@@ -2170,7 +2170,7 @@
             "row_index": -1,
             "pass_index": -1,
             "phase_before": "checkpoint_commit",
-            "phase_after": "outcome_selected_terminal_between_restarts_or_arnoldi",
+            "phase_after": "outcome_selected_terminal_between_restarts_arnoldi_or_final_guard_handoff",
             "device_gate_source": "always",
             "admitted_reduction_valid_masks": [
               0,
@@ -2196,6 +2196,7 @@
           "successful_transaction_is_single_hashed_schedule_slice": true,
           "checkpoint_decide_only_boundary_is_publishable": false,
           "checkpoint_commit_only_boundary_is_publishable": false,
+          "full_final_cycle_requires_later_final_guard_launch": true,
           "successful_end_schedule_epoch": "29+14*S",
           "successful_end_reduction_epoch": "14*S"
         },
@@ -2274,7 +2275,7 @@
           },
           "max_iterations": {
             "evaluated_after_stagnation": true,
-            "terminal": "effective_iterations==max_iterations"
+            "terminal": "effective_iterations==max_iterations_unless_exact_full_final_cycle_handoff"
           }
         },
         "outcome_contract": [
@@ -2380,8 +2381,8 @@
             "final_phase": "terminal"
           },
           {
-            "name": "planned_end_max_iterations",
-            "condition": "scale_path_and_not_stagnated_and_effective_iterations_equals_max_iterations",
+            "name": "planned_end_max_iterations_checkpoint_terminal",
+            "condition": "scale_path_and_not_stagnated_and_effective_iterations_equals_max_iterations_and_not_exact_full_final_cycle",
             "commit_required": 1,
             "continuation_required": 0,
             "restart_row_written": true,
@@ -2390,6 +2391,23 @@
             "restart_hint": 1,
             "restart_flags": "bit0_replayed_or_individual_gate_bits_or_actual_plateau_and_tiny_bits",
             "final_phase": "terminal"
+          },
+          {
+            "name": "planned_end_max_iterations_final_guard_handoff",
+            "condition": "scale_path_and_not_stagnated_and_effective_iterations_equals_max_iterations_and_restart_R_column_M_minus_1_and_max_iterations_equals_R_times_M",
+            "commit_required": 1,
+            "continuation_required": 0,
+            "restart_row_written": true,
+            "pending_terminal_status_before_finalize": 2,
+            "pending_termination_code_before_finalize": 10,
+            "terminal_status": 0,
+            "termination_code": 0,
+            "restart_hint": 1,
+            "restart_flags": "bit0_replayed_or_individual_gate_bits_or_actual_plateau_and_tiny_bits",
+            "final_phase": "arnoldi",
+            "final_column_index": "M-1",
+            "final_guard_required": true,
+            "handoff_postcondition": "exact_final_guard_exhausted_shape"
           },
           {
             "name": "planned_end_continue_next_restart",
@@ -2434,7 +2452,8 @@
             "pending_restart_flags"
           ],
           "active_must_remain_1_until_finalize_on_nonfailure": true,
-          "pending_algorithmic_terminal_is_not_public_before_finalize": true
+          "pending_algorithmic_terminal_is_not_public_before_finalize": true,
+          "full_final_cycle_pending_max_is_cleared_into_guard_handoff": true
         },
         "reduction_validity_lifetime_contract": {
           "start_masks": [
@@ -2642,9 +2661,9 @@
           "predecessor_validation_state": 0,
           "predecessor_mask_snapshot": 0,
           "predecessor_reduction_epoch_snapshot": 0,
-          "active": "0_if_terminal_else_1",
-          "phase": "terminal_or_between_restarts_or_arnoldi",
-          "column_index": "0_if_terminal_else_-1_if_between_restarts_else_1",
+          "active": "0_if_checkpoint_terminal_else_1",
+          "phase": "terminal_or_between_restarts_or_arnoldi_including_guard_handoff",
+          "column_index": "0_if_checkpoint_terminal_or_guard_handoff_else_-1_if_between_restarts_else_1",
           "restart_index": 1,
           "next_expected_restart": 2,
           "effective_restarts": 1,
@@ -2655,7 +2674,8 @@
           "preconditioner_apply_count": 1,
           "public_record_matches_committed_vector_ownership": true,
           "later_column_or_restart_executed": false,
-          "final_guard_executed": false
+          "final_guard_executed": false,
+          "final_guard_handoff_may_be_required": true
         }
       }
     },
@@ -2881,6 +2901,11 @@
             "active_required_endpoint",
             "active_required_history",
             "active_required_prestate",
+            "active_handoff_condition",
+            "checkpoint_finalize_handoff",
+            "handoff_postcondition_revalidated_before_guard",
+            "partial_final_cycle_behavior",
+            "priority_before_handoff",
             "active_valid_behavior",
             "active_malformed_behavior",
             "absent_when_I_zero"
@@ -2897,6 +2922,21 @@
             },
             "active_required_prestate": {
               "const": "phase=arnoldi,status=not_terminal,code=none,all_action_and_pending_fields_clear"
+            },
+            "active_handoff_condition": {
+              "const": "plain_max_iterations_after_exact_full_final_cycle_I_equals_R_times_M"
+            },
+            "checkpoint_finalize_handoff": {
+              "const": "commit_candidate_and_final_restart_row_clear_transients_preserve_active_arnoldi"
+            },
+            "handoff_postcondition_revalidated_before_guard": {
+              "const": true
+            },
+            "partial_final_cycle_behavior": {
+              "const": "checkpoint_finalize_publishes_max_iterations_before_inactive_guard"
+            },
+            "priority_before_handoff": {
+              "const": "converged_breakdown_diverged_stagnated_publish_at_checkpoint_finalize"
             },
             "active_valid_behavior": {
               "const": "claim_one_schedule_epoch_and_publish_max_iterations"
@@ -3181,7 +3221,7 @@
           "$ref": "#/$defs/firstColumnCheckpointTransactionSchedule"
         },
         "first_column_checkpoint_transaction_schedule_hash": {
-          "const": "sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5"
+          "const": "sha256:0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d"
         },
         "device_error_bits": {
           "const": {"invalid_control_or_geometry":0,"csr_structure":1,"nonfinite_input":2,"arithmetic_overflow":3,"record_abi":4,"jacobi_inverse":5,"invalid_reduction_pair":6}

@@ -7,10 +7,10 @@ already-terminal padded program.  The product-path probes cover the global
 owner only; verification D2H is deliberately performed after those probes and
 after the immutable product receipt has been captured.
 
-This evidence proves one active later column and submission of the fixed final
-guard.  It does not prove an active later restart or an active final-guard
-fallthrough.  Those remain separate coverage obligations and must not be
-inferred from this test.
+The five-node cases separately prove active later restarts, partial-final-cycle
+checkpoint terminalization, and an exact full-final-cycle handoff whose active
+``FINAL_GUARD`` claims the last schedule epoch.  Product receipts remain
+outcome-free; verification-only D2H never upgrades their claims.
 """
 
 from __future__ import annotations
@@ -664,15 +664,21 @@ def test_native_gfx1030_parent_recovers_abandoned_consumed_global_suffix(
         chain.close()
 
 
+@pytest.mark.parametrize(
+    "max_iterations",
+    (5, 4),
+    ids=("partial_final_cycle", "active_final_guard_full_cycle"),
+)
 def test_native_gfx1030_global_owner_executes_active_later_restarts(
     monkeypatch: pytest.MonkeyPatch,
+    max_iterations: int,
 ) -> None:
     required = _hardware_required()
     architecture = _native_gfx1030(required)
     model = _serial_cantilever_model(5)
     policy = compile_fgmres_policy_v1(
         restart_dimension=2,
-        max_iterations=5,
+        max_iterations=max_iterations,
         absolute_tolerance=0.0,
         relative_tolerance=1.0e-30,
     )
@@ -684,11 +690,49 @@ def test_native_gfx1030_global_owner_executes_active_later_restarts(
     assert execution_plan.reduced_nnz == 360
     assert oracle.status == "max_iterations"
     assert oracle.termination_code == "max_iterations_exhausted"
-    assert oracle.iteration_count == 5
-    assert oracle.restart_count == 3
-    assert oracle.operator_apply_count == 9
-    assert oracle.preconditioner_apply_count == 5
-    assert tuple(row.restart_index for row in oracle.history) == (1, 2, 3)
+    expected = {
+        5: {
+            "restart_count": 3,
+            "operator_count": 9,
+            "preconditioner_count": 5,
+            "plan_final_schedule": 215,
+            "plan_final_reduction": 70,
+            "plan_schedule_end": 216,
+            "full_launches": 228,
+            "suffix_launches": 183,
+            "cycle_start": 4,
+            "cycle_width": 1,
+            "column_index": 0,
+            "observed_schedule": 179,
+            "observed_reduction": 58,
+            "active_final_guard": False,
+        },
+        4: {
+            "restart_count": 2,
+            "operator_count": 7,
+            "preconditioner_count": 4,
+            "plan_final_schedule": 147,
+            "plan_final_reduction": 48,
+            "plan_schedule_end": 148,
+            "full_launches": 156,
+            "suffix_launches": 111,
+            "cycle_start": 2,
+            "cycle_width": 2,
+            "column_index": 1,
+            "observed_schedule": 148,
+            "observed_reduction": 48,
+            "active_final_guard": True,
+        },
+    }[max_iterations]
+    expected_restarts = int(expected["restart_count"])
+    expected_suffix_launches = int(expected["suffix_launches"])
+    assert oracle.iteration_count == max_iterations
+    assert oracle.restart_count == expected_restarts
+    assert oracle.operator_apply_count == expected["operator_count"]
+    assert oracle.preconditioner_apply_count == expected["preconditioner_count"]
+    assert tuple(row.restart_index for row in oracle.history) == tuple(
+        range(1, expected_restarts + 1)
+    )
 
     chain, predecessor_capability = _open_canonical_chain(
         model=model,
@@ -709,15 +753,17 @@ def test_native_gfx1030_global_owner_executes_active_later_restarts(
         sealed_receipt = sealed.context.receipt()
         assert sealed_receipt.telemetry.fence_success_count == 1
 
-        partition = compile_hip_fgmres_global_sealed_continuation_v1(24, 2, 5)
+        partition = compile_hip_fgmres_global_sealed_continuation_v1(
+            24, 2, max_iterations
+        )
         assert partition.plan.reduction_stage_count == 1
-        assert partition.plan.maximum_restart_count == 3
-        assert partition.plan.final_schedule_epoch == 215
-        assert partition.plan.final_reduction_epoch == 70
-        assert partition.plan.schedule_end_epoch == 216
-        assert partition.full.launch_count == 228
+        assert partition.plan.maximum_restart_count == expected_restarts
+        assert partition.plan.final_schedule_epoch == expected["plan_final_schedule"]
+        assert partition.plan.final_reduction_epoch == expected["plan_final_reduction"]
+        assert partition.plan.schedule_end_epoch == expected["plan_schedule_end"]
+        assert partition.full.launch_count == expected["full_launches"]
         assert partition.sealed_prefix.launch_count == 45
-        assert partition.continuation.launch_count == 183
+        assert partition.continuation.launch_count == expected_suffix_launches
         assert partition.continuation.launches[0].name == (
             "APPLY_JACOBI_RESTART1_COLUMN1"
         )
@@ -728,7 +774,7 @@ def test_native_gfx1030_global_owner_executes_active_later_restarts(
         assert any(
             row.name == "RESTART_BEGIN_RESTART3"
             for row in partition.continuation.launches
-        )
+        ) == (expected_restarts == 3)
         assert partition.continuation.launches[-1].name == "FINAL_GUARD"
 
         kernel = chain.live._kernel
@@ -803,19 +849,25 @@ def test_native_gfx1030_global_owner_executes_active_later_restarts(
             assert opening_receipt.dimensions.free_dof_count == 24
             assert opening_receipt.dimensions.reduced_csr_nnz == 360
             assert opening_receipt.dimensions.restart_dimension == 2
-            assert opening_receipt.dimensions.max_iterations == 5
-            assert opening_receipt.dimensions.maximum_restart_count == 3
-            assert opening_receipt.dimensions.full_program_launch_count == 228
+            assert opening_receipt.dimensions.max_iterations == max_iterations
+            assert opening_receipt.dimensions.maximum_restart_count == expected_restarts
+            assert (
+                opening_receipt.dimensions.full_program_launch_count
+                == expected["full_launches"]
+            )
             assert opening_receipt.dimensions.sealed_prefix_launch_count == 45
-            assert opening_receipt.dimensions.continuation_launch_count == 183
+            assert (
+                opening_receipt.dimensions.continuation_launch_count
+                == expected_suffix_launches
+            )
 
             pending = global_open.context.enqueue_remaining_global_recurrence()
-            assert pending.attempted_launch_count == 183
-            assert pending.accepted_launch_count_lower_bound == 183
-            assert pending.accepted_launch_count_upper_bound == 183
+            assert pending.attempted_launch_count == expected_suffix_launches
+            assert pending.accepted_launch_count_lower_bound == expected_suffix_launches
+            assert pending.accepted_launch_count_upper_bound == expected_suffix_launches
             assert kernel._checkpoint_pending_snapshot(
                 chain.live._checkpoint_token
-            ) == ((chain.live._stream_pointer_snapshot, 183),)
+            ) == ((chain.live._stream_pointer_snapshot, expected_suffix_launches),)
             assert product_runtime_calls == []
             assert product_fences == []
 
@@ -827,7 +879,7 @@ def test_native_gfx1030_global_owner_executes_active_later_restarts(
                 )
                 is completion
             )
-            assert completion.fenced_launch_count == 183
+            assert completion.fenced_launch_count == expected_suffix_launches
             assert (
                 kernel._checkpoint_pending_snapshot(chain.live._checkpoint_token) == ()
             )
@@ -840,10 +892,22 @@ def test_native_gfx1030_global_owner_executes_active_later_restarts(
                 expected_context=global_open.context,
             )
             assert product_receipt.status == "recurrence_fenced"
-            assert product_receipt.telemetry.kernel_launch_attempt_count == 183
-            assert product_receipt.telemetry.kernel_launch_accept_lower_bound == 183
-            assert product_receipt.telemetry.kernel_launch_accept_upper_bound == 183
-            assert product_receipt.telemetry.consumed_launch_count == 183
+            assert (
+                product_receipt.telemetry.kernel_launch_attempt_count
+                == expected_suffix_launches
+            )
+            assert (
+                product_receipt.telemetry.kernel_launch_accept_lower_bound
+                == expected_suffix_launches
+            )
+            assert (
+                product_receipt.telemetry.kernel_launch_accept_upper_bound
+                == expected_suffix_launches
+            )
+            assert (
+                product_receipt.telemetry.consumed_launch_count
+                == expected_suffix_launches
+            )
             assert product_receipt.telemetry.fence_success_count == 1
             assert product_receipt.telemetry.allocation_count == 0
             assert product_receipt.telemetry.h2d_operation_count == 0
@@ -885,14 +949,34 @@ def test_native_gfx1030_global_owner_executes_active_later_restarts(
             _i32(control, control_offsets, "phase")
             == control_abi["phase_codes"]["terminal"]
         )
-        assert _i32(control, control_offsets, "restart_index") == 3
-        assert _i32(control, control_offsets, "cycle_start_iteration") == 4
-        assert _i32(control, control_offsets, "cycle_width") == 1
-        assert _i32(control, control_offsets, "column_index") == 0
-        assert _i32(control, control_offsets, "arnoldi_step_count") == 1
-        assert _i32(control, control_offsets, "next_expected_restart") == 4
-        assert _i32(control, control_offsets, "schedule_epoch") == 179
-        assert _i32(control, control_offsets, "reduction_epoch") == 58
+        assert _i32(control, control_offsets, "restart_index") == expected_restarts
+        assert (
+            _i32(control, control_offsets, "cycle_start_iteration")
+            == expected["cycle_start"]
+        )
+        assert _i32(control, control_offsets, "cycle_width") == expected["cycle_width"]
+        assert (
+            _i32(control, control_offsets, "column_index") == expected["column_index"]
+        )
+        assert (
+            _i32(control, control_offsets, "arnoldi_step_count")
+            == expected["cycle_width"]
+        )
+        assert (
+            _i32(control, control_offsets, "next_expected_restart")
+            == expected_restarts + 1
+        )
+        observed_schedule = _i32(control, control_offsets, "schedule_epoch")
+        assert observed_schedule == expected["observed_schedule"]
+        assert (
+            _i32(control, control_offsets, "reduction_epoch")
+            == expected["observed_reduction"]
+        )
+        if expected["active_final_guard"]:
+            assert observed_schedule == partition.plan.schedule_end_epoch
+            assert observed_schedule == partition.plan.final_schedule_epoch + 1
+        else:
+            assert observed_schedule < partition.plan.final_schedule_epoch
 
         assert _i32(record, record_offsets, "active") == 0
         assert (
@@ -904,13 +988,22 @@ def test_native_gfx1030_global_owner_executes_active_later_restarts(
             == record_abi["termination_codes"]["max_iterations_exhausted"]
         )
         assert _i32(record, record_offsets, "device_error_bits") == 0
-        assert _i32(record, record_offsets, "scheduled_iterations") == 5
-        assert _i32(record, record_offsets, "effective_iterations") == 5
-        assert _i32(record, record_offsets, "scheduled_restarts") == 3
-        assert _i32(record, record_offsets, "effective_restarts") == 3
-        assert _i32(record, record_offsets, "effective_arnoldi_dimension") == 1
-        assert _i32(record, record_offsets, "operator_apply_count") == 9
-        assert _i32(record, record_offsets, "preconditioner_apply_count") == 5
+        assert _i32(record, record_offsets, "scheduled_iterations") == max_iterations
+        assert _i32(record, record_offsets, "effective_iterations") == max_iterations
+        assert _i32(record, record_offsets, "scheduled_restarts") == expected_restarts
+        assert _i32(record, record_offsets, "effective_restarts") == expected_restarts
+        assert (
+            _i32(record, record_offsets, "effective_arnoldi_dimension")
+            == expected["cycle_width"]
+        )
+        assert (
+            _i32(record, record_offsets, "operator_apply_count")
+            == expected["operator_count"]
+        )
+        assert (
+            _i32(record, record_offsets, "preconditioner_apply_count")
+            == expected["preconditioner_count"]
+        )
 
         np.testing.assert_allclose(
             observed["solution_x"].view("<f8"),

@@ -270,7 +270,7 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         in recurrence_plan_v2["supported_scope"]
     )
     assert (
-        "checkpoint_transaction_schedule_hash_sha256_2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5"
+        "checkpoint_transaction_schedule_hash_sha256_0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d"
         in recurrence_plan_v2["supported_scope"]
     )
     assert {
@@ -279,6 +279,8 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "checkpoint_source_preflight_destination_access_zero_and_no_new_f_workspace",
         "checkpoint_invalid_source_failure_status_code47_error_bit4_origin2_destination_preservation_contract",
         "checkpoint_fixed_four_row_parallel_o_f_preflight_without_product_h2d_d2h_sync_or_fallback",
+        "checkpoint_mandatory_handoff_required_and_prestate_validity_separated",
+        "checkpoint_malformed_mandatory_handoff_fails_before_restart_row_and_result_header_publication",
     }.issubset(recurrence_plan_v2["supported_scope"])
     assert (
         "checkpoint_finalizer_only_restart_row_and_result_metric_header_publish_contract"
@@ -654,13 +656,16 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
     )
     assert {
         "immutable_initial_plus_r_times_m_columns_plus_final_guard_schedule",
-        "global_schedule_semantic_contract_hash_sha256_425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4",
-        "current_combined_recurrence_abi_hash_sha256_4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017",
-        "current_fixed_source_hash_sha256_2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967",
+        "current_checkpoint_transaction_schedule_hash_sha256_0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d",
+        "global_schedule_semantic_contract_hash_sha256_7c18ba9190fef663fec8e1f87e0f56ec393e23f04d4753ffbc3c707bff1a10ea",
+        "current_combined_recurrence_abi_hash_sha256_6a361ccfd0dbbe544e93b6c9ea788cc3702f6f924a969a3aa3deebf3292f315b",
+        "current_fixed_source_hash_sha256_a5b39fb976aa330eaffae74feb8561f241df662a21dc32354b8010af2bb1c93d",
         "v0_2_24_python_host_control_only_cpp_hip_public_schema_and_abi_unchanged",
         "v0_2_25_exact_stream_query_and_parent_owned_abandoned_child_recovery",
         "v0_2_25_cpp_hip_public_schema_and_abi_identities_unchanged",
-        "current_global_combined_and_source_hashes_unchanged_from_v0_2_23",
+        "v0_2_26_exact_full_final_cycle_checkpoint_to_guard_handoff",
+        "v0_2_26_cpp_hip_recurrence_plan_schema_and_semantic_identities_changed",
+        "v0_2_26_global_receipt_completion_and_completion_capability_schema_unchanged",
         "gap_free_nonoverlap_full_sealed_prefix_and_continuation_partition",
         "sealed_conditional_continuation_capability_reserved_and_consumed_exactly_once",
         "prefix_replay_rejected_and_suffix_only_submission",
@@ -709,6 +714,13 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "native_integrated_cpu_max_iterations_exhausted_iterations_restarts_5_3_operator_preconditioner_9_5_solution_residual_allclose",
         "native_integrated_active_restart_one_passed_one_deselected_in_59_39_seconds",
         "native_integrated_final_guard_expected_e215_q70_submitted_inactive_after_terminal_checkpoint_finalize",
+        "native_integrated_active_final_guard_f24_nnz360_m2_i4_r2_full_prefix_suffix_156_45_111",
+        "native_integrated_full_final_checkpoint_handoff_e147_q48_guard_terminal_e148_q48",
+        "native_integrated_active_final_guard_cpu_counts_iterations_restarts_4_2_operator_preconditioner_7_4_solution_residual_allclose",
+        "native_integrated_active_final_guard_product_path_zero_copy_zero_allocation_one_fence_and_outcome_free_receipt",
+        "native_integrated_active_final_guard_full_cycle_one_passed_in_60_93_seconds",
+        "native_integrated_partial_final_cycle_regression_one_passed_in_61_97_seconds",
+        "native_gfx1030_normal_next_restart_and_operator_count_malformed_handoff_three_passed_in_8_12_seconds",
         "native_integrated_gfx1030_f12_m2_i2_suffix_pending_39_to_zero_lifecycle_gate",
         "native_integrated_recovery_query_not_ready_then_complete_and_successful_sync_one",
         "native_integrated_recovery_product_malloc_h2d_d2h_runtime_facade_sync_and_verification_d2h_zero",
@@ -728,7 +740,6 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "authoritative_terminal_status_proven",
         "product_receipt_numerical_parity_verified",
         "solution_ready",
-        "integrated_active_final_guard_fallthrough_proven",
         "completion_only_solution_record_and_residual_export",
         "model_family_and_multi_architecture_cpu_hip_full_recurrence_parity",
         "iteration_host_copy_zero_proven",
@@ -764,8 +775,14 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "recovery_exact_bool_cleanup_owner_frozen_authority_and_baseexception_fail_closed_regressions",
         "native_integrated_recovery_not_ready_sync_complete_pending_39_to_zero_zero_product_calls",
         "native_integrated_active_later_restart_one_through_three_max_iteration_exhaustion",
-        "native_integrated_submitted_but_inactive_final_guard_kept_separate_from_active_fallthrough_claim",
+        "native_integrated_partial_final_cycle_checkpoint_terminalization_kept_inactive_guard",
+        "native_integrated_exact_full_final_cycle_checkpoint_handoff_and_active_guard_epoch_claim",
+        "native_malformed_next_restart_and_operator_count_handoff_prepublication_fail_closed",
     }.issubset(global_owner["verification_cases"])
+    assert (
+        "integrated_active_final_guard_fallthrough_proven"
+        not in global_owner["explicit_exclusions"]
+    )
     assert {
         "docs/engine-v2-hip-fgmres-global-recurrence-v1.md",
         "src/structural_analysis/engine_v2/assembly_backend/fgmres_global_schedule_plan_v1.py",
@@ -820,15 +837,21 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "implemented_process_local_parent_owned_weak_liveness_recovery_for_abandoned_consumed_or_pending_suffix_owner",
         "implemented_exact_stream_query_optional_single_checkpoint_sync_ack_and_terminal_release_recovery",
         "recovery_kept_lifecycle_only_without_terminal_numerical_completion_or_solution_promotion",
+        "implemented_exact_full_final_cycle_checkpoint_to_final_guard_handoff",
+        "implemented_mandatory_handoff_required_and_full_prestate_validity_separation",
+        "implemented_malformed_mandatory_handoff_prepublication_fail_closed",
         "native_raw_three_restart_exhaustion_early_terminal_padding_and_final_guard_evidence",
         "native_integrated_active_later_column_and_suffix_zero_copy_one_fence_evidence",
         "native_integrated_active_later_restarts_one_through_three_evidence",
+        "native_integrated_active_final_guard_full_cycle_e147_to_e148_evidence",
+        "native_malformed_handoff_next_restart_and_operator_count_prepublication_evidence",
         "implemented_fixed_suffix_host_submission_control_o_l_structural_gate_not_general_n_dof_o_n",
         "implemented_registry_sealed_immutable_dispatch_snapshot_and_canonical_row_tuple",
         "final_independent_linear_reaudit_no_remaining_defect_in_requested_host_control_scope",
-        "current_global_schedule_semantic_contract_hash_sha256_425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4",
-        "current_combined_recurrence_abi_hash_sha256_4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017",
-        "current_fixed_source_hash_sha256_2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967",
+        "current_checkpoint_transaction_schedule_hash_sha256_0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d",
+        "current_global_schedule_semantic_contract_hash_sha256_7c18ba9190fef663fec8e1f87e0f56ec393e23f04d4753ffbc3c707bff1a10ea",
+        "current_combined_recurrence_abi_hash_sha256_6a361ccfd0dbbe544e93b6c9ea788cc3702f6f924a969a3aa3deebf3292f315b",
+        "current_fixed_source_hash_sha256_a5b39fb976aa330eaffae74feb8561f241df662a21dc32354b8010af2bb1c93d",
         "native_integrated_recovery_pending_39_to_zero_query_not_ready_then_complete_sync_one_zero_product_calls",
         "independent_v0_2_25_recovery_audit_blocker_high_medium_low_zero",
     }.issubset(recurrence_v2["supported_scope"])
@@ -849,7 +872,6 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         not in (recurrence_v2["explicit_exclusions"])
     )
     assert {
-        "integrated_active_final_guard_fallthrough",
         "completion_only_solution_record_and_residual_export",
         "native_cpu_hip_full_recurrence_parity",
         "general_n_dof_o_n_claim",
@@ -857,11 +879,15 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "abandoned_recovery_as_terminal_numerical_parity_completion_or_solution_evidence",
     }.issubset(recurrence_v2["explicit_exclusions"])
     assert (
+        "integrated_active_final_guard_fallthrough"
+        not in recurrence_v2["explicit_exclusions"]
+    )
+    assert (
         "final_independent_linear_reaudit_closure"
         not in recurrence_v2["explicit_exclusions"]
     )
     assert {
-        "integrated_active_later_restart_kept_separate_from_active_final_guard_and_authoritative_outcome_claims",
+        "integrated_active_later_restart_and_active_final_guard_kept_separate_from_authoritative_outcome_claims",
         "fixed_suffix_host_control_o_l_kept_separate_from_general_n_dof_o_n_and_speedup_claims",
         "final_linear_reaudit_closed_only_requested_host_control_scope_without_product_promotion",
         "process_local_abandoned_suffix_owner_recovery_kept_separate_from_numerical_completion_claim",

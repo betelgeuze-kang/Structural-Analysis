@@ -1,6 +1,6 @@
 # Engine v2 HIP FGMRES sealed-continuation global recurrence owner v1
 
-- 상태: v0.2.25 Phase 0 implemented, `contract_only`/non-promoting
+- 상태: v0.2.26 Phase 0 implemented, `contract_only`/non-promoting
 - schema version: `structural-analysis-hip-fgmres-global-recurrence-context.v1`
 - capability profile: `phase0_sealed_continuation_consuming_fixed_global_recurrence`
 - evidence scope: `fixed_suffix_fenced_device_outcome_unobserved_non_promoting`
@@ -183,7 +183,18 @@ Canonical producer, sealed transaction과 global owner가 각각 final fence 하
 - global product path allocation/H2D/D2H/intermediate sync/fallback/live-read/host-branch 0, global fence 1
 - `FINAL_GUARD`의 fixed expected endpoint `E=215,Q=70`은 제출되었지만 checkpoint finalizer가 이미 terminalize한 뒤여서 inactive였음
 
-따라서 integrated active later restart는 이제 native evidence가 있지만 integrated active final-guard fallthrough은 아직 미증명이다. Active valid/malformed final guard는 계속 raw-only hardware evidence로 분리한다.
+별도 v0.2.26 parameter는 같은 5-node cantilever의 exact full final cycle을 실행해 integrated active `FINAL_GUARD`를 닫았다.
+
+- `F=24`, reduced CSR `nnz=360`, `M=2`, `I=4`, `R=2`
+- full/sealed-prefix/continuation launch count `156/45/111`
+- final checkpoint commit `E/Q=147/48`; active guard가 schedule epoch 하나를 단독 claim해 terminal `E/Q=148/48`
+- CPU oracle iteration/restart `4/2`, operator/preconditioner `7/4`, device solution/residual allclose
+- global product path allocation/H2D/D2H/intermediate sync/fallback/live-read/host-branch 0, global fence 1
+- product receipt는 verification D2H 전에 고정되며 outcome/status/parity/solution 관찰 claim은 false 유지
+
+Exact full-cycle max decision과 last restart/column이면 checkpoint finalizer는 row/metric을 commit한 뒤 active/not-terminal을 유지하고 `FINAL_GUARD`에 넘긴다. `I=5` partial final cycle은 기존 checkpoint-owned terminal `E/Q=179/58`과 inactive guard를 보존한다. Mandatory handoff eligibility와 exact prestate validity는 별도 predicate다. Required handoff에서 `next_expected_restart` 등이 오염되면 restart row/header publish 전 error/status/code `1/6/47`로 fail-closed하며 checkpoint-owned max termination으로 fallback하지 않는 actual `gfx1030` 음성 회귀를 통과했다.
+
+따라서 integrated active later restart와 active final-guard fallthrough은 native evidence가 있다. 다만 이 evidence는 product receipt의 terminal outcome, solution 또는 parity 관찰을 승격하지 않는다.
 
 Immutable dispatch snapshot TOCTOU 수정 후 위 F12 later-column과 F24 active-restart required hardware 두 case를 같이 재실행해 `2 passed in 96.11s`로 최종 재통과했다.
 
@@ -193,21 +204,22 @@ Focused verification은 RTC `103 passed`, global owner `11 passed in 268.76s`, s
 
 v0.2.25 최종 전수 회귀는 RTC `111 passed in 34.77s`, checkpoint context v2 `261 passed in 248.58s`, global owner `54 passed in 1387.12s`, sealed transaction `30 passed in 507.23s`를 통과했다. Sealed 회귀에는 recovery cell 등록 없이 continuation을 consume하려면 HIP/query/sync/pending 변화 없이 fail-closed하고 unused reservation은 다시 열리는 음성 경계 검증이 포함된다.
 
-별도 [raw global recurrence hardware gate](../tests/test_engine_v2_hip_fgmres_global_recurrence_hardware_v1.py)는 `F=513,M=2,I=5`의 lower-bidiagonal 3-restart exhaustion과 identity early-terminal padding을 CPU oracle과 비교한다. [Raw final-guard hardware gate](../tests/test_engine_v2_hip_fgmres_final_guard_hardware_v1.py)는 active valid fallthrough와 malformed fail-closed를 검사한다. Raw final-guard evidence를 integrated owner의 active final-guard evidence로 재분류하지 않는다.
+별도 [raw global recurrence hardware gate](../tests/test_engine_v2_hip_fgmres_global_recurrence_hardware_v1.py)는 `F=513,M=2,I=5`의 lower-bidiagonal 3-restart exhaustion과 identity early-terminal padding을 CPU oracle과 비교한다. [Raw final-guard hardware gate](../tests/test_engine_v2_hip_fgmres_final_guard_hardware_v1.py)는 active valid fallthrough와 malformed fail-closed를 검사한다. Raw evidence와 v0.2.26 integrated owner evidence는 각각의 소유·schedule 계약으로 별도 유지한다.
 
 ## Current identity
 
-| Current v0.2.25 payload | SHA-256 |
+| Current v0.2.26 payload | SHA-256 |
 | --- | --- |
-| global schedule semantic contract | `sha256:425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4` |
-| combined recurrence/kernel ABI | `sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017` |
-| fixed HIP source | `sha256:2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967` |
+| checkpoint transaction semantic contract | `sha256:0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d` |
+| global schedule semantic contract | `sha256:7c18ba9190fef663fec8e1f87e0f56ec393e23f04d4753ffbc3c707bff1a10ea` |
+| combined recurrence/kernel ABI | `sha256:6a361ccfd0dbbe544e93b6c9ea788cc3702f6f924a969a3aa3deebf3292f315b` |
+| fixed HIP source | `sha256:a5b39fb976aa330eaffae74feb8561f241df662a21dc32354b8010af2bb1c93d` |
 
 Integrated `F=12,M=2,I=2` fixture의 dimension-specific full/prefix/suffix hash는 각각 `sha256:ff7c027b7a2d9d40b2371bbc9b369f2c9413a36f83d969b4c03c1f6582f0d8ac`, `sha256:33c8f74230ac5489f7e28e060a973917e434a7b0d169c8d32bae3c32500c001b`, `sha256:7c710e878195e1b6567f6732f389b89c3d725d99e712ef8c3e98d1ef7a52abdc`다. 이 값은 dimension과 모든 launch field에 결속된 instance hash이며 전역 ABI 상수가 아니다.
 
-v0.2.22 sealed checkpoint evidence의 combined/source `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`/`sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`는 historical identity다. Current v0.2.25 native evidence로 소급 재해석하지 않는다. v0.2.24와 v0.2.25는 Python host-control/lifecycle hardening이며 C++/HIP source, public schema, public ABI와 semantic hashes를 바꾸지 않았으므로 위 current hash는 v0.2.23과 동일하다.
+v0.2.22 sealed checkpoint evidence의 combined/source `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`/`sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`와 v0.2.23-v0.2.25 identities는 historical identity다. Current v0.2.26 native evidence로 소급 재해석하지 않는다. v0.2.26은 recurrence semantic payload/schema와 HIP source를 변경했지만 public global receipt/completion schema는 변경하지 않았다.
 
-v0.2.25 package 검증은 현재 `src/`로 wheel `875235` bytes (`sha256:e6522f810af2a4a0f6d62c770f510bcab57278e64cec4e0070b8fbec2eb2b8e2`) 및 sdist `823734` bytes (`sha256:8094a8bcaf30d3aaf954d5c5f0183baaf03881ff96ae62b33b6832276b2b3d3c`)를 구성했다. Wheel을 `--no-deps` 격리 target에 설치해 Engine v2 global public export, global schedule/sealed-continuation API, Draft 2020-12 global schema (`15196` bytes, `sha256:72c1aa47547970e90376c20831698e80aef4c57e9fc6d600e6949d17288bad48`) 및 packaged HIP source (`207780` bytes, 위 fixed-source hash)를 확인했다. 이는 패키지 완전성 검증이며 solver outcome이나 release promotion 증거가 아니다.
+Historical v0.2.25 package 검증은 당시 `src/`로 wheel `875235` bytes (`sha256:e6522f810af2a4a0f6d62c770f510bcab57278e64cec4e0070b8fbec2eb2b8e2`) 및 sdist `823734` bytes (`sha256:8094a8bcaf30d3aaf954d5c5f0183baaf03881ff96ae62b33b6832276b2b3d3c`)를 구성했다. Wheel을 `--no-deps` 격리 target에 설치해 Engine v2 global public export, global schedule/sealed-continuation API, Draft 2020-12 global schema (`15196` bytes, `sha256:72c1aa47547970e90376c20831698e80aef4c57e9fc6d600e6949d17288bad48`) 및 당시 packaged HIP source (`207780` bytes, `sha256:2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967`)를 확인했다. 이는 historical 패키지 완전성 검증이며 current v0.2.26 package, solver outcome이나 release promotion 증거가 아니다.
 
 ## Receipt 진본성과 claim boundary
 
@@ -224,16 +236,17 @@ Receipt canonical hash와 standalone validator는 current schema, ABI/source/sch
 - per-row validation 후 실제 launch argument가 registry-sealed immutable dispatch snapshot과 canonical row-value tuple에서만 생성됨
 - final independent linear re-audit이 요청 범위 내 remaining defect 0을 확인함
 - actual integrated owner가 restart `1 -> 2 -> 3`의 active later restart를 실행함
+- actual integrated owner가 exact full final cycle에서 checkpoint `E=147`의 mandatory handoff 후 active `FINAL_GUARD` `E=148`을 실행함
+- malformed mandatory handoff prestate가 checkpoint-owned max termination으로 위장되지 않고 code 47로 fail-closed함
 - consumed/pending owner abandonment가 exact query → optional successful sync 1회 → query → pending pop → terminal release의 parent-owned monotonic retry로 process-locally 회수됨
 
 다음은 계속 false다.
 
 - product receipt의 actual terminal outcome/status/solution/parity 관찰
 - authoritative predecessor, numerical checkpoint transaction 또는 terminal solver receipt
-- active final-guard fallthrough의 integrated owner 증거
 - model-family·multi-architecture full CPU/HIP parity
 - completion-only export, ResultIR 연결과 iteration host-copy-zero
 - kernel speedup, solver end-to-end speedup, 일반 `N`-DOF O(N) 또는 model-family latency
 - SPD/PCG, AMG/DD, signed promotion과 commercial readiness
 
-현재 next action은 active final-guard fallthrough integrated native coverage, completion-only export와 product receipt의 명시적 outcome 관찰 계약을 순서대로 구현하는 것이다. 그 뒤 CPU/HIP full parity와 iteration host-copy-zero를 별도로 닫는다.
+현재 next action은 completion-only solution/record/residual export와 product receipt의 명시적 terminal-outcome 관찰 계약을 순서대로 구현하는 것이다. 그 뒤 model-family·multi-architecture CPU/HIP full parity와 iteration host-copy-zero를 별도로 닫는다.

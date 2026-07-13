@@ -2120,7 +2120,10 @@ def hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2() -> dict
                 "row_index": -1,
                 "pass_index": -1,
                 "phase_before": "checkpoint_commit",
-                "phase_after": "outcome_selected_terminal_between_restarts_or_arnoldi",
+                "phase_after": (
+                    "outcome_selected_terminal_between_restarts_arnoldi_or_"
+                    "final_guard_handoff"
+                ),
                 "device_gate_source": "always",
                 "admitted_reduction_valid_masks": [0, 1792, 7936],
                 "reduction_valid_mask_effect": "clear_exact_to_0_on_success",
@@ -2144,6 +2147,7 @@ def hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2() -> dict
             "successful_transaction_is_single_hashed_schedule_slice": True,
             "checkpoint_decide_only_boundary_is_publishable": False,
             "checkpoint_commit_only_boundary_is_publishable": False,
+            "full_final_cycle_requires_later_final_guard_launch": True,
             "successful_end_schedule_epoch": "29+14*S",
             "successful_end_reduction_epoch": "14*S",
         },
@@ -2225,7 +2229,10 @@ def hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2() -> dict
             },
             "max_iterations": {
                 "evaluated_after_stagnation": True,
-                "terminal": "effective_iterations==max_iterations",
+                "terminal": (
+                    "effective_iterations==max_iterations_unless_exact_full_"
+                    "final_cycle_handoff"
+                ),
             },
         },
         "outcome_contract": [
@@ -2346,10 +2353,10 @@ def hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2() -> dict
                 "final_phase": "terminal",
             },
             {
-                "name": "planned_end_max_iterations",
+                "name": "planned_end_max_iterations_checkpoint_terminal",
                 "condition": (
                     "scale_path_and_not_stagnated_and_effective_iterations_"
-                    "equals_max_iterations"
+                    "equals_max_iterations_and_not_exact_full_final_cycle"
                 ),
                 "commit_required": 1,
                 "continuation_required": 0,
@@ -2362,6 +2369,30 @@ def hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2() -> dict
                     "and_tiny_bits"
                 ),
                 "final_phase": "terminal",
+            },
+            {
+                "name": "planned_end_max_iterations_final_guard_handoff",
+                "condition": (
+                    "scale_path_and_not_stagnated_and_effective_iterations_"
+                    "equals_max_iterations_and_restart_R_column_M_minus_1_and_"
+                    "max_iterations_equals_R_times_M"
+                ),
+                "commit_required": 1,
+                "continuation_required": 0,
+                "restart_row_written": True,
+                "pending_terminal_status_before_finalize": 2,
+                "pending_termination_code_before_finalize": 10,
+                "terminal_status": 0,
+                "termination_code": 0,
+                "restart_hint": 1,
+                "restart_flags": (
+                    "bit0_replayed_or_individual_gate_bits_or_actual_plateau_"
+                    "and_tiny_bits"
+                ),
+                "final_phase": "arnoldi",
+                "final_column_index": "M-1",
+                "final_guard_required": True,
+                "handoff_postcondition": "exact_final_guard_exhausted_shape",
             },
             {
                 "name": "planned_end_continue_next_restart",
@@ -2413,6 +2444,7 @@ def hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2() -> dict
             ],
             "active_must_remain_1_until_finalize_on_nonfailure": True,
             "pending_algorithmic_terminal_is_not_public_before_finalize": True,
+            "full_final_cycle_pending_max_is_cleared_into_guard_handoff": True,
         },
         "reduction_validity_lifetime_contract": {
             "start_masks": [0, 1792, 7936],
@@ -2596,9 +2628,14 @@ def hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2() -> dict
             "predecessor_validation_state": 0,
             "predecessor_mask_snapshot": 0,
             "predecessor_reduction_epoch_snapshot": 0,
-            "active": "0_if_terminal_else_1",
-            "phase": "terminal_or_between_restarts_or_arnoldi",
-            "column_index": "0_if_terminal_else_-1_if_between_restarts_else_1",
+            "active": "0_if_checkpoint_terminal_else_1",
+            "phase": (
+                "terminal_or_between_restarts_or_arnoldi_including_guard_handoff"
+            ),
+            "column_index": (
+                "0_if_checkpoint_terminal_or_guard_handoff_else_-1_if_between_"
+                "restarts_else_1"
+            ),
             "restart_index": 1,
             "next_expected_restart": 2,
             "effective_restarts": 1,
@@ -2610,6 +2647,7 @@ def hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2() -> dict
             "public_record_matches_committed_vector_ownership": True,
             "later_column_or_restart_executed": False,
             "final_guard_executed": False,
+            "final_guard_handoff_may_be_required": True,
         },
     }
 

@@ -1,6 +1,6 @@
 # Engine v2 HIP FGMRES first-column checkpoint transaction context v2
 
-- 상태: Checkpoint owner v0.2.16 implemented; current v0.2.25 recurrence ABI compatibility confirmed, `contract_only`
+- 상태: Checkpoint owner v0.2.16 implemented; current v0.2.26 recurrence ABI compatibility confirmed, `contract_only`
 - 증거 범위: `caller_attested_valid_predecessor_non_promoting`
 - 수치 커널: [initial + first-column checkpoint recurrence v2](engine-v2-hip-fgmres-initial-recurrence-v2.md)
 - 후속 live owner: [canonical-capability-consuming sealed checkpoint transaction v1](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)
@@ -160,13 +160,13 @@ v0.2.16 집중 검증은 다음을 통과했다.
 - combined recurrence ABI: `sha256:31fbff2fa25c221a99f28e170818990a8ed71211169d239e05d28628941941c9`
 - checkpoint schedule: `sha256:d9b9115287e3b5839096e3f4417c04899ffc7592864483d918be55deaf4b4442`
 
-현재 v0.2.25 recurrence identity는 다음과 같다. v0.2.23 이후 C++/HIP source, public schema/ABI와 semantic hashes는 바뀌지 않았으며 위 historical ABI/source와 구분한다.
+현재 v0.2.26 recurrence identity는 다음과 같다. Exact full-final-cycle checkpoint-to-guard handoff로 recurrence semantic payload/schema와 HIP source가 변경됐으며 위 historical ABI/source와 구분한다.
 
 - predecessor validator schedule: `sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58`
-- global schedule semantic contract: `sha256:425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4`
-- combined recurrence ABI: `sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017`
-- fixed HIP source: `sha256:2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967`
-- checkpoint schedule: `sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5`
+- global schedule semantic contract: `sha256:7c18ba9190fef663fec8e1f87e0f56ec393e23f04d4753ffbc3c707bff1a10ea`
+- combined recurrence ABI: `sha256:6a361ccfd0dbbe544e93b6c9ea788cc3702f6f924a969a3aa3deebf3292f315b`
+- fixed HIP source: `sha256:a5b39fb976aa330eaffae74feb8561f241df662a21dc32354b8010af2bb1c93d`
+- checkpoint schedule: `sha256:0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d`
 
 v0.2.22 combined/source `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`/`sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`, v0.2.21 fixed source와 v0.2.20 combined/source는 historical identity다. Gate clear만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않는다.
 
@@ -196,4 +196,4 @@ v0.2.25 lifecycle 검증은 focused `33 passed`, RTC full `111 passed in 34.77s`
 - multi-GPU/explicit HIP context, HIP graph/capture와 속도 증거
 - SPD/PCG, AMG/DD, Newton, ResultIR, O(N), signed promotion, commercial readiness
 
-다음 구현은 active final-guard fallthrough integrated native coverage이며, 그 뒤 global owner 위 completion-only export와 명시적 outcome observation contract를 닫는다. D2H가 없는 receipt는 exact mask scalar나 validator verdict를 host가 안다고 주장하지 않고 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지해야 한다.
+다음 구현은 global owner 위 completion-only solution/record/residual export와 명시적 terminal-outcome observation contract다. Active final-guard integrated native coverage는 v0.2.26 downstream owner에서 검증됐지만 본 historical caller-attested receipt를 소급 승격하지 않는다. D2H가 없는 receipt는 exact mask scalar나 validator verdict를 host가 안다고 주장하지 않고 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지해야 한다.

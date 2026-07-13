@@ -385,6 +385,20 @@ def test_global_schedule_semantic_contract_is_fresh_and_binds_terminal_no_op() -
     assert first["final_guard_contract"]["inactive_behavior"] == (
         "byte_preserving_no_op"
     )
+    final_guard = first["final_guard_contract"]
+    assert final_guard["active_handoff_condition"] == (
+        "plain_max_iterations_after_exact_full_final_cycle_I_equals_R_times_M"
+    )
+    assert final_guard["checkpoint_finalize_handoff"] == (
+        "commit_candidate_and_final_restart_row_clear_transients_preserve_active_arnoldi"
+    )
+    assert final_guard["handoff_postcondition_revalidated_before_guard"] is True
+    assert final_guard["partial_final_cycle_behavior"] == (
+        "checkpoint_finalize_publishes_max_iterations_before_inactive_guard"
+    )
+    assert final_guard["priority_before_handoff"] == (
+        "converged_breakdown_diverged_stagnated_publish_at_checkpoint_finalize"
+    )
     assert first["complexity_boundary"]["per_iteration_host_device_copy"] == 0
     assert first["complexity_boundary"]["per_iteration_host_synchronization"] == 0
     assert not first["complexity_boundary"][

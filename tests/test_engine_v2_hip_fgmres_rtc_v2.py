@@ -5127,6 +5127,90 @@ def test_checkpoint_preflight_is_read_only_nonadvancing_and_commit_is_pure_copy(
     )
 
 
+def test_full_final_cycle_checkpoint_handoff_is_exact_and_postvalidated() -> None:
+    source = fgmres_rtc_v2._fixed_source().decode("utf-8")
+    required_start = source.index(
+        "bool\nengine_v2_checkpoint_requires_final_guard_handoff("
+    )
+    valid_start = source.index(
+        "bool\nengine_v2_checkpoint_final_guard_handoff_prestate_valid("
+    )
+    valid_end = source.index("\n}\n\n}  // namespace", valid_start) + 2
+    required_source = source[required_start:valid_start]
+    valid_source = source[valid_start:valid_end]
+    for required in (
+        "max_iterations % restart_dimension != 0",
+        "max_iterations / restart_dimension != maximum_restart_count",
+        "decision.pending_terminal_status == kTerminalMaxIterations",
+        "decision.pending_termination_code == kTerminationMaxIterationsExhausted",
+        "expected_restart == maximum_restart_count",
+        "expected_column == restart_dimension - 1",
+    ):
+        assert required in required_source
+    for required in (
+        "kControlOffsetScheduleEpoch",
+        "engine_v2_global_final_schedule_epoch(",
+        "kControlOffsetReductionEpoch",
+        "engine_v2_global_final_reduction_epoch(",
+        "kControlOffsetReorthogonalizationCount",
+        "kControlOffsetDgksReorthRequired",
+        "kControlOffsetFailureOrigin",
+        "kRecordOffsetScheduledIterations",
+        "kRecordOffsetEffectiveIterations",
+        "kRecordOffsetScheduledRestarts",
+        "kRecordOffsetEffectiveRestarts",
+        "kRecordOffsetOperatorApplyCount",
+        "kRecordOffsetPreconditionerApplyCount",
+        "kRecordOffsetRestartDimension",
+        "kRecordOffsetEstimatedResidualL2",
+    ):
+        assert required in valid_source
+
+    finalize_start = source.index(
+        "if (control_mode == kControlModeCheckpointFinalize) {\n"
+        "    const EngineV2CheckpointDecision"
+    )
+    finalize_end = source.index(
+        "if (control_mode == kControlModeBindRhs)", finalize_start
+    )
+    finalize_source = source[finalize_start:finalize_end]
+    required_call = finalize_source.index(
+        "engine_v2_checkpoint_requires_final_guard_handoff("
+    )
+    validity_call = finalize_source.index(
+        "!engine_v2_checkpoint_final_guard_handoff_prestate_valid("
+    )
+    fail_closed = finalize_source.index(
+        "A malformed mandatory handoff must never masquerade"
+    )
+    restart_row_publish = finalize_source.index("kRestartOffsetStartIteration")
+    result_header_publish = finalize_source.index(
+        "solve_record_base, kRecordOffsetFinalResidualL2, candidate_l2"
+    )
+    handoff_branch = finalize_source.index("if (final_guard_handoff) {")
+    checkpoint_terminal_branch = finalize_source.index(
+        "else if (decision.pending_terminal_status != kTerminalNotTerminal)"
+    )
+    clear_predecessor = finalize_source.rindex(
+        "kControlOffsetPredecessorValidationState"
+    )
+    postcondition = finalize_source.rindex("!engine_v2_final_guard_exhausted_shape(")
+    assert required_call < validity_call < fail_closed < restart_row_publish
+    assert fail_closed < result_header_publish
+    assert (
+        "kTerminationRestartStateFailed"
+        in finalize_source[validity_call:restart_row_publish]
+    )
+    assert restart_row_publish < handoff_branch
+    assert handoff_branch < checkpoint_terminal_branch
+    assert clear_predecessor < postcondition
+    assert (
+        "kControlOffsetPhase, kPhaseArnoldi"
+        in finalize_source[handoff_branch:checkpoint_terminal_branch]
+    )
+    assert "kTerminationRestartStateFailed" in finalize_source[postcondition:]
+
+
 def test_checkpoint_preflight_and_commit_reject_every_active_allocation_base_alias(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

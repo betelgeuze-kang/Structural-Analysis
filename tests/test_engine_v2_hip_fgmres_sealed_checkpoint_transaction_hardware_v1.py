@@ -92,7 +92,7 @@ from tests.test_engine_v2_hip_resident_csr_hardware_v1 import (  # noqa: E402
 
 
 _TERMINAL_FAILURE_CLEARING_SOURCE_SHA256 = (
-    "sha256:2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967"
+    "sha256:a5b39fb976aa330eaffae74feb8561f241df662a21dc32354b8010af2bb1c93d"
 )
 
 

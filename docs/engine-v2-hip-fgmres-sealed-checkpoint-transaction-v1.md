@@ -1,6 +1,6 @@
 # Engine v2 HIP FGMRES sealed checkpoint transaction v1
 
-- 상태: v0.2.22 Phase 0 historical checkpoint implemented, current v0.2.24 downstream-compatible, `contract_only`/non-promoting
+- 상태: v0.2.22 Phase 0 historical checkpoint implemented, current v0.2.26 downstream-compatible, `contract_only`/non-promoting
 - schema version: `structural-analysis-hip-fgmres-sealed-checkpoint-transaction.v1`
 - capability profile: `phase0_canonical_capability_consuming_sealed_checkpoint_transaction`
 - evidence scope: `canonical_capability_consumed_device_outcome_unobserved_non_promoting`
@@ -165,13 +165,13 @@ Receipt는 canonical/live/Krylov/source-apply lineage, recurrence plan/kernel AB
 
 ## Current와 historical identity
 
-| Current v0.2.24 executable payload | SHA-256 |
+| Current v0.2.26 executable payload | SHA-256 |
 | --- | --- |
 | predecessor validator schedule | `sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58` |
-| checkpoint transaction schedule | `sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5` |
-| global schedule semantic contract | `sha256:425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4` |
-| combined recurrence/kernel ABI | `sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017` |
-| fixed HIP source | `sha256:2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967` |
+| checkpoint transaction schedule | `sha256:0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d` |
+| global schedule semantic contract | `sha256:7c18ba9190fef663fec8e1f87e0f56ec393e23f04d4753ffbc3c707bff1a10ea` |
+| combined recurrence/kernel ABI | `sha256:6a361ccfd0dbbe544e93b6c9ea788cc3702f6f924a969a3aa3deebf3292f315b` |
+| fixed HIP source | `sha256:a5b39fb976aa330eaffae74feb8561f241df662a21dc32354b8010af2bb1c93d` |
 
 | Historical v0.2.22 sealed evidence payload | SHA-256 |
 | --- | --- |
@@ -180,7 +180,7 @@ Receipt는 canonical/live/Krylov/source-apply lineage, recurrence plan/kernel AB
 | combined recurrence/kernel ABI | `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f` |
 | fixed HIP source | `sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113` |
 
-Checkpoint와 validator schedule은 v0.2.24에서도 바뀌지 않았다. Combined ABI/source 변경은 global fixed schedule과 later recurrence/final guard를 interface에 결박한 current executable identity다. v0.2.24는 Python host-control/lifecycle hardening이며 C++/HIP source, public schema와 public ABI는 변경되지 않았다. Historical v0.2.22 native evidence를 current identity의 native evidence로 소급 재해석하지 않는다. Future action gate `commit_required=continuation_required=0`만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않으며, late-invalid no-commit과 destination 보존은 source-only preflight ordering과 full-byte sentinel로 별도 검증한다. v0.2.21 atomicity source `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`도 historical identity다.
+v0.2.26 current identity는 exact full-final-cycle checkpoint-to-guard handoff와 malformed mandatory-prestate prepublication fail-closed를 recurrence semantic payload/schema와 HIP source에 결박한다. Public sealed/global receipt·completion schema는 변경되지 않았다. Historical v0.2.22 native evidence를 current identity의 native evidence로 소급 재해석하지 않는다. Future action gate `commit_required=continuation_required=0`만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않으며, late-invalid no-commit과 destination 보존은 source-only preflight ordering과 full-byte sentinel로 별도 검증한다. v0.2.21 atomicity source `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`도 historical identity다.
 
 ## 검증 현황과 남은 gate
 
@@ -188,8 +188,8 @@ Checkpoint와 validator schedule은 v0.2.24에서도 바뀌지 않았다. Combin
 
 [Actual `gfx1030` hardware gate](../tests/test_engine_v2_hip_fgmres_sealed_checkpoint_transaction_hardware_v1.py)는 latest v0.2.22 source에서 valid canonical -> sealed chain `1 passed in 41.30s`와 `F=513` late NaN/Inf multi-block sealed invalid-source `1 passed in 432.80s`, 합계 2 scoped cases를 확인했다. Valid case는 canonical fence 1 + transaction fence 1 = total 2, exact four-row pending consume와 additional allocation/borrow/module/copy/fallback 0을 관찰했다. Invalid case는 state `{2,3}` 허용, pending status/code 6/47, future action gate clear, mask/snapshot provenance 보존과 두 destination full-byte 불변을 verification-only D2H로 대조했다.
 
-저장소 밖에서 만든 `826616`-byte wheel(`sha256:9c0eaaa4e27f2cbb9b2ac827a91b1f3785c8ca01c3e494077d01aae763420ffb`)을 격리 target에 설치해 public sealed API, Draft 2020-12 sealed schema, HIP kernel resource import와 current source hash를 확인했다.
+저장소 밖에서 만든 historical v0.2.22 `826616`-byte wheel(`sha256:9c0eaaa4e27f2cbb9b2ac827a91b1f3785c8ca01c3e494077d01aae763420ffb`)을 격리 target에 설치해 public sealed API, Draft 2020-12 sealed schema, HIP kernel resource import와 당시 source hash를 확인했다.
 
 이 D2H는 테스트 oracle이며 product receipt telemetry가 아니다. 따라서 scoped native byte-preservation 결과를 actual mask/verdict/commit host observation, authoritative numerical transaction 또는 solution claim으로 승격하지 않는다.
 
-v0.2.24 sealed/global lifecycle focused `6 passed in 123.64s`는 abandoned unconsumed factory result의 weak-lease reap, consumed/pending fail-closed 경계와 parent/child close 순서를 확인했고 independent lifecycle audit은 추가 defect를 찾지 않았다. Global owner의 actual integrated `gfx1030` gate는 이 continuation을 소비해 `F=12,M=2,I=2`의 active later column과 `F=24,M=2,I=5,R=3`의 active restart `1 -> 2 -> 3`을 실행했지만 sealed receipt의 numerical outcome claim을 바꾸지 않는다. Downstream transient dispatch TOCTOU HIGH는 immutable snapshot/row tuple로 수정되었고 final independent linear re-audit은 focused `4 passed in 120.65s`, immutable `1 passed in 26.74s`와 함께 요청 범위 내 remaining defect 0으로 종료했다. 다음 순서는 consumed/pending owner-loss recovery/reaper 운영 계약, active final-guard fallthrough integrated coverage, completion-only export와 명시적 outcome observation contract다. 그 뒤 CPU/HIP full recurrence parity와 iteration host-copy-zero를 각각 별도 gate로 닫는다.
+v0.2.24 sealed/global lifecycle focused `6 passed in 123.64s`는 abandoned unconsumed factory result의 weak-lease reap, consumed/pending fail-closed 경계와 parent/child close 순서를 확인했고 independent lifecycle audit은 추가 defect를 찾지 않았다. v0.2.25는 process-local consumed/pending owner-loss recovery를 구현했다. Global owner의 actual integrated `gfx1030` gate는 이 continuation을 소비해 active later column, restart `1 -> 2 -> 3`, v0.2.26 exact full-cycle active `FINAL_GUARD`를 실행했지만 sealed receipt의 numerical outcome claim을 바꾸지 않는다. 다음 순서는 completion-only solution/record/residual export와 명시적 terminal-outcome observation contract이며, 그 뒤 CPU/HIP full recurrence parity와 iteration host-copy-zero를 각각 별도 gate로 닫는다.

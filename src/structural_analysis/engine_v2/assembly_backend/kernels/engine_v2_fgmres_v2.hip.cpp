@@ -1,6 +1,6 @@
 #pragma clang fp contract(off)
 
-// engine-v2-fgmres-recurrence-interface-v2: sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017
+// engine-v2-fgmres-recurrence-interface-v2: sha256:6a361ccfd0dbbe544e93b6c9ea788cc3702f6f924a969a3aa3deebf3292f315b
 
 #if defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && \
     (__BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__)
@@ -1415,6 +1415,105 @@ engine_v2_checkpoint_decision(
   return result;
 }
 
+__device__ __forceinline__ bool
+engine_v2_checkpoint_requires_final_guard_handoff(
+    const EngineV2CheckpointDecision& decision,
+    int expected_restart,
+    int expected_column,
+    int restart_dimension,
+    int max_iterations,
+    int maximum_restart_count) {
+  if (restart_dimension < 1 || max_iterations < 1 ||
+      maximum_restart_count < 1 ||
+      max_iterations % restart_dimension != 0 ||
+      max_iterations / restart_dimension != maximum_restart_count) {
+    return false;
+  }
+  return decision.valid != 0 && decision.commit_required == 1 &&
+      decision.continuation_required == 0 && decision.row_required == 1 &&
+      decision.same_cycle_continuation == 0 &&
+      decision.between_restarts_continuation == 0 &&
+      decision.scale_path == 1 &&
+      decision.pending_terminal_status == kTerminalMaxIterations &&
+      decision.pending_termination_code == kTerminationMaxIterationsExhausted &&
+      decision.pending_restart_hint == kRestartHintRestartCompleted &&
+      expected_restart == maximum_restart_count &&
+      expected_column == restart_dimension - 1;
+}
+
+__device__ __forceinline__ bool
+engine_v2_checkpoint_final_guard_handoff_prestate_valid(
+    const unsigned char* control,
+    const unsigned char* record,
+    int stages,
+    int restart_dimension,
+    int max_iterations,
+    int maximum_restart_count) {
+  if (stages < 1 || restart_dimension < 1 || max_iterations < 1 ||
+      maximum_restart_count < 1) {
+    return false;
+  }
+  const int final_cycle_start = max_iterations - restart_dimension;
+  const int reorthogonalization_count = engine_v2_load_i32_le(
+      control, kControlOffsetReorthogonalizationCount);
+  const int false_convergence_count = engine_v2_load_i32_le(
+      record, kRecordOffsetFalseConvergenceCount);
+  const int expected_operator_count = 1 + max_iterations +
+      maximum_restart_count + false_convergence_count;
+  const double estimated_residual_l2 = engine_v2_load_f64_le(
+      record, kRecordOffsetEstimatedResidualL2);
+  return engine_v2_load_i32_le(control, kControlOffsetPhase) ==
+          kPhaseCheckpointCommit &&
+      engine_v2_load_i32_le(control, kControlOffsetRestartIndex) ==
+          maximum_restart_count &&
+      engine_v2_load_i32_le(control, kControlOffsetCycleStartIteration) ==
+          final_cycle_start &&
+      engine_v2_load_i32_le(control, kControlOffsetCycleWidth) ==
+          restart_dimension &&
+      engine_v2_load_i32_le(control, kControlOffsetColumnIndex) ==
+          restart_dimension - 1 &&
+      engine_v2_load_i32_le(control, kControlOffsetArnoldiStepCount) ==
+          restart_dimension &&
+      reorthogonalization_count >= 0 &&
+      reorthogonalization_count <= restart_dimension &&
+      engine_v2_load_i32_le(control, kControlOffsetDgksReorthRequired) == 0 &&
+      engine_v2_load_i32_le(control, kControlOffsetFailureOrigin) ==
+          kFailureOriginNone &&
+      engine_v2_load_i32_le(control, kControlOffsetNextExpectedRestart) ==
+          maximum_restart_count + 1 &&
+      engine_v2_load_i32_le(control, kControlOffsetScheduleEpoch) ==
+          engine_v2_global_final_schedule_epoch(
+              stages, restart_dimension, maximum_restart_count) &&
+      engine_v2_load_i32_le(control, kControlOffsetReductionEpoch) ==
+          engine_v2_global_final_reduction_epoch(
+              stages, restart_dimension, maximum_restart_count) &&
+      engine_v2_load_i32_le(record, kRecordOffsetActive) == 1 &&
+      engine_v2_load_i32_le(record, kRecordOffsetTerminalStatus) ==
+          kTerminalNotTerminal &&
+      engine_v2_load_i32_le(record, kRecordOffsetTerminationCode) ==
+          kTerminationNone &&
+      engine_v2_load_i32_le(record, kRecordOffsetDeviceErrorBits) == 0 &&
+      engine_v2_load_i32_le(record, kRecordOffsetScheduledIterations) ==
+          max_iterations &&
+      engine_v2_load_i32_le(record, kRecordOffsetEffectiveIterations) ==
+          max_iterations &&
+      engine_v2_load_i32_le(record, kRecordOffsetScheduledRestarts) ==
+          maximum_restart_count &&
+      engine_v2_load_i32_le(record, kRecordOffsetEffectiveRestarts) ==
+          maximum_restart_count &&
+      engine_v2_load_i32_le(record, kRecordOffsetEffectiveArnoldiDimension) ==
+          restart_dimension &&
+      false_convergence_count >= 0 &&
+      engine_v2_load_i32_le(record, kRecordOffsetOperatorApplyCount) ==
+          expected_operator_count &&
+      engine_v2_load_i32_le(record, kRecordOffsetPreconditionerApplyCount) ==
+          max_iterations &&
+      engine_v2_load_i32_le(record, kRecordOffsetRestartDimension) ==
+          restart_dimension &&
+      engine_v2_isfinite(estimated_residual_l2) &&
+      estimated_residual_l2 >= 0.0;
+}
+
 }  // namespace
 
 extern "C" __global__ void engine_v2_fgmres_control_v2(
@@ -2379,6 +2478,34 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
       return;
     }
 
+    const bool final_guard_handoff =
+        engine_v2_checkpoint_requires_final_guard_handoff(
+            decision,
+            expected_restart,
+            expected_column,
+            restart_dimension,
+            max_iterations,
+            maximum_restart_count);
+    if (final_guard_handoff &&
+        !engine_v2_checkpoint_final_guard_handoff_prestate_valid(
+            control_state_base,
+            solve_record_base,
+            stages,
+            restart_dimension,
+            max_iterations,
+            maximum_restart_count)) {
+      // Exact full-cycle exhaustion has one legal publisher: FINAL_GUARD.
+      // A malformed mandatory handoff must never masquerade as an ordinary
+      // checkpoint-owned max-iteration terminal outcome.
+      engine_v2_terminal_failure(
+          control_state_base,
+          solve_record_base,
+          kErrorInvalidControlOrGeometry,
+          kFailureOriginControl,
+          kTerminationRestartStateFailed);
+      return;
+    }
+
     const int candidate_required = engine_v2_load_i32_le(
         control_state_base, kControlOffsetCandidateRequired);
     const int candidate_reason_bits = engine_v2_load_i32_le(
@@ -2503,7 +2630,13 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
           prior_false + 1);
     }
 
-    if (decision.pending_terminal_status != kTerminalNotTerminal) {
+    if (final_guard_handoff) {
+      // The fixed global program owns the immediately following FINAL_GUARD.
+      // Keep the committed exact exhausted shape active until that row claims
+      // the final schedule epoch and becomes the max-iteration publisher.
+      engine_v2_store_i32_le(
+          control_state_base, kControlOffsetPhase, kPhaseArnoldi);
+    } else if (decision.pending_terminal_status != kTerminalNotTerminal) {
       engine_v2_store_i32_le(
           solve_record_base, kRecordOffsetActive, 0);
       engine_v2_store_i32_le(
@@ -2584,6 +2717,28 @@ extern "C" __global__ void engine_v2_fgmres_control_v2(
         control_state_base,
         kControlOffsetPredecessorValidationState,
         kPredecessorValidationEmpty);
+    if (final_guard_handoff &&
+        (engine_v2_load_i32_le(
+             control_state_base, kControlOffsetScheduleEpoch) !=
+             engine_v2_global_final_schedule_epoch(
+                 stages, restart_dimension, maximum_restart_count) ||
+         engine_v2_load_i32_le(
+             control_state_base, kControlOffsetReductionEpoch) !=
+             engine_v2_global_final_reduction_epoch(
+                 stages, restart_dimension, maximum_restart_count) ||
+         !engine_v2_final_guard_exhausted_shape(
+             control_state_base,
+             solve_record_base,
+             restart_dimension,
+             max_iterations,
+             maximum_restart_count))) {
+      engine_v2_terminal_failure(
+          control_state_base,
+          solve_record_base,
+          kErrorInvalidControlOrGeometry,
+          kFailureOriginControl,
+          kTerminationRestartStateFailed);
+    }
     return;
   }
 

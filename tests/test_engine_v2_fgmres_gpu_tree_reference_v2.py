@@ -2163,6 +2163,24 @@ def test_checkpoint_transaction_stagnation_streak_reset_limit_and_max_priority()
     assert maximum.terminal_status_code == 2
     assert maximum.termination_code_value == 10
 
+    handoff = _checkpoint_transaction(
+        ordinary,
+        previous_checkpoint_l2=3.0,
+        previous_stagnation_checkpoint_count=0,
+        max_iterations=1,
+        restart_dimension=1,
+    )
+    assert handoff.decision == "max_iterations"
+    assert handoff.pending_terminal_status == "max_iterations"
+    assert handoff.pending_termination_code == "max_iterations_exhausted"
+    assert handoff.final_guard_handoff_required is True
+    assert handoff.continuation_required is False
+    assert handoff.active_after_finalize is True
+    assert handoff.terminal_status == "not_terminal"
+    assert handoff.termination_code == "none"
+    assert handoff.phase_after_finalize == "arnoldi"
+    assert handoff.column_index_after_finalize == 0
+
 
 def test_checkpoint_transaction_x_scale_overflow_is_precommit_fail_closed() -> None:
     maximum = float(np.finfo(np.float64).max)
@@ -2292,6 +2310,7 @@ def test_checkpoint_transaction_raw_replay_matches_composed_oracle() -> None:
         stagnation_relative_tolerance=0.1,
         stagnation_checkpoint_limit=2,
         max_iterations=2,
+        restart_dimension=2,
     )
 
     assert raw.decision == composed.decision
@@ -2594,6 +2613,7 @@ def _checkpoint_transaction(
         "stagnation_relative_tolerance": 0.1,
         "stagnation_checkpoint_limit": 2,
         "max_iterations": 2,
+        "restart_dimension": 2,
     }
     arguments.update(overrides)
     return prepare_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(

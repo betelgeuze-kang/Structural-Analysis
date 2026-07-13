@@ -673,6 +673,8 @@ def test_native_gfx1030_fgmres_v2_initial_schedule_matches_gpu_tree_oracle() -> 
         "happy_breakdown",
         "triangular_breakdown",
         "cycle_end_candidate",
+        "malformed_final_handoff_next_restart",
+        "malformed_final_handoff_operator_count",
     ),
 )
 def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
@@ -682,7 +684,16 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
     kernel = execution.kernel
 
     free_dof_count = 513
-    restart_dimension = 1 if column_case == "cycle_end_candidate" else 4
+    restart_dimension = (
+        1
+        if column_case
+        in {
+            "cycle_end_candidate",
+            "malformed_final_handoff_next_restart",
+            "malformed_final_handoff_operator_count",
+        }
+        else 4
+    )
     max_iterations = restart_dimension
     maximum_restart_count = 1
     absolute_tolerance = 0.0
@@ -849,6 +860,7 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
         stagnation_relative_tolerance=stagnation_relative_tolerance,
         stagnation_checkpoint_limit=2,
         max_iterations=max_iterations,
+        restart_dimension=restart_dimension,
     )
     if column_case == "signed_dot_dgks":
         assert column_oracle.h00_first_coefficient < 0.0
@@ -869,7 +881,11 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
             assert preparation_oracle.triangular_breakdown is True
             assert preparation_oracle.invariant_breakdown is True
         else:
-            assert column_case == "cycle_end_candidate"
+            assert column_case in {
+                "cycle_end_candidate",
+                "malformed_final_handoff_next_restart",
+                "malformed_final_handoff_operator_count",
+            }
             assert column_oracle.dgks_second_pass is False
             assert completion_oracle.invariant_breakdown is False
             assert completion_oracle.candidate_reason_bits == 4
@@ -879,7 +895,12 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
         preparation_oracle.candidate_vector_valid
     )
     assert candidate_scale_oracle.candidate_scale_required == (
-        column_case == "cycle_end_candidate"
+        column_case
+        in {
+            "cycle_end_candidate",
+            "malformed_final_handoff_next_restart",
+            "malformed_final_handoff_operator_count",
+        }
     )
 
     control_abi = hip_fgmres_control_state_abi_payload_v2()
@@ -1194,6 +1215,7 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
         )
 
         completion_metric_stages: dict[str, int] = {}
+        handoff_corruption: np.ndarray | None = None
         for row in (
             *completion_rows,
             *preparation_rows,
@@ -1242,6 +1264,43 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
             elif row.submission_kind == "control":
                 assert row.row_index is not None
                 assert row.pass_index is not None
+                if column_case.startswith("malformed_final_handoff_") and (
+                    row.name == "CHECKPOINT_FINALIZE_COLUMN0"
+                ):
+                    if column_case == "malformed_final_handoff_next_restart":
+                        corruption_role = "control"
+                        corruption_field = "next_expected_restart"
+                        corruption_value = maximum_restart_count
+                    else:
+                        assert column_case == "malformed_final_handoff_operator_count"
+                        corruption_role = "record"
+                        corruption_field = "operator_apply_count"
+                        corruption_value = (
+                            candidate_scale_oracle.operator_apply_count + 1
+                        )
+                    corruption_offsets = (
+                        control_offsets
+                        if corruption_role == "control"
+                        else _field_offsets(record_abi["header_fields"])
+                    )
+                    handoff_corruption = np.asarray([corruption_value], dtype="<i4")
+                    corrupt_destination = ctypes.c_void_p(
+                        device[corruption_role].value
+                        + corruption_offsets[corruption_field]
+                    )
+                    _require_hip_success(
+                        execution.api.runtime,
+                        int(
+                            execution.api.hip_memcpy_async(
+                                corrupt_destination,
+                                ctypes.c_void_p(handoff_corruption.ctypes.data),
+                                handoff_corruption.nbytes,
+                                _HIP_MEMCPY_HOST_TO_DEVICE,
+                                stream,
+                            )
+                        ),
+                        "hipMemcpyAsync(H2D malformed final handoff)",
+                    )
                 launch_control(
                     row.mode,
                     row.expected_schedule_epoch,
@@ -1297,7 +1356,12 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
                     device["record"],
                 )
                 if (
-                    column_case == "cycle_end_candidate"
+                    column_case
+                    in {
+                        "cycle_end_candidate",
+                        "malformed_final_handoff_next_restart",
+                        "malformed_final_handoff_operator_count",
+                    }
                     and row.name == "PREFLIGHT_COMMIT_SOURCE_COLUMN0"
                 ):
                     sealed_preflight_control = np.empty_like(host_inputs["control"])
@@ -1344,6 +1408,45 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
             execution.enqueue_download(name, device[name], host)
         execution.observe_fence_and_acknowledge()
         assert kernel.pending_stream_count == 0
+
+        if column_case.startswith("malformed_final_handoff_"):
+            assert handoff_corruption is not None
+            control_payload = host_outputs["control"].tobytes()
+            record_payload = host_outputs["record"].tobytes()
+            record_offsets = _field_offsets(record_abi["header_fields"])
+            assert (
+                _i32(control_payload, control_offsets, "phase")
+                == control_abi["phase_codes"]["failed"]
+            )
+            assert _i32(control_payload, control_offsets, "failure_origin") == 1
+            assert _i32(record_payload, record_offsets, "active") == 0
+            assert _i32(record_payload, record_offsets, "terminal_status") == 6
+            assert _i32(record_payload, record_offsets, "termination_code") == 47
+            assert _i32(record_payload, record_offsets, "device_error_bits") == 1
+            assert _f64(record_payload, record_offsets, "final_residual_l2") == (
+                initial_oracle.residual_l2.value
+            )
+            assert _f64(record_payload, record_offsets, "final_residual_linf") == (
+                initial_oracle.residual_linf.value
+            )
+            assert _f64(record_payload, record_offsets, "final_scaled_residual") == (
+                initial_oracle.scaled_residual_linf
+            )
+            assert _f64(record_payload, record_offsets, "solution_update_l2") == 0.0
+            assert (
+                _f64(
+                    record_payload,
+                    record_offsets,
+                    "previous_checkpoint_residual_l2",
+                )
+                == initial_oracle.residual_l2.value
+            )
+            restart_payload = record_payload[
+                record_abi["header_bytes"] : record_abi["header_bytes"]
+                + record_abi["restart_bytes"]
+            ]
+            assert restart_payload == bytes(record_abi["restart_bytes"])
+            return
 
         np.testing.assert_array_equal(
             host_outputs["basis_v"][:free_dof_count],
@@ -1421,16 +1524,9 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
         )
         assert _i32(control_payload, control_offsets, "restart_index") == 1
         assert _i32(control_payload, control_offsets, "next_expected_restart") == 2
-        expected_final_column = (
-            0
-            if checkpoint_oracle.terminal_status != "not_terminal"
-            else (
-                -1 if checkpoint_oracle.continuation_kind == "between_restarts" else 1
-            )
-        )
         assert (
             _i32(control_payload, control_offsets, "column_index")
-            == expected_final_column
+            == checkpoint_oracle.column_index_after_finalize
         )
         assert _i32(control_payload, control_offsets, "cycle_start_iteration") == 0
         assert (
@@ -1507,6 +1603,16 @@ def test_native_gfx1030_first_column_checkpoint_transaction_matches_oracle(
             == checkpoint_oracle.termination_code_value
         )
         assert _i32(record_payload, record_offsets, "device_error_bits") == 0
+        assert checkpoint_oracle.final_guard_handoff_required == (
+            column_case == "cycle_end_candidate"
+        )
+        if checkpoint_oracle.final_guard_handoff_required:
+            assert checkpoint_oracle.pending_terminal_status == "max_iterations"
+            assert checkpoint_oracle.pending_termination_code == (
+                "max_iterations_exhausted"
+            )
+            assert checkpoint_oracle.terminal_status == "not_terminal"
+            assert checkpoint_oracle.termination_code == "none"
         assert _i32(record_payload, record_offsets, "effective_restarts") == 1
         assert (
             _i32(record_payload, record_offsets, "effective_iterations")

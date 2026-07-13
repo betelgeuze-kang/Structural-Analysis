@@ -1,6 +1,6 @@
 # Engine v2 HIP FGMRES initial + first-column checkpoint transaction recurrence v2
 
-- 상태: v0.2.25, Phase 0 first-column historical slice와 current global ABI compatibility, `contract_only`
+- 상태: v0.2.26, Phase 0 first-column historical slice와 current global ABI compatibility, `contract_only`
 - Caller-attested owner: [first-column checkpoint transaction context v2](engine-v2-hip-fgmres-checkpoint-context-v2.md)
 - Live sealed owner: [canonical-capability-consuming sealed checkpoint transaction v1](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)
 - Global continuation consumer: [sealed-continuation global recurrence owner v1](engine-v2-hip-fgmres-global-recurrence-v1.md)
@@ -129,7 +129,7 @@ Validator schedule hash는 `sha256:b083896de86a808b1398d0fde4abe73726cb91f503996
 | `CHECKPOINT_DECIDE` | `E=26+14S`, `Q=14S` | Sealed 경로는 armed snapshot과 live mask/epoch을 대조하고 `armed(1) -> consumed(2)`로 전이한다. Legacy raw 경로는 state/snapshot 모두 0이어야 한다. 그 뒤 `x_scale_l2=trial_x_l2+committed_x_l2`, unit floor 없음으로 dual gate → invariant → strict divergence → stagnation → max iterations 우선순위를 계산하고 pending outcome을 기록한다. |
 | `PREFLIGHT_COMMIT_SOURCE(mode=9)` | `E=27+14S`, `Q=14S`; non-advancing | 정상 admission은 legacy `0 -> 3`, sealed `2 -> 3` ticket을 발행한다. `commit_required=true`이면 `work_w`와 `V[M]`만 읽어 전체 source finite를 검사하며 destination과 snapshot은 쓰지 않는다. False이면 source/destination을 읽지 않는다. Invalid source는 error bit 4, origin 2, code 47, `active=0`으로 fail-closed한다. |
 | gated `COMMIT_CHECKPOINT` | `E=27+14S`, `Q=14S` | 모든 lane이 state 3, active 1, error bits 0과 exact legacy/sealed snapshot shape를 확인한 뒤 pure copy만 수행한다. Late finite 검사나 rollback branch는 없다. False이면 source와 destination을 읽거나 쓰지 않는다. |
-| `CHECKPOINT_FINALIZE` | `E=28+14S`, `Q=14S`; 성공 종료 `E=29+14S`, `Q=14S` | Sealed 경로는 state 3과 preserved snapshot을 다시 대조한다. Pending decision을 재계산·대조한 뒤 restart row와 result-metric header를 쓰는 유일한 publisher이며, 성공 시 mask와 snapshot을 먼저 지우고 validation state를 마지막에 0으로 clear해 terminal/continuation phase를 확정한다. |
+| `CHECKPOINT_FINALIZE` | `E=28+14S`, `Q=14S`; 성공 종료 `E=29+14S`, `Q=14S` | Sealed 경로는 state 3과 preserved snapshot을 다시 대조한다. Pending decision을 재계산·대조한 뒤 restart row와 result-metric header를 쓰는 유일한 publisher이다. Exact full-final-cycle max에서는 active/not-terminal을 유지해 다음 fixed `FINAL_GUARD`로 mandatory handoff하고, partial final cycle은 기존 checkpoint terminal을 publish한다. Required handoff의 exact prestate가 invalid이면 row/header publish 전 code 47로 fail-closed한다. |
 
 Mask 0/1792/7936은 decide, preflight와 commit 동안 그대로 유지되고 finalizer만 0으로 지운다. 정상 transaction에서 solve record의 `active`도 finalizer 전까지 1이며 정상 sealed lifecycle만 `2 -> 3 -> 0`으로 단정한다. Multi-block preflight의 block>0 invalid lane이 block 0의 state CAS보다 먼저 `active=0`을 publish할 수 있으므로 invalid failure 종료 state는 scheduling에 따라 `consumed(2)` 또는 `commit-preflighted(3)`일 수 있다. 두 경우 모두 mask/reduction snapshot은 보존되고 COMMIT은 `active=0` admission에서 destination을 쓰지 않으므로 destination atomicity에는 영향이 없다. Terminal numerical failure는 `commit_required=0`, `continuation_required=0`, `active=0`과 terminal status/code/error header를 기록하며 result metrics/restart row는 publish하지 않는다. Restart row는 나머지 field를 먼저 쓴 뒤 `restart_index` sentinel을 마지막에 쓴다. 정상 finalizer는 snapshot과 transient를 먼저 지우고 state `3 -> 0`을 마지막에 수행한다.
 
@@ -139,12 +139,12 @@ Mask 0/1792/7936은 decide, preflight와 commit 동안 그대로 유지되고 fi
 - candidate-residual schedule: `sha256:c2c74ad20a4b881ad209a632d021cbf368d8ae042bca5f161e82cb0bae9c4ad3`
 - candidate scale-metrics schedule: `sha256:1bc8a32247ad2255cc5953f525f67b1991a62ffb9f6ca6bf299a898c11468ba8`
 - predecessor validator schedule: `sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58`
-- checkpoint transaction schedule: `sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5`
-- current global schedule semantic contract: `sha256:425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4`
-- current combined v2 kernel ABI: `sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017`
-- current fixed HIP source: `sha256:2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967`
+- checkpoint transaction schedule: `sha256:0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d`
+- current global schedule semantic contract: `sha256:7c18ba9190fef663fec8e1f87e0f56ec393e23f04d4753ffbc3c707bff1a10ea`
+- current combined v2 kernel ABI: `sha256:6a361ccfd0dbbe544e93b6c9ea788cc3702f6f924a969a3aa3deebf3292f315b`
+- current fixed HIP source: `sha256:a5b39fb976aa330eaffae74feb8561f241df662a21dc32354b8010af2bb1c93d`
 
-v0.2.22 combined/source `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`/`sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`는 historical sealed evidence identity다. Gate clear만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않으며 late-invalid no-commit은 source-only preflight와 destination full-byte sentinel로 별도 확인한다. v0.2.21/v0.2.20/v0.2.15의 기존 exact hashes도 historical snapshot이며 current v0.2.25 identity로 재사용하지 않는다.
+v0.2.22 combined/source `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`/`sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`는 historical sealed evidence identity다. Gate clear만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않으며 late-invalid no-commit은 source-only preflight와 destination full-byte sentinel로 별도 확인한다. v0.2.21-v0.2.25의 기존 exact hashes도 historical snapshot이며 current v0.2.26 identity로 재사용하지 않는다.
 
 모든 pending operation은 최초에 결속된 하나의 stream에만 제출할 수 있다. 다른 stream은 completion fence가 관찰되고 pending reservation이 소비되기 전에 host에서 거부된다. v0.2.21 checkpoint owner는 exact four-row sequence와 같은 stream을 결속하고, preflight/commit에는 동일한 exact 11-pointer snapshot을 전달한다. v0.2.22 sealed child는 still-open canonical capability를 single-use consume하고 exact live kernel/checkpoint token/stream/direct11/physical16과 four-row tuple을 고정한 뒤 각 row 전에 exact pending map을 재검증한다. Binding witness는 exact loaded runtime의 `hipStreamSynchronize`, `hipStreamQuery`와 sealed `hipMemsetAsync` callable을 함께 고정하고 kernel/memset acceptance interval을 같은 pending accounting에 포함한다. Query status `0`만 COMPLETE, `600`만 NOT_READY이며 그 밖의 status·예외와 non-bool wrapper 결과는 fail-closed다. Canonical producer는 8개 owned memset과 exact `27+14S` kernel row를 한 fence로 소비하고, sealed transaction은 네 row를 별도 final fence 하나로 소비한다. 따라서 연속 chain의 successful fence는 총 2회다. Reduction의 pre-barrier admission은 block-shared flag로 통일해 lane 일부만 return한 뒤 `__syncthreads()`에 진입하는 경우를 금지한다.
 
@@ -176,6 +176,8 @@ v0.2.24 downstream integrated owner는 별도 actual gate에서 restart `1 -> 2 
 
 v0.2.25 lifecycle recovery 검증은 focused `33 passed`, RTC full `111 passed in 34.77s`, checkpoint context v2 full `261 passed in 248.58s`, global owner full `54 passed in 1387.12s`, sealed transaction full `30 passed in 507.23s`를 통과했고 independent audit은 `BLOCKER/HIGH/MEDIUM/LOW 0/0/0/0`으로 종료했다. Actual RX 6900 XT `gfx1030` F12/M2/I2 abandoned suffix required gate는 pending `39 -> 0`, query `(False, True)`, sync 1, product-path malloc/H2D/D2H/runtime sync 0과 `1 passed, 2 deselected in 37.42s`를 확인했다. C++/HIP source, public schema/ABI와 위 semantic hashes는 변하지 않았다. 이 evidence는 process-local lifecycle에만 해당하며 completion, numerical result/parity, product outcome, O(N), speedup 또는 commercial readiness를 승격하지 않는다.
 
+v0.2.26 downstream integrated owner는 exact full final cycle `F=24,M=2,I=4,R=2`에서 checkpoint `E/Q=147/48` 후 active `FINAL_GUARD` `E/Q=148/48`을 확인했다. `I=5` partial final cycle은 기존 checkpoint terminal `E/Q=179/58`를 보존한다. Required handoff의 `next_expected_restart` 또는 operator count를 오염시킨 actual native 음성 gate는 restart row/result header 미발행과 code 47 fail-closed를 확인했다. 이 후속 evidence도 first-column historical receipt의 outcome/parity claim을 소급 승격하지 않는다.
+
 실제 RX 6900 XT `gfx1030` gate에서는 `F=513` diagonal CSR과 nonzero `x0`를 사용해 두 block/two-stage 초기 schedule을 실행했다. Completion에서만 `x`, `Ax`, residual, control, record를 D2H하고 stream fence 1회를 관찰했다. GPU-tree oracle과 vector/네 norm/gate가 일치했고 `schedule_epoch=15`, `reduction_epoch=8`, operator count 1, `device_error_bits=0`, fallback 0을 확인했다. 이는 initial slice의 조건부 native test이며 signed promotion receipt나 전체 recurrence parity가 아니다.
 
 동일한 `F=513` nonfinal LASSQ stage를 같은 schedule/reduction epoch로 중복 제출한 native 회귀에서도 stream이 hang 없이 완료되고, invalid-control error bit·`active=0`·failed phase·보존된 epoch으로 종료됨을 확인했다.
@@ -204,6 +206,6 @@ v0.2.25 lifecycle recovery 검증은 focused `33 passed`, RTC full `111 passed i
 
 다음은 true다: valid predecessor에 대한 raw `x_scale_l2`, `CHECKPOINT_DECIDE`, source-only `PREFLIGHT_COMMIT_SOURCE`, gated pure-copy `COMMIT_CHECKPOINT`, `CHECKPOINT_FINALIZE` 수치 slice와 actual HIPRTC 실행. Exact registered nonoverlap allocation, same stream, exclusive source ownership과 fixed four-row owner sequence에 한해 invalid-source destination failure atomicity도 true다.
 
-다음은 아직 false다: authoritative predecessor와 numerical checkpoint transaction, host-observed actual device mask/validator verdict/commit/device outcome, arbitrary writer/duplicate/device-fault 범위의 전역 atomicity, active final-guard fallthrough의 integrated owner 증거, full recurrence/full parity, authoritative solver/solution receipt, 전체 iteration host-copy-zero, SPD/PCG, AMG/DD, Newton, ResultIR, end-to-end O(N), speedup, signed promotion, commercial readiness.
+다음은 아직 false다: authoritative predecessor와 numerical checkpoint transaction, host-observed actual device mask/validator verdict/commit/device outcome, arbitrary writer/duplicate/device-fault 범위의 전역 atomicity, product terminal-outcome observation, completion export, full recurrence/full parity, authoritative solver/solution receipt, 전체 iteration host-copy-zero, SPD/PCG, AMG/DD, Newton, ResultIR, end-to-end O(N), speedup, signed promotion, commercial readiness.
 
-다음 구현 우선순위는 active final-guard fallthrough integrated native coverage와 completion-only export다. Global dispatch TOCTOU 수정의 final independent linear re-audit은 요청 범위 remaining defect 0으로 종료했고 active later restart `1 -> 2 -> 3`도 downstream integrated owner에서 검증됐다. D2H가 없는 receipt는 계속 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지한다.
+다음 구현 우선순위는 completion-only solution/record/residual export → 명시적 terminal-outcome observation contract → model-family CPU/HIP full parity·iteration host-copy-zero다. Active later restart `1 -> 2 -> 3`과 exact full-cycle active `FINAL_GUARD`는 downstream integrated owner에서 검증됐다. D2H가 없는 receipt는 계속 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지한다.

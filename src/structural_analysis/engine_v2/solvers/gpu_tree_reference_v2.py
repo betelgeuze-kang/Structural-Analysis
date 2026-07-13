@@ -381,6 +381,8 @@ class FgmresGpuTreeFirstColumnCheckpointTransactionReplayV2:
     termination_code: str
     termination_code_value: int
     phase_after_finalize: str
+    final_guard_handoff_required: bool
+    column_index_after_finalize: int
     previous_stagnation_checkpoint_count: int
     stagnation_checkpoint_count: int
     previous_false_convergence_count: int
@@ -1286,6 +1288,7 @@ def prepare_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(
     stagnation_relative_tolerance: float,
     stagnation_checkpoint_limit: int,
     max_iterations: int,
+    restart_dimension: int,
 ) -> FgmresGpuTreeFirstColumnCheckpointTransactionReplayV2:
     """Replay first-column CHECKPOINT_DECIDE/COMMIT/FINALIZE.
 
@@ -1357,6 +1360,16 @@ def prepare_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(
         _fail(
             "fgmres_gpu_tree_checkpoint_max_iterations_invalid",
             "/max_iterations",
+        )
+    if (
+        type(restart_dimension) is not int
+        or not 1 <= restart_dimension <= _FGMRES_GPU_TREE_MAX_RESTART_DIMENSION
+        or source.candidate_residual.candidate_preparation.through_givens.cycle_width
+        > restart_dimension
+    ):
+        _fail(
+            "fgmres_gpu_tree_checkpoint_restart_dimension_invalid",
+            "/restart_dimension",
         )
 
     committed_x = _finite_vector_preserve_zero(
@@ -1566,6 +1579,25 @@ def prepare_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(
                 decision = "between_restarts"
                 continuation_kind = "between_restarts"
 
+    pending_terminal_status = terminal_status
+    pending_termination_code = termination_code
+    cycle_width = (
+        source.candidate_residual.candidate_preparation.through_givens.cycle_width
+    )
+    final_guard_handoff_required = (
+        terminal_status == "max_iterations"
+        and termination_code == "max_iterations_exhausted"
+        and commit_required
+        and row_appended
+        and restart_dimension == 1
+        and cycle_width == restart_dimension
+        and source.arnoldi_step_count == restart_dimension
+        and source.effective_iterations == max_iterations == restart_dimension
+    )
+    if final_guard_handoff_required:
+        terminal_status = "not_terminal"
+        termination_code = "none"
+
     if commit_required:
         trial = _finite_vector(
             residual.candidate_preparation.trial_x,
@@ -1652,6 +1684,11 @@ def prepare_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(
             "between_restarts" if continuation_kind == "between_restarts" else "arnoldi"
         )
     )
+    column_index_after = (
+        0
+        if terminal or final_guard_handoff_required
+        else (-1 if continuation_kind == "between_restarts" else 1)
+    )
     start_mask = source.reduction_valid_mask
     return FgmresGpuTreeFirstColumnCheckpointTransactionReplayV2(
         candidate_scale_metrics=source,
@@ -1685,13 +1722,13 @@ def prepare_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(
         continuation_kind=continuation_kind,
         row_appended=row_appended,
         restart_record=record,
-        pending_terminal_status=terminal_status,
+        pending_terminal_status=pending_terminal_status,
         pending_terminal_status_code=_FGMRES_GPU_TREE_TERMINAL_STATUS_CODES[
-            terminal_status
+            pending_terminal_status
         ],
-        pending_termination_code=termination_code,
+        pending_termination_code=pending_termination_code,
         pending_termination_code_value=_FGMRES_GPU_TREE_TERMINATION_CODES[
-            termination_code
+            pending_termination_code
         ],
         pending_restart_hint=restart_hint,
         pending_restart_hint_code=_FGMRES_GPU_TREE_RESTART_HINT_CODES[restart_hint],
@@ -1701,6 +1738,8 @@ def prepare_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(
         termination_code=termination_code,
         termination_code_value=_FGMRES_GPU_TREE_TERMINATION_CODES[termination_code],
         phase_after_finalize=phase_after,
+        final_guard_handoff_required=final_guard_handoff_required,
+        column_index_after_finalize=column_index_after,
         previous_stagnation_checkpoint_count=previous_stagnation,
         stagnation_checkpoint_count=stagnation_count,
         previous_false_convergence_count=previous_false,
@@ -1861,6 +1900,7 @@ def replay_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(
     stagnation_relative_tolerance: float,
     stagnation_checkpoint_limit: int,
     max_iterations: int,
+    restart_dimension: int,
 ) -> FgmresGpuTreeFirstColumnCheckpointTransactionReplayV2:
     """Replay raw column-zero inputs through the checkpoint transaction."""
 
@@ -1897,6 +1937,7 @@ def replay_fgmres_gpu_tree_first_column_checkpoint_transaction_v2(
         stagnation_relative_tolerance=stagnation_relative_tolerance,
         stagnation_checkpoint_limit=stagnation_checkpoint_limit,
         max_iterations=max_iterations,
+        restart_dimension=restart_dimension,
     )
 
 

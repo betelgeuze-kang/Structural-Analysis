@@ -211,6 +211,19 @@ def hip_fgmres_global_schedule_contract_payload_v1() -> dict[str, Any]:
             "active_required_prestate": (
                 "phase=arnoldi,status=not_terminal,code=none,all_action_and_pending_fields_clear"
             ),
+            "active_handoff_condition": (
+                "plain_max_iterations_after_exact_full_final_cycle_I_equals_R_times_M"
+            ),
+            "checkpoint_finalize_handoff": (
+                "commit_candidate_and_final_restart_row_clear_transients_preserve_active_arnoldi"
+            ),
+            "handoff_postcondition_revalidated_before_guard": True,
+            "partial_final_cycle_behavior": (
+                "checkpoint_finalize_publishes_max_iterations_before_inactive_guard"
+            ),
+            "priority_before_handoff": (
+                "converged_breakdown_diverged_stagnated_publish_at_checkpoint_finalize"
+            ),
             "active_valid_behavior": "claim_one_schedule_epoch_and_publish_max_iterations",
             "active_malformed_behavior": "fail_closed_code_47",
             "absent_when_I_zero": True,

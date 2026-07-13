@@ -69,7 +69,7 @@ SCHEMA = (
 )
 
 _GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2 = (
-    "sha256:4078f8f07b3bf605baae04ded1795f8a49038c636910b1c40916b42d3fe8c017"
+    "sha256:6a361ccfd0dbbe544e93b6c9ea788cc3702f6f924a969a3aa3deebf3292f315b"
 )
 _HISTORICAL_FIRST_COLUMN_CHECKPOINT_KERNEL_ABI_HASH_V2 = (
     "sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f"
@@ -554,7 +554,7 @@ def test_global_fixed_recurrence_schedule_is_closed_and_kernel_hash_bound() -> N
     kernel = hip_fgmres_recurrence_kernel_abi_payload_v2()
 
     assert canonical_hash(contract) == (
-        "sha256:425ea7f4cd30e67a255b1da7490011bd4ecda8537444011e7b7fa005bb477ad4"
+        "sha256:7c18ba9190fef663fec8e1f87e0f56ec393e23f04d4753ffbc3c707bff1a10ea"
     )
     assert kernel["global_fixed_recurrence_schedule"] == contract
     assert canonical_hash(kernel) == _GLOBAL_FIXED_RECURRENCE_KERNEL_ABI_HASH_V2
@@ -1801,7 +1801,7 @@ def test_checkpoint_transaction_schedule_is_exact_hashed_and_abi_bound() -> None
         "required_active_scale_true_mask": 7936,
     }
     assert canonical_hash(transaction) == (
-        "sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5"
+        "sha256:0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d"
     )
     assert kernel["first_column_checkpoint_transaction_schedule"] == transaction
     assert kernel["first_column_checkpoint_transaction_schedule_hash"] == (
@@ -1818,7 +1818,7 @@ def test_checkpoint_transaction_schedule_is_exact_hashed_and_abi_bound() -> None
     assert second["launches"][1]["vector_mode_code"] == 9
     assert second["commit_source_preflight_contract"]["end_to_end_O_N_proven"] is False
     assert canonical_hash(second) == (
-        "sha256:2423da989b6cd419b7c4bef46d6c76f2120825a0c840cb516803bb2643ca11e5"
+        "sha256:0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d"
     )
 
 
@@ -1911,6 +1911,13 @@ def test_checkpoint_transaction_launches_epochs_and_masks_are_exact() -> None:
     assert schedule["success_end_state"]["predecessor_validation_state"] == 0
     assert schedule["success_end_state"]["predecessor_mask_snapshot"] == 0
     assert schedule["success_end_state"]["predecessor_reduction_epoch_snapshot"] == 0
+    assert (
+        schedule["fixed_submission_contract"][
+            "full_final_cycle_requires_later_final_guard_launch"
+        ]
+        is True
+    )
+    assert schedule["success_end_state"]["final_guard_handoff_may_be_required"] is True
 
 
 def test_commit_source_preflight_contract_is_parallel_device_only_and_nonpromoting() -> (
@@ -2054,7 +2061,8 @@ def test_checkpoint_transaction_priority_outcomes_are_exact() -> None:
         "invariant_subspace_breakdown",
         "planned_end_diverged",
         "planned_end_stagnated",
-        "planned_end_max_iterations",
+        "planned_end_max_iterations_checkpoint_terminal",
+        "planned_end_max_iterations_final_guard_handoff",
         "planned_end_continue_next_restart",
         "early_false_convergence_same_cycle",
     ]
@@ -2073,7 +2081,20 @@ def test_checkpoint_transaction_priority_outcomes_are_exact() -> None:
     assert outcomes["invariant_subspace_breakdown"]["termination_code"] == 31
     assert outcomes["planned_end_diverged"]["terminal_status"] == 4
     assert outcomes["planned_end_stagnated"]["terminal_status"] == 3
-    assert outcomes["planned_end_max_iterations"]["terminal_status"] == 2
+    assert (
+        outcomes["planned_end_max_iterations_checkpoint_terminal"]["terminal_status"]
+        == 2
+    )
+    handoff = outcomes["planned_end_max_iterations_final_guard_handoff"]
+    assert handoff["pending_terminal_status_before_finalize"] == 2
+    assert handoff["pending_termination_code_before_finalize"] == 10
+    assert handoff["terminal_status"] == 0
+    assert handoff["termination_code"] == 0
+    assert handoff["continuation_required"] == 0
+    assert handoff["final_phase"] == "arnoldi"
+    assert handoff["final_column_index"] == "M-1"
+    assert handoff["final_guard_required"] is True
+    assert handoff["handoff_postcondition"] == ("exact_final_guard_exhausted_shape")
     assert outcomes["planned_end_continue_next_restart"]["commit_required"] == 1
     assert outcomes["planned_end_continue_next_restart"]["continuation_required"] == 1
     early = outcomes["early_false_convergence_same_cycle"]
