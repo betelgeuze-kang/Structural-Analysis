@@ -121,11 +121,50 @@ def test_engine_v2_hip_rows_separate_artifact_replay_and_native_parity() -> None
     )
 
 
-def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() -> (
-    None
-):
+def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() -> None:
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    release_identity = rows["hip_fgmres_external_release_identity_v1"]
+    assert release_identity["implementation_state"] == "implemented"
+    assert release_identity["promotion_state"] == "contract_only"
+    assert {
+        "candidate_wheel_bytes_and_record_identity_replay",
+        "current_installed_distribution_record_replay",
+        "clean_git_source_commit_and_manifest_replay",
+        "exact_git_archive_source_bundle_replay",
+        "runner_source_aggregate_identity",
+        "declared_canonical_build_recipe_policy_identity",
+        "declared_target_runtime_dependency_lock_and_wheelhouse_closure",
+        "two_sequential_full_artifact_replays_before_challenge_and_signed_verification",
+        "process_local_verified_release_capability_wrapper",
+    }.issubset(release_identity["supported_scope"])
+    assert {
+        "atomic_multi_artifact_snapshot",
+        "build_recipe_execution",
+        "reproducible_build_proof",
+        "remote_commit_authenticity",
+        "build_system_dependency_closure",
+        "runtime_dependency_installation_execution",
+        "current_interpreter_wheel_tag_compatibility",
+        "bounded_source_artifact_memory",
+        "hostile_in_process_mint_isolation",
+        "serialized_signed_release_identity_receipt_binding",
+        "durable_cross_process_replay_ledger",
+        "hardware_root_attestation",
+        "hardware_execution",
+        "actual_external_gfx1100_signed_cell",
+        "same_artifact_two_architecture_evidence",
+        "result_ir",
+        "iteration_host_copy_zero",
+        "performance_speedup",
+        "end_to_end_o_n",
+        "commercial_readiness",
+    }.issubset(release_identity["explicit_exclusions"])
+    assert (
+        release_identity["claim_level"]
+        == "local_double_replay_sequential_artifact_identity_active_keys_zero_external_cells_zero_non_promoting"
+    )
 
     registry = rows["hip_fgmres_package_fixture_registry_v1"]
     assert registry["implementation_state"] == "implemented"

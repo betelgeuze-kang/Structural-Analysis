@@ -1,7 +1,8 @@
 # Engine v2 HIP FGMRES registry-bound model-family parity v2
 
-- 상태: implemented, local `gfx1030` fixed-suite lane complete
+- 상태: implemented, local `gfx1030` fixed-suite lane complete; v0.2.34 release-artifact identity working contract available, external lane empty
 - 날짜: 2026-07-14
+- 감사 기준: pushed HEAD `b2284e7a640932f9e21f5d78ed141097c721d4dd`; v0.2.34 identity gate는 local unpushed working milestone
 - 스키마: `structural-analysis-hip-fgmres-model-family-parity.v2`
 - capability: `phase0_registry_bound_fixed_suite_live_hardware_coverage`
 - evidence scope: `process_local_registry_bound_unsigned_non_promoting`
@@ -39,7 +40,7 @@ PCI는 결합쌍이 아니라 각각 cross-ISA 재표기를 거부한다. 이 �
 20 cell이다.
 
 - local actual `gfx1030`: `10/10` 완료
-- external actual `gfx1100`: `0/10`, 별도 signed trust-anchor 계약 대기
+- external actual `gfx1100`: `0/10`; v0.2.33 signed verifier와 v0.2.34 independent artifact-identity working contract이 있지만 package active key는 `0`
 - 전체 matrix: `10/20`
 
 `gfx1030` 10/10은 아래 물리/재시작 경계를 포함한다.
@@ -87,6 +88,17 @@ parity로 명시한 것이다.
 - wheel에는 fixture/registry JSON 11개, 신규 schema 2개, registry/family-v2 module
   2개가 포함된다. source tree 밖 격리 venv에서 registry 10개 replay와 empty v2
   non-promoting receipt를 확인했다.
+- v0.2.33 verifier 추가 wheel: `1034513` bytes,
+  `sha256:4031426ee32b973e1e702f2947cc4dfebaaaf4be1f5d39043fabb11b5b7318e4`.
+  External signed verifier 집중 `10 passed`, registry/Ed25519/public API를 합친 quick
+  suite `23 passed`를 통과했다. 이 합성 검증은 이 문서의 process-local family receipt에
+  external cell을 추가하지 않으며 실제 external hardware evidence가 아니다.
+- v0.2.34 [external release identity v1](engine-v2-hip-fgmres-external-release-identity-v1.md)
+  working milestone은 candidate wheel/설치본, clean Git/exact archive/runner/build/lock,
+  declared-target runtime dependency wheel closure와 declared recipe를 두 번 순차 replay하고
+  challenge·signed verify 직전 fresh replay에 결속한다. 이는 v0.2.33의
+  caller-supplied artifact identity 경계를 좁히지만 family receipt에 external cell을
+  추가하지 않고 actual hardware evidence도 아니다.
 
 `1088.47s`는 10개 GPU chain을 동시에 live로 유지하고 각 case authority 및 package
 registry를 반복 재검증한 테스트 wall-clock이다. kernel/solver speedup 또는 제품
@@ -106,8 +118,13 @@ throughput benchmark로 사용할 수 없다.
 - 모든 frame/truss 또는 full model-family parity
 - `gfx1100` parity와 전체 20-cell 완료
 - 일반적인 multi-architecture parity
-- serialized external evidence 합산
-- signed evidence와 release promotion
+- serialized external evidence를 이 process-local family receipt에 합산
+- package active key와 실제 external signed evidence
+- same-artifact two-architecture와 release promotion
+- atomic multi-artifact snapshot, build 실행/재현성, remote commit authenticity,
+  build-system dependency closure, dependency 설치 실행/current-interpreter wheel-tag
+  호환성, bounded total source-artifact memory, identity receipt hash의 serialized signature binding
+- hostile same-process mint isolation, durable replay ledger, runner honesty와 hardware-root attestation
 - ResultIR, iteration host-copy zero, speedup, end-to-end O(N), commercial readiness
 
 기존 historical `model-family-parity.v1`의 registered `0/10`, coverage `0/20`은
@@ -115,9 +132,10 @@ throughput benchmark로 사용할 수 없다.
 
 ## 다음 순서
 
-1. 외부 actual `gfx1100` 실행을 위한 독립 signed evidence envelope와 trust anchor
-2. 동일 wheel/source/schema/registry/runtime/kernel/device/run nonce에 대한 서명 검증
-3. 외부 `gfx1100` 10개 cell 실행과 signature 검증
-4. 그 이후 iteration host-copy-zero gate
-5. ResultIR integration
-6. certificate-bound SPD-gated PCG state machine
+1. v0.2.34 artifact identity receipt와 signed campaign/run sequence의 durable replay ledger
+2. 검토된 external runner active key·rotation/revocation policy와 격리 runner harness
+3. 최종 candidate artifact에서 독립 `gfx1100` 10개 cell 실행과 signature 검증
+4. 동일 final key-bearing artifact에서 local `gfx1030` 10/10 재실행
+5. 그 이후 iteration host-copy-zero gate
+6. ResultIR integration
+7. certificate-bound SPD-gated PCG state machine

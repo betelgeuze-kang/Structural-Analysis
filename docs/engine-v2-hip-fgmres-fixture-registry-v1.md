@@ -2,6 +2,7 @@
 
 - 상태: implemented, package-local replay gate
 - 날짜: 2026-07-14
+- 후속 working milestone: v0.2.34 external release identity v1; committed audit HEAD `b2284e7a640932f9e21f5d78ed141097c721d4dd`
 - package registry resource 스키마: `structural-analysis-hip-fgmres-fixture-registry.v1`
 - suite: `phase0_execution_plan_v2_linear_frame_truss_fgmres_fixed_suite.v2`
 - evidence scope: `package_local_unsigned_non_promoting`
@@ -76,6 +77,15 @@ replay receipt hash는
   `sha256:b0dd44b98ae1c5932b15ef4b830392d2c70acb91e26c61c56130365026b425ec`
 - wheel 내부 resource: model/registry JSON `11`, registry schema `1`
 - source tree 밖 격리 venv wheel 설치 후 10 slot 전체 replay와 동일 registry/receipt hash 확인
+- v0.2.33 external verifier 추가 wheel: `1034513` bytes,
+  `sha256:4031426ee32b973e1e702f2947cc4dfebaaaf4be1f5d39043fabb11b5b7318e4`.
+  Verifier는 이 current package registry와 schema manifest를 직접 재생하지만,
+  caller-supplied expected wheel/source identity의 파일을 직접 다시 해시하지는 않는다.
+- v0.2.34 [external release identity v1](engine-v2-hip-fgmres-external-release-identity-v1.md)
+  local unpushed working milestone은 candidate wheel/설치본, clean Git/exact archive,
+  runner/build/lock, runtime dependency wheelhouse와 declared recipe를 독립 재생한
+  release binding에 이 registry identity를 결합한다. 이 후속 계약은 registry
+  receipt 자체의 hardware/signed/promotion authority를 변경하지 않는다.
 
 ## Claim boundary
 
@@ -85,7 +95,13 @@ replay receipt hash는
 - registry receipt 자체의 실제 HIP hardware parity claim
 - full model-family parity 또는 모든 frame/truss 지원범위
 - multi-architecture 또는 same-process two-ISA parity
-- signed evidence와 release promotion
+- registry receipt 자체의 서명 또는 release promotion
+- external verifier package active key와 실제 `gfx1100` signed evidence
+- atomic multi-artifact snapshot, build 실행/재현성, remote commit authenticity,
+  build-system dependency closure, dependency 설치 실행/current-interpreter wheel-tag
+  호환성, bounded total source-artifact memory와 durable replay ledger
+- hostile same-process mint isolation, runner honesty, hardware-root attestation,
+  same-artifact two-architecture
 - iteration host-copy zero, ResultIR, speedup, end-to-end O(N), commercial readiness
 
 ## 다음 순서
@@ -94,6 +110,16 @@ replay receipt hash는
 actual local `gfx1030` 10/10을 별도 live receipt로 확인했다. Registry receipt에 그
 hardware claim을 역으로 삽입하지 않는다. 남은 순서는 다음과 같다.
 
-1. local receipt와 외부 증거를 섞지 않는 별도 trust-anchor signed envelope 설계
-2. 외부 actual `gfx1100` 10개 cell 실행 및 서명 검증
-3. 그 다음에만 iteration host-copy-zero → ResultIR → SPD certificate-bound PCG로 이동
+v0.2.33은 local receipt와 외부 증거를 섞지 않는 별도 trust-anchor signed verifier
+계약을 구현했다. 합성 exact 10-slot 성공·공격 경로를 포함한 집중 `10 passed`와
+quick suite `23 passed`는 계약 검증일 뿐 hardware evidence가 아니다. Package active
+key가 `0`이므로 공개 verifier는 `trust_anchor_not_found`로 fail-closed한다.
+
+v0.2.34는 실제 release artifact identity를 두 번 순차 replay하고
+challenge·signed verification 앞 fresh replay하는 계약을 local branch에 추가했다.
+
+1. identity receipt와 signed campaign/run sequence의 durable replay ledger
+2. 검토된 external runner key·rotation/revocation policy와 격리 harness
+3. 최종 artifact에서 외부 actual `gfx1100` 10개 cell 실행 및 서명 검증
+4. 동일 final artifact에서 local `gfx1030` 10/10 재실행
+5. 그 다음에만 iteration host-copy-zero → ResultIR → SPD certificate-bound PCG로 이동

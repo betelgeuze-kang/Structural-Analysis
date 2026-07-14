@@ -5,6 +5,15 @@ from importlib.resources import files
 import structural_analysis.engine_v2 as engine_v2
 import structural_analysis.engine_v2.assembly_backend as assembly_backend
 import structural_analysis.engine_v2.backends.hip as hip_backend
+import structural_analysis.engine_v2.evidence as evidence
+from structural_analysis.engine_v2.assembly_backend import (
+    fgmres_external_release_identity_v1 as external_release_identity,
+)
+from structural_analysis.engine_v2.evidence import (
+    dependency_lock_v1,
+    source_artifact_v1,
+    wheel_artifact_v1,
+)
 
 
 CASE_EXPORTS = (
@@ -53,6 +62,12 @@ DEVICE_EXPORTS = (
     "validate_hip_device_identity_receipt_v1",
     "validate_hip_device_identity_result_v1",
 )
+ARTIFACT_EVIDENCE_MODULES = (
+    source_artifact_v1,
+    wheel_artifact_v1,
+    dependency_lock_v1,
+)
+RELEASE_IDENTITY_EXPORTS = tuple(external_release_identity.__all__)
 
 
 def test_parity_and_device_identity_surfaces_are_exported_from_engine_v2() -> None:
@@ -66,6 +81,23 @@ def test_parity_and_device_identity_surfaces_are_exported_from_engine_v2() -> No
         assert getattr(engine_v2, name) is getattr(hip_backend, name)
 
 
+def test_release_identity_surfaces_are_exported_from_engine_v2() -> None:
+    for name in RELEASE_IDENTITY_EXPORTS:
+        assert name in assembly_backend.__all__
+        assert name in engine_v2.__all__
+        assert getattr(assembly_backend, name) is getattr(
+            external_release_identity, name
+        )
+        assert getattr(engine_v2, name) is getattr(external_release_identity, name)
+
+
+def test_artifact_identity_surfaces_are_exported_from_evidence_package() -> None:
+    for module in ARTIFACT_EVIDENCE_MODULES:
+        for name in module.__all__:
+            assert name in evidence.__all__
+            assert getattr(evidence, name) is getattr(module, name)
+
+
 def test_parity_and_device_identity_schemas_are_package_resources() -> None:
     schema_root = files("structural_analysis.schemas")
     for name in (
@@ -77,6 +109,7 @@ def test_parity_and_device_identity_schemas_are_package_resources() -> None:
         "hip_fgmres_external_trust_anchor_registry_v1.schema.json",
         "hip_fgmres_external_signed_evidence_v1.schema.json",
         "hip_fgmres_external_signed_evidence_receipt_v1.schema.json",
+        "hip_fgmres_external_release_identity_v1.schema.json",
     ):
         resource = schema_root.joinpath(name)
         assert resource.is_file()
@@ -91,6 +124,6 @@ def test_parity_and_device_identity_schemas_are_package_resources() -> None:
 
 
 def test_public_all_lists_have_no_duplicates_or_missing_attributes() -> None:
-    for module in (engine_v2, assembly_backend, hip_backend):
+    for module in (engine_v2, assembly_backend, hip_backend, evidence):
         assert len(module.__all__) == len(set(module.__all__))
         assert not [name for name in module.__all__ if not hasattr(module, name)]

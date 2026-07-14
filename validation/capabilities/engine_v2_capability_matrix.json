@@ -21,6 +21,30 @@
   ],
   "rows": [
     {
+      "capability_id": "hip_fgmres_external_release_identity_v1",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["candidate_wheel_bytes_and_record_identity_replay", "current_installed_distribution_record_replay", "clean_git_source_commit_and_manifest_replay", "exact_git_archive_source_bundle_replay", "runner_source_aggregate_identity", "declared_canonical_build_recipe_policy_identity", "declared_target_runtime_dependency_lock_and_wheelhouse_closure", "release_binding_derived_from_verified_artifacts", "two_sequential_full_artifact_replays_before_challenge_and_signed_verification", "process_local_verified_release_capability_wrapper"],
+      "explicit_exclusions": ["atomic_multi_artifact_snapshot", "build_recipe_execution", "reproducible_build_proof", "remote_commit_authenticity", "build_system_dependency_closure", "runtime_dependency_installation_execution", "current_interpreter_wheel_tag_compatibility", "bounded_source_artifact_memory", "hostile_in_process_mint_isolation", "serialized_signed_release_identity_receipt_binding", "durable_cross_process_replay_ledger", "hardware_root_attestation", "hardware_execution", "active_package_trust_anchor", "actual_external_gfx1100_signed_cell", "same_artifact_two_architecture_evidence", "result_ir", "iteration_host_copy_zero", "performance_speedup", "end_to_end_o_n", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006", "ADR-007"],
+      "verification_cases": ["candidate_wheel_same_open_hash_and_full_record_replay", "installed_distribution_record_and_console_script_replay", "clean_git_tree_and_exact_archive_replay", "runner_build_recipe_and_dependency_lock_tamper_rejection", "runtime_dependency_wheelhouse_closure", "cross_role_alias_and_sequential_drift_rejection", "process_local_capability_construction_guard", "fresh_replay_before_challenge_and_signed_verification", "strict_non_promoting_receipt_schema"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-external-release-identity-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_external_release_identity_v1.py",
+        "src/structural_analysis/engine_v2/evidence/source_artifact_v1.py",
+        "src/structural_analysis/engine_v2/evidence/wheel_artifact_v1.py",
+        "src/structural_analysis/engine_v2/evidence/dependency_lock_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_external_release_identity_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_external_release_identity_v1.py",
+        "tests/test_engine_v2_source_artifact_v1.py",
+        "tests/test_engine_v2_wheel_artifact_v1.py",
+        "tests/test_engine_v2_dependency_lock_v1.py"
+      ],
+      "claim_level": "local_double_replay_sequential_artifact_identity_active_keys_zero_external_cells_zero_non_promoting"
+    },
+    {
       "capability_id": "hip_fgmres_external_signed_evidence_v1",
       "category": "solver_verification",
       "phase_target": "phase_0",
