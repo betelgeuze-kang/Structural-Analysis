@@ -1,0 +1,587 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_completion_export_v1.schema.json",
+  "title": "HIP FGMRES completion export receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "context_id",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "reason",
+    "bindings",
+    "dimensions",
+    "buffers",
+    "telemetry",
+    "claims",
+    "payload_hash",
+    "extensions",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-completion-export.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_fenced_completion_three_buffer_blocking_d2h_export"
+    },
+    "status": {
+      "enum": [
+        "context_ready",
+        "exported",
+        "poisoned",
+        "context_closed",
+        "cleanup_failed"
+      ]
+    },
+    "context_id": {
+      "$ref": "#/$defs/hash"
+    },
+    "evidence_scope": {
+      "const": "fenced_completion_bytes_exported_outcome_uninterpreted_non_promoting"
+    },
+    "actual_backend": {
+      "enum": ["hip", "test_double"]
+    },
+    "promotion_eligible": {
+      "const": false
+    },
+    "reason": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/reason"
+        }
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_context_id",
+        "global_receipt_hash",
+        "completion_receipt_hash",
+        "continuation_schedule_hash",
+        "recurrence_plan_hash",
+        "recurrence_kernel_abi_hash",
+        "combined_recurrence_abi_hash",
+        "kernel_identity_hash",
+        "kernel_source_sha256",
+        "solve_record_abi_hash",
+        "direct_generation_binding_hash",
+        "physical_projection_hash",
+        "source_binding_hash",
+        "architecture",
+        "device_ordinal",
+        "copy_api",
+        "completion_capability_identity_serialized",
+        "device_pointer_values_serialized"
+      ],
+      "properties": {
+        "global_context_id": {
+          "$ref": "#/$defs/hash"
+        },
+        "global_receipt_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "completion_receipt_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "continuation_schedule_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "recurrence_plan_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "recurrence_kernel_abi_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "combined_recurrence_abi_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "kernel_identity_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "kernel_source_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "solve_record_abi_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "direct_generation_binding_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "physical_projection_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "source_binding_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "architecture": {
+          "type": "string",
+          "pattern": "^gfx[0-9a-f]+$"
+        },
+        "device_ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "copy_api": {
+          "const": "hipMemcpyDeviceToHost_blocking"
+        },
+        "completion_capability_identity_serialized": {
+          "const": false
+        },
+        "device_pointer_values_serialized": {
+          "const": false
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "maximum_restart_count",
+        "solution_byte_count",
+        "true_residual_byte_count",
+        "solve_record_byte_count",
+        "total_export_byte_count",
+        "exported_buffer_count"
+      ],
+      "properties": {
+        "free_dof_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "maximum_restart_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "solution_byte_count": {
+          "type": "integer",
+          "minimum": 8,
+          "multipleOf": 8
+        },
+        "true_residual_byte_count": {
+          "type": "integer",
+          "minimum": 8,
+          "multipleOf": 8
+        },
+        "solve_record_byte_count": {
+          "type": "integer",
+          "minimum": 264,
+          "multipleOf": 24
+        },
+        "total_export_byte_count": {
+          "type": "integer",
+          "minimum": 280,
+          "multipleOf": 8
+        },
+        "exported_buffer_count": {
+          "const": 3
+        }
+      }
+    },
+    "buffers": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "dtype",
+            "shape",
+            "byte_count",
+            "allocation_generation",
+            "source_lineage_hash",
+            "payload_sha256"
+          ],
+          "properties": {
+            "role": {
+              "const": "solution_x"
+            },
+            "dtype": {
+              "const": "<f8"
+            },
+            "shape": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                }
+              ],
+              "items": false
+            },
+            "byte_count": {
+              "type": "integer",
+              "minimum": 8,
+              "multipleOf": 8
+            },
+            "allocation_generation": {
+              "$ref": "#/$defs/positiveInteger"
+            },
+            "source_lineage_hash": {
+              "$ref": "#/$defs/hash"
+            },
+            "payload_sha256": {
+              "$ref": "#/$defs/hash"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "dtype",
+            "shape",
+            "byte_count",
+            "allocation_generation",
+            "source_lineage_hash",
+            "payload_sha256"
+          ],
+          "properties": {
+            "role": {
+              "const": "true_residual"
+            },
+            "dtype": {
+              "const": "<f8"
+            },
+            "shape": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 2147483647
+                }
+              ],
+              "items": false
+            },
+            "byte_count": {
+              "type": "integer",
+              "minimum": 8,
+              "multipleOf": 8
+            },
+            "allocation_generation": {
+              "$ref": "#/$defs/positiveInteger"
+            },
+            "source_lineage_hash": {
+              "$ref": "#/$defs/hash"
+            },
+            "payload_sha256": {
+              "$ref": "#/$defs/hash"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "dtype",
+            "shape",
+            "byte_count",
+            "allocation_generation",
+            "source_lineage_hash",
+            "payload_sha256"
+          ],
+          "properties": {
+            "role": {
+              "const": "solve_record"
+            },
+            "dtype": {
+              "const": "|u1"
+            },
+            "shape": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "prefixItems": [
+                {
+                  "type": "integer",
+                  "minimum": 264,
+                  "multipleOf": 24
+                }
+              ],
+              "items": false
+            },
+            "byte_count": {
+              "type": "integer",
+              "minimum": 264,
+              "multipleOf": 24
+            },
+            "allocation_generation": {
+              "$ref": "#/$defs/positiveInteger"
+            },
+            "source_lineage_hash": {
+              "$ref": "#/$defs/hash"
+            },
+            "payload_sha256": {
+              "$ref": "#/$defs/hash"
+            }
+          }
+        }
+      ],
+      "items": false
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completion_capability_reservation_count",
+        "completion_capability_consume_count",
+        "host_staging_allocation_count",
+        "d2h_operation_attempt_count",
+        "d2h_operation_success_count",
+        "d2h_bytes_attempted",
+        "d2h_bytes_succeeded",
+        "blocking_copy_completion_count",
+        "device_allocation_count",
+        "allocation_borrow_count",
+        "h2d_operation_count",
+        "kernel_launch_count",
+        "explicit_stream_sync_count",
+        "fallback_count",
+        "numerical_content_branch_count"
+      ],
+      "properties": {
+        "completion_capability_reservation_count": {
+          "const": 1
+        },
+        "completion_capability_consume_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "host_staging_allocation_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "d2h_operation_attempt_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "d2h_operation_success_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "d2h_bytes_attempted": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "d2h_bytes_succeeded": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "blocking_copy_completion_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "device_allocation_count": {
+          "const": 0
+        },
+        "allocation_borrow_count": {
+          "const": 0
+        },
+        "h2d_operation_count": {
+          "const": 0
+        },
+        "kernel_launch_count": {
+          "const": 0
+        },
+        "explicit_stream_sync_count": {
+          "const": 0
+        },
+        "fallback_count": {
+          "const": 0
+        },
+        "numerical_content_branch_count": {
+          "const": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_fenced_completion_bound",
+        "completion_capability_consumed",
+        "exact_three_source_lineages_bound",
+        "raw_completion_buffers_host_materialized",
+        "blocking_completion_only_d2h",
+        "immutable_detached_host_payload",
+        "no_device_allocation_or_borrow",
+        "no_h2d_or_kernel_launch",
+        "no_explicit_stream_synchronization",
+        "solve_record_semantics_interpreted",
+        "numerical_content_host_branch_performed",
+        "actual_terminal_outcome_host_observed",
+        "authoritative_terminal_status_proven",
+        "numerical_parity_verified",
+        "solution_ready",
+        "result_ir_ready",
+        "iteration_host_copy_zero_proven",
+        "performance_or_speedup_proven",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "global_fenced_completion_bound": {
+          "type": "boolean"
+        },
+        "completion_capability_consumed": {
+          "type": "boolean"
+        },
+        "exact_three_source_lineages_bound": {
+          "type": "boolean"
+        },
+        "raw_completion_buffers_host_materialized": {
+          "type": "boolean"
+        },
+        "blocking_completion_only_d2h": {
+          "type": "boolean"
+        },
+        "immutable_detached_host_payload": {
+          "type": "boolean"
+        },
+        "no_device_allocation_or_borrow": {
+          "type": "boolean"
+        },
+        "no_h2d_or_kernel_launch": {
+          "type": "boolean"
+        },
+        "no_explicit_stream_synchronization": {
+          "type": "boolean"
+        },
+        "solve_record_semantics_interpreted": {
+          "const": false
+        },
+        "numerical_content_host_branch_performed": {
+          "const": false
+        },
+        "actual_terminal_outcome_host_observed": {
+          "const": false
+        },
+        "authoritative_terminal_status_proven": {
+          "const": false
+        },
+        "numerical_parity_verified": {
+          "const": false
+        },
+        "solution_ready": {
+          "const": false
+        },
+        "result_ir_ready": {
+          "const": false
+        },
+        "iteration_host_copy_zero_proven": {
+          "const": false
+        },
+        "performance_or_speedup_proven": {
+          "const": false
+        },
+        "commercial_ready": {
+          "const": false
+        },
+        "promotion_eligible": {
+          "const": false
+        }
+      }
+    },
+    "payload_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "maxProperties": 0
+    },
+    "receipt_hash": {
+      "$ref": "#/$defs/hash"
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonnegativeInteger": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "positiveInteger": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "reason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "detail"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,127}$"
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": ["context_ready", "exported"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reason": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": ["poisoned", "cleanup_failed"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reason": {
+            "$ref": "#/$defs/reason"
+          }
+        }
+      }
+    }
+  ]
+}

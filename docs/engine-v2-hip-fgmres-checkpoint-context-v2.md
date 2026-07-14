@@ -196,4 +196,4 @@ v0.2.25 lifecycle 검증은 focused `33 passed`, RTC full `111 passed in 34.77s`
 - multi-GPU/explicit HIP context, HIP graph/capture와 속도 증거
 - SPD/PCG, AMG/DD, Newton, ResultIR, O(N), signed promotion, commercial readiness
 
-다음 구현은 global owner 위 completion-only solution/record/residual export와 명시적 terminal-outcome observation contract다. Active final-guard integrated native coverage는 v0.2.26 downstream owner에서 검증됐지만 본 historical caller-attested receipt를 소급 승격하지 않는다. D2H가 없는 receipt는 exact mask scalar나 validator verdict를 host가 안다고 주장하지 않고 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지해야 한다.
+Global owner 위 completion-only solution/residual/opaque-record export는 v0.2.27의 별도 non-promoting receipt로 구현됐다. 다음 구현은 그 raw bytes와 lineage를 해석하는 명시적 terminal-outcome observation contract이다. Active final-guard integrated native coverage는 v0.2.26 downstream owner에서 검증됐지만 본 historical caller-attested receipt를 소급 승격하지 않는다. D2H가 없는 receipt는 exact mask scalar나 validator verdict를 host가 안다고 주장하지 않고 `actual_mask_host_observed=false`, `device_validation_outcome_host_observed=false`를 유지해야 한다.

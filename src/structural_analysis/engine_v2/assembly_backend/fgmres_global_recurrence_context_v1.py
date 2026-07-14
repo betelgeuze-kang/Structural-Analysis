@@ -15,6 +15,7 @@ commercial readiness was observed.
 
 from __future__ import annotations
 
+import ctypes
 from dataclasses import asdict, dataclass, replace
 from functools import lru_cache, wraps
 import json
@@ -373,7 +374,9 @@ class HipFgmresGlobalRecurrenceOpenResultV1:
 class _GlobalRecurrenceLaunchBinding:
     kernel: HipRtcFgmresV2Kernel
     checkpoint_owner_token: object
+    runtime: Any
     loaded_runtime: Any
+    stream: Any
     stream_pointer: int
     device_ordinal: int
     architecture: str
@@ -388,6 +391,8 @@ class _GlobalRecurrenceLaunchBinding:
     authoritative_tolerance: float
     stagnation_relative_tolerance: float
     divergence_factor: float
+    direct_capabilities: tuple[Any, ...]
+    direct_capability_snapshot: tuple[Any, ...]
     pointer_values: tuple[tuple[str, int], ...]
     partition: HipFgmresGlobalSealedContinuationV1
     launches: tuple[HipFgmresGlobalScheduleLaunchV1, ...]
@@ -413,6 +418,39 @@ class _GlobalRecurrenceDispatchSnapshot(NamedTuple):
     stagnation_relative_tolerance: float
     divergence_factor: float
     pointer_values: tuple[tuple[str, int], ...]
+
+
+class _CompletionExportChildLeaseV1:
+    """Weak-parent lease held strongly only by one completion exporter."""
+
+    __slots__ = ("__weakref__",)
+
+
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class _CompletionExportChildAuthorityV1:
+    """Private frozen authority for the three completion-output buffers."""
+
+    global_context_id: str
+    global_receipt_hash: str
+    completion_receipt_hash: str
+    continuation_schedule_hash: str
+    runtime: Any
+    loaded_runtime: Any
+    stream: Any
+    stream_pointer: int
+    device_ordinal: int
+    architecture: str
+    free_dof_count: int
+    maximum_restart_count: int
+    recurrence_plan_hash: str
+    recurrence_kernel_abi_hash: str
+    combined_recurrence_abi_hash: str
+    kernel_identity_hash: str
+    kernel_source_sha256: str
+    direct_generation_binding_hash: str
+    physical_projection_hash: str
+    source_capabilities: tuple[Any, ...]
+    source_snapshot: tuple[Any, ...]
 
 
 _CONTEXT_MINT = object()
@@ -471,6 +509,11 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
         self._pending_nonce = object()
         self._completion_nonce = object()
         self._pending_consume_started = False
+        self._completion_export_child_reference: (
+            weakref.ReferenceType[_CompletionExportChildLeaseV1] | None
+        ) = None
+        self._completion_export_capability_consumed = False
+        self._completion_export_child_terminal = False
         self._child_released = False
         self._closed = False
         self._active_operation: str | None = None
@@ -690,6 +733,13 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
             if self._closed:
                 return
             try:
+                self._reap_completion_export_child_locked()
+                if self._active_completion_export_child_locked() is not None:
+                    _fail(
+                        "hip_fgmres_global_recurrence_completion_export_child_active",
+                        "/cleanup/completion_export",
+                        cleanup_owner=self,
+                    )
                 if (
                     self._telemetry.continuation_capability_consume_count == 1
                     and not self._child_released
@@ -1510,6 +1560,190 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
         self._completion = capability
         return capability
 
+    def _reserve_completion_export_child(
+        self,
+        token: _CompletionExportChildLeaseV1,
+        capability: HipFgmresGlobalRecurrenceCompletionCapabilityV1,
+    ) -> _CompletionExportChildLeaseV1:
+        """Reserve the sole downstream raw-export child without consuming it."""
+
+        with self._lock:
+            self._reap_completion_export_child_locked()
+            validate_hip_fgmres_global_recurrence_completion_capability_v1(
+                capability,
+                expected_context=self,
+            )
+            if (
+                type(token) is not _CompletionExportChildLeaseV1
+                or self._closed
+                or self._child_released
+                or self._state != "recurrence_fenced"
+                or self._completion_export_capability_consumed
+                or self._completion_export_child_terminal
+                or self._active_completion_export_child_locked() is not None
+            ):
+                _fail(
+                    "hip_fgmres_global_recurrence_completion_export_reservation_invalid",
+                    "/completion_export/reserve",
+                    cleanup_owner=self,
+                )
+            self._completion_export_child_reference = weakref.ref(token)
+            return token
+
+    def _consume_completion_export_capability(
+        self,
+        token: _CompletionExportChildLeaseV1,
+        capability: HipFgmresGlobalRecurrenceCompletionCapabilityV1,
+    ) -> None:
+        """Irreversibly consume completion authority before the first host read."""
+
+        with self._lock:
+            self._require_completion_export_child_locked(token, consumed=False)
+            validate_hip_fgmres_global_recurrence_completion_capability_v1(
+                capability,
+                expected_context=self,
+            )
+            self._completion_export_capability_consumed = True
+
+    def _completion_export_capability_is_consumed(
+        self,
+        token: _CompletionExportChildLeaseV1,
+    ) -> bool:
+        with self._lock:
+            self._require_completion_export_child_locked(token)
+            return self._completion_export_capability_consumed
+
+    def _completion_export_child_token_is_active(
+        self,
+        token: _CompletionExportChildLeaseV1,
+    ) -> bool:
+        with self._lock:
+            self._reap_completion_export_child_locked()
+            return token is self._active_completion_export_child_locked()
+
+    def _completion_export_child_authority(
+        self,
+        token: _CompletionExportChildLeaseV1,
+        capability: HipFgmresGlobalRecurrenceCompletionCapabilityV1,
+        *,
+        consumed: bool,
+    ) -> _CompletionExportChildAuthorityV1:
+        """Return a fresh exact authority for the immutable output-buffer subset."""
+
+        with self._lock:
+            self._require_completion_export_child_locked(token, consumed=consumed)
+            validate_hip_fgmres_global_recurrence_completion_capability_v1(
+                capability,
+                expected_context=self,
+            )
+            binding = self._require_frozen_binding()
+            self._require_current_binding(
+                expected_pending_operation_bounds=(0, 0),
+                expected_binding=binding,
+            )
+            self._require_schedule_unchanged(binding)
+            direct = binding.direct_capabilities
+            if (
+                type(direct) is not tuple
+                or len(direct) != len(_DIRECT_ROLES)
+                or tuple(getattr(row, "role", None) for row in direct) != _DIRECT_ROLES
+                or tuple(getattr(row, "pointer_snapshot", None) for row in direct)
+                != tuple(pointer for _role, pointer in binding.pointer_values[:11])
+            ):
+                _fail(
+                    "hip_fgmres_global_recurrence_completion_export_sources_invalid",
+                    "/completion_export/authority/sources",
+                    cleanup_owner=self,
+                )
+            source_roles = ("solution_x", "true_residual", "solve_record")
+            by_role = {row.role: row for row in direct}
+            sources = tuple(by_role[role] for role in source_roles)
+            source_snapshot = _completion_export_source_snapshot(binding, sources)
+            receipt = self._build_receipt("recurrence_fenced")
+            bindings = self._require_bindings()
+            authority = _CompletionExportChildAuthorityV1(
+                global_context_id=self._context_id,
+                global_receipt_hash=receipt.receipt_hash,
+                completion_receipt_hash=capability.receipt_hash,
+                continuation_schedule_hash=capability.continuation_schedule_hash,
+                runtime=binding.runtime,
+                loaded_runtime=binding.loaded_runtime,
+                stream=binding.stream,
+                stream_pointer=binding.stream_pointer,
+                device_ordinal=binding.device_ordinal,
+                architecture=binding.architecture,
+                free_dof_count=binding.free_dof_count,
+                maximum_restart_count=binding.maximum_restart_count,
+                recurrence_plan_hash=bindings.recurrence_plan_hash,
+                recurrence_kernel_abi_hash=bindings.recurrence_kernel_abi_hash,
+                combined_recurrence_abi_hash=bindings.combined_recurrence_abi_hash,
+                kernel_identity_hash=bindings.kernel_identity_hash,
+                kernel_source_sha256=bindings.kernel_source_sha256,
+                direct_generation_binding_hash=(
+                    bindings.direct_generation_binding_hash
+                ),
+                physical_projection_hash=bindings.physical_projection_hash,
+                source_capabilities=sources,
+                source_snapshot=source_snapshot,
+            )
+            self._require_completion_export_child_locked(token, consumed=consumed)
+            if _completion_export_source_snapshot(binding, sources) != source_snapshot:
+                _fail(
+                    "hip_fgmres_global_recurrence_completion_export_sources_changed",
+                    "/completion_export/authority/sources",
+                    cleanup_owner=self,
+                )
+            return authority
+
+    def _release_completion_export_child(
+        self,
+        token: _CompletionExportChildLeaseV1,
+    ) -> None:
+        with self._lock:
+            self._require_completion_export_child_locked(token)
+            self._completion_export_child_reference = None
+            if self._completion_export_capability_consumed:
+                self._completion_export_child_terminal = True
+
+    def _require_completion_export_child_locked(
+        self,
+        token: _CompletionExportChildLeaseV1,
+        *,
+        consumed: bool | None = None,
+    ) -> None:
+        self._reap_completion_export_child_locked()
+        if (
+            type(token) is not _CompletionExportChildLeaseV1
+            or token is not self._active_completion_export_child_locked()
+            or self._closed
+            or self._child_released
+            or self._state != "recurrence_fenced"
+            or self._completion_export_child_terminal
+            or (
+                consumed is not None
+                and self._completion_export_capability_consumed is not consumed
+            )
+        ):
+            _fail(
+                "hip_fgmres_global_recurrence_completion_export_child_invalid",
+                "/completion_export/lifetime",
+                cleanup_owner=self,
+            )
+
+    def _active_completion_export_child_locked(
+        self,
+    ) -> _CompletionExportChildLeaseV1 | None:
+        reference = self._completion_export_child_reference
+        return None if reference is None else reference()
+
+    def _reap_completion_export_child_locked(self) -> None:
+        reference = self._completion_export_child_reference
+        if reference is None or reference() is not None:
+            return
+        if self._completion_export_capability_consumed:
+            self._completion_export_child_terminal = True
+        self._completion_export_child_reference = None
+
     def _release_child(self) -> None:
         if self._child_released:
             return
@@ -1878,6 +2112,33 @@ def _capture_binding(
     pointer_values = authority.physical_pointer_values
     if (
         type(authority.kernel) is not HipRtcFgmresV2Kernel
+        or authority.runtime is None
+        or authority.stream is None
+        or type(authority.direct_capabilities) is not tuple
+        or len(authority.direct_capabilities) != len(_DIRECT_ROLES)
+        or tuple(
+            getattr(capability, "role", None)
+            for capability in authority.direct_capabilities
+        )
+        != _DIRECT_ROLES
+        or tuple(
+            getattr(capability, "pointer_snapshot", None)
+            for capability in authority.direct_capabilities
+        )
+        != tuple(pointer for _role, pointer in pointer_values[:11])
+        or any(
+            getattr(capability, "runtime_owner", None) is not authority.runtime
+            or type(getattr(capability, "device_ordinal", None)) is not int
+            or capability.device_ordinal != authority.device_ordinal
+            or type(getattr(capability, "nbytes", None)) is not int
+            or capability.nbytes <= 0
+            or getattr(capability, "element_type", None) not in {"f64", "i32", "u8"}
+            or type(getattr(capability, "generation", None)) is not int
+            or capability.generation <= 0
+            or _allocation_base_pointer(capability) != capability.pointer_snapshot
+            or getattr(capability, "promotion_eligible", None) is not False
+            for capability in authority.direct_capabilities
+        )
         or tuple(role for role, _pointer in pointer_values) != _PHYSICAL_ROLES
         or len({pointer for _role, pointer in pointer_values}) != 16
         or any(pointer <= 0 for _role, pointer in pointer_values)
@@ -1894,7 +2155,9 @@ def _capture_binding(
     return _GlobalRecurrenceLaunchBinding(
         kernel=authority.kernel,
         checkpoint_owner_token=authority.checkpoint_owner_token,
+        runtime=authority.runtime,
         loaded_runtime=authority.loaded_runtime,
+        stream=authority.stream,
         stream_pointer=authority.stream_pointer,
         device_ordinal=authority.device_ordinal,
         architecture=authority.architecture,
@@ -1909,6 +2172,10 @@ def _capture_binding(
         authoritative_tolerance=authority.authoritative_tolerance,
         stagnation_relative_tolerance=authority.stagnation_relative_tolerance,
         divergence_factor=authority.divergence_factor,
+        direct_capabilities=authority.direct_capabilities,
+        direct_capability_snapshot=_direct_capabilities_snapshot(
+            authority.direct_capabilities
+        ),
         pointer_values=pointer_values,
         partition=partition,
         launches=partition.continuation.launches,
@@ -1954,7 +2221,9 @@ def _resource_values(binding: _GlobalRecurrenceLaunchBinding) -> tuple[Any, ...]
     values = (
         id(binding.kernel),
         id(binding.checkpoint_owner_token),
+        id(binding.runtime),
         id(binding.loaded_runtime),
+        id(binding.stream),
         binding.stream_pointer,
         binding.device_ordinal,
         binding.architecture,
@@ -1969,6 +2238,8 @@ def _resource_values(binding: _GlobalRecurrenceLaunchBinding) -> tuple[Any, ...]
         binding.authoritative_tolerance,
         binding.stagnation_relative_tolerance,
         binding.divergence_factor,
+        tuple(id(capability) for capability in binding.direct_capabilities),
+        binding.direct_capability_snapshot,
         binding.pointer_values,
         binding.partition.full.canonical_sha256,
         binding.partition.sealed_prefix.canonical_sha256,
@@ -1976,6 +2247,118 @@ def _resource_values(binding: _GlobalRecurrenceLaunchBinding) -> tuple[Any, ...]
         binding.kernel_binding_snapshot,
     )
     return tuple(_exact_value_snapshot(value) for value in values)
+
+
+def _direct_capabilities_snapshot(
+    capabilities: tuple[Any, ...],
+) -> tuple[Any, ...]:
+    return tuple(
+        (
+            type(capability),
+            id(capability),
+            type(getattr(capability, "allocation_id", None)),
+            getattr(capability, "allocation_id", None),
+            type(getattr(capability, "role", None)),
+            getattr(capability, "role", None),
+            type(getattr(capability, "pointer_snapshot", None)),
+            getattr(capability, "pointer_snapshot", None),
+            type(getattr(capability, "base", None)),
+            id(getattr(capability, "base", None)),
+            _allocation_base_pointer(capability),
+            type(getattr(capability, "nbytes", None)),
+            getattr(capability, "nbytes", None),
+            type(getattr(capability, "element_type", None)),
+            getattr(capability, "element_type", None),
+            type(getattr(capability, "generation", None)),
+            getattr(capability, "generation", None),
+            id(getattr(capability, "owner_identity", None)),
+            id(getattr(capability, "runtime_owner", None)),
+            id(getattr(capability, "runtime_domain", None)),
+            type(getattr(capability, "runtime_domain_id", None)),
+            getattr(capability, "runtime_domain_id", None),
+            type(getattr(capability, "device_ordinal", None)),
+            getattr(capability, "device_ordinal", None),
+            type(getattr(capability, "evidence_scope", None)),
+            getattr(capability, "evidence_scope", None),
+            type(getattr(capability, "promotion_eligible", None)),
+            getattr(capability, "promotion_eligible", None),
+        )
+        for capability in capabilities
+    )
+
+
+def _completion_export_source_snapshot(
+    binding: _GlobalRecurrenceLaunchBinding,
+    sources: tuple[Any, ...],
+) -> tuple[Any, ...]:
+    factory = getattr(binding.runtime, "completion_export_copy_binding", None)
+    if (
+        not callable(factory)
+        or getattr(factory, "__self__", None) is not binding.runtime
+    ):
+        _fail(
+            "hip_fgmres_global_recurrence_completion_export_copy_binding_invalid",
+            "/completion_export/authority/copy",
+        )
+    try:
+        copy_binding = factory()
+    except Exception as exc:
+        raise HipFgmresGlobalRecurrenceV1Error(
+            "hip_fgmres_global_recurrence_completion_export_copy_binding_invalid",
+            "/completion_export/authority/copy",
+            _detail(exc),
+        ) from exc
+    if not callable(copy_binding):
+        _fail(
+            "hip_fgmres_global_recurrence_completion_export_copy_binding_invalid",
+            "/completion_export/authority/copy",
+        )
+    return (
+        id(binding.runtime),
+        id(binding.loaded_runtime),
+        id(binding.stream),
+        (type(binding.stream_pointer), binding.stream_pointer),
+        (type(binding.device_ordinal), binding.device_ordinal),
+        id(getattr(type(binding.runtime), "completion_export_copy_binding", None)),
+        id(getattr(factory, "__func__", None)),
+        type(copy_binding),
+        id(copy_binding),
+        id(getattr(type(copy_binding), "__call__", None)),
+        id(getattr(copy_binding, "_memcpy", None)),
+        id(getattr(copy_binding, "_loaded", None)),
+        _completion_export_copy_operation_snapshot(copy_binding),
+        id(getattr(binding.runtime, "_blocking_d2h_copy", None)),
+        id(getattr(binding.runtime, "_memcpy", None)),
+        id(getattr(binding.runtime, "_loaded", None)),
+        _direct_capabilities_snapshot(sources),
+    )
+
+
+def _completion_export_copy_operation_snapshot(
+    copy_binding: Any,
+) -> tuple[Any, ...]:
+    operation = getattr(copy_binding, "_memcpy", None)
+    argtypes = getattr(operation, "argtypes", None)
+    return (
+        type(operation),
+        id(operation),
+        None
+        if argtypes is None
+        else tuple((type(argument), id(argument)) for argument in argtypes),
+        type(getattr(operation, "restype", None)),
+        id(getattr(operation, "restype", None)),
+        type(getattr(operation, "errcheck", None)),
+        id(getattr(operation, "errcheck", None)),
+    )
+
+
+def _allocation_base_pointer(capability: Any) -> int | None:
+    base = getattr(capability, "base", None)
+    if type(base) is int and base > 0:
+        return base
+    if type(base) is ctypes.c_void_p and type(base.value) is int and base.value > 0:
+        return base.value
+    return None
 
 
 def _launch_value(
@@ -2511,6 +2894,12 @@ def _issue_capability(type_: type[Any], fields: dict[str, Any]) -> Any:
     for name, field_value in fields.items():
         object.__setattr__(value, name, field_value)
     return value
+
+
+def _mint_completion_export_child_lease_v1() -> _CompletionExportChildLeaseV1:
+    """Mint one nonconstructible-by-convention downstream lease token."""
+
+    return _CompletionExportChildLeaseV1()
 
 
 @lru_cache(maxsize=1)

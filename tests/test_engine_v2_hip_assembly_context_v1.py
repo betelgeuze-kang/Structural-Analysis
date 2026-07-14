@@ -105,6 +105,7 @@ class FakeRuntime:
         self.device_ordinal: int | None = None
         self._next = 0x10000000
         self.total_memory = 8 * 1024**3
+        self._blocking_d2h_copy = self.copy_d2h
 
     def hip_init(self) -> int:
         return 0
@@ -153,6 +154,15 @@ class FakeRuntime:
 
     def copy_d2h_async(self, array: np.ndarray, pointer: int, stream: object) -> None:
         del stream
+        self._copy_d2h(array, pointer)
+
+    def copy_d2h(self, array: np.ndarray, pointer: int) -> None:
+        self._copy_d2h(array, pointer)
+
+    def completion_export_copy_binding(self) -> Any:
+        return self._blocking_d2h_copy
+
+    def _copy_d2h(self, array: np.ndarray, pointer: int) -> None:
         self.d2h_calls += 1
         self.d2h_pointers.append(pointer)
         if self.d2h_calls == self.d2h_failure_at:

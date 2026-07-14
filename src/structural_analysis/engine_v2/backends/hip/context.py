@@ -12,7 +12,7 @@ from dataclasses import dataclass, replace
 from functools import lru_cache
 import json
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, NoReturn, Protocol
 
 from jsonschema import Draft202012Validator
 import numpy as np
@@ -256,11 +256,44 @@ class HipContextRuntimeProtocol(Protocol):
 
     def copy_d2h_async(self, array: np.ndarray, pointer: Any, stream: Any) -> None: ...
 
+    def copy_d2h(self, array: np.ndarray, pointer: Any) -> None: ...
+
+    def completion_export_copy_binding(self) -> Any: ...
+
     def synchronize(self, stream: Any) -> None: ...
 
     def free(self, pointer: Any) -> None: ...
 
     def destroy_stream(self, stream: Any) -> None: ...
+
+
+class _BoundBlockingD2HCopy:
+    """Immutable callable that never re-reads mutable runtime attributes."""
+
+    __slots__ = ("_loaded", "_memcpy")
+
+    def __init__(self, memcpy: Any, loaded_runtime: Any) -> None:
+        object.__setattr__(self, "_memcpy", memcpy)
+        object.__setattr__(self, "_loaded", loaded_runtime)
+
+    def __setattr__(self, _name: str, _value: object) -> NoReturn:
+        raise AttributeError(f"{type(self).__name__} is immutable")
+
+    def __delattr__(self, _name: str) -> NoReturn:
+        raise AttributeError(f"{type(self).__name__} is immutable")
+
+    def __call__(self, array: np.ndarray, pointer: Any) -> None:
+        status = self._memcpy(
+            ctypes.c_void_p(int(array.ctypes.data)),
+            pointer,
+            int(array.nbytes),
+            2,
+        )
+        if status != 0:
+            raise HipContextError(
+                "hip_copy_failed",
+                f"hipMemcpy(D2H): {self._loaded.hip_error_string(status)}",
+            )
 
 
 class _BoundHipContextRuntime:
@@ -319,6 +352,20 @@ class _BoundHipContextRuntime:
                 ctypes.c_void_p,
             ],
             ctypes.c_int,
+        )
+        self._memcpy = loaded_runtime.bind(
+            "hipMemcpy",
+            [
+                ctypes.c_void_p,
+                ctypes.c_void_p,
+                ctypes.c_size_t,
+                ctypes.c_int,
+            ],
+            ctypes.c_int,
+        )
+        self._blocking_d2h_copy = _BoundBlockingD2HCopy(
+            self._memcpy,
+            loaded_runtime,
         )
         self._stream_sync = loaded_runtime.bind(
             "hipStreamSynchronize", [ctypes.c_void_p], ctypes.c_int
@@ -407,6 +454,16 @@ class _BoundHipContextRuntime:
                 "hip_copy_failed",
                 f"hipMemcpyAsync(D2H): {self._loaded.hip_error_string(status)}",
             )
+
+    def copy_d2h(self, array: np.ndarray, pointer: ctypes.c_void_p) -> None:
+        """Complete one blocking D2H copy before returning to the caller."""
+
+        self._blocking_d2h_copy(array, pointer)
+
+    def completion_export_copy_binding(self) -> _BoundBlockingD2HCopy:
+        """Return the loader-bound immutable blocking D2H callable."""
+
+        return self._blocking_d2h_copy
 
     def synchronize(self, stream: ctypes.c_void_p) -> None:
         self._check(self._stream_sync(stream), "hipStreamSynchronize")

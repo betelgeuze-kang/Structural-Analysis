@@ -1,6 +1,6 @@
 # Engine v2 HIP FGMRES sealed checkpoint transaction v1
 
-- 상태: v0.2.22 Phase 0 historical checkpoint implemented, current v0.2.26 downstream-compatible, `contract_only`/non-promoting
+- 상태: v0.2.22 Phase 0 historical checkpoint implemented, current v0.2.27 downstream-compatible, `contract_only`/non-promoting
 - schema version: `structural-analysis-hip-fgmres-sealed-checkpoint-transaction.v1`
 - capability profile: `phase0_canonical_capability_consuming_sealed_checkpoint_transaction`
 - evidence scope: `canonical_capability_consumed_device_outcome_unobserved_non_promoting`
@@ -8,6 +8,7 @@
 - 수치·atomicity 계약: [checkpoint invalid-source atomicity v1](engine-v2-hip-fgmres-checkpoint-atomicity-v1.md)
 - 전체 설계: [HIP FGMRES full recurrence ABI v2](engine-v2-hip-fgmres-recurrence-abi-v2.md)
 - 하위 consumer: [global recurrence owner v1](engine-v2-hip-fgmres-global-recurrence-v1.md)
+- 하위 export: [completion-only export v1](engine-v2-hip-fgmres-completion-export-v1.md)
 
 ## 문서 범위
 
@@ -15,7 +16,7 @@
 
 이 연결은 v0.2.16 caller-attested raw predecessor를 product live chain의 canonical capability로 대체한다. 다만 product path는 actual mask, validator verdict, commit gate, commit 여부 또는 device numerical outcome을 D2H하지 않는다. 따라서 발행 capability와 receipt는 고정 프로그램의 연속 실행만 조건부로 증명하며 authoritative predecessor, numerical transaction, solver 또는 solution을 증명하지 않는다.
 
-v0.2.24 global recurrence child는 이 conditional continuation을 single-use consume해 canonical global-program suffix만 제출한다. 이 downstream 소비는 sealed receipt를 authoritative numerical transaction으로 소급 승격하지 않는다. Standalone sealed/global receipt validation은 structural/semantic consistency만 검증하며 process-local provenance에는 `expected_context`, 외부 전달 provenance에는 signed chain이 필요하다.
+v0.2.24 global recurrence child는 이 conditional continuation을 single-use consume해 canonical global-program suffix만 제출한다. v0.2.27 completion-export child는 그 global owner가 발행한 outcome-free completion capability를 다시 single-use consume해 `solution_x`, `true_residual`, opaque `solve_record`를 exact three blocking D2H로 내보낸다. 이 downstream 소비와 export는 sealed receipt를 authoritative numerical transaction으로 소급 승격하지 않으며 record/outcome을 해석하지 않는다. Standalone sealed/global/export receipt validation은 structural/semantic consistency만 검증하며 process-local provenance에는 `expected_context`, 외부 전달 provenance에는 signed chain이 필요하다.
 
 권위 구현은 [sealed transaction source](../src/structural_analysis/engine_v2/assembly_backend/fgmres_sealed_checkpoint_transaction_v1.py), 직렬화 계약은 [JSON Schema](../src/structural_analysis/schemas/hip_fgmres_sealed_checkpoint_transaction_v1.schema.json)에 있다.
 
@@ -70,6 +71,9 @@ live checkpoint context
               -> global recurrence child
                  same authority + exact suffix only + final fence
                  outcome-free completion capability
+                   -> completion export child
+                      solution_x -> true_residual -> opaque solve_record
+                      exact three blocking D2H, outcome uninterpreted
 ```
 
 Lock 순서는 child transaction에서 canonical, live, kernel owner 방향으로만 진행한다. Open은 canonical capability와 idle owner를 같은 reservation 경계에서 묶고, enqueue 전과 각 row 직전에 다음 immutable binding을 재검증한다.
@@ -165,7 +169,7 @@ Receipt는 canonical/live/Krylov/source-apply lineage, recurrence plan/kernel AB
 
 ## Current와 historical identity
 
-| Current v0.2.26 executable payload | SHA-256 |
+| Current recurrence executable payload (v0.2.26 identity, unchanged by v0.2.27 export) | SHA-256 |
 | --- | --- |
 | predecessor validator schedule | `sha256:b083896de86a808b1398d0fde4abe73726cb91f50399651274ef82dc09a5ef58` |
 | checkpoint transaction schedule | `sha256:0583f66e5faa848da734ff8fbcc430d8bb71ef9fc854fab49121be3f61691e5d` |
@@ -180,7 +184,7 @@ Receipt는 canonical/live/Krylov/source-apply lineage, recurrence plan/kernel AB
 | combined recurrence/kernel ABI | `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f` |
 | fixed HIP source | `sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113` |
 
-v0.2.26 current identity는 exact full-final-cycle checkpoint-to-guard handoff와 malformed mandatory-prestate prepublication fail-closed를 recurrence semantic payload/schema와 HIP source에 결박한다. Public sealed/global receipt·completion schema는 변경되지 않았다. Historical v0.2.22 native evidence를 current identity의 native evidence로 소급 재해석하지 않는다. Future action gate `commit_required=continuation_required=0`만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않으며, late-invalid no-commit과 destination 보존은 source-only preflight ordering과 full-byte sentinel로 별도 검증한다. v0.2.21 atomicity source `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`도 historical identity다.
+v0.2.26 current recurrence identity는 exact full-final-cycle checkpoint-to-guard handoff와 malformed mandatory-prestate prepublication fail-closed를 recurrence semantic payload/schema와 HIP source에 결박한다. Public sealed/global receipt·completion schema는 변경되지 않았다. v0.2.27 completion export는 별도 source/schema/receipt를 추가하며 sealed/global receipt와 위 recurrence identity를 변경하지 않는다. Historical v0.2.22 native evidence를 current identity의 native evidence로 소급 재해석하지 않는다. Future action gate `commit_required=continuation_required=0`만으로 과거 COMMIT 미실행이나 rollback을 증명하지 않으며, late-invalid no-commit과 destination 보존은 source-only preflight ordering과 full-byte sentinel로 별도 검증한다. v0.2.21 atomicity source `sha256:ce4353f61fc3e8cd1311ad52ce50f21a677c7bfa865a2656aa5447b6ec104a83`도 historical identity다.
 
 ## 검증 현황과 남은 gate
 
@@ -192,4 +196,4 @@ v0.2.26 current identity는 exact full-final-cycle checkpoint-to-guard handoff�
 
 이 D2H는 테스트 oracle이며 product receipt telemetry가 아니다. 따라서 scoped native byte-preservation 결과를 actual mask/verdict/commit host observation, authoritative numerical transaction 또는 solution claim으로 승격하지 않는다.
 
-v0.2.24 sealed/global lifecycle focused `6 passed in 123.64s`는 abandoned unconsumed factory result의 weak-lease reap, consumed/pending fail-closed 경계와 parent/child close 순서를 확인했고 independent lifecycle audit은 추가 defect를 찾지 않았다. v0.2.25는 process-local consumed/pending owner-loss recovery를 구현했다. Global owner의 actual integrated `gfx1030` gate는 이 continuation을 소비해 active later column, restart `1 -> 2 -> 3`, v0.2.26 exact full-cycle active `FINAL_GUARD`를 실행했지만 sealed receipt의 numerical outcome claim을 바꾸지 않는다. 다음 순서는 completion-only solution/record/residual export와 명시적 terminal-outcome observation contract이며, 그 뒤 CPU/HIP full recurrence parity와 iteration host-copy-zero를 각각 별도 gate로 닫는다.
+v0.2.24 sealed/global lifecycle focused `6 passed in 123.64s`는 abandoned unconsumed factory result의 weak-lease reap, consumed/pending fail-closed 경계와 parent/child close 순서를 확인했고 independent lifecycle audit은 추가 defect를 찾지 않았다. v0.2.25는 process-local consumed/pending owner-loss recovery를 구현했다. Global owner의 actual integrated `gfx1030` gate는 이 continuation을 소비해 active later column, restart `1 -> 2 -> 3`, v0.2.26 exact full-cycle active `FINAL_GUARD`를 실행했지만 sealed receipt의 numerical outcome claim을 바꾸지 않는다. v0.2.27 downstream export는 exact three blocking D2H로 raw completion bytes를 내보냈지만 opaque record/outcome을 해석하지 않아 sealed/global receipt를 승격하지 않는다. 다음 authoritative 순서는 명시적 terminal-outcome observation contract이고, 그 뒤 model-family·multi-architecture CPU/HIP full recurrence parity와 iteration host-copy-zero를 각각 별도 gate로 닫는다.

@@ -177,6 +177,15 @@ int hipMemcpyAsync(
     (void)destination; (void)source; (void)byte_length; (void)kind; (void)stream;
     return 0;
 }
+int hipMemcpy(
+    void *destination,
+    void *source,
+    size_t byte_length,
+    int kind
+) {
+    (void)destination; (void)source; (void)byte_length; (void)kind;
+    return 0;
+}
 int hipMemsetAsync(
     void *destination,
     int value,

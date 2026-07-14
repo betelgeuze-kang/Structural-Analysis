@@ -790,7 +790,90 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "src/structural_analysis/schemas/hip_fgmres_global_recurrence_context_v1.schema.json",
         "tests/test_engine_v2_hip_fgmres_global_recurrence_context_hardware_v1.py",
     }.issubset(global_owner["evidence_paths"])
-    assert row_ids[atomicity_index + 3] == "hip_fgmres_full_device_recurrence_abi_v2"
+    assert row_ids[atomicity_index + 3] == "hip_fgmres_completion_export_v1"
+
+    completion_export = rows["hip_fgmres_completion_export_v1"]
+    assert completion_export["implementation_state"] == "implemented"
+    assert completion_export["promotion_state"] == "contract_only"
+    assert completion_export["claim_level"] == (
+        "fenced_completion_three_raw_buffer_blocking_d2h_export_"
+        "outcome_uninterpreted_non_promoting"
+    )
+    assert {
+        "exact_fenced_global_completion_capability_reserved_and_consumed_once",
+        "preconsume_three_host_staging_allocations_retryable_before_irreversible_consume",
+        "exact_blocking_d2h_order_solution_x_true_residual_solve_record",
+        "exact_solution_and_true_residual_extent_eight_f_bytes_each",
+        "exact_opaque_solve_record_extent_192_plus_72r_bytes",
+        "exact_total_export_extent_16f_plus_192_plus_72r_bytes",
+        "loader_bound_hip_memcpy_device_to_host_binding_and_immutable_source_pointer_snapshots",
+        "native_exact_bound_copy_type_call_ctypes_abi_errcheck_memcpy_and_loaded_runtime_relationship",
+        "authority_and_copy_binding_revalidated_before_each_copy_and_before_publication",
+        "exact_three_blocking_d2h_attempts_successes_and_completions_on_exported_path",
+        "immutable_detached_bytes_read_only_numpy_views_and_payload_bundle_receipt_hashes",
+        "no_partial_result_publication_and_consumed_failure_no_recopy",
+        "repeat_and_concurrent_result_retrieval_same_identity_without_additional_copy",
+        "global_owner_receipt_and_hash_unchanged_by_separate_export_telemetry",
+        "export_owner_device_allocation_borrow_h2d_kernel_explicit_stream_sync_fallback_and_numerical_host_branch_zero",
+        "single_active_child_parent_close_gate_and_unused_child_weak_reap",
+        "consume_ambiguity_release_return_loss_and_publication_interruption_fail_closed_reconciliation",
+        "upstream_regular_errors_rebound_to_exact_export_cleanup_owner",
+        "consumed_release_store_interruption_cannot_wedge_parent_or_reopen_export",
+        "standalone_exact_type_schema_hash_and_semantic_validation",
+        "expected_context_required_for_process_local_provenance_authenticity",
+        "native_gfx1030_f6_m1_i1_exact_three_copies_48_48_264_total_360_bytes",
+        "verification_only_cpu_payload_comparison_after_outcome_free_product_receipt_freeze",
+    }.issubset(completion_export["supported_scope"])
+    assert {
+        "solve_record_semantics_interpreted",
+        "solve_record_status_code_active_error_counter_or_metric_validation",
+        "actual_terminal_outcome_host_observed",
+        "authoritative_terminal_status_proven",
+        "authoritative_completion_or_solution_receipt",
+        "finite_or_numerical_invariant_validation",
+        "numerical_parity_verified_in_product_receipt",
+        "solution_ready",
+        "result_ir_ready",
+        "iteration_host_copy_zero_proven",
+        "model_family_and_multi_architecture_cpu_hip_full_recurrence_parity",
+        "asynchronous_d2h_export",
+        "general_n_dof_o_n_claim",
+        "kernel_speedup_claim",
+        "solver_end_to_end_speedup_claim",
+        "performance_or_speedup_claim",
+        "process_crash_gpu_reset_or_cross_process_abandoned_owner_recovery",
+        "standalone_receipt_provenance_authenticity_without_expected_context_or_signed_chain",
+        "signed_promotion_evidence",
+        "commercial_readiness",
+        "promotion_eligible",
+    }.issubset(completion_export["explicit_exclusions"])
+    assert {
+        "exact_three_buffer_order_extent_payload_hash_and_global_receipt_immutability",
+        "single_use_repeat_and_two_thread_concurrent_export_identity",
+        "pre_fence_foreign_forged_stale_and_binding_drift_zero_copy_rejection",
+        "preconsume_host_staging_allocation_failure_retry_without_capability_loss",
+        "copy_one_two_and_three_failure_exact_attempt_success_prefix_without_partial_publication",
+        "consume_query_ambiguity_and_release_return_loss_cleanup_authority_reconciliation",
+        "upstream_error_cleanup_owner_and_consumed_release_terminal_store_interruption_recovery",
+        "publication_and_result_store_interruption_monotonic_recovery_without_recopy",
+        "closed_context_no_result_resurrection",
+        "closed_context_expected_provenance_rejects_semantically_valid_rehashed_receipt_forgery",
+        "strict_schema_semantic_hash_result_immutability_and_bool_as_int_forgery_rejection",
+        "native_gfx1030_exact_three_blocking_d2h_and_verification_only_cpu_payload_comparison",
+    }.issubset(completion_export["verification_cases"])
+    assert {
+        "docs/engine-v2-hip-fgmres-completion-export-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_completion_export_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_completion_export_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_completion_export_v1.py",
+        "tests/test_engine_v2_hip_fgmres_completion_export_hardware_v1.py",
+    }.issubset(completion_export["evidence_paths"])
+    assert (
+        "completion_only_solution_record_and_residual_export"
+        in global_owner["explicit_exclusions"]
+    )
+
+    assert row_ids[atomicity_index + 4] == "hip_fgmres_full_device_recurrence_abi_v2"
 
     recurrence_v2 = rows["hip_fgmres_full_device_recurrence_abi_v2"]
     assert recurrence_v2["implementation_state"] == "in_progress"
@@ -845,6 +928,8 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "native_integrated_active_later_restarts_one_through_three_evidence",
         "native_integrated_active_final_guard_full_cycle_e147_to_e148_evidence",
         "native_malformed_handoff_next_restart_and_operator_count_prepublication_evidence",
+        "implemented_completion_only_solution_true_residual_and_opaque_solve_record_export_kept_outcome_uninterpreted",
+        "native_gfx1030_completion_export_exact_three_blocking_d2h_360_bytes_evidence",
         "implemented_fixed_suffix_host_submission_control_o_l_structural_gate_not_general_n_dof_o_n",
         "implemented_registry_sealed_immutable_dispatch_snapshot_and_canonical_row_tuple",
         "final_independent_linear_reaudit_no_remaining_defect_in_requested_host_control_scope",
@@ -872,12 +957,18 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         not in (recurrence_v2["explicit_exclusions"])
     )
     assert {
-        "completion_only_solution_record_and_residual_export",
         "native_cpu_hip_full_recurrence_parity",
         "general_n_dof_o_n_claim",
         "process_crash_gpu_reset_or_cross_process_abandoned_owner_recovery",
         "abandoned_recovery_as_terminal_numerical_parity_completion_or_solution_evidence",
     }.issubset(recurrence_v2["explicit_exclusions"])
+    assert (
+        "completion_only_solution_record_and_residual_export"
+        not in recurrence_v2["explicit_exclusions"]
+    )
+    assert "product_terminal_outcome_observation" in recurrence_v2[
+        "explicit_exclusions"
+    ]
     assert (
         "integrated_active_final_guard_fallthrough"
         not in recurrence_v2["explicit_exclusions"]

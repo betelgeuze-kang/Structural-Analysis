@@ -2,7 +2,7 @@
 
 - 상태: Phase 0 resource-lifetime slice와 single canonical producer-child coordination 구현·독립 감사 완료, `contract_only`/non-promoting
 - resource 구현 버전: v0.2.19; canonical child 연동: v0.2.20
-- 다음 권위 단계: invalid-source destination atomicity와 sealed checkpoint transaction 결속
+- 현재 downstream 권위 단계: v0.2.27 raw export 이후 explicit terminal-outcome observation
 - 상위 기준: [Structural Solver Engine v2 마스터 로드맵](structural-solver-engine-v2-master-roadmap.md)
 
 ## 문서 범위
@@ -274,13 +274,8 @@ rg --files src/structural_analysis/schemas -g '*.schema.json' \
 
 Wheel을 별도 target에 설치한 뒤 그 target의 `structural_analysis.engine_v2`에서 live context와 owner-control public API를 import하고, packaged live receipt schema와 `engine_v2_fgmres_v2.hip.cpp` resource를 읽어 확인했다. 이 검증은 패키지 완결성 증거이며 수치 solver 승격 증거가 아니다.
 
-## 다음 권위 단계
+## Downstream 권위 진행
 
-Canonical device producer와 mask-domain validator까지 구현되었으므로 다음 순서는 아래와 같다.
+이 resource-only receipt 이후 invalid-source destination atomicity(v0.2.21), sealed checkpoint transaction(v0.2.22), later column/restart·final-guard global owner(v0.2.23-v0.2.26), completion-only raw export(v0.2.27)가 각각 별도 contract과 receipt로 구현됐다. 이 downstream 구현은 본 live resource receipt의 수치·solution claim을 소급 승격하지 않는다.
 
-1. invalid-source multi-block commit의 destination all-or-nothing 정책을 고정한다.
-2. conditional sealed predecessor capability를 checkpoint transaction이 same-lifetime으로 소비하게 결속한다.
-3. arm→consume→clear와 부분 enqueue/fence retry를 통합 receipt에서 검증한다.
-4. 그 뒤 later column/restart schedule과 final guard로 확장한다.
-
-이 단계 전에는 현 live checkpoint context나 canonical child를 authoritative predecessor, solver-ready 또는 commercial-ready 자원으로 승격해서는 안 된다.
+현재 다음 권위 단계는 raw `solve_record`와 payload lineage를 해석·검증하는 explicit terminal-outcome observation contract이다. 그 뒤 model-family·multi-architecture CPU/HIP full parity와 iteration host-copy-zero를 별도 gate로 닫아야 한다. 그 전에는 현 live checkpoint context나 canonical child, raw export를 authoritative solver/solution, ResultIR-ready 또는 commercial-ready 증거로 승격해서는 안 된다.

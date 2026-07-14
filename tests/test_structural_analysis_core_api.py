@@ -124,6 +124,7 @@ def test_pyproject_discovers_structural_analysis_package() -> None:
     )
     assert '[tool.setuptools.packages.find]\nwhere = ["src"]' in pyproject_text
     assert 'include = ["structural_analysis*"]' in pyproject_text
+    assert '"scipy>=1.10",' in pyproject_text
     assert "py-modules" not in pyproject_text
 
 

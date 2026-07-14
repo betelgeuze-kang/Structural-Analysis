@@ -374,7 +374,9 @@ class _GlobalRecurrenceChildAuthorityV1:
 
     kernel: HipRtcFgmresV2Kernel
     checkpoint_owner_token: object
+    runtime: Any
     loaded_runtime: Any
+    stream: Any
     stream_pointer: int
     device_ordinal: int
     architecture: str
@@ -389,6 +391,7 @@ class _GlobalRecurrenceChildAuthorityV1:
     authoritative_tolerance: float
     stagnation_relative_tolerance: float
     divergence_factor: float
+    direct_capabilities: tuple[Any, ...]
     physical_pointer_values: tuple[tuple[str, int], ...]
     kernel_binding_snapshot: tuple[Any, ...]
 
@@ -1360,7 +1363,9 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
                 authority = _GlobalRecurrenceChildAuthorityV1(
                     kernel=binding.kernel,
                     checkpoint_owner_token=binding.checkpoint_owner_token,
+                    runtime=live._runtime,
                     loaded_runtime=binding.loaded_runtime,
+                    stream=live._stream,
                     stream_pointer=binding.stream_pointer,
                     device_ordinal=live._device_ordinal,
                     architecture=live._architecture,
@@ -1377,6 +1382,7 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
                         binding.stagnation_relative_tolerance
                     ),
                     divergence_factor=binding.divergence_factor,
+                    direct_capabilities=direct,
                     physical_pointer_values=physical_pointer_values,
                     kernel_binding_snapshot=binding.kernel_binding_snapshot,
                 )
