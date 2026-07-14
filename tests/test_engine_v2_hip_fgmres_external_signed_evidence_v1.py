@@ -611,18 +611,21 @@ def _build_envelope(
     material: dict[str, Any],
     *,
     mutate: Any = None,
+    challenge_override: Any | None = None,
 ) -> tuple[bytes, Any]:
-    challenge = evidence_module._issue_challenge_with_registry(
-        release_binding=material["release"],
-        key_id="ed25519:external-runner:v1",
-        runner_id="external-runner",
-        run_sequence=1,
-        request_id="request:test-001",
-        campaign_id="campaign:test-001",
-        ttl_seconds=900,
-        registry=material["trust_registry"],
-        now=material["now"],
-    )
+    challenge = challenge_override
+    if challenge is None:
+        challenge = evidence_module._issue_challenge_with_registry(
+            release_binding=material["release"],
+            key_id="ed25519:external-runner:v1",
+            runner_id="external-runner",
+            run_sequence=1,
+            request_id="request:test-001",
+            campaign_id="campaign:test-001",
+            ttl_seconds=900,
+            registry=material["trust_registry"],
+            now=material["now"],
+        )
     registry = material["registry"]
     payload = {
         "payload_schema_version": (
@@ -686,6 +689,8 @@ def _verify(
     raw: bytes,
     challenge: Any,
     material: dict[str, Any],
+    *,
+    success_commit_hook: Any = None,
 ) -> Any:
     return evidence_module._verify_with_authorities(
         raw,
@@ -694,6 +699,7 @@ def _verify(
         trust_registry=material["trust_registry"],
         fixture_registry=material["registry"],
         now=material["now"] + timedelta(seconds=3),
+        success_commit_hook=success_commit_hook,
     )
 
 
@@ -720,6 +726,225 @@ def test_exact_signed_gfx1100_ten_slot_envelope_replays_and_consumes_challenge(
     with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as replayed:
         _verify(raw, challenge, evidence_material)
     assert replayed.value.code == "hip_fgmres_external_challenge_replayed"
+
+
+def test_success_commit_hook_receives_final_receipt_before_challenge_consumption(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    raw, challenge = _build_envelope(evidence_material)
+    committed: list[Any] = []
+    order: list[str] = []
+
+    def validate_numerics(*_args: Any, **_kwargs: Any) -> None:
+        order.append("numeric_validation")
+
+    monkeypatch.setattr(evidence_module, "_validate_cases", validate_numerics)
+
+    def commit(receipt: Any) -> None:
+        assert order == ["numeric_validation"]
+        assert not challenge.consumed
+        assert (
+            evidence_module.validate_hip_fgmres_external_signed_evidence_receipt_v1(
+                receipt
+            )
+            is receipt
+        )
+        assert receipt.challenge_id == challenge.challenge_id
+        assert not receipt.claims.durable_replay_ledger_verified
+        order.append("success_commit")
+        committed.append(receipt)
+
+    returned = _verify(
+        raw,
+        challenge,
+        evidence_material,
+        success_commit_hook=commit,
+    )
+
+    assert committed == [returned]
+    assert committed[0] is returned
+    assert order == ["numeric_validation", "success_commit"]
+    assert challenge.consumed
+
+
+def test_success_commit_hook_failure_releases_reservation_without_consuming(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    raw, challenge = _build_envelope(evidence_material)
+    finalized: list[Any] = []
+    order: list[str] = []
+
+    def validate_numerics(*_args: Any, **_kwargs: Any) -> None:
+        order.append("numeric_validation")
+
+    monkeypatch.setattr(evidence_module, "_validate_cases", validate_numerics)
+
+    class CommitFailure(RuntimeError):
+        pass
+
+    def reject_commit(receipt: Any) -> None:
+        assert order == ["numeric_validation"]
+        assert not challenge.consumed
+        order.append("success_commit")
+        finalized.append(receipt)
+        raise CommitFailure("durable commit failed")
+
+    with pytest.raises(CommitFailure, match="durable commit failed"):
+        _verify(
+            raw,
+            challenge,
+            evidence_material,
+            success_commit_hook=reject_commit,
+        )
+
+    assert len(finalized) == 1
+    assert order == ["numeric_validation", "success_commit"]
+    assert not challenge.consumed
+    reservation = challenge._reserve()
+    challenge._release(reservation)
+    assert not challenge.consumed
+
+
+def test_rehydrated_stored_challenge_completes_actual_signed_verification(
+    evidence_material: dict[str, Any],
+) -> None:
+    raw, original = _build_envelope(evidence_material)
+    restored = evidence_module._rehydrate_hip_fgmres_external_challenge_v1(
+        original.to_dict()
+    )
+
+    assert restored is not original
+    assert restored.to_dict() == original.to_dict()
+    receipt = _verify(raw, restored, evidence_material)
+
+    assert restored.consumed
+    assert not original.consumed
+    assert receipt.challenge_id == restored.challenge_id
+    assert not receipt.claims.durable_replay_ledger_verified
+
+
+def test_stored_challenge_rehydration_rejects_malformed_and_forged_payloads(
+    evidence_material: dict[str, Any],
+) -> None:
+    _, challenge = _build_envelope(evidence_material)
+    valid = challenge.to_dict()
+
+    cases: tuple[tuple[Any, str], ...] = (
+        ([], "hip_fgmres_external_stored_challenge_type_invalid"),
+        (
+            {key: value for key, value in valid.items() if key != "campaign_id"},
+            "hip_fgmres_external_stored_challenge_fields_invalid",
+        ),
+        (
+            {**valid, "unknown": "field"},
+            "hip_fgmres_external_stored_challenge_fields_invalid",
+        ),
+        (
+            {**valid, "expected_run_sequence": True},
+            "hip_fgmres_external_stored_challenge_field_invalid",
+        ),
+        (
+            {**valid, "request_id": "INVALID"},
+            "hip_fgmres_external_stored_challenge_semantics_invalid",
+        ),
+        (
+            {**valid, "nonce_base64": "A" * 44},
+            "hip_fgmres_external_stored_challenge_nonce_invalid",
+        ),
+        (
+            {**valid, "expires_at_utc": valid["issued_at_utc"]},
+            "hip_fgmres_external_stored_challenge_timestamp_invalid",
+        ),
+        (
+            {**valid, "audience": "untrusted-verifier"},
+            "hip_fgmres_external_stored_challenge_semantics_invalid",
+        ),
+        (
+            {**valid, "expected_architecture_base": "gfx1030"},
+            "hip_fgmres_external_stored_challenge_semantics_invalid",
+        ),
+        (
+            {**valid, "expected_suite_id": "wrong-suite"},
+            "hip_fgmres_external_stored_challenge_semantics_invalid",
+        ),
+        (
+            {**valid, "campaign_id": "campaign:forged"},
+            "hip_fgmres_external_stored_challenge_hash_invalid",
+        ),
+    )
+    for payload, expected_code in cases:
+        with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
+            evidence_module._rehydrate_hip_fgmres_external_challenge_v1(payload)
+        assert caught.value.code == expected_code
+
+    private_payload = evidence_module._ChallengePayloadV1(**valid)
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as private_mint:
+        evidence_module.HipFgmresExternalChallengeV1(
+            private_payload,
+            mint=object(),
+        )
+    assert private_mint.value.code == (
+        "hip_fgmres_external_challenge_construction_forbidden"
+    )
+
+
+def test_routing_extractor_is_strict_but_does_not_claim_signature_authority(
+    evidence_material: dict[str, Any],
+) -> None:
+    raw, challenge = _build_envelope(evidence_material)
+
+    payload = evidence_module._extract_hip_fgmres_external_envelope_routing_v1(raw)
+    assert payload["challenge_id"] == challenge.challenge_id
+    assert payload == challenge.to_dict()
+
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as noncanonical:
+        evidence_module._extract_hip_fgmres_external_envelope_routing_v1(raw + b"\n")
+    assert noncanonical.value.code == "hip_fgmres_external_envelope_not_canonical"
+
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as duplicate:
+        evidence_module._extract_hip_fgmres_external_envelope_routing_v1(
+            b'{"a":1,"a":2}'
+        )
+    assert duplicate.value.code == "hip_fgmres_external_envelope_duplicate_key"
+
+    parsed = evidence_module._parse_canonical_envelope(raw)
+    parsed["signed_payload"]["challenge"]["campaign_id"] = "campaign:forged"
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as hash_tamper:
+        evidence_module._extract_hip_fgmres_external_envelope_routing_v1(
+            canonical_json_bytes(parsed)
+        )
+    assert hash_tamper.value.code == "hip_fgmres_external_envelope_semantics_invalid"
+
+    parsed["signed_payload_sha256"] = sha256_prefixed(
+        canonical_json_bytes(parsed["signed_payload"])
+    )
+    parsed["envelope_hash"] = canonical_hash(
+        {key: value for key, value in parsed.items() if key != "envelope_hash"}
+    )
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as forged:
+        evidence_module._extract_hip_fgmres_external_envelope_routing_v1(
+            canonical_json_bytes(parsed)
+        )
+    assert forged.value.code == "hip_fgmres_external_stored_challenge_hash_invalid"
+
+    parsed = evidence_module._parse_canonical_envelope(raw)
+    parsed["signature_base64"] = base64.b64encode(b"\x00" * 64).decode("ascii")
+    parsed["envelope_hash"] = canonical_hash(
+        {key: value for key, value in parsed.items() if key != "envelope_hash"}
+    )
+    routed_payload = evidence_module._extract_hip_fgmres_external_envelope_routing_v1(
+        canonical_json_bytes(parsed)
+    )
+    assert routed_payload["challenge_id"] == challenge.challenge_id
+    assert routed_payload == challenge.to_dict()
+
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as oversized:
+        evidence_module._extract_hip_fgmres_external_envelope_routing_v1(
+            b"x" * (evidence_module._ENVELOPE_MAX_BYTES + 1)
+        )
+    assert oversized.value.code == "hip_fgmres_external_envelope_extent_invalid"
 
 
 def test_public_package_registry_with_zero_keys_rejects_synthetic_envelope(
@@ -822,6 +1047,33 @@ def test_challenge_reservation_is_atomic_across_threads(
     assert not challenge.consumed
 
 
+def test_challenge_lifetime_cannot_outlive_trust_anchor(
+    evidence_material: dict[str, Any],
+) -> None:
+    near_key_expiry = datetime(
+        2026,
+        12,
+        31,
+        23,
+        59,
+        30,
+        tzinfo=timezone.utc,
+    )
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
+        evidence_module._issue_challenge_with_registry(
+            release_binding=evidence_material["release"],
+            key_id="ed25519:external-runner:v1",
+            runner_id="external-runner",
+            run_sequence=1,
+            request_id="request:key-expiry",
+            campaign_id="campaign:key-expiry",
+            ttl_seconds=60,
+            registry=evidence_material["trust_registry"],
+            now=near_key_expiry,
+        )
+    assert caught.value.code == "hip_fgmres_external_trust_anchor_not_active"
+
+
 def test_expired_challenge_and_mixed_device_fail_before_consumption(
     evidence_material: dict[str, Any],
 ) -> None:
@@ -852,9 +1104,7 @@ def test_expired_challenge_and_mixed_device_fail_before_consumption(
     )
     with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as mixed:
         _verify(mixed_raw, mixed_challenge, evidence_material)
-    assert mixed.value.code == (
-        "hip_fgmres_external_runner_family_binding_mismatch"
-    )
+    assert mixed.value.code == ("hip_fgmres_external_runner_family_binding_mismatch")
     assert not mixed_challenge.consumed
 
 
@@ -873,3 +1123,68 @@ def test_envelope_parser_rejects_bom_duplicate_and_nonfinite(
     with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
         evidence_module._parse_canonical_envelope(raw)
     assert caught.value.code == code
+
+
+@pytest.mark.parametrize(
+    "depth",
+    [
+        evidence_module._ENVELOPE_MAX_JSON_DEPTH + 1,
+        1_100,
+    ],
+)
+def test_envelope_parser_maps_excessive_json_nesting_to_stable_extent_error(
+    depth: int,
+) -> None:
+    raw = b"[" * depth + b"0" + b"]" * depth
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
+        evidence_module._parse_canonical_envelope(raw)
+    assert caught.value.code == "hip_fgmres_external_envelope_extent_invalid"
+
+
+def test_envelope_parser_bounds_total_json_nodes() -> None:
+    raw = (
+        b"["
+        + b",".join(b"0" for _ in range(evidence_module._ENVELOPE_MAX_JSON_NODES))
+        + b"]"
+    )
+    assert len(raw) < evidence_module._ENVELOPE_MAX_BYTES
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
+        evidence_module._parse_canonical_envelope(raw)
+    assert caught.value.code == "hip_fgmres_external_envelope_extent_invalid"
+
+
+def test_schema_validation_stops_after_first_error_and_bounds_message(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class FirstError:
+        absolute_path = ("signed_payload", "cases")
+        validator = "maxItems"
+        message = "attacker-controlled-instance" * 100_000
+
+    class FailFastProbeValidator:
+        @staticmethod
+        def check_schema(schema: dict[str, Any]) -> None:
+            assert schema["$schema"].endswith("2020-12/schema")
+
+        def __init__(self, schema: dict[str, Any]) -> None:
+            assert schema["type"] == "object"
+
+        def iter_errors(self, payload: dict[str, Any]) -> Any:
+            assert payload == {}
+            yield FirstError()
+            raise AssertionError("schema errors must not be materialized")
+
+    monkeypatch.setattr(
+        evidence_module,
+        "Draft202012Validator",
+        FailFastProbeValidator,
+    )
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
+        evidence_module._validate_json_schema(
+            {},
+            evidence_module._ENVELOPE_SCHEMA_RESOURCE,
+            path="/envelope",
+        )
+    assert caught.value.code == "hip_fgmres_external_schema_validation_failed"
+    assert caught.value.path == "/envelope/signed_payload/cases"
+    assert caught.value.message == "schema keyword maxItems rejected value"

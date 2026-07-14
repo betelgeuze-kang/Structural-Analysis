@@ -8,9 +8,11 @@ import structural_analysis.engine_v2.backends.hip as hip_backend
 import structural_analysis.engine_v2.evidence as evidence
 from structural_analysis.engine_v2.assembly_backend import (
     fgmres_external_release_identity_v1 as external_release_identity,
+    fgmres_external_replay_ledger_v1 as external_replay_ledger,
 )
 from structural_analysis.engine_v2.evidence import (
     dependency_lock_v1,
+    durable_replay_ledger_v1,
     source_artifact_v1,
     wheel_artifact_v1,
 )
@@ -66,8 +68,10 @@ ARTIFACT_EVIDENCE_MODULES = (
     source_artifact_v1,
     wheel_artifact_v1,
     dependency_lock_v1,
+    durable_replay_ledger_v1,
 )
 RELEASE_IDENTITY_EXPORTS = tuple(external_release_identity.__all__)
+REPLAY_LEDGER_EXPORTS = tuple(external_replay_ledger.__all__)
 
 
 def test_parity_and_device_identity_surfaces_are_exported_from_engine_v2() -> None:
@@ -91,6 +95,14 @@ def test_release_identity_surfaces_are_exported_from_engine_v2() -> None:
         assert getattr(engine_v2, name) is getattr(external_release_identity, name)
 
 
+def test_external_replay_ledger_surfaces_are_exported_from_engine_v2() -> None:
+    for name in REPLAY_LEDGER_EXPORTS:
+        assert name in assembly_backend.__all__
+        assert name in engine_v2.__all__
+        assert getattr(assembly_backend, name) is getattr(external_replay_ledger, name)
+        assert getattr(engine_v2, name) is getattr(external_replay_ledger, name)
+
+
 def test_artifact_identity_surfaces_are_exported_from_evidence_package() -> None:
     for module in ARTIFACT_EVIDENCE_MODULES:
         for name in module.__all__:
@@ -110,6 +122,8 @@ def test_parity_and_device_identity_schemas_are_package_resources() -> None:
         "hip_fgmres_external_signed_evidence_v1.schema.json",
         "hip_fgmres_external_signed_evidence_receipt_v1.schema.json",
         "hip_fgmres_external_release_identity_v1.schema.json",
+        "durable_replay_ledger_receipts_v1.schema.json",
+        "hip_fgmres_external_replay_ledger_receipt_v1.schema.json",
     ):
         resource = schema_root.joinpath(name)
         assert resource.is_file()

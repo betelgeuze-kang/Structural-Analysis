@@ -125,6 +125,45 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
+    replay_ledger = rows["hip_fgmres_external_replay_ledger_v1"]
+    assert replay_ledger["implementation_state"] == "implemented"
+    assert replay_ledger["promotion_state"] == "contract_only"
+    assert {
+        "expected_ledger_id_and_immutable_namespace_open",
+        "directory_and_database_inode_pin",
+        "begin_immediate_cross_process_writer_serialization",
+        "runner_sequence_monotonic_across_key_epochs_and_campaigns",
+        "post_commit_response_crash_recovery_lookup_and_reverification",
+        "acceptance_commit_head_event_snapshot",
+        "single_configured_ledger_cross_process_at_most_once_acceptance",
+    }.issubset(replay_ledger["supported_scope"])
+    assert {
+        "exactly_once_delivery",
+        "cross_host_or_cross_ledger_replay_prevention",
+        "coordinated_storage_snapshot_rollback_resistance",
+        "same_uid_root_or_storage_administrator_attack_resistance",
+        "cryptographic_ledger_authenticity",
+        "tpm_or_remote_monotonic_anchor",
+        "nfs_fuse_or_non_posix_filesystem",
+        "current_ledger_head_attestation_after_later_appends",
+        "serialized_signed_release_identity_receipt_binding",
+        "runner_honesty",
+        "hardware_execution_truth",
+        "active_package_trust_anchor",
+        "actual_external_gfx1100_signed_cell",
+        "same_artifact_two_architecture_evidence",
+        "release_promotion",
+        "result_ir",
+        "iteration_host_copy_zero",
+        "performance_speedup",
+        "end_to_end_o_n",
+        "commercial_readiness",
+    }.issubset(replay_ledger["explicit_exclusions"])
+    assert (
+        replay_ledger["claim_level"]
+        == "single_configured_owner_private_local_posix_sqlite_ledger_cross_process_at_most_once_acceptance_active_keys_zero_external_cells_zero_non_promoting"
+    )
+
     release_identity = rows["hip_fgmres_external_release_identity_v1"]
     assert release_identity["implementation_state"] == "implemented"
     assert release_identity["promotion_state"] == "contract_only"
@@ -165,6 +204,9 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         release_identity["claim_level"]
         == "local_double_replay_sequential_artifact_identity_active_keys_zero_external_cells_zero_non_promoting"
     )
+    assert (
+        "durable_cross_process_replay_ledger" in release_identity["explicit_exclusions"]
+    )
 
     registry = rows["hip_fgmres_package_fixture_registry_v1"]
     assert registry["implementation_state"] == "implemented"
@@ -189,7 +231,39 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         in signed["explicit_exclusions"]
     )
     assert "same_artifact_two_architecture_evidence" in signed["explicit_exclusions"]
+    assert "durable_cross_process_replay_ledger" in signed["explicit_exclusions"]
     assert "active_keys_zero_external_cells_zero" in signed["claim_level"]
+
+    signed_schema = json.loads(
+        (
+            REPO_ROOT
+            / "src/structural_analysis/schemas/hip_fgmres_external_signed_evidence_receipt_v1.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    identity_schema = json.loads(
+        (
+            REPO_ROOT
+            / "src/structural_analysis/schemas/hip_fgmres_external_release_identity_v1.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert (
+        signed_schema["$defs"]["claims"]["properties"][
+            "durable_replay_ledger_verified"
+        ]["const"]
+        is False
+    )
+    assert (
+        identity_schema["$defs"]["claims"]["properties"][
+            "durable_replay_ledger_verified"
+        ]["const"]
+        is False
+    )
+    assert (
+        identity_schema["$defs"]["claims"]["properties"][
+            "signed_envelope_binds_release_identity_receipt"
+        ]["const"]
+        is False
+    )
 
     resident = rows["hip_assembly_resident_csr_residual_jvp_consumer_v1"]
     assert resident["implementation_state"] == "implemented"

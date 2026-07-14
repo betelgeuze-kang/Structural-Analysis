@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/durable_replay_ledger_receipts_v1.schema.json",
+  "title": "Durable replay ledger receipts v1",
+  "oneOf": [
+    {"$ref": "#/$defs/reservation"},
+    {"$ref": "#/$defs/storage"},
+    {"$ref": "#/$defs/audit"}
+  ],
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._:-]*$"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{6}Z$"
+    },
+    "reservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "ledger_id",
+        "namespace",
+        "challenge_id",
+        "request_id",
+        "campaign_id",
+        "key_id",
+        "key_epoch",
+        "runner_id",
+        "run_sequence",
+        "release_binding_hash",
+        "release_identity_receipt_hash",
+        "event_sequence",
+        "event_hash",
+        "reserved_at_utc",
+        "receipt_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-durable-replay-reservation-receipt.v1"
+        },
+        "status": {"const": "durable_replay_challenge_reserved"},
+        "ledger_id": {"$ref": "#/$defs/hash"},
+        "namespace": {"$ref": "#/$defs/id"},
+        "challenge_id": {"$ref": "#/$defs/hash"},
+        "request_id": {"$ref": "#/$defs/id"},
+        "campaign_id": {"$ref": "#/$defs/id"},
+        "key_id": {"type": "string", "minLength": 3, "maxLength": 128},
+        "key_epoch": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+        "runner_id": {"$ref": "#/$defs/id"},
+        "run_sequence": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+        "release_binding_hash": {"$ref": "#/$defs/hash"},
+        "release_identity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "event_sequence": {"type": "integer", "minimum": 1, "maximum": 200000},
+        "event_hash": {"$ref": "#/$defs/hash"},
+        "reserved_at_utc": {"$ref": "#/$defs/timestamp"},
+        "receipt_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "ledger_id",
+        "namespace",
+        "challenge_id",
+        "campaign_id",
+        "runner_id",
+        "run_sequence",
+        "acceptance_sequence",
+        "envelope_hash",
+        "signed_payload_sha256",
+        "signed_receipt_hash",
+        "event_sequence",
+        "event_hash",
+        "accepted_at_utc",
+        "receipt_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-durable-replay-storage-receipt.v1"
+        },
+        "status": {"const": "durable_replay_evidence_committed"},
+        "ledger_id": {"$ref": "#/$defs/hash"},
+        "namespace": {"$ref": "#/$defs/id"},
+        "challenge_id": {"$ref": "#/$defs/hash"},
+        "campaign_id": {"$ref": "#/$defs/id"},
+        "runner_id": {"$ref": "#/$defs/id"},
+        "run_sequence": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+        "acceptance_sequence": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "envelope_hash": {"$ref": "#/$defs/hash"},
+        "signed_payload_sha256": {"$ref": "#/$defs/hash"},
+        "signed_receipt_hash": {"$ref": "#/$defs/hash"},
+        "event_sequence": {"type": "integer", "minimum": 1, "maximum": 200000},
+        "event_hash": {"$ref": "#/$defs/hash"},
+        "accepted_at_utc": {"$ref": "#/$defs/timestamp"},
+        "receipt_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "ledger_id",
+        "namespace",
+        "schema_manifest_hash",
+        "campaign_count",
+        "challenge_count",
+        "acceptance_count",
+        "event_count",
+        "last_event_sequence",
+        "last_event_hash",
+        "quick_check_ok",
+        "canonical_blobs_verified",
+        "event_chain_verified",
+        "audited_at_utc",
+        "receipt_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-durable-replay-audit-receipt.v1"
+        },
+        "status": {"const": "durable_replay_ledger_audited"},
+        "ledger_id": {"$ref": "#/$defs/hash"},
+        "namespace": {"$ref": "#/$defs/id"},
+        "schema_manifest_hash": {"$ref": "#/$defs/hash"},
+        "campaign_count": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "challenge_count": {"type": "integer", "minimum": 0, "maximum": 100000},
+        "acceptance_count": {"type": "integer", "minimum": 0, "maximum": 100000},
+        "event_count": {"type": "integer", "minimum": 0, "maximum": 200000},
+        "last_event_sequence": {"type": "integer", "minimum": 0, "maximum": 200000},
+        "last_event_hash": {"$ref": "#/$defs/hash"},
+        "quick_check_ok": {"const": true},
+        "canonical_blobs_verified": {"const": true},
+        "event_chain_verified": {"const": true},
+        "audited_at_utc": {"$ref": "#/$defs/timestamp"},
+        "receipt_hash": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}

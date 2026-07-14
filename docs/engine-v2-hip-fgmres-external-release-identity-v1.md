@@ -3,8 +3,8 @@
 ## 상태
 
 - 로드맵 작업 마일스톤: `v0.2.34`
-- 감사 기준 HEAD: `b2284e7a640932f9e21f5d78ed141097c721d4dd`
-- 작업 상태: 위 감사 기준 HEAD 이후의 local unpushed working milestone
+- 구현 및 pushed 기준 HEAD: `7a46bfbd732e07291bc166ac6ff4266e1277e238`
+- 작업 상태: pushed contract-only milestone
 - 스키마: `structural-analysis-hip-fgmres-external-release-identity.v1`
 - capability: `phase0_external_release_artifact_identity_replay`
 - evidence scope: `local_double_replay_sequential_release_artifact_identity_non_promoting`
@@ -140,6 +140,34 @@ Mint guard는 정상적인 공개 constructor 우회를 막는 process-local 불
 serialized signed field가 아니며, combined capability도 process-local이지 durable
 cross-process receipt가 아니다.
 
+### v0.2.35 durable wrapper와의 관계
+
+후속 [external replay ledger v1](engine-v2-hip-fgmres-external-replay-ledger-v1.md)은
+명시 초기화한 단일 owner-private local POSIX SQLite ledger에 full
+challenge, 본 identity receipt와 v0.2.33 signed receipt를 저장한다. Pinned
+ledger ID/namespace, `synchronous=EXTRA` acceptance commit, strict canonical payload/schema
+및 event hash-chain replay를 통해 프로세스 재시작 뒤에도 단일 ledger
+내 cross-process at-most-once acceptance를 유지하고, commit 후 응답 전
+crash는 recovery lookup에서 저장 시점 권위를 다시 검증한다.
+
+신규 receipt의 `acceptance_commit_head_event_*`는 acceptance commit 시점의 head이자
+acceptance event sequence/hash이다. 후속 event append 뒤의 current head를
+증명하지 않으며, 후속 append는 이미 발행된 receipt를 stale로
+만들지 않는다.
+
+이는 본 identity receipt 자체의
+`durable_replay_ledger_verified=false` 또는
+`signed_envelope_binds_release_identity_receipt=false`를 바꾸지 않는다. Local
+durable claim은 신규 v0.2.35 wrapper receipt에서만 true다. 따라서
+ledger join은 full identity receipt hash가 runner envelope에 서명되었다는
+뜻이 아니다. 또한 exactly-once, cross-host/multi-ledger, 동일 UID/root/storage
+rollback 저항, cryptographic log/TPM anchor, non-POSIX/NFS/FUSE durability,
+runner/hardware truth, 실제 external `gfx1100` 실행, promotion·ResultIR·
+host-copy-zero·speedup·O(N)·commercial claim을 만들지 않는다. v0.2.35
+publication candidate에서 durable ledger `41`, high-level replay `13`, 본
+signed-evidence `16`과 지원 회귀 `104`의 비중복 `174 passed`, candidate wheel
+격리 설치·reopen audit를 완료했지만 이 claim 경계는 바뀌지 않는다.
+
 ## 검증 결과
 
 - source/wheel/dependency identity, high-level double replay, public API/resource와
@@ -187,7 +215,7 @@ hardware 실행 또는 promotion receipt가 아니다. Lower-level artifact prim
 - bounded total source-artifact memory
 - identity-receipt hash 전체의 serialized signature binding
 - hostile same-process mint isolation, runner honesty, hardware-root attestation,
-  durable replay ledger
+  본 v0.2.34 receipt 자체의 durable replay ledger claim
 - local process의 외부 GPU 실행 관찰
 - 실제 external `gfx1100` parity: `0/10`
 - same-artifact two-architecture, multiarchitecture completion, release promotion
@@ -201,9 +229,10 @@ historical unsigned `10/10`이며 이 working milestone에서 same-artifact로 �
 
 ## 다음 순서
 
-1. identity receipt와 signed campaign/run sequence를 보존하는 durable replay ledger
-2. 검토된 external runner key, rotation/revocation policy와 격리 runner harness
+1. v0.2.35 single-ledger durable replay 경계 검증 완료와 격리 runner/key 운영
+2. 검토된 external runner key 및 rotation/revocation policy
 3. 최종 candidate의 실제 `gfx1100` fixed-suite `10/10` 서명 증거
 4. 동일 final artifact의 local `gfx1030` `10/10` 재실행
-5. iteration host-copy-zero 게이트와 ResultIR integration
-6. certificate-bound SPD-gated PCG 상태기계
+5. identity receipt를 직접 서명하는 envelope v2와 external monotonic anchor
+6. iteration host-copy-zero 게이트와 ResultIR integration
+7. certificate-bound SPD-gated PCG 상태기계

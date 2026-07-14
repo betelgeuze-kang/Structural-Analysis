@@ -11,6 +11,7 @@ host-copy-zero, performance, O(N), or commercial readiness.
 from __future__ import annotations
 
 import base64
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from importlib import metadata, resources
@@ -109,10 +110,18 @@ _DISTRIBUTION_NAME = "structural-optimization-workbench"
 _ENVELOPE_SCHEMA_RESOURCE = "hip_fgmres_external_signed_evidence_v1.schema.json"
 _RECEIPT_SCHEMA_RESOURCE = "hip_fgmres_external_signed_evidence_receipt_v1.schema.json"
 _ENVELOPE_MAX_BYTES = 4 * 1024 * 1024
+_ENVELOPE_MAX_JSON_NODES = 200_000
+_ENVELOPE_MAX_JSON_DEPTH = 64
 _SIGNATURE_DOMAIN = b"structural-analysis\0hip-fgmres-external-gfx1100-evidence\0v1\0"
 _HASH_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 _SOURCE_COMMIT_RE = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
 _ID_RE = re.compile(r"^[a-z0-9][a-z0-9._:-]{2,127}$")
+_KEY_ID_RE = re.compile(r"^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$")
+_RUNNER_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{2,63}$")
+_UTC_RE = re.compile(
+    r"^[0-9]{4}-[0-9]{2}-[0-9]{2}T"
+    r"[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{6}Z$"
+)
 _ZERO_HASH = "sha256:" + "0" * 64
 _CHALLENGE_MINT = object()
 
@@ -502,8 +511,13 @@ def _issue_challenge_with_registry(
         or key.allowed_fixture_registry_hash != release_binding.fixture_registry_hash
     ):
         _fail("hip_fgmres_external_challenge_release_not_allowed", "/release_binding")
+    expires_at = current + timedelta(seconds=ttl_seconds)
+    if key.valid_until_utc is not None and expires_at > _parse_utc(
+        key.valid_until_utc, "/trust_anchor/valid_until_utc"
+    ):
+        _fail("hip_fgmres_external_trust_anchor_not_active", "/key_id")
     issued = _format_utc(current)
-    expires = _format_utc(current + timedelta(seconds=ttl_seconds))
+    expires = _format_utc(expires_at)
     nonce = base64.b64encode(secrets.token_bytes(32)).decode("ascii")
     unsigned = {
         "schema_version": HIP_FGMRES_EXTERNAL_CHALLENGE_SCHEMA_VERSION_V1,
@@ -529,24 +543,144 @@ def _issue_challenge_with_registry(
     return HipFgmresExternalChallengeV1(payload, mint=_CHALLENGE_MINT)
 
 
-def _verify_with_authorities(
+def _rehydrate_hip_fgmres_external_challenge_v1(
+    payload: dict[str, Any],
+) -> HipFgmresExternalChallengeV1:
+    """Rehydrate an exact ledger-authorized challenge payload.
+
+    This helper validates serialized structure and issuer invariants only.  Its
+    package-private caller remains responsible for establishing that the bytes
+    came from an authoritative durable issuance record.
+    """
+
+    restored = _validate_stored_challenge_payload_v1(payload)
+    return HipFgmresExternalChallengeV1(restored, mint=_CHALLENGE_MINT)
+
+
+def _validate_stored_challenge_payload_v1(
+    payload: dict[str, Any],
+) -> _ChallengePayloadV1:
+    if type(payload) is not dict:
+        _fail("hip_fgmres_external_stored_challenge_type_invalid", "/challenge")
+    expected_fields = frozenset(_ChallengePayloadV1.__dataclass_fields__)
+    if frozenset(payload) != expected_fields:
+        _fail("hip_fgmres_external_stored_challenge_fields_invalid", "/challenge")
+
+    string_fields = (
+        "schema_version",
+        "challenge_id",
+        "request_id",
+        "audience",
+        "campaign_id",
+        "nonce_base64",
+        "issued_at_utc",
+        "expires_at_utc",
+        "expected_key_id",
+        "expected_runner_id",
+        "expected_release_binding_hash",
+        "expected_trust_registry_hash",
+        "expected_architecture_base",
+        "expected_suite_id",
+    )
+    for field in string_fields:
+        if type(payload[field]) is not str:
+            _fail(
+                "hip_fgmres_external_stored_challenge_field_invalid",
+                f"/challenge/{field}",
+            )
+    integer_fields = ("expected_key_epoch", "expected_run_sequence")
+    for field in integer_fields:
+        if type(payload[field]) is not int or payload[field] <= 0:
+            _fail(
+                "hip_fgmres_external_stored_challenge_field_invalid",
+                f"/challenge/{field}",
+            )
+
+    if (
+        payload["schema_version"] != HIP_FGMRES_EXTERNAL_CHALLENGE_SCHEMA_VERSION_V1
+        or _HASH_RE.fullmatch(payload["challenge_id"]) is None
+        or _ID_RE.fullmatch(payload["request_id"]) is None
+        or payload["audience"] != _AUDIENCE
+        or _ID_RE.fullmatch(payload["campaign_id"]) is None
+        or _KEY_ID_RE.fullmatch(payload["expected_key_id"]) is None
+        or _RUNNER_ID_RE.fullmatch(payload["expected_runner_id"]) is None
+        or _HASH_RE.fullmatch(payload["expected_release_binding_hash"]) is None
+        or _HASH_RE.fullmatch(payload["expected_trust_registry_hash"]) is None
+        or payload["expected_architecture_base"] != "gfx1100"
+        or payload["expected_suite_id"] != HIP_FGMRES_FIXTURE_REGISTRY_SUITE_ID_V1
+        or payload["expected_key_id"]
+        != (f"ed25519:{payload['expected_runner_id']}:v{payload['expected_key_epoch']}")
+    ):
+        _fail("hip_fgmres_external_stored_challenge_semantics_invalid", "/challenge")
+
+    try:
+        decode_canonical_base64_v1(
+            payload["nonce_base64"],
+            expected_byte_count=32,
+            path="/challenge/nonce_base64",
+        )
+    except Ed25519EvidenceV1Error as exc:
+        _fail(
+            "hip_fgmres_external_stored_challenge_nonce_invalid",
+            "/challenge/nonce_base64",
+            exc.code,
+        )
+
+    if (
+        _UTC_RE.fullmatch(payload["issued_at_utc"]) is None
+        or _UTC_RE.fullmatch(payload["expires_at_utc"]) is None
+    ):
+        _fail("hip_fgmres_external_stored_challenge_timestamp_invalid", "/challenge")
+    try:
+        issued = _parse_utc(payload["issued_at_utc"], "/challenge/issued_at_utc")
+        expires = _parse_utc(payload["expires_at_utc"], "/challenge/expires_at_utc")
+    except HipFgmresExternalSignedEvidenceV1Error as exc:
+        _fail(
+            "hip_fgmres_external_stored_challenge_timestamp_invalid",
+            exc.path,
+            exc.code,
+        )
+    lifetime = expires - issued
+    if (
+        lifetime < timedelta(seconds=60)
+        or lifetime > timedelta(seconds=3600)
+        or lifetime.microseconds != 0
+    ):
+        _fail("hip_fgmres_external_stored_challenge_timestamp_invalid", "/challenge")
+
+    unsigned = {
+        field: payload[field]
+        for field in _ChallengePayloadV1.__dataclass_fields__
+        if field != "challenge_id"
+    }
+    if payload["challenge_id"] != canonical_hash(unsigned):
+        _fail("hip_fgmres_external_stored_challenge_hash_invalid", "/challenge")
+
+    return _ChallengePayloadV1(**payload)
+
+
+def _extract_hip_fgmres_external_envelope_routing_v1(
     envelope_bytes: bytes,
-    *,
-    challenge: HipFgmresExternalChallengeV1,
-    release_binding: HipFgmresExternalReleaseBindingV1,
-    trust_registry: HipFgmresExternalTrustAnchorRegistryResultV1,
-    fixture_registry: HipFgmresFixtureRegistryResultV1,
-    now: datetime | None = None,
-) -> HipFgmresExternalSignedEvidenceReceiptV1:
-    if type(challenge) is not HipFgmresExternalChallengeV1:
-        _fail("hip_fgmres_external_challenge_type_invalid", "/challenge")
-    validate_hip_fgmres_external_release_binding_v1(release_binding)
-    if type(trust_registry) is not HipFgmresExternalTrustAnchorRegistryResultV1:
-        _fail("hip_fgmres_external_trust_registry_type_invalid", "/trust_registry")
-    if type(fixture_registry) is not HipFgmresFixtureRegistryResultV1:
-        _fail("hip_fgmres_external_fixture_registry_type_invalid", "/fixture_registry")
+) -> dict[str, Any]:
+    """Extract strict routing data without asserting signature authority.
+
+    The full returned challenge payload includes ``challenge_id``.  Envelope
+    identity hashes and the challenge's own identity are checked, but the
+    Ed25519 signature is deliberately not verified at this routing boundary.
+    """
+
     envelope = _parse_canonical_envelope(envelope_bytes)
     _validate_json_schema(envelope, _ENVELOPE_SCHEMA_RESOURCE, path="/envelope")
+    signed_payload = _validate_envelope_integrity_v1(envelope)
+    challenge_payload = _validate_stored_challenge_payload_v1(
+        signed_payload["challenge"]
+    )
+    return challenge_payload.to_dict()
+
+
+def _validate_envelope_integrity_v1(
+    envelope: dict[str, Any],
+) -> dict[str, Any]:
     expected_envelope_hash = canonical_hash(
         {key: value for key, value in envelope.items() if key != "envelope_hash"}
     )
@@ -567,6 +701,33 @@ def _verify_with_authorities(
         != HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_SCOPE_V1
     ):
         _fail("hip_fgmres_external_envelope_semantics_invalid", "/envelope")
+    return signed_payload
+
+
+def _verify_with_authorities(
+    envelope_bytes: bytes,
+    *,
+    challenge: HipFgmresExternalChallengeV1,
+    release_binding: HipFgmresExternalReleaseBindingV1,
+    trust_registry: HipFgmresExternalTrustAnchorRegistryResultV1,
+    fixture_registry: HipFgmresFixtureRegistryResultV1,
+    now: datetime | None = None,
+    success_commit_hook: (
+        Callable[[HipFgmresExternalSignedEvidenceReceiptV1], None] | None
+    ) = None,
+) -> HipFgmresExternalSignedEvidenceReceiptV1:
+    if type(challenge) is not HipFgmresExternalChallengeV1:
+        _fail("hip_fgmres_external_challenge_type_invalid", "/challenge")
+    validate_hip_fgmres_external_release_binding_v1(release_binding)
+    if type(trust_registry) is not HipFgmresExternalTrustAnchorRegistryResultV1:
+        _fail("hip_fgmres_external_trust_registry_type_invalid", "/trust_registry")
+    if type(fixture_registry) is not HipFgmresFixtureRegistryResultV1:
+        _fail("hip_fgmres_external_fixture_registry_type_invalid", "/fixture_registry")
+    if success_commit_hook is not None and not callable(success_commit_hook):
+        _fail("hip_fgmres_external_success_commit_hook_invalid", "/commit_hook")
+    envelope = _parse_canonical_envelope(envelope_bytes)
+    _validate_json_schema(envelope, _ENVELOPE_SCHEMA_RESOURCE, path="/envelope")
+    signed_payload = _validate_envelope_integrity_v1(envelope)
     if signed_payload["challenge"] != challenge.to_dict():
         _fail("hip_fgmres_external_challenge_mismatch", "/signed_payload/challenge")
     if signed_payload["release_binding"] != release_binding.to_dict():
@@ -636,41 +797,48 @@ def _verify_with_authorities(
             ordered_case_aggregate_hash=signed_payload["ordered_case_aggregate_hash"],
         )
         _validate_payload_claims(signed_payload["claims"])
+        draft = HipFgmresExternalSignedEvidenceReceiptV1(
+            schema_version=(
+                HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCHEMA_VERSION_V1
+            ),
+            capability_profile=(
+                HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_CAPABILITY_PROFILE_V1
+            ),
+            status="external_gfx1100_fixed_suite_signed_evidence_verified",
+            evidence_scope=HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCOPE_V1,
+            envelope_hash=envelope["envelope_hash"],
+            signed_payload_sha256=envelope["signed_payload_sha256"],
+            key_id=key.key_id,
+            key_epoch=key.key_epoch,
+            runner_id=key.runner_id,
+            run_sequence=runner["run_sequence"],
+            challenge_id=challenge.challenge_id,
+            release_binding_hash=release_binding.binding_hash,
+            trust_registry_hash=trust_registry.registry_hash,
+            fixture_registry_hash=fixture_registry.registry_hash,
+            family_receipt_hash=family_receipt.receipt_hash,
+            common_runtime_binding_hash=signed_payload["common_runtime_binding_hash"],
+            ordered_case_aggregate_hash=signed_payload["ordered_case_aggregate_hash"],
+            verified_slot_count=len(HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1),
+            verified_slot_ids=HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1,
+            claims=HipFgmresExternalSignedEvidenceClaimsV1(),
+            promotion_eligible=False,
+            receipt_hash=_ZERO_HASH,
+        )
+        receipt = replace(
+            draft,
+            receipt_hash=canonical_hash(
+                _verification_receipt_payload(draft, include_hash=False)
+            ),
+        )
+        receipt = validate_hip_fgmres_external_signed_evidence_receipt_v1(receipt)
+        if success_commit_hook is not None:
+            success_commit_hook(receipt)
         challenge._consume(reservation)
     except BaseException:
         challenge._release(reservation)
         raise
-    draft = HipFgmresExternalSignedEvidenceReceiptV1(
-        schema_version=HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCHEMA_VERSION_V1,
-        capability_profile=HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_CAPABILITY_PROFILE_V1,
-        status="external_gfx1100_fixed_suite_signed_evidence_verified",
-        evidence_scope=HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCOPE_V1,
-        envelope_hash=envelope["envelope_hash"],
-        signed_payload_sha256=envelope["signed_payload_sha256"],
-        key_id=key.key_id,
-        key_epoch=key.key_epoch,
-        runner_id=key.runner_id,
-        run_sequence=runner["run_sequence"],
-        challenge_id=challenge.challenge_id,
-        release_binding_hash=release_binding.binding_hash,
-        trust_registry_hash=trust_registry.registry_hash,
-        fixture_registry_hash=fixture_registry.registry_hash,
-        family_receipt_hash=family_receipt.receipt_hash,
-        common_runtime_binding_hash=signed_payload["common_runtime_binding_hash"],
-        ordered_case_aggregate_hash=signed_payload["ordered_case_aggregate_hash"],
-        verified_slot_count=len(HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1),
-        verified_slot_ids=HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1,
-        claims=HipFgmresExternalSignedEvidenceClaimsV1(),
-        promotion_eligible=False,
-        receipt_hash=_ZERO_HASH,
-    )
-    receipt = replace(
-        draft,
-        receipt_hash=canonical_hash(
-            _verification_receipt_payload(draft, include_hash=False)
-        ),
-    )
-    return validate_hip_fgmres_external_signed_evidence_receipt_v1(receipt)
+    return receipt
 
 
 def _parse_model_case_receipt(
@@ -1254,7 +1422,13 @@ def _parse_canonical_envelope(raw: bytes) -> dict[str, Any]:
         _reject_nonfinite(payload, path="/envelope")
         canonical = canonical_json_bytes(payload)
     except _DuplicateKeyError as exc:
-        _fail("hip_fgmres_external_envelope_duplicate_key", "/envelope", str(exc))
+        _fail(
+            "hip_fgmres_external_envelope_duplicate_key",
+            "/envelope",
+            str(exc)[:256],
+        )
+    except RecursionError:
+        _fail("hip_fgmres_external_envelope_extent_invalid", "/envelope")
     except (UnicodeDecodeError, json.JSONDecodeError, ValueError, TypeError) as exc:
         _fail("hip_fgmres_external_envelope_json_invalid", "/envelope", str(exc))
     if type(payload) is not dict:
@@ -1265,14 +1439,21 @@ def _parse_canonical_envelope(raw: bytes) -> dict[str, Any]:
 
 
 def _reject_nonfinite(value: Any, *, path: str) -> None:
-    if type(value) is float and not math.isfinite(value):
-        _fail("hip_fgmres_external_envelope_nonfinite", path)
-    if type(value) is dict:
-        for key, item in value.items():
-            _reject_nonfinite(item, path=f"{path}/{key}")
-    elif type(value) is list:
-        for index, item in enumerate(value):
-            _reject_nonfinite(item, path=f"{path}/{index}")
+    stack: list[tuple[Any, str, int]] = [(value, path, 0)]
+    node_count = 0
+    while stack:
+        item, item_path, depth = stack.pop()
+        node_count += 1
+        if node_count > _ENVELOPE_MAX_JSON_NODES or depth > _ENVELOPE_MAX_JSON_DEPTH:
+            _fail("hip_fgmres_external_envelope_extent_invalid", item_path)
+        if type(item) is float and not math.isfinite(item):
+            _fail("hip_fgmres_external_envelope_nonfinite", item_path)
+        if type(item) is dict:
+            for key, child in item.items():
+                stack.append((child, f"{item_path}/{key}", depth + 1))
+        elif type(item) is list:
+            for index, child in enumerate(item):
+                stack.append((child, f"{item_path}/{index}", depth + 1))
 
 
 def _validate_json_schema(
@@ -1293,16 +1474,19 @@ def _validate_json_schema(
         _fail(
             "hip_fgmres_external_schema_invalid", path, f"{type(exc).__name__}: {exc}"
         )
-    errors = sorted(
-        Draft202012Validator(schema).iter_errors(payload),
-        key=lambda error: tuple(str(part) for part in error.absolute_path),
-    )
-    if errors:
-        error = errors[0]
+    error = next(Draft202012Validator(schema).iter_errors(payload), None)
+    if error is not None:
         location = (
             path.rstrip("/") + "/" + "/".join(str(part) for part in error.absolute_path)
         )
-        _fail("hip_fgmres_external_schema_validation_failed", location, error.message)
+        keyword = str(error.validator)
+        if len(keyword) > 64:
+            keyword = keyword[:64]
+        _fail(
+            "hip_fgmres_external_schema_validation_failed",
+            location,
+            f"schema keyword {keyword} rejected value",
+        )
 
 
 def _decode_case_base64(value: str, byte_count: int, path: str) -> bytes:

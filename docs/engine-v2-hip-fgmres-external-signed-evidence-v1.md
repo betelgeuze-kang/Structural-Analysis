@@ -56,6 +56,12 @@ signing API를 제공하지 않는다. 소스 배포본의 합성 검증 테스�
 BOM, duplicate key, invalid UTF-8, NaN/Infinity, `-0.0`, whitespace와 key-order가
 다른 표현은 서명 검증 전에 거부된다.
 
+서명·schema 검증 전에 untrusted envelope를 최대 `4 MiB`, JSON depth `64`,
+JSON node `200,000`으로 제한한다. Depth/node 초과와 decoder/canonicalizer의
+`RecursionError`는 `hip_fgmres_external_envelope_extent_invalid`로 fail-closed한다.
+Schema 검증은 첫 오류에서 멈추며 오류 메시지에 공격자 payload를 복사하지 않는다.
+이는 parser availability 경계이고 서명·runner·hardware 신뢰 claim을 넓히지 않는다.
+
 서명 메시지는 다음 domain과 canonical content의 연결이다.
 
 ```text
@@ -108,6 +114,35 @@ challenge를 검증해도 하나만 reservation을 얻는다. 이 상태는 proc
 `false`다. 제품 승격 전에는 서명된 durable campaign/run-sequence ledger와 key
 rotation/revocation 운영 절차가 별도로 필요하다.
 
+### v0.2.35 durable wrapper와의 관계
+
+후속 [external replay ledger v1](engine-v2-hip-fgmres-external-replay-ledger-v1.md)은
+명시적으로 초기화한 단일 owner-private local POSIX SQLite ledger에
+이 v1 challenge, envelope와 signed receipt를 저장하는 **별도**
+v0.2.35 wrapper다. Pinned ledger ID/namespace, `BEGIN IMMEDIATE`,
+`journal_mode=DELETE`, `synchronous=EXTRA`, strict canonical stored payload/schema와
+event hash-chain replay로 cross-process at-most-once acceptance와 재시작
+challenge rehydration을 제공한다. Acceptance commit 후 응답 전에
+process가 종료되면 recovery lookup이 저장된 envelope의 서명·수치와
+receipt를 다시 검증한다.
+
+신규 durable receipt의 `acceptance_commit_head_event_*`는 acceptance transaction이
+commit될 때의 ledger head이자 acceptance event 자체의 sequence/hash다.
+이후 다른 process가 event를 append해도 기존 receipt가 stale하거나
+invalid로 변하지 않는다. 따라서 해당 field는 조회 시점의
+current ledger head attestation이 아니다.
+
+이 후속 wrapper는 본 v0.2.33 receipt의
+`durable_replay_ledger_verified=false`를 `true`로 바꾸지 않는다. Local
+durability claim은 두 legacy receipt와 ledger acceptance를 결속하는 신규
+v0.2.35 receipt에서만 true다. 이 결속은 exactly-once delivery,
+cross-host/multi-ledger replay 방지, 동일 UID/root/storage rollback 저항,
+cryptographic log/TPM anchor, non-POSIX/NFS/FUSE durability, runner/hardware truth,
+full release-identity-receipt signed binding, 실제 `gfx1100` 실행이나
+promotion을 증명하지 않는다. v0.2.35 publication candidate에서 본 전체
+signed-evidence 회귀 `16 passed in 658.36s`와 durable-ledger/candidate-wheel
+격리 검증을 완료했지만 이 claim 경계는 바뀌지 않는다.
+
 ## 외부 runner가 제출해야 할 자료
 
 실제 runner는 최종 candidate wheel을 격리 설치한 뒤 다음을 한 봉투에 넣어야
@@ -133,6 +168,7 @@ exact fixture registry hash를 package trust registry에 추가하고 raw/schema
 
 - RFC 8032 Ed25519 known-answer vector
 - strict/canonical Base64와 canonical JSON
+- JSON depth `65`/`1100`, node `200,001` extent와 schema fail-fast 경계
 - package empty trust registry raw/content hash
 - synthetic key로 signed `gfx1100` exact 10-slot happy path
 - raw CPU solution/residual, independent residual 및 solve-record semantic replay
