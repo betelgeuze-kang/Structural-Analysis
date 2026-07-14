@@ -30,6 +30,10 @@ from structural_analysis.engine_v2.backends.hip.context import (
     _BoundBlockingD2HCopy,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.engine_v2.contracts.execution_plan_v2 import (
+    ExecutionPlanV2,
+    validate_execution_plan_v2,
+)
 
 from .fgmres_global_recurrence_context_v1 import (
     HipFgmresGlobalRecurrenceCompletionCapabilityV1,
@@ -38,7 +42,12 @@ from .fgmres_global_recurrence_context_v1 import (
     _mint_completion_export_child_lease_v1,
     validate_hip_fgmres_global_recurrence_completion_capability_v1,
 )
-from .fgmres_recurrence_plan_v2 import hip_fgmres_solve_record_abi_payload_v2
+from .fgmres_plan import HipFgmresPlanV1, validate_hip_fgmres_plan_v1
+from .fgmres_recurrence_plan_v2 import (
+    HipFgmresRecurrencePlanV2,
+    hip_fgmres_solve_record_abi_payload_v2,
+    validate_hip_fgmres_recurrence_plan_v2,
+)
 from .fgmres_rtc_v2 import solve_record_byte_length_v2
 
 
@@ -306,6 +315,15 @@ class _CompletionExportPublishedResultAuthorityV1:
     payload_hash: str
     buffer_payload_hashes: tuple[str, str, str]
     policy: _CompletionExportPolicySnapshotV1
+
+
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class _CompletionExportModelCaseParityAuthorityV1:
+    """Private seal joining one final publication to its exact model source."""
+
+    publication: _CompletionExportPublishedResultAuthorityV1
+    source: _CompletionExportChildAuthorityV1
+    source_snapshot: tuple[Any, ...]
 
 
 def _guard_state_change(name: str) -> Any:
@@ -699,6 +717,79 @@ class HipFgmresCompletionExportExecutionContextV1:
                 )
             validate_hip_fgmres_completion_export_result_v1(result)
             return seal
+
+    def _model_case_parity_authority(
+        self,
+        result: HipFgmresCompletionExportResultV1,
+    ) -> _CompletionExportModelCaseParityAuthorityV1:
+        """Bind the final bytes to the exact still-live source plan lineage."""
+
+        with self._lock:
+            publication = self._terminal_outcome_observation_authority(result)
+            source = self._require_authority(consumed=True)
+            _validate_authority_extents(source)
+            try:
+                validate_execution_plan_v2(source.source_execution_plan)
+                validate_hip_fgmres_plan_v1(
+                    source.source_fgmres_plan,
+                    expected_execution_plan=source.source_execution_plan,
+                    expected_free_space_plan=(
+                        source.source_fgmres_plan._source_free_space_plan
+                    ),
+                )
+                validate_hip_fgmres_recurrence_plan_v2(
+                    source.source_recurrence_plan,
+                    expected_source_plan=source.source_fgmres_plan,
+                )
+            except Exception as exc:
+                raise HipFgmresCompletionExportV1Error(
+                    "hip_fgmres_completion_export_model_source_invalid",
+                    "/authority/model_source",
+                    _detail(exc),
+                    cleanup_owner=self,
+                ) from exc
+            policy = source.source_fgmres_plan.policy
+            if (
+                source.source_fgmres_plan._source_execution_plan
+                is not source.source_execution_plan
+                or source.source_recurrence_plan.source_fgmres_plan_hash
+                != source.source_fgmres_plan.plan_hash
+                or source.source_recurrence_plan.source_execution_plan_hash
+                != source.source_execution_plan.plan_hash
+                or source.recurrence_plan_hash
+                != source.source_recurrence_plan.plan_hash
+                or _completion_export_policy_value_snapshot(publication.policy)
+                != _completion_export_policy_value_snapshot(
+                    _CompletionExportPolicySnapshotV1(
+                        restart_dimension=policy.restart_dimension,
+                        max_iterations=policy.max_iterations,
+                        maximum_restart_count=source.maximum_restart_count,
+                        stagnation_checkpoint_limit=(
+                            policy.stagnation_checkpoint_limit
+                        ),
+                        absolute_tolerance=policy.absolute_tolerance,
+                        relative_tolerance=policy.relative_tolerance,
+                        authoritative_tolerance=(
+                            source.source_execution_plan.residual_tolerance
+                        ),
+                        stagnation_relative_tolerance=(
+                            policy.stagnation_relative_tolerance
+                        ),
+                        divergence_factor=policy.divergence_factor,
+                    )
+                )
+            ):
+                _fail(
+                    "hip_fgmres_completion_export_model_source_binding_invalid",
+                    "/authority/model_source",
+                    cleanup_owner=self,
+                )
+            snapshot = _authority_snapshot(source)
+            return _CompletionExportModelCaseParityAuthorityV1(
+                publication=publication,
+                source=source,
+                source_snapshot=snapshot,
+            )
 
     def _record_consumed(self) -> None:
         self._telemetry = replace(
@@ -1223,6 +1314,11 @@ def _validate_authority_extents(
         )
         or type(sources) is not tuple
         or len(sources) != 3
+        or type(authority.source_fgmres_plan) is not HipFgmresPlanV1
+        or type(authority.source_recurrence_plan) is not HipFgmresRecurrencePlanV2
+        or type(authority.source_execution_plan) is not ExecutionPlanV2
+        or authority.source_fgmres_plan._source_execution_plan
+        is not authority.source_execution_plan
     ):
         _fail(
             "hip_fgmres_completion_export_authority_invalid",
@@ -1282,6 +1378,12 @@ def _authority_snapshot(
             float.hex(authority.stagnation_relative_tolerance),
         ),
         (type(authority.divergence_factor), float.hex(authority.divergence_factor)),
+        id(authority.source_fgmres_plan),
+        authority.source_fgmres_plan.plan_hash,
+        id(authority.source_recurrence_plan),
+        authority.source_recurrence_plan.plan_hash,
+        id(authority.source_execution_plan),
+        authority.source_execution_plan.plan_hash,
         authority.recurrence_plan_hash,
         authority.recurrence_kernel_abi_hash,
         authority.combined_recurrence_abi_hash,
@@ -1347,6 +1449,37 @@ def _published_result_authority_snapshot(
         authority.receipt_hash,
         authority.payload_hash,
         authority.buffer_payload_hashes,
+        type(policy),
+        (type(policy.restart_dimension), policy.restart_dimension),
+        (type(policy.max_iterations), policy.max_iterations),
+        (type(policy.maximum_restart_count), policy.maximum_restart_count),
+        (
+            type(policy.stagnation_checkpoint_limit),
+            policy.stagnation_checkpoint_limit,
+        ),
+        (type(policy.absolute_tolerance), float.hex(policy.absolute_tolerance)),
+        (type(policy.relative_tolerance), float.hex(policy.relative_tolerance)),
+        (
+            type(policy.authoritative_tolerance),
+            float.hex(policy.authoritative_tolerance),
+        ),
+        (
+            type(policy.stagnation_relative_tolerance),
+            float.hex(policy.stagnation_relative_tolerance),
+        ),
+        (type(policy.divergence_factor), float.hex(policy.divergence_factor)),
+    )
+
+
+def _completion_export_policy_value_snapshot(
+    policy: _CompletionExportPolicySnapshotV1,
+) -> tuple[Any, ...]:
+    if type(policy) is not _CompletionExportPolicySnapshotV1:
+        _fail(
+            "hip_fgmres_completion_export_policy_snapshot_invalid",
+            "/authority/policy",
+        )
+    return (
         type(policy),
         (type(policy.restart_dimension), policy.restart_dimension),
         (type(policy.max_iterations), policy.max_iterations),

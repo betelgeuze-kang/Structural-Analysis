@@ -4732,10 +4732,9 @@ def _identity_payload(
             "full_solver": False,
             "live_solver_ready": False,
             "iteration_host_copy_zero_proven": False,
-            "native_numerical_parity": True,
+            "native_numerical_parity": False,
             "native_numerical_parity_scope": (
-                "gfx1030_valid_predecessor_restart_one_column_zero_through_"
-                "checkpoint_transaction"
+                "requires_downstream_model_case_parity_receipt"
             ),
         },
         "source_resource": identity.source_resource,

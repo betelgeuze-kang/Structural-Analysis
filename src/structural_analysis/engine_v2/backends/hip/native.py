@@ -13,8 +13,11 @@ from collections.abc import Sequence
 import ctypes
 import ctypes.util
 from dataclasses import dataclass
+import fcntl
 import hashlib
+import os
 from pathlib import Path
+import stat
 import threading
 from typing import Any, Protocol, runtime_checkable
 import weakref
@@ -97,9 +100,53 @@ class _PrivateHipCdllFacade:
 
 _LOADED_HIP_RUNTIME_MINT = object()
 _LOADED_HIP_RUNTIME_WITNESS_LOCK = threading.RLock()
-_LOADED_HIP_RUNTIME_WITNESSES: weakref.WeakKeyDictionary[object, object] = (
-    weakref.WeakKeyDictionary()
-)
+_LIBRARY_SNAPSHOT_FD_LOCK = threading.RLock()
+_LIBRARY_SNAPSHOT_FD_HIGH_WATER = 256
+
+
+def _native_callable_state(function: Any) -> tuple[Any, ...]:
+    if function is None:
+        return (None,)
+    argtypes = getattr(function, "argtypes", None)
+    normalized_argtypes = (
+        None
+        if argtypes is None
+        else tuple((type(value), id(value)) for value in tuple(argtypes))
+    )
+    restype = getattr(function, "restype", None)
+    errcheck = getattr(function, "errcheck", None)
+    return (
+        type(function),
+        id(function),
+        normalized_argtypes,
+        type(restype),
+        id(restype),
+        type(errcheck),
+        id(errcheck),
+    )
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class _LoadedHipRuntimeAuthority:
+    witness: object
+    library_identity: HipRuntimeLibraryIdentity
+    library_identity_snapshot: tuple[Any, ...]
+    cdll: ctypes.CDLL
+    private_cdll: _PrivateHipCdllFacade | None
+    private_handle: int | None
+    hip_init: Any
+    hip_get_device_count: Any
+    hip_device_get_name: Any
+    hip_runtime_get_version: Any
+    hip_driver_get_version: Any
+    hip_get_error_string: Any
+    probe_callable_state: tuple[Any, ...]
+
+
+_LOADED_HIP_RUNTIME_WITNESSES: weakref.WeakKeyDictionary[
+    object,
+    _LoadedHipRuntimeAuthority,
+] = weakref.WeakKeyDictionary()
 
 
 class LoadedHipRuntime:
@@ -162,13 +209,83 @@ class LoadedHipRuntime:
             )
         except HipNativeRuntimeError:
             self._hip_get_error_string = None
+        private_handle = (
+            self._private_cdll._handle if self._private_cdll is not None else None
+        )
+        authority = _LoadedHipRuntimeAuthority(
+            witness=self._loader_provenance_nonce,
+            library_identity=self._library_identity,
+            library_identity_snapshot=(
+                type(self._library_identity),
+                type(
+                    object.__getattribute__(self._library_identity, "discovery_source")
+                ),
+                object.__getattribute__(self._library_identity, "discovery_source"),
+                type(object.__getattribute__(self._library_identity, "requested_name")),
+                object.__getattribute__(self._library_identity, "requested_name"),
+                type(object.__getattribute__(self._library_identity, "loaded_name")),
+                object.__getattribute__(self._library_identity, "loaded_name"),
+                type(object.__getattribute__(self._library_identity, "resolved_path")),
+                object.__getattribute__(self._library_identity, "resolved_path"),
+                type(object.__getattribute__(self._library_identity, "sha256")),
+                object.__getattribute__(self._library_identity, "sha256"),
+            ),
+            cdll=self._cdll,
+            private_cdll=self._private_cdll,
+            private_handle=private_handle,
+            hip_init=self._hip_init,
+            hip_get_device_count=self._hip_get_device_count,
+            hip_device_get_name=self._hip_device_get_name,
+            hip_runtime_get_version=self._hip_runtime_get_version,
+            hip_driver_get_version=self._hip_driver_get_version,
+            hip_get_error_string=self._hip_get_error_string,
+            probe_callable_state=tuple(
+                _native_callable_state(function)
+                for function in (
+                    self._hip_init,
+                    self._hip_get_device_count,
+                    self._hip_device_get_name,
+                    self._hip_runtime_get_version,
+                    self._hip_driver_get_version,
+                    self._hip_get_error_string,
+                )
+            ),
+        )
         with _LOADED_HIP_RUNTIME_WITNESS_LOCK:
-            _LOADED_HIP_RUNTIME_WITNESSES[self] = self._loader_provenance_nonce
+            _LOADED_HIP_RUNTIME_WITNESSES[self] = authority
 
     @property
     def library_identity(self) -> HipRuntimeLibraryIdentity:
         """Return immutable loader-attested library identity metadata."""
 
+        with _LOADED_HIP_RUNTIME_WITNESS_LOCK:
+            authority = _LOADED_HIP_RUNTIME_WITNESSES.get(self)
+        if (
+            type(authority) is not _LoadedHipRuntimeAuthority
+            or authority.library_identity is not self._library_identity
+            or authority.library_identity_snapshot
+            != (
+                type(self._library_identity),
+                type(
+                    object.__getattribute__(self._library_identity, "discovery_source")
+                ),
+                object.__getattribute__(self._library_identity, "discovery_source"),
+                type(object.__getattribute__(self._library_identity, "requested_name")),
+                object.__getattribute__(self._library_identity, "requested_name"),
+                type(object.__getattribute__(self._library_identity, "loaded_name")),
+                object.__getattribute__(self._library_identity, "loaded_name"),
+                type(object.__getattribute__(self._library_identity, "resolved_path")),
+                object.__getattribute__(self._library_identity, "resolved_path"),
+                type(object.__getattribute__(self._library_identity, "sha256")),
+                object.__getattribute__(self._library_identity, "sha256"),
+            )
+        ):
+            raise HipNativeRuntimeError(
+                "hip_runtime_provenance_invalid",
+                "LoadedHipRuntime library identity changed after loader minting.",
+                library=self._library_identity,
+                runtime_loaded=True,
+            )
         return self._library_identity
 
     @property
@@ -181,15 +298,57 @@ class LoadedHipRuntime:
         """Return the process-local loader witness after registry validation."""
 
         with _LOADED_HIP_RUNTIME_WITNESS_LOCK:
-            witness = _LOADED_HIP_RUNTIME_WITNESSES.get(self)
-        if witness is not self._loader_provenance_nonce:
+            authority = _LOADED_HIP_RUNTIME_WITNESSES.get(self)
+        if (
+            type(authority) is not _LoadedHipRuntimeAuthority
+            or authority.witness is not self._loader_provenance_nonce
+            or authority.library_identity is not self._library_identity
+            or authority.library_identity_snapshot
+            != (
+                type(self._library_identity),
+                type(
+                    object.__getattribute__(self._library_identity, "discovery_source")
+                ),
+                object.__getattribute__(self._library_identity, "discovery_source"),
+                type(object.__getattribute__(self._library_identity, "requested_name")),
+                object.__getattribute__(self._library_identity, "requested_name"),
+                type(object.__getattribute__(self._library_identity, "loaded_name")),
+                object.__getattribute__(self._library_identity, "loaded_name"),
+                type(object.__getattribute__(self._library_identity, "resolved_path")),
+                object.__getattribute__(self._library_identity, "resolved_path"),
+                type(object.__getattribute__(self._library_identity, "sha256")),
+                object.__getattribute__(self._library_identity, "sha256"),
+            )
+            or authority.cdll is not self._cdll
+            or authority.private_cdll is not self._private_cdll
+            or (self._private_cdll._handle if self._private_cdll is not None else None)
+            != authority.private_handle
+            or authority.hip_init is not self._hip_init
+            or authority.hip_get_device_count is not self._hip_get_device_count
+            or authority.hip_device_get_name is not self._hip_device_get_name
+            or authority.hip_runtime_get_version is not self._hip_runtime_get_version
+            or authority.hip_driver_get_version is not self._hip_driver_get_version
+            or authority.hip_get_error_string is not self._hip_get_error_string
+            or authority.probe_callable_state
+            != tuple(
+                _native_callable_state(function)
+                for function in (
+                    self._hip_init,
+                    self._hip_get_device_count,
+                    self._hip_device_get_name,
+                    self._hip_runtime_get_version,
+                    self._hip_driver_get_version,
+                    self._hip_get_error_string,
+                )
+            )
+        ):
             raise HipNativeRuntimeError(
                 "hip_runtime_provenance_invalid",
                 "LoadedHipRuntime is not backed by the native loader registry.",
                 library=self._library_identity,
                 runtime_loaded=True,
             )
-        return witness
+        return authority.witness
 
     def bind(
         self,
@@ -216,7 +375,7 @@ class LoadedHipRuntime:
                 raise HipNativeRuntimeError(
                     "hip_runtime_symbol_missing",
                     f"Required HIP symbol is missing or invalid: {symbol}.",
-                    library=self.library_identity,
+                    library=object.__getattribute__(self, "_library_identity"),
                     runtime_loaded=True,
                 ) from exc
 
@@ -226,7 +385,7 @@ class LoadedHipRuntime:
             raise HipNativeRuntimeError(
                 "hip_runtime_symbol_missing",
                 f"Required HIP symbol is missing: {symbol}.",
-                library=self.library_identity,
+                library=object.__getattribute__(self, "_library_identity"),
                 runtime_loaded=True,
             ) from exc
         try:
@@ -372,27 +531,65 @@ def load_hip_native_runtime(
             library=identity,
         )
 
+    snapshot_fd: int | None = None
+    snapshot_fingerprint: tuple[int, ...] | None = None
     sha256: str | None = None
-    if candidate.resolved_path is not None:
-        try:
-            sha256 = _sha256_file(Path(candidate.resolved_path))
-        except OSError as exc:
-            identity = _library_identity(candidate, loaded_name=None, sha256=None)
-            raise HipNativeRuntimeError(
-                "hip_runtime_library_hash_failed",
-                f"Could not hash resolved HIP runtime: {type(exc).__name__}.",
-                library=identity,
-            ) from exc
-
-    before_load = _library_identity(candidate, loaded_name=None, sha256=sha256)
+    load_name = candidate.load_name
     try:
-        cdll = ctypes.CDLL(candidate.load_name, mode=getattr(ctypes, "RTLD_LOCAL", 0))
+        if candidate.resolved_path is not None:
+            snapshot_fd, snapshot_fingerprint, sha256 = _open_library_snapshot(
+                Path(candidate.resolved_path)
+            )
+            load_name = f"/proc/self/fd/{snapshot_fd}"
+        before_load = _library_identity(candidate, loaded_name=None, sha256=sha256)
+        try:
+            cdll = ctypes.CDLL(load_name, mode=getattr(ctypes, "RTLD_LOCAL", 0))
+        except OSError as exc:
+            raise HipNativeRuntimeError(
+                "hip_runtime_library_load_failed",
+                f"libamdhip64 could not be loaded: {type(exc).__name__}.",
+                library=before_load,
+            ) from exc
+        if snapshot_fd is not None:
+            try:
+                if (
+                    _library_fd_fingerprint(snapshot_fd) != snapshot_fingerprint
+                    or _sha256_fd(snapshot_fd) != sha256
+                ):
+                    raise OSError("library snapshot changed during load")
+                path_descriptor, path_fingerprint, path_sha256 = _open_library_snapshot(
+                    Path(candidate.resolved_path)
+                )
+                try:
+                    if (
+                        path_fingerprint != snapshot_fingerprint
+                        or path_sha256 != sha256
+                    ):
+                        raise OSError("resolved library path changed during load")
+                finally:
+                    os.close(path_descriptor)
+            except OSError as exc:
+                changed_identity = _library_identity(
+                    candidate,
+                    loaded_name=candidate.load_name,
+                    sha256=sha256,
+                )
+                raise HipNativeRuntimeError(
+                    "hip_runtime_library_changed_during_load",
+                    "Resolved HIP runtime changed while its exact snapshot was loaded.",
+                    library=changed_identity,
+                    runtime_loaded=True,
+                ) from exc
     except OSError as exc:
+        identity = _library_identity(candidate, loaded_name=None, sha256=None)
         raise HipNativeRuntimeError(
-            "hip_runtime_library_load_failed",
-            f"libamdhip64 could not be loaded: {type(exc).__name__}.",
-            library=before_load,
+            "hip_runtime_library_hash_failed",
+            f"Could not snapshot resolved HIP runtime: {type(exc).__name__}.",
+            library=identity,
         ) from exc
+    finally:
+        if snapshot_fd is not None:
+            os.close(snapshot_fd)
 
     loaded_identity = _library_identity(
         candidate,
@@ -702,6 +899,58 @@ def _resolve_loader_name(loader_name: str) -> str | None:
 
 def _looks_like_path(name: str) -> bool:
     return "/" in name or "\\" in name or name.startswith(".")
+
+
+def _open_library_snapshot(path: Path) -> tuple[int, tuple[int, ...], str]:
+    global _LIBRARY_SNAPSHOT_FD_HIGH_WATER
+
+    flags = os.O_RDONLY | getattr(os, "O_CLOEXEC", 0)
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    source_descriptor = os.open(path, flags)
+    try:
+        with _LIBRARY_SNAPSHOT_FD_LOCK:
+            descriptor = fcntl.fcntl(
+                source_descriptor,
+                fcntl.F_DUPFD_CLOEXEC,
+                _LIBRARY_SNAPSHOT_FD_HIGH_WATER,
+            )
+            _LIBRARY_SNAPSHOT_FD_HIGH_WATER = descriptor + 1
+    finally:
+        os.close(source_descriptor)
+    try:
+        fingerprint = _library_fd_fingerprint(descriptor)
+        digest = _sha256_fd(descriptor)
+    except BaseException:
+        os.close(descriptor)
+        raise
+    return descriptor, fingerprint, digest
+
+
+def _library_fd_fingerprint(descriptor: int) -> tuple[int, ...]:
+    metadata = os.fstat(descriptor)
+    if not stat.S_ISREG(metadata.st_mode) or metadata.st_size <= 0:
+        raise OSError("HIP runtime snapshot is not a non-empty regular file")
+    return (
+        int(metadata.st_dev),
+        int(metadata.st_ino),
+        int(metadata.st_mode),
+        int(metadata.st_size),
+        int(metadata.st_mtime_ns),
+        int(metadata.st_ctime_ns),
+    )
+
+
+def _sha256_fd(descriptor: int) -> str:
+    digest = hashlib.sha256()
+    offset = 0
+    while True:
+        chunk = os.pread(descriptor, 1024 * 1024, offset)
+        if not chunk:
+            break
+        digest.update(chunk)
+        offset += len(chunk)
+    return f"sha256:{digest.hexdigest()}"
 
 
 def _sha256_file(path: Path) -> str:

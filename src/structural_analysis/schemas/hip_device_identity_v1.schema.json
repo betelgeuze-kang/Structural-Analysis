@@ -1,0 +1,269 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_device_identity_v1.schema.json",
+  "title": "Engine v2 loader-attested HIP device identity receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "actual_backend",
+    "library",
+    "device",
+    "versions",
+    "architecture",
+    "telemetry",
+    "claims",
+    "promotion_eligible",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-device-identity.v1"
+    },
+    "capability_profile": {
+      "const": "engine_v2_loader_attested_hip_device_identity_v1"
+    },
+    "status": {"const": "identity_attested"},
+    "evidence_scope": {
+      "const": "process_local_loader_attested_nonexecuting_hip_device_identity"
+    },
+    "actual_backend": {"const": "hip"},
+    "library": {"$ref": "#/$defs/library"},
+    "device": {"$ref": "#/$defs/device"},
+    "versions": {"$ref": "#/$defs/versions"},
+    "architecture": {"$ref": "#/$defs/architectureBinding"},
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "promotion_eligible": {"type": "boolean", "const": false},
+    "receipt_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "library": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "discovery_source",
+        "requested_name",
+        "loaded_name",
+        "resolved_path",
+        "sha256"
+      ],
+      "properties": {
+        "discovery_source": {
+          "type": "string",
+          "enum": ["explicit", "opt_rocm", "system_loader"]
+        },
+        "requested_name": {"type": "string", "minLength": 1},
+        "loaded_name": {"type": "string", "minLength": 1},
+        "resolved_path": {"type": "string", "minLength": 1, "pattern": "^/"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "device": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selected_ordinal",
+        "device_count",
+        "name",
+        "uuid",
+        "uuid_bytes_hex",
+        "pci_bus_id_raw",
+        "pci_bdf",
+        "properties_pci_domain_id",
+        "properties_pci_bus_id",
+        "properties_pci_device_id"
+      ],
+      "properties": {
+        "selected_ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "device_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "name": {"type": "string", "minLength": 1, "maxLength": 255},
+        "uuid": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "uuid_bytes_hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$",
+          "not": {
+            "enum": [
+              "00000000000000000000000000000000",
+              "ffffffffffffffffffffffffffffffff"
+            ]
+          }
+        },
+        "pci_bus_id_raw": {
+          "type": "string",
+          "pattern": "^[0-9A-Fa-f]{4}:[0-9A-Fa-f]{2}:[01][0-9A-Fa-f]\\.[0-7]$"
+        },
+        "pci_bdf": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{4}:[0-9a-f]{2}:[01][0-9a-f]\\.[0-7]$"
+        },
+        "properties_pci_domain_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "properties_pci_bus_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "properties_pci_device_id": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime", "driver"],
+      "properties": {
+        "runtime": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "driver": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "gcnArchitecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["raw", "base", "features", "normalized"],
+      "properties": {
+        "raw": {
+          "type": "string",
+          "pattern": "^[Gg][Ff][Xx][0-9][0-9A-Fa-f]{2,15}(?::[A-Za-z][A-Za-z0-9_]{0,31}[+-])*$"
+        },
+        "base": {
+          "type": "string",
+          "pattern": "^gfx[0-9][0-9a-f]{2,15}$",
+          "not": {"const": "gfx000"}
+        },
+        "features": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}[+-]$"
+          }
+        },
+        "normalized": {
+          "type": "string",
+          "pattern": "^gfx[0-9][0-9a-f]{2,15}(?::[a-z][a-z0-9_]{0,31}[+-])*$"
+        }
+      }
+    },
+    "architectureBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime", "expected_compiled", "base_matches"],
+      "properties": {
+        "runtime": {"$ref": "#/$defs/gcnArchitecture"},
+        "expected_compiled": {"$ref": "#/$defs/gcnArchitecture"},
+        "base_matches": {"type": "boolean", "const": true}
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "loader_provenance_check_count",
+        "fresh_function_bind_count",
+        "hip_init_call_count",
+        "device_count_call_count",
+        "device_name_call_count",
+        "runtime_version_call_count",
+        "driver_version_call_count",
+        "device_properties_r0000_call_count",
+        "device_uuid_call_count",
+        "device_pci_bus_id_call_count",
+        "device_allocation_count",
+        "device_copy_count",
+        "kernel_launch_count",
+        "context_creation_count",
+        "stream_creation_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "loader_provenance_check_count": {"type": "integer", "const": 3},
+        "fresh_function_bind_count": {"type": "integer", "const": 8},
+        "hip_init_call_count": {"type": "integer", "const": 1},
+        "device_count_call_count": {"type": "integer", "const": 1},
+        "device_name_call_count": {"type": "integer", "const": 1},
+        "runtime_version_call_count": {"type": "integer", "const": 1},
+        "driver_version_call_count": {"type": "integer", "const": 1},
+        "device_properties_r0000_call_count": {"type": "integer", "const": 1},
+        "device_uuid_call_count": {"type": "integer", "const": 1},
+        "device_pci_bus_id_call_count": {"type": "integer", "const": 1},
+        "device_allocation_count": {"type": "integer", "const": 0},
+        "device_copy_count": {"type": "integer", "const": 0},
+        "kernel_launch_count": {"type": "integer", "const": 0},
+        "context_creation_count": {"type": "integer", "const": 0},
+        "stream_creation_count": {"type": "integer", "const": 0},
+        "fallback_count": {"type": "integer", "const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_loader_issued_runtime_verified",
+        "loader_registry_witness_verified",
+        "runtime_library_path_and_sha256_bound",
+        "fixed_r0000_gcn_arch_name_decoded",
+        "runtime_and_compiled_architecture_base_match",
+        "uuid_16_bytes_observed",
+        "canonical_pci_bdf_observed",
+        "no_device_allocation_copy_or_kernel",
+        "process_local_runtime_identity_verified",
+        "process_local_runtime_identity_serialized",
+        "standalone_serialized_authenticity",
+        "signed_evidence",
+        "multi_architecture_verified",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "exact_loader_issued_runtime_verified": {"type": "boolean", "const": true},
+        "loader_registry_witness_verified": {"type": "boolean", "const": true},
+        "runtime_library_path_and_sha256_bound": {"type": "boolean", "const": true},
+        "fixed_r0000_gcn_arch_name_decoded": {"type": "boolean", "const": true},
+        "runtime_and_compiled_architecture_base_match": {"type": "boolean", "const": true},
+        "uuid_16_bytes_observed": {"type": "boolean", "const": true},
+        "canonical_pci_bdf_observed": {"type": "boolean", "const": true},
+        "no_device_allocation_copy_or_kernel": {"type": "boolean", "const": true},
+        "process_local_runtime_identity_verified": {"type": "boolean", "const": true},
+        "process_local_runtime_identity_serialized": {"type": "boolean", "const": false},
+        "standalone_serialized_authenticity": {"type": "boolean", "const": false},
+        "signed_evidence": {"type": "boolean", "const": false},
+        "multi_architecture_verified": {"type": "boolean", "const": false},
+        "commercial_ready": {"type": "boolean", "const": false},
+        "promotion_eligible": {"type": "boolean", "const": false}
+      }
+    }
+  }
+}

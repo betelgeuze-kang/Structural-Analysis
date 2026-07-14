@@ -17,9 +17,7 @@ from jsonschema import Draft202012Validator
 
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
-HIP_CAPABILITY_RECEIPT_SCHEMA_VERSION = (
-    "structural-analysis-hip-capability-receipt.v1"
-)
+HIP_CAPABILITY_RECEIPT_SCHEMA_VERSION = "structural-analysis-hip-capability-receipt.v1"
 HIP_CAPABILITY_PROBE_VERSION = "engine-v2-native-hip-capability-probe.v1"
 HIP_CAPABILITY_READY_CODE = "hip_runtime_device_ready"
 HIP_CAPABILITY_UNAVAILABLE_CODES = frozenset(
@@ -27,6 +25,7 @@ HIP_CAPABILITY_UNAVAILABLE_CODES = frozenset(
         "hip_runtime_library_not_found",
         "hip_runtime_library_hash_failed",
         "hip_runtime_library_load_failed",
+        "hip_runtime_library_changed_during_load",
         "hip_runtime_symbol_missing",
         "hip_init_failed",
         "hip_device_count_failed",
@@ -306,7 +305,10 @@ def _validate_semantics(receipt: HipCapabilityReceipt) -> None:
             "A device count requires successful enumeration.",
         )
     if facts.selected_device_available:
-        if device.device_count is None or device.selected_ordinal >= device.device_count:
+        if (
+            device.device_count is None
+            or device.selected_ordinal >= device.device_count
+        ):
             _semantic_error(
                 "/device/selected_ordinal",
                 "Selected ordinal is outside the enumerated device range.",
@@ -330,6 +332,7 @@ def _validate_semantics(receipt: HipCapabilityReceipt) -> None:
         "hip_runtime_library_not_found": (False, False, False, False),
         "hip_runtime_library_hash_failed": (False, False, False, False),
         "hip_runtime_library_load_failed": (False, False, False, False),
+        "hip_runtime_library_changed_during_load": (True, False, False, False),
         "hip_runtime_symbol_missing": (True, False, False, False),
         "hip_init_failed": (True, False, False, False),
         "hip_device_count_failed": (True, True, False, False),
@@ -369,10 +372,14 @@ def _validate_semantics(receipt: HipCapabilityReceipt) -> None:
             "/device/selected_ordinal",
             "Unavailable ordinal must be outside a non-empty enumerated range.",
         )
-    if receipt.status_code in {
-        "hip_device_name_failed",
-        "hip_device_name_invalid",
-    } and device.name is not None:
+    if (
+        receipt.status_code
+        in {
+            "hip_device_name_failed",
+            "hip_device_name_invalid",
+        }
+        and device.name is not None
+    ):
         _semantic_error(
             "/device/name", "A failed device-name query cannot carry a name."
         )

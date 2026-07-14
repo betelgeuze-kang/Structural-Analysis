@@ -1778,15 +1778,14 @@ def test_identity_binds_canonical_v2_control_record_and_four_symbol_interface(
     assert implemented["arnoldi"] is True
     assert implemented["arnoldi_scope"] == ("restart_one_column_zero_through_givens")
     assert implemented["native_numerical_parity_scope"] == (
-        "gfx1030_valid_predecessor_restart_one_column_zero_through_"
-        "checkpoint_transaction"
+        "requires_downstream_model_case_parity_receipt"
     )
     assert implemented["dgks"] is True
     assert implemented["dgks_scope"] == (
         "restart_one_column_zero_conditional_second_pass"
     )
     assert implemented["givens"] is True
-    assert implemented["native_numerical_parity"] is True
+    assert implemented["native_numerical_parity"] is False
     assert implemented["epoch_semantics"] == (
         "admission_order_only_not_global_numeric_success"
     )

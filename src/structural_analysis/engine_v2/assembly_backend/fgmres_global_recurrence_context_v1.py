@@ -28,6 +28,7 @@ import weakref
 from jsonschema import Draft202012Validator
 
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.engine_v2.contracts.execution_plan_v2 import ExecutionPlanV2
 
 from .fgmres_context_v2 import (
     HIP_FGMRES_COMBINED_RECURRENCE_ABI_HASH_V2,
@@ -38,7 +39,11 @@ from .fgmres_global_schedule_plan_v1 import (
     HipFgmresGlobalSealedContinuationV1,
     compile_hip_fgmres_global_sealed_continuation_v1,
 )
-from .fgmres_recurrence_plan_v2 import hip_fgmres_recurrence_kernel_abi_payload_v2
+from .fgmres_plan import HipFgmresPlanV1
+from .fgmres_recurrence_plan_v2 import (
+    HipFgmresRecurrencePlanV2,
+    hip_fgmres_recurrence_kernel_abi_payload_v2,
+)
 from .fgmres_rtc_v2 import HipRtcFgmresV2Kernel
 from .fgmres_sealed_checkpoint_transaction_v1 import (
     HipFgmresSealedCheckpointContinuationCapabilityV1,
@@ -391,6 +396,9 @@ class _GlobalRecurrenceLaunchBinding:
     authoritative_tolerance: float
     stagnation_relative_tolerance: float
     divergence_factor: float
+    source_fgmres_plan: HipFgmresPlanV1
+    source_recurrence_plan: HipFgmresRecurrencePlanV2
+    source_execution_plan: ExecutionPlanV2
     direct_capabilities: tuple[Any, ...]
     direct_capability_snapshot: tuple[Any, ...]
     pointer_values: tuple[tuple[str, int], ...]
@@ -450,6 +458,9 @@ class _CompletionExportChildAuthorityV1:
     authoritative_tolerance: float
     stagnation_relative_tolerance: float
     divergence_factor: float
+    source_fgmres_plan: HipFgmresPlanV1
+    source_recurrence_plan: HipFgmresRecurrencePlanV2
+    source_execution_plan: ExecutionPlanV2
     recurrence_plan_hash: str
     recurrence_kernel_abi_hash: str
     combined_recurrence_abi_hash: str
@@ -1690,6 +1701,9 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 authoritative_tolerance=binding.authoritative_tolerance,
                 stagnation_relative_tolerance=(binding.stagnation_relative_tolerance),
                 divergence_factor=binding.divergence_factor,
+                source_fgmres_plan=binding.source_fgmres_plan,
+                source_recurrence_plan=binding.source_recurrence_plan,
+                source_execution_plan=binding.source_execution_plan,
                 recurrence_plan_hash=bindings.recurrence_plan_hash,
                 recurrence_kernel_abi_hash=bindings.recurrence_kernel_abi_hash,
                 combined_recurrence_abi_hash=bindings.combined_recurrence_abi_hash,
@@ -2163,6 +2177,11 @@ def _capture_binding(
         or partition.plan.max_iterations != authority.max_iterations
         or partition.plan.maximum_restart_count != authority.maximum_restart_count
         or partition.continuation.launches == ()
+        or type(authority.source_fgmres_plan) is not HipFgmresPlanV1
+        or type(authority.source_recurrence_plan) is not HipFgmresRecurrencePlanV2
+        or type(authority.source_execution_plan) is not ExecutionPlanV2
+        or authority.source_fgmres_plan._source_execution_plan
+        is not authority.source_execution_plan
     ):
         _fail(
             "hip_fgmres_global_recurrence_physical_projection_invalid",
@@ -2188,6 +2207,9 @@ def _capture_binding(
         authoritative_tolerance=authority.authoritative_tolerance,
         stagnation_relative_tolerance=authority.stagnation_relative_tolerance,
         divergence_factor=authority.divergence_factor,
+        source_fgmres_plan=authority.source_fgmres_plan,
+        source_recurrence_plan=authority.source_recurrence_plan,
+        source_execution_plan=authority.source_execution_plan,
         direct_capabilities=authority.direct_capabilities,
         direct_capability_snapshot=_direct_capabilities_snapshot(
             authority.direct_capabilities
@@ -2254,6 +2276,12 @@ def _resource_values(binding: _GlobalRecurrenceLaunchBinding) -> tuple[Any, ...]
         binding.authoritative_tolerance,
         binding.stagnation_relative_tolerance,
         binding.divergence_factor,
+        id(binding.source_fgmres_plan),
+        binding.source_fgmres_plan.plan_hash,
+        id(binding.source_recurrence_plan),
+        binding.source_recurrence_plan.plan_hash,
+        id(binding.source_execution_plan),
+        binding.source_execution_plan.plan_hash,
         tuple(id(capability) for capability in binding.direct_capabilities),
         binding.direct_capability_snapshot,
         binding.pointer_values,

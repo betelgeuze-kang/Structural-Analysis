@@ -1,0 +1,438 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_model_family_parity_v1.schema.json",
+  "title": "HIP FGMRES fixed model-family parity coverage receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "backend_scope",
+    "promotion_eligible",
+    "suite",
+    "observed_cases",
+    "coverage",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-model-family-parity.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_fixed_suite_frame_truss_fgmres_cpu_hip_parity_coverage"
+    },
+    "status": {
+      "const": "pending_model_cases_and_external_architecture"
+    },
+    "evidence_scope": {
+      "const": "process_local_fixed_suite_coverage_aggregate_unsigned_non_promoting"
+    },
+    "backend_scope": {"const": "hip"},
+    "promotion_eligible": {"const": false},
+    "suite": {"$ref": "#/$defs/suite"},
+    "observed_cases": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/observedCase"}
+    },
+    "coverage": {"$ref": "#/$defs/coverage"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "architectureBase": {
+      "enum": ["gfx1030", "gfx1100"]
+    },
+    "requiredSlotId": {
+      "enum": [
+        "frame_single_axial",
+        "frame_single_weak_axis_bending",
+        "frame_single_strong_axis_bending",
+        "frame_single_torsion",
+        "frame_single_rotated_local_axis_bending",
+        "frame_serial_later_column",
+        "truss_single_axial",
+        "recurrence_initial_or_early_terminal",
+        "recurrence_later_restart_partial_final_cycle",
+        "recurrence_exact_full_final_cycle_guard"
+      ]
+    },
+    "suite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "suite_id",
+        "suite_scope",
+        "suite_hash",
+        "required_architecture_bases",
+        "required_slot_ids",
+        "registered_slot_ids",
+        "caller_override_allowed"
+      ],
+      "properties": {
+        "suite_id": {
+          "const": "phase0_execution_plan_v2_linear_frame_truss_fgmres_fixed_suite.v1"
+        },
+        "suite_scope": {
+          "const": "execution_plan_v2_linear_frame_truss_zero_offset_release_prescribed_fgmres_only"
+        },
+        "suite_hash": {"$ref": "#/$defs/hash"},
+        "required_architecture_bases": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "gfx1030"},
+            {"const": "gfx1100"}
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "required_slot_ids": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "frame_single_axial"},
+            {"const": "frame_single_weak_axis_bending"},
+            {"const": "frame_single_strong_axis_bending"},
+            {"const": "frame_single_torsion"},
+            {"const": "frame_single_rotated_local_axis_bending"},
+            {"const": "frame_serial_later_column"},
+            {"const": "truss_single_axial"},
+            {"const": "recurrence_initial_or_early_terminal"},
+            {"const": "recurrence_later_restart_partial_final_cycle"},
+            {"const": "recurrence_exact_full_final_cycle_guard"}
+          ],
+          "items": false,
+          "minItems": 10,
+          "maxItems": 10
+        },
+        "registered_slot_ids": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "caller_override_allowed": {"const": false}
+      }
+    },
+    "elementSignature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "element_type_code",
+        "formulation_code",
+        "material_law_code",
+        "section_family_code",
+        "element_count"
+      ],
+      "properties": {
+        "element_type_code": {"type": "integer", "minimum": 1},
+        "formulation_code": {"type": "integer", "minimum": 1},
+        "material_law_code": {"type": "integer", "minimum": 1},
+        "section_family_code": {"type": "integer", "minimum": 1},
+        "element_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "bufferBindingBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "content_hash"],
+      "properties": {
+        "name": {"type": "string"},
+        "content_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "metadataBufferBindings": {
+      "type": "array",
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "node_coordinates_m"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "element_connectivity"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "element_type"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "element_formulation_code"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "element_material_index"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "element_section_index"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "material_law_code"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "section_family_code"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "element_local_axis_rotation_rad"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "element_offsets_m"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "element_release_mask"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "support_mask"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "prescribed_values_si"}}}]},
+        {"allOf": [{"$ref": "#/$defs/bufferBindingBase"}, {"properties": {"name": {"const": "load_vector_si"}}}]}
+      ],
+      "items": false,
+      "minItems": 14,
+      "maxItems": 14
+    },
+    "componentMask": {
+      "type": "array",
+      "items": {"type": "boolean"},
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descriptor_version",
+        "execution_plan_schema_version",
+        "execution_plan_capability_profile",
+        "execution_plan_hash",
+        "model_ir_content_hash",
+        "solver_buffer_schema_version",
+        "solver_numeric_buffer_hash",
+        "solver_entity_mapping_hash",
+        "solver_artifact_hash",
+        "operator_version",
+        "source_element_operator_version",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "symbolic_reuse_hash",
+        "partition_hash",
+        "node_count",
+        "element_count",
+        "global_dof_count",
+        "free_dof_count",
+        "reduced_csr_nnz",
+        "element_signatures",
+        "metadata_buffer_bindings",
+        "load_nonzero_component_mask",
+        "support_component_mask",
+        "nonzero_local_axis_roll_count",
+        "nonzero_offset_component_count",
+        "released_dof_count",
+        "descriptor_hash"
+      ],
+      "properties": {
+        "descriptor_version": {"const": "authoritative_execution_plan_metadata.v1"},
+        "execution_plan_schema_version": {"type": "string", "minLength": 1},
+        "execution_plan_capability_profile": {"type": "string", "minLength": 1},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "solver_buffer_schema_version": {"type": "string", "minLength": 1},
+        "solver_numeric_buffer_hash": {"$ref": "#/$defs/hash"},
+        "solver_entity_mapping_hash": {"$ref": "#/$defs/hash"},
+        "solver_artifact_hash": {"$ref": "#/$defs/hash"},
+        "operator_version": {"type": "string", "minLength": 1},
+        "source_element_operator_version": {"type": "string", "minLength": 1},
+        "operator_hash": {"$ref": "#/$defs/hash"},
+        "numeric_snapshot_hash": {"$ref": "#/$defs/hash"},
+        "symbolic_reuse_hash": {"$ref": "#/$defs/hash"},
+        "partition_hash": {"$ref": "#/$defs/hash"},
+        "node_count": {"type": "integer", "minimum": 1},
+        "element_count": {"type": "integer", "minimum": 1},
+        "global_dof_count": {"type": "integer", "minimum": 1},
+        "free_dof_count": {"type": "integer", "minimum": 1},
+        "reduced_csr_nnz": {"type": "integer", "minimum": 1},
+        "element_signatures": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/elementSignature"}
+        },
+        "metadata_buffer_bindings": {"$ref": "#/$defs/metadataBufferBindings"},
+        "load_nonzero_component_mask": {"$ref": "#/$defs/componentMask"},
+        "support_component_mask": {"$ref": "#/$defs/componentMask"},
+        "nonzero_local_axis_roll_count": {"type": "integer", "minimum": 0},
+        "nonzero_offset_component_count": {"type": "integer", "minimum": 0},
+        "released_dof_count": {"type": "integer", "minimum": 0},
+        "descriptor_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "observedCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "case_receipt_hash",
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "policy_hash",
+        "cpu_result_hash",
+        "cpu_status",
+        "cpu_termination_code",
+        "runtime_architecture_base",
+        "compiled_architecture",
+        "device_ordinal",
+        "device_identity_receipt_hash",
+        "device_uuid_bytes_hex",
+        "device_pci_bdf",
+        "registration_status",
+        "slot_id",
+        "logical_case_key",
+        "matrix_cell_id",
+        "descriptor"
+      ],
+      "properties": {
+        "case_id": {"$ref": "#/$defs/hash"},
+        "case_receipt_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "policy_hash": {"$ref": "#/$defs/hash"},
+        "cpu_result_hash": {"$ref": "#/$defs/hash"},
+        "cpu_status": {"type": "string", "minLength": 1},
+        "cpu_termination_code": {"type": "string", "minLength": 1},
+        "runtime_architecture_base": {"$ref": "#/$defs/architectureBase"},
+        "compiled_architecture": {
+          "type": "string",
+          "pattern": "^gfx[0-9a-f]+(?::[a-z][a-z0-9_]*[+-])*$"
+        },
+        "device_ordinal": {"type": "integer", "minimum": 0},
+        "device_identity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "device_uuid_bytes_hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "device_pci_bdf": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\\.[0-7]$"
+        },
+        "registration_status": {"const": "unregistered_case"},
+        "slot_id": {"type": "null"},
+        "logical_case_key": {"type": "null"},
+        "matrix_cell_id": {"type": "null"},
+        "descriptor": {"$ref": "#/$defs/descriptor"}
+      }
+    },
+    "matrixCell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["slot_id", "architecture_base"],
+      "properties": {
+        "slot_id": {"$ref": "#/$defs/requiredSlotId"},
+        "architecture_base": {"$ref": "#/$defs/architectureBase"}
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validated_input_case_count",
+        "registered_input_case_count",
+        "unregistered_input_case_count",
+        "required_slot_count",
+        "registered_slot_definition_count",
+        "required_architecture_count",
+        "expected_matrix_cell_count",
+        "covered_matrix_cell_count",
+        "observed_architecture_bases",
+        "completed_architecture_bases",
+        "incomplete_architecture_bases",
+        "unregistered_slot_definition_ids",
+        "covered_cells",
+        "missing_cells"
+      ],
+      "properties": {
+        "validated_input_case_count": {"type": "integer", "minimum": 0},
+        "registered_input_case_count": {"const": 0},
+        "unregistered_input_case_count": {"type": "integer", "minimum": 0},
+        "required_slot_count": {"const": 10},
+        "registered_slot_definition_count": {"const": 0},
+        "required_architecture_count": {"const": 2},
+        "expected_matrix_cell_count": {"const": 20},
+        "covered_matrix_cell_count": {"const": 0},
+        "observed_architecture_bases": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/architectureBase"},
+          "uniqueItems": true,
+          "maxItems": 2
+        },
+        "completed_architecture_bases": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "incomplete_architecture_bases": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "gfx1030"},
+            {"const": "gfx1100"}
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "unregistered_slot_definition_ids": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "frame_single_axial"},
+            {"const": "frame_single_weak_axis_bending"},
+            {"const": "frame_single_strong_axis_bending"},
+            {"const": "frame_single_torsion"},
+            {"const": "frame_single_rotated_local_axis_bending"},
+            {"const": "frame_serial_later_column"},
+            {"const": "truss_single_axial"},
+            {"const": "recurrence_initial_or_early_terminal"},
+            {"const": "recurrence_later_restart_partial_final_cycle"},
+            {"const": "recurrence_exact_full_final_cycle_guard"}
+          ],
+          "items": false,
+          "minItems": 10,
+          "maxItems": 10
+        },
+        "covered_cells": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "missing_cells": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/matrixCell"},
+          "minItems": 20,
+          "maxItems": 20,
+          "uniqueItems": true
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixed_package_suite_manifest_bound",
+        "authoritative_execution_plan_metadata_classification",
+        "caller_supplied_family_or_case_labels_used",
+        "caller_supplied_required_architectures_used",
+        "all_submitted_exact_case_results_replayed",
+        "architecture_key_is_normalized_runtime_base",
+        "duplicate_logical_slot_architecture_cells_rejected",
+        "serialized_receipt_authoritative",
+        "unsigned_external_evidence_counted",
+        "fixed_suite_slot_registration_complete",
+        "fixed_suite_matrix_complete",
+        "full_model_family_parity_verified",
+        "multi_architecture_parity_verified",
+        "same_process_actual_two_isa_verified",
+        "iteration_host_copy_zero_proven",
+        "solution_ready",
+        "result_ir_ready",
+        "performance_or_speedup_proven",
+        "signed_evidence",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "fixed_package_suite_manifest_bound": {"const": true},
+        "authoritative_execution_plan_metadata_classification": {"const": true},
+        "caller_supplied_family_or_case_labels_used": {"const": false},
+        "caller_supplied_required_architectures_used": {"const": false},
+        "all_submitted_exact_case_results_replayed": {"const": true},
+        "architecture_key_is_normalized_runtime_base": {"const": true},
+        "duplicate_logical_slot_architecture_cells_rejected": {"const": true},
+        "serialized_receipt_authoritative": {"const": false},
+        "unsigned_external_evidence_counted": {"const": false},
+        "fixed_suite_slot_registration_complete": {"const": false},
+        "fixed_suite_matrix_complete": {"const": false},
+        "full_model_family_parity_verified": {"const": false},
+        "multi_architecture_parity_verified": {"const": false},
+        "same_process_actual_two_isa_verified": {"const": false},
+        "iteration_host_copy_zero_proven": {"const": false},
+        "solution_ready": {"const": false},
+        "result_ir_ready": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "signed_evidence": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

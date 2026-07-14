@@ -22,6 +22,7 @@ import weakref
 from jsonschema import Draft202012Validator
 
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.engine_v2.contracts.execution_plan_v2 import ExecutionPlanV2
 
 from .fgmres_canonical_predecessor_v1 import (
     HipFgmresCanonicalPredecessorCapabilityV1,
@@ -35,10 +36,12 @@ from .fgmres_context_v2 import (
     HIP_FGMRES_RTC_SOURCE_SHA256_V2,
 )
 from .fgmres_recurrence_plan_v2 import (
+    HipFgmresRecurrencePlanV2,
     hip_fgmres_first_column_checkpoint_transaction_schedule_payload_v2,
     hip_fgmres_first_column_predecessor_validation_schedule_payload_v2,
     hip_fgmres_recurrence_kernel_abi_payload_v2,
 )
+from .fgmres_plan import HipFgmresPlanV1
 from .fgmres_rtc_v2 import (
     FgmresV2FirstColumnCheckpointTransactionLaunch,
     HipRtcFgmresV2Kernel,
@@ -391,6 +394,9 @@ class _GlobalRecurrenceChildAuthorityV1:
     authoritative_tolerance: float
     stagnation_relative_tolerance: float
     divergence_factor: float
+    source_fgmres_plan: HipFgmresPlanV1
+    source_recurrence_plan: HipFgmresRecurrencePlanV2
+    source_execution_plan: ExecutionPlanV2
     direct_capabilities: tuple[Any, ...]
     physical_pointer_values: tuple[tuple[str, int], ...]
     kernel_binding_snapshot: tuple[Any, ...]
@@ -1300,10 +1306,14 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
                         cleanup_owner=self,
                     ) from exc
                 policy = None if source_plan is None else source_plan.policy
+                execution_plan = (
+                    None if source_plan is None else source_plan._source_execution_plan
+                )
                 identity = binding.kernel.identity
                 if (
-                    recurrence is None
-                    or source_plan is None
+                    type(recurrence) is not HipFgmresRecurrencePlanV2
+                    or type(source_plan) is not HipFgmresPlanV1
+                    or type(execution_plan) is not ExecutionPlanV2
                     or policy is None
                     or projection is None
                     or canonical_bindings is None
@@ -1349,6 +1359,10 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
                     or binding.stagnation_relative_tolerance
                     != policy.stagnation_relative_tolerance
                     or binding.divergence_factor != policy.divergence_factor
+                    or source_plan._source_execution_plan is not execution_plan
+                    or recurrence.source_fgmres_plan_hash != source_plan.plan_hash
+                    or recurrence.source_execution_plan_hash != execution_plan.plan_hash
+                    or sealed_bindings.recurrence_plan_hash != recurrence.plan_hash
                     or binding.kernel_binding_snapshot != live._kernel_binding_snapshot
                     or canonical_bindings.direct_generation_binding_hash
                     != sealed_bindings.direct_generation_binding_hash
@@ -1382,6 +1396,9 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
                         binding.stagnation_relative_tolerance
                     ),
                     divergence_factor=binding.divergence_factor,
+                    source_fgmres_plan=source_plan,
+                    source_recurrence_plan=recurrence,
+                    source_execution_plan=execution_plan,
                     direct_capabilities=direct,
                     physical_pointer_values=physical_pointer_values,
                     kernel_binding_snapshot=binding.kernel_binding_snapshot,

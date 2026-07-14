@@ -1,0 +1,337 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_model_case_parity_v1.schema.json",
+  "title": "HIP FGMRES model-case CPU/HIP parity receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "case_id",
+    "bindings",
+    "dimensions",
+    "tolerance",
+    "discrete",
+    "vectors",
+    "telemetry",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-model-case-parity.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_exact_model_case_cpu_hip_fgmres_parity"
+    },
+    "status": {"const": "case_parity_verified"},
+    "evidence_scope": {
+      "const": "process_local_exact_model_case_native_hip_cpu_parity_non_promoting"
+    },
+    "actual_backend": {"const": "hip"},
+    "promotion_eligible": {"const": false},
+    "case_id": {"$ref": "#/$defs/hash"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "tolerance": {"$ref": "#/$defs/tolerance"},
+    "discrete": {"$ref": "#/$defs/discrete"},
+    "vectors": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"$ref": "#/$defs/solutionVector"},
+        {"$ref": "#/$defs/residualVector"},
+        {"$ref": "#/$defs/replayVector"}
+      ],
+      "items": false
+    },
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonNegativeFinite": {
+      "type": "number",
+      "minimum": 0
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "execution_plan_id",
+        "execution_plan_hash",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "symbolic_reuse_hash",
+        "partition_hash",
+        "load_pattern_id",
+        "fgmres_plan_id",
+        "fgmres_plan_hash",
+        "recurrence_plan_id",
+        "recurrence_plan_hash",
+        "policy_hash",
+        "terminal_observation_id",
+        "terminal_observation_receipt_hash",
+        "terminal_outcome_hash",
+        "completion_export_context_id",
+        "completion_export_receipt_hash",
+        "completion_export_payload_hash",
+        "global_context_id",
+        "global_receipt_hash",
+        "kernel_identity_hash",
+        "kernel_source_sha256",
+        "compiled_architecture",
+        "runtime_architecture_base",
+        "device_ordinal",
+        "device_identity_receipt_hash",
+        "runtime_library_sha256",
+        "device_uuid_bytes_hex",
+        "device_pci_bdf",
+        "cpu_result_hash",
+        "retained_execution_plan_snapshot_identity_verified",
+        "process_local_runtime_identity_verified",
+        "process_local_identities_serialized"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_id": {"type": "string", "pattern": "^SparsePlan:[0-9a-f]{24}$"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "operator_hash": {"$ref": "#/$defs/hash"},
+        "numeric_snapshot_hash": {"$ref": "#/$defs/hash"},
+        "symbolic_reuse_hash": {"$ref": "#/$defs/hash"},
+        "partition_hash": {"$ref": "#/$defs/hash"},
+        "load_pattern_id": {"type": "string", "minLength": 1},
+        "fgmres_plan_id": {"type": "string", "pattern": "^HipFgmresPlan:[0-9a-f]{24}$"},
+        "fgmres_plan_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_plan_id": {"type": "string", "pattern": "^HipFgmresRecurrencePlan:[0-9a-f]{24}$"},
+        "recurrence_plan_hash": {"$ref": "#/$defs/hash"},
+        "policy_hash": {"$ref": "#/$defs/hash"},
+        "terminal_observation_id": {"$ref": "#/$defs/hash"},
+        "terminal_observation_receipt_hash": {"$ref": "#/$defs/hash"},
+        "terminal_outcome_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_context_id": {"$ref": "#/$defs/hash"},
+        "completion_export_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_payload_hash": {"$ref": "#/$defs/hash"},
+        "global_context_id": {"$ref": "#/$defs/hash"},
+        "global_receipt_hash": {"$ref": "#/$defs/hash"},
+        "kernel_identity_hash": {"$ref": "#/$defs/hash"},
+        "kernel_source_sha256": {"$ref": "#/$defs/hash"},
+        "compiled_architecture": {"type": "string", "pattern": "^gfx[0-9a-f]+(?::[a-z][a-z0-9_]*[+-])*$"},
+        "runtime_architecture_base": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+        "device_ordinal": {"type": "integer", "minimum": 0},
+        "device_identity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "runtime_library_sha256": {"$ref": "#/$defs/hash"},
+        "device_uuid_bytes_hex": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+        "device_pci_bdf": {"type": "string", "pattern": "^[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\\.[0-7]$"},
+        "cpu_result_hash": {"$ref": "#/$defs/hash"},
+        "retained_execution_plan_snapshot_identity_verified": {"const": true},
+        "process_local_runtime_identity_verified": {"const": true},
+        "process_local_identities_serialized": {"const": false}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_dof_count",
+        "free_dof_count",
+        "reduced_csr_nnz",
+        "restart_dimension",
+        "max_iterations",
+        "maximum_restart_count",
+        "populated_restart_row_count"
+      ],
+      "properties": {
+        "global_dof_count": {"type": "integer", "minimum": 1},
+        "free_dof_count": {"type": "integer", "minimum": 1},
+        "reduced_csr_nnz": {"type": "integer", "minimum": 1},
+        "restart_dimension": {"type": "integer", "minimum": 1, "maximum": 16},
+        "max_iterations": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "maximum_restart_count": {"type": "integer", "minimum": 1},
+        "populated_restart_row_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "tolerance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relative_tolerance",
+        "absolute_tolerance",
+        "comparison_rule",
+        "caller_relaxation_allowed"
+      ],
+      "properties": {
+        "relative_tolerance": {"const": 1e-8},
+        "absolute_tolerance": {"const": 1e-12},
+        "comparison_rule": {"const": "componentwise_abs_le_atol_plus_rtol_times_abs_cpu"},
+        "caller_relaxation_allowed": {"const": false}
+      }
+    },
+    "discrete": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terminal_status_match",
+        "termination_code_match",
+        "iteration_count_match",
+        "restart_count_match",
+        "operator_apply_count_match",
+        "preconditioner_apply_count_match",
+        "restart_history_shape_match",
+        "restart_history_discrete_fields_match",
+        "restart_history_metrics_within_tolerance",
+        "terminal_metrics_within_tolerance",
+        "numerical_failure_absent"
+      ],
+      "properties": {
+        "terminal_status_match": {"const": true},
+        "termination_code_match": {"const": true},
+        "iteration_count_match": {"const": true},
+        "restart_count_match": {"const": true},
+        "operator_apply_count_match": {"const": true},
+        "preconditioner_apply_count_match": {"const": true},
+        "restart_history_shape_match": {"const": true},
+        "restart_history_discrete_fields_match": {"const": true},
+        "restart_history_metrics_within_tolerance": {"const": true},
+        "terminal_metrics_within_tolerance": {"const": true},
+        "numerical_failure_absent": {"const": true}
+      }
+    },
+    "vectorBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "element_count",
+        "cpu_or_reference_sha256",
+        "hip_or_candidate_sha256",
+        "maximum_absolute_error",
+        "l2_absolute_error",
+        "reference_l2",
+        "relative_l2_error",
+        "maximum_tolerance_ratio",
+        "relative_l2_tolerance_passed",
+        "absolute_linf_tolerance_passed",
+        "componentwise_tolerance_passed"
+      ],
+      "properties": {
+        "name": {"type": "string"},
+        "element_count": {"type": "integer", "minimum": 1},
+        "cpu_or_reference_sha256": {"$ref": "#/$defs/hash"},
+        "hip_or_candidate_sha256": {"$ref": "#/$defs/hash"},
+        "maximum_absolute_error": {"$ref": "#/$defs/nonNegativeFinite"},
+        "l2_absolute_error": {"$ref": "#/$defs/nonNegativeFinite"},
+        "reference_l2": {"$ref": "#/$defs/nonNegativeFinite"},
+        "relative_l2_error": {"$ref": "#/$defs/nonNegativeFinite"},
+        "maximum_tolerance_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "relative_l2_tolerance_passed": {"type": "boolean"},
+        "absolute_linf_tolerance_passed": {"type": "boolean"},
+        "componentwise_tolerance_passed": {"const": true}
+      }
+    },
+    "solutionVector": {
+      "allOf": [
+        {"$ref": "#/$defs/vectorBase"},
+        {"properties": {"name": {"const": "solution_x"}}}
+      ]
+    },
+    "residualVector": {
+      "allOf": [
+        {"$ref": "#/$defs/vectorBase"},
+        {"properties": {"name": {"const": "true_residual"}}}
+      ]
+    },
+    "replayVector": {
+      "allOf": [
+        {"$ref": "#/$defs/vectorBase"},
+        {"properties": {"name": {"const": "true_residual_replay"}}}
+      ]
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cpu_reference_result_count",
+        "hip_terminal_observation_result_count",
+        "hip_device_identity_result_count",
+        "independent_true_residual_replay_count",
+        "compared_vector_count",
+        "additional_d2h_operation_count",
+        "h2d_operation_count",
+        "device_allocation_count",
+        "kernel_launch_count",
+        "explicit_stream_sync_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "cpu_reference_result_count": {"const": 1},
+        "hip_terminal_observation_result_count": {"const": 1},
+        "hip_device_identity_result_count": {"const": 1},
+        "independent_true_residual_replay_count": {"const": 1},
+        "compared_vector_count": {"const": 3},
+        "additional_d2h_operation_count": {"const": 0},
+        "h2d_operation_count": {"const": 0},
+        "device_allocation_count": {"const": 0},
+        "kernel_launch_count": {"const": 0},
+        "explicit_stream_sync_count": {"const": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_retained_execution_plan_snapshot_bound",
+        "deterministic_cpu_reference_replayed",
+        "actual_hip_backend_verified",
+        "runtime_device_identity_verified",
+        "terminal_outcome_parity_verified",
+        "solution_vector_parity_verified",
+        "exported_residual_parity_verified",
+        "independent_operator_residual_replay_verified",
+        "fp64_relative_tolerance_at_most_1e_8",
+        "single_model_case_numerical_parity_verified",
+        "full_model_family_parity_verified",
+        "multi_architecture_parity_verified",
+        "iteration_host_copy_zero_proven",
+        "solution_ready",
+        "result_ir_ready",
+        "performance_or_speedup_proven",
+        "signed_evidence",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "exact_retained_execution_plan_snapshot_bound": {"const": true},
+        "deterministic_cpu_reference_replayed": {"const": true},
+        "actual_hip_backend_verified": {"const": true},
+        "runtime_device_identity_verified": {"const": true},
+        "terminal_outcome_parity_verified": {"const": true},
+        "solution_vector_parity_verified": {"const": true},
+        "exported_residual_parity_verified": {"const": true},
+        "independent_operator_residual_replay_verified": {"const": true},
+        "fp64_relative_tolerance_at_most_1e_8": {"const": true},
+        "single_model_case_numerical_parity_verified": {"const": true},
+        "full_model_family_parity_verified": {"const": false},
+        "multi_architecture_parity_verified": {"const": false},
+        "iteration_host_copy_zero_proven": {"const": false},
+        "solution_ready": {"const": false},
+        "result_ir_ready": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "signed_evidence": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

@@ -21,6 +21,48 @@
   ],
   "rows": [
     {
+      "capability_id": "hip_fgmres_fixed_suite_model_family_parity_local_matrix_v1",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["exact_process_local_case_result_replay", "detached_validated_case_snapshot_observation", "authoritative_execution_plan_metadata_descriptor", "package_owned_ten_slot_manifest", "fixed_gfx1030_gfx1100_twenty_cell_matrix", "normalized_architecture_base_key", "duplicate_cell_rejection", "device_identity_architecture_base_consistency", "explicit_missing_cells"],
+      "explicit_exclusions": ["registered_golden_slots", "full_model_family_parity", "multi_architecture_parity", "signed_evidence", "cross_process_promotion", "iteration_host_copy_zero", "result_ir", "performance_speedup", "end_to_end_o_n", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006", "ADR-007"],
+      "verification_cases": ["empty_fixed_suite_pending", "unregistered_case_not_counted", "caller_label_absent", "required_architecture_override_absent", "same_base_duplicate_cell_rejected", "coordinated_live_relabel_snapshot_guard", "uuid_pci_architecture_conflict_rejected", "actual_gfx1030_family_aggregate_replay", "strict_serialized_receipt_schema"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-model-family-parity-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_model_family_parity_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_model_family_parity_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_model_family_parity_v1.py",
+        "tests/test_engine_v2_hip_fgmres_model_case_parity_hardware_v1.py",
+        "tests/test_engine_v2_hip_fgmres_parity_public_api_v1.py"
+      ],
+      "claim_level": "fixed_suite_contract_only_zero_registered_slots_unsigned_non_promoting"
+    },
+    {
+      "capability_id": "hip_fgmres_exact_single_model_case_cpu_hip_parity_v1",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["process_local_exact_result_authority", "deterministic_cpu_fgmres_replay", "retained_execution_plan_compiler_replay", "terminal_discrete_parity", "solution_and_true_residual_parity", "independent_b_minus_ax_replay", "loader_issued_runtime_device_identity", "loader_registry_sealed_library_fields_and_cached_callable_state", "eight_fresh_private_fixed_identity_symbol_bindings", "same_open_file_hash_and_dlopen_snapshot_with_resolved_path_recheck", "exact_published_device_identity_result", "fixed_rtol_1e_8_atol_1e_12"],
+      "explicit_exclusions": ["full_model_family", "multi_architecture", "signed_evidence", "vendor_signed_runtime_authenticity", "caller_selected_explicit_library_path_authenticity", "post_load_pathname_immutability", "transitive_dependency_or_mapped_state_attestation", "prelaunch_uuid_pci_execution_epoch", "iteration_host_copy_zero", "result_ir", "performance_speedup", "end_to_end_o_n", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006", "ADR-007"],
+      "verification_cases": ["strict_receipt_schema", "process_local_source_replay", "coherent_relabel_rejection", "exact_publication_clone_rejection", "persistent_runtime_callable_slot_drift_rejection", "ctypes_errcheck_state_drift_rejection", "loader_library_identity_field_drift_rejection", "coherent_shared_library_identity_forge_rejection", "file_and_parent_directory_path_swap_rejection", "signed_zero_and_type_confusion_rejection", "actual_gfx1030_later_column_full_chain"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-model-case-parity-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_model_case_parity_v1.py",
+        "src/structural_analysis/engine_v2/backends/hip/device_identity_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_model_case_parity_v1.schema.json",
+        "src/structural_analysis/schemas/hip_device_identity_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_model_case_parity_v1.py",
+        "tests/test_engine_v2_hip_fgmres_model_case_parity_hardware_v1.py",
+        "tests/test_engine_v2_hip_device_identity_v1.py"
+      ],
+      "claim_level": "single_model_case_single_isa_unsigned_non_promoting"
+    },
+    {
       "capability_id": "model_ir_v2_contract",
       "category": "schema",
       "phase_target": "phase_0",
