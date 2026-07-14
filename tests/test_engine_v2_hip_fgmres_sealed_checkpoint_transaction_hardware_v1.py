@@ -158,9 +158,10 @@ def _open_canonical_chain(
     architecture: str,
     required: bool,
     policy: FgmresPolicyV1,
+    load_pattern_id: str = "LC_AXIAL",
     verify_cpu_parity: bool = True,
 ) -> tuple[_NativeCanonicalChain, Any]:
-    buffers = pack_solver_model_buffers(model, load_pattern_id="LC_AXIAL")
+    buffers = pack_solver_model_buffers(model, load_pattern_id=load_pattern_id)
     execution_plan = compile_execution_plan_v2(buffers)
     assembly_plan = compile_hip_assembly_plan_v1(buffers, execution_plan)
     assembly = resident = free_space = primitives = live = canonical = None

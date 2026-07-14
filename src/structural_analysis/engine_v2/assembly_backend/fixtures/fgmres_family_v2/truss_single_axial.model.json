@@ -1,0 +1,221 @@
+{
+  "capability_profile": "engine_v2_phase0_linear_3d",
+  "constraints": [
+    {
+      "dofs": [
+        "UX",
+        "UY",
+        "UZ",
+        "RX",
+        "RY",
+        "RZ"
+      ],
+      "extensions": {},
+      "id": "BC1",
+      "index": 0,
+      "node_id": "N1",
+      "prescribed_values_si": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 0.0,
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "source_id": "generated:BC1",
+      "type": "fixed_dofs"
+    },
+    {
+      "dofs": [
+        "UY",
+        "UZ",
+        "RX",
+        "RY",
+        "RZ"
+      ],
+      "extensions": {},
+      "id": "BC2",
+      "index": 1,
+      "node_id": "N2",
+      "prescribed_values_si": {},
+      "source_id": "generated:BC2",
+      "type": "fixed_dofs"
+    }
+  ],
+  "construction_stages": [],
+  "coordinate_system": {
+    "axis_order": [
+      "X",
+      "Y",
+      "Z"
+    ],
+    "frame_id": "global",
+    "handedness": "right",
+    "origin_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "up_axis": "Z"
+  },
+  "dof_components": [
+    "UX",
+    "UY",
+    "UZ",
+    "RX",
+    "RY",
+    "RZ"
+  ],
+  "elements": [
+    {
+      "extensions": {},
+      "formulation": "linear_truss_3d",
+      "id": "E1",
+      "index": 0,
+      "material_id": "M1",
+      "node_ids": [
+        "N1",
+        "N2"
+      ],
+      "offsets": {
+        "i_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "j_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "section_id": "S1",
+      "source_id": "generated:E1",
+      "type": "truss_3d"
+    }
+  ],
+  "extensions": {},
+  "load_combinations": [],
+  "load_patterns": [
+    {
+      "analysis_type": "linear_static",
+      "extensions": {},
+      "id": "LC_AXIAL",
+      "index": 0,
+      "nodal_loads": [
+        {
+          "components_si": {
+            "FX": 100000.0,
+            "FY": 0.0,
+            "FZ": 0.0,
+            "MX": 0.0,
+            "MY": 0.0,
+            "MZ": 0.0
+          },
+          "extensions": {},
+          "id": "L_AXIAL_N2",
+          "index": 0,
+          "node_id": "N2",
+          "source_id": "generated:L_AXIAL_N2"
+        }
+      ],
+      "self_weight": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_id": "generated:LC_AXIAL"
+    }
+  ],
+  "materials": [
+    {
+      "extensions": {},
+      "id": "M1",
+      "index": 0,
+      "law_id": "linear_elastic_isotropic",
+      "parameter_set_version": "1",
+      "parameters": {
+        "density_kg_m3": 7850.0,
+        "elastic_modulus_pa": 200000000000.0,
+        "poisson_ratio": 0.3
+      },
+      "source_id": "generated:M1",
+      "state_schema": {
+        "state_update_epoch": "none",
+        "stateful": false,
+        "supports_trial_commit_rollback": true
+      }
+    }
+  ],
+  "model_id": "engine-v2-fgmres-family-v2-truss_single_axial",
+  "nodes": [
+    {
+      "coordinates_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "extensions": {},
+      "id": "N1",
+      "index": 0,
+      "source_id": "generated:N1"
+    },
+    {
+      "coordinates_m": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "extensions": {},
+      "id": "N2",
+      "index": 1,
+      "source_id": "generated:N2"
+    }
+  ],
+  "provenance": {
+    "extensions": {},
+    "normalizer_id": "engine-v2-fgmres-family-v2-fixture-builder",
+    "normalizer_version": "1",
+    "source_format": "generated",
+    "source_ref": "generated:structural-analysis:fgmres-family-v2:truss_single_axial:recipe-v1",
+    "source_sha256": "sha256:a6c2c9c66483f68075834e061606030b966f1301c89059cae2824e76cca929a1",
+    "source_units": {
+      "force": "N",
+      "length": "m",
+      "mass": "kg",
+      "rotation": "rad",
+      "time": "s"
+    },
+    "unit_scales_to_si": {
+      "force_to_n": 1.0,
+      "length_to_m": 1.0,
+      "mass_to_kg": 1.0,
+      "rotation_to_rad": 1.0,
+      "time_to_s": 1.0
+    }
+  },
+  "roundtrip_map": [],
+  "schema_version": "structural-analysis-model-ir.v2",
+  "sections": [
+    {
+      "extensions": {},
+      "family_id": "truss_3d",
+      "id": "S1",
+      "index": 0,
+      "parameter_set_version": "1",
+      "parameters": {
+        "area_m2": 0.02
+      },
+      "source_id": "generated:S1"
+    }
+  ],
+  "time_functions": [],
+  "units": {
+    "force": "N",
+    "length": "m",
+    "mass": "kg",
+    "rotation": "rad",
+    "time": "s"
+  },
+  "unsupported_features": []
+}

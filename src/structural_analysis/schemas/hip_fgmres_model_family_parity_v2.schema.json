@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_model_family_parity_v2.schema.json",
+  "title": "Registry-bound live HIP FGMRES fixed-suite coverage v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "registry_bytes_sha256",
+    "registry_hash",
+    "required_architecture_bases",
+    "required_slot_ids",
+    "observations",
+    "coverage",
+    "claims",
+    "promotion_eligible",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-model-family-parity.v2"
+    },
+    "capability_profile": {
+      "const": "phase0_registry_bound_fixed_suite_live_hardware_coverage"
+    },
+    "status": {
+      "enum": [
+        "pending_primary_gfx1030_and_external_gfx1100",
+        "partial_fixed_suite_hardware_observation",
+        "primary_gfx1030_fixed_suite_complete_external_gfx1100_pending",
+        "unsigned_fixed_suite_two_architecture_matrix_observed_non_promoting"
+      ]
+    },
+    "evidence_scope": {
+      "const": "process_local_registry_bound_unsigned_non_promoting"
+    },
+    "registry_bytes_sha256": {"$ref": "#/$defs/hash"},
+    "registry_hash": {"$ref": "#/$defs/hash"},
+    "required_architecture_bases": {
+      "type": "array",
+      "prefixItems": [{"const": "gfx1030"}, {"const": "gfx1100"}],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "required_slot_ids": {"$ref": "#/$defs/slot_ids"},
+    "observations": {
+      "type": "array",
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/observation"}
+    },
+    "coverage": {"$ref": "#/$defs/coverage"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "promotion_eligible": {"const": false},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "slot_id": {
+      "enum": [
+        "frame_single_axial",
+        "frame_single_weak_axis_bending",
+        "frame_single_strong_axis_bending",
+        "frame_single_torsion",
+        "frame_single_rotated_local_axis_bending",
+        "frame_serial_later_column",
+        "truss_single_axial",
+        "recurrence_initial_or_early_terminal",
+        "recurrence_later_restart_partial_final_cycle",
+        "recurrence_exact_full_final_cycle_guard"
+      ]
+    },
+    "slot_ids": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "frame_single_axial"},
+        {"const": "frame_single_weak_axis_bending"},
+        {"const": "frame_single_strong_axis_bending"},
+        {"const": "frame_single_torsion"},
+        {"const": "frame_single_rotated_local_axis_bending"},
+        {"const": "frame_serial_later_column"},
+        {"const": "truss_single_axial"},
+        {"const": "recurrence_initial_or_early_terminal"},
+        {"const": "recurrence_later_restart_partial_final_cycle"},
+        {"const": "recurrence_exact_full_final_cycle_guard"}
+      ],
+      "items": false,
+      "minItems": 10,
+      "maxItems": 10
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot_id",
+        "runtime_architecture_base",
+        "compiled_architecture",
+        "device_ordinal",
+        "device_uuid_bytes_hex",
+        "device_pci_bdf",
+        "runtime_library_sha256",
+        "kernel_identity_hash",
+        "kernel_source_sha256",
+        "case_id",
+        "case_receipt_hash",
+        "device_identity_receipt_hash",
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "fgmres_plan_hash",
+        "recurrence_plan_hash",
+        "policy_hash",
+        "cpu_result_hash",
+        "descriptor_hash",
+        "slot_registration_hash",
+        "case_fingerprint",
+        "logical_case_key",
+        "matrix_cell_id"
+      ],
+      "properties": {
+        "slot_id": {"$ref": "#/$defs/slot_id"},
+        "runtime_architecture_base": {"enum": ["gfx1030", "gfx1100"]},
+        "compiled_architecture": {
+          "type": "string",
+          "pattern": "^gfx[0-9a-f]+(?::[a-z][a-z0-9_]*[+-])*$"
+        },
+        "device_ordinal": {"type": "integer", "minimum": 0},
+        "device_uuid_bytes_hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "device_pci_bdf": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\\.[0-7]$"
+        },
+        "runtime_library_sha256": {"$ref": "#/$defs/hash"},
+        "kernel_identity_hash": {"$ref": "#/$defs/hash"},
+        "kernel_source_sha256": {"$ref": "#/$defs/hash"},
+        "case_id": {"$ref": "#/$defs/hash"},
+        "case_receipt_hash": {"$ref": "#/$defs/hash"},
+        "device_identity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "fgmres_plan_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_plan_hash": {"$ref": "#/$defs/hash"},
+        "policy_hash": {"$ref": "#/$defs/hash"},
+        "cpu_result_hash": {"$ref": "#/$defs/hash"},
+        "descriptor_hash": {"$ref": "#/$defs/hash"},
+        "slot_registration_hash": {"$ref": "#/$defs/hash"},
+        "case_fingerprint": {"$ref": "#/$defs/hash"},
+        "logical_case_key": {"$ref": "#/$defs/hash"},
+        "matrix_cell_id": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_slot_count",
+        "required_architecture_count",
+        "expected_matrix_cell_count",
+        "validated_input_case_count",
+        "covered_matrix_cell_count",
+        "missing_matrix_cell_count",
+        "covered_cells",
+        "missing_cells",
+        "observed_architecture_bases",
+        "completed_architecture_bases",
+        "incomplete_architecture_bases"
+      ],
+      "properties": {
+        "required_slot_count": {"const": 10},
+        "required_architecture_count": {"const": 2},
+        "expected_matrix_cell_count": {"const": 20},
+        "validated_input_case_count": {"type": "integer", "minimum": 0, "maximum": 20},
+        "covered_matrix_cell_count": {"type": "integer", "minimum": 0, "maximum": 20},
+        "missing_matrix_cell_count": {"type": "integer", "minimum": 0, "maximum": 20},
+        "covered_cells": {"$ref": "#/$defs/cells"},
+        "missing_cells": {"$ref": "#/$defs/cells"},
+        "observed_architecture_bases": {"$ref": "#/$defs/architectures"},
+        "completed_architecture_bases": {"$ref": "#/$defs/architectures"},
+        "incomplete_architecture_bases": {"$ref": "#/$defs/architectures"}
+      }
+    },
+    "cells": {
+      "type": "array",
+      "maxItems": 20,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^gfx(1030|1100):[a-z0-9_]+$"
+      }
+    },
+    "architectures": {
+      "type": "array",
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {"enum": ["gfx1030", "gfx1100"]}
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixed_package_registry_replayed",
+        "exact_registered_slot_classification",
+        "all_submitted_process_local_case_authorities_replayed",
+        "duplicate_matrix_cells_rejected",
+        "architecture_device_consistency_verified",
+        "primary_gfx1030_fixed_suite_complete",
+        "unsigned_fixed_suite_two_architecture_matrix_observed",
+        "serialized_external_evidence_counted",
+        "signed_evidence",
+        "promotion_eligible",
+        "full_model_family_parity_verified",
+        "multiarchitecture_parity_verified",
+        "result_ir_verified",
+        "iteration_host_copy_zero_verified",
+        "speedup_verified",
+        "end_to_end_o_n_verified",
+        "commercial_ready"
+      ],
+      "properties": {
+        "fixed_package_registry_replayed": {"const": true},
+        "exact_registered_slot_classification": {"const": true},
+        "all_submitted_process_local_case_authorities_replayed": {"const": true},
+        "duplicate_matrix_cells_rejected": {"const": true},
+        "architecture_device_consistency_verified": {"const": true},
+        "primary_gfx1030_fixed_suite_complete": {"type": "boolean"},
+        "unsigned_fixed_suite_two_architecture_matrix_observed": {"type": "boolean"},
+        "serialized_external_evidence_counted": {"const": false},
+        "signed_evidence": {"const": false},
+        "promotion_eligible": {"const": false},
+        "full_model_family_parity_verified": {"const": false},
+        "multiarchitecture_parity_verified": {"const": false},
+        "result_ir_verified": {"const": false},
+        "iteration_host_copy_zero_verified": {"const": false},
+        "speedup_verified": {"const": false},
+        "end_to_end_o_n_verified": {"const": false},
+        "commercial_ready": {"const": false}
+      }
+    }
+  }
+}

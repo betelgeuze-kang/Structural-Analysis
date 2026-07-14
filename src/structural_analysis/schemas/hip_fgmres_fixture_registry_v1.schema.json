@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_fixture_registry_v1.schema.json",
+  "title": "Package-owned HIP FGMRES fixed-suite fixture registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "suite_id",
+    "suite_scope",
+    "evidence_scope",
+    "required_slot_ids",
+    "registration_target_slot_count",
+    "claims",
+    "slots",
+    "registry_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-fixture-registry.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_package_owned_fgmres_fixed_suite_replay"
+    },
+    "suite_id": {
+      "const": "phase0_execution_plan_v2_linear_frame_truss_fgmres_fixed_suite.v2"
+    },
+    "suite_scope": {
+      "const": "execution_plan_v2_linear_frame_truss_zero_offset_release_prescribed_fgmres_fixed_cases_only"
+    },
+    "evidence_scope": {
+      "const": "package_local_unsigned_non_promoting"
+    },
+    "required_slot_ids": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "prefixItems": [
+        {"const": "frame_single_axial"},
+        {"const": "frame_single_weak_axis_bending"},
+        {"const": "frame_single_strong_axis_bending"},
+        {"const": "frame_single_torsion"},
+        {"const": "frame_single_rotated_local_axis_bending"},
+        {"const": "frame_serial_later_column"},
+        {"const": "truss_single_axial"},
+        {"const": "recurrence_initial_or_early_terminal"},
+        {"const": "recurrence_later_restart_partial_final_cycle"},
+        {"const": "recurrence_exact_full_final_cycle_guard"}
+      ],
+      "items": false
+    },
+    "registration_target_slot_count": {"const": 10},
+    "claims": {"$ref": "#/$defs/claims"},
+    "slots": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {"$ref": "#/$defs/slot"}
+    },
+    "registry_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "signed_evidence",
+        "promotion_eligible",
+        "full_model_family_parity_verified",
+        "multiarchitecture_parity_verified",
+        "same_process_actual_two_isa_verified",
+        "result_ir_verified",
+        "iteration_host_copy_zero_verified",
+        "speedup_verified",
+        "end_to_end_o_n_verified",
+        "commercial_ready"
+      ],
+      "properties": {
+        "signed_evidence": {"const": false},
+        "promotion_eligible": {"const": false},
+        "full_model_family_parity_verified": {"const": false},
+        "multiarchitecture_parity_verified": {"const": false},
+        "same_process_actual_two_isa_verified": {"const": false},
+        "result_ir_verified": {"const": false},
+        "iteration_host_copy_zero_verified": {"const": false},
+        "speedup_verified": {"const": false},
+        "end_to_end_o_n_verified": {"const": false},
+        "commercial_ready": {"const": false}
+      }
+    },
+    "policy_parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restart_dimension",
+        "max_iterations",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "stagnation_checkpoint_limit",
+        "stagnation_relative_tolerance",
+        "divergence_factor"
+      ],
+      "properties": {
+        "restart_dimension": {"type": "integer", "minimum": 1, "maximum": 16},
+        "max_iterations": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "absolute_tolerance": {"type": "number", "minimum": 0},
+        "relative_tolerance": {"type": "number", "minimum": 0},
+        "stagnation_checkpoint_limit": {"type": "integer", "minimum": 2, "maximum": 16},
+        "stagnation_relative_tolerance": {"type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1},
+        "divergence_factor": {"type": "number", "exclusiveMinimum": 1}
+      }
+    },
+    "semantic_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_kind",
+        "node_count",
+        "element_count",
+        "global_dof_count",
+        "free_dof_count",
+        "reduced_csr_nnz",
+        "load_component",
+        "load_value_si",
+        "load_node_id",
+        "nonzero_local_axis_roll_count",
+        "zero_reduced_rhs",
+        "history_cycles",
+        "analytic_free_solution_nonzero"
+      ],
+      "properties": {
+        "model_kind": {"enum": ["frame_3d", "truss_3d"]},
+        "node_count": {"type": "integer", "minimum": 2},
+        "element_count": {"type": "integer", "minimum": 1},
+        "global_dof_count": {"type": "integer", "minimum": 1},
+        "free_dof_count": {"type": "integer", "minimum": 1},
+        "reduced_csr_nnz": {"type": "integer", "minimum": 1},
+        "load_component": {"enum": ["FX", "FY", "FZ", "MX", "MY", "MZ"]},
+        "load_value_si": {"type": "number"},
+        "load_node_id": {"type": "string", "pattern": "^N[1-9][0-9]*$"},
+        "nonzero_local_axis_roll_count": {"type": "integer", "minimum": 0},
+        "zero_reduced_rhs": {"type": "boolean"},
+        "history_cycles": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {"type": "integer", "minimum": 0},
+              {"type": "integer", "minimum": 0},
+              {"type": "integer", "minimum": 1}
+            ],
+            "items": false,
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "analytic_free_solution_nonzero": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {"type": "integer", "minimum": 0},
+              {"type": "number"}
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "descriptor_hash",
+        "free_space_plan_hash",
+        "fgmres_plan_hash",
+        "recurrence_plan_hash",
+        "policy_hash",
+        "cpu_result_hash",
+        "cpu_status",
+        "cpu_termination_code",
+        "cpu_iteration_count",
+        "cpu_restart_count",
+        "cpu_operator_apply_count",
+        "cpu_preconditioner_apply_count",
+        "cpu_history_hash",
+        "cpu_solution_data_hash",
+        "cpu_true_residual_data_hash",
+        "direct_solution_data_hash",
+        "direct_residual_data_hash"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "descriptor_hash": {"$ref": "#/$defs/hash"},
+        "free_space_plan_hash": {"$ref": "#/$defs/hash"},
+        "fgmres_plan_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_plan_hash": {"$ref": "#/$defs/hash"},
+        "policy_hash": {"$ref": "#/$defs/hash"},
+        "cpu_result_hash": {"$ref": "#/$defs/hash"},
+        "cpu_status": {"enum": ["converged", "max_iterations"]},
+        "cpu_termination_code": {
+          "enum": [
+            "converged_initial_true_residual",
+            "converged_happy_breakdown",
+            "max_iterations_exhausted"
+          ]
+        },
+        "cpu_iteration_count": {"type": "integer", "minimum": 0},
+        "cpu_restart_count": {"type": "integer", "minimum": 0},
+        "cpu_operator_apply_count": {"type": "integer", "minimum": 0},
+        "cpu_preconditioner_apply_count": {"type": "integer", "minimum": 0},
+        "cpu_history_hash": {"$ref": "#/$defs/hash"},
+        "cpu_solution_data_hash": {"$ref": "#/$defs/hash"},
+        "cpu_true_residual_data_hash": {"$ref": "#/$defs/hash"},
+        "direct_solution_data_hash": {"$ref": "#/$defs/hash"},
+        "direct_residual_data_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot_id",
+        "group",
+        "description",
+        "model_resource",
+        "model_bytes_sha256",
+        "load_pattern_id",
+        "execution_residual_tolerance",
+        "policy_parameters",
+        "semantic_profile",
+        "semantic_contract",
+        "expected",
+        "case_fingerprint",
+        "slot_registration_hash"
+      ],
+      "properties": {
+        "slot_id": {
+          "enum": [
+            "frame_single_axial",
+            "frame_single_weak_axis_bending",
+            "frame_single_strong_axis_bending",
+            "frame_single_torsion",
+            "frame_single_rotated_local_axis_bending",
+            "frame_serial_later_column",
+            "truss_single_axial",
+            "recurrence_initial_or_early_terminal",
+            "recurrence_later_restart_partial_final_cycle",
+            "recurrence_exact_full_final_cycle_guard"
+          ]
+        },
+        "group": {"enum": ["model_semantics", "recurrence_semantics"]},
+        "description": {"type": "string", "minLength": 1},
+        "model_resource": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+\\.model\\.json$"
+        },
+        "model_bytes_sha256": {"$ref": "#/$defs/hash"},
+        "load_pattern_id": {"type": "string", "pattern": "^LC_[A-Z]+$"},
+        "execution_residual_tolerance": {"const": 1e-10},
+        "policy_parameters": {"$ref": "#/$defs/policy_parameters"},
+        "semantic_profile": {"type": "string", "pattern": "^[a-z0-9_]+\\.v1$"},
+        "semantic_contract": {"$ref": "#/$defs/semantic_contract"},
+        "expected": {"$ref": "#/$defs/expected"},
+        "case_fingerprint": {"$ref": "#/$defs/hash"},
+        "slot_registration_hash": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}

@@ -1,0 +1,341 @@
+{
+  "capability_profile": "engine_v2_phase0_linear_3d",
+  "constraints": [
+    {
+      "dofs": [
+        "UX",
+        "UY",
+        "UZ",
+        "RX",
+        "RY",
+        "RZ"
+      ],
+      "extensions": {},
+      "id": "BC1",
+      "index": 0,
+      "node_id": "N1",
+      "prescribed_values_si": {
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 0.0,
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "source_id": "generated:BC1",
+      "type": "fixed_dofs"
+    }
+  ],
+  "construction_stages": [],
+  "coordinate_system": {
+    "axis_order": [
+      "X",
+      "Y",
+      "Z"
+    ],
+    "frame_id": "global",
+    "handedness": "right",
+    "origin_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "up_axis": "Z"
+  },
+  "dof_components": [
+    "UX",
+    "UY",
+    "UZ",
+    "RX",
+    "RY",
+    "RZ"
+  ],
+  "elements": [
+    {
+      "extensions": {},
+      "formulation": "euler_bernoulli_3d",
+      "id": "E1",
+      "index": 0,
+      "local_axis_rotation_rad": 0.0,
+      "material_id": "M1",
+      "node_ids": [
+        "N1",
+        "N2"
+      ],
+      "offsets": {
+        "i_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "j_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "releases": {
+        "i": [],
+        "j": []
+      },
+      "section_id": "S1",
+      "source_id": "generated:E1",
+      "type": "frame_3d"
+    },
+    {
+      "extensions": {},
+      "formulation": "euler_bernoulli_3d",
+      "id": "E2",
+      "index": 1,
+      "local_axis_rotation_rad": 0.0,
+      "material_id": "M1",
+      "node_ids": [
+        "N2",
+        "N3"
+      ],
+      "offsets": {
+        "i_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "j_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "releases": {
+        "i": [],
+        "j": []
+      },
+      "section_id": "S1",
+      "source_id": "generated:E2",
+      "type": "frame_3d"
+    },
+    {
+      "extensions": {},
+      "formulation": "euler_bernoulli_3d",
+      "id": "E3",
+      "index": 2,
+      "local_axis_rotation_rad": 0.0,
+      "material_id": "M1",
+      "node_ids": [
+        "N3",
+        "N4"
+      ],
+      "offsets": {
+        "i_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "j_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "releases": {
+        "i": [],
+        "j": []
+      },
+      "section_id": "S1",
+      "source_id": "generated:E3",
+      "type": "frame_3d"
+    },
+    {
+      "extensions": {},
+      "formulation": "euler_bernoulli_3d",
+      "id": "E4",
+      "index": 3,
+      "local_axis_rotation_rad": 0.0,
+      "material_id": "M1",
+      "node_ids": [
+        "N4",
+        "N5"
+      ],
+      "offsets": {
+        "i_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "j_global_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "releases": {
+        "i": [],
+        "j": []
+      },
+      "section_id": "S1",
+      "source_id": "generated:E4",
+      "type": "frame_3d"
+    }
+  ],
+  "extensions": {},
+  "load_combinations": [],
+  "load_patterns": [
+    {
+      "analysis_type": "linear_static",
+      "extensions": {},
+      "id": "LC_AXIAL",
+      "index": 0,
+      "nodal_loads": [
+        {
+          "components_si": {
+            "FX": 100000.0,
+            "FY": 0.0,
+            "FZ": 0.0,
+            "MX": 0.0,
+            "MY": 0.0,
+            "MZ": 0.0
+          },
+          "extensions": {},
+          "id": "L_AXIAL_N5",
+          "index": 0,
+          "node_id": "N5",
+          "source_id": "generated:L_AXIAL_N5"
+        }
+      ],
+      "self_weight": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "source_id": "generated:LC_AXIAL"
+    }
+  ],
+  "materials": [
+    {
+      "extensions": {},
+      "id": "M1",
+      "index": 0,
+      "law_id": "linear_elastic_isotropic",
+      "parameter_set_version": "1",
+      "parameters": {
+        "density_kg_m3": 7850.0,
+        "elastic_modulus_pa": 200000000000.0,
+        "poisson_ratio": 0.3
+      },
+      "source_id": "generated:M1",
+      "state_schema": {
+        "state_update_epoch": "none",
+        "stateful": false,
+        "supports_trial_commit_rollback": true
+      }
+    }
+  ],
+  "model_id": "engine-v2-fgmres-family-v2-frame_serial_five",
+  "nodes": [
+    {
+      "coordinates_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "extensions": {},
+      "id": "N1",
+      "index": 0,
+      "source_id": "generated:N1"
+    },
+    {
+      "coordinates_m": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "extensions": {},
+      "id": "N2",
+      "index": 1,
+      "source_id": "generated:N2"
+    },
+    {
+      "coordinates_m": [
+        4.0,
+        0.0,
+        0.0
+      ],
+      "extensions": {},
+      "id": "N3",
+      "index": 2,
+      "source_id": "generated:N3"
+    },
+    {
+      "coordinates_m": [
+        6.0,
+        0.0,
+        0.0
+      ],
+      "extensions": {},
+      "id": "N4",
+      "index": 3,
+      "source_id": "generated:N4"
+    },
+    {
+      "coordinates_m": [
+        8.0,
+        0.0,
+        0.0
+      ],
+      "extensions": {},
+      "id": "N5",
+      "index": 4,
+      "source_id": "generated:N5"
+    }
+  ],
+  "provenance": {
+    "extensions": {},
+    "normalizer_id": "engine-v2-fgmres-family-v2-fixture-builder",
+    "normalizer_version": "1",
+    "source_format": "generated",
+    "source_ref": "generated:structural-analysis:fgmres-family-v2:frame_serial_five:recipe-v1",
+    "source_sha256": "sha256:3246381dd4c2c3d3bf635ea341e5e4a8ad407bf369a754799bbc5476d8adc204",
+    "source_units": {
+      "force": "N",
+      "length": "m",
+      "mass": "kg",
+      "rotation": "rad",
+      "time": "s"
+    },
+    "unit_scales_to_si": {
+      "force_to_n": 1.0,
+      "length_to_m": 1.0,
+      "mass_to_kg": 1.0,
+      "rotation_to_rad": 1.0,
+      "time_to_s": 1.0
+    }
+  },
+  "roundtrip_map": [],
+  "schema_version": "structural-analysis-model-ir.v2",
+  "sections": [
+    {
+      "extensions": {},
+      "family_id": "frame_3d",
+      "id": "S1",
+      "index": 0,
+      "parameter_set_version": "1",
+      "parameters": {
+        "area_m2": 0.02,
+        "iy_m4": 8e-05,
+        "iz_m4": 5e-05,
+        "shear_area_y_m2": 0.016,
+        "shear_area_z_m2": 0.016,
+        "torsional_constant_m4": 1e-05
+      },
+      "source_id": "generated:S1"
+    }
+  ],
+  "time_functions": [],
+  "units": {
+    "force": "N",
+    "length": "m",
+    "mass": "kg",
+    "rotation": "rad",
+    "time": "s"
+  },
+  "unsupported_features": []
+}
