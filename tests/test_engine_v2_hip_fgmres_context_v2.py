@@ -5,6 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import FrozenInstanceError, replace
 import inspect
 from itertools import combinations
+import math
 from pathlib import Path
 import sys
 from types import MappingProxyType
@@ -426,6 +427,9 @@ def _construct_context(
     restart_dimension: int = M,
     max_iterations: int = MAX_ITERATIONS,
     maximum_restart_count: int = R,
+    absolute_tolerance: float = 0.0,
+    relative_tolerance: float = 1.0e-8,
+    authoritative_tolerance: float = 1.0e-9,
 ) -> HipFgmresRecurrenceExecutionContextV2:
     return HipFgmresRecurrenceExecutionContextV2(
         kernel=kernel,
@@ -437,9 +441,9 @@ def _construct_context(
         max_iterations=max_iterations,
         maximum_restart_count=maximum_restart_count,
         stagnation_checkpoint_limit=2,
-        absolute_tolerance=0.0,
-        relative_tolerance=1.0e-8,
-        authoritative_tolerance=1.0e-9,
+        absolute_tolerance=absolute_tolerance,
+        relative_tolerance=relative_tolerance,
+        authoritative_tolerance=authoritative_tolerance,
         stagnation_relative_tolerance=1.0e-8,
         divergence_factor=1.0e8,
         buffers=buffers,
@@ -469,6 +473,33 @@ def _close_ready(context: HipFgmresRecurrenceExecutionContextV2) -> None:
         for _, allocation in context.buffers.items():
             if allocation.pointer_snapshot in context._registered:
                 context.release_allocation(allocation)
+
+
+def test_nonnegative_policy_signed_zero_is_canonicalized_before_binding(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    loaded = BoundFakeLoadedRuntime()
+    kernel, _, _ = _compile_fake(monkeypatch, loaded)
+    runtime = _exact_sync_runtime(loaded)
+    _, rows = _allocations(runtime=runtime)
+    context = _construct_context(
+        kernel,
+        runtime,
+        _buffers(rows),
+        absolute_tolerance=-0.0,
+        relative_tolerance=1.0e-8,
+        authoritative_tolerance=-0.0,
+    )
+    try:
+        binding = context._capture_transaction_launch_binding()
+        for value in (
+            binding.absolute_tolerance,
+            binding.authoritative_tolerance,
+        ):
+            assert value == 0.0
+            assert math.copysign(1.0, value) == 1.0
+    finally:
+        _close_ready(context)
 
 
 def _replace_role(

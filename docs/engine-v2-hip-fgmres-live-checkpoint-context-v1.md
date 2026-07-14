@@ -2,7 +2,7 @@
 
 - 상태: Phase 0 resource-lifetime slice와 single canonical producer-child coordination 구현·독립 감사 완료, `contract_only`/non-promoting
 - resource 구현 버전: v0.2.19; canonical child 연동: v0.2.20
-- 현재 downstream 권위 단계: v0.2.27 raw export 이후 explicit terminal-outcome observation
+- 현재 downstream 권위 단계: v0.2.28 explicit terminal-outcome observation 구현; 다음은 full CPU/HIP parity
 - 상위 기준: [Structural Solver Engine v2 마스터 로드맵](structural-solver-engine-v2-master-roadmap.md)
 
 ## 문서 범위
@@ -278,4 +278,4 @@ Wheel을 별도 target에 설치한 뒤 그 target의 `structural_analysis.engin
 
 이 resource-only receipt 이후 invalid-source destination atomicity(v0.2.21), sealed checkpoint transaction(v0.2.22), later column/restart·final-guard global owner(v0.2.23-v0.2.26), completion-only raw export(v0.2.27)가 각각 별도 contract과 receipt로 구현됐다. 이 downstream 구현은 본 live resource receipt의 수치·solution claim을 소급 승격하지 않는다.
 
-현재 다음 권위 단계는 raw `solve_record`와 payload lineage를 해석·검증하는 explicit terminal-outcome observation contract이다. 그 뒤 model-family·multi-architecture CPU/HIP full parity와 iteration host-copy-zero를 별도 gate로 닫아야 한다. 그 전에는 현 live checkpoint context나 canonical child, raw export를 authoritative solver/solution, ResultIR-ready 또는 commercial-ready 증거로 승격해서는 안 된다.
+raw `solve_record`와 payload lineage를 해석·검증하는 explicit terminal-outcome observation contract은 v0.2.28의 별도 non-promoting child로 구현됐다. 다음 권위 단계에서 model-family·multi-architecture CPU/HIP full parity와 iteration host-copy-zero를 각각 별도 gate로 닫아야 한다. 그 전에는 현 live checkpoint context나 canonical child, raw export, observer를 authoritative solver/solution, ResultIR-ready 또는 commercial-ready 증거로 승격해서는 안 된다.

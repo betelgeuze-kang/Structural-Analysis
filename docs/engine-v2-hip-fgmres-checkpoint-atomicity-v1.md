@@ -108,4 +108,4 @@ v0.2.22 [live sealed owner](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v
 - later columns/restarts, full recurrence, solver/solution receipt
 - iteration host-copy zero, full CPU/HIP parity, O(N), speedup, signed promotion, commercial readiness
 
-Later column/restart global control과 final guard는 v0.2.23에서, completion-only raw export는 v0.2.27에서 별도 구현됐다. 이 historical atomicity receipt는 소급 승격되지 않으며 다음 통합 gate는 별도 product receipt의 명시적 terminal-outcome observation이다.
+Later column/restart global control과 final guard는 v0.2.23에서, completion-only raw export는 v0.2.27에서, 명시적 terminal-outcome observation은 v0.2.28에서 각각 별도 구현됐다. 이 historical atomicity receipt는 소급 승격되지 않으며 다음 통합 gate는 model-family·multi-architecture CPU/HIP full parity와 iteration host-copy-zero다.

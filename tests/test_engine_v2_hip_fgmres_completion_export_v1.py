@@ -335,9 +335,7 @@ def test_unused_reopen_binding_drift_and_staging_failure_remain_precopy_retryabl
                 "fenced_launch_count",
                 original_fenced_count,
             )
-        assert upstream.value.code == (
-            "hip_fgmres_completion_export_upstream_failed"
-        )
+        assert upstream.value.code == ("hip_fgmres_completion_export_upstream_failed")
         assert upstream.value.cleanup_owner is export_context
         assert export_context.receipt().status == "context_ready"
         assert probe.calls == []
@@ -565,6 +563,19 @@ def test_publication_store_interruptions_reconcile_without_recopied_or_closed_re
         with pytest.raises(_InjectedOpcodeInterruption):
             _interrupt_immediately_after_store_attr(
                 HipFgmresCompletionExportExecutionContextV1._finish_publication,
+                "_published_result_authority_state",
+                export_context.export,
+            )
+        authority_state = export_context._published_result_authority_state
+        assert authority_state is not None
+        assert authority_state[0].result is publication
+        assert export_context.result is None
+        assert export_context.receipt() is publication.receipt
+        assert len(probe.calls) == 3
+
+        with pytest.raises(_InjectedOpcodeInterruption):
+            _interrupt_immediately_after_store_attr(
+                HipFgmresCompletionExportExecutionContextV1._finish_publication,
                 "_result",
                 export_context.export,
             )
@@ -593,9 +604,10 @@ def test_publication_store_interruptions_reconcile_without_recopied_or_closed_re
                 completion_capability_consumed=False,
             ),
         )
-        assert validate_hip_fgmres_completion_export_receipt_v1(
-            forged_closed
-        ) is forged_closed
+        assert (
+            validate_hip_fgmres_completion_export_receipt_v1(forged_closed)
+            is forged_closed
+        )
         with pytest.raises(HipFgmresCompletionExportV1Error) as forged_provenance:
             validate_hip_fgmres_completion_export_receipt_v1(
                 forged_closed,

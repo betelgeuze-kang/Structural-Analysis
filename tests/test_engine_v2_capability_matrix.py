@@ -821,6 +821,7 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "consumed_release_store_interruption_cannot_wedge_parent_or_reopen_export",
         "standalone_exact_type_schema_hash_and_semantic_validation",
         "expected_context_required_for_process_local_provenance_authenticity",
+        "private_atomic_final_result_identity_and_exact_recurrence_policy_seal_for_downstream_observation_without_raw_receipt_change",
         "native_gfx1030_f6_m1_i1_exact_three_copies_48_48_264_total_360_bytes",
         "verification_only_cpu_payload_comparison_after_outcome_free_product_receipt_freeze",
     }.issubset(completion_export["supported_scope"])
@@ -859,6 +860,7 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "closed_context_no_result_resurrection",
         "closed_context_expected_provenance_rejects_semantically_valid_rehashed_receipt_forgery",
         "strict_schema_semantic_hash_result_immutability_and_bool_as_int_forgery_rejection",
+        "fresh_parent_authority_policy_seal_toctou_and_single_store_publication_interruption_recovery",
         "native_gfx1030_exact_three_blocking_d2h_and_verification_only_cpu_payload_comparison",
     }.issubset(completion_export["verification_cases"])
     assert {
@@ -873,7 +875,57 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         in global_owner["explicit_exclusions"]
     )
 
-    assert row_ids[atomicity_index + 4] == "hip_fgmres_full_device_recurrence_abi_v2"
+    assert row_ids[atomicity_index + 4] == "hip_fgmres_terminal_outcome_observation_v1"
+
+    terminal_observation = rows["hip_fgmres_terminal_outcome_observation_v1"]
+    assert terminal_observation["implementation_state"] == "implemented"
+    assert terminal_observation["promotion_state"] == "contract_only"
+    assert terminal_observation["claim_level"] == (
+        "context_bound_exported_terminal_record_semantics_observed_non_promoting"
+    )
+    assert {
+        "exact_final_immutable_completion_export_result_and_process_local_context_seal_required",
+        "separate_observer_receipt_preserves_raw_completion_export_receipt_payload_and_hashes",
+        "explicit_little_endian_192_plus_72r_solve_record_decode",
+        "all_seventeen_current_terminal_termination_codes_without_invented_cancelled_status",
+        "numerical_failure_stale_header_metrics_hidden_and_committed_row_prefix_only",
+        "nonfailure_true_residual_payload_deterministic_tree_l2_linf_and_scaled_metric_match",
+        "solution_payload_finiteness_observed_without_solution_norm_or_solution_ready_claim",
+        "authoritative_terminal_record_status_with_exact_process_local_export_provenance",
+        "context_required_public_receipt_validation_and_nonserialized_result_identity",
+        "observer_additional_device_allocation_borrow_h2d_d2h_kernel_sync_and_fallback_zero",
+        "host_observation_cost_o_f_plus_r_without_solver_o_n_claim",
+        "native_gfx1030_later_column_convergence_and_active_final_guard_max_iteration_observation",
+    }.issubset(terminal_observation["supported_scope"])
+    assert {
+        "authoritative_completion_or_solution_receipt",
+        "numerical_parity_verified",
+        "solution_ready",
+        "result_ir_ready",
+        "equilibrium_or_residual_equation_replay",
+        "iteration_host_copy_zero_proven",
+        "model_family_and_multi_architecture_cpu_hip_full_recurrence_parity",
+        "general_n_dof_o_n_claim",
+        "performance_or_speedup_claim",
+        "standalone_serialized_receipt_provenance_authenticity_without_process_local_context_or_signed_chain",
+        "commercial_readiness",
+        "promotion_eligible",
+    }.issubset(terminal_observation["explicit_exclusions"])
+    assert {
+        "complete_terminal_code_table_status_code_error_name_and_restart_hint_mapping",
+        "exact_policy_counter_gate_flag_stagnation_divergence_and_priority_semantic_replay",
+        "context_required_receipt_provenance_backend_dimension_and_source_binding_forgery_rejection",
+        "native_gfx1030_two_terminal_paths_exact_three_raw_d2h_and_observer_zero_device_operations",
+    }.issubset(terminal_observation["verification_cases"])
+    assert {
+        "docs/engine-v2-hip-fgmres-terminal-outcome-observation-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_terminal_outcome_observation_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_terminal_outcome_observation_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_terminal_outcome_observation_v1.py",
+        "tests/test_engine_v2_hip_fgmres_terminal_outcome_observation_hardware_v1.py",
+    }.issubset(terminal_observation["evidence_paths"])
+
+    assert row_ids[atomicity_index + 5] == "hip_fgmres_full_device_recurrence_abi_v2"
 
     recurrence_v2 = rows["hip_fgmres_full_device_recurrence_abi_v2"]
     assert recurrence_v2["implementation_state"] == "in_progress"
@@ -930,6 +982,8 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "native_malformed_handoff_next_restart_and_operator_count_prepublication_evidence",
         "implemented_completion_only_solution_true_residual_and_opaque_solve_record_export_kept_outcome_uninterpreted",
         "native_gfx1030_completion_export_exact_three_blocking_d2h_360_bytes_evidence",
+        "implemented_context_bound_terminal_record_observation_with_zero_additional_device_operations_kept_non_promoting",
+        "native_gfx1030_later_column_convergence_and_final_guard_max_iteration_terminal_observation_evidence",
         "implemented_fixed_suffix_host_submission_control_o_l_structural_gate_not_general_n_dof_o_n",
         "implemented_registry_sealed_immutable_dispatch_snapshot_and_canonical_row_tuple",
         "final_independent_linear_reaudit_no_remaining_defect_in_requested_host_control_scope",
@@ -966,9 +1020,10 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "completion_only_solution_record_and_residual_export"
         not in recurrence_v2["explicit_exclusions"]
     )
-    assert "product_terminal_outcome_observation" in recurrence_v2[
-        "explicit_exclusions"
-    ]
+    assert (
+        "product_terminal_outcome_observation"
+        not in recurrence_v2["explicit_exclusions"]
+    )
     assert (
         "integrated_active_final_guard_fallthrough"
         not in recurrence_v2["explicit_exclusions"]
@@ -981,6 +1036,7 @@ def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None
         "integrated_active_later_restart_and_active_final_guard_kept_separate_from_authoritative_outcome_claims",
         "fixed_suffix_host_control_o_l_kept_separate_from_general_n_dof_o_n_and_speedup_claims",
         "final_linear_reaudit_closed_only_requested_host_control_scope_without_product_promotion",
+        "terminal_outcome_observer_kept_separate_from_completion_solution_parity_result_ir_and_promotion_claims",
         "process_local_abandoned_suffix_owner_recovery_kept_separate_from_numerical_completion_claim",
         "native_integrated_recovery_lifecycle_gate_kept_separate_from_full_recurrence_parity_and_solution",
     }.issubset(recurrence_v2["verification_cases"])

@@ -2053,7 +2053,7 @@ def _nonnegative_float64(value: Any, path: str) -> float:
     converted = _finite_float64(value, path)
     if converted < 0.0:
         _fail("hip_fgmres_checkpoint_float_invalid", path)
-    return converted
+    return 0.0 if converted == 0.0 else converted
 
 
 def _positive_float64(value: Any, path: str) -> float:

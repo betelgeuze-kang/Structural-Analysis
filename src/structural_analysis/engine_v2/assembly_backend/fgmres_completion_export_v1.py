@@ -17,6 +17,7 @@ from dataclasses import dataclass, replace
 from functools import lru_cache, wraps
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 import threading
@@ -277,6 +278,36 @@ class HipFgmresCompletionExportOpenResultV1:
             )
 
 
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class _CompletionExportPolicySnapshotV1:
+    """Private value-only copy of the exact recurrence decision policy."""
+
+    restart_dimension: int
+    max_iterations: int
+    maximum_restart_count: int
+    stagnation_checkpoint_limit: int
+    absolute_tolerance: float
+    relative_tolerance: float
+    authoritative_tolerance: float
+    stagnation_relative_tolerance: float
+    divergence_factor: float
+
+
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class _CompletionExportPublishedResultAuthorityV1:
+    """Private identity seal for one fully published detached result."""
+
+    result: HipFgmresCompletionExportResultV1
+    receipt: HipFgmresCompletionExportReceiptV1
+    solution_x: bytes
+    true_residual: bytes
+    solve_record: bytes
+    receipt_hash: str
+    payload_hash: str
+    buffer_payload_hashes: tuple[str, str, str]
+    policy: _CompletionExportPolicySnapshotV1
+
+
 def _guard_state_change(name: str) -> Any:
     def decorate(operation: Any) -> Any:
         @wraps(operation)
@@ -367,6 +398,9 @@ class HipFgmresCompletionExportExecutionContextV1:
         self._staging: tuple[np.ndarray, ...] | None = None
         self._publication: HipFgmresCompletionExportResultV1 | None = None
         self._result: HipFgmresCompletionExportResultV1 | None = None
+        self._published_result_authority_state: (
+            tuple[_CompletionExportPublishedResultAuthorityV1, tuple[Any, ...]] | None
+        ) = None
         self._child_released = False
         self._closed = False
         self._active_operation: str | None = None
@@ -604,6 +638,25 @@ class HipFgmresCompletionExportExecutionContextV1:
                 cleanup_owner=self,
             )
         validate_hip_fgmres_completion_export_result_v1(publication)
+        authority = self._require_authority(consumed=True)
+        seal = _published_result_authority(
+            publication,
+            _completion_export_policy_snapshot(authority),
+        )
+        seal_snapshot = _published_result_authority_snapshot(seal)
+        authority_state = self._published_result_authority_state
+        if authority_state is None:
+            self._published_result_authority_state = (seal, seal_snapshot)
+        elif (
+            _published_result_authority_snapshot(authority_state[0])
+            != authority_state[1]
+            or seal_snapshot != authority_state[1]
+        ):
+            _fail(
+                "hip_fgmres_completion_export_publication_authority_changed",
+                "/export/publication/authority",
+                cleanup_owner=self,
+            )
         # All three blocking copies have already been detached into immutable
         # ``bytes`` owned by ``publication``.  Release the temporary NumPy
         # staging before publishing the final result so large-F exports do not
@@ -612,6 +665,40 @@ class HipFgmresCompletionExportExecutionContextV1:
         self._result = publication
         self._state = "exported"
         return publication
+
+    def _terminal_outcome_observation_authority(
+        self,
+        result: HipFgmresCompletionExportResultV1,
+    ) -> _CompletionExportPublishedResultAuthorityV1:
+        """Return the exact final-publication seal; intermediate publication fails."""
+
+        with self._lock:
+            authority_state = self._published_result_authority_state
+            seal = None if authority_state is None else authority_state[0]
+            snapshot = None if authority_state is None else authority_state[1]
+            if (
+                type(result) is not HipFgmresCompletionExportResultV1
+                or self._result is not result
+                or type(seal) is not _CompletionExportPublishedResultAuthorityV1
+                or snapshot is None
+                or _published_result_authority_snapshot(seal) != snapshot
+                or seal.result is not result
+                or seal.receipt is not result.receipt
+                or seal.solution_x is not result.solution_x
+                or seal.true_residual is not result.true_residual
+                or seal.solve_record is not result.solve_record
+                or seal.receipt_hash != result.receipt.receipt_hash
+                or seal.payload_hash != result.payload_hash
+                or seal.buffer_payload_hashes
+                != tuple(row.payload_sha256 for row in result.receipt.buffers)
+            ):
+                _fail(
+                    "hip_fgmres_completion_export_final_publication_invalid",
+                    "/result",
+                    cleanup_owner=self,
+                )
+            validate_hip_fgmres_completion_export_result_v1(result)
+            return seal
 
     def _record_consumed(self) -> None:
         self._telemetry = replace(
@@ -1113,8 +1200,27 @@ def _validate_authority_extents(
     if (
         type(authority.free_dof_count) is not int
         or authority.free_dof_count <= 0
+        or type(authority.restart_dimension) is not int
+        or authority.restart_dimension <= 0
+        or type(authority.max_iterations) is not int
+        or authority.max_iterations <= 0
         or type(authority.maximum_restart_count) is not int
         or authority.maximum_restart_count <= 0
+        or authority.maximum_restart_count
+        != (authority.max_iterations + authority.restart_dimension - 1)
+        // authority.restart_dimension
+        or type(authority.stagnation_checkpoint_limit) is not int
+        or not 2 <= authority.stagnation_checkpoint_limit <= 16
+        or any(
+            type(value) is not float or not math.isfinite(value)
+            for value in (
+                authority.absolute_tolerance,
+                authority.relative_tolerance,
+                authority.authoritative_tolerance,
+                authority.stagnation_relative_tolerance,
+                authority.divergence_factor,
+            )
+        )
         or type(sources) is not tuple
         or len(sources) != 3
     ):
@@ -1158,7 +1264,24 @@ def _authority_snapshot(
         (type(authority.device_ordinal), authority.device_ordinal),
         (type(authority.architecture), authority.architecture),
         (type(authority.free_dof_count), authority.free_dof_count),
+        (type(authority.restart_dimension), authority.restart_dimension),
+        (type(authority.max_iterations), authority.max_iterations),
         (type(authority.maximum_restart_count), authority.maximum_restart_count),
+        (
+            type(authority.stagnation_checkpoint_limit),
+            authority.stagnation_checkpoint_limit,
+        ),
+        (type(authority.absolute_tolerance), float.hex(authority.absolute_tolerance)),
+        (type(authority.relative_tolerance), float.hex(authority.relative_tolerance)),
+        (
+            type(authority.authoritative_tolerance),
+            float.hex(authority.authoritative_tolerance),
+        ),
+        (
+            type(authority.stagnation_relative_tolerance),
+            float.hex(authority.stagnation_relative_tolerance),
+        ),
+        (type(authority.divergence_factor), float.hex(authority.divergence_factor)),
         authority.recurrence_plan_hash,
         authority.recurrence_kernel_abi_hash,
         authority.combined_recurrence_abi_hash,
@@ -1172,6 +1295,77 @@ def _authority_snapshot(
             authority.runtime,
             _resolve_copy_binding(authority.runtime),
         ),
+    )
+
+
+def _completion_export_policy_snapshot(
+    authority: _CompletionExportChildAuthorityV1,
+) -> _CompletionExportPolicySnapshotV1:
+    return _CompletionExportPolicySnapshotV1(
+        restart_dimension=authority.restart_dimension,
+        max_iterations=authority.max_iterations,
+        maximum_restart_count=authority.maximum_restart_count,
+        stagnation_checkpoint_limit=authority.stagnation_checkpoint_limit,
+        absolute_tolerance=authority.absolute_tolerance,
+        relative_tolerance=authority.relative_tolerance,
+        authoritative_tolerance=authority.authoritative_tolerance,
+        stagnation_relative_tolerance=authority.stagnation_relative_tolerance,
+        divergence_factor=authority.divergence_factor,
+    )
+
+
+def _published_result_authority(
+    result: HipFgmresCompletionExportResultV1,
+    policy: _CompletionExportPolicySnapshotV1,
+) -> _CompletionExportPublishedResultAuthorityV1:
+    return _CompletionExportPublishedResultAuthorityV1(
+        result=result,
+        receipt=result.receipt,
+        solution_x=result.solution_x,
+        true_residual=result.true_residual,
+        solve_record=result.solve_record,
+        receipt_hash=result.receipt.receipt_hash,
+        payload_hash=result.payload_hash,
+        buffer_payload_hashes=tuple(
+            row.payload_sha256 for row in result.receipt.buffers
+        ),
+        policy=policy,
+    )
+
+
+def _published_result_authority_snapshot(
+    authority: _CompletionExportPublishedResultAuthorityV1,
+) -> tuple[Any, ...]:
+    policy = authority.policy
+    return (
+        type(authority),
+        id(authority.result),
+        id(authority.receipt),
+        id(authority.solution_x),
+        id(authority.true_residual),
+        id(authority.solve_record),
+        authority.receipt_hash,
+        authority.payload_hash,
+        authority.buffer_payload_hashes,
+        type(policy),
+        (type(policy.restart_dimension), policy.restart_dimension),
+        (type(policy.max_iterations), policy.max_iterations),
+        (type(policy.maximum_restart_count), policy.maximum_restart_count),
+        (
+            type(policy.stagnation_checkpoint_limit),
+            policy.stagnation_checkpoint_limit,
+        ),
+        (type(policy.absolute_tolerance), float.hex(policy.absolute_tolerance)),
+        (type(policy.relative_tolerance), float.hex(policy.relative_tolerance)),
+        (
+            type(policy.authoritative_tolerance),
+            float.hex(policy.authoritative_tolerance),
+        ),
+        (
+            type(policy.stagnation_relative_tolerance),
+            float.hex(policy.stagnation_relative_tolerance),
+        ),
+        (type(policy.divergence_factor), float.hex(policy.divergence_factor)),
     )
 
 

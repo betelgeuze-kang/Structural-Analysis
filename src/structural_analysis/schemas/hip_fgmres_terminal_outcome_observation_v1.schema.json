@@ -1,0 +1,899 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_terminal_outcome_observation_v1.schema.json",
+  "title": "HIP FGMRES terminal outcome observation receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "observation_id",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "bindings",
+    "dimensions",
+    "policy",
+    "outcome",
+    "telemetry",
+    "claims",
+    "outcome_hash",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-terminal-outcome-observation.v1"
+    },
+    "status": {
+      "enum": [
+        "terminal_converged",
+        "terminal_not_converged",
+        "terminal_numerical_failure"
+      ]
+    },
+    "observation_id": {
+      "$ref": "#/$defs/hash"
+    },
+    "evidence_scope": {
+      "const": "context_bound_terminal_record_semantics_observed_non_promoting"
+    },
+    "actual_backend": {
+      "enum": ["hip", "test_double"]
+    },
+    "promotion_eligible": {
+      "const": false
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completion_export_context_id",
+        "completion_export_receipt_hash",
+        "completion_export_payload_hash",
+        "completion_export_source_binding_hash",
+        "global_context_id",
+        "global_receipt_hash",
+        "completion_receipt_hash",
+        "solve_record_abi_hash",
+        "control_state_abi_hash",
+        "recurrence_plan_hash",
+        "recurrence_kernel_abi_hash",
+        "combined_recurrence_abi_hash",
+        "continuation_schedule_hash",
+        "kernel_identity_hash",
+        "kernel_source_sha256",
+        "architecture",
+        "device_ordinal",
+        "policy_hash",
+        "solution_payload_sha256",
+        "true_residual_payload_sha256",
+        "solve_record_payload_sha256",
+        "process_local_export_context_verified",
+        "process_local_result_identity_serialized"
+      ],
+      "properties": {
+        "completion_export_context_id": {
+          "$ref": "#/$defs/hash"
+        },
+        "completion_export_receipt_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "completion_export_payload_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "completion_export_source_binding_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "global_context_id": {
+          "$ref": "#/$defs/hash"
+        },
+        "global_receipt_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "completion_receipt_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "solve_record_abi_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "control_state_abi_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "recurrence_plan_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "recurrence_kernel_abi_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "combined_recurrence_abi_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "continuation_schedule_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "kernel_identity_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "kernel_source_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "architecture": {
+          "type": "string",
+          "pattern": "^gfx[0-9a-f]+$"
+        },
+        "device_ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "policy_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "solution_payload_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "true_residual_payload_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "solve_record_payload_sha256": {
+          "$ref": "#/$defs/hash"
+        },
+        "process_local_export_context_verified": {
+          "const": true
+        },
+        "process_local_result_identity_serialized": {
+          "const": false
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "maximum_restart_count",
+        "solve_record_header_bytes",
+        "solve_record_restart_bytes",
+        "solve_record_byte_count",
+        "inspected_host_payload_byte_count"
+      ],
+      "properties": {
+        "free_dof_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "maximum_restart_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "solve_record_header_bytes": {
+          "const": 192
+        },
+        "solve_record_restart_bytes": {
+          "const": 72
+        },
+        "solve_record_byte_count": {
+          "type": "integer",
+          "minimum": 264,
+          "maximum": 295104,
+          "multipleOf": 24
+        },
+        "inspected_host_payload_byte_count": {
+          "type": "integer",
+          "minimum": 280,
+          "multipleOf": 8
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restart_dimension",
+        "max_iterations",
+        "maximum_restart_count",
+        "stagnation_checkpoint_limit",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "authoritative_tolerance",
+        "stagnation_relative_tolerance",
+        "divergence_factor"
+      ],
+      "properties": {
+        "restart_dimension": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_iterations": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "maximum_restart_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "stagnation_checkpoint_limit": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 16
+        },
+        "absolute_tolerance": {
+          "$ref": "#/$defs/nonnegativeNumber"
+        },
+        "relative_tolerance": {
+          "$ref": "#/$defs/nonnegativeNumber"
+        },
+        "authoritative_tolerance": {
+          "$ref": "#/$defs/nonnegativeNumber"
+        },
+        "stagnation_relative_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "divergence_factor": {
+          "type": "number",
+          "exclusiveMinimum": 1
+        }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outcome_class",
+        "active",
+        "terminal_status",
+        "terminal_status_code",
+        "termination_code",
+        "termination_code_value",
+        "device_error_bits",
+        "device_error_names",
+        "counters",
+        "record_metrics_authoritative",
+        "metrics",
+        "restart_rows",
+        "solution_x_all_finite",
+        "true_residual_all_finite",
+        "observed_solution_x_l2",
+        "observed_true_residual_l2",
+        "observed_true_residual_linf",
+        "observed_true_residual_scaled_linf",
+        "true_residual_record_metrics_match"
+      ],
+      "properties": {
+        "outcome_class": {
+          "enum": ["converged", "not_converged", "numerical_failure"]
+        },
+        "active": {
+          "const": 0
+        },
+        "terminal_status": {
+          "enum": [
+            "converged",
+            "max_iterations",
+            "stagnated",
+            "diverged",
+            "arnoldi_breakdown",
+            "numerical_failure"
+          ]
+        },
+        "terminal_status_code": {
+          "enum": [1, 2, 3, 4, 5, 6]
+        },
+        "termination_code": {
+          "enum": [
+            "converged_initial_true_residual",
+            "converged_happy_breakdown",
+            "converged_true_residual",
+            "converged_restart_true_residual",
+            "max_iterations_exhausted",
+            "true_residual_stagnated",
+            "true_residual_diverged",
+            "arnoldi_triangular_factor_breakdown",
+            "arnoldi_invariant_subspace_breakdown",
+            "invalid_input_or_control",
+            "nonfinite_arithmetic",
+            "operator_application_failed",
+            "orthogonalization_failed",
+            "givens_rotation_failed",
+            "triangular_solve_failed",
+            "true_residual_replay_failed",
+            "restart_state_failed"
+          ]
+        },
+        "termination_code_value": {
+          "enum": [1, 2, 3, 4, 10, 20, 21, 30, 31, 40, 41, 42, 43, 44, 45, 46, 47]
+        },
+        "device_error_bits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 127
+        },
+        "device_error_names": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 7,
+          "items": {
+            "enum": [
+              "invalid_control_or_geometry",
+              "csr_structure",
+              "nonfinite_input",
+              "arithmetic_overflow",
+              "record_abi",
+              "jacobi_inverse",
+              "invalid_reduction_pair"
+            ]
+          }
+        },
+        "counters": {
+          "$ref": "#/$defs/counters"
+        },
+        "record_metrics_authoritative": {
+          "type": "boolean"
+        },
+        "metrics": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/metrics"}
+          ]
+        },
+        "restart_rows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "$ref": "#/$defs/restartRow"
+          }
+        },
+        "solution_x_all_finite": {
+          "type": "boolean"
+        },
+        "true_residual_all_finite": {
+          "type": "boolean"
+        },
+        "observed_solution_x_l2": {
+          "$ref": "#/$defs/nullableNonnegativeNumber"
+        },
+        "observed_true_residual_l2": {
+          "$ref": "#/$defs/nullableNonnegativeNumber"
+        },
+        "observed_true_residual_linf": {
+          "$ref": "#/$defs/nullableNonnegativeNumber"
+        },
+        "observed_true_residual_scaled_linf": {
+          "$ref": "#/$defs/nullableNonnegativeNumber"
+        },
+        "true_residual_record_metrics_match": {
+          "type": ["boolean", "null"]
+        }
+      },
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "properties": {
+                "outcome_class": {"const": "converged"},
+                "terminal_status": {"const": "converged"},
+                "terminal_status_code": {"const": 1}
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "termination_code": {"const": "converged_initial_true_residual"},
+                    "termination_code_value": {"const": 1}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "converged_happy_breakdown"},
+                    "termination_code_value": {"const": 2}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "converged_true_residual"},
+                    "termination_code_value": {"const": 3}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "converged_restart_true_residual"},
+                    "termination_code_value": {"const": 4}
+                  }
+                }
+              ]
+            },
+            {
+              "properties": {
+                "outcome_class": {"const": "not_converged"},
+                "terminal_status": {"const": "max_iterations"},
+                "terminal_status_code": {"const": 2},
+                "termination_code": {"const": "max_iterations_exhausted"},
+                "termination_code_value": {"const": 10}
+              }
+            },
+            {
+              "properties": {
+                "outcome_class": {"const": "not_converged"},
+                "terminal_status": {"const": "stagnated"},
+                "terminal_status_code": {"const": 3},
+                "termination_code": {"const": "true_residual_stagnated"},
+                "termination_code_value": {"const": 20}
+              }
+            },
+            {
+              "properties": {
+                "outcome_class": {"const": "not_converged"},
+                "terminal_status": {"const": "diverged"},
+                "terminal_status_code": {"const": 4},
+                "termination_code": {"const": "true_residual_diverged"},
+                "termination_code_value": {"const": 21}
+              }
+            },
+            {
+              "properties": {
+                "outcome_class": {"const": "not_converged"},
+                "terminal_status": {"const": "arnoldi_breakdown"},
+                "terminal_status_code": {"const": 5}
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "termination_code": {"const": "arnoldi_triangular_factor_breakdown"},
+                    "termination_code_value": {"const": 30}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "arnoldi_invariant_subspace_breakdown"},
+                    "termination_code_value": {"const": 31}
+                  }
+                }
+              ]
+            },
+            {
+              "properties": {
+                "outcome_class": {"const": "numerical_failure"},
+                "terminal_status": {"const": "numerical_failure"},
+                "terminal_status_code": {"const": 6}
+              },
+              "oneOf": [
+                {
+                  "properties": {
+                    "termination_code": {"const": "invalid_input_or_control"},
+                    "termination_code_value": {"const": 40}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "nonfinite_arithmetic"},
+                    "termination_code_value": {"const": 41}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "operator_application_failed"},
+                    "termination_code_value": {"const": 42}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "orthogonalization_failed"},
+                    "termination_code_value": {"const": 43}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "givens_rotation_failed"},
+                    "termination_code_value": {"const": 44}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "triangular_solve_failed"},
+                    "termination_code_value": {"const": 45}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "true_residual_replay_failed"},
+                    "termination_code_value": {"const": 46}
+                  }
+                },
+                {
+                  "properties": {
+                    "termination_code": {"const": "restart_state_failed"},
+                    "termination_code_value": {"const": 47}
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome_class": {"const": "numerical_failure"}
+            },
+            "required": ["outcome_class"]
+          },
+          "then": {
+            "properties": {
+              "device_error_bits": {"type": "integer", "minimum": 1, "maximum": 127},
+              "device_error_names": {"minItems": 1},
+              "record_metrics_authoritative": {"const": false},
+              "metrics": {"type": "null"},
+              "observed_solution_x_l2": {"type": "null"},
+              "observed_true_residual_l2": {"type": "null"},
+              "observed_true_residual_linf": {"type": "null"},
+              "observed_true_residual_scaled_linf": {"type": "null"},
+              "true_residual_record_metrics_match": {"type": "null"}
+            }
+          },
+          "else": {
+            "properties": {
+              "device_error_bits": {"const": 0},
+              "device_error_names": {"maxItems": 0},
+              "record_metrics_authoritative": {"const": true},
+              "metrics": {"$ref": "#/$defs/metrics"},
+              "solution_x_all_finite": {"const": true},
+              "true_residual_all_finite": {"const": true},
+              "observed_solution_x_l2": {"type": "null"},
+              "observed_true_residual_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+              "observed_true_residual_linf": {"$ref": "#/$defs/nonnegativeNumber"},
+              "observed_true_residual_scaled_linf": {"$ref": "#/$defs/nonnegativeNumber"},
+              "true_residual_record_metrics_match": {"const": true}
+            }
+          }
+        }
+      ]
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completion_export_source_result_count",
+        "solve_record_payload_count",
+        "solve_record_header_field_count",
+        "solve_record_restart_row_count",
+        "inspected_host_payload_byte_count",
+        "published_terminal_outcome_count",
+        "additional_d2h_operation_count",
+        "h2d_operation_count",
+        "device_allocation_count",
+        "allocation_borrow_count",
+        "kernel_launch_count",
+        "explicit_stream_sync_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "completion_export_source_result_count": {"const": 1},
+        "solve_record_payload_count": {"const": 1},
+        "solve_record_header_field_count": {"const": 32},
+        "solve_record_restart_row_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "inspected_host_payload_byte_count": {
+          "type": "integer",
+          "minimum": 280,
+          "multipleOf": 8
+        },
+        "published_terminal_outcome_count": {"const": 1},
+        "additional_d2h_operation_count": {"const": 0},
+        "h2d_operation_count": {"const": 0},
+        "device_allocation_count": {"const": 0},
+        "allocation_borrow_count": {"const": 0},
+        "kernel_launch_count": {"const": 0},
+        "explicit_stream_sync_count": {"const": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "completion_export_result_bound",
+        "raw_export_receipt_preserved",
+        "solve_record_semantics_interpreted",
+        "actual_terminal_outcome_host_observed",
+        "terminal_record_invariants_verified",
+        "process_local_export_provenance_verified",
+        "authoritative_terminal_status_proven",
+        "no_additional_device_operation",
+        "authoritative_completion_or_solution_receipt",
+        "numerical_parity_verified",
+        "solution_ready",
+        "result_ir_ready",
+        "iteration_host_copy_zero_proven",
+        "performance_or_speedup_proven",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "completion_export_result_bound": {"const": true},
+        "raw_export_receipt_preserved": {"const": true},
+        "solve_record_semantics_interpreted": {"const": true},
+        "actual_terminal_outcome_host_observed": {"const": true},
+        "terminal_record_invariants_verified": {"const": true},
+        "process_local_export_provenance_verified": {"const": true},
+        "authoritative_terminal_status_proven": {"const": true},
+        "no_additional_device_operation": {"const": true},
+        "authoritative_completion_or_solution_receipt": {"const": false},
+        "numerical_parity_verified": {"const": false},
+        "solution_ready": {"const": false},
+        "result_ir_ready": {"const": false},
+        "iteration_host_copy_zero_proven": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    },
+    "outcome_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "receipt_hash": {
+      "$ref": "#/$defs/hash"
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonnegativeNumber": {
+      "type": "number",
+      "minimum": 0
+    },
+    "nullableNonnegativeNumber": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/nonnegativeNumber"}
+      ]
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scheduled_iterations",
+        "effective_iterations",
+        "scheduled_restarts",
+        "effective_restarts",
+        "effective_arnoldi_dimension",
+        "happy_breakdown_count",
+        "stagnation_checkpoint_count",
+        "false_convergence_count",
+        "operator_apply_count",
+        "preconditioner_apply_count",
+        "restart_dimension"
+      ],
+      "properties": {
+        "scheduled_iterations": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "effective_iterations": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "scheduled_restarts": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "effective_restarts": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "effective_arnoldi_dimension": {"type": "integer", "minimum": 0, "maximum": 16},
+        "happy_breakdown_count": {"type": "integer", "minimum": 0, "maximum": 1},
+        "stagnation_checkpoint_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "false_convergence_count": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "operator_apply_count": {"type": "integer", "minimum": 0, "maximum": 12289},
+        "preconditioner_apply_count": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "restart_dimension": {"type": "integer", "minimum": 1, "maximum": 16}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rhs_l2",
+        "rhs_linf",
+        "solver_tolerance_l2",
+        "authoritative_tolerance_scaled_linf",
+        "initial_residual_l2",
+        "final_residual_l2",
+        "final_residual_linf",
+        "final_scaled_residual",
+        "previous_checkpoint_residual_l2",
+        "solution_update_l2",
+        "solution_scale_l2",
+        "estimated_residual_l2",
+        "arnoldi_work_l2",
+        "arnoldi_breakdown_threshold",
+        "triangular_scale"
+      ],
+      "properties": {
+        "rhs_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "rhs_linf": {"$ref": "#/$defs/nonnegativeNumber"},
+        "solver_tolerance_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "authoritative_tolerance_scaled_linf": {"$ref": "#/$defs/nonnegativeNumber"},
+        "initial_residual_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "final_residual_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "final_residual_linf": {"$ref": "#/$defs/nonnegativeNumber"},
+        "final_scaled_residual": {"$ref": "#/$defs/nonnegativeNumber"},
+        "previous_checkpoint_residual_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "solution_update_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "solution_scale_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "estimated_residual_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "arnoldi_work_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "arnoldi_breakdown_threshold": {"$ref": "#/$defs/nonnegativeNumber"},
+        "triangular_scale": {"$ref": "#/$defs/nonnegativeNumber"}
+      }
+    },
+    "restartRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot_index",
+        "populated",
+        "restart_index",
+        "start_iteration",
+        "end_iteration",
+        "arnoldi_step_count",
+        "reorthogonalization_count",
+        "termination_hint",
+        "termination_hint_code",
+        "flags",
+        "flag_names",
+        "estimated_residual_l2",
+        "true_residual_l2",
+        "true_residual_linf",
+        "scaled_true_residual",
+        "solution_update_l2"
+      ],
+      "properties": {
+        "slot_index": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "populated": {"type": "boolean"},
+        "restart_index": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "start_iteration": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "end_iteration": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "arnoldi_step_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "reorthogonalization_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "termination_hint": {
+          "enum": [
+            "none",
+            "restart_completed",
+            "converged_happy_breakdown",
+            "converged_true_residual",
+            "arnoldi_invariant_subspace_breakdown",
+            "arnoldi_triangular_factor_breakdown"
+          ]
+        },
+        "termination_hint_code": {"enum": [0, 1, 2, 3, 4, 5]},
+        "flags": {"type": "integer", "minimum": 0, "maximum": 255},
+        "flag_names": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 8,
+          "items": {
+            "enum": [
+              "true_residual_replayed",
+              "solver_l2_passed",
+              "authoritative_linf_passed",
+              "happy_breakdown",
+              "invariant_breakdown",
+              "stagnation_plateau",
+              "tiny_update",
+              "divergence"
+            ]
+          }
+        },
+        "estimated_residual_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "true_residual_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "true_residual_linf": {"$ref": "#/$defs/nonnegativeNumber"},
+        "scaled_true_residual": {"$ref": "#/$defs/nonnegativeNumber"},
+        "solution_update_l2": {"$ref": "#/$defs/nonnegativeNumber"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"populated": {"const": false}},
+            "required": ["populated"]
+          },
+          "then": {
+            "properties": {
+              "restart_index": {"const": 0},
+              "start_iteration": {"const": 0},
+              "end_iteration": {"const": 0},
+              "arnoldi_step_count": {"const": 0},
+              "reorthogonalization_count": {"const": 0},
+              "termination_hint": {"const": "none"},
+              "termination_hint_code": {"const": 0},
+              "flags": {"const": 0},
+              "flag_names": {"maxItems": 0},
+              "estimated_residual_l2": {"const": 0},
+              "true_residual_l2": {"const": 0},
+              "true_residual_linf": {"const": 0},
+              "scaled_true_residual": {"const": 0},
+              "solution_update_l2": {"const": 0}
+            }
+          },
+          "else": {
+            "properties": {
+              "restart_index": {"minimum": 1},
+              "end_iteration": {"minimum": 1},
+              "arnoldi_step_count": {"minimum": 1},
+              "termination_hint": {
+                "enum": [
+                  "restart_completed",
+                  "converged_happy_breakdown",
+                  "converged_true_residual",
+                  "arnoldi_invariant_subspace_breakdown",
+                  "arnoldi_triangular_factor_breakdown"
+                ]
+              },
+              "termination_hint_code": {"enum": [1, 2, 3, 4, 5]}
+            },
+            "oneOf": [
+              {
+                "properties": {
+                  "termination_hint": {"const": "restart_completed"},
+                  "termination_hint_code": {"const": 1}
+                }
+              },
+              {
+                "properties": {
+                  "termination_hint": {"const": "converged_happy_breakdown"},
+                  "termination_hint_code": {"const": 2}
+                }
+              },
+              {
+                "properties": {
+                  "termination_hint": {"const": "converged_true_residual"},
+                  "termination_hint_code": {"const": 3}
+                }
+              },
+              {
+                "properties": {
+                  "termination_hint": {"const": "arnoldi_invariant_subspace_breakdown"},
+                  "termination_hint_code": {"const": 4}
+                }
+              },
+              {
+                "properties": {
+                  "termination_hint": {"const": "arnoldi_triangular_factor_breakdown"},
+                  "termination_hint_code": {"const": 5}
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "oneOf": [
+        {
+          "properties": {
+            "status": {"const": "terminal_converged"},
+            "outcome": {
+              "properties": {"outcome_class": {"const": "converged"}}
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {"const": "terminal_not_converged"},
+            "outcome": {
+              "properties": {"outcome_class": {"const": "not_converged"}}
+            }
+          }
+        },
+        {
+          "properties": {
+            "status": {"const": "terminal_numerical_failure"},
+            "outcome": {
+              "properties": {"outcome_class": {"const": "numerical_failure"}}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

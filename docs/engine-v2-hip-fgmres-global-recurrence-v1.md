@@ -1,12 +1,13 @@
 # Engine v2 HIP FGMRES sealed-continuation global recurrence owner v1
 
-- 상태: v0.2.26 Phase 0 owner implemented, v0.2.27 downstream completion-export compatible, `contract_only`/non-promoting
+- 상태: v0.2.26 Phase 0 owner implemented, v0.2.27 completion export 및 v0.2.28 terminal observer compatible, `contract_only`/non-promoting
 - schema version: `structural-analysis-hip-fgmres-global-recurrence-context.v1`
 - capability profile: `phase0_sealed_continuation_consuming_fixed_global_recurrence`
 - evidence scope: `fixed_suffix_fenced_device_outcome_unobserved_non_promoting`
 - 상위 transaction: [sealed checkpoint transaction v1](engine-v2-hip-fgmres-sealed-checkpoint-transaction-v1.md)
 - 전체 ABI: [HIP FGMRES full recurrence ABI v2](engine-v2-hip-fgmres-recurrence-abi-v2.md)
 - 하위 consumer: [completion-only export v1](engine-v2-hip-fgmres-completion-export-v1.md)
+- 별도 host observer: [terminal-outcome observation v1](engine-v2-hip-fgmres-terminal-outcome-observation-v1.md)
 
 ## 문서 범위
 
@@ -222,7 +223,7 @@ v0.2.25 최종 전수 회귀는 RTC `111 passed in 34.77s`, checkpoint context v
 
 Integrated `F=12,M=2,I=2` fixture의 dimension-specific full/prefix/suffix hash는 각각 `sha256:ff7c027b7a2d9d40b2371bbc9b369f2c9413a36f83d969b4c03c1f6582f0d8ac`, `sha256:33c8f74230ac5489f7e28e060a973917e434a7b0d169c8d32bae3c32500c001b`, `sha256:7c710e878195e1b6567f6732f389b89c3d725d99e712ef8c3e98d1ef7a52abdc`다. 이 값은 dimension과 모든 launch field에 결속된 instance hash이며 전역 ABI 상수가 아니다.
 
-v0.2.22 sealed checkpoint evidence의 combined/source `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`/`sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`와 v0.2.23-v0.2.25 identities는 historical identity다. Current v0.2.26 native evidence로 소급 재해석하지 않는다. v0.2.26은 recurrence semantic payload/schema와 HIP source를 변경했지만 public global receipt/completion schema는 변경하지 않았다. v0.2.27 completion export는 별도 source/schema/receipt를 추가하며 이 recurrence identity와 global receipt/hash를 변경하지 않는다.
+v0.2.22 sealed checkpoint evidence의 combined/source `sha256:bb5b94457fbf3be4c5f2b38dda3f50c8a757094e0b97fb4d7288e7bdbf4db39f`/`sha256:a1d2da3f0d9a6c4a574fb1cb9d5be24c30c1e6e5e1c6de3ff1a4b50eeefad113`와 v0.2.23-v0.2.25 identities는 historical identity다. Current v0.2.26 native evidence로 소급 재해석하지 않는다. v0.2.26은 recurrence semantic payload/schema와 HIP source를 변경했지만 public global receipt/completion schema는 변경하지 않았다. v0.2.27 completion export와 v0.2.28 observer는 별도 source/schema/receipt를 추가하며 이 recurrence identity와 global receipt/hash를 변경하지 않는다.
 
 Historical v0.2.25 package 검증은 당시 `src/`로 wheel `875235` bytes (`sha256:e6522f810af2a4a0f6d62c770f510bcab57278e64cec4e0070b8fbec2eb2b8e2`) 및 sdist `823734` bytes (`sha256:8094a8bcaf30d3aaf954d5c5f0183baaf03881ff96ae62b33b6832276b2b3d3c`)를 구성했다. Wheel을 `--no-deps` 격리 target에 설치해 Engine v2 global public export, global schedule/sealed-continuation API, Draft 2020-12 global schema (`15196` bytes, `sha256:72c1aa47547970e90376c20831698e80aef4c57e9fc6d600e6949d17288bad48`) 및 당시 packaged HIP source (`207780` bytes, `sha256:2ecbbe21f8f95686117e2a12cf8cf0984f7e51b11fa331e7d5c81e15f8ed7967`)를 확인했다. 이는 historical 패키지 완전성 검증이며 current v0.2.26 package, solver outcome이나 release promotion 증거가 아니다.
 
@@ -254,4 +255,4 @@ Receipt canonical hash와 standalone validator는 current schema, ABI/source/sch
 - kernel speedup, solver end-to-end speedup, 일반 `N`-DOF O(N) 또는 model-family latency
 - SPD/PCG, AMG/DD, signed promotion과 commercial readiness
 
-v0.2.27 downstream completion export는 `solution_x` → `true_residual` → opaque `solve_record`를 exact three blocking D2H로 materialize하지만 record를 parse하거나 payload content로 host branch하지 않는다. 현재 next action은 별도 product receipt의 명시적 terminal-outcome observation contract이다. 그 뒤 model-family·multi-architecture CPU/HIP full parity와 iteration host-copy-zero를 별도로 닫는다.
+v0.2.27 downstream completion export는 `solution_x` → `true_residual` → opaque `solve_record`를 exact three blocking D2H로 materialize하고, v0.2.28 별도 observer가 exact process-local final publication에서 terminal record를 해석한다. 두 receipt는 분리되며 global/export receipt의 outcome-free claim은 변하지 않는다. 현재 next action은 model-family·multi-architecture CPU/HIP full parity이며, 그 뒤 iteration host-copy-zero와 ResultIR을 별도로 닫는다.

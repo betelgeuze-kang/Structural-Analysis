@@ -1,6 +1,6 @@
 # Engine v2 HIP FGMRES full recurrence ABI v2 design
 
-- 상태: v0.2.27 accepted ABI; global fixed schedule, later column/restart kernel, terminal padding, exact full-final-cycle active final-guard handoff, sealed-continuation-consuming suffix owner, `O(L)` fixed-suffix host-control gate와 completion-only three-buffer export까지 `contract_only` 구현, authoritative outcome/full parity는 unavailable
+- 상태: v0.2.28 accepted ABI; global fixed schedule, later column/restart kernel, terminal padding, exact full-final-cycle active final-guard handoff, sealed-continuation-consuming suffix owner, `O(L)` fixed-suffix host-control gate, completion export와 context-bound terminal observer까지 `contract_only` 구현, full parity/solution은 unavailable
 - 목표: fixed-restart right-Jacobi FGMRES의 iteration D2H/sync 0 device schedule
 - 수치 oracle: [CPU fixed-restart FGMRES reference v1](engine-v2-cpu-fgmres-reference-v1.md)
 - 기반: [HIPRTC FGMRES 7-symbol recurrence substrate v1](engine-v2-hip-fgmres-rtc-substrate-v1.md)
@@ -15,6 +15,8 @@ v0.2.22의 [sealed checkpoint transaction v1](engine-v2-hip-fgmres-sealed-checkp
 v0.2.26의 [global recurrence owner v1](engine-v2-hip-fgmres-global-recurrence-v1.md)은 `initial + R*M columns + FINAL_GUARD`를 full/sealed-prefix/continuation으로 분할하고 conditional continuation capability를 single-use consume해 suffix만 제출한다. Actual integrated `gfx1030` chain은 active later column, restart `1 -> 2 -> 3`, exact full-final-cycle checkpoint handoff와 active final-guard epoch claim을 관찰했다. Product receipt는 terminal outcome을 읽지 않으므로 authoritative solver/solution, full parity와 iteration host-copy-zero로 승격하지 않는다.
 
 v0.2.27의 [completion-only export v1](engine-v2-hip-fgmres-completion-export-v1.md)은 still-open `recurrence_fenced` global owner의 exact completion capability를 single-use consume하고 `solution_x` → `true_residual` → opaque `solve_record`를 exact three blocking D2H로 materialize한다. Export receipt는 exact `8F/8F/(192+72R)` extent, source lineage, immutable detached bytes, read-only view, payload hash와 copy-prefix telemetry를 결속하지만 `solve_record`를 parse하거나 payload content로 host branch하지 않는다. 따라서 terminal outcome/status, numerical parity, solution-ready, ResultIR 및 iteration host-copy-zero는 이 단계에서 승격되지 않는다.
+
+v0.2.28의 [terminal-outcome observation v1](engine-v2-hip-fgmres-terminal-outcome-observation-v1.md)은 exact final export result와 process-local context seal을 요구하고 little-endian record/status/code/error/counter/metric/restart history를 별도 receipt에서 해석한다. Nonfailure residual payload metric 일치와 terminal record status는 이 제한 범위에서 authoritative하지만, raw export/global receipt는 계속 outcome-free이며 numerical parity, solution-ready, ResultIR와 iteration host-copy-zero는 false다.
 
 v0.2.24는 이 numerical ABI를 바꾸지 않고 Python host-control/lifecycle만 harden했다. RTC binding은 compiler-time canonical identity hash와 flat exact-type fixed-field witness를 결속하고, control/vector/indexed-SpMV/reduction 네 launch path는 private `_checkpoint_expected_prior_pending_count`를 owner lock 안에서 exact pending map과 원자적으로 대조한다. Global owner의 deep lineage check는 suffix 전/후 phase boundary 2회로 제한하고 각 row는 frozen resource/current row/child lease와 `0..L-1` count를 검사한다. C++/HIP source, public schema와 public ABI는 변경되지 않았다.
 
@@ -228,7 +230,7 @@ Deterministic host-control test는 `L=1`과 `L=35`에서 deep `_require_current_
 
 ## 5. 구현 순서
 
-현재 1~5번의 raw fixed recurrence kernel과 schedule, 6번의 caller-attested owner, live resource owner, canonical predecessor, sealed transaction 및 conditional global suffix owner, 7번의 completion-only export가 구현되었다. Raw actual evidence는 later restart, terminal padding과 final guard를 포함하고 integrated owner evidence는 active later column, restart `1 -> 2 -> 3`의 active later restart와 exact full-cycle active final-guard fallthrough을 포함한다. 그러나 completion export는 opaque solve-record/outcome을 해석하지 않으므로 product receipt의 actual terminal outcome/status 관찰은 아직 없다.
+현재 1~5번의 raw fixed recurrence kernel과 schedule, 6번의 caller-attested owner, live resource owner, canonical predecessor, sealed transaction 및 conditional global suffix owner, 7번의 completion-only export, 8번의 context-bound terminal observer가 구현되었다. Raw actual evidence는 later restart, terminal padding과 final guard를 포함하고 integrated owner evidence는 active later column, restart `1 -> 2 -> 3`의 active later restart와 exact full-cycle active final-guard fallthrough을 포함한다. Global/export product receipt는 outcome-free로 유지되고, 별도 observer receipt만 exact process-local terminal record status를 해석한다.
 
 v0.2.20 focused 기록은 recurrence plan `61 passed`, RTC `99 passed`, delegated producer projection `14 passed`, canonical producer `8 passed`다. Actual `gfx1030` required gate는 raw validator arm→consume→clear checkpoint `5 passed`와 canonical producer chain `1 passed`를 관찰했다. 이 수치는 first-column contract evidence이며 broad solver parity나 승격 증거가 아니다.
 
@@ -246,6 +248,8 @@ v0.2.26 exact full-cycle parameter `F=24,nnz=360,M=2,I=4,R=2`는 full/prefix/suf
 
 v0.2.27 actual `gfx1030` completion-export gate는 `F=6,M=1,I=1,R=1`에서 `solution_x`/`true_residual` 각 48 bytes와 `solve_record` 264 bytes, 합계 360 bytes를 exact three blocking D2H로 내보냈다. Export에는 host staging allocation 3이 있지만 추가 HIP device allocation·H2D·async D2H·explicit stream sync·checkpoint fence는 0이다. Verification-only CPU 비교는 exported arrays를 확인했지만 product export receipt의 terminal outcome/status/parity/solution claim을 변경하지 않는다.
 
+v0.2.28 actual `gfx1030` observer gate는 later-column convergence와 exact full-cycle active `FINAL_GUARD` max-iteration 두 경로의 terminal record를 해석했다. Raw export D2H는 각각 정확히 3회였고 observer 구간의 device allocation/H2D/D2H/kernel/sync는 0이다. CPU oracle은 observer receipt 발행 후 test-only로 실행했으며 full parity claim이 아니다.
+
 Sealed parent의 weak lease reaper는 dead/unconsumed/stream-idle factory result만 lazy release한다. Continuation이 consume됐거나 pending work가 있는 downstream owner 자체가 유실되면 자동 reap하지 않고 parent close를 fail-closed한다. 운영 계층은 cleanup owner를 보존해 명시적 fence/ack/close retry를 완료해야 한다.
 
 1. v2 plan/schema에 256-byte control buffer와 identity/layout hash 추가
@@ -254,7 +258,8 @@ Sealed parent의 weak lease reaper는 dead/unconsumed/stream-idle factory result
 4. full MGS/DGKS, h-next, V normalization, Givens, scale-relative backsolve, candidate replay
 5. commit, false-convergence continuation, stagnation/divergence/breakdown/final guard; raw fixed program 구현, integrated active later column/restart 검증 완료
 6. live allocation/context, strict completion capability/receipt, poison/retry cleanup; conditional global suffix fence owner까지 구현
-7. completion-only exact three blocking-D2H export 구현; explicit terminal-outcome observation, model-family CPU/HIP parity 및 iteration host-copy-zero gate는 미완료
+7. completion-only exact three blocking-D2H export 구현
+8. exact process-local terminal-outcome observer 구현; model-family CPU/HIP parity, iteration host-copy-zero와 ResultIR gate는 미완료
 
 ## 6. 필수 검증
 
@@ -282,6 +287,8 @@ Sealed parent의 weak lease reaper는 dead/unconsumed/stream-idle factory result
 - actual integrated active later column/restart 및 exact full-cycle active final-guard; partial-cycle inactive guard와 malformed handoff fail-closed 별도 gate
 - completion capability single-use consume, exact `solution_x` → `true_residual` → opaque `solve_record` three blocking D2H, `8F/8F/(192+72R)` extent, immutable payload/hash와 copy-prefix telemetry
 - completion export의 record/content non-interpretation, terminal outcome/status/parity/solution-ready false 경계
+- observer의 17 terminal code, exact policy/counter/gate/flag/stagnation history, failure stale-metric 숨김과 context-required provenance
+- actual observer 구간의 추가 device allocation/H2D/D2H/kernel/sync 0 및 raw export receipt 불변
 - standalone receipt structural/semantic validation과 `expected_context`/signed provenance 경계
 - 실제 `gfx1030` compile/symbol, 조건부 native numerical gate
 
@@ -291,4 +298,4 @@ GPU fixed tree와 CPU `math.fsum`/순차 LASSQ는 각각 결정적이지만 bitw
 
 현재 `plan_schema_implemented`, `candidate_spmv_residual_l2_raw_linf_implemented`, `device_scale_metrics_priority_predicate_implemented`, `trial_committed_x_norms_implemented`, `raw_x_scale_l2_implemented`, `raw_checkpoint_decide_preflight_gated_commit_finalize_implemented`, `native_first_column_checkpoint_raw_slice_observed`, `caller_attested_checkpoint_range_lease_enqueue_fence_context_implemented`, `live_krylov_parent_integrated`, `allocator_provenance_bound`, `resource_owner_ready`, `global_fixed_schedule_implemented`, `raw_later_columns_and_restarts_implemented`와 `raw_final_guard_implemented`는 true다. Exact registered nonoverlap allocation, same stream, exclusive source ownership과 fixed four-row owner sequence에 한해 `invalid_source_destination_atomicity_proven`도 true다. Canonical producer의 fenced receipt에 한해 `owned_content_initialized`, `canonical_producer_prefix_fenced`, `device_mask_domain_gate_bound`, exact16 projection과 same-runtime/device/stream binding도 true다. Sealed/global child의 fenced receipt에서는 conditional continuation capability consume, direct11/physical16 continuity, exact suffix fence와 outcome-free completion 발행이 true다. `fixed_suffix_host_submission_control_linear_in_L_structural_gate`도 phase-boundary deep check가 상수이고 row당 fixed work인 제한된 구조에서 true다. Actual integrated owner의 active later column/restart와 `integrated_active_final_guard_fallthrough_proven`도 true다. 별도 completion-export receipt에 한해 `completion_raw_buffers_exported`, exact three blocking D2H와 immutable detached payload publication이 true다.
 
-Actual integrated owner chain은 active later column, restart `1 -> 2 -> 3`과 exact full-cycle active `FINAL_GUARD`를 실행하고 product-path global allocation/copy/intermediate-sync/live-read/host-branch 0과 one-fence suffix completion을 확인했다. v0.2.27 export는 completion raw bytes를 host에 materialize하지만 opaque `solve_record`를 parse하거나 content로 branch하지 않는다. 따라서 `actual_terminal_outcome_host_observed`, `solve_record_semantics_interpreted`, `actual_mask_host_observed`, `device_validation_outcome_host_observed`, `authoritative_predecessor_proven`, `authoritative_numerical_transaction_proven`, `full_device_recurrence_implemented`, `live_solver_ready`, `solution_ready`, `iteration_host_copy_zero_proven`, `native_full_recurrence_parity`, 일반 `N`-DOF O(N), kernel/solver speedup, ResultIR 통합, SPD/PCG와 commercial readiness는 false다. Process-local consumed/pending downstream cleanup owner 유실 recovery는 v0.2.25 범위에서 구현됐지만 process crash/GPU reset/cross-process recovery는 false다. Standalone receipt validation은 structural/semantic consistency만 증명하며 provenance authenticity에는 `expected_context` 또는 signed chain이 필요하다. 다음 authoritative 우선순위는 명시적 terminal-outcome observation contract이고, 그 다음은 model-family·multi-architecture CPU/HIP full parity와 iteration host-copy-zero다.
+Actual integrated owner chain은 active later column, restart `1 -> 2 -> 3`과 exact full-cycle active `FINAL_GUARD`를 실행하고 product-path global allocation/copy/intermediate-sync/live-read/host-branch 0과 one-fence suffix completion을 확인했다. v0.2.27 export는 completion raw bytes를 host에 materialize하고 v0.2.28 별도 observer는 exact process-local result의 `actual_terminal_outcome_host_observed`/`solve_record_semantics_interpreted`/terminal record status를 true로 고정한다. 그러나 global/export receipt는 계속 outcome-free이며 `actual_mask_host_observed`, `device_validation_outcome_host_observed`, `authoritative_predecessor_proven`, `authoritative_numerical_transaction_proven`, `full_device_recurrence_implemented`, `live_solver_ready`, `solution_ready`, `iteration_host_copy_zero_proven`, `native_full_recurrence_parity`, 일반 `N`-DOF O(N), kernel/solver speedup, ResultIR 통합, SPD/PCG와 commercial readiness는 false다. Process-local consumed/pending downstream cleanup owner 유실 recovery는 v0.2.25 범위에서 구현됐지만 process crash/GPU reset/cross-process recovery는 false다. Serialized observer receipt는 process identity를 포함하지 않아 provenance authenticity에 exact source/context 또는 향후 signed chain이 필요하다. 다음 authoritative 우선순위는 model-family·multi-architecture CPU/HIP full parity이고, 그 다음은 iteration host-copy-zero와 ResultIR이다.

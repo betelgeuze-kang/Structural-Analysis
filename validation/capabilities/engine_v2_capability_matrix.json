@@ -1574,6 +1574,7 @@
         "consumed_release_store_interruption_cannot_wedge_parent_or_reopen_export",
         "standalone_exact_type_schema_hash_and_semantic_validation",
         "expected_context_required_for_process_local_provenance_authenticity",
+        "private_atomic_final_result_identity_and_exact_recurrence_policy_seal_for_downstream_observation_without_raw_receipt_change",
         "native_gfx1030_f6_m1_i1_exact_three_copies_48_48_264_total_360_bytes",
         "verification_only_cpu_payload_comparison_after_outcome_free_product_receipt_freeze"
       ],
@@ -1618,6 +1619,7 @@
         "closed_context_no_result_resurrection",
         "closed_context_expected_provenance_rejects_semantically_valid_rehashed_receipt_forgery",
         "strict_schema_semantic_hash_result_immutability_and_bool_as_int_forgery_rejection",
+        "fresh_parent_authority_policy_seal_toctou_and_single_store_publication_interruption_recovery",
         "native_gfx1030_exact_three_blocking_d2h_and_verification_only_cpu_payload_comparison"
       ],
       "evidence_paths": [
@@ -1633,6 +1635,78 @@
         "tests/test_engine_v2_hip_fgmres_completion_export_hardware_v1.py"
       ],
       "claim_level": "fenced_completion_three_raw_buffer_blocking_d2h_export_outcome_uninterpreted_non_promoting"
+    },
+    {
+      "capability_id": "hip_fgmres_terminal_outcome_observation_v1",
+      "category": "backend_validation",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": [
+        "exact_final_immutable_completion_export_result_and_process_local_context_seal_required",
+        "separate_observer_receipt_preserves_raw_completion_export_receipt_payload_and_hashes",
+        "explicit_little_endian_192_plus_72r_solve_record_decode",
+        "terminal_active_status_termination_error_counter_metric_and_restart_row_invariants",
+        "all_seventeen_current_terminal_termination_codes_without_invented_cancelled_status",
+        "exact_frozen_restart_iteration_tolerance_stagnation_and_divergence_policy_snapshot",
+        "nonfailure_exact_gate_flag_priority_counter_and_committed_restart_history_validation",
+        "numerical_failure_stale_header_metrics_hidden_and_committed_row_prefix_only",
+        "nonfailure_true_residual_payload_deterministic_tree_l2_linf_and_scaled_metric_match",
+        "solution_payload_finiteness_observed_without_solution_norm_or_solution_ready_claim",
+        "authoritative_terminal_record_status_with_exact_process_local_export_provenance",
+        "context_required_public_receipt_validation_and_nonserialized_result_identity",
+        "observer_additional_device_allocation_borrow_h2d_d2h_kernel_sync_and_fallback_zero",
+        "host_observation_cost_o_f_plus_r_without_solver_o_n_claim",
+        "native_gfx1030_later_column_convergence_and_active_final_guard_max_iteration_observation"
+      ],
+      "explicit_exclusions": [
+        "authoritative_completion_or_solution_receipt",
+        "numerical_parity_verified",
+        "solution_ready",
+        "result_ir_ready",
+        "equilibrium_or_residual_equation_replay",
+        "iteration_host_copy_zero_proven",
+        "model_family_and_multi_architecture_cpu_hip_full_recurrence_parity",
+        "general_n_dof_o_n_claim",
+        "kernel_speedup_claim",
+        "solver_end_to_end_speedup_claim",
+        "performance_or_speedup_claim",
+        "standalone_serialized_receipt_provenance_authenticity_without_process_local_context_or_signed_chain",
+        "process_crash_gpu_reset_or_cross_process_abandoned_owner_recovery",
+        "commercial_readiness",
+        "promotion_eligible"
+      ],
+      "required_contracts": [
+        "ADR-003",
+        "ADR-004",
+        "ADR-006",
+        "ADR-007"
+      ],
+      "verification_cases": [
+        "complete_terminal_code_table_status_code_error_name_and_restart_hint_mapping",
+        "exact_policy_counter_gate_flag_stagnation_divergence_and_priority_semantic_replay",
+        "numerical_failure_stale_nonfinite_metrics_huge_finite_solution_and_committed_prefix_handling",
+        "raw_export_identity_hash_payload_and_global_receipt_immutability",
+        "final_publication_identity_policy_seal_mutation_toctou_and_atomic_interruption_recovery",
+        "context_required_receipt_provenance_backend_dimension_and_source_binding_forgery_rejection",
+        "strict_scalar_type_signed_zero_nan_inf_unknown_bit_partial_row_and_rehashed_semantic_forgery_rejection",
+        "public_root_and_assembly_backend_api_identity_schema_and_package_resource_validation",
+        "native_gfx1030_two_terminal_paths_exact_three_raw_d2h_and_observer_zero_device_operations",
+        "verification_only_cpu_oracle_after_observer_receipt_publication"
+      ],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-terminal-outcome-observation-v1.md",
+        "docs/engine-v2-hip-fgmres-completion-export-v1.md",
+        "docs/engine-v2-hip-fgmres-global-recurrence-v1.md",
+        "docs/engine-v2-hip-fgmres-recurrence-abi-v2.md",
+        "docs/structural-solver-engine-v2-master-roadmap.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_terminal_outcome_observation_v1.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_completion_export_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_terminal_outcome_observation_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_terminal_outcome_observation_v1.py",
+        "tests/test_engine_v2_hip_fgmres_terminal_outcome_observation_hardware_v1.py"
+      ],
+      "claim_level": "context_bound_exported_terminal_record_semantics_observed_non_promoting"
     },
     {
       "capability_id": "hip_fgmres_full_device_recurrence_abi_v2",
@@ -1668,6 +1742,8 @@
         "native_malformed_handoff_next_restart_and_operator_count_prepublication_evidence",
         "implemented_completion_only_solution_true_residual_and_opaque_solve_record_export_kept_outcome_uninterpreted",
         "native_gfx1030_completion_export_exact_three_blocking_d2h_360_bytes_evidence",
+        "implemented_context_bound_terminal_record_observation_with_zero_additional_device_operations_kept_non_promoting",
+        "native_gfx1030_later_column_convergence_and_final_guard_max_iteration_terminal_observation_evidence",
         "implemented_fixed_suffix_host_submission_control_o_l_structural_gate_not_general_n_dof_o_n",
         "implemented_registry_sealed_immutable_dispatch_snapshot_and_canonical_row_tuple",
         "final_independent_linear_reaudit_no_remaining_defect_in_requested_host_control_scope",
@@ -1686,7 +1762,6 @@
         "complete_device_recurrence_execution",
         "live_fgmres_solver_or_solution_context",
         "authoritative_completion_or_solution_receipt",
-        "product_terminal_outcome_observation",
         "iteration_host_copy_zero",
         "native_cpu_hip_full_recurrence_parity",
         "general_n_dof_o_n_claim",
@@ -1713,6 +1788,7 @@
         "final_linear_reaudit_closed_only_requested_host_control_scope_without_product_promotion",
         "global_owner_receipt_outcome_unobserved_and_non_promoting",
         "completion_export_kept_raw_outcome_uninterpreted_and_non_promoting",
+        "terminal_outcome_observer_kept_separate_from_completion_solution_parity_result_ir_and_promotion_claims",
         "process_local_abandoned_suffix_owner_recovery_kept_separate_from_numerical_completion_claim",
         "native_integrated_recovery_lifecycle_gate_kept_separate_from_full_recurrence_parity_and_solution"
       ],
@@ -1725,18 +1801,21 @@
         "src/structural_analysis/engine_v2/assembly_backend/fgmres_global_schedule_plan_v1.py",
         "src/structural_analysis/engine_v2/assembly_backend/fgmres_global_recurrence_context_v1.py",
         "src/structural_analysis/engine_v2/assembly_backend/fgmres_completion_export_v1.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_terminal_outcome_observation_v1.py",
         "src/structural_analysis/engine_v2/assembly_backend/fgmres_rtc_v2.py",
         "src/structural_analysis/engine_v2/assembly_backend/kernels/engine_v2_fgmres_v2.hip.cpp",
         "src/structural_analysis/schemas/hip_fgmres_completion_export_v1.schema.json",
+        "src/structural_analysis/schemas/hip_fgmres_terminal_outcome_observation_v1.schema.json",
         "tests/test_engine_v2_hip_fgmres_global_schedule_plan_v1.py",
         "tests/test_engine_v2_hip_fgmres_global_recurrence_hardware_v1.py",
         "tests/test_engine_v2_hip_fgmres_final_guard_hardware_v1.py",
         "tests/test_engine_v2_hip_fgmres_global_recurrence_context_v1.py",
         "tests/test_engine_v2_hip_fgmres_global_recurrence_context_hardware_v1.py",
         "tests/test_engine_v2_hip_fgmres_completion_export_v1.py",
-        "tests/test_engine_v2_hip_fgmres_completion_export_hardware_v1.py"
+        "tests/test_engine_v2_hip_fgmres_completion_export_hardware_v1.py",
+        "tests/test_engine_v2_hip_fgmres_terminal_outcome_observation_hardware_v1.py"
       ],
-      "claim_level": "global_recurrence_kernel_conditional_suffix_owner_and_raw_completion_export_in_progress_without_authoritative_outcome_full_parity_or_solution"
+      "claim_level": "global_recurrence_kernel_conditional_suffix_owner_raw_completion_export_and_context_bound_terminal_observation_in_progress_without_full_parity_or_solution"
     },
     {
       "capability_id": "hip_canonical_csr_aot_kernel_artifact_v1",

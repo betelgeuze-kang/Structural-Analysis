@@ -441,7 +441,15 @@ class _CompletionExportChildAuthorityV1:
     device_ordinal: int
     architecture: str
     free_dof_count: int
+    restart_dimension: int
+    max_iterations: int
     maximum_restart_count: int
+    stagnation_checkpoint_limit: int
+    absolute_tolerance: float
+    relative_tolerance: float
+    authoritative_tolerance: float
+    stagnation_relative_tolerance: float
+    divergence_factor: float
     recurrence_plan_hash: str
     recurrence_kernel_abi_hash: str
     combined_recurrence_abi_hash: str
@@ -1673,7 +1681,15 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 device_ordinal=binding.device_ordinal,
                 architecture=binding.architecture,
                 free_dof_count=binding.free_dof_count,
+                restart_dimension=binding.restart_dimension,
+                max_iterations=binding.max_iterations,
                 maximum_restart_count=binding.maximum_restart_count,
+                stagnation_checkpoint_limit=binding.stagnation_checkpoint_limit,
+                absolute_tolerance=binding.absolute_tolerance,
+                relative_tolerance=binding.relative_tolerance,
+                authoritative_tolerance=binding.authoritative_tolerance,
+                stagnation_relative_tolerance=(binding.stagnation_relative_tolerance),
+                divergence_factor=binding.divergence_factor,
                 recurrence_plan_hash=bindings.recurrence_plan_hash,
                 recurrence_kernel_abi_hash=bindings.recurrence_kernel_abi_hash,
                 combined_recurrence_abi_hash=bindings.combined_recurrence_abi_hash,

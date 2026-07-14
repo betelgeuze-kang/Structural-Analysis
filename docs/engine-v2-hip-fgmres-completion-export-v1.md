@@ -117,6 +117,8 @@ context_ready, exported, poisoned, context_closed, cleanup_failed
 
 Standalone validator는 exact Python type, Draft 2020-12 schema, receipt/payload hash와 내부 semantic consistency를 검증한다. Canonical hash는 서명이 아니므로 process-local provenance에는 `expected_context` 검증이 필요하고, 장기 보관·외부 전달의 진본성은 향후 signed chain의 범위다.
 
+Downstream [terminal-outcome observer v1](engine-v2-hip-fgmres-terminal-outcome-observation-v1.md)을 위해 exporter는 public raw receipt와 그 hash를 바꾸지 않는 private final-publication seal을 유지한다. Seal은 exact final result/receipt/세 payload identity와 hash, parent에서 publication 직전에 다시 검증한 recurrence policy를 단일 state로 결속한다. Intermediate publication이나 local policy mutation은 observer authority가 아니며, seal publication interruption은 동일 result로 monotonic retry된다. 이 private seal은 exporter가 solve record를 해석했다는 claim을 추가하지 않는다.
+
 ## Operation·telemetry 계약
 
 정상 `exported` receipt의 exact accounting은 다음과 같다.
@@ -168,6 +170,7 @@ Actual AMD HIP gate는 gfx1030에서 `F=6`, `R=1`, `I=1`로 실행했다. Requir
 
 ## 다음 단계
 
-다음 우선순위는 **explicit terminal-outcome observation contract**다. 별도 observer가 이 export의 opaque solve-record ABI와 payload lineage를 consume·검증하고 terminal status/code, active/error, counter와 metric을 명시적으로 해석해야 한다. 그 observer는 본 raw-export receipt의 outcome-free claim을 소급 변경하지 않고 별도 receipt로 성공·실패 의미를 고정해야 한다.
 
-Terminal-outcome observation을 닫은 뒤에도 model-family·multi-architecture CPU/HIP full parity, ResultIR integration과 iteration host-copy-zero는 각각 독립 gate로 검증해야 한다.
+Explicit terminal-outcome observation은 [별도 v1 contract](engine-v2-hip-fgmres-terminal-outcome-observation-v1.md)로 구현되었다. Observer는 본 raw-export receipt의 outcome-free claim을 소급 변경하지 않고 별도 receipt에서 terminal record 의미를 고정한다.
+
+다음 우선순위는 model-family·multi-architecture CPU/HIP full parity이다. ResultIR integration과 iteration host-copy-zero는 그 후에도 각각 독립 gate로 검증해야 한다.
