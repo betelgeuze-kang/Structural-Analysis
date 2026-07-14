@@ -1,0 +1,8 @@
+{
+  "schema_version": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v1",
+  "capability_profile": "phase0_external_gfx1100_ed25519_trust_anchors",
+  "registry_epoch": 1,
+  "evidence_scope": "package_owned_ed25519_verification_keys_non_promoting",
+  "keys": [],
+  "registry_hash": "sha256:4154e2e679ce17b986eac4e90735e518ceddda62751625aa6e254742924b1704"
+}

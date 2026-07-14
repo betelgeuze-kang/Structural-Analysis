@@ -704,14 +704,56 @@ def _decode_and_validate_outcome(
     policy: HipFgmresTerminalOutcomePolicySnapshotV1,
 ) -> HipFgmresTerminalOutcomeV1:
     source = export_result.receipt
-    abi = hip_fgmres_solve_record_abi_payload_v2()
-    kernel_abi = hip_fgmres_recurrence_kernel_abi_payload_v2()
-    abi_hash = canonical_hash(abi)
+    abi_hash = canonical_hash(hip_fgmres_solve_record_abi_payload_v2())
     if source.bindings.solve_record_abi_hash != abi_hash:
         _fail(
             "hip_fgmres_terminal_outcome_solve_record_abi_mismatch",
             "/bindings/solve_record_abi_hash",
         )
+    if (
+        source.dimensions.maximum_restart_count != policy.maximum_restart_count
+        or source.dimensions.free_dof_count <= 0
+        or source.dimensions.solve_record_byte_count
+        != _HEADER_BYTES + _RESTART_BYTES * policy.maximum_restart_count
+    ):
+        _fail("hip_fgmres_terminal_outcome_record_extent_invalid", "/record")
+    return decode_hip_fgmres_detached_completion_payload_v1(
+        solution_x=export_result.solution_x,
+        true_residual=export_result.true_residual,
+        solve_record=export_result.solve_record,
+        free_dof_count=source.dimensions.free_dof_count,
+        maximum_restart_count=source.dimensions.maximum_restart_count,
+        policy=policy,
+    )
+
+
+def decode_hip_fgmres_detached_completion_payload_v1(
+    *,
+    solution_x: bytes,
+    true_residual: bytes,
+    solve_record: bytes,
+    free_dof_count: int,
+    maximum_restart_count: int,
+    policy: HipFgmresTerminalOutcomePolicySnapshotV1,
+) -> HipFgmresTerminalOutcomeV1:
+    """Decode current-ABI completion bytes without restoring live authority."""
+
+    _validate_policy_snapshot(policy)
+    if (
+        type(solution_x) is not bytes
+        or type(true_residual) is not bytes
+        or type(solve_record) is not bytes
+        or type(free_dof_count) is not int
+        or free_dof_count <= 0
+        or type(maximum_restart_count) is not int
+        or maximum_restart_count <= 0
+        or maximum_restart_count != policy.maximum_restart_count
+        or len(solution_x) != 8 * free_dof_count
+        or len(true_residual) != 8 * free_dof_count
+    ):
+        _fail("hip_fgmres_terminal_outcome_detached_payload_invalid", "/payload")
+    abi = hip_fgmres_solve_record_abi_payload_v2()
+    kernel_abi = hip_fgmres_recurrence_kernel_abi_payload_v2()
     if (
         abi["byte_order"] != "little_endian"
         or abi["header_bytes"] != _HEADER_BYTES
@@ -720,15 +762,10 @@ def _decode_and_validate_outcome(
     ):
         _fail("hip_fgmres_terminal_outcome_abi_invalid", "/abi")
 
-    maximum_restarts = source.dimensions.maximum_restart_count
+    maximum_restarts = maximum_restart_count
     expected_length = _HEADER_BYTES + _RESTART_BYTES * maximum_restarts
-    payload = export_result.solve_record
-    if (
-        type(maximum_restarts) is not int
-        or maximum_restarts <= 0
-        or len(payload) != expected_length
-        or source.dimensions.solve_record_byte_count != expected_length
-    ):
+    payload = solve_record
+    if len(payload) != expected_length:
         _fail("hip_fgmres_terminal_outcome_record_extent_invalid", "/record")
 
     header_fields = _parse_fields(payload, abi["header_fields"], base=0)
@@ -858,11 +895,9 @@ def _decode_and_validate_outcome(
         raw_failure_metrics_available=True,
     )
 
-    solution = np.frombuffer(export_result.solution_x, dtype="<f8")
-    residual = np.frombuffer(export_result.true_residual, dtype="<f8")
-    if solution.size != source.dimensions.free_dof_count or residual.size != (
-        source.dimensions.free_dof_count
-    ):
+    solution = np.frombuffer(solution_x, dtype="<f8")
+    residual = np.frombuffer(true_residual, dtype="<f8")
+    if solution.size != free_dof_count or residual.size != free_dof_count:
         _fail(
             "hip_fgmres_terminal_outcome_vector_extent_invalid",
             "/payload",
@@ -2539,6 +2574,7 @@ __all__ = [
     "HipFgmresTerminalOutcomeObservationV1Error",
     "HipFgmresTerminalOutcomeRestartRowV1",
     "HipFgmresTerminalOutcomeV1",
+    "decode_hip_fgmres_detached_completion_payload_v1",
     "observe_hip_fgmres_terminal_outcome_v1",
     "validate_hip_fgmres_terminal_outcome_observation_receipt_v1",
     "validate_hip_fgmres_terminal_outcome_observation_result_v1",

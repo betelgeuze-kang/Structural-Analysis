@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_external_trust_anchor_registry_v1.schema.json",
+  "title": "Package-owned Ed25519 trust anchors for external HIP FGMRES evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "registry_epoch",
+    "evidence_scope",
+    "keys",
+    "registry_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_external_gfx1100_ed25519_trust_anchors"
+    },
+    "registry_epoch": {"type": "integer", "minimum": 1},
+    "evidence_scope": {
+      "const": "package_owned_ed25519_verification_keys_non_promoting"
+    },
+    "keys": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/key"}
+    },
+    "registry_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z$"
+    },
+    "key": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "key_epoch",
+        "status",
+        "runner_id",
+        "public_key_base64",
+        "public_key_sha256",
+        "allowed_architecture_base",
+        "allowed_suite_id",
+        "allowed_fixture_registry_bytes_sha256",
+        "allowed_fixture_registry_hash",
+        "minimum_run_sequence",
+        "maximum_run_sequence",
+        "valid_from_utc",
+        "valid_until_utc",
+        "revoked_at_utc",
+        "revocation_reason"
+      ],
+      "properties": {
+        "key_id": {
+          "type": "string",
+          "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
+        },
+        "key_epoch": {"type": "integer", "minimum": 1},
+        "status": {"enum": ["active", "revoked"]},
+        "runner_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+        },
+        "public_key_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "allowed_architecture_base": {"const": "gfx1100"},
+        "allowed_suite_id": {
+          "const": "phase0_execution_plan_v2_linear_frame_truss_fgmres_fixed_suite.v2"
+        },
+        "allowed_fixture_registry_bytes_sha256": {"$ref": "#/$defs/hash"},
+        "allowed_fixture_registry_hash": {"$ref": "#/$defs/hash"},
+        "minimum_run_sequence": {"type": "integer", "minimum": 1},
+        "maximum_run_sequence": {
+          "oneOf": [
+            {"type": "integer", "minimum": 1},
+            {"type": "null"}
+          ]
+        },
+        "valid_from_utc": {"$ref": "#/$defs/utc"},
+        "valid_until_utc": {
+          "oneOf": [{"$ref": "#/$defs/utc"}, {"type": "null"}]
+        },
+        "revoked_at_utc": {
+          "oneOf": [{"$ref": "#/$defs/utc"}, {"type": "null"}]
+        },
+        "revocation_reason": {
+          "oneOf": [
+            {"type": "string", "minLength": 1, "maxLength": 256},
+            {"type": "null"}
+          ]
+        }
+      }
+    }
+  }
+}

@@ -120,6 +120,38 @@ def test_engine_v2_hip_rows_separate_artifact_replay_and_native_parity() -> None
         == "device_assembly_contract_and_hiprtc_compile_only_fresh_native_launch_unavailable"
     )
 
+
+def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() -> (
+    None
+):
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    registry = rows["hip_fgmres_package_fixture_registry_v1"]
+    assert registry["implementation_state"] == "implemented"
+    assert registry["promotion_state"] == "contract_only"
+    assert "hardware_execution" in registry["explicit_exclusions"]
+    assert "package_fixture_registration_ten_of_ten" in registry["claim_level"]
+
+    family = rows["hip_fgmres_registry_bound_model_family_parity_v2"]
+    assert "actual_local_gfx1030_ten_of_ten" in family["supported_scope"]
+    assert "actual_external_gfx1100_cell" in family["explicit_exclusions"]
+    assert "serialized_external_evidence_counting" in family["explicit_exclusions"]
+    assert "external_gfx1100_zero" in family["claim_level"]
+
+    signed = rows["hip_fgmres_external_signed_evidence_v1"]
+    assert signed["implementation_state"] == "implemented"
+    assert signed["promotion_state"] == "contract_only"
+    assert "domain_separated_ed25519_verification" in signed["supported_scope"]
+    assert "active_package_trust_anchor" in signed["explicit_exclusions"]
+    assert "actual_external_gfx1100_signed_cell" in signed["explicit_exclusions"]
+    assert (
+        "independent_installed_wheel_and_source_bundle_hash_recomputation"
+        in signed["explicit_exclusions"]
+    )
+    assert "same_artifact_two_architecture_evidence" in signed["explicit_exclusions"]
+    assert "active_keys_zero_external_cells_zero" in signed["claim_level"]
+
     resident = rows["hip_assembly_resident_csr_residual_jvp_consumer_v1"]
     assert resident["implementation_state"] == "implemented"
     assert resident["promotion_state"] == "contract_only"

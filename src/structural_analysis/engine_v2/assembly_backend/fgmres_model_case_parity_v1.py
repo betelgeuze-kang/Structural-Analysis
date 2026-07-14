@@ -480,6 +480,47 @@ def validate_hip_fgmres_model_case_parity_result_v1(
     return result
 
 
+def replay_hip_fgmres_detached_model_case_numerics_v1(
+    *,
+    execution_plan: ExecutionPlanV2,
+    cpu_result: CpuFgmresReferenceResultV1,
+    solution_x: bytes,
+    true_residual: bytes,
+    outcome: Any,
+) -> tuple[HipFgmresModelCaseParityVectorComparisonV1, ...]:
+    """Replay detached numerical bytes without asserting HIP provenance."""
+
+    validate_execution_plan_v2(execution_plan)
+    validate_cpu_fgmres_reference_result_v1(
+        cpu_result,
+        expected_plan=execution_plan,
+        expected_policy=cpu_result.policy,
+        expected_initial_full_state=None,
+    )
+    free_dof_count = int(execution_plan.array("free_dofs").size)
+    hip_solution = _f64_vector_from_bytes(solution_x, free_dof_count)
+    hip_residual = _f64_vector_from_bytes(true_residual, free_dof_count)
+    cpu_solution = _exact_f64_vector(cpu_result.reduced_solution, free_dof_count)
+    cpu_residual = _exact_f64_vector(cpu_result.true_residual, free_dof_count)
+    replayed_residual = _replay_true_residual(execution_plan, hip_solution)
+    vectors = (
+        _compare_vector("solution_x", cpu_solution, hip_solution),
+        _compare_vector("true_residual", cpu_residual, hip_residual),
+        _compare_vector("true_residual_replay", hip_residual, replayed_residual),
+    )
+    try:
+        populated = tuple(row for row in outcome.restart_rows if row.populated)
+    except (AttributeError, TypeError) as exc:
+        _fail(
+            "hip_fgmres_model_case_parity_detached_outcome_invalid",
+            "/outcome",
+            type(exc).__name__,
+        )
+    _validate_discrete_parity(cpu_result, outcome, populated)
+    _validate_metric_parity(cpu_result, outcome, populated)
+    return vectors
+
+
 def _evaluate_sources(
     cpu_result: CpuFgmresReferenceResultV1,
     observation_result: HipFgmresTerminalOutcomeObservationResultV1,
@@ -1360,6 +1401,7 @@ __all__ = [
     "HipFgmresModelCaseParityV1Error",
     "HipFgmresModelCaseParityVectorComparisonV1",
     "attest_hip_fgmres_model_case_parity_v1",
+    "replay_hip_fgmres_detached_model_case_numerics_v1",
     "validate_hip_fgmres_model_case_parity_receipt_v1",
     "validate_hip_fgmres_model_case_parity_result_v1",
 ]
