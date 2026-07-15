@@ -114,7 +114,7 @@ Start operation ordinal을 `b`, canonical launch 수를 `C`, continuation launch
 
 ## 현재 검증
 
-- focused audit 회귀: `11 passed in 243.76s (0:04:03)`
+- focused audit 회귀: `11 passed in 242.95s (0:04:02)`
 - public API/capability 회귀: `16 passed in 1.73s`
 - RTC 전체 회귀: `134 passed in 43.82s`
 - current-snapshot actual local `gfx1030` gate: `1 skipped in 1.80s`
