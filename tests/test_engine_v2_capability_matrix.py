@@ -160,6 +160,10 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         "tests/test_engine_v2_hip_fgmres_iteration_host_transfer_audit_hardware_v1.py"
         in ordinal_audit["evidence_paths"]
     )
+    assert (
+        "tests/test_engine_v2_hip_fgmres_iteration_host_transfer_audit_hardware_v1.py"
+        in ordinal_audit["evidence_paths"]
+    )
 
     family_transfer = rows["hip_fgmres_model_family_host_transfer_audit_v1"]
     assert payload["rows"][1]["capability_id"] == (
