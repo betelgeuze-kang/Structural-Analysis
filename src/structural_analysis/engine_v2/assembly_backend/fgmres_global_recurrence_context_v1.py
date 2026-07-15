@@ -45,6 +45,7 @@ from .fgmres_recurrence_plan_v2 import (
     hip_fgmres_recurrence_kernel_abi_payload_v2,
 )
 from .fgmres_rtc_v2 import HipRtcFgmresV2Kernel
+from .fgmres_rtc_launch_fence_ledger_v1 import _launch_descriptor_hash_v1
 from .fgmres_sealed_checkpoint_transaction_v1 import (
     HipFgmresSealedCheckpointContinuationCapabilityV1,
     HipFgmresSealedCheckpointTransactionExecutionContextV1,
@@ -980,6 +981,7 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
         row = dict(launch)
         pointers = dict(submission.pointer_values)
         token = submission.checkpoint_owner_token
+        audit_descriptor_hash = _launch_descriptor_hash_v1(launch)
         if row["submission_kind"] == "control":
             result = submission.kernel.launch_control(
                 submission.stream_pointer,
@@ -1004,6 +1006,7 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 pointers["solve_record"],
                 _checkpoint_owner_token=token,
                 _checkpoint_expected_prior_pending_count=(expected_prior_pending_count),
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
         elif row["submission_kind"] == "vector":
             result = submission.kernel.launch_vector(
@@ -1018,6 +1021,7 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 *(pointers[role] for role in _DIRECT_ROLES),
                 _checkpoint_owner_token=token,
                 _checkpoint_expected_prior_pending_count=(expected_prior_pending_count),
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
         elif row["submission_kind"] == "spmv":
             result = submission.kernel.launch_csr_spmv_indexed(
@@ -1040,6 +1044,7 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 pointers["solve_record"],
                 _checkpoint_owner_token=token,
                 _checkpoint_expected_prior_pending_count=(expected_prior_pending_count),
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
         elif row["submission_kind"] == "reduction":
             tree_id = row["reduction_tree_id"]
@@ -1077,6 +1082,7 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 pointers["solve_record"],
                 _checkpoint_owner_token=token,
                 _checkpoint_expected_prior_pending_count=(expected_prior_pending_count),
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
             scratch_stage[tree_id] = stage + 1
         else:
@@ -2370,10 +2376,12 @@ def _completion_export_source_snapshot(
         id(getattr(type(copy_binding), "__call__", None)),
         id(getattr(copy_binding, "_memcpy", None)),
         id(getattr(copy_binding, "_loaded", None)),
+        id(getattr(copy_binding, "_copy_audit_v1", None)),
         _completion_export_copy_operation_snapshot(copy_binding),
         id(getattr(binding.runtime, "_blocking_d2h_copy", None)),
         id(getattr(binding.runtime, "_memcpy", None)),
         id(getattr(binding.runtime, "_loaded", None)),
+        id(getattr(binding.runtime, "_copy_audit_v1", None)),
         _direct_capabilities_snapshot(sources),
     )
 

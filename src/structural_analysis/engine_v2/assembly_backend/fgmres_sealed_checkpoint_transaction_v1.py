@@ -49,6 +49,7 @@ from .fgmres_rtc_v2 import (
     first_column_checkpoint_transaction_launches_v2,
     reduction_stage_output_counts_v2,
 )
+from .fgmres_rtc_launch_fence_ledger_v1 import _launch_descriptor_hash_v1
 
 
 HIP_FGMRES_SEALED_CHECKPOINT_TRANSACTION_SCHEMA_VERSION_V1 = (
@@ -1984,6 +1985,7 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
         binding: _SealedTransactionLaunchBinding,
         launch: FgmresV2FirstColumnCheckpointTransactionLaunch,
     ) -> None:
+        audit_descriptor_hash = _launch_descriptor_hash_v1(launch)
         if launch.submission_kind == "control":
             result = binding.kernel.launch_control(
                 binding.stream_pointer,
@@ -2005,6 +2007,7 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
                 binding.divergence_factor,
                 *binding.pointer_values[-3:],
                 _checkpoint_owner_token=binding.checkpoint_owner_token,
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
         elif launch.submission_kind == "vector":
             result = binding.kernel.launch_vector(
@@ -2018,6 +2021,7 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
                 launch.logical_index,
                 *binding.pointer_values,
                 _checkpoint_owner_token=binding.checkpoint_owner_token,
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
         else:
             _fail(

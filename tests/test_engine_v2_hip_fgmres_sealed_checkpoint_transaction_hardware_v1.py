@@ -7,7 +7,7 @@ import json
 import os
 from pathlib import Path
 import sys
-from typing import Any, NoReturn
+from typing import Any, Callable, NoReturn
 
 import numpy as np
 import pytest
@@ -160,6 +160,7 @@ def _open_canonical_chain(
     policy: FgmresPolicyV1,
     load_pattern_id: str = "LC_AXIAL",
     verify_cpu_parity: bool = True,
+    before_canonical_enqueue: Callable[[Any], None] | None = None,
 ) -> tuple[_NativeCanonicalChain, Any]:
     buffers = pack_solver_model_buffers(model, load_pattern_id=load_pattern_id)
     execution_plan = compile_execution_plan_v2(buffers)
@@ -248,6 +249,8 @@ def _open_canonical_chain(
 
         canonical_open = open_hip_fgmres_canonical_predecessor_context_v1(live)
         canonical = canonical_open.context
+        if before_canonical_enqueue is not None:
+            before_canonical_enqueue(canonical)
         predecessor_pending = canonical.enqueue_canonical_predecessor()
         capability = canonical.synchronize_canonical_predecessor(predecessor_pending)
         chain = _NativeCanonicalChain(

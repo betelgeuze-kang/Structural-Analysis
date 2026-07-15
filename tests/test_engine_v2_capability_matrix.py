@@ -125,6 +125,193 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
+    ordinal_audit = rows["hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"]
+    assert payload["rows"][0]["capability_id"] == (
+        "hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"
+    )
+    assert ordinal_audit["implementation_state"] == "implemented"
+    assert ordinal_audit["promotion_state"] == "contract_only"
+    assert {
+        "exact_process_local_fgmres_v2_kernel_ledger",
+        "native_memset_launch_and_stream_fence_attempt_recorded_before_call",
+        "fixed_eight_prelaunch_memsets_and_full_recurrence_descriptor_replay",
+        "canonical_sealed_and_global_terminal_fence_order",
+        "constant_space_fixed_binary_sha256_rolling_predecessor_chain",
+        "completion_export_not_opened_at_terminal_seal_boundary",
+        "actual_local_gfx1030_single_case_owned_eight_memsets_full_launch_chain_and_three_fences",
+    }.issubset(ordinal_audit["supported_scope"])
+    assert {
+        "process_wide_rocm_launch_completeness",
+        "all_device_operations_observed",
+        "device_kernel_semantic_execution_success",
+        "device_content_terminal_outcome_solution_or_numerical_parity",
+        "iteration_host_copy_zero",
+        "actual_external_gfx1100_receipt",
+        "end_to_end_o_n",
+        "performance_speedup",
+        "commercial_readiness",
+    }.issubset(ordinal_audit["explicit_exclusions"])
+    assert ordinal_audit["claim_level"] == (
+        "exact_process_local_owned_rtc_operation_order_replayed_actual_local_gfx1030_"
+        "single_case_working_session_nonpersistent_non_promoting"
+    )
+
+    family_transfer = rows["hip_fgmres_model_family_host_transfer_audit_v1"]
+    assert payload["rows"][1]["capability_id"] == (
+        "hip_fgmres_model_family_host_transfer_audit_v1"
+    )
+    assert family_transfer["implementation_state"] == "implemented"
+    assert family_transfer["promotion_state"] == "contract_only"
+    assert {
+        "exact_package_registry_gfx1030_ten_slot_family_v2_binding",
+        "source_family_and_composition_registry_identity_atomic_binding",
+        "ten_same_process_audit_authorities_captured_while_exported",
+        "case_parity_and_audit_same_completion_export_object_identity",
+        "completion_global_recurrence_kernel_device_and_dimension_cross_binding",
+        "per_slot_bound_runtime_recurrence_copy_api_attempt_zero",
+        "per_slot_post_fence_exact_three_blocking_d2h",
+        "ten_slot_total_thirty_blocking_d2h_and_4408_bytes",
+        "composition_factory_reuses_retained_export_identity_only",
+        "detached_context_uniqueness_and_architecture_device_kernel_consistency",
+        "actual_local_gfx1030_ten_slot_family_parity_and_bound_runtime_transfer_audit_composed",
+        "strict_non_promoting_structural_receipt_schema",
+    }.issubset(family_transfer["supported_scope"])
+    assert {
+        "actual_external_gfx1100_ten_slot_audit",
+        "persistent_hardware_receipt_or_external_execution_log",
+        "process_wide_rocm_activity_or_host_transfer_zero",
+        "pre_window_async_copy_completion_or_device_dma_activity_zero",
+        "whole_process_additional_device_solve_or_export_absence",
+        "iteration_host_copy_zero",
+        "standalone_receipt_provenance_authenticity_without_retained_expected_context_and_family_case_source_authorities_or_signature",
+        "signed_evidence",
+        "result_ir",
+        "end_to_end_o_n",
+        "commercial_readiness",
+    }.issubset(family_transfer["explicit_exclusions"])
+    assert {
+        "synthetic_exact_ten_slot_exported_authority_capture",
+        "reversed_context_input_canonical_registry_order",
+        "missing_duplicate_wrong_order_and_explicit_foreign_expected_context_rejection",
+        "source_family_composition_registry_cross_snapshot_rejection",
+        "same_export_object_identity_and_lineage_forgery_rejection",
+        "detached_claim_order_pair_hash_exact_type_duplicate_context_and_device_kernel_forgery_rejection",
+        "valid_payload_all_object_levels_strict_schema",
+        "failure_complete_hardware_resource_cleanup",
+        "public_export_and_package_schema_resource_integrity",
+        "actual_gfx1030_ten_slot_composed_hardware_receipt_one_passed_in_2004_37_seconds",
+    }.issubset(family_transfer["verification_cases"])
+    assert family_transfer["claim_level"] == (
+        "actual_local_gfx1030_ten_slot_family_parity_and_bound_runtime_"
+        "transfer_audit_composed_working_session_nonpersistent_non_promoting"
+    )
+
+    transfer_audit = rows["hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"]
+    assert payload["rows"][2]["capability_id"] == (
+        "hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"
+    )
+    assert transfer_audit["implementation_state"] == "implemented"
+    assert transfer_audit["promotion_state"] == "contract_only"
+    assert {
+        "monotonic_process_local_copy_attempt_success_failure_and_byte_accounting",
+        "bound_runtime_h2d_async_d2h_async_and_blocking_d2h_paths",
+        "failed_or_raised_copy_accounted_before_native_call",
+        "canonical_context_ready_before_enqueue_to_global_terminal_fence_window",
+        "recurrence_program_bound_runtime_copy_attempt_delta_zero",
+        "post_fence_completion_export_exact_three_blocking_d2h",
+        "strict_non_promoting_receipt_schema_and_public_result_binding",
+        "actual_local_gfx1030_single_case_zero_copy_window_and_three_d2h_360_bytes",
+    }.issubset(transfer_audit["supported_scope"])
+    assert {
+        "process_wide_rocm_activity_trace",
+        "loaded_runtime_cdll_compatibility_view",
+        "fresh_loaded_runtime_bind_calls",
+        "direct_ctypes_dlsym_or_c_extension_calls",
+        "third_party_rocm_or_external_dma",
+        "pre_window_async_copy_completion_or_device_dma_activity_zero",
+        "hostile_same_process_monkeypatch_or_interposition",
+        "synchronization_zero",
+        "full_solver_setup_transfer_zero",
+        "iteration_host_copy_zero",
+        "standalone_receipt_provenance_authenticity_without_expected_context_or_signature",
+        "actual_gfx1030_ten_case_family_receipt",
+        "actual_external_gfx1100_receipt",
+        "commercial_readiness",
+    }.issubset(transfer_audit["explicit_exclusions"])
+    assert {
+        "bound_runtime_all_three_copy_paths_success_return_error_and_raised_exception_accounting",
+        "atomic_start_boundary_reentrant_enqueue_rejection",
+        "test_double_canonical_to_global_fence_zero_copy_and_exact_export",
+        "window_copy_attempt_fail_closed",
+        "detached_broad_claim_rehash_rejection",
+        "valid_payload_top_level_and_nested_strict_schema_unknown_property_rejection",
+        "exact_numeric_and_nested_string_type_alias_rejection",
+        "completion_export_backend_and_binding_forgery_rejection",
+        "cached_result_exact_input_identity_and_zero_recopy",
+        "package_copy_binding_and_private_invocation_ast_heuristic_allowlist",
+        "public_export_and_package_schema_resource_integrity",
+        "working_session_actual_gfx1030_single_case_one_passed_in_36_34_seconds",
+    }.issubset(transfer_audit["verification_cases"])
+    assert transfer_audit["claim_level"] == (
+        "exact_bound_runtime_canonical_to_global_fence_copy_attempt_zero_plus_"
+        "fenced_three_d2h_export_actual_local_gfx1030_single_case_non_promoting"
+    )
+
+    reviewer_bootstrap = rows["hip_fgmres_reviewer_root_bootstrap_new_trust_genesis_v1"]
+    assert reviewer_bootstrap["implementation_state"] == "implemented"
+    assert reviewer_bootstrap["promotion_state"] == "contract_only"
+    assert {
+        "exact_v0237_empty_registry_v2_source_identity_binding",
+        "package_code_pinned_pending_bootstrap_status",
+        "explicit_new_registry_v3_id_and_lineage_generation",
+        "all_three_root_endorsements_required_for_bootstrap",
+        "future_two_of_three_event_approval_policy",
+        "second_three_of_three_exact_target_genesis_activation_required",
+        "target_genesis_must_bind_bootstrap_plan_and_receipt_hashes",
+        "lineage_bound_runner_enrollment_required",
+        "detached_root_possession_signatures_receipt_non_authoritative",
+        "explicit_absence_of_predecessor_reviewer_authority_continuity",
+        "exact_pep517_command_reproducibility_smoke_non_authoritative",
+    }.issubset(reviewer_bootstrap["supported_scope"])
+    assert {
+        "actual_independent_reviewer_root_material",
+        "package_bootstrap_inclusion",
+        "target_registry_v3_genesis_activation",
+        "operational_reviewer_bootstrap",
+        "predecessor_reviewer_authority_continuity",
+        "reviewer_human_or_organization_identity",
+        "reviewer_hsm_origin_or_non_exportability",
+        "ceremony_nonce_entropy_or_global_uniqueness",
+        "hostile_same_process_python_module_mutation",
+        "authoritative_release_identity_publication_gate",
+        "clean_committed_source_replay",
+        "separate_build_system_dependency_lock_and_wheelhouse",
+        "build_system_dependency_closure",
+        "runtime_dependency_wheelhouse_closure_for_exact_build",
+        "external_transparency_log_or_monotonic_anchor",
+        "runner_key_enrollment_or_activation",
+        "signed_evidence_v3",
+        "durable_ledger_v3",
+        "actual_external_gfx1100_signed_cell",
+        "commercial_readiness",
+    }.issubset(reviewer_bootstrap["explicit_exclusions"])
+    assert {
+        "exact_package_pending_status_and_raw_schema_pins",
+        "source_schema_raw_registry_head_time_reviewer_commitment_and_receipt_mutation_rejection",
+        "new_registry_id_generation_and_full_ceremony_lineage_binding",
+        "bootstrap_strictly_after_source_head",
+        "root_insert_remove_reorder_duplicate_and_public_key_reuse_rejection",
+        "missing_extra_duplicate_reordered_wrong_key_wrong_domain_and_transplanted_endorsement_rejection",
+        "no_reviewer_signature_or_private_material_in_pending_fixture",
+        "two_clean_materialized_source_exact_pep517_byte_reproducibility_smoke",
+        "isolated_exact_wheel_resource_import",
+        "runtime_and_build_system_wheelhouse_conflation_remains_fail_closed",
+    }.issubset(reviewer_bootstrap["verification_cases"])
+    assert reviewer_bootstrap["claim_level"] == (
+        "fresh_genesis_bootstrap_contract_pending_reviewer_roots_zero_"
+        "target_registry_inactive_non_promoting"
+    )
+
     trust_lifecycle = rows["hip_fgmres_reviewed_trust_anchor_lifecycle_v2"]
     assert trust_lifecycle["implementation_state"] == "implemented"
     assert trust_lifecycle["promotion_state"] == "contract_only"

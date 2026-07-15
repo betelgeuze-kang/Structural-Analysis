@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_iteration_host_transfer_audit_v1.schema.json",
+  "title": "HIP FGMRES iteration host transfer audit v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "context_id",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "bindings",
+    "window",
+    "dimensions",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-iteration-host-transfer-audit.v1"
+    },
+    "status": {"const": "exported"},
+    "context_id": {"$ref": "#/$defs/hash"},
+    "evidence_scope": {
+      "const": "engine_v2_bound_runtime_recurrence_program_copy_zero_and_fenced_export_non_promoting"
+    },
+    "actual_backend": {"enum": ["hip", "test_double"]},
+    "promotion_eligible": {"const": false},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "window": {"$ref": "#/$defs/window"},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonnegative": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "positive": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "delta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_count",
+        "success_count",
+        "failure_count",
+        "bytes_attempted",
+        "bytes_succeeded"
+      ],
+      "properties": {
+        "attempt_count": {"$ref": "#/$defs/nonnegative"},
+        "success_count": {"$ref": "#/$defs/nonnegative"},
+        "failure_count": {"$ref": "#/$defs/nonnegative"},
+        "bytes_attempted": {"$ref": "#/$defs/nonnegative"},
+        "bytes_succeeded": {"$ref": "#/$defs/nonnegative"}
+      }
+    },
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence_delta",
+        "h2d_async",
+        "d2h_async",
+        "d2h_blocking"
+      ],
+      "properties": {
+        "sequence_delta": {"$ref": "#/$defs/nonnegative"},
+        "h2d_async": {"$ref": "#/$defs/delta"},
+        "d2h_async": {"$ref": "#/$defs/delta"},
+        "d2h_blocking": {"$ref": "#/$defs/delta"}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_context_id",
+        "canonical_open_receipt_hash",
+        "canonical_fenced_receipt_hash",
+        "sealed_checkpoint_context_id",
+        "sealed_checkpoint_receipt_hash",
+        "global_context_id",
+        "global_receipt_hash",
+        "completion_receipt_hash",
+        "completion_export_context_id",
+        "completion_export_receipt_hash",
+        "completion_export_payload_hash",
+        "recurrence_plan_hash",
+        "recurrence_kernel_abi_hash",
+        "combined_recurrence_abi_hash",
+        "kernel_identity_hash",
+        "kernel_source_sha256",
+        "global_full_schedule_hash",
+        "sealed_prefix_schedule_hash",
+        "continuation_schedule_hash",
+        "direct_generation_binding_hash",
+        "physical_projection_hash",
+        "architecture",
+        "device_ordinal",
+        "runtime_scope",
+        "native_loader_bound_runtime",
+        "stream_identity_serialized",
+        "runtime_identity_serialized"
+      ],
+      "properties": {
+        "canonical_context_id": {"$ref": "#/$defs/hash"},
+        "canonical_open_receipt_hash": {"$ref": "#/$defs/hash"},
+        "canonical_fenced_receipt_hash": {"$ref": "#/$defs/hash"},
+        "sealed_checkpoint_context_id": {"$ref": "#/$defs/hash"},
+        "sealed_checkpoint_receipt_hash": {"$ref": "#/$defs/hash"},
+        "global_context_id": {"$ref": "#/$defs/hash"},
+        "global_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_context_id": {"$ref": "#/$defs/hash"},
+        "completion_export_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_payload_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_plan_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_kernel_abi_hash": {"$ref": "#/$defs/hash"},
+        "combined_recurrence_abi_hash": {"$ref": "#/$defs/hash"},
+        "kernel_identity_hash": {"$ref": "#/$defs/hash"},
+        "kernel_source_sha256": {"$ref": "#/$defs/hash"},
+        "global_full_schedule_hash": {"$ref": "#/$defs/hash"},
+        "sealed_prefix_schedule_hash": {"$ref": "#/$defs/hash"},
+        "continuation_schedule_hash": {"$ref": "#/$defs/hash"},
+        "direct_generation_binding_hash": {"$ref": "#/$defs/hash"},
+        "physical_projection_hash": {"$ref": "#/$defs/hash"},
+        "architecture": {"type": "string", "minLength": 1, "maxLength": 64},
+        "device_ordinal": {"$ref": "#/$defs/nonnegative"},
+        "runtime_scope": {"const": "exact_engine_v2_bound_context_runtime_only"},
+        "native_loader_bound_runtime": {"type": "boolean"},
+        "stream_identity_serialized": {"const": false},
+        "runtime_identity_serialized": {"const": false}
+      }
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start_boundary",
+        "fence_boundary",
+        "export_boundary",
+        "start_sequence",
+        "fence_sequence",
+        "export_sequence",
+        "start_in_flight_count",
+        "fence_in_flight_count",
+        "export_in_flight_count",
+        "recurrence_program",
+        "completion_export"
+      ],
+      "properties": {
+        "start_boundary": {"const": "canonical_context_ready_before_predecessor_enqueue"},
+        "fence_boundary": {"const": "global_recurrence_fenced_before_completion_export_open"},
+        "export_boundary": {"const": "completion_export_returned_after_three_blocking_d2h_calls"},
+        "start_sequence": {"$ref": "#/$defs/nonnegative"},
+        "fence_sequence": {"$ref": "#/$defs/nonnegative"},
+        "export_sequence": {"$ref": "#/$defs/nonnegative"},
+        "start_in_flight_count": {"const": 0},
+        "fence_in_flight_count": {"const": 0},
+        "export_in_flight_count": {"const": 0},
+        "recurrence_program": {"$ref": "#/$defs/phase"},
+        "completion_export": {"$ref": "#/$defs/phase"}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "maximum_restart_count",
+        "full_program_launch_count",
+        "solution_byte_count",
+        "true_residual_byte_count",
+        "solve_record_byte_count",
+        "total_export_byte_count",
+        "exported_buffer_count"
+      ],
+      "properties": {
+        "free_dof_count": {"$ref": "#/$defs/positive"},
+        "maximum_restart_count": {"$ref": "#/$defs/positive"},
+        "full_program_launch_count": {"$ref": "#/$defs/positive"},
+        "solution_byte_count": {"$ref": "#/$defs/positive"},
+        "true_residual_byte_count": {"$ref": "#/$defs/positive"},
+        "solve_record_byte_count": {"$ref": "#/$defs/positive"},
+        "total_export_byte_count": {"$ref": "#/$defs/positive"},
+        "exported_buffer_count": {"const": 3}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_to_global_fence_lineage_bound",
+        "exact_bound_runtime_copy_counter_bound",
+        "recurrence_program_bound_runtime_copy_attempt_zero",
+        "post_fence_exact_three_blocking_d2h",
+        "post_fence_export_byte_count_exact",
+        "same_runtime_device_stream_lineage_bound",
+        "process_wide_host_transfer_zero_proven",
+        "raw_cdll_or_fresh_binding_transfer_zero_proven",
+        "hostile_same_process_interference_excluded",
+        "synchronization_zero_proven",
+        "host_scheduling_zero_proven",
+        "full_solver_setup_transfer_zero_proven",
+        "iteration_host_copy_zero_proven",
+        "pre_window_async_copy_completion_or_device_dma_activity_zero_proven",
+        "standalone_receipt_provenance_authenticity",
+        "numerical_parity_verified",
+        "solution_ready",
+        "result_ir_ready",
+        "performance_or_speedup_proven",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "canonical_to_global_fence_lineage_bound": {"const": true},
+        "exact_bound_runtime_copy_counter_bound": {"const": true},
+        "recurrence_program_bound_runtime_copy_attempt_zero": {"const": true},
+        "post_fence_exact_three_blocking_d2h": {"const": true},
+        "post_fence_export_byte_count_exact": {"const": true},
+        "same_runtime_device_stream_lineage_bound": {"const": true},
+        "process_wide_host_transfer_zero_proven": {"const": false},
+        "raw_cdll_or_fresh_binding_transfer_zero_proven": {"const": false},
+        "hostile_same_process_interference_excluded": {"const": false},
+        "synchronization_zero_proven": {"const": false},
+        "host_scheduling_zero_proven": {"const": false},
+        "full_solver_setup_transfer_zero_proven": {"const": false},
+        "iteration_host_copy_zero_proven": {"const": false},
+        "pre_window_async_copy_completion_or_device_dma_activity_zero_proven": {"const": false},
+        "standalone_receipt_provenance_authenticity": {"const": false},
+        "numerical_parity_verified": {"const": false},
+        "solution_ready": {"const": false},
+        "result_ir_ready": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

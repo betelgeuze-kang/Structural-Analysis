@@ -36,6 +36,10 @@ from .fgmres_rtc_v2 import (
     reduction_stage_output_counts_v2,
     _runtime_pointer,
 )
+from .fgmres_rtc_launch_fence_ledger_v1 import (
+    _launch_descriptor_hash_v1,
+    _memset_descriptor_hash_v1,
+)
 
 
 HIP_FGMRES_CANONICAL_PREDECESSOR_SCHEMA_VERSION_V1 = (
@@ -551,6 +555,10 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
             self._stream(),
             self._pointers[role],
             self._owned_byte_lengths[role],
+            _checkpoint_audit_descriptor_hash=_memset_descriptor_hash_v1(
+                role,
+                self._owned_byte_lengths[role],
+            ),
         )
 
     def _dispatch(
@@ -566,6 +574,7 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
         kernel = self._kernel()
         token = self._live_checkpoint_token()
         stream = self._stream()
+        audit_descriptor_hash = _launch_descriptor_hash_v1(row)
         common_control = (
             live._recurrence_plan.free_dof_count,  # type: ignore[union-attr]
             live._recurrence_plan.restart_dimension,  # type: ignore[union-attr]
@@ -592,6 +601,7 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
                 self._pointers["fgmres_control_state_v2"],
                 self._pointers["solve_record"],
                 _checkpoint_owner_token=token,
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
             return
         n = live._recurrence_plan.free_dof_count  # type: ignore[union-attr]
@@ -617,6 +627,7 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
                 self._pointers["fgmres_control_state_v2"],
                 self._pointers["solve_record"],
                 _checkpoint_owner_token=token,
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
             return
         if row.submission_kind == "spmv":
@@ -639,6 +650,7 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
                 self._pointers["fgmres_control_state_v2"],
                 self._pointers["solve_record"],
                 _checkpoint_owner_token=token,
+                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
             return
         if row.submission_kind != "reduction":
@@ -679,6 +691,7 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
             self._pointers["fgmres_control_state_v2"],
             self._pointers["solve_record"],
             _checkpoint_owner_token=token,
+            _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
         )
         scratch_stage[tree_id] = stage + 1
 
@@ -889,8 +902,7 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
             type(expected_pending_operation_bounds) is not tuple
             or len(expected_pending_operation_bounds) != 2
             or any(
-                type(value) is not int
-                for value in expected_pending_operation_bounds
+                type(value) is not int for value in expected_pending_operation_bounds
             )
             or not 0
             <= expected_pending_operation_bounds[0]
@@ -915,9 +927,7 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
             checkpoint_token = self._live_checkpoint_token()
             try:
                 runtime_owner = kernel._checkpoint_runtime_owner(checkpoint_token)
-                binding_snapshot = kernel._checkpoint_binding_snapshot(
-                    checkpoint_token
-                )
+                binding_snapshot = kernel._checkpoint_binding_snapshot(checkpoint_token)
             except Exception as exc:
                 raise HipFgmresCanonicalPredecessorV1Error(
                     "hip_fgmres_canonical_predecessor_sealed_authority_invalid",
