@@ -138,6 +138,7 @@ AST allowlist는 package-owned Python 경로의 우발적 우회를 잡는 회�
    검증한 뒤 parity, transfer-audit, ordinal-audit receipt hash와 공통 lineage를
    결속한다. 이 결과만으로 broad iteration-host-copy-zero를 승격하지 않으며 detached
    소비 경로는 동일 authority를 묶는 서명 envelope 없이는 provenance를 승격하지
-   않는다. Final-source required local `gfx1030` gate는 CPU fallback 없이
-   `1 passed in 3171.31s (0:52:51)`로 recurrence copy attempt `0`, completion D2H
-   `30/30/0`·`4,408` bytes를 ordinal exact 합계와 같은 10-slot 실행에서 확인했다.
+   않는다. Identity-token 패치 전 source의 required local `gfx1030` gate는
+   CPU fallback 없이 `1 passed in 3171.31s (0:52:51)`로 recurrence copy attempt
+   `0`, completion D2H `30/30/0`·`4,408` bytes를 ordinal exact 합계와 같은
+   10-slot 실행에서 확인했다. Token-hardened current-source gate는 pending이다.

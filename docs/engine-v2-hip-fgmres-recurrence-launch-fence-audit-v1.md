@@ -125,7 +125,8 @@ Start operation ordinal을 `b`, canonical launch 수를 `C`, continuation launch
 - exact 10-slot family composition: v0.2.42 additive
   [audited parity v2](engine-v2-hip-fgmres-model-family-audited-parity-v2.md)에
   결합 완료
-  - final-source required local `gfx1030` gate `1 passed in 3171.31s (0:52:51)`
+  - identity-token 패치 전 source gate `1 passed in 3171.31s (0:52:51)`;
+    token-hardened current-source gate pending
   - 10-slot owned memset `80/80/0/0/0`, launch `1,230/1,230/0/0/0`,
     fence `30/30/0/0/0`
   - unsigned 비영속 작업 세션 관찰이며 standalone provenance는 아님
