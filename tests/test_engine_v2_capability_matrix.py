@@ -125,8 +125,43 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
-    family_transfer = rows["hip_fgmres_model_family_host_transfer_audit_v1"]
+    ordinal_audit = rows["hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"]
     assert payload["rows"][0]["capability_id"] == (
+        "hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"
+    )
+    assert ordinal_audit["implementation_state"] == "implemented"
+    assert ordinal_audit["promotion_state"] == "contract_only"
+    assert {
+        "exact_process_local_fgmres_v2_kernel_ledger",
+        "native_memset_launch_and_stream_fence_attempt_recorded_before_call",
+        "fixed_eight_prelaunch_memsets_and_full_recurrence_descriptor_replay",
+        "canonical_sealed_and_global_terminal_fence_order",
+        "constant_space_fixed_binary_sha256_rolling_predecessor_chain",
+        "completion_export_not_opened_at_terminal_seal_boundary",
+        "actual_local_gfx1030_single_case_owned_eight_memsets_full_launch_chain_and_three_fences",
+    }.issubset(ordinal_audit["supported_scope"])
+    assert {
+        "process_wide_rocm_launch_completeness",
+        "all_device_operations_observed",
+        "device_kernel_semantic_execution_success",
+        "device_content_terminal_outcome_solution_or_numerical_parity",
+        "iteration_host_copy_zero",
+        "actual_external_gfx1100_receipt",
+        "end_to_end_o_n",
+        "performance_speedup",
+        "commercial_readiness",
+    }.issubset(ordinal_audit["explicit_exclusions"])
+    assert ordinal_audit["claim_level"] == (
+        "exact_process_local_owned_rtc_operation_order_replayed_actual_local_gfx1030_"
+        "single_case_working_session_nonpersistent_non_promoting"
+    )
+    assert (
+        "tests/test_engine_v2_hip_fgmres_iteration_host_transfer_audit_hardware_v1.py"
+        in ordinal_audit["evidence_paths"]
+    )
+
+    family_transfer = rows["hip_fgmres_model_family_host_transfer_audit_v1"]
+    assert payload["rows"][1]["capability_id"] == (
         "hip_fgmres_model_family_host_transfer_audit_v1"
     )
     assert family_transfer["implementation_state"] == "implemented"
@@ -142,10 +177,12 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         "ten_slot_total_thirty_blocking_d2h_and_4408_bytes",
         "composition_factory_reuses_retained_export_identity_only",
         "detached_context_uniqueness_and_architecture_device_kernel_consistency",
+        "actual_local_gfx1030_ten_slot_family_parity_and_bound_runtime_transfer_audit_composed",
         "strict_non_promoting_structural_receipt_schema",
     }.issubset(family_transfer["supported_scope"])
     assert {
         "actual_external_gfx1100_ten_slot_audit",
+        "persistent_hardware_receipt_or_external_execution_log",
         "process_wide_rocm_activity_or_host_transfer_zero",
         "pre_window_async_copy_completion_or_device_dma_activity_zero",
         "whole_process_additional_device_solve_or_export_absence",
@@ -166,14 +203,15 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         "valid_payload_all_object_levels_strict_schema",
         "failure_complete_hardware_resource_cleanup",
         "public_export_and_package_schema_resource_integrity",
+        "actual_gfx1030_ten_slot_composed_hardware_receipt_one_passed_in_2004_37_seconds",
     }.issubset(family_transfer["verification_cases"])
     assert family_transfer["claim_level"] == (
-        "contract_implemented_actual_gfx1030_ten_slot_composed_hardware_"
-        "receipt_pending_non_promoting"
+        "actual_local_gfx1030_ten_slot_family_parity_and_bound_runtime_"
+        "transfer_audit_composed_working_session_nonpersistent_non_promoting"
     )
 
     transfer_audit = rows["hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"]
-    assert payload["rows"][1]["capability_id"] == (
+    assert payload["rows"][2]["capability_id"] == (
         "hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"
     )
     assert transfer_audit["implementation_state"] == "implemented"

@@ -5,10 +5,13 @@
 - 버전: v0.2.39
 - 구현: `implemented`
 - 승격: `contract_only`, `promotion_eligible=false`
-- 현재 성공 증거: test-double과 작업 세션에서 실행한 actual local `gfx1030` single case
+- 현재 성공 증거: test-double, actual local `gfx1030` single case, v0.2.40
+  exact 10-slot family/audit composition
 - 장치 표기 경계: 영수증과 hardware gate는 ISA `gfx1030`을 결속한다. RX 6900 XT는
   운영자 관찰값이며 이 계약이 독립적으로 결속하는 device marketing model이 아니다.
-- 실제 external `gfx1100` 및 `gfx1030` 10-case family 영수증: 미확보
+- actual local `gfx1030` 10-case composition: `1 passed in 2004.37s (0:33:24)`,
+  recurrence attempt `0`, export `30/30/0`, `4,408` bytes
+- 실제 external `gfx1100`: `0/10`; 별도 영속 hardware receipt/log는 미확보
 
 ## 목적과 정확한 경계
 
@@ -123,9 +126,13 @@ AST allowlist는 package-owned Python 경로의 우발적 우회를 잡는 회�
 
 ## 다음 단계
 
-1. 기존 10-slot model-family hardware loop에 이 audit을 결합해 별도 중복 18분
-   실행 없이 slot당 recurrence 0, export 3을 검증한다.
-2. RTC launch/fence rolling ordinal ledger를 추가해 “첫 native recurrence launch
-   직전부터 terminal fence 직후”의 시간 순서를 독립 봉인한다.
-3. 향후 audited parity v2가 parity receipt hash와 이 audit receipt hash를 함께
-   소비한 뒤에만 좁은 iteration-host-copy claim 승격을 검토한다.
+1. **완료(v0.2.40):** 기존 10-slot model-family hardware loop에 audit을 결합해
+   slot당 recurrence 0, export 3을 한 loop에서 검증했다. GPU recurrence/export는
+   중복하지 않았지만 반복 live family validation으로 전체 gate는 `33:24`가
+   걸렸으며 이 CPU/control-plane 재검증 비용은 후속 최적화 대상이다.
+2. **완료(v0.2.41):** additive [RTC launch/fence rolling ordinal audit](engine-v2-hip-fgmres-recurrence-launch-fence-audit-v1.md)을
+   추가해 canonical pre-enqueue부터 terminal fence 직후까지 fixed memset/launch/fence
+   descriptor의 시간 순서를 독립 rolling chain으로 봉인했다.
+3. 다음 audited parity v2가 parity receipt hash, 이 transfer-audit receipt hash,
+   ordinal-audit receipt hash를 함께 소비한 뒤에만 좁은 iteration-host-copy claim
+   승격을 검토한다.

@@ -21,15 +21,35 @@
   ],
   "rows": [
     {
+      "capability_id": "hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["exact_process_local_fgmres_v2_kernel_ledger", "native_memset_launch_and_stream_fence_attempt_recorded_before_call", "success_rejected_ambiguous_and_in_flight_disposition_accounting", "canonical_context_ready_before_enqueue_start_boundary", "fixed_eight_prelaunch_memsets_and_full_recurrence_descriptor_replay", "canonical_sealed_and_global_terminal_fence_order", "same_kernel_loaded_runtime_checkpoint_token_device_and_stream_lineage", "constant_space_fixed_binary_sha256_rolling_predecessor_chain", "completion_export_not_opened_at_terminal_seal_boundary", "strict_non_promoting_receipt_schema_and_expected_context_binding", "actual_local_gfx1030_single_case_owned_eight_memsets_full_launch_chain_and_three_fences"],
+      "explicit_exclusions": ["raw_cdll_fresh_binding_dlsym_c_extension_or_third_party_launch_observation", "process_wide_rocm_launch_completeness", "all_device_operations_observed", "hostile_same_process_python_mutation_resistance", "device_kernel_semantic_execution_success", "device_content_terminal_outcome_solution_or_numerical_parity", "hipstreamquery_recovered_ambiguous_fence_as_clean_success", "standalone_receipt_provenance_authenticity_without_expected_context_or_signature", "iteration_host_copy_zero", "actual_external_gfx1100_receipt", "signed_hardware_truth", "result_ir", "end_to_end_o_n", "performance_speedup", "promotion_eligibility", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006"],
+      "verification_cases": ["test_double_canonical_sealed_global_full_descriptor_chain", "exact_eight_memset_full_launch_and_three_fence_counts", "terminal_fence_is_last_successful_owned_event", "extra_owned_event_rolling_chain_rejection", "duplicate_ledger_owner_rejection", "detached_false_claim_rehash_rejection", "strict_nested_schema_unknown_property_rejection", "public_export_and_package_schema_resource_integrity", "actual_local_gfx1030_single_case_one_passed_in_37_24_seconds", "future_exact_ten_slot_composition_without_duplicate_solve_or_export"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-recurrence-launch-fence-audit-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_rtc_launch_fence_ledger_v1.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_recurrence_launch_fence_audit_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_recurrence_launch_fence_audit_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_recurrence_launch_fence_audit_v1.py",
+        "tests/test_engine_v2_hip_fgmres_iteration_host_transfer_audit_hardware_v1.py"
+      ],
+      "claim_level": "exact_process_local_owned_rtc_operation_order_replayed_actual_local_gfx1030_single_case_working_session_nonpersistent_non_promoting"
+    },
+    {
       "capability_id": "hip_fgmres_model_family_host_transfer_audit_v1",
       "category": "solver_verification",
       "phase_target": "phase_0",
       "implementation_state": "implemented",
       "promotion_state": "contract_only",
-      "supported_scope": ["exact_package_registry_gfx1030_ten_slot_family_v2_binding", "source_family_and_composition_registry_identity_atomic_binding", "ten_same_process_audit_authorities_captured_while_exported", "case_parity_and_audit_same_completion_export_object_identity", "completion_global_recurrence_kernel_device_and_dimension_cross_binding", "per_slot_bound_runtime_recurrence_copy_api_attempt_zero", "per_slot_post_fence_exact_three_blocking_d2h", "ten_slot_total_thirty_blocking_d2h_and_4408_bytes", "composition_factory_reuses_retained_export_identity_only", "canonical_registry_slot_order_and_duplicate_authority_rejection", "detached_context_uniqueness_and_architecture_device_kernel_consistency", "strict_non_promoting_structural_receipt_schema"],
-      "explicit_exclusions": ["actual_external_gfx1100_ten_slot_audit", "unsigned_two_architecture_fixed_suite_audit", "process_wide_rocm_activity_or_host_transfer_zero", "pre_window_async_copy_completion_or_device_dma_activity_zero", "raw_cdll_fresh_binding_ctypes_dlsym_c_extension_or_third_party_transfer_zero", "full_solver_setup_teardown_or_between_case_transfer_zero", "same_runtime_or_stream_shared_across_all_cases", "whole_process_additional_device_solve_or_export_absence", "iteration_host_copy_zero", "full_model_family_or_general_multiarchitecture_parity", "standalone_receipt_provenance_authenticity_without_retained_expected_context_and_family_case_source_authorities_or_signature", "signed_evidence", "result_ir", "performance_speedup", "end_to_end_o_n", "promotion_eligibility", "commercial_readiness"],
+      "supported_scope": ["exact_package_registry_gfx1030_ten_slot_family_v2_binding", "source_family_and_composition_registry_identity_atomic_binding", "ten_same_process_audit_authorities_captured_while_exported", "case_parity_and_audit_same_completion_export_object_identity", "completion_global_recurrence_kernel_device_and_dimension_cross_binding", "per_slot_bound_runtime_recurrence_copy_api_attempt_zero", "per_slot_post_fence_exact_three_blocking_d2h", "ten_slot_total_thirty_blocking_d2h_and_4408_bytes", "composition_factory_reuses_retained_export_identity_only", "canonical_registry_slot_order_and_duplicate_authority_rejection", "detached_context_uniqueness_and_architecture_device_kernel_consistency", "actual_local_gfx1030_ten_slot_family_parity_and_bound_runtime_transfer_audit_composed", "strict_non_promoting_structural_receipt_schema"],
+      "explicit_exclusions": ["actual_external_gfx1100_ten_slot_audit", "unsigned_two_architecture_fixed_suite_audit", "persistent_hardware_receipt_or_external_execution_log", "process_wide_rocm_activity_or_host_transfer_zero", "pre_window_async_copy_completion_or_device_dma_activity_zero", "raw_cdll_fresh_binding_ctypes_dlsym_c_extension_or_third_party_transfer_zero", "full_solver_setup_teardown_or_between_case_transfer_zero", "same_runtime_or_stream_shared_across_all_cases", "whole_process_additional_device_solve_or_export_absence", "iteration_host_copy_zero", "full_model_family_or_general_multiarchitecture_parity", "standalone_receipt_provenance_authenticity_without_retained_expected_context_and_family_case_source_authorities_or_signature", "signed_evidence", "result_ir", "performance_speedup", "end_to_end_o_n", "promotion_eligibility", "commercial_readiness"],
       "required_contracts": ["ADR-003", "ADR-004", "ADR-006"],
-      "verification_cases": ["synthetic_exact_ten_slot_exported_authority_capture", "reversed_context_input_canonical_registry_order", "missing_duplicate_wrong_order_and_explicit_foreign_expected_context_rejection", "source_family_composition_registry_cross_snapshot_rejection", "same_export_object_identity_and_lineage_forgery_rejection", "detached_claim_order_pair_hash_exact_type_duplicate_context_and_device_kernel_forgery_rejection", "valid_payload_all_object_levels_strict_schema", "failure_complete_hardware_resource_cleanup", "public_export_and_package_schema_resource_integrity"],
+      "verification_cases": ["synthetic_exact_ten_slot_exported_authority_capture", "reversed_context_input_canonical_registry_order", "missing_duplicate_wrong_order_and_explicit_foreign_expected_context_rejection", "source_family_composition_registry_cross_snapshot_rejection", "same_export_object_identity_and_lineage_forgery_rejection", "detached_claim_order_pair_hash_exact_type_duplicate_context_and_device_kernel_forgery_rejection", "valid_payload_all_object_levels_strict_schema", "failure_complete_hardware_resource_cleanup", "public_export_and_package_schema_resource_integrity", "actual_gfx1030_ten_slot_composed_hardware_receipt_one_passed_in_2004_37_seconds"],
       "evidence_paths": [
         "docs/engine-v2-hip-fgmres-model-family-host-transfer-audit-v1.md",
         "src/structural_analysis/engine_v2/assembly_backend/fgmres_model_family_host_transfer_audit_v1.py",
@@ -37,7 +57,7 @@
         "tests/test_engine_v2_hip_fgmres_model_family_host_transfer_audit_v1.py",
         "tests/test_engine_v2_hip_fgmres_model_family_parity_v2_hardware.py"
       ],
-      "claim_level": "contract_implemented_actual_gfx1030_ten_slot_composed_hardware_receipt_pending_non_promoting"
+      "claim_level": "actual_local_gfx1030_ten_slot_family_parity_and_bound_runtime_transfer_audit_composed_working_session_nonpersistent_non_promoting"
     },
     {
       "capability_id": "hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1",
@@ -2287,8 +2307,7 @@
         "docs/engine-v2-rtc-kernel-scaling-v1.md",
         "scripts/benchmark_engine_v2_rtc_kernel_scaling.py",
         "src/structural_analysis/schemas/rtc_kernel_scaling_report_v1.schema.json",
-        "tests/test_engine_v2_rtc_kernel_scaling_v1.py",
-        "validation/observations/engine_v2/rtc_kernel_scaling_gfx1030_unsigned_v1.json"
+        "tests/test_engine_v2_rtc_kernel_scaling_v1.py"
       ],
       "claim_level": "fixed_degree3_hiprtc_kernel_only_near_linear_scaling_observed_unsigned_non_promoting"
     },

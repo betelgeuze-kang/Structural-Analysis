@@ -71,6 +71,12 @@ from .fgmres_recurrence_plan_v2 import (
     hip_fgmres_recurrence_kernel_abi_payload_v2,
     hip_fgmres_solve_record_abi_payload_v2,
 )
+from .fgmres_rtc_launch_fence_ledger_v1 import (
+    _RTC_LAUNCH_FENCE_LEDGER_SNAPSHOT_MINT_V1,
+    _HipFgmresRtcLaunchFenceLedgerStateV1,
+    _fallback_descriptor_hash_v1,
+    _fence_descriptor_hash_v1,
+)
 
 
 HIP_RTC_FGMRES_V2_IDENTITY_SCHEMA_VERSION = (
@@ -1599,6 +1605,7 @@ class _HipRtcFgmresV2BindingWitness:
     identity: HipRtcFgmresV2KernelIdentity
     identity_payload_hash: str
     identity_value_snapshot: tuple[Any, ...]
+    launch_fence_ledger_state: _HipFgmresRtcLaunchFenceLedgerStateV1
     stream_synchronize_callable: Any | None = None
     stream_query_callable: Any | None = None
     memset_async_callable: Any | None = None
@@ -1651,6 +1658,7 @@ def _checkpoint_binding_snapshot_values(
         id(witness.stream_synchronize_callable),
         id(witness.stream_query_callable),
         id(witness.memset_async_callable),
+        id(witness.launch_fence_ledger_state),
         id(witness.identity),
         witness.identity_payload_hash,
     )
@@ -1885,6 +1893,7 @@ class HipRtcFgmresV2Kernel:
         "_checkpoint_owner_token",
         "_checkpoint_owner_poisoned",
         "_checkpoint_owner_binding_snapshot",
+        "_launch_fence_ledger_state",
     )
 
     def __init__(
@@ -1952,6 +1961,7 @@ class HipRtcFgmresV2Kernel:
         self._checkpoint_owner_token: object | None = None
         self._checkpoint_owner_poisoned = False
         self._checkpoint_owner_binding_snapshot: tuple[Any, ...] | None = None
+        self._launch_fence_ledger_state = _HipFgmresRtcLaunchFenceLedgerStateV1()
         witness = _HipRtcFgmresV2BindingWitness(
             runtime_api=runtime,
             loaded_runtime=runtime._runtime,
@@ -1968,6 +1978,7 @@ class HipRtcFgmresV2Kernel:
             identity=identity,
             identity_payload_hash=self._identity_payload_hash_snapshot,
             identity_value_snapshot=self._identity_value_snapshot,
+            launch_fence_ledger_state=self._launch_fence_ledger_state,
         )
         with _KERNEL_BINDING_LOCK:
             _KERNEL_BINDINGS[self] = witness
@@ -2036,6 +2047,10 @@ class HipRtcFgmresV2Kernel:
                     witness.memset_async_callable is not None
                     and not callable(witness.memset_async_callable)
                 )
+                or type(witness.launch_fence_ledger_state)
+                is not _HipFgmresRtcLaunchFenceLedgerStateV1
+                or self._launch_fence_ledger_state
+                is not witness.launch_fence_ledger_state
                 or type(witness.module_device_ordinal) is not int
                 or witness.module_device_ordinal < 0
                 or (
@@ -2089,6 +2104,7 @@ class HipRtcFgmresV2Kernel:
         *,
         _checkpoint_owner_token: object | None = None,
         _checkpoint_expected_prior_pending_count: int | None = None,
+        _checkpoint_audit_descriptor_hash: str | None = None,
     ) -> None:
         self._require_open()
         mode = _exact_enum(
@@ -2217,6 +2233,7 @@ class HipRtcFgmresV2Kernel:
             checkpoint_expected_prior_pending_count=(
                 _checkpoint_expected_prior_pending_count
             ),
+            checkpoint_audit_descriptor_hash=_checkpoint_audit_descriptor_hash,
         )
 
     def launch_vector(
@@ -2243,6 +2260,7 @@ class HipRtcFgmresV2Kernel:
         *,
         _checkpoint_owner_token: object | None = None,
         _checkpoint_expected_prior_pending_count: int | None = None,
+        _checkpoint_audit_descriptor_hash: str | None = None,
     ) -> None:
         self._require_open()
         mode = _exact_enum(vector_mode, "vector_mode", _IMPLEMENTED_VECTOR_MODES)
@@ -2323,6 +2341,7 @@ class HipRtcFgmresV2Kernel:
             checkpoint_expected_prior_pending_count=(
                 _checkpoint_expected_prior_pending_count
             ),
+            checkpoint_audit_descriptor_hash=_checkpoint_audit_descriptor_hash,
         )
 
     def launch_csr_spmv_indexed(
@@ -2347,6 +2366,7 @@ class HipRtcFgmresV2Kernel:
         *,
         _checkpoint_owner_token: object | None = None,
         _checkpoint_expected_prior_pending_count: int | None = None,
+        _checkpoint_audit_descriptor_hash: str | None = None,
     ) -> None:
         self._require_open()
         mode = _exact_enum(
@@ -2421,6 +2441,7 @@ class HipRtcFgmresV2Kernel:
             checkpoint_expected_prior_pending_count=(
                 _checkpoint_expected_prior_pending_count
             ),
+            checkpoint_audit_descriptor_hash=_checkpoint_audit_descriptor_hash,
         )
 
     def launch_reduction(
@@ -2446,6 +2467,7 @@ class HipRtcFgmresV2Kernel:
         *,
         _checkpoint_owner_token: object | None = None,
         _checkpoint_expected_prior_pending_count: int | None = None,
+        _checkpoint_audit_descriptor_hash: str | None = None,
     ) -> None:
         self._require_open()
         mode = _exact_enum(
@@ -2530,6 +2552,7 @@ class HipRtcFgmresV2Kernel:
             checkpoint_expected_prior_pending_count=(
                 _checkpoint_expected_prior_pending_count
             ),
+            checkpoint_audit_descriptor_hash=_checkpoint_audit_descriptor_hash,
         )
 
     def acknowledge_stream_completion(
@@ -2913,6 +2936,34 @@ class HipRtcFgmresV2Kernel:
             )
             return tuple(sorted(self._pending_streams.items()))
 
+    def _checkpoint_launch_fence_ledger_snapshot_v1(
+        self,
+        token: object,
+        mint: object,
+    ) -> tuple[
+        _HipFgmresRtcLaunchFenceLedgerStateV1,
+        Any,
+        tuple[Any, ...],
+    ]:
+        """Return the exact lease-bound RTC ordinal snapshot to its auditor."""
+
+        if mint is not _RTC_LAUNCH_FENCE_LEDGER_SNAPSHOT_MINT_V1:
+            raise PermissionError("invalid RTC launch/fence ledger snapshot mint")
+        with self._checkpoint_owner_lock:
+            self._require_open()
+            self._require_checkpoint_owner_identity(token)
+            witness = self._validated_binding()
+            _require_expected_device_ordinal(
+                witness,
+                operation="checkpoint launch/fence ledger observation",
+            )
+            state = witness.launch_fence_ledger_state
+            return (
+                state,
+                state.snapshot(),
+                _checkpoint_binding_snapshot_values(witness),
+            )
+
     def _consume_checkpoint_pending_after_fence(
         self,
         token: object,
@@ -2949,19 +3000,60 @@ class HipRtcFgmresV2Kernel:
                     "hip_rtc_fgmres_v2_checkpoint_sync_unavailable",
                     "The exact runtime fence callable is absent from the lease.",
                 )
+            ticket = witness.launch_fence_ledger_state.begin(
+                "fence",
+                _fence_descriptor_hash_v1(),
+            )
             try:
-                status = int(stream_synchronize(ctypes.c_void_p(stream_value)))
-            except Exception as exc:
+                raw_status = stream_synchronize(ctypes.c_void_p(stream_value))
+            except BaseException as exc:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="ambiguous",
+                )
+                if not isinstance(exc, Exception):
+                    raise
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_checkpoint_sync_failed",
                     f"hipStreamSynchronize raised {type(exc).__name__}.",
                 ) from exc
+            if type(raw_status) is not int:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="ambiguous",
+                )
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_checkpoint_sync_failed",
+                    "hipStreamSynchronize returned a non-exact status value.",
+                )
+            try:
+                status = int(raw_status)
+            except BaseException as exc:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="ambiguous",
+                )
+                if not isinstance(exc, Exception):
+                    raise
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_checkpoint_sync_failed",
+                    f"hipStreamSynchronize status handling raised "
+                    f"{type(exc).__name__}.",
+                ) from exc
             if status != 0:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="rejected",
+                )
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_checkpoint_sync_failed",
                     "hipStreamSynchronize failed: "
                     f"{self._runtime.error_string(status)}.",
                 )
+            witness.launch_fence_ledger_state.finish(
+                ticket,
+                disposition="success",
+            )
 
     def _query_checkpoint_stream_completion(
         self,
@@ -3033,6 +3125,8 @@ class HipRtcFgmresV2Kernel:
         stream: Any,
         base: Any,
         byte_length: int,
+        *,
+        _checkpoint_audit_descriptor_hash: str | None = None,
     ) -> None:
         """Queue one exact-runtime device memset under checkpoint ownership."""
 
@@ -3071,22 +3165,50 @@ class HipRtcFgmresV2Kernel:
             self._pending_streams[stream_value] = (
                 self._pending_streams.get(stream_value, 0) + 1
             )
-            try:
-                status = int(
-                    memset_async(
-                        ctypes.c_void_p(base_value),
-                        ctypes.c_int(0),
-                        ctypes.c_size_t(byte_length),
-                        ctypes.c_void_p(stream_value),
-                    )
+            descriptor_hash = _checkpoint_audit_descriptor_hash
+            if descriptor_hash is None:
+                descriptor_hash = _fallback_descriptor_hash_v1(
+                    "memset",
+                    "FGMRES v2 checkpoint memset",
                 )
-            except Exception as exc:
+            ticket = witness.launch_fence_ledger_state.begin(
+                "memset",
+                descriptor_hash,
+            )
+            try:
+                status = memset_async(
+                    ctypes.c_void_p(base_value),
+                    ctypes.c_int(0),
+                    ctypes.c_size_t(byte_length),
+                    ctypes.c_void_p(stream_value),
+                )
+            except BaseException as exc:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="ambiguous",
+                )
+                if not isinstance(exc, Exception):
+                    raise
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_checkpoint_memset_failed",
                     f"hipMemsetAsync raised {type(exc).__name__}.",
                     launch_disposition="ambiguous",
                 ) from exc
+            if type(status) is not int:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="ambiguous",
+                )
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_checkpoint_memset_failed",
+                    "hipMemsetAsync returned a non-exact status value.",
+                    launch_disposition="ambiguous",
+                )
             if status != 0:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="rejected",
+                )
                 pending_count = self._pending_streams[stream_value] - 1
                 if pending_count:
                     self._pending_streams[stream_value] = pending_count
@@ -3098,6 +3220,10 @@ class HipRtcFgmresV2Kernel:
                     f"{_runtime_error_string(witness.loaded_runtime, status)}.",
                     launch_disposition="rejected",
                 )
+            witness.launch_fence_ledger_state.finish(
+                ticket,
+                disposition="success",
+            )
 
     def _launch(
         self,
@@ -3110,6 +3236,7 @@ class HipRtcFgmresV2Kernel:
         operation: str,
         checkpoint_owner_token: object | None,
         checkpoint_expected_prior_pending_count: int | None,
+        checkpoint_audit_descriptor_hash: str | None,
     ) -> None:
         with self._checkpoint_owner_lock:
             self._require_open()
@@ -3152,31 +3279,60 @@ class HipRtcFgmresV2Kernel:
             self._pending_streams[stream_value] = (
                 self._pending_streams.get(stream_value, 0) + 1
             )
-            try:
-                status = int(
-                    witness.launch_callable(
-                        ctypes.c_void_p(function_pointer),
-                        grid_x,
-                        1,
-                        1,
-                        block_x,
-                        1,
-                        1,
-                        0,
-                        ctypes.c_void_p(stream_value),
-                        parameters,
-                        None,
-                    )
+            descriptor_hash = checkpoint_audit_descriptor_hash
+            if descriptor_hash is None:
+                descriptor_hash = _fallback_descriptor_hash_v1(
+                    "launch",
+                    operation,
                 )
-            except Exception as exc:
+            ticket = witness.launch_fence_ledger_state.begin(
+                "launch",
+                descriptor_hash,
+            )
+            try:
+                status = witness.launch_callable(
+                    ctypes.c_void_p(function_pointer),
+                    grid_x,
+                    1,
+                    1,
+                    block_x,
+                    1,
+                    1,
+                    0,
+                    ctypes.c_void_p(stream_value),
+                    parameters,
+                    None,
+                )
+            except BaseException as exc:
                 # An exception leaves launch acceptance ambiguous.  Ownership
                 # remains pending until a real completion fence is observed.
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="ambiguous",
+                )
+                if not isinstance(exc, Exception):
+                    raise
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_kernel_launch_failed",
                     f"{operation} hipModuleLaunchKernel raised {type(exc).__name__}.",
                     launch_disposition="ambiguous",
                 ) from exc
+            if type(status) is not int:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="ambiguous",
+                )
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_kernel_launch_failed",
+                    f"{operation} hipModuleLaunchKernel returned a non-exact "
+                    "status value.",
+                    launch_disposition="ambiguous",
+                )
             if status != 0:
+                witness.launch_fence_ledger_state.finish(
+                    ticket,
+                    disposition="rejected",
+                )
                 pending_count = self._pending_streams[stream_value] - 1
                 if pending_count:
                     self._pending_streams[stream_value] = pending_count
@@ -3188,6 +3344,10 @@ class HipRtcFgmresV2Kernel:
                     f"{_runtime_error_string(witness.loaded_runtime, status)}.",
                     launch_disposition="rejected",
                 )
+            witness.launch_fence_ledger_state.finish(
+                ticket,
+                disposition="success",
+            )
 
     def _require_checkpoint_owner_identity(self, token: object) -> None:
         if token is not self._checkpoint_owner_token:

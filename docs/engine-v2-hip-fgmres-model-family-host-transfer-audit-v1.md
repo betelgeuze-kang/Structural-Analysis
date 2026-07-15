@@ -8,7 +8,7 @@
 - 범위: package registry의 exact `gfx1030` 10-slot family-v2 결과와 각
   `context.result` 캡처 순간에 `exported`인 slot별 bound-runtime transfer-audit
   authority의 process-local composition
-- actual 10-slot 결합 hardware 영수증: 최종 트리 재실행 중, 완료 전까지 pending
+- actual local `gfx1030` 10-slot 결합: `1 passed in 2004.37s (0:33:24)`
 - external actual `gfx1100`: `0/10`
 
 ## 목적
@@ -121,6 +121,7 @@ Slot별 조건:
 - broad `iteration_host_copy_zero_proven`
 - full model-family 또는 일반 multiarchitecture parity
 - standalone receipt provenance authenticity, signed evidence/promotion
+- 별도로 저장된 hardware receipt 또는 external execution log
 - ResultIR, speedup, end-to-end O(N), commercial readiness
 
 ## Hardware loop 통합
@@ -136,11 +137,33 @@ identity 결속은 composition factory 밖 전체 프로세스의 no-extra-solve
 Cleanup 순서는 audit → global → sealed → canonical/live parent chain이다. Audit close가
 내부 exporter child와 runtime owner reservation을 해제한다.
 
+## Actual local gfx1030 결과
+
+2026-07-15 최종 코드 트리에서 required hardware gate를 실행했다.
+
+```text
+1 passed in 2004.37s (0:33:24)
+```
+
+한 프로세스의 10-slot loop에서 다음을 동시에 확인했다.
+
+- exact package registry local `gfx1030` slot `10/10`, 전체 matrix `10/20`
+- slot별 recurrence-program bound-runtime copy API attempt `0`
+- completion export blocking D2H 합계 attempt/success/failure `30/30/0`
+- completion export byte 합계 `4,408`
+- 각 case parity와 audit의 exact same completion-export context/result object identity
+- external `gfx1100` `0/10`, `promotion_eligible=false`
+
+이 수치는 현재 작업 세션의 pytest 관찰값이며 receipt를 별도 파일/로그로
+저장하지 않았다. Gate와 receipt가 결속한 아키텍처는 `gfx1030`이며 장치
+마케팅 명칭은 계약 권한이 아니다. `2004.37s`는 반복 live replay를 포함한
+테스트 wall-clock이지 solver speedup이나 end-to-end O(N) 증거가 아니다.
+
 ## 검증 계획
 
 현재 트리의 synthetic/public/capability 검증은 `24 passed`, 인접
-historical family-v2/audit-v1 두 파일은 `21 passed`다. Actual 수치는 재실행이 완료되기 전에
-성공으로 기록하지 않는다.
+historical family-v2/audit-v1 두 파일은 `21 passed`다. Actual local `gfx1030`는
+위 required gate에서 `1 passed in 2004.37s (0:33:24)`로 완료했다.
 
 - exact 10-slot 합성 authority composition과 caller 역순 canonicalization
 - missing/duplicate/foreign expected context 거부
@@ -150,5 +173,6 @@ historical family-v2/audit-v1 두 파일은 `21 passed`다. Actual 수치는 재
 - valid payload의 top-level 및 모든 nested object strict schema
 - public `__all__` identity와 package schema resource
 - 기존 family-v2/audit-v1/helper 인접 회귀
-- 기존 actual `gfx1030` 10-slot hardware loop 한 번에서 family `10/20`, recurrence
+- 기존 actual `gfx1030` 10-slot hardware loop 한 번에서 local family `10/10`
+  (전체 matrix `10/20`), recurrence
   attempts `0`, export `30/30/0`, `4,408` bytes 확인

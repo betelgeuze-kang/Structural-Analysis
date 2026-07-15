@@ -17,6 +17,7 @@ from structural_analysis.engine_v2.assembly_backend import (
     fgmres_iteration_host_transfer_audit_v1 as iteration_host_transfer_audit,
     fgmres_model_family_host_transfer_audit_v1 as model_family_transfer_audit,
     fgmres_model_family_parity_v2 as model_family_v2,
+    fgmres_recurrence_launch_fence_audit_v1 as recurrence_launch_fence_audit,
 )
 from structural_analysis.engine_v2.evidence import (
     dependency_lock_v1,
@@ -86,6 +87,7 @@ TRUST_REGISTRY_V2_EXPORTS = tuple(external_trust_registry_v2.__all__)
 SIGNED_EVIDENCE_V2_EXPORTS = tuple(external_signed_evidence_v2.__all__)
 REPLAY_LEDGER_V2_EXPORTS = tuple(external_replay_ledger_v2.__all__)
 ITERATION_HOST_TRANSFER_AUDIT_EXPORTS = tuple(iteration_host_transfer_audit.__all__)
+RECURRENCE_LAUNCH_FENCE_AUDIT_EXPORTS = tuple(recurrence_launch_fence_audit.__all__)
 MODEL_FAMILY_V2_EXPORTS = tuple(model_family_v2.__all__)
 MODEL_FAMILY_TRANSFER_AUDIT_EXPORTS = tuple(model_family_transfer_audit.__all__)
 
@@ -137,6 +139,7 @@ def test_external_signed_identity_v2_surfaces_are_exported_from_engine_v2() -> N
 def test_iteration_host_transfer_audit_surfaces_are_exported_from_engine_v2() -> None:
     for module, names in (
         (iteration_host_transfer_audit, ITERATION_HOST_TRANSFER_AUDIT_EXPORTS),
+        (recurrence_launch_fence_audit, RECURRENCE_LAUNCH_FENCE_AUDIT_EXPORTS),
         (model_family_v2, MODEL_FAMILY_V2_EXPORTS),
         (model_family_transfer_audit, MODEL_FAMILY_TRANSFER_AUDIT_EXPORTS),
     ):
@@ -145,6 +148,12 @@ def test_iteration_host_transfer_audit_surfaces_are_exported_from_engine_v2() ->
             assert name in engine_v2.__all__
             assert getattr(assembly_backend, name) is getattr(module, name)
             assert getattr(engine_v2, name) is getattr(module, name)
+    assert "HipFgmresRtcOperationCounterV1" in assembly_backend.__all__
+    assert "HipFgmresRtcOperationCounterV1" in engine_v2.__all__
+    assert (
+        engine_v2.HipFgmresRtcOperationCounterV1
+        is assembly_backend.HipFgmresRtcOperationCounterV1
+    )
 
 
 def test_artifact_identity_surfaces_are_exported_from_evidence_package() -> None:
@@ -175,6 +184,7 @@ def test_parity_and_device_identity_schemas_are_package_resources() -> None:
         "hip_fgmres_external_trust_anchor_registry_v2.schema.json",
         "hip_fgmres_external_reviewer_root_bootstrap_v1.schema.json",
         "hip_fgmres_iteration_host_transfer_audit_v1.schema.json",
+        "hip_fgmres_recurrence_launch_fence_audit_v1.schema.json",
         "hip_fgmres_model_family_host_transfer_audit_v1.schema.json",
     ):
         resource = schema_root.joinpath(name)

@@ -2,7 +2,7 @@
 
 ## 1. 상태와 목적
 
-- 마일스톤: v0.2.38 working-tree milestone
+- 마일스톤: v0.2.38 feature-branch publication milestone
 - 구현 상태: `implemented`
 - promotion 상태: `contract_only`
 - package bootstrap 상태: `pending_independent_reviewer_root_material`
@@ -205,7 +205,7 @@ Git tracked working bytes와 v0.2.38 신규 source/resource만 물질화한 clea
 
 Repo 밖 isolated target 설치에서는 root public export identity, schema/status raw hash, pathless loader의 `pending_independent_reviewer_root_material`, reviewer roots 없음, target inactive, promotion/commercial false를 확인했다. 기존 no-isolation fallback wheel `sha256:558007fb2d0a0317824ff80bde50bf8c305440bdf6aecb2a015a941ba788e9d1`은 historical smoke로만 보존한다.
 
-이 성공은 authoritative release-identity publication receipt가 아니다. 현재 v0.2.38은 uncommitted working tree여서 `source_artifact_v1`의 clean HEAD/index/worktree/archive replay를 만족하지 않는다. 더 근본적으로 v1 recipe는 PEP 517 build-system wheel과 runtime dependency exact closure를 같은 `dependency-wheelhouse` 경로에 둔다. Build에 필요한 `setuptools`, `wheel`, `tomli` 등은 runtime lock에 없는 extra artifact이므로 dependency verifier가 `dependency_lock_wheelhouse_artifact_extra`로 거부한다. 따라서 별도 build-system lock/wheelhouse를 갖는 후속 contract 없이 v1 authoritative gate를 통과했다고 주장하지 않는다. `build_system_dependency_closure_verified`, clean committed source, runtime dependency closure, publication approval은 계속 false다.
+이 성공은 authoritative release-identity publication receipt가 아니다. 당시 v0.2.38 검증 입력은 uncommitted working tree여서 `source_artifact_v1`의 clean HEAD/index/worktree/archive replay를 만족하지 않았다. 더 근본적으로 v1 recipe는 PEP 517 build-system wheel과 runtime dependency exact closure를 같은 `dependency-wheelhouse` 경로에 둔다. Build에 필요한 `setuptools`, `wheel`, `tomli` 등은 runtime lock에 없는 extra artifact이므로 dependency verifier가 `dependency_lock_wheelhouse_artifact_extra`로 거부한다. 따라서 별도 build-system lock/wheelhouse를 갖는 후속 contract 없이 v1 authoritative gate를 통과했다고 주장하지 않는다. `build_system_dependency_closure_verified`, 해당 검증 실행의 clean committed source, runtime dependency closure, publication approval은 계속 false다.
 
 ## 10. 다음 마일스톤
 

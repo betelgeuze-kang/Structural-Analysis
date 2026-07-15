@@ -5,8 +5,6 @@ from __future__ import annotations
 import os
 from typing import Any
 
-import pytest
-
 from structural_analysis.engine_v2.assembly_backend.fgmres_canonical_predecessor_v1 import (
     HipFgmresCanonicalPredecessorExecutionContextV1,
 )
@@ -16,6 +14,10 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_global_recurrence_con
 from structural_analysis.engine_v2.assembly_backend.fgmres_iteration_host_transfer_audit_v1 import (
     open_hip_fgmres_iteration_host_transfer_audit_v1,
     validate_hip_fgmres_iteration_host_transfer_audit_result_v1,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_recurrence_launch_fence_audit_v1 import (
+    open_hip_fgmres_recurrence_launch_fence_audit_v1,
+    validate_hip_fgmres_recurrence_launch_fence_audit_result_v1,
 )
 from structural_analysis.engine_v2.assembly_backend.fgmres_sealed_checkpoint_transaction_v1 import (
     open_hip_fgmres_sealed_checkpoint_transaction_context_v1,
@@ -40,9 +42,7 @@ def _hardware_required() -> bool:
     )
 
 
-def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
+def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h() -> None:
     required = _hardware_required()
     architecture = _native_gfx1030(required)
     model = load_model_ir_v2(FIXTURE)
@@ -52,32 +52,33 @@ def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h
         relative_tolerance=1.0e-15,
     )
     audit_opens: list[Any] = []
-    original_enqueue = (
-        HipFgmresCanonicalPredecessorExecutionContextV1.enqueue_canonical_predecessor
-    )
-
+    ordinal_opens: list[Any] = []
     def open_audit_before_first_enqueue(
         context: HipFgmresCanonicalPredecessorExecutionContextV1,
-    ) -> Any:
-        assert not audit_opens
-        audit_opens.append(open_hip_fgmres_iteration_host_transfer_audit_v1(context))
-        return original_enqueue(context)
-
-    monkeypatch.setattr(
-        HipFgmresCanonicalPredecessorExecutionContextV1,
-        "enqueue_canonical_predecessor",
-        open_audit_before_first_enqueue,
-    )
-    chain, predecessor = _open_canonical_chain(
-        model=model,
-        architecture=architecture,
-        required=required,
-        policy=policy,
-    )
-    assert len(audit_opens) == 1
-    audit = audit_opens[0].context
+    ) -> None:
+        assert not audit_opens and not ordinal_opens
+        transfer = open_hip_fgmres_iteration_host_transfer_audit_v1(context)
+        try:
+            ordinal = open_hip_fgmres_recurrence_launch_fence_audit_v1(context)
+        except BaseException:
+            transfer.context.close()
+            raise
+        audit_opens.append(transfer)
+        ordinal_opens.append(ordinal)
+    chain = None
+    audit = ordinal_audit = None
     sealed = global_open = None
     try:
+        chain, predecessor = _open_canonical_chain(
+            model=model,
+            architecture=architecture,
+            required=required,
+            policy=policy,
+            before_canonical_enqueue=open_audit_before_first_enqueue,
+        )
+        assert len(audit_opens) == 1 and len(ordinal_opens) == 1
+        audit = audit_opens[0].context
+        ordinal_audit = ordinal_opens[0].context
         sealed = open_hip_fgmres_sealed_checkpoint_transaction_context_v1(
             chain.canonical,
             predecessor,
@@ -92,6 +93,14 @@ def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h
         )
         global_pending = global_open.context.enqueue_remaining_global_recurrence()
         completion = global_open.context.synchronize(global_pending)
+        ordinal_result = ordinal_audit.seal_terminal_fence(
+            global_open.context,
+            completion,
+        )
+        validate_hip_fgmres_recurrence_launch_fence_audit_result_v1(
+            ordinal_result,
+            expected_context=ordinal_audit,
+        )
         result = audit.export_completion_buffers(global_open.context, completion)
         validate_hip_fgmres_iteration_host_transfer_audit_result_v1(
             result,
@@ -117,10 +126,39 @@ def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h
         )
         assert not receipt.claims.process_wide_host_transfer_zero_proven
         assert not receipt.claims.commercial_ready
+
+        ordinal_receipt = ordinal_result.receipt
+        ordinal_dimensions = ordinal_receipt.dimensions
+        assert ordinal_receipt.actual_backend == "hip"
+        assert ordinal_receipt.bindings.architecture == "gfx1030"
+        assert ordinal_receipt.telemetry.memset.attempt_count == 8
+        assert ordinal_receipt.telemetry.memset.success_count == 8
+        assert ordinal_receipt.telemetry.launch.attempt_count == (
+            ordinal_dimensions.full_program_launch_count
+        )
+        assert ordinal_receipt.telemetry.launch.success_count == (
+            ordinal_dimensions.full_program_launch_count
+        )
+        assert ordinal_receipt.telemetry.fence.attempt_count == 3
+        assert ordinal_receipt.telemetry.fence.success_count == 3
+        assert ordinal_receipt.window.terminal_fence_ordinal == (
+            ordinal_receipt.window.end_operation_ordinal
+        )
+        assert not ordinal_receipt.claims.device_kernel_execution_success_proven
+        assert not ordinal_receipt.claims.iteration_host_copy_zero_proven
+        assert not ordinal_receipt.claims.commercial_ready
     finally:
-        audit.close()
+        if ordinal_audit is not None:
+            ordinal_audit.close()
+        elif ordinal_opens:
+            ordinal_opens[-1].context.close()
+        if audit is not None:
+            audit.close()
+        elif audit_opens:
+            audit_opens[-1].context.close()
         if global_open is not None and not global_open.context.closed:
             global_open.context.close()
         if sealed is not None and not sealed.context.closed:
             sealed.context.close()
-        chain.close()
+        if chain is not None:
+            chain.close()

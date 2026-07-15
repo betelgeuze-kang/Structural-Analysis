@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_recurrence_launch_fence_audit_v1.schema.json",
+  "title": "HIP FGMRES recurrence launch/fence audit v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "context_id",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "bindings",
+    "window",
+    "dimensions",
+    "telemetry",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-recurrence-launch-fence-audit.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_exact_kernel_rtc_launch_fence_rolling_ordinal_audit"
+    },
+    "status": { "const": "ordinal_chain_sealed" },
+    "context_id": { "$ref": "#/$defs/hash" },
+    "evidence_scope": {
+      "const": "process_local_exact_kernel_fixed_recurrence_descriptor_order_non_promoting"
+    },
+    "actual_backend": { "enum": ["hip", "test_double"] },
+    "promotion_eligible": { "const": false },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "window": { "$ref": "#/$defs/window" },
+    "dimensions": { "$ref": "#/$defs/dimensions" },
+    "telemetry": { "$ref": "#/$defs/telemetry" },
+    "claims": { "$ref": "#/$defs/claims" },
+    "receipt_hash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "safeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "positiveSafeInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_context_id",
+        "canonical_open_receipt_hash",
+        "canonical_fenced_receipt_hash",
+        "sealed_checkpoint_context_id",
+        "sealed_checkpoint_receipt_hash",
+        "global_context_id",
+        "global_receipt_hash",
+        "completion_receipt_hash",
+        "recurrence_plan_hash",
+        "recurrence_kernel_abi_hash",
+        "combined_recurrence_abi_hash",
+        "kernel_identity_hash",
+        "kernel_source_sha256",
+        "canonical_schedule_hash",
+        "checkpoint_schedule_hash",
+        "global_full_schedule_hash",
+        "sealed_prefix_schedule_hash",
+        "continuation_schedule_hash",
+        "direct_generation_binding_hash",
+        "physical_projection_hash",
+        "program_descriptor_hash",
+        "architecture",
+        "device_ordinal",
+        "ledger_algorithm",
+        "descriptor_algorithm",
+        "runtime_identity_serialized",
+        "stream_identity_serialized",
+        "checkpoint_token_identity_serialized",
+        "kernel_object_identity_serialized"
+      ],
+      "properties": {
+        "canonical_context_id": { "$ref": "#/$defs/hash" },
+        "canonical_open_receipt_hash": { "$ref": "#/$defs/hash" },
+        "canonical_fenced_receipt_hash": { "$ref": "#/$defs/hash" },
+        "sealed_checkpoint_context_id": { "$ref": "#/$defs/hash" },
+        "sealed_checkpoint_receipt_hash": { "$ref": "#/$defs/hash" },
+        "global_context_id": { "$ref": "#/$defs/hash" },
+        "global_receipt_hash": { "$ref": "#/$defs/hash" },
+        "completion_receipt_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_plan_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_kernel_abi_hash": { "$ref": "#/$defs/hash" },
+        "combined_recurrence_abi_hash": { "$ref": "#/$defs/hash" },
+        "kernel_identity_hash": { "$ref": "#/$defs/hash" },
+        "kernel_source_sha256": { "$ref": "#/$defs/hash" },
+        "canonical_schedule_hash": { "$ref": "#/$defs/hash" },
+        "checkpoint_schedule_hash": { "$ref": "#/$defs/hash" },
+        "global_full_schedule_hash": { "$ref": "#/$defs/hash" },
+        "sealed_prefix_schedule_hash": { "$ref": "#/$defs/hash" },
+        "continuation_schedule_hash": { "$ref": "#/$defs/hash" },
+        "direct_generation_binding_hash": { "$ref": "#/$defs/hash" },
+        "physical_projection_hash": { "$ref": "#/$defs/hash" },
+        "program_descriptor_hash": { "$ref": "#/$defs/hash" },
+        "architecture": {
+          "type": "string",
+          "pattern": "^gfx[0-9a-f]+$"
+        },
+        "device_ordinal": { "$ref": "#/$defs/safeInteger" },
+        "ledger_algorithm": {
+          "const": "sha256_fixed_binary_predecessor_chain_v1"
+        },
+        "descriptor_algorithm": {
+          "const": "canonical_common_schedule_projection_sha256_v1"
+        },
+        "runtime_identity_serialized": { "const": false },
+        "stream_identity_serialized": { "const": false },
+        "checkpoint_token_identity_serialized": { "const": false },
+        "kernel_object_identity_serialized": { "const": false }
+      }
+    },
+    "window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start_boundary",
+        "end_boundary",
+        "start_operation_ordinal",
+        "end_operation_ordinal",
+        "start_event_sequence",
+        "end_event_sequence",
+        "start_rolling_hash",
+        "end_rolling_hash",
+        "first_recurrence_launch_ordinal",
+        "canonical_fence_ordinal",
+        "sealed_checkpoint_fence_ordinal",
+        "terminal_fence_ordinal",
+        "start_in_flight_count",
+        "end_in_flight_count",
+        "terminal_event_kind",
+        "terminal_event_disposition"
+      ],
+      "properties": {
+        "start_boundary": {
+          "const": "canonical_context_ready_before_predecessor_enqueue"
+        },
+        "end_boundary": {
+          "const": "global_recurrence_fenced_before_completion_export_open"
+        },
+        "start_operation_ordinal": { "$ref": "#/$defs/safeInteger" },
+        "end_operation_ordinal": { "$ref": "#/$defs/safeInteger" },
+        "start_event_sequence": { "$ref": "#/$defs/safeInteger" },
+        "end_event_sequence": { "$ref": "#/$defs/safeInteger" },
+        "start_rolling_hash": { "$ref": "#/$defs/hash" },
+        "end_rolling_hash": { "$ref": "#/$defs/hash" },
+        "first_recurrence_launch_ordinal": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "canonical_fence_ordinal": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "sealed_checkpoint_fence_ordinal": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "terminal_fence_ordinal": {
+          "$ref": "#/$defs/positiveSafeInteger"
+        },
+        "start_in_flight_count": { "const": 0 },
+        "end_in_flight_count": { "const": 0 },
+        "terminal_event_kind": { "const": "fence" },
+        "terminal_event_disposition": { "const": "success" }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "restart_dimension",
+        "max_iterations",
+        "maximum_restart_count",
+        "reduction_stage_count",
+        "prelaunch_memset_count",
+        "canonical_launch_count",
+        "sealed_checkpoint_launch_count",
+        "continuation_launch_count",
+        "full_program_launch_count",
+        "fence_count",
+        "total_native_call_count"
+      ],
+      "properties": {
+        "free_dof_count": { "$ref": "#/$defs/positiveSafeInteger" },
+        "restart_dimension": { "$ref": "#/$defs/positiveSafeInteger" },
+        "max_iterations": { "$ref": "#/$defs/positiveSafeInteger" },
+        "maximum_restart_count": { "$ref": "#/$defs/positiveSafeInteger" },
+        "reduction_stage_count": { "$ref": "#/$defs/safeInteger" },
+        "prelaunch_memset_count": { "const": 8 },
+        "canonical_launch_count": { "$ref": "#/$defs/positiveSafeInteger" },
+        "sealed_checkpoint_launch_count": { "const": 4 },
+        "continuation_launch_count": { "$ref": "#/$defs/safeInteger" },
+        "full_program_launch_count": { "$ref": "#/$defs/positiveSafeInteger" },
+        "fence_count": { "const": 3 },
+        "total_native_call_count": { "$ref": "#/$defs/positiveSafeInteger" }
+      }
+    },
+    "counter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_count",
+        "success_count",
+        "rejected_count",
+        "ambiguous_count",
+        "in_flight_count"
+      ],
+      "properties": {
+        "attempt_count": { "$ref": "#/$defs/safeInteger" },
+        "success_count": { "$ref": "#/$defs/safeInteger" },
+        "rejected_count": { "$ref": "#/$defs/safeInteger" },
+        "ambiguous_count": { "$ref": "#/$defs/safeInteger" },
+        "in_flight_count": { "$ref": "#/$defs/safeInteger" }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memset",
+        "launch",
+        "fence",
+        "operation_ordinal_delta",
+        "event_sequence_delta"
+      ],
+      "properties": {
+        "memset": { "$ref": "#/$defs/counter" },
+        "launch": { "$ref": "#/$defs/counter" },
+        "fence": { "$ref": "#/$defs/counter" },
+        "operation_ordinal_delta": { "$ref": "#/$defs/safeInteger" },
+        "event_sequence_delta": { "$ref": "#/$defs/safeInteger" }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_process_local_kernel_ledger_bound",
+        "canonical_to_terminal_fence_lineage_bound",
+        "fixed_recurrence_descriptor_order_replayed",
+        "native_attempt_recorded_before_each_owned_call",
+        "canonical_sealed_terminal_fences_ordered",
+        "exact_successful_call_counts_bound",
+        "constant_space_rolling_ledger_bound",
+        "raw_or_fresh_native_binding_calls_observed",
+        "process_wide_rocm_launch_completeness_proven",
+        "all_device_operations_observed",
+        "hostile_same_process_mutation_resistant",
+        "device_kernel_execution_success_proven",
+        "device_content_or_numerical_outcome_proven",
+        "standalone_receipt_provenance_authenticity",
+        "iteration_host_copy_zero_proven",
+        "external_architecture_verified",
+        "signed_hardware_truth_verified",
+        "result_ir_ready",
+        "end_to_end_on_complexity_proven",
+        "performance_or_speedup_proven",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "exact_process_local_kernel_ledger_bound": { "const": true },
+        "canonical_to_terminal_fence_lineage_bound": { "const": true },
+        "fixed_recurrence_descriptor_order_replayed": { "const": true },
+        "native_attempt_recorded_before_each_owned_call": { "const": true },
+        "canonical_sealed_terminal_fences_ordered": { "const": true },
+        "exact_successful_call_counts_bound": { "const": true },
+        "constant_space_rolling_ledger_bound": { "const": true },
+        "raw_or_fresh_native_binding_calls_observed": { "const": false },
+        "process_wide_rocm_launch_completeness_proven": { "const": false },
+        "all_device_operations_observed": { "const": false },
+        "hostile_same_process_mutation_resistant": { "const": false },
+        "device_kernel_execution_success_proven": { "const": false },
+        "device_content_or_numerical_outcome_proven": { "const": false },
+        "standalone_receipt_provenance_authenticity": { "const": false },
+        "iteration_host_copy_zero_proven": { "const": false },
+        "external_architecture_verified": { "const": false },
+        "signed_hardware_truth_verified": { "const": false },
+        "result_ir_ready": { "const": false },
+        "end_to_end_on_complexity_proven": { "const": false },
+        "performance_or_speedup_proven": { "const": false },
+        "commercial_ready": { "const": false },
+        "promotion_eligible": { "const": false }
+      }
+    }
+  }
+}
