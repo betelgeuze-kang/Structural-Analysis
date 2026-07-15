@@ -314,6 +314,10 @@ class FakeLoadedRuntime:
         missing_symbol: str | None = None,
         launch_status: int = 0,
         launch_exception: bool = False,
+        memset_status: Any = 0,
+        memset_exception: bool = False,
+        sync_status: Any = 0,
+        sync_exception: bool = False,
         unload_statuses: tuple[int, ...] = (0,),
         current_device: int = 0,
         get_device_status: int = 0,
@@ -332,6 +336,10 @@ class FakeLoadedRuntime:
         self.missing_symbol = missing_symbol
         self.launch_status = launch_status
         self.launch_exception = launch_exception
+        self.memset_status = memset_status
+        self.memset_exception = memset_exception
+        self.sync_status = sync_status
+        self.sync_exception = sync_exception
         self.unload_statuses = list(unload_statuses)
         self.current_device = current_device
         self.get_device_status = get_device_status
@@ -457,14 +465,18 @@ class FakeLoadedRuntime:
         assert stream_value is not None
         self.memset_streams.append(stream_value)
         self._stream_completion[stream_value] = False
-        return 0
+        if self.memset_exception:
+            raise RuntimeError("ambiguous fake memset exception")
+        return self.memset_status
 
     def _synchronize(self, stream: Any) -> int:
         stream_value = _pointer_value(stream)
         assert stream_value is not None
         self.sync_streams.append(stream_value)
         self._stream_completion[stream_value] = True
-        return 0
+        if self.sync_exception:
+            raise RuntimeError("ambiguous fake synchronize exception")
+        return self.sync_status
 
     def _query(self, stream: Any) -> int:
         stream_value = _pointer_value(stream)
@@ -694,6 +706,7 @@ def _launch_control(
     pass_index: int = -1,
     checkpoint_owner_token: object | None = None,
     expected_prior_pending_count: int | None = None,
+    audit_descriptor_hash: str | None = None,
 ) -> None:
     kernel.launch_control(
         stream,
@@ -718,6 +731,7 @@ def _launch_control(
         203,
         _checkpoint_owner_token=checkpoint_owner_token,
         _checkpoint_expected_prior_pending_count=expected_prior_pending_count,
+        _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
     )
 
 
@@ -2015,6 +2029,575 @@ def test_checkpoint_expected_prior_count_is_atomic_exact_and_covers_all_launches
     kernel._synchronize_checkpoint_stream(token, stream)
     assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 4
     assert kernel._checkpoint_pending_snapshot(token) == ()
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_invalid_audit_descriptors_do_not_leave_pending_reservations(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 189
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+
+    with pytest.raises(HipRtcFgmresV2Error) as memset_error:
+        kernel._checkpoint_memset_zero(
+            token,
+            stream,
+            201,
+            8,
+            _checkpoint_audit_descriptor_hash="invalid",
+        )
+    assert memset_error.value.code == "hip_rtc_fgmres_v2_launch_contract_invalid"
+    assert memset_error.value.launch_disposition == "not_attempted"
+    assert kernel._checkpoint_pending_snapshot(token) == ()
+    assert runtime.memset_streams == []
+
+    with pytest.raises(HipRtcFgmresV2Error) as launch_error:
+        _launch_control(
+            kernel,
+            stream,
+            control_modes["INIT"],
+            0,
+            checkpoint_owner_token=token,
+            expected_prior_pending_count=0,
+            audit_descriptor_hash="invalid",
+        )
+    assert launch_error.value.code == "hip_rtc_fgmres_v2_launch_contract_invalid"
+    assert launch_error.value.launch_disposition == "not_attempted"
+    assert kernel._checkpoint_pending_snapshot(token) == ()
+    assert runtime.launch_records == []
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_poisoned_audit_ledger_cannot_block_pending_work_safety_fence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 190
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    ledger.poison()
+
+    with pytest.raises(RuntimeError, match="ledger is poisoned"):
+        ledger.snapshot()
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    assert len(runtime.launch_records) == 1
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 1),)
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert runtime.sync_streams == [stream]
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    assert kernel._checkpoint_pending_snapshot(token) == ()
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_poisoned_audit_ledger_cannot_block_checkpoint_memset(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 196
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    ledger.poison()
+
+    kernel._checkpoint_memset_zero(token, stream, 201, 8)
+    assert runtime.memset_streams == [stream]
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 1),)
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert runtime.sync_streams == [stream]
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+@pytest.mark.parametrize("operation_kind", ["launch", "memset"])
+def test_interrupted_enqueue_audit_begin_cancels_before_native_and_rolls_back(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_kind: str,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 197
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    original_begin = type(ledger).begin
+
+    def interrupt_selected_begin(
+        state: Any,
+        kind: Any,
+        descriptor_hash: Any,
+    ) -> Any:
+        if kind == operation_kind:
+            state.poison()
+            raise KeyboardInterrupt(f"injected during {kind} audit begin")
+        return original_begin(state, kind, descriptor_hash)
+
+    monkeypatch.setattr(type(ledger), "begin", interrupt_selected_begin)
+    with pytest.raises(KeyboardInterrupt, match=f"during {operation_kind} audit begin"):
+        if operation_kind == "launch":
+            control_modes = hip_fgmres_control_state_abi_payload_v2()[
+                "control_mode_codes"
+            ]
+            _launch_control(
+                kernel,
+                stream,
+                control_modes["INIT"],
+                0,
+                checkpoint_owner_token=token,
+                expected_prior_pending_count=0,
+            )
+        else:
+            kernel._checkpoint_memset_zero(token, stream, 201, 8)
+
+    assert runtime.launch_records == []
+    assert runtime.memset_streams == []
+    assert kernel._checkpoint_pending_snapshot(token) == ()
+    kernel.close(_checkpoint_owner_token=token)
+
+
+@pytest.mark.parametrize("operation_kind", ["launch", "memset"])
+def test_audit_poison_failure_cannot_block_valid_enqueue_after_ordinary_begin_error(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_kind: str,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 199
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    original_begin = type(ledger).begin
+
+    def fail_selected_begin(
+        state: Any,
+        kind: Any,
+        descriptor_hash: Any,
+    ) -> Any:
+        if kind == operation_kind:
+            raise RuntimeError(f"injected {kind} audit begin failure")
+        return original_begin(state, kind, descriptor_hash)
+
+    def fail_poison(_state: Any) -> None:
+        raise SystemExit("injected audit poison failure")
+
+    monkeypatch.setattr(type(ledger), "begin", fail_selected_begin)
+    monkeypatch.setattr(type(ledger), "poison", fail_poison)
+    if operation_kind == "launch":
+        control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+        _launch_control(
+            kernel,
+            stream,
+            control_modes["INIT"],
+            0,
+            checkpoint_owner_token=token,
+            expected_prior_pending_count=0,
+        )
+    else:
+        kernel._checkpoint_memset_zero(token, stream, 201, 8)
+
+    assert len(runtime.launch_records) == (1 if operation_kind == "launch" else 0)
+    assert len(runtime.memset_streams) == (1 if operation_kind == "memset" else 0)
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 1),)
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert runtime.sync_streams == [stream]
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+@pytest.mark.parametrize("operation_kind", ["launch", "memset"])
+def test_enqueue_begin_interruption_survives_poison_failure_and_rolls_back(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_kind: str,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 200
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    interruption = KeyboardInterrupt(f"injected {operation_kind} audit interruption")
+
+    def interrupt_selected_begin(
+        _state: Any,
+        kind: Any,
+        _descriptor_hash: Any,
+    ) -> Any:
+        if kind == operation_kind:
+            raise interruption
+        raise AssertionError(f"unexpected audit begin for {kind}")
+
+    def fail_poison(_state: Any) -> None:
+        raise SystemExit("injected audit poison failure")
+
+    monkeypatch.setattr(type(ledger), "begin", interrupt_selected_begin)
+    monkeypatch.setattr(type(ledger), "poison", fail_poison)
+    with pytest.raises(KeyboardInterrupt) as caught:
+        if operation_kind == "launch":
+            control_modes = hip_fgmres_control_state_abi_payload_v2()[
+                "control_mode_codes"
+            ]
+            _launch_control(
+                kernel,
+                stream,
+                control_modes["INIT"],
+                0,
+                checkpoint_owner_token=token,
+                expected_prior_pending_count=0,
+            )
+        else:
+            kernel._checkpoint_memset_zero(token, stream, 201, 8)
+
+    assert caught.value is interruption
+    assert runtime.launch_records == []
+    assert runtime.memset_streams == []
+    assert kernel._checkpoint_pending_snapshot(token) == ()
+    kernel.close(_checkpoint_owner_token=token)
+
+
+@pytest.mark.parametrize(
+    ("operation_kind", "native_outcome"),
+    [
+        ("launch", "success"),
+        ("launch", "rejected"),
+        ("launch", "exception"),
+        ("launch", "non_exact"),
+        ("memset", "success"),
+        ("memset", "rejected"),
+        ("memset", "exception"),
+        ("memset", "non_exact"),
+    ],
+)
+def test_audit_finish_failure_cannot_mask_native_enqueue_outcome(
+    monkeypatch: pytest.MonkeyPatch,
+    operation_kind: str,
+    native_outcome: str,
+) -> None:
+    runtime_options: dict[str, Any] = {}
+    if operation_kind == "launch":
+        if native_outcome == "rejected":
+            runtime_options["launch_status"] = 7
+        elif native_outcome == "exception":
+            runtime_options["launch_exception"] = True
+        elif native_outcome == "non_exact":
+            runtime_options["launch_status"] = False
+    else:
+        if native_outcome == "rejected":
+            runtime_options["memset_status"] = 7
+        elif native_outcome == "exception":
+            runtime_options["memset_exception"] = True
+        elif native_outcome == "non_exact":
+            runtime_options["memset_status"] = False
+    runtime = FakeLoadedRuntime(**runtime_options)
+    kernel, _, _ = _compile_fake(monkeypatch, runtime)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 198
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    expected_disposition = (
+        "success"
+        if native_outcome == "success"
+        else "rejected"
+        if native_outcome == "rejected"
+        else "ambiguous"
+    )
+
+    def fail_audit_finish(
+        _state: Any,
+        _ticket: Any,
+        *,
+        disposition: Any,
+    ) -> None:
+        assert disposition == expected_disposition
+        raise RuntimeError("injected enqueue audit finish failure")
+
+    monkeypatch.setattr(type(ledger), "finish", fail_audit_finish)
+
+    def invoke_native_operation() -> None:
+        if operation_kind == "launch":
+            control_modes = hip_fgmres_control_state_abi_payload_v2()[
+                "control_mode_codes"
+            ]
+            _launch_control(
+                kernel,
+                stream,
+                control_modes["INIT"],
+                0,
+                checkpoint_owner_token=token,
+                expected_prior_pending_count=0,
+            )
+        else:
+            kernel._checkpoint_memset_zero(token, stream, 201, 8)
+
+    if native_outcome == "success":
+        invoke_native_operation()
+    else:
+        with pytest.raises(HipRtcFgmresV2Error) as native_error:
+            invoke_native_operation()
+        assert native_error.value.launch_disposition == expected_disposition
+        assert native_error.value.code == (
+            "hip_rtc_fgmres_v2_kernel_launch_failed"
+            if operation_kind == "launch"
+            else "hip_rtc_fgmres_v2_checkpoint_memset_failed"
+        )
+
+    assert len(runtime.launch_records) == (1 if operation_kind == "launch" else 0)
+    assert len(runtime.memset_streams) == (1 if operation_kind == "memset" else 0)
+    expected_pending = 0 if native_outcome == "rejected" else 1
+    assert kernel._checkpoint_pending_snapshot(token) == (
+        () if expected_pending == 0 else ((stream, 1),)
+    )
+    with pytest.raises(RuntimeError, match="ledger is poisoned"):
+        ledger.snapshot()
+    if expected_pending:
+        runtime.launch_exception = False
+        runtime.launch_status = 0
+        runtime.memset_exception = False
+        runtime.memset_status = 0
+        kernel._synchronize_checkpoint_stream(token, stream)
+        assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_interrupted_ledger_fence_begin_is_deferred_until_after_native_fence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 192
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    original_begin = type(ledger).begin
+
+    def interrupt_fence_begin(state: Any, kind: Any, descriptor_hash: Any) -> Any:
+        if kind == "fence":
+            state.poison()
+            raise KeyboardInterrupt("injected during audit fence begin")
+        return original_begin(state, kind, descriptor_hash)
+
+    monkeypatch.setattr(type(ledger), "begin", interrupt_fence_begin)
+    with pytest.raises(KeyboardInterrupt, match="during audit fence begin"):
+        kernel._synchronize_checkpoint_stream(token, stream)
+    assert runtime.sync_streams == [stream]
+    assert kernel._query_checkpoint_stream_completion(token, stream) is True
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_fence_begin_interruption_survives_poison_failure_after_native_fence(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 195
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    interruption = KeyboardInterrupt("injected audit fence begin interruption")
+
+    def interrupt_fence_begin(
+        _state: Any,
+        kind: Any,
+        _descriptor_hash: Any,
+    ) -> Any:
+        assert kind == "fence"
+        raise interruption
+
+    def fail_poison(_state: Any) -> None:
+        raise SystemExit("injected audit poison failure")
+
+    monkeypatch.setattr(type(ledger), "begin", interrupt_fence_begin)
+    monkeypatch.setattr(type(ledger), "poison", fail_poison)
+    with pytest.raises(KeyboardInterrupt) as caught:
+        kernel._synchronize_checkpoint_stream(token, stream)
+    assert caught.value is interruption
+    assert runtime.sync_streams == [stream]
+    assert kernel._query_checkpoint_stream_completion(token, stream) is True
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_ledger_fence_finish_exception_does_not_change_native_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 193
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    original_finish = type(ledger).finish
+
+    def fail_after_fence_finish(
+        state: Any,
+        ticket: Any,
+        *,
+        disposition: Any,
+    ) -> None:
+        original_finish(state, ticket, disposition=disposition)
+        if ticket.kind == "fence" and disposition == "success":
+            raise RuntimeError("injected audit finish failure")
+
+    monkeypatch.setattr(type(ledger), "finish", fail_after_fence_finish)
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert runtime.sync_streams == [stream]
+    with pytest.raises(RuntimeError, match="ledger is poisoned"):
+        ledger.snapshot()
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_ledger_finish_failure_cannot_mask_native_fence_rejection(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = FakeLoadedRuntime(sync_status=7)
+    kernel, _, _ = _compile_fake(monkeypatch, runtime)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 194
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+
+    def fail_fence_finish(
+        _state: Any,
+        _ticket: Any,
+        *,
+        disposition: Any,
+    ) -> None:
+        assert disposition == "rejected"
+        raise RuntimeError("injected audit rejection finish failure")
+
+    monkeypatch.setattr(type(ledger), "finish", fail_fence_finish)
+    with pytest.raises(HipRtcFgmresV2Error) as rejected:
+        kernel._synchronize_checkpoint_stream(token, stream)
+    assert rejected.value.code == "hip_rtc_fgmres_v2_checkpoint_sync_failed"
+    assert runtime.sync_streams == [stream]
+
+    runtime.sync_status = 0
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert runtime.sync_streams == [stream, stream]
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
+    kernel.close(_checkpoint_owner_token=token)
+
+
+def test_interrupted_ledger_fence_finish_remains_retryable_and_consumable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    kernel, _, runtime = _compile_fake(monkeypatch)
+    token = object()
+    kernel._acquire_checkpoint_transaction_owner_and_binding_snapshot(
+        0,
+        _checkpoint_owner_token=token,
+    )
+    stream = 191
+    control_modes = hip_fgmres_control_state_abi_payload_v2()["control_mode_codes"]
+    _launch_control(
+        kernel,
+        stream,
+        control_modes["INIT"],
+        0,
+        checkpoint_owner_token=token,
+        expected_prior_pending_count=0,
+    )
+    ledger = fgmres_rtc_v2._KERNEL_BINDINGS[kernel].launch_fence_ledger_state
+    original_finish = type(ledger).finish
+    interrupted = False
+
+    def interrupt_after_fence_finish(
+        state: Any,
+        ticket: Any,
+        *,
+        disposition: Any,
+    ) -> None:
+        nonlocal interrupted
+        original_finish(state, ticket, disposition=disposition)
+        if ticket.kind == "fence" and disposition == "success" and not interrupted:
+            interrupted = True
+            state.poison()
+            raise KeyboardInterrupt("injected after audit fence finish")
+
+    monkeypatch.setattr(type(ledger), "finish", interrupt_after_fence_finish)
+    with pytest.raises(KeyboardInterrupt, match="after audit fence finish"):
+        kernel._synchronize_checkpoint_stream(token, stream)
+    assert runtime.sync_streams == [stream]
+    assert kernel._checkpoint_pending_snapshot(token) == ((stream, 1),)
+
+    kernel._synchronize_checkpoint_stream(token, stream)
+    assert runtime.sync_streams == [stream, stream]
+    assert kernel._consume_checkpoint_pending_after_fence(token, stream) == 1
     kernel.close(_checkpoint_owner_token=token)
 
 

@@ -5,10 +5,13 @@ The ledger observes only calls that pass through the exact package-owned
 trace and does not claim visibility into fresh native bindings, other
 libraries, or device-side work submitted outside that owner.
 
-Each native-call attempt receives one monotonically increasing operation
-ordinal before the call.  A second hash-chain event records the disposition
-after the call.  The state retains counters and a rolling SHA-256 head rather
-than an event array, so one operation costs constant additional memory.
+On a healthy, receipt-eligible ledger path, each native-call attempt receives
+one monotonically increasing operation ordinal before the call.  A second
+hash-chain event records the disposition after the call.  An internal audit
+fault irreversibly poisons receipt issuance while the owning solver may keep
+its native lifecycle running without a ticket.  The state retains counters and
+a rolling SHA-256 head rather than an event array, so one operation costs
+constant additional memory.
 """
 
 from __future__ import annotations
@@ -142,6 +145,7 @@ class _HipFgmresRtcLaunchFenceLedgerStateV1:
 
     def __init__(self) -> None:
         self._lock = threading.RLock()
+        self._poisoned = False
         self._operation_ordinal = 0
         self._event_sequence = 0
         self._rolling_hash = _GENESIS_HASH
@@ -164,6 +168,8 @@ class _HipFgmresRtcLaunchFenceLedgerStateV1:
         _require_hash(descriptor_hash, "descriptor_hash")
         nonce = object()
         with self._lock:
+            if self._poisoned:
+                raise RuntimeError("RTC launch/fence audit ledger is poisoned")
             if self._in_flight:
                 raise RuntimeError(
                     "an RTC launch/fence audit operation is already in flight"
@@ -179,20 +185,24 @@ class _HipFgmresRtcLaunchFenceLedgerStateV1:
                 kind,
                 descriptor_hash,
             )
-            row = self._counters[kind]
-            row[0] += 1
-            row[4] += 1
-            self._operation_ordinal = ordinal
-            self._event_sequence += 1
-            self._rolling_hash = _fold_event(
-                self._rolling_hash,
-                ordinal=ordinal,
-                kind=kind,
-                descriptor_hash=descriptor_hash,
-                phase="attempt",
-                disposition=None,
-            )
-            self._in_flight[nonce] = ticket
+            try:
+                row = self._counters[kind]
+                row[0] += 1
+                row[4] += 1
+                self._operation_ordinal = ordinal
+                self._event_sequence += 1
+                self._rolling_hash = _fold_event(
+                    self._rolling_hash,
+                    ordinal=ordinal,
+                    kind=kind,
+                    descriptor_hash=descriptor_hash,
+                    phase="attempt",
+                    disposition=None,
+                )
+                self._in_flight[nonce] = ticket
+            except BaseException:
+                self._poisoned = True
+                raise
             return ticket
 
     def finish(
@@ -206,30 +216,44 @@ class _HipFgmresRtcLaunchFenceLedgerStateV1:
         if disposition not in _DISPOSITION_CODE:
             raise ValueError("RTC launch/fence disposition is invalid")
         with self._lock:
+            if self._poisoned:
+                raise RuntimeError("RTC launch/fence audit ledger is poisoned")
             current = self._in_flight.get(ticket.nonce)
             if current is not ticket:
                 raise RuntimeError(
                     "RTC launch/fence audit ticket is stale or already completed"
                 )
-            row = self._counters[ticket.kind]
-            row[{"success": 1, "rejected": 2, "ambiguous": 3}[disposition]] += 1
-            row[4] -= 1
-            self._event_sequence += 1
-            self._rolling_hash = _fold_event(
-                self._rolling_hash,
-                ordinal=ticket.ordinal,
-                kind=ticket.kind,
-                descriptor_hash=ticket.descriptor_hash,
-                phase="outcome",
-                disposition=disposition,
-            )
-            del self._in_flight[ticket.nonce]
-            self._last_completed_operation_ordinal = ticket.ordinal
-            self._last_completed_kind = ticket.kind
-            self._last_completed_disposition = disposition
+            try:
+                row = self._counters[ticket.kind]
+                row[{"success": 1, "rejected": 2, "ambiguous": 3}[disposition]] += 1
+                row[4] -= 1
+                self._event_sequence += 1
+                self._rolling_hash = _fold_event(
+                    self._rolling_hash,
+                    ordinal=ticket.ordinal,
+                    kind=ticket.kind,
+                    descriptor_hash=ticket.descriptor_hash,
+                    phase="outcome",
+                    disposition=disposition,
+                )
+                del self._in_flight[ticket.nonce]
+                self._last_completed_operation_ordinal = ticket.ordinal
+                self._last_completed_kind = ticket.kind
+                self._last_completed_disposition = disposition
+            except BaseException:
+                self._poisoned = True
+                raise
+
+    def poison(self) -> None:
+        """Fail closed after an interrupted caller-side begin hand-off."""
+
+        with self._lock:
+            self._poisoned = True
 
     def snapshot(self) -> HipFgmresRtcLaunchFenceLedgerSnapshotV1:
         with self._lock:
+            if self._poisoned:
+                raise RuntimeError("RTC launch/fence audit ledger is poisoned")
             rows = {
                 kind: HipFgmresRtcOperationCounterV1(*self._counters[kind])
                 for kind in _KINDS
@@ -427,13 +451,23 @@ def _validate_snapshot_v1(
             or snapshot.last_completed_disposition != "none"
         ):
             raise ValueError("RTC launch/fence empty tail is inconsistent")
-    elif (
-        snapshot.last_completed_operation_ordinal <= 0
-        or snapshot.last_completed_operation_ordinal > snapshot.operation_ordinal
-        or snapshot.last_completed_kind not in _KINDS
-        or snapshot.last_completed_disposition not in _DISPOSITION_CODE
-    ):
-        raise ValueError("RTC launch/fence completed tail is inconsistent")
+    else:
+        if (
+            snapshot.last_completed_operation_ordinal
+            != snapshot.operation_ordinal - in_flight
+            or snapshot.last_completed_kind not in _KINDS
+            or snapshot.last_completed_disposition not in _DISPOSITION_CODE
+        ):
+            raise ValueError("RTC launch/fence completed tail is inconsistent")
+        last_counter = getattr(snapshot, snapshot.last_completed_kind)
+        if (
+            getattr(
+                last_counter,
+                f"{snapshot.last_completed_disposition}_count",
+            )
+            <= 0
+        ):
+            raise ValueError("RTC launch/fence completed tail has no matching event")
 
 
 def _fold_event(

@@ -36,19 +36,24 @@ binding witness와 그 exact object identity를 결속한다. Native choke point
 - `_launch()` → sealed `hipModuleLaunchKernel`
 - `_synchronize_checkpoint_stream()` → sealed `hipStreamSynchronize`
 
-각 호출은 native callable 직전에 operation ordinal을 한 번 증가시키고 attempt
-event를 rolling SHA-256 head에 fold한다. 반환 뒤에는 같은 ordinal로 다음 disposition
-중 하나를 기록한다.
+Receipt 발행이 가능한 healthy ledger 경로에서 각 호출은 native callable 직전에
+operation ordinal을 한 번 증가시키고 attempt event를 rolling SHA-256 head에 fold한다.
+반환 뒤에는 같은 ordinal로 다음 disposition 중 하나를 기록한다.
 
 - `success`: exact integer status `0`
 - `rejected`: exact integer nonzero status
 - `ambiguous`: 예외, `BaseException`, 또는 non-exact status
 
-Ordinal은 실패해도 되돌리지 않는다. 동시에 둘 이상의 in-flight native call은
-kernel 내부 ledger가 pre-native fail-closed한다. Event 배열은 저장하지 않고
-고정 counter, 마지막 완료 event, rolling head만 유지하므로 event당 추가 상태는
-`O(1)`, 전체 host-control 계측 시간은 `O(L+K)`, ledger 메모리는 `O(1)`이다. 이는
-유한요소 해석 전체의 `O(N)` 증거가 아니다.
+Ordinal은 native attempt 뒤 실패해도 되돌리지 않는다. Ledger `begin`/`finish`의
+ordinary 내부 오류는 ledger를 비가역 poison해 clean receipt 발행만 fail-closed한다.
+Companion audit은 기존 solver 의미를 바꾸지 않으므로 이때 valid memset/launch와
+safety fence는 ticket 없는 degraded mode로 계속된다. Invalid descriptor는 native 전
+거부하고, enqueue ledger-begin의 `BaseException`은 pending을 rollback한 뒤 전파한다.
+Fence-begin `BaseException`은 exact native safety fence 성공 뒤 전파하며, native fence
+실패·non-exact·rejection이 있으면 그 authoritative native 결과를 우선한다.
+Event 배열은 저장하지 않고 고정 counter, 마지막 완료 event, rolling head만 유지하므로
+event당 추가 상태는 `O(1)`, 전체 host-control 계측 시간은 `O(L+K)`, ledger 메모리는
+`O(1)`이다. 이는 유한요소 해석 전체의 `O(N)` 증거가 아니다.
 
 Descriptor는 raw pointer를 포함하지 않는다. Canonical/sealed/global fixed schedule의
 공통 semantic row projection을 canonical SHA-256으로 만들고, memset은 role과 exact
@@ -88,7 +93,7 @@ Start operation ordinal을 `b`, canonical launch 수를 `C`, continuation launch
 ## True claim
 
 - exact process-local FGMRES-v2 kernel ledger와 retained context 결속
-- native-call 전 attempt 및 반환/중단 disposition 보존
+- clean-receipt 경로의 native-call 전 attempt 및 반환/중단 disposition 보존
 - fixed 8 memset, full recurrence descriptor, 세 fence의 exact 순서 replay
 - canonical→sealed→global의 same kernel, loaded runtime, checkpoint token, device,
   stream lineage
@@ -109,19 +114,22 @@ Start operation ordinal을 `b`, canonical launch 수를 `C`, continuation launch
 
 ## 현재 검증
 
-- 신규 focused/public/capability 회귀: `22 passed in 154.71s`
-- actual local `gfx1030` single-case required gate: `1 passed in 37.24s`
-  - owned memset `8/8`, full-program launch attempt/success exact 일치, fence `3/3`
-  - ordinal audit을 terminal fence 뒤 seal하고 기존 transfer-audit exporter보다 먼저 검증
-- 위 actual 결과는 이 작업 세션의 비영속 관찰이며 standalone signed hardware
-  receipt 또는 외부 실행 로그가 아니다.
+- focused audit 회귀: `11 passed in 243.76s (0:04:03)`
+- public API/capability 회귀: `16 passed in 1.73s`
+- RTC 전체 회귀: `134 passed in 43.82s`
+- current-snapshot actual local `gfx1030` gate: `1 skipped in 1.80s`
+  - 현재 실행 환경에서 real gfx agent를 찾지 못했으므로 actual hardware claim은 false다.
+  - 이전 `1 passed in 37.24s`는 최종 safety/degraded-mode 수정 전 관찰이라 현재
+    snapshot 증거로 승격하지 않는다.
 - exact 10-slot family composition: 다음 additive audited-parity 단계로 보류
 
 ## 다음 단계
 
 1. 기존 10-slot loop에 per-kernel ordinal result를 결합하되 device solve/export를
    중복 실행하지 않는다.
-2. parity receipt hash, host-transfer audit hash, ordinal audit hash를 함께 소비하는
-   별도 audited-parity v2에서만 좁은 iteration-host-copy claim 승격을 검토한다.
+2. 별도 audited-parity v2가 세 retained result를 각각 `expected_context` authority로
+   먼저 검증한 뒤 parity, host-transfer audit, ordinal audit receipt hash를 함께
+   결속해야 좁은 iteration-host-copy claim 승격을 검토한다. Detached artifact만
+   소비하는 경로에는 이 authority들을 묶는 서명 envelope가 추가로 필요하다.
 3. Exact fence-prefix consume seal, post-fence enqueue 차단, query-recovery seal은 이
    관측형 v1보다 강한 후속 lifecycle 계약으로 분리한다.

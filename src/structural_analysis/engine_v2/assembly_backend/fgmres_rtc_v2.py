@@ -28,7 +28,7 @@ import math
 from pathlib import Path
 import re
 import threading
-from typing import Any
+from typing import Any, Literal
 import weakref
 
 from structural_analysis.engine_v2.backends.hip.native import LoadedHipRuntime
@@ -76,6 +76,7 @@ from .fgmres_rtc_launch_fence_ledger_v1 import (
     _HipFgmresRtcLaunchFenceLedgerStateV1,
     _fallback_descriptor_hash_v1,
     _fence_descriptor_hash_v1,
+    _require_hash,
 )
 
 
@@ -3000,16 +3001,35 @@ class HipRtcFgmresV2Kernel:
                     "hip_rtc_fgmres_v2_checkpoint_sync_unavailable",
                     "The exact runtime fence callable is absent from the lease.",
                 )
-            ticket = witness.launch_fence_ledger_state.begin(
-                "fence",
-                _fence_descriptor_hash_v1(),
-            )
+            ticket = None
+            deferred_audit_interruption: BaseException | None = None
+            try:
+                ticket = witness.launch_fence_ledger_state.begin(
+                    "fence",
+                    _fence_descriptor_hash_v1(),
+                )
+            except Exception:
+                # Audit availability must never strand already-submitted device
+                # work.  A poisoned, exhausted, or interrupted ledger makes a
+                # clean ordinal receipt permanently unavailable, but the exact
+                # safety fence still has to reach the owning runtime.
+                _best_effort_poison_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state
+                )
+            except BaseException as exc:
+                _best_effort_poison_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state
+                )
+                deferred_audit_interruption = exc
+
             try:
                 raw_status = stream_synchronize(ctypes.c_void_p(stream_value))
             except BaseException as exc:
-                witness.launch_fence_ledger_state.finish(
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
                     ticket,
                     disposition="ambiguous",
+                    propagate_base_exception=False,
                 )
                 if not isinstance(exc, Exception):
                     raise
@@ -3018,9 +3038,11 @@ class HipRtcFgmresV2Kernel:
                     f"hipStreamSynchronize raised {type(exc).__name__}.",
                 ) from exc
             if type(raw_status) is not int:
-                witness.launch_fence_ledger_state.finish(
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
                     ticket,
                     disposition="ambiguous",
+                    propagate_base_exception=False,
                 )
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_checkpoint_sync_failed",
@@ -3029,9 +3051,11 @@ class HipRtcFgmresV2Kernel:
             try:
                 status = int(raw_status)
             except BaseException as exc:
-                witness.launch_fence_ledger_state.finish(
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
                     ticket,
                     disposition="ambiguous",
+                    propagate_base_exception=False,
                 )
                 if not isinstance(exc, Exception):
                     raise
@@ -3041,19 +3065,25 @@ class HipRtcFgmresV2Kernel:
                     f"{type(exc).__name__}.",
                 ) from exc
             if status != 0:
-                witness.launch_fence_ledger_state.finish(
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
                     ticket,
                     disposition="rejected",
+                    propagate_base_exception=False,
                 )
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_checkpoint_sync_failed",
                     "hipStreamSynchronize failed: "
                     f"{self._runtime.error_string(status)}.",
                 )
-            witness.launch_fence_ledger_state.finish(
+            _finish_rtc_operation_audit_v1(
+                witness.launch_fence_ledger_state,
                 ticket,
                 disposition="success",
+                propagate_base_exception=True,
             )
+            if deferred_audit_interruption is not None:
+                raise deferred_audit_interruption
 
     def _query_checkpoint_stream_completion(
         self,
@@ -3162,19 +3192,40 @@ class HipRtcFgmresV2Kernel:
                     "The sealed hipMemsetAsync callable is unavailable.",
                     launch_disposition="not_attempted",
                 )
-            self._pending_streams[stream_value] = (
-                self._pending_streams.get(stream_value, 0) + 1
-            )
             descriptor_hash = _checkpoint_audit_descriptor_hash
             if descriptor_hash is None:
                 descriptor_hash = _fallback_descriptor_hash_v1(
                     "memset",
                     "FGMRES v2 checkpoint memset",
                 )
-            ticket = witness.launch_fence_ledger_state.begin(
-                "memset",
-                descriptor_hash,
-            )
+            try:
+                _require_hash(descriptor_hash, "checkpoint audit descriptor hash")
+            except (TypeError, ValueError) as exc:
+                raise _launch_contract_error(
+                    "checkpoint memset audit descriptor hash is invalid."
+                ) from exc
+            prior_pending_count = self._pending_streams.get(stream_value, 0)
+            self._pending_streams[stream_value] = prior_pending_count + 1
+            ticket = None
+            try:
+                ticket = witness.launch_fence_ledger_state.begin(
+                    "memset",
+                    descriptor_hash,
+                )
+            except Exception:
+                _best_effort_poison_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state
+                )
+            except BaseException:
+                _best_effort_restore_pending_reservation_v1(
+                    self._pending_streams,
+                    stream_value=stream_value,
+                    prior_pending_count=prior_pending_count,
+                )
+                _best_effort_poison_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state
+                )
+                raise
             try:
                 status = memset_async(
                     ctypes.c_void_p(base_value),
@@ -3183,9 +3234,11 @@ class HipRtcFgmresV2Kernel:
                     ctypes.c_void_p(stream_value),
                 )
             except BaseException as exc:
-                witness.launch_fence_ledger_state.finish(
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
                     ticket,
                     disposition="ambiguous",
+                    propagate_base_exception=False,
                 )
                 if not isinstance(exc, Exception):
                     raise
@@ -3195,9 +3248,11 @@ class HipRtcFgmresV2Kernel:
                     launch_disposition="ambiguous",
                 ) from exc
             if type(status) is not int:
-                witness.launch_fence_ledger_state.finish(
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
                     ticket,
                     disposition="ambiguous",
+                    propagate_base_exception=False,
                 )
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_checkpoint_memset_failed",
@@ -3205,24 +3260,28 @@ class HipRtcFgmresV2Kernel:
                     launch_disposition="ambiguous",
                 )
             if status != 0:
-                witness.launch_fence_ledger_state.finish(
-                    ticket,
-                    disposition="rejected",
-                )
                 pending_count = self._pending_streams[stream_value] - 1
                 if pending_count:
                     self._pending_streams[stream_value] = pending_count
                 else:
                     del self._pending_streams[stream_value]
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
+                    ticket,
+                    disposition="rejected",
+                    propagate_base_exception=False,
+                )
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_checkpoint_memset_failed",
                     "hipMemsetAsync failed: "
                     f"{_runtime_error_string(witness.loaded_runtime, status)}.",
                     launch_disposition="rejected",
                 )
-            witness.launch_fence_ledger_state.finish(
+            _finish_rtc_operation_audit_v1(
+                witness.launch_fence_ledger_state,
                 ticket,
                 disposition="success",
+                propagate_base_exception=True,
             )
 
     def _launch(
@@ -3276,19 +3335,40 @@ class HipRtcFgmresV2Kernel:
                 operation=operation,
                 launch_disposition="not_attempted",
             )
-            self._pending_streams[stream_value] = (
-                self._pending_streams.get(stream_value, 0) + 1
-            )
             descriptor_hash = checkpoint_audit_descriptor_hash
             if descriptor_hash is None:
                 descriptor_hash = _fallback_descriptor_hash_v1(
                     "launch",
                     operation,
                 )
-            ticket = witness.launch_fence_ledger_state.begin(
-                "launch",
-                descriptor_hash,
-            )
+            try:
+                _require_hash(descriptor_hash, "checkpoint audit descriptor hash")
+            except (TypeError, ValueError) as exc:
+                raise _launch_contract_error(
+                    "checkpoint launch audit descriptor hash is invalid."
+                ) from exc
+            prior_pending_count = self._pending_streams.get(stream_value, 0)
+            self._pending_streams[stream_value] = prior_pending_count + 1
+            ticket = None
+            try:
+                ticket = witness.launch_fence_ledger_state.begin(
+                    "launch",
+                    descriptor_hash,
+                )
+            except Exception:
+                _best_effort_poison_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state
+                )
+            except BaseException:
+                _best_effort_restore_pending_reservation_v1(
+                    self._pending_streams,
+                    stream_value=stream_value,
+                    prior_pending_count=prior_pending_count,
+                )
+                _best_effort_poison_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state
+                )
+                raise
             try:
                 status = witness.launch_callable(
                     ctypes.c_void_p(function_pointer),
@@ -3306,9 +3386,11 @@ class HipRtcFgmresV2Kernel:
             except BaseException as exc:
                 # An exception leaves launch acceptance ambiguous.  Ownership
                 # remains pending until a real completion fence is observed.
-                witness.launch_fence_ledger_state.finish(
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
                     ticket,
                     disposition="ambiguous",
+                    propagate_base_exception=False,
                 )
                 if not isinstance(exc, Exception):
                     raise
@@ -3318,9 +3400,11 @@ class HipRtcFgmresV2Kernel:
                     launch_disposition="ambiguous",
                 ) from exc
             if type(status) is not int:
-                witness.launch_fence_ledger_state.finish(
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
                     ticket,
                     disposition="ambiguous",
+                    propagate_base_exception=False,
                 )
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_kernel_launch_failed",
@@ -3329,24 +3413,28 @@ class HipRtcFgmresV2Kernel:
                     launch_disposition="ambiguous",
                 )
             if status != 0:
-                witness.launch_fence_ledger_state.finish(
-                    ticket,
-                    disposition="rejected",
-                )
                 pending_count = self._pending_streams[stream_value] - 1
                 if pending_count:
                     self._pending_streams[stream_value] = pending_count
                 else:
                     del self._pending_streams[stream_value]
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
+                    ticket,
+                    disposition="rejected",
+                    propagate_base_exception=False,
+                )
                 raise HipRtcFgmresV2Error(
                     "hip_rtc_fgmres_v2_kernel_launch_failed",
                     f"{operation} hipModuleLaunchKernel failed: "
                     f"{_runtime_error_string(witness.loaded_runtime, status)}.",
                     launch_disposition="rejected",
                 )
-            witness.launch_fence_ledger_state.finish(
+            _finish_rtc_operation_audit_v1(
+                witness.launch_fence_ledger_state,
                 ticket,
                 disposition="success",
+                propagate_base_exception=True,
             )
 
     def _require_checkpoint_owner_identity(self, token: object) -> None:
@@ -3387,6 +3475,53 @@ class HipRtcFgmresV2Kernel:
                 "hip_rtc_fgmres_v2_kernel_closed",
                 "HIPRTC FGMRES v2 kernel is closed or retiring.",
             )
+
+
+def _best_effort_poison_rtc_operation_audit_v1(
+    state: _HipFgmresRtcLaunchFenceLedgerStateV1,
+) -> None:
+    """Poison receipt issuance without masking the owning native lifecycle."""
+
+    try:
+        state.poison()
+    except BaseException:
+        pass
+
+
+def _best_effort_restore_pending_reservation_v1(
+    pending_streams: dict[int, int],
+    *,
+    stream_value: int,
+    prior_pending_count: int,
+) -> None:
+    """Restore pre-native pending ownership without replacing an interruption."""
+
+    try:
+        if prior_pending_count:
+            pending_streams[stream_value] = prior_pending_count
+        else:
+            pending_streams.pop(stream_value, None)
+    except BaseException:
+        pass
+
+
+def _finish_rtc_operation_audit_v1(
+    state: _HipFgmresRtcLaunchFenceLedgerStateV1,
+    ticket: Any,
+    *,
+    disposition: Literal["success", "rejected", "ambiguous"],
+    propagate_base_exception: bool,
+) -> None:
+    """Finish auxiliary audit state without changing a known native outcome."""
+
+    if ticket is None:
+        return
+    try:
+        state.finish(ticket, disposition=disposition)
+    except BaseException as exc:
+        _best_effort_poison_rtc_operation_audit_v1(state)
+        if propagate_base_exception and not isinstance(exc, Exception):
+            raise
 
 
 def reduction_output_count_v2(value_count: int) -> int:

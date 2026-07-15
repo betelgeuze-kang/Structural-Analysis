@@ -1,4 +1,4 @@
-"""Actual-gfx1030 gate for the bound-runtime recurrence copy audit."""
+"""Actual-gfx1030 gate for bound copy and RTC launch/fence audits."""
 
 from __future__ import annotations
 
@@ -38,11 +38,12 @@ def _hardware_required() -> bool:
         for name in (
             "ENGINE_V2_REQUIRE_HIP_HARDWARE",
             "ENGINE_V2_REQUIRE_HIP_FGMRES_TRANSFER_AUDIT_HARDWARE",
+            "ENGINE_V2_REQUIRE_HIP_FGMRES_RECURRENCE_LAUNCH_FENCE_AUDIT_HARDWARE",
         )
     )
 
 
-def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h() -> None:
+def test_native_gfx1030_copy_zero_launch_fence_order_and_fenced_export() -> None:
     required = _hardware_required()
     architecture = _native_gfx1030(required)
     model = load_model_ir_v2(FIXTURE)
@@ -53,6 +54,7 @@ def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h
     )
     audit_opens: list[Any] = []
     ordinal_opens: list[Any] = []
+
     def open_audit_before_first_enqueue(
         context: HipFgmresCanonicalPredecessorExecutionContextV1,
     ) -> None:
@@ -65,6 +67,7 @@ def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h
             raise
         audit_opens.append(transfer)
         ordinal_opens.append(ordinal)
+
     chain = None
     audit = ordinal_audit = None
     sealed = global_open = None
@@ -147,6 +150,34 @@ def test_native_gfx1030_recurrence_program_copy_zero_and_fenced_export_three_d2h
         assert not ordinal_receipt.claims.device_kernel_execution_success_proven
         assert not ordinal_receipt.claims.iteration_host_copy_zero_proven
         assert not ordinal_receipt.claims.commercial_ready
+        transfer_bindings = receipt.bindings
+        ordinal_bindings = ordinal_receipt.bindings
+        for field_name in (
+            "canonical_context_id",
+            "canonical_open_receipt_hash",
+            "canonical_fenced_receipt_hash",
+            "sealed_checkpoint_context_id",
+            "sealed_checkpoint_receipt_hash",
+            "global_context_id",
+            "global_receipt_hash",
+            "completion_receipt_hash",
+            "recurrence_plan_hash",
+            "recurrence_kernel_abi_hash",
+            "combined_recurrence_abi_hash",
+            "kernel_identity_hash",
+            "kernel_source_sha256",
+            "global_full_schedule_hash",
+            "sealed_prefix_schedule_hash",
+            "continuation_schedule_hash",
+            "direct_generation_binding_hash",
+            "physical_projection_hash",
+            "architecture",
+            "device_ordinal",
+        ):
+            assert getattr(ordinal_bindings, field_name) == getattr(
+                transfer_bindings,
+                field_name,
+            )
     finally:
         if ordinal_audit is not None:
             ordinal_audit.close()

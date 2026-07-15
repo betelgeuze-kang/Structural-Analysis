@@ -133,6 +133,7 @@ AST allowlist는 package-owned Python 경로의 우발적 우회를 잡는 회�
 2. **완료(v0.2.41):** additive [RTC launch/fence rolling ordinal audit](engine-v2-hip-fgmres-recurrence-launch-fence-audit-v1.md)을
    추가해 canonical pre-enqueue부터 terminal fence 직후까지 fixed memset/launch/fence
    descriptor의 시간 순서를 독립 rolling chain으로 봉인했다.
-3. 다음 audited parity v2가 parity receipt hash, 이 transfer-audit receipt hash,
-   ordinal-audit receipt hash를 함께 소비한 뒤에만 좁은 iteration-host-copy claim
-   승격을 검토한다.
+3. 다음 audited parity v2가 세 retained result를 각각 `expected_context` authority로
+   검증한 뒤 parity, 이 transfer-audit, ordinal-audit receipt hash를 결속해야 좁은
+   iteration-host-copy claim 승격을 검토한다. Detached 소비 경로는 동일 authority를
+   묶는 서명 envelope 없이는 provenance를 승격하지 않는다.
