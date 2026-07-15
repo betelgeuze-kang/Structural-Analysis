@@ -28,6 +28,10 @@ from structural_analysis.engine_v2.contracts._canonical import (
 )
 
 from .native import LoadedHipRuntime, load_hip_native_runtime, probe_hip_capability
+from .transfer_audit_v1 import (
+    _BOUND_COPY_AUDIT_SNAPSHOT_MINT_V1,
+    _BoundHipCopyAuditStateV1,
+)
 from .types import HipCapabilityReceipt
 
 HIP_CONTEXT_RECEIPT_SCHEMA_VERSION = "structural-analysis-hip-context-receipt.v1"
@@ -270,11 +274,17 @@ class HipContextRuntimeProtocol(Protocol):
 class _BoundBlockingD2HCopy:
     """Immutable callable that never re-reads mutable runtime attributes."""
 
-    __slots__ = ("_loaded", "_memcpy")
+    __slots__ = ("_copy_audit_v1", "_loaded", "_memcpy")
 
-    def __init__(self, memcpy: Any, loaded_runtime: Any) -> None:
+    def __init__(
+        self,
+        memcpy: Any,
+        loaded_runtime: Any,
+        copy_audit_v1: _BoundHipCopyAuditStateV1,
+    ) -> None:
         object.__setattr__(self, "_memcpy", memcpy)
         object.__setattr__(self, "_loaded", loaded_runtime)
+        object.__setattr__(self, "_copy_audit_v1", copy_audit_v1)
 
     def __setattr__(self, _name: str, _value: object) -> NoReturn:
         raise AttributeError(f"{type(self).__name__} is immutable")
@@ -283,12 +293,19 @@ class _BoundBlockingD2HCopy:
         raise AttributeError(f"{type(self).__name__} is immutable")
 
     def __call__(self, array: np.ndarray, pointer: Any) -> None:
-        status = self._memcpy(
-            ctypes.c_void_p(int(array.ctypes.data)),
-            pointer,
-            int(array.nbytes),
-            2,
-        )
+        byte_count = int(array.nbytes)
+        ticket = self._copy_audit_v1.begin("d2h_blocking", byte_count)
+        try:
+            status = self._memcpy(
+                ctypes.c_void_p(int(array.ctypes.data)),
+                pointer,
+                byte_count,
+                2,
+            )
+        except BaseException:
+            self._copy_audit_v1.finish(ticket, succeeded=False)
+            raise
+        self._copy_audit_v1.finish(ticket, succeeded=status == 0)
         if status != 0:
             raise HipContextError(
                 "hip_copy_failed",
@@ -363,9 +380,11 @@ class _BoundHipContextRuntime:
             ],
             ctypes.c_int,
         )
+        self._copy_audit_v1 = _BoundHipCopyAuditStateV1()
         self._blocking_d2h_copy = _BoundBlockingD2HCopy(
             self._memcpy,
             loaded_runtime,
+            self._copy_audit_v1,
         )
         self._stream_sync = loaded_runtime.bind(
             "hipStreamSynchronize", [ctypes.c_void_p], ctypes.c_int
@@ -426,13 +445,20 @@ class _BoundHipContextRuntime:
     def copy_h2d_async(
         self, pointer: ctypes.c_void_p, array: np.ndarray, stream: ctypes.c_void_p
     ) -> None:
-        status = self._memcpy_async(
-            pointer,
-            ctypes.c_void_p(int(array.ctypes.data)),
-            int(array.nbytes),
-            1,
-            stream,
-        )
+        byte_count = int(array.nbytes)
+        ticket = self._copy_audit_v1.begin("h2d_async", byte_count)
+        try:
+            status = self._memcpy_async(
+                pointer,
+                ctypes.c_void_p(int(array.ctypes.data)),
+                byte_count,
+                1,
+                stream,
+            )
+        except BaseException:
+            self._copy_audit_v1.finish(ticket, succeeded=False)
+            raise
+        self._copy_audit_v1.finish(ticket, succeeded=status == 0)
         if status != 0:
             raise HipContextError(
                 "hip_copy_failed",
@@ -442,13 +468,20 @@ class _BoundHipContextRuntime:
     def copy_d2h_async(
         self, array: np.ndarray, pointer: ctypes.c_void_p, stream: ctypes.c_void_p
     ) -> None:
-        status = self._memcpy_async(
-            ctypes.c_void_p(int(array.ctypes.data)),
-            pointer,
-            int(array.nbytes),
-            2,
-            stream,
-        )
+        byte_count = int(array.nbytes)
+        ticket = self._copy_audit_v1.begin("d2h_async", byte_count)
+        try:
+            status = self._memcpy_async(
+                ctypes.c_void_p(int(array.ctypes.data)),
+                pointer,
+                byte_count,
+                2,
+                stream,
+            )
+        except BaseException:
+            self._copy_audit_v1.finish(ticket, succeeded=False)
+            raise
+        self._copy_audit_v1.finish(ticket, succeeded=status == 0)
         if status != 0:
             raise HipContextError(
                 "hip_copy_failed",
@@ -464,6 +497,16 @@ class _BoundHipContextRuntime:
         """Return the loader-bound immutable blocking D2H callable."""
 
         return self._blocking_d2h_copy
+
+    def _bound_copy_audit_snapshot_v1(
+        self,
+        mint: object,
+    ) -> tuple[_BoundHipCopyAuditStateV1, Any]:
+        """Return a private immutable snapshot to the FGMRES audit composer."""
+
+        if mint is not _BOUND_COPY_AUDIT_SNAPSHOT_MINT_V1:
+            raise PermissionError("bound-copy audit snapshot authority is invalid")
+        return self._copy_audit_v1, self._copy_audit_v1.snapshot()
 
     def synchronize(self, stream: ctypes.c_void_p) -> None:
         self._check(self._stream_sync(stream), "hipStreamSynchronize")

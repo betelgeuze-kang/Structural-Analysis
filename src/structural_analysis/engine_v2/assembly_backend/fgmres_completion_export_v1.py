@@ -1547,6 +1547,8 @@ def _validate_copy_binding_relationship(
         or method is not getattr(runtime, "_blocking_d2h_copy", None)
         or getattr(method, "_memcpy", None) is not getattr(runtime, "_memcpy", None)
         or getattr(method, "_loaded", None) is not authority.loaded_runtime
+        or getattr(method, "_copy_audit_v1", None)
+        is not getattr(runtime, "_copy_audit_v1", None)
         or getattr(runtime, "_loaded", None) is not authority.loaded_runtime
     ):
         _fail(
@@ -1570,10 +1572,12 @@ def _copy_method_snapshot(runtime: Any, method: Any) -> tuple[Any, ...]:
         id(getattr(method, "__func__", None)),
         id(getattr(method, "_memcpy", None)),
         id(getattr(method, "_loaded", None)),
+        id(getattr(method, "_copy_audit_v1", None)),
         _copy_operation_snapshot(method),
         id(getattr(runtime, "_blocking_d2h_copy", None)),
         id(getattr(runtime, "_memcpy", None)),
         id(getattr(runtime, "_loaded", None)),
+        id(getattr(runtime, "_copy_audit_v1", None)),
     )
 
 

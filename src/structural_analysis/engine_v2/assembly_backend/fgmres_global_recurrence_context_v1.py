@@ -2370,10 +2370,12 @@ def _completion_export_source_snapshot(
         id(getattr(type(copy_binding), "__call__", None)),
         id(getattr(copy_binding, "_memcpy", None)),
         id(getattr(copy_binding, "_loaded", None)),
+        id(getattr(copy_binding, "_copy_audit_v1", None)),
         _completion_export_copy_operation_snapshot(copy_binding),
         id(getattr(binding.runtime, "_blocking_d2h_copy", None)),
         id(getattr(binding.runtime, "_memcpy", None)),
         id(getattr(binding.runtime, "_loaded", None)),
+        id(getattr(binding.runtime, "_copy_audit_v1", None)),
         _direct_capabilities_snapshot(sources),
     )
 

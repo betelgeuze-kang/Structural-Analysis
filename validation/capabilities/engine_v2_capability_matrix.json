@@ -21,6 +21,66 @@
   ],
   "rows": [
     {
+      "capability_id": "hip_fgmres_model_family_host_transfer_audit_v1",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["exact_package_registry_gfx1030_ten_slot_family_v2_binding", "source_family_and_composition_registry_identity_atomic_binding", "ten_same_process_audit_authorities_captured_while_exported", "case_parity_and_audit_same_completion_export_object_identity", "completion_global_recurrence_kernel_device_and_dimension_cross_binding", "per_slot_bound_runtime_recurrence_copy_api_attempt_zero", "per_slot_post_fence_exact_three_blocking_d2h", "ten_slot_total_thirty_blocking_d2h_and_4408_bytes", "composition_factory_reuses_retained_export_identity_only", "canonical_registry_slot_order_and_duplicate_authority_rejection", "detached_context_uniqueness_and_architecture_device_kernel_consistency", "strict_non_promoting_structural_receipt_schema"],
+      "explicit_exclusions": ["actual_external_gfx1100_ten_slot_audit", "unsigned_two_architecture_fixed_suite_audit", "process_wide_rocm_activity_or_host_transfer_zero", "pre_window_async_copy_completion_or_device_dma_activity_zero", "raw_cdll_fresh_binding_ctypes_dlsym_c_extension_or_third_party_transfer_zero", "full_solver_setup_teardown_or_between_case_transfer_zero", "same_runtime_or_stream_shared_across_all_cases", "whole_process_additional_device_solve_or_export_absence", "iteration_host_copy_zero", "full_model_family_or_general_multiarchitecture_parity", "standalone_receipt_provenance_authenticity_without_live_contexts_or_signature", "signed_evidence", "result_ir", "performance_speedup", "end_to_end_o_n", "promotion_eligibility", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006"],
+      "verification_cases": ["synthetic_exact_ten_slot_exported_authority_capture", "reversed_context_input_canonical_registry_order", "missing_duplicate_wrong_order_and_explicit_foreign_expected_context_rejection", "source_family_composition_registry_cross_snapshot_rejection", "same_export_object_identity_and_lineage_forgery_rejection", "detached_claim_order_pair_hash_exact_type_duplicate_context_and_device_kernel_forgery_rejection", "valid_payload_all_object_levels_strict_schema", "failure_complete_hardware_resource_cleanup", "public_export_and_package_schema_resource_integrity"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-model-family-host-transfer-audit-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_model_family_host_transfer_audit_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_model_family_host_transfer_audit_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_model_family_host_transfer_audit_v1.py",
+        "tests/test_engine_v2_hip_fgmres_model_family_parity_v2_hardware.py"
+      ],
+      "claim_level": "contract_implemented_actual_gfx1030_ten_slot_composed_hardware_receipt_pending_non_promoting"
+    },
+    {
+      "capability_id": "hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["monotonic_process_local_copy_attempt_success_failure_and_byte_accounting", "bound_runtime_h2d_async_d2h_async_and_blocking_d2h_paths", "failed_or_raised_copy_accounted_before_native_call", "canonical_context_ready_before_enqueue_to_global_terminal_fence_window", "exact_same_canonical_sealed_global_runtime_device_stream_lineage", "recurrence_program_bound_runtime_copy_attempt_delta_zero", "post_fence_completion_export_exact_three_blocking_d2h", "solution_residual_and_solve_record_exact_export_byte_count", "concurrent_same_runtime_copy_is_conservative_scope_contamination", "strict_non_promoting_receipt_schema_and_public_result_binding", "actual_local_gfx1030_single_case_zero_copy_window_and_three_d2h_360_bytes"],
+      "explicit_exclusions": ["process_wide_rocm_activity_trace", "loaded_runtime_cdll_compatibility_view", "fresh_loaded_runtime_bind_calls", "direct_ctypes_dlsym_or_c_extension_calls", "third_party_rocm_or_external_dma", "pre_window_async_copy_completion_or_device_dma_activity_zero", "hostile_same_process_monkeypatch_or_interposition", "synchronization_zero", "host_scheduling_zero", "full_solver_setup_transfer_zero", "initial_source_apply_transfer_zero", "iteration_host_copy_zero", "standalone_receipt_provenance_authenticity_without_expected_context_or_signature", "numerical_parity", "solution_ready", "result_ir", "performance_speedup", "end_to_end_o_n", "actual_gfx1030_ten_case_family_receipt", "actual_external_gfx1100_receipt", "promotion_eligibility", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006"],
+      "verification_cases": ["bound_runtime_all_three_copy_paths_success_return_error_and_raised_exception_accounting", "atomic_start_boundary_reentrant_enqueue_rejection", "test_double_canonical_to_global_fence_zero_copy_and_exact_export", "window_copy_attempt_fail_closed", "detached_broad_claim_rehash_rejection", "valid_payload_top_level_and_nested_strict_schema_unknown_property_rejection", "exact_numeric_and_nested_string_type_alias_rejection", "completion_export_backend_and_binding_forgery_rejection", "cached_result_exact_input_identity_and_zero_recopy", "package_copy_binding_and_private_invocation_ast_heuristic_allowlist", "public_export_and_package_schema_resource_integrity", "hip_context_regression_twelve_passed", "completion_export_regression_eleven_passed", "working_session_actual_gfx1030_single_case_one_passed_in_36_34_seconds"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-iteration-host-transfer-audit-v1.md",
+        "src/structural_analysis/engine_v2/backends/hip/transfer_audit_v1.py",
+        "src/structural_analysis/engine_v2/backends/hip/context.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_iteration_host_transfer_audit_v1.py",
+        "src/structural_analysis/schemas/hip_fgmres_iteration_host_transfer_audit_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_iteration_host_transfer_audit_v1.py",
+        "tests/test_engine_v2_hip_fgmres_iteration_host_transfer_audit_hardware_v1.py"
+      ],
+      "claim_level": "exact_bound_runtime_canonical_to_global_fence_copy_attempt_zero_plus_fenced_three_d2h_export_actual_local_gfx1030_single_case_non_promoting"
+    },
+    {
+      "capability_id": "hip_fgmres_reviewer_root_bootstrap_new_trust_genesis_v1",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["exact_v0237_empty_registry_v2_source_identity_binding", "package_code_pinned_pending_bootstrap_status", "explicit_new_registry_v3_id_and_lineage_generation", "fixed_three_reviewer_root_policy", "all_three_root_endorsements_required_for_bootstrap", "future_two_of_three_event_approval_policy", "second_three_of_three_exact_target_genesis_activation_required", "target_genesis_must_bind_bootstrap_plan_and_receipt_hashes", "lineage_bound_runner_enrollment_required", "canonical_nonidentity_prime_order_ed25519_root_validation", "domain_separated_plan_endorsements", "self_hashed_source_policy_root_lineage_plan_and_receipt_chain", "detached_root_possession_signatures_receipt_non_authoritative", "bounded_strict_json_schema_and_linear_root_verification", "explicit_absence_of_predecessor_reviewer_authority_continuity", "exact_pep517_command_reproducibility_smoke_non_authoritative"],
+      "explicit_exclusions": ["actual_independent_reviewer_root_material", "package_bootstrap_inclusion", "target_registry_v3_genesis_activation", "operational_reviewer_bootstrap", "predecessor_reviewer_authority_continuity", "reviewer_human_or_organization_identity", "reviewer_independence", "reviewer_hsm_origin_or_non_exportability", "trusted_ceremony_time", "ceremony_nonce_entropy_or_global_uniqueness", "hostile_same_process_python_module_mutation", "authoritative_release_identity_publication_gate", "clean_committed_source_replay", "separate_build_system_dependency_lock_and_wheelhouse", "build_system_dependency_closure", "runtime_dependency_wheelhouse_closure_for_exact_build", "external_transparency_log_or_monotonic_anchor", "historical_registry_resolution", "runner_key_enrollment_or_activation", "signed_evidence_v3", "durable_ledger_v3", "actual_external_gfx1100_signed_cell", "same_artifact_two_architecture_evidence", "result_ir", "iteration_host_copy_zero", "performance_speedup", "end_to_end_o_n", "promotion_eligibility", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006", "ADR-007"],
+      "verification_cases": ["exact_package_pending_status_and_raw_schema_pins", "source_schema_raw_registry_head_time_reviewer_commitment_and_receipt_mutation_rejection", "new_registry_id_generation_and_full_ceremony_lineage_binding", "bootstrap_strictly_after_source_head", "all_root_success_and_deterministic_receipt", "root_insert_remove_reorder_duplicate_and_public_key_reuse_rejection", "root_validity_half_open_boundary_rejection", "missing_extra_duplicate_reordered_wrong_key_wrong_domain_and_transplanted_endorsement_rejection", "low_order_public_key_and_noncanonical_signature_rejection", "integer_float_boolean_alias_rejection", "prehash_nested_type_length_and_collection_extent_rejection", "forged_true_identity_hsm_activation_promotion_and_commercial_claim_rejection", "duplicate_json_bom_nonfinite_depth_node_and_error_bound_rejection", "public_pathless_loader_exports_and_package_resource", "no_reviewer_signature_or_private_material_in_pending_fixture", "two_clean_materialized_source_exact_pep517_byte_reproducibility_smoke", "isolated_exact_wheel_resource_import", "runtime_and_build_system_wheelhouse_conflation_remains_fail_closed"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-reviewer-root-bootstrap-migration-v1.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_external_reviewer_root_bootstrap_v1.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fixtures/fgmres_external_reviewer_root_bootstrap_v1/status.v1.json",
+        "src/structural_analysis/schemas/hip_fgmres_external_reviewer_root_bootstrap_v1.schema.json",
+        "tests/test_engine_v2_hip_fgmres_external_reviewer_root_bootstrap_v1.py",
+        "tests/test_engine_v2_hip_fgmres_parity_public_api_v1.py"
+      ],
+      "claim_level": "fresh_genesis_bootstrap_contract_pending_reviewer_roots_zero_target_registry_inactive_non_promoting"
+    },
+    {
       "capability_id": "hip_fgmres_reviewed_trust_anchor_lifecycle_v2",
       "category": "solver_verification",
       "phase_target": "phase_0",
