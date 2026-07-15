@@ -25,6 +25,7 @@ from structural_analysis.engine_v2.contracts._canonical import (  # noqa: E402
     has_immutable_bytes_backing,
     immutable_array,
 )
+from structural_analysis.engine_v2.contracts import result_ir_v2 as result_ir_module  # noqa: E402
 from structural_analysis.engine_v2.contracts.execution_plan_v2 import (  # noqa: E402
     ExecutionPlanV2,
     compile_execution_plan_v2,
@@ -35,6 +36,7 @@ from structural_analysis.engine_v2.contracts.result_ir_v2 import (  # noqa: E402
     ResultIRV2SourceProvenance,
     SourceProvenance,
     _array_artifact,
+    _issue_bridge_result_ir_v2_ready,
     _numerical_hash,
     _receipt_hash,
     build_result_ir_v2,
@@ -487,7 +489,6 @@ def test_source_provenance_is_exact_typed_and_claims_remain_bounded_false(
 
     positive_claims = {
         "result_ir_verified",
-        "result_ir_ready",
         "state_ir_lineage_verified",
         "reaction_recovery_verified",
         "member_force_recovery_verified",
@@ -527,6 +528,74 @@ def test_source_provenance_is_exact_typed_and_claims_remain_bounded_false(
     with pytest.raises(ResultIRV2Error) as claim_error:
         validate_result_ir_v2(promoted)
     assert claim_error.value.code == "result_ir_v2_claim_invalid"
+
+
+def test_result_ir_ready_requires_exact_private_bridge_object_identity(
+    pipeline: tuple[ExecutionPlanV2, StateIR, StateIR, ResultIRV2],
+) -> None:
+    _, _, _, receipt = pipeline
+    assert "_issue_bridge_result_ir_v2_ready" not in result_ir_module.__all__
+    assert receipt.claims.result_ir_ready is False
+    assert validate_result_ir_v2(receipt) is receipt
+
+    coherent_rehash = _rehash(
+        receipt,
+        claims=replace(receipt.claims, result_ir_ready=True),
+    )
+    with pytest.raises(ResultIRV2Error) as coherent_error:
+        validate_result_ir_v2(coherent_rehash)
+    assert coherent_error.value.code == "result_ir_v2_ready_authority_unavailable"
+
+    issued = _issue_bridge_result_ir_v2_ready(receipt)
+    assert issued.claims.result_ir_ready is True
+    assert validate_result_ir_v2(issued) is issued
+
+    replaced = replace(issued)
+    with pytest.raises(ResultIRV2Error) as replace_error:
+        validate_result_ir_v2(replaced)
+    assert replace_error.value.code == "result_ir_v2_ready_authority_unavailable"
+
+    direct = ResultIRV2(
+        result_id=issued.result_id,
+        input_bindings=issued.input_bindings,
+        analysis=issued.analysis,
+        ordering=issued.ordering,
+        arrays=issued.arrays,
+        convergence=issued.convergence,
+        energy=issued.energy,
+        source_provenance=issued.source_provenance,
+        claims=issued.claims,
+        numerical_result_hash=issued.numerical_result_hash,
+        result_ir_hash=issued.result_ir_hash,
+    )
+    with pytest.raises(ResultIRV2Error) as direct_error:
+        validate_result_ir_v2(direct)
+    assert direct_error.value.code == "result_ir_v2_ready_authority_unavailable"
+
+    detached_manifest = issued.to_manifest()
+    with pytest.raises(ResultIRV2Error) as manifest_error:
+        validate_result_ir_v2_manifest(detached_manifest)
+    assert manifest_error.value.code == "result_ir_v2_ready_authority_unavailable"
+
+
+def test_free_reaction_requires_exact_positive_zero_under_coherent_rehash(
+    pipeline: tuple[ExecutionPlanV2, StateIR, StateIR, ResultIRV2],
+) -> None:
+    plan, trial, committed, receipt = pipeline
+    reactions = receipt.arrays.reactions_si.values.copy()
+    free = np.asarray(plan.free_dofs, dtype=np.int64)
+    reactions.reshape(-1)[int(free[0])] = 1.25e-8
+    forged = _replace_array(receipt, "reactions_si", reactions)
+    assert validate_result_ir_v2(forged) is forged
+
+    with pytest.raises(ResultIRV2Error) as error:
+        validate_result_ir_v2_physics(
+            forged,
+            expected_plan=plan,
+            expected_evaluated_trial_state=trial,
+            expected_committed_state=committed,
+        )
+    assert error.value.code == "result_ir_v2_free_reaction_not_positive_zero"
 
 
 def test_retained_array_bytes_follow_exact_linear_materialization_formula() -> None:

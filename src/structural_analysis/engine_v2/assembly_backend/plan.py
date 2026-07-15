@@ -16,20 +16,22 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field as dataclass_field, replace
 from functools import lru_cache
 import json
-import math
 from pathlib import Path
 from typing import Any, Mapping
 
 from jsonschema import Draft202012Validator
 import numpy as np
 
-from structural_analysis.engine_v2.backends.cpu_reference.linear_static import (
-    CPUReferenceError,
-    _frame_transform,
-)
 from structural_analysis.engine_v2.buffers import (
     SOLVER_MODEL_BUFFERS_SCHEMA_VERSION,
     SolverModelBuffers,
+)
+from structural_analysis.engine_v2.elements.linear_frame_truss_v1 import (
+    LINEAR_FRAME_TRUSS_REFERENCE_AXIS_POLICY_V1,
+    REFERENCE_AXIS_SWITCH_THRESHOLD_V1,
+    LinearFrameTrussV1Error,
+    frame_reference_axis_v1,
+    frame_transform_v1,
 )
 from structural_analysis.engine_v2.contracts._canonical import (
     array_content_hash,
@@ -50,9 +52,7 @@ from structural_analysis.engine_v2.contracts.execution_plan_v2 import (
 
 HIP_ASSEMBLY_PLAN_V1_SCHEMA_VERSION = "structural-analysis-hip-assembly-plan.v1"
 HIP_ASSEMBLY_PLAN_V1_CAPABILITY_PROFILE = "phase0_hip_element_assembly_symbolic_plan"
-HIP_ASSEMBLY_PLAN_V1_AXIS_POLICY = (
-    "cpu_reference_global_z_unless_abs_local_x_z_gt_0_9_v1"
-)
+HIP_ASSEMBLY_PLAN_V1_AXIS_POLICY = LINEAR_FRAME_TRUSS_REFERENCE_AXIS_POLICY_V1
 HIP_ASSEMBLY_PLAN_V1_ASSEMBLY_ORDER = (
     "element_index_then_local_row_then_local_column_v1"
 )
@@ -61,7 +61,7 @@ HIP_ASSEMBLY_PLAN_V1_REVERSE_ORDER = "csr_slot_then_stable_source_contribution_i
 # Kernel ABI values.  Zero and all values other than these two are invalid.
 REFERENCE_AXIS_GLOBAL_Y = 1
 REFERENCE_AXIS_GLOBAL_Z = 2
-REFERENCE_AXIS_SWITCH_THRESHOLD = 0.9
+REFERENCE_AXIS_SWITCH_THRESHOLD = REFERENCE_AXIS_SWITCH_THRESHOLD_V1
 
 _DOFS_PER_ELEMENT = 12
 _CONTRIBUTIONS_PER_ELEMENT = _DOFS_PER_ELEMENT * _DOFS_PER_ELEMENT
@@ -770,19 +770,20 @@ def _compile_reference_axis_codes(buffers: SolverModelBuffers) -> np.ndarray:
     for element_index in range(connectivity.shape[0]):
         node_i = int(connectivity[element_index, 0])
         node_j = int(connectivity[element_index, 1])
-        delta = coordinates[node_j] - coordinates[node_i]
-        length = float(np.linalg.norm(delta))
-        # ExecutionPlanV2 validation already proves the CPU length invariant.
-        if not math.isfinite(length) or length <= 1.0e-12:  # pragma: no cover
-            _raise(
-                "hip_assembly_plan_axis_source_invalid",
-                f"/elements/{element_index}",
-                "Cannot derive a reference axis from a zero-length element.",
+        try:
+            reference_axis = frame_reference_axis_v1(
+                coordinates[node_i],
+                coordinates[node_j],
             )
-        local_x_z = float(delta[2]) / length
+        except LinearFrameTrussV1Error as exc:  # pragma: no cover - plan preflight
+            raise HipAssemblyPlanV1Error(
+                "hip_assembly_plan_axis_source_invalid",
+                f"/elements/{element_index}/geometry",
+                f"{exc.code}: {exc.message}",
+            ) from exc
         result[element_index] = (
             REFERENCE_AXIS_GLOBAL_Y
-            if abs(local_x_z) > REFERENCE_AXIS_SWITCH_THRESHOLD
+            if reference_axis == "global_y"
             else REFERENCE_AXIS_GLOBAL_Z
         )
     return result
@@ -881,7 +882,7 @@ def _validate_reference_axis_codes_independent(
         for element_index in range(artifact.element_count):
             node_i = int(connectivity[element_index, 0])
             node_j = int(connectivity[element_index, 1])
-            transform, _ = _frame_transform(
+            transform, _ = frame_transform_v1(
                 coordinates[node_i],
                 coordinates[node_j],
                 float(rolls[element_index]),
@@ -891,11 +892,13 @@ def _validate_reference_axis_codes_independent(
                 if abs(float(transform[0, 2])) > REFERENCE_AXIS_SWITCH_THRESHOLD
                 else REFERENCE_AXIS_GLOBAL_Z
             )
-    except CPUReferenceError as exc:  # pragma: no cover - source preflight invariant
+    except (
+        LinearFrameTrussV1Error
+    ) as exc:  # pragma: no cover - source preflight invariant
         raise HipAssemblyPlanV1Error(
             "hip_assembly_plan_axis_source_invalid",
             "/source_contract/geometry_hash",
-            str(exc),
+            f"{exc.code}: {exc.message}",
         ) from exc
     if not np.array_equal(actual, independently_derived):
         _fail(

@@ -141,4 +141,8 @@ AST allowlist는 package-owned Python 경로의 우발적 우회를 잡는 회�
    않는다. Identity-token 패치 전 source의 required local `gfx1030` gate는
    CPU fallback 없이 `1 passed in 3171.31s (0:52:51)`로 recurrence copy attempt
    `0`, completion D2H `30/30/0`·`4,408` bytes를 ordinal exact 합계와 같은
-   10-slot 실행에서 확인했다. Token-hardened current-source gate는 pending이다.
+   10-slot 실행에서 확인했다. Token-hardened current-source 통합 gate도 CPU fallback
+   없이 `1 passed in 7820.35s (2:10:20)`로 같은 v0.2.42 exact totals와 v0.2.43
+   converged 7개 bridge, v0.2.44 7-ready/3-not-issued disposition 및 post-close
+   validation을 확인했다. 두 결과 모두 unsigned 비영속 관찰이며 broad
+   iteration-host-copy-zero, standalone/signed provenance 또는 promotion 증거가 아니다.

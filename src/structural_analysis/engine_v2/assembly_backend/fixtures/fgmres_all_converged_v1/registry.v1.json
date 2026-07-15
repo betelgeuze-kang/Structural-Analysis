@@ -1,0 +1,790 @@
+{
+  "capability_profile": "phase0_package_owned_fgmres_all_converged_fixed_suite_replay",
+  "claims": {
+    "all_authoritative_plan_tolerance_passed": true,
+    "all_cpu_reference_converged": true,
+    "all_solver_tolerance_passed": true,
+    "commercial_ready": false,
+    "end_to_end_o_n_verified": false,
+    "fixed_suite_registration_complete": true,
+    "full_model_family_parity_verified": false,
+    "iteration_host_copy_zero_verified": false,
+    "multiarchitecture_parity_verified": false,
+    "package_all_converged_fixture_registry_replayed": true,
+    "promotion_eligible": false,
+    "result_ir_verified": false,
+    "same_process_actual_two_isa_verified": false,
+    "signed_evidence": false,
+    "speedup_verified": false,
+    "ten_unique_model_ir_verified": true
+  },
+  "evidence_scope": "package_local_unsigned_non_promoting",
+  "registration_target_slot_count": 10,
+  "registry_hash": "sha256:dfc836a87b604a8aff066a4d9b6746311184477d8b0db4788479fb1c9d782aff",
+  "required_slot_ids": [
+    "solution_frame_single_axial",
+    "solution_frame_single_weak_axis_bending",
+    "solution_frame_single_strong_axis_bending",
+    "solution_frame_single_torsion",
+    "solution_frame_single_rotated_axis_bending",
+    "solution_frame_serial_two_span_axial",
+    "solution_truss_single_axial",
+    "solution_frame_zero_free_rhs_edge",
+    "solution_frame_serial_four_span_axial",
+    "solution_frame_serial_five_span_axial"
+  ],
+  "schema_version": "structural-analysis-hip-fgmres-all-converged-fixture-registry.v1",
+  "slots": [
+    {
+      "case_fingerprint": "sha256:04c5eca5e1156efc6fc24c5e392f1efc3be5e12a3ca169a2e0979c366211c13b",
+      "description": "single straight frame under axial excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:153a6a0b566b6ee8b8945959ffcddf02128daf9f629b7f7ee88266f3905694b8",
+        "cpu_iteration_count": 1,
+        "cpu_operator_apply_count": 3,
+        "cpu_preconditioner_apply_count": 1,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:4a50f5ad25d5c0e15f17c65d8034e1a97c609204741a81f6aebe5509706a4477",
+        "cpu_solution_data_hash": "sha256:3a9c580b53c8e18ee17ac0cf976f69ee318b86219391569443502de7c1945381",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        "descriptor_hash": "sha256:2135e0d681ba628be2854c7116fbc698b256df961cddc70bf5a5de26039b6843",
+        "direct_residual_data_hash": "sha256:17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        "direct_solution_data_hash": "sha256:3a9c580b53c8e18ee17ac0cf976f69ee318b86219391569443502de7c1945381",
+        "execution_plan_hash": "sha256:b3ae1b5c8538c36013913dc0092fa0192f338695e928d9fa308bafc6671802b2",
+        "fgmres_plan_hash": "sha256:f1754485892bc8de31d2bae408726828d4bef033a98e754cc13fff45b45f561d",
+        "free_space_plan_hash": "sha256:562de811711f70b2c7a2ffe0fe931cb4c5d26c93b89cdf3f78ccf9072e1f2e3b",
+        "model_ir_content_hash": "sha256:d2533c70755e74b3d7595f03db0596eba37711bd2a3142632ca6158f013b4646",
+        "policy_hash": "sha256:bd009f7747bfe47669df1c10e5db46191f0d3e3df8040d482708617073cb1df7",
+        "recurrence_plan_hash": "sha256:1f5cf6bce8d1b9e03b8b5ef57831b57d682e8b0c37eccbc4ef99dccb4eba30ce",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_AXIAL",
+      "model_bytes_sha256": "sha256:f0df79812bf2080e09725b286c7b90f05c2118584cf2d3006ba04c28ea09f366",
+      "model_resource": "solution_frame_single_axial.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 2,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 2,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            0,
+            5e-05
+          ]
+        ],
+        "element_count": 1,
+        "free_dof_count": 6,
+        "global_dof_count": 12,
+        "history_cycles": [
+          [
+            0,
+            1,
+            1
+          ]
+        ],
+        "load_component": "FX",
+        "load_node_id": "N2",
+        "load_value_si": 100000.0,
+        "model_kind": "frame_3d",
+        "node_count": 2,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 36,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_frame_single_axial.v1",
+      "slot_id": "solution_frame_single_axial",
+      "slot_registration_hash": "sha256:2ef8b88b463200a9f316f9e6a883d3f8cc82aa538c6b202bacebc9686ae5e760"
+    },
+    {
+      "case_fingerprint": "sha256:29a1a1f29cf98f1aa291fc3b7bd539565a23e2b61ca21751af894fb02555c2ff",
+      "description": "single straight frame under weak-axis bending excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:80cfe8cc38a067c9c53e8c9b0be546fedbcdf8dba9647a31542390efd390f1e8",
+        "cpu_iteration_count": 2,
+        "cpu_operator_apply_count": 4,
+        "cpu_preconditioner_apply_count": 2,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:a3c914e8a7beee98ee90a9706de4cdbdfc688862e76f2e8de36e99422b644fca",
+        "cpu_solution_data_hash": "sha256:f01ec62aa59e45758bd6abdc88ae9605c4e149778905d9626b8c210b465b1bbd",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:e8b4761b6d883935a3cd5198683d2428ec2e974a4002777df7823832ac5ec810",
+        "descriptor_hash": "sha256:7b6242ac2f4245ddc0c5faff0bdca1829f7b631c70b80c27d6abda7e737ea1fd",
+        "direct_residual_data_hash": "sha256:17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        "direct_solution_data_hash": "sha256:01670ad7558a89b07407413a6dd39b7b597c48bee8e3f0272b81c99072ab5afe",
+        "execution_plan_hash": "sha256:1fe3dea5d2f3e75163e8f41fcc0a422c73215a59a5903a58a682f3284ad0496b",
+        "fgmres_plan_hash": "sha256:1da12c32df412c283aba7e8d451b591ff64b683ac567f7a7e2741374b1a32291",
+        "free_space_plan_hash": "sha256:c57ce9ba1f19632a39ca8e062f4ef5731c8b71210c4256fab00dfa09a9e60fa5",
+        "model_ir_content_hash": "sha256:2b54d00146bf4196f3d46900a7b313c92a73794e3aef205e0ca772b89004e7cb",
+        "policy_hash": "sha256:bd009f7747bfe47669df1c10e5db46191f0d3e3df8040d482708617073cb1df7",
+        "recurrence_plan_hash": "sha256:61e3897b1462b60d3e73caf4aa3d1a1b9bcdd400b293895cdad6919a9bfa4665",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_WEAK",
+      "model_bytes_sha256": "sha256:ac6827ce2c7574f724e9dacb77e516069be410639331e1eb8f084ab58e3b3a27",
+      "model_resource": "solution_frame_single_weak_axis_bending.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 2,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 2,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            1,
+            -0.0026666666666666666
+          ],
+          [
+            5,
+            -0.002
+          ]
+        ],
+        "element_count": 1,
+        "free_dof_count": 6,
+        "global_dof_count": 12,
+        "history_cycles": [
+          [
+            0,
+            2,
+            2
+          ]
+        ],
+        "load_component": "FY",
+        "load_node_id": "N2",
+        "load_value_si": -10000.0,
+        "model_kind": "frame_3d",
+        "node_count": 2,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 36,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_frame_single_weak_axis_bending.v1",
+      "slot_id": "solution_frame_single_weak_axis_bending",
+      "slot_registration_hash": "sha256:694985334796856b6b85b5f39689a0488d3cef78b422a7d28b65501d9782914e"
+    },
+    {
+      "case_fingerprint": "sha256:5e0e1f6dbf5d3b1cbf6b5182c54d77f3ef8d002cc46092f0bddd330a9502bfc8",
+      "description": "single straight frame under strong-axis bending excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:0334d833b6ffc2965a90afb36118bfb93d319763dc9012bf38e98f833534924b",
+        "cpu_iteration_count": 2,
+        "cpu_operator_apply_count": 4,
+        "cpu_preconditioner_apply_count": 2,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:2b65dfb846d204279e4954a9201d108bfc9d4362ae32a22fc4c112f256ce0d9f",
+        "cpu_solution_data_hash": "sha256:e69b2a43f7977dac01b739d92236e7d6930fab502954b24df7d8f0cfb39e74b5",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:4079c5835c403ea173d4a28b6f7ce64f17608c5163c05e6c1054c79b5b7310f1",
+        "descriptor_hash": "sha256:8a99e3e19da26f52a611b27be6f90c89c58b2f34e5d7c4c89104e5b3265c96e7",
+        "direct_residual_data_hash": "sha256:a2b446dd254316f2fc1294c2e2a463d3b4835e4186cc006db24382165adf94c9",
+        "direct_solution_data_hash": "sha256:46364a285426d911e54f35c9323886cb214f3eab0388be4ba99c407550b2bd98",
+        "execution_plan_hash": "sha256:c44375357574fb118b3c8dfc527cdfbe9faa64883fc1c07b176797971eb18acd",
+        "fgmres_plan_hash": "sha256:a22157d4837d50851e936fd2593cc562c14788ae7c63f7122617f682095934cf",
+        "free_space_plan_hash": "sha256:828379c9aca4223a92a5054c75b8f05ad76c7ef5880bf941822e98ab80b17293",
+        "model_ir_content_hash": "sha256:1b0e73526116480e94b78bafbb24d807ad8f85b52c838f099514afd045539eff",
+        "policy_hash": "sha256:bd009f7747bfe47669df1c10e5db46191f0d3e3df8040d482708617073cb1df7",
+        "recurrence_plan_hash": "sha256:c2673d8cdfa7d359b0816377573bf8fb031997eb9edd970684284f353e16668b",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_STRONG",
+      "model_bytes_sha256": "sha256:42a1a3c7a8b3a230057d28e5a35bb66ef7577a0b50886ee48671cc01dff8dfd7",
+      "model_resource": "solution_frame_single_strong_axis_bending.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 2,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 2,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            2,
+            -0.0016666666666666668
+          ],
+          [
+            4,
+            0.00125
+          ]
+        ],
+        "element_count": 1,
+        "free_dof_count": 6,
+        "global_dof_count": 12,
+        "history_cycles": [
+          [
+            0,
+            2,
+            2
+          ]
+        ],
+        "load_component": "FZ",
+        "load_node_id": "N2",
+        "load_value_si": -10000.0,
+        "model_kind": "frame_3d",
+        "node_count": 2,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 36,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_frame_single_strong_axis_bending.v1",
+      "slot_id": "solution_frame_single_strong_axis_bending",
+      "slot_registration_hash": "sha256:4e188d4a8d92539ed71efd00756303fad41b6c50c2686dfd3e1cb72dc3379b9c"
+    },
+    {
+      "case_fingerprint": "sha256:5d914cbe5d6afd3d518205a3a4a42372bfd081c9459f220c04b35ac083ee21de",
+      "description": "single straight frame under torsional excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:a01365a4dc963d6b2875b72b2558c4e0e47a201d363dfc1d91dce4387be7d55e",
+        "cpu_iteration_count": 1,
+        "cpu_operator_apply_count": 3,
+        "cpu_preconditioner_apply_count": 1,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:0fb9033fa2ed84e58a257de0b4d22f7bc52a687a041b674ce7684fea58c0da59",
+        "cpu_solution_data_hash": "sha256:ee94aac03bc9b407f3955c82b196741565762e81247650a885a1e888adedc334",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:13c0119898f79ca4e2611ef8b01912ab25f735451400a0325f254ae276141ee8",
+        "descriptor_hash": "sha256:5bea9cc66f9292fbce74aecc14255f6c2fb588b8ff1a2102830679187ebc90ea",
+        "direct_residual_data_hash": "sha256:17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        "direct_solution_data_hash": "sha256:ddb645fdd65145bbe8df170e9b72502d96656e11d91c0b69292f7b3c223bb28c",
+        "execution_plan_hash": "sha256:54b8bcb7d97917d5e1eddb8e35c3101476d68f27497830c9af4d98091225b222",
+        "fgmres_plan_hash": "sha256:e43866fdb4c2c65d730f0c9dcccd75f87b877c43fd50ea3459e1dbb444f8275f",
+        "free_space_plan_hash": "sha256:87190500c272096614017fb54865b5f97da9cca68a6e7a33c6fc5046026fc1c7",
+        "model_ir_content_hash": "sha256:aba5fdd45d12798003bc8f4e9c58766ef7b25cc7c3d36087abd8723c9faa09b4",
+        "policy_hash": "sha256:bd009f7747bfe47669df1c10e5db46191f0d3e3df8040d482708617073cb1df7",
+        "recurrence_plan_hash": "sha256:598eb1a4a05c26f4fe8688a69483d0b18e020e77035ca09721d06029d12968bc",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_TORSION",
+      "model_bytes_sha256": "sha256:7c6dbcfafcce78a2ae801080aaec964bc20ea7b12ee9c40d9f7df90e4ce9a80b",
+      "model_resource": "solution_frame_single_torsion.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 2,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 2,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            3,
+            0.013
+          ]
+        ],
+        "element_count": 1,
+        "free_dof_count": 6,
+        "global_dof_count": 12,
+        "history_cycles": [
+          [
+            0,
+            1,
+            1
+          ]
+        ],
+        "load_component": "MX",
+        "load_node_id": "N2",
+        "load_value_si": 5000.0,
+        "model_kind": "frame_3d",
+        "node_count": 2,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 36,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_frame_single_torsion.v1",
+      "slot_id": "solution_frame_single_torsion",
+      "slot_registration_hash": "sha256:83ee7a4b81f1d82b0f9e49bb90c7cb20738569cc7f39c488565c0eb2dd776d5f"
+    },
+    {
+      "case_fingerprint": "sha256:027e5863b4719208020a73a3f357f30a3eafc2e52aeab868d96c25799ecb589f",
+      "description": "single skew frame with nonzero local-axis roll under bending excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:3e63803ef2b8498f6d6bc816d5239670d3b79701870610136696e13e48c0c835",
+        "cpu_iteration_count": 6,
+        "cpu_operator_apply_count": 8,
+        "cpu_preconditioner_apply_count": 6,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:97ccd0f9350748814f86138680b81e2c03f6bca8a18a279509d153ce9ec44f97",
+        "cpu_solution_data_hash": "sha256:6c97a37d47088985f34272ad2356a85291250c4176e2e63461cc83bfdb0e27f7",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:9fa992f33a4efb3a42f7e14cd3e2ce6f0c1f57ade971ba98290e7306188066c2",
+        "descriptor_hash": "sha256:d13cb7ee16b92dff137c9e82ed1b956d90ca0f9a1935b4a0818d29abb13ba3ab",
+        "direct_residual_data_hash": "sha256:984e80c343eaff601e21c2dafa2dbde98ff8ceadc197174834104de72fc85aed",
+        "direct_solution_data_hash": "sha256:1e33ef54a5f7d498e1cd825ab74e162f76406ce050c0b3cb2a9659f5e77cd48d",
+        "execution_plan_hash": "sha256:cacc317712adbe80e078b3d880a6299e5454d31eff906695cc5611b6524aacb6",
+        "fgmres_plan_hash": "sha256:cb79c91b165012ae927d0482439f5e1f763177c4369ae734b9fa38168a81d808",
+        "free_space_plan_hash": "sha256:116d5fdfa59518ff29eaa1d0546e58ca520d75aafa56079896c60f126b96e6a3",
+        "model_ir_content_hash": "sha256:63cff1e337414908d633a7418679b4eceb7b85d227e70c6e9641c801a8976bbe",
+        "policy_hash": "sha256:635180e3dce6757602d8438d71a6b99b882ce9cff8d84800b76bea9351cccc42",
+        "recurrence_plan_hash": "sha256:4a652a821fae0669c11d18bbceeb36d4848d8ac605012e58c25c4556b837c5cb",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_WEAK",
+      "model_bytes_sha256": "sha256:edb9e5f33570ff7245e5fe630ca489794c6e828a7275ee599068fa173b8b3ef6",
+      "model_resource": "solution_frame_single_rotated_axis_bending.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 6,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 6,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            0,
+            0.002552171711639753
+          ],
+          [
+            1,
+            -0.007960471927653038
+          ],
+          [
+            2,
+            0.004450021285577484
+          ],
+          [
+            3,
+            0.0035122991093693642
+          ],
+          [
+            4,
+            0.00034355291242947313
+          ],
+          [
+            5,
+            -0.0013998016447427767
+          ]
+        ],
+        "element_count": 1,
+        "free_dof_count": 6,
+        "global_dof_count": 12,
+        "history_cycles": [
+          [
+            0,
+            6,
+            6
+          ]
+        ],
+        "load_component": "FY",
+        "load_node_id": "N2",
+        "load_value_si": -10000.0,
+        "model_kind": "frame_3d",
+        "node_count": 2,
+        "nonzero_local_axis_roll_count": 1,
+        "reduced_csr_nnz": 36,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_frame_single_rotated_axis_bending.v1",
+      "slot_id": "solution_frame_single_rotated_axis_bending",
+      "slot_registration_hash": "sha256:30d468768cbf2ac526374dde72eabb4df108378908cbdbef3c84c80cda0ea05a"
+    },
+    {
+      "case_fingerprint": "sha256:0a9ae5f5bb0997aff8bbca0baa59dfcad73e9fbe2fb1df6ad8589eee50de1953",
+      "description": "three-node two-span serial frame under axial excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:6011f6c16ddea190a07c56513067be891d0dfda5c1eb21f5d71dcbf29f675581",
+        "cpu_iteration_count": 2,
+        "cpu_operator_apply_count": 4,
+        "cpu_preconditioner_apply_count": 2,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:c8bc0568e0957da671644966dfac6df9ae1584bc600cbbbb352f1b4cc179962d",
+        "cpu_solution_data_hash": "sha256:78a322e495971cf0acd2f2fdec836df222d76f3448788608f8b79723d850191d",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:16ba6e825e88ac4c44b71e1c6eee586f4a489fd46b4042466bb4ebe23ed89020",
+        "descriptor_hash": "sha256:9da45742b0db44d26db42173b08cac8844a767bf76a0e4e42339c56de3c032e9",
+        "direct_residual_data_hash": "sha256:2ea9ab9198d1638007400cd2c3bef1cc745b864b76011a0e1bc52180ac6452d4",
+        "direct_solution_data_hash": "sha256:add11b2447e7b61cf9dc9d7b18c722a8bad9f892659de6df506345f58932c44c",
+        "execution_plan_hash": "sha256:e34ae62c38e697cc9e401fff191f6a77f3f7c1821123fc84b9745edcb8f0e4e0",
+        "fgmres_plan_hash": "sha256:e7b48a4f7d3c30fe7a300d1d3d147d337f8a40c25dcea1c250e696c06ff0f8f3",
+        "free_space_plan_hash": "sha256:c16752eb5e003fa9b775c3a4b8d20f097daf150869eae4f14b0070fe1640a7a2",
+        "model_ir_content_hash": "sha256:11bb1f63c1cc029a8ff35fe298cd6f3c2c385c6dfc749e65e5b194b72dd1a5cf",
+        "policy_hash": "sha256:bd009f7747bfe47669df1c10e5db46191f0d3e3df8040d482708617073cb1df7",
+        "recurrence_plan_hash": "sha256:0da55cad2687e0a721dccfac140402e0ff8fcfbb02b6affc00f68e65c9996c5d",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_AXIAL",
+      "model_bytes_sha256": "sha256:188e7cc43728e9c8946532e606bf62cac5fc8a8e1985f815abde38ebaba91807",
+      "model_resource": "solution_frame_serial_two_span_axial.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 2,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 2,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            0,
+            5e-05
+          ],
+          [
+            6,
+            0.0001
+          ]
+        ],
+        "element_count": 2,
+        "free_dof_count": 12,
+        "global_dof_count": 18,
+        "history_cycles": [
+          [
+            0,
+            2,
+            2
+          ]
+        ],
+        "load_component": "FX",
+        "load_node_id": "N3",
+        "load_value_si": 100000.0,
+        "model_kind": "frame_3d",
+        "node_count": 3,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 144,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_frame_serial_two_span_axial.v1",
+      "slot_id": "solution_frame_serial_two_span_axial",
+      "slot_registration_hash": "sha256:cb3dc4b58676fc94c51b01538f0a4311ae9bc7c81e2053420951b1767467f825"
+    },
+    {
+      "case_fingerprint": "sha256:36d4f6bf265b184e913db2d754396834966fd27ecf08ec9016ac2e37bfbc56d7",
+      "description": "single truss element under axial excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:153a6a0b566b6ee8b8945959ffcddf02128daf9f629b7f7ee88266f3905694b8",
+        "cpu_iteration_count": 1,
+        "cpu_operator_apply_count": 3,
+        "cpu_preconditioner_apply_count": 1,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:6616509b727eff7ec6be3f911482ec6d54334dfa69ffb4aec570451fc0a09df0",
+        "cpu_solution_data_hash": "sha256:d0bb8f4af8713da3be6923187a412e0ef88b2477345b5bf2e350dd1bb177b760",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+        "descriptor_hash": "sha256:65d35f7b56de3dd5c429b35d367f2d97c40a75d7f50d50d655c20a6fb879ec05",
+        "direct_residual_data_hash": "sha256:af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+        "direct_solution_data_hash": "sha256:d0bb8f4af8713da3be6923187a412e0ef88b2477345b5bf2e350dd1bb177b760",
+        "execution_plan_hash": "sha256:419f64ace472a706b0b9581b5eacff55e1605bd4f60e95352cb8b09fae743522",
+        "fgmres_plan_hash": "sha256:c56c6d88308171b87ab7454c15bdcbfdc47a01a1d0c8d61ea1f56a2982bc521d",
+        "free_space_plan_hash": "sha256:b4c9900fe31fa818e9cf71a36aac19f71e9649f928b0377bbf9cebc18f26a4f3",
+        "model_ir_content_hash": "sha256:951a08cd5df2204dd56bfe423f2333f9815896b856a34f9c36ef1684eb508b08",
+        "policy_hash": "sha256:d16fb420fe2b473afa63baba4c79e22b0fc84feea17f4578091102174c6e9fd8",
+        "recurrence_plan_hash": "sha256:2ced1a314b25389f8c5558f49fdf915bc12daef53ea32d404aabd113e9f28411",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_AXIAL",
+      "model_bytes_sha256": "sha256:1eeb97c9e82faac612db9ad9f42c296d5e3ffd2ec2ab8c0c21f588df3f0c8fc2",
+      "model_resource": "solution_truss_single_axial.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 1,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 1,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            0,
+            5e-05
+          ]
+        ],
+        "element_count": 1,
+        "free_dof_count": 1,
+        "global_dof_count": 12,
+        "history_cycles": [
+          [
+            0,
+            1,
+            1
+          ]
+        ],
+        "load_component": "FX",
+        "load_node_id": "N2",
+        "load_value_si": 100000.0,
+        "model_kind": "truss_3d",
+        "node_count": 2,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 1,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_truss_single_axial.v1",
+      "slot_id": "solution_truss_single_axial",
+      "slot_registration_hash": "sha256:4284fc9d56f84ac39ad59574963e04b7753063bf7e7356e90493a48ae855e2df"
+    },
+    {
+      "case_fingerprint": "sha256:03421475132294ddb3f6a69cc1c370d755322d4bc2139472af1c85c252de7ee3",
+      "description": "single frame with a load entirely on the constrained partition",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "cpu_iteration_count": 0,
+        "cpu_operator_apply_count": 1,
+        "cpu_preconditioner_apply_count": 0,
+        "cpu_restart_count": 0,
+        "cpu_result_hash": "sha256:31e48f53279a0f63757102a2ee189ee672c0a287cb1e4d9d95832067bdd8d0a9",
+        "cpu_solution_data_hash": "sha256:17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_initial_true_residual",
+        "cpu_true_residual_data_hash": "sha256:17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        "descriptor_hash": "sha256:3d168608e2463e67d1798bc5adf9b3f64ccc5f7642c748f95be7c04e6abcac32",
+        "direct_residual_data_hash": "sha256:17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        "direct_solution_data_hash": "sha256:17b0761f87b081d5cf10757ccc89f12be355c70e2e29df288b65b30710dcbcd1",
+        "execution_plan_hash": "sha256:e19788b210e62d5ac03136397187766c1b393bccbfe91633a54ead3c3db2bc89",
+        "fgmres_plan_hash": "sha256:d4ac044e45ab81a0d126badb0e6da1be0d47407b061db94db28aee603c074419",
+        "free_space_plan_hash": "sha256:257d45381794b3de380bf0645a5ce18c239ff950dc32626a0bd9011d185226fc",
+        "model_ir_content_hash": "sha256:6420244fc30a60d660a1555846b25e634ddbfba9af5c42c438e0ba855d20e593",
+        "policy_hash": "sha256:bd009f7747bfe47669df1c10e5db46191f0d3e3df8040d482708617073cb1df7",
+        "recurrence_plan_hash": "sha256:b4ee0145cdd4a5309f9df223f305f2d0d12e516845125885463e20ec3f3ba256",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_edge_semantics",
+      "load_pattern_id": "LC_AXIAL",
+      "model_bytes_sha256": "sha256:61207132d72f8c08687751eefe7771dee985cb42886bca4e506cf3cf51c88dc8",
+      "model_resource": "solution_frame_zero_free_rhs_edge.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 2,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 2,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [],
+        "element_count": 1,
+        "free_dof_count": 6,
+        "global_dof_count": 12,
+        "history_cycles": [],
+        "load_component": "FX",
+        "load_node_id": "N1",
+        "load_value_si": 100000.0,
+        "model_kind": "frame_3d",
+        "node_count": 2,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 36,
+        "zero_reduced_rhs": true
+      },
+      "semantic_profile": "solution_frame_zero_free_rhs_edge.v1",
+      "slot_id": "solution_frame_zero_free_rhs_edge",
+      "slot_registration_hash": "sha256:0ebcf97f98767dccb0b245a7dbca73a96db2965bcd24411f120fde5e577aa1b4"
+    },
+    {
+      "case_fingerprint": "sha256:f82d58191d18a4c4aca7408533d848448bb8d5b201946ec2dfcc48baf9863da8",
+      "description": "five-node four-span serial frame under axial excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:4e0105eeec8a32febee6b008e254ce9bdf4f63239f914959428c0c7baf196a77",
+        "cpu_iteration_count": 4,
+        "cpu_operator_apply_count": 6,
+        "cpu_preconditioner_apply_count": 4,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:ce2b33719e8ad3ffeae6ffebc11c2ecd87efe5af0dd8822340d953076bc68b82",
+        "cpu_solution_data_hash": "sha256:fcfba371a021fb57d3e132da588c52d4dcd40378d650d8062e021f10fffd8a46",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:7cad1645859aa900db1332592d1bc292ad37da3d6eadb839eb3ddc7f9d67846f",
+        "descriptor_hash": "sha256:f2b3e34d08bfc2b900594a5849044a01e7140e898a07fb3178412bc30edaf7d1",
+        "direct_residual_data_hash": "sha256:6fd3f50125cced9af4995922e7754559bd4484eba206976cca3803854ae41570",
+        "direct_solution_data_hash": "sha256:0ebb599c98a6bd6aa219b1cee0642db40d6147f9a6528ee2ba343412a869c23f",
+        "execution_plan_hash": "sha256:dd185039f7ab2f8eea0d84f92090d1d3b9e1703f6f5ac65bca02c09c0a04f1fe",
+        "fgmres_plan_hash": "sha256:bb02cbfb1e43049890c6d45c05406ad1d34da615a5fbe6a0a5cfdd970dfc5f47",
+        "free_space_plan_hash": "sha256:3fa234094190c281f1dcbda01577db8077248a50259c263c6eb00c244526e7c3",
+        "model_ir_content_hash": "sha256:c8c7cbde02445e020742e39e8a1408637be8c0300bf12e021e111b923883f591",
+        "policy_hash": "sha256:d40878ecd0b6d17e5fbc9072c77f4aff8d23d467a2f0209be9abd1cb6be15175",
+        "recurrence_plan_hash": "sha256:c870d102cc4f8b94ca58209b85004be65fbfa703abe08a7ced38ee35a3bc047f",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_AXIAL",
+      "model_bytes_sha256": "sha256:8f26bc53451841e09612c25369da45e1fca67177fa91548f5b2ec28949d0ff04",
+      "model_resource": "solution_frame_serial_four_span_axial.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 4,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 4,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            0,
+            5e-05
+          ],
+          [
+            6,
+            0.0001
+          ],
+          [
+            12,
+            0.00015
+          ],
+          [
+            18,
+            0.0002
+          ]
+        ],
+        "element_count": 4,
+        "free_dof_count": 24,
+        "global_dof_count": 30,
+        "history_cycles": [
+          [
+            0,
+            4,
+            4
+          ]
+        ],
+        "load_component": "FX",
+        "load_node_id": "N5",
+        "load_value_si": 100000.0,
+        "model_kind": "frame_3d",
+        "node_count": 5,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 360,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_frame_serial_four_span_axial.v1",
+      "slot_id": "solution_frame_serial_four_span_axial",
+      "slot_registration_hash": "sha256:d5cd9da7a2e2bdf3c4acf2459626b219a8eeb46671d713bddca03219487bc6dc"
+    },
+    {
+      "case_fingerprint": "sha256:a582756f27072d7e4ee058d9a60078ad644702799801cda76c438c3b000c9ad4",
+      "description": "six-node five-span serial frame under axial excitation",
+      "execution_residual_tolerance": 1e-10,
+      "expected": {
+        "authoritative_plan_tolerance_passed": true,
+        "cpu_history_hash": "sha256:417d114cbab947e97791509d7f91dcf83ef3cbc7ef3835fd5149c9e7dab5119d",
+        "cpu_iteration_count": 5,
+        "cpu_operator_apply_count": 7,
+        "cpu_preconditioner_apply_count": 5,
+        "cpu_restart_count": 1,
+        "cpu_result_hash": "sha256:c652dc15dfa60a4c8d3d1d7d8adf89b237a5513d68040d6a267a865f9810a72d",
+        "cpu_solution_data_hash": "sha256:5d1e601c1030977ff480707018f1efd8afadc4c2fa84ce3d833c49c04907a3f0",
+        "cpu_status": "converged",
+        "cpu_termination_code": "converged_happy_breakdown",
+        "cpu_true_residual_data_hash": "sha256:6b309a908777743bd18e5242763ed9c9f914ce7f7b592dd09a0efa0c7fa76e8e",
+        "descriptor_hash": "sha256:4b1cdcc009049d975cebfb05bf54dedf6da1d9836183e04156e0ba2e74b8e0c4",
+        "direct_residual_data_hash": "sha256:2dfba633817046c7f559ed4b93076048435f7e1a90f14eb8035c04b9ebae2537",
+        "direct_solution_data_hash": "sha256:254e41cf716d6056cee0b4a7db9e840698d60cf5c9ad1f09a69af8c54a290c6f",
+        "execution_plan_hash": "sha256:e6fdbaf36fea3e91ed994bca57de70a014fb9e01de036adbb18bd6883f89cf07",
+        "fgmres_plan_hash": "sha256:cfdc6c7d62449d779ef95cd8189b066796e78913eb0022a27203b33eb2c890d1",
+        "free_space_plan_hash": "sha256:a471265806aaa1cda0b41d8878af9dcce98ac593fc3bfea1fa9e120a674708f5",
+        "model_ir_content_hash": "sha256:49f8ade44312c63146b59cfceb69d9d4d9f31e8901c9a5eb9ee9fddd5ab0ec33",
+        "policy_hash": "sha256:dd36e5ba05790fc3cc72a4a242042ee6ddcdce259e84d40b2e018b17aebd9b51",
+        "recurrence_plan_hash": "sha256:4ba4372ab7c55adf68fd3641e2adec7a6d899d8be6f040ec68035cdf61b0a243",
+        "solver_tolerance_passed": true
+      },
+      "group": "solution_semantics",
+      "load_pattern_id": "LC_AXIAL",
+      "model_bytes_sha256": "sha256:71af7d0e881ae62e472bd64f603618a397b8ea22cc2f57369fa483fd9bf248de",
+      "model_resource": "solution_frame_serial_five_span_axial.model.json",
+      "policy_parameters": {
+        "absolute_tolerance": 0.0,
+        "divergence_factor": 100000000.0,
+        "max_iterations": 5,
+        "relative_tolerance": 1e-12,
+        "restart_dimension": 5,
+        "stagnation_checkpoint_limit": 2,
+        "stagnation_relative_tolerance": 1.4901161193847656e-08
+      },
+      "semantic_contract": {
+        "analytic_free_solution_nonzero": [
+          [
+            0,
+            5e-05
+          ],
+          [
+            6,
+            0.0001
+          ],
+          [
+            12,
+            0.00015
+          ],
+          [
+            18,
+            0.0002
+          ],
+          [
+            24,
+            0.00025
+          ]
+        ],
+        "element_count": 5,
+        "free_dof_count": 30,
+        "global_dof_count": 36,
+        "history_cycles": [
+          [
+            0,
+            5,
+            5
+          ]
+        ],
+        "load_component": "FX",
+        "load_node_id": "N6",
+        "load_value_si": 100000.0,
+        "model_kind": "frame_3d",
+        "node_count": 6,
+        "nonzero_local_axis_roll_count": 0,
+        "reduced_csr_nnz": 468,
+        "zero_reduced_rhs": false
+      },
+      "semantic_profile": "solution_frame_serial_five_span_axial.v1",
+      "slot_id": "solution_frame_serial_five_span_axial",
+      "slot_registration_hash": "sha256:4e9b5f40a99b0db1932d90047dd8d8494a5d755865a19081aa42da8e2b1c1c84"
+    }
+  ],
+  "suite_id": "phase0_execution_plan_v2_linear_frame_truss_fgmres_all_converged_suite.v1",
+  "suite_scope": "execution_plan_v2_linear_frame_truss_zero_offset_release_prescribed_fgmres_all_converged_cases_only"
+}

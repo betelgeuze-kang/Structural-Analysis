@@ -39,6 +39,7 @@ from structural_analysis.engine_v2.contracts.result_ir_v2 import (
     ResultIRV2,
     ResultIRV2Error,
     SourceProvenance,
+    _issue_bridge_result_ir_v2_ready,
     build_result_ir_v2,
     validate_result_ir_v2_physics,
 )
@@ -291,6 +292,7 @@ def build_hip_fgmres_result_ir_v2(
     # published.
     second = _capture_live_authority(case_result)
     _require_same_live_authority(first, second)
+    result_ir = _issue_bridge_result_ir_v2_ready(result_ir)
 
     seal = _make_detached_seal(
         first,

@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import ast
+from concurrent.futures import ThreadPoolExecutor
+import copy
 from dataclasses import replace
+import gc
 import hashlib
 import inspect
 from types import SimpleNamespace
 from typing import Any, Callable
+import weakref
 
 import numpy as np
 import pytest
@@ -27,7 +31,11 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_result_ir_v2 import (
     build_hip_fgmres_result_ir_v2,
     validate_hip_fgmres_result_ir_v2,
 )
-from structural_analysis.engine_v2.contracts._canonical import sha256_prefixed
+from structural_analysis.engine_v2.contracts._canonical import (
+    canonical_hash,
+    sha256_prefixed,
+)
+from structural_analysis.engine_v2.contracts.result_ir_v2 import _receipt_hash
 from structural_analysis.engine_v2.contracts import result_ir_v2 as result_ir_module
 from structural_analysis.engine_v2.contracts.state_ir import (
     commit_trial_state,
@@ -452,6 +460,79 @@ def test_detached_validator_rejects_raw_seal_and_result_tampering(
     assert error.value.code == expected_code
 
 
+def test_factory_issuance_rejects_direct_replace_copy_and_coherent_rehash(
+    monkeypatch: pytest.MonkeyPatch,
+    converged_slot: HipFgmresFixtureReplayV1,
+) -> None:
+    _, result = _build(monkeypatch, converged_slot)
+
+    direct = HipFgmresResultIRBridgeResultV2(
+        receipt=result.receipt,
+        accepted_state=result.accepted_state,
+        evaluated_trial_state=result.evaluated_trial_state,
+        committed_state=result.committed_state,
+        _source_execution_plan=result.source_execution_plan,
+        _source_seal=result._source_seal,
+    )
+    candidates = (direct, replace(result), copy.copy(result))
+    for candidate in candidates:
+        with pytest.raises(HipFgmresResultIRV2Error) as error:
+            validate_hip_fgmres_result_ir_v2(candidate)
+        assert error.value.code == "hip_fgmres_result_ir_v2_issuance_unavailable"
+    with pytest.raises(TypeError, match="mappingproxy"):
+        copy.deepcopy(result)
+
+    attacker_case_hash = _hash("attacker-case-parity")
+    attacker_device_hash = _hash("attacker-device-identity")
+    provenance = replace(
+        result.receipt.source_provenance,
+        case_parity_receipt_hash=attacker_case_hash,
+        device_identity_receipt_hash=attacker_device_hash,
+        device_uuid_bytes_hex="fedcba9876543210fedcba9876543210",
+    )
+    receipt = replace(
+        result.receipt,
+        source_provenance=provenance,
+        result_ir_hash="sha256:" + "0" * 64,
+    )
+    receipt = replace(receipt, result_ir_hash=_receipt_hash(receipt.to_dict()))
+    seal = replace(
+        result._source_seal,
+        case_parity_receipt_hash=attacker_case_hash,
+        device_identity_receipt_hash=attacker_device_hash,
+        source_provenance=provenance,
+        result_ir_hash=receipt.result_ir_hash,
+        capture_hash="sha256:" + "0" * 64,
+    )
+    seal = replace(
+        seal,
+        capture_hash=canonical_hash(bridge_module._detached_seal_payload(seal)),
+    )
+    coherently_rehashed = replace(result, receipt=receipt, _source_seal=seal)
+    with pytest.raises(HipFgmresResultIRV2Error) as error:
+        validate_hip_fgmres_result_ir_v2(coherently_rehashed)
+    assert error.value.code == "hip_fgmres_result_ir_v2_detached_replay_invalid"
+
+
+def test_factory_issuance_registry_is_thread_safe_weak_and_post_close_stable(
+    monkeypatch: pytest.MonkeyPatch,
+    converged_slot: HipFgmresFixtureReplayV1,
+) -> None:
+    def exercise_issued_result() -> tuple[weakref.ReferenceType[Any], int]:
+        _, result = _build(monkeypatch, converged_slot)
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            validated = tuple(
+                executor.map(validate_hip_fgmres_result_ir_v2, (result,) * 32)
+            )
+        assert all(candidate is result for candidate in validated)
+        return weakref.ref(result), len(bridge_module._BRIDGE_RESULT_ISSUANCES)
+
+    reference, during = exercise_issued_result()
+    gc.collect()
+    assert reference() is None
+    assert len(bridge_module._BRIDGE_RESULT_ISSUANCES) < during
+
+
 def test_final_issuance_rejects_exact_clone_and_coherently_rehashed_clone(
     monkeypatch: pytest.MonkeyPatch,
     converged_slot: HipFgmresFixtureReplayV1,
@@ -490,7 +571,9 @@ def test_final_issuance_rejects_exact_clone_and_coherently_rehashed_clone(
     )
     with pytest.raises(HipFgmresResultIRV2Error) as coherent_error:
         validate_hip_fgmres_result_ir_v2(coherent_clone)
-    assert coherent_error.value.code == ("hip_fgmres_result_ir_v2_issuance_unavailable")
+    assert (
+        coherent_error.value.code == "hip_fgmres_result_ir_v2_detached_replay_invalid"
+    )
 
 
 def test_final_issuance_rejects_cross_result_registry_transplant(

@@ -140,14 +140,19 @@ ruff check src/structural_analysis/engine_v2/contracts/execution_plan_v2.py \
   tests/test_engine_v2_execution_plan_v2_sparse.py
 ```
 
-## Follow-up debt
+## Shared element semantics boundary
 
-The v2 compiler currently imports the v1 CPU reference module's private element
-validation, frame construction, and frame/truss stiffness helpers. This avoids
-changing frozen v1 behavior while preserving exact numerical conventions. A
-later isolated refactor should move these formulas into a versioned shared
-element-kernel module and make both v1 and v2 consume it under unchanged parity
-tests.
+The private CPU-reference dependency described by the original v2 milestone was
+removed in v0.2.46. The CPU reference and sparse compiler now consume the public
+versioned [shared linear frame/truss semantics v1](engine-v2-shared-linear-frame-truss-element-semantics-v1.md),
+while the HIP symbolic plan consumes the same local-axis policy. The historical
+serialized source operator version and all frozen v2 numerical/plan hashes stay
+unchanged because the formulas and arithmetic order did not change.
+
+Remaining debt is narrower: generate or otherwise single-source the sealed HIP
+C++ coefficients, broaden the narrow global-Z/global-Y native RTC shared-oracle
+regression into source-boundary parity, add offset/release and shell semantics,
+and strengthen scaling/refinement for slender or ill-conditioned models.
 
 `ExecutionPlanV2` also keeps a strong `_source_buffers` reference so validation
 can independently rederive source semantics. Compilation first applies the

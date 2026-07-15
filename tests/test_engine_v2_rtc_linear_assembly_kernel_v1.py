@@ -23,10 +23,11 @@ from structural_analysis.engine_v2.assembly_backend.rtc import (
     compile_hip_rtc_linear_frame_truss_assembly_kernel,
 )
 from structural_analysis.engine_v2.assembly_backend import plan as assembly_plan
-from structural_analysis.engine_v2.backends.cpu_reference.linear_static import (
-    _frame_local_stiffness,
-    _frame_transform,
-    _truss_local_stiffness,
+from structural_analysis.engine_v2.elements.linear_frame_truss_v1 import (
+    frame_local_stiffness_v1,
+    frame_reference_axis_v1,
+    frame_transform_v1,
+    truss_local_stiffness_v1,
 )
 from structural_analysis.engine_v2.backends.hip.native import (
     load_hip_native_runtime,
@@ -410,8 +411,10 @@ def test_axis_threshold_boundary_is_host_owned_and_not_rederived_on_device() -> 
     assert host_axis(-above) == REFERENCE_AXIS_GLOBAL_Y
     assert assembly_plan.REFERENCE_AXIS_GLOBAL_Y == REFERENCE_AXIS_GLOBAL_Y
     assert assembly_plan.REFERENCE_AXIS_GLOBAL_Z == REFERENCE_AXIS_GLOBAL_Z
-    host_source = inspect.getsource(assembly_plan._compile_reference_axis_codes)
-    assert "abs(local_x_z) > REFERENCE_AXIS_SWITCH_THRESHOLD" in host_source
+    compiler_source = inspect.getsource(assembly_plan._compile_reference_axis_codes)
+    assert "frame_reference_axis_v1" in compiler_source
+    semantics_source = inspect.getsource(frame_reference_axis_v1)
+    assert "> REFERENCE_AXIS_SWITCH_THRESHOLD_V1" in semantics_source
     device_source = KERNEL_SOURCE.read_text(encoding="utf-8")
     assert "REFERENCE_AXIS_SWITCH_THRESHOLD" not in device_source
     assert "fabs(local_x[2])" not in device_source
@@ -725,14 +728,21 @@ def test_actual_hiprtc_assembly_frame_truss_and_stable_gather() -> None:
     stream_destroy = _bind(runtime, "hipStreamDestroy", [ctypes.c_void_p])
 
     coordinates = np.array(
-        [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [0.0, 0.0, 0.0], [1.0, 1.0, 0.0]],
+        [
+            [0.0, 0.0, 0.0],
+            [2.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0],
+            [0.0, 0.0, 2.0],
+        ],
         dtype="<f8",
     )
-    connectivity = np.array([[0, 1], [2, 3]], dtype="<i4")
-    element_type = np.array([2, 1], dtype="u1")
-    formulation = np.array([2, 1], dtype="u1")
-    material_index = np.array([0, 0], dtype="<i4")
-    section_index = np.array([0, 1], dtype="<i4")
+    connectivity = np.array([[0, 1], [2, 3], [4, 5]], dtype="<i4")
+    element_type = np.array([2, 1, 2], dtype="u1")
+    formulation = np.array([2, 1, 2], dtype="u1")
+    material_index = np.array([0, 0, 0], dtype="<i4")
+    section_index = np.array([0, 1, 0], dtype="<i4")
     material_law = np.array([1], dtype="u1")
     materials = np.array([[210.0e9, 0.3, 7850.0]], dtype="<f8")
     section_family = np.array([2, 1], dtype="u1")
@@ -743,8 +753,10 @@ def test_actual_hiprtc_assembly_frame_truss_and_stable_gather() -> None:
         ],
         dtype="<f8",
     )
-    rolls = np.array([0.2, -0.1], dtype="<f8")
-    reference_axes = np.array([2, 2], dtype="u1")
+    rolls = np.array([0.2, -0.1, 0.35], dtype="<f8")
+    reference_axes = np.array([2, 2, 1], dtype="u1")
+    assert frame_reference_axis_v1(coordinates[0], coordinates[1]) == "global_z"
+    assert frame_reference_axis_v1(coordinates[4], coordinates[5]) == "global_y"
     host_inputs = (
         coordinates,
         connectivity,
@@ -777,7 +789,7 @@ def test_actual_hiprtc_assembly_frame_truss_and_stable_gather() -> None:
                 == 0
             )
         contribution_pointer = ctypes.c_void_p()
-        assert hip_malloc(ctypes.byref(contribution_pointer), 288 * 8) == 0
+        assert hip_malloc(ctypes.byref(contribution_pointer), 432 * 8) == 0
         pointers.append(contribution_pointer)
         error_pointer = ctypes.c_void_p()
         assert hip_malloc(ctypes.byref(error_pointer), 4) == 0
@@ -794,14 +806,14 @@ def test_actual_hiprtc_assembly_frame_truss_and_stable_gather() -> None:
         )
         kernel.launch_element_contributions(
             stream,
-            2,
-            4,
+            3,
+            6,
             1,
             2,
             *pointers,
         )
         assert stream_sync(stream) == 0
-        contributions = np.empty((2, 12, 12), dtype="<f8")
+        contributions = np.empty((3, 12, 12), dtype="<f8")
         assert (
             hip_memcpy(
                 ctypes.c_void_p(contributions.ctypes.data),
@@ -822,21 +834,29 @@ def test_actual_hiprtc_assembly_frame_truss_and_stable_gather() -> None:
         )
         assert host_error.tolist() == [0]
 
-        frame_transform, frame_length = _frame_transform(
+        frame_transform, frame_length = frame_transform_v1(
             coordinates[0], coordinates[1], rolls[0]
         )
-        truss_transform, truss_length = _frame_transform(
+        truss_transform, truss_length = frame_transform_v1(
             coordinates[2], coordinates[3], rolls[1]
+        )
+        global_y_frame_transform, global_y_frame_length = frame_transform_v1(
+            coordinates[4], coordinates[5], rolls[2]
         )
         expected_frame = (
             frame_transform.T
-            @ _frame_local_stiffness(materials[0], sections[0], frame_length)
+            @ frame_local_stiffness_v1(materials[0], sections[0], frame_length)
             @ frame_transform
         )
         expected_truss = (
             truss_transform.T
-            @ _truss_local_stiffness(materials[0], sections[1], truss_length)
+            @ truss_local_stiffness_v1(materials[0], sections[1], truss_length)
             @ truss_transform
+        )
+        expected_global_y_frame = (
+            global_y_frame_transform.T
+            @ frame_local_stiffness_v1(materials[0], sections[0], global_y_frame_length)
+            @ global_y_frame_transform
         )
         np.testing.assert_allclose(
             contributions[0], expected_frame, rtol=2.0e-13, atol=1.0e-6
@@ -844,10 +864,17 @@ def test_actual_hiprtc_assembly_frame_truss_and_stable_gather() -> None:
         np.testing.assert_allclose(
             contributions[1], expected_truss, rtol=2.0e-13, atol=1.0e-6
         )
+        np.testing.assert_allclose(
+            contributions[2], expected_global_y_frame, rtol=2.0e-13, atol=1.0e-6
+        )
 
-        offsets = np.arange(0, 289, 2, dtype="<i4")
+        offsets = np.arange(0, 433, 3, dtype="<i4")
         reverse = np.column_stack(
-            (np.arange(144, dtype="<i4"), np.arange(144, 288, dtype="<i4"))
+            (
+                np.arange(144, dtype="<i4"),
+                np.arange(144, 288, dtype="<i4"),
+                np.arange(288, 432, dtype="<i4"),
+            )
         ).reshape(-1)
         for array in (offsets, reverse):
             pointer = ctypes.c_void_p()
@@ -868,7 +895,7 @@ def test_actual_hiprtc_assembly_frame_truss_and_stable_gather() -> None:
         kernel.launch_csr_gather(
             stream,
             144,
-            288,
+            432,
             contribution_pointer,
             pointers[-3],
             pointers[-2],
@@ -888,7 +915,7 @@ def test_actual_hiprtc_assembly_frame_truss_and_stable_gather() -> None:
         )
         np.testing.assert_allclose(
             gathered.reshape(12, 12),
-            expected_frame + expected_truss,
+            expected_frame + expected_truss + expected_global_y_frame,
             rtol=2.0e-13,
             atol=1.0e-6,
         )

@@ -13,14 +13,16 @@ Two validation layers are intentionally public and separate:
 * :func:`validate_result_ir_v2_physics` additionally replays the exact plan
   and trial/committed ``StateIR`` bindings and all physical identities.
 
-The serialized provenance is a hash commitment, not live HIP authority.  A
-HIP bridge must validate that authority before calling the builder.
+The serialized provenance is a hash commitment, not live HIP authority.  The
+public builder therefore emits ``result_ir_ready=false``.  A HIP bridge must
+validate its retained authority and use the private process-local issuer before
+the exact returned object may carry ``result_ir_ready=true``.
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
 from functools import lru_cache
 import json
 import math
@@ -279,7 +281,7 @@ ResultIRV2SourceProvenance = SourceProvenance
 @dataclass(frozen=True, slots=True)
 class ResultIRV2Claims:
     result_ir_verified: Literal[True] = True
-    result_ir_ready: Literal[True] = True
+    result_ir_ready: bool = False
     state_ir_lineage_verified: Literal[True] = True
     reaction_recovery_verified: Literal[True] = True
     member_force_recovery_verified: Literal[True] = True
@@ -297,6 +299,18 @@ class ResultIRV2Claims:
         return asdict(self)
 
 
+_RESULT_IR_V2_READY_MINT = object()
+
+
+@dataclass(frozen=True, slots=True)
+class _ResultIRV2ReadyAuthority:
+    """Non-serialized identity seal issued only by the retained-source bridge."""
+
+    receipt_identity: int
+    result_ir_hash: str
+    _mint: object = field(repr=False, compare=False)
+
+
 @dataclass(frozen=True, slots=True)
 class ResultIRV2:
     """Immutable sparse-recovery linear-static result receipt."""
@@ -312,6 +326,12 @@ class ResultIRV2:
     claims: ResultIRV2Claims
     numerical_result_hash: str
     result_ir_hash: str
+    _result_ir_ready_authority: _ResultIRV2ReadyAuthority | None = field(
+        default=None,
+        init=False,
+        repr=False,
+        compare=False,
+    )
 
     @property
     def schema_version(self) -> str:
@@ -511,6 +531,47 @@ def build_result_ir_v2(
     )
 
 
+def _issue_bridge_result_ir_v2_ready(receipt: ResultIRV2) -> ResultIRV2:
+    """Issue one exact bridge result with non-serialized process-local authority.
+
+    This private hook is intentionally absent from every public ``__all__``.
+    The retained-source bridge calls it only after its second live-authority
+    capture succeeds.  The identity seal is integrity metadata, not a security
+    boundary against hostile code executing in the same Python process.
+    """
+
+    validate_result_ir_v2(receipt)
+    if receipt.claims.result_ir_ready:
+        _raise(
+            "result_ir_v2_ready_authority_already_issued",
+            "/claims/result_ir_ready",
+            "Only a generic not-ready ResultIR v2 can receive bridge authority.",
+        )
+    issued = replace(
+        receipt,
+        claims=replace(receipt.claims, result_ir_ready=True),
+        result_ir_hash="sha256:" + "0" * 64,
+    )
+    issued = replace(issued, result_ir_hash=_receipt_hash(issued.to_dict()))
+    authority = _ResultIRV2ReadyAuthority(
+        receipt_identity=id(issued),
+        result_ir_hash=issued.result_ir_hash,
+        _mint=_RESULT_IR_V2_READY_MINT,
+    )
+    object.__setattr__(issued, "_result_ir_ready_authority", authority)
+    return validate_result_ir_v2(issued)
+
+
+def _has_bridge_result_ir_ready_authority(receipt: ResultIRV2) -> bool:
+    authority = receipt._result_ir_ready_authority
+    return (
+        type(authority) is _ResultIRV2ReadyAuthority
+        and authority._mint is _RESULT_IR_V2_READY_MINT
+        and authority.receipt_identity == id(receipt)
+        and authority.result_ir_hash == receipt.result_ir_hash
+    )
+
+
 def validate_result_ir_v2(receipt: ResultIRV2) -> ResultIRV2:
     """Validate exact dataclass/storage and detached serialized commitments."""
 
@@ -555,12 +616,31 @@ def validate_result_ir_v2(receipt: ResultIRV2) -> ResultIRV2:
     for row in artifacts:
         _validate_array_dataclass(row)
     _validate_source_provenance(receipt.source_provenance)
-    validate_result_ir_v2_manifest(receipt.to_dict())
+    _validate_result_ir_v2_manifest(
+        receipt.to_dict(),
+        allow_result_ir_ready=receipt.claims.result_ir_ready,
+    )
     return receipt
 
 
 def validate_result_ir_v2_manifest(manifest: Mapping[str, Any]) -> None:
-    """Validate a detached JSON-shaped ResultIR v2 without live sources."""
+    """Validate a detached JSON-shaped ResultIR v2 without live sources.
+
+    A serialized manifest cannot retain the process-local bridge identity, so
+    this public validator accepts only ``result_ir_ready=false``.  A live
+    bridge-issued ``ResultIRV2`` remains valid through
+    :func:`validate_result_ir_v2` while its exact object identity is retained.
+    """
+
+    _validate_result_ir_v2_manifest(manifest, allow_result_ir_ready=False)
+
+
+def _validate_result_ir_v2_manifest(
+    manifest: Mapping[str, Any],
+    *,
+    allow_result_ir_ready: bool,
+) -> None:
+    """Validate one manifest with an explicitly established authority scope."""
 
     if type(manifest) is not dict:
         _raise(
@@ -579,6 +659,12 @@ def validate_result_ir_v2_manifest(manifest: Mapping[str, Any]) -> None:
 
     _validate_manifest_array_metadata(manifest)
     _validate_manifest_scalars(manifest)
+    if manifest["claims"]["result_ir_ready"] and not allow_result_ir_ready:
+        _raise(
+            "result_ir_v2_ready_authority_unavailable",
+            "/claims/result_ir_ready",
+            "Detached ResultIR v2 has no process-local bridge authority.",
+        )
 
     try:
         expected_numerical = _numerical_hash_from_manifest(manifest)
@@ -665,6 +751,13 @@ def validate_result_ir_v2_physics(
     )
     expected_reactions = np.zeros(plan.dof_count, dtype="<f8")
     expected_reactions[constrained] = expected_residual[constrained]
+    free_reactions = reactions[free]
+    if np.any(free_reactions != 0.0) or np.any(np.signbit(free_reactions)):
+        _raise(
+            "result_ir_v2_free_reaction_not_positive_zero",
+            "/arrays/reactions_si",
+            "Every free-DOF reaction must be exact positive zero.",
+        )
     _assert_array_close(
         reactions,
         expected_reactions,
@@ -1374,12 +1467,30 @@ def _validate_receipt_scalars(receipt: ResultIRV2) -> None:
     expected_claims = ResultIRV2Claims()
     for field_name in receipt.claims.__dataclass_fields__:
         value = getattr(receipt.claims, field_name)
-        if type(value) is not bool or value is not getattr(expected_claims, field_name):
+        if type(value) is not bool or (
+            field_name != "result_ir_ready"
+            and value is not getattr(expected_claims, field_name)
+        ):
             _raise(
                 "result_ir_v2_claim_invalid",
                 f"/claims/{field_name}",
                 "ResultIR v2 claim boundary is fixed and non-promoting.",
             )
+    ready_authority_valid = _has_bridge_result_ir_ready_authority(receipt)
+    if receipt.claims.result_ir_ready and not ready_authority_valid:
+        _raise(
+            "result_ir_v2_ready_authority_unavailable",
+            "/claims/result_ir_ready",
+            "result_ir_ready=true requires the exact process-local bridge object.",
+        )
+    if not receipt.claims.result_ir_ready and (
+        receipt._result_ir_ready_authority is not None
+    ):
+        _raise(
+            "result_ir_v2_ready_authority_invalid",
+            "/claims/result_ir_ready",
+            "A not-ready ResultIR v2 cannot retain bridge-ready authority.",
+        )
     _require_hash(receipt.numerical_result_hash, "/numerical_result_hash")
     _require_hash(receipt.result_ir_hash, "/result_ir_hash")
 

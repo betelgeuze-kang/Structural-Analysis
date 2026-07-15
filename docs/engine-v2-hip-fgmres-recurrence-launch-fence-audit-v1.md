@@ -125,11 +125,15 @@ Start operation ordinal을 `b`, canonical launch 수를 `C`, continuation launch
 - exact 10-slot family composition: v0.2.42 additive
   [audited parity v2](engine-v2-hip-fgmres-model-family-audited-parity-v2.md)에
   결합 완료
-  - identity-token 패치 전 source gate `1 passed in 3171.31s (0:52:51)`;
-    token-hardened current-source gate pending
+  - identity-token 패치 전 source gate `1 passed in 3171.31s (0:52:51)`
+  - token-hardened current-source 통합 gate `1 passed in 7820.35s (2:10:20)`,
+    CPU fallback 없음
   - 10-slot owned memset `80/80/0/0/0`, launch `1,230/1,230/0/0/0`,
     fence `30/30/0/0/0`
-  - unsigned 비영속 작업 세션 관찰이며 standalone provenance는 아님
+  - 같은 current-source 실행에서 v0.2.43 converged 7개 bridge와 v0.2.44
+    7-ready/3-not-issued disposition 및 post-close validation을 확인
+  - 두 실행은 unsigned 비영속 작업 세션 관찰이며 broad iteration-host-copy-zero,
+    standalone/signed provenance 또는 promotion 증거는 아님
 
 ## 다음 단계
 

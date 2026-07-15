@@ -6,8 +6,10 @@
 `ExecutionPlanV2 -> StateIR -> ResultIRV2`로 연결하는 contract-only 후보
 milestone이다. 구현 계약과 CPU sparse recovery 경로는 current source에서 검증됐다.
 비재사용 exact-case identity token 패치 전 source snapshot은 actual local `gfx1030`
-단일 모델 required gate를 통과했지만, 현재 token-hardened source의 hardware 재실행은
-pending이다. Fixed package 10/10 solution-ready와 external `gfx1100`도 아직 pending이다.
+단일 모델 required gate를 통과했다. Current-source actual local `gfx1030` 통합 gate도
+CPU fallback 없이 `1 passed in 7820.35s (2:10:20)`로 통과해 converged 7개 bridge와
+context close 뒤 validation을 확인했다. Fixed package 10/10 solution-ready와 external
+`gfx1100`은 아직 pending이다.
 다만 현재 fixed package 10-slot 중 3개는
 의도적으로 `max_iterations` 종료를 검증하는 case이므로, 현 ResultIRV2 계약으로
 10개 모두를 `result_ir_ready=true`로 만드는 것은 허용되지 않는다.
@@ -16,13 +18,20 @@ pending이다. Fixed package 10/10 solution-ready와 external `gfx1100`도 아�
 factory가 model-case parity의 private process-local authority를 검증하고 이미 host에
 export된 `solution_x`와 `true_residual` bytes만 소비한다. 기존 completion export의
 blocking D2H 세 번(`solution_x`, `true_residual`, `solve_record`)은 그대로 존재하며,
-ResultIR projection이 추가하는 device operation, D2H, solve, export, fallback은 모두
-`0`이다.
+retained-source factory direct-call contract에서 추가하는 device operation, D2H, solve,
+export, fallback은 모두 `0`이다. 이는 transitive/process-wide 계측값이 아니다.
 
 따라서 이 exact retained converged single-case 범위에서만
 `ResultIRV2Claims.result_ir_ready=true`다. 이는 upstream completion/model-family
 receipt의 historical `result_ir_ready=false`를 변경하지 않고, general solver·all-10·
 hardware promotion readiness로 전파되지 않는다.
+
+Public generic `build_result_ir_v2()`는 물리 복원을 통과해도 항상
+`result_ir_ready=false`를 발행한다. Bridge는 두 번째 live-authority capture까지 성공한
+뒤 비공개 process-local mint로 반환된 exact `ResultIRV2` object identity에만 true 권한을
+부여한다. `replace`, direct construction, coherent rehash 또는 standalone manifest는 이
+identity를 보존하지 못해 generic validator에서 true 위조로 거부된다. 이는 동일
+프로세스의 hostile code에 대한 보안 경계나 tamper-proof mint 주장이 아니다.
 
 ## 계약 체인
 
@@ -32,7 +41,7 @@ retained converged HIP model-case authority (live factory only)
   -> exact retained sparse ExecutionPlanV2
   -> full displacement: free <- solution_x, constrained <- +0.0
   -> full residual: ExecutionPlanV2.residual(u) = K*u-F
-  -> reaction: constrained residual, free zero
+  -> reaction: constrained residual, free exact +0.0
   -> local member force / element strain energy
   -> trial StateIR -> committed StateIR
   -> descriptor-only ResultIRV2
@@ -68,7 +77,7 @@ plan이 보유한 `element_global_dofs`, global-to-local transform, local stiffn
 - trial/committed StateIR의 plan binding, direct-parent lineage와 vector 보존
 - scaled full/free residual 및 exported residual이 plan tolerance 이하
 - exported `F-K*u`와 `-(K*u-F)[free]`의 `atol=1e-12`, `rtol=1e-8` 부호/수치 일치
-- reaction의 constrained/free partition
+- reaction의 constrained partition과 free DOF exact `+0.0`
 - local end force와 element energy
 - element 합 = global strain energy
 - global strain energy = half external work + half residual work
@@ -78,6 +87,18 @@ plan이 보유한 `element_global_dofs`, global-to-local transform, local stiffn
 Manifest는 배열 값을 JSON list로 복제하지 않는다. Shape, layout, axis/component 단위,
 byte length, data/content hash만 직렬화하는 descriptor-only 형식이다. 프로세스 내부
 structural/physics validator는 private retained 배열 bytes를 다시 검증한다.
+
+Process-local ready authority는 manifest에 직렬화하지 않는다. Bridge가 반환한 exact live
+object는 detached physics replay 뒤 true claim을 유지하지만, public standalone manifest
+validator는 `result_ir_ready=true`를 독립적으로 인증하지 않고 fail-closed한다.
+
+Prepublication compatibility decision: 이 ResultIR v2 code/schema는 `origin` tracking
+branch에 아직 게시되지 않은 unpublished candidate다. Generic `result_ir_ready=true`
+의미는 first publication 전에 generic ready false/private exact-object ready로 재정의했다.
+따라서 이전 local v2 ready-true manifest와 현재 ready-false manifest는 양방향 호환되지
+않으며, legacy local persisted v2에 대한 migration 또는 acceptance를 제공하지 않는다.
+실제 persisted artifact가 발견되면 명시적 v3 contract와 migration을 구현·검증할 때까지
+ResultIR publication을 금지한다.
 
 Raw HIP payload hash는 signed-zero canonicalization 이전의 exact export bytes를 결속하며
 live factory와 detached source seal이 검증한다. Generic ResultIR validator가 raw HIP hash를
@@ -95,9 +116,9 @@ Live factory와 상위 family composition은 factory-issued model-case를 weak-k
 수거된 뒤의 CPython `id()` 재사용이나 exact-value clone은 live-case binding을 얻지
 못한다.
 
-## 전송 및 실행 계측 경계
+## 전송 및 실행 직접 호출 계약 경계
 
-| 항목 | ResultIR projection 추가량 |
+| 항목 | retained-source factory direct-call surface 추가량 |
 |---|---:|
 | device operation | `0` |
 | blocking/async D2H | `0` |
@@ -105,9 +126,11 @@ Live factory와 상위 family composition은 factory-issued model-case를 weak-k
 | completion export | `0` |
 | fallback | `0` |
 
-위 표는 ResultIR projection 자체의 추가량이다. Upstream completion export가 이미 수행한
-blocking D2H `3`회를 `0`으로 재분류하지 않으며, 전체 solve setup/teardown 또는
-process-wide ROCm activity가 zero라는 주장도 아니다.
+위 표는 이미 host에 보존된 source bytes를 소비하는 factory의 direct-call surface와
+provenance literal을 고정한 contract다. Transitive helper/runtime 활동을 계측한 값이 아니며
+process-wide operation ledger도 아니다. Upstream completion export가 이미 수행한 blocking
+D2H `3`회를 `0`으로 재분류하지 않고, 전체 solve setup/teardown 또는 process-wide ROCm
+activity가 zero라는 주장도 아니다.
 
 ## 복잡도와 메모리 경계
 
@@ -133,13 +156,14 @@ near-linear scaling, latency, speedup 증거가 아니다.
 
 - nonconverged/failed HIP terminal 결과의 성공 ResultIR 발행
 - fixed package 10-slot의 10/10 `result_ir_ready=true` 승격
-- 3개 intentional `max_iterations` case의 solution-ready ResultIR 또는 DiagnosticIR
-- current-snapshot actual local 7-ready/3-nonconverged disposition gate
-- token-hardened current-source actual local single-case gate
+- 이 v0.2.43 ResultIR bridge 자체에서 3개 intentional `max_iterations` case의
+  solution-ready ResultIR 또는 DiagnosticIR 발행
 - actual external `gfx1100` ResultIR
 - process-wide activity 또는 broad iteration-host-copy-zero
+- transitive helper/runtime operation 계측 또는 factory 밖 process-wide zero
 - GPU-side reaction/member-force/energy recovery
 - standalone detached/serialized provenance authenticity
+- hostile same-process private mint/object-identity 공격 저항성
 - signed evidence, promotion eligibility, commercial readiness
 - solver/end-to-end `O(N)` 또는 speedup
 - nonlinear, dynamic, shell, solid, contact 해석 결과
@@ -153,27 +177,36 @@ near-linear scaling, latency, speedup 증거가 아니다.
 - `tests/test_engine_v2_hip_fgmres_result_ir_v2.py`
 - `tests/test_engine_v2_result_ir_v2_public_api.py`
 - `tests/test_engine_v2_hip_fgmres_model_case_parity_hardware_v1.py`
+- `tests/test_engine_v2_capability_matrix.py`
 
-Generic/bridge focused contract `25 passed`, public API `3 passed`, capability matrix
-`8 passed`, final combined suite `44 passed in 27.97s`, model-case downstream authority
-`24 passed in 1.85s`를 확인했다. 첫 actual run은 production global context가 매 검증마다
+Generic contract `16 passed`, bridge contract `13 passed`(합계 `29 passed`), public API
+`3 passed`, capability matrix `9 passed`, model-case downstream authority `24 passed` 및 이
+다섯 파일 combined `65 passed in 29.31s`를 확인했다. 첫 actual run은 production global
+context가 매 검증마다
 fresh outer source-authority wrapper를 반환하는 수명주기를 드러냈다. Wrapper 객체 identity를
 고정값으로 오해한 검증을 제거하고, 봉인된 source snapshot과 retained plan/runtime/buffer
 identity를 계속 재생하도록 수정했다. 이후 required local `gfx1030` gate는 CPU fallback 없이
 `1 passed in 169.10s (0:02:49)`로 통과했다.
 
-이 actual 결과는 비재사용 identity-token 패치 전 source snapshot의 unsigned 비영속
-단일 모델 역사 관찰이다. 현재 token-hardened source의 hardware gate, fixed package 10/10
+위 `169.10s` 결과는 비재사용 identity-token 패치 전 source snapshot의 unsigned 비영속
+단일 모델 역사 관찰이다. Token-hardened current source는 이후 exact 10-slot 통합 gate를
+CPU fallback 없이 `1 passed in 7820.35s (2:10:20)`로 통과했다. 같은 실행에서 converged
+7개 ResultIRV2 bridge를 actual `gfx1030` lineage에 결속하고 context close 뒤 모두 다시
+검증했다. 이 current-source 결과도 unsigned 비영속 관찰이며 fixed package 10/10
 solution-ready, external `gfx1100`, standalone/signed provenance 또는 promotion 증거가 아니다.
 
 ## 다음 단계
 
-1. **역사 실행 완료/current-source 재검증 필요:** 기존 single-case HIP hardware
-   harness에서 동일 solve/export lineage의 ResultIR v2를 actual local `gfx1030`으로
-   검증했지만, 비재사용 identity-token 패치 뒤 current source gate는 다시 실행해야 한다.
+1. **Current-source hardware 완료:** 통합 10-slot harness에서 동일 solve/export lineage의
+   converged 7개 ResultIR v2 bridge를 actual local `gfx1030`으로 검증하고 context close 뒤
+   다시 검증했다.
 2. **완료:** Exact package 10-slot을 7개 converged ResultIRV2와 3개 intentional
    `max_iterations` 비발행 disposition으로 결속했고 solve/export를 중복하지 않았다.
-3. 10/10 solution-ready 검증은 별도의 all-converged fixture registry에서 수행하고,
-   미수렴 partial iterate가 필요하면 solution-ready ResultIRV2와 분리된 DiagnosticIR
-   계약을 먼저 정의한다.
-4. External `gfx1100`과 signed release/hardware evidence는 별도 승격 gate로 유지한다.
+3. **DiagnosticIR 분리는 v0.2.45에서 완료:** 미수렴 partial iterate는
+   solution-ready ResultIRV2와 분리된 additive DiagnosticIR로 보존한다.
+4. **v0.2.47 contract/harness 완료:** 별도 all-converged registry와 exact 10/10
+   ResultIR vertical slice를 구현했다. 기존 7/3 역사적 진실은 바꾸지 않는다. 현재
+   host probe는 `gfx1030` ready이고 fallback false지만 신규 required actual `gfx1030`
+   10/10과 peak RSS는 pending이며 termination-registry의 과거 `5757.94s` 및
+   current-source `7820.35s` 실행을 이 증거로 재사용하지 않는다.
+5. External `gfx1100`과 signed release/hardware evidence는 별도 승격 gate로 유지한다.

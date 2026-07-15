@@ -5,10 +5,10 @@ array.  It builds a sorted CSR symbolic plan first and accumulates each 12 by
 12 element contribution directly into the retained CSR slots in element order
 and local-row-major order.
 
-The element formulas are temporarily shared with the independent v1 CPU
-reference module.  They are private helpers, but using them here keeps one
-numerical convention while v1 remains frozen.  The dependency is explicit in
-``SOURCE_ELEMENT_OPERATOR_VERSION`` and in the numeric snapshot hash.
+Frame/truss formulas and local-frame policy come from the versioned,
+backend-neutral element semantics module.  The historical source operator
+version remains in serialized hashes for byte-for-byte artifact compatibility;
+the separate source semantics version identifies the refactored code boundary.
 """
 
 from __future__ import annotations
@@ -19,19 +19,11 @@ import json
 import math
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any, Mapping
+from typing import Any, Mapping, NoReturn
 
 from jsonschema import Draft202012Validator
 import numpy as np
 
-from structural_analysis.engine_v2.backends.cpu_reference.linear_static import (
-    CPU_REFERENCE_OPERATOR_VERSION,
-    _frame_local_stiffness,
-    _frame_transform,
-    _truss_local_stiffness,
-    _validate_buffer_contract,
-    _validate_element_references,
-)
 from structural_analysis.engine_v2.buffers import (
     BufferDescriptor,
     DOF_ORDER,
@@ -41,6 +33,15 @@ from structural_analysis.engine_v2.buffers import (
     SolverModelBuffers,
     SolverModelBufferError,
     validate_solver_model_buffers,
+)
+from structural_analysis.engine_v2.elements.linear_frame_truss_v1 import (
+    LINEAR_FRAME_TRUSS_ELEMENT_SEMANTICS_VERSION_V1,
+    LINEAR_FRAME_TRUSS_OPERATOR_COMPATIBILITY_VERSION_V1,
+    LinearFrameTrussV1Error,
+    frame_local_stiffness_v1,
+    frame_transform_v1,
+    truss_local_stiffness_v1,
+    validate_linear_frame_truss_references_v1,
 )
 
 from ._canonical import (
@@ -54,7 +55,8 @@ from ._canonical import (
 EXECUTION_PLAN_V2_SCHEMA_VERSION = "structural-analysis-execution-plan.v2"
 EXECUTION_PLAN_V2_CAPABILITY_PROFILE = "phase0_sparse_cpu_direct_linear_static"
 SPARSE_CPU_OPERATOR_VERSION = "engine-v2-cpu-direct-csr-linear-static.v2"
-SOURCE_ELEMENT_OPERATOR_VERSION = CPU_REFERENCE_OPERATOR_VERSION
+SOURCE_ELEMENT_OPERATOR_VERSION = LINEAR_FRAME_TRUSS_OPERATOR_COMPATIBILITY_VERSION_V1
+SOURCE_ELEMENT_SEMANTICS_VERSION = LINEAR_FRAME_TRUSS_ELEMENT_SEMANTICS_VERSION_V1
 
 _DOFS_PER_NODE = len(DOF_ORDER)
 _ELEMENT_DOF_COUNT = 2 * _DOFS_PER_NODE
@@ -757,7 +759,6 @@ def _validate_supported_buffers(buffers: SolverModelBuffers) -> None:
         for descriptor in buffers.descriptors
     ):
         _fail("execution_plan_v2_source_buffer_invalid", "/input_binding")
-    _validate_buffer_contract(buffers)
     offsets = buffers.array("element_offsets_m")
     releases = buffers.array("element_release_mask")
     prescribed = buffers.array("prescribed_values_si")
@@ -780,18 +781,21 @@ def _validate_supported_buffers(buffers: SolverModelBuffers) -> None:
             "ExecutionPlan v2 supports zero prescribed displacements only.",
         )
 
-    _validate_element_references(
-        coordinates=buffers.array("node_coordinates_m"),
-        connectivity=buffers.array("element_connectivity"),
-        element_types=buffers.array("element_type"),
-        formulations=buffers.array("element_formulation_code"),
-        material_indices=buffers.array("element_material_index"),
-        section_indices=buffers.array("element_section_index"),
-        material_laws=buffers.array("material_law_code"),
-        materials=buffers.array("material_properties_si"),
-        section_families=buffers.array("section_family_code"),
-        sections=buffers.array("section_properties_si"),
-    )
+    try:
+        validate_linear_frame_truss_references_v1(
+            coordinates=buffers.array("node_coordinates_m"),
+            connectivity=buffers.array("element_connectivity"),
+            element_types=buffers.array("element_type"),
+            formulations=buffers.array("element_formulation_code"),
+            material_indices=buffers.array("element_material_index"),
+            section_indices=buffers.array("element_section_index"),
+            material_laws=buffers.array("material_law_code"),
+            materials=buffers.array("material_properties_si"),
+            section_families=buffers.array("section_family_code"),
+            sections=buffers.array("section_properties_si"),
+        )
+    except LinearFrameTrussV1Error as exc:
+        _raise_element_semantics_error(exc)
 
 
 def _detached_source_snapshot(buffers: SolverModelBuffers) -> SolverModelBuffers:
@@ -871,11 +875,14 @@ def _compile_element_numeric(
     for element_index in range(element_count):
         node_i = int(connectivity[element_index, 0])
         node_j = int(connectivity[element_index, 1])
-        transform, length = _frame_transform(
-            coordinates[node_i],
-            coordinates[node_j],
-            float(rolls[element_index]),
-        )
+        try:
+            transform, length = frame_transform_v1(
+                coordinates[node_i],
+                coordinates[node_j],
+                float(rolls[element_index]),
+            )
+        except LinearFrameTrussV1Error as exc:
+            _raise_element_semantics_error(exc, element_index=element_index)
         material = materials[int(material_indices[element_index])]
         section = sections[int(section_indices[element_index])]
         element_type = int(element_types[element_index])
@@ -887,7 +894,10 @@ def _compile_element_numeric(
                     f"/elements/{element_index}/formulation",
                     "Frame element requires euler_bernoulli_3d.",
                 )
-            stiffness = _frame_local_stiffness(material, section, length)
+            try:
+                stiffness = frame_local_stiffness_v1(material, section, length)
+            except LinearFrameTrussV1Error as exc:  # pragma: no cover - preflight
+                _raise_element_semantics_error(exc, element_index=element_index)
         elif element_type == ELEMENT_TYPE_CODES["truss_3d"]:
             if formulation != ELEMENT_FORMULATION_CODES["linear_truss_3d"]:
                 _raise(
@@ -895,7 +905,10 @@ def _compile_element_numeric(
                     f"/elements/{element_index}/formulation",
                     "Truss element requires linear_truss_3d.",
                 )
-            stiffness = _truss_local_stiffness(material, section, length)
+            try:
+                stiffness = truss_local_stiffness_v1(material, section, length)
+            except LinearFrameTrussV1Error as exc:  # pragma: no cover - preflight
+                _raise_element_semantics_error(exc, element_index=element_index)
         else:  # pragma: no cover - validated code-table invariant
             _raise(
                 "execution_plan_v2_element_type_unsupported",
@@ -914,6 +927,35 @@ def _compile_element_numeric(
         immutable_array(_normalize_float_array(transforms), dtype="<f8"),
         immutable_array(_normalize_float_array(local_stiffness), dtype="<f8"),
     )
+
+
+def _raise_element_semantics_error(
+    exc: LinearFrameTrussV1Error,
+    *,
+    element_index: int | None = None,
+) -> NoReturn:
+    code = {
+        "linear_frame_truss_formulation_not_supported": (
+            "execution_plan_v2_formulation_unsupported"
+        ),
+        "linear_frame_truss_element_type_not_supported": (
+            "execution_plan_v2_element_type_unsupported"
+        ),
+    }.get(exc.code, "execution_plan_v2_element_semantics_invalid")
+    path = exc.path
+    if element_index is not None and path in {
+        "/geometry",
+        "/start_m",
+        "/end_m",
+        "/roll_rad",
+        "/length_m",
+    }:
+        path = f"/elements/{element_index}{path}"
+    raise ExecutionPlanV2Error(
+        code,
+        path,
+        f"{exc.code}: {exc.message}",
+    ) from exc
 
 
 def _compile_symbolic_pattern(

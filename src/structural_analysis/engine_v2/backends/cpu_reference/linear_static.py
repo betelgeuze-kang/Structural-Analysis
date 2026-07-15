@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 import math
-from typing import Literal
+from typing import Literal, NoReturn
 
 import numpy as np
 
@@ -23,8 +23,16 @@ from structural_analysis.engine_v2.buffers import (
     _mapping_hash,
     _numeric_buffer_hash,
 )
+from structural_analysis.engine_v2.elements.linear_frame_truss_v1 import (
+    LINEAR_FRAME_TRUSS_OPERATOR_COMPATIBILITY_VERSION_V1,
+    LinearFrameTrussV1Error,
+    frame_local_stiffness_v1,
+    frame_transform_v1,
+    truss_local_stiffness_v1,
+    validate_linear_frame_truss_references_v1,
+)
 
-CPU_REFERENCE_OPERATOR_VERSION = "engine-v2-cpu-reference-linear-static.v1"
+CPU_REFERENCE_OPERATOR_VERSION = LINEAR_FRAME_TRUSS_OPERATOR_COMPATIBILITY_VERSION_V1
 _DOF_PER_NODE = len(DOF_ORDER)
 _ELEMENT_DOF_COUNT = 12
 _REQUIRED_BUFFER_NAMES = frozenset(
@@ -78,6 +86,46 @@ class CPUReferenceError(RuntimeError):
         self.code = code
         self.message = message
         super().__init__(f"{code}: {message}")
+
+
+_SHARED_ELEMENT_ERROR_TO_CPU_REFERENCE = {
+    "linear_frame_truss_input_shape_invalid": "cpu_reference_buffer_shape_mismatch",
+    "linear_frame_truss_input_dtype_invalid": "cpu_reference_buffer_dtype_mismatch",
+    "linear_frame_truss_input_non_finite": "cpu_reference_buffer_non_finite",
+    "linear_frame_truss_zero_length_element": "cpu_reference_zero_length_element",
+    "linear_frame_truss_local_frame_invalid": "cpu_reference_local_frame_invalid",
+    "linear_frame_truss_local_frame_left_handed": (
+        "cpu_reference_local_frame_left_handed"
+    ),
+    "linear_frame_truss_connectivity_out_of_range": (
+        "cpu_reference_connectivity_out_of_range"
+    ),
+    "linear_frame_truss_connectivity_invalid": "cpu_reference_connectivity_invalid",
+    "linear_frame_truss_material_index_out_of_range": (
+        "cpu_reference_material_index_out_of_range"
+    ),
+    "linear_frame_truss_section_index_out_of_range": (
+        "cpu_reference_section_index_out_of_range"
+    ),
+    "linear_frame_truss_material_law_not_supported": (
+        "cpu_reference_material_law_not_supported"
+    ),
+    "linear_frame_truss_material_properties_invalid": (
+        "cpu_reference_material_properties_invalid"
+    ),
+    "linear_frame_truss_formulation_not_supported": (
+        "cpu_reference_formulation_not_supported"
+    ),
+    "linear_frame_truss_section_family_mismatch": (
+        "cpu_reference_section_family_mismatch"
+    ),
+    "linear_frame_truss_section_properties_invalid": (
+        "cpu_reference_section_properties_invalid"
+    ),
+    "linear_frame_truss_element_type_not_supported": (
+        "cpu_reference_element_type_not_supported"
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -143,7 +191,9 @@ class LinearStaticResult:
         }
 
 
-def assemble_linear_static_operator(buffers: SolverModelBuffers) -> LinearStaticOperator:
+def assemble_linear_static_operator(
+    buffers: SolverModelBuffers,
+) -> LinearStaticOperator:
     _validate_buffer_contract(buffers)
     coordinates = buffers.array("node_coordinates_m")
     connectivity = buffers.array("element_connectivity")
@@ -246,12 +296,17 @@ def assemble_linear_static_operator(buffers: SolverModelBuffers) -> LinearStatic
         )
 
     load_vector = np.asarray(loads, dtype="<f8").reshape(-1)
-    constrained_dofs = tuple(int(value) for value in np.flatnonzero(support_mask.reshape(-1)))
+    constrained_dofs = tuple(
+        int(value) for value in np.flatnonzero(support_mask.reshape(-1))
+    )
     constrained_set = set(constrained_dofs)
-    free_dofs = tuple(index for index in range(dof_count) if index not in constrained_set)
+    free_dofs = tuple(
+        index for index in range(dof_count) if index not in constrained_set
+    )
     if not constrained_dofs:
         raise CPUReferenceError(
-            "cpu_reference_constraints_missing", "At least one constrained DOF is required."
+            "cpu_reference_constraints_missing",
+            "At least one constrained DOF is required.",
         )
     if not free_dofs:
         raise CPUReferenceError(
@@ -261,7 +316,8 @@ def assemble_linear_static_operator(buffers: SolverModelBuffers) -> LinearStatic
     antisymmetric_linf = float(np.max(np.abs(stiffness - stiffness.T)))
     if antisymmetric_linf > stiffness_scale * 1.0e-12:
         raise CPUReferenceError(
-            "cpu_reference_stiffness_not_symmetric", "Assembled stiffness is not symmetric."
+            "cpu_reference_stiffness_not_symmetric",
+            "Assembled stiffness is not symmetric.",
         )
     stiffness = 0.5 * (stiffness + stiffness.T)
 
@@ -350,7 +406,8 @@ def solve_linear_static_operator(
 
     if not np.all(np.isfinite(displacement)):
         raise CPUReferenceError(
-            "cpu_reference_non_finite_solution", "Linear solve returned NaN or Infinity."
+            "cpu_reference_non_finite_solution",
+            "Linear solve returned NaN or Infinity.",
         )
 
     residual = operator.residual(displacement)
@@ -367,14 +424,18 @@ def solve_linear_static_operator(
     )
     element_energy = np.zeros(len(operator.element_operators), dtype="<f8")
     for index, element in enumerate(operator.element_operators):
-        global_displacement = displacement[np.asarray(element.global_dofs, dtype=np.int64)]
+        global_displacement = displacement[
+            np.asarray(element.global_dofs, dtype=np.int64)
+        ]
         local_displacement = element.transform_global_to_local @ global_displacement
         local_force = element.stiffness_local @ local_displacement
         element_forces[index] = local_force.reshape(2, _DOF_PER_NODE)
         element_energy[index] = 0.5 * float(local_displacement @ local_force)
 
     total_energy = float(np.sum(element_energy))
-    immutable_displacement = _immutable_array(displacement.reshape(node_count, _DOF_PER_NODE))
+    immutable_displacement = _immutable_array(
+        displacement.reshape(node_count, _DOF_PER_NODE)
+    )
     immutable_reactions = _immutable_array(reactions.reshape(node_count, _DOF_PER_NODE))
     immutable_residual = _immutable_array(residual.reshape(node_count, _DOF_PER_NODE))
     immutable_element_forces = _immutable_array(element_forces)
@@ -469,7 +530,10 @@ def _validate_linear_static_operator(
         or not isinstance(free, tuple)
         or not constrained
         or not free
-        or any(isinstance(value, bool) or not isinstance(value, int) for value in constrained + free)
+        or any(
+            isinstance(value, bool) or not isinstance(value, int)
+            for value in constrained + free
+        )
         or any(left >= right for left, right in zip(constrained, constrained[1:]))
         or any(left >= right for left, right in zip(free, free[1:]))
         or sorted(constrained + free) != list(range(dof_count))
@@ -529,7 +593,9 @@ def _validate_linear_static_operator(
                 f"Element operator {element_index} transform is not orthonormal.",
             )
         global_stiffness = transform.T @ local_stiffness @ transform
-        reconstructed[np.ix_(element.global_dofs, element.global_dofs)] += global_stiffness
+        reconstructed[np.ix_(element.global_dofs, element.global_dofs)] += (
+            global_stiffness
+        )
     scale = max(1.0, float(np.max(np.abs(stiffness))))
     if not np.allclose(reconstructed, stiffness, rtol=5.0e-13, atol=5.0e-13 * scale):
         raise CPUReferenceError(
@@ -552,92 +618,28 @@ def _validate_linear_static_operator(
 def _frame_local_stiffness(
     material: np.ndarray, section: np.ndarray, length: float
 ) -> np.ndarray:
-    elastic_modulus = float(material[0])
-    poisson_ratio = float(material[1])
-    area, iy, iz, torsion, _, _ = (float(value) for value in section)
-    shear_modulus = elastic_modulus / (2.0 * (1.0 + poisson_ratio))
-    stiffness = np.zeros((_ELEMENT_DOF_COUNT, _ELEMENT_DOF_COUNT), dtype="<f8")
-
-    _add_pair(stiffness, 0, 6, elastic_modulus * area / length)
-    _add_pair(stiffness, 3, 9, shear_modulus * torsion / length)
-    _add_bending_block(stiffness, (1, 5, 7, 11), elastic_modulus * iz, length, 1.0)
-    _add_bending_block(stiffness, (2, 4, 8, 10), elastic_modulus * iy, length, -1.0)
-    return stiffness
+    try:
+        return frame_local_stiffness_v1(material, section, length)
+    except LinearFrameTrussV1Error as exc:  # pragma: no cover - buffer preflight
+        _raise_cpu_reference_element_error(exc)
 
 
 def _truss_local_stiffness(
     material: np.ndarray, section: np.ndarray, length: float
 ) -> np.ndarray:
-    stiffness = np.zeros((_ELEMENT_DOF_COUNT, _ELEMENT_DOF_COUNT), dtype="<f8")
-    _add_pair(stiffness, 0, 6, float(material[0]) * float(section[0]) / length)
-    return stiffness
-
-
-def _add_pair(matrix: np.ndarray, start: int, end: int, value: float) -> None:
-    matrix[start, start] += value
-    matrix[start, end] -= value
-    matrix[end, start] -= value
-    matrix[end, end] += value
-
-
-def _add_bending_block(
-    matrix: np.ndarray,
-    dofs: tuple[int, int, int, int],
-    flexural_rigidity: float,
-    length: float,
-    rotation_sign: float,
-) -> None:
-    l2 = length * length
-    base = (flexural_rigidity / (length**3)) * np.array(
-        [
-            [12.0, 6.0 * length, -12.0, 6.0 * length],
-            [6.0 * length, 4.0 * l2, -6.0 * length, 2.0 * l2],
-            [-12.0, -6.0 * length, 12.0, -6.0 * length],
-            [6.0 * length, 2.0 * l2, -6.0 * length, 4.0 * l2],
-        ],
-        dtype="<f8",
-    )
-    if rotation_sign < 0.0:
-        sign = np.diag([1.0, -1.0, 1.0, -1.0])
-        base = sign @ base @ sign
-    matrix[np.ix_(dofs, dofs)] += base
+    try:
+        return truss_local_stiffness_v1(material, section, length)
+    except LinearFrameTrussV1Error as exc:  # pragma: no cover - buffer preflight
+        _raise_cpu_reference_element_error(exc)
 
 
 def _frame_transform(
     start: np.ndarray, end: np.ndarray, roll_rad: float
 ) -> tuple[np.ndarray, float]:
-    delta = np.asarray(end, dtype=float) - np.asarray(start, dtype=float)
-    length = float(np.linalg.norm(delta))
-    if not math.isfinite(length) or length <= 1.0e-12:
-        raise CPUReferenceError(
-            "cpu_reference_zero_length_element",
-            "Element length must exceed 1e-12 m.",
-        )
-    local_x = delta / length
-    reference = np.array([0.0, 0.0, 1.0], dtype=float)
-    if abs(float(np.dot(local_x, reference))) > 0.9:
-        reference = np.array([0.0, 1.0, 0.0], dtype=float)
-    local_y_zero = np.cross(reference, local_x)
-    local_y_zero /= np.linalg.norm(local_y_zero)
-    local_z_zero = np.cross(local_x, local_y_zero)
-    cosine = math.cos(roll_rad)
-    sine = math.sin(roll_rad)
-    local_y = cosine * local_y_zero + sine * local_z_zero
-    local_z = -sine * local_y_zero + cosine * local_z_zero
-    rotation = np.vstack((local_x, local_y, local_z))
-    if not np.allclose(rotation @ rotation.T, np.eye(3), rtol=0.0, atol=1.0e-12):
-        raise CPUReferenceError(
-            "cpu_reference_local_frame_invalid", "Element local frame is not orthonormal."
-        )
-    if float(np.linalg.det(rotation)) <= 0.0:
-        raise CPUReferenceError(
-            "cpu_reference_local_frame_left_handed", "Element local frame must be right-handed."
-        )
-    transform = np.zeros((_ELEMENT_DOF_COUNT, _ELEMENT_DOF_COUNT), dtype="<f8")
-    for block in range(4):
-        offset = block * 3
-        transform[offset : offset + 3, offset : offset + 3] = rotation
-    return transform, length
+    try:
+        return frame_transform_v1(start, end, roll_rad)
+    except LinearFrameTrussV1Error as exc:
+        _raise_cpu_reference_element_error(exc)
 
 
 def _validate_buffer_contract(buffers: SolverModelBuffers) -> None:
@@ -776,7 +778,9 @@ def _validate_buffer_contract(buffers: SolverModelBuffers) -> None:
             "cpu_reference_code_tables_invalid",
             "SolverModelBuffers code tables do not match the CPU reference ABI.",
         )
-    expected_numeric_hash = _numeric_buffer_hash(buffers.descriptors, buffers.code_tables)
+    expected_numeric_hash = _numeric_buffer_hash(
+        buffers.descriptors, buffers.code_tables
+    )
     if buffers.numeric_buffer_hash != expected_numeric_hash:
         raise CPUReferenceError(
             "cpu_reference_numeric_buffer_hash_mismatch",
@@ -797,7 +801,9 @@ def _validate_buffer_contract(buffers: SolverModelBuffers) -> None:
             "SolverModelBuffers entity mapping has missing or unexpected families.",
         )
     for family, ids in buffers.entity_ids.items():
-        if not isinstance(ids, tuple) or any(not isinstance(value, str) for value in ids):
+        if not isinstance(ids, tuple) or any(
+            not isinstance(value, str) for value in ids
+        ):
             raise CPUReferenceError(
                 "cpu_reference_entity_mapping_invalid",
                 f"Entity family {family} must contain a tuple of string IDs.",
@@ -856,98 +862,29 @@ def _validate_element_references(
     section_families: np.ndarray,
     sections: np.ndarray,
 ) -> None:
-    node_count = coordinates.shape[0]
-    material_count = materials.shape[0]
-    section_count = sections.shape[0]
-    supported_material_law = MATERIAL_LAW_CODES["linear_elastic_isotropic"]
-    frame_type = ELEMENT_TYPE_CODES["frame_3d"]
-    truss_type = ELEMENT_TYPE_CODES["truss_3d"]
-    frame_family = SECTION_FAMILY_CODES["frame_3d"]
-    truss_family = SECTION_FAMILY_CODES["truss_3d"]
-
-    for element_index in range(connectivity.shape[0]):
-        node_i = int(connectivity[element_index, 0])
-        node_j = int(connectivity[element_index, 1])
-        if not (0 <= node_i < node_count and 0 <= node_j < node_count):
-            raise CPUReferenceError(
-                "cpu_reference_connectivity_out_of_range",
-                f"Element {element_index} references a node outside [0, {node_count}).",
-            )
-        if node_i == node_j:
-            raise CPUReferenceError(
-                "cpu_reference_connectivity_invalid",
-                f"Element {element_index} must connect two distinct nodes.",
-            )
-        material_index = int(material_indices[element_index])
-        section_index = int(section_indices[element_index])
-        if not 0 <= material_index < material_count:
-            raise CPUReferenceError(
-                "cpu_reference_material_index_out_of_range",
-                f"Element {element_index} material index {material_index} is out of range.",
-            )
-        if not 0 <= section_index < section_count:
-            raise CPUReferenceError(
-                "cpu_reference_section_index_out_of_range",
-                f"Element {element_index} section index {section_index} is out of range.",
-            )
-        material_law = int(material_laws[material_index])
-        if material_law != supported_material_law:
-            raise CPUReferenceError(
-                "cpu_reference_material_law_not_supported",
-                f"Element {element_index} references unsupported material law code {material_law}.",
-            )
-        elastic_modulus, poisson_ratio, density = (
-            float(value) for value in materials[material_index]
+    try:
+        validate_linear_frame_truss_references_v1(
+            coordinates=coordinates,
+            connectivity=connectivity,
+            element_types=element_types,
+            formulations=formulations,
+            material_indices=material_indices,
+            section_indices=section_indices,
+            material_laws=material_laws,
+            materials=materials,
+            section_families=section_families,
+            sections=sections,
         )
-        if elastic_modulus <= 0.0 or not -1.0 < poisson_ratio < 0.5 or density < 0.0:
-            raise CPUReferenceError(
-                "cpu_reference_material_properties_invalid",
-                f"Element {element_index} references invalid isotropic material properties.",
-            )
+    except LinearFrameTrussV1Error as exc:
+        _raise_cpu_reference_element_error(exc)
 
-        element_type = int(element_types[element_index])
-        formulation = int(formulations[element_index])
-        section_family = int(section_families[section_index])
-        section = sections[section_index]
-        if element_type == frame_type:
-            if formulation != ELEMENT_FORMULATION_CODES["euler_bernoulli_3d"]:
-                raise CPUReferenceError(
-                    "cpu_reference_formulation_not_supported",
-                    f"Unsupported frame formulation code {formulation}.",
-                )
-            if section_family != frame_family:
-                raise CPUReferenceError(
-                    "cpu_reference_section_family_mismatch",
-                    f"Frame element {element_index} requires section family code {frame_family}, "
-                    f"got {section_family}.",
-                )
-            if np.any(section <= 0.0):
-                raise CPUReferenceError(
-                    "cpu_reference_section_properties_invalid",
-                    f"Frame element {element_index} requires positive section properties.",
-                )
-        elif element_type == truss_type:
-            if formulation != ELEMENT_FORMULATION_CODES["linear_truss_3d"]:
-                raise CPUReferenceError(
-                    "cpu_reference_formulation_not_supported",
-                    f"Unsupported truss formulation code {formulation}.",
-                )
-            if section_family != truss_family:
-                raise CPUReferenceError(
-                    "cpu_reference_section_family_mismatch",
-                    f"Truss element {element_index} requires section family code {truss_family}, "
-                    f"got {section_family}.",
-                )
-            if float(section[0]) <= 0.0 or np.any(section[1:] != 0.0):
-                raise CPUReferenceError(
-                    "cpu_reference_section_properties_invalid",
-                    f"Truss element {element_index} requires positive area and zero unused columns.",
-                )
-        else:
-            raise CPUReferenceError(
-                "cpu_reference_element_type_not_supported",
-                f"Unsupported element type code {element_type}.",
-            )
+
+def _raise_cpu_reference_element_error(exc: LinearFrameTrussV1Error) -> NoReturn:
+    code = _SHARED_ELEMENT_ERROR_TO_CPU_REFERENCE.get(
+        exc.code,
+        "cpu_reference_element_semantics_invalid",
+    )
+    raise CPUReferenceError(code, exc.message) from exc
 
 
 def _vector(value: np.ndarray, size: int, label: str) -> np.ndarray:
@@ -979,10 +916,14 @@ def _operator_hash(
     for array in (stiffness, load):
         digest.update(b"\0")
         digest.update(array.dtype.str.encode("ascii"))
-        digest.update(json.dumps(list(array.shape), separators=(",", ":")).encode("ascii"))
+        digest.update(
+            json.dumps(list(array.shape), separators=(",", ":")).encode("ascii")
+        )
         digest.update(memoryview(array).cast("B"))
     digest.update(b"\0")
-    digest.update(json.dumps(list(constrained_dofs), separators=(",", ":")).encode("ascii"))
+    digest.update(
+        json.dumps(list(constrained_dofs), separators=(",", ":")).encode("ascii")
+    )
     return f"sha256:{digest.hexdigest()}"
 
 

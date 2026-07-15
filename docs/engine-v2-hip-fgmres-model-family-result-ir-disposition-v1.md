@@ -101,9 +101,8 @@ CPU reference replay 0을 뜻하지 않는다. 이 경계는
 다음은 계속 false 또는 pending이다.
 
 - exact package 10/10 ResultIRV2 또는 all-ten solution-ready
-- 미수렴 partial iterate의 DiagnosticIR
+- 이 v0.2.44 receipt 자체에 미수렴 partial iterate DiagnosticIR 포함
 - 별도 all-converged fixture registry
-- actual local `gfx1030` 10-slot disposition hardware gate
 - actual external `gfx1100`
 - GPU-side reaction/member-force/energy recovery
 - process-wide activity 또는 broad iteration-host-copy-zero
@@ -124,17 +123,25 @@ bridge/aggregate issuance transplant, serially identical cross-run splice, sourc
 schema/hash/claim, context close 뒤 검증 및 aggregate 연산 금지를 포함해
 focused `23 passed`를 통과했다. Identity-token model-case/ResultIR, disposition,
 capability 및 공개 API 최종 통합 검증은 `91 passed in 116.59s`를 통과했고,
-capability/FGMRES-public/ResultIRV2-public 부분 집합은 `19 passed`다. Actual aggregate hardware
-harness는 `1 test collected` 상태를 확인했다. 이번 v0.2.44 current-source actual local
-`gfx1030` 10-slot disposition
-gate는 실행하지 않았으며, 따라서 hardware claim은 계속 pending이다.
+capability/FGMRES-public/ResultIRV2-public 부분 집합은 `19 passed`다. Current-source actual
+local `gfx1030` 통합 gate는 CPU fallback 없이 `1 passed in 7820.35s (2:10:20)`로
+통과했다. 이 한 실행은 v0.2.42 exact 10-slot audited totals, v0.2.43 converged 7개
+ResultIRV2 bridge, v0.2.44 canonical `7 ready_result_ir_v2 + 3
+not_issued_nonconverged` disposition과 context close 뒤 detached validation을 함께
+확인했다. 이 결과는 unsigned 비영속 작업 세션 관찰이며 10/10 ResultIRV2 ready,
+standalone/signed provenance 또는 promotion 증거가 아니다.
 
 ## 다음 단계
 
-1. Actual local `gfx1030` 10-slot harness에서 기존 solve/export를 재사용해 수렴 7건의
-   bridge만 발행하고, 7/3 aggregate를 context close 뒤 다시 검증한다.
-2. 종료·failure 의미론을 검증하는 현 registry v1은 유지하고, 제품의 10/10
-   solution-ready 검증은 별도 all-converged registry에서 수행한다.
-3. Nonconverged partial iterate가 UI·재시작·진단에 필요하면 ResultIRV2를 완화하지 않고
-   `solution_ready=false`인 별도 DiagnosticIR 계약을 정의한다.
+1. **Current-source hardware 완료:** actual local `gfx1030` 10-slot harness에서 기존
+   solve/export를 재사용해 수렴 7건의 bridge만 발행하고, 7/3 aggregate를 context close
+   뒤 다시 검증했다.
+2. **v0.2.47 contract/harness 완료:** 종료·failure 의미론을 검증하는 현 registry v1과
+   canonical 7-ready/3-not-issued disposition을 유지한 채 별도 all-converged registry와
+   exact 10/10 ResultIR vertical slice를 구현했다. 현재 host probe는 `gfx1030` ready이고
+   fallback false지만 신규 required actual `gfx1030` 10/10과 peak RSS는 pending이며 과거
+   `5757.94s` 및 current-source `7820.35s` termination-registry 실행을 재사용하지 않는다.
+3. **v0.2.45 additive companion 완료:** ResultIRV2를 완화하지 않고 nonconverged
+   partial iterate를 `solution_ready=false`인 별도 DiagnosticIR 계약에 결속했다.
+   UI 소비와 재시작 checkpoint 자격은 여전히 후속 범위다.
 4. External `gfx1100`, signed evidence 및 promotion은 별도 gate로 유지한다.

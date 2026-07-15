@@ -373,7 +373,7 @@
       ],
       "properties": {
         "result_ir_verified": {"const": true},
-        "result_ir_ready": {"const": true},
+        "result_ir_ready": {"type": "boolean"},
         "state_ir_lineage_verified": {"const": true},
         "reaction_recovery_verified": {"const": true},
         "member_force_recovery_verified": {"const": true},

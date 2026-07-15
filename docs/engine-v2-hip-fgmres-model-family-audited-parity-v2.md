@@ -6,9 +6,9 @@
 suite에 대해 다음 세 retained authority를 한 process-local receipt로 결속한다.
 Contract/test-double 구현은 identity-token-hardened current source에서 통과했다.
 비재사용 identity token 패치 전 source snapshot은 actual local `gfx1030` 10-slot
-required hardware gate를 통과했지만 current-source hardware 재실행은 pending이다.
-Historical actual 결과는 비영속 unsigned 관찰이며 standalone provenance나 promotion
-증거가 아니다.
+required hardware gate를 통과했다. Current-source actual local 통합 gate도 CPU fallback
+없이 `1 passed in 7820.35s (2:10:20)`로 통과했다. 두 actual 결과는 비영속 unsigned
+관찰이며 standalone provenance나 promotion 증거가 아니다.
 
 1. model-case CPU/HIP numerical parity를 보유한 family-v2 result
 2. canonical enqueue부터 terminal fence까지 bound-runtime copy attempt가 `0`이고
@@ -26,7 +26,7 @@ entrypoint를 포함하지 않고 이미 retained된 authority의 validator만 �
 ## 단일 실행 경계
 
 기존 `gfx1030` 10-slot hardware test harness를 slot마다 다음 순서가 되도록 확장했고,
-identity-token 패치 전 source snapshot의 actual 통합 실행으로 검증했다.
+identity-token 패치 전 source snapshot과 current source의 actual 통합 실행으로 검증했다.
 
 ```text
 canonical context ready
@@ -45,8 +45,8 @@ terminal fence 직후이면서 completion-export child가 열리기 전에 seal�
 transfer-owned export context/result 객체가 terminal observation과 model-case parity에
 그대로 전달되도록 wiring했다. Harness 구조상 slot당 device recurrence와 completion
 export 호출은 각각 한 번이다. 패치 전 source의 required gate가 이 wiring을 CPU
-fallback 없이 actual local `gfx1030`에서 통과했다. Token-hardened current-source gate는
-아직 실행하지 않았다.
+fallback 없이 actual local `gfx1030`에서 통과했고, token-hardened current-source gate도
+동일 wiring과 exact 합계를 통과했다.
 
 ## 결속 계약
 
@@ -153,8 +153,16 @@ unknown property, factory exact direct-call AST 및 export/seal 호출 금지를
   - owned memset `80/80/0/0/0`, launch `1,230/1,230/0/0/0`,
     terminal-chain fence `30/30/0/0/0`
 - 이 actual 결과는 패치 전 source의 작업 세션 관찰이며 별도 persistent log, signature
-  또는 standalone hardware provenance receipt가 아니다. Token-hardened current-source
-  gate는 pending이다.
+  또는 standalone hardware provenance receipt가 아니다.
+- token-hardened current-source actual local `gfx1030` 통합 gate:
+  `1 passed in 7820.35s (2:10:20)`, CPU fallback 없음
+  - v0.2.42 exact 10-slot audited totals와 동일한 `10/10`, D2H `30/30/0`,
+    `4,408` bytes, memset `80/80/0/0/0`, launch `1,230/1,230/0/0/0`,
+    fence `30/30/0/0/0`
+  - 같은 실행에서 v0.2.43 converged 7개 ResultIRV2 bridge와 v0.2.44 7-ready/
+    3-not-issued disposition을 만들고 context close 뒤 다시 검증
+  - unsigned 비영속 작업 세션 관찰이며 standalone/signed provenance 또는 promotion
+    증거가 아님
 
 ## 다음 단계
 
@@ -162,6 +170,6 @@ unknown property, factory exact direct-call AST 및 export/seal 호출 금지를
 2. v0.2.43 [HIP FGMRES ResultIR v2](engine-v2-hip-fgmres-result-ir-v2.md)의 contract와
    v0.2.44 7-ready/3-nonconverged disposition은 완료됐다. `1 passed in 169.10s` 단일-case
    actual 기록은 identity-token 패치 전 source의 역사 관찰이다. Token-hardened
-   current-source single-case 및 10-slot aggregate hardware gate는 다시 실행해야 한다.
+   current-source single-case 범위를 포함한 10-slot aggregate hardware gate도 통과했다.
 3. 그 뒤 AI 경로는 dense v1 projection을 승격하지 않고 sparse `ExecutionPlanV2` JVP
    기반 projected-residual shadow를 추가한 뒤 fixed E(3) feature bank를 연결한다.

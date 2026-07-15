@@ -1,0 +1,444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_model_family_diagnostic_ir_v1.schema.json",
+  "title": "HIP FGMRES exact-package three-slot DiagnosticIR v1 companion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "attestation_id",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "bindings",
+    "observations",
+    "totals",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-model-family-diagnostic-ir.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_exact_package_gfx1030_three_nonconverged_diagnostic_ir_v1"
+    },
+    "status": {
+      "const": "exact_gfx1030_three_nonconverged_diagnostic_ir_v1_verified"
+    },
+    "attestation_id": {"$ref": "#/$defs/hash"},
+    "evidence_scope": {
+      "const": "process_local_registry_bound_unsigned_nonpersistent_nonpromoting"
+    },
+    "actual_backend": {"const": "hip"},
+    "promotion_eligible": {"const": false},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "observations": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/observation"},
+            {
+              "properties": {
+                "slot_id": {
+                  "const": "frame_single_rotated_local_axis_bending"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/observation"},
+            {
+              "properties": {
+                "slot_id": {
+                  "const": "recurrence_later_restart_partial_final_cycle"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/observation"},
+            {
+              "properties": {
+                "slot_id": {
+                  "const": "recurrence_exact_full_final_cycle_guard"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "totals": {"$ref": "#/$defs/totals"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "nonnegative": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_schema_version",
+        "fixture_suite_id",
+        "registry_bytes_sha256",
+        "registry_hash",
+        "source_audited_schema_version",
+        "source_audited_capability_profile",
+        "source_audited_attestation_id",
+        "source_audited_receipt_hash",
+        "source_result_ir_disposition_schema_version",
+        "source_result_ir_disposition_capability_profile",
+        "source_result_ir_disposition_attestation_id",
+        "source_result_ir_disposition_receipt_hash",
+        "diagnostic_ir_schema_version",
+        "diagnostic_ir_capability_profile",
+        "diagnostic_ir_bridge_capability_profile",
+        "required_architecture_base",
+        "required_slot_ids"
+      ],
+      "properties": {
+        "registry_schema_version": {
+          "const": "structural-analysis-hip-fgmres-fixture-registry.v1"
+        },
+        "fixture_suite_id": {
+          "const": "phase0_execution_plan_v2_linear_frame_truss_fgmres_fixed_suite.v2"
+        },
+        "registry_bytes_sha256": {"$ref": "#/$defs/hash"},
+        "registry_hash": {"$ref": "#/$defs/hash"},
+        "source_audited_schema_version": {
+          "const": "structural-analysis-hip-fgmres-model-family-audited-parity.v2"
+        },
+        "source_audited_capability_profile": {
+          "const": "phase0_exact_gfx1030_family_parity_transfer_and_launch_fence_audit_composition"
+        },
+        "source_audited_attestation_id": {"$ref": "#/$defs/hash"},
+        "source_audited_receipt_hash": {"$ref": "#/$defs/hash"},
+        "source_result_ir_disposition_schema_version": {
+          "const": "structural-analysis-hip-fgmres-model-family-result-ir-disposition.v1"
+        },
+        "source_result_ir_disposition_capability_profile": {
+          "const": "phase0_exact_package_gfx1030_ten_slot_result_ir_v2_disposition"
+        },
+        "source_result_ir_disposition_attestation_id": {
+          "$ref": "#/$defs/hash"
+        },
+        "source_result_ir_disposition_receipt_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "diagnostic_ir_schema_version": {
+          "const": "structural-analysis-diagnostic-ir.v1"
+        },
+        "diagnostic_ir_capability_profile": {
+          "const": "hip_source_bound_fgmres_max_iterations_partial_iterate"
+        },
+        "diagnostic_ir_bridge_capability_profile": {
+          "const": "hip_fgmres_retained_max_iterations_diagnostic_ir_v1"
+        },
+        "required_architecture_base": {"const": "gfx1030"},
+        "required_slot_ids": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "prefixItems": [
+            {"const": "frame_single_rotated_local_axis_bending"},
+            {"const": "recurrence_later_restart_partial_final_cycle"},
+            {"const": "recurrence_exact_full_final_cycle_guard"}
+          ],
+          "items": false
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot_id",
+        "disposition",
+        "slot_registration_hash",
+        "case_fingerprint",
+        "logical_case_key",
+        "matrix_cell_id",
+        "audited_triple_binding_hash",
+        "case_id",
+        "case_receipt_hash",
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "cpu_result_hash",
+        "terminal_observation_receipt_hash",
+        "terminal_outcome_hash",
+        "completion_export_context_id",
+        "completion_export_receipt_hash",
+        "completion_export_payload_hash",
+        "device_identity_receipt_hash",
+        "compiled_architecture",
+        "runtime_architecture_base",
+        "device_ordinal",
+        "device_uuid_bytes_hex",
+        "device_pci_bdf",
+        "cpu_status",
+        "cpu_termination_code",
+        "iteration_count",
+        "restart_count",
+        "solver_tolerance_passed",
+        "authoritative_plan_tolerance_passed",
+        "diagnostic_id",
+        "diagnostic_ir_hash",
+        "numerical_diagnostic_hash",
+        "accepted_state_hash",
+        "evaluated_trial_state_hash",
+        "committed_state_hash",
+        "rollback_state_hash",
+        "source_solution_payload_sha256",
+        "exported_free_residual_payload_sha256",
+        "solve_record_payload_sha256",
+        "diagnostic_termination_hash",
+        "diagnostic_array_descriptor_hash",
+        "diagnostic_array_count",
+        "diagnostic_array_byte_count",
+        "detached_raw_export_payload_byte_count",
+        "upstream_completion_export_blocking_d2h_attempt_count",
+        "upstream_completion_export_blocking_d2h_success_count",
+        "upstream_completion_export_blocking_d2h_failure_count",
+        "sparse_residual_replay_count",
+        "additional_device_operation_count",
+        "additional_d2h_operation_count",
+        "additional_solve_count",
+        "additional_export_count",
+        "fallback_count",
+        "state_commit_count",
+        "diagnostic_binding_hash"
+      ],
+      "properties": {
+        "slot_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "disposition": {"const": "ready_diagnostic_ir_v1"},
+        "slot_registration_hash": {"$ref": "#/$defs/hash"},
+        "case_fingerprint": {"$ref": "#/$defs/hash"},
+        "logical_case_key": {"$ref": "#/$defs/hash"},
+        "matrix_cell_id": {"$ref": "#/$defs/hash"},
+        "audited_triple_binding_hash": {"$ref": "#/$defs/hash"},
+        "case_id": {"$ref": "#/$defs/stableId"},
+        "case_receipt_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "cpu_result_hash": {"$ref": "#/$defs/hash"},
+        "terminal_observation_receipt_hash": {"$ref": "#/$defs/hash"},
+        "terminal_outcome_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_context_id": {"$ref": "#/$defs/hash"},
+        "completion_export_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_payload_hash": {"$ref": "#/$defs/hash"},
+        "device_identity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "compiled_architecture": {"const": "gfx1030"},
+        "runtime_architecture_base": {"const": "gfx1030"},
+        "device_ordinal": {"$ref": "#/$defs/nonnegative"},
+        "device_uuid_bytes_hex": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "device_pci_bdf": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\\.[0-7]$"
+        },
+        "cpu_status": {"const": "max_iterations"},
+        "cpu_termination_code": {"const": "max_iterations_exhausted"},
+        "iteration_count": {"$ref": "#/$defs/nonnegative"},
+        "restart_count": {"$ref": "#/$defs/nonnegative"},
+        "solver_tolerance_passed": {"const": false},
+        "authoritative_plan_tolerance_passed": {"const": false},
+        "diagnostic_id": {"$ref": "#/$defs/stableId"},
+        "diagnostic_ir_hash": {"$ref": "#/$defs/hash"},
+        "numerical_diagnostic_hash": {"$ref": "#/$defs/hash"},
+        "accepted_state_hash": {"$ref": "#/$defs/hash"},
+        "evaluated_trial_state_hash": {"$ref": "#/$defs/hash"},
+        "committed_state_hash": {"type": "null"},
+        "rollback_state_hash": {"$ref": "#/$defs/hash"},
+        "source_solution_payload_sha256": {"$ref": "#/$defs/hash"},
+        "exported_free_residual_payload_sha256": {"$ref": "#/$defs/hash"},
+        "solve_record_payload_sha256": {"$ref": "#/$defs/hash"},
+        "diagnostic_termination_hash": {"$ref": "#/$defs/hash"},
+        "diagnostic_array_descriptor_hash": {"$ref": "#/$defs/hash"},
+        "diagnostic_array_count": {"const": 3},
+        "diagnostic_array_byte_count": {"$ref": "#/$defs/nonnegative"},
+        "detached_raw_export_payload_byte_count": {
+          "$ref": "#/$defs/nonnegative"
+        },
+        "upstream_completion_export_blocking_d2h_attempt_count": {"const": 3},
+        "upstream_completion_export_blocking_d2h_success_count": {"const": 3},
+        "upstream_completion_export_blocking_d2h_failure_count": {"const": 0},
+        "sparse_residual_replay_count": {
+          "const": 1,
+          "description": "Logical coverage count: this diagnostic slot has sparse residual replay validation; it is not a physical Python call counter."
+        },
+        "additional_device_operation_count": {"const": 0},
+        "additional_d2h_operation_count": {"const": 0},
+        "additional_solve_count": {"const": 0},
+        "additional_export_count": {"const": 0},
+        "fallback_count": {"const": 0},
+        "state_commit_count": {"const": 0},
+        "diagnostic_binding_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_diagnostic_slot_count",
+        "ready_result_ir_v2_count",
+        "ready_diagnostic_ir_v1_count",
+        "diagnostic_global_dof_count",
+        "diagnostic_element_count",
+        "diagnostic_free_dof_count",
+        "diagnostic_csr_nnz",
+        "diagnostic_array_count",
+        "diagnostic_array_byte_count",
+        "diagnostic_detached_raw_export_payload_byte_count",
+        "upstream_completion_export_blocking_d2h_attempt_count",
+        "upstream_completion_export_blocking_d2h_success_count",
+        "upstream_completion_export_blocking_d2h_failure_count",
+        "upstream_completion_export_byte_count",
+        "sparse_residual_replay_count",
+        "diagnostic_projection_additional_device_operation_count",
+        "diagnostic_projection_additional_d2h_operation_count",
+        "diagnostic_projection_additional_solve_count",
+        "diagnostic_projection_additional_export_count",
+        "diagnostic_projection_fallback_count",
+        "diagnostic_projection_state_commit_count"
+      ],
+      "properties": {
+        "required_diagnostic_slot_count": {"const": 3},
+        "ready_result_ir_v2_count": {"const": 7},
+        "ready_diagnostic_ir_v1_count": {"const": 3},
+        "diagnostic_global_dof_count": {"const": 72},
+        "diagnostic_element_count": {"const": 9},
+        "diagnostic_free_dof_count": {"const": 54},
+        "diagnostic_csr_nnz": {"const": 1080},
+        "diagnostic_array_count": {"const": 9},
+        "diagnostic_array_byte_count": {"const": 1584},
+        "diagnostic_detached_raw_export_payload_byte_count": {"const": 1872},
+        "upstream_completion_export_blocking_d2h_attempt_count": {"const": 9},
+        "upstream_completion_export_blocking_d2h_success_count": {"const": 9},
+        "upstream_completion_export_blocking_d2h_failure_count": {"const": 0},
+        "upstream_completion_export_byte_count": {"const": 1872},
+        "sparse_residual_replay_count": {
+          "const": 3,
+          "description": "Logical coverage count across three slots, not the number of validator plan.residual invocations."
+        },
+        "diagnostic_projection_additional_device_operation_count": {"const": 0},
+        "diagnostic_projection_additional_d2h_operation_count": {"const": 0},
+        "diagnostic_projection_additional_solve_count": {"const": 0},
+        "diagnostic_projection_additional_export_count": {"const": 0},
+        "diagnostic_projection_fallback_count": {"const": 0},
+        "diagnostic_projection_state_commit_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fixed_package_registry_replayed",
+        "audited_ten_slot_authority_replayed_at_issuance",
+        "source_result_ir_disposition_replayed_unchanged",
+        "seven_converged_result_ir_v2_preserved",
+        "three_nonconverged_diagnostic_ir_v1_verified",
+        "exact_three_diagnostic_bridge_identity_bound",
+        "case_plan_terminal_export_device_cross_bound",
+        "partial_iterates_preserved",
+        "evaluated_trial_states_verified",
+        "nonconverged_state_commit_zero",
+        "sparse_residual_replayed_for_each_diagnostic",
+        "descriptor_only_family_manifest",
+        "post_close_detached_value_validation_supported",
+        "composition_factory_reuses_retained_authorities_only",
+        "diagnostic_projection_additional_device_operation_zero",
+        "diagnostic_projection_additional_d2h_zero",
+        "diagnostic_projection_additional_solve_zero",
+        "diagnostic_projection_additional_export_zero",
+        "diagnostic_projection_fallback_zero",
+        "registry_validation_cpu_reference_replay_zero_proven",
+        "exact_ten_slot_result_ir_v2_ready",
+        "all_ten_solution_ready",
+        "all_ten_converged",
+        "diagnostic_ir_is_solution_result",
+        "nonconverged_state_committed",
+        "external_gfx1100_diagnostic_ir_verified",
+        "full_model_family_diagnostic_ir_verified",
+        "process_wide_host_transfer_zero_proven",
+        "iteration_host_copy_zero_proven",
+        "standalone_receipt_provenance_authenticity",
+        "hostile_same_process_mutation_or_interposition_resistance",
+        "signed_evidence",
+        "persistent_external_log_verified",
+        "performance_or_speedup_proven",
+        "end_to_end_o_n_verified",
+        "nonlinear_dynamic_shell_solid_contact_verified",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "fixed_package_registry_replayed": {"const": true},
+        "audited_ten_slot_authority_replayed_at_issuance": {"const": true},
+        "source_result_ir_disposition_replayed_unchanged": {"const": true},
+        "seven_converged_result_ir_v2_preserved": {"const": true},
+        "three_nonconverged_diagnostic_ir_v1_verified": {"const": true},
+        "exact_three_diagnostic_bridge_identity_bound": {"const": true},
+        "case_plan_terminal_export_device_cross_bound": {"const": true},
+        "partial_iterates_preserved": {"const": true},
+        "evaluated_trial_states_verified": {"const": true},
+        "nonconverged_state_commit_zero": {"const": true},
+        "sparse_residual_replayed_for_each_diagnostic": {"const": true},
+        "descriptor_only_family_manifest": {"const": true},
+        "post_close_detached_value_validation_supported": {"const": true},
+        "composition_factory_reuses_retained_authorities_only": {"const": true},
+        "diagnostic_projection_additional_device_operation_zero": {"const": true},
+        "diagnostic_projection_additional_d2h_zero": {"const": true},
+        "diagnostic_projection_additional_solve_zero": {"const": true},
+        "diagnostic_projection_additional_export_zero": {"const": true},
+        "diagnostic_projection_fallback_zero": {"const": true},
+        "registry_validation_cpu_reference_replay_zero_proven": {"const": false},
+        "exact_ten_slot_result_ir_v2_ready": {"const": false},
+        "all_ten_solution_ready": {"const": false},
+        "all_ten_converged": {"const": false},
+        "diagnostic_ir_is_solution_result": {"const": false},
+        "nonconverged_state_committed": {"const": false},
+        "external_gfx1100_diagnostic_ir_verified": {"const": false},
+        "full_model_family_diagnostic_ir_verified": {"const": false},
+        "process_wide_host_transfer_zero_proven": {"const": false},
+        "iteration_host_copy_zero_proven": {"const": false},
+        "standalone_receipt_provenance_authenticity": {"const": false},
+        "hostile_same_process_mutation_or_interposition_resistance": {
+          "const": false
+        },
+        "signed_evidence": {"const": false},
+        "persistent_external_log_verified": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "end_to_end_o_n_verified": {"const": false},
+        "nonlinear_dynamic_shell_solid_contact_verified": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}
