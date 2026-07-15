@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://structural-analysis.local/schemas/hip_fgmres_external_signed_evidence_receipt_v1.schema.json",
-  "title": "Verified external gfx1100 FGMRES signed-evidence receipt v1",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_external_signed_evidence_receipt_v2.schema.json",
+  "title": "Verified external gfx1100 release-identity signed-evidence receipt v2",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -17,6 +17,8 @@
     "run_sequence",
     "challenge_id",
     "release_binding_hash",
+    "release_identity_receipt_schema_version",
+    "release_identity_receipt_hash",
     "trust_registry_hash",
     "fixture_registry_hash",
     "family_receipt_hash",
@@ -30,16 +32,23 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "structural-analysis-hip-fgmres-external-signed-evidence-receipt.v1"
+      "const": "structural-analysis-hip-fgmres-external-signed-evidence-receipt.v2"
     },
     "capability_profile": {
-      "const": "phase0_external_gfx1100_fixed_suite_ed25519_verification"
+      "const": "phase0_external_gfx1100_release_identity_ed25519_verification"
     },
-    "status": {"const": "external_gfx1100_fixed_suite_signed_evidence_verified"},
-    "evidence_scope": {"const": "trusted_runner_signed_raw_numerics_replayed_non_promoting"},
+    "status": {
+      "const": "external_gfx1100_release_identity_signed_evidence_verified"
+    },
+    "evidence_scope": {
+      "const": "trusted_runner_signed_release_identity_hash_raw_numerics_replayed_non_promoting"
+    },
     "envelope_hash": {"$ref": "#/$defs/hash"},
     "signed_payload_sha256": {"$ref": "#/$defs/hash"},
-    "key_id": {"type": "string", "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"},
+    "key_id": {
+      "type": "string",
+      "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
+    },
     "key_epoch": {"type": "integer", "minimum": 1},
     "runner_id": {
       "type": "string",
@@ -48,6 +57,10 @@
     "run_sequence": {"type": "integer", "minimum": 1},
     "challenge_id": {"$ref": "#/$defs/hash"},
     "release_binding_hash": {"$ref": "#/$defs/hash"},
+    "release_identity_receipt_schema_version": {
+      "const": "structural-analysis-hip-fgmres-external-release-identity.v1"
+    },
+    "release_identity_receipt_hash": {"$ref": "#/$defs/hash"},
     "trust_registry_hash": {"$ref": "#/$defs/hash"},
     "fixture_registry_hash": {"$ref": "#/$defs/hash"},
     "family_receipt_hash": {"$ref": "#/$defs/hash"},
@@ -74,8 +87,12 @@
         "canonical_envelope_verified",
         "package_trust_anchor_matched",
         "ed25519_signature_verified",
-        "verifier_challenge_consumed",
+        "verifier_challenge_single_use_reserved",
+        "release_artifacts_freshly_replayed",
         "expected_release_binding_matched",
+        "release_identity_receipt_schema_matched",
+        "release_identity_receipt_hash_matched",
+        "signed_envelope_binds_release_identity_receipt",
         "current_schema_manifest_matched",
         "current_fixture_registry_bound",
         "external_gfx1100_fixed_suite_signed",
@@ -88,6 +105,7 @@
         "same_artifact_two_architecture_verified",
         "external_hardware_independently_observed_by_local_process",
         "hardware_root_attested",
+        "runner_honesty_verified",
         "full_model_family_parity_verified",
         "multiarchitecture_promotion_verified",
         "result_ir_verified",
@@ -101,8 +119,12 @@
         "canonical_envelope_verified": {"const": true},
         "package_trust_anchor_matched": {"const": true},
         "ed25519_signature_verified": {"const": true},
-        "verifier_challenge_consumed": {"const": true},
+        "verifier_challenge_single_use_reserved": {"const": true},
+        "release_artifacts_freshly_replayed": {"const": true},
         "expected_release_binding_matched": {"const": true},
+        "release_identity_receipt_schema_matched": {"const": true},
+        "release_identity_receipt_hash_matched": {"const": true},
+        "signed_envelope_binds_release_identity_receipt": {"const": true},
         "current_schema_manifest_matched": {"const": true},
         "current_fixture_registry_bound": {"const": true},
         "external_gfx1100_fixed_suite_signed": {"const": true},
@@ -115,6 +137,7 @@
         "same_artifact_two_architecture_verified": {"const": false},
         "external_hardware_independently_observed_by_local_process": {"const": false},
         "hardware_root_attested": {"const": false},
+        "runner_honesty_verified": {"const": false},
         "full_model_family_parity_verified": {"const": false},
         "multiarchitecture_promotion_verified": {"const": false},
         "result_ir_verified": {"const": false},

@@ -13,7 +13,9 @@ import numpy as np
 import pytest
 
 from structural_analysis.engine_v2.assembly_backend import (
+    fgmres_external_release_identity_v1 as release_identity_module,
     fgmres_external_signed_evidence_v1 as evidence_module,
+    fgmres_external_signed_evidence_v2 as evidence_v2_module,
     fgmres_model_case_parity_v1 as case_module,
     fgmres_model_family_parity_v2 as family_module,
 )
@@ -1141,6 +1143,20 @@ def test_envelope_parser_maps_excessive_json_nesting_to_stable_extent_error(
     assert caught.value.code == "hip_fgmres_external_envelope_extent_invalid"
 
 
+def test_envelope_parser_applies_depth_limit_to_empty_containers() -> None:
+    accepted_depth = evidence_module._ENVELOPE_MAX_JSON_DEPTH
+    accepted_raw = b"[" * accepted_depth + b"]" * accepted_depth
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as accepted:
+        evidence_module._parse_canonical_envelope(accepted_raw)
+    assert accepted.value.code == "hip_fgmres_external_envelope_root_invalid"
+
+    rejected_depth = accepted_depth + 1
+    rejected_raw = b"[" * rejected_depth + b"]" * rejected_depth
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as rejected:
+        evidence_module._parse_canonical_envelope(rejected_raw)
+    assert rejected.value.code == "hip_fgmres_external_envelope_extent_invalid"
+
+
 def test_envelope_parser_bounds_total_json_nodes() -> None:
     raw = (
         b"["
@@ -1151,6 +1167,18 @@ def test_envelope_parser_bounds_total_json_nodes() -> None:
     with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
         evidence_module._parse_canonical_envelope(raw)
     assert caught.value.code == "hip_fgmres_external_envelope_extent_invalid"
+
+
+def test_envelope_parser_shares_wide_paths_and_bounds_error_text() -> None:
+    long_key = b"k" * 100_000
+    deep_leaf = b"[" * 65 + b"0" + b"]" * 65
+    raw = b'{"' + long_key + b'":[' + b",".join([deep_leaf] * 256) + b"]}"
+    assert len(raw) < evidence_module._ENVELOPE_MAX_BYTES
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
+        evidence_module._parse_canonical_envelope(raw)
+    assert caught.value.code == "hip_fgmres_external_envelope_extent_invalid"
+    assert len(caught.value.path) <= evidence_module._ENVELOPE_MAX_ERROR_PATH_CHARS
+    assert len(str(caught.value)) < 768
 
 
 def test_schema_validation_stops_after_first_error_and_bounds_message(
@@ -1188,3 +1216,676 @@ def test_schema_validation_stops_after_first_error_and_bounds_message(
     assert caught.value.code == "hip_fgmres_external_schema_validation_failed"
     assert caught.value.path == "/envelope/signed_payload/cases"
     assert caught.value.message == "schema keyword maxItems rejected value"
+
+
+def test_schema_validator_internal_failure_maps_to_stable_domain_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class BrokenValidator:
+        @staticmethod
+        def check_schema(schema: dict[str, Any]) -> None:
+            assert schema["type"] == "object"
+
+        def __init__(self, schema: dict[str, Any]) -> None:
+            assert schema["$schema"].endswith("2020-12/schema")
+
+        def iter_errors(self, payload: dict[str, Any]) -> Any:
+            del payload
+            raise RuntimeError("library detail must not escape")
+            yield
+
+    monkeypatch.setattr(evidence_module, "Draft202012Validator", BrokenValidator)
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as caught:
+        evidence_module._validate_json_schema(
+            {},
+            evidence_module._ENVELOPE_SCHEMA_RESOURCE,
+            path="/envelope",
+        )
+    assert caught.value.code == "hip_fgmres_external_schema_invalid"
+    assert caught.value.path == "/envelope"
+    assert caught.value.message == "RuntimeError"
+
+
+def _make_verified_release_v2(
+    material: dict[str, Any],
+    *,
+    identity_label: str = "primary",
+) -> Any:
+    binding = material["release"]
+    draft = release_identity_module.HipFgmresExternalReleaseIdentityReceiptV1(
+        schema_version=(
+            release_identity_module.HIP_FGMRES_EXTERNAL_RELEASE_IDENTITY_SCHEMA_VERSION_V1
+        ),
+        capability_profile=(
+            release_identity_module.HIP_FGMRES_EXTERNAL_RELEASE_IDENTITY_CAPABILITY_PROFILE_V1
+        ),
+        status="external_release_artifacts_independently_verified",
+        evidence_scope=(
+            release_identity_module.HIP_FGMRES_EXTERNAL_RELEASE_IDENTITY_EVIDENCE_SCOPE_V1
+        ),
+        release_binding_hash=binding.binding_hash,
+        wheel_identity_hash=_hash(f"v2-wheel-identity-{identity_label}"),
+        installed_replay_hash=_hash(f"v2-installed-{identity_label}"),
+        source_identity_hash=_hash(f"v2-source-{identity_label}"),
+        dependency_lock_receipt_hash=_hash(f"v2-dependency-{identity_label}"),
+        build_recipe_semantic_hash=_hash(f"v2-recipe-{identity_label}"),
+        wheel_filename=binding.wheel_filename,
+        wheel_byte_count=binding.wheel_byte_count,
+        wheel_sha256=binding.wheel_sha256,
+        wheel_record_sha256=binding.wheel_record_sha256,
+        wheel_member_count=2,
+        installed_verified_member_count=1,
+        installed_extra_file_count=0,
+        installed_script_file_count=0,
+        installed_script_manifest_sha256=_hash(f"v2-scripts-{identity_label}"),
+        source_commit=binding.source_commit,
+        source_tree_sha256=binding.source_tree_sha256,
+        source_tracked_file_count=1,
+        source_bundle_byte_count=1,
+        source_bundle_sha256=binding.source_bundle_sha256,
+        runner_source_file_count=1,
+        runner_source_sha256=binding.runner_source_sha256,
+        build_recipe_sha256=binding.build_recipe_sha256,
+        dependency_lock_sha256=binding.dependency_lock_sha256,
+        dependency_artifact_count=0,
+        dependency_artifact_aggregate_hash=_hash(
+            f"v2-dependency-aggregate-{identity_label}"
+        ),
+        claims=release_identity_module.HipFgmresExternalReleaseIdentityClaimsV1(),
+        promotion_eligible=False,
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    receipt = replace(
+        draft,
+        receipt_hash=canonical_hash(
+            release_identity_module._receipt_payload(draft, include_hash=False)
+        ),
+    )
+    release_identity_module.validate_hip_fgmres_external_release_identity_receipt_v1(
+        receipt
+    )
+    paths = release_identity_module.HipFgmresExternalReleaseArtifactPathsV1(
+        repository_root=f"/synthetic/{identity_label}/repository",
+        artifact_root=f"/synthetic/{identity_label}/artifacts",
+        wheel_filename=binding.wheel_filename,
+        source_bundle_filename="source.tar",
+        runner_source_paths=("runner.py",),
+        build_recipe_path="build-recipe.json",
+        dependency_lock_path="dependency-lock.json",
+        dependency_artifact_root=f"/synthetic/{identity_label}/wheelhouse",
+    )
+    return release_identity_module.HipFgmresExternalVerifiedReleaseV1(
+        paths=paths,
+        release_binding=binding,
+        identity_receipt=receipt,
+        mint=release_identity_module._VERIFIED_RELEASE_MINT,
+    )
+
+
+def _build_envelope_v2(
+    material: dict[str, Any],
+    verified_release: Any,
+    *,
+    mutate: Any = None,
+    challenge_override: Any | None = None,
+) -> tuple[bytes, Any]:
+    challenge = challenge_override
+    if challenge is None:
+        challenge = evidence_v2_module._issue_challenge_with_registry_v2(
+            verified_release=verified_release,
+            key_id="ed25519:external-runner:v1",
+            runner_id="external-runner",
+            run_sequence=1,
+            request_id="request:v2-test-001",
+            campaign_id="campaign:v2-test-001",
+            ttl_seconds=900,
+            registry=material["trust_registry"],
+            now=material["now"],
+        )
+    registry = material["registry"]
+    identity = verified_release.identity_receipt
+    payload = {
+        "payload_schema_version": (
+            evidence_v2_module.HIP_FGMRES_EXTERNAL_SIGNED_PAYLOAD_SCHEMA_VERSION_V2
+        ),
+        "purpose": "hip_fgmres_external_gfx1100_release_identity_attestation",
+        "evidence_scope": (
+            "trusted_runner_signed_release_identity_serialized_lane_non_promoting"
+        ),
+        "challenge": challenge.to_dict(),
+        "release_binding": verified_release.release_binding.to_dict(),
+        "release_identity_receipt_schema_version": identity.schema_version,
+        "release_identity_receipt_hash": identity.receipt_hash,
+        "runner": dict(material["runner"]),
+        "fixture_registry": {
+            "suite_id": HIP_FGMRES_FIXTURE_REGISTRY_SUITE_ID_V1,
+            "registry_bytes_sha256": registry.registry_bytes_sha256,
+            "registry_hash": registry.registry_hash,
+            "registry_receipt_hash": registry.receipt_hash,
+            "ordered_slot_ids": list(HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1),
+        },
+        "family_receipt_v2": material["family"].to_dict(),
+        "cases": [dict(row) for row in material["cases"]],
+        "common_runtime_binding_hash": canonical_hash(
+            evidence_module._runtime_binding_payload(material["runner"])
+        ),
+        "ordered_case_aggregate_hash": _HASH,
+        "claims": {
+            "runner_attests_actual_native_hip_execution": True,
+            "runner_attests_external_gfx1100_fixed_suite": True,
+            "runner_attests_release_identity_receipt_hash": True,
+            "raw_completion_payloads_included": True,
+            "full_model_family_parity_verified": False,
+            "multiarchitecture_promotion_verified": False,
+            "result_ir_verified": False,
+            "iteration_host_copy_zero_verified": False,
+            "speedup_verified": False,
+            "end_to_end_o_n_verified": False,
+            "commercial_ready": False,
+            "promotion_eligible": False,
+        },
+    }
+    _refresh_case_hashes_and_aggregate(payload)
+    if mutate is not None:
+        mutate(payload)
+    root = {
+        "schema_version": (
+            evidence_v2_module.HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_SCHEMA_VERSION_V2
+        ),
+        "capability_profile": (
+            evidence_v2_module.HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_CAPABILITY_PROFILE_V2
+        ),
+        "algorithm": "Ed25519",
+        "key_id": "ed25519:external-runner:v1",
+        "signed_payload_sha256": sha256_prefixed(canonical_json_bytes(payload)),
+        "signed_payload": payload,
+    }
+    message = evidence_v2_module._SIGNATURE_DOMAIN_V2 + canonical_json_bytes(root)
+    root["signature_base64"] = base64.b64encode(
+        material["private_key"].sign(message)
+    ).decode("ascii")
+    root["envelope_hash"] = canonical_hash(root)
+    return canonical_json_bytes(root), challenge
+
+
+def _verify_v2(
+    raw: bytes,
+    challenge: Any,
+    verified_release: Any,
+    material: dict[str, Any],
+) -> Any:
+    return evidence_v2_module._verify_with_authorities_v2(
+        raw,
+        challenge=challenge,
+        verified_release=verified_release,
+        trust_registry=material["trust_registry"],
+        fixture_registry=material["registry"],
+        now=material["now"] + timedelta(seconds=3),
+    )
+
+
+def test_v2_signed_release_identity_hash_happy_path_is_direct_and_non_promoting(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+    monkeypatch.setattr(
+        evidence_module,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY",
+        lambda: evidence_material["trust_registry"],
+    )
+    monkeypatch.setattr(
+        evidence_module,
+        "_FIXTURE_REGISTRY_LOADER_AUTHORITY",
+        lambda: evidence_material["registry"],
+    )
+    monkeypatch.setattr(
+        evidence_v2_module,
+        "_utc_now_v2",
+        lambda: evidence_material["now"] + timedelta(seconds=3),
+    )
+    raw, challenge = _build_envelope_v2(evidence_material, verified_release)
+
+    verified = evidence_v2_module.verify_hip_fgmres_external_signed_evidence_for_verified_release_v2(
+        raw,
+        challenge=challenge,
+        verified_release=verified_release,
+    )
+    receipt = verified.signed_receipt
+
+    assert challenge.consumed
+    assert (
+        type(verified) is evidence_v2_module.HipFgmresExternalVerifiedSignedEvidenceV2
+    )
+    assert verified.identity_receipt is verified_release.identity_receipt
+    assert receipt.release_identity_receipt_hash == (
+        verified_release.identity_receipt.receipt_hash
+    )
+    assert receipt.claims.signed_envelope_binds_release_identity_receipt
+    assert receipt.claims.release_artifacts_freshly_replayed
+    assert not receipt.claims.durable_replay_ledger_verified
+    assert not receipt.claims.hardware_root_attested
+    assert not receipt.claims.promotion_eligible
+    assert not receipt.claims.commercial_ready
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as forged_authority:
+        evidence_v2_module.HipFgmresExternalVerifiedSignedEvidenceV2(
+            identity_receipt=verified_release.identity_receipt,
+            signed_receipt=receipt,
+            mint=object(),
+        )
+    assert forged_authority.value.code == (
+        "hip_fgmres_external_v2_verified_signed_evidence_construction_forbidden"
+    )
+
+
+def test_v2_resigned_identity_hash_mutation_is_rejected_before_consumption(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+    raw, challenge = _build_envelope_v2(
+        evidence_material,
+        verified_release,
+        mutate=lambda payload: payload.__setitem__(
+            "release_identity_receipt_hash", _hash("attacker-selected-identity")
+        ),
+    )
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        _verify_v2(raw, challenge, verified_release, evidence_material)
+
+    assert caught.value.code == "hip_fgmres_external_v2_release_identity_mismatch"
+    assert not challenge.consumed
+
+
+def test_v2_same_binding_different_identity_receipt_substitution_is_rejected(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = _make_verified_release_v2(evidence_material, identity_label="original")
+    substituted = _make_verified_release_v2(
+        evidence_material,
+        identity_label="substituted",
+    )
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+    raw, challenge = _build_envelope_v2(evidence_material, original)
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        _verify_v2(raw, challenge, substituted, evidence_material)
+
+    assert caught.value.code == "hip_fgmres_external_v2_release_identity_mismatch"
+    assert original.release_binding == substituted.release_binding
+    assert original.identity_receipt.receipt_hash != (
+        substituted.identity_receipt.receipt_hash
+    )
+    assert not challenge.consumed
+
+
+def test_v1_and_v2_envelopes_cannot_downgrade_across_verifiers(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+    v1_raw, v1_challenge = _build_envelope(evidence_material)
+    v2_raw, v2_challenge = _build_envelope_v2(evidence_material, verified_release)
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as v1_into_v2:
+        _verify_v2(v1_raw, v2_challenge, verified_release, evidence_material)
+    assert v1_into_v2.value.code == ("hip_fgmres_external_v2_schema_validation_failed")
+
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as v2_into_v1:
+        _verify(v2_raw, v1_challenge, evidence_material)
+    assert v2_into_v1.value.code == "hip_fgmres_external_schema_validation_failed"
+    assert not v1_challenge.consumed
+    assert not v2_challenge.consumed
+
+
+def test_v2_artifact_drift_during_verify_fails_before_challenge_consumption(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    calls = 0
+
+    def replay(value: Any) -> Any:
+        nonlocal calls
+        calls += 1
+        if calls > 2:
+            raise release_identity_module.HipFgmresExternalReleaseIdentityV1Error(
+                "synthetic_artifact_drift",
+                "/artifact",
+            )
+        return value
+
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        replay,
+    )
+    raw, challenge = _build_envelope_v2(evidence_material, verified_release)
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        _verify_v2(raw, challenge, verified_release, evidence_material)
+
+    assert caught.value.code == (
+        "hip_fgmres_external_v2_release_artifact_replay_failed"
+    )
+    assert calls == 3
+    assert not challenge.consumed
+
+
+def test_v2_public_empty_registry_path_fails_closed(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module.issue_hip_fgmres_external_evidence_challenge_for_verified_release_v2(
+            verified_release=verified_release,
+            key_id="ed25519:external-runner:v1",
+            runner_id="external-runner",
+            run_sequence=1,
+            request_id="request:v2-public-empty",
+            campaign_id="campaign:v2-public-empty",
+        )
+
+    assert caught.value.code == "hip_fgmres_external_v2_trust_anchor_not_found"
+
+
+def test_v2_parser_rejects_excessive_depth_with_bounded_error() -> None:
+    raw = b"[" * 65 + b"]" * 65
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module._parse_canonical_envelope_v2(raw)
+
+    assert caught.value.code == "hip_fgmres_external_v2_envelope_extent_invalid"
+    assert (
+        len(caught.value.path) <= evidence_v2_module._ENVELOPE_MAX_ERROR_PATH_CHARS_V2
+    )
+
+
+def test_v2_rejects_signature_created_with_v1_domain_before_consumption(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+    raw, challenge = _build_envelope_v2(evidence_material, verified_release)
+    root = evidence_v2_module._parse_canonical_envelope_v2(raw)
+    root.pop("envelope_hash")
+    message = evidence_module._SIGNATURE_DOMAIN + canonical_json_bytes(
+        evidence_v2_module._signed_content_v2(root)
+    )
+    root["signature_base64"] = base64.b64encode(
+        evidence_material["private_key"].sign(message)
+    ).decode("ascii")
+    root["envelope_hash"] = canonical_hash(root)
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        _verify_v2(
+            canonical_json_bytes(root),
+            challenge,
+            verified_release,
+            evidence_material,
+        )
+
+    assert caught.value.code == "hip_fgmres_external_v2_signature_invalid"
+    assert not challenge.consumed
+
+
+def test_v2_rejects_resigned_false_to_true_claim_before_consumption(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+    raw, challenge = _build_envelope_v2(
+        evidence_material,
+        verified_release,
+        mutate=lambda payload: payload["claims"].__setitem__(
+            "full_model_family_parity_verified",
+            True,
+        ),
+    )
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        _verify_v2(raw, challenge, verified_release, evidence_material)
+
+    assert caught.value.code in {
+        "hip_fgmres_external_v2_schema_validation_failed",
+        "hip_fgmres_external_v2_payload_claims_invalid",
+    }
+    assert not challenge.consumed
+
+
+def test_signed_nested_receipt_parsers_reject_unverified_extra_fields(
+    evidence_material: dict[str, Any],
+) -> None:
+    family_payload = evidence_material["family"].to_dict()
+    family_payload["unverified_assertion"] = True
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as family_error:
+        evidence_module._parse_family_receipt(family_payload)
+    assert family_error.value.code == "hip_fgmres_external_family_receipt_invalid"
+
+    case_payload = dict(evidence_material["cases"][0]["model_case_receipt_v1"])
+    case_payload["unverified_assertion"] = True
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error) as case_error:
+        evidence_module._parse_model_case_receipt(case_payload)
+    assert case_error.value.code == ("hip_fgmres_external_model_case_receipt_invalid")
+
+
+def test_v2_addition_does_not_promote_v1_receipt_claims() -> None:
+    assert not evidence_module.HipFgmresExternalSignedEvidenceClaimsV1().durable_replay_ledger_verified
+    identity_claims = release_identity_module.HipFgmresExternalReleaseIdentityClaimsV1()
+    assert not identity_claims.signed_envelope_binds_release_identity_receipt
+    assert not identity_claims.durable_replay_ledger_verified
+
+
+def _detached_signed_receipt_v1() -> Any:
+    draft = evidence_module.HipFgmresExternalSignedEvidenceReceiptV1(
+        schema_version=(
+            evidence_module.HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCHEMA_VERSION_V1
+        ),
+        capability_profile=(
+            evidence_module.HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_CAPABILITY_PROFILE_V1
+        ),
+        status="external_gfx1100_fixed_suite_signed_evidence_verified",
+        evidence_scope=(
+            evidence_module.HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCOPE_V1
+        ),
+        envelope_hash=_hash("v1-detached-envelope"),
+        signed_payload_sha256=_hash("v1-detached-payload"),
+        key_id="ed25519:external-runner:v1",
+        key_epoch=1,
+        runner_id="external-runner",
+        run_sequence=1,
+        challenge_id=_hash("v1-detached-challenge"),
+        release_binding_hash=_hash("v1-detached-release"),
+        trust_registry_hash=_hash("v1-detached-trust"),
+        fixture_registry_hash=_hash("v1-detached-fixture"),
+        family_receipt_hash=_hash("v1-detached-family"),
+        common_runtime_binding_hash=_hash("v1-detached-runtime"),
+        ordered_case_aggregate_hash=_hash("v1-detached-cases"),
+        verified_slot_count=len(HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1),
+        verified_slot_ids=HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1,
+        claims=evidence_module.HipFgmresExternalSignedEvidenceClaimsV1(),
+        promotion_eligible=False,
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    return replace(
+        draft,
+        receipt_hash=canonical_hash(
+            evidence_module._verification_receipt_payload(
+                draft,
+                include_hash=False,
+            )
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    ("runner_id", "key_id"),
+    [
+        ("external:runner", "ed25519:external-runner:v1"),
+        ("alternate-runner", "ed25519:external-runner:v1"),
+    ],
+)
+def test_v1_detached_signed_receipt_rejects_runner_or_key_relation_forgery(
+    runner_id: str,
+    key_id: str,
+) -> None:
+    valid = _detached_signed_receipt_v1()
+    assert (
+        evidence_module.validate_hip_fgmres_external_signed_evidence_receipt_v1(valid)
+        is valid
+    )
+    receipt = replace(valid, runner_id=runner_id, key_id=key_id)
+    forged = replace(
+        receipt,
+        receipt_hash=canonical_hash(
+            evidence_module._verification_receipt_payload(
+                receipt,
+                include_hash=False,
+            )
+        ),
+    )
+
+    with pytest.raises(HipFgmresExternalSignedEvidenceV1Error):
+        evidence_module.validate_hip_fgmres_external_signed_evidence_receipt_v1(forged)
+
+
+def _detached_signed_receipt_v2() -> Any:
+    draft = evidence_v2_module.HipFgmresExternalSignedEvidenceReceiptV2(
+        schema_version=(
+            evidence_v2_module.HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCHEMA_VERSION_V2
+        ),
+        capability_profile=(
+            evidence_v2_module.HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_CAPABILITY_PROFILE_V2
+        ),
+        status="external_gfx1100_release_identity_signed_evidence_verified",
+        evidence_scope=(
+            evidence_v2_module.HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCOPE_V2
+        ),
+        envelope_hash=_hash("v2-detached-envelope"),
+        signed_payload_sha256=_hash("v2-detached-payload"),
+        key_id="ed25519:external-runner:v1",
+        key_epoch=1,
+        runner_id="external-runner",
+        run_sequence=1,
+        challenge_id=_hash("v2-detached-challenge"),
+        release_binding_hash=_hash("v2-detached-release"),
+        release_identity_receipt_schema_version=(
+            release_identity_module.HIP_FGMRES_EXTERNAL_RELEASE_IDENTITY_SCHEMA_VERSION_V1
+        ),
+        release_identity_receipt_hash=_hash("v2-detached-identity"),
+        trust_registry_hash=_hash("v2-detached-trust"),
+        fixture_registry_hash=_hash("v2-detached-fixture"),
+        family_receipt_hash=_hash("v2-detached-family"),
+        common_runtime_binding_hash=_hash("v2-detached-runtime"),
+        ordered_case_aggregate_hash=_hash("v2-detached-cases"),
+        verified_slot_count=len(HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1),
+        verified_slot_ids=HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1,
+        claims=evidence_v2_module.HipFgmresExternalSignedEvidenceClaimsV2(),
+        promotion_eligible=False,
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    return replace(
+        draft,
+        receipt_hash=canonical_hash(
+            evidence_v2_module._verification_receipt_payload_v2(
+                draft,
+                include_hash=False,
+            )
+        ),
+    )
+
+
+@pytest.mark.parametrize(
+    ("runner_id", "key_id"),
+    [
+        ("external:runner", "ed25519:external-runner:v1"),
+        ("alternate-runner", "ed25519:external-runner:v1"),
+    ],
+)
+def test_v2_detached_signed_receipt_rejects_runner_or_key_relation_forgery(
+    runner_id: str,
+    key_id: str,
+) -> None:
+    valid = _detached_signed_receipt_v2()
+    assert (
+        evidence_v2_module.validate_hip_fgmres_external_signed_evidence_receipt_v2(
+            valid
+        )
+        is valid
+    )
+    receipt = replace(
+        valid,
+        runner_id=runner_id,
+        key_id=key_id,
+    )
+    forged = replace(
+        receipt,
+        receipt_hash=canonical_hash(
+            evidence_v2_module._verification_receipt_payload_v2(
+                receipt,
+                include_hash=False,
+            )
+        ),
+    )
+
+    with pytest.raises(evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error):
+        evidence_v2_module.validate_hip_fgmres_external_signed_evidence_receipt_v2(
+            forged
+        )

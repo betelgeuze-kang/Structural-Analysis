@@ -3,8 +3,8 @@
 ## 상태
 
 - 로드맵 작업 마일스톤: `v0.2.35`
-- 구현 기준 HEAD: `7a46bfbd732e07291bc166ac6ff4266e1277e238`
-- 작업 상태: 위 기준 HEAD 이후의 branch publication candidate; `origin/main` 포함은 주장하지 않음
+- 구현 기준 pushed audit baseline: `59a09585884585cff29b0c6a35667b4502334646`
+- 작업 상태: pushed branch contract-only milestone; `origin/main` 포함은 주장하지 않음
 - receipt schema: `structural-analysis-hip-fgmres-external-replay-ledger-receipt.v1`
 - capability: `phase0_external_signed_evidence_local_durable_replay_ledger`
 - evidence scope: `single_configured_local_posix_sqlite_ledger_cross_process_at_most_once_acceptance_non_promoting`
@@ -125,6 +125,12 @@ identity receipt의 `signed_envelope_binds_release_identity_receipt=false`는 �
 유지한다. Ledger가 두 receipt를 나중에 join하는 것은 runner가 identity receipt
 hash 전체에 서명했다는 뜻이 아니다.
 
+후속 [signed release-identity binding v2](engine-v2-hip-fgmres-signed-release-identity-binding-v2.md)는
+별도 v2 signature domain과 ledger namespace에서 이 결손을 닫는다. Full identity
+receipt schema/hash를 challenge와 signed payload에 직접 넣고 v2 durable receipt까지
+같은 hash chain을 보존한다. 본 v0.2.35 namespace/receipt를 재사용하거나 본 receipt의
+false claim을 소급 변경하지 않는다.
+
 ## Claim boundary
 
 성공한 신규 receipt에서만 true인 범위는 다음이다.
@@ -184,9 +190,10 @@ Package active key는 `0`이므로 공개 key 경로는 계속
 
 ## 다음 순서
 
-1. 검토된 external runner public key와 rotation/revocation 운영 절차
+1. 격리 runner/HSM key 운영과 검토된 rotation/revocation 절차
 2. 최종 candidate의 실제 external `gfx1100` fixed-suite `10/10` 서명 evidence
 3. 동일 final artifact의 local `gfx1030` `10/10` 재실행
-4. identity receipt hash를 직접 서명하는 envelope v2와 external monotonic anchor
-5. iteration host-copy-zero gate와 ResultIR integration
-6. certificate-bound SPD-gated PCG 상태기계
+4. external monotonic anchor
+5. iteration host-copy-zero gate
+6. ResultIR integration
+7. certificate-bound SPD-gated PCG 상태기계

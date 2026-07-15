@@ -265,6 +265,66 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         is False
     )
 
+    signed_identity_v2 = rows["hip_fgmres_signed_release_identity_binding_v2"]
+    assert signed_identity_v2["implementation_state"] == "implemented"
+    assert signed_identity_v2["promotion_state"] == "contract_only"
+    assert {
+        "signed_payload_exact_release_identity_receipt_schema_and_hash_binding",
+        "strict_v1_v2_downgrade_and_cross_protocol_rejection",
+        "dedicated_v2_owner_private_local_posix_sqlite_ledger_namespace",
+        "durable_v2_challenge_acceptance_and_post_response_loss_recovery",
+    }.issubset(signed_identity_v2["supported_scope"])
+    assert {
+        "active_package_trust_anchor",
+        "actual_external_gfx1100_signed_cell",
+        "trust_anchor_rotation_or_revocation_lifecycle",
+        "cross_host_or_cross_ledger_replay_prevention",
+        "hardware_execution_truth",
+        "release_promotion",
+        "commercial_readiness",
+    }.issubset(signed_identity_v2["explicit_exclusions"])
+    assert (
+        signed_identity_v2["claim_level"]
+        == "signed_full_release_identity_receipt_binding_with_single_configured_local_v2_replay_ledger_active_keys_zero_external_cells_zero_non_promoting"
+    )
+
+    signed_identity_schema_v2 = json.loads(
+        (
+            REPO_ROOT
+            / "src/structural_analysis/schemas/hip_fgmres_external_signed_evidence_receipt_v2.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    replay_ledger_schema_v2 = json.loads(
+        (
+            REPO_ROOT
+            / "src/structural_analysis/schemas/hip_fgmres_external_replay_ledger_receipt_v2.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert (
+        signed_identity_schema_v2["$defs"]["claims"]["properties"][
+            "signed_envelope_binds_release_identity_receipt"
+        ]["const"]
+        is True
+    )
+    assert (
+        signed_identity_schema_v2["$defs"]["claims"]["properties"][
+            "durable_replay_ledger_verified"
+        ]["const"]
+        is False
+    )
+    assert (
+        replay_ledger_schema_v2["$defs"]["claims"]["properties"][
+            "signed_envelope_binds_release_identity_receipt"
+        ]["const"]
+        is True
+    )
+    assert (
+        replay_ledger_schema_v2["$defs"]["claims"]["properties"][
+            "durable_replay_ledger_verified"
+        ]["const"]
+        is True
+    )
+
     resident = rows["hip_assembly_resident_csr_residual_jvp_consumer_v1"]
     assert resident["implementation_state"] == "implemented"
     assert resident["promotion_state"] == "contract_only"

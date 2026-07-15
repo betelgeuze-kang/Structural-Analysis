@@ -21,6 +21,29 @@
   ],
   "rows": [
     {
+      "capability_id": "hip_fgmres_signed_release_identity_binding_v2",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["distinct_v2_signature_domain_and_strict_envelope_schema", "verifier_minted_single_use_challenge_for_freshly_replayed_verified_release", "signed_payload_exact_release_identity_receipt_schema_and_hash_binding", "release_binding_hash_and_release_identity_receipt_hash_chain_consistency", "exact_current_package_fixture_registry_and_ten_slot_numerical_replay", "strict_v1_v2_downgrade_and_cross_protocol_rejection", "dedicated_v2_owner_private_local_posix_sqlite_ledger_namespace", "durable_v2_challenge_acceptance_and_post_response_loss_recovery", "fresh_release_artifact_replay_before_v2_acceptance_and_recovery", "strict_non_promoting_signed_and_ledger_receipt_schemas"],
+      "explicit_exclusions": ["active_package_trust_anchor", "actual_external_gfx1100_signed_cell", "trust_anchor_rotation_or_revocation_lifecycle", "historical_recovery_across_package_trust_or_fixture_registry_rotation", "exactly_once_delivery", "cross_host_or_cross_ledger_replay_prevention", "coordinated_storage_snapshot_rollback_resistance", "hostile_in_process_mint_isolation", "same_uid_root_or_storage_administrator_attack_resistance", "cryptographic_ledger_authenticity", "tpm_or_remote_monotonic_anchor", "nfs_fuse_or_non_posix_filesystem", "false_fsync_controller_resistance", "wall_clock_authenticity", "physical_fsync_before_challenge_expiry_or_ttl_deadline", "current_ledger_head_attestation_after_later_appends", "hardware_execution_truth", "hardware_root_attestation", "malicious_runner_exclusion", "same_artifact_two_architecture_evidence", "multiarchitecture_promotion", "release_promotion", "result_ir", "iteration_host_copy_zero", "performance_speedup", "end_to_end_o_n", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006", "ADR-007"],
+      "verification_cases": ["synthetic_signed_gfx1100_ten_slot_v2_replay", "release_identity_receipt_hash_mutation_and_substitution_rejection", "v1_v2_cross_protocol_and_downgrade_rejection", "fresh_release_artifact_drift_rejection", "public_empty_registry_fail_closed", "v2_ledger_restart_and_response_loss_recovery", "v1_namespace_and_v2_identity_substitution_rejection", "forged_low_level_recovery_and_expiry_rollback_rejection", "strict_draft_2020_12_schemas_and_public_exports"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-signed-release-identity-binding-v2.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_external_signed_evidence_v2.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_external_replay_ledger_v2.py",
+        "src/structural_analysis/schemas/hip_fgmres_external_signed_evidence_v2.schema.json",
+        "src/structural_analysis/schemas/hip_fgmres_external_signed_evidence_receipt_v2.schema.json",
+        "src/structural_analysis/schemas/hip_fgmres_external_replay_ledger_receipt_v2.schema.json",
+        "tests/test_engine_v2_hip_fgmres_external_signed_evidence_v1.py",
+        "tests/test_engine_v2_hip_fgmres_external_replay_ledger_v2.py",
+        "tests/test_engine_v2_hip_fgmres_parity_public_api_v1.py"
+      ],
+      "claim_level": "signed_full_release_identity_receipt_binding_with_single_configured_local_v2_replay_ledger_active_keys_zero_external_cells_zero_non_promoting"
+    },
+    {
       "capability_id": "hip_fgmres_external_replay_ledger_v1",
       "category": "solver_verification",
       "phase_target": "phase_0",

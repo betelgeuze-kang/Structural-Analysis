@@ -139,9 +139,18 @@ v0.2.35 receipt에서만 true다. 이 결속은 exactly-once delivery,
 cross-host/multi-ledger replay 방지, 동일 UID/root/storage rollback 저항,
 cryptographic log/TPM anchor, non-POSIX/NFS/FUSE durability, runner/hardware truth,
 full release-identity-receipt signed binding, 실제 `gfx1100` 실행이나
-promotion을 증명하지 않는다. v0.2.35 publication candidate에서 본 전체
+promotion을 증명하지 않는다. v0.2.35 pushed branch milestone에서 본 전체
 signed-evidence 회귀 `16 passed in 658.36s`와 durable-ledger/candidate-wheel
 격리 검증을 완료했지만 이 claim 경계는 바뀌지 않는다.
+
+### v0.2.36 identity-binding envelope와의 관계
+
+후속 [signed release-identity binding v2](engine-v2-hip-fgmres-signed-release-identity-binding-v2.md)는
+본 v1 envelope를 감싸거나 receipt를 사후 승격하지 않는다. 별도 challenge/payload/
+envelope/receipt schema와 signature domain을 사용하고 full release-identity receipt
+schema/hash를 runner 서명 대상에 직접 포함한다. 따라서 본 v0.2.33 receipt의
+`signed_envelope_binds_release_identity_receipt=false`와
+`durable_replay_ledger_verified=false`는 그대로 유지된다.
 
 ## 외부 runner가 제출해야 할 자료
 

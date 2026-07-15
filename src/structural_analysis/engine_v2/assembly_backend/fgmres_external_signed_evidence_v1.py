@@ -112,6 +112,7 @@ _RECEIPT_SCHEMA_RESOURCE = "hip_fgmres_external_signed_evidence_receipt_v1.schem
 _ENVELOPE_MAX_BYTES = 4 * 1024 * 1024
 _ENVELOPE_MAX_JSON_NODES = 200_000
 _ENVELOPE_MAX_JSON_DEPTH = 64
+_ENVELOPE_MAX_ERROR_PATH_CHARS = 512
 _SIGNATURE_DOMAIN = b"structural-analysis\0hip-fgmres-external-gfx1100-evidence\0v1\0"
 _HASH_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 _SOURCE_COMMIT_RE = re.compile(r"^[0-9a-f]{40}(?:[0-9a-f]{24})?$")
@@ -134,6 +135,12 @@ class HipFgmresExternalSignedEvidenceV1Error(RuntimeError):
         self.path = path
         self.message = message or code
         super().__init__(f"{code}@{path}: {self.message}")
+
+
+@dataclass(frozen=True, slots=True)
+class _EnvelopeJsonPathV1:
+    parent: _EnvelopeJsonPathV1 | None
+    segment: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -459,6 +466,8 @@ def validate_hip_fgmres_external_signed_evidence_receipt_v1(
         or receipt.status != "external_gfx1100_fixed_suite_signed_evidence_verified"
         or receipt.evidence_scope
         != HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_RECEIPT_SCOPE_V1
+        or _RUNNER_ID_RE.fullmatch(receipt.runner_id) is None
+        or receipt.key_id != f"ed25519:{receipt.runner_id}:v{receipt.key_epoch}"
         or receipt.verified_slot_ids != HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1
         or receipt.verified_slot_count != len(receipt.verified_slot_ids)
         or receipt.claims != HipFgmresExternalSignedEvidenceClaimsV1()
@@ -781,20 +790,10 @@ def _verify_with_authorities(
             _fail(
                 "hip_fgmres_external_signature_invalid", "/signature_base64", exc.code
             )
-        _validate_release_against_current_package(release_binding, fixture_registry)
-        family_receipt = _parse_family_receipt(signed_payload["family_receipt_v2"])
-        _validate_external_family_lane(family_receipt)
-        _validate_fixture_registry_block(
-            signed_payload["fixture_registry"], fixture_registry
-        )
-        _validate_runner_binding(runner, family_receipt)
-        _validate_cases(
-            signed_payload["cases"],
-            family_receipt=family_receipt,
+        family_receipt = _replay_external_fixed_suite_payload_common_v1(
+            signed_payload=signed_payload,
+            release_binding=release_binding,
             fixture_registry=fixture_registry,
-            runner=runner,
-            common_runtime_binding_hash=signed_payload["common_runtime_binding_hash"],
-            ordered_case_aggregate_hash=signed_payload["ordered_case_aggregate_hash"],
         )
         _validate_payload_claims(signed_payload["claims"])
         draft = HipFgmresExternalSignedEvidenceReceiptV1(
@@ -841,6 +840,33 @@ def _verify_with_authorities(
     return receipt
 
 
+def _replay_external_fixed_suite_payload_common_v1(
+    *,
+    signed_payload: dict[str, Any],
+    release_binding: HipFgmresExternalReleaseBindingV1,
+    fixture_registry: HipFgmresFixtureRegistryResultV1,
+) -> HipFgmresModelFamilyParityReceiptV2:
+    """Replay the schema- and signature-neutral fixed-suite payload core."""
+
+    _validate_release_against_current_package(release_binding, fixture_registry)
+    family_receipt = _parse_family_receipt(signed_payload["family_receipt_v2"])
+    _validate_external_family_lane(family_receipt)
+    _validate_fixture_registry_block(
+        signed_payload["fixture_registry"], fixture_registry
+    )
+    runner = signed_payload["runner"]
+    _validate_runner_binding(runner, family_receipt)
+    _validate_cases(
+        signed_payload["cases"],
+        family_receipt=family_receipt,
+        fixture_registry=fixture_registry,
+        runner=runner,
+        common_runtime_binding_hash=signed_payload["common_runtime_binding_hash"],
+        ordered_case_aggregate_hash=signed_payload["ordered_case_aggregate_hash"],
+    )
+    return family_receipt
+
+
 def _parse_model_case_receipt(
     payload: dict[str, Any],
 ) -> HipFgmresModelCaseParityReceiptV1:
@@ -867,7 +893,13 @@ def _parse_model_case_receipt(
             claims=HipFgmresModelCaseParityClaimsV1(**payload["claims"]),
             receipt_hash=payload["receipt_hash"],
         )
-        return validate_hip_fgmres_model_case_parity_receipt_v1(receipt)
+        validated = validate_hip_fgmres_model_case_parity_receipt_v1(receipt)
+        if validated.to_dict() != payload:
+            _fail(
+                "hip_fgmres_external_model_case_receipt_invalid",
+                "/cases/model_case_receipt_v1",
+            )
+        return validated
     except Exception as exc:
         _fail(
             "hip_fgmres_external_model_case_receipt_invalid",
@@ -923,7 +955,13 @@ def _parse_family_receipt(
             promotion_eligible=payload["promotion_eligible"],
             receipt_hash=payload["receipt_hash"],
         )
-        return validate_hip_fgmres_model_family_parity_receipt_v2(receipt)
+        validated = validate_hip_fgmres_model_family_parity_receipt_v2(receipt)
+        if validated.to_dict() != payload:
+            _fail(
+                "hip_fgmres_external_family_receipt_invalid",
+                "/signed_payload/family_receipt_v2",
+            )
+        return validated
     except Exception as exc:
         _fail(
             "hip_fgmres_external_family_receipt_invalid",
@@ -1439,21 +1477,68 @@ def _parse_canonical_envelope(raw: bytes) -> dict[str, Any]:
 
 
 def _reject_nonfinite(value: Any, *, path: str) -> None:
-    stack: list[tuple[Any, str, int]] = [(value, path, 0)]
+    stack: list[tuple[Any, _EnvelopeJsonPathV1 | None, int]] = [(value, None, 0)]
     node_count = 0
     while stack:
         item, item_path, depth = stack.pop()
         node_count += 1
-        if node_count > _ENVELOPE_MAX_JSON_NODES or depth > _ENVELOPE_MAX_JSON_DEPTH:
-            _fail("hip_fgmres_external_envelope_extent_invalid", item_path)
+        if (
+            node_count > _ENVELOPE_MAX_JSON_NODES
+            or depth > _ENVELOPE_MAX_JSON_DEPTH
+            or (type(item) in (dict, list) and depth >= _ENVELOPE_MAX_JSON_DEPTH)
+        ):
+            _fail(
+                "hip_fgmres_external_envelope_extent_invalid",
+                _format_envelope_json_path(path, item_path),
+            )
         if type(item) is float and not math.isfinite(item):
-            _fail("hip_fgmres_external_envelope_nonfinite", item_path)
+            _fail(
+                "hip_fgmres_external_envelope_nonfinite",
+                _format_envelope_json_path(path, item_path),
+            )
+        if type(item) in (dict, list) and (
+            node_count + len(stack) + len(item) > _ENVELOPE_MAX_JSON_NODES
+        ):
+            _fail(
+                "hip_fgmres_external_envelope_extent_invalid",
+                _format_envelope_json_path(path, item_path),
+            )
         if type(item) is dict:
             for key, child in item.items():
-                stack.append((child, f"{item_path}/{key}", depth + 1))
+                stack.append((child, _EnvelopeJsonPathV1(item_path, key), depth + 1))
         elif type(item) is list:
             for index, child in enumerate(item):
-                stack.append((child, f"{item_path}/{index}", depth + 1))
+                stack.append(
+                    (
+                        child,
+                        _EnvelopeJsonPathV1(item_path, str(index)),
+                        depth + 1,
+                    )
+                )
+
+
+def _format_envelope_json_path(
+    root: str,
+    leaf: _EnvelopeJsonPathV1 | None,
+) -> str:
+    segments: list[str] = []
+    current = leaf
+    while current is not None:
+        segments.append(current.segment)
+        current = current.parent
+    result = root[:_ENVELOPE_MAX_ERROR_PATH_CHARS]
+    for segment in reversed(segments):
+        if len(result) >= _ENVELOPE_MAX_ERROR_PATH_CHARS:
+            break
+        addition = "/" + segment
+        remaining = _ENVELOPE_MAX_ERROR_PATH_CHARS - len(result)
+        if len(addition) <= remaining:
+            result += addition
+            continue
+        if remaining > 3:
+            result += addition[: remaining - 3] + "..."
+        break
+    return result
 
 
 def _validate_json_schema(
@@ -1474,11 +1559,18 @@ def _validate_json_schema(
         _fail(
             "hip_fgmres_external_schema_invalid", path, f"{type(exc).__name__}: {exc}"
         )
-    error = next(Draft202012Validator(schema).iter_errors(payload), None)
+    try:
+        error = next(Draft202012Validator(schema).iter_errors(payload), None)
+    except RecursionError:
+        _fail("hip_fgmres_external_envelope_extent_invalid", path)
+    except Exception as exc:
+        _fail("hip_fgmres_external_schema_invalid", path, type(exc).__name__)
     if error is not None:
         location = (
             path.rstrip("/") + "/" + "/".join(str(part) for part in error.absolute_path)
         )
+        if len(location) > _ENVELOPE_MAX_ERROR_PATH_CHARS:
+            location = location[: _ENVELOPE_MAX_ERROR_PATH_CHARS - 3] + "..."
         keyword = str(error.validator)
         if len(keyword) > 64:
             keyword = keyword[:64]

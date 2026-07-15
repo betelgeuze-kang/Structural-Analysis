@@ -3,7 +3,7 @@
 ## 상태
 
 - 로드맵 작업 마일스톤: `v0.2.34`
-- 구현 및 pushed 기준 HEAD: `7a46bfbd732e07291bc166ac6ff4266e1277e238`
+- 구현 및 pushed audit baseline: `7a46bfbd732e07291bc166ac6ff4266e1277e238`
 - 작업 상태: pushed contract-only milestone
 - 스키마: `structural-analysis-hip-fgmres-external-release-identity.v1`
 - capability: `phase0_external_release_artifact_identity_replay`
@@ -164,7 +164,7 @@ ledger join은 full identity receipt hash가 runner envelope에 서명되었다�
 rollback 저항, cryptographic log/TPM anchor, non-POSIX/NFS/FUSE durability,
 runner/hardware truth, 실제 external `gfx1100` 실행, promotion·ResultIR·
 host-copy-zero·speedup·O(N)·commercial claim을 만들지 않는다. v0.2.35
-publication candidate에서 durable ledger `41`, high-level replay `13`, 본
+pushed branch milestone에서 durable ledger `41`, high-level replay `13`, 본
 signed-evidence `16`과 지원 회귀 `104`의 비중복 `174 passed`, candidate wheel
 격리 설치·reopen audit를 완료했지만 이 claim 경계는 바뀌지 않는다.
 
@@ -227,12 +227,18 @@ Package active key는 `0`이므로 public signed path는 여전히
 historical unsigned `10/10`이며 이 working milestone에서 same-artifact로 재실행된
 것이 아니다.
 
+후속 [signed release-identity binding v2](engine-v2-hip-fgmres-signed-release-identity-binding-v2.md)는
+본 receipt의 schema/hash를 별도 v2 envelope의 canonical Ed25519 서명 대상에 직접
+포함한다. 이 후속 wrapper에서만 serialized identity binding claim이 true이며, 본
+v0.2.34 receipt의 `signed_envelope_binds_release_identity_receipt=false`는 소급
+변경하지 않는다.
+
 ## 다음 순서
 
-1. v0.2.35 single-ledger durable replay 경계 검증 완료와 격리 runner/key 운영
-2. 검토된 external runner key 및 rotation/revocation policy
-3. 최종 candidate의 실제 `gfx1100` fixed-suite `10/10` 서명 증거
-4. 동일 final artifact의 local `gfx1030` `10/10` 재실행
-5. identity receipt를 직접 서명하는 envelope v2와 external monotonic anchor
-6. iteration host-copy-zero 게이트와 ResultIR integration
+1. 격리 runner/HSM key 운영과 검토된 rotation/revocation policy
+2. 최종 candidate의 실제 `gfx1100` fixed-suite `10/10` 서명 증거
+3. 동일 final artifact의 local `gfx1030` `10/10` 재실행
+4. external monotonic anchor
+5. iteration host-copy-zero 게이트
+6. ResultIR integration
 7. certificate-bound SPD-gated PCG 상태기계

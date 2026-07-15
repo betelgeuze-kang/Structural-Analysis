@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_external_signed_evidence_v2.schema.json",
+  "title": "Ed25519-signed external gfx1100 FGMRES release-identity envelope v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "algorithm",
+    "key_id",
+    "signed_payload_sha256",
+    "signed_payload",
+    "signature_base64",
+    "envelope_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-external-signed-evidence.v2"
+    },
+    "capability_profile": {
+      "const": "phase0_external_gfx1100_release_identity_ed25519_verification"
+    },
+    "algorithm": {"const": "Ed25519"},
+    "key_id": {"$ref": "#/$defs/key_id"},
+    "signed_payload_sha256": {"$ref": "#/$defs/hash"},
+    "signed_payload": {"$ref": "#/$defs/payload"},
+    "signature_base64": {"type": "string", "minLength": 88, "maxLength": 88},
+    "envelope_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "key_id": {
+      "type": "string",
+      "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
+    },
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"},
+    "utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{6}Z$"
+    },
+    "base64": {"type": "string", "pattern": "^[A-Za-z0-9+/]*={0,2}$"},
+    "challenge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "challenge_id",
+        "request_id",
+        "audience",
+        "campaign_id",
+        "nonce_base64",
+        "issued_at_utc",
+        "expires_at_utc",
+        "expected_key_id",
+        "expected_key_epoch",
+        "expected_runner_id",
+        "expected_run_sequence",
+        "expected_release_binding_hash",
+        "expected_release_identity_receipt_schema_version",
+        "expected_release_identity_receipt_hash",
+        "expected_trust_registry_hash",
+        "expected_architecture_base",
+        "expected_suite_id"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-challenge.v2"
+        },
+        "challenge_id": {"$ref": "#/$defs/hash"},
+        "request_id": {"$ref": "#/$defs/id"},
+        "audience": {"const": "structural-analysis-engine-v2-verifier"},
+        "campaign_id": {"$ref": "#/$defs/id"},
+        "nonce_base64": {"type": "string", "minLength": 44, "maxLength": 44},
+        "issued_at_utc": {"$ref": "#/$defs/utc"},
+        "expires_at_utc": {"$ref": "#/$defs/utc"},
+        "expected_key_id": {"$ref": "#/$defs/key_id"},
+        "expected_key_epoch": {"type": "integer", "minimum": 1},
+        "expected_runner_id": {"$ref": "#/$defs/id"},
+        "expected_run_sequence": {"type": "integer", "minimum": 1},
+        "expected_release_binding_hash": {"$ref": "#/$defs/hash"},
+        "expected_release_identity_receipt_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-release-identity.v1"
+        },
+        "expected_release_identity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "expected_trust_registry_hash": {"$ref": "#/$defs/hash"},
+        "expected_architecture_base": {"const": "gfx1100"},
+        "expected_suite_id": {
+          "const": "phase0_execution_plan_v2_linear_frame_truss_fgmres_fixed_suite.v2"
+        }
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "distribution_name",
+        "distribution_version",
+        "wheel_filename",
+        "wheel_byte_count",
+        "wheel_sha256",
+        "wheel_record_sha256",
+        "source_commit",
+        "source_tree_sha256",
+        "source_bundle_sha256",
+        "runner_source_sha256",
+        "build_recipe_sha256",
+        "dependency_lock_sha256",
+        "schema_manifest_count",
+        "schema_manifest_hash",
+        "fixture_registry_bytes_sha256",
+        "fixture_registry_hash",
+        "fixture_registry_receipt_hash",
+        "binding_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-release-binding.v1"
+        },
+        "distribution_name": {"const": "structural-optimization-workbench"},
+        "distribution_version": {"type": "string", "minLength": 1, "maxLength": 64},
+        "wheel_filename": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.+-]+\\.whl$",
+          "maxLength": 255
+        },
+        "wheel_byte_count": {"type": "integer", "minimum": 1},
+        "wheel_sha256": {"$ref": "#/$defs/hash"},
+        "wheel_record_sha256": {"$ref": "#/$defs/hash"},
+        "source_commit": {"type": "string", "pattern": "^[0-9a-f]{40}([0-9a-f]{24})?$"},
+        "source_tree_sha256": {"$ref": "#/$defs/hash"},
+        "source_bundle_sha256": {"$ref": "#/$defs/hash"},
+        "runner_source_sha256": {"$ref": "#/$defs/hash"},
+        "build_recipe_sha256": {"$ref": "#/$defs/hash"},
+        "dependency_lock_sha256": {"$ref": "#/$defs/hash"},
+        "schema_manifest_count": {"type": "integer", "minimum": 1},
+        "schema_manifest_hash": {"$ref": "#/$defs/hash"},
+        "fixture_registry_bytes_sha256": {"$ref": "#/$defs/hash"},
+        "fixture_registry_hash": {"$ref": "#/$defs/hash"},
+        "fixture_registry_receipt_hash": {"$ref": "#/$defs/hash"},
+        "binding_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runner_id",
+        "run_sequence",
+        "runner_nonce_base64",
+        "started_at_utc",
+        "completed_at_utc",
+        "architecture_base",
+        "compiled_architecture",
+        "device_ordinal",
+        "device_uuid_bytes_hex",
+        "device_pci_bdf",
+        "device_name",
+        "rocm_version",
+        "driver_version",
+        "hiprtc_version",
+        "runtime_library_sha256",
+        "runtime_dependency_manifest_hash",
+        "kernel_identity_hash",
+        "kernel_source_sha256",
+        "kernel_code_object_sha256"
+      ],
+      "properties": {
+        "runner_id": {"$ref": "#/$defs/id"},
+        "run_sequence": {"type": "integer", "minimum": 1},
+        "runner_nonce_base64": {"type": "string", "minLength": 44, "maxLength": 44},
+        "started_at_utc": {"$ref": "#/$defs/utc"},
+        "completed_at_utc": {"$ref": "#/$defs/utc"},
+        "architecture_base": {"const": "gfx1100"},
+        "compiled_architecture": {
+          "type": "string",
+          "pattern": "^gfx1100(?::[a-z][a-z0-9_]*[+-])*$"
+        },
+        "device_ordinal": {"type": "integer", "minimum": 0},
+        "device_uuid_bytes_hex": {"type": "string", "pattern": "^[0-9a-f]{32}$"},
+        "device_pci_bdf": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\\.[0-7]$"
+        },
+        "device_name": {"type": "string", "minLength": 1, "maxLength": 256},
+        "rocm_version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "driver_version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "hiprtc_version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "runtime_library_sha256": {"$ref": "#/$defs/hash"},
+        "runtime_dependency_manifest_hash": {"$ref": "#/$defs/hash"},
+        "kernel_identity_hash": {"$ref": "#/$defs/hash"},
+        "kernel_source_sha256": {"$ref": "#/$defs/hash"},
+        "kernel_code_object_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "fixture_registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "suite_id",
+        "registry_bytes_sha256",
+        "registry_hash",
+        "registry_receipt_hash",
+        "ordered_slot_ids"
+      ],
+      "properties": {
+        "suite_id": {
+          "const": "phase0_execution_plan_v2_linear_frame_truss_fgmres_fixed_suite.v2"
+        },
+        "registry_bytes_sha256": {"$ref": "#/$defs/hash"},
+        "registry_hash": {"$ref": "#/$defs/hash"},
+        "registry_receipt_hash": {"$ref": "#/$defs/hash"},
+        "ordered_slot_ids": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z0-9_]+$"}
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "slot_id",
+        "slot_registration_hash",
+        "model_case_receipt_v1",
+        "solution_x_base64",
+        "true_residual_base64",
+        "solve_record_base64",
+        "completion_payload_hash",
+        "case_evidence_hash"
+      ],
+      "properties": {
+        "slot_id": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+        "slot_registration_hash": {"$ref": "#/$defs/hash"},
+        "model_case_receipt_v1": {"type": "object"},
+        "solution_x_base64": {"$ref": "#/$defs/base64"},
+        "true_residual_base64": {"$ref": "#/$defs/base64"},
+        "solve_record_base64": {"$ref": "#/$defs/base64"},
+        "completion_payload_hash": {"$ref": "#/$defs/hash"},
+        "case_evidence_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runner_attests_actual_native_hip_execution",
+        "runner_attests_external_gfx1100_fixed_suite",
+        "runner_attests_release_identity_receipt_hash",
+        "raw_completion_payloads_included",
+        "full_model_family_parity_verified",
+        "multiarchitecture_promotion_verified",
+        "result_ir_verified",
+        "iteration_host_copy_zero_verified",
+        "speedup_verified",
+        "end_to_end_o_n_verified",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "runner_attests_actual_native_hip_execution": {"const": true},
+        "runner_attests_external_gfx1100_fixed_suite": {"const": true},
+        "runner_attests_release_identity_receipt_hash": {"const": true},
+        "raw_completion_payloads_included": {"const": true},
+        "full_model_family_parity_verified": {"const": false},
+        "multiarchitecture_promotion_verified": {"const": false},
+        "result_ir_verified": {"const": false},
+        "iteration_host_copy_zero_verified": {"const": false},
+        "speedup_verified": {"const": false},
+        "end_to_end_o_n_verified": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_schema_version",
+        "purpose",
+        "evidence_scope",
+        "challenge",
+        "release_binding",
+        "release_identity_receipt_schema_version",
+        "release_identity_receipt_hash",
+        "runner",
+        "fixture_registry",
+        "family_receipt_v2",
+        "cases",
+        "common_runtime_binding_hash",
+        "ordered_case_aggregate_hash",
+        "claims"
+      ],
+      "properties": {
+        "payload_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-signed-payload.v2"
+        },
+        "purpose": {
+          "const": "hip_fgmres_external_gfx1100_release_identity_attestation"
+        },
+        "evidence_scope": {
+          "const": "trusted_runner_signed_release_identity_serialized_lane_non_promoting"
+        },
+        "challenge": {"$ref": "#/$defs/challenge"},
+        "release_binding": {"$ref": "#/$defs/release"},
+        "release_identity_receipt_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-release-identity.v1"
+        },
+        "release_identity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "runner": {"$ref": "#/$defs/runner"},
+        "fixture_registry": {"$ref": "#/$defs/fixture_registry"},
+        "family_receipt_v2": {"type": "object"},
+        "cases": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": {"$ref": "#/$defs/case"}
+        },
+        "common_runtime_binding_hash": {"$ref": "#/$defs/hash"},
+        "ordered_case_aggregate_hash": {"$ref": "#/$defs/hash"},
+        "claims": {"$ref": "#/$defs/claims"}
+      }
+    }
+  }
+}
