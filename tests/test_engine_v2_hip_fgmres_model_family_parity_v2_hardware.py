@@ -1,4 +1,4 @@
-"""Actual-gfx1030 replay and transfer audit of all fixed-suite v2 cells."""
+"""Actual-gfx1030 parity, transfer, and launch/fence audit of fixed-suite v2."""
 
 from __future__ import annotations
 
@@ -20,6 +20,10 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_iteration_host_transf
     open_hip_fgmres_iteration_host_transfer_audit_v1,
     validate_hip_fgmres_iteration_host_transfer_audit_result_v1,
 )
+from structural_analysis.engine_v2.assembly_backend.fgmres_model_family_audited_parity_v2 import (
+    attest_hip_fgmres_model_family_audited_parity_v2,
+    validate_hip_fgmres_model_family_audited_parity_result_v2,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_model_family_host_transfer_audit_v1 import (
     attest_hip_fgmres_model_family_host_transfer_audit_v1,
     validate_hip_fgmres_model_family_host_transfer_audit_result_v1,
@@ -28,6 +32,10 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_model_family_parity_v
     HIP_FGMRES_MODEL_FAMILY_REQUIRED_SLOT_IDS_V2,
     attest_hip_fgmres_model_family_coverage_v2,
     validate_hip_fgmres_model_family_parity_result_v2,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_recurrence_launch_fence_audit_v1 import (
+    open_hip_fgmres_recurrence_launch_fence_audit_v1,
+    validate_hip_fgmres_recurrence_launch_fence_audit_result_v1,
 )
 from structural_analysis.engine_v2.assembly_backend.fgmres_sealed_checkpoint_transaction_v1 import (
     open_hip_fgmres_sealed_checkpoint_transaction_context_v1,
@@ -55,6 +63,7 @@ def _hardware_required() -> bool:
             "ENGINE_V2_REQUIRE_HIP_HARDWARE",
             "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_FAMILY_PARITY_V2_HARDWARE",
             "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_FAMILY_HOST_TRANSFER_AUDIT_HARDWARE",
+            "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_FAMILY_AUDITED_PARITY_V2_HARDWARE",
         )
     )
 
@@ -65,10 +74,16 @@ class _LiveCaseResources:
     sealed: Any
     global_open: Any
     audit_context: Any
+    ordinal_context: Any
 
     def close(self) -> None:
         _run_all_cleanup_steps(
             (
+                lambda: (
+                    self.ordinal_context.close()
+                    if self.ordinal_context is not None
+                    else None
+                ),
                 lambda: (
                     self.audit_context.close()
                     if self.audit_context is not None
@@ -129,13 +144,31 @@ def _execute_live_case(
     slot: Any,
     architecture: str,
     required: bool,
-) -> tuple[Any, Any, Any]:
-    chain = sealed = global_open = audit_context = None
+) -> tuple[Any, Any, Any, Any]:
+    chain = sealed = global_open = audit_context = ordinal_context = None
     audit_opens: list[Any] = []
+    ordinal_opens: list[Any] = []
 
-    def open_audit_before_enqueue(canonical: Any) -> None:
-        opened = open_hip_fgmres_iteration_host_transfer_audit_v1(canonical)
-        audit_opens.append(opened.context)
+    def open_audits_before_enqueue(canonical: Any) -> None:
+        transfer = open_hip_fgmres_iteration_host_transfer_audit_v1(canonical)
+        try:
+            ordinal = open_hip_fgmres_recurrence_launch_fence_audit_v1(canonical)
+        except BaseException as primary_error:
+            try:
+                transfer.context.close()
+            except BaseException as cleanup_error:
+                _attach_cleanup_failures(primary_error, [cleanup_error])
+            raise
+        audit_opens.append(transfer.context)
+        ordinal_opens.append(ordinal.context)
+
+    def close_audits_before_chain_cleanup() -> None:
+        _run_all_cleanup_steps(
+            (
+                *(opened.close for opened in reversed(ordinal_opens)),
+                *(opened.close for opened in reversed(audit_opens)),
+            )
+        )
 
     try:
         chain, predecessor_capability = _open_canonical_chain(
@@ -144,10 +177,12 @@ def _execute_live_case(
             required=required,
             policy=slot.policy,
             load_pattern_id=slot.execution_plan.load_pattern_id,
-            before_canonical_enqueue=open_audit_before_enqueue,
+            before_canonical_enqueue=open_audits_before_enqueue,
+            before_chain_cleanup=close_audits_before_chain_cleanup,
         )
-        assert len(audit_opens) == 1
+        assert len(audit_opens) == 1 and len(ordinal_opens) == 1
         audit_context = audit_opens[0]
+        ordinal_context = ordinal_opens[0]
         source_fgmres_plan = chain.recurrence._source_fgmres_plan
         source_execution_plan = source_fgmres_plan._source_execution_plan
         assert source_execution_plan.plan_hash == slot.execution_plan.plan_hash
@@ -168,6 +203,14 @@ def _execute_live_case(
         )
         global_pending = global_open.context.enqueue_remaining_global_recurrence()
         completion = global_open.context.synchronize(global_pending)
+        ordinal_result = ordinal_context.seal_terminal_fence(
+            global_open.context,
+            completion,
+        )
+        validate_hip_fgmres_recurrence_launch_fence_audit_result_v1(
+            ordinal_result,
+            expected_context=ordinal_context,
+        )
         audit_result = audit_context.export_completion_buffers(
             global_open.context,
             completion,
@@ -204,14 +247,14 @@ def _execute_live_case(
             sealed=sealed,
             global_open=global_open,
             audit_context=audit_context,
+            ordinal_context=ordinal_context,
         )
-        return resources, parity, audit_context
+        return resources, parity, audit_context, ordinal_context
     except BaseException as primary_error:
         try:
-            audit_steps = tuple(opened.close for opened in reversed(audit_opens))
             _run_all_cleanup_steps(
                 (
-                    *audit_steps,
+                    close_audits_before_chain_cleanup,
                     lambda: (
                         global_open.context.close()
                         if global_open is not None and not global_open.context.closed
@@ -239,10 +282,11 @@ def test_native_gfx1030_replays_and_audits_all_ten_cells_in_one_live_aggregate()
     resources: list[_LiveCaseResources] = []
     cases: list[Any] = []
     audit_contexts: list[Any] = []
+    ordinal_contexts: list[Any] = []
     try:
         for slot_id in HIP_FGMRES_MODEL_FAMILY_REQUIRED_SLOT_IDS_V2:
             print(f"actual-gfx1030 fixed-suite cell: {slot_id}", flush=True)
-            opened, case, audit_context = _execute_live_case(
+            opened, case, audit_context, ordinal_context = _execute_live_case(
                 registry.slot(slot_id),
                 architecture,
                 required,
@@ -250,6 +294,7 @@ def test_native_gfx1030_replays_and_audits_all_ten_cells_in_one_live_aggregate()
             resources.append(opened)
             cases.append(case)
             audit_contexts.append(audit_context)
+            ordinal_contexts.append(ordinal_context)
 
         family = attest_hip_fgmres_model_family_coverage_v2(tuple(cases))
         validate_hip_fgmres_model_family_parity_result_v2(
@@ -303,6 +348,50 @@ def test_native_gfx1030_replays_and_audits_all_ten_cells_in_one_live_aggregate()
         assert not audit_receipt.claims.standalone_receipt_provenance_authenticity
         assert not audit_receipt.claims.commercial_ready
         assert not audit_receipt.promotion_eligible
+
+        audited = attest_hip_fgmres_model_family_audited_parity_v2(
+            composed,
+            tuple(ordinal_contexts),
+        )
+        validate_hip_fgmres_model_family_audited_parity_result_v2(
+            audited,
+            expected_transfer_composition_result=composed,
+            expected_ordinal_contexts=tuple(ordinal_contexts),
+        )
+        audited_receipt = audited.receipt
+        totals = audited_receipt.totals
+        assert totals.paired_slot_count == 10
+        assert totals.recurrence_program_copy_attempt_count == 0
+        assert totals.completion_export_blocking_d2h_attempt_count == 30
+        assert totals.completion_export_blocking_d2h_success_count == 30
+        assert totals.completion_export_byte_count == 4408
+        assert totals.ordinal_memset_attempt_count == 80
+        assert totals.ordinal_memset_success_count == 80
+        assert totals.ordinal_memset_rejected_count == 0
+        assert totals.ordinal_memset_ambiguous_count == 0
+        assert totals.ordinal_memset_in_flight_count == 0
+        assert totals.ordinal_launch_attempt_count == 1230
+        assert totals.ordinal_launch_success_count == 1230
+        assert totals.ordinal_launch_rejected_count == 0
+        assert totals.ordinal_launch_ambiguous_count == 0
+        assert totals.ordinal_launch_in_flight_count == 0
+        assert totals.ordinal_fence_attempt_count == 30
+        assert totals.ordinal_fence_success_count == 30
+        assert totals.ordinal_fence_rejected_count == 0
+        assert totals.ordinal_fence_ambiguous_count == 0
+        assert totals.ordinal_fence_in_flight_count == 0
+        claims = audited_receipt.claims
+        assert claims.three_retained_authority_families_replayed
+        assert claims.exact_gfx1030_registered_ten_slot_coverage_bound
+        assert claims.transfer_and_ordinal_lineage_cross_bound
+        assert claims.per_slot_bound_runtime_recurrence_copy_attempt_zero
+        assert claims.per_slot_fixed_recurrence_descriptor_order_replayed
+        assert not claims.external_gfx1100_fixed_suite_audited
+        assert not claims.iteration_host_copy_zero_proven
+        assert not claims.standalone_receipt_provenance_authenticity
+        assert not claims.hostile_same_process_mutation_or_interposition_resistance
+        assert not claims.commercial_ready
+        assert not audited_receipt.promotion_eligible
     finally:
         cleanup_errors: list[BaseException] = []
         for opened in reversed(resources):

@@ -21,6 +21,25 @@
   ],
   "rows": [
     {
+      "capability_id": "hip_fgmres_model_family_audited_parity_v2",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["exact_package_registry_gfx1030_ten_slot_family_v2_binding", "retained_model_case_parity_host_transfer_and_launch_fence_authority_replay", "same_completion_export_object_identity_replayed_by_source_composition", "transfer_and_ordinal_canonical_sealed_global_completion_plan_abi_kernel_schedule_device_lineage_cross_binding", "detached_fixed_package_recurrence_abi_combined_abi_kernel_source_canonical_checkpoint_and_program_descriptor_recalculation", "contract_expected_per_slot_bound_runtime_recurrence_copy_api_attempt_zero", "contract_expected_per_slot_post_fence_exact_three_blocking_d2h", "contract_expected_ten_slot_total_thirty_blocking_d2h_and_4408_bytes", "contract_expected_ten_slot_total_1230_launch_attempts_and_successes", "synthetic_retained_authority_per_slot_owned_eight_memsets_full_launch_program_and_three_fences", "synthetic_retained_authority_ten_slot_total_eighty_memsets_and_thirty_fences", "synthetic_retained_authority_owned_rtc_memset_launch_and_fence_rejected_ambiguous_and_in_flight_counts_zero", "caller_order_independent_registry_slot_canonicalization", "missing_duplicate_foreign_and_cross_run_splice_rejection", "composition_factory_direct_call_surface_reuses_retained_authorities_without_solve_export_seal_or_native_entrypoint", "strict_process_local_unsigned_non_promoting_receipt_schema"],
+      "explicit_exclusions": ["current_snapshot_actual_local_gfx1030_ten_slot_triple_composition", "actual_external_gfx1100_ten_slot_audit", "unsigned_two_architecture_fixed_suite_audit", "persistent_hardware_receipt_or_external_execution_log", "process_wide_rocm_activity_host_transfer_or_launch_completeness", "pre_window_dma_setup_teardown_or_between_case_transfer_zero", "raw_fresh_ctypes_dlsym_c_extension_or_third_party_native_call_observation", "whole_process_additional_device_solve_or_export_absence", "same_runtime_or_stream_shared_across_all_cases", "hostile_same_process_mutation_or_interposition_resistance", "device_kernel_semantic_execution_success_from_ordinal_chain", "device_content_or_numerical_outcome_from_ordinal_chain", "iteration_host_copy_zero", "full_model_family_or_general_multiarchitecture_parity", "standalone_receipt_provenance_authenticity_without_retained_authorities_or_signature", "signed_hardware_truth", "result_ir", "reaction_member_force_recovery_or_energy", "performance_speedup", "end_to_end_o_n", "promotion_eligibility", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006"],
+      "verification_cases": ["synthetic_exact_ten_slot_three_authority_composition", "actual_v041_counter_type_shape_used_by_synthetic_rejected_ambiguous_and_in_flight_zero", "reversed_ordinal_input_canonical_registry_order", "unsealed_poisoned_and_closed_retained_lifecycle", "missing_duplicate_foreign_and_wrong_expected_context_rejection", "serially_identical_cross_run_retained_identity_rejection", "canonical_sealed_abi_schedule_projection_and_device_lineage_splice_rejection", "retained_context_result_source_registry_and_duplicate_receipt_replay_rejection", "detached_claim_order_triple_hash_counter_logical_schedule_zero_launch_safe_integer_and_exact_type_forgery_rejection", "detached_fixed_package_abi_source_schedule_and_program_descriptor_forgery_rejection", "factory_exact_direct_call_surface_ast_and_export_seal_runtime_purity_guard", "valid_payload_all_object_levels_strict_schema", "public_export_and_package_schema_resource_integrity", "hardware_test_loop_integration_contract_without_duplicate_solve_or_export", "final_source_required_gfx1030_gate_pending"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-model-family-audited-parity-v2.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_model_family_audited_parity_v2.py",
+        "src/structural_analysis/schemas/hip_fgmres_model_family_audited_parity_v2.schema.json",
+        "tests/test_engine_v2_hip_fgmres_model_family_audited_parity_v2.py",
+        "tests/test_engine_v2_hip_fgmres_model_family_parity_v2_hardware.py"
+      ],
+      "claim_level": "exact_test_double_gfx1030_ten_slot_retained_parity_transfer_and_owned_rtc_operation_order_composition_contract_only_hardware_pending_non_promoting"
+    },
+    {
       "capability_id": "hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1",
       "category": "solver_verification",
       "phase_target": "phase_0",

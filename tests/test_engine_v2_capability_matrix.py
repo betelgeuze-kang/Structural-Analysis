@@ -125,8 +125,67 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
-    ordinal_audit = rows["hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"]
+    audited_family = rows["hip_fgmres_model_family_audited_parity_v2"]
     assert payload["rows"][0]["capability_id"] == (
+        "hip_fgmres_model_family_audited_parity_v2"
+    )
+    assert audited_family["implementation_state"] == "implemented"
+    assert audited_family["promotion_state"] == "contract_only"
+    assert {
+        "retained_model_case_parity_host_transfer_and_launch_fence_authority_replay",
+        "same_completion_export_object_identity_replayed_by_source_composition",
+        "transfer_and_ordinal_canonical_sealed_global_completion_plan_abi_kernel_schedule_device_lineage_cross_binding",
+        "detached_fixed_package_recurrence_abi_combined_abi_kernel_source_canonical_checkpoint_and_program_descriptor_recalculation",
+        "contract_expected_per_slot_bound_runtime_recurrence_copy_api_attempt_zero",
+        "contract_expected_ten_slot_total_thirty_blocking_d2h_and_4408_bytes",
+        "contract_expected_ten_slot_total_1230_launch_attempts_and_successes",
+        "synthetic_retained_authority_per_slot_owned_eight_memsets_full_launch_program_and_three_fences",
+        "synthetic_retained_authority_ten_slot_total_eighty_memsets_and_thirty_fences",
+        "synthetic_retained_authority_owned_rtc_memset_launch_and_fence_rejected_ambiguous_and_in_flight_counts_zero",
+        "composition_factory_direct_call_surface_reuses_retained_authorities_without_solve_export_seal_or_native_entrypoint",
+        "strict_process_local_unsigned_non_promoting_receipt_schema",
+    }.issubset(audited_family["supported_scope"])
+    assert {
+        "current_snapshot_actual_local_gfx1030_ten_slot_triple_composition",
+        "actual_external_gfx1100_ten_slot_audit",
+        "process_wide_rocm_activity_host_transfer_or_launch_completeness",
+        "pre_window_dma_setup_teardown_or_between_case_transfer_zero",
+        "whole_process_additional_device_solve_or_export_absence",
+        "hostile_same_process_mutation_or_interposition_resistance",
+        "device_kernel_semantic_execution_success_from_ordinal_chain",
+        "device_content_or_numerical_outcome_from_ordinal_chain",
+        "iteration_host_copy_zero",
+        "standalone_receipt_provenance_authenticity_without_retained_authorities_or_signature",
+        "result_ir",
+        "reaction_member_force_recovery_or_energy",
+        "end_to_end_o_n",
+        "commercial_readiness",
+    }.issubset(audited_family["explicit_exclusions"])
+    assert {
+        "synthetic_exact_ten_slot_three_authority_composition",
+        "actual_v041_counter_type_shape_used_by_synthetic_rejected_ambiguous_and_in_flight_zero",
+        "reversed_ordinal_input_canonical_registry_order",
+        "unsealed_poisoned_and_closed_retained_lifecycle",
+        "missing_duplicate_foreign_and_wrong_expected_context_rejection",
+        "serially_identical_cross_run_retained_identity_rejection",
+        "canonical_sealed_abi_schedule_projection_and_device_lineage_splice_rejection",
+        "retained_context_result_source_registry_and_duplicate_receipt_replay_rejection",
+        "detached_claim_order_triple_hash_counter_logical_schedule_zero_launch_safe_integer_and_exact_type_forgery_rejection",
+        "detached_fixed_package_abi_source_schedule_and_program_descriptor_forgery_rejection",
+        "factory_exact_direct_call_surface_ast_and_export_seal_runtime_purity_guard",
+        "valid_payload_all_object_levels_strict_schema",
+        "public_export_and_package_schema_resource_integrity",
+        "hardware_test_loop_integration_contract_without_duplicate_solve_or_export",
+        "final_source_required_gfx1030_gate_pending",
+    }.issubset(audited_family["verification_cases"])
+    assert audited_family["claim_level"] == (
+        "exact_test_double_gfx1030_ten_slot_retained_parity_transfer_and_owned_"
+        "rtc_operation_order_composition_contract_only_hardware_pending_non_"
+        "promoting"
+    )
+
+    ordinal_audit = rows["hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"]
+    assert payload["rows"][1]["capability_id"] == (
         "hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"
     )
     assert ordinal_audit["implementation_state"] == "implemented"
@@ -163,7 +222,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         in ordinal_audit["evidence_paths"]
     )
     family_transfer = rows["hip_fgmres_model_family_host_transfer_audit_v1"]
-    assert payload["rows"][1]["capability_id"] == (
+    assert payload["rows"][2]["capability_id"] == (
         "hip_fgmres_model_family_host_transfer_audit_v1"
     )
     assert family_transfer["implementation_state"] == "implemented"
@@ -213,7 +272,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     transfer_audit = rows["hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"]
-    assert payload["rows"][2]["capability_id"] == (
+    assert payload["rows"][3]["capability_id"] == (
         "hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"
     )
     assert transfer_audit["implementation_state"] == "implemented"

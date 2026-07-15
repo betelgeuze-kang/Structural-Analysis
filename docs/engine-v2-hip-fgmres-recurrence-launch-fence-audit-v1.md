@@ -122,15 +122,17 @@ Start operation ordinal을 `b`, canonical launch 수를 `C`, continuation launch
   - ordinal audit과 transfer audit을 같은 solve/export lineage에서 검증했다.
   - 이 결과는 현재 작업 세션의 비영속 관찰이며 standalone signed hardware receipt나
     외부 실행 로그가 아니다.
-- exact 10-slot family composition: 다음 additive audited-parity 단계로 보류
+- exact 10-slot family composition: v0.2.42 additive
+  [audited parity v2](engine-v2-hip-fgmres-model-family-audited-parity-v2.md)에
+  결합 완료
 
 ## 다음 단계
 
-1. 기존 10-slot loop에 per-kernel ordinal result를 결합하되 device solve/export를
-   중복 실행하지 않는다.
-2. 별도 audited-parity v2가 세 retained result를 각각 `expected_context` authority로
-   먼저 검증한 뒤 parity, host-transfer audit, ordinal audit receipt hash를 함께
-   결속해야 좁은 iteration-host-copy claim 승격을 검토한다. Detached artifact만
-   소비하는 경로에는 이 authority들을 묶는 서명 envelope가 추가로 필요하다.
+1. **완료(v0.2.42):** 기존 10-slot loop에 per-kernel ordinal result를 결합하되
+   device solve/export를 중복 실행하지 않는다.
+2. **완료(v0.2.42):** 별도 audited-parity v2가 세 retained authority를 재생하고
+   parity, host-transfer audit, ordinal audit receipt hash와 공통 lineage를 함께
+   결속한다. 이 결과만으로 broad iteration-host-copy-zero를 승격하지 않으며 detached
+   소비 경로에는 authority들을 묶는 서명 envelope가 추가로 필요하다.
 3. Exact fence-prefix consume seal, post-fence enqueue 차단, query-recovery seal은 이
    관측형 v1보다 강한 후속 lifecycle 계약으로 분리한다.
