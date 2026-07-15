@@ -569,6 +569,11 @@ def test_hardware_cleanup_runs_every_step_and_preserves_primary_failure() -> Non
     ) == (RuntimeError,)
 
     primary = LookupError("primary")
-    cleanup = OSError("cleanup")
-    _attach_cleanup_failures(primary, [cleanup])
-    assert getattr(primary, "_engine_v2_cleanup_failures") == (cleanup,)
+    cleanup_first = OSError("cleanup-first")
+    cleanup_nested = RuntimeError("cleanup-nested")
+    _attach_cleanup_failures(primary, [cleanup_first])
+    _attach_cleanup_failures(primary, [cleanup_nested])
+    assert getattr(primary, "_engine_v2_cleanup_failures") == (
+        cleanup_first,
+        cleanup_nested,
+    )

@@ -59,11 +59,17 @@ family-v2의 canonical registry slot 순서로 다시 정렬한다.
 
 Authoritative result는 family result와 10개 `(audit context, captured result)`를 strong
 retain한다. Mint에는 각 authority를 각각의 `context.result` read 순간에
-`exported` 상태에서 캡처하지만, 후속 result
-재검증은 upstream expected-context 계약에 따라 이미 캡처한 `closed` publication도
-재생할 수 있다. 따라서 claim은 현재 liveness가 아니라 캡처 시점의 exported
-상태를 뜻한다. Serialized receipt는 구조·hash 일관성 projection일 뿐 standalone
-provenance가 아니다.
+`exported` 상태에서 캡처한다. Audit-v1 하위 expected-context validator는 캡처된
+`closed` publication을 재생할 수 있지만, 전체 composition result validator는 family
+case의 live completion-export source authority도 다시 요구한다. 따라서 전체 result는
+child cleanup 전에 검증하며 post-close full replay는 주장하지 않는다. Claim은 현재
+liveness가 아니라 각 캡처 시점의 exported 상태를 뜻한다.
+
+Serialized receipt validator는 구조·hash·순서·중복·합계 일관성을 확인하지만
+`logical_case_key`, `matrix_cell_id`, `family_observation_hash`는 source family authority
+없이 재유도할 수 없는 opaque commitment다. 이 세 필드와 하위/receipt hash를 모두
+다시 만든 detached payload는 구조 검증을 통과할 수 있으며, 그 경우도 standalone
+provenance authority가 아니다.
 
 ## 고정 영수증
 

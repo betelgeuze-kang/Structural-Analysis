@@ -110,10 +110,15 @@ def _attach_cleanup_failures(
     if not cleanup_errors:
         return
     try:
+        existing = getattr(primary, "_engine_v2_cleanup_failures", ())
+        if type(existing) is not tuple or any(
+            not isinstance(exc, BaseException) for exc in existing
+        ):
+            existing = ()
         setattr(
             primary,
             "_engine_v2_cleanup_failures",
-            tuple(cleanup_errors),
+            existing + tuple(cleanup_errors),
         )
     except Exception:
         # Cleanup diagnostics must never replace the primary failure.
