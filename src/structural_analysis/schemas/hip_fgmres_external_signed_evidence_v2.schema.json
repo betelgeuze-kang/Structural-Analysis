@@ -32,6 +32,7 @@
     "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "key_id": {
       "type": "string",
+      "maxLength": 128,
       "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
     },
     "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"},
@@ -75,9 +76,17 @@
         "issued_at_utc": {"$ref": "#/$defs/utc"},
         "expires_at_utc": {"$ref": "#/$defs/utc"},
         "expected_key_id": {"$ref": "#/$defs/key_id"},
-        "expected_key_epoch": {"type": "integer", "minimum": 1},
+        "expected_key_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
         "expected_runner_id": {"$ref": "#/$defs/id"},
-        "expected_run_sequence": {"type": "integer", "minimum": 1},
+        "expected_run_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
         "expected_release_binding_hash": {"$ref": "#/$defs/hash"},
         "expected_release_identity_receipt_schema_version": {
           "const": "structural-analysis-hip-fgmres-external-release-identity.v1"
@@ -168,7 +177,11 @@
       ],
       "properties": {
         "runner_id": {"$ref": "#/$defs/id"},
-        "run_sequence": {"type": "integer", "minimum": 1},
+        "run_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
         "runner_nonce_base64": {"type": "string", "minLength": 44, "maxLength": 44},
         "started_at_utc": {"$ref": "#/$defs/utc"},
         "completed_at_utc": {"$ref": "#/$defs/utc"},

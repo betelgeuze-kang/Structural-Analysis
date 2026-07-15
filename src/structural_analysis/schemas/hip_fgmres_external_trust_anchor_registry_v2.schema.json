@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_external_trust_anchor_registry_v2.schema.json",
+  "title": "Event-sourced package-owned external HIP FGMRES trust-anchor registry v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "evidence_scope",
+    "registry_epoch",
+    "predecessor_registry_epoch",
+    "predecessor_registry_hash",
+    "reviewer_authorities",
+    "events",
+    "registry_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v2"
+    },
+    "capability_profile": {
+      "const": "phase0_external_gfx1100_reviewed_ed25519_trust_lifecycle"
+    },
+    "evidence_scope": {
+      "const": "package_owned_event_sourced_trust_lifecycle_non_promoting"
+    },
+    "registry_epoch": {"type": "integer", "minimum": 1, "maximum": 100000},
+    "predecessor_registry_epoch": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 99999
+    },
+    "predecessor_registry_hash": {
+      "description": "Immediately preceding fixed-size rolling registry hash, or null at epoch 1.",
+      "oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]
+    },
+    "reviewer_authorities": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/reviewer_authority"}
+    },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100000,
+      "items": {"$ref": "#/$defs/event"}
+    },
+    "registry_hash": {
+      "description": "Final fixed-size rolling hash binding schema/profile/scope, epoch, predecessor hash, immutable reviewer commitment, and current head event hash.",
+      "$ref": "#/$defs/hash"
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{6})?Z$"
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "key_id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
+    },
+    "reviewer_key_id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^ed25519-review:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
+    },
+    "reviewer_authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "key_id",
+        "key_epoch",
+        "public_key_base64",
+        "public_key_sha256",
+        "valid_from_utc",
+        "valid_until_utc"
+      ],
+      "properties": {
+        "reviewer_id": {"$ref": "#/$defs/id"},
+        "key_id": {"$ref": "#/$defs/reviewer_key_id"},
+        "key_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "public_key_base64": {
+          "type": "string",
+          "minLength": 44,
+          "maxLength": 44,
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "valid_from_utc": {"$ref": "#/$defs/utc"},
+        "valid_until_utc": {"$ref": "#/$defs/utc"}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewer_id", "reviewer_key_id", "signature_base64"],
+      "properties": {
+        "reviewer_id": {"$ref": "#/$defs/id"},
+        "reviewer_key_id": {"$ref": "#/$defs/reviewer_key_id"},
+        "signature_base64": {
+          "type": "string",
+          "minLength": 88,
+          "maxLength": 88,
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      }
+    },
+    "event_common": {
+      "type": "object",
+      "required": [
+        "sequence",
+        "event_type",
+        "occurred_at_utc",
+        "previous_event_hash",
+        "action",
+        "approvals",
+        "event_hash"
+      ]
+    },
+    "event": {
+      "oneOf": [
+        {"$ref": "#/$defs/registry_initialized_event"},
+        {"$ref": "#/$defs/key_enrolled_event"},
+        {"$ref": "#/$defs/key_activated_event"},
+        {"$ref": "#/$defs/key_rotated_event"},
+        {"$ref": "#/$defs/key_retired_event"},
+        {"$ref": "#/$defs/key_revoked_event"}
+      ]
+    },
+    "registry_initialized_event": {
+      "allOf": [
+        {"$ref": "#/$defs/event_common"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sequence": {"const": 1},
+            "event_type": {"const": "registry_initialized"},
+            "occurred_at_utc": {"$ref": "#/$defs/utc"},
+            "previous_event_hash": {"type": "null"},
+            "action": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "registry_id",
+                "minimum_reviewer_approvals",
+                "reviewer_authority_count",
+                "reviewer_authority_commitment_hash"
+              ],
+              "properties": {
+                "registry_id": {
+                  "const": "structural-analysis-engine-v2-external-trust-registry"
+                },
+                "minimum_reviewer_approvals": {"const": 2},
+                "reviewer_authority_count": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 32
+                },
+                "reviewer_authority_commitment_hash": {"$ref": "#/$defs/hash"}
+              }
+            },
+            "approvals": {"type": "array", "maxItems": 0},
+            "event_hash": {"$ref": "#/$defs/hash"}
+          }
+        }
+      ]
+    },
+    "key_enrolled_event": {
+      "allOf": [
+        {"$ref": "#/$defs/event_common"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sequence": {"type": "integer", "minimum": 2},
+            "event_type": {"const": "key_enrolled"},
+            "occurred_at_utc": {"$ref": "#/$defs/utc"},
+            "previous_event_hash": {"$ref": "#/$defs/hash"},
+            "action": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enrollment_receipt"],
+              "properties": {
+                "enrollment_receipt": {
+                  "type": "object",
+                  "minProperties": 1,
+                  "maxProperties": 64
+                }
+              }
+            },
+            "approvals": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {"$ref": "#/$defs/approval"}
+            },
+            "event_hash": {"$ref": "#/$defs/hash"}
+          }
+        }
+      ]
+    },
+    "key_activated_event": {
+      "allOf": [
+        {"$ref": "#/$defs/event_common"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sequence": {"type": "integer", "minimum": 2},
+            "event_type": {"const": "key_activated"},
+            "occurred_at_utc": {"$ref": "#/$defs/utc"},
+            "previous_event_hash": {"$ref": "#/$defs/hash"},
+            "action": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["key_id", "activated_at_utc"],
+              "properties": {
+                "key_id": {"$ref": "#/$defs/key_id"},
+                "activated_at_utc": {"$ref": "#/$defs/utc"}
+              }
+            },
+            "approvals": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {"$ref": "#/$defs/approval"}
+            },
+            "event_hash": {"$ref": "#/$defs/hash"}
+          }
+        }
+      ]
+    },
+    "key_rotated_event": {
+      "allOf": [
+        {"$ref": "#/$defs/event_common"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sequence": {"type": "integer", "minimum": 2},
+            "event_type": {"const": "key_rotated"},
+            "occurred_at_utc": {"$ref": "#/$defs/utc"},
+            "previous_event_hash": {"$ref": "#/$defs/hash"},
+            "action": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["retired_key_id", "successor_key_id", "rotated_at_utc"],
+              "properties": {
+                "retired_key_id": {"$ref": "#/$defs/key_id"},
+                "successor_key_id": {"$ref": "#/$defs/key_id"},
+                "rotated_at_utc": {"$ref": "#/$defs/utc"}
+              }
+            },
+            "approvals": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {"$ref": "#/$defs/approval"}
+            },
+            "event_hash": {"$ref": "#/$defs/hash"}
+          }
+        }
+      ]
+    },
+    "key_retired_event": {
+      "allOf": [
+        {"$ref": "#/$defs/event_common"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sequence": {"type": "integer", "minimum": 2},
+            "event_type": {"const": "key_retired"},
+            "occurred_at_utc": {"$ref": "#/$defs/utc"},
+            "previous_event_hash": {"$ref": "#/$defs/hash"},
+            "action": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["key_id", "retired_at_utc", "reason"],
+              "properties": {
+                "key_id": {"$ref": "#/$defs/key_id"},
+                "retired_at_utc": {"$ref": "#/$defs/utc"},
+                "reason": {"type": "string", "minLength": 1, "maxLength": 256}
+              }
+            },
+            "approvals": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {"$ref": "#/$defs/approval"}
+            },
+            "event_hash": {"$ref": "#/$defs/hash"}
+          }
+        }
+      ]
+    },
+    "key_revoked_event": {
+      "allOf": [
+        {"$ref": "#/$defs/event_common"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sequence": {"type": "integer", "minimum": 2},
+            "event_type": {"const": "key_revoked"},
+            "occurred_at_utc": {"$ref": "#/$defs/utc"},
+            "previous_event_hash": {"$ref": "#/$defs/hash"},
+            "action": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["key_id", "revoked_at_utc", "revocation_effect", "reason"],
+              "properties": {
+                "key_id": {"$ref": "#/$defs/key_id"},
+                "revoked_at_utc": {"$ref": "#/$defs/utc"},
+                "revocation_effect": {"enum": ["prospective", "retroactive"]},
+                "reason": {"type": "string", "minLength": 1, "maxLength": 256}
+              }
+            },
+            "approvals": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {"$ref": "#/$defs/approval"}
+            },
+            "event_hash": {"$ref": "#/$defs/hash"}
+          }
+        }
+      ]
+    }
+  }
+}

@@ -15,7 +15,7 @@ import json
 import re
 from typing import Any, Literal, NoReturn
 
-from jsonschema import Draft202012Validator, SchemaError, ValidationError
+from jsonschema import Draft202012Validator, SchemaError
 
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.engine_v2.evidence.durable_replay_ledger_v1 import (
@@ -35,6 +35,7 @@ from structural_analysis.engine_v2.evidence.durable_replay_ledger_v1 import (
 
 from . import fgmres_external_release_identity_v1 as release_identity
 from . import fgmres_external_signed_evidence_v2 as signed_evidence
+from . import fgmres_external_trust_anchor_registry_v2 as trust_registry_v2
 
 
 HIP_FGMRES_EXTERNAL_REPLAY_LEDGER_RECEIPT_SCHEMA_VERSION_V2 = (
@@ -58,6 +59,10 @@ _ID_RE = re.compile(r"^[a-z0-9][a-z0-9._:-]{2,127}$")
 _KEY_ID_RE = re.compile(r"^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$")
 _RUNNER_ID_RE = re.compile(r"^[a-z0-9][a-z0-9._-]{2,63}$")
 _ZERO_HASH = "sha256:" + "0" * 64
+_MAX_ERROR_PATH_CHARS = 512
+_MAX_KEY_ID_CHARS = 128
+_MAX_KEY_EPOCH = 100_000
+_MAX_SEQUENCE = 9_223_372_036_854_775_807
 _LEDGERED_CHALLENGE_MINT = object()
 _DURABLY_VERIFIED_MINT = object()
 
@@ -92,7 +97,7 @@ class HipFgmresExternalReplayLedgerV2Error(RuntimeError):
         if code not in HIP_FGMRES_EXTERNAL_REPLAY_LEDGER_STABLE_ERROR_CODES_V2:
             code = "hip_fgmres_external_replay_ledger_v2_storage_error"
         self.code = code
-        self.path = path if type(path) is str and path.startswith("/") else "/"
+        self.path = _bounded_path(path)
         text = message if type(message) is str and message else code
         self.message = text[:240]
         super().__init__(f"{self.code}@{self.path}: {self.message}")
@@ -133,6 +138,16 @@ class HipFgmresExternalReplayLedgerClaimsV2:
 
     def to_dict(self) -> dict[str, bool]:
         return {name: getattr(self, name) for name in self.__dataclass_fields__}
+
+
+def _ledger_claims_are_exact_v2(
+    claims: HipFgmresExternalReplayLedgerClaimsV2,
+) -> bool:
+    expected = HipFgmresExternalReplayLedgerClaimsV2()
+    return all(
+        getattr(claims, field) is getattr(expected, field)
+        for field in expected.__dataclass_fields__
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -245,7 +260,13 @@ class HipFgmresExternalLedgeredChallengeV2:
 class HipFgmresExternalDurablyVerifiedSignedEvidenceV2:
     """Process-local authority joining identity, signed, and durable receipts."""
 
-    __slots__ = ("_identity_receipt", "_signed_receipt", "_ledger_receipt", "_mint")
+    __slots__ = (
+        "_identity_receipt",
+        "_signed_receipt",
+        "_ledger_receipt",
+        "_trust_registry",
+        "_mint",
+    )
 
     def __init__(
         self,
@@ -253,6 +274,7 @@ class HipFgmresExternalDurablyVerifiedSignedEvidenceV2:
         identity_receipt: release_identity.HipFgmresExternalReleaseIdentityReceiptV1,
         signed_receipt: Any,
         ledger_receipt: HipFgmresExternalReplayLedgerReceiptV2,
+        trust_registry: trust_registry_v2.HipFgmresExternalTrustAnchorRegistryResultV2,
         mint: object,
     ) -> None:
         if mint is not _DURABLY_VERIFIED_MINT:
@@ -267,6 +289,16 @@ class HipFgmresExternalDurablyVerifiedSignedEvidenceV2:
             signed_receipt
         )
         validate_hip_fgmres_external_replay_ledger_receipt_v2(ledger_receipt)
+        try:
+            trust_registry_v2.validate_hip_fgmres_external_trust_anchor_registry_result_v2(
+                trust_registry
+            )
+        except trust_registry_v2.HipFgmresExternalTrustAnchorRegistryV2Error as exc:
+            _fail(
+                "hip_fgmres_external_replay_ledger_v2_durable_result_invalid",
+                "/result/trust_registry",
+                exc.code,
+            )
         if (
             identity_receipt.release_binding_hash != signed_receipt.release_binding_hash
             or signed_receipt.release_identity_receipt_schema_version
@@ -290,6 +322,7 @@ class HipFgmresExternalDurablyVerifiedSignedEvidenceV2:
             or ledger_receipt.runner_id != signed_receipt.runner_id
             or ledger_receipt.run_sequence != signed_receipt.run_sequence
             or ledger_receipt.trust_registry_hash != signed_receipt.trust_registry_hash
+            or signed_receipt.trust_registry_hash != trust_registry.registry_hash
             or ledger_receipt.fixture_registry_hash
             != signed_receipt.fixture_registry_hash
         ):
@@ -300,6 +333,7 @@ class HipFgmresExternalDurablyVerifiedSignedEvidenceV2:
         self._identity_receipt = identity_receipt
         self._signed_receipt = signed_receipt
         self._ledger_receipt = ledger_receipt
+        self._trust_registry = trust_registry
         self._mint = mint
 
     @property
@@ -315,6 +349,12 @@ class HipFgmresExternalDurablyVerifiedSignedEvidenceV2:
     @property
     def ledger_receipt(self) -> HipFgmresExternalReplayLedgerReceiptV2:
         return self._ledger_receipt
+
+    @property
+    def trust_registry(
+        self,
+    ) -> trust_registry_v2.HipFgmresExternalTrustAnchorRegistryResultV2:
+        return self._trust_registry
 
 
 def _require_replay_ledger(ledger: Any) -> DurableReplayLedgerV1:
@@ -382,9 +422,7 @@ def issue_hip_fgmres_external_evidence_challenge_with_replay_ledger_v2(
     ledger = _require_replay_ledger(ledger)
     release_identity._validate_verified_release(verified_release)
     release_identity.verify_hip_fgmres_external_release_artifacts_v1(verified_release)
-    trust_registry = (
-        signed_evidence.signed_evidence_v1._TRUST_REGISTRY_LOADER_AUTHORITY()
-    )
+    trust_registry = trust_registry_v2._TRUST_REGISTRY_LOADER_AUTHORITY_V2()
     challenge = signed_evidence._issue_challenge_with_registry_v2(
         verified_release=verified_release,
         key_id=key_id,
@@ -490,9 +528,7 @@ def verify_hip_fgmres_external_signed_evidence_with_replay_ledger_v2(
     challenge = signed_evidence._rehydrate_hip_fgmres_external_challenge_v2(
         stored_challenge
     )
-    trust_registry = (
-        signed_evidence.signed_evidence_v1._TRUST_REGISTRY_LOADER_AUTHORITY()
-    )
+    trust_registry = trust_registry_v2._TRUST_REGISTRY_LOADER_AUTHORITY_V2()
     fixture_registry = (
         signed_evidence.signed_evidence_v1._FIXTURE_REGISTRY_LOADER_AUTHORITY()
     )
@@ -586,6 +622,7 @@ def verify_hip_fgmres_external_signed_evidence_with_replay_ledger_v2(
         identity_receipt=verified_release.identity_receipt,
         signed_receipt=signed_receipt,
         ledger_receipt=ledger_receipt,
+        trust_registry=trust_registry,
         mint=_DURABLY_VERIFIED_MINT,
     )
 
@@ -638,9 +675,7 @@ def recover_hip_fgmres_external_signed_evidence_from_replay_ledger_v2(
     challenge = signed_evidence._rehydrate_hip_fgmres_external_challenge_v2(
         accepted.challenge_payload
     )
-    trust_registry = (
-        signed_evidence.signed_evidence_v1._TRUST_REGISTRY_LOADER_AUTHORITY()
-    )
+    trust_registry = trust_registry_v2._TRUST_REGISTRY_LOADER_AUTHORITY_V2()
     fixture_registry = (
         signed_evidence.signed_evidence_v1._FIXTURE_REGISTRY_LOADER_AUTHORITY()
     )
@@ -677,6 +712,7 @@ def recover_hip_fgmres_external_signed_evidence_from_replay_ledger_v2(
         identity_receipt=verified_release.identity_receipt,
         signed_receipt=reverified_receipt,
         ledger_receipt=ledger_receipt,
+        trust_registry=trust_registry,
         mint=_DURABLY_VERIFIED_MINT,
     )
 
@@ -689,6 +725,21 @@ def validate_hip_fgmres_external_replay_ledger_receipt_v2(
     if (
         type(receipt) is not HipFgmresExternalReplayLedgerReceiptV2
         or type(receipt.claims) is not HipFgmresExternalReplayLedgerClaimsV2
+        or not _ledger_claims_are_exact_v2(receipt.claims)
+        or type(receipt.key_id) is not str
+        or not 1 <= len(receipt.key_id) <= _MAX_KEY_ID_CHARS
+        or type(receipt.key_epoch) is not int
+        or not 1 <= receipt.key_epoch <= _MAX_KEY_EPOCH
+        or type(receipt.run_sequence) is not int
+        or not 1 <= receipt.run_sequence <= _MAX_SEQUENCE
+        or any(
+            type(value) is not int or not 1 <= value <= _MAX_SEQUENCE
+            for value in (
+                receipt.reservation_event_sequence,
+                receipt.acceptance_event_sequence,
+                receipt.acceptance_commit_head_event_sequence,
+            )
+        )
     ):
         _fail("hip_fgmres_external_replay_ledger_v2_receipt_type_invalid", "/")
     payload = _receipt_payload(receipt, include_hash=True)
@@ -910,6 +961,28 @@ def _require_signed_identity_matches_receipt(
 
 
 def _parse_signed_receipt(payload: dict[str, Any]) -> Any:
+    expected_fields = frozenset(
+        signed_evidence.HipFgmresExternalSignedEvidenceReceiptV2.__dataclass_fields__
+    )
+    expected_claim_fields = frozenset(
+        signed_evidence.HipFgmresExternalSignedEvidenceClaimsV2.__dataclass_fields__
+    )
+    required_slots = signed_evidence.HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1
+    if (
+        type(payload) is not dict
+        or payload.keys() != expected_fields
+        or type(payload.get("verified_slot_ids")) is not list
+        or len(payload["verified_slot_ids"]) != len(required_slots)
+        or tuple(payload["verified_slot_ids"]) != required_slots
+        or type(payload.get("verified_slot_count")) is not int
+        or payload["verified_slot_count"] != len(required_slots)
+        or type(payload.get("claims")) is not dict
+        or payload["claims"].keys() != expected_claim_fields
+    ):
+        _fail(
+            "hip_fgmres_external_replay_ledger_v2_signed_receipt_mismatch",
+            "/signed_receipt",
+        )
     try:
         values = dict(payload)
         values["verified_slot_ids"] = tuple(values["verified_slot_ids"])
@@ -924,7 +997,7 @@ def _parse_signed_receipt(payload: dict[str, Any]) -> Any:
         _fail(
             "hip_fgmres_external_replay_ledger_v2_signed_receipt_mismatch",
             "/signed_receipt",
-            f"{type(exc).__name__}: {exc}",
+            type(exc).__name__,
         )
 
 
@@ -981,25 +1054,26 @@ def _validate_schema(payload: dict[str, Any]) -> None:
             .read_text(encoding="utf-8")
         )
         Draft202012Validator.check_schema(schema)
-        Draft202012Validator(schema).validate(payload)
+        error = next(Draft202012Validator(schema).iter_errors(payload), None)
     except SchemaError as exc:
         _fail(
             "hip_fgmres_external_replay_ledger_v2_schema_invalid",
             "/schema",
-            exc.message,
-        )
-    except ValidationError as exc:
-        pointer = "/" + "/".join(str(part) for part in exc.absolute_path)
-        _fail(
-            "hip_fgmres_external_replay_ledger_v2_schema_validation_failed",
-            pointer,
-            exc.message,
+            type(exc).__name__,
         )
     except (OSError, ValueError, TypeError) as exc:
         _fail(
             "hip_fgmres_external_replay_ledger_v2_schema_invalid",
             "/schema",
-            f"{type(exc).__name__}: {exc}",
+            type(exc).__name__,
+        )
+    if error is not None:
+        pointer = _bounded_json_pointer(error.absolute_path)
+        keyword = str(error.validator)[:64]
+        _fail(
+            "hip_fgmres_external_replay_ledger_v2_schema_validation_failed",
+            pointer,
+            f"schema keyword {keyword} rejected value",
         )
 
 
@@ -1015,7 +1089,7 @@ def _parse_utc(value: str, path: str) -> datetime:
         _fail(
             "hip_fgmres_external_replay_ledger_v2_acceptance_time_invalid",
             path,
-            str(exc),
+            type(exc).__name__,
         )
     if parsed.tzinfo is None or parsed.utcoffset() != timezone.utc.utcoffset(parsed):
         _fail(
@@ -1044,6 +1118,30 @@ def _utc_now() -> datetime:
 
 def _fail(code: str, path: str, message: str = "") -> NoReturn:
     raise HipFgmresExternalReplayLedgerV2Error(code, path, message)
+
+
+def _bounded_path(path: str) -> str:
+    value = path if type(path) is str and path.startswith("/") else "/"
+    if len(value) <= _MAX_ERROR_PATH_CHARS:
+        return value
+    return value[: _MAX_ERROR_PATH_CHARS - 3] + "..."
+
+
+def _bounded_json_pointer(parts: Any) -> str:
+    result = "/"
+    for part in parts:
+        if len(result) >= _MAX_ERROR_PATH_CHARS:
+            break
+        segment = str(part)
+        addition = ("" if result == "/" else "/") + segment
+        remaining = _MAX_ERROR_PATH_CHARS - len(result)
+        if len(addition) <= remaining:
+            result += addition
+            continue
+        if remaining > 3:
+            result += addition[: remaining - 3] + "..."
+        break
+    return result
 
 
 __all__ = [

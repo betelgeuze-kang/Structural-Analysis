@@ -40,10 +40,11 @@ from structural_analysis.engine_v2.evidence.ed25519_v1 import (
 
 from . import fgmres_external_release_identity_v1 as release_identity_v1
 from . import fgmres_external_signed_evidence_v1 as signed_evidence_v1
+from . import fgmres_external_trust_anchor_registry_v2 as trust_registry_v2
 from .fgmres_external_signed_evidence_v1 import HipFgmresExternalReleaseBindingV1
-from .fgmres_external_trust_anchor_registry_v1 import (
-    HipFgmresExternalTrustAnchorRegistryResultV1,
-    HipFgmresExternalTrustAnchorV1,
+from .fgmres_external_trust_anchor_registry_v2 import (
+    HipFgmresExternalTrustAnchorRegistryResultV2,
+    HipFgmresExternalTrustAnchorV2,
 )
 from .fgmres_fixture_registry_v1 import (
     HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1,
@@ -84,6 +85,11 @@ _ENVELOPE_MAX_BYTES_V2 = 4 * 1024 * 1024
 _ENVELOPE_MAX_JSON_NODES_V2 = 200_000
 _ENVELOPE_MAX_JSON_DEPTH_V2 = 64
 _ENVELOPE_MAX_ERROR_PATH_CHARS_V2 = 512
+_MAX_KEY_ID_CHARS_V2 = 128
+_MAX_RUNNER_ID_CHARS_V2 = 64
+_MAX_KEY_EPOCH_V2 = 100_000
+_MAX_RUN_SEQUENCE_V2 = 9_223_372_036_854_775_807
+_CANONICAL_32_BYTE_BASE64_CHARS_V2 = 44
 _SIGNATURE_DOMAIN_V2 = (
     b"structural-analysis\0hip-fgmres-external-gfx1100-evidence\0v2\0"
 )
@@ -98,6 +104,9 @@ _UTC_RE = re.compile(
 _ZERO_HASH = "sha256:" + "0" * 64
 _CHALLENGE_MINT_V2 = object()
 _VERIFIED_SIGNED_EVIDENCE_MINT_V2 = object()
+_TRUST_REGISTRY_LOADER_AUTHORITY_V2 = (
+    trust_registry_v2.load_hip_fgmres_external_trust_anchor_registry_v2
+)
 
 
 class HipFgmresExternalSignedEvidenceV2Error(RuntimeError):
@@ -105,8 +114,10 @@ class HipFgmresExternalSignedEvidenceV2Error(RuntimeError):
 
     def __init__(self, code: str, path: str, message: str = "") -> None:
         self.code = code
-        self.path = path if type(path) is str and path.startswith("/") else "/"
-        self.message = (message or code)[:240]
+        error_path = path if type(path) is str and path.startswith("/") else "/"
+        self.path = error_path[:_ENVELOPE_MAX_ERROR_PATH_CHARS_V2]
+        error_message = message if type(message) is str and message else code
+        self.message = error_message[:240]
         super().__init__(f"{self.code}@{self.path}: {self.message}")
 
 
@@ -231,6 +242,16 @@ class HipFgmresExternalSignedEvidenceClaimsV2:
         return {name: getattr(self, name) for name in self.__dataclass_fields__}
 
 
+def _signed_claims_are_exact_v2(
+    claims: HipFgmresExternalSignedEvidenceClaimsV2,
+) -> bool:
+    expected = HipFgmresExternalSignedEvidenceClaimsV2()
+    return all(
+        getattr(claims, field) is getattr(expected, field)
+        for field in expected.__dataclass_fields__
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class HipFgmresExternalSignedEvidenceReceiptV2:
     schema_version: str
@@ -266,13 +287,14 @@ class HipFgmresExternalSignedEvidenceReceiptV2:
 class HipFgmresExternalVerifiedSignedEvidenceV2:
     """Process-local authority for a freshly replayed, verified v2 envelope."""
 
-    __slots__ = ("_identity_receipt", "_signed_receipt", "_mint")
+    __slots__ = ("_identity_receipt", "_signed_receipt", "_trust_registry", "_mint")
 
     def __init__(
         self,
         *,
         identity_receipt: release_identity_v1.HipFgmresExternalReleaseIdentityReceiptV1,
         signed_receipt: HipFgmresExternalSignedEvidenceReceiptV2,
+        trust_registry: HipFgmresExternalTrustAnchorRegistryResultV2,
         mint: object,
     ) -> None:
         if mint is not _VERIFIED_SIGNED_EVIDENCE_MINT_V2:
@@ -280,6 +302,7 @@ class HipFgmresExternalVerifiedSignedEvidenceV2:
                 "hip_fgmres_external_v2_verified_signed_evidence_construction_forbidden",
                 "/result",
             )
+        _validate_exact_package_trust_registry_v2(trust_registry)
         release_identity_v1.validate_hip_fgmres_external_release_identity_receipt_v1(
             identity_receipt
         )
@@ -290,6 +313,7 @@ class HipFgmresExternalVerifiedSignedEvidenceV2:
             != identity_receipt.schema_version
             or signed_receipt.release_identity_receipt_hash
             != identity_receipt.receipt_hash
+            or signed_receipt.trust_registry_hash != trust_registry.registry_hash
         ):
             _fail(
                 "hip_fgmres_external_v2_verified_signed_evidence_binding_mismatch",
@@ -297,6 +321,7 @@ class HipFgmresExternalVerifiedSignedEvidenceV2:
             )
         self._identity_receipt = identity_receipt
         self._signed_receipt = signed_receipt
+        self._trust_registry = trust_registry
         self._mint = mint
 
     @property
@@ -309,9 +334,73 @@ class HipFgmresExternalVerifiedSignedEvidenceV2:
     def signed_receipt(self) -> HipFgmresExternalSignedEvidenceReceiptV2:
         return self._signed_receipt
 
+    @property
+    def trust_registry(self) -> HipFgmresExternalTrustAnchorRegistryResultV2:
+        return self._trust_registry
+
 
 class _DuplicateKeyError(ValueError):
     pass
+
+
+def _load_exact_package_trust_registry_v2() -> (
+    HipFgmresExternalTrustAnchorRegistryResultV2
+):
+    """Load and replay only the package-owned v2 registry authority."""
+
+    try:
+        registry = _TRUST_REGISTRY_LOADER_AUTHORITY_V2()
+        return _validate_exact_package_trust_registry_v2(registry)
+    except HipFgmresExternalSignedEvidenceV2Error:
+        raise
+    except trust_registry_v2.HipFgmresExternalTrustAnchorRegistryV2Error as exc:
+        _fail(
+            "hip_fgmres_external_v2_trust_registry_invalid",
+            exc.path,
+            exc.code,
+        )
+
+
+def _validate_exact_package_trust_registry_v2(
+    registry: HipFgmresExternalTrustAnchorRegistryResultV2,
+) -> HipFgmresExternalTrustAnchorRegistryResultV2:
+    if type(registry) is not HipFgmresExternalTrustAnchorRegistryResultV2:
+        _fail("hip_fgmres_external_v2_trust_registry_type_invalid", "/trust_registry")
+    try:
+        validated = trust_registry_v2.validate_hip_fgmres_external_trust_anchor_registry_result_v2(
+            registry
+        )
+    except trust_registry_v2.HipFgmresExternalTrustAnchorRegistryV2Error as exc:
+        _fail(
+            "hip_fgmres_external_v2_trust_registry_invalid",
+            exc.path,
+            exc.code,
+        )
+    if validated is not registry:
+        _fail("hip_fgmres_external_v2_trust_registry_invalid", "/trust_registry")
+    return registry
+
+
+def _validate_trust_registry_snapshot_v2(
+    registry: HipFgmresExternalTrustAnchorRegistryResultV2,
+) -> HipFgmresExternalTrustAnchorRegistryResultV2:
+    """Validate a v2 snapshot for private integration and synthetic tests."""
+
+    if type(registry) is not HipFgmresExternalTrustAnchorRegistryResultV2:
+        _fail("hip_fgmres_external_v2_trust_registry_type_invalid", "/trust_registry")
+    try:
+        validated = trust_registry_v2._validate_hip_fgmres_external_trust_anchor_registry_snapshot_result_v2(
+            registry
+        )
+    except trust_registry_v2.HipFgmresExternalTrustAnchorRegistryV2Error as exc:
+        _fail(
+            "hip_fgmres_external_v2_trust_registry_invalid",
+            exc.path,
+            exc.code,
+        )
+    if validated is not registry:
+        _fail("hip_fgmres_external_v2_trust_registry_invalid", "/trust_registry")
+    return registry
 
 
 def issue_hip_fgmres_external_evidence_challenge_for_verified_release_v2(
@@ -326,7 +415,7 @@ def issue_hip_fgmres_external_evidence_challenge_for_verified_release_v2(
 ) -> HipFgmresExternalChallengeV2:
     """Freshly replay a mint-guarded release and issue a v2 challenge."""
 
-    registry = signed_evidence_v1._TRUST_REGISTRY_LOADER_AUTHORITY()
+    registry = _load_exact_package_trust_registry_v2()
     return _issue_challenge_with_registry_v2(
         verified_release=verified_release,
         key_id=key_id,
@@ -347,7 +436,7 @@ def verify_hip_fgmres_external_signed_evidence_for_verified_release_v2(
 ) -> HipFgmresExternalVerifiedSignedEvidenceV2:
     """Return process-local authority after final replay and challenge consumption."""
 
-    trust_registry = signed_evidence_v1._TRUST_REGISTRY_LOADER_AUTHORITY()
+    trust_registry = _load_exact_package_trust_registry_v2()
     fixture_registry = signed_evidence_v1._FIXTURE_REGISTRY_LOADER_AUTHORITY()
     signed_receipt = _verify_with_authorities_v2(
         envelope_bytes,
@@ -359,6 +448,7 @@ def verify_hip_fgmres_external_signed_evidence_for_verified_release_v2(
     return HipFgmresExternalVerifiedSignedEvidenceV2(
         identity_receipt=verified_release.identity_receipt,
         signed_receipt=signed_receipt,
+        trust_registry=trust_registry,
         mint=_VERIFIED_SIGNED_EVIDENCE_MINT_V2,
     )
 
@@ -372,6 +462,19 @@ def validate_hip_fgmres_external_signed_evidence_receipt_v2(
         type(receipt) is not HipFgmresExternalSignedEvidenceReceiptV2
         or type(receipt.verified_slot_ids) is not tuple
         or type(receipt.claims) is not HipFgmresExternalSignedEvidenceClaimsV2
+        or not _signed_claims_are_exact_v2(receipt.claims)
+        or type(receipt.key_id) is not str
+        or not 1 <= len(receipt.key_id) <= _MAX_KEY_ID_CHARS_V2
+        or type(receipt.runner_id) is not str
+        or not 1 <= len(receipt.runner_id) <= _MAX_RUNNER_ID_CHARS_V2
+        or type(receipt.key_epoch) is not int
+        or not 1 <= receipt.key_epoch <= _MAX_KEY_EPOCH_V2
+        or type(receipt.run_sequence) is not int
+        or not 1 <= receipt.run_sequence <= _MAX_RUN_SEQUENCE_V2
+        or type(receipt.verified_slot_count) is not int
+        or receipt.verified_slot_count
+        != len(HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1)
+        or receipt.verified_slot_ids != HIP_FGMRES_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1
     ):
         _fail("hip_fgmres_external_v2_signed_receipt_type_invalid", "/")
     payload = _verification_receipt_payload_v2(receipt, include_hash=True)
@@ -423,16 +526,18 @@ def _issue_challenge_with_registry_v2(
     request_id: str,
     campaign_id: str,
     ttl_seconds: int,
-    registry: HipFgmresExternalTrustAnchorRegistryResultV1,
+    registry: HipFgmresExternalTrustAnchorRegistryResultV2,
     now: datetime | None = None,
 ) -> HipFgmresExternalChallengeV2:
+    _validate_trust_registry_snapshot_v2(registry)
     binding, identity = _fresh_verified_release_snapshot_v2(verified_release)
     if (
-        type(registry) is not HipFgmresExternalTrustAnchorRegistryResultV1
-        or type(key_id) is not str
+        type(key_id) is not str
+        or not 1 <= len(key_id) <= _MAX_KEY_ID_CHARS_V2
         or type(runner_id) is not str
+        or not 1 <= len(runner_id) <= _MAX_RUNNER_ID_CHARS_V2
         or type(run_sequence) is not int
-        or run_sequence <= 0
+        or not 1 <= run_sequence <= _MAX_RUN_SEQUENCE_V2
         or type(request_id) is not str
         or _ID_RE.fullmatch(request_id) is None
         or type(campaign_id) is not str
@@ -494,7 +599,6 @@ def _rehydrate_hip_fgmres_external_challenge_v2(
     payload: dict[str, Any],
 ) -> HipFgmresExternalChallengeV2:
     """Rehydrate an exact durable-authorized v2 challenge payload."""
-
     restored = _validate_stored_challenge_payload_v2(payload)
     return HipFgmresExternalChallengeV2(restored, mint=_CHALLENGE_MINT_V2)
 
@@ -505,7 +609,7 @@ def _validate_stored_challenge_payload_v2(
     if type(payload) is not dict:
         _fail("hip_fgmres_external_v2_stored_challenge_type_invalid", "/challenge")
     expected_fields = frozenset(_ChallengePayloadV2.__dataclass_fields__)
-    if frozenset(payload) != expected_fields:
+    if payload.keys() != expected_fields:
         _fail("hip_fgmres_external_v2_stored_challenge_fields_invalid", "/challenge")
     string_fields = tuple(
         name
@@ -519,7 +623,10 @@ def _validate_stored_challenge_payload_v2(
                 f"/challenge/{field}",
             )
     for field in ("expected_key_epoch", "expected_run_sequence"):
-        if type(payload[field]) is not int or payload[field] <= 0:
+        maximum = (
+            _MAX_KEY_EPOCH_V2 if field == "expected_key_epoch" else _MAX_RUN_SEQUENCE_V2
+        )
+        if type(payload[field]) is not int or not 1 <= payload[field] <= maximum:
             _fail(
                 "hip_fgmres_external_v2_stored_challenge_field_invalid",
                 f"/challenge/{field}",
@@ -530,7 +637,9 @@ def _validate_stored_challenge_payload_v2(
         or _ID_RE.fullmatch(payload["request_id"]) is None
         or payload["audience"] != _AUDIENCE_V2
         or _ID_RE.fullmatch(payload["campaign_id"]) is None
+        or len(payload["expected_key_id"]) > _MAX_KEY_ID_CHARS_V2
         or _KEY_ID_RE.fullmatch(payload["expected_key_id"]) is None
+        or len(payload["expected_runner_id"]) > _MAX_RUNNER_ID_CHARS_V2
         or _RUNNER_ID_RE.fullmatch(payload["expected_runner_id"]) is None
         or _HASH_RE.fullmatch(payload["expected_release_binding_hash"]) is None
         or payload["expected_release_identity_receipt_schema_version"]
@@ -541,6 +650,7 @@ def _validate_stored_challenge_payload_v2(
         or payload["expected_suite_id"] != HIP_FGMRES_FIXTURE_REGISTRY_SUITE_ID_V1
         or payload["expected_key_id"]
         != f"ed25519:{payload['expected_runner_id']}:v{payload['expected_key_epoch']}"
+        or len(payload["nonce_base64"]) != _CANONICAL_32_BYTE_BASE64_CHARS_V2
     ):
         _fail("hip_fgmres_external_v2_stored_challenge_semantics_invalid", "/challenge")
     try:
@@ -617,7 +727,7 @@ def _verify_with_authorities_v2(
     *,
     challenge: HipFgmresExternalChallengeV2,
     verified_release: release_identity_v1.HipFgmresExternalVerifiedReleaseV1,
-    trust_registry: HipFgmresExternalTrustAnchorRegistryResultV1,
+    trust_registry: HipFgmresExternalTrustAnchorRegistryResultV2,
     fixture_registry: HipFgmresFixtureRegistryResultV1,
     now: datetime | None = None,
     success_commit_hook: (
@@ -628,8 +738,7 @@ def _verify_with_authorities_v2(
 
     if type(challenge) is not HipFgmresExternalChallengeV2:
         _fail("hip_fgmres_external_v2_challenge_type_invalid", "/challenge")
-    if type(trust_registry) is not HipFgmresExternalTrustAnchorRegistryResultV1:
-        _fail("hip_fgmres_external_v2_trust_registry_type_invalid", "/trust_registry")
+    _validate_trust_registry_snapshot_v2(trust_registry)
     if type(fixture_registry) is not HipFgmresFixtureRegistryResultV1:
         _fail(
             "hip_fgmres_external_v2_fixture_registry_type_invalid", "/fixture_registry"
@@ -898,13 +1007,13 @@ def _validate_payload_claims_v2(claims: dict[str, Any]) -> None:
 
 
 def _resolve_active_key_v2(
-    registry: HipFgmresExternalTrustAnchorRegistryResultV1,
+    registry: HipFgmresExternalTrustAnchorRegistryResultV2,
     *,
     key_id: str,
     runner_id: str,
     run_sequence: int,
     observed_at: datetime,
-) -> HipFgmresExternalTrustAnchorV1:
+) -> HipFgmresExternalTrustAnchorV2:
     matches = tuple(key for key in registry.keys if key.key_id == key_id)
     if len(matches) != 1:
         _fail("hip_fgmres_external_v2_trust_anchor_not_found", "/key_id")
@@ -912,6 +1021,14 @@ def _resolve_active_key_v2(
     valid_from = _parse_trust_anchor_utc_v2(
         key.valid_from_utc,
         "/trust_anchor/valid_from_utc",
+    )
+    activated_at = (
+        None
+        if key.activated_at_utc is None
+        else _parse_trust_anchor_utc_v2(
+            key.activated_at_utc,
+            "/trust_anchor/activated_at_utc",
+        )
     )
     valid_until = (
         None
@@ -926,13 +1043,15 @@ def _resolve_active_key_v2(
         or key.runner_id != runner_id
         or key.allowed_architecture_base != "gfx1100"
         or key.allowed_suite_id != HIP_FGMRES_FIXTURE_REGISTRY_SUITE_ID_V1
+        or activated_at is None
         or run_sequence < key.minimum_run_sequence
         or (
             key.maximum_run_sequence is not None
             and run_sequence > key.maximum_run_sequence
         )
         or observed_at < valid_from
-        or (valid_until is not None and observed_at > valid_until)
+        or (activated_at is not None and observed_at < activated_at)
+        or (valid_until is not None and observed_at >= valid_until)
     ):
         _fail("hip_fgmres_external_v2_trust_anchor_not_active", "/key_id")
     return key
@@ -1011,11 +1130,11 @@ def _parse_canonical_envelope_v2(raw: bytes) -> dict[str, Any]:
         )
         _reject_nonfinite_v2(payload, path="/envelope")
         canonical = canonical_json_bytes(payload)
-    except _DuplicateKeyError as exc:
+    except _DuplicateKeyError:
         _fail(
             "hip_fgmres_external_v2_envelope_duplicate_key",
             "/envelope",
-            str(exc)[:128],
+            "duplicate object member",
         )
     except RecursionError:
         _fail("hip_fgmres_external_v2_envelope_extent_invalid", "/envelope")
@@ -1082,8 +1201,8 @@ def _format_envelope_json_path_v2(
     for segment in reversed(segments):
         if len(result) >= _ENVELOPE_MAX_ERROR_PATH_CHARS_V2:
             break
-        addition = "/" + segment
         remaining = _ENVELOPE_MAX_ERROR_PATH_CHARS_V2 - len(result)
+        addition = "/" + segment[:remaining]
         if len(addition) <= remaining:
             result += addition
             continue
@@ -1113,17 +1232,31 @@ def _validate_json_schema_v2(
     except Exception as exc:
         _fail("hip_fgmres_external_v2_schema_invalid", path, type(exc).__name__)
     if error is not None:
-        location = (
-            path.rstrip("/") + "/" + "/".join(str(part) for part in error.absolute_path)
-        )
-        if len(location) > _ENVELOPE_MAX_ERROR_PATH_CHARS_V2:
-            location = location[: _ENVELOPE_MAX_ERROR_PATH_CHARS_V2 - 3] + "..."
+        location = _bounded_schema_path_v2(path, error.absolute_path)
         keyword = str(error.validator)[:64]
         _fail(
             "hip_fgmres_external_v2_schema_validation_failed",
             location,
             f"schema keyword {keyword} rejected value",
         )
+
+
+def _bounded_schema_path_v2(path: str, parts: Any) -> str:
+    result = path.rstrip("/") or "/"
+    for part in parts:
+        if len(result) >= _ENVELOPE_MAX_ERROR_PATH_CHARS_V2:
+            break
+        segment = str(part)
+        separator = "" if result == "/" else "/"
+        remaining = _ENVELOPE_MAX_ERROR_PATH_CHARS_V2 - len(result)
+        addition = separator + segment[:remaining]
+        if len(addition) <= remaining:
+            result += addition
+            continue
+        if remaining > 3:
+            result += addition[: remaining - 3] + "..."
+        break
+    return result
 
 
 def _parse_utc_v2(value: str, path: str) -> datetime:

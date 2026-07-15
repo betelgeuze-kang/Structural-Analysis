@@ -209,9 +209,26 @@ SHA-256은
 모듈 2개와 schema 3개 포함, private-key 표식 부재, 격리 설치 뒤 public import와
 v2 ledger initialize/close/reopen/audit를 확인했다.
 
+## v0.2.37 additive trust-authority integration
+
+v0.2.37 feature-branch milestone은 v2 signed envelope/receipt wire schema를 바꾸지
+않고 `expected_trust_registry_hash` 권한을 event-sourced trust registry v2로
+교체한다. Public challenge/verify와 durable issue/acceptance/recovery는 exact
+registry-v2 package authority를 다시 읽고, process-local verified wrapper가
+registry result를 identity/signed/ledger receipt와 직접 결속한다. V1
+registry result, `enrolled`/`retired`/`revoked` key, registry hash drift는
+fail-closed다.
+
+현재 package registry는 init reviewer commitment만 있는 epoch 1이며
+reviewer/key/active 수는 `0/0/0`이다. 합성 reviewer/private key로 실행한
+PoP·quorum·activation·rotation/revocation 회귀는 protocol 검증이지 실제
+reviewer/HSM 운영 또는 hardware evidence가 아니다. 세부 계약과 해시는
+[reviewed trust-anchor lifecycle v2](engine-v2-hip-fgmres-reviewed-trust-anchor-lifecycle-v2.md)에서
+고정한다.
+
 ## 다음 순서
 
-1. trust registry lifecycle와 격리 runner/HSM public-key enrollment
+1. 실제 reviewer root bootstrap/migration과 격리 runner/HSM public-key enrollment
 2. 최종 candidate의 실제 external `gfx1100` fixed-suite `10/10`
 3. 동일 final artifact의 local `gfx1030` `10/10` 재실행
 4. external monotonic anchor와 historical trust/revocation recovery

@@ -1,0 +1,26 @@
+{
+  "schema_version": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v2",
+  "capability_profile": "phase0_external_gfx1100_reviewed_ed25519_trust_lifecycle",
+  "evidence_scope": "package_owned_event_sourced_trust_lifecycle_non_promoting",
+  "registry_epoch": 1,
+  "predecessor_registry_epoch": 0,
+  "predecessor_registry_hash": null,
+  "reviewer_authorities": [],
+  "events": [
+    {
+      "sequence": 1,
+      "event_type": "registry_initialized",
+      "occurred_at_utc": "2026-07-15T00:00:00Z",
+      "previous_event_hash": null,
+      "action": {
+        "registry_id": "structural-analysis-engine-v2-external-trust-registry",
+        "minimum_reviewer_approvals": 2,
+        "reviewer_authority_count": 0,
+        "reviewer_authority_commitment_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "approvals": [],
+      "event_hash": "sha256:0742df80dcb3c737362fac6c4c409668976b10a030a35f5305e9951f527b1813"
+    }
+  ],
+  "registry_hash": "sha256:5dc12aa7bb553f1852eb702f1d0ad6f3b927f193dcd7ce28f85a5c9658d6b1e4"
+}

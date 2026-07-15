@@ -7,10 +7,12 @@ import structural_analysis.engine_v2.assembly_backend as assembly_backend
 import structural_analysis.engine_v2.backends.hip as hip_backend
 import structural_analysis.engine_v2.evidence as evidence
 from structural_analysis.engine_v2.assembly_backend import (
+    fgmres_external_key_enrollment_v1 as external_key_enrollment,
     fgmres_external_release_identity_v1 as external_release_identity,
     fgmres_external_replay_ledger_v1 as external_replay_ledger,
     fgmres_external_replay_ledger_v2 as external_replay_ledger_v2,
     fgmres_external_signed_evidence_v2 as external_signed_evidence_v2,
+    fgmres_external_trust_anchor_registry_v2 as external_trust_registry_v2,
 )
 from structural_analysis.engine_v2.evidence import (
     dependency_lock_v1,
@@ -74,6 +76,8 @@ ARTIFACT_EVIDENCE_MODULES = (
 )
 RELEASE_IDENTITY_EXPORTS = tuple(external_release_identity.__all__)
 REPLAY_LEDGER_EXPORTS = tuple(external_replay_ledger.__all__)
+KEY_ENROLLMENT_EXPORTS = tuple(external_key_enrollment.__all__)
+TRUST_REGISTRY_V2_EXPORTS = tuple(external_trust_registry_v2.__all__)
 SIGNED_EVIDENCE_V2_EXPORTS = tuple(external_signed_evidence_v2.__all__)
 REPLAY_LEDGER_V2_EXPORTS = tuple(external_replay_ledger_v2.__all__)
 
@@ -109,6 +113,8 @@ def test_external_replay_ledger_surfaces_are_exported_from_engine_v2() -> None:
 
 def test_external_signed_identity_v2_surfaces_are_exported_from_engine_v2() -> None:
     for module, names in (
+        (external_key_enrollment, KEY_ENROLLMENT_EXPORTS),
+        (external_trust_registry_v2, TRUST_REGISTRY_V2_EXPORTS),
         (external_signed_evidence_v2, SIGNED_EVIDENCE_V2_EXPORTS),
         (external_replay_ledger_v2, REPLAY_LEDGER_V2_EXPORTS),
     ):
@@ -143,6 +149,8 @@ def test_parity_and_device_identity_schemas_are_package_resources() -> None:
         "hip_fgmres_external_signed_evidence_v2.schema.json",
         "hip_fgmres_external_signed_evidence_receipt_v2.schema.json",
         "hip_fgmres_external_replay_ledger_receipt_v2.schema.json",
+        "hip_fgmres_external_key_enrollment_v1.schema.json",
+        "hip_fgmres_external_trust_anchor_registry_v2.schema.json",
     ):
         resource = schema_root.joinpath(name)
         assert resource.is_file()
@@ -154,6 +162,13 @@ def test_parity_and_device_identity_schemas_are_package_resources() -> None:
     ).joinpath("registry.v1.json")
     assert trust_registry.is_file()
     assert b'"keys": []' in trust_registry.read_bytes()
+
+    trust_registry_v2 = files(
+        "structural_analysis.engine_v2.assembly_backend.fixtures."
+        "fgmres_external_trust_anchors_v2"
+    ).joinpath("registry.v2.json")
+    assert trust_registry_v2.is_file()
+    assert b'"reviewer_authorities": []' in trust_registry_v2.read_bytes()
 
 
 def test_public_all_lists_have_no_duplicates_or_missing_attributes() -> None:

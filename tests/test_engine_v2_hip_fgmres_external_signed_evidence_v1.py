@@ -16,11 +16,17 @@ from structural_analysis.engine_v2.assembly_backend import (
     fgmres_external_release_identity_v1 as release_identity_module,
     fgmres_external_signed_evidence_v1 as evidence_module,
     fgmres_external_signed_evidence_v2 as evidence_v2_module,
+    fgmres_external_trust_anchor_registry_v2 as trust_registry_v2_module,
     fgmres_model_case_parity_v1 as case_module,
     fgmres_model_family_parity_v2 as family_module,
 )
 from structural_analysis.engine_v2.assembly_backend.fgmres_completion_export_v1 import (
     _bundle_hash,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_external_key_enrollment_v1 import (
+    compile_hip_fgmres_external_key_enrollment_challenge_v1,
+    compile_hip_fgmres_external_key_enrollment_proof_message_v1,
+    verify_hip_fgmres_external_key_enrollment_proof_v1,
 )
 from structural_analysis.engine_v2.assembly_backend.fgmres_external_signed_evidence_v1 import (
     HIP_FGMRES_EXTERNAL_SIGNED_EVIDENCE_CAPABILITY_PROFILE_V1,
@@ -493,6 +499,172 @@ def _family_receipt(
     )
 
 
+def _synthetic_active_trust_registry_v2(
+    *,
+    fixture_registry: Any,
+    runner_private_key: Ed25519PrivateKey,
+) -> Any:
+    reviewer_private_keys = (
+        Ed25519PrivateKey.generate(),
+        Ed25519PrivateKey.generate(),
+    )
+    reviewer_rows = []
+    for index, reviewer_private_key in enumerate(reviewer_private_keys, start=1):
+        reviewer_id = f"reviewer.{index}"
+        reviewer_public_key = reviewer_private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+        reviewer_rows.append(
+            {
+                "reviewer_id": reviewer_id,
+                "key_id": f"ed25519-review:{reviewer_id}:v1",
+                "key_epoch": 1,
+                "public_key_base64": base64.b64encode(reviewer_public_key).decode(
+                    "ascii"
+                ),
+                "public_key_sha256": sha256_prefixed(reviewer_public_key),
+                "valid_from_utc": "2025-01-01T00:00:00Z",
+                "valid_until_utc": "2027-01-01T00:00:00Z",
+            }
+        )
+    reviewer_objects = tuple(
+        trust_registry_v2_module.HipFgmresExternalTrustReviewerAuthorityV2(**row)
+        for row in reviewer_rows
+    )
+    initialized_at = "2026-01-01T00:00:00Z"
+    enrolled_at = "2026-01-01T00:00:01Z"
+    activated_at = "2026-01-01T00:00:02Z"
+    events: list[dict[str, Any]] = [
+        {
+            "sequence": 1,
+            "event_type": "registry_initialized",
+            "occurred_at_utc": initialized_at,
+            "previous_event_hash": None,
+            "action": {
+                "registry_id": (
+                    trust_registry_v2_module.HIP_FGMRES_EXTERNAL_TRUST_ANCHOR_REGISTRY_ID_V2
+                ),
+                "minimum_reviewer_approvals": 2,
+                "reviewer_authority_count": len(reviewer_rows),
+                "reviewer_authority_commitment_hash": canonical_hash(reviewer_rows),
+            },
+            "approvals": [],
+        }
+    ]
+    events[0]["event_hash"] = canonical_hash(events[0])
+
+    def seal_manifest() -> dict[str, Any]:
+        prefix_hashes = trust_registry_v2_module._registry_prefix_hashes_v2(
+            events=events,
+            reviewers=reviewer_objects,
+        )
+        manifest = {
+            "schema_version": (
+                trust_registry_v2_module.HIP_FGMRES_EXTERNAL_TRUST_ANCHOR_REGISTRY_SCHEMA_VERSION_V2
+            ),
+            "capability_profile": (
+                trust_registry_v2_module.HIP_FGMRES_EXTERNAL_TRUST_ANCHOR_REGISTRY_CAPABILITY_PROFILE_V2
+            ),
+            "evidence_scope": (
+                trust_registry_v2_module.HIP_FGMRES_EXTERNAL_TRUST_ANCHOR_REGISTRY_EVIDENCE_SCOPE_V2
+            ),
+            "registry_epoch": len(events),
+            "predecessor_registry_epoch": len(events) - 1,
+            "predecessor_registry_hash": (
+                None if len(events) == 1 else prefix_hashes[-2]
+            ),
+            "reviewer_authorities": reviewer_rows,
+            "events": events,
+        }
+        manifest["registry_hash"] = prefix_hashes[-1]
+        return manifest
+
+    runner_public_key = runner_private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.Raw,
+        format=serialization.PublicFormat.Raw,
+    )
+    predecessor_manifest = seal_manifest()
+    enrollment_challenge = compile_hip_fgmres_external_key_enrollment_challenge_v1(
+        nonce=b"E" * 32,
+        request_id="request:enroll:external-runner:v1",
+        runner_id="external-runner",
+        key_id="ed25519:external-runner:v1",
+        key_epoch=1,
+        predecessor_registry_epoch=1,
+        predecessor_registry_hash=predecessor_manifest["registry_hash"],
+        target_registry_epoch=2,
+        predecessor_key=None,
+        public_key=runner_public_key,
+        public_key_sha256=sha256_prefixed(runner_public_key),
+        allowed_architecture_base="gfx1100",
+        allowed_suite_id=HIP_FGMRES_FIXTURE_REGISTRY_SUITE_ID_V1,
+        allowed_fixture_registry_bytes_sha256=(fixture_registry.registry_bytes_sha256),
+        allowed_fixture_registry_hash=fixture_registry.registry_hash,
+        minimum_run_sequence=1,
+        maximum_run_sequence=10,
+        valid_from_utc=activated_at,
+        valid_until_utc="2027-01-01T00:00:00Z",
+        runner_declared_key_origin="runner_declared_isolated_hsm",
+        attestation_digest_sha256=None,
+    )
+    enrollment_proof = runner_private_key.sign(
+        compile_hip_fgmres_external_key_enrollment_proof_message_v1(
+            enrollment_challenge
+        )
+    )
+    enrollment_receipt = verify_hip_fgmres_external_key_enrollment_proof_v1(
+        enrollment_challenge,
+        proof_signature_base64=base64.b64encode(enrollment_proof).decode("ascii"),
+    )
+
+    def append_approved_event(
+        *, event_type: str, occurred_at_utc: str, action: dict[str, Any]
+    ) -> None:
+        event = {
+            "sequence": len(events) + 1,
+            "event_type": event_type,
+            "occurred_at_utc": occurred_at_utc,
+            "previous_event_hash": events[-1]["event_hash"],
+            "action": action,
+            "approvals": [],
+        }
+        approval_message = trust_registry_v2_module._review_approval_message_v2(event)
+        event["approvals"] = [
+            {
+                "reviewer_id": row["reviewer_id"],
+                "reviewer_key_id": row["key_id"],
+                "signature_base64": base64.b64encode(
+                    reviewer_private_key.sign(approval_message)
+                ).decode("ascii"),
+            }
+            for row, reviewer_private_key in zip(
+                reviewer_rows, reviewer_private_keys, strict=True
+            )
+        ]
+        event["event_hash"] = canonical_hash(event)
+        events.append(event)
+
+    append_approved_event(
+        event_type="key_enrolled",
+        occurred_at_utc=enrolled_at,
+        action={"enrollment_receipt": enrollment_receipt.to_dict()},
+    )
+    append_approved_event(
+        event_type="key_activated",
+        occurred_at_utc=activated_at,
+        action={
+            "key_id": "ed25519:external-runner:v1",
+            "activated_at_utc": activated_at,
+        },
+    )
+    manifest = seal_manifest()
+    return trust_registry_v2_module._compile_hip_fgmres_external_trust_anchor_registry_snapshot_v2(
+        manifest,
+        registry_bytes_sha256=canonical_hash({"synthetic-v2-trust-registry": manifest}),
+    )
+
+
 @pytest.fixture(scope="module")
 def evidence_material() -> dict[str, Any]:
     registry = load_hip_fgmres_fixture_registry_v1()
@@ -526,6 +698,10 @@ def evidence_material() -> dict[str, Any]:
         registry_epoch=1,
         keys=(trust_key,),
         receipt_hash=_hash("synthetic-trust-registry-receipt"),
+    )
+    trust_registry_v2 = _synthetic_active_trust_registry_v2(
+        fixture_registry=registry,
+        runner_private_key=private_key,
     )
     release = compile_hip_fgmres_external_release_binding_v1(
         wheel_filename="structural_optimization_workbench-1.0.0-py3-none-any.whl",
@@ -583,6 +759,7 @@ def evidence_material() -> dict[str, Any]:
         "registry": registry,
         "private_key": private_key,
         "trust_registry": trust_registry,
+        "trust_registry_v2": trust_registry_v2,
         "release": release,
         "runner": runner,
         "family": family,
@@ -1339,7 +1516,7 @@ def _build_envelope_v2(
             request_id="request:v2-test-001",
             campaign_id="campaign:v2-test-001",
             ttl_seconds=900,
-            registry=material["trust_registry"],
+            registry=material["trust_registry_v2"],
             now=material["now"],
         )
     registry = material["registry"]
@@ -1418,7 +1595,7 @@ def _verify_v2(
         raw,
         challenge=challenge,
         verified_release=verified_release,
-        trust_registry=material["trust_registry"],
+        trust_registry=material["trust_registry_v2"],
         fixture_registry=material["registry"],
         now=material["now"] + timedelta(seconds=3),
     )
@@ -1435,9 +1612,14 @@ def test_v2_signed_release_identity_hash_happy_path_is_direct_and_non_promoting(
         lambda value: value,
     )
     monkeypatch.setattr(
-        evidence_module,
-        "_TRUST_REGISTRY_LOADER_AUTHORITY",
-        lambda: evidence_material["trust_registry"],
+        evidence_v2_module,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: evidence_material["trust_registry_v2"],
+    )
+    monkeypatch.setattr(
+        trust_registry_v2_module,
+        "validate_hip_fgmres_external_trust_anchor_registry_result_v2",
+        trust_registry_v2_module._validate_hip_fgmres_external_trust_anchor_registry_snapshot_result_v2,
     )
     monkeypatch.setattr(
         evidence_module,
@@ -1463,6 +1645,8 @@ def test_v2_signed_release_identity_hash_happy_path_is_direct_and_non_promoting(
         type(verified) is evidence_v2_module.HipFgmresExternalVerifiedSignedEvidenceV2
     )
     assert verified.identity_receipt is verified_release.identity_receipt
+    assert verified.trust_registry is evidence_material["trust_registry_v2"]
+    assert receipt.trust_registry_hash == verified.trust_registry.registry_hash
     assert receipt.release_identity_receipt_hash == (
         verified_release.identity_receipt.receipt_hash
     )
@@ -1473,12 +1657,40 @@ def test_v2_signed_release_identity_hash_happy_path_is_direct_and_non_promoting(
     assert not receipt.claims.promotion_eligible
     assert not receipt.claims.commercial_ready
 
+    mismatched_draft = replace(
+        receipt,
+        trust_registry_hash=_hash("other-v2-trust-registry"),
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    mismatched_receipt = replace(
+        mismatched_draft,
+        receipt_hash=canonical_hash(
+            evidence_v2_module._verification_receipt_payload_v2(
+                mismatched_draft,
+                include_hash=False,
+            )
+        ),
+    )
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as registry_mismatch:
+        evidence_v2_module.HipFgmresExternalVerifiedSignedEvidenceV2(
+            identity_receipt=verified_release.identity_receipt,
+            signed_receipt=mismatched_receipt,
+            trust_registry=evidence_material["trust_registry_v2"],
+            mint=evidence_v2_module._VERIFIED_SIGNED_EVIDENCE_MINT_V2,
+        )
+    assert registry_mismatch.value.code == (
+        "hip_fgmres_external_v2_verified_signed_evidence_binding_mismatch"
+    )
+
     with pytest.raises(
         evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
     ) as forged_authority:
         evidence_v2_module.HipFgmresExternalVerifiedSignedEvidenceV2(
             identity_receipt=verified_release.identity_receipt,
             signed_receipt=receipt,
+            trust_registry=evidence_material["trust_registry_v2"],
             mint=object(),
         )
     assert forged_authority.value.code == (
@@ -1567,6 +1779,188 @@ def test_v1_and_v2_envelopes_cannot_downgrade_across_verifiers(
     assert not v1_challenge.consumed
     assert not v2_challenge.consumed
 
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as v1_registry_into_v2:
+        evidence_v2_module._issue_challenge_with_registry_v2(
+            verified_release=verified_release,
+            key_id="ed25519:external-runner:v1",
+            runner_id="external-runner",
+            run_sequence=1,
+            request_id="request:v2-v1-registry-downgrade",
+            campaign_id="campaign:v2-v1-registry-downgrade",
+            ttl_seconds=900,
+            registry=evidence_material["trust_registry"],
+            now=evidence_material["now"],
+        )
+    assert v1_registry_into_v2.value.code == (
+        "hip_fgmres_external_v2_trust_registry_type_invalid"
+    )
+
+    monkeypatch.setattr(
+        evidence_v2_module,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: evidence_material["trust_registry"],
+    )
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as public_v1_registry_into_v2:
+        evidence_v2_module.issue_hip_fgmres_external_evidence_challenge_for_verified_release_v2(
+            verified_release=verified_release,
+            key_id="ed25519:external-runner:v1",
+            runner_id="external-runner",
+            run_sequence=1,
+            request_id="request:v2-public-v1-registry-downgrade",
+            campaign_id="campaign:v2-public-v1-registry-downgrade",
+            ttl_seconds=900,
+        )
+    assert public_v1_registry_into_v2.value.code == (
+        "hip_fgmres_external_v2_trust_registry_type_invalid"
+    )
+
+
+@pytest.mark.parametrize(
+    ("status", "revocation_effect"),
+    [
+        ("enrolled", None),
+        ("retired", None),
+        ("revoked", "prospective"),
+        ("revoked", "retroactive"),
+    ],
+)
+def test_v2_only_current_active_registry_key_can_issue_challenge(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+    status: str,
+    revocation_effect: str | None,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+    active_key = evidence_material["trust_registry_v2"].keys[0]
+    terminal = status in {"retired", "revoked"}
+    key = replace(
+        active_key,
+        status=status,
+        activation_event_hash=(
+            None if status == "enrolled" else active_key.activation_event_hash
+        ),
+        activated_at_utc=(
+            None if status == "enrolled" else active_key.activated_at_utc
+        ),
+        terminal_event_hash=(
+            _hash(f"synthetic-v2-{status}-event") if terminal else None
+        ),
+        terminal_at_utc="2026-07-14T00:00:00Z" if terminal else None,
+        revocation_effect=revocation_effect,
+        terminal_reason=f"synthetic-{status}" if terminal else None,
+    )
+    draft = replace(
+        evidence_material["trust_registry_v2"],
+        keys=(key,),
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    registry = replace(
+        draft,
+        receipt_hash=canonical_hash(
+            trust_registry_v2_module._result_payload_v2(draft, include_hash=False)
+        ),
+    )
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module._issue_challenge_with_registry_v2(
+            verified_release=verified_release,
+            key_id=key.key_id,
+            runner_id=key.runner_id,
+            run_sequence=key.minimum_run_sequence,
+            request_id=f"request:v2-inactive-{status}",
+            campaign_id=f"campaign:v2-inactive-{status}",
+            ttl_seconds=900,
+            registry=registry,
+            now=evidence_material["now"],
+        )
+    assert caught.value.code == "hip_fgmres_external_v2_trust_anchor_not_active"
+
+
+def test_v2_active_key_valid_until_is_exclusive(
+    evidence_material: dict[str, Any],
+) -> None:
+    active_key = evidence_material["trust_registry_v2"].keys[0]
+    valid_until = datetime.fromisoformat(
+        active_key.valid_until_utc.replace("Z", "+00:00")
+    )
+    resolved = evidence_v2_module._resolve_active_key_v2(
+        evidence_material["trust_registry_v2"],
+        key_id=active_key.key_id,
+        runner_id=active_key.runner_id,
+        run_sequence=active_key.maximum_run_sequence,
+        observed_at=valid_until - timedelta(microseconds=1),
+    )
+    assert resolved is active_key
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module._resolve_active_key_v2(
+            evidence_material["trust_registry_v2"],
+            key_id=active_key.key_id,
+            runner_id=active_key.runner_id,
+            run_sequence=active_key.maximum_run_sequence,
+            observed_at=valid_until,
+        )
+    assert caught.value.code == "hip_fgmres_external_v2_trust_anchor_not_active"
+
+
+def test_v2_active_key_cannot_authorize_before_reviewer_activation(
+    evidence_material: dict[str, Any],
+) -> None:
+    active_key = evidence_material["trust_registry_v2"].keys[0]
+    activated_at = datetime.fromisoformat(
+        active_key.activated_at_utc.replace("Z", "+00:00")
+    )
+    key = replace(active_key, valid_from_utc="2026-01-01T00:00:00Z")
+    draft = replace(
+        evidence_material["trust_registry_v2"],
+        keys=(key,),
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    registry = replace(
+        draft,
+        receipt_hash=canonical_hash(
+            trust_registry_v2_module._result_payload_v2(draft, include_hash=False)
+        ),
+    )
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as before_activation:
+        evidence_v2_module._resolve_active_key_v2(
+            registry,
+            key_id=key.key_id,
+            runner_id=key.runner_id,
+            run_sequence=key.minimum_run_sequence,
+            observed_at=activated_at - timedelta(microseconds=1),
+        )
+    assert before_activation.value.code == (
+        "hip_fgmres_external_v2_trust_anchor_not_active"
+    )
+
+    assert (
+        evidence_v2_module._resolve_active_key_v2(
+            registry,
+            key_id=key.key_id,
+            runner_id=key.runner_id,
+            run_sequence=key.minimum_run_sequence,
+            observed_at=activated_at,
+        )
+        is key
+    )
+
 
 def test_v2_artifact_drift_during_verify_fails_before_challenge_consumption(
     evidence_material: dict[str, Any],
@@ -1628,6 +2022,132 @@ def test_v2_public_empty_registry_path_fails_closed(
         )
 
     assert caught.value.code == "hip_fgmres_external_v2_trust_anchor_not_found"
+
+
+def _stored_challenge_payload_v2() -> dict[str, Any]:
+    unsigned = {
+        "schema_version": (
+            evidence_v2_module.HIP_FGMRES_EXTERNAL_CHALLENGE_SCHEMA_VERSION_V2
+        ),
+        "request_id": "request:v2-stored-hostile",
+        "audience": evidence_v2_module._AUDIENCE_V2,
+        "campaign_id": "campaign:v2-stored-hostile",
+        "nonce_base64": base64.b64encode(b"N" * 32).decode("ascii"),
+        "issued_at_utc": "2026-07-15T00:00:00.000000Z",
+        "expires_at_utc": "2026-07-15T00:15:00.000000Z",
+        "expected_key_id": "ed25519:external-runner:v1",
+        "expected_key_epoch": 1,
+        "expected_runner_id": "external-runner",
+        "expected_run_sequence": 1,
+        "expected_release_binding_hash": _hash("stored-v2-release"),
+        "expected_release_identity_receipt_schema_version": (
+            release_identity_module.HIP_FGMRES_EXTERNAL_RELEASE_IDENTITY_SCHEMA_VERSION_V1
+        ),
+        "expected_release_identity_receipt_hash": _hash("stored-v2-identity"),
+        "expected_trust_registry_hash": _hash("stored-v2-trust"),
+        "expected_architecture_base": "gfx1100",
+        "expected_suite_id": HIP_FGMRES_FIXTURE_REGISTRY_SUITE_ID_V1,
+    }
+    return {"challenge_id": canonical_hash(unsigned), **unsigned}
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "expected_code"),
+    [
+        pytest.param(
+            "expected_key_epoch",
+            10**100_000,
+            "hip_fgmres_external_v2_stored_challenge_field_invalid",
+            id="key-epoch",
+        ),
+        pytest.param(
+            "expected_run_sequence",
+            10**100_000,
+            "hip_fgmres_external_v2_stored_challenge_field_invalid",
+            id="run-sequence",
+        ),
+        pytest.param(
+            "expected_key_id",
+            "ed25519:external-runner:v" + "9" * 100_001,
+            "hip_fgmres_external_v2_stored_challenge_semantics_invalid",
+            id="key-id",
+        ),
+        pytest.param(
+            "expected_runner_id",
+            "r" * 100_001,
+            "hip_fgmres_external_v2_stored_challenge_semantics_invalid",
+            id="runner-id",
+        ),
+        pytest.param(
+            "nonce_base64",
+            "A" * 100_001,
+            "hip_fgmres_external_v2_stored_challenge_semantics_invalid",
+            id="nonce",
+        ),
+    ],
+)
+def test_v2_stored_challenge_rejects_hostile_extents_before_hashing(
+    field: str,
+    value: Any,
+    expected_code: str,
+) -> None:
+    payload = _stored_challenge_payload_v2()
+    payload[field] = value
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module._rehydrate_hip_fgmres_external_challenge_v2(payload)
+
+    assert caught.value.code == expected_code
+    assert len(caught.value.path) <= (
+        evidence_v2_module._ENVELOPE_MAX_ERROR_PATH_CHARS_V2
+    )
+    assert len(str(caught.value)) < 800
+
+
+def test_v2_challenge_issue_rejects_hostile_run_sequence(
+    evidence_material: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    verified_release = _make_verified_release_v2(evidence_material)
+    monkeypatch.setattr(
+        release_identity_module,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module._issue_challenge_with_registry_v2(
+            verified_release=verified_release,
+            key_id="ed25519:external-runner:v1",
+            runner_id="external-runner",
+            run_sequence=10**100_000,
+            request_id="request:v2-hostile-run",
+            campaign_id="campaign:v2-hostile-run",
+            ttl_seconds=900,
+            registry=evidence_material["trust_registry_v2"],
+            now=evidence_material["now"],
+        )
+
+    assert caught.value.code == "hip_fgmres_external_v2_challenge_request_invalid"
+    assert len(str(caught.value)) < 800
+
+
+def test_v2_duplicate_member_error_does_not_echo_giant_key() -> None:
+    key = b"x" * 100_001
+    raw = b'{"' + key + b'":0,"' + key + b'":1}'
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module._parse_canonical_envelope_v2(raw)
+
+    assert caught.value.code == "hip_fgmres_external_v2_envelope_duplicate_key"
+    assert caught.value.message == "duplicate object member"
+    assert len(str(caught.value)) < 800
 
 
 def test_v2_parser_rejects_excessive_depth_with_bounded_error() -> None:
@@ -1850,6 +2370,61 @@ def _detached_signed_receipt_v2() -> Any:
             )
         ),
     )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        pytest.param("key_epoch", 100_001, id="key-epoch"),
+        pytest.param("run_sequence", 10**100_000, id="run-sequence"),
+        pytest.param(
+            "key_id",
+            "ed25519:external-runner:v" + "9" * 100_001,
+            id="key-id",
+        ),
+        pytest.param("verified_slot_count", 10**100_000, id="slot-count"),
+        pytest.param("verified_slot_ids", ("x" * 100_001,), id="slot-ids"),
+    ],
+)
+def test_v2_detached_signed_receipt_rejects_hostile_extents_before_payload(
+    field: str,
+    value: Any,
+) -> None:
+    hostile = replace(_detached_signed_receipt_v2(), **{field: value})
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module.validate_hip_fgmres_external_signed_evidence_receipt_v2(
+            hostile
+        )
+
+    assert caught.value.code == "hip_fgmres_external_v2_signed_receipt_type_invalid"
+    assert len(str(caught.value)) < 800
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("canonical_envelope_verified", 1),
+        ("commercial_ready", 0),
+    ],
+)
+def test_v2_detached_signed_receipt_rejects_bool_int_claim_alias(
+    field: str,
+    value: int,
+) -> None:
+    valid = _detached_signed_receipt_v2()
+    hostile = replace(valid, claims=replace(valid.claims, **{field: value}))
+
+    with pytest.raises(
+        evidence_v2_module.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        evidence_v2_module.validate_hip_fgmres_external_signed_evidence_receipt_v2(
+            hostile
+        )
+
+    assert caught.value.code == "hip_fgmres_external_v2_signed_receipt_type_invalid"
 
 
 @pytest.mark.parametrize(

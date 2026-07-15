@@ -125,6 +125,46 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
+    trust_lifecycle = rows["hip_fgmres_reviewed_trust_anchor_lifecycle_v2"]
+    assert trust_lifecycle["implementation_state"] == "implemented"
+    assert trust_lifecycle["promotion_state"] == "contract_only"
+    assert {
+        "detached_domain_separated_ed25519_key_proof_of_possession",
+        "canonical_nonidentity_prime_order_ed25519_runner_and_reviewer_keys",
+        "package_owned_reviewer_authority_commitment",
+        "quorum_signed_append_only_registry_events",
+        "fixed_shape_rolling_registry_hash_and_linear_event_key_replay",
+        "reviewer_activation_time_preserved_and_enforced_as_authorization_lower_bound",
+        "cross_role_unique_public_keys_contiguous_key_epochs_and_nonoverlapping_sequence_time_ranges",
+        "exact_registry_v2_authority_for_signed_evidence_v2_and_replay_ledger_v2",
+    }.issubset(trust_lifecycle["supported_scope"])
+    assert {
+        "operational_reviewer_bootstrap",
+        "active_package_runner_key",
+        "actual_hsm_or_hardware_token_key",
+        "hostile_same_process_python_module_mutation",
+        "actual_external_gfx1100_signed_cell",
+        "historical_recovery_across_package_trust_or_fixture_registry_rotation",
+        "external_transparency_log_or_monotonic_anchor",
+        "same_artifact_two_architecture_evidence",
+        "result_ir",
+        "iteration_host_copy_zero",
+        "performance_speedup",
+        "end_to_end_o_n",
+        "commercial_readiness",
+    }.issubset(trust_lifecycle["explicit_exclusions"])
+    assert {
+        "low_order_identity_noncanonical_and_mixed_order_ed25519_point_rejection",
+        "pre_reviewer_activation_authorization_rejection",
+        "reviewer_runner_cross_role_and_global_runner_public_key_reuse_rejection",
+        "signed_v2_exact_registry_type_and_inactive_key_rejection",
+        "durable_v2_registry_drift_revocation_and_v1_downgrade_rejection",
+    }.issubset(trust_lifecycle["verification_cases"])
+    assert (
+        trust_lifecycle["claim_level"]
+        == "reviewed_event_sourced_trust_lifecycle_contract_reviewer_roots_zero_active_keys_zero_external_cells_zero_non_promoting"
+    )
+
     replay_ledger = rows["hip_fgmres_external_replay_ledger_v1"]
     assert replay_ledger["implementation_state"] == "implemented"
     assert replay_ledger["promotion_state"] == "contract_only"

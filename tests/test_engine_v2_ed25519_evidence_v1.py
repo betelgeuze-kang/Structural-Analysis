@@ -7,6 +7,7 @@ import pytest
 from structural_analysis.engine_v2.evidence.ed25519_v1 import (
     Ed25519EvidenceV1Error,
     decode_canonical_base64_v1,
+    validate_ed25519_public_key_v1,
     verify_ed25519_signature_v1,
 )
 
@@ -47,6 +48,22 @@ def test_base64_rejects_noncanonical_or_wrong_extent(
         )
 
 
+def test_base64_extent_is_rejected_before_decoder_allocation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def forbidden_decode(*_: object, **__: object) -> bytes:
+        raise AssertionError("decoder must not receive an impossible extent")
+
+    monkeypatch.setattr(base64, "b64decode", forbidden_decode)
+    with pytest.raises(Ed25519EvidenceV1Error) as caught:
+        decode_canonical_base64_v1(
+            "A" * 1_000_000,
+            expected_byte_count=32,
+            path="/test",
+        )
+    assert caught.value.code == "ed25519_base64_noncanonical"
+
+
 def test_signature_tamper_and_wrong_key_fail_closed() -> None:
     signature = base64.b64encode(b"\x00" * 64).decode("ascii")
     with pytest.raises(Ed25519EvidenceV1Error) as caught:
@@ -56,3 +73,23 @@ def test_signature_tamper_and_wrong_key_fail_closed() -> None:
             message=b"domain-separated-message",
         )
     assert caught.value.code == "ed25519_signature_invalid"
+
+
+@pytest.mark.parametrize(
+    "public_key",
+    [
+        b"\x00" * 32,
+        b"\x01" + b"\x00" * 31,
+        (2**255 - 19).to_bytes(32, "little"),
+        # RFC 8032 vector-two public point plus the order-two torsion point.
+        bytes.fromhex(
+            "b0bfe83c17bc76a56d48f558b2e481436367d330d13b69733f32aa0ed50b99f3"
+        ),
+    ],
+)
+def test_low_order_identity_and_noncanonical_public_keys_are_rejected(
+    public_key: bytes,
+) -> None:
+    with pytest.raises(Ed25519EvidenceV1Error) as caught:
+        validate_ed25519_public_key_v1(public_key)
+    assert caught.value.code == "ed25519_public_key_invalid"

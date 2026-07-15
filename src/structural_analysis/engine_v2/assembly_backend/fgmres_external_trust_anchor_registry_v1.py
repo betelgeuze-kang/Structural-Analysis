@@ -21,7 +21,9 @@ from structural_analysis.engine_v2.contracts._canonical import (
     sha256_prefixed,
 )
 from structural_analysis.engine_v2.evidence.ed25519_v1 import (
+    Ed25519EvidenceV1Error,
     decode_canonical_base64_v1,
+    validate_ed25519_public_key_v1,
 )
 
 from .fgmres_fixture_registry_v1 import (
@@ -85,11 +87,20 @@ class HipFgmresExternalTrustAnchorV1:
 
     @property
     def public_key_bytes(self) -> bytes:
-        return decode_canonical_base64_v1(
-            self.public_key_base64,
-            expected_byte_count=32,
-            path="/keys/public_key_base64",
-        )
+        try:
+            return validate_ed25519_public_key_v1(
+                decode_canonical_base64_v1(
+                    self.public_key_base64,
+                    expected_byte_count=32,
+                    path="/keys/public_key_base64",
+                )
+            )
+        except Ed25519EvidenceV1Error as exc:
+            _fail(
+                "hip_fgmres_external_trust_registry_key_invalid",
+                "/keys/public_key_base64",
+                exc.code,
+            )
 
     def to_dict(self) -> dict[str, Any]:
         return {name: getattr(self, name) for name in self.__dataclass_fields__}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import inspect
 import json
 from pathlib import Path
@@ -45,8 +46,17 @@ def test_package_registry_is_intentionally_empty_and_nonpromoting() -> None:
     assert manifest["claims"]["external_gfx1100_signed_cells"] == 0
     assert not manifest["claims"]["durable_replay_protection"]
     assert not manifest["claims"]["promotion_eligible"]
-    assert validate_hip_fgmres_external_trust_anchor_registry_result_v1(result) is result
-    assert tuple(inspect.signature(load_hip_fgmres_external_trust_anchor_registry_v1).parameters) == ()
+    assert (
+        validate_hip_fgmres_external_trust_anchor_registry_result_v1(result) is result
+    )
+    assert (
+        tuple(
+            inspect.signature(
+                load_hip_fgmres_external_trust_anchor_registry_v1
+            ).parameters
+        )
+        == ()
+    )
 
 
 def test_registry_resource_matches_strict_schema_and_declared_hash() -> None:
@@ -74,9 +84,36 @@ def test_code_anchored_raw_resource_tamper_is_rejected(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     original = RESOURCE.read_bytes()
-    monkeypatch.setattr(registry_module, "_read_fixed_resource", lambda: original + b" ")
+    monkeypatch.setattr(
+        registry_module, "_read_fixed_resource", lambda: original + b" "
+    )
     with pytest.raises(HipFgmresExternalTrustAnchorRegistryV1Error) as caught:
         load_hip_fgmres_external_trust_anchor_registry_v1()
     assert caught.value.code == (
         "hip_fgmres_external_trust_registry_resource_hash_mismatch"
     )
+
+
+def test_v1_registry_wraps_low_order_key_as_stable_registry_error() -> None:
+    low_order = b"\x00" * 32
+    anchor = registry_module.HipFgmresExternalTrustAnchorV1(
+        key_id="ed25519:external-runner:v1",
+        key_epoch=1,
+        status="active",
+        runner_id="external-runner",
+        public_key_base64=base64.b64encode(low_order).decode("ascii"),
+        public_key_sha256="sha256:" + "0" * 64,
+        allowed_architecture_base="gfx1100",
+        allowed_suite_id="synthetic",
+        allowed_fixture_registry_bytes_sha256="sha256:" + "0" * 64,
+        allowed_fixture_registry_hash="sha256:" + "0" * 64,
+        minimum_run_sequence=1,
+        maximum_run_sequence=None,
+        valid_from_utc="2026-01-01T00:00:00Z",
+        valid_until_utc=None,
+        revoked_at_utc=None,
+        revocation_reason=None,
+    )
+    with pytest.raises(HipFgmresExternalTrustAnchorRegistryV1Error) as caught:
+        _ = anchor.public_key_bytes
+    assert caught.value.code == "hip_fgmres_external_trust_registry_key_invalid"

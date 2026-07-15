@@ -47,14 +47,23 @@
     "signed_payload_sha256": {"$ref": "#/$defs/hash"},
     "key_id": {
       "type": "string",
+      "maxLength": 128,
       "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
     },
-    "key_epoch": {"type": "integer", "minimum": 1},
+    "key_epoch": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100000
+    },
     "runner_id": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
     },
-    "run_sequence": {"type": "integer", "minimum": 1},
+    "run_sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9223372036854775807
+    },
     "challenge_id": {"$ref": "#/$defs/hash"},
     "release_binding_hash": {"$ref": "#/$defs/hash"},
     "release_identity_receipt_schema_version": {

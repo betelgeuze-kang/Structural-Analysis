@@ -53,11 +53,23 @@
     "ledger_namespace": {
       "const": "hip_fgmres_external_signed_release_identity_v2"
     },
-    "reservation_event_sequence": {"type": "integer", "minimum": 1},
+    "reservation_event_sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9223372036854775807
+    },
     "reservation_event_hash": {"$ref": "#/$defs/hash"},
-    "acceptance_event_sequence": {"type": "integer", "minimum": 2},
+    "acceptance_event_sequence": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 9223372036854775807
+    },
     "acceptance_event_hash": {"$ref": "#/$defs/hash"},
-    "acceptance_commit_head_event_sequence": {"type": "integer", "minimum": 2},
+    "acceptance_commit_head_event_sequence": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 9223372036854775807
+    },
     "acceptance_commit_head_event_hash": {"$ref": "#/$defs/hash"},
     "request_id": {"$ref": "#/$defs/id"},
     "campaign_id": {"$ref": "#/$defs/id"},
@@ -67,9 +79,13 @@
       "maxLength": 128,
       "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
     },
-    "key_epoch": {"type": "integer", "minimum": 1},
+    "key_epoch": {"type": "integer", "minimum": 1, "maximum": 100000},
     "runner_id": {"$ref": "#/$defs/runner_id"},
-    "run_sequence": {"type": "integer", "minimum": 1},
+    "run_sequence": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9223372036854775807
+    },
     "release_binding_hash": {"$ref": "#/$defs/hash"},
     "release_identity_receipt_schema_version": {
       "const": "structural-analysis-hip-fgmres-external-release-identity.v1"

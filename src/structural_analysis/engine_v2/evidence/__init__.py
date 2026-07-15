@@ -16,6 +16,7 @@ from .ed25519_v1 import (
     ED25519_ALGORITHM_V1,
     Ed25519EvidenceV1Error,
     decode_canonical_base64_v1,
+    validate_ed25519_public_key_v1,
     verify_ed25519_signature_v1,
 )
 from .durable_replay_ledger_v1 import (
@@ -132,6 +133,7 @@ __all__ = [
     "validate_durable_replay_storage_receipt_v1",
     "validate_dependency_lock_receipt_v1",
     "validate_dependency_lock_v1",
+    "validate_ed25519_public_key_v1",
     "validate_installed_wheel_replay_v1",
     "validate_source_artifact_identity_v1",
     "validate_wheel_artifact_identity_v1",

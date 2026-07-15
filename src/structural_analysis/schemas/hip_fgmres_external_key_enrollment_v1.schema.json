@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_external_key_enrollment_v1.schema.json",
+  "title": "Detached external HIP FGMRES runner key enrollment proof v1",
+  "oneOf": [
+    {"$ref": "#/$defs/challenge"},
+    {"$ref": "#/$defs/receipt"}
+  ],
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._:-]{2,127}$"
+    },
+    "runner_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+    },
+    "key_id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v[1-9][0-9]*$"
+    },
+    "utc": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{6})?Z$"
+    },
+    "predecessor_key": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key_id",
+        "key_epoch",
+        "public_key_sha256",
+        "maximum_run_sequence"
+      ],
+      "properties": {
+        "key_id": {"$ref": "#/$defs/key_id"},
+        "key_epoch": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "maximum_run_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        }
+      }
+    },
+    "challenge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_profile",
+        "purpose",
+        "request_id",
+        "nonce_base64",
+        "runner_id",
+        "key_id",
+        "key_epoch",
+        "predecessor_registry_epoch",
+        "predecessor_registry_hash",
+        "target_registry_epoch",
+        "predecessor_key",
+        "public_key_base64",
+        "public_key_sha256",
+        "allowed_architecture_base",
+        "allowed_suite_id",
+        "allowed_fixture_registry_bytes_sha256",
+        "allowed_fixture_registry_hash",
+        "minimum_run_sequence",
+        "maximum_run_sequence",
+        "valid_from_utc",
+        "valid_until_utc",
+        "runner_declared_key_origin",
+        "attestation_digest_sha256",
+        "challenge_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-key-enrollment-challenge.v1"
+        },
+        "capability_profile": {
+          "const": "phase0_external_gfx1100_detached_key_enrollment_pop"
+        },
+        "purpose": {
+          "const": "hip_fgmres_external_gfx1100_runner_key_proof_of_possession"
+        },
+        "request_id": {"$ref": "#/$defs/request_id"},
+        "nonce_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "runner_id": {"$ref": "#/$defs/runner_id"},
+        "key_id": {"$ref": "#/$defs/key_id"},
+        "key_epoch": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "predecessor_registry_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 99999
+        },
+        "predecessor_registry_hash": {"$ref": "#/$defs/hash"},
+        "target_registry_epoch": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 100000
+        },
+        "predecessor_key": {
+          "oneOf": [
+            {"$ref": "#/$defs/predecessor_key"},
+            {"type": "null"}
+          ]
+        },
+        "public_key_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "allowed_architecture_base": {"const": "gfx1100"},
+        "allowed_suite_id": {
+          "const": "phase0_execution_plan_v2_linear_frame_truss_fgmres_fixed_suite.v2"
+        },
+        "allowed_fixture_registry_bytes_sha256": {"$ref": "#/$defs/hash"},
+        "allowed_fixture_registry_hash": {"$ref": "#/$defs/hash"},
+        "minimum_run_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "maximum_run_sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9223372036854775807
+        },
+        "valid_from_utc": {"$ref": "#/$defs/utc"},
+        "valid_until_utc": {"$ref": "#/$defs/utc"},
+        "runner_declared_key_origin": {
+          "enum": [
+            "runner_declared_isolated_hsm",
+            "runner_declared_hardware_token",
+            "runner_declared_software_keystore",
+            "runner_declared_unknown"
+          ]
+        },
+        "attestation_digest_sha256": {
+          "oneOf": [
+            {"$ref": "#/$defs/hash"},
+            {"type": "null"}
+          ]
+        },
+        "challenge_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "private_key_possession_at_enrollment_verified",
+        "package_registry_inclusion_verified",
+        "key_activation_verified",
+        "hsm_origin_verified",
+        "hsm_non_exportability_verified",
+        "reviewer_identity_verified",
+        "hardware_execution_verified",
+        "promotion_eligible",
+        "commercial_ready"
+      ],
+      "properties": {
+        "private_key_possession_at_enrollment_verified": {"const": true},
+        "package_registry_inclusion_verified": {"const": false},
+        "key_activation_verified": {"const": false},
+        "hsm_origin_verified": {"const": false},
+        "hsm_non_exportability_verified": {"const": false},
+        "reviewer_identity_verified": {"const": false},
+        "hardware_execution_verified": {"const": false},
+        "promotion_eligible": {"const": false},
+        "commercial_ready": {"const": false}
+      }
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "capability_profile",
+        "status",
+        "evidence_scope",
+        "challenge",
+        "proof_algorithm",
+        "proof_signature_base64",
+        "proof_signature_sha256",
+        "claims",
+        "receipt_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-key-enrollment-receipt.v1"
+        },
+        "capability_profile": {
+          "const": "phase0_external_gfx1100_detached_key_enrollment_pop"
+        },
+        "status": {
+          "const": "detached_runner_key_proof_of_possession_verified"
+        },
+        "evidence_scope": {
+          "const": "detached_ed25519_possession_only_non_authoritative"
+        },
+        "challenge": {"$ref": "#/$defs/challenge"},
+        "proof_algorithm": {"const": "Ed25519"},
+        "proof_signature_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        },
+        "proof_signature_sha256": {"$ref": "#/$defs/hash"},
+        "claims": {"$ref": "#/$defs/claims"},
+        "receipt_hash": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}

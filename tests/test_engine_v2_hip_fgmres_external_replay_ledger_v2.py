@@ -14,6 +14,7 @@ from structural_analysis.engine_v2.assembly_backend import (
     fgmres_external_replay_ledger_v1 as replay_ledger_v1,
     fgmres_external_replay_ledger_v2 as replay_ledger,
     fgmres_external_signed_evidence_v2 as signed_evidence,
+    fgmres_external_trust_anchor_registry_v2 as trust_registry_v2,
 )
 from structural_analysis.engine_v2.contracts._canonical import (
     canonical_hash,
@@ -28,6 +29,7 @@ from structural_analysis.engine_v2.evidence.durable_replay_ledger_v1 import (
 )
 from tests.test_engine_v2_hip_fgmres_external_signed_evidence_v1 import (
     _build_envelope_v2,
+    _detached_signed_receipt_v2,
     _make_verified_release_v2,
     evidence_material as _source_evidence_material,
 )
@@ -65,9 +67,14 @@ def _patch_synthetic_authorities(
         replay_release,
     )
     monkeypatch.setattr(
-        signed_evidence.signed_evidence_v1,
-        "_TRUST_REGISTRY_LOADER_AUTHORITY",
-        lambda: material["trust_registry"],
+        trust_registry_v2,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: material["trust_registry_v2"],
+    )
+    monkeypatch.setattr(
+        signed_evidence,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: material["trust_registry_v2"],
     )
     monkeypatch.setattr(
         signed_evidence.signed_evidence_v1,
@@ -175,6 +182,135 @@ def _detached_ledger_receipt_v2() -> Any:
     )
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        pytest.param("reservation_event_sequence", 10**100_000, id="reservation"),
+        pytest.param("acceptance_event_sequence", 10**100_000, id="acceptance"),
+        pytest.param(
+            "acceptance_commit_head_event_sequence",
+            10**100_000,
+            id="commit-head",
+        ),
+        pytest.param("key_epoch", 100_001, id="key-epoch"),
+        pytest.param("run_sequence", 10**100_000, id="run-sequence"),
+        pytest.param("key_id", "ed25519:runner:v" + "9" * 100_001, id="key-id"),
+    ],
+)
+def test_detached_ledger_receipt_rejects_hostile_extents_before_schema(
+    field: str,
+    value: Any,
+) -> None:
+    hostile = replace(_detached_ledger_receipt_v2(), **{field: value})
+
+    with pytest.raises(replay_ledger.HipFgmresExternalReplayLedgerV2Error) as caught:
+        replay_ledger.validate_hip_fgmres_external_replay_ledger_receipt_v2(hostile)
+
+    assert caught.value.code == (
+        "hip_fgmres_external_replay_ledger_v2_receipt_type_invalid"
+    )
+    assert len(caught.value.path) <= replay_ledger._MAX_ERROR_PATH_CHARS
+    assert len(str(caught.value)) < 800
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("release_artifacts_freshly_replayed", 1),
+        ("commercial_ready", 0),
+    ],
+)
+def test_detached_ledger_receipt_rejects_bool_int_claim_alias(
+    field: str,
+    value: int,
+) -> None:
+    valid = _detached_ledger_receipt_v2()
+    hostile = replace(valid, claims=replace(valid.claims, **{field: value}))
+
+    with pytest.raises(replay_ledger.HipFgmresExternalReplayLedgerV2Error) as caught:
+        replay_ledger.validate_hip_fgmres_external_replay_ledger_receipt_v2(hostile)
+
+    assert caught.value.code == (
+        "hip_fgmres_external_replay_ledger_v2_receipt_type_invalid"
+    )
+
+
+def test_ledger_schema_failure_does_not_echo_hostile_value() -> None:
+    payload = replay_ledger._receipt_payload(
+        _detached_ledger_receipt_v2(),
+        include_hash=True,
+    )
+    hostile = "r" * 100_001
+    payload["request_id"] = hostile
+
+    with pytest.raises(replay_ledger.HipFgmresExternalReplayLedgerV2Error) as caught:
+        replay_ledger._validate_schema(payload)
+
+    assert caught.value.code == (
+        "hip_fgmres_external_replay_ledger_v2_schema_validation_failed"
+    )
+    assert caught.value.path == "/request_id"
+    assert caught.value.message == "schema keyword maxLength rejected value"
+    assert hostile not in str(caught.value)
+
+
+@pytest.mark.parametrize("mutation", ["extra-field", "slot-ids", "claims"])
+def test_signed_receipt_parser_rejects_hostile_containers_without_echo(
+    mutation: str,
+) -> None:
+    payload = signed_evidence._verification_receipt_payload_v2(
+        _detached_signed_receipt_v2(),
+        include_hash=True,
+    )
+    hostile = "x" * 100_001
+    if mutation == "extra-field":
+        payload[hostile] = False
+    elif mutation == "slot-ids":
+        payload["verified_slot_ids"] = [hostile]
+    else:
+        payload["claims"] = {hostile: False}
+
+    with pytest.raises(replay_ledger.HipFgmresExternalReplayLedgerV2Error) as caught:
+        replay_ledger._parse_signed_receipt(payload)
+
+    assert caught.value.code == (
+        "hip_fgmres_external_replay_ledger_v2_signed_receipt_mismatch"
+    )
+    assert caught.value.path == "/signed_receipt"
+    assert hostile not in str(caught.value)
+
+
+def _revoked_registry_head(registry: Any) -> Any:
+    revoked_key = replace(
+        registry.keys[0],
+        status="revoked",
+        terminal_event_hash=canonical_hash({"synthetic": "revocation-event"}),
+        terminal_at_utc="2026-07-14T00:00:04.000000Z",
+        revocation_effect="retroactive",
+        terminal_reason="synthetic-test-revocation",
+    )
+    draft = replace(
+        registry,
+        registry_bytes_sha256=canonical_hash({"synthetic": "revoked-registry-bytes"}),
+        registry_hash=canonical_hash(
+            {"synthetic": "revoked-registry", "previous": registry.registry_hash}
+        ),
+        registry_epoch=registry.registry_epoch + 1,
+        predecessor_registry_epoch=registry.registry_epoch,
+        predecessor_registry_hash=registry.registry_hash,
+        head_event_hash=revoked_key.terminal_event_hash,
+        event_count=registry.event_count + 1,
+        keys=(revoked_key,),
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    return replace(
+        draft,
+        receipt_hash=canonical_hash(
+            trust_registry_v2._result_payload_v2(draft, include_hash=False)
+        ),
+    )
+
+
 def test_restart_happy_path_binds_identity_and_later_event_does_not_stale_receipt(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -212,6 +348,36 @@ def test_restart_happy_path_binds_identity_and_later_event_does_not_stale_receip
         )
     )
     receipt = result.ledger_receipt
+    assert result.trust_registry is material["trust_registry_v2"]
+    assert result.trust_registry.registry_hash == receipt.trust_registry_hash
+    assert not result.trust_registry.claims.historical_recovery_verified
+    drifted_registry_draft = replace(
+        result.trust_registry,
+        registry_hash=canonical_hash({"synthetic": "detached-registry-drift"}),
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    drifted_registry = replace(
+        drifted_registry_draft,
+        receipt_hash=canonical_hash(
+            trust_registry_v2._result_payload_v2(
+                drifted_registry_draft,
+                include_hash=False,
+            )
+        ),
+    )
+    with pytest.raises(
+        replay_ledger.HipFgmresExternalReplayLedgerV2Error
+    ) as registry_drift:
+        replay_ledger.HipFgmresExternalDurablyVerifiedSignedEvidenceV2(
+            identity_receipt=result.identity_receipt,
+            signed_receipt=result.signed_receipt,
+            ledger_receipt=result.ledger_receipt,
+            trust_registry=drifted_registry,
+            mint=replay_ledger._DURABLY_VERIFIED_MINT,
+        )
+    assert registry_drift.value.code == (
+        "hip_fgmres_external_replay_ledger_v2_durable_result_invalid"
+    )
     assert result.signed_receipt.claims.signed_envelope_binds_release_identity_receipt
     assert result.signed_receipt.release_identity_receipt_schema_version == (
         verified.identity_receipt.schema_version
@@ -274,6 +440,7 @@ def test_restart_happy_path_binds_identity_and_later_event_does_not_stale_receip
     assert recovered.identity_receipt == result.identity_receipt
     assert recovered.signed_receipt == result.signed_receipt
     assert recovered.ledger_receipt == result.ledger_receipt
+    assert recovered.trust_registry is material["trust_registry_v2"]
     ledger.close()
 
 
@@ -308,6 +475,121 @@ def test_package_zero_key_path_cannot_mutate_ledger(
     ledger.close()
 
 
+def test_v1_registry_cannot_downgrade_v2_ledger_issue_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    evidence_material_fixture: dict[str, Any],
+) -> None:
+    material = evidence_material_fixture
+    verified = _make_verified_release_v2(material)
+    monkeypatch.setattr(
+        release_identity,
+        "verify_hip_fgmres_external_release_artifacts_v1",
+        lambda value: value,
+    )
+    monkeypatch.setattr(
+        trust_registry_v2,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: material["trust_registry"],
+    )
+    monkeypatch.setattr(signed_evidence, "_utc_now_v2", lambda: material["now"])
+    ledger = _initialize_ledger(tmp_path / "v1-registry-downgrade-ledger")
+
+    with pytest.raises(
+        signed_evidence.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        _issue(verified=verified, ledger=ledger)
+
+    assert caught.value.code == "hip_fgmres_external_v2_trust_registry_type_invalid"
+    audit = replay_ledger.audit_hip_fgmres_external_replay_ledger_v2(ledger)
+    assert (audit.campaign_count, audit.challenge_count, audit.acceptance_count) == (
+        0,
+        0,
+        0,
+    )
+    assert audit.event_count == 0
+    ledger.close()
+
+
+def test_v1_registry_cannot_downgrade_v2_ledger_verify_or_recovery_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    evidence_material_fixture: dict[str, Any],
+) -> None:
+    material = evidence_material_fixture
+    verified = _make_verified_release_v2(material)
+    clock = _patch_synthetic_authorities(monkeypatch, material)
+    ledger = _initialize_ledger(tmp_path / "v1-registry-verify-downgrade-ledger")
+    challenge = _issue(verified=verified, ledger=ledger)
+    raw, _ = _build_envelope_v2(
+        material,
+        verified,
+        challenge_override=challenge,
+    )
+    _verification_time(clock, material)
+    monkeypatch.setattr(
+        trust_registry_v2,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: material["trust_registry"],
+    )
+
+    with pytest.raises(
+        signed_evidence.HipFgmresExternalSignedEvidenceV2Error
+    ) as verify_downgrade:
+        replay_ledger.verify_hip_fgmres_external_signed_evidence_with_replay_ledger_v2(
+            raw,
+            verified_release=verified,
+            ledger=ledger,
+        )
+    assert verify_downgrade.value.code == (
+        "hip_fgmres_external_v2_trust_registry_type_invalid"
+    )
+    audit = replay_ledger.audit_hip_fgmres_external_replay_ledger_v2(ledger)
+    assert (audit.challenge_count, audit.acceptance_count, audit.event_count) == (
+        1,
+        0,
+        1,
+    )
+
+    monkeypatch.setattr(
+        trust_registry_v2,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: material["trust_registry_v2"],
+    )
+    accepted = (
+        replay_ledger.verify_hip_fgmres_external_signed_evidence_with_replay_ledger_v2(
+            raw,
+            verified_release=verified,
+            ledger=ledger,
+        )
+    )
+    monkeypatch.setattr(
+        trust_registry_v2,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: material["trust_registry"],
+    )
+
+    with pytest.raises(
+        signed_evidence.HipFgmresExternalSignedEvidenceV2Error
+    ) as recovery_downgrade:
+        replay_ledger.recover_hip_fgmres_external_signed_evidence_from_replay_ledger_v2(
+            verified_release=verified,
+            ledger=ledger,
+            challenge_id=challenge.challenge_id,
+            expected_envelope_hash=accepted.signed_receipt.envelope_hash,
+        )
+    assert recovery_downgrade.value.code == (
+        "hip_fgmres_external_v2_trust_registry_type_invalid"
+    )
+    audit = replay_ledger.audit_hip_fgmres_external_replay_ledger_v2(ledger)
+    assert (audit.challenge_count, audit.acceptance_count, audit.event_count) == (
+        1,
+        1,
+        2,
+    )
+    ledger.close()
+
+
 def test_rehydrated_durable_challenge_rechecks_release_allowlist_before_acceptance(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -324,19 +606,29 @@ def test_rehydrated_durable_challenge_rechecks_release_allowlist_before_acceptan
         challenge_override=challenge,
     )
     blocked_key = replace(
-        material["trust_registry"].keys[0],
+        material["trust_registry_v2"].keys[0],
         allowed_fixture_registry_bytes_sha256=canonical_hash(
             {"forged_allowlist": "bytes"}
         ),
         allowed_fixture_registry_hash=canonical_hash({"forged_allowlist": "semantic"}),
     )
-    blocked_registry = replace(
-        material["trust_registry"],
+    blocked_registry_draft = replace(
+        material["trust_registry_v2"],
         keys=(blocked_key,),
+        receipt_hash="sha256:" + "0" * 64,
+    )
+    blocked_registry = replace(
+        blocked_registry_draft,
+        receipt_hash=canonical_hash(
+            trust_registry_v2._result_payload_v2(
+                blocked_registry_draft,
+                include_hash=False,
+            )
+        ),
     )
     monkeypatch.setattr(
-        signed_evidence.signed_evidence_v1,
-        "_TRUST_REGISTRY_LOADER_AUTHORITY",
+        trust_registry_v2,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
         lambda: blocked_registry,
     )
     _verification_time(clock, material)
@@ -425,6 +717,57 @@ def test_response_failure_recovers_without_second_acceptance(
     assert recovered.signed_receipt.envelope_hash == envelope_hash
     after = replay_ledger.audit_hip_fgmres_external_replay_ledger_v2(ledger)
     assert (after.acceptance_count, after.event_count) == (1, 2)
+    ledger.close()
+
+
+def test_current_registry_revocation_head_blocks_historical_recovery(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    evidence_material_fixture: dict[str, Any],
+) -> None:
+    material = evidence_material_fixture
+    verified = _make_verified_release_v2(material)
+    clock = _patch_synthetic_authorities(monkeypatch, material)
+    ledger = _initialize_ledger(tmp_path / "revoked-recovery-ledger")
+    challenge = _issue(verified=verified, ledger=ledger)
+    raw, _ = _build_envelope_v2(
+        material,
+        verified,
+        challenge_override=challenge,
+    )
+    _verification_time(clock, material)
+    accepted = (
+        replay_ledger.verify_hip_fgmres_external_signed_evidence_with_replay_ledger_v2(
+            raw,
+            verified_release=verified,
+            ledger=ledger,
+        )
+    )
+    revoked_registry = _revoked_registry_head(material["trust_registry_v2"])
+    monkeypatch.setattr(
+        trust_registry_v2,
+        "_TRUST_REGISTRY_LOADER_AUTHORITY_V2",
+        lambda: revoked_registry,
+    )
+
+    with pytest.raises(
+        signed_evidence.HipFgmresExternalSignedEvidenceV2Error
+    ) as caught:
+        replay_ledger.recover_hip_fgmres_external_signed_evidence_from_replay_ledger_v2(
+            verified_release=verified,
+            ledger=ledger,
+            challenge_id=challenge.challenge_id,
+            expected_envelope_hash=accepted.signed_receipt.envelope_hash,
+        )
+
+    assert caught.value.code == "hip_fgmres_external_v2_challenge_binding_invalid"
+    audit = replay_ledger.audit_hip_fgmres_external_replay_ledger_v2(ledger)
+    assert (audit.challenge_count, audit.acceptance_count, audit.event_count) == (
+        1,
+        1,
+        2,
+    )
+    assert not revoked_registry.claims.historical_recovery_verified
     ledger.close()
 
 

@@ -21,6 +21,32 @@
   ],
   "rows": [
     {
+      "capability_id": "hip_fgmres_reviewed_trust_anchor_lifecycle_v2",
+      "category": "solver_verification",
+      "phase_target": "phase_0",
+      "implementation_state": "implemented",
+      "promotion_state": "contract_only",
+      "supported_scope": ["detached_domain_separated_ed25519_key_proof_of_possession", "canonical_nonidentity_prime_order_ed25519_runner_and_reviewer_keys", "bounded_self_hashed_enrollment_challenge_and_receipt", "package_owned_reviewer_authority_commitment", "quorum_signed_append_only_registry_events", "contiguous_event_and_prefix_registry_hash_chain", "fixed_shape_rolling_registry_hash_and_linear_event_key_replay", "key_enrollment_activation_atomic_rotation_retirement_and_revocation_replay", "reviewer_activation_time_preserved_and_enforced_as_authorization_lower_bound", "cross_role_unique_public_keys_contiguous_key_epochs_and_nonoverlapping_sequence_time_ranges", "exact_registry_v2_authority_for_signed_evidence_v2_and_replay_ledger_v2", "strict_v1_registry_downgrade_rejection", "current_registry_revocation_and_drift_fail_closed_recovery", "process_local_verified_wrappers_bind_exact_trust_registry"],
+      "explicit_exclusions": ["operational_reviewer_bootstrap", "active_package_runner_key", "actual_hsm_or_hardware_token_key", "private_key_non_exportability_attestation", "reviewer_human_identity_or_independence", "reviewer_hsm_attestation", "vendor_or_remote_attestation", "hostile_same_process_python_module_mutation", "actual_external_gfx1100_signed_cell", "historical_recovery_across_package_trust_or_fixture_registry_rotation", "external_transparency_log_or_monotonic_anchor", "cross_host_or_cross_ledger_replay_prevention", "coordinated_storage_rollback_resistance", "same_artifact_two_architecture_evidence", "multiarchitecture_or_release_promotion", "result_ir", "iteration_host_copy_zero", "performance_speedup", "end_to_end_o_n", "commercial_readiness"],
+      "required_contracts": ["ADR-003", "ADR-004", "ADR-006", "ADR-007"],
+      "verification_cases": ["wrong_key_domain_nonce_and_request_pop_rejection", "low_order_identity_noncanonical_and_mixed_order_ed25519_point_rejection", "bounded_integer_base64_timestamp_and_schema_rejection", "package_empty_registry_exact_hash_replay", "reviewer_quorum_duplicate_wrong_key_domain_and_validity_rejection", "event_sequence_predecessor_prefix_and_registry_epoch_tamper_rejection", "fixed_shape_rolling_hash_and_runner_index_linear_replay_regression", "key_activation_atomic_rotation_retirement_and_prospective_retroactive_revocation", "pre_reviewer_activation_authorization_rejection", "reviewer_runner_cross_role_and_global_runner_public_key_reuse_rejection", "range_overlap_and_reactivation_rejection", "signed_v2_exact_registry_type_and_inactive_key_rejection", "durable_v2_registry_drift_revocation_and_v1_downgrade_rejection", "strict_public_exports_package_resources_and_no_private_key_material"],
+      "evidence_paths": [
+        "docs/engine-v2-hip-fgmres-reviewed-trust-anchor-lifecycle-v2.md",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_external_key_enrollment_v1.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_external_trust_anchor_registry_v2.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_external_signed_evidence_v2.py",
+        "src/structural_analysis/engine_v2/assembly_backend/fgmres_external_replay_ledger_v2.py",
+        "src/structural_analysis/schemas/hip_fgmres_external_key_enrollment_v1.schema.json",
+        "src/structural_analysis/schemas/hip_fgmres_external_trust_anchor_registry_v2.schema.json",
+        "tests/test_engine_v2_hip_fgmres_external_key_enrollment_v1.py",
+        "tests/test_engine_v2_hip_fgmres_external_trust_anchor_registry_v2.py",
+        "tests/test_engine_v2_hip_fgmres_external_signed_evidence_v1.py",
+        "tests/test_engine_v2_hip_fgmres_external_replay_ledger_v2.py",
+        "tests/test_engine_v2_hip_fgmres_parity_public_api_v1.py"
+      ],
+      "claim_level": "reviewed_event_sourced_trust_lifecycle_contract_reviewer_roots_zero_active_keys_zero_external_cells_zero_non_promoting"
+    },
+    {
       "capability_id": "hip_fgmres_signed_release_identity_binding_v2",
       "category": "solver_verification",
       "phase_target": "phase_0",
