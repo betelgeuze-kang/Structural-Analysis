@@ -133,7 +133,7 @@ Cleanup 순서는 audit → global → sealed → canonical/live parent chain이
 ## 검증 계획
 
 현재 트리의 synthetic/public/capability 검증은 `24 passed`, 인접
-family-v2/audit-v1은 `26 passed`다. Actual 수치는 재실행이 완료되기 전에
+historical family-v2/audit-v1 두 파일은 `21 passed`다. Actual 수치는 재실행이 완료되기 전에
 성공으로 기록하지 않는다.
 
 - exact 10-slot 합성 authority composition과 caller 역순 canonicalization

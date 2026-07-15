@@ -150,7 +150,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         "pre_window_async_copy_completion_or_device_dma_activity_zero",
         "whole_process_additional_device_solve_or_export_absence",
         "iteration_host_copy_zero",
-        "standalone_receipt_provenance_authenticity_without_live_contexts_or_signature",
+        "standalone_receipt_provenance_authenticity_without_retained_expected_context_authorities_or_signature",
         "signed_evidence",
         "result_ir",
         "end_to_end_o_n",
