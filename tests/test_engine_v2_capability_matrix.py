@@ -134,11 +134,13 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     assert {
         "exact_process_local_fgmres_v2_kernel_ledger",
         "native_memset_launch_and_stream_fence_attempt_recorded_before_call_on_receipt_eligible_path",
+        "success_rejected_ambiguous_and_in_flight_disposition_accounting_on_receipt_eligible_path",
         "fixed_eight_prelaunch_memsets_and_full_recurrence_descriptor_replay",
         "canonical_sealed_and_global_terminal_fence_order",
         "constant_space_fixed_binary_sha256_rolling_predecessor_chain",
         "completion_export_not_opened_at_terminal_seal_boundary",
         "audit_fault_poison_forbids_receipt_without_blocking_valid_solver_native_lifecycle",
+        "actual_local_gfx1030_single_case_owned_eight_memsets_full_launch_chain_and_three_fences",
     }.issubset(ordinal_audit["supported_scope"])
     assert {
         "process_wide_rocm_launch_completeness",
@@ -146,25 +148,20 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         "device_kernel_semantic_execution_success",
         "device_content_terminal_outcome_solution_or_numerical_parity",
         "iteration_host_copy_zero",
-        "current_snapshot_actual_local_gfx1030_receipt",
+        "persistent_hardware_receipt_or_external_execution_log",
         "actual_external_gfx1100_receipt",
         "end_to_end_o_n",
         "performance_speedup",
         "commercial_readiness",
     }.issubset(ordinal_audit["explicit_exclusions"])
     assert ordinal_audit["claim_level"] == (
-        "exact_process_local_owned_rtc_operation_order_replayed_test_double_"
-        "contract_only_non_promoting"
+        "exact_process_local_owned_rtc_operation_order_replayed_actual_local_gfx1030_"
+        "single_case_working_session_nonpersistent_non_promoting"
     )
     assert (
         "tests/test_engine_v2_hip_fgmres_iteration_host_transfer_audit_hardware_v1.py"
         in ordinal_audit["evidence_paths"]
     )
-    assert (
-        "tests/test_engine_v2_hip_fgmres_iteration_host_transfer_audit_hardware_v1.py"
-        in ordinal_audit["evidence_paths"]
-    )
-
     family_transfer = rows["hip_fgmres_model_family_host_transfer_audit_v1"]
     assert payload["rows"][1]["capability_id"] == (
         "hip_fgmres_model_family_host_transfer_audit_v1"

@@ -117,10 +117,11 @@ Start operation ordinal을 `b`, canonical launch 수를 `C`, continuation launch
 - focused audit 회귀: `11 passed in 242.95s (0:04:02)`
 - public API/capability 회귀: `16 passed in 1.73s`
 - RTC 전체 회귀: `134 passed in 43.82s`
-- current-snapshot actual local `gfx1030` gate: `1 skipped in 1.80s`
-  - 현재 실행 환경에서 real gfx agent를 찾지 못했으므로 actual hardware claim은 false다.
-  - 이전 `1 passed in 37.24s`는 최종 safety/degraded-mode 수정 전 관찰이라 현재
-    snapshot 증거로 승격하지 않는다.
+- current-snapshot actual local `gfx1030` required gate: `1 passed in 37.22s`
+  - owned memset `8/8`, full-program launch attempt/success exact 일치, fence `3/3`
+  - ordinal audit과 transfer audit을 같은 solve/export lineage에서 검증했다.
+  - 이 결과는 현재 작업 세션의 비영속 관찰이며 standalone signed hardware receipt나
+    외부 실행 로그가 아니다.
 - exact 10-slot family composition: 다음 additive audited-parity 단계로 보류
 
 ## 다음 단계
