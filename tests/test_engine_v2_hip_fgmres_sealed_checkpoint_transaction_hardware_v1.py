@@ -152,6 +152,35 @@ class _NativeCanonicalChain:
         )
 
 
+def _cleanup_failed_canonical_chain(
+    primary_error: BaseException,
+    before_chain_cleanup: Callable[[], None] | None,
+    *contexts: tuple[str, Any],
+) -> None:
+    cleanup_errors: list[BaseException] = []
+    if before_chain_cleanup is not None:
+        try:
+            before_chain_cleanup()
+        except BaseException as cleanup_error:
+            cleanup_errors.append(cleanup_error)
+    try:
+        _close_chain(*contexts)
+    except BaseException as cleanup_error:
+        cleanup_errors.append(cleanup_error)
+    if cleanup_errors:
+        try:
+            existing = getattr(primary_error, "_engine_v2_cleanup_failures", ())
+            if type(existing) is not tuple:
+                existing = ()
+            setattr(
+                primary_error,
+                "_engine_v2_cleanup_failures",
+                existing + tuple(cleanup_errors),
+            )
+        except Exception:
+            pass
+
+
 def _open_canonical_chain(
     *,
     model: Any,
@@ -161,6 +190,7 @@ def _open_canonical_chain(
     load_pattern_id: str = "LC_AXIAL",
     verify_cpu_parity: bool = True,
     before_canonical_enqueue: Callable[[Any], None] | None = None,
+    before_chain_cleanup: Callable[[], None] | None = None,
 ) -> tuple[_NativeCanonicalChain, Any]:
     buffers = pack_solver_model_buffers(model, load_pattern_id=load_pattern_id)
     execution_plan = compile_execution_plan_v2(buffers)
@@ -263,8 +293,10 @@ def _open_canonical_chain(
             recurrence,
         )
         return chain, capability
-    except BaseException:
-        _close_chain(
+    except BaseException as primary_error:
+        _cleanup_failed_canonical_chain(
+            primary_error,
+            before_chain_cleanup,
             ("canonical-predecessor", canonical),
             ("fgmres-live", live),
             ("krylov", primitives),

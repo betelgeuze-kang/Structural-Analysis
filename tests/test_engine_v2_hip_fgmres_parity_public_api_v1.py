@@ -15,8 +15,10 @@ from structural_analysis.engine_v2.assembly_backend import (
     fgmres_external_signed_evidence_v2 as external_signed_evidence_v2,
     fgmres_external_trust_anchor_registry_v2 as external_trust_registry_v2,
     fgmres_iteration_host_transfer_audit_v1 as iteration_host_transfer_audit,
+    fgmres_model_family_audited_parity_v2 as model_family_audited_parity,
     fgmres_model_family_host_transfer_audit_v1 as model_family_transfer_audit,
     fgmres_model_family_parity_v2 as model_family_v2,
+    fgmres_model_family_result_ir_disposition_v1 as model_family_result_ir_disposition,
     fgmres_recurrence_launch_fence_audit_v1 as recurrence_launch_fence_audit,
 )
 from structural_analysis.engine_v2.evidence import (
@@ -90,6 +92,10 @@ ITERATION_HOST_TRANSFER_AUDIT_EXPORTS = tuple(iteration_host_transfer_audit.__al
 RECURRENCE_LAUNCH_FENCE_AUDIT_EXPORTS = tuple(recurrence_launch_fence_audit.__all__)
 MODEL_FAMILY_V2_EXPORTS = tuple(model_family_v2.__all__)
 MODEL_FAMILY_TRANSFER_AUDIT_EXPORTS = tuple(model_family_transfer_audit.__all__)
+MODEL_FAMILY_AUDITED_PARITY_EXPORTS = tuple(model_family_audited_parity.__all__)
+MODEL_FAMILY_RESULT_IR_DISPOSITION_EXPORTS = tuple(
+    model_family_result_ir_disposition.__all__
+)
 
 
 def test_parity_and_device_identity_surfaces_are_exported_from_engine_v2() -> None:
@@ -142,6 +148,11 @@ def test_iteration_host_transfer_audit_surfaces_are_exported_from_engine_v2() ->
         (recurrence_launch_fence_audit, RECURRENCE_LAUNCH_FENCE_AUDIT_EXPORTS),
         (model_family_v2, MODEL_FAMILY_V2_EXPORTS),
         (model_family_transfer_audit, MODEL_FAMILY_TRANSFER_AUDIT_EXPORTS),
+        (model_family_audited_parity, MODEL_FAMILY_AUDITED_PARITY_EXPORTS),
+        (
+            model_family_result_ir_disposition,
+            MODEL_FAMILY_RESULT_IR_DISPOSITION_EXPORTS,
+        ),
     ):
         for name in names:
             assert name in assembly_backend.__all__
@@ -186,6 +197,8 @@ def test_parity_and_device_identity_schemas_are_package_resources() -> None:
         "hip_fgmres_iteration_host_transfer_audit_v1.schema.json",
         "hip_fgmres_recurrence_launch_fence_audit_v1.schema.json",
         "hip_fgmres_model_family_host_transfer_audit_v1.schema.json",
+        "hip_fgmres_model_family_audited_parity_v2.schema.json",
+        "hip_fgmres_model_family_result_ir_disposition_v1.schema.json",
     ):
         resource = schema_root.joinpath(name)
         assert resource.is_file()

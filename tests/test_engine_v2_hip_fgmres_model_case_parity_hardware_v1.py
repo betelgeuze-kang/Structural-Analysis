@@ -20,6 +20,10 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_model_family_parity_v
     attest_hip_fgmres_model_family_coverage_v1,
     validate_hip_fgmres_model_family_parity_result_v1,
 )
+from structural_analysis.engine_v2.assembly_backend.fgmres_result_ir_v2 import (
+    build_hip_fgmres_result_ir_v2,
+    validate_hip_fgmres_result_ir_v2,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_sealed_checkpoint_transaction_v1 import (
     open_hip_fgmres_sealed_checkpoint_transaction_context_v1,
 )
@@ -51,6 +55,7 @@ def _hardware_required() -> bool:
         for name in (
             "ENGINE_V2_REQUIRE_HIP_HARDWARE",
             "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_CASE_PARITY_HARDWARE",
+            "ENGINE_V2_REQUIRE_HIP_FGMRES_RESULT_IR_HARDWARE",
         )
     )
 
@@ -58,6 +63,7 @@ def _hardware_required() -> bool:
 def test_native_gfx1030_later_column_convergence_attests_exact_model_case_parity() -> (
     None
 ):
+    result_ir_bridge = None
     required = _hardware_required()
     architecture = _native_gfx1030(required)
     model = _serial_cantilever_model(3)
@@ -154,6 +160,14 @@ def test_native_gfx1030_later_column_convergence_attests_exact_model_case_parity
             expected_observation_result=observation,
             expected_device_identity_result=device_identity,
         )
+        result_ir_bridge = build_hip_fgmres_result_ir_v2(parity)
+        validate_hip_fgmres_result_ir_v2(result_ir_bridge)
+        assert result_ir_bridge.source_execution_plan is source_execution_plan
+        assert result_ir_bridge.receipt.source_provenance.actual_backend == "hip"
+        assert result_ir_bridge.receipt.claims.result_ir_verified
+        assert result_ir_bridge.receipt.claims.result_ir_ready
+        assert not parity.receipt.claims.solution_ready
+        assert not parity.receipt.claims.result_ir_ready
         receipt = parity.receipt
         validate_hip_fgmres_model_case_parity_receipt_v1(receipt)
 
@@ -253,3 +267,6 @@ def test_native_gfx1030_later_column_convergence_attests_exact_model_case_parity
         if sealed is not None and not sealed.context.closed:
             sealed.context.close()
         chain.close()
+
+    assert result_ir_bridge is not None
+    assert validate_hip_fgmres_result_ir_v2(result_ir_bridge) is result_ir_bridge
