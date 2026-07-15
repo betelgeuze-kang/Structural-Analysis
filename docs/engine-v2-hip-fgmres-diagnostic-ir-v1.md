@@ -192,7 +192,8 @@ all-converged registry verified -> false
 - `tests/test_engine_v2_hip_fgmres_model_family_parity_v2_hardware.py`
 
 Current-source focused/public 4개 파일은 `41 passed in 378.12s`, capability
-matrix는 `9 passed`, hardware harness는 `1 test collected`를 확인했다. Real
+matrix는 `9 passed`, v0.2.43~v0.2.45 인접 통합 suite는
+`137 passed in 496.50s`, hardware harness는 `1 test collected`를 확인했다. Real
 gfx agent가 없는 환경에서 non-required gate는 `1 skipped`, required gate는
 skip 없이 `1 failed`했으므로 actual local token-hardened `gfx1030` 검증은
 pending으로 유지한다.
