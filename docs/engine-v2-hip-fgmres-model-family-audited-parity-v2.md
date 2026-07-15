@@ -4,8 +4,11 @@
 
 `v0.2.42` 후보 계약은 package fixture registry의 exact `gfx1030` 10-slot 고정
 suite에 대해 다음 세 retained authority를 한 process-local receipt로 결속한다.
-Contract/test-double 구현은 완료됐고 final-source actual 10-slot hardware gate는 아직
-재실행 전이다.
+Contract/test-double 구현은 identity-token-hardened current source에서 통과했다.
+비재사용 identity token 패치 전 source snapshot은 actual local `gfx1030` 10-slot
+required hardware gate를 통과했지만 current-source hardware 재실행은 pending이다.
+Historical actual 결과는 비영속 unsigned 관찰이며 standalone provenance나 promotion
+증거가 아니다.
 
 1. model-case CPU/HIP numerical parity를 보유한 family-v2 result
 2. canonical enqueue부터 terminal fence까지 bound-runtime copy attempt가 `0`이고
@@ -22,8 +25,8 @@ entrypoint를 포함하지 않고 이미 retained된 authority의 validator만 �
 
 ## 단일 실행 경계
 
-기존 `gfx1030` 10-slot hardware test harness를 slot마다 다음 순서가 되도록
-확장했다. Final-source actual 통합 실행은 현재 pending이다.
+기존 `gfx1030` 10-slot hardware test harness를 slot마다 다음 순서가 되도록 확장했고,
+identity-token 패치 전 source snapshot의 actual 통합 실행으로 검증했다.
 
 ```text
 canonical context ready
@@ -41,8 +44,9 @@ canonical context ready
 terminal fence 직후이면서 completion-export child가 열리기 전에 seal된다. 동일한
 transfer-owned export context/result 객체가 terminal observation과 model-case parity에
 그대로 전달되도록 wiring했다. Harness 구조상 slot당 device recurrence와 completion
-export 호출은 각각 한 번이며, 이 final-source wiring의 actual 10-slot 통과는 hardware
-gate가 확인해야 한다.
+export 호출은 각각 한 번이다. 패치 전 source의 required gate가 이 wiring을 CPU
+fallback 없이 actual local `gfx1030`에서 통과했다. Token-hardened current-source gate는
+아직 실행하지 않았다.
 
 ## 결속 계약
 
@@ -133,24 +137,31 @@ unknown property, factory exact direct-call AST 및 export/seal 호출 금지를
 
 ## 현재 검증
 
-- final-source focused synthetic/attack/lifecycle: `15 passed in 136.00s (0:02:16)`
-- final-source public API/capability: `16 passed in 1.68s`
+- identity-token-hardened current-source focused synthetic/attack/lifecycle:
+  `16 passed in 137.54s (0:02:17)`
+- current-source public API/capability: `16 passed`
 - previous adjacent family/transfer/public/capability: `40 passed in 61.05s`
 - previous adjacent launch/fence ordinal audit: `11 passed in 242.00s (0:04:02)`
 - previous RTC v2 full: `134 passed in 43.69s`
 - actual v0.2.41 `HipFgmresRtcOperationCounterV1`의
   `attempt/success/rejected/ambiguous/in_flight` 형태를 직접 사용한다.
-- final-source required local `gfx1030` 10-slot gate는 아직 성공 재실행 전이다.
-  이전 preflight/hardening 중 실행 결과를 final-source 증거로 승격하지 않는다.
-- 따라서 현재 snapshot의 actual 10-slot triple-composition 통과 claim은 아직 false다.
-  v0.2.40 historical 10-slot transfer composition과 v0.2.41 single-case ordinal 결과를
-  v0.2.42 통합 증거로 대체하지 않는다.
+- identity-token 패치 전 source의 required local `gfx1030` 10-slot gate:
+  `1 passed in 3171.31s (0:52:51)`, CPU fallback 없음
+  - local family `10/10`(matrix `10/20`)
+  - recurrence bound-runtime copy attempt `0`
+  - completion D2H `30/30/0`, `4,408` bytes
+  - owned memset `80/80/0/0/0`, launch `1,230/1,230/0/0/0`,
+    terminal-chain fence `30/30/0/0/0`
+- 이 actual 결과는 패치 전 source의 작업 세션 관찰이며 별도 persistent log, signature
+  또는 standalone hardware provenance receipt가 아니다. Token-hardened current-source
+  gate는 pending이다.
 
 ## 다음 단계
 
 1. 외부 reviewer/HSM 및 actual `gfx1100`은 외부 의존 상태로 유지한다.
-2. 로컬 다음 수직 슬라이스는 retained `ExecutionPlanV2`와 HIP completion solution을
-   사용해 displacement, full residual, reaction, member force, energy를 복원하고
-   `StateIR -> ResultIRV2`로 연결하는 HIP FGMRES ResultIR 경로다.
-3. AI 경로는 dense v1 projection을 승격하지 않고 sparse `ExecutionPlanV2` JVP 기반
-   projected-residual shadow를 먼저 추가한 뒤 fixed E(3) feature bank를 연결한다.
+2. v0.2.43 [HIP FGMRES ResultIR v2](engine-v2-hip-fgmres-result-ir-v2.md)의 contract와
+   v0.2.44 7-ready/3-nonconverged disposition은 완료됐다. `1 passed in 169.10s` 단일-case
+   actual 기록은 identity-token 패치 전 source의 역사 관찰이다. Token-hardened
+   current-source single-case 및 10-slot aggregate hardware gate는 다시 실행해야 한다.
+3. 그 뒤 AI 경로는 dense v1 projection을 승격하지 않고 sparse `ExecutionPlanV2` JVP
+   기반 projected-residual shadow를 추가한 뒤 fixed E(3) feature bank를 연결한다.

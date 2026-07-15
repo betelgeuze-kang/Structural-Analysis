@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import ast
 from dataclasses import replace
 import hashlib
+import inspect
 import json
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from typing import Any, Callable
 
@@ -11,6 +14,9 @@ from jsonschema import Draft202012Validator
 import numpy as np
 import pytest
 
+from structural_analysis.engine_v2.assembly_backend import (
+    fgmres_completion_export_v1 as completion_export_module,
+)
 from structural_analysis.engine_v2.assembly_backend import (
     fgmres_model_case_parity_v1 as parity_module,
 )
@@ -224,6 +230,81 @@ def _result(
         _device_identity_result=device,
         _source_execution_plan=plan,
     )
+
+
+def _downstream_sources(
+    monkeypatch: pytest.MonkeyPatch,
+) -> tuple[Any, Any, Any, Any, Any]:
+    cpu = _uninitialized(CpuFgmresReferenceResultV1)
+    device = _uninitialized(HipDeviceIdentityResultV1)
+    plan = _uninitialized(ExecutionPlanV2)
+    context = object.__new__(
+        completion_export_module.HipFgmresCompletionExportExecutionContextV1
+    )
+    export_receipt = object()
+    export_result = completion_export_module.HipFgmresCompletionExportResultV1(
+        receipt=export_receipt,  # type: ignore[arg-type]
+        solution_x=b"solution",
+        true_residual=b"residual",
+        solve_record=b"record",
+        payload_hash=_hash("payload"),
+    )
+    observation = HipFgmresTerminalOutcomeObservationResultV1(
+        receipt=SimpleNamespace(),
+        _source_export_result=export_result,
+        _source_export_context=context,
+    )
+    published = completion_export_module._CompletionExportPublishedResultAuthorityV1(
+        result=export_result,
+        receipt=export_receipt,  # type: ignore[arg-type]
+        solution_x=export_result.solution_x,
+        true_residual=export_result.true_residual,
+        solve_record=export_result.solve_record,
+        receipt_hash=_hash("export-receipt"),
+        payload_hash=export_result.payload_hash,
+        buffer_payload_hashes=(
+            _hash("solution"),
+            _hash("residual"),
+            _hash("record"),
+        ),
+        policy=SimpleNamespace(),
+    )
+    source = SimpleNamespace(source_execution_plan=plan)
+    live = parity_module._CompletionExportModelCaseParityAuthorityV1(
+        publication=published,
+        source=source,
+        source_snapshot=("exact-source",),
+    )
+
+    authority_call_count = 0
+
+    def exact_authority(actual_context: Any, actual_result: Any) -> Any:
+        nonlocal authority_call_count
+        assert actual_context is context
+        assert actual_result is export_result
+        authority_call_count += 1
+        if authority_call_count == 1:
+            return live
+        # The production global context intentionally returns a fresh outer
+        # source-authority value on every validation call.  Its snapshot and
+        # retained plan identities, rather than the wrapper identity, are the
+        # stable authority boundary.
+        return replace(
+            live,
+            source=SimpleNamespace(source_execution_plan=plan),
+        )
+
+    monkeypatch.setattr(
+        completion_export_module.HipFgmresCompletionExportExecutionContextV1,
+        "_model_case_parity_authority",
+        exact_authority,
+    )
+    monkeypatch.setattr(
+        parity_module,
+        "_result_ir_downstream_value_snapshot",
+        lambda **_kwargs: ("exact-snapshot",),
+    )
+    return cpu, observation, device, plan, live
 
 
 def test_schema_and_canonical_receipt_are_strict_fixed_and_nonpromoting() -> None:
@@ -580,3 +661,133 @@ def test_nested_scalar_type_confusion_fails_even_after_coherent_rehash(
     with pytest.raises(HipFgmresModelCaseParityV1Error) as caught:
         validate_hip_fgmres_model_case_parity_receipt_v1(forged)
     assert caught.value.code == expected_code
+
+
+def test_attestation_seals_exact_result_ir_downstream_live_authority_without_replay(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt = _receipt()
+    cpu, observation, device, plan, live = _downstream_sources(monkeypatch)
+    replay_count = 0
+
+    def exact_replay(*actual: Any) -> Any:
+        nonlocal replay_count
+        replay_count += 1
+        assert actual == (cpu, observation, device)
+        return receipt, plan
+
+    monkeypatch.setattr(parity_module, "_evaluate_sources", exact_replay)
+    result = parity_module.attest_hip_fgmres_model_case_parity_v1(
+        cpu,
+        observation,
+        device,
+    )
+    assert replay_count == 2
+
+    seal = result._result_ir_downstream_authority()
+    assert replay_count == 2
+    assert seal.receipt is receipt
+    assert seal.source_execution_plan is plan
+    assert seal.cpu_result is cpu
+    assert seal.observation_result is observation
+    assert seal.device_identity_result is device
+    assert seal.export_result is observation._source_export_result
+    assert seal.export_context is observation._source_export_context
+    assert seal.publication is live
+    assert seal.publication.publication.solution_x is seal.export_result.solution_x
+    assert seal.publication.publication.true_residual is (
+        seal.export_result.true_residual
+    )
+    assert seal.snapshot == ("exact-snapshot",)
+    bound_seal, identity_token = result._result_ir_downstream_authority_binding()
+    assert bound_seal is seal
+    assert type(identity_token) is object
+
+    exact_clone = replace(result)
+    assert exact_clone._result_ir_downstream_authority() is seal
+    with pytest.raises(HipFgmresModelCaseParityV1Error) as unissued_clone:
+        exact_clone._result_ir_downstream_authority_binding()
+    assert unissued_clone.value.code == (
+        "hip_fgmres_model_case_parity_result_ir_identity_unavailable"
+    )
+
+    def forbidden_replay(*_args: Any) -> Any:
+        raise AssertionError("downstream authority must not replay source evaluation")
+
+    monkeypatch.setattr(parity_module, "_evaluate_sources", forbidden_replay)
+    assert result._result_ir_downstream_authority() is seal
+
+
+def test_downstream_authority_fails_closed_on_missing_changed_or_rebound_seal(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    receipt = _receipt()
+    cpu, observation, device, plan, _live = _downstream_sources(monkeypatch)
+    monkeypatch.setattr(
+        parity_module,
+        "_evaluate_sources",
+        lambda *_args: (receipt, plan),
+    )
+    result = parity_module.attest_hip_fgmres_model_case_parity_v1(
+        cpu,
+        observation,
+        device,
+    )
+    seal = result._result_ir_downstream_authority()
+
+    legacy = replace(result, _result_ir_downstream_authority_seal=None)
+    with pytest.raises(HipFgmresModelCaseParityV1Error) as missing:
+        legacy._result_ir_downstream_authority()
+    assert missing.value.code == (
+        "hip_fgmres_model_case_parity_result_ir_authority_unavailable"
+    )
+    assert validate_hip_fgmres_model_case_parity_result_v1(legacy) is legacy
+
+    changed_seal = replace(seal, snapshot=("changed-snapshot",))
+    changed = replace(
+        result,
+        _result_ir_downstream_authority_seal=changed_seal,
+    )
+    with pytest.raises(HipFgmresModelCaseParityV1Error) as snapshot_changed:
+        changed._result_ir_downstream_authority()
+    assert snapshot_changed.value.code == (
+        "hip_fgmres_model_case_parity_result_ir_snapshot_changed"
+    )
+    with pytest.raises(HipFgmresModelCaseParityV1Error) as public_changed:
+        validate_hip_fgmres_model_case_parity_result_v1(changed)
+    assert public_changed.value.code == (
+        "hip_fgmres_model_case_parity_result_ir_snapshot_changed"
+    )
+
+    rebound = replace(
+        result,
+        _cpu_result=_uninitialized(CpuFgmresReferenceResultV1),
+    )
+    with pytest.raises(HipFgmresModelCaseParityV1Error) as identity_changed:
+        rebound._result_ir_downstream_authority()
+    assert identity_changed.value.code == (
+        "hip_fgmres_model_case_parity_result_ir_identity_changed"
+    )
+
+
+def test_result_ir_downstream_authority_method_has_no_solver_or_source_replay_call() -> (
+    None
+):
+    source = textwrap.dedent(
+        inspect.getsource(
+            HipFgmresModelCaseParityResultV1._result_ir_downstream_authority
+        )
+    )
+    tree = ast.parse(source)
+    calls = {
+        node.func.id
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+    }
+    calls.update(
+        node.func.attr
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    )
+    assert "_evaluate_sources" not in calls
+    assert "solve_cpu_fgmres_reference_v1" not in calls

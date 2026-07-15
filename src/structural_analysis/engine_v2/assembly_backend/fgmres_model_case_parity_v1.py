@@ -16,7 +16,9 @@ import json
 import math
 from pathlib import Path
 import re
+import threading
 from typing import Any, Literal, NamedTuple, NoReturn
+import weakref
 
 from jsonschema import Draft202012Validator
 import numpy as np
@@ -39,6 +41,8 @@ from structural_analysis.engine_v2.solvers.cpu_fgmres import (
 
 from .fgmres_completion_export_v1 import (
     _CompletionExportModelCaseParityAuthorityV1,
+    HipFgmresCompletionExportExecutionContextV1,
+    HipFgmresCompletionExportResultV1,
 )
 from .fgmres_plan import (
     HipFgmresPlanV1,
@@ -287,7 +291,28 @@ class HipFgmresModelCaseParityReceiptV1:
 
 
 @dataclass(frozen=True, slots=True, repr=False, eq=False)
-class HipFgmresModelCaseParityResultV1:
+class _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1:
+    """Private process-local seal for a ResultIR downstream consumer."""
+
+    receipt: HipFgmresModelCaseParityReceiptV1
+    source_execution_plan: ExecutionPlanV2
+    cpu_result: CpuFgmresReferenceResultV1
+    observation_result: HipFgmresTerminalOutcomeObservationResultV1
+    device_identity_result: HipDeviceIdentityResultV1
+    export_result: HipFgmresCompletionExportResultV1
+    export_context: HipFgmresCompletionExportExecutionContextV1
+    publication: _CompletionExportModelCaseParityAuthorityV1
+    snapshot: tuple[Any, ...]
+
+
+class _WeakReferenceableModelCaseParityResultV1:
+    """Python 3.10-compatible weak-reference slot for issuance tracking."""
+
+    __slots__ = ("__weakref__",)
+
+
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class HipFgmresModelCaseParityResultV1(_WeakReferenceableModelCaseParityResultV1):
     receipt: HipFgmresModelCaseParityReceiptV1
     _cpu_result: CpuFgmresReferenceResultV1 = dataclass_field(
         repr=False,
@@ -304,10 +329,127 @@ class HipFgmresModelCaseParityResultV1:
         repr=False,
         compare=False,
     )
+    _result_ir_downstream_authority_seal: (
+        _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1 | None
+    ) = dataclass_field(
+        default=None,
+        repr=False,
+        compare=False,
+    )
 
     def to_manifest(self) -> dict[str, Any]:
         validate_hip_fgmres_model_case_parity_result_v1(self)
         return self.receipt.to_dict()
+
+    def _result_ir_downstream_authority(
+        self,
+    ) -> _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1:
+        """Recover the sealed live authority without replaying the CPU solve."""
+
+        seal = self._result_ir_downstream_authority_seal
+        if type(seal) is not _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1:
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_authority_unavailable",
+                "/result_ir_downstream_authority",
+            )
+        observation = self._observation_result
+        try:
+            export_result = observation._source_export_result
+            export_context = observation._source_export_context
+        except AttributeError as exc:
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_source_invalid",
+                "/result_ir_downstream_authority/source",
+                type(exc).__name__,
+            )
+        if (
+            seal.receipt is not self.receipt
+            or seal.source_execution_plan is not self._source_execution_plan
+            or seal.cpu_result is not self._cpu_result
+            or seal.observation_result is not observation
+            or seal.device_identity_result is not self._device_identity_result
+            or seal.export_result is not export_result
+            or seal.export_context is not export_context
+            or type(export_result) is not HipFgmresCompletionExportResultV1
+            or type(export_context) is not HipFgmresCompletionExportExecutionContextV1
+            or type(seal.publication) is not _CompletionExportModelCaseParityAuthorityV1
+            or type(seal.snapshot) is not tuple
+        ):
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_identity_changed",
+                "/result_ir_downstream_authority/identity",
+            )
+        try:
+            live = export_context._model_case_parity_authority(export_result)
+        except Exception as exc:
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_live_authority_invalid",
+                "/result_ir_downstream_authority/publication",
+                type(exc).__name__,
+            )
+        publication = seal.publication
+        if (
+            type(live) is not _CompletionExportModelCaseParityAuthorityV1
+            or live.publication is not publication.publication
+            or live.source.source_execution_plan is not seal.source_execution_plan
+            or live.publication.result is not seal.export_result
+            or live.publication.receipt is not seal.export_result.receipt
+            or live.publication.solution_x is not seal.export_result.solution_x
+            or live.publication.true_residual is not seal.export_result.true_residual
+            or live.publication.solve_record is not seal.export_result.solve_record
+            or live.source_snapshot != publication.source_snapshot
+        ):
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_live_authority_changed",
+                "/result_ir_downstream_authority/publication",
+            )
+        try:
+            snapshot = _result_ir_downstream_value_snapshot(
+                receipt=self.receipt,
+                source_execution_plan=self._source_execution_plan,
+                cpu_result=self._cpu_result,
+                observation_result=observation,
+                device_identity_result=self._device_identity_result,
+                export_result=export_result,
+                export_context=export_context,
+                publication=live,
+            )
+        except HipFgmresModelCaseParityV1Error:
+            raise
+        except Exception as exc:
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_snapshot_invalid",
+                "/result_ir_downstream_authority/snapshot",
+                type(exc).__name__,
+            )
+        if snapshot != seal.snapshot:
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_snapshot_changed",
+                "/result_ir_downstream_authority/snapshot",
+            )
+        return seal
+
+    def _result_ir_downstream_authority_binding(
+        self,
+    ) -> tuple[_HipFgmresModelCaseParityResultIrDownstreamAuthorityV1, object]:
+        """Return live authority plus a non-recycled exact-result token."""
+
+        authority = self._result_ir_downstream_authority()
+        with _RESULT_IR_DOWNSTREAM_IDENTITY_LOCK:
+            token = _RESULT_IR_DOWNSTREAM_IDENTITIES.get(self)
+        if type(token) is not object:
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_identity_unavailable",
+                "/result_ir_downstream_authority/identity_token",
+            )
+        return authority, token
+
+
+_RESULT_IR_DOWNSTREAM_IDENTITY_LOCK = threading.RLock()
+_RESULT_IR_DOWNSTREAM_IDENTITIES: weakref.WeakKeyDictionary[
+    HipFgmresModelCaseParityResultV1,
+    object,
+] = weakref.WeakKeyDictionary()
 
 
 def attest_hip_fgmres_model_case_parity_v1(
@@ -329,12 +471,39 @@ def attest_hip_fgmres_model_case_parity_v1(
         _device_identity_result=device_identity_result,
         _source_execution_plan=execution_plan,
     )
-    return validate_hip_fgmres_model_case_parity_result_v1(
+    validated = validate_hip_fgmres_model_case_parity_result_v1(
         result,
         expected_cpu_result=cpu_result,
         expected_observation_result=observation_result,
         expected_device_identity_result=device_identity_result,
     )
+    sealed = replace(
+        validated,
+        _result_ir_downstream_authority_seal=(
+            _seal_result_ir_downstream_authority(validated)
+        ),
+    )
+    identity_token = object()
+    with _RESULT_IR_DOWNSTREAM_IDENTITY_LOCK:
+        if sealed in _RESULT_IR_DOWNSTREAM_IDENTITIES:  # pragma: no cover
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_identity_duplicate",
+                "/result_ir_downstream_authority/identity_token",
+            )
+        _RESULT_IR_DOWNSTREAM_IDENTITIES[sealed] = identity_token
+    try:
+        _, recovered_token = sealed._result_ir_downstream_authority_binding()
+        if recovered_token is not identity_token:  # pragma: no cover
+            _fail(
+                "hip_fgmres_model_case_parity_result_ir_identity_changed",
+                "/result_ir_downstream_authority/identity_token",
+            )
+        return sealed
+    except BaseException:
+        with _RESULT_IR_DOWNSTREAM_IDENTITY_LOCK:
+            if _RESULT_IR_DOWNSTREAM_IDENTITIES.get(sealed) is identity_token:
+                del _RESULT_IR_DOWNSTREAM_IDENTITIES[sealed]
+        raise
 
 
 def validate_hip_fgmres_model_case_parity_receipt_v1(
@@ -477,6 +646,8 @@ def validate_hip_fgmres_model_case_parity_result_v1(
         )
     if replayed != result.receipt:
         _fail("hip_fgmres_model_case_parity_replay_mismatch", "/")
+    if result._result_ir_downstream_authority_seal is not None:
+        result._result_ir_downstream_authority()
     return result
 
 
@@ -1139,6 +1310,168 @@ def _model_source_value_witness(source: Any) -> _ModelSourceValueWitnessV1:
         policy_hash=policy_hash,
         value_snapshot=value_snapshot,
     )
+
+
+def _seal_result_ir_downstream_authority(
+    result: HipFgmresModelCaseParityResultV1,
+) -> _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1:
+    """Mint a non-serializable seal after the public result replay succeeds."""
+
+    observation = result._observation_result
+    export_result = observation._source_export_result
+    export_context = observation._source_export_context
+    if (
+        type(export_result) is not HipFgmresCompletionExportResultV1
+        or type(export_context) is not HipFgmresCompletionExportExecutionContextV1
+    ):
+        _fail(
+            "hip_fgmres_model_case_parity_result_ir_source_invalid",
+            "/result_ir_downstream_authority/source",
+        )
+    try:
+        publication = export_context._model_case_parity_authority(export_result)
+    except Exception as exc:
+        _fail(
+            "hip_fgmres_model_case_parity_result_ir_live_authority_invalid",
+            "/result_ir_downstream_authority/publication",
+            type(exc).__name__,
+        )
+    if (
+        type(publication) is not _CompletionExportModelCaseParityAuthorityV1
+        or publication.source.source_execution_plan is not result._source_execution_plan
+        or publication.publication.result is not export_result
+        or publication.publication.receipt is not export_result.receipt
+        or publication.publication.solution_x is not export_result.solution_x
+        or publication.publication.true_residual is not export_result.true_residual
+        or publication.publication.solve_record is not export_result.solve_record
+    ):
+        _fail(
+            "hip_fgmres_model_case_parity_result_ir_live_authority_changed",
+            "/result_ir_downstream_authority/publication",
+        )
+    snapshot = _result_ir_downstream_value_snapshot(
+        receipt=result.receipt,
+        source_execution_plan=result._source_execution_plan,
+        cpu_result=result._cpu_result,
+        observation_result=observation,
+        device_identity_result=result._device_identity_result,
+        export_result=export_result,
+        export_context=export_context,
+        publication=publication,
+    )
+    return _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1(
+        receipt=result.receipt,
+        source_execution_plan=result._source_execution_plan,
+        cpu_result=result._cpu_result,
+        observation_result=observation,
+        device_identity_result=result._device_identity_result,
+        export_result=export_result,
+        export_context=export_context,
+        publication=publication,
+        snapshot=snapshot,
+    )
+
+
+def _result_ir_downstream_value_snapshot(
+    *,
+    receipt: HipFgmresModelCaseParityReceiptV1,
+    source_execution_plan: ExecutionPlanV2,
+    cpu_result: CpuFgmresReferenceResultV1,
+    observation_result: HipFgmresTerminalOutcomeObservationResultV1,
+    device_identity_result: HipDeviceIdentityResultV1,
+    export_result: HipFgmresCompletionExportResultV1,
+    export_context: HipFgmresCompletionExportExecutionContextV1,
+    publication: _CompletionExportModelCaseParityAuthorityV1,
+) -> tuple[Any, ...]:
+    """Capture immutable values while retaining identities only in the seal."""
+
+    plan_arrays = tuple(
+        (
+            row.name,
+            type(source_execution_plan.array(row.name)),
+            source_execution_plan.array(row.name).dtype.str,
+            tuple(int(value) for value in source_execution_plan.array(row.name).shape),
+            bool(source_execution_plan.array(row.name).flags.c_contiguous),
+            bool(source_execution_plan.array(row.name).flags.writeable),
+            _bytes_sha256(source_execution_plan.array(row.name).tobytes(order="C")),
+        )
+        for row in source_execution_plan.descriptors
+    )
+    cpu_arrays = tuple(
+        (
+            name,
+            type(cpu_result.array(name)),
+            cpu_result.array(name).dtype.str,
+            tuple(int(value) for value in cpu_result.array(name).shape),
+            bool(cpu_result.array(name).flags.c_contiguous),
+            bool(cpu_result.array(name).flags.writeable),
+            _bytes_sha256(cpu_result.array(name).tobytes(order="C")),
+        )
+        for name in ("reduced_solution", "true_residual")
+    )
+    published = publication.publication
+    source_witness = _model_source_value_witness(publication.source)
+    device_private = (
+        id(device_identity_result._loaded_runtime),
+        id(device_identity_result._loader_witness),
+        id(device_identity_result._runtime_library_identity),
+        _private_snapshot_token(device_identity_result._runtime_library_snapshot),
+        id(device_identity_result._runtime_query_authority),
+        _private_snapshot_token(device_identity_result._runtime_private_snapshot),
+        _private_snapshot_token(device_identity_result._publication_authority_snapshot),
+    )
+    published_policy = tuple(
+        (name, _private_snapshot_token(getattr(published.policy, name)))
+        for name in published.policy.__dataclass_fields__
+    )
+    return (
+        type(receipt),
+        canonical_hash(_receipt_payload(receipt, include_hash=True)),
+        type(source_execution_plan),
+        canonical_hash(source_execution_plan.to_dict()),
+        id(source_execution_plan._source_buffers),
+        plan_arrays,
+        type(cpu_result),
+        canonical_hash(cpu_result.to_dict()),
+        cpu_arrays,
+        type(observation_result),
+        canonical_hash(observation_result.receipt.to_dict()),
+        type(device_identity_result),
+        canonical_hash(device_identity_result.receipt.to_dict()),
+        device_private,
+        type(export_result),
+        canonical_hash(export_result.receipt.to_dict()),
+        export_result.payload_hash,
+        (len(export_result.solution_x), _bytes_sha256(export_result.solution_x)),
+        (len(export_result.true_residual), _bytes_sha256(export_result.true_residual)),
+        (len(export_result.solve_record), _bytes_sha256(export_result.solve_record)),
+        type(export_context),
+        type(publication),
+        _private_snapshot_token(publication.source_snapshot),
+        _private_snapshot_token(source_witness.value_snapshot),
+        type(published),
+        published.receipt_hash,
+        published.payload_hash,
+        published.buffer_payload_hashes,
+        (len(published.solution_x), _bytes_sha256(published.solution_x)),
+        (len(published.true_residual), _bytes_sha256(published.true_residual)),
+        (len(published.solve_record), _bytes_sha256(published.solve_record)),
+        published_policy,
+    )
+
+
+def _private_snapshot_token(value: Any) -> tuple[Any, ...]:
+    """Normalize private snapshot tuples without invoking arbitrary equality."""
+
+    if value is None or type(value) in {bool, int, str, bytes}:
+        return (type(value), value)
+    if type(value) is float:
+        return (float, float.hex(value))
+    if type(value) is tuple:
+        return (tuple, tuple(_private_snapshot_token(item) for item in value))
+    if type(value) is type:
+        return (type, value.__module__, value.__qualname__)
+    return (type(value), id(value))
 
 
 def _bytes_sha256(payload: bytes) -> str:

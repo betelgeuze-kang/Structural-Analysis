@@ -33,12 +33,28 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_model_family_parity_v
     attest_hip_fgmres_model_family_coverage_v2,
     validate_hip_fgmres_model_family_parity_result_v2,
 )
+from structural_analysis.engine_v2.assembly_backend.fgmres_model_family_result_ir_disposition_v1 import (
+    HipFgmresModelFamilyResultIRNotIssuedObservationV1,
+    HipFgmresModelFamilyResultIRReadyObservationV1,
+    attest_hip_fgmres_model_family_result_ir_disposition_v1,
+    validate_hip_fgmres_model_family_result_ir_disposition_result_v1,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_model_family_diagnostic_ir_v1 import (
+    attest_hip_fgmres_model_family_diagnostic_ir_v1,
+    validate_hip_fgmres_model_family_diagnostic_ir_result_v1,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_recurrence_launch_fence_audit_v1 import (
     open_hip_fgmres_recurrence_launch_fence_audit_v1,
     validate_hip_fgmres_recurrence_launch_fence_audit_result_v1,
 )
 from structural_analysis.engine_v2.assembly_backend.fgmres_sealed_checkpoint_transaction_v1 import (
     open_hip_fgmres_sealed_checkpoint_transaction_context_v1,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_result_ir_v2 import (
+    build_hip_fgmres_result_ir_v2,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_diagnostic_ir_v1 import (
+    build_hip_fgmres_diagnostic_ir_v1,
 )
 from structural_analysis.engine_v2.assembly_backend.fgmres_terminal_outcome_observation_v1 import (
     observe_hip_fgmres_terminal_outcome_v1,
@@ -64,6 +80,8 @@ def _hardware_required() -> bool:
             "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_FAMILY_PARITY_V2_HARDWARE",
             "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_FAMILY_HOST_TRANSFER_AUDIT_HARDWARE",
             "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_FAMILY_AUDITED_PARITY_V2_HARDWARE",
+            "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_FAMILY_RESULT_IR_DISPOSITION_V1_HARDWARE",
+            "ENGINE_V2_REQUIRE_HIP_FGMRES_MODEL_FAMILY_DIAGNOSTIC_IR_V1_HARDWARE",
         )
     )
 
@@ -283,6 +301,10 @@ def test_native_gfx1030_replays_and_audits_all_ten_cells_in_one_live_aggregate()
     cases: list[Any] = []
     audit_contexts: list[Any] = []
     ordinal_contexts: list[Any] = []
+    result_ir_bridges: list[Any] = []
+    diagnostic_ir_bridges: list[Any] = []
+    family_disposition = None
+    family_diagnostic = None
     try:
         for slot_id in HIP_FGMRES_MODEL_FAMILY_REQUIRED_SLOT_IDS_V2:
             print(f"actual-gfx1030 fixed-suite cell: {slot_id}", flush=True)
@@ -295,6 +317,23 @@ def test_native_gfx1030_replays_and_audits_all_ten_cells_in_one_live_aggregate()
             cases.append(case)
             audit_contexts.append(audit_context)
             ordinal_contexts.append(ordinal_context)
+            if registry.slot(slot_id).cpu_result.status == "converged":
+                result_ir_bridges.append(
+                    build_hip_fgmres_result_ir_v2(
+                        case,
+                        result_id=f"Result.hip-fgmres-fixed-suite.{slot_id}.v2",
+                    )
+                )
+            else:
+                assert registry.slot(slot_id).cpu_result.status == "max_iterations"
+                diagnostic_ir_bridges.append(
+                    build_hip_fgmres_diagnostic_ir_v1(
+                        case,
+                        diagnostic_id=(
+                            f"Diagnostic.hip-fgmres-fixed-suite.{slot_id}.v1"
+                        ),
+                    )
+                )
 
         family = attest_hip_fgmres_model_family_coverage_v2(tuple(cases))
         validate_hip_fgmres_model_family_parity_result_v2(
@@ -390,8 +429,171 @@ def test_native_gfx1030_replays_and_audits_all_ten_cells_in_one_live_aggregate()
         assert not claims.iteration_host_copy_zero_proven
         assert not claims.standalone_receipt_provenance_authenticity
         assert not claims.hostile_same_process_mutation_or_interposition_resistance
+        assert not claims.result_ir_verified
         assert not claims.commercial_ready
         assert not audited_receipt.promotion_eligible
+
+        family_disposition = attest_hip_fgmres_model_family_result_ir_disposition_v1(
+            audited,
+            tuple(result_ir_bridges),
+        )
+        result_receipt = family_disposition.receipt
+        result_totals = result_receipt.totals
+        assert tuple(
+            row.slot_id
+            for row in result_receipt.observations
+            if type(row) is HipFgmresModelFamilyResultIRReadyObservationV1
+        ) == (
+            "frame_single_axial",
+            "frame_single_weak_axis_bending",
+            "frame_single_strong_axis_bending",
+            "frame_single_torsion",
+            "frame_serial_later_column",
+            "truss_single_axial",
+            "recurrence_initial_or_early_terminal",
+        )
+        assert tuple(
+            row.slot_id
+            for row in result_receipt.observations
+            if type(row) is HipFgmresModelFamilyResultIRNotIssuedObservationV1
+        ) == (
+            "frame_single_rotated_local_axis_bending",
+            "recurrence_later_restart_partial_final_cycle",
+            "recurrence_exact_full_final_cycle_guard",
+        )
+        assert all(
+            row.disposition == "ready_result_ir_v2"
+            and row.result_array_count == 6
+            and row.additional_device_operation_count == 0
+            and row.additional_d2h_operation_count == 0
+            and row.additional_solve_count == 0
+            and row.additional_export_count == 0
+            and row.fallback_count == 0
+            for row in result_receipt.observations
+            if type(row) is HipFgmresModelFamilyResultIRReadyObservationV1
+        )
+        assert all(
+            row.disposition == "not_issued_nonconverged"
+            and row.result_ir_absence_reason == "source_not_converged"
+            and row.result_ir_materialized is False
+            and row.solver_tolerance_passed is False
+            and row.authoritative_plan_tolerance_passed is False
+            for row in result_receipt.observations
+            if type(row) is HipFgmresModelFamilyResultIRNotIssuedObservationV1
+        )
+        assert result_totals.required_slot_count == 10
+        assert result_totals.ready_result_ir_v2_count == 7
+        assert result_totals.not_issued_nonconverged_count == 3
+        assert result_totals.package_global_dof_count == 162
+        assert result_totals.package_element_count == 17
+        assert result_totals.package_free_dof_count == 97
+        assert result_totals.package_csr_nnz == 2196
+        assert result_totals.ready_global_dof_count == 90
+        assert result_totals.ready_element_count == 8
+        assert result_totals.ready_free_dof_count == 43
+        assert result_totals.ready_csr_nnz == 1116
+        assert result_totals.ready_result_array_count == 42
+        assert result_totals.ready_result_array_byte_count == 3336
+        assert result_totals.ready_detached_raw_payload_byte_count == 688
+        assert result_totals.upstream_completion_export_blocking_d2h_attempt_count == 30
+        assert result_totals.upstream_completion_export_blocking_d2h_success_count == 30
+        assert result_totals.upstream_completion_export_blocking_d2h_failure_count == 0
+        assert result_totals.upstream_completion_export_byte_count == 4408
+        assert result_totals.result_ir_projection_additional_device_operation_count == 0
+        assert result_totals.result_ir_projection_additional_d2h_operation_count == 0
+        assert result_totals.result_ir_projection_additional_solve_count == 0
+        assert result_totals.result_ir_projection_additional_export_count == 0
+        assert result_totals.result_ir_projection_fallback_count == 0
+        assert len(family_disposition.result_ir_bridges) == 7
+        for bridge in family_disposition.result_ir_bridges:
+            provenance = bridge.receipt.source_provenance
+            assert provenance.actual_backend == "hip"
+            assert provenance.runtime_architecture_base == "gfx1030"
+            assert provenance.additional_device_operation_count == 0
+            assert provenance.additional_d2h_operation_count == 0
+            assert provenance.additional_solve_count == 0
+            assert provenance.additional_export_count == 0
+            assert provenance.fallback_count == 0
+        result_claims = result_receipt.claims
+        assert result_claims.seven_converged_result_ir_v2_verified
+        assert result_claims.three_nonconverged_result_ir_v2_not_issued
+        assert not result_claims.exact_ten_slot_result_ir_v2_ready
+        assert not result_claims.external_gfx1100_result_ir_verified
+        assert not result_claims.iteration_host_copy_zero_proven
+        assert not result_claims.end_to_end_o_n_verified
+        assert not result_claims.performance_or_speedup_proven
+        assert not result_claims.signed_evidence
+        assert not result_claims.commercial_ready
+        assert not result_receipt.promotion_eligible
+
+        family_diagnostic = attest_hip_fgmres_model_family_diagnostic_ir_v1(
+            audited,
+            family_disposition,
+            tuple(reversed(diagnostic_ir_bridges)),
+        )
+        diagnostic_receipt = family_diagnostic.receipt
+        diagnostic_totals = diagnostic_receipt.totals
+        assert tuple(row.slot_id for row in diagnostic_receipt.observations) == (
+            "frame_single_rotated_local_axis_bending",
+            "recurrence_later_restart_partial_final_cycle",
+            "recurrence_exact_full_final_cycle_guard",
+        )
+        assert diagnostic_totals.required_diagnostic_slot_count == 3
+        assert diagnostic_totals.ready_result_ir_v2_count == 7
+        assert diagnostic_totals.ready_diagnostic_ir_v1_count == 3
+        assert diagnostic_totals.diagnostic_global_dof_count == 72
+        assert diagnostic_totals.diagnostic_element_count == 9
+        assert diagnostic_totals.diagnostic_free_dof_count == 54
+        assert diagnostic_totals.diagnostic_csr_nnz == 1080
+        assert diagnostic_totals.diagnostic_array_count == 9
+        assert diagnostic_totals.diagnostic_array_byte_count == 1584
+        assert (
+            diagnostic_totals.diagnostic_detached_raw_export_payload_byte_count == 1872
+        )
+        assert (
+            diagnostic_totals.upstream_completion_export_blocking_d2h_attempt_count == 9
+        )
+        assert (
+            diagnostic_totals.upstream_completion_export_blocking_d2h_success_count == 9
+        )
+        assert (
+            diagnostic_totals.upstream_completion_export_blocking_d2h_failure_count == 0
+        )
+        assert diagnostic_totals.upstream_completion_export_byte_count == 1872
+        assert diagnostic_totals.sparse_residual_replay_count == 3
+        assert (
+            diagnostic_totals.diagnostic_projection_additional_device_operation_count
+            == 0
+        )
+        assert (
+            diagnostic_totals.diagnostic_projection_additional_d2h_operation_count == 0
+        )
+        assert diagnostic_totals.diagnostic_projection_additional_solve_count == 0
+        assert diagnostic_totals.diagnostic_projection_additional_export_count == 0
+        assert diagnostic_totals.diagnostic_projection_fallback_count == 0
+        assert diagnostic_totals.diagnostic_projection_state_commit_count == 0
+        assert len(family_diagnostic.diagnostic_bridges) == 3
+        diagnostic_claims = diagnostic_receipt.claims
+        assert diagnostic_claims.source_result_ir_disposition_replayed_unchanged
+        assert diagnostic_claims.seven_converged_result_ir_v2_preserved
+        assert diagnostic_claims.three_nonconverged_diagnostic_ir_v1_verified
+        assert diagnostic_claims.partial_iterates_preserved
+        assert diagnostic_claims.evaluated_trial_states_verified
+        assert diagnostic_claims.nonconverged_state_commit_zero
+        assert diagnostic_claims.sparse_residual_replayed_for_each_diagnostic
+        assert not diagnostic_claims.exact_ten_slot_result_ir_v2_ready
+        assert not diagnostic_claims.all_ten_solution_ready
+        assert not diagnostic_claims.all_ten_converged
+        assert not diagnostic_claims.diagnostic_ir_is_solution_result
+        assert not diagnostic_claims.nonconverged_state_committed
+        assert not diagnostic_claims.external_gfx1100_diagnostic_ir_verified
+        assert not diagnostic_claims.iteration_host_copy_zero_proven
+        assert not diagnostic_claims.standalone_receipt_provenance_authenticity
+        assert not diagnostic_claims.end_to_end_o_n_verified
+        assert not diagnostic_claims.performance_or_speedup_proven
+        assert not diagnostic_claims.commercial_ready
+        assert not diagnostic_claims.promotion_eligible
+        assert not diagnostic_receipt.promotion_eligible
     finally:
         cleanup_errors: list[BaseException] = []
         for opened in reversed(resources):
@@ -407,3 +609,15 @@ def test_native_gfx1030_replays_and_audits_all_ten_cells_in_one_live_aggregate()
                 first = cleanup_errors[0]
                 _attach_cleanup_failures(first, cleanup_errors[1:])
                 raise first
+    assert family_disposition is not None
+    assert family_diagnostic is not None
+    assert (
+        validate_hip_fgmres_model_family_result_ir_disposition_result_v1(
+            family_disposition
+        )
+        is family_disposition
+    )
+    assert (
+        validate_hip_fgmres_model_family_diagnostic_ir_result_v1(family_diagnostic)
+        is family_diagnostic
+    )
