@@ -21,6 +21,7 @@ def validate(
     passed_fields = [
         "engine_version",
         "input_checksum",
+        "canonical_model_checksum",
         "tolerance",
         "convergence_history",
         "claim_boundary_version",
@@ -93,6 +94,7 @@ def validate(
         warnings=warnings,
         developer_preview=result.developer_preview,
         claim_boundary_version=result.claim_boundary_version,
+        canonical_model_checksum=result.canonical_model_checksum,
     )
 
 
