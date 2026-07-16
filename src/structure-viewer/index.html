@@ -1083,6 +1083,10 @@ import {
   readViewerProjectBundleFile,
   viewerProjectBundleFileMetadata,
 } from './viewer-project-bundle-file-reader.js';
+import {
+  readViewerLocalModelFile,
+  viewerLocalModelFileFailure,
+} from './viewer-local-model-file-reader.js';
 
 const VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY='structure-viewer-runtime-ingest-payload-v1';
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
@@ -21494,18 +21498,24 @@ async function loadCustomJson() {
 }
 
 async function handleFileSelect(event) {
-  const file = event.target.files?.[0];
+  const input = event?.target;
+  const file = input?.files?.[0] || null;
   if (!file) return;
   showLoadingIndicator(`Loading ${file.name}...`);
   try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-    await window.buildModel?.(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
+    const fileRead = await readViewerLocalModelFile(file);
+    await window.buildModel?.(fileRead.payload, {
+      mode: 'local_file',
+      label: fileRead.name || file.name,
+      resolvedPath: fileRead.name || file.name,
+    });
+  } catch (error) {
+    const failure = viewerLocalModelFileFailure(error, { sourceName: file.name });
+    console.warn(`[Viewer] Local model file blocked: ${failure.error_code}@${failure.error_path}`);
+    alert(`Could not load the selected JSON model (${failure.error_code} @ ${failure.error_path}).`);
+  } finally {
     hideLoadingIndicator();
-  } catch (err) {
-    console.error('[Viewer] Failed to load file:', err);
-    hideLoadingIndicator();
-    alert(`Failed to load ${file.name}: ${err.message}`);
+    if (input instanceof HTMLInputElement) input.value = '';
   }
 }
 
@@ -21542,18 +21552,23 @@ function setupFileDropZone() {
   dropZone.addEventListener('drop', async (e) => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
-    const file = e.dataTransfer?.files?.[0];
+    const file = e.dataTransfer?.files?.[0] || null;
     if (!file) return;
     showLoadingIndicator(`Loading ${file.name}...`);
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      await window.buildModel?.(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
+      const fileRead = await readViewerLocalModelFile(file);
+      await window.buildModel?.(fileRead.payload, {
+        mode: 'local_file',
+        label: fileRead.name || file.name,
+        resolvedPath: fileRead.name || file.name,
+      });
+    } catch (error) {
+      const failure = viewerLocalModelFileFailure(error, { sourceName: file.name });
+      console.warn(`[Viewer] Dropped local model blocked: ${failure.error_code}@${failure.error_path}`);
+      alert(`Could not load the dropped JSON model (${failure.error_code} @ ${failure.error_path}).`);
+    } finally {
       hideLoadingIndicator();
-    } catch (err) {
-      console.error('[Viewer] Failed to load dropped file:', err);
-      hideLoadingIndicator();
-      alert(`Failed to load ${file.name}: ${err.message}`);
+      dropZone.classList.remove('drag-over');
     }
   });
 }
