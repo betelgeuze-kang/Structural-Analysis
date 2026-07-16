@@ -54,10 +54,14 @@ def test_file_select_and_drop_share_the_bounded_model_reader() -> None:
         assert "failure.error_path" in handler
         assert f"Could not load the {action} JSON model" in handler
         assert "await window.buildModel?.(fileRead.payload" in handler
+        assert "mode: 'local_file'" in handler
+        assert "label: fileRead.name || file.name" in handler
+        assert "resolvedPath: fileRead.name || file.name" in handler
         assert "showLoadingIndicator(" in handler
         assert "hideLoadingIndicator();" in handler
         assert "file.text()" not in handler
         assert "JSON.parse(" not in handler
+        assert "window.loadStructureData(" not in handler
         assert "console.error(" not in handler
         assert "String(error" not in handler
         assert ".message" not in handler
