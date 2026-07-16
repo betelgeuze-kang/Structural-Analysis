@@ -632,18 +632,24 @@ def _add_up(left: float, right: float, path: str) -> float:
 
 
 def _mul_up(left: float, right: float, path: str) -> float:
+    if left < 0.0 or right < 0.0:
+        _fail("fp64_csr_residual_roundoff_bound_invalid", path)
     value = left * right
     if not math.isfinite(value):
         _fail("fp64_csr_residual_roundoff_bound_overflow", path)
+    if value == 0.0 and left != 0.0 and right != 0.0:
+        return FP64_BINARY64_SMALLEST_SUBNORMAL_V1
     return _next_up_nonnegative(value, path) if value != 0.0 else 0.0
 
 
 def _div_up(numerator: float, denominator: float, path: str) -> float:
-    if denominator <= 0.0:
+    if numerator < 0.0 or denominator <= 0.0:
         _fail("fp64_csr_residual_roundoff_zero_denominator", path)
     value = numerator / denominator
     if not math.isfinite(value):
         _fail("fp64_csr_residual_roundoff_bound_overflow", path)
+    if value == 0.0 and numerator != 0.0:
+        return FP64_BINARY64_SMALLEST_SUBNORMAL_V1
     return _next_up_nonnegative(value, path) if value != 0.0 else 0.0
 
 

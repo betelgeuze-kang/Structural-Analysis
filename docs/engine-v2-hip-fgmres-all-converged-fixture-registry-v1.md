@@ -163,7 +163,9 @@ fallback으로 세지 않지만, CPU replay가 없다고 주장해서도 안 된
   일반적인 scale-aware residual 계약을 증명하지 않는다. 별도 downstream v0.2.48은
   원래 고하중 세 case의 componentwise roundoff/backward-error vector gate를 actual
   `gfx1030`에서 `1 passed in 218.17s`로 통과했지만 이 v0.2.47 ResultIR authority에
-  소급하지 않는다.
+  소급하지 않는다. Downstream v0.2.49 terminal norm record gate도 같은 세 고하중
+  case에서 final-source `1 passed in 226.25s`로 통과했지만 이 registry의 ResultIR/aggregate
+  authority에는 소급하지 않는다.
 - 별도 restricted namespace에는 `/dev/kfd`가 없었다. Non-required mode는 static test가
   통과하고 actual gate가 skip되어 `1 passed, 1 skipped in 1.74s`였고, required mode는
   static test가
@@ -206,7 +208,7 @@ HIP 또는 10/10 ResultIR 증거로 재사용하지 않는다.
 
 ## 다음 단계
 
-1. v0.2.48 componentwise bound를 terminal `L2/Linf/scaled Linf` metric과 model-case
-   parity v2/고하중 ResultIR bridge에 결속한다.
+1. v0.2.49 additive terminal `L2/Linf/scaled Linf` v2 이후 restart-history metric과
+   고하중 ResultIR bridge/compatibility registry를 결속한다.
 2. External `gfx1100` 및 동일 final artifact의 local `gfx1030` 재실행, durable/signed
    provenance, broad host-copy-zero를 순서대로 추가한다.

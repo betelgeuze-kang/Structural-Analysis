@@ -136,7 +136,8 @@ Proposition 5.1에 정리되어 있다. 이 구현은 residual subtraction과 �
 
 ## 아직 증명하지 않는 것
 
-- v1 terminal/history scalar metric의 새 normwise bound 또는 기존 receipt migration
+- 이 v1 자체의 terminal/history scalar metric 또는 기존 receipt migration. Downstream
+  v0.2.49가 additive terminal `L2/Linf/scaled-Linf` v2를 별도로 완료했지만 소급하지 않음
 - 고하중 파생 모델의 ResultIR/aggregate authority
 - v0.2.47 unit-load fixture를 원래 load로 되돌리는 compatibility migration
 - kernel instruction sequence의 formal/machine-checked IEEE proof
@@ -147,9 +148,8 @@ Proposition 5.1에 정리되어 있다. 이 구현은 residual subtraction과 �
 
 ## 다음 순서
 
-1. componentwise `B_i`에서 `L2/Linf/scaled Linf` normwise budget을 유도해
-   model-case parity v2 terminal metric에 결속한다.
-2. 기존 v1 wire receipt를 소급 변경하지 않고 v1→v2 compatibility/migration 결정을
-   고정한다.
-3. 세 고하중 case의 ResultIR bridge와 post-close validator를 v2로 발행한다.
+1. Downstream v0.2.49 terminal `L2/Linf/scaled-Linf` additive v2 이후 restart-history
+   true-residual norm metric과 estimated-residual/solution-update 오차 모델을 분리한다.
+2. 세 고하중 case의 ResultIR bridge와 post-close validator를 v2로 발행한다.
+3. v0.2.47 unit-load registry를 변경하지 않는 compatibility registry/aggregate를 만든다.
 4. actual `gfx1100`과 동일 final artifact의 local `gfx1030` 재실행으로 확장한다.

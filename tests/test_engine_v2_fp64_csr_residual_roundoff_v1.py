@@ -373,6 +373,7 @@ def test_detached_fgmres_adapter_adds_roundoff_gate_without_relaxing_legacy_v1()
 def test_outward_primitives_bound_exact_binary64_arithmetic() -> None:
     positive_pairs = (
         (0.0, 0.0),
+        (float.fromhex("0x0.0000000000001p-1022"), 0.5),
         (float.fromhex("0x0.0000000000001p-1022"), 3.0),
         (float.fromhex("0x1.0000000000000p-1022"), 0.5),
         (1.0, 2.0**-53),

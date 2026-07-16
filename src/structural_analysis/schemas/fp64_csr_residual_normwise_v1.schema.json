@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/fp64-csr-residual-normwise-v1.schema.json",
+  "title": "Engine v2 FP64 CSR residual normwise projection v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "promotion_eligible",
+    "projection_id",
+    "bindings",
+    "metrics",
+    "summary",
+    "compatibility",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-fp64-csr-residual-normwise.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_fp64_csr_residual_normwise_projection"
+    },
+    "status": {"const": "normwise_projection_verified"},
+    "evidence_scope": {
+      "const": "backend_neutral_normwise_value_contract_non_promoting"
+    },
+    "promotion_eligible": {"const": false},
+    "projection_id": {"$ref": "#/$defs/hash"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "metrics": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"$ref": "#/$defs/l2Metric"},
+        {"$ref": "#/$defs/linfMetric"},
+        {"$ref": "#/$defs/scaledLinfMetric"}
+      ],
+      "items": false
+    },
+    "summary": {"$ref": "#/$defs/summary"},
+    "compatibility": {"$ref": "#/$defs/compatibility"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonnegativeNumber": {
+      "type": "number",
+      "minimum": 0
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "componentwise_comparison_id",
+        "componentwise_receipt_hash",
+        "execution_plan_hash",
+        "operator_hash",
+        "reference_residual_sha256",
+        "candidate_residual_sha256",
+        "componentwise_bound_sha256",
+        "metric_projection_hash"
+      ],
+      "properties": {
+        "componentwise_comparison_id": {"$ref": "#/$defs/hash"},
+        "componentwise_receipt_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "operator_hash": {"$ref": "#/$defs/hash"},
+        "reference_residual_sha256": {"$ref": "#/$defs/hash"},
+        "candidate_residual_sha256": {"$ref": "#/$defs/hash"},
+        "componentwise_bound_sha256": {"$ref": "#/$defs/hash"},
+        "metric_projection_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "interval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lower", "upper"],
+      "properties": {
+        "lower": {"$ref": "#/$defs/nonnegativeNumber"},
+        "upper": {"$ref": "#/$defs/nonnegativeNumber"}
+      }
+    },
+    "metricBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "reference_interval",
+        "candidate_interval",
+        "vector_difference_upper_bound",
+        "interval_gap_lower_bound",
+        "interval_envelope_gap_upper_bound",
+        "reverse_triangle_bound_verified"
+      ],
+      "properties": {
+        "name": {"enum": ["l2", "linf", "scaled_linf"]},
+        "reference_interval": {"$ref": "#/$defs/interval"},
+        "candidate_interval": {"$ref": "#/$defs/interval"},
+        "vector_difference_upper_bound": {
+          "$ref": "#/$defs/nonnegativeNumber"
+        },
+        "interval_gap_lower_bound": {
+          "$ref": "#/$defs/nonnegativeNumber"
+        },
+        "interval_envelope_gap_upper_bound": {
+          "$ref": "#/$defs/nonnegativeNumber"
+        },
+        "reverse_triangle_bound_verified": {"const": true}
+      }
+    },
+    "l2Metric": {
+      "allOf": [
+        {"$ref": "#/$defs/metricBase"},
+        {"properties": {"name": {"const": "l2"}}}
+      ]
+    },
+    "linfMetric": {
+      "allOf": [
+        {"$ref": "#/$defs/metricBase"},
+        {"properties": {"name": {"const": "linf"}}}
+      ]
+    },
+    "scaledLinfMetric": {
+      "allOf": [
+        {"$ref": "#/$defs/metricBase"},
+        {"properties": {"name": {"const": "scaled_linf"}}}
+      ]
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row_count",
+        "rhs_linf",
+        "load_scale",
+        "metric_count",
+        "all_reverse_triangle_bounds_verified"
+      ],
+      "properties": {
+        "row_count": {"type": "integer", "minimum": 1},
+        "rhs_linf": {"$ref": "#/$defs/nonnegativeNumber"},
+        "load_scale": {"type": "number", "minimum": 1},
+        "metric_count": {"const": 3},
+        "all_reverse_triangle_bounds_verified": {"const": true}
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_componentwise_schema_version",
+        "source_wire_receipt_mutated",
+        "migration_action"
+      ],
+      "properties": {
+        "source_componentwise_schema_version": {
+          "const": "structural-analysis-fp64-csr-residual-roundoff.v1"
+        },
+        "source_wire_receipt_mutated": {"const": false},
+        "migration_action": {
+          "const": "preserve_v1_and_issue_additive_normwise_v1"
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "componentwise_receipt_fully_replayed",
+        "reverse_triangle_l2_verified",
+        "reverse_triangle_linf_verified",
+        "reverse_triangle_scaled_linf_verified",
+        "outward_interval_arithmetic_verified",
+        "caller_tolerance_allowed",
+        "legacy_wire_contract_changed",
+        "actual_backend_verified",
+        "terminal_record_metric_verified",
+        "history_metric_verified",
+        "performance_speedup_verified",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "componentwise_receipt_fully_replayed": {"const": true},
+        "reverse_triangle_l2_verified": {"const": true},
+        "reverse_triangle_linf_verified": {"const": true},
+        "reverse_triangle_scaled_linf_verified": {"const": true},
+        "outward_interval_arithmetic_verified": {"const": true},
+        "caller_tolerance_allowed": {"const": false},
+        "legacy_wire_contract_changed": {"const": false},
+        "actual_backend_verified": {"const": false},
+        "terminal_record_metric_verified": {"const": false},
+        "history_metric_verified": {"const": false},
+        "performance_speedup_verified": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

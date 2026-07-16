@@ -169,7 +169,8 @@ Tolerance 규칙을 변경하지 않고 rotated/four/five-span을 명시적 `1 N
 gate를 다시 실행했다. 이 fixed-suite 처리는 일반 load scale의 roundoff-aware ResultIR
 또는 성능 증거가 아니다. 별도 downstream v0.2.48은 원래 고하중 세 case의
 componentwise residual vector bound를 actual `gfx1030`에서 `1 passed in 218.17s`로
-통과했지만 terminal metric과 이 v0.2.47 ResultIR authority에 소급하지 않는다.
+통과했다. Downstream v0.2.49 terminal norm record gate도 같은 세 고하중 case에서
+final-source `1 passed in 226.25s`로 통과했지만 이 v0.2.47 ResultIR authority에는 소급하지 않는다.
 별도 restricted namespace에는 `/dev/kfd`가 없었고, non-required mode는 static bound test가
 통과한 뒤 actual gate가 skip되어 `1 passed, 1 skipped in 1.74s`, required mode는 static
 test가 통과한 뒤 actual gate가 `No real gfx agent was detected.`로 fail-closed하여
@@ -245,8 +246,8 @@ PYTHONPATH=src python3 -m pytest -q \
 
 ## 다음 단계
 
-1. v0.2.48 componentwise bound를 terminal `L2/Linf/scaled Linf` metric과 model-case
-   parity v2/고하중 ResultIR bridge에 결속한다.
+1. v0.2.49 additive terminal `L2/Linf/scaled Linf` v2 이후 restart-history metric과
+   고하중 ResultIR bridge/compatibility registry를 결속한다.
 2. Reviewer-root bootstrap/HSM lifecycle 뒤 external `gfx1100`, 동일 final artifact local
    `gfx1030`, durable monotonic ledger 및 signed evidence를 순서대로 검증한다.
 3. Broad iteration host-copy-zero와 GPU result recovery를 별도 authoritative gate로 닫은
