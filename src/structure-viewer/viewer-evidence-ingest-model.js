@@ -10,6 +10,15 @@ import {
   claimsAuthoritativeViewerContract,
   validateAuthoritativeViewerPayload,
 } from './viewer-authoritative-payload-contract.js';
+import {
+  EvidenceIngestResourceLimitError,
+  STRUCTURE_VIEWER_INGEST_MAX_ROW_COUNT,
+  STRUCTURE_VIEWER_INGEST_RESOURCE_POLICY,
+  evidenceIngestResourceLimits,
+  validateEvidenceIngestRenderableCounts,
+  validateEvidenceIngestRowCount,
+  validateEvidenceIngestText,
+} from './viewer-evidence-ingest-resource-policy.js';
 
 export const STRUCTURE_VIEWER_INGEST_PREVIEW_SCHEMA_VERSION = 'structure-viewer-evidence-ingest-preview.v1';
 export const STRUCTURE_VIEWER_RENDERABLE_INSPECTION_SCHEMA_VERSION = 'structure-viewer-renderable-ingest-inspection.v1';
@@ -44,14 +53,37 @@ function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function resourceErrorResult(error) {
+  if (!(error instanceof EvidenceIngestResourceLimitError)) throw error;
+  return {
+    valid: false,
+    rows: [],
+    errorCode: error.code,
+    errorPath: error.path,
+  };
+}
+
 function parseCsvRows(text = '') {
   const lines = normalizeText(text).split(/\r?\n/).filter(Boolean);
-  if (!lines.length) return [];
+  if (!lines.length) {
+    return {valid: true, rows: [], errorCode: '', errorPath: ''};
+  }
+  const rowCount = Math.max(0, lines.length - 1);
+  try {
+    validateEvidenceIngestRowCount(rowCount, '/rows');
+  } catch (error) {
+    return resourceErrorResult(error);
+  }
   const headers = lines[0].split(',').map((header) => normalizeToken(header));
-  return lines.slice(1).map((line) => {
-    const cells = line.split(',');
-    return Object.fromEntries(headers.map((header, index) => [header, normalizeText(cells[index])]));
-  });
+  return {
+    valid: true,
+    rows: lines.slice(1).map((line) => {
+      const cells = line.split(',');
+      return Object.fromEntries(headers.map((header, index) => [header, normalizeText(cells[index])]));
+    }),
+    errorCode: '',
+    errorPath: '',
+  };
 }
 
 function parseJsonDocument(text = '') {
@@ -91,6 +123,11 @@ function selectJsonRows(value) {
       errorPath: '/',
     };
   }
+  try {
+    validateEvidenceIngestRowCount(rows.length, pathPrefix || '/rows');
+  } catch (error) {
+    return resourceErrorResult(error);
+  }
   const invalidIndex = rows.findIndex((row) => !isRecord(row));
   if (invalidIndex >= 0) {
     return {
@@ -122,7 +159,7 @@ function resolveRenderablePayloadKind(payload = null) {
 }
 
 function countRenderablePayload(payload = null, kind = '') {
-  if (!payload || typeof payload !== 'object') return { nodeCount: 0, elementCount: 0, segmentCount: 0 };
+  if (!payload || typeof payload !== 'object') return {nodeCount: 0, elementCount: 0, segmentCount: 0};
   if (kind === 'direct_model' || kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND) {
     const model = payload.model && typeof payload.model === 'object' ? payload.model : payload;
     return {
@@ -153,6 +190,7 @@ function inspectionEnvelope({
   validationStatus = 'unavailable',
   validationErrorCode = '',
   validationErrorPath = '',
+  textByteCount = 0,
   payload = null,
 } = {}) {
   const counts = countRenderablePayload(payload, payloadKind);
@@ -166,15 +204,39 @@ function inspectionEnvelope({
     validation_status: validationStatus,
     validation_error_code: validationErrorCode,
     validation_error_path: validationErrorPath,
+    resource_policy: STRUCTURE_VIEWER_INGEST_RESOURCE_POLICY,
+    resource_limits: evidenceIngestResourceLimits(),
+    text_byte_count: textByteCount,
     node_count: counts.nodeCount,
     element_count: counts.elementCount,
     segment_count: counts.segmentCount,
     model_identity: payloadKind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
       && payload?.model_identity && typeof payload.model_identity === 'object'
-      ? { ...payload.model_identity }
+      ? {...payload.model_identity}
       : null,
     payload: available ? payload : null,
   };
+}
+
+function resourceBlockedInspection({
+  sourceType,
+  sourceName,
+  generatedAt,
+  payloadKind = '',
+  textByteCount = 0,
+  error,
+}) {
+  if (!(error instanceof EvidenceIngestResourceLimitError)) throw error;
+  return inspectionEnvelope({
+    sourceType,
+    sourceName,
+    generatedAt,
+    payloadKind,
+    validationStatus: 'blocked_resource_limit',
+    validationErrorCode: error.code,
+    validationErrorPath: error.path,
+    textByteCount,
+  });
 }
 
 export function inspectRenderableEvidencePayloadFromText(text = '', {
@@ -182,6 +244,17 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
   sourceName = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
+  let textMeasurement;
+  try {
+    textMeasurement = validateEvidenceIngestText(text);
+  } catch (error) {
+    return resourceBlockedInspection({
+      sourceType: normalizeToken(sourceType) || 'json',
+      sourceName,
+      generatedAt,
+      error,
+    });
+  }
   const normalizedSourceType = resolveEvidenceSourceType(sourceType, text, sourceName);
   if (normalizedSourceType !== 'json') {
     return inspectionEnvelope({
@@ -189,6 +262,7 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
       sourceName,
       generatedAt,
       validationStatus: 'not_json',
+      textByteCount: textMeasurement.byteLength,
     });
   }
   const document = parseJsonDocument(text);
@@ -200,6 +274,7 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
       validationStatus: 'unavailable',
       validationErrorCode: document.errorCode,
       validationErrorPath: document.errorPath,
+      textByteCount: textMeasurement.byteLength,
     });
   }
   const payload = document.value;
@@ -211,6 +286,7 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
       validationStatus: 'unavailable',
       validationErrorCode: 'json_object_required',
       validationErrorPath: '/',
+      textByteCount: textMeasurement.byteLength,
     });
   }
   if (claimsAuthoritativeViewerContract(payload)) {
@@ -223,18 +299,23 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
         available: true,
         payloadKind: AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
         validationStatus: 'validated_authoritative_contract',
+        textByteCount: textMeasurement.byteLength,
         payload,
       });
     } catch (error) {
       if (!(error instanceof AuthoritativeViewerPayloadValidationError)) throw error;
+      const resourceLimited = error.code === 'viewer_node_count_limit_exceeded'
+        || error.code === 'viewer_element_count_limit_exceeded'
+        || error.code === 'viewer_resource_count_invalid';
       return inspectionEnvelope({
         sourceType: normalizedSourceType,
         sourceName,
         generatedAt,
         payloadKind: AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
-        validationStatus: 'blocked_authoritative_contract',
+        validationStatus: resourceLimited ? 'blocked_resource_limit' : 'blocked_authoritative_contract',
         validationErrorCode: error.code,
         validationErrorPath: error.path,
+        textByteCount: textMeasurement.byteLength,
       });
     }
   }
@@ -247,6 +328,20 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
       validationStatus: 'unavailable',
       validationErrorCode: 'renderable_payload_shape_not_found',
       validationErrorPath: '/',
+      textByteCount: textMeasurement.byteLength,
+    });
+  }
+  const counts = countRenderablePayload(payload, kind);
+  try {
+    validateEvidenceIngestRenderableCounts(counts);
+  } catch (error) {
+    return resourceBlockedInspection({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      payloadKind: kind,
+      textByteCount: textMeasurement.byteLength,
+      error,
     });
   }
   return inspectionEnvelope({
@@ -256,6 +351,7 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
     available: true,
     payloadKind: kind,
     validationStatus: 'basic_shape_only',
+    textByteCount: textMeasurement.byteLength,
     payload,
   });
 }
@@ -272,6 +368,9 @@ export function extractRenderableEvidencePayloadFromText(text = '', options = {}
     validation_status: inspection.validation_status,
     validation_error_code: '',
     validation_error_path: '',
+    resource_policy: inspection.resource_policy,
+    resource_limits: inspection.resource_limits,
+    text_byte_count: inspection.text_byte_count,
     node_count: inspection.node_count,
     element_count: inspection.element_count,
     segment_count: inspection.segment_count,
@@ -338,6 +437,8 @@ function buildAuthoritativeViewerMetadataRow(inspection, {
       status: 'validated authoritative Viewer contract',
       payload_kind: inspection.payload_kind,
       validation_status: inspection.validation_status,
+      resource_policy: inspection.resource_policy,
+      text_byte_count: inspection.text_byte_count,
       node_count: inspection.node_count,
       element_count: inspection.element_count,
       model_identity: identity,
@@ -384,6 +485,8 @@ function buildBlockedEvidenceMetadataRow(inspection, {
       validation_status: inspection.validation_status,
       validation_error_code: errorCode,
       validation_error_path: errorPath,
+      resource_policy: inspection.resource_policy || STRUCTURE_VIEWER_INGEST_RESOURCE_POLICY,
+      text_byte_count: inspection.text_byte_count || 0,
       preview_only: true,
     },
   };
@@ -402,7 +505,9 @@ function blockedDirectRows({
     sourceType: sourceToken,
     sourceName,
     generatedAt,
-    validationStatus: 'unavailable',
+    validationStatus: errorCode === 'evidence_ingest_row_count_limit_exceeded'
+      ? 'blocked_resource_limit'
+      : 'unavailable',
     validationErrorCode: errorCode,
     validationErrorPath: errorPath,
   });
@@ -520,15 +625,29 @@ export function buildEvidenceIngestPreview({
       errorPath: '/rows',
     });
   } else {
-    const invalidIndex = rows.findIndex((row) => !isRecord(row));
-    if (invalidIndex >= 0) {
+    try {
+      validateEvidenceIngestRowCount(rows.length, '/rows');
+    } catch (error) {
+      if (!(error instanceof EvidenceIngestResourceLimitError)) throw error;
       sourceRows = blockedDirectRows({
         sourceType,
         projectId,
         generatedAt,
-        errorCode: 'ingest_row_object_required',
-        errorPath: `/rows/${invalidIndex}`,
+        errorCode: error.code,
+        errorPath: error.path,
       });
+    }
+    if (sourceRows === rows) {
+      const invalidIndex = rows.findIndex((row) => !isRecord(row));
+      if (invalidIndex >= 0) {
+        sourceRows = blockedDirectRows({
+          sourceType,
+          projectId,
+          generatedAt,
+          errorCode: 'ingest_row_object_required',
+          errorPath: `/rows/${invalidIndex}`,
+        });
+      }
     }
   }
   const normalizedRows = sourceRows.map((row, index) => normalizeEvidenceIngestRow(row, {
@@ -545,7 +664,7 @@ export function buildEvidenceIngestPreview({
   const drawings = manifest.projects?.[0]?.drawings || [];
   const blockedIssues = drawings.flatMap((drawing) => (
     drawing.commercial_review_status === 'blocked'
-      ? [{ drawing_id: drawing.drawing_id, issue: 'blocked quality status', quality_flags: drawing.quality_flags }]
+      ? [{drawing_id: drawing.drawing_id, issue: 'blocked quality status', quality_flags: drawing.quality_flags}]
       : []
   ));
   const profileCounts = normalizedRows.reduce((acc, row) => {
@@ -558,6 +677,8 @@ export function buildEvidenceIngestPreview({
     schema_version: STRUCTURE_VIEWER_INGEST_PREVIEW_SCHEMA_VERSION,
     source_type: normalizeToken(sourceType) || 'json',
     generated_at: generatedAt,
+    resource_policy: STRUCTURE_VIEWER_INGEST_RESOURCE_POLICY,
+    resource_limits: evidenceIngestResourceLimits(),
     row_count: normalizedRows.length,
     drawing_count: drawings.length,
     normalized_rows: normalizedRows.slice(0, 1000),
@@ -575,50 +696,69 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
   artifactPath = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  const type = resolveEvidenceSourceType(sourceType, text, artifactPath);
   const inspection = inspectRenderableEvidencePayloadFromText(text, {
-    sourceType: type,
+    sourceType,
     sourceName: artifactPath,
     generatedAt,
   });
-  const jsonDocument = type === 'json' ? parseJsonDocument(text) : null;
-  const jsonRows = jsonDocument?.parsed ? selectJsonRows(jsonDocument.value) : null;
+  const type = inspection.source_type;
   let effectiveInspection = inspection;
-  if (
-    type === 'json'
-    && jsonDocument?.parsed
-    && jsonDocument.value
-    && typeof jsonDocument.value === 'object'
-    && inspection.validation_status !== 'blocked_authoritative_contract'
-    && jsonRows
-    && !jsonRows.valid
-  ) {
-    effectiveInspection = {
-      ...inspection,
-      validation_status: 'unavailable',
-      validation_error_code: jsonRows.errorCode,
-      validation_error_path: jsonRows.errorPath,
-    };
-  }
   let rows = [];
-  if (type === 'csv') rows = parseCsvRows(text);
-  else if (type === 'ifc') rows = [buildIfcMetadataRow(text, { drawingId: projectId, artifactPath })];
-  else if (
-    effectiveInspection.available
-    && effectiveInspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
-    && effectiveInspection.validation_status === 'validated_authoritative_contract'
-  ) {
-    rows = [buildAuthoritativeViewerMetadataRow(effectiveInspection, { projectId, artifactPath })];
-  } else if (
-    !jsonDocument?.parsed
-    || !jsonRows?.valid
-    || (
-      effectiveInspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
-      && effectiveInspection.validation_status === 'blocked_authoritative_contract'
-    )
-  ) {
-    rows = [buildBlockedEvidenceMetadataRow(effectiveInspection, { projectId, artifactPath })];
-  } else rows = jsonRows.rows;
+  if (inspection.validation_status === 'blocked_resource_limit') {
+    rows = [buildBlockedEvidenceMetadataRow(inspection, {projectId, artifactPath})];
+  } else if (type === 'csv') {
+    const csvRows = parseCsvRows(text);
+    if (csvRows.valid) rows = csvRows.rows;
+    else {
+      effectiveInspection = {
+        ...inspection,
+        validation_status: csvRows.errorCode === 'evidence_ingest_row_count_limit_exceeded'
+          ? 'blocked_resource_limit'
+          : 'unavailable',
+        validation_error_code: csvRows.errorCode,
+        validation_error_path: csvRows.errorPath,
+      };
+      rows = [buildBlockedEvidenceMetadataRow(effectiveInspection, {projectId, artifactPath})];
+    }
+  } else if (type === 'ifc') {
+    rows = [buildIfcMetadataRow(text, {drawingId: projectId, artifactPath})];
+  } else {
+    const jsonDocument = inspection.payload
+      ? {parsed: true, value: inspection.payload, errorCode: '', errorPath: ''}
+      : parseJsonDocument(text);
+    const jsonRows = jsonDocument.parsed ? selectJsonRows(jsonDocument.value) : null;
+    if (
+      jsonDocument.parsed
+      && jsonDocument.value
+      && typeof jsonDocument.value === 'object'
+      && inspection.validation_status !== 'blocked_authoritative_contract'
+      && jsonRows
+      && !jsonRows.valid
+    ) {
+      effectiveInspection = {
+        ...inspection,
+        validation_status: jsonRows.errorCode === 'evidence_ingest_row_count_limit_exceeded'
+          ? 'blocked_resource_limit'
+          : 'unavailable',
+        validation_error_code: jsonRows.errorCode,
+        validation_error_path: jsonRows.errorPath,
+      };
+    }
+    if (
+      effectiveInspection.available
+      && effectiveInspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
+      && effectiveInspection.validation_status === 'validated_authoritative_contract'
+    ) {
+      rows = [buildAuthoritativeViewerMetadataRow(effectiveInspection, {projectId, artifactPath})];
+    } else if (
+      !jsonDocument.parsed
+      || !jsonRows?.valid
+      || effectiveInspection.validation_status === 'blocked_authoritative_contract'
+      || effectiveInspection.validation_status === 'blocked_resource_limit'
+    ) {
+      rows = [buildBlockedEvidenceMetadataRow(effectiveInspection, {projectId, artifactPath})];
+    } else rows = jsonRows.rows;
+  }
   const preview = buildEvidenceIngestPreview({
     rows,
     sourceType: type,
@@ -628,6 +768,7 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
   });
   return {
     ...preview,
+    ingest_text_byte_count: effectiveInspection.text_byte_count,
     renderable_payload_available: effectiveInspection.available,
     renderable_payload_kind: effectiveInspection.payload_kind,
     renderable_payload_validation_status: effectiveInspection.validation_status,
