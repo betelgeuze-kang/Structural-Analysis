@@ -12,6 +12,7 @@ import {
 } from './viewer-project-bundle-state-policy.js';
 
 export const VIEWER_LOCAL_OPS_PERSISTENCE_POLICY = 'structure_viewer_local_ops_persistence_v1';
+export const VIEWER_LOCAL_OPS_MAX_NORMALIZED_ROWS = 1000;
 export const VIEWER_LOCAL_OPS_MAX_PREVIEW_ISSUES = 100;
 export const VIEWER_LOCAL_OPS_MAX_ISSUE_FLAGS = 20;
 export const VIEWER_LOCAL_OPS_MAX_TOOL_PROFILES = 100;
@@ -54,6 +55,28 @@ const FILE_READ_INTEGER_FIELDS = [
   'file_size',
   'last_modified',
   'text_byte_length',
+];
+const NORMALIZED_ROW_FIELDS = [
+  'project_id', 'projectId', 'drawing_id', 'drawingId', 'drawing_title', 'title', 'name',
+  'source_family', 'sourceFamily', 'source_type', 'source_tool', 'tool', 'program',
+  'analysis_program', 'application', 'source_tool_profile', 'source_profile',
+  'member_id', 'memberId', 'external_member_id', 'source_member_id', 'sourceMemberId',
+  'frame', 'frame_id', 'object_id', 'unique_name', 'element_id', 'guid', 'global_id',
+  'globalid', 'label', 'id',
+  'section', 'section_name', 'frame_section', 'property', 'profile', 'profile_name',
+  'family_type', 'type_name', 'cross_section',
+  'dcr', 'dcr_after', 'max_dcr_after', 'dcr_before', 'max_dcr_before', 'utilization',
+  'usage', 'ratio', 'pm_ratio', 'design_ratio',
+  'story', 'story_name', 'level', 'storey', 'building_storey', 'floor', 'location',
+  'phase', 'base_level', 'reference_level',
+  'mode', 'mode_id', 'mode_number', 'modal_case', 'mode_shape', 'eigenmode',
+  'material', 'material_name', 'material_id', 'grade', 'structural_material',
+  'load_combo', 'combination', 'output_case', 'case', 'combo', 'lc', 'loading',
+  'load_combination',
+  'receipt_path', 'receiptPath', 'path', 'artifact_path', 'source_path', 'model_path',
+  'ifc_path',
+  'member_count', 'node_count', 'element_count', 'load_model_status', 'evidence_level',
+  'status', 'receipt_status', 'governing_constraint', 'constraint',
 ];
 
 function isRecord(value) {
@@ -102,6 +125,12 @@ function compactKnownScalars(value, fields) {
     }
   }
   return output;
+}
+
+function compactNormalizedRows(value) {
+  return boundedArray(value, VIEWER_LOCAL_OPS_MAX_NORMALIZED_ROWS)
+    .map((row) => compactKnownScalars(row, NORMALIZED_ROW_FIELDS))
+    .filter((row) => Object.keys(row).length > 0);
 }
 
 function compactIssue(row) {
@@ -161,9 +190,13 @@ function compactModelIdentity(value) {
 
 function compactEvidenceIngestPreview(value, {
   includeManifest = true,
+  includeNormalizedRows = true,
   renderablePayloadPersisted = false,
 } = {}) {
   if (!isRecord(value)) return null;
+  const normalizedRows = includeNormalizedRows
+    ? compactNormalizedRows(value.normalized_rows)
+    : [];
   return {
     schema_version: normalizeText(value.schema_version),
     source_type: normalizeText(value.source_type),
@@ -175,6 +208,7 @@ function compactEvidenceIngestPreview(value, {
       : 0,
     row_count: Number.isSafeInteger(value.row_count) ? value.row_count : 0,
     drawing_count: Number.isSafeInteger(value.drawing_count) ? value.drawing_count : 0,
+    ...(normalizedRows.length ? {normalized_rows: normalizedRows} : {}),
     commercial_tool_profiles: boundedNumericObject(
       value.commercial_tool_profiles,
       VIEWER_LOCAL_OPS_MAX_TOOL_PROFILES,
@@ -205,6 +239,7 @@ function compactEvidenceIngestPreview(value, {
       : 0,
     ingest_file_read: compactFileRead(value.ingest_file_read),
     renderable_payload_persisted: Boolean(renderablePayloadPersisted),
+    normalized_rows_persisted: normalizedRows.length > 0,
     preview_persistence: includeManifest
       ? 'attachable_metadata'
       : 'summary_only_state_budget',
@@ -302,10 +337,25 @@ export function prepareViewerLocalOpsStateForStorage(state = {}) {
       candidate.lastIngestPreview,
       {
         includeManifest: true,
+        includeNormalizedRows: true,
         renderablePayloadPersisted: false,
       },
     );
     degradedFields.push('lastIngestRenderablePayload');
+    inspection = inspectViewerProjectBundleLocalState(candidate);
+    if (inspection.valid) return result(candidate, inspection, degradedFields);
+  }
+
+  if (candidate.lastIngestPreview?.normalized_rows?.length) {
+    candidate.lastIngestPreview = compactEvidenceIngestPreview(
+      candidate.lastIngestPreview,
+      {
+        includeManifest: true,
+        includeNormalizedRows: false,
+        renderablePayloadPersisted: false,
+      },
+    );
+    degradedFields.push('lastIngestPreview.normalized_rows');
     inspection = inspectViewerProjectBundleLocalState(candidate);
     if (inspection.valid) return result(candidate, inspection, degradedFields);
   }
@@ -315,6 +365,7 @@ export function prepareViewerLocalOpsStateForStorage(state = {}) {
       candidate.lastIngestPreview,
       {
         includeManifest: false,
+        includeNormalizedRows: false,
         renderablePayloadPersisted: false,
       },
     );
@@ -342,6 +393,7 @@ export function viewerLocalOpsPersistenceLimits() {
     policy: VIEWER_LOCAL_OPS_PERSISTENCE_POLICY,
     state_policy: VIEWER_PROJECT_BUNDLE_STATE_POLICY,
     state_limits: viewerProjectBundleStateLimits(),
+    max_normalized_rows: VIEWER_LOCAL_OPS_MAX_NORMALIZED_ROWS,
     max_preview_issues: VIEWER_LOCAL_OPS_MAX_PREVIEW_ISSUES,
     max_issue_flags: VIEWER_LOCAL_OPS_MAX_ISSUE_FLAGS,
     max_tool_profiles: VIEWER_LOCAL_OPS_MAX_TOOL_PROFILES,
