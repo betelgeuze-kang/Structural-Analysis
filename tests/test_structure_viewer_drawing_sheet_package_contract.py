@@ -139,3 +139,61 @@ console.log(JSON.stringify({
     assert payload["handoffHasRevisionCallout"] is True
     assert payload["handoffHasDeepLinkActions"] is True
     assert payload["handoffHasSheetButtons"] is True
+
+
+def test_report_panel_marks_blocked_authoritative_ingest_as_warning() -> None:
+    payload = _run_node(
+        """
+import {buildReportExportPanelHtml} from './src/structure-viewer/viewer-report-panel-renderer.js';
+
+const blocked = buildReportExportPanelHtml({
+  ingestPreview: {
+    source_type: 'json',
+    drawing_count: 1,
+    blocked_issues: [],
+    renderable_payload_available: false,
+    renderable_payload_kind: 'authoritative_viewer_v2',
+    renderable_payload_validation_status: 'blocked_authoritative_contract',
+    renderable_payload_error_code: 'viewer_model_identity_missing',
+    renderable_payload_error_path: '/model_identity',
+  },
+});
+const valid = buildReportExportPanelHtml({
+  ingestPreview: {
+    source_type: 'json',
+    drawing_count: 1,
+    blocked_issues: [],
+    renderable_payload_available: true,
+    renderable_payload_kind: 'authoritative_viewer_v2',
+    renderable_payload_validation_status: 'validated_authoritative_contract',
+    renderable_payload_error_code: '',
+    renderable_payload_error_path: '',
+    renderable_element_count: 1,
+    renderable_segment_count: 0,
+  },
+});
+console.log(JSON.stringify({
+  blockedWarn: blocked.includes('prop-value--warn'),
+  blockedCount: blocked.includes('1 blocked'),
+  blockedStatus: blocked.includes('blocked_authoritative_contract'),
+  blockedCode: blocked.includes('viewer_model_identity_missing'),
+  blockedPath: blocked.includes('/model_identity'),
+  validSuccess: valid.includes('prop-value--success'),
+  validCount: valid.includes('0 blocked'),
+  validStatus: valid.includes('validated_authoritative_contract'),
+  validRenderable: valid.includes('renderable authoritative_viewer_v2'),
+}));
+"""
+    )
+
+    assert payload == {
+        "blockedWarn": True,
+        "blockedCount": True,
+        "blockedStatus": True,
+        "blockedCode": True,
+        "blockedPath": True,
+        "validSuccess": True,
+        "validCount": True,
+        "validStatus": True,
+        "validRenderable": True,
+    }
