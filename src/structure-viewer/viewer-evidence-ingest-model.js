@@ -26,6 +26,20 @@ function firstText(...values) {
   return values.map(normalizeText).find(Boolean) || '';
 }
 
+function resolveEvidenceSourceType(sourceType = '', text = '', sourceName = '') {
+  const requested = normalizeToken(sourceType);
+  if (requested && requested !== 'auto') return requested;
+  const name = normalizeText(sourceName).toLowerCase();
+  if (name.endsWith('.csv')) return 'csv';
+  if (name.endsWith('.ifc')) return 'ifc';
+  if (name.endsWith('.json')) return 'json';
+  const body = normalizeText(text);
+  if (body.startsWith('{') || body.startsWith('[')) return 'json';
+  if (/^(ISO-10303-21;|#\d+=IFC)/i.test(body)) return 'ifc';
+  if (body.includes(',') && body.includes('\n')) return 'csv';
+  return 'json';
+}
+
 function parseCsvRows(text = '') {
   const lines = normalizeText(text).split(/\r?\n/).filter(Boolean);
   if (!lines.length) return [];
@@ -127,7 +141,7 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
   sourceName = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  const normalizedSourceType = normalizeToken(sourceType);
+  const normalizedSourceType = resolveEvidenceSourceType(sourceType, text, sourceName);
   if (normalizedSourceType !== 'json') {
     return inspectionEnvelope({
       sourceType: normalizedSourceType,
@@ -411,9 +425,9 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
   artifactPath = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  const type = normalizeToken(sourceType);
+  const type = resolveEvidenceSourceType(sourceType, text, artifactPath);
   const inspection = inspectRenderableEvidencePayloadFromText(text, {
-    sourceType: type || 'json',
+    sourceType: type,
     sourceName: artifactPath,
     generatedAt,
   });
@@ -429,7 +443,7 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
   } else rows = parseJsonRows(text);
   const preview = buildEvidenceIngestPreview({
     rows,
-    sourceType: type || 'json',
+    sourceType: type,
     projectId,
     projectTitle,
     generatedAt,
