@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
-import json
 from pathlib import Path
 import sys
 import time
@@ -170,8 +169,6 @@ def run_active_set_minimax_trust_iterations(
     history: list[dict[str, Any]] = []
     stop_reason = "max_steps"
     free_stable = np.asarray(initial_free, dtype=np.int64)
-    current_residual = np.asarray(initial_residual, dtype=np.float64)
-    current_rhs = np.asarray(initial_rhs, dtype=np.float64)
     active_row_count_schedule = tuple(
         int(value)
         for value in (
@@ -187,8 +184,6 @@ def run_active_set_minimax_trust_iterations(
         free = np.asarray(free, dtype=np.int64)
         residual = np.asarray(residual, dtype=np.float64)
         rhs = np.asarray(rhs, dtype=np.float64)
-        current_residual = residual
-        current_rhs = rhs
         residual_before = _max_abs(residual)
         if residual_before <= float(residual_gate_n):
             stop_reason = "residual_gate_passed"

@@ -25,7 +25,6 @@ from run_g1_active_set_ls_trust_candidate import (  # noqa: E402
 )
 from run_g1_true_newton_reference_candidate import _max_abs  # noqa: E402
 from run_mgt_direct_residual_newton_probe import (  # noqa: E402
-    DEFAULT_CHECKPOINT,
     ENGINE_VERSION,
     PRODUCTIZATION,
     _git_head,

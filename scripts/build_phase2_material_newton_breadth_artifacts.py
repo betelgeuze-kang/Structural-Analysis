@@ -322,12 +322,6 @@ def _state_updated_frame_shell_coupled_material_seed_payload(
         "pass": bool(direct_parity["cpu_seed_consistent_newton_gate_passed"]),
     }
     material_state = dict(assembly_result.material_state_next)
-    frame_material = dict(
-        material_state.get("component_material_states", {}).get("frame") or {}
-    )
-    shell_material = dict(
-        material_state.get("component_material_states", {}).get("shell") or {}
-    )
     metrics = solution.metrics
     frame_shell_coupled_material_pass = (
         solution.status == "ready"

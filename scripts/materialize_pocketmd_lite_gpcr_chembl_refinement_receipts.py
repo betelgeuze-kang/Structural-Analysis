@@ -26,7 +26,12 @@ try:  # noqa: E402
     from rdkit import rdBase
     from rdkit.Chem import AllChem
 except Exception as exc:  # pragma: no cover - import failure is environment-specific.
-    raise SystemExit(f"RDKit is required for PocketMD Lite refinement receipts: {exc}")
+    Chem = None
+    rdBase = None
+    AllChem = None
+    _RDKIT_IMPORT_ERROR: Exception | None = exc
+else:
+    _RDKIT_IMPORT_ERROR = None
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -50,6 +55,20 @@ SOURCE_LICENSE = "ChEMBL public API data; use subject to EMBL-EBI and ChEMBL ter
 SOURCE_VERSION = "chembl_molecule_api_snapshot_rdkit_2022_09_5"
 SOURCE_FAMILY = "ChEMBL GPCR hard-decoy top-k ligand refinement"
 USER_AGENT = "pocketmd-lite-refinement-receipt-materializer/1.0"
+
+
+def _require_rdkit() -> None:
+    """Fail at execution time while keeping import and pytest collection safe."""
+
+    if Chem is None or rdBase is None or AllChem is None:
+        detail = (
+            f"{type(_RDKIT_IMPORT_ERROR).__name__}: {_RDKIT_IMPORT_ERROR}"
+            if _RDKIT_IMPORT_ERROR is not None
+            else "RDKit modules are unavailable"
+        )
+        raise RuntimeError(
+            "RDKit is required for PocketMD Lite refinement receipts: " + detail
+        )
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -225,6 +244,7 @@ def _retention_rate(before: set[tuple[int, int]], after: set[tuple[int, int]]) -
 
 
 def _single_conformer_metrics(smiles: str, *, seed: int) -> dict[str, Any]:
+    _require_rdkit()
     base_mol = Chem.MolFromSmiles(smiles)
     if base_mol is None:
         raise ValueError("smiles_parse_failed")
@@ -503,6 +523,7 @@ def materialize_pocketmd_lite_gpcr_chembl_refinement_receipts(
     target_order: tuple[str, ...] = DEFAULT_TARGET_ORDER,
     candidates_per_target: int = DEFAULT_CANDIDATES_PER_TARGET,
 ) -> dict[str, Any]:
+    _require_rdkit()
     generated_at = _now_utc_iso()
     gpcr_payload = _load_json(repo_root, gpcr_rows)
     bundle_payload = _load_json(repo_root, receipt_bundle)

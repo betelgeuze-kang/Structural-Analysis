@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import sys
-from typing import Any, Iterable
+from typing import Any
 
 import numpy as np
 from scipy.optimize import linprog

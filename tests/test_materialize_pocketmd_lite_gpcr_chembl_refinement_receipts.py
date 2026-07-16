@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import builtins
 import hashlib
 import importlib.util
 import json
 from pathlib import Path
 import sys
+
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +34,28 @@ rows_module = _load_module(
     "materialize_pocketmd_lite_topk_rows_from_receipt_bundle",
     "materialize_pocketmd_lite_topk_rows_from_receipt_bundle.py",
 )
+
+
+def test_module_import_is_collection_safe_without_rdkit(
+    monkeypatch,
+) -> None:
+    original_import = builtins.__import__
+
+    def blocked_import(name, *args, **kwargs):
+        if name == "rdkit" or name.startswith("rdkit."):
+            raise ModuleNotFoundError("simulated missing rdkit")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", blocked_import)
+    missing = _load_module(
+        "materialize_pocketmd_lite_gpcr_chembl_refinement_receipts_missing_rdkit",
+        "materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py",
+    )
+
+    assert missing.Chem is None
+    assert missing.AllChem is None
+    with pytest.raises(RuntimeError, match="RDKit is required"):
+        missing._require_rdkit()
 
 
 def _checksum(seed: str) -> str:
