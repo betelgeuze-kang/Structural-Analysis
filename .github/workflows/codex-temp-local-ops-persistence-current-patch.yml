@@ -1,0 +1,213 @@
+name: Codex Temp Current Local Ops Persistence Patch
+
+on:
+  pull_request:
+    paths:
+      - "src/structure-viewer/**"
+      - ".github/workflows/codex-temp-local-ops-persistence-current-patch.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+      - name: Apply local ops persistence policy and remove this workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('src/structure-viewer/viewer-local-ops-state.js')
+          text = path.read_text(encoding='utf-8')
+
+          old_import = """import {
+            inspectViewerProjectBundleLocalState,
+            mergeViewerProjectBundleLocalState,
+          } from './viewer-project-bundle-state-policy.js';
+          """
+          new_import = """import {
+            VIEWER_PROJECT_BUNDLE_MAX_RECEIPTS,
+            inspectViewerProjectBundleLocalState,
+            mergeViewerProjectBundleLocalState,
+          } from './viewer-project-bundle-state-policy.js';
+          import {
+            prepareViewerLocalOpsStateForStorage,
+          } from './viewer-local-ops-persistence-policy.js';
+          """
+          if text.count(old_import) != 1:
+              raise SystemExit(f'expected one project-bundle state import; found={text.count(old_import)}')
+          text = text.replace(old_import, new_import, 1)
+
+          read_pattern = re.compile(
+              r"export function readViewerLocalOpsState\(.*?\n\}\n\n"
+              r"export function writeViewerLocalOpsState",
+              re.DOTALL,
+          )
+          read_replacement = """function emptyViewerLocalOpsState() {
+            return {
+              recentSelections: [],
+              auditEventsJsonl: '',
+              exportHistory: [],
+              reviewNotes: {},
+              reviewTasks: {},
+              annotations: {},
+              receiptIndex: {},
+              lastImportPreview: null,
+              lastIngestPreview: null,
+              lastIngestRenderablePayload: null,
+            };
+          }
+
+          export function readViewerLocalOpsState({
+            storageGet = (key) => globalThis.localStorage?.getItem(key),
+            storageKey = VIEWER_LOCAL_OPS_STATE_KEY,
+          } = {}) {
+            const parsed = parseState(storageGet(storageKey));
+            const candidate = {
+              recentSelections: Array.isArray(parsed.recentSelections) ? parsed.recentSelections : [],
+              auditEventsJsonl: normalizeText(parsed.auditEventsJsonl),
+              exportHistory: Array.isArray(parsed.exportHistory) ? parsed.exportHistory : [],
+              reviewNotes: parsed.reviewNotes && typeof parsed.reviewNotes === 'object' ? parsed.reviewNotes : {},
+              reviewTasks: parsed.reviewTasks && typeof parsed.reviewTasks === 'object' ? parsed.reviewTasks : {},
+              annotations: parsed.annotations && typeof parsed.annotations === 'object' ? parsed.annotations : {},
+              receiptIndex: parsed.receiptIndex && typeof parsed.receiptIndex === 'object' ? parsed.receiptIndex : {},
+              lastImportPreview: parsed.lastImportPreview && typeof parsed.lastImportPreview === 'object' ? parsed.lastImportPreview : null,
+              lastIngestPreview: parsed.lastIngestPreview && typeof parsed.lastIngestPreview === 'object' ? parsed.lastIngestPreview : null,
+              lastIngestRenderablePayload: parsed.lastIngestRenderablePayload && typeof parsed.lastIngestRenderablePayload === 'object'
+                ? parsed.lastIngestRenderablePayload
+                : null,
+            };
+            const prepared = prepareViewerLocalOpsStateForStorage(candidate);
+            return prepared.valid ? prepared.state : emptyViewerLocalOpsState();
+          }
+
+          export function writeViewerLocalOpsState"""
+          text, count = read_pattern.subn(read_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'expected one local ops read function; replaced={count}')
+
+          write_pattern = re.compile(
+              r"export function writeViewerLocalOpsState\(.*?\n\}\n\n"
+              r"export function rememberViewerWorkspaceSelection",
+              re.DOTALL,
+          )
+          write_replacement = """export function writeViewerLocalOpsState(state = {}, {
+            storageGet = (key) => globalThis.localStorage?.getItem(key),
+            storageSet = (key, value) => globalThis.localStorage?.setItem(key, value),
+            storageKey = VIEWER_LOCAL_OPS_STATE_KEY,
+          } = {}) {
+            const prepared = prepareViewerLocalOpsStateForStorage(state);
+            if (!prepared.valid) {
+              return readViewerLocalOpsState({storageGet, storageKey});
+            }
+            storageSet(storageKey, JSON.stringify(prepared.state));
+            return prepared.state;
+          }
+
+          export function rememberViewerWorkspaceSelection"""
+          text, count = write_pattern.subn(write_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'expected one local ops write function; replaced={count}')
+
+          merge_pattern = re.compile(
+              r"export function mergeViewerEvidenceIngestPreview\(state = \{\}, preview = \{\}\) \{.*?\n\}\n\n"
+              r"export function buildViewerProjectBundleExport",
+              re.DOTALL,
+          )
+          merge_replacement = """export function mergeViewerEvidenceIngestPreview(state = {}, preview = {}) {
+            if (!preview || (Array.isArray(preview.blocked_issues) && preview.blocked_issues.length)) {
+              return state;
+            }
+            const currentPrepared = prepareViewerLocalOpsStateForStorage(state);
+            if (!currentPrepared.valid) return state;
+            const current = currentPrepared.state;
+            const index = current.receiptIndex && typeof current.receiptIndex === 'object'
+              ? current.receiptIndex
+              : {};
+            const projects = Array.isArray(preview?.manifest?.projects) ? preview.manifest.projects : [];
+            const receiptRows = projects.flatMap((project) => (
+              (Array.isArray(project?.drawings) ? project.drawings : []).flatMap((drawing) => (
+                (Array.isArray(drawing?.solver_receipts) ? drawing.solver_receipts : []).map((receipt) => ({
+                  project_id: normalizeText(receipt.project_id || project.project_id),
+                  drawing_id: normalizeText(receipt.drawing_id || drawing.drawing_id),
+                  ...receipt,
+                }))
+              ))
+            ));
+            const nextIndex = {...index};
+            const receiptKeys = new Set(Object.keys(nextIndex));
+            for (const receipt of receiptRows) {
+              const key = [
+                normalizeText(receipt.project_id),
+                normalizeText(receipt.drawing_id),
+                normalizeText(receipt.member_id || receipt.memberId),
+              ].join('::');
+              if (key === '::::' || key.endsWith('::')) continue;
+              if (!receiptKeys.has(key) && receiptKeys.size >= VIEWER_PROJECT_BUNDLE_MAX_RECEIPTS) {
+                return state;
+              }
+              receiptKeys.add(key);
+              nextIndex[key] = receipt;
+            }
+            const renderablePayload = preview.renderable_payload && typeof preview.renderable_payload === 'object'
+              ? preview.renderable_payload
+              : current.lastIngestRenderablePayload || null;
+            const candidate = {
+              ...current,
+              receiptIndex: nextIndex,
+              lastIngestPreview: preview && typeof preview === 'object' ? preview : null,
+              lastIngestRenderablePayload: renderablePayload,
+            };
+            const prepared = prepareViewerLocalOpsStateForStorage(candidate);
+            return prepared.valid ? prepared.state : state;
+          }
+
+          export function buildViewerProjectBundleExport"""
+          text, count = merge_pattern.subn(merge_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'expected one evidence ingest merge function; replaced={count}')
+
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/codex-temp-local-ops-persistence-current-patch.yml').unlink()
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+
+          text = Path('src/structure-viewer/viewer-local-ops-state.js').read_text(encoding='utf-8')
+          required = (
+              "from './viewer-local-ops-persistence-policy.js';",
+              'VIEWER_PROJECT_BUNDLE_MAX_RECEIPTS',
+              'const prepared = prepareViewerLocalOpsStateForStorage(candidate);',
+              'return prepared.valid ? prepared.state : emptyViewerLocalOpsState();',
+              'return readViewerLocalOpsState({storageGet, storageKey});',
+              'if (!receiptKeys.has(key) && receiptKeys.size >= VIEWER_PROJECT_BUNDLE_MAX_RECEIPTS)',
+              'lastIngestRenderablePayload: renderablePayload',
+          )
+          missing = [value for value in required if value not in text]
+          if missing:
+              raise SystemExit(f'missing local ops persistence contracts: {missing}')
+          forbidden = (
+              'storageSet(storageKey, JSON.stringify({',
+              'receiptRows.forEach((receipt) =>',
+          )
+          retained = [value for value in forbidden if value in text]
+          if retained:
+              raise SystemExit(f'retained unbounded local ops patterns: {retained}')
+          PY
+
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/structure-viewer/viewer-local-ops-state.js .github/workflows/codex-temp-local-ops-persistence-current-patch.yml
+          git commit -m "Apply local ops persistence budgets"
+          git push origin HEAD:${{ github.head_ref }}
