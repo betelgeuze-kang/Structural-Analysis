@@ -1,9 +1,10 @@
 name: Codex Temp Viewer Ingest Handler Inspect
 
 on:
-  push:
-    branches:
-      - codex/viewer-ingest-file-read-preflight-20260716
+  pull_request:
+    paths:
+      - "src/structure-viewer/**"
+      - ".github/workflows/codex-temp-viewer-ingest-handler-inspect.yml"
 
 permissions:
   contents: read
