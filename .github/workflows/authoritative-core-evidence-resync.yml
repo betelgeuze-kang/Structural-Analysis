@@ -145,12 +145,18 @@ jobs:
           set -euxo pipefail
           runtime_checkpoint_dir="implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints"
 
-          # Read raw committed blobs directly instead of invoking checkout filters.
-          # These tracked NPZ checkpoints are transient side effects of readiness
-          # propagation and are not authoritative-core evidence for this PR.
+          # The tracked NPZ checkpoints are LFS-managed transient side effects of
+          # readiness propagation. Fetch only their committed LFS objects, then
+          # smudge the raw HEAD pointers into exact original bytes. They are not
+          # authoritative-core evidence for this PR and must never be allowlisted.
+          git lfs install --local
+          git lfs fetch \
+            --include="${runtime_checkpoint_dir}/**" \
+            --exclude="" \
+            origin "$CURRENT_HEAD_SHA"
           while IFS= read -r -d '' path; do
             restore_path="${path}.evidence-restore"
-            git show "HEAD:${path}" > "$restore_path"
+            git show "HEAD:${path}" | git lfs smudge > "$restore_path"
             mv "$restore_path" "$path"
           done < <(git ls-files -z -- "$runtime_checkpoint_dir")
           git clean -fd -- "$runtime_checkpoint_dir"
