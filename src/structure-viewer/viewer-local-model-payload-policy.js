@@ -60,7 +60,22 @@ function validateArrayCount(value, {
 }
 
 function childPath(basePath, field) {
-  return `${basePath}/${field}` || `/${field}`;
+  return basePath ? `${basePath}/${field}` : `/${field}`;
+}
+
+function validateAggregateCount(value, {
+  path,
+  limit,
+  code,
+  label,
+}) {
+  if (value > limit) {
+    fail(
+      code,
+      path,
+      `${label} aggregate count ${value} exceeds ${limit} under ${VIEWER_LOCAL_MODEL_OBJECT_POLICY}.`,
+    );
+  }
 }
 
 export function inspectViewerLocalModelJsonStructure(text, {
@@ -147,12 +162,16 @@ export function validateViewerLocalModelPayloadResources(payload) {
     {path: '/native_model', value: payload.native_model},
     {path: '/geometry', value: payload.geometry},
   ];
+  const seenModelContainers = new Set();
   let maximumNodeCount = 0;
   let maximumElementCount = 0;
+  let totalNodeCount = 0;
+  let totalElementCount = 0;
   let modelContainerCount = 0;
 
   for (const candidate of modelContainers) {
-    if (!isRecord(candidate.value)) continue;
+    if (!isRecord(candidate.value) || seenModelContainers.has(candidate.value)) continue;
+    seenModelContainers.add(candidate.value);
     const nodeCount = validateArrayCount(candidate.value.nodes, {
       path: childPath(candidate.path, 'nodes'),
       limit: VIEWER_LOCAL_MODEL_MAX_NODE_COUNT,
@@ -168,6 +187,20 @@ export function validateViewerLocalModelPayloadResources(payload) {
     if (nodeCount || elementCount) modelContainerCount += 1;
     maximumNodeCount = Math.max(maximumNodeCount, nodeCount);
     maximumElementCount = Math.max(maximumElementCount, elementCount);
+    totalNodeCount += nodeCount;
+    totalElementCount += elementCount;
+    validateAggregateCount(totalNodeCount, {
+      path: '/model_containers/nodes',
+      limit: VIEWER_LOCAL_MODEL_MAX_NODE_COUNT,
+      code: 'local_model_total_node_count_limit_exceeded',
+      label: 'Local model node',
+    });
+    validateAggregateCount(totalElementCount, {
+      path: '/model_containers/elements',
+      limit: VIEWER_LOCAL_MODEL_MAX_ELEMENT_COUNT,
+      code: 'local_model_total_element_count_limit_exceeded',
+      label: 'Local model element',
+    });
   }
 
   const interactiveContainers = [
@@ -175,10 +208,18 @@ export function validateViewerLocalModelPayloadResources(payload) {
     {path: '/interactive_3d', value: payload.interactive_3d},
     {path: '/interactive_3d_payload', value: payload.interactive_3d_payload},
   ];
+  const seenInteractiveContainers = new Set();
   let maximumSegmentCount = 0;
+  let totalSegmentCount = 0;
   let interactiveContainerCount = 0;
   for (const candidate of interactiveContainers) {
-    if (!isRecord(candidate.value)) continue;
+    if (
+      !isRecord(candidate.value)
+      || seenInteractiveContainers.has(candidate.value)
+    ) {
+      continue;
+    }
+    seenInteractiveContainers.add(candidate.value);
     const baselineCount = Array.isArray(candidate.value.baseline_segments)
       ? candidate.value.baseline_segments.length
       : 0;
@@ -195,6 +236,13 @@ export function validateViewerLocalModelPayloadResources(payload) {
     }
     if (baselineCount || afterCount) interactiveContainerCount += 1;
     maximumSegmentCount = Math.max(maximumSegmentCount, segmentCount);
+    totalSegmentCount += segmentCount;
+    validateAggregateCount(totalSegmentCount, {
+      path: '/interactive_containers/segments',
+      limit: VIEWER_LOCAL_MODEL_MAX_SEGMENT_COUNT,
+      code: 'local_model_total_segment_count_limit_exceeded',
+      label: 'Local model segment',
+    });
   }
 
   return Object.freeze({
@@ -202,6 +250,9 @@ export function validateViewerLocalModelPayloadResources(payload) {
     maximumNodeCount,
     maximumElementCount,
     maximumSegmentCount,
+    totalNodeCount,
+    totalElementCount,
+    totalSegmentCount,
     modelContainerCount,
     interactiveContainerCount,
   });
