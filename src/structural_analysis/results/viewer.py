@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from importlib import resources
 import json
 import math
-from pathlib import Path
 import re
 from typing import Any, Mapping
 
@@ -300,7 +300,11 @@ def _require_hash(value: Any, label: str) -> str:
 
 @lru_cache(maxsize=1)
 def _schema_validator() -> Draft202012Validator:
-    schema_path = Path(__file__).resolve().parents[1] / "schemas" / VIEWER_SCHEMA_RESOURCE
-    schema = json.loads(schema_path.read_text(encoding="utf-8"))
+    schema_text = (
+        resources.files("structural_analysis")
+        .joinpath("schemas", VIEWER_SCHEMA_RESOURCE)
+        .read_text(encoding="utf-8")
+    )
+    schema = json.loads(schema_text)
     Draft202012Validator.check_schema(schema)
     return Draft202012Validator(schema)
