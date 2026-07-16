@@ -17,124 +17,99 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
-          fetch-depth: 0
-      - name: Patch local model file-select and drop handlers
+          fetch-depth: 1
+      - name: Patch the exact local model handlers
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import re
 
           path = Path('src/structure-viewer/index.html')
           text = path.read_text(encoding='utf-8')
 
-          import_needle = """import {
-            buildViewerProjectBundleFileFailurePreview,
-            readViewerProjectBundleFile,
-            viewerProjectBundleFileMetadata,
-          } from './viewer-project-bundle-file-reader.js';
-          """
-          import_replacement = import_needle + """import {
-            readViewerLocalModelFile,
-            viewerLocalModelFileFailure,
-          } from './viewer-local-model-file-reader.js';
-          """
+          import_needle = "} from './viewer-project-bundle-file-reader.js';\n"
+          import_block = "\n".join([
+              "import {",
+              "  readViewerLocalModelFile,",
+              "  viewerLocalModelFileFailure,",
+              "} from './viewer-local-model-file-reader.js';",
+              "",
+          ])
           if text.count(import_needle) != 1:
               raise SystemExit(
-                  f'expected one project-bundle file-reader import; found={text.count(import_needle)}'
+                  f'expected one project-bundle file-reader terminator; found={text.count(import_needle)}'
               )
-          text = text.replace(import_needle, import_replacement, 1)
+          text = text.replace(import_needle, import_needle + import_block, 1)
 
-          old_select = """async function handleFileSelect(event) {
-            const file = event.target.files?.[0];
-            if (!file) return;
-            showLoadingIndicator(`Loading ${file.name}...`);
-            try {
-              const text = await file.text();
-              const data = JSON.parse(text);
-              await window.buildModel?.(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
-              hideLoadingIndicator();
-            } catch (err) {
-              console.error('[Viewer] Failed to load file:', err);
-              hideLoadingIndicator();
-              alert(`Failed to load ${file.name}: ${err.message}`);
-            }
-          }
-          """
-          new_select = """async function handleFileSelect(event) {
-            const input = event?.target;
-            const file = input?.files?.[0] || null;
-            if (!file) return;
-            showLoadingIndicator(`Loading ${file.name}...`);
-            try {
-              const fileRead = await readViewerLocalModelFile(file);
-              await window.buildModel?.(fileRead.payload, {
-                mode: 'local_file',
-                label: fileRead.name || file.name,
-                resolvedPath: fileRead.name || file.name,
-              });
-            } catch (error) {
-              const failure = viewerLocalModelFileFailure(error, { sourceName: file.name });
-              console.warn(`[Viewer] Local model file blocked: ${failure.error_code}@${failure.error_path}`);
-              alert(`Could not load the selected JSON model (${failure.error_code} @ ${failure.error_path}).`);
-            } finally {
-              hideLoadingIndicator();
-              if (input instanceof HTMLInputElement) input.value = '';
-            }
-          }
-          """
-          if text.count(old_select) != 1:
-              raise SystemExit(
-                  f'expected one file-select handler; found={text.count(old_select)}'
-              )
-          text = text.replace(old_select, new_select, 1)
+          select_pattern = re.compile(
+              r"async function handleFileSelect\(event\) \{\n"
+              r"  const file = event\.target\.files\?\.\[0\];.*?"
+              r"\n\}\n\nfunction showLoadingIndicator",
+              re.DOTALL,
+          )
+          select_replacement = "\n".join([
+              "async function handleFileSelect(event) {",
+              "  const input = event?.target;",
+              "  const file = input?.files?.[0] || null;",
+              "  if (!file) return;",
+              "  showLoadingIndicator(`Loading ${file.name}...`);",
+              "  try {",
+              "    const fileRead = await readViewerLocalModelFile(file);",
+              "    await window.buildModel?.(fileRead.payload, {",
+              "      mode: 'local_file',",
+              "      label: fileRead.name || file.name,",
+              "      resolvedPath: fileRead.name || file.name,",
+              "    });",
+              "  } catch (error) {",
+              "    const failure = viewerLocalModelFileFailure(error, { sourceName: file.name });",
+              "    console.warn(`[Viewer] Local model file blocked: ${failure.error_code}@${failure.error_path}`);",
+              "    alert(`Could not load the selected JSON model (${failure.error_code} @ ${failure.error_path}).`);",
+              "  } finally {",
+              "    hideLoadingIndicator();",
+              "    if (input instanceof HTMLInputElement) input.value = '';",
+              "  }",
+              "}",
+              "",
+              "function showLoadingIndicator",
+          ])
+          text, select_count = select_pattern.subn(select_replacement, text, count=1)
+          if select_count != 1:
+              raise SystemExit(f'expected one file-select handler; replaced={select_count}')
 
-          old_drop = """  dropZone.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const file = e.dataTransfer?.files?.[0];
-            if (!file) return;
-            showLoadingIndicator(`Loading ${file.name}...`);
-            try {
-              const text = await file.text();
-              const data = JSON.parse(text);
-              await window.buildModel?.(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
-              hideLoadingIndicator();
-            } catch (err) {
-              console.error('[Viewer] Failed to load dropped file:', err);
-              hideLoadingIndicator();
-              alert(`Failed to load ${file.name}: ${err.message}`);
-            }
-          });
-          """
-          new_drop = """  dropZone.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const file = e.dataTransfer?.files?.[0] || null;
-            if (!file) return;
-            showLoadingIndicator(`Loading ${file.name}...`);
-            try {
-              const fileRead = await readViewerLocalModelFile(file);
-              await window.buildModel?.(fileRead.payload, {
-                mode: 'local_file',
-                label: fileRead.name || file.name,
-                resolvedPath: fileRead.name || file.name,
-              });
-            } catch (error) {
-              const failure = viewerLocalModelFileFailure(error, { sourceName: file.name });
-              console.warn(`[Viewer] Dropped local model blocked: ${failure.error_code}@${failure.error_path}`);
-              alert(`Could not load the dropped JSON model (${failure.error_code} @ ${failure.error_path}).`);
-            } finally {
-              hideLoadingIndicator();
-              dropZone.classList.remove('drag-over');
-            }
-          });
-          """
-          if text.count(old_drop) != 1:
-              raise SystemExit(
-                  f'expected one drop handler; found={text.count(old_drop)}'
-              )
-          text = text.replace(old_drop, new_drop, 1)
+          drop_pattern = re.compile(
+              r"  dropZone\.addEventListener\('drop', async \(e\) => \{.*?"
+              r"\n  \}\);",
+              re.DOTALL,
+          )
+          drop_replacement = "\n".join([
+              "  dropZone.addEventListener('drop', async (e) => {",
+              "    e.preventDefault();",
+              "    dropZone.classList.remove('drag-over');",
+              "    const file = e.dataTransfer?.files?.[0] || null;",
+              "    if (!file) return;",
+              "    showLoadingIndicator(`Loading ${file.name}...`);",
+              "    try {",
+              "      const fileRead = await readViewerLocalModelFile(file);",
+              "      await window.buildModel?.(fileRead.payload, {",
+              "        mode: 'local_file',",
+              "        label: fileRead.name || file.name,",
+              "        resolvedPath: fileRead.name || file.name,",
+              "      });",
+              "    } catch (error) {",
+              "      const failure = viewerLocalModelFileFailure(error, { sourceName: file.name });",
+              "      console.warn(`[Viewer] Dropped local model blocked: ${failure.error_code}@${failure.error_path}`);",
+              "      alert(`Could not load the dropped JSON model (${failure.error_code} @ ${failure.error_path}).`);",
+              "    } finally {",
+              "      hideLoadingIndicator();",
+              "      dropZone.classList.remove('drag-over');",
+              "    }",
+              "  });",
+          ])
+          text, drop_count = drop_pattern.subn(drop_replacement, text, count=1)
+          if drop_count != 1:
+              raise SystemExit(f'expected one drop handler; replaced={drop_count}')
 
           path.write_text(text, encoding='utf-8')
           Path('.github/workflows/codex-temp-local-model-file-handler-patch.yml').unlink()
@@ -174,6 +149,8 @@ jobs:
               retained = [value for value in forbidden if value in handler]
               if retained:
                   raise SystemExit(f'{label} retained unsafe operations: {retained}')
+          if text.count("from './viewer-local-model-file-reader.js';") != 1:
+              raise SystemExit('local model reader import missing or duplicated')
           PY
 
           git diff --check
