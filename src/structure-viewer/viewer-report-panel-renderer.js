@@ -33,7 +33,7 @@ export function buildReportExportPanelHtml({
   const ingestValidationErrorCode = String(ingestPreview?.renderable_payload_error_code || '').trim();
   const ingestValidationErrorPath = String(ingestPreview?.renderable_payload_error_path || '').trim();
   const ingestContractBlocked = ingestValidationStatus === 'blocked_authoritative_contract';
-  const ingestBlockedCount = ingestIssues.length || (ingestContractBlocked ? 1 : 0);
+  const ingestBlockedCount = ingestIssues.length + (ingestContractBlocked ? 1 : 0);
   const ingestValidationLabel = ingestValidationStatus
     ? ` · ${ingestValidationStatus}${ingestValidationErrorCode ? ` · ${ingestValidationErrorCode}${ingestValidationErrorPath ? ` @ ${ingestValidationErrorPath}` : ''}` : ''}`
     : '';
