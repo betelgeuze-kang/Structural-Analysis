@@ -79,7 +79,7 @@
   "expected_frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
   "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
   "frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
-  "generated_at": "2026-07-16T03:30:05.422054+00:00",
+  "generated_at": "2026-07-16T03:39:45.019797+00:00",
   "input_checksums": {
     "src/structural_analysis/analyses/linear_static.py": "sha256:28c6d11332459829b4ba8a0ba12b7cc31c35101a9a7049b389b7a9a779d3428d",
     "src/structural_analysis/api/cli.py": "sha256:97b7c7c28295b60aa60fa55f8c1b134370d79521f83bde0bd72ef906ddfca595",
@@ -91,7 +91,7 @@
     "src/structural_analysis/materials/elastic.py": "sha256:f57e5ad59bbfef197fce1ee39dd79277c994ec02928cfc9b3d74c409aa99fe3b",
     "src/structural_analysis/results/schema.py": "sha256:d968361004fa20409e24b8eb6f8d475ce1b06e5cd4c6a7e00829356a28c210b4",
     "src/structural_analysis/results/validation.py": "sha256:05bae370b5aa15fbf01fae904a7f735a8475e79a81b2802e65d88804b72bf576",
-    "src/structural_analysis/results/viewer.py": "sha256:a068184f9d9fc0b646b30c7de2e7f305ff0e5621ca9368b891cb358ecbb8d3a4",
+    "src/structural_analysis/results/viewer.py": "sha256:333ab16dd786b945373d414844b65be5a7704cc2257067dfa749f617327cce3b",
     "src/structural_analysis/schemas/result.schema.json": "sha256:4697b4b32b92dd8963fdfafa083678ea1ae43501a287ab78b950b5dc32c787be",
     "src/structural_analysis/schemas/validation_report.schema.json": "sha256:534d4125281a9a28b69f58d96dd882628db1d3a820aad2e56cea8ec5473ee2bd",
     "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
@@ -178,12 +178,12 @@
     "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
   },
   "schema_version": "phase1-core-api-contract-artifacts.v2",
-  "source_commit_sha": "5dcb1e67aea7e60b402e7bb377968c5518930f13",
+  "source_commit_sha": "2ebf055626f25104412c68c76221141be5b6a9e7",
   "source_state_policy": {
     "allowed_post_source_scope": "generated_phase1_and_readiness_evidence_only",
     "exact_head_verification_required": true,
     "mode": "source_commit_then_evidence_only_commit",
-    "source_commit_sha": "5dcb1e67aea7e60b402e7bb377968c5518930f13"
+    "source_commit_sha": "2ebf055626f25104412c68c76221141be5b6a9e7"
   },
   "status": "ready",
   "supported_preview_analysis_types": [
