@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import json
 from pathlib import Path
 
@@ -11,7 +12,9 @@ from structural_analysis.api.core import CLAIM_BOUNDARY_VERSION
 from structural_analysis.results.schema import RESULT_SCHEMA_VERSION
 from structural_analysis.results.viewer import (
     VIEWER_MODEL_IDENTITY_POLICY,
+    ViewerPayloadValidationError,
     bind_viewer_model_identity,
+    validate_linear_static_viewer_payload,
 )
 
 
@@ -176,6 +179,14 @@ def test_reactions_residuals_and_increment_semantics_are_separated(
 
     viewer = result.metrics["viewer_payload"]
     assert viewer["schema_version"] == "structural-analysis-viewer-payload.v2"
+    assert validate_linear_static_viewer_payload(viewer) == viewer
+    viewer_schema = json.loads(
+        (ROOT / "src/structural_analysis/schemas/viewer_payload.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    Draft202012Validator.check_schema(viewer_schema)
+    assert list(Draft202012Validator(viewer_schema).iter_errors(viewer)) == []
     identity = viewer["model_identity"]
     assert identity == {
         "identity_policy": VIEWER_MODEL_IDENTITY_POLICY,
@@ -223,15 +234,61 @@ def test_viewer_identity_separates_source_bytes_from_canonical_semantics(
 
     unbound = dict(compact.metrics["viewer_payload"])
     unbound.pop("model_identity")
-    with pytest.raises(ValueError, match="source_input_checksum"):
+    with pytest.raises(ViewerPayloadValidationError) as missing_identity:
+        validate_linear_static_viewer_payload(unbound)
+    assert missing_identity.value.code == "viewer_model_identity_missing"
+    assert validate_linear_static_viewer_payload(
+        unbound,
+        require_bound_identity=False,
+    ) == unbound
+
+    with pytest.raises(ViewerPayloadValidationError, match="source_input_checksum"):
         bind_viewer_model_identity(
             unbound,
             source_input_checksum="not-a-sha256",
             canonical_model_checksum=str(compact.canonical_model_checksum),
         )
-    with pytest.raises(ValueError, match="already contains model identity"):
+    with pytest.raises(
+        ViewerPayloadValidationError,
+        match="already contains model identity",
+    ):
         bind_viewer_model_identity(
             compact.metrics["viewer_payload"],
             source_input_checksum=compact.input_checksum,
             canonical_model_checksum=str(compact.canonical_model_checksum),
         )
+
+
+def test_viewer_validator_rejects_tampered_topology_and_nonfinite_values(
+    tmp_path: Path,
+) -> None:
+    model_path = tmp_path / "frame.json"
+    _write_frame_model(model_path)
+    viewer = analyze(
+        load_model(model_path),
+        AnalysisConfig(analysis_type="linear_static", tolerance=1.0e-9),
+    ).metrics["viewer_payload"]
+
+    unknown = deepcopy(viewer)
+    unknown["unexpected"] = False
+    with pytest.raises(ViewerPayloadValidationError) as schema_error:
+        validate_linear_static_viewer_payload(unknown)
+    assert schema_error.value.code == "viewer_payload_schema_invalid"
+
+    duplicate = deepcopy(viewer)
+    duplicate["nodes"][1]["id"] = duplicate["nodes"][0]["id"]
+    with pytest.raises(ViewerPayloadValidationError) as duplicate_error:
+        validate_linear_static_viewer_payload(duplicate)
+    assert duplicate_error.value.code == "viewer_node_id_duplicate"
+
+    missing_reference = deepcopy(viewer)
+    missing_reference["elements"][0]["nodes"][1] = "missing-node"
+    with pytest.raises(ViewerPayloadValidationError) as reference_error:
+        validate_linear_static_viewer_payload(missing_reference)
+    assert reference_error.value.code == "viewer_element_node_missing"
+
+    nonfinite = deepcopy(viewer)
+    nonfinite["nodes"][0]["coordinates"][0] = float("nan")
+    with pytest.raises(ViewerPayloadValidationError) as numeric_error:
+        validate_linear_static_viewer_payload(nonfinite)
+    assert numeric_error.value.code == "viewer_numeric_value_invalid"
