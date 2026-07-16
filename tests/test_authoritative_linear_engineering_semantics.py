@@ -9,6 +9,10 @@ import pytest
 from structural_analysis import AnalysisConfig, analyze, load_model
 from structural_analysis.api.core import CLAIM_BOUNDARY_VERSION
 from structural_analysis.results.schema import RESULT_SCHEMA_VERSION
+from structural_analysis.results.viewer import (
+    VIEWER_MODEL_IDENTITY_POLICY,
+    bind_viewer_model_identity,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -172,8 +176,62 @@ def test_reactions_residuals_and_increment_semantics_are_separated(
 
     viewer = result.metrics["viewer_payload"]
     assert viewer["schema_version"] == "structural-analysis-viewer-payload.v2"
+    identity = viewer["model_identity"]
+    assert identity == {
+        "identity_policy": VIEWER_MODEL_IDENTITY_POLICY,
+        "source_input_checksum": result.input_checksum,
+        "canonical_model_checksum": result.canonical_model_checksum,
+        "analysis_input_snapshot": "detached_canonical_model_v1",
+    }
     nodes = {row["id"]: row for row in viewer["nodes"]}
     assert nodes["N1"]["reaction"]["FY"] == pytest.approx(10.0)
     assert nodes["N2"]["reaction"]["FY"] == 0.0
     assert nodes["N1"]["equilibrium_residual"]["FY"] == 0.0
     assert abs(nodes["N2"]["equilibrium_residual"]["FY"]) <= 1.0e-12
+
+
+def test_viewer_identity_separates_source_bytes_from_canonical_semantics(
+    tmp_path: Path,
+) -> None:
+    compact_path = tmp_path / "compact.json"
+    pretty_path = tmp_path / "pretty.json"
+    _write_frame_model(compact_path)
+    payload = json.loads(compact_path.read_text(encoding="utf-8"))
+    pretty_path.write_text(
+        json.dumps(payload, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    compact = analyze(
+        load_model(compact_path),
+        AnalysisConfig(analysis_type="linear_static", tolerance=1.0e-9),
+    )
+    pretty = analyze(
+        load_model(pretty_path),
+        AnalysisConfig(analysis_type="linear_static", tolerance=1.0e-9),
+    )
+
+    assert compact.input_checksum != pretty.input_checksum
+    assert compact.canonical_model_checksum == pretty.canonical_model_checksum
+    compact_identity = compact.metrics["viewer_payload"]["model_identity"]
+    pretty_identity = pretty.metrics["viewer_payload"]["model_identity"]
+    assert compact_identity["source_input_checksum"] == compact.input_checksum
+    assert pretty_identity["source_input_checksum"] == pretty.input_checksum
+    assert compact_identity["canonical_model_checksum"] == (
+        pretty_identity["canonical_model_checksum"]
+    )
+
+    unbound = dict(compact.metrics["viewer_payload"])
+    unbound.pop("model_identity")
+    with pytest.raises(ValueError, match="source_input_checksum"):
+        bind_viewer_model_identity(
+            unbound,
+            source_input_checksum="not-a-sha256",
+            canonical_model_checksum=str(compact.canonical_model_checksum),
+        )
+    with pytest.raises(ValueError, match="already contains model identity"):
+        bind_viewer_model_identity(
+            compact.metrics["viewer_payload"],
+            source_input_checksum=compact.input_checksum,
+            canonical_model_checksum=str(compact.canonical_model_checksum),
+        )
