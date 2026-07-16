@@ -1,6 +1,9 @@
 export const AUTHORITATIVE_VIEWER_SCHEMA_VERSION = 'structural-analysis-viewer-payload.v2';
 export const AUTHORITATIVE_VIEWER_IDENTITY_POLICY = 'source_bytes_and_detached_canonical_model_v1';
 export const AUTHORITATIVE_VIEWER_PAYLOAD_KIND = 'authoritative_viewer_v2';
+export const AUTHORITATIVE_VIEWER_RESOURCE_LIMIT_POLICY = 'authoritative_viewer_large_model_gate_v1';
+export const AUTHORITATIVE_VIEWER_MAX_NODE_COUNT = 200000;
+export const AUTHORITATIVE_VIEWER_MAX_ELEMENT_COUNT = 100000;
 
 const SOURCE = 'authoritative_solver_result';
 const SOLVER_PATH_ID = 'authoritative_cpu_linear_fea_3d_v1';
@@ -158,6 +161,30 @@ function validateElement(row, index, nodeIds) {
   return elementId;
 }
 
+export function validateAuthoritativeViewerResourceCounts({nodeCount, elementCount} = {}) {
+  if (!Number.isInteger(nodeCount) || nodeCount < 0) {
+    fail('viewer_resource_count_invalid', '/nodes', 'Viewer node count must be a non-negative integer.');
+  }
+  if (!Number.isInteger(elementCount) || elementCount < 0) {
+    fail('viewer_resource_count_invalid', '/elements', 'Viewer element count must be a non-negative integer.');
+  }
+  if (nodeCount > AUTHORITATIVE_VIEWER_MAX_NODE_COUNT) {
+    fail(
+      'viewer_node_count_limit_exceeded',
+      '/nodes',
+      `Viewer payload contains ${nodeCount} nodes; limit is ${AUTHORITATIVE_VIEWER_MAX_NODE_COUNT} under ${AUTHORITATIVE_VIEWER_RESOURCE_LIMIT_POLICY}.`,
+    );
+  }
+  if (elementCount > AUTHORITATIVE_VIEWER_MAX_ELEMENT_COUNT) {
+    fail(
+      'viewer_element_count_limit_exceeded',
+      '/elements',
+      `Viewer payload contains ${elementCount} elements; limit is ${AUTHORITATIVE_VIEWER_MAX_ELEMENT_COUNT} under ${AUTHORITATIVE_VIEWER_RESOURCE_LIMIT_POLICY}.`,
+    );
+  }
+  return {nodeCount, elementCount};
+}
+
 export function claimsAuthoritativeViewerContract(payload) {
   if (!isRecord(payload)) return false;
   const identity = isRecord(payload.model_identity) ? payload.model_identity : null;
@@ -201,6 +228,10 @@ export function validateAuthoritativeViewerPayload(payload) {
   if (!Array.isArray(root.elements) || !root.elements.length) {
     fail('viewer_payload_schema_invalid', '/elements', 'At least one element is required.');
   }
+  validateAuthoritativeViewerResourceCounts({
+    nodeCount: root.nodes.length,
+    elementCount: root.elements.length,
+  });
   const nodeIds = new Set();
   root.nodes.forEach((row, index) => {
     const nodeId = validateNode(row, index);
