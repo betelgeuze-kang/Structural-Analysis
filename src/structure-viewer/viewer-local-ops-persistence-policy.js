@@ -13,7 +13,48 @@ import {
 
 export const VIEWER_LOCAL_OPS_PERSISTENCE_POLICY = 'structure_viewer_local_ops_persistence_v1';
 export const VIEWER_LOCAL_OPS_MAX_PREVIEW_ISSUES = 100;
+export const VIEWER_LOCAL_OPS_MAX_ISSUE_FLAGS = 20;
 export const VIEWER_LOCAL_OPS_MAX_TOOL_PROFILES = 100;
+
+const RESOURCE_LIMIT_FIELDS = [
+  'policy',
+  'max_text_bytes',
+  'max_rows',
+  'max_nodes',
+  'max_elements',
+  'max_segments',
+  'max_serialized_bytes',
+  'max_recent_selections',
+  'max_audit_lines',
+  'max_export_history',
+  'max_review_notes',
+  'max_review_tasks',
+  'max_annotations',
+  'max_receipts',
+];
+const INCOMING_COUNT_FIELDS = [
+  'recentSelections',
+  'auditEvents',
+  'exportHistory',
+  'reviewNotes',
+  'reviewTasks',
+  'annotations',
+  'receiptIndex',
+];
+const FILE_READ_TEXT_FIELDS = [
+  'contract',
+  'resource_policy',
+  'file_name',
+  'file_type',
+  'status',
+  'error_code',
+  'error_path',
+];
+const FILE_READ_INTEGER_FIELDS = [
+  'file_size',
+  'last_modified',
+  'text_byte_length',
+];
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -33,19 +74,89 @@ function boundedObject(value, limit) {
   return Object.fromEntries(entries.slice(Math.max(0, entries.length - limit)));
 }
 
+function boundedNumericObject(value, limit) {
+  if (!isRecord(value)) return {};
+  const entries = Object.entries(value)
+    .filter(([, row]) => typeof row === 'number' && Number.isFinite(row))
+    .slice(-limit);
+  return Object.fromEntries(entries);
+}
+
 function boundedArray(value, limit, {take = 'first'} = {}) {
   if (!Array.isArray(value)) return [];
   return take === 'last' ? value.slice(-limit) : value.slice(0, limit);
 }
 
-function boundedIssues(value) {
-  return boundedArray(value, VIEWER_LOCAL_OPS_MAX_PREVIEW_ISSUES).map((row) => (
-    isRecord(row) ? {...row} : {severity: 'warning', issue: normalizeText(row)}
-  ));
+function compactKnownScalars(value, fields) {
+  if (!isRecord(value)) return {};
+  const output = {};
+  for (const field of fields) {
+    const row = value[field];
+    if (
+      typeof row === 'string'
+      || typeof row === 'boolean'
+      || (typeof row === 'number' && Number.isFinite(row))
+      || row === null
+    ) {
+      output[field] = row;
+    }
+  }
+  return output;
 }
 
-function copyFileRead(value) {
-  return isRecord(value) ? {...value} : null;
+function compactIssue(row) {
+  if (!isRecord(row)) {
+    return {severity: 'warning', issue: normalizeText(row)};
+  }
+  const output = {
+    severity: normalizeText(row.severity) || 'warning',
+    issue: normalizeText(row.issue),
+  };
+  for (const field of ['value', 'code', 'path', 'drawing_id']) {
+    const value = normalizeText(row[field]);
+    if (value) output[field] = value;
+  }
+  if (Array.isArray(row.quality_flags)) {
+    output.quality_flags = row.quality_flags
+      .slice(0, VIEWER_LOCAL_OPS_MAX_ISSUE_FLAGS)
+      .map((value) => normalizeText(value))
+      .filter(Boolean);
+  }
+  return output;
+}
+
+function boundedIssues(value) {
+  return boundedArray(value, VIEWER_LOCAL_OPS_MAX_PREVIEW_ISSUES)
+    .map((row) => compactIssue(row));
+}
+
+function compactFileRead(value) {
+  if (!isRecord(value)) return null;
+  const output = {};
+  for (const field of FILE_READ_TEXT_FIELDS) {
+    const row = normalizeText(value[field]);
+    if (row) output[field] = row;
+  }
+  for (const field of FILE_READ_INTEGER_FIELDS) {
+    const row = value[field];
+    if (Number.isSafeInteger(row) && row >= 0) output[field] = row;
+  }
+  return output;
+}
+
+function compactModelIdentity(value) {
+  if (!isRecord(value)) return null;
+  const output = {};
+  for (const field of [
+    'identity_policy',
+    'source_input_checksum',
+    'canonical_model_checksum',
+    'analysis_input_snapshot',
+  ]) {
+    const row = normalizeText(value[field]);
+    if (row) output[field] = row;
+  }
+  return Object.keys(output).length ? output : null;
 }
 
 function compactEvidenceIngestPreview(value, {
@@ -58,13 +169,13 @@ function compactEvidenceIngestPreview(value, {
     source_type: normalizeText(value.source_type),
     generated_at: normalizeText(value.generated_at),
     resource_policy: normalizeText(value.resource_policy),
-    resource_limits: isRecord(value.resource_limits) ? {...value.resource_limits} : {},
+    resource_limits: compactKnownScalars(value.resource_limits, RESOURCE_LIMIT_FIELDS),
     ingest_text_byte_count: Number.isSafeInteger(value.ingest_text_byte_count)
       ? value.ingest_text_byte_count
       : 0,
     row_count: Number.isSafeInteger(value.row_count) ? value.row_count : 0,
     drawing_count: Number.isSafeInteger(value.drawing_count) ? value.drawing_count : 0,
-    commercial_tool_profiles: boundedObject(
+    commercial_tool_profiles: boundedNumericObject(
       value.commercial_tool_profiles,
       VIEWER_LOCAL_OPS_MAX_TOOL_PROFILES,
     ),
@@ -80,9 +191,9 @@ function compactEvidenceIngestPreview(value, {
     ),
     renderable_payload_error_code: normalizeText(value.renderable_payload_error_code),
     renderable_payload_error_path: normalizeText(value.renderable_payload_error_path),
-    renderable_payload_model_identity: isRecord(value.renderable_payload_model_identity)
-      ? {...value.renderable_payload_model_identity}
-      : null,
+    renderable_payload_model_identity: compactModelIdentity(
+      value.renderable_payload_model_identity,
+    ),
     renderable_node_count: Number.isSafeInteger(value.renderable_node_count)
       ? value.renderable_node_count
       : 0,
@@ -92,7 +203,7 @@ function compactEvidenceIngestPreview(value, {
     renderable_segment_count: Number.isSafeInteger(value.renderable_segment_count)
       ? value.renderable_segment_count
       : 0,
-    ingest_file_read: copyFileRead(value.ingest_file_read),
+    ingest_file_read: compactFileRead(value.ingest_file_read),
     renderable_payload_persisted: Boolean(renderablePayloadPersisted),
     preview_persistence: includeManifest
       ? 'attachable_metadata'
@@ -110,15 +221,15 @@ function compactProjectBundleImportPreview(value, {includePayload = true} = {}) 
     variant: normalizeText(value.variant),
     blocked: Boolean(value.blocked) || !includePayload,
     issues: boundedIssues(value.issues),
-    incoming_counts: isRecord(value.incoming_counts) ? {...value.incoming_counts} : {},
+    incoming_counts: compactKnownScalars(value.incoming_counts, INCOMING_COUNT_FIELDS),
     state_policy: normalizeText(value.state_policy),
-    state_limits: isRecord(value.state_limits) ? {...value.state_limits} : {},
+    state_limits: compactKnownScalars(value.state_limits, RESOURCE_LIMIT_FIELDS),
     local_state_serialized_bytes: Number.isSafeInteger(value.local_state_serialized_bytes)
       ? value.local_state_serialized_bytes
       : 0,
     manifest: includePayload && isRecord(value.manifest) ? value.manifest : null,
     local_state: includePayload && isRecord(value.local_state) ? value.local_state : {},
-    file_read: copyFileRead(value.file_read),
+    file_read: compactFileRead(value.file_read),
     preview_persistence: includePayload
       ? 'mergeable_metadata'
       : 'summary_only_state_budget',
@@ -232,6 +343,7 @@ export function viewerLocalOpsPersistenceLimits() {
     state_policy: VIEWER_PROJECT_BUNDLE_STATE_POLICY,
     state_limits: viewerProjectBundleStateLimits(),
     max_preview_issues: VIEWER_LOCAL_OPS_MAX_PREVIEW_ISSUES,
+    max_issue_flags: VIEWER_LOCAL_OPS_MAX_ISSUE_FLAGS,
     max_tool_profiles: VIEWER_LOCAL_OPS_MAX_TOOL_PROFILES,
   });
 }
