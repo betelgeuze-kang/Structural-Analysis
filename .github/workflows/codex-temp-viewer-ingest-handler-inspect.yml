@@ -7,53 +7,145 @@ on:
       - ".github/workflows/codex-temp-viewer-ingest-handler-inspect.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  inspect:
+  patch:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Capture evidence ingest handler context
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Patch evidence file input and remove this temporary workflow
+        shell: bash
         run: |
+          set -euo pipefail
           python - <<'PY'
           from pathlib import Path
+          import re
 
-          source = Path('src/structure-viewer/index.html')
-          output = Path('/tmp/viewer-ingest-handler-context.txt')
-          lines = source.read_text(encoding='utf-8').splitlines()
-          patterns = (
-              'previewEvidenceIngestFromInput',
-              'attachEvidenceIngestPreview',
-              'evidence-ingest-source-select',
-              '.text()',
-              'FileReader',
-              'viewer-evidence-ingest-model.js',
+          path = Path('src/structure-viewer/index.html')
+          text = path.read_text(encoding='utf-8')
+
+          import_needle = """import {
+            buildEvidenceIngestPreviewFromText,
+            extractRenderableEvidencePayloadFromText,
+          } from './viewer-evidence-ingest-model.js';
+          """
+          import_replacement = import_needle + """import {
+            buildEvidenceIngestFileReadFailurePreview,
+            evidenceIngestFileReadMetadata,
+            readEvidenceIngestFileText,
+          } from './viewer-evidence-ingest-file-reader.js';
+          """
+          if text.count(import_needle) != 1:
+              raise SystemExit('expected exactly one Viewer evidence ingest import block')
+          text = text.replace(import_needle, import_replacement, 1)
+
+          handler_pattern = re.compile(
+              r"async function previewEvidenceIngestFromInput\(event\)\{\n.*?\n\}\nfunction attachEvidenceIngestPreview\(\)\{",
+              re.DOTALL,
           )
-          chunks = []
-          seen = set()
-          for pattern in patterns:
-              matches = [index for index, line in enumerate(lines) if pattern in line]
-              chunks.append(f'=== PATTERN {pattern!r} matches={len(matches)} ===')
-              for index in matches[:30]:
-                  begin = max(0, index - 20)
-                  end = min(len(lines), index + 35)
-                  key = (begin, end)
-                  if key in seen:
-                      continue
-                  seen.add(key)
-                  chunks.append(f'--- lines {begin + 1}-{end} ---')
-                  chunks.extend(
-                      f'{line_number + 1:06d}: {lines[line_number]}'
-                      for line_number in range(begin, end)
-                  )
-          output.write_text('\n'.join(chunks) + '\n', encoding='utf-8')
-          print(f'captured {len(chunks)} lines to {output}')
+          handler_replacement = """async function previewEvidenceIngestFromInput(event){
+            const input=event?.target;
+            const file=input instanceof HTMLInputElement?input.files?.[0]:null;
+            if(!file)return;
+            const sourceType=inferEvidenceIngestSourceType(file);
+            const generatedAt=new Date().toISOString();
+            try{
+              const fileRead=await readEvidenceIngestFileText(file);
+              const text=fileRead.text;
+              const preview=buildEvidenceIngestPreviewFromText(text,{
+                sourceType,
+                projectId:workspaceState.projectId||'ingested_project',
+                projectTitle:workspaceState.projectTitle||'Ingested Evidence Project',
+                artifactPath:file.name,
+                generatedAt,
+              });
+              const renderable=extractRenderableEvidencePayloadFromText(text,{
+                sourceType,
+                sourceName:file.name,
+                generatedAt,
+              });
+              preview.ingest_file_read=evidenceIngestFileReadMetadata(fileRead);
+              if(renderable)preview.renderable_payload=renderable;
+              window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
+              window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=renderable;
+              writeRuntimeIngestRenderablePayload(renderable);
+              writeLocalOpsState({
+                ...readLocalOpsState(),
+                lastIngestPreview:preview,
+                lastIngestRenderablePayload:renderable,
+              });
+              rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
+              auditWorkspaceEvent('evidence_ingest_previewed',file.name,resolveSelectionMemberId(selectedElementData),{
+                status:preview.blocked_issues?.length?'needs_review':'ready',
+              });
+            }catch(err){
+              const preview=buildEvidenceIngestFileReadFailurePreview(err,{
+                sourceType,
+                sourceName:file.name,
+                drawingId:workspaceState.drawingId||'',
+                generatedAt,
+              });
+              window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
+              window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=null;
+              writeRuntimeIngestRenderablePayload(null);
+              writeLocalOpsState({...readLocalOpsState(),lastIngestPreview:preview,lastIngestRenderablePayload:null});
+              rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
+              auditWorkspaceEvent(
+                'evidence_ingest_preview_failed',
+                `${preview.renderable_payload_error_code||'evidence_ingest_file_preview_failed'}@${preview.renderable_payload_error_path||'/file'}`,
+                resolveSelectionMemberId(selectedElementData),
+                {status:'blocked'},
+              );
+            }finally{
+              if(input instanceof HTMLInputElement)input.value='';
+              renderProjectWorkspacePanel();
+              renderReportExportPanel();
+            }
+          }
+          function attachEvidenceIngestPreview(){"""
+          text, count = handler_pattern.subn(handler_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'expected exactly one evidence ingest handler; replaced={count}')
+          if 'const text=await file.text();' in handler_replacement:
+              raise SystemExit('direct file.text() remained in replacement handler')
+
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/codex-temp-viewer-ingest-handler-inspect.yml').unlink()
           PY
-      - name: Upload handler context
-        uses: actions/upload-artifact@v7
-        with:
-          name: viewer-ingest-handler-context-${{ github.run_id }}
-          path: /tmp/viewer-ingest-handler-context.txt
-          if-no-files-found: error
-          retention-days: 1
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          text = Path('src/structure-viewer/index.html').read_text(encoding='utf-8')
+          match = re.search(
+              r"async function previewEvidenceIngestFromInput\(event\)\{\n.*?\n\}\nfunction attachEvidenceIngestPreview\(\)\{",
+              text,
+              re.DOTALL,
+          )
+          if match is None:
+              raise SystemExit('patched handler not found')
+          handler = match.group(0)
+          required = (
+              'readEvidenceIngestFileText(file)',
+              'evidenceIngestFileReadMetadata(fileRead)',
+              'buildEvidenceIngestFileReadFailurePreview(err',
+          )
+          missing = [value for value in required if value not in handler]
+          if missing:
+              raise SystemExit(f'missing handler contracts: {missing}')
+          if 'file.text()' in handler:
+              raise SystemExit('direct file.text() remains in evidence ingest handler')
+          PY
+
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/structure-viewer/index.html .github/workflows/codex-temp-viewer-ingest-handler-inspect.yml
+          git commit -m "Use pre-read validation for Viewer evidence files"
+          git push origin HEAD:${{ github.head_ref }}
