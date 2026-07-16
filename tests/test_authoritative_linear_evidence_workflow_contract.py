@@ -18,3 +18,14 @@ def test_authoritative_evidence_has_one_branch_writer() -> None:
     assert "scripts/verify_phase1_evidence_source_state.py" in text
     assert "Verify exact evidence head" in text
     assert "git push origin HEAD:${{ github.head_ref || github.ref_name }}" in text
+
+
+def test_transient_checkpoints_are_restored_without_checkout_filters() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+
+    assert 'runtime_checkpoint_dir="implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints"' in text
+    assert 'git show "HEAD:${path}" > "$restore_path"' in text
+    assert 'git ls-files -z -- "$runtime_checkpoint_dir"' in text
+    assert 'git diff --quiet -- "$runtime_checkpoint_dir"' in text
+    assert 'git restore --source=HEAD --staged --worktree -- "$runtime_checkpoint_dir" || true' not in text
+    assert "Transient nonlinear checkpoints were not restored exactly" in text
