@@ -2,13 +2,15 @@ name: CI
 
 # Canonical structural-product integration gate. Legacy evidence and quarantined
 # science code have independent ownership workflows and cannot redefine this lane.
+# Frontend and static-viewer sources are owned by their dedicated web workflows;
+# this lane is triggered by the Python structural package and shared product gates.
 
 on:
   push:
     branches: ["main", "codex/**", "web/**", "feat/**", "solver/**", "ci/**"]
     paths:
       - "implementation/**"
-      - "src/**"
+      - "src/structural_analysis/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
       - "*.py"
@@ -25,7 +27,7 @@ on:
   pull_request:
     paths:
       - "implementation/**"
-      - "src/**"
+      - "src/structural_analysis/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
       - "*.py"
