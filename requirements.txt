@@ -1,5 +1,6 @@
 cryptography>=42
 numpy>=1.23
+scipy>=1.10
 matplotlib>=3.7
 jsonschema>=4.20
 packaging>=23

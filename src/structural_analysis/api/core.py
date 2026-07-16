@@ -2,30 +2,48 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
-import json
+from dataclasses import asdict, dataclass
 from importlib import metadata
 from pathlib import Path
 from typing import Any
 
-from structural_analysis.io.ifc.loader import load_ifc_step
-from structural_analysis.io.midas.loader import load_midas_mgt
-from structural_analysis.io.neutral.loader import load_neutral_json
-from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.analyses.linear_static import (
+    AUTHORITATIVE_CPU_SOLVER_ID,
+    run_authoritative_linear_static,
+)
 from structural_analysis.assembly.nonlinear_static import (
     axial_chain_mesh_problem_from_canonical_model,
     finite_difference_assembled_jacobian_check,
     mesh_series_force_equilibrium_check,
     solve_axial_chain_mesh,
 )
+from structural_analysis.io.ifc.loader import load_ifc_step
+from structural_analysis.io.midas import load_midas_mgt
+from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.results.schema import (
+    CLAIM_BOUNDARY_VERSION as CLAIM_BOUNDARY_VERSION,
+    AnalysisResult as AnalysisResult,
+    ValidationReport as ValidationReport,
+)
+from structural_analysis.results.validation import validate as validate
 from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
-from structural_analysis.solvers.linear.static import solve_linear_static, solve_linear_static_sparse
 
-CLAIM_BOUNDARY_VERSION = "developer-preview-core-api-v1"
+MODEL_HEALTH_SOLVER_ID = "developer_preview_model_health"
+NONLINEAR_MATERIAL_MESH_SOLVER_ID = (
+    "developer_preview_material_mesh_newton_axial_chain"
+)
+UNSUPPORTED_ANALYSIS_SOLVER_ID = "unsupported_analysis_type"
 SUPPORTED_ANALYSIS_TYPES = {
     "linear_static",
     "model_health",
     "nonlinear_static_material_mesh",
+}
+LEGACY_SOLVER_HINTS = {
+    MODEL_HEALTH_SOLVER_ID,
+    "developer_preview_linear_static_axial",
+    "developer_preview_linear_static_axial_sparse",
+    NONLINEAR_MATERIAL_MESH_SOLVER_ID,
 }
 
 
@@ -41,58 +59,23 @@ ANALYSIS_ENGINE_VERSION = _engine_version()
 
 @dataclass(frozen=True)
 class AnalysisConfig:
-    """Explicit solver configuration shared by Python API and CLI."""
+    """Explicit numerical configuration shared by Python API and CLI.
+
+    ``solver``, ``developer_preview``, and ``claim_boundary_version`` remain as
+    compatibility-only request fields for the v1 API surface. They never control
+    result provenance: the engine selects the solver identifier and claim metadata.
+    ``reference`` is likewise retained only for legacy construction compatibility;
+    validation references belong to :func:`validate` or the CLI ``--reference``
+    option.
+    """
 
     analysis_type: str = "model_health"
-    solver: str = "developer_preview_model_health"
+    solver: str = MODEL_HEALTH_SOLVER_ID
     tolerance: float = 1.0e-8
     max_iterations: int = 0
     load_case: str | None = None
     reference: str | None = None
     matrix_backend: str = "numpy_linalg_solve_dense"
-    developer_preview: bool = True
-    claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True)
-class AnalysisResult:
-    """Versioned result envelope; this first slice does not claim solver closure."""
-
-    status: str
-    analysis_type: str
-    solver: str
-    engine_version: str
-    input_checksum: str
-    tolerance: float
-    convergence_history: list[dict[str, Any]]
-    unsupported_features: list[dict[str, Any]] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
-    metrics: dict[str, Any] = field(default_factory=dict)
-    developer_preview: bool = True
-    claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
-
-    def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass(frozen=True)
-class ValidationReport:
-    """Validation envelope that keeps passed and unsupported fields separate."""
-
-    status: str
-    contract_pass: bool
-    engine_version: str
-    input_checksum: str
-    tolerance: float
-    convergence_history: list[dict[str, Any]]
-    passed_fields: list[str] = field(default_factory=list)
-    unsupported_fields: list[str] = field(default_factory=list)
-    developer_preview_blocked_fields: list[str] = field(default_factory=list)
-    comparisons: list[dict[str, Any]] = field(default_factory=list)
-    warnings: list[str] = field(default_factory=list)
     developer_preview: bool = True
     claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
 
@@ -114,12 +97,67 @@ def load_model(path: str | Path) -> CanonicalModel:
     raise ValueError(f"Unsupported model input extension: {suffix or '<none>'}")
 
 
-def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> AnalysisResult:
-    """Analyze a canonical model using a conservative Developer Preview contract."""
+def _engine_owned_solver_id(analysis_type: str) -> str:
+    if analysis_type == "linear_static":
+        return AUTHORITATIVE_CPU_SOLVER_ID
+    if analysis_type == "nonlinear_static_material_mesh":
+        return NONLINEAR_MATERIAL_MESH_SOLVER_ID
+    if analysis_type == "model_health":
+        return MODEL_HEALTH_SOLVER_ID
+    return UNSUPPORTED_ANALYSIS_SOLVER_ID
+
+
+def _engine_owned_metadata_warnings(
+    config: AnalysisConfig,
+    *,
+    selected_solver: str,
+) -> list[str]:
+    warnings: list[str] = []
+    requested_solver = str(config.solver or "").strip()
+    if (
+        requested_solver
+        and requested_solver != selected_solver
+        and requested_solver not in LEGACY_SOLVER_HINTS
+    ):
+        warnings.append(
+            "Requested solver identifier was ignored; solver provenance is engine-owned."
+        )
+    if config.developer_preview is not True:
+        warnings.append(
+            "Requested developer_preview override was ignored; claim metadata is engine-owned."
+        )
+    if config.claim_boundary_version != CLAIM_BOUNDARY_VERSION:
+        warnings.append(
+            "Requested claim_boundary_version override was ignored; claim metadata is engine-owned."
+        )
+    return warnings
+
+
+def analyze(
+    model: CanonicalModel,
+    config: AnalysisConfig | None = None,
+) -> AnalysisResult:
+    """Analyze one detached canonical snapshot under the Developer Preview contract."""
 
     analysis_config = config or AnalysisConfig()
+    model = model.detached_analysis_snapshot()
+    canonical_model_checksum = model.canonical_model_checksum
+
+    def build_result(**kwargs: Any) -> AnalysisResult:
+        return AnalysisResult(
+            canonical_model_checksum=canonical_model_checksum,
+            **kwargs,
+        )
+
+    engine_solver = _engine_owned_solver_id(analysis_config.analysis_type)
     unsupported = list(model.unsupported_features)
-    warnings = list(model.warnings)
+    warnings = [
+        *model.warnings,
+        *_engine_owned_metadata_warnings(
+            analysis_config,
+            selected_solver=engine_solver,
+        ),
+    ]
 
     if analysis_config.analysis_type not in SUPPORTED_ANALYSIS_TYPES:
         unsupported.append(
@@ -142,8 +180,8 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
                 "kind": "linear_static_matrix_backend_not_supported",
                 "matrix_backend": analysis_config.matrix_backend,
                 "detail": (
-                    "Developer Preview supports dense NumPy and scoped scipy sparse "
-                    "CPU backends for the narrow axial linear_static slice only."
+                    "Authoritative CPU linear static supports dense NumPy and scoped "
+                    "SciPy sparse CPU backends for frame/truss models."
                 ),
             }
         )
@@ -154,7 +192,9 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
     ):
         unsupported.append(
             {
-                "kind": "nonlinear_static_material_mesh_matrix_backend_not_supported",
+                "kind": (
+                    "nonlinear_static_material_mesh_matrix_backend_not_supported"
+                ),
                 "matrix_backend": analysis_config.matrix_backend,
                 "detail": (
                     "Developer Preview material mesh Newton seed supports dense NumPy "
@@ -164,32 +204,43 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
         )
 
     if not unsupported and analysis_config.analysis_type == "linear_static":
-        if analysis_config.matrix_backend == "scipy_sparse_spsolve_cpu":
-            solution = solve_linear_static_sparse(model, tolerance=analysis_config.tolerance)
-        else:
-            solution = solve_linear_static(model, tolerance=analysis_config.tolerance)
-        return AnalysisResult(
+        solution = run_authoritative_linear_static(
+            model,
+            tolerance=analysis_config.tolerance,
+            matrix_backend=analysis_config.matrix_backend,
+            load_case=analysis_config.load_case,
+        )
+        return build_result(
             status=solution.status,
             analysis_type=analysis_config.analysis_type,
-            solver=analysis_config.solver,
+            solver=engine_solver,
             engine_version=ANALYSIS_ENGINE_VERSION,
             input_checksum=model.input_checksum,
             tolerance=analysis_config.tolerance,
             convergence_history=solution.convergence_history,
             unsupported_features=solution.unsupported_features,
             warnings=warnings + solution.warnings,
-            metrics=solution.metrics,
-            developer_preview=analysis_config.developer_preview,
-            claim_boundary_version=analysis_config.claim_boundary_version,
+            metrics={
+                **solution.metrics,
+                "provenance_policy": "engine_owned",
+                "analysis_input_snapshot": "detached_canonical_model_v1",
+            },
+            developer_preview=True,
+            claim_boundary_version=CLAIM_BOUNDARY_VERSION,
         )
 
-    if not unsupported and analysis_config.analysis_type == "nonlinear_static_material_mesh":
-        mesh_problem, mesh_unsupported = axial_chain_mesh_problem_from_canonical_model(model)
+    if (
+        not unsupported
+        and analysis_config.analysis_type == "nonlinear_static_material_mesh"
+    ):
+        mesh_problem, mesh_unsupported = (
+            axial_chain_mesh_problem_from_canonical_model(model)
+        )
         if mesh_unsupported or mesh_problem is None:
-            return AnalysisResult(
+            return build_result(
                 status="blocked",
                 analysis_type=analysis_config.analysis_type,
-                solver=analysis_config.solver,
+                solver=engine_solver,
                 engine_version=ANALYSIS_ENGINE_VERSION,
                 input_checksum=model.input_checksum,
                 tolerance=analysis_config.tolerance,
@@ -201,17 +252,23 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
                     "element_count": len(model.elements),
                     "load_count": len(model.loads),
                     "support_count": len(model.supports),
-                    "claim_boundary": "nonlinear_material_mesh_seed_unsupported_input",
+                    "claim_boundary": (
+                        "nonlinear_material_mesh_seed_unsupported_input"
+                    ),
+                    "provenance_policy": "engine_owned",
+                    "analysis_input_snapshot": "detached_canonical_model_v1",
                 },
-                developer_preview=analysis_config.developer_preview,
-                claim_boundary_version=analysis_config.claim_boundary_version,
+                developer_preview=True,
+                claim_boundary_version=CLAIM_BOUNDARY_VERSION,
             )
         cfg = NewtonRaphsonConfig(
             residual_tolerance=analysis_config.tolerance,
             increment_tolerance=min(analysis_config.tolerance, 1.0e-12),
-            max_iterations=analysis_config.max_iterations
-            if analysis_config.max_iterations > 0
-            else 25,
+            max_iterations=(
+                analysis_config.max_iterations
+                if analysis_config.max_iterations > 0
+                else 25
+            ),
             matrix_backend=analysis_config.matrix_backend,
         )
         solution, final_state = solve_axial_chain_mesh(mesh_problem, config=cfg)
@@ -220,10 +277,10 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
             solution.free_displacements_m,
         )
         series_check = mesh_series_force_equilibrium_check(final_state)
-        return AnalysisResult(
+        return build_result(
             status=solution.status,
             analysis_type=analysis_config.analysis_type,
-            solver=analysis_config.solver,
+            solver=engine_solver,
             engine_version=ANALYSIS_ENGINE_VERSION,
             input_checksum=model.input_checksum,
             tolerance=analysis_config.tolerance,
@@ -235,7 +292,9 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
                 "node_count": mesh_problem.node_count,
                 "element_count": len(mesh_problem.elements),
                 "free_dof_count": len(final_state.free_node_indices),
-                "residual_norm": float(max(abs(value) for value in final_state.residual_kn)),
+                "residual_norm": float(
+                    max(abs(value) for value in final_state.residual_kn)
+                ),
                 "tip_displacement_m": float(final_state.displacements_m[-1]),
                 "reactions": final_state.reactions_kn.tolist(),
                 "internal_forces": final_state.internal_forces_kn.tolist(),
@@ -246,32 +305,40 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
                 "series_force_equilibrium_pass": bool(series_check["pass"]),
                 "regularization_used": solution.metrics.get("regularization_used"),
                 "fallback_used": solution.metrics.get("fallback_used"),
-                "claim_boundary": "nonlinear_material_mesh_axial_chain_preview_only",
+                "claim_boundary": (
+                    "nonlinear_material_mesh_axial_chain_preview_only"
+                ),
+                "provenance_policy": "engine_owned",
+                "analysis_input_snapshot": "detached_canonical_model_v1",
             },
-            developer_preview=analysis_config.developer_preview,
-            claim_boundary_version=analysis_config.claim_boundary_version,
+            developer_preview=True,
+            claim_boundary_version=CLAIM_BOUNDARY_VERSION,
         )
 
     if unsupported:
-        return AnalysisResult(
+        return build_result(
             status="blocked",
             analysis_type=analysis_config.analysis_type,
-            solver=analysis_config.solver,
+            solver=engine_solver,
             engine_version=ANALYSIS_ENGINE_VERSION,
             input_checksum=model.input_checksum,
             tolerance=analysis_config.tolerance,
             convergence_history=[],
             unsupported_features=unsupported,
             warnings=warnings,
-            metrics=_model_health_metrics(model),
-            developer_preview=analysis_config.developer_preview,
-            claim_boundary_version=analysis_config.claim_boundary_version,
+            metrics={
+                **_model_health_metrics(model),
+                "provenance_policy": "engine_owned",
+                "analysis_input_snapshot": "detached_canonical_model_v1",
+            },
+            developer_preview=True,
+            claim_boundary_version=CLAIM_BOUNDARY_VERSION,
         )
 
-    return AnalysisResult(
+    return build_result(
         status="ready",
         analysis_type=analysis_config.analysis_type,
-        solver=analysis_config.solver,
+        solver=engine_solver,
         engine_version=ANALYSIS_ENGINE_VERSION,
         input_checksum=model.input_checksum,
         tolerance=analysis_config.tolerance,
@@ -290,9 +357,11 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
             "unit_length": model.units.length,
             "unit_force": model.units.force,
             "up_axis": model.coordinate_system.up_axis,
+            "provenance_policy": "engine_owned",
+            "analysis_input_snapshot": "detached_canonical_model_v1",
         },
-        developer_preview=analysis_config.developer_preview,
-        claim_boundary_version=analysis_config.claim_boundary_version,
+        developer_preview=True,
+        claim_boundary_version=CLAIM_BOUNDARY_VERSION,
     )
 
 
@@ -303,7 +372,7 @@ def _model_health_metrics(model: CanonicalModel) -> dict[str, Any]:
         "load_count": len(model.loads),
         "support_count": len(model.supports),
     }
-    metadata = model.metadata if isinstance(model.metadata, dict) else {}
+    metadata_payload = model.metadata if isinstance(model.metadata, dict) else {}
     for key in (
         "record_count",
         "parsed_record_count",
@@ -315,86 +384,6 @@ def _model_health_metrics(model: CanonicalModel) -> dict[str, Any]:
         "text_scan_only",
         "adapter_scope",
     ):
-        if key in metadata:
-            metrics[key] = metadata[key]
+        if key in metadata_payload:
+            metrics[key] = metadata_payload[key]
     return metrics
-
-
-def validate(
-    result: AnalysisResult,
-    reference: dict[str, Any] | str | Path | None = None,
-) -> ValidationReport:
-    """Validate a result while preserving unsupported fields as blockers."""
-
-    reference_payload = _load_reference(reference)
-    passed_fields = [
-        "engine_version",
-        "input_checksum",
-        "tolerance",
-        "convergence_history",
-        "claim_boundary_version",
-    ]
-    unsupported_fields = [
-        item.get("kind", "unsupported_feature") for item in result.unsupported_features
-    ]
-    warnings = list(result.warnings)
-    comparisons: list[dict[str, Any]] = []
-
-    if reference_payload:
-        for field_name, expected in reference_payload.items():
-            actual = result.metrics.get(field_name)
-            comparison_status = "pass" if actual == expected else "review"
-            comparisons.append(
-                {
-                    "field": field_name,
-                    "expected": expected,
-                    "actual": actual,
-                    "status": comparison_status,
-                }
-            )
-    elif result.analysis_type != "model_health":
-        warnings.append("No reference payload supplied for non-model-health analysis.")
-
-    reference_mismatches = [
-        str(row["field"]) for row in comparisons if row.get("status") != "pass"
-    ]
-    contract_pass = (
-        result.status == "ready"
-        and not unsupported_fields
-        and not reference_mismatches
-    )
-    report_status = "pass" if contract_pass else "blocked"
-    blocked_fields = unsupported_fields.copy()
-    blocked_fields.extend(
-        f"reference_mismatch:{field_name}" for field_name in reference_mismatches
-    )
-    if result.status != "ready" and not blocked_fields:
-        blocked_fields.append(result.analysis_type)
-
-    return ValidationReport(
-        status=report_status,
-        contract_pass=contract_pass,
-        engine_version=result.engine_version,
-        input_checksum=result.input_checksum,
-        tolerance=result.tolerance,
-        convergence_history=result.convergence_history,
-        passed_fields=passed_fields if contract_pass else [],
-        unsupported_fields=unsupported_fields,
-        developer_preview_blocked_fields=blocked_fields,
-        comparisons=comparisons,
-        warnings=warnings,
-        developer_preview=result.developer_preview,
-        claim_boundary_version=result.claim_boundary_version,
-    )
-
-
-def _load_reference(reference: dict[str, Any] | str | Path | None) -> dict[str, Any]:
-    if reference is None:
-        return {}
-    if isinstance(reference, dict):
-        return reference
-    with Path(reference).open(encoding="utf-8") as handle:
-        payload = json.load(handle)
-    if not isinstance(payload, dict):
-        raise ValueError("Reference payload must be a JSON object.")
-    return payload

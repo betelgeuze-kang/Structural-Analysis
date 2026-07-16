@@ -10,6 +10,8 @@
     "input_checksum",
     "tolerance",
     "convergence_history",
+    "metrics",
+    "result_schema_version",
     "developer_preview",
     "claim_boundary_version"
   ],
@@ -19,10 +21,19 @@
     "solver": {"type": "string"},
     "engine_version": {"type": "string"},
     "input_checksum": {"type": "string"},
+    "canonical_model_checksum": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
     "tolerance": {"type": "number"},
-    "convergence_history": {"type": "array"},
+    "convergence_history": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
     "unsupported_features": {"type": "array"},
-    "warnings": {"type": "array"},
+    "warnings": {"type": "array", "items": {"type": "string"}},
+    "metrics": {"type": "object"},
+    "result_schema_version": {"const": "structural-analysis-result.v2"},
     "developer_preview": {"const": true},
     "claim_boundary_version": {"const": "developer-preview-core-api-v1"}
   }

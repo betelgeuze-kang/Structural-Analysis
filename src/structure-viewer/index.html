@@ -1052,6 +1052,11 @@ import {
   extractRenderableEvidencePayloadFromText,
 } from './viewer-evidence-ingest-model.js';
 import {
+  buildEvidenceIngestFileReadFailurePreview,
+  evidenceIngestFileReadMetadata,
+  readEvidenceIngestFileText,
+} from './viewer-evidence-ingest-file-reader.js';
+import {
   buildReviewTaskModel,
 } from './viewer-review-task-model.js';
 import {
@@ -1073,6 +1078,15 @@ import {
   setViewerReviewNote,
   writeViewerLocalOpsState,
 } from './viewer-local-ops-state.js';
+import {
+  buildViewerProjectBundleFileFailurePreview,
+  readViewerProjectBundleFile,
+  viewerProjectBundleFileMetadata,
+} from './viewer-project-bundle-file-reader.js';
+import {
+  readViewerLocalModelFile,
+  viewerLocalModelFileFailure,
+} from './viewer-local-model-file-reader.js';
 
 const VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY='structure-viewer-runtime-ingest-payload-v1';
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
@@ -3232,24 +3246,29 @@ async function previewProjectBundleImportFromInput(event){
   const input=event?.target;
   const file=input instanceof HTMLInputElement?input.files?.[0]:null;
   if(!file)return;
+  const generatedAt=new Date().toISOString();
   try{
-    const text=await file.text();
-    const payload=JSON.parse(text);
-    const preview=buildViewerProjectBundleImportPreview(payload,{currentManifest:projectManifest});
-    const next={...readLocalOpsState(),lastImportPreview:preview};
-    writeLocalOpsState(next);
+    const bundleRead=await readViewerProjectBundleFile(file);
+    const preview=buildViewerProjectBundleImportPreview(bundleRead.payload,{currentManifest:projectManifest});
+    preview.file_read=viewerProjectBundleFileMetadata(bundleRead);
+    window.__STRUCTURE_VIEWER_LAST_IMPORT_PREVIEW__=preview;
+    writeLocalOpsState({...readLocalOpsState(),lastImportPreview:preview});
     auditWorkspaceEvent('project_bundle_import_previewed',file.name,resolveSelectionMemberId(selectedElementData),{
-      status:preview.blocked?'blocked':'mergeable',
+      status:preview.blocked?'blocked':'ready',
     });
   }catch(err){
-    const preview={
-      schema_version:'structure-viewer-project-bundle-import-preview.v1',
-      blocked:true,
-      issues:[{severity:'critical',issue:'import parse failed',value:String(err?.message||err)}],
-      incoming_counts:{reviewTasks:0,receiptIndex:0},
-    };
+    const preview=buildViewerProjectBundleFileFailurePreview(err,{
+      sourceName:file.name,
+      generatedAt,
+    });
+    window.__STRUCTURE_VIEWER_LAST_IMPORT_PREVIEW__=preview;
     writeLocalOpsState({...readLocalOpsState(),lastImportPreview:preview});
-    auditWorkspaceEvent('project_bundle_import_preview_failed',String(err?.message||err),resolveSelectionMemberId(selectedElementData),{status:'blocked'});
+    auditWorkspaceEvent(
+      'project_bundle_import_preview_failed',
+      `${preview.file_read?.error_code||'project_bundle_preview_failed'}@${preview.file_read?.error_path||'/file'}`,
+      resolveSelectionMemberId(selectedElementData),
+      {status:'blocked'},
+    );
   }finally{
     if(input instanceof HTMLInputElement)input.value='';
     renderReportExportPanel();
@@ -3284,10 +3303,11 @@ async function previewEvidenceIngestFromInput(event){
   const input=event?.target;
   const file=input instanceof HTMLInputElement?input.files?.[0]:null;
   if(!file)return;
+  const sourceType=inferEvidenceIngestSourceType(file);
+  const generatedAt=new Date().toISOString();
   try{
-    const sourceType=inferEvidenceIngestSourceType(file);
-    const text=await file.text();
-    const generatedAt=new Date().toISOString();
+    const fileRead=await readEvidenceIngestFileText(file);
+    const text=fileRead.text;
     const preview=buildEvidenceIngestPreviewFromText(text,{
       sourceType,
       projectId:workspaceState.projectId||'ingested_project',
@@ -3300,6 +3320,7 @@ async function previewEvidenceIngestFromInput(event){
       sourceName:file.name,
       generatedAt,
     });
+    preview.ingest_file_read=evidenceIngestFileReadMetadata(fileRead);
     if(renderable)preview.renderable_payload=renderable;
     window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
     window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=renderable;
@@ -3314,20 +3335,23 @@ async function previewEvidenceIngestFromInput(event){
       status:preview.blocked_issues?.length?'needs_review':'ready',
     });
   }catch(err){
-    const preview={
-      schema_version:'structure-viewer-evidence-ingest-preview.v1',
-      source_type:'unknown',
-      row_count:0,
-      drawing_count:0,
-      blocked_issues:[{drawing_id:workspaceState.drawingId||'',issue:'evidence ingest parse failed',quality_flags:[String(err?.message||err)]}],
-      manifest:{schema_version:'structure-viewer-project-manifest.v1',projects:[]},
-    };
+    const preview=buildEvidenceIngestFileReadFailurePreview(err,{
+      sourceType,
+      sourceName:file.name,
+      drawingId:workspaceState.drawingId||'',
+      generatedAt,
+    });
     window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
     window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=null;
     writeRuntimeIngestRenderablePayload(null);
     writeLocalOpsState({...readLocalOpsState(),lastIngestPreview:preview,lastIngestRenderablePayload:null});
     rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
-    auditWorkspaceEvent('evidence_ingest_preview_failed',String(err?.message||err),resolveSelectionMemberId(selectedElementData),{status:'blocked'});
+    auditWorkspaceEvent(
+      'evidence_ingest_preview_failed',
+      `${preview.renderable_payload_error_code||'evidence_ingest_file_preview_failed'}@${preview.renderable_payload_error_path||'/file'}`,
+      resolveSelectionMemberId(selectedElementData),
+      {status:'blocked'},
+    );
   }finally{
     if(input instanceof HTMLInputElement)input.value='';
     renderProjectWorkspacePanel();
@@ -21474,18 +21498,24 @@ async function loadCustomJson() {
 }
 
 async function handleFileSelect(event) {
-  const file = event.target.files?.[0];
+  const input = event?.target;
+  const file = input?.files?.[0] || null;
   if (!file) return;
   showLoadingIndicator(`Loading ${file.name}...`);
   try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-    await window.buildModel?.(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
+    const fileRead = await readViewerLocalModelFile(file);
+    await window.buildModel?.(fileRead.payload, {
+      mode: 'local_file',
+      label: fileRead.name || file.name,
+      resolvedPath: fileRead.name || file.name,
+    });
+  } catch (error) {
+    const failure = viewerLocalModelFileFailure(error, { sourceName: file.name });
+    console.warn(`[Viewer] Local model file blocked: ${failure.error_code}@${failure.error_path}`);
+    alert(`Could not load the selected JSON model (${failure.error_code} @ ${failure.error_path}).`);
+  } finally {
     hideLoadingIndicator();
-  } catch (err) {
-    console.error('[Viewer] Failed to load file:', err);
-    hideLoadingIndicator();
-    alert(`Failed to load ${file.name}: ${err.message}`);
+    if (input instanceof HTMLInputElement) input.value = '';
   }
 }
 
@@ -21522,18 +21552,23 @@ function setupFileDropZone() {
   dropZone.addEventListener('drop', async (e) => {
     e.preventDefault();
     dropZone.classList.remove('drag-over');
-    const file = e.dataTransfer?.files?.[0];
+    const file = e.dataTransfer?.files?.[0] || null;
     if (!file) return;
     showLoadingIndicator(`Loading ${file.name}...`);
     try {
-      const text = await file.text();
-      const data = JSON.parse(text);
-      await window.buildModel?.(data, { mode: 'local_file', label: file.name, resolvedPath: file.name });
+      const fileRead = await readViewerLocalModelFile(file);
+      await window.buildModel?.(fileRead.payload, {
+        mode: 'local_file',
+        label: fileRead.name || file.name,
+        resolvedPath: fileRead.name || file.name,
+      });
+    } catch (error) {
+      const failure = viewerLocalModelFileFailure(error, { sourceName: file.name });
+      console.warn(`[Viewer] Dropped local model blocked: ${failure.error_code}@${failure.error_path}`);
+      alert(`Could not load the dropped JSON model (${failure.error_code} @ ${failure.error_path}).`);
+    } finally {
       hideLoadingIndicator();
-    } catch (err) {
-      console.error('[Viewer] Failed to load dropped file:', err);
-      hideLoadingIndicator();
-      alert(`Failed to load ${file.name}: ${err.message}`);
+      dropZone.classList.remove('drag-over');
     }
   });
 }

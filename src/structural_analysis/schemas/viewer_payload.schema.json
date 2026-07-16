@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/viewer_payload.schema.json",
+  "title": "Authoritative Linear Static Viewer Payload v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "solver_path_id",
+    "analysis_fidelity",
+    "reaction_definition",
+    "equilibrium_residual_definition",
+    "nodes",
+    "elements"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-viewer-payload.v2"},
+    "source": {"const": "authoritative_solver_result"},
+    "solver_path_id": {"const": "authoritative_cpu_linear_fea_3d_v1"},
+    "analysis_fidelity": {"const": "cpu_reference_linear_fea"},
+    "reaction_definition": {
+      "const": "constrained_dof_internal_minus_external_force"
+    },
+    "equilibrium_residual_definition": {
+      "const": "free_dof_internal_minus_external_force; constrained entries are zero"
+    },
+    "model_identity": {"$ref": "#/$defs/modelIdentity"},
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200000,
+      "items": {"$ref": "#/$defs/node"}
+    },
+    "elements": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100000,
+      "items": {
+        "oneOf": [
+          {"$ref": "#/$defs/frameElement"},
+          {"$ref": "#/$defs/axialElement"}
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "modelIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity_policy",
+        "source_input_checksum",
+        "canonical_model_checksum",
+        "analysis_input_snapshot"
+      ],
+      "properties": {
+        "identity_policy": {
+          "const": "source_bytes_and_detached_canonical_model_v1"
+        },
+        "source_input_checksum": {"$ref": "#/$defs/sha256"},
+        "canonical_model_checksum": {"$ref": "#/$defs/sha256"},
+        "analysis_input_snapshot": {"const": "detached_canonical_model_v1"}
+      }
+    },
+    "coordinates": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "displacementVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+      "properties": {
+        "UX": {"type": "number"},
+        "UY": {"type": "number"},
+        "UZ": {"type": "number"},
+        "RX": {"type": "number"},
+        "RY": {"type": "number"},
+        "RZ": {"type": "number"}
+      }
+    },
+    "forceVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["FX", "FY", "FZ", "MX", "MY", "MZ"],
+      "properties": {
+        "FX": {"type": "number"},
+        "FY": {"type": "number"},
+        "FZ": {"type": "number"},
+        "MX": {"type": "number"},
+        "MY": {"type": "number"},
+        "MZ": {"type": "number"}
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "coordinates",
+        "displacement",
+        "reaction",
+        "equilibrium_residual"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "coordinates": {"$ref": "#/$defs/coordinates"},
+        "displacement": {"$ref": "#/$defs/displacementVector"},
+        "reaction": {"$ref": "#/$defs/forceVector"},
+        "equilibrium_residual": {"$ref": "#/$defs/forceVector"}
+      }
+    },
+    "elementNodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/stableId"}
+    },
+    "frameEndForces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "FX_I", "FY_I", "FZ_I", "MX_I", "MY_I", "MZ_I",
+        "FX_J", "FY_J", "FZ_J", "MX_J", "MY_J", "MZ_J"
+      ],
+      "properties": {
+        "FX_I": {"type": "number"},
+        "FY_I": {"type": "number"},
+        "FZ_I": {"type": "number"},
+        "MX_I": {"type": "number"},
+        "MY_I": {"type": "number"},
+        "MZ_I": {"type": "number"},
+        "FX_J": {"type": "number"},
+        "FY_J": {"type": "number"},
+        "FZ_J": {"type": "number"},
+        "MX_J": {"type": "number"},
+        "MY_J": {"type": "number"},
+        "MZ_J": {"type": "number"}
+      }
+    },
+    "axialEndForces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["FX_I", "FX_J"],
+      "properties": {
+        "FX_I": {"type": "number"},
+        "FX_J": {"type": "number"}
+      }
+    },
+    "frameElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "nodes", "local_end_forces"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "type": {"enum": ["frame", "beam", "column"]},
+        "nodes": {"$ref": "#/$defs/elementNodes"},
+        "local_end_forces": {"$ref": "#/$defs/frameEndForces"}
+      }
+    },
+    "axialElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "nodes",
+        "axial_force",
+        "elongation",
+        "local_end_forces"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "type": {"enum": ["truss", "axial"]},
+        "nodes": {"$ref": "#/$defs/elementNodes"},
+        "axial_force": {"type": "number"},
+        "elongation": {"type": "number"},
+        "local_end_forces": {"$ref": "#/$defs/axialEndForces"}
+      }
+    }
+  }
+}

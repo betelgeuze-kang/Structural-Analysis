@@ -167,7 +167,13 @@ export function renderForceDiagramOverlay(container, diagramData, options = {}) 
 
   const title = document.createElement('div');
   title.style.cssText = 'font-size:12px;font-weight:700;color:#e2e8f0;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;';
-  title.innerHTML = `<span>Force Diagrams · ${diagramData.memberId || diagramData.elementId}</span><span style="font-size:10px;color:#64748b;font-weight:400">${(diagramData.length || 0).toFixed(2)} m</span>`;
+  const label = document.createElement('span');
+  label.textContent = `Force Diagrams · ${diagramData.memberId || diagramData.elementId || 'unknown'}`;
+  const length = document.createElement('span');
+  length.style.cssText = 'font-size:10px;color:#64748b;font-weight:400';
+  length.textContent = `${(diagramData.length || 0).toFixed(2)} m`;
+  title.appendChild(label);
+  title.appendChild(length);
   wrapper.appendChild(title);
 
   const grids = [

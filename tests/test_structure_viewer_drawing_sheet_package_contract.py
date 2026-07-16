@@ -139,3 +139,95 @@ console.log(JSON.stringify({
     assert payload["handoffHasRevisionCallout"] is True
     assert payload["handoffHasDeepLinkActions"] is True
     assert payload["handoffHasSheetButtons"] is True
+
+
+def test_report_surfaces_mark_blocked_authoritative_ingest_as_warning() -> None:
+    payload = _run_node(
+        """
+import {buildStructureViewerReportHtml} from './src/structure-viewer/viewer-report-export.js';
+import {buildReportExportPanelHtml} from './src/structure-viewer/viewer-report-panel-renderer.js';
+
+const blockedPreview = {
+  source_type: 'json',
+  row_count: 1,
+  drawing_count: 1,
+  blocked_issues: [],
+  renderable_payload_available: false,
+  renderable_payload_kind: 'authoritative_viewer_v2',
+  renderable_payload_validation_status: 'blocked_authoritative_contract',
+  renderable_payload_error_code: 'viewer_model_identity_missing',
+  renderable_payload_error_path: '/model_identity',
+};
+const combinedPreview = {
+  ...blockedPreview,
+  blocked_issues: [{issue: 'blocked quality status', drawing_id: 'drawing-1'}],
+};
+const validPreview = {
+  source_type: 'json',
+  row_count: 1,
+  drawing_count: 1,
+  blocked_issues: [],
+  renderable_payload_available: true,
+  renderable_payload_kind: 'authoritative_viewer_v2',
+  renderable_payload_validation_status: 'validated_authoritative_contract',
+  renderable_payload_error_code: '',
+  renderable_payload_error_path: '',
+  renderable_node_count: 2,
+  renderable_element_count: 1,
+  renderable_segment_count: 0,
+};
+const blockedPanel = buildReportExportPanelHtml({ingestPreview: blockedPreview});
+const combinedPanel = buildReportExportPanelHtml({ingestPreview: combinedPreview});
+const validPanel = buildReportExportPanelHtml({ingestPreview: validPreview});
+const blockedReport = buildStructureViewerReportHtml({ingestPreview: blockedPreview});
+const combinedReport = buildStructureViewerReportHtml({ingestPreview: combinedPreview});
+const validReport = buildStructureViewerReportHtml({ingestPreview: validPreview});
+console.log(JSON.stringify({
+  blockedPanelWarn: blockedPanel.includes('prop-value--warn'),
+  blockedPanelCount: blockedPanel.includes('1 blocked'),
+  blockedPanelStatus: blockedPanel.includes('blocked_authoritative_contract'),
+  blockedPanelCode: blockedPanel.includes('viewer_model_identity_missing'),
+  blockedPanelPath: blockedPanel.includes('/model_identity'),
+  combinedPanelCount: combinedPanel.includes('2 blocked'),
+  validPanelSuccess: validPanel.includes('prop-value--success'),
+  validPanelCount: validPanel.includes('0 blocked'),
+  validPanelStatus: validPanel.includes('validated_authoritative_contract'),
+  validPanelRenderable: validPanel.includes('renderable authoritative_viewer_v2'),
+  blockedReportStatus: blockedReport.includes('blocked_authoritative_contract'),
+  blockedReportCode: blockedReport.includes('viewer_model_identity_missing'),
+  blockedReportPath: blockedReport.includes('/model_identity'),
+  blockedReportTone: blockedReport.includes('class="row blocked"'),
+  blockedReportNoFalseClear: !blockedReport.includes('No evidence ingest blocked issue registered'),
+  combinedReportDrawingIssue: combinedReport.includes('blocked quality status'),
+  combinedReportContractIssue: combinedReport.includes('viewer_model_identity_missing'),
+  validReportStatus: validReport.includes('validated_authoritative_contract'),
+  validReportRenderable: validReport.includes('authoritative_viewer_v2 · nodes=2 · elements=1'),
+  validReportNoError: !validReport.includes('viewer_model_identity_missing'),
+  validReportClear: validReport.includes('No evidence ingest blocked issue registered'),
+}));
+"""
+    )
+
+    assert payload == {
+        "blockedPanelWarn": True,
+        "blockedPanelCount": True,
+        "blockedPanelStatus": True,
+        "blockedPanelCode": True,
+        "blockedPanelPath": True,
+        "combinedPanelCount": True,
+        "validPanelSuccess": True,
+        "validPanelCount": True,
+        "validPanelStatus": True,
+        "validPanelRenderable": True,
+        "blockedReportStatus": True,
+        "blockedReportCode": True,
+        "blockedReportPath": True,
+        "blockedReportTone": True,
+        "blockedReportNoFalseClear": True,
+        "combinedReportDrawingIssue": True,
+        "combinedReportContractIssue": True,
+        "validReportStatus": True,
+        "validReportRenderable": True,
+        "validReportNoError": True,
+        "validReportClear": True,
+    }

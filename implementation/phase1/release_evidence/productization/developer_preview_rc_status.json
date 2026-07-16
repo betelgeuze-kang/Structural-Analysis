@@ -113,7 +113,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 6,
+        "blocker_count": 7,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
@@ -129,9 +129,10 @@
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
-            "blocker_count": 1,
+            "blocker_count": 2,
             "blockers": [
-              "medium_model_pass_or_review_below_required:0/5"
+              "medium_model_pass_or_review_below_required:0/5",
+              "medium_structural_models_current_below_required:3/5"
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
@@ -168,6 +169,7 @@
         "unassigned_blockers": []
       },
       "blockers": [
+        "medium_structural_models_current_below_required:3/5",
         "license_review_pending",
         "medium_model_pass_or_review_missing",
         "normalization_receipts_missing",
@@ -478,43 +480,43 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-05T22:00:29.610829+00:00",
+  "generated_at": "2026-07-16T06:12:20.581640+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:5a436ca3846f76de79eebf996121d974aa018c5d9f22e22d4b6ef6e634565da3",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:2d8ec6ac75d210af270cbb3dc04686889324695216ea1544c5d75d4741dd6ef9",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:ca6ff1bad5f8103f79e40e4e2ec3223526ff977926246da343d92dbde0cd7e0d",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:87f5b53ccdee74dab2e922851e3bc62fe3bc3215733d12a212f9a4ed7137c542",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:500f9bbd82c6983a2a5e0ac22afa21f92c6ade3bc399e7e08a52c665268091e3",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:2c8e8f61015ac45c829d2c585da1fce9c33745ecb7be9c8c274fd8c4053ac41a",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:8ee1b59e56a2dfd5638a39d8321f0c3f44812807437ec96c92cb9931784f7b92",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:c77091d8cf107a4e47581bb2c78aebbb966a9c0b5e98c5722513235d046cb264",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:04d1678e8d17ebf48a91913dbf408d1af555ab9f8b604b534dbd949498838fad",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:72e06d12205155989c9daa6786862d8311c893432ed2f172f95cef5742e46ca6",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:53af198ecca38e58f0756ae7f70c2cecf2028a326909932edeb44b8edb1cb61f",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:57b13b5272159ddf3c3da4a9e4da1efeacac6d1f2999ddc10f33b9aceb481a7f",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:2d3fd50ad43bed838d61a6527750819eb5474283cb3c5143562958a6feca9712",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "sha256:fb612e88bc196e0c323190da8a0d29f409286ff1c8748257e47ef5eceee0cf65",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:0869dbcbee11196b524d5ba87125ed67521be5bdaf095a576ad63a2c9a3ee674",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:460f3fa5ab532c8fc4d61a809c3918602171cee76b8d2e8fe462ce8dc7944815",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:b02e106f69d03bf7d4cb88ea2c48e2882f8ab0726ce1fb1bfe2ae62dfa5de167",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:fb3f211f5d85e0c2479f9e46e7349f9fc6483cbaea37fdd6facc1afbca8c6069",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:99295eade2415f1c299a9e16c4fa2bfc0bd9bfb870a14ce6510b2f223f199548",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:4a102063db8ed32743ea1e067c1e1d7cd5f8aa35a1232271ec037b7fadd26c69",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:6ebf9065f5b8394ae3e32a4281ae97a9cc397e8f2a795b9cef071278cb953630",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:190de20d56258bebee061d081bf7103c9f5f22df9198d61b4808ea4a332a8382",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:e247ff80b0f98644404bea047c21aa64f7a8320433f1b5fb6ef36a62526c6146",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:8e2ff5a3c583014ec323c0e7502197549f0226326a0ef2b30c95d262c099d711",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:e7aaf9c21c175aeb705f6211ae072bbe13a3a2c5f36fe3e3b542a9fa06ea71b3",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:dfab62a2935d4de859f6b63085ee33d16a1b1a61043ad5509bd4acf6201cafa1",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:5bc106b5824d41c84c6e8f16549b48589ea92029e8592bd012128d08a2b8b7ba",
-    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:91e2860f2c98676d3b856bf9ccc6180e3457ffd7dba651592580b6c24d32bd88",
-    "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:c6a7fdd6708cd7fbf9758219ef2648d64c591fd1043ab61056d42db27ba341e0",
-    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:d7a3ea866624688de137d3d6bb1d2a51d7355e449d6044fc109d0f8a9e367992",
-    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:0deae8b4585e707be7f9cd58a5d57759eafdf209ae833ba6afd508d51565d11a",
-    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:4485c428f8584d9b41f462d2f48b4f52dbc714e12df1d7d2188ad463cc5eeb8b",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:6ff8dceb28c2ea5ee700ecf5d6065e099c326c1da50bf13775979a622450c0c7",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:756067757668092301e8f0249edc5d92ee0171352a6785baf93c413555079518",
-    "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
+    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:cba5aa5f8392dfecabf2af461e814e79859bb8a5b606e73d8a45beb5a501ed1e",
+    "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
+    "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:f7319490106191876ffbfaff7d34d082dfec6c3f297467b7e42adb17f9095530",
+    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:1da775e8d0cc6b97d1b7454f5b983a9d26660121753f8dfb0cc3b8d925f28291",
+    "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:e5d52668ed5a3f8034e1437260cf4f2e68fecc5b8caa435874e1eb10ffa24dc4",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:142e4777ba69b7f3db0cef0e645e1f44c2d2d90a19f1c3b6c943d2eaad521b4c",
+    "pyproject.toml": "sha256:020bfffe797ce5eca4bb9d0695afa434d2d3b15426f96f5cf8f69388873fe3b9",
     "scripts/build_phase6_platform_replay_receipt.py": "sha256:4033a3af3c9149894b6df4091c07f7b6c3262bee3253cc301848bb3dab1a5ce6",
-    "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70"
+    "setup.cfg": "sha256:14f978f1149338462bb9d83bf4bdf4a1b1153967f39d7df29e2faf1c38913431"
   },
   "known_limitations": {
     "benchmark_quantity_handoff": {
       "acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
       "benchmark_scale_blocker_grouping": {
-        "blocker_count": 9,
+        "blocker_count": 10,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
@@ -534,9 +536,10 @@
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
-            "blocker_count": 1,
+            "blocker_count": 2,
             "blockers": [
-              "medium_model_pass_or_review_below_required:0/5"
+              "medium_model_pass_or_review_below_required:0/5",
+              "medium_structural_models_current_below_required:3/5"
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
@@ -796,7 +799,7 @@
           ],
           "benchmark_scale_gate": {
             "blocker_grouping_metadata": {
-              "blocker_count": 6,
+              "blocker_count": 7,
               "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
               "groups": {
                 "large_quantity_shortfall": {
@@ -812,9 +815,10 @@
                   "scope": "large_model_execution_lane"
                 },
                 "medium_quantity_shortfall": {
-                  "blocker_count": 1,
+                  "blocker_count": 2,
                   "blockers": [
-                    "medium_model_pass_or_review_below_required:0/5"
+                    "medium_model_pass_or_review_below_required:0/5",
+                    "medium_structural_models_current_below_required:3/5"
                   ],
                   "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
                   "scope": "medium_model_quantity_gate"
@@ -854,6 +858,7 @@
               "license_review_pending",
               "medium_model_pass_or_review_below_required:0/5",
               "medium_model_pass_or_review_missing",
+              "medium_structural_models_current_below_required:3/5",
               "normalization_receipts_missing",
               "opensees_medium_scorecard_execution_missing",
               "reference_outputs_missing"
@@ -862,9 +867,30 @@
             "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
             "contract_pass": false,
             "current_medium_model_scorecard_count": 0,
-            "local_candidate_artifact_count": 5,
+            "local_candidate_artifact_count": 3,
             "local_topology_contract_pass": true,
             "operator_next_actions": [
+              {
+                "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+                "clears_blockers": [
+                  "medium_structural_models_current_below_required:3/5"
+                ],
+                "current_candidate_case_count": 3,
+                "evidence_artifacts": [
+                  "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+                  "operator-attached source/license/reference/normalization rows for each added case"
+                ],
+                "id": "select_additional_medium_model_cases",
+                "lane": "opensees-medium",
+                "owner": "benchmark_operator",
+                "remaining_case_count": 2,
+                "required_candidate_case_count": 5,
+                "validation_commands": [
+                  "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+                  "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+                  "python3 scripts/build_developer_preview_rc_status.py --check"
+                ]
+              },
               {
                 "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
                 "clears_blockers": [
@@ -926,7 +952,7 @@
                 "owner": "benchmark_operator",
                 "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
                 "remaining_case_count": 5,
-                "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json --normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+                "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
                 "validation_commands": [
                   "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                   "python3 scripts/build_phase6_benchmark_scale_status.py --check",
@@ -971,10 +997,10 @@
                 "required": 9
               },
               "local_candidate_selection": {
-                "contract_pass": true,
-                "current": 5,
+                "contract_pass": false,
+                "current": 3,
                 "label": "parser/topology candidate cases selected",
-                "remaining": 0,
+                "remaining": 2,
                 "required": 5
               },
               "pass_or_approved_review": {
@@ -1001,8 +1027,8 @@
             "status": "blocked"
           },
           "contract_pass": false,
-          "current": 5,
-          "remaining": 0,
+          "current": 3,
+          "remaining": 2,
           "required": 5,
           "scorecard_blockers": [
             "license_review_pending",
@@ -1246,19 +1272,28 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 11,
+    "developer_preview_blocker_count": 91,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
+      "pm_release::M2::nonlinear_residual_integrated_case_missing",
+      "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+      "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+      "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+      "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+      "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
+      "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
       "human_ux::observation_file_missing",
-      "stale_or_inconsistent:worktree_dirty",
-      "structural_scope::owner_decision_pending_count=251",
-      "structural_scope::owner_decisions_missing",
-      "structural_scope::release_surface_owner_decision_required_count=3"
+      "independent_product:not_ready",
+      "missing_artifact:implementation/phase1/release/external_benchmark_submission_readiness.json",
+      "missing_artifact:implementation/phase1/release/independent_product_readiness.json",
+      "pm_release::M2::contact_material_coupled_case_count_lt_10_or_missing",
+      "pm_release::M2::element_material_breadth_gate_not_green",
+      "pm_release::M2::panel_contact_failure_reason_code_missing"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -1276,8 +1311,8 @@
       "autonomous_ai_engine_claim_ready": false,
       "claim_boundary": "This is a visibility summary for existing gap-ledger closure requirements. It does not add Developer Preview blockers, close G1/G6/G7, create external receipts, promote commercial readiness, or promote autonomous AI engine claims.",
       "closure_requirement_count": 19,
-      "closure_requirement_fail_count": 15,
-      "closure_requirement_pass_count": 4,
+      "closure_requirement_fail_count": 16,
+      "closure_requirement_pass_count": 3,
       "ledgers": {
         "ai_engine": {
           "closure_requirement_count": 0,
@@ -1290,8 +1325,8 @@
         },
         "commercial_solver": {
           "closure_requirement_count": 19,
-          "closure_requirement_fail_count": 15,
-          "closure_requirement_pass_count": 4,
+          "closure_requirement_fail_count": 16,
+          "closure_requirement_pass_count": 3,
           "nonclosed_failed_closure_requirement_ids": [
             "G1:coupled_frame_surface_nonlinear_equilibrium_closed",
             "G1:fallback_and_regularization_free_full_path",
@@ -1299,6 +1334,7 @@
             "G1:full_line_mesh_nonlinear_equilibrium_closed",
             "G1:full_load_scale_1_0_reached",
             "G1:state_updated_material_newton_breadth_closed",
+            "G1:strict_full_load_hip_newton_checkpoint_available",
             "G6:eb_receipt_hardest_external_10case",
             "G6:eb_receipt_korean_public_structures",
             "G6:eb_receipt_peer_spd_hinge",
@@ -1321,6 +1357,7 @@
         "G1:full_line_mesh_nonlinear_equilibrium_closed",
         "G1:full_load_scale_1_0_reached",
         "G1:state_updated_material_newton_breadth_closed",
+        "G1:strict_full_load_hip_newton_checkpoint_available",
         "G6:eb_receipt_hardest_external_10case",
         "G6:eb_receipt_korean_public_structures",
         "G6:eb_receipt_peer_spd_hinge",
@@ -1899,7 +1936,7 @@
         "status": "pass"
       },
       "expected_stable_artifact_checksums": {
-        "acquisition_plan": "sha256:bf007f37b48364f2d6cd3d92df0c8d142975d90c01db269613181350f787207b",
+        "acquisition_plan": "sha256:ee8fc1bbf6f3ec11e5ee8a169a130cec20947ccc669e0902cacf53a089594e33",
         "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",
         "buildingsmart_ifc_acquisition_receipt": "sha256:c79dea3ca47b7383bbe465976d584277bbaf82a30a971eddc2ed061f83dde2e3",
         "commercial_comparison_import_template": "sha256:37dd0e219d8eee66b2d2e3c84ab13ba63a7f27334a727346dca577c231b2cb67",
@@ -1986,10 +2023,10 @@
               "return_code": 0
             }
           ],
-          "required_source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4",
+          "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
           "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
           "stable_artifact_checksums": {
-            "acquisition_plan": "sha256:bf007f37b48364f2d6cd3d92df0c8d142975d90c01db269613181350f787207b",
+            "acquisition_plan": "sha256:ee8fc1bbf6f3ec11e5ee8a169a130cec20947ccc669e0902cacf53a089594e33",
             "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",
             "buildingsmart_ifc_acquisition_receipt": "sha256:c79dea3ca47b7383bbe465976d584277bbaf82a30a971eddc2ed061f83dde2e3",
             "commercial_comparison_import_template": "sha256:37dd0e219d8eee66b2d2e3c84ab13ba63a7f27334a727346dca577c231b2cb67",
@@ -2170,13 +2207,13 @@
           "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
           "receipt_origin": "OPERATOR_RECORDED_RECEIPT_ORIGIN",
           "replay_environment": "OPERATOR_RECORDED_REPLAY_ENVIRONMENT",
-          "source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4"
+          "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d"
         },
         "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
         "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
-        "source_commit_sha": "95d9c7e12eeb16efe4ceed434e9f58aeb63fcbe4",
+        "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
         "stable_artifact_checksums": {
-          "acquisition_plan": "sha256:bf007f37b48364f2d6cd3d92df0c8d142975d90c01db269613181350f787207b",
+          "acquisition_plan": "sha256:ee8fc1bbf6f3ec11e5ee8a169a130cec20947ccc669e0902cacf53a089594e33",
           "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",
           "buildingsmart_ifc_acquisition_receipt": "sha256:c79dea3ca47b7383bbe465976d584277bbaf82a30a971eddc2ed061f83dde2e3",
           "commercial_comparison_import_template": "sha256:37dd0e219d8eee66b2d2e3c84ab13ba63a7f27334a727346dca577c231b2cb67",
@@ -2207,7 +2244,7 @@
     },
     "medium_model_scorecard_handoff": {
       "benchmark_scale_blocker_grouping": {
-        "blocker_count": 6,
+        "blocker_count": 7,
         "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
@@ -2223,9 +2260,10 @@
             "scope": "large_model_execution_lane"
           },
           "medium_quantity_shortfall": {
-            "blocker_count": 1,
+            "blocker_count": 2,
             "blockers": [
-              "medium_model_pass_or_review_below_required:0/5"
+              "medium_model_pass_or_review_below_required:0/5",
+              "medium_structural_models_current_below_required:3/5"
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
@@ -2264,7 +2302,7 @@
       "benchmark_scale_contract_pass": false,
       "benchmark_scale_gate": {
         "blocker_grouping_metadata": {
-          "blocker_count": 6,
+          "blocker_count": 7,
           "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
           "groups": {
             "large_quantity_shortfall": {
@@ -2280,9 +2318,10 @@
               "scope": "large_model_execution_lane"
             },
             "medium_quantity_shortfall": {
-              "blocker_count": 1,
+              "blocker_count": 2,
               "blockers": [
-                "medium_model_pass_or_review_below_required:0/5"
+                "medium_model_pass_or_review_below_required:0/5",
+                "medium_structural_models_current_below_required:3/5"
               ],
               "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
               "scope": "medium_model_quantity_gate"
@@ -2322,6 +2361,7 @@
           "license_review_pending",
           "medium_model_pass_or_review_below_required:0/5",
           "medium_model_pass_or_review_missing",
+          "medium_structural_models_current_below_required:3/5",
           "normalization_receipts_missing",
           "opensees_medium_scorecard_execution_missing",
           "reference_outputs_missing"
@@ -2330,9 +2370,30 @@
         "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
         "contract_pass": false,
         "current_medium_model_scorecard_count": 0,
-        "local_candidate_artifact_count": 5,
+        "local_candidate_artifact_count": 3,
         "local_topology_contract_pass": true,
         "operator_next_actions": [
+          {
+            "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+            "clears_blockers": [
+              "medium_structural_models_current_below_required:3/5"
+            ],
+            "current_candidate_case_count": 3,
+            "evidence_artifacts": [
+              "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+              "operator-attached source/license/reference/normalization rows for each added case"
+            ],
+            "id": "select_additional_medium_model_cases",
+            "lane": "opensees-medium",
+            "owner": "benchmark_operator",
+            "remaining_case_count": 2,
+            "required_candidate_case_count": 5,
+            "validation_commands": [
+              "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+              "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+              "python3 scripts/build_developer_preview_rc_status.py --check"
+            ]
+          },
           {
             "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
             "clears_blockers": [
@@ -2394,7 +2455,7 @@
             "owner": "benchmark_operator",
             "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
             "remaining_case_count": 5,
-            "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json --normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+            "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
             "validation_commands": [
               "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
               "python3 scripts/build_phase6_benchmark_scale_status.py --check",
@@ -2439,10 +2500,10 @@
             "required": 9
           },
           "local_candidate_selection": {
-            "contract_pass": true,
-            "current": 5,
+            "contract_pass": false,
+            "current": 3,
             "label": "parser/topology candidate cases selected",
-            "remaining": 0,
+            "remaining": 2,
             "required": 5
           },
           "pass_or_approved_review": {
@@ -2533,15 +2594,13 @@
       },
       "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
       "current_medium_model_scorecard_count": 0,
-      "local_candidate_artifact_count": 5,
+      "local_candidate_artifact_count": 3,
       "local_parser_boundary": {
         "beam_element_count": 166,
         "canonical_candidate_case_ids": [
           "SCBF16B",
           "SCBF16B_shell_beam_mix",
-          "luxinzheng_megatall_model1",
-          "luxinzheng_megatall_model2",
-          "nheri_soft_story_podium"
+          "luxinzheng_megatall_model1"
         ],
         "claim_boundary": "Local checksum and topology/parser evidence is retained only as parser input evidence. It is not reference-output ingest, normalization, medium scorecard execution, or PASS/REVIEW benchmark evidence.",
         "node_count": 426,
@@ -2604,7 +2663,7 @@
           "remaining_case_count": 5,
           "required": "OpenSees medium scorecard execution retaining residual, increment, and convergence history.",
           "required_case_count": 5,
-          "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json --normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+          "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
           "status": "missing"
         },
         {
@@ -2623,6 +2682,26 @@
         }
       ],
       "operator_next_actions": [
+        {
+          "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
+          "clears_blockers": [
+            "medium_structural_models_current_below_required:3/5"
+          ],
+          "current_candidate_case_count": 3,
+          "evidence_artifacts": [
+            "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+            "operator-attached source/license/reference/normalization rows for each added case"
+          ],
+          "id": "select_additional_medium_model_cases",
+          "owner": "benchmark_operator",
+          "remaining_case_count": 2,
+          "required_candidate_case_count": 5,
+          "validation_commands": [
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
+            "python3 scripts/build_phase6_benchmark_scale_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        },
         {
           "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
           "clears_blockers": [
@@ -2680,7 +2759,7 @@
           "owner": "benchmark_operator",
           "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
           "remaining_case_count": 5,
-          "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json --normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+          "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
           "validation_commands": [
             "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
             "python3 scripts/build_phase6_benchmark_scale_status.py --check",
@@ -2717,7 +2796,7 @@
         "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner"
       },
       "runner_command_ready": true,
-      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json --normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
       "scorecard_readiness_receipt": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
       "scorecard_receipt_template": {
         "case_id": "OPERATOR_ATTACHED_CASE_ID",
@@ -2733,7 +2812,7 @@
         "oom": false,
         "peak_memory_gb": "OPERATOR_RECORDED_PEAK_MEMORY",
         "reference_output_sha256": "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256",
-        "runner_command": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --reference OPERATOR_ATTACHED_REFERENCE_OUTPUTS.json --normalization-receipt OPERATOR_ATTACHED_NORMALIZATION_RECEIPT.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "runner_command": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
         "runtime_seconds": "OPERATOR_RECORDED_RUNTIME",
         "schema_version": "phase3-medium-model-scorecard-receipt.v1",
         "source_id": "opensees_scbf16b_medium_candidate",
@@ -3168,6 +3247,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "c85fa87d070b84b697686fec69cfb43c06ec0a82",
+  "source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
   "status": "blocked"
 }

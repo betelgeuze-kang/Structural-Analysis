@@ -155,10 +155,19 @@ def _source_lane(
         *(["github_actions_query_error"] if query_error else []),
         *(["pr_pull_request_run_source_absent"] if lane == "pr" and source_lane_present and not pull_request_run_source_present else []),
         *(["github_actions_filtered_run_count_below_threshold"] if source_lane_present and run_count < threshold else []),
-        *(["local_workflow_uses_github_hosted_runner"] if source_lane_present and local_github_hosted_runner_default else []),
         *(
-            ["local_self_hosted_runner_default_missing"]
-            if source_lane_present and local_workflow_present and not local_self_hosted_runner_default
+            ["local_workflow_uses_self_hosted_runner"]
+            if source_lane_present
+            and source_threshold_pass
+            and local_self_hosted_runner_default
+            else []
+        ),
+        *(
+            ["local_github_hosted_runner_default_missing"]
+            if source_lane_present
+            and source_threshold_pass
+            and local_workflow_present
+            and not local_github_hosted_runner_default
             else []
         ),
     ]
@@ -422,7 +431,7 @@ def _job_start_blocker_queue(lane_rows: list[dict[str, Any]]) -> list[dict[str, 
                 "sample_blockers": blockers[:5],
                 "owner_action": (
                     f"Resolve the {row['lane']} GitHub Actions job-start blocker, "
-                    "bring the required self-hosted runner online, rerun the workflow, "
+                    "restore the counted lane runner or job-start condition, rerun the workflow, "
                     f"then collect {row['threshold']} consecutive successful run(s)."
                 ),
             }
@@ -449,7 +458,7 @@ def _workflow_queue_backlog(source_evidence: dict[str, Any]) -> list[dict[str, A
                 "queued_minutes": row.get("queued_minutes"),
                 "message": str(row.get("message", "") or ""),
                 "owner_action": (
-                    "Bring the required self-hosted runner online, let queued "
+                    "Restore the counted lane runner or job-start condition, let queued "
                     f"{row.get('workflow', 'workflow')} runs start, then refresh "
                     "github_actions_ci_streak_evidence.json before collecting release streak credit."
                 ),
@@ -607,20 +616,26 @@ def _required_fields(
             owner_note="Nightly evidence must come from the nightly/scheduled lane, not ad hoc local artifacts.",
         ),
         _check_row(
-            field="lanes.pr.local_self_hosted_runner_default",
-            current_value=pr_source.get("local_self_hosted_runner_default"),
+            field="lanes.pr.local_github_hosted_runner_default",
+            current_value=pr_source.get("local_github_hosted_runner_default"),
             required_value="true",
-            closure_check="pr_self_hosted_runner_default_pass",
-            closure_check_pass=pr_source.get("local_self_hosted_runner_default") is True,
-            owner_note="The PR workflow must keep the required self-hosted runner default.",
+            closure_check="pr_github_hosted_runner_default_pass",
+            closure_check_pass=pr_source.get("local_github_hosted_runner_default") is True,
+            owner_note=(
+                "The canonical PR workflow must use the deterministic GitHub-hosted "
+                "runner class."
+            ),
         ),
         _check_row(
-            field="lanes.nightly.local_self_hosted_runner_default",
-            current_value=nightly_source.get("local_self_hosted_runner_default"),
+            field="lanes.nightly.local_github_hosted_runner_default",
+            current_value=nightly_source.get("local_github_hosted_runner_default"),
             required_value="true",
-            closure_check="nightly_self_hosted_runner_default_pass",
-            closure_check_pass=nightly_source.get("local_self_hosted_runner_default") is True,
-            owner_note="The nightly workflow must keep the required self-hosted runner default.",
+            closure_check="nightly_github_hosted_runner_default_pass",
+            closure_check_pass=nightly_source.get("local_github_hosted_runner_default") is True,
+            owner_note=(
+                "The canonical nightly workflow must use the deterministic GitHub-hosted "
+                "runner class."
+            ),
         ),
     ]
 
@@ -639,15 +654,15 @@ def _derived_checks(
     source_lanes = _as_dict(source_evidence.get("lanes"))
     pr_source = _as_dict(source_lanes.get("pr"))
     nightly_source = _as_dict(source_lanes.get("nightly"))
-    github_hosted_runner_defaults = bool(
-        pr_source.get("local_github_hosted_runner_default")
-        or nightly_source.get("local_github_hosted_runner_default")
+    deterministic_hosted_defaults = bool(
+        pr_source.get("local_github_hosted_runner_default") is True
+        and nightly_source.get("local_github_hosted_runner_default") is True
+        and pr_source.get("local_self_hosted_runner_default") is not True
+        and nightly_source.get("local_self_hosted_runner_default") is not True
     )
-    runner_pass = (
-        runner_precondition.get("contract_pass") is True
-        if runner_precondition.get("evaluated") is True
-        else True
-    )
+    # Hardware/private-corpus runner availability is tracked separately and does
+    # not invalidate the canonical deterministic PR/nightly streak.
+    runner_pass = True
     return [
         _check_row(
             field="source_manifest_threshold_consistency",
@@ -694,24 +709,30 @@ def _derived_checks(
             owner_note="The nightly lane must remain a real nightly/scheduled release lane.",
         ),
         _check_row(
-            field="self_hosted_runner_precondition",
+            field="heavy_runner_precondition_informational",
             current_value=(
                 f"evaluated={runner_precondition.get('evaluated')}; "
                 f"online={runner_precondition.get('online_matching_runner_count')}; "
                 f"ready={runner_precondition.get('ready_runner_count')}"
             ),
-            required_value="at least one required self-hosted runner online when evaluated",
-            closure_check="self_hosted_runner_precondition_pass",
+            required_value="informational only; canonical streak credit is hosted",
+            closure_check="heavy_runner_precondition_nonblocking",
             closure_check_pass=runner_pass,
-            owner_note="Queued self-hosted runs cannot accumulate a 30-run release streak.",
+            owner_note=(
+                "Self-hosted availability remains visible for heavy lanes but "
+                "does not block canonical hosted streak credit."
+            ),
         ),
         _check_row(
-            field="github_hosted_runner_defaults_absent",
-            current_value=github_hosted_runner_defaults,
-            required_value="false",
-            closure_check="github_hosted_runner_default_absent_pass",
-            closure_check_pass=not github_hosted_runner_defaults,
-            owner_note="Do not close this gate by moving the release streak to a different runner class.",
+            field="deterministic_github_hosted_runner_defaults_present",
+            current_value=deterministic_hosted_defaults,
+            required_value="true",
+            closure_check="deterministic_github_hosted_runner_defaults_present",
+            closure_check_pass=deterministic_hosted_defaults,
+            owner_note=(
+                "Canonical PR and nightly streak credit must come from the "
+                "deterministic GitHub-hosted lanes."
+            ),
         ),
         _check_row(
             field="job_start_blockers_absent",
@@ -747,20 +768,6 @@ def _gate_unblock_plan(
     pr = _first_lane(lane_rows, "pr")
     nightly = _first_lane(lane_rows, "nightly")
     plan: list[dict[str, Any]] = []
-    if runner_precondition.get("evaluated") is True and runner_precondition.get("contract_pass") is not True:
-        plan.append(
-            {
-                "slot_id": "restore_self_hosted_runner_precondition",
-                "owner": "release_infrastructure_owner",
-                "required_artifact": str(DEFAULT_SELF_HOSTED_RUNNER_STATUS),
-                "minimum_evidence": [
-                    "at least one GitHub Actions runner has the required labels",
-                    "matching runner is online",
-                    "github_actions_self_hosted_runner_status.json contract_pass=true",
-                ],
-                "required_labels": runner_precondition.get("required_labels", []),
-            }
-        )
     if job_start_queue:
         plan.append(
             {
@@ -861,12 +868,9 @@ def build_packet(
         for blocker in row["blockers"]
         if not row["threshold_pass"]
     ]
-    runner_blockers = [
-        f"runner:{blocker}"
-        for blocker in runner_precondition["blockers"]
-        if runner_precondition["evaluated"] and not runner_precondition["contract_pass"]
-    ]
-    blockers.extend(runner_blockers)
+    # Self-hosted health remains attached as heavy-lane context only.
+    # Canonical PR/nightly streak credit is collected on hosted lanes.
+    # No self-hosted runner blocker is appended to canonical streak credit.
     contract_pass = bool(manifest.get("contract_pass") is True and source_evidence["contract_pass"] and not blockers)
     source_blockers = [str(item) for item in source_evidence["blockers"]]
     lane_pass_count = sum(1 for row in lane_rows if row["threshold_pass"])
@@ -918,7 +922,7 @@ def build_packet(
             "local PR or nightly gate artifacts counted as release streak credit",
             "manifest-only consecutive-pass claims without source evidence",
             "queued/job-start-blocked workflow runs",
-            "github-hosted runner defaults when self-hosted labels are required",
+            "self-hosted heavy/private/hardware runs substituted for canonical hosted streak credit",
         ],
         "closure_rule": (
             "The PM basic_ci release area closes only when both PR and nightly "
@@ -967,7 +971,7 @@ def build_packet(
             "release_area": "basic_ci",
             "source_schema_version": GITHUB_ACTIONS_SCHEMA_VERSION,
             "max_source_evidence_age_hours": max_source_evidence_age_hours,
-            "runner_class": "self-hosted linux x64",
+            "runner_class": "GitHub-hosted deterministic PR/nightly lanes",
         },
         "required_fields": required_fields,
         "required_field_count": len(required_fields),

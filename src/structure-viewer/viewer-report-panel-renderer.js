@@ -28,9 +28,18 @@ export function buildReportExportPanelHtml({
   const mapperRows = Array.isArray(commercialMapper?.rows) ? commercialMapper.rows : [];
   const mapperPresets = Array.isArray(commercialMapper?.presets) ? commercialMapper.presets : [];
   const sheetRows = Array.isArray(drawingSheetPackage?.sheets) ? drawingSheetPackage.sheets : [];
-  const ingestRenderableLabel = ingestPreview?.renderable_payload_available
-    ? ` · renderable ${ingestPreview.renderable_payload_kind || 'model'} · elements ${ingestPreview.renderable_element_count || 0} · segments ${ingestPreview.renderable_segment_count || 0}`
+  const ingestIssues = Array.isArray(ingestPreview?.blocked_issues) ? ingestPreview.blocked_issues : [];
+  const ingestValidationStatus = String(ingestPreview?.renderable_payload_validation_status || '').trim();
+  const ingestValidationErrorCode = String(ingestPreview?.renderable_payload_error_code || '').trim();
+  const ingestValidationErrorPath = String(ingestPreview?.renderable_payload_error_path || '').trim();
+  const ingestContractBlocked = ingestValidationStatus === 'blocked_authoritative_contract';
+  const ingestBlockedCount = ingestIssues.length + (ingestContractBlocked ? 1 : 0);
+  const ingestValidationLabel = ingestValidationStatus
+    ? ` · ${ingestValidationStatus}${ingestValidationErrorCode ? ` · ${ingestValidationErrorCode}${ingestValidationErrorPath ? ` @ ${ingestValidationErrorPath}` : ''}` : ''}`
     : '';
+  const ingestRenderableLabel = ingestPreview?.renderable_payload_available
+    ? ` · renderable ${ingestPreview.renderable_payload_kind || 'model'} · elements ${ingestPreview.renderable_element_count || 0} · segments ${ingestPreview.renderable_segment_count || 0}${ingestValidationLabel}`
+    : ingestValidationLabel;
   return `
     <div class="prop-row"><span class="prop-label">Project</span><span class="prop-value">${escapeHtml(workspace.projectTitle || workspace.projectId || '--')}</span></div>
     <div class="prop-row"><span class="prop-label">Drawing</span><span class="prop-value">${escapeHtml(workspace.drawingTitle || workspace.drawingId || '--')}</span></div>
@@ -48,7 +57,7 @@ export function buildReportExportPanelHtml({
     <div class="prop-row"><span class="prop-label">Tool Crosswalk</span><span class="prop-value prop-value--${escapeHtml(commercialCrosswalk?.tone || 'neutral')}">${escapeHtml(commercialCrosswalk?.summary || 'commercial tool crosswalk pending')}</span></div>
     <div class="prop-row"><span class="prop-label">CSV Mapper</span><span class="prop-value prop-value--accent">${escapeHtml(commercialMapper?.summary || 'commercial CSV mapper pending')}</span></div>
     <div class="prop-row"><span class="prop-label">Import Preview</span><span class="prop-value prop-value--${escapeHtml(importPreview?.blocked ? 'danger' : importPreview ? 'success' : 'neutral')}">${escapeHtml(importPreview ? `${importPreview.blocked ? 'blocked' : 'mergeable'} · ${importPreview.incoming_counts?.reviewTasks || 0} tasks · ${importPreview.incoming_counts?.receiptIndex || 0} receipts` : '--')}</span></div>
-    <div class="prop-row"><span class="prop-label">Evidence Ingest</span><span class="prop-value prop-value--${escapeHtml((ingestPreview?.blocked_issues || []).length ? 'warn' : ingestPreview ? 'success' : 'neutral')}">${escapeHtml(ingestPreview ? `${ingestPreview.source_type || '--'} · ${ingestPreview.drawing_count || 0} drawings · ${(ingestPreview.blocked_issues || []).length} blocked${ingestRenderableLabel}` : '--')}</span></div>
+    <div class="prop-row"><span class="prop-label">Evidence Ingest</span><span class="prop-value prop-value--${escapeHtml(ingestBlockedCount ? 'warn' : ingestPreview ? 'success' : 'neutral')}">${escapeHtml(ingestPreview ? `${ingestPreview.source_type || '--'} · ${ingestPreview.drawing_count || 0} drawings · ${ingestBlockedCount} blocked${ingestRenderableLabel}` : '--')}</span></div>
     ${rows.map(row => `<div class="prop-row"><span class="prop-label">${escapeHtml(row.label)}</span><span class="prop-value prop-value--${escapeHtml(row.tone)}">${escapeHtml(row.delta || row.value)}</span></div>`).join('')}
     <div class="panel-field report-note-field">
       <label for="review-task-status-select">Review Task</label>

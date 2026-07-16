@@ -836,8 +836,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
             "name: CI\n"
             "jobs:\n"
             "  verify:\n"
-            "    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || "
-            "'[\"self-hosted\",\"linux\",\"x64\"]') }}\n"
+            "    runs-on: ubuntu-latest\n"
         ),
     )
 
@@ -857,8 +856,7 @@ def _write_stable_non_receipt_inputs(tmp_path: Path) -> None:
             "name: CI\n"
             "jobs:\n"
             "  verify:\n"
-            "    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || "
-            "'[\"self-hosted\",\"linux\",\"x64\"]') }}\n"
+            "    runs-on: ubuntu-latest\n"
         ),
     )
 
@@ -5738,7 +5736,7 @@ def test_snapshot_does_not_promote_ready_status_with_component_blockers(tmp_path
     assert payload["release_ready"] is False
 
 
-def test_snapshot_blocks_github_hosted_actions_runner_policy(tmp_path: Path) -> None:
+def test_snapshot_blocks_self_hosted_runner_in_deterministic_ci_policy(tmp_path: Path) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -5797,7 +5795,7 @@ def test_snapshot_blocks_github_hosted_actions_runner_policy(tmp_path: Path) -> 
     _write_common_metadata(tmp_path, commit=commit)
     _write_text(
         tmp_path / ".github/workflows/ci.yml",
-        "name: CI\njobs:\n  verify:\n    runs-on: ubuntu-latest\n",
+        "name: CI\njobs:\n  verify:\n    runs-on: self-hosted\n",
     )
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -5810,7 +5808,7 @@ def test_snapshot_blocks_github_hosted_actions_runner_policy(tmp_path: Path) -> 
     assert payload["paid_pilot_ready"] is False
     assert payload["release_ready"] is False
     assert any(
-        blocker.startswith("runner_policy::.github/workflows/ci.yml:4:github_hosted_runner_label")
+        blocker.startswith("runner_policy::.github/workflows/ci.yml:4:github_hosted_runner_required")
         for blocker in payload["blockers"]
     )
 

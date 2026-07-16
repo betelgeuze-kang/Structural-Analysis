@@ -1,35 +1,46 @@
 name: CI
 
-# Heavy solver/repository quality gate. Frontend-only PRs are verified by
-# frontend-web-ci.yml, and structure-viewer browser changes by viewer-browser-ci.yml.
-# Workflow-only edits are validated by workflow-contract-ci.yml.
+# Canonical structural-product integration gate. Legacy evidence and quarantined
+# science code have independent ownership workflows and cannot redefine this lane.
+# Frontend and static-viewer sources are owned by their dedicated web workflows;
+# this lane is triggered by the Python structural package and shared product gates.
 
 on:
   push:
-    branches: ["main", "codex/**", "web/**", "feat/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**", "solver/**", "ci/**"]
     paths:
       - "implementation/**"
+      - "src/structural_analysis/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
       - "*.py"
       - "pyproject.toml"
+      - "setup.cfg"
       - "pytest.ini"
       - "requirements*.txt"
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/legacy-evidence-ci.yml"
+      - ".github/workflows/science-quarantine-ci.yml"
   pull_request:
     paths:
       - "implementation/**"
+      - "src/structural_analysis/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
       - "*.py"
       - "pyproject.toml"
+      - "setup.cfg"
       - "pytest.ini"
       - "requirements*.txt"
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
+      - ".github/workflows/ci.yml"
+      - ".github/workflows/legacy-evidence-ci.yml"
+      - ".github/workflows/science-quarantine-ci.yml"
   workflow_dispatch:
 
 env:
@@ -41,7 +52,8 @@ concurrency:
 
 jobs:
   verify:
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -50,6 +62,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.10"
+          cache: pip
 
       - name: Set up Node
         uses: actions/setup-node@v6
@@ -64,7 +77,46 @@ jobs:
         run: npm ci
 
       - name: Install Playwright browser
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Validate product CI ownership boundaries
+        run: >-
+          python scripts/check_product_ci_boundaries.py
+          --json
+          --out product-ci-boundary-report.json
+          --fail-blocked
+
+      - name: Verify structural core Python lane
+        run: python scripts/run_product_ci_lane.py --lane core --ruff --compile
+
+      - name: Materialize deterministic structural-scope audit candidate
+        run: python scripts/check_structural_scope_contamination.py --tracked-only
+
+      - name: Upload structural-scope audit candidate
+        uses: actions/upload-artifact@v7
+        with:
+          name: structural-scope-audit-${{ github.run_id }}
+          path: |
+            implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json
+            implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md
+            product-ci-boundary-report.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: PR quality gate
-        run: python scripts/verify_quality_gate.py --mode pr
+        shell: bash
+        run: |
+          set +e
+          python scripts/verify_quality_gate.py --mode pr > ci-quality-gate.log 2>&1
+          code=$?
+          tail -n 300 ci-quality-gate.log
+          exit "$code"
+
+      - name: Upload quality-gate log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-quality-gate-${{ github.run_id }}
+          path: ci-quality-gate.log
+          if-no-files-found: warn
+          retention-days: 14

@@ -25,19 +25,28 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert output.index("npm ci") < output.index("npm audit --audit-level high")
     assert "verify:viewer-manifest" in output
     assert "scripts/verify_structure_viewer_contracts.py" in output
-    assert output.index("verify:viewer-manifest") < output.index("scripts/verify_structure_viewer_contracts.py")
+    assert output.index("verify:viewer-manifest") < output.index(
+        "scripts/verify_structure_viewer_contracts.py"
+    )
     assert "verify:frontend-browser-smoke -- --mode minimal" in output
     assert "scripts/report_source_boundary_footprint.py --check" in output
-    assert (
-        "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
-        in output
+    scope_line = next(
+        line
+        for line in output.splitlines()
+        if "scripts/check_structural_scope_contamination.py" in line
     )
+    assert "--tracked-only --check" in scope_line
+    assert "--fail-blocked" not in scope_line
     assert output.index("scripts/report_source_boundary_footprint.py --check") < output.index(
-        "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
+        scope_line
+    )
+    assert output.index(scope_line) < output.index(
+        "scripts/check_product_ci_boundaries.py --fail-blocked"
     )
     assert output.index(
-        "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
+        "scripts/check_product_ci_boundaries.py --fail-blocked"
     ) < output.index("scripts/check_git_remote_safety.py --show-ok")
+    assert "scripts/run_product_ci_lane.py --lane core --ruff --compile" in output
     assert "tests/test_project_ops_api_service.py" in output
     assert "-m pytest -q\n" not in output
 
@@ -54,15 +63,28 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
         "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
         in output
     )
+    assert "scripts/run_product_ci_lane.py --lane legacy_evidence --ruff --compile" in output
+    assert "scripts/run_product_ci_lane.py --lane molecular_quarantine --ruff --compile" in output
     assert "-m pytest -q" in output
     assert "verify:viewer-report-pdf" in output
     assert "verify:viewer-performance-probe" in output
     assert "verify:viewer-visual-regression" in output
-    assert output.index("verify:frontend-browser-smoke") < output.index("verify:viewer-report-pdf")
-    assert output.index("verify:viewer-report-pdf") < output.index("verify:viewer-performance-probe")
-    assert output.index("verify:viewer-performance-probe") < output.index("verify:viewer-visual-regression")
-    assert "scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0" in output
-    assert output.index("verify:viewer-visual-regression") < output.index("scripts/report_commercialization_level.py")
+    assert output.index("verify:frontend-browser-smoke") < output.index(
+        "verify:viewer-report-pdf"
+    )
+    assert output.index("verify:viewer-report-pdf") < output.index(
+        "verify:viewer-performance-probe"
+    )
+    assert output.index("verify:viewer-performance-probe") < output.index(
+        "verify:viewer-visual-regression"
+    )
+    assert (
+        "scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0"
+        in output
+    )
+    assert output.index("verify:viewer-visual-regression") < output.index(
+        "scripts/report_commercialization_level.py"
+    )
     assert "scripts/build_developer_preview_readiness.py --check" in output
     assert output.index("scripts/report_commercialization_level.py") < output.index(
         "scripts/build_developer_preview_readiness.py"
@@ -107,7 +129,8 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
     assert "scripts/check_github_actions_self_hosted_runner_status.py" in output
     assert "github_actions_self_hosted_runner_status.json" in output
     runner_status_line = next(
-        line for line in output.splitlines()
+        line
+        for line in output.splitlines()
         if "scripts/check_github_actions_self_hosted_runner_status.py" in line
     )
     assert " --check" in runner_status_line
@@ -122,9 +145,9 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
     assert "product_readiness_snapshot.json" in output
     assert "tests/test_product_readiness_snapshot_doc_sync.py" in output
     assert "--fail-blocked" in output
-    # The canonical snapshot gate must run as a non-mutating --check.
     snapshot_gate_line = next(
-        line for line in output.splitlines()
+        line
+        for line in output.splitlines()
         if "scripts/build_product_readiness_snapshot.py" in line
     )
     assert " --check" in snapshot_gate_line
@@ -147,7 +170,9 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
     assert output.index("scripts/build_product_readiness_snapshot.py") < output.index(
         "tests/test_product_readiness_snapshot_doc_sync.py"
     )
-    assert output.index("tests/test_product_readiness_snapshot_doc_sync.py") < output.rindex("git diff --check")
+    assert output.index("tests/test_product_readiness_snapshot_doc_sync.py") < output.rindex(
+        "git diff --check"
+    )
 
 
 def test_quality_gate_release_mode_returns_nonzero_but_runs_followup_checks(
@@ -168,14 +193,13 @@ def test_quality_gate_release_mode_returns_nonzero_but_runs_followup_checks(
     assert exit_code == 1
     assert any("scripts/build_product_readiness_snapshot.py" in item for item in rendered)
     runner_status_line = next(
-        item for item in rendered
+        item
+        for item in rendered
         if "scripts/check_github_actions_self_hosted_runner_status.py" in item
     )
     assert " --check" in runner_status_line
     assert " --fail-blocked" in runner_status_line
     assert "--write-query-error-evidence" not in runner_status_line
-    # The snapshot gate must run as a non-mutating --check that can also
-    # still report a non-zero exit when the stored snapshot is stale.
     snapshot_gate_line = next(
         item for item in rendered if "scripts/build_product_readiness_snapshot.py" in item
     )

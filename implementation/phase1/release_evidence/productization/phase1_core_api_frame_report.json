@@ -1,0 +1,120 @@
+{
+  "canonical_model_checksum": "sha256:3db2de90887e06a6029f576d6a645176e38f731a7405f82c52f67f9149ec717e",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparisons": [
+    {
+      "actual": "cpu_reference_linear_fea",
+      "expected": "cpu_reference_linear_fea",
+      "field": "analysis_fidelity",
+      "status": "pass"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "field": "automatic_support_generation_used",
+      "status": "pass"
+    },
+    {
+      "actual": "linear_static_3d_frame_cpu_reference_v1",
+      "expected": "linear_static_3d_frame_cpu_reference_v1",
+      "field": "claim_boundary",
+      "status": "pass"
+    },
+    {
+      "actual": 20.0,
+      "expected": 20.0,
+      "field": "constrained_reaction_norm",
+      "status": "pass"
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "element_count",
+      "status": "pass"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "field": "fallback_used",
+      "status": "pass"
+    },
+    {
+      "actual": 6,
+      "expected": 6,
+      "field": "free_dof_count",
+      "status": "pass"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "field": "implicit_property_fallback_used",
+      "status": "pass"
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "load_count",
+      "status": "pass"
+    },
+    {
+      "actual": 0.0026666666666666666,
+      "expected": 0.0026666666666666666,
+      "field": "max_displacement",
+      "status": "pass"
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "node_count",
+      "status": "pass"
+    },
+    {
+      "actual": true,
+      "expected": true,
+      "field": "production_fail_closed",
+      "status": "pass"
+    },
+    {
+      "actual": "authoritative_cpu_linear_fea_3d_v1",
+      "expected": "authoritative_cpu_linear_fea_3d_v1",
+      "field": "solver_path_id",
+      "status": "pass"
+    },
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "support_count",
+      "status": "pass"
+    }
+  ],
+  "contract_pass": true,
+  "convergence_history": [
+    {
+      "increment_definition": "single_direct_linear_solve; no iterative relative increment",
+      "increment_norm": 0.0026666666666666666,
+      "iteration": 1,
+      "relative_increment": 0.0,
+      "relative_increment_applicable": false,
+      "relative_residual": 8.326672684688674e-17,
+      "residual_norm": 8.326672684688674e-16,
+      "status": "ready",
+      "step": "linear_static"
+    }
+  ],
+  "developer_preview": true,
+  "developer_preview_blocked_fields": [],
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
+  "passed_fields": [
+    "engine_version",
+    "input_checksum",
+    "canonical_model_checksum",
+    "tolerance",
+    "convergence_history",
+    "claim_boundary_version"
+  ],
+  "status": "pass",
+  "tolerance": 1e-08,
+  "unsupported_fields": [],
+  "warnings": []
+}

@@ -36,6 +36,31 @@ function getDcColor(ratio) {
   return CHART_CONFIG.colors.danger;
 }
 
+function appendHeatmapHeaderCell(row, label, { align = 'center', transform = false } = {}) {
+  const cell = document.createElement('th');
+  cell.style.cssText = `padding:4px 6px;text-align:${align};color:#64748b;border-bottom:1px solid rgba(51,65,85,0.5);${transform ? 'text-transform:capitalize' : ''}`;
+  cell.textContent = label;
+  row.appendChild(cell);
+}
+
+function appendHeatmapValue(cell, maxDcr, count) {
+  const value = document.createElement('div');
+  value.style.cssText = `background:${getDcColor(maxDcr)};border-radius:4px;padding:2px 4px;color:#fff;font-weight:700`;
+  value.textContent = maxDcr.toFixed(2);
+  const note = document.createElement('div');
+  note.style.cssText = 'color:#64748b;font-size:9px;margin-top:2px';
+  note.textContent = `n=${count}`;
+  cell.appendChild(value);
+  cell.appendChild(note);
+}
+
+function appendEmptyHeatmapValue(cell) {
+  const dash = document.createElement('span');
+  dash.style.cssText = 'color:#475569';
+  dash.textContent = '—';
+  cell.appendChild(dash);
+}
+
 function attachChartCrosshair(canvas, { labels = [], values = [], formatValue = (v) => String(v), crosshairOnly = false } = {}) {
   if (!canvas || canvas.dataset.crosshairBound === '1') return;
   canvas.dataset.crosshairBound = '1';
@@ -282,8 +307,8 @@ export function renderUtilizationHeatmap(container, elements, { storyKey = 'stor
   // Header
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
-  headerRow.innerHTML = `<th style="padding:4px 6px;text-align:left;color:#64748b;border-bottom:1px solid rgba(51,65,85,0.5)">Story</th>` +
-    types.map(t => `<th style="padding:4px 6px;text-align:center;color:#64748b;border-bottom:1px solid rgba(51,65,85,0.5);text-transform:capitalize">${t}</th>`).join('');
+  appendHeatmapHeaderCell(headerRow, 'Story', { align: 'left' });
+  types.forEach((type) => appendHeatmapHeaderCell(headerRow, type, { transform: true }));
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
@@ -305,10 +330,9 @@ export function renderUtilizationHeatmap(container, elements, { storyKey = 'stor
       cell.style.cssText = `padding:4px 6px;text-align:center;border-bottom:1px solid rgba(51,65,85,0.3);`;
 
       if (dcrs.length) {
-        const color = getDcColor(maxDcr);
-        cell.innerHTML = `<div style="background:${color};border-radius:4px;padding:2px 4px;color:#fff;font-weight:700">${maxDcr.toFixed(2)}</div><div style="color:#64748b;font-size:9px;margin-top:2px">n=${dcrs.length}</div>`;
+        appendHeatmapValue(cell, maxDcr, dcrs.length);
       } else {
-        cell.innerHTML = `<span style="color:#475569">—</span>`;
+        appendEmptyHeatmapValue(cell);
       }
       row.appendChild(cell);
     });
@@ -473,7 +497,14 @@ export function renderCriticalMemberRanking(container, elements, { maxRows = 8 }
 
     const info = document.createElement('div');
     info.style.cssText = 'min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
-    info.innerHTML = `<span style="color:#e2e8f0;font-weight:500">${el.member_id || el.id}</span> <span style="color:#64748b">${el.type || ''}</span>`;
+    const member = document.createElement('span');
+    member.style.cssText = 'color:#e2e8f0;font-weight:500';
+    member.textContent = String(el.member_id || el.id || 'unknown');
+    const type = document.createElement('span');
+    type.style.cssText = 'color:#64748b';
+    type.textContent = ` ${el.type || ''}`;
+    info.appendChild(member);
+    info.appendChild(type);
 
     const dcr = document.createElement('div');
     dcr.style.cssText = `text-align:right;font-weight:700;color:${getDcColor(el.dcr)}`;

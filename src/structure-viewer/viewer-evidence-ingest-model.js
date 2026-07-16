@@ -4,8 +4,24 @@ import {
 import {
   inferCommercialToolProfile,
 } from './viewer-commercial-tool-crosswalk-model.js';
+import {
+  AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
+  AuthoritativeViewerPayloadValidationError,
+  claimsAuthoritativeViewerContract,
+  validateAuthoritativeViewerPayload,
+} from './viewer-authoritative-payload-contract.js';
+import {
+  EvidenceIngestResourceLimitError,
+  STRUCTURE_VIEWER_INGEST_MAX_ROW_COUNT,
+  STRUCTURE_VIEWER_INGEST_RESOURCE_POLICY,
+  evidenceIngestResourceLimits,
+  validateEvidenceIngestRenderableCounts,
+  validateEvidenceIngestRowCount,
+  validateEvidenceIngestText,
+} from './viewer-evidence-ingest-resource-policy.js';
 
 export const STRUCTURE_VIEWER_INGEST_PREVIEW_SCHEMA_VERSION = 'structure-viewer-evidence-ingest-preview.v1';
+export const STRUCTURE_VIEWER_RENDERABLE_INSPECTION_SCHEMA_VERSION = 'structure-viewer-renderable-ingest-inspection.v1';
 
 function normalizeText(value) {
   return String(value ?? '').trim();
@@ -19,31 +35,114 @@ function firstText(...values) {
   return values.map(normalizeText).find(Boolean) || '';
 }
 
+function resolveEvidenceSourceType(sourceType = '', text = '', sourceName = '') {
+  const requested = normalizeToken(sourceType);
+  if (requested && requested !== 'auto') return requested;
+  const name = normalizeText(sourceName).toLowerCase();
+  if (name.endsWith('.csv')) return 'csv';
+  if (name.endsWith('.ifc')) return 'ifc';
+  if (name.endsWith('.json')) return 'json';
+  const body = normalizeText(text);
+  if (body.startsWith('{') || body.startsWith('[')) return 'json';
+  if (/^(ISO-10303-21;|#\d+=IFC)/i.test(body)) return 'ifc';
+  if (body.includes(',') && body.includes('\n')) return 'csv';
+  return 'json';
+}
+
+function isRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function resourceErrorResult(error) {
+  if (!(error instanceof EvidenceIngestResourceLimitError)) throw error;
+  return {
+    valid: false,
+    rows: [],
+    errorCode: error.code,
+    errorPath: error.path,
+  };
+}
+
 function parseCsvRows(text = '') {
   const lines = normalizeText(text).split(/\r?\n/).filter(Boolean);
-  if (!lines.length) return [];
-  const headers = lines[0].split(',').map((header) => normalizeToken(header));
-  return lines.slice(1).map((line) => {
-    const cells = line.split(',');
-    return Object.fromEntries(headers.map((header, index) => [header, normalizeText(cells[index])]));
-  });
-}
-
-function parseJsonRows(text = '') {
-  const parsed = JSON.parse(text);
-  if (Array.isArray(parsed)) return parsed;
-  if (Array.isArray(parsed.rows)) return parsed.rows;
-  if (Array.isArray(parsed.drawings)) return parsed.drawings;
-  if (parsed && typeof parsed === 'object') return [parsed];
-  return [];
-}
-
-function parseJsonValue(text = '') {
-  try {
-    return JSON.parse(text);
-  } catch (_err) {
-    return null;
+  if (!lines.length) {
+    return {valid: true, rows: [], errorCode: '', errorPath: ''};
   }
+  const rowCount = Math.max(0, lines.length - 1);
+  try {
+    validateEvidenceIngestRowCount(rowCount, '/rows');
+  } catch (error) {
+    return resourceErrorResult(error);
+  }
+  const headers = lines[0].split(',').map((header) => normalizeToken(header));
+  return {
+    valid: true,
+    rows: lines.slice(1).map((line) => {
+      const cells = line.split(',');
+      return Object.fromEntries(headers.map((header, index) => [header, normalizeText(cells[index])]));
+    }),
+    errorCode: '',
+    errorPath: '',
+  };
+}
+
+function parseJsonDocument(text = '') {
+  try {
+    return {
+      parsed: true,
+      value: JSON.parse(text),
+      errorCode: '',
+      errorPath: '',
+    };
+  } catch (_error) {
+    return {
+      parsed: false,
+      value: null,
+      errorCode: 'json_parse_failed',
+      errorPath: '/',
+    };
+  }
+}
+
+function selectJsonRows(value) {
+  let rows = [];
+  let pathPrefix = '';
+  if (Array.isArray(value)) rows = value;
+  else if (isRecord(value) && Array.isArray(value.rows)) {
+    rows = value.rows;
+    pathPrefix = '/rows';
+  } else if (isRecord(value) && Array.isArray(value.drawings)) {
+    rows = value.drawings;
+    pathPrefix = '/drawings';
+  } else if (isRecord(value)) rows = [value];
+  else {
+    return {
+      valid: false,
+      rows: [],
+      errorCode: 'json_object_required',
+      errorPath: '/',
+    };
+  }
+  try {
+    validateEvidenceIngestRowCount(rows.length, pathPrefix || '/rows');
+  } catch (error) {
+    return resourceErrorResult(error);
+  }
+  const invalidIndex = rows.findIndex((row) => !isRecord(row));
+  if (invalidIndex >= 0) {
+    return {
+      valid: false,
+      rows: [],
+      errorCode: 'json_row_object_required',
+      errorPath: `${pathPrefix}/${invalidIndex}` || '/',
+    };
+  }
+  return {
+    valid: true,
+    rows,
+    errorCode: '',
+    errorPath: '',
+  };
 }
 
 function resolveRenderablePayloadKind(payload = null) {
@@ -60,8 +159,8 @@ function resolveRenderablePayloadKind(payload = null) {
 }
 
 function countRenderablePayload(payload = null, kind = '') {
-  if (!payload || typeof payload !== 'object') return { nodeCount: 0, elementCount: 0, segmentCount: 0 };
-  if (kind === 'direct_model') {
+  if (!payload || typeof payload !== 'object') return {nodeCount: 0, elementCount: 0, segmentCount: 0};
+  if (kind === 'direct_model' || kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND) {
     const model = payload.model && typeof payload.model === 'object' ? payload.model : payload;
     return {
       nodeCount: Array.isArray(model.nodes) ? model.nodes.length : 0,
@@ -82,26 +181,201 @@ function countRenderablePayload(payload = null, kind = '') {
   };
 }
 
-export function extractRenderableEvidencePayloadFromText(text = '', {
+function inspectionEnvelope({
+  sourceType,
+  sourceName,
+  generatedAt,
+  available = false,
+  payloadKind = '',
+  validationStatus = 'unavailable',
+  validationErrorCode = '',
+  validationErrorPath = '',
+  textByteCount = 0,
+  payload = null,
+} = {}) {
+  const counts = countRenderablePayload(payload, payloadKind);
+  return {
+    schema_version: STRUCTURE_VIEWER_RENDERABLE_INSPECTION_SCHEMA_VERSION,
+    source_type: normalizeToken(sourceType) || 'json',
+    source_name: normalizeText(sourceName) || 'browser-json-ingest',
+    generated_at: generatedAt,
+    available: Boolean(available),
+    payload_kind: payloadKind,
+    validation_status: validationStatus,
+    validation_error_code: validationErrorCode,
+    validation_error_path: validationErrorPath,
+    resource_policy: STRUCTURE_VIEWER_INGEST_RESOURCE_POLICY,
+    resource_limits: evidenceIngestResourceLimits(),
+    text_byte_count: textByteCount,
+    node_count: counts.nodeCount,
+    element_count: counts.elementCount,
+    segment_count: counts.segmentCount,
+    model_identity: payloadKind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
+      && payload?.model_identity && typeof payload.model_identity === 'object'
+      ? {...payload.model_identity}
+      : null,
+    payload: available ? payload : null,
+  };
+}
+
+function resourceBlockedInspection({
+  sourceType,
+  sourceName,
+  generatedAt,
+  payloadKind = '',
+  textByteCount = 0,
+  error,
+}) {
+  if (!(error instanceof EvidenceIngestResourceLimitError)) throw error;
+  return inspectionEnvelope({
+    sourceType,
+    sourceName,
+    generatedAt,
+    payloadKind,
+    validationStatus: 'blocked_resource_limit',
+    validationErrorCode: error.code,
+    validationErrorPath: error.path,
+    textByteCount,
+  });
+}
+
+export function inspectRenderableEvidencePayloadFromText(text = '', {
   sourceType = 'json',
   sourceName = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  if (normalizeToken(sourceType) !== 'json') return null;
-  const payload = parseJsonValue(text);
+  let textMeasurement;
+  try {
+    textMeasurement = validateEvidenceIngestText(text);
+  } catch (error) {
+    return resourceBlockedInspection({
+      sourceType: normalizeToken(sourceType) || 'json',
+      sourceName,
+      generatedAt,
+      error,
+    });
+  }
+  const normalizedSourceType = resolveEvidenceSourceType(sourceType, text, sourceName);
+  if (normalizedSourceType !== 'json') {
+    return inspectionEnvelope({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      validationStatus: 'not_json',
+      textByteCount: textMeasurement.byteLength,
+    });
+  }
+  const document = parseJsonDocument(text);
+  if (!document.parsed) {
+    return inspectionEnvelope({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      validationStatus: 'unavailable',
+      validationErrorCode: document.errorCode,
+      validationErrorPath: document.errorPath,
+      textByteCount: textMeasurement.byteLength,
+    });
+  }
+  const payload = document.value;
+  if (!payload || typeof payload !== 'object') {
+    return inspectionEnvelope({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      validationStatus: 'unavailable',
+      validationErrorCode: 'json_object_required',
+      validationErrorPath: '/',
+      textByteCount: textMeasurement.byteLength,
+    });
+  }
+  if (claimsAuthoritativeViewerContract(payload)) {
+    try {
+      validateAuthoritativeViewerPayload(payload);
+      return inspectionEnvelope({
+        sourceType: normalizedSourceType,
+        sourceName,
+        generatedAt,
+        available: true,
+        payloadKind: AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
+        validationStatus: 'validated_authoritative_contract',
+        textByteCount: textMeasurement.byteLength,
+        payload,
+      });
+    } catch (error) {
+      if (!(error instanceof AuthoritativeViewerPayloadValidationError)) throw error;
+      const resourceLimited = error.code === 'viewer_node_count_limit_exceeded'
+        || error.code === 'viewer_element_count_limit_exceeded'
+        || error.code === 'viewer_resource_count_invalid';
+      return inspectionEnvelope({
+        sourceType: normalizedSourceType,
+        sourceName,
+        generatedAt,
+        payloadKind: AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
+        validationStatus: resourceLimited ? 'blocked_resource_limit' : 'blocked_authoritative_contract',
+        validationErrorCode: error.code,
+        validationErrorPath: error.path,
+        textByteCount: textMeasurement.byteLength,
+      });
+    }
+  }
   const kind = resolveRenderablePayloadKind(payload);
-  if (!kind) return null;
+  if (!kind) {
+    return inspectionEnvelope({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      validationStatus: 'unavailable',
+      validationErrorCode: 'renderable_payload_shape_not_found',
+      validationErrorPath: '/',
+      textByteCount: textMeasurement.byteLength,
+    });
+  }
   const counts = countRenderablePayload(payload, kind);
+  try {
+    validateEvidenceIngestRenderableCounts(counts);
+  } catch (error) {
+    return resourceBlockedInspection({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      payloadKind: kind,
+      textByteCount: textMeasurement.byteLength,
+      error,
+    });
+  }
+  return inspectionEnvelope({
+    sourceType: normalizedSourceType,
+    sourceName,
+    generatedAt,
+    available: true,
+    payloadKind: kind,
+    validationStatus: 'basic_shape_only',
+    textByteCount: textMeasurement.byteLength,
+    payload,
+  });
+}
+
+export function extractRenderableEvidencePayloadFromText(text = '', options = {}) {
+  const inspection = inspectRenderableEvidencePayloadFromText(text, options);
+  if (!inspection.available || !inspection.payload) return null;
   return {
     schema_version: 'structure-viewer-renderable-ingest-payload.v1',
-    source_type: 'json',
-    source_name: normalizeText(sourceName) || 'browser-json-ingest',
-    generated_at: generatedAt,
-    payload_kind: kind,
-    node_count: counts.nodeCount,
-    element_count: counts.elementCount,
-    segment_count: counts.segmentCount,
-    payload,
+    source_type: inspection.source_type,
+    source_name: inspection.source_name,
+    generated_at: inspection.generated_at,
+    payload_kind: inspection.payload_kind,
+    validation_status: inspection.validation_status,
+    validation_error_code: '',
+    validation_error_path: '',
+    resource_policy: inspection.resource_policy,
+    resource_limits: inspection.resource_limits,
+    text_byte_count: inspection.text_byte_count,
+    node_count: inspection.node_count,
+    element_count: inspection.element_count,
+    segment_count: inspection.segment_count,
+    model_identity: inspection.model_identity,
+    payload: inspection.payload,
   };
 }
 
@@ -125,11 +399,139 @@ function buildIfcMetadataRow(text = '', {
   };
 }
 
+function buildAuthoritativeViewerMetadataRow(inspection, {
+  projectId = 'ingested_project',
+  artifactPath = '',
+} = {}) {
+  const identity = inspection.model_identity && typeof inspection.model_identity === 'object'
+    ? inspection.model_identity
+    : {};
+  const sourcePath = normalizeText(artifactPath) || inspection.source_name || 'browser-json-ingest';
+  return {
+    project_id: normalizeToken(projectId),
+    drawing_id: `${normalizeToken(projectId) || 'ingested_project'}_authoritative_viewer`,
+    drawing_title: 'Validated authoritative Viewer payload',
+    source_family: AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
+    source_tool: 'Structural Analysis authoritative CPU solver',
+    source_tool_profile: 'generic',
+    artifact_path: sourcePath,
+    member_count: inspection.element_count,
+    node_count: inspection.node_count,
+    element_count: inspection.element_count,
+    load_model_status: 'authoritative_viewer_payload_validated',
+    evidence_level: 'validated authoritative Viewer contract',
+    quality_flags: [
+      'authoritative_viewer_contract_validated',
+      'engineer_review_required',
+    ],
+    commercial_review_status: 'needs_review',
+    provenance: {
+      source_path: sourcePath,
+      evidence_level: 'validated authoritative Viewer contract',
+      identity_policy: normalizeText(identity.identity_policy),
+      source_input_checksum: normalizeText(identity.source_input_checksum),
+      canonical_model_checksum: normalizeText(identity.canonical_model_checksum),
+      analysis_input_snapshot: normalizeText(identity.analysis_input_snapshot),
+    },
+    ingest_summary: {
+      status: 'validated authoritative Viewer contract',
+      payload_kind: inspection.payload_kind,
+      validation_status: inspection.validation_status,
+      resource_policy: inspection.resource_policy,
+      text_byte_count: inspection.text_byte_count,
+      node_count: inspection.node_count,
+      element_count: inspection.element_count,
+      model_identity: identity,
+      preview_only: true,
+    },
+  };
+}
+
+function buildBlockedEvidenceMetadataRow(inspection, {
+  projectId = 'ingested_project',
+  artifactPath = '',
+} = {}) {
+  const normalizedProjectId = normalizeToken(projectId) || 'ingested_project';
+  const sourceToken = normalizeToken(inspection.source_type) || 'evidence';
+  const sourcePath = normalizeText(artifactPath) || inspection.source_name || `browser-${sourceToken}-ingest`;
+  const errorCode = normalizeToken(inspection.validation_error_code) || 'evidence_ingest_blocked';
+  const errorPath = normalizeText(inspection.validation_error_path) || '/';
+  const authoritative = inspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND;
+  return {
+    project_id: normalizedProjectId,
+    drawing_id: `${normalizedProjectId}_${authoritative ? 'blocked_authoritative_viewer' : `blocked_${sourceToken}_ingest`}`,
+    drawing_title: authoritative ? 'Blocked authoritative Viewer payload' : `Blocked ${sourceToken.toUpperCase()} evidence ingest`,
+    source_family: authoritative ? AUTHORITATIVE_VIEWER_PAYLOAD_KIND : `${sourceToken}_blocked_ingest`,
+    source_tool: authoritative ? 'Structural Analysis authoritative CPU solver' : `Browser ${sourceToken.toUpperCase()} ingest`,
+    source_tool_profile: 'generic',
+    artifact_path: sourcePath,
+    member_count: 0,
+    node_count: 0,
+    element_count: 0,
+    load_model_status: errorCode,
+    evidence_level: 'blocked evidence ingest',
+    quality_flags: [
+      'evidence_ingest_blocked',
+      errorCode,
+    ],
+    commercial_review_status: 'blocked',
+    provenance: {
+      source_path: sourcePath,
+      evidence_level: 'blocked evidence ingest',
+    },
+    ingest_summary: {
+      status: 'blocked evidence ingest',
+      payload_kind: inspection.payload_kind,
+      validation_status: inspection.validation_status,
+      validation_error_code: errorCode,
+      validation_error_path: errorPath,
+      resource_policy: inspection.resource_policy || STRUCTURE_VIEWER_INGEST_RESOURCE_POLICY,
+      text_byte_count: inspection.text_byte_count || 0,
+      preview_only: true,
+    },
+  };
+}
+
+function blockedDirectRows({
+  sourceType,
+  projectId,
+  generatedAt,
+  errorCode,
+  errorPath,
+} = {}) {
+  const sourceToken = normalizeToken(sourceType) || 'json';
+  const sourceName = `inline-${sourceToken}-ingest-rows`;
+  const inspection = inspectionEnvelope({
+    sourceType: sourceToken,
+    sourceName,
+    generatedAt,
+    validationStatus: errorCode === 'evidence_ingest_row_count_limit_exceeded'
+      ? 'blocked_resource_limit'
+      : 'unavailable',
+    validationErrorCode: errorCode,
+    validationErrorPath: errorPath,
+  });
+  return [buildBlockedEvidenceMetadataRow(inspection, {
+    projectId,
+    artifactPath: sourceName,
+  })];
+}
+
 export function normalizeEvidenceIngestRow(row = {}, {
   sourceType = '',
   projectId = '',
   drawingId = '',
+  rowIndex = 0,
 } = {}) {
+  if (!isRecord(row)) {
+    return blockedDirectRows({
+      sourceType,
+      projectId,
+      generatedAt: '2026-05-17T00:00:00Z',
+      errorCode: 'ingest_row_object_required',
+      errorPath: `/rows/${rowIndex}`,
+    })[0];
+  }
   const type = normalizeToken(sourceType || row.source_type || row.format || row.input_format) || 'json';
   const sourceTool = firstText(
     row.source_tool,
@@ -213,10 +615,46 @@ export function buildEvidenceIngestPreview({
   projectTitle = 'Ingested Evidence Project',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  const normalizedRows = (Array.isArray(rows) ? rows : []).map((row, index) => normalizeEvidenceIngestRow(row, {
+  let sourceRows = rows;
+  if (!Array.isArray(rows)) {
+    sourceRows = blockedDirectRows({
+      sourceType,
+      projectId,
+      generatedAt,
+      errorCode: 'ingest_rows_array_required',
+      errorPath: '/rows',
+    });
+  } else {
+    try {
+      validateEvidenceIngestRowCount(rows.length, '/rows');
+    } catch (error) {
+      if (!(error instanceof EvidenceIngestResourceLimitError)) throw error;
+      sourceRows = blockedDirectRows({
+        sourceType,
+        projectId,
+        generatedAt,
+        errorCode: error.code,
+        errorPath: error.path,
+      });
+    }
+    if (sourceRows === rows) {
+      const invalidIndex = rows.findIndex((row) => !isRecord(row));
+      if (invalidIndex >= 0) {
+        sourceRows = blockedDirectRows({
+          sourceType,
+          projectId,
+          generatedAt,
+          errorCode: 'ingest_row_object_required',
+          errorPath: `/rows/${invalidIndex}`,
+        });
+      }
+    }
+  }
+  const normalizedRows = sourceRows.map((row, index) => normalizeEvidenceIngestRow(row, {
     sourceType,
     projectId,
     drawingId: row?.drawing_id || row?.drawingId || `ingest_${index + 1}`,
+    rowIndex: index,
   }));
   const manifest = buildProjectManifestFromRows(normalizedRows, {
     project_id: projectId,
@@ -226,7 +664,7 @@ export function buildEvidenceIngestPreview({
   const drawings = manifest.projects?.[0]?.drawings || [];
   const blockedIssues = drawings.flatMap((drawing) => (
     drawing.commercial_review_status === 'blocked'
-      ? [{ drawing_id: drawing.drawing_id, issue: 'blocked quality status', quality_flags: drawing.quality_flags }]
+      ? [{drawing_id: drawing.drawing_id, issue: 'blocked quality status', quality_flags: drawing.quality_flags}]
       : []
   ));
   const profileCounts = normalizedRows.reduce((acc, row) => {
@@ -239,6 +677,8 @@ export function buildEvidenceIngestPreview({
     schema_version: STRUCTURE_VIEWER_INGEST_PREVIEW_SCHEMA_VERSION,
     source_type: normalizeToken(sourceType) || 'json',
     generated_at: generatedAt,
+    resource_policy: STRUCTURE_VIEWER_INGEST_RESOURCE_POLICY,
+    resource_limits: evidenceIngestResourceLimits(),
     row_count: normalizedRows.length,
     drawing_count: drawings.length,
     normalized_rows: normalizedRows.slice(0, 1000),
@@ -256,29 +696,87 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
   artifactPath = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  const type = normalizeToken(sourceType);
+  const inspection = inspectRenderableEvidencePayloadFromText(text, {
+    sourceType,
+    sourceName: artifactPath,
+    generatedAt,
+  });
+  const type = inspection.source_type;
+  let effectiveInspection = inspection;
   let rows = [];
-  if (type === 'csv') rows = parseCsvRows(text);
-  else if (type === 'ifc') rows = [buildIfcMetadataRow(text, { drawingId: projectId, artifactPath })];
-  else rows = parseJsonRows(text);
+  if (inspection.validation_status === 'blocked_resource_limit') {
+    rows = [buildBlockedEvidenceMetadataRow(inspection, {projectId, artifactPath})];
+  } else if (type === 'csv') {
+    const csvRows = parseCsvRows(text);
+    if (csvRows.valid) rows = csvRows.rows;
+    else {
+      effectiveInspection = {
+        ...inspection,
+        validation_status: csvRows.errorCode === 'evidence_ingest_row_count_limit_exceeded'
+          ? 'blocked_resource_limit'
+          : 'unavailable',
+        validation_error_code: csvRows.errorCode,
+        validation_error_path: csvRows.errorPath,
+      };
+      rows = [buildBlockedEvidenceMetadataRow(effectiveInspection, {projectId, artifactPath})];
+    }
+  } else if (type === 'ifc') {
+    rows = [buildIfcMetadataRow(text, {drawingId: projectId, artifactPath})];
+  } else {
+    const jsonDocument = inspection.payload
+      ? {parsed: true, value: inspection.payload, errorCode: '', errorPath: ''}
+      : parseJsonDocument(text);
+    const jsonRows = jsonDocument.parsed ? selectJsonRows(jsonDocument.value) : null;
+    if (
+      jsonDocument.parsed
+      && jsonDocument.value
+      && typeof jsonDocument.value === 'object'
+      && inspection.validation_status !== 'blocked_authoritative_contract'
+      && jsonRows
+      && !jsonRows.valid
+    ) {
+      effectiveInspection = {
+        ...inspection,
+        validation_status: jsonRows.errorCode === 'evidence_ingest_row_count_limit_exceeded'
+          ? 'blocked_resource_limit'
+          : 'unavailable',
+        validation_error_code: jsonRows.errorCode,
+        validation_error_path: jsonRows.errorPath,
+      };
+    }
+    if (
+      effectiveInspection.available
+      && effectiveInspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
+      && effectiveInspection.validation_status === 'validated_authoritative_contract'
+    ) {
+      rows = [buildAuthoritativeViewerMetadataRow(effectiveInspection, {projectId, artifactPath})];
+    } else if (
+      !jsonDocument.parsed
+      || !jsonRows?.valid
+      || effectiveInspection.validation_status === 'blocked_authoritative_contract'
+      || effectiveInspection.validation_status === 'blocked_resource_limit'
+    ) {
+      rows = [buildBlockedEvidenceMetadataRow(effectiveInspection, {projectId, artifactPath})];
+    } else rows = jsonRows.rows;
+  }
   const preview = buildEvidenceIngestPreview({
     rows,
-    sourceType: type || 'json',
+    sourceType: type,
     projectId,
     projectTitle,
     generatedAt,
   });
-  const renderable = extractRenderableEvidencePayloadFromText(text, {
-    sourceType: type || 'json',
-    sourceName: artifactPath,
-    generatedAt,
-  });
   return {
     ...preview,
-    renderable_payload_available: Boolean(renderable),
-    renderable_payload_kind: renderable?.payload_kind || '',
-    renderable_node_count: renderable?.node_count || 0,
-    renderable_element_count: renderable?.element_count || 0,
-    renderable_segment_count: renderable?.segment_count || 0,
+    ingest_text_byte_count: effectiveInspection.text_byte_count,
+    renderable_payload_available: effectiveInspection.available,
+    renderable_payload_kind: effectiveInspection.payload_kind,
+    renderable_payload_validation_status: effectiveInspection.validation_status,
+    renderable_payload_error_code: effectiveInspection.validation_error_code,
+    renderable_payload_error_path: effectiveInspection.validation_error_path,
+    renderable_payload_model_identity: effectiveInspection.model_identity,
+    renderable_node_count: effectiveInspection.node_count,
+    renderable_element_count: effectiveInspection.element_count,
+    renderable_segment_count: effectiveInspection.segment_count,
   };
 }
