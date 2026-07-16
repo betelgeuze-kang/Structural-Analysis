@@ -4,8 +4,15 @@ import {
 import {
   inferCommercialToolProfile,
 } from './viewer-commercial-tool-crosswalk-model.js';
+import {
+  AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
+  AuthoritativeViewerPayloadValidationError,
+  claimsAuthoritativeViewerContract,
+  validateAuthoritativeViewerPayload,
+} from './viewer-authoritative-payload-contract.js';
 
 export const STRUCTURE_VIEWER_INGEST_PREVIEW_SCHEMA_VERSION = 'structure-viewer-evidence-ingest-preview.v1';
+export const STRUCTURE_VIEWER_RENDERABLE_INSPECTION_SCHEMA_VERSION = 'structure-viewer-renderable-ingest-inspection.v1';
 
 function normalizeText(value) {
   return String(value ?? '').trim();
@@ -61,7 +68,7 @@ function resolveRenderablePayloadKind(payload = null) {
 
 function countRenderablePayload(payload = null, kind = '') {
   if (!payload || typeof payload !== 'object') return { nodeCount: 0, elementCount: 0, segmentCount: 0 };
-  if (kind === 'direct_model') {
+  if (kind === 'direct_model' || kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND) {
     const model = payload.model && typeof payload.model === 'object' ? payload.model : payload;
     return {
       nodeCount: Array.isArray(model.nodes) ? model.nodes.length : 0,
@@ -82,26 +89,128 @@ function countRenderablePayload(payload = null, kind = '') {
   };
 }
 
-export function extractRenderableEvidencePayloadFromText(text = '', {
+function inspectionEnvelope({
+  sourceType,
+  sourceName,
+  generatedAt,
+  available = false,
+  payloadKind = '',
+  validationStatus = 'unavailable',
+  validationErrorCode = '',
+  validationErrorPath = '',
+  payload = null,
+} = {}) {
+  const counts = countRenderablePayload(payload, payloadKind);
+  return {
+    schema_version: STRUCTURE_VIEWER_RENDERABLE_INSPECTION_SCHEMA_VERSION,
+    source_type: normalizeToken(sourceType) || 'json',
+    source_name: normalizeText(sourceName) || 'browser-json-ingest',
+    generated_at: generatedAt,
+    available: Boolean(available),
+    payload_kind: payloadKind,
+    validation_status: validationStatus,
+    validation_error_code: validationErrorCode,
+    validation_error_path: validationErrorPath,
+    node_count: counts.nodeCount,
+    element_count: counts.elementCount,
+    segment_count: counts.segmentCount,
+    model_identity: payloadKind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
+      && payload?.model_identity && typeof payload.model_identity === 'object'
+      ? { ...payload.model_identity }
+      : null,
+    payload: available ? payload : null,
+  };
+}
+
+export function inspectRenderableEvidencePayloadFromText(text = '', {
   sourceType = 'json',
   sourceName = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  if (normalizeToken(sourceType) !== 'json') return null;
+  const normalizedSourceType = normalizeToken(sourceType);
+  if (normalizedSourceType !== 'json') {
+    return inspectionEnvelope({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      validationStatus: 'not_json',
+    });
+  }
   const payload = parseJsonValue(text);
+  if (!payload || typeof payload !== 'object') {
+    return inspectionEnvelope({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      validationStatus: 'unavailable',
+      validationErrorCode: 'json_object_required',
+      validationErrorPath: '/',
+    });
+  }
+  if (claimsAuthoritativeViewerContract(payload)) {
+    try {
+      validateAuthoritativeViewerPayload(payload);
+      return inspectionEnvelope({
+        sourceType: normalizedSourceType,
+        sourceName,
+        generatedAt,
+        available: true,
+        payloadKind: AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
+        validationStatus: 'validated_authoritative_contract',
+        payload,
+      });
+    } catch (error) {
+      if (!(error instanceof AuthoritativeViewerPayloadValidationError)) throw error;
+      return inspectionEnvelope({
+        sourceType: normalizedSourceType,
+        sourceName,
+        generatedAt,
+        payloadKind: AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
+        validationStatus: 'blocked_authoritative_contract',
+        validationErrorCode: error.code,
+        validationErrorPath: error.path,
+      });
+    }
+  }
   const kind = resolveRenderablePayloadKind(payload);
-  if (!kind) return null;
-  const counts = countRenderablePayload(payload, kind);
+  if (!kind) {
+    return inspectionEnvelope({
+      sourceType: normalizedSourceType,
+      sourceName,
+      generatedAt,
+      validationStatus: 'unavailable',
+      validationErrorCode: 'renderable_payload_shape_not_found',
+      validationErrorPath: '/',
+    });
+  }
+  return inspectionEnvelope({
+    sourceType: normalizedSourceType,
+    sourceName,
+    generatedAt,
+    available: true,
+    payloadKind: kind,
+    validationStatus: 'basic_shape_only',
+    payload,
+  });
+}
+
+export function extractRenderableEvidencePayloadFromText(text = '', options = {}) {
+  const inspection = inspectRenderableEvidencePayloadFromText(text, options);
+  if (!inspection.available || !inspection.payload) return null;
   return {
     schema_version: 'structure-viewer-renderable-ingest-payload.v1',
-    source_type: 'json',
-    source_name: normalizeText(sourceName) || 'browser-json-ingest',
-    generated_at: generatedAt,
-    payload_kind: kind,
-    node_count: counts.nodeCount,
-    element_count: counts.elementCount,
-    segment_count: counts.segmentCount,
-    payload,
+    source_type: inspection.source_type,
+    source_name: inspection.source_name,
+    generated_at: inspection.generated_at,
+    payload_kind: inspection.payload_kind,
+    validation_status: inspection.validation_status,
+    validation_error_code: '',
+    validation_error_path: '',
+    node_count: inspection.node_count,
+    element_count: inspection.element_count,
+    segment_count: inspection.segment_count,
+    model_identity: inspection.model_identity,
+    payload: inspection.payload,
   };
 }
 
@@ -268,17 +377,21 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
     projectTitle,
     generatedAt,
   });
-  const renderable = extractRenderableEvidencePayloadFromText(text, {
+  const inspection = inspectRenderableEvidencePayloadFromText(text, {
     sourceType: type || 'json',
     sourceName: artifactPath,
     generatedAt,
   });
   return {
     ...preview,
-    renderable_payload_available: Boolean(renderable),
-    renderable_payload_kind: renderable?.payload_kind || '',
-    renderable_node_count: renderable?.node_count || 0,
-    renderable_element_count: renderable?.element_count || 0,
-    renderable_segment_count: renderable?.segment_count || 0,
+    renderable_payload_available: inspection.available,
+    renderable_payload_kind: inspection.payload_kind,
+    renderable_payload_validation_status: inspection.validation_status,
+    renderable_payload_error_code: inspection.validation_error_code,
+    renderable_payload_error_path: inspection.validation_error_path,
+    renderable_payload_model_identity: inspection.model_identity,
+    renderable_node_count: inspection.node_count,
+    renderable_element_count: inspection.element_count,
+    renderable_segment_count: inspection.segment_count,
   };
 }
