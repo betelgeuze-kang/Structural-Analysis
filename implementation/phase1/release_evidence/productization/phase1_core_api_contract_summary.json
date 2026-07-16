@@ -45,12 +45,12 @@
     "production_fail_closed": true,
     "python_api_cli_equal": true,
     "regularization_used": false,
-    "result_checksum": "sha256:72fc13f357232f80ca5ef64ea6ed1b71e468ecf847a106f93a6666ebbc2f93d6",
+    "result_checksum": "sha256:2c2b94e56f7e65b386b9856c617372e819de470b0c234e728017b7a69074561b",
     "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
     "status": "ready",
     "stiffness_symmetry_error": 0.0,
     "validation_report_checksum": "sha256:2fe06a9c5f33744a91c145e39f0617053b66da23b08490d34e0b0ed4da46b21f",
-    "viewer_payload_checksum": "sha256:4fbb4f5bcd4e8f43e4e71b29efcefdf27eea92ed005f2ec0c6028f8b3566ad3c",
+    "viewer_payload_checksum": "sha256:e8bdbb6a109f5e5e79887bd52f8d4d525ce917dc58e0651a41e3309eabd777cc",
     "viewer_solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
     "viewer_source": "authoritative_solver_result"
   },
@@ -79,9 +79,9 @@
   "expected_frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
   "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
   "frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
-  "generated_at": "2026-07-16T02:59:43.505600+00:00",
+  "generated_at": "2026-07-16T03:15:33.342553+00:00",
   "input_checksums": {
-    "src/structural_analysis/analyses/linear_static.py": "sha256:571c836469c0b246d3fc1b787c5519af8faca69fbc61ad668090bf2359c52511",
+    "src/structural_analysis/analyses/linear_static.py": "sha256:28c6d11332459829b4ba8a0ba12b7cc31c35101a9a7049b389b7a9a779d3428d",
     "src/structural_analysis/api/cli.py": "sha256:97b7c7c28295b60aa60fa55f8c1b134370d79521f83bde0bd72ef906ddfca595",
     "src/structural_analysis/api/core.py": "sha256:1a4d8fbe22023d8bd7c480a3988765d007d73e26c6330d8552f7dbecae2598e1",
     "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
@@ -91,7 +91,7 @@
     "src/structural_analysis/materials/elastic.py": "sha256:f57e5ad59bbfef197fce1ee39dd79277c994ec02928cfc9b3d74c409aa99fe3b",
     "src/structural_analysis/results/schema.py": "sha256:d968361004fa20409e24b8eb6f8d475ce1b06e5cd4c6a7e00829356a28c210b4",
     "src/structural_analysis/results/validation.py": "sha256:05bae370b5aa15fbf01fae904a7f735a8475e79a81b2802e65d88804b72bf576",
-    "src/structural_analysis/results/viewer.py": "sha256:26922e284c64611aafa04fa6218f7d9825f009990689ba53c61d44883d6ede06",
+    "src/structural_analysis/results/viewer.py": "sha256:d8bef82a1d1b4b516bd6e5b57a285709452c31f872c0f562df9a9fb7259a0320",
     "src/structural_analysis/schemas/result.schema.json": "sha256:4697b4b32b92dd8963fdfafa083678ea1ae43501a287ab78b950b5dc32c787be",
     "src/structural_analysis/schemas/validation_report.schema.json": "sha256:534d4125281a9a28b69f58d96dd882628db1d3a820aad2e56cea8ec5473ee2bd",
     "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
@@ -178,12 +178,12 @@
     "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
   },
   "schema_version": "phase1-core-api-contract-artifacts.v2",
-  "source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+  "source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
   "source_state_policy": {
     "allowed_post_source_scope": "generated_phase1_and_readiness_evidence_only",
     "exact_head_verification_required": true,
     "mode": "source_commit_then_evidence_only_commit",
-    "source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d"
+    "source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6"
   },
   "status": "ready",
   "supported_preview_analysis_types": [

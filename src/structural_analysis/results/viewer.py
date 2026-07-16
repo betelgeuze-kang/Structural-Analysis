@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from typing import Any
+import re
+from typing import Any, Mapping
 
 import numpy as np
 
 REACTION_LABELS = ("FX", "FY", "FZ", "MX", "MY", "MZ")
 VIEWER_SCHEMA_VERSION = "structural-analysis-viewer-payload.v2"
+VIEWER_MODEL_IDENTITY_POLICY = "source_bytes_and_detached_canonical_model_v1"
+_HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 def build_linear_static_viewer_payload(
@@ -26,6 +29,11 @@ def build_linear_static_viewer_payload(
     ``reaction`` contains constrained-DOF support reactions only. Free-DOF
     numerical imbalance is exposed separately as ``equilibrium_residual`` so it
     cannot be mistaken for a physical support reaction.
+
+    Model identity is bound later at the public analysis boundary, where the
+    exact source-byte checksum and detached canonical snapshot checksum are both
+    available. Direct solver payloads therefore remain explicitly unbound until
+    :func:`bind_viewer_model_identity` succeeds.
     """
 
     width = len(dof_labels)
@@ -64,3 +72,42 @@ def build_linear_static_viewer_payload(
         "nodes": nodes,
         "elements": member_forces,
     }
+
+
+def bind_viewer_model_identity(
+    payload: Mapping[str, Any],
+    *,
+    source_input_checksum: str,
+    canonical_model_checksum: str,
+) -> dict[str, Any]:
+    """Return a viewer payload bound to both source bytes and analysis semantics.
+
+    ``source_input_checksum`` identifies the imported file bytes. The canonical
+    checksum identifies the detached, source-path-independent model envelope
+    actually supplied to analysis. Neither value is a solver-validation or
+    signed-authenticity claim.
+    """
+
+    if not isinstance(payload, Mapping):
+        raise TypeError("Viewer payload must be a mapping.")
+    if payload.get("schema_version") != VIEWER_SCHEMA_VERSION:
+        raise ValueError("Viewer model identity requires the supported payload schema.")
+    if "model_identity" in payload:
+        raise ValueError("Viewer payload already contains model identity.")
+    _require_hash(source_input_checksum, "source_input_checksum")
+    _require_hash(canonical_model_checksum, "canonical_model_checksum")
+
+    bound = dict(payload)
+    bound["model_identity"] = {
+        "identity_policy": VIEWER_MODEL_IDENTITY_POLICY,
+        "source_input_checksum": source_input_checksum,
+        "canonical_model_checksum": canonical_model_checksum,
+        "analysis_input_snapshot": "detached_canonical_model_v1",
+    }
+    return bound
+
+
+def _require_hash(value: Any, label: str) -> str:
+    if type(value) is not str or _HASH_PATTERN.fullmatch(value) is None:
+        raise ValueError(f"{label} must be sha256:<64 lowercase hex>.")
+    return value

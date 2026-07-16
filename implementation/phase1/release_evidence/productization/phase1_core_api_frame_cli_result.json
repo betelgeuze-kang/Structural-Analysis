@@ -199,6 +199,12 @@
         }
       ],
       "equilibrium_residual_definition": "free_dof_internal_minus_external_force; constrained entries are zero",
+      "model_identity": {
+        "analysis_input_snapshot": "detached_canonical_model_v1",
+        "canonical_model_checksum": "sha256:3db2de90887e06a6029f576d6a645176e38f731a7405f82c52f67f9149ec717e",
+        "identity_policy": "source_bytes_and_detached_canonical_model_v1",
+        "source_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc"
+      },
       "nodes": [
         {
           "coordinates": [
