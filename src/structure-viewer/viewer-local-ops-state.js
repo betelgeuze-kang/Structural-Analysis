@@ -1,3 +1,8 @@
+import {
+  inspectViewerProjectBundleLocalState,
+  mergeViewerProjectBundleLocalState,
+} from './viewer-project-bundle-state-policy.js';
+
 export const VIEWER_LOCAL_OPS_STATE_KEY = 'structure-viewer-local-ops-state-v1';
 
 function normalizeText(value) {
@@ -218,9 +223,15 @@ export function buildViewerProjectBundleImportPreview(payload = {}, {
   currentManifest = null,
 } = {}) {
   const schemaVersion = normalizeText(payload?.schema_version);
-  const localState = payload?.local_state && typeof payload.local_state === 'object' ? payload.local_state : {};
+  const hasLocalState = payload !== null
+    && typeof payload === 'object'
+    && !Array.isArray(payload)
+    && Object.prototype.hasOwnProperty.call(payload, 'local_state');
+  const rawLocalState = hasLocalState ? payload.local_state : {};
+  const stateInspection = inspectViewerProjectBundleLocalState(rawLocalState);
+  const localState = stateInspection.valid ? rawLocalState : {};
   const manifest = payload?.manifest && typeof payload.manifest === 'object' ? payload.manifest : null;
-  const issues = [];
+  const issues = [...stateInspection.issues];
   if (schemaVersion !== 'structure-viewer-project-bundle.v1') {
     issues.push({ severity: 'critical', issue: 'invalid schema version', value: schemaVersion || '--' });
   }
@@ -235,7 +246,9 @@ export function buildViewerProjectBundleImportPreview(payload = {}, {
   if (currentManifest && incomingDrawing && !drawing) {
     issues.push({ severity: 'critical', issue: 'unknown drawing', value: incomingDrawing });
   }
-  const receiptRows = Object.values(localState.receiptIndex && typeof localState.receiptIndex === 'object' ? localState.receiptIndex : {});
+  const receiptRows = stateInspection.valid
+    ? Object.values(localState.receiptIndex && typeof localState.receiptIndex === 'object' ? localState.receiptIndex : {})
+    : [];
   receiptRows.forEach((receipt) => {
     if (!normalizeText(receipt?.receipt_path || receipt?.receiptPath)) {
       issues.push({ severity: 'warning', issue: 'stale receipt path', value: normalizeText(receipt?.member_id || receipt?.memberId) || '--' });
@@ -249,58 +262,63 @@ export function buildViewerProjectBundleImportPreview(payload = {}, {
     variant: normalizeText(payload?.variant),
     blocked: issues.some((issue) => issue.severity === 'critical'),
     issues,
+    state_policy: stateInspection.policy,
+    state_limits: stateInspection.limits,
+    local_state_serialized_bytes: stateInspection.serialized_bytes,
     incoming_counts: {
-      recentSelections: Array.isArray(localState.recentSelections) ? localState.recentSelections.length : 0,
-      exportHistory: Array.isArray(localState.exportHistory) ? localState.exportHistory.length : 0,
-      reviewTasks: localState.reviewTasks && typeof localState.reviewTasks === 'object' ? Object.keys(localState.reviewTasks).length : 0,
-      annotations: localState.annotations && typeof localState.annotations === 'object' ? Object.keys(localState.annotations).length : 0,
-      receiptIndex: localState.receiptIndex && typeof localState.receiptIndex === 'object' ? Object.keys(localState.receiptIndex).length : 0,
+      recentSelections: stateInspection.counts.recentSelections,
+      auditEvents: stateInspection.counts.auditEvents,
+      exportHistory: stateInspection.counts.exportHistory,
+      reviewNotes: stateInspection.counts.reviewNotes,
+      reviewTasks: stateInspection.counts.reviewTasks,
+      annotations: stateInspection.counts.annotations,
+      receiptIndex: stateInspection.counts.receiptIndex,
     },
     manifest,
-    local_state: readViewerLocalOpsState({
-      storageGet: () => JSON.stringify(localState),
-    }),
+    local_state: stateInspection.valid
+      ? readViewerLocalOpsState({storageGet: () => JSON.stringify(localState)})
+      : {},
+  };
+}
+
+function storedProjectBundleImportPreview(preview = {}) {
+  return {
+    schema_version: normalizeText(preview.schema_version),
+    source_schema_version: normalizeText(preview.source_schema_version),
+    project_id: normalizeText(preview.project_id),
+    drawing_id: normalizeText(preview.drawing_id),
+    variant: normalizeText(preview.variant),
+    blocked: Boolean(preview.blocked),
+    issues: Array.isArray(preview.issues) ? preview.issues.slice(0, 100) : [],
+    incoming_counts: preview.incoming_counts && typeof preview.incoming_counts === 'object'
+      ? {...preview.incoming_counts}
+      : {},
+    state_policy: normalizeText(preview.state_policy),
+    state_limits: preview.state_limits && typeof preview.state_limits === 'object'
+      ? {...preview.state_limits}
+      : {},
+    local_state_serialized_bytes: Number.isSafeInteger(preview.local_state_serialized_bytes)
+      ? preview.local_state_serialized_bytes
+      : 0,
+    file_read: preview.file_read && typeof preview.file_read === 'object'
+      ? {...preview.file_read}
+      : null,
   };
 }
 
 export function mergeViewerProjectBundleImport(state = {}, preview = {}) {
   if (!preview || preview.blocked) return state;
-  const incoming = preview.local_state && typeof preview.local_state === 'object' ? preview.local_state : {};
-  return {
-    ...state,
-    recentSelections: [
-      ...(Array.isArray(incoming.recentSelections) ? incoming.recentSelections : []),
-      ...(Array.isArray(state.recentSelections) ? state.recentSelections : []),
-    ].slice(0, 12),
-    auditEventsJsonl: [
-      normalizeText(state.auditEventsJsonl),
-      normalizeText(incoming.auditEventsJsonl),
-    ].filter(Boolean).join('\n'),
-    exportHistory: [
-      ...(Array.isArray(incoming.exportHistory) ? incoming.exportHistory : []),
-      ...(Array.isArray(state.exportHistory) ? state.exportHistory : []),
-    ].slice(0, 20),
-    reviewNotes: {
-      ...(state.reviewNotes && typeof state.reviewNotes === 'object' ? state.reviewNotes : {}),
-      ...(incoming.reviewNotes && typeof incoming.reviewNotes === 'object' ? incoming.reviewNotes : {}),
-    },
-    reviewTasks: {
-      ...(state.reviewTasks && typeof state.reviewTasks === 'object' ? state.reviewTasks : {}),
-      ...(incoming.reviewTasks && typeof incoming.reviewTasks === 'object' ? incoming.reviewTasks : {}),
-    },
-    annotations: {
-      ...(state.annotations && typeof state.annotations === 'object' ? state.annotations : {}),
-      ...(incoming.annotations && typeof incoming.annotations === 'object' ? incoming.annotations : {}),
-    },
-    receiptIndex: {
-      ...(state.receiptIndex && typeof state.receiptIndex === 'object' ? state.receiptIndex : {}),
-      ...(incoming.receiptIndex && typeof incoming.receiptIndex === 'object' ? incoming.receiptIndex : {}),
-    },
-    lastImportPreview: preview,
-    lastIngestRenderablePayload: incoming.lastIngestRenderablePayload && typeof incoming.lastIngestRenderablePayload === 'object'
-      ? incoming.lastIngestRenderablePayload
-      : state.lastIngestRenderablePayload || null,
+  const incoming = preview.local_state && typeof preview.local_state === 'object'
+    ? preview.local_state
+    : {};
+  const merged = mergeViewerProjectBundleLocalState(state, incoming);
+  if (!merged.valid) return state;
+  const candidate = {
+    ...merged.state,
+    lastImportPreview: storedProjectBundleImportPreview(preview),
   };
+  const finalInspection = inspectViewerProjectBundleLocalState(candidate);
+  return finalInspection.valid ? candidate : state;
 }
 
 export function mergeViewerEvidenceIngestPreview(state = {}, preview = {}) {
