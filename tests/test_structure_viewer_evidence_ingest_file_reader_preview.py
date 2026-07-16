@@ -28,18 +28,18 @@ const receipt = await readEvidenceIngestFileText({
   async text() { return '{}'; },
 });
 const metadata = evidenceIngestFileReadMetadata(receipt);
+let oversizedError = null;
+try {
+  await readEvidenceIngestFileText({
+    name: 'oversized.json',
+    size: STRUCTURE_VIEWER_INGEST_MAX_TEXT_BYTES + 1,
+    async text() { throw new Error('must not run'); },
+  });
+} catch (error) {
+  oversizedError = error;
+}
 const oversized = buildEvidenceIngestFileReadFailurePreview(
-  (() => {
-    try {
-      return await readEvidenceIngestFileText({
-        name: 'oversized.json',
-        size: STRUCTURE_VIEWER_INGEST_MAX_TEXT_BYTES + 1,
-        async text() { throw new Error('must not run'); },
-      });
-    } catch (error) {
-      return error;
-    }
-  })(),
+  oversizedError,
   {
     sourceType: 'json',
     sourceName: 'oversized.json',
