@@ -1,0 +1,221 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_result_ir_v3.schema.json",
+  "title": "HIP FGMRES roundoff-aware ResultIR authority v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "promotion_eligible",
+    "result_id",
+    "bindings",
+    "dimensions",
+    "residual_validation",
+    "compatibility",
+    "telemetry",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-fgmres-result-ir.v3"},
+    "capability_profile": {"const": "hip_fgmres_scoped_roundoff_aware_sparse_result_ir_v3"},
+    "status": {"const": "result_ir_v3_ready"},
+    "evidence_scope": {"const": "process_local_high_load_single_terminal_restart_result_ir_non_promoting"},
+    "promotion_eligible": {"const": false},
+    "result_id": {"$ref": "#/$defs/hash"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "residual_validation": {"$ref": "#/$defs/residualValidation"},
+    "compatibility": {"$ref": "#/$defs/compatibility"},
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "case_parity_receipt_hash",
+        "terminal_metric_parity_receipt_hash",
+        "execution_plan_hash",
+        "evaluated_trial_state_hash",
+        "committed_state_hash",
+        "terminal_observation_receipt_hash",
+        "completion_export_receipt_hash",
+        "completion_export_payload_hash",
+        "device_identity_receipt_hash",
+        "source_provenance_hash",
+        "solution_payload_sha256",
+        "exported_residual_payload_sha256",
+        "independent_fsum_residual_sha256",
+        "result_ir_plan_residual_f_minus_ku_sha256",
+        "exported_to_fsum_componentwise_receipt_hash",
+        "fsum_to_result_ir_plan_componentwise_receipt_hash",
+        "base_result_ir_v2_hash",
+        "base_numerical_result_hash",
+        "fixed_physics_witness_result_ir_hash"
+      ],
+      "properties": {
+        "case_id": {"$ref": "#/$defs/hash"},
+        "case_parity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "terminal_metric_parity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "evaluated_trial_state_hash": {"$ref": "#/$defs/hash"},
+        "committed_state_hash": {"$ref": "#/$defs/hash"},
+        "terminal_observation_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_payload_hash": {"$ref": "#/$defs/hash"},
+        "device_identity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "source_provenance_hash": {"$ref": "#/$defs/hash"},
+        "solution_payload_sha256": {"$ref": "#/$defs/hash"},
+        "exported_residual_payload_sha256": {"$ref": "#/$defs/hash"},
+        "independent_fsum_residual_sha256": {"$ref": "#/$defs/hash"},
+        "result_ir_plan_residual_f_minus_ku_sha256": {"$ref": "#/$defs/hash"},
+        "exported_to_fsum_componentwise_receipt_hash": {"$ref": "#/$defs/hash"},
+        "fsum_to_result_ir_plan_componentwise_receipt_hash": {"$ref": "#/$defs/hash"},
+        "base_result_ir_v2_hash": {"$ref": "#/$defs/hash"},
+        "base_numerical_result_hash": {"$ref": "#/$defs/hash"},
+        "fixed_physics_witness_result_ir_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_dof_count",
+        "free_dof_count",
+        "reduced_csr_nnz",
+        "result_array_count",
+        "residual_comparison_stage_count"
+      ],
+      "properties": {
+        "global_dof_count": {"type": "integer", "minimum": 1},
+        "free_dof_count": {"type": "integer", "minimum": 1},
+        "reduced_csr_nnz": {"type": "integer", "minimum": 1},
+        "result_array_count": {"const": 6},
+        "residual_comparison_stage_count": {"const": 2}
+      }
+    },
+    "residualValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "chain",
+        "exported_to_fsum_maximum_componentwise_bound_ratio",
+        "fsum_to_result_ir_plan_maximum_componentwise_bound_ratio",
+        "terminal_maximum_record_bound_ratio",
+        "exported_to_fsum_componentwise_bound_verified",
+        "fsum_to_result_ir_plan_componentwise_bound_verified",
+        "terminal_l2_linf_scaled_linf_bound_verified",
+        "fixed_physics_witness_verified",
+        "caller_tolerance_allowed"
+      ],
+      "properties": {
+        "chain": {"const": "exported_hip_to_independent_fsum_to_result_ir_plan_f_minus_ku"},
+        "exported_to_fsum_maximum_componentwise_bound_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "fsum_to_result_ir_plan_maximum_componentwise_bound_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "terminal_maximum_record_bound_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "exported_to_fsum_componentwise_bound_verified": {"const": true},
+        "fsum_to_result_ir_plan_componentwise_bound_verified": {"const": true},
+        "terminal_l2_linf_scaled_linf_bound_verified": {"const": true},
+        "fixed_physics_witness_verified": {"const": true},
+        "caller_tolerance_allowed": {"const": false}
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_model_case_schema_version",
+        "retained_base_result_ir_schema_version",
+        "retained_base_result_ir_ready",
+        "retained_base_wire_mutated",
+        "result_ir_v2_fixed_residual_policy_relaxed",
+        "migration_action"
+      ],
+      "properties": {
+        "source_model_case_schema_version": {"const": "structural-analysis-hip-fgmres-model-case-parity.v2"},
+        "retained_base_result_ir_schema_version": {"const": "structural-analysis-result-ir.v2"},
+        "retained_base_result_ir_ready": {"const": false},
+        "retained_base_wire_mutated": {"const": false},
+        "result_ir_v2_fixed_residual_policy_relaxed": {"const": false},
+        "migration_action": {"const": "retain_not_ready_v2_and_issue_roundoff_aware_v3_authority"}
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "retained_completion_payload_count",
+        "additional_cpu_componentwise_comparison_count",
+        "fixed_physics_witness_count",
+        "additional_device_operation_count",
+        "additional_d2h_operation_count",
+        "additional_solve_count",
+        "additional_export_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "retained_completion_payload_count": {"const": 2},
+        "additional_cpu_componentwise_comparison_count": {"const": 1},
+        "fixed_physics_witness_count": {"const": 1},
+        "additional_device_operation_count": {"const": 0},
+        "additional_d2h_operation_count": {"const": 0},
+        "additional_solve_count": {"const": 0},
+        "additional_export_count": {"const": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result_ir_v3_verified",
+        "result_ir_v3_ready",
+        "state_ir_lineage_verified",
+        "reaction_recovery_verified",
+        "member_force_recovery_verified",
+        "energy_identities_verified",
+        "exported_residual_roundoff_chain_verified",
+        "actual_hip_source_provenance_verified_at_factory",
+        "general_restart_history_v2_verified",
+        "device_recovery_verified",
+        "iteration_host_copy_zero_proven",
+        "standalone_provenance",
+        "signed_evidence",
+        "end_to_end_o_n_proven",
+        "performance_or_speedup_proven",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "result_ir_v3_verified": {"const": true},
+        "result_ir_v3_ready": {"const": true},
+        "state_ir_lineage_verified": {"const": true},
+        "reaction_recovery_verified": {"const": true},
+        "member_force_recovery_verified": {"const": true},
+        "energy_identities_verified": {"const": true},
+        "exported_residual_roundoff_chain_verified": {"const": true},
+        "actual_hip_source_provenance_verified_at_factory": {"const": true},
+        "general_restart_history_v2_verified": {"const": false},
+        "device_recovery_verified": {"const": false},
+        "iteration_host_copy_zero_proven": {"const": false},
+        "standalone_provenance": {"const": false},
+        "signed_evidence": {"const": false},
+        "end_to_end_o_n_proven": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

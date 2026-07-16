@@ -154,9 +154,12 @@ inequality를 적용한다.
 
 ## 아직 증명하지 않는 것
 
-- restart history row의 L2/Linf/scaled-Linf v2 계약
+- 일반 multi-restart history row의 독립 vector-backed L2/Linf/scaled-Linf v2 계약
+- v0.2.50이 후속 결속한 정확히 하나의 terminal restart row를 넘어서는 중간
+  checkpoint solution/true-residual vector authority
 - 기존 v1 receipt의 교체 또는 persisted v1→v2 migration
-- 고하중 세 모델의 ResultIR/aggregate authority
+- v0.2.50의 process-local single-terminal-restart ResultIR v3 범위를 넘어서는 고하중
+  compatibility registry/aggregate authority
 - v0.2.47 unit-load registry의 원래 load compatibility migration
 - formal/machine-checked IEEE 및 reverse-triangle proof
 - actual subnormal/overflow hardware acceptance
@@ -166,9 +169,12 @@ inequality를 적용한다.
 
 ## 다음 순서
 
-1. restart history의 `true_residual_l2/linf/scaled` 각 row에 같은 record-path budget을
-   결속하고 estimated residual·solution-update metric은 별도 오차 모델로 분리한다.
-2. 고하중 세 case를 별도 v2 model-case authority와 ResultIR bridge에 결속한다.
+1. v0.2.50은 현재 ABI가 증명 가능한 정확히 하나의 terminal restart row를 별도 v2
+   model-case authority와 roundoff-aware ResultIR v3에 결속했다. 일반 history v2 claim은
+   계속 false다.
+2. per-restart checkpoint solution/true-residual vector export를 추가하고 각 row의
+   `true_residual_l2/linf/scaled`를 같은 record-path budget에 결속한다. Estimated
+   residual·solution-update metric은 별도 오차 모델로 분리한다.
 3. v0.2.47 unit-load registry를 변경하지 않는 고하중 compatibility registry/aggregate를
    정의한다.
 4. external `gfx1100`과 동일 final artifact local `gfx1030` 재실행으로 확장한다.

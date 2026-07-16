@@ -66,6 +66,12 @@ from .fgmres_model_case_parity_v1 import (
     HipFgmresModelCaseParityV1Error,
     _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1,
 )
+from .fgmres_model_case_parity_v2 import (
+    HipFgmresModelCaseParityReceiptV2,
+    HipFgmresModelCaseParityResultV2,
+    HipFgmresModelCaseParityV2Error,
+    _HipFgmresModelCaseParityResultIrDownstreamAuthorityV2,
+)
 from .fgmres_terminal_outcome_observation_v1 import (
     HipFgmresTerminalOutcomeObservationResultV1,
 )
@@ -99,9 +105,12 @@ class HipFgmresResultIRV2Error(ValueError):
 class _LiveAuthorityCaptureV2:
     """Transient identity-bearing view; never retained in the result."""
 
-    authority: _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1
+    authority: (
+        _HipFgmresModelCaseParityResultIrDownstreamAuthorityV1
+        | _HipFgmresModelCaseParityResultIrDownstreamAuthorityV2
+    )
     source_case_identity_token: object
-    receipt: HipFgmresModelCaseParityReceiptV1
+    receipt: HipFgmresModelCaseParityReceiptV1 | HipFgmresModelCaseParityReceiptV2
     plan: ExecutionPlanV2
     cpu_result: CpuFgmresReferenceResultV1
     observation_result: HipFgmresTerminalOutcomeObservationResultV1
@@ -333,6 +342,132 @@ def build_hip_fgmres_result_ir_v2(
                 "hip_fgmres_result_ir_v2_issuance_duplicate",
                 "/source/issuance",
             )
+        _BRIDGE_RESULT_ISSUANCES[result] = issuance
+    try:
+        return validate_hip_fgmres_result_ir_v2(result)
+    except BaseException:
+        with _BRIDGE_RESULT_ISSUANCE_LOCK:
+            if _BRIDGE_RESULT_ISSUANCES.get(result) is issuance:
+                del _BRIDGE_RESULT_ISSUANCES[result]
+        raise
+
+
+def _probe_hip_fgmres_result_ir_v2_from_model_case_parity_v2(
+    case_result: HipFgmresModelCaseParityResultV2,
+    *,
+    accepted_state: StateIR | None = None,
+    result_id: str = "Result.hip-fgmres-linear-static.model-case-v2",
+) -> HipFgmresResultIRBridgeResultV2:
+    """Exercise the frozen v2 gate as a non-public compatibility probe.
+
+    Original-scale high-load cases are expected to fail the v2 fixed residual
+    sign tolerance.  The public additive path is ResultIR v3; keeping this
+    helper private prevents a false claim that the v2 wire was relaxed.
+    """
+
+    if type(case_result) is not HipFgmresModelCaseParityResultV2:
+        _fail(
+            "hip_fgmres_result_ir_v2_case_result_v2_type_invalid",
+            "/source/case_result",
+            "Expected an exact HipFgmresModelCaseParityResultV2.",
+        )
+
+    first = _capture_live_authority_v2(case_result)
+    plan = first.plan
+    _require_converged_native_source(first)
+
+    initial = _canonical_initial_state(plan, accepted_state)
+    free = plan.array("free_dofs")
+    constrained = plan.array("constrained_dofs")
+    solution = _f64_payload(
+        first.solution_x,
+        int(free.size),
+        "/source/completion_export/solution_x",
+    )
+    exported_residual = _f64_payload(
+        first.true_residual,
+        int(free.size),
+        "/source/completion_export/true_residual",
+    )
+    displacement = np.zeros(plan.dof_count, dtype="<f8")
+    displacement[free] = solution
+    displacement[constrained] = 0.0
+
+    try:
+        trial = open_trial_state(
+            initial,
+            displacement,
+            load_step=1,
+            iteration=first.cpu_result.iteration_count,
+            load_factor=1.0,
+            expected_plan=plan,
+        )
+        committed = commit_trial_state(initial, trial, expected_plan=plan)
+    except StateIRError as exc:
+        raise HipFgmresResultIRV2Error(
+            "hip_fgmres_result_ir_v2_state_transition_invalid",
+            exc.path,
+            f"{exc.code}: {exc.message}",
+        ) from exc
+
+    provenance = _source_provenance(first)
+    try:
+        result_ir = build_result_ir_v2(
+            plan,
+            trial,
+            committed,
+            displacement,
+            exported_residual,
+            provenance,
+            result_id=result_id,
+        )
+    except ResultIRV2Error as exc:
+        raise HipFgmresResultIRV2Error(
+            "hip_fgmres_result_ir_v2_recovery_invalid",
+            exc.path,
+            f"{exc.code}: {exc.message}",
+        ) from exc
+
+    second = _capture_live_authority_v2(case_result)
+    _require_same_live_authority(first, second)
+    result_ir = _issue_bridge_result_ir_v2_ready(result_ir)
+
+    seal = _make_detached_seal(
+        first,
+        provenance=provenance,
+        accepted_state=initial,
+        evaluated_trial_state=trial,
+        committed_state=committed,
+        result_ir=result_ir,
+    )
+    result = HipFgmresResultIRBridgeResultV2(
+        receipt=result_ir,
+        accepted_state=initial,
+        evaluated_trial_state=trial,
+        committed_state=committed,
+        _source_execution_plan=plan,
+        _source_seal=seal,
+    )
+    issuance = _HipFgmresResultIRBridgeIssuanceV2(
+        mint=seal._mint,
+        seal=seal,
+        receipt=result_ir,
+        accepted_state=initial,
+        evaluated_trial_state=trial,
+        committed_state=committed,
+        source_execution_plan=plan,
+        source_provenance=provenance,
+        result_ir_hash=result_ir.result_ir_hash,
+        capture_hash=seal.capture_hash,
+        provenance_hash=canonical_hash(provenance.to_dict()),
+        accepted_state_hash=initial.state_hash,
+        evaluated_trial_state_hash=trial.state_hash,
+        committed_state_hash=committed.state_hash,
+        source_case_identity_token=seal._source_case_identity_token,
+    )
+    with _BRIDGE_RESULT_ISSUANCE_LOCK:
+        if result in _BRIDGE_RESULT_ISSUANCES:  # pragma: no cover - fresh object
+            _fail("hip_fgmres_result_ir_v2_issuance_duplicate", "/source/issuance")
         _BRIDGE_RESULT_ISSUANCES[result] = issuance
     try:
         return validate_hip_fgmres_result_ir_v2(result)
@@ -684,6 +819,101 @@ def _capture_live_authority(
     except CanonicalContractError as exc:
         _fail(
             "hip_fgmres_result_ir_v2_authority_snapshot_invalid",
+            "/source/authority/snapshot",
+            str(exc),
+        )
+    return _LiveAuthorityCaptureV2(
+        authority=authority,
+        source_case_identity_token=source_case_identity_token,
+        receipt=authority.receipt,
+        plan=authority.source_execution_plan,
+        cpu_result=authority.cpu_result,
+        observation_result=authority.observation_result,
+        device_identity_result=authority.device_identity_result,
+        export_result=authority.export_result,
+        publication_authority=publication_authority,
+        published_result=published,
+        solution_x=memoryview(published.solution_x).tobytes(),
+        true_residual=memoryview(published.true_residual).tobytes(),
+        authority_snapshot_hash=snapshot_hash,
+    )
+
+
+def _capture_live_authority_v2(
+    case_result: HipFgmresModelCaseParityResultV2,
+) -> _LiveAuthorityCaptureV2:
+    """Capture the additive v2 case authority without accepting a v1 proxy."""
+
+    try:
+        authority, source_case_identity_token = (
+            case_result._result_ir_downstream_authority_binding()
+        )
+    except HipFgmresModelCaseParityV2Error as exc:
+        raise HipFgmresResultIRV2Error(
+            "hip_fgmres_result_ir_v2_live_authority_v2_invalid",
+            exc.path,
+            f"{exc.code}: {exc.message}",
+        ) from exc
+    if type(authority) is not _HipFgmresModelCaseParityResultIrDownstreamAuthorityV2:
+        _fail(
+            "hip_fgmres_result_ir_v2_live_authority_v2_type_invalid",
+            "/source/authority",
+        )
+    if type(source_case_identity_token) is not object:
+        _fail(
+            "hip_fgmres_result_ir_v2_live_case_v2_identity_token_invalid",
+            "/source/authority/identity_token",
+        )
+    publication_authority = authority.publication
+    if type(publication_authority) is not _CompletionExportModelCaseParityAuthorityV1:
+        _fail(
+            "hip_fgmres_result_ir_v2_publication_authority_v2_type_invalid",
+            "/source/authority/publication",
+        )
+    published = publication_authority.publication
+    exact_sources = (
+        (authority.receipt, HipFgmresModelCaseParityReceiptV2),
+        (authority.source_execution_plan, ExecutionPlanV2),
+        (authority.cpu_result, CpuFgmresReferenceResultV1),
+        (authority.observation_result, HipFgmresTerminalOutcomeObservationResultV1),
+        (authority.device_identity_result, HipDeviceIdentityResultV1),
+        (authority.export_result, HipFgmresCompletionExportResultV1),
+        (published, _CompletionExportPublishedResultAuthorityV1),
+    )
+    if any(type(value) is not expected for value, expected in exact_sources):
+        _fail(
+            "hip_fgmres_result_ir_v2_live_source_v2_type_invalid",
+            "/source/authority",
+        )
+    if (
+        authority.receipt is not case_result.receipt
+        or authority.terminal_metric_parity is not case_result.terminal_metric_parity
+        or publication_authority.source.source_execution_plan
+        is not authority.source_execution_plan
+        or published.result is not authority.export_result
+        or published.receipt is not authority.export_result.receipt
+        or published.solution_x is not authority.export_result.solution_x
+        or published.true_residual is not authority.export_result.true_residual
+        or type(published.solution_x) is not bytes
+        or type(published.true_residual) is not bytes
+        or type(authority.snapshot) is not tuple
+    ):
+        _fail(
+            "hip_fgmres_result_ir_v2_live_source_v2_identity_invalid",
+            "/source/authority",
+        )
+    try:
+        validate_execution_plan_v2(authority.source_execution_plan)
+        snapshot_hash = canonical_hash(_snapshot_token(authority.snapshot))
+    except ExecutionPlanV2Error as exc:
+        raise HipFgmresResultIRV2Error(
+            "hip_fgmres_result_ir_v2_plan_invalid",
+            exc.path,
+            f"{exc.code}: {exc.message}",
+        ) from exc
+    except CanonicalContractError as exc:
+        _fail(
+            "hip_fgmres_result_ir_v2_authority_v2_snapshot_invalid",
             "/source/authority/snapshot",
             str(exc),
         )

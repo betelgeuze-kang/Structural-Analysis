@@ -349,12 +349,79 @@ def test_fp64_csr_normwise_terminal_metric_v2_stays_additive_and_nonpromoting() 
     )
 
 
+def test_high_load_model_case_v2_result_ir_v3_stays_scoped_and_nonpromoting() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    capability = rows["hip_fgmres_high_load_model_case_parity_v2_result_ir_v3"]
+    assert payload["rows"][3]["capability_id"] == (
+        "hip_fgmres_high_load_model_case_parity_v2_result_ir_v3"
+    )
+    assert capability["implementation_state"] == "implemented"
+    assert capability["promotion_state"] == "contract_only"
+    assert {
+        "process_local_high_load_model_case_parity_v2_actual_hip_authority",
+        "exactly_one_populated_terminal_restart_row",
+        "explicit_restart_history_evidence_disposition",
+        "roundoff_aware_two_stage_exported_hip_to_independent_fsum_to_result_ir_plan_residual_chain",
+        "retained_structurally_valid_result_ir_v2_marked_not_ready_without_fixed_policy_relaxation",
+        "fixed_physics_witness_sparse_reaction_member_force_energy_and_state_lineage_replay",
+        "actual_local_gfx1030_original_high_load_rotated_four_span_and_five_span_gate_passed",
+        "actual_local_gfx1030_recurrence_d2h_zero_completion_d2h_exact_three_and_fallback_zero",
+        "current_source_aggregate_sha256_9b902eb0b70102875b60efff4adbffc70420aeff26d7eb854988a080dea285f8",
+        "actual_dirty_nonrelease_wheel_exact_new_module_and_schema_bytes_and_isolated_public_exports",
+    }.issubset(capability["supported_scope"])
+    assert {
+        "general_multi_restart_history_v2",
+        "per_restart_checkpoint_solution_and_true_residual_vector_export_v2",
+        "estimated_residual_roundoff_error_model",
+        "solution_update_roundoff_error_model",
+        "retained_base_result_ir_v2_ready_under_fixed_allclose_policy",
+        "high_load_compatibility_registry_or_family_aggregate",
+        "actual_external_gfx1100",
+        "standalone_detached_or_serialized_provenance_authenticity",
+        "reproducible_wheel_build",
+        "signed_evidence",
+        "broad_iteration_host_copy_zero",
+        "end_to_end_o_n",
+        "performance_speedup",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(capability["explicit_exclusions"])
+    assert capability["required_contracts"] == [
+        "ADR-001",
+        "ADR-002",
+        "ADR-003",
+        "ADR-004",
+        "ADR-006",
+        "ADR-007",
+    ]
+    assert {
+        "model_case_v2_multirow_alias_scalar_slot_and_schema_tamper_fail_closed",
+        "legacy_model_case_v1_schema_and_fixed_tolerance_policy_frozen",
+        "result_ir_v2_fixed_residual_sign_gate_rejects_original_high_load_synthetic_case",
+        "result_ir_v3_two_componentwise_fp64_csr_residual_receipts_validate_same_case",
+        "result_ir_v3_core_four_passed_in_8_26_seconds_and_complete_public_package_six_passed_in_11_92_seconds",
+        "current_result_ir_v2_model_case_v2_result_ir_v3_and_capability_crosscheck_fifty_six_passed_in_45_09_seconds",
+        "adjacent_roundoff_model_case_result_ir_all_converged_diagnostic_and_capability_222_passed_in_739_43_seconds",
+        "single_dirty_nonrelease_wheel_1462632_bytes_287_members_sha256_5e55cfc00386d1c2a3ec6d2684a723e9eee661f904e10b01e469afba94c2971e",
+        "actual_local_gfx1030_high_load_three_case_gate_one_passed_in_430_66_seconds",
+        "actual_local_gfx1030_wall_time_431_29_seconds_and_process_peak_rss_430796_kib",
+        "source_aggregate_identical_before_and_after_actual_gate",
+    }.issubset(capability["verification_cases"])
+    assert capability["claim_level"] == (
+        "single_terminal_restart_high_load_actual_local_gfx1030_model_case_v2_and_"
+        "roundoff_aware_result_ir_v3_process_local_contract_only_unsigned_"
+        "nonpersistent_nonpromoting"
+    )
+
+
 def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() -> None:
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
     family_disposition = rows["hip_fgmres_model_family_result_ir_disposition_v1"]
-    assert payload["rows"][4]["capability_id"] == (
+    assert payload["rows"][5]["capability_id"] == (
         "hip_fgmres_model_family_result_ir_disposition_v1"
     )
     assert family_disposition["implementation_state"] == "implemented"
@@ -411,7 +478,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     result_ir = rows["hip_fgmres_result_ir_v2"]
-    assert payload["rows"][5]["capability_id"] == "hip_fgmres_result_ir_v2"
+    assert payload["rows"][6]["capability_id"] == "hip_fgmres_result_ir_v2"
     assert result_ir["implementation_state"] == "implemented"
     assert result_ir["promotion_state"] == "contract_only"
     assert set(result_ir["supported_scope"]) == {
@@ -512,7 +579,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     audited_family = rows["hip_fgmres_model_family_audited_parity_v2"]
-    assert payload["rows"][6]["capability_id"] == (
+    assert payload["rows"][7]["capability_id"] == (
         "hip_fgmres_model_family_audited_parity_v2"
     )
     assert audited_family["implementation_state"] == "implemented"
@@ -573,7 +640,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     ordinal_audit = rows["hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"]
-    assert payload["rows"][7]["capability_id"] == (
+    assert payload["rows"][8]["capability_id"] == (
         "hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"
     )
     assert ordinal_audit["implementation_state"] == "implemented"
@@ -610,7 +677,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         in ordinal_audit["evidence_paths"]
     )
     family_transfer = rows["hip_fgmres_model_family_host_transfer_audit_v1"]
-    assert payload["rows"][8]["capability_id"] == (
+    assert payload["rows"][9]["capability_id"] == (
         "hip_fgmres_model_family_host_transfer_audit_v1"
     )
     assert family_transfer["implementation_state"] == "implemented"
@@ -660,7 +727,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     transfer_audit = rows["hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"]
-    assert payload["rows"][9]["capability_id"] == (
+    assert payload["rows"][10]["capability_id"] == (
         "hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"
     )
     assert transfer_audit["implementation_state"] == "implemented"
@@ -1973,7 +2040,7 @@ def test_nonconverged_diagnostic_ir_v1_claims_stay_diagnostic_only() -> None:
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
     diagnostic = rows["hip_fgmres_nonconverged_diagnostic_ir_v1"]
-    assert payload["rows"][3]["capability_id"] == (
+    assert payload["rows"][4]["capability_id"] == (
         "hip_fgmres_nonconverged_diagnostic_ir_v1"
     )
     assert diagnostic["implementation_state"] == "implemented"

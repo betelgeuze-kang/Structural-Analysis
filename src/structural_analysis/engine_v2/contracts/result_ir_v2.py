@@ -378,7 +378,7 @@ class ResultIRV2:
         return self.to_dict()
 
 
-def build_result_ir_v2(
+def _build_result_ir_v2_unvalidated_physics(
     plan: ExecutionPlanV2,
     evaluated_trial_state: StateIR,
     committed_state: StateIR,
@@ -388,10 +388,15 @@ def build_result_ir_v2(
     *,
     result_id: str = "Result.linear-static.v2",
 ) -> ResultIRV2:
-    """Recover six result arrays and build a fully replayed ResultIR v2.
+    """Recover six arrays without selecting a residual-comparison policy.
 
     ``full_displacement_si`` is node-major global-DOF order.  The exported
     residual is free-DOF order and uses the FGMRES ``F-K*u`` sign.
+
+    The returned receipt is structurally validated but not physics-ready.  The
+    public v2 builder below applies the frozen fixed-tolerance validator.  An
+    additive higher-version bridge may instead apply a separately retained
+    roundoff receipt without changing the v2 wire or public v2 semantics.
     """
 
     _validate_exact_sources(plan, evaluated_trial_state, committed_state)
@@ -523,6 +528,30 @@ def build_result_ir_v2(
         result_ir_hash="sha256:" + "0" * 64,
     )
     receipt = replace(receipt, result_ir_hash=_receipt_hash(receipt.to_dict()))
+    return validate_result_ir_v2(receipt)
+
+
+def build_result_ir_v2(
+    plan: ExecutionPlanV2,
+    evaluated_trial_state: StateIR,
+    committed_state: StateIR,
+    full_displacement_si: Any,
+    exported_free_residual_si: Any,
+    source_provenance: SourceProvenance,
+    *,
+    result_id: str = "Result.linear-static.v2",
+) -> ResultIRV2:
+    """Recover six result arrays and apply the frozen v2 physics policy."""
+
+    receipt = _build_result_ir_v2_unvalidated_physics(
+        plan,
+        evaluated_trial_state,
+        committed_state,
+        full_displacement_si,
+        exported_free_residual_si,
+        source_provenance,
+        result_id=result_id,
+    )
     return validate_result_ir_v2_physics(
         receipt,
         expected_plan=plan,
