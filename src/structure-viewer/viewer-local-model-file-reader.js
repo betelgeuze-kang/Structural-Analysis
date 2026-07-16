@@ -1,3 +1,10 @@
+import {
+  ViewerLocalModelPayloadError,
+  inspectViewerLocalModelJsonStructure,
+  validateViewerLocalModelPayloadResources,
+  viewerLocalModelObjectLimits,
+} from './viewer-local-model-payload-policy.js';
+
 export const VIEWER_LOCAL_MODEL_FILE_READ_CONTRACT = 'structure_viewer_local_model_file_read_v1';
 export const VIEWER_LOCAL_MODEL_RESOURCE_POLICY = 'structure_viewer_local_model_file_budget_v1';
 export const VIEWER_LOCAL_MODEL_MAX_TEXT_BYTES = 64 * 1024 * 1024;
@@ -14,6 +21,13 @@ export class ViewerLocalModelFileError extends Error {
 function fail(code, path, message, cause = undefined) {
   const options = cause === undefined ? undefined : {cause};
   throw new ViewerLocalModelFileError(code, path, message, options);
+}
+
+function rethrowPayloadError(error) {
+  if (error instanceof ViewerLocalModelPayloadError) {
+    fail(error.code, error.path, error.detail, error);
+  }
+  throw error;
 }
 
 function requireFileMetadata(file) {
@@ -102,6 +116,13 @@ export async function readViewerLocalModelFile(file) {
   }
   const textByteLength = measureUtf8Bytes(text);
 
+  let jsonStructure;
+  try {
+    jsonStructure = inspectViewerLocalModelJsonStructure(text);
+  } catch (error) {
+    rethrowPayloadError(error);
+  }
+
   let payload;
   try {
     payload = JSON.parse(text);
@@ -121,14 +142,28 @@ export async function readViewerLocalModelFile(file) {
     );
   }
 
+  let payloadResources;
+  try {
+    payloadResources = validateViewerLocalModelPayloadResources(payload);
+  } catch (error) {
+    rethrowPayloadError(error);
+  }
+
   return Object.freeze({
     contract: VIEWER_LOCAL_MODEL_FILE_READ_CONTRACT,
     resourcePolicy: VIEWER_LOCAL_MODEL_RESOURCE_POLICY,
+    objectPolicy: payloadResources.policy,
+    objectLimits: viewerLocalModelObjectLimits(),
     name: metadata.name,
     size: metadata.size,
     type: metadata.type,
     lastModified: metadata.lastModified,
     textByteLength,
+    maximumJsonDepth: jsonStructure.maximumDepth,
+    jsonContainerCount: jsonStructure.containerCount,
+    maximumNodeCount: payloadResources.maximumNodeCount,
+    maximumElementCount: payloadResources.maximumElementCount,
+    maximumSegmentCount: payloadResources.maximumSegmentCount,
     payload,
   });
 }
@@ -150,6 +185,10 @@ export function viewerLocalModelFileMetadata(receipt) {
   return Object.freeze({
     contract: receipt.contract,
     resource_policy: receipt.resourcePolicy,
+    object_policy: String(receipt.objectPolicy ?? ''),
+    object_limits: receipt.objectLimits && typeof receipt.objectLimits === 'object'
+      ? {...receipt.objectLimits}
+      : {},
     file_name: String(receipt.name ?? ''),
     file_size: Number.isSafeInteger(receipt.size) ? receipt.size : null,
     file_type: String(receipt.type ?? ''),
@@ -158,6 +197,21 @@ export function viewerLocalModelFileMetadata(receipt) {
       : null,
     text_byte_length: Number.isSafeInteger(receipt.textByteLength)
       ? receipt.textByteLength
+      : null,
+    maximum_json_depth: Number.isSafeInteger(receipt.maximumJsonDepth)
+      ? receipt.maximumJsonDepth
+      : null,
+    json_container_count: Number.isSafeInteger(receipt.jsonContainerCount)
+      ? receipt.jsonContainerCount
+      : null,
+    maximum_node_count: Number.isSafeInteger(receipt.maximumNodeCount)
+      ? receipt.maximumNodeCount
+      : null,
+    maximum_element_count: Number.isSafeInteger(receipt.maximumElementCount)
+      ? receipt.maximumElementCount
+      : null,
+    maximum_segment_count: Number.isSafeInteger(receipt.maximumSegmentCount)
+      ? receipt.maximumSegmentCount
       : null,
   });
 }
