@@ -6,6 +6,10 @@ import {
 import {
   prepareViewerLocalOpsStateForStorage,
 } from './viewer-local-ops-persistence-policy.js';
+import {
+  readViewerLocalOpsStorage,
+  writeViewerLocalOpsStorage,
+} from './viewer-local-ops-storage-policy.js';
 
 export const VIEWER_LOCAL_OPS_STATE_KEY = 'structure-viewer-local-ops-state-v1';
 
@@ -46,7 +50,9 @@ export function readViewerLocalOpsState({
   storageGet = (key) => globalThis.localStorage?.getItem(key),
   storageKey = VIEWER_LOCAL_OPS_STATE_KEY,
 } = {}) {
-  const parsed = parseState(storageGet(storageKey));
+  const storageRead = readViewerLocalOpsStorage({storageGet, storageKey});
+  if (!storageRead.ok) return emptyViewerLocalOpsState();
+  const parsed = parseState(storageRead.text);
   const candidate = {
     recentSelections: Array.isArray(parsed.recentSelections) ? parsed.recentSelections : [],
     auditEventsJsonl: normalizeText(parsed.auditEventsJsonl),
@@ -70,12 +76,16 @@ export function writeViewerLocalOpsState(state = {}, {
   storageSet = (key, value) => globalThis.localStorage?.setItem(key, value),
   storageKey = VIEWER_LOCAL_OPS_STATE_KEY,
 } = {}) {
+  const previousState = readViewerLocalOpsState({storageGet, storageKey});
   const prepared = prepareViewerLocalOpsStateForStorage(state);
-  if (!prepared.valid) {
-    return readViewerLocalOpsState({storageGet, storageKey});
-  }
-  storageSet(storageKey, JSON.stringify(prepared.state));
-  return prepared.state;
+  if (!prepared.valid) return previousState;
+  const serialized = JSON.stringify(prepared.state);
+  const storageWrite = writeViewerLocalOpsStorage({
+    storageSet,
+    storageKey,
+    text: serialized,
+  });
+  return storageWrite.ok ? prepared.state : previousState;
 }
 
 export function rememberViewerWorkspaceSelection(state = {}, selection = {}, {
