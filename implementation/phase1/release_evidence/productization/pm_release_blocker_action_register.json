@@ -64,12 +64,12 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-16T02:59:45.690856+00:00",
+  "generated_at": "2026-07-16T03:15:35.931603+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:500b7803686ab0e8a38937948dc8831ce19bf9ef6461e601121ef434e39ba81a",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:9ddb5502fc9eb5911082834fb184629f72eb488fd8b53425594c32a52ef06a2f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:bdfbd5d3feb46c5c20472271fdd672627f74fab1ce054e6d28d87e1c954efb2b",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a310d081fcade797728b3333295f0576cc803827c81eb0595388df02e09b6936",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a3a98ddafed0dd8f03b4f696fa8456885330673938c914deabf3af6547468043",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ce77e35a503a3a444cbb9c39d52d2b699d9caad9059add01f7dcb359e6add62c",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:18bc58bb2a7bb2ae2d64a9e7b2476f32697392860e8eab9d28e5ad6949dababe",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:7ad36778461baa79f656ed870b84fdf37b95fdbf264f3a94bc717228ab82b8e9"
@@ -2287,7 +2287,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -2368,7 +2368,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -2449,7 +2449,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -2530,7 +2530,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -2611,7 +2611,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -2692,7 +2692,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -2773,7 +2773,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -2854,7 +2854,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -2935,7 +2935,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3016,7 +3016,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3097,7 +3097,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3178,7 +3178,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3259,7 +3259,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3340,7 +3340,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3421,7 +3421,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3502,7 +3502,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3583,7 +3583,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -3664,7 +3664,7 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -5439,7 +5439,7 @@
           "tests/test_verify_quality_gate.py",
           "tests/test_verify_quality_gate_contract.py"
         ],
-        "current_head_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_head_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -5563,7 +5563,7 @@
           "tests/test_verify_quality_gate.py",
           "tests/test_verify_quality_gate_contract.py"
         ],
-        "current_head_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_head_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -6141,7 +6141,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+  "source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 11,

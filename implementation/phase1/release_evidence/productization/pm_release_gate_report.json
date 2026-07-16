@@ -123,7 +123,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-07-16T02:59:45.614622+00:00",
+  "generated_at": "2026-07-16T03:15:35.852111+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -177,12 +177,12 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:468be9e7c053c3bedec25df06403a4e1f8fa8b5ae20e389405326d66c24df11c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:6fec947892f35dc3d6457a4ac6b99923866c943b2f2423cdfb0797490252fce7",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:b96f825c17f0deb8588c73d58eb35c8b17e6b5ffa27fcc7a410547c20e526116",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:3016132ed83e743a96c13faf97e674190842538b6eaf0415b510013c6ddb9a2b",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:64f640b1a5e9a42ef076a222311fc0b0d957f04ba951e00767a057a2a443196a",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a310d081fcade797728b3333295f0576cc803827c81eb0595388df02e09b6936",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ce77e35a503a3a444cbb9c39d52d2b699d9caad9059add01f7dcb359e6add62c",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -662,7 +662,7 @@
       "summary": {
         "artifact_count": 14,
         "blocker_count": 18,
-        "current_source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "max_age_days": 30.0,
         "pass_count": 3
       },
@@ -1216,7 +1216,7 @@
           "tests/test_verify_quality_gate.py",
           "tests/test_verify_quality_gate_contract.py"
         ],
-        "current_head_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+        "current_head_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -1530,6 +1530,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
+  "source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
   "summary_line": "PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304"
 }
