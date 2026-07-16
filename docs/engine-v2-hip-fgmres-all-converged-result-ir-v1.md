@@ -1,7 +1,7 @@
 # Engine v2 HIP FGMRES All-Converged ResultIR v1
 
 - Milestone: v0.2.47 unpublished candidate
-- Status: implemented contract and hardware harness; actual `gfx1030` gate pending
+- Status: implemented contract; actual local `gfx1030` gate observed
 - Promotion: `contract_only`, non-promoting
 - 기준일: 2026-07-16
 - Authority: [Engine v2 master roadmap](structural-solver-engine-v2-master-roadmap.md)
@@ -118,10 +118,10 @@ resistance 및 cryptographic signature는 이 계약에 포함되지 않는다.
 - Live family authority contract: `9 functions/10 collected cases` passed
 - Ten-bridge aggregate contract: `10 functions/15 collected cases` passed
 - Public API/resource packaging and actual-wheel contract: `5` passed
-- Combined current-source contract run: `57 passed in 264.00s (0:04:24)`
+- Combined contract scope: `57` cases passed within the 5-file cross-check below
 - Capability matrix: `11 passed in 0.31s`
 - Current-source contract + capability 5-file cross-check:
-  `68 passed in 262.53s (0:04:22)`
+  `68 passed in 259.34s (0:04:19)`
 - Hardware harness: static full-replay-bound test와 actual gate, 합계 `2` tests collected
 
 Contract tests는 canonical ordering과 전체 registry manifest `const`를 검증한다. Schema는
@@ -147,9 +147,27 @@ Required hardware 흐름의 exact full registry replay는 explicit initial `1` +
 cost는 약 `92s`다. 이 값은 성능 보증이 아니다. Fast raw refresh는 family `1` + aggregate
 `3` = `4`회다.
 
-현재 root host에는 `/dev/kfd`가 존재하고 `_local_architectures=('gfx1030',)`, probe ready,
-backend `hip_native`, fallback false다. 다만 required all-converged actual gate는 아직
-완료하지 않아 current-source actual local `gfx1030` 10/10과 peak RSS는 pending이다.
+Current-source required local `gfx1030` gate는 RX 6900 XT에서 CPU fallback 없이
+`1 passed in 1087.52s (0:18:07)`로 통과했다. Exact live case와 ResultIRV2 bridge
+`10/10`, family, aggregate 및 context close 뒤 detached validator를 한 프로세스에서
+확인했다. Baseline, 각 case, family, aggregate, post-close RSS checkpoint의 process peak는
+`450,868 KiB`(약 `440.3 MiB`)이고 post-close current RSS는 `433,188 KiB`였다.
+
+실행 전후 Engine source/schema/fixture aggregate
+`sha256:41bf10b8e4fb506b5829d386ff3ad24a7ece76bcfbd4be4865e2fa8dedcaac30`,
+hardware harness
+`sha256:4d43b262b57696de8e04b591fa79adad0dc06815114176319d45e25f03d67681`,
+shared live harness
+`sha256:3b0acb3ab1af894f5ef099c227614b54983f51857c1dce08e0def9977df00bde`가
+동일했다.
+
+첫 actual run은 rotated-axis, 두 번째 actual run은 four-span case의 수렴 후 near-zero
+raw residual absolute parity에서 fail-closed했다. Solver/authoritative scaled gate와 solution
+parity는 통과했으나 cancellation 계산 순서 차이가 v1 고정 absolute floor를 넘었다.
+Tolerance 규칙을 변경하지 않고 rotated/four/five-span을 명시적 `1 N` normalized fixture로
+고정해 각 strict case parity/ResultIR-ready를 실제 HIP에서 먼저 검증한 뒤 최종 10-slot
+gate를 다시 실행했다. 이 fixed-suite 처리는 일반 load scale의 roundoff-aware residual
+parity나 성능 증거가 아니다.
 별도 restricted namespace에는 `/dev/kfd`가 없었고, non-required mode는 static bound test가
 통과한 뒤 actual gate가 skip되어 `1 passed, 1 skipped in 1.74s`, required mode는 static
 test가 통과한 뒤 actual gate가 `No real gfx agent was detected.`로 fail-closed하여
@@ -162,12 +180,18 @@ registry용이며 이 신규 aggregate의 actual evidence로 재사용하지 않
 smoke일 뿐 clean source/release identity, actual HIP, signature 또는 promotion 증거가
 아니다.
 
-별도 final non-release wheel smoke는 동결된 `390`개 input tree 전후
-`sha256:4bd5ccec…4358` 동일성을 확인하고 `1,401,376` bytes,
-`sha256:8beb53e159c25decaa5c105fd771163ef15a968a3381c44550b2c0dfbaa92a3e` wheel의
+Current-source final non-release wheel smoke는 `1,401,602` bytes,
+`sha256:d9deea5512465f5fea353fffa4cab036eb03dff91fbbedf78c8a98bc560efc00` wheel의
 Engine/Assembly/Contracts/Elements public symbols `886/730/63/10`, 관련 schema `5`, fixture
-JSON `11`, registry `10`-slot fresh CPU replay를 격리 설치에서 통과했다. 이는 dirty
-non-release package smoke이며 clean release identity나 hardware evidence가 아니다.
+JSON `11`, registry `10`-slot fresh CPU replay를 소스 경로를 제거한 설치에서 통과했다.
+현재 런타임 의존성을 사용한 단일 dirty non-release package smoke이며 reproducible build,
+clean release identity 또는 hardware evidence가 아니다.
+
+같은 source의 연속 wheel 두 개는 모두 `1,401,602` bytes와 `264` members였고 member
+content diff는 `0`이었지만 `dist-info` 5개 timestamp가 달라 archive hash가
+`sha256:f704a687e0ca13233c2fb379a9b71714888c6e0c192b120f3fa2cae82fa08838`와
+`sha256:18bcb7f7f405ceb5be75474e0926bcf906bc35ad274d9946faa7d09ba4da0ba0`로
+달랐다. 따라서 현재 reproducible wheel build는 명시적으로 false다.
 
 ## 현재 true와 pending
 
@@ -183,10 +207,14 @@ Contract/test-double source에서 true:
 - family/aggregate manifest의 `actual_hardware_execution_verified=false` 및
   `hardware_gate_completed=false`
 
+별도 current-source hardware harness 관찰에서 true:
+
+- actual local `gfx1030` 10/10 ResultIR, family, aggregate 및 post-close validation
+- CPU fallback `0`
+- process peak RSS `450,868 KiB`, post-close current RSS `433,188 KiB`
+
 Pending 또는 false:
 
-- current-source actual local `gfx1030` 10/10 ResultIR hardware 통과
-- actual peak RSS
 - external `gfx1100`와 multiarchitecture/same-process two-ISA 결과
 - GPU-native reaction/member-force/energy recovery 자체
 - process-wide/broad iteration host-copy-zero
@@ -195,6 +223,7 @@ Pending 또는 false:
 - end-to-end O(N), performance 또는 speedup
 - nonlinear/dynamic/shell/solid/contact
 - commercial readiness
+- 일반 load scale의 roundoff-aware residual parity
 
 ## 실행 gate
 
@@ -214,10 +243,9 @@ PYTHONPATH=src python3 -m pytest -q \
 
 ## 다음 단계
 
-1. Actual `gfx1030`에서 per-case 및 aggregate peak RSS를 계측한다.
-2. 동일 current source/package resources로 required hardware gate를 실행해 actual
-   `10/10` family, bridge, aggregate 및 post-close validation을 닫는다.
-3. Reviewer-root bootstrap/HSM lifecycle 뒤 external `gfx1100`, 동일 final artifact local
+1. Fixed-suite 정규화와 별도로 CSR row roundoff/backward-error bound를 직렬화하는
+   scale-invariant residual parity 계약을 추가한다.
+2. Reviewer-root bootstrap/HSM lifecycle 뒤 external `gfx1100`, 동일 final artifact local
    `gfx1030`, durable monotonic ledger 및 signed evidence를 순서대로 검증한다.
-4. Broad iteration host-copy-zero와 GPU result recovery를 별도 authoritative gate로 닫은
+3. Broad iteration host-copy-zero와 GPU result recovery를 별도 authoritative gate로 닫은
    뒤에만 O(N), speedup 또는 commercial/promotion claim을 검토한다.

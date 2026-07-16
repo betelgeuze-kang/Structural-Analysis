@@ -1,7 +1,8 @@
 # Engine v2 HIP FGMRES All-Converged Fixture Registry v1
 
 - Milestone: v0.2.47 unpublished candidate
-- Status: implemented, `contract_only`, non-promoting
+- Status: implemented, `contract_only`, actual local `gfx1030` gate observed,
+  non-promoting
 - 기준일: 2026-07-16
 - Authority: [Engine v2 master roadmap](structural-solver-engine-v2-master-roadmap.md)
 - Result vertical slice: [HIP FGMRES all-converged ResultIR v1](engine-v2-hip-fgmres-all-converged-result-ir-v1.md)
@@ -51,6 +52,15 @@ structural_analysis.engine_v2.assembly_backend.fixtures.fgmres_all_converged_v1/
 `sha256:bc12d11a15d23f2768e4c27e5f8449f88d26453f9579ebb741861a3176eae2fa`로
 동결되어 있고, 신규 테스트가 이 불변성을 함께 확인한다.
 
+All-converged suite는 termination source model `7`개의 raw bytes를 그대로 보존한다.
+Cancellation-sensitive rotated-axis와 four-span case는 원본 기하·재료·section·support를
+유지하되 각각 FY/FX `1 N` 단위하중으로 정규화한 명시적 derivative이고, five-span은
+처음부터 별도로 생성한 `1 N` normalized model이다. 이 세 case는 기존 v1의 고정
+`atol + rtol*|CPU|` residual parity 규칙을 변경하거나 tolerance를 완화하지 않는다.
+Generator
+`scripts/regenerate_engine_v2_all_converged_registry.py`가 이 세 slot만 다시 컴파일해
+registry와 strict schema hash pin을 재생하며 나머지 slot row는 그대로 보존한다.
+
 ## 고정 suite
 
 | 순서 | Slot | CPU iteration | 분류 |
@@ -59,12 +69,12 @@ structural_analysis.engine_v2.assembly_backend.fixtures.fgmres_all_converged_v1/
 | 2 | `solution_frame_single_weak_axis_bending` | 2 | nontrivial solution |
 | 3 | `solution_frame_single_strong_axis_bending` | 2 | nontrivial solution |
 | 4 | `solution_frame_single_torsion` | 1 | nontrivial solution |
-| 5 | `solution_frame_single_rotated_axis_bending` | 6 | nontrivial solution |
+| 5 | `solution_frame_single_rotated_axis_bending` | 6 | normalized-unit-load nontrivial solution |
 | 6 | `solution_frame_serial_two_span_axial` | 2 | nontrivial solution |
 | 7 | `solution_truss_single_axial` | 1 | nontrivial solution |
 | 8 | `solution_frame_zero_free_rhs_edge` | 0 | explicit zero-free-RHS edge |
-| 9 | `solution_frame_serial_four_span_axial` | 4 | nontrivial solution |
-| 10 | `solution_frame_serial_five_span_axial` | 5 | nontrivial solution |
+| 9 | `solution_frame_serial_four_span_axial` | 4 | normalized-unit-load nontrivial solution |
+| 10 | `solution_frame_serial_five_span_axial` | 5 | normalized-unit-load nontrivial solution |
 
 모든 slot은 CPU FGMRES `relative_tolerance=1.0e-12`와 ExecutionPlanV2
 `residual_tolerance=1.0e-10`을 사용한다. Registry replay는 각 case에 대해 다음을
@@ -85,8 +95,8 @@ Zero-RHS edge는 `converged_initial_true_residual`, iteration `0`, 빈 history�
 
 | 항목 | 고정값 |
 | --- | --- |
-| Registry raw bytes SHA-256 | `sha256:f1e7342a846db16af0a88bd2f410b4685206b17cee850b96157c5be40730a28a` |
-| Registry canonical content hash | `sha256:dfc836a87b604a8aff066a4d9b6746311184477d8b0db4788479fb1c9d782aff` |
+| Registry raw bytes SHA-256 | `sha256:e3414a08530703a9cc4405393157c9c88f6a721b2dbf5717e77c6a5dee7f31f1` |
+| Registry canonical content hash | `sha256:85611ec01af14b375be09f91ee67e9eb2ee89734f110ff9899239465d5793a19` |
 | Registered slots | `10` |
 | Unique model raw hashes | `10` |
 | Unique ModelIR content hashes | `10` |
@@ -128,14 +138,29 @@ fallback으로 세지 않지만, CPU replay가 없다고 주장해서도 안 된
 - Family contract: `9 functions/10 collected cases` passed
 - ResultIR aggregate contract: `10 functions/15 collected cases` passed
 - Public/package and actual-wheel contract: `5` passed
-- Combined current-source contract run: `57 passed in 264.00s (0:04:24)`
+- Combined contract scope: `57` cases passed within the 5-file cross-check below
 - Capability matrix: `11 passed in 0.31s`
 - Current-source contract + capability 5-file cross-check:
-  `68 passed in 262.53s (0:04:22)`
+  `68 passed in 259.34s (0:04:19)`
 - Hardware harness: static full-replay-bound test와 actual gate, 합계 `2` tests collected
-- 현재 root host에는 `/dev/kfd`가 존재하고 `_local_architectures=('gfx1030',)`, probe
-  ready, backend `hip_native`, fallback false다. 다만 required all-converged actual gate는
-  아직 완료하지 않았으므로 actual local `gfx1030` 10/10과 peak RSS는 pending이다.
+- Current-source required local `gfx1030` actual gate는 RX 6900 XT에서 CPU fallback 없이
+  `1 passed in 1087.52s (0:18:07)`로 통과했다. Exact live case/ResultIR bridge `10/10`,
+  family, aggregate와 context close 뒤 detached validation을 한 프로세스에서 확인했다.
+  Baseline/각 case/family/aggregate/post-close RSS checkpoint를 계측했고 process peak는
+  `450,868 KiB`(약 `440.3 MiB`), post-close current RSS는 `433,188 KiB`였다.
+- 실행 전후 Engine source/schema/fixture aggregate
+  `sha256:41bf10b8e4fb506b5829d386ff3ad24a7ece76bcfbd4be4865e2fa8dedcaac30`,
+  hardware harness
+  `sha256:4d43b262b57696de8e04b591fa79adad0dc06815114176319d45e25f03d67681`,
+  shared live harness
+  `sha256:3b0acb3ab1af894f5ef099c227614b54983f51857c1dce08e0def9977df00bde`가
+  동일했다.
+- 첫 실제 run은 rotated-axis, 두 번째 run은 four-span의 수렴 후 near-zero raw residual
+  absolute parity에서 fail-closed했다. CPU/HIP scaled residual과 solution은 통과했으나
+  cancellation residual의 계산 순서 차이가 v1 고정 absolute floor를 넘었다. 세
+  cancellation-sensitive fixture를 unit load로 정규화한 뒤 각 case를 별도로 strict
+  parity/ResultIR-ready 검증하고 최종 10-slot run을 다시 통과했다. 이는 일반적인
+  scale-invariant roundoff-aware residual 계약을 증명하지 않는다.
 - 별도 restricted namespace에는 `/dev/kfd`가 없었다. Non-required mode는 static test가
   통과하고 actual gate가 skip되어 `1 passed, 1 skipped in 1.74s`였고, required mode는
   static test가
@@ -146,12 +171,17 @@ fallback으로 세지 않지만, CPU replay가 없다고 주장해서도 안 된
   JSON `11`개와 schema `3`개의 exact package path 및 byte를 source resource와 대조한다.
   이는 package completeness smoke이며 clean release identity, actual HIP, signature 또는
   promotion 증거가 아니다.
-- 별도 final non-release wheel smoke는 동결된 `390`개 input tree 전후
-  `sha256:4bd5ccec…4358` 동일성을 확인하고 `1,401,376` bytes,
-  `sha256:8beb53e159c25decaa5c105fd771163ef15a968a3381c44550b2c0dfbaa92a3e` wheel의
+- Current-source final non-release wheel smoke는 `1,401,602` bytes,
+  `sha256:d9deea5512465f5fea353fffa4cab036eb03dff91fbbedf78c8a98bc560efc00` wheel의
   Engine/Assembly/Contracts/Elements public symbols `886/730/63/10`, 관련 schema `5`,
-  fixture JSON `11`, registry `10`-slot fresh CPU replay를 격리 설치에서 통과했다. 이 또한
-  dirty non-release package smoke이며 release identity가 아니다.
+  fixture JSON `11`, registry `10`-slot fresh CPU replay를 소스 경로를 제거한 설치에서
+  통과했다. 현재 런타임 의존성을 사용한 단일 dirty non-release package smoke이며
+  reproducible build 또는 release identity가 아니다.
+- 같은 source의 연속 wheel 두 개는 모두 `1,401,602` bytes와 `264` members였고 member
+  content diff는 `0`이었지만 `dist-info` 5개 timestamp가 달라 archive hash가
+  `sha256:f704a687e0ca13233c2fb379a9b71714888c6e0c192b120f3fa2cae82fa08838`와
+  `sha256:18bcb7f7f405ceb5be75474e0926bcf906bc35ad274d9946faa7d09ba4da0ba0`로
+  달랐다. 따라서 현재 reproducible wheel build는 명시적으로 false다.
 
 과거 v0.2.45 통합 `gfx1030` `5757.94s`와 current-source `7820.35s` 결과는 다른
 termination registry의 7-result/3-diagnostic lineage이므로 이 신규 registry의 actual
@@ -162,19 +192,18 @@ HIP 또는 10/10 ResultIR 증거로 재사용하지 않는다.
 현재 true인 것은 package-owned fixed suite, 10개 고유 ModelIR/plan, CPU convergence 및
 두 tolerance gate뿐이다. 다음은 이 registry만으로 증명하지 않는다.
 
-- actual local `gfx1030` 실행 또는 ResultIR 발행
 - external `gfx1100`, multiarchitecture 또는 same-process two-ISA parity
 - standalone/persistent/signed provenance와 promotion eligibility
 - broad/process-wide iteration host-copy-zero
 - GPU reaction/member-force/energy recovery
-- peak RSS, end-to-end O(N), 성능 또는 speedup
+- end-to-end O(N), 성능 또는 speedup
+- 일반 load scale에 대한 roundoff-aware residual parity
 - nonlinear/dynamic/shell/solid/contact
 - commercial readiness
 
 ## 다음 단계
 
-1. Actual `gfx1030` 환경에서 peak RSS를 별도 측정해 현재 ordered gate를 닫는다.
-2. 같은 current source와 fixed resource로 required all-converged hardware harness를 실행해
-   `10/10` live family와 ResultIR aggregate를 검증한다.
-3. External `gfx1100` 및 동일 final artifact의 local `gfx1030` 재실행, durable/signed
+1. Fixed-suite 정규화와 별도로 CSR row roundoff/backward-error bound를 직렬화하는
+   scale-invariant residual parity 후속 계약을 설계한다.
+2. External `gfx1100` 및 동일 final artifact의 local `gfx1030` 재실행, durable/signed
    provenance, broad host-copy-zero를 순서대로 추가한다.

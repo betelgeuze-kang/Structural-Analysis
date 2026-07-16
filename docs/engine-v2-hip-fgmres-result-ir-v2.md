@@ -205,8 +205,9 @@ solution-ready, external `gfx1100`, standalone/signed provenance 또는 promotio
 3. **DiagnosticIR 분리는 v0.2.45에서 완료:** 미수렴 partial iterate는
    solution-ready ResultIRV2와 분리된 additive DiagnosticIR로 보존한다.
 4. **v0.2.47 contract/harness 완료:** 별도 all-converged registry와 exact 10/10
-   ResultIR vertical slice를 구현했다. 기존 7/3 역사적 진실은 바꾸지 않는다. 현재
-   host probe는 `gfx1030` ready이고 fallback false지만 신규 required actual `gfx1030`
-   10/10과 peak RSS는 pending이며 termination-registry의 과거 `5757.94s` 및
+   ResultIR vertical slice를 구현했고, required actual local `gfx1030` gate가 CPU fallback
+   없이 `1 passed in 1087.52s (0:18:07)`로 case/bridge `10/10`, family, aggregate와
+   post-close validation을 통과했다. Process peak RSS는 `450,868 KiB`였다. 기존 7/3
+   역사적 진실은 바꾸지 않으며 termination-registry의 과거 `5757.94s` 및
    current-source `7820.35s` 실행을 이 증거로 재사용하지 않는다.
 5. External `gfx1100`과 signed release/hardware evidence는 별도 승격 gate로 유지한다.

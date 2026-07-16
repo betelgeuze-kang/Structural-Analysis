@@ -220,9 +220,9 @@ promotion/commercial evidence가 아니다.
    actual local `gfx1030` 통합 harness에서 검증했다.
 2. **v0.2.47 contract/harness 완료:** 현 종료-회귀 registry와 7-result/3-diagnostic
    진실표를 유지하면서 10개 고유 ModelIR·실제 해석 tolerance를 갖는 별도
-   all-converged registry와 exact 10/10 ResultIR vertical slice를 구현했다. 현재 host
-   probe는 `gfx1030` ready이고 fallback false지만 신규 required actual `gfx1030` gate와
-   peak RSS는 pending이고 과거 `5757.94s` 및 current-source `7820.35s`
-   termination-registry 실행은 신규 all-converged 증거가 아니다.
+   all-converged registry와 exact 10/10 ResultIR vertical slice를 구현했다. Required
+   actual local `gfx1030` gate는 CPU fallback 없이 `1 passed in 1087.52s (0:18:07)`로
+   통과했고 process peak RSS는 `450,868 KiB`였다. 과거 `5757.94s` 및 current-source
+   `7820.35s` termination-registry 실행은 신규 all-converged 증거가 아니다.
 3. External `gfx1100`, signed hardware/release evidence와 promotion gate는 별도로
    유지한다.

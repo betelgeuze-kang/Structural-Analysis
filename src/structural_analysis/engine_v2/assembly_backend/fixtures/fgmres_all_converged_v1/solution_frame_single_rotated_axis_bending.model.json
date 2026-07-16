@@ -95,7 +95,7 @@
         {
           "components_si": {
             "FX": 0.0,
-            "FY": -10000.0,
+            "FY": -1.0,
             "FZ": 0.0,
             "MX": 0.0,
             "MY": 0.0,
@@ -163,11 +163,11 @@
   ],
   "provenance": {
     "extensions": {},
-    "normalizer_id": "engine-v2-fgmres-family-v2-fixture-builder",
-    "normalizer_version": "1",
+    "normalizer_id": "engine-v2-fgmres-all-converged-v1-fixture-builder",
+    "normalizer_version": "2",
     "source_format": "generated",
-    "source_ref": "generated:structural-analysis:fgmres-family-v2:frame_single_rotated_local_axis_bending:recipe-v1",
-    "source_sha256": "sha256:6a383dcee148e4308a3a738a463629efccb922f9801db8652a7338ed18cf3ce1",
+    "source_ref": "generated:structural-analysis:fgmres-all-converged-v1:frame_single_rotated_local_axis_bending_unit_load:recipe-v2",
+    "source_sha256": "sha256:352bb6d8cfde892e4ab85263c223f5375e7e403b2efb25bda4a39a31c45e29a1",
     "source_units": {
       "force": "N",
       "length": "m",

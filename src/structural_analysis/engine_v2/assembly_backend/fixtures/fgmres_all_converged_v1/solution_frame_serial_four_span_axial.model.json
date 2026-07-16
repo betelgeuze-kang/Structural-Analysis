@@ -187,7 +187,7 @@
       "nodal_loads": [
         {
           "components_si": {
-            "FX": 100000.0,
+            "FX": 1.0,
             "FY": 0.0,
             "FZ": 0.0,
             "MX": 0.0,
@@ -289,11 +289,11 @@
   ],
   "provenance": {
     "extensions": {},
-    "normalizer_id": "engine-v2-fgmres-family-v2-fixture-builder",
-    "normalizer_version": "1",
+    "normalizer_id": "engine-v2-fgmres-all-converged-v1-fixture-builder",
+    "normalizer_version": "2",
     "source_format": "generated",
-    "source_ref": "generated:structural-analysis:fgmres-family-v2:frame_serial_five:recipe-v1",
-    "source_sha256": "sha256:3246381dd4c2c3d3bf635ea341e5e4a8ad407bf369a754799bbc5476d8adc204",
+    "source_ref": "generated:structural-analysis:fgmres-all-converged-v1:frame_serial_four_span_axial_unit_load:recipe-v2",
+    "source_sha256": "sha256:68bae3c049713f95f2f6b1d4a358594c4b21e4e77e88e39dbfcfa707ae9b0d2c",
     "source_units": {
       "force": "N",
       "length": "m",

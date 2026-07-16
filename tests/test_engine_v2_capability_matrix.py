@@ -121,7 +121,7 @@ def test_engine_v2_hip_rows_separate_artifact_replay_and_native_parity() -> None
     )
 
 
-def test_all_converged_result_ir_v1_claims_stay_contract_only_until_hardware() -> None:
+def test_all_converged_result_ir_v1_stays_contract_only_after_local_hardware() -> None:
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
@@ -133,8 +133,15 @@ def test_all_converged_result_ir_v1_claims_stay_contract_only_until_hardware() -
     assert capability["promotion_state"] == "contract_only"
     assert {
         "separate_package_owned_all_converged_fixed_registry",
+        "current_source_actual_local_gfx1030_all_converged_ten_result_ir_gate_passed",
+        "actual_local_gfx1030_process_peak_rss_450868_kib",
+        "per_case_family_aggregate_and_post_close_rss_checkpoints_measured",
+        "engine_source_aggregate_sha256_41bf10b8e4fb506b5829d386ff3ad24a7ece76bcfbd4be4865e2fa8dedcaac30",
+        "hardware_harness_sha256_4d43b262b57696de8e04b591fa79adad0dc06815114176319d45e25f03d67681",
+        "registry_generator_sha256_b5a196b93fac4807308df56fc05096ae34f43e0a364c42d2231613e28a66ebff",
         "strict_registry_schema_full_manifest_registry_case_registration_and_all_expected_cpu_oracle_package_hash_exact_const_pinning",
         "ten_unique_model_ir_content_and_execution_plan_hashes",
+        "seven_termination_source_models_preserved_two_normalized_unit_load_derivatives_one_new_normalized_serial_model",
         "nine_nontrivial_solution_cases_and_one_explicit_zero_free_rhs_edge",
         "cpu_reference_converged_solver_tolerance_and_authoritative_plan_tolerance_ten_of_ten",
         "historical_termination_registry_bytes_and_seven_result_three_diagnostic_truth_preserved",
@@ -151,8 +158,6 @@ def test_all_converged_result_ir_v1_claims_stay_contract_only_until_hardware() -
         "actual_wheel_exact_paths_and_source_bytes_for_eleven_fixture_json_and_three_schemas",
     }.issubset(capability["supported_scope"])
     assert {
-        "current_source_actual_local_gfx1030_all_converged_ten_result_ir_gate",
-        "peak_rss_measurement",
         "registry_validation_cpu_reference_replay_zero",
         "actual_external_gfx1100_result_ir",
         "multiarchitecture_or_same_process_two_isa_result_ir",
@@ -162,6 +167,7 @@ def test_all_converged_result_ir_v1_claims_stay_contract_only_until_hardware() -
         "gpu_crash_reset_or_cross_process_abandoned_owner_recovery",
         "standalone_detached_or_serialized_provenance_authenticity",
         "persistent_external_hardware_log",
+        "reproducible_wheel_build",
         "signed_evidence",
         "promotion_eligibility",
         "end_to_end_o_n",
@@ -202,20 +208,27 @@ def test_all_converged_result_ir_v1_claims_stay_contract_only_until_hardware() -
         "family_contract_9_functions_10_collected_cases_passed",
         "aggregate_contract_10_functions_15_collected_cases_passed",
         "public_api_and_actual_wheel_tests_5_passed",
-        "combined_contract_tests_57_passed_in_264_00_seconds",
+        "combined_contract_scope_57_passed_within_five_file_crosscheck",
         "capability_matrix_tests_11_passed_in_0_31_seconds",
-        "current_source_contract_and_capability_five_file_crosscheck_68_passed_in_262_53_seconds",
-        "final_nonrelease_wheel_1401376_bytes_sha256_8beb53e159c25decaa5c105fd771163ef15a968a3381c44550b2c0dfbaa92a3e_engine886_assembly730_contracts63_elements10_schema5_fixture11_registry10_replay",
+        "current_source_contract_and_capability_five_file_crosscheck_68_passed_in_259_34_seconds",
+        "final_nonrelease_wheel_1401602_bytes_sha256_d9deea5512465f5fea353fffa4cab036eb03dff91fbbedf78c8a98bc560efc00_engine886_assembly730_contracts63_elements10_schema5_fixture11_registry10_replay",
+        "sequential_wheel_rebuilds_1401602_bytes_264_members_zero_content_diffs_five_dist_info_timestamp_diffs_sha256_f704a687e0ca13233c2fb379a9b71714888c6e0c192b120f3fa2cae82fa08838_and_18bcb7f7f405ceb5be75474e0926bcf906bc35ad274d9946faa7d09ba4da0ba0",
         "hardware_harness_two_tests_collected",
         "current_root_host_dev_kfd_present_gfx1030_probe_ready_hip_native_fallback_false",
         "separate_restricted_namespace_dev_kfd_absent_no_durable_hardware_observation",
         "separate_restricted_namespace_nonrequired_hardware_static_one_passed_actual_one_skipped_in_1_74_seconds_without_real_gfx_agent",
         "separate_restricted_namespace_required_hardware_static_one_passed_actual_one_failed_in_1_76_seconds_no_real_gfx_agent_detected",
-        "actual_local_gfx1030_ten_result_ir_and_peak_rss_pending",
+        "actual_local_gfx1030_ten_result_ir_bridge_family_aggregate_post_close_gate_1_passed_in_1087_52_seconds_without_cpu_fallback",
+        "actual_local_gfx1030_process_peak_rss_450868_kib_post_close_current_rss_433188_kib",
+        "rss_baseline_and_ten_case_family_aggregate_post_close_checkpoints_measured",
+        "engine_source_aggregate_and_harness_hashes_identical_before_after_actual_gate",
+        "first_actual_attempt_failed_rotated_axis_terminal_metric_near_zero_absolute_scale_then_second_failed_four_span_same_boundary",
+        "three_cancellation_sensitive_slots_normalized_to_unit_load_without_tolerance_relaxation",
+        "normalized_rotated_four_span_five_span_strict_case_parity_and_result_ir_ready_verified",
     }.issubset(capability["verification_cases"])
     assert capability["claim_level"] == (
-        "separate_all_converged_registry_and_exact_ten_result_ir_vertical_slice_"
-        "contract_only_actual_gfx1030_pending_unsigned_nonpersistent_detached_"
+        "separate_all_converged_registry_exact_ten_result_ir_and_actual_local_"
+        "gfx1030_gate_observed_contract_only_unsigned_nonpersistent_detached_"
         "non_provenance_nonpromoting"
     )
 

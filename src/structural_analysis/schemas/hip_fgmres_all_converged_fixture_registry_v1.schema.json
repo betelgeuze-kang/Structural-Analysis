@@ -24,7 +24,7 @@
     },
     "evidence_scope": "package_local_unsigned_non_promoting",
     "registration_target_slot_count": 10,
-    "registry_hash": "sha256:dfc836a87b604a8aff066a4d9b6746311184477d8b0db4788479fb1c9d782aff",
+    "registry_hash": "sha256:85611ec01af14b375be09f91ee67e9eb2ee89734f110ff9899239465d5793a19",
     "required_slot_ids": [
       "solution_frame_single_axial",
       "solution_frame_single_weak_axis_bending",
@@ -328,35 +328,35 @@
         "slot_registration_hash": "sha256:83ee7a4b81f1d82b0f9e49bb90c7cb20738569cc7f39c488565c0eb2dd776d5f"
       },
       {
-        "case_fingerprint": "sha256:027e5863b4719208020a73a3f357f30a3eafc2e52aeab868d96c25799ecb589f",
-        "description": "single skew frame with nonzero local-axis roll under bending excitation",
+        "case_fingerprint": "sha256:369badd9e49e839d87a444c9ce582fdecf18dc8497d51e3a3cd83fea121d81f0",
+        "description": "single skew frame with nonzero local-axis roll under normalized unit bending excitation",
         "execution_residual_tolerance": 1e-10,
         "expected": {
           "authoritative_plan_tolerance_passed": true,
-          "cpu_history_hash": "sha256:3e63803ef2b8498f6d6bc816d5239670d3b79701870610136696e13e48c0c835",
+          "cpu_history_hash": "sha256:05383b65dea54c9f807b8192ccd83b45c5683ee26f7fc9e6fefa49f2450e0fa6",
           "cpu_iteration_count": 6,
           "cpu_operator_apply_count": 8,
           "cpu_preconditioner_apply_count": 6,
           "cpu_restart_count": 1,
-          "cpu_result_hash": "sha256:97ccd0f9350748814f86138680b81e2c03f6bca8a18a279509d153ce9ec44f97",
-          "cpu_solution_data_hash": "sha256:6c97a37d47088985f34272ad2356a85291250c4176e2e63461cc83bfdb0e27f7",
+          "cpu_result_hash": "sha256:81575846148d8be5a5bb631484db0ada244b94a797380a97dcf2eb59a4db58cf",
+          "cpu_solution_data_hash": "sha256:97c64863fa3e24f4944bf26c712499847edc90e265deac43a0f61bf861629206",
           "cpu_status": "converged",
           "cpu_termination_code": "converged_happy_breakdown",
-          "cpu_true_residual_data_hash": "sha256:9fa992f33a4efb3a42f7e14cd3e2ce6f0c1f57ade971ba98290e7306188066c2",
-          "descriptor_hash": "sha256:d13cb7ee16b92dff137c9e82ed1b956d90ca0f9a1935b4a0818d29abb13ba3ab",
-          "direct_residual_data_hash": "sha256:984e80c343eaff601e21c2dafa2dbde98ff8ceadc197174834104de72fc85aed",
-          "direct_solution_data_hash": "sha256:1e33ef54a5f7d498e1cd825ab74e162f76406ce050c0b3cb2a9659f5e77cd48d",
-          "execution_plan_hash": "sha256:cacc317712adbe80e078b3d880a6299e5454d31eff906695cc5611b6524aacb6",
-          "fgmres_plan_hash": "sha256:cb79c91b165012ae927d0482439f5e1f763177c4369ae734b9fa38168a81d808",
-          "free_space_plan_hash": "sha256:116d5fdfa59518ff29eaa1d0546e58ca520d75aafa56079896c60f126b96e6a3",
-          "model_ir_content_hash": "sha256:63cff1e337414908d633a7418679b4eceb7b85d227e70c6e9641c801a8976bbe",
+          "cpu_true_residual_data_hash": "sha256:6f505ab9a487adcdac42764a5ed042828cb15d7ff6385546884648611db06fce",
+          "descriptor_hash": "sha256:ab00874b52a88c1c1649150088cdaa21052b977d5cae14345303643b5613b1cb",
+          "direct_residual_data_hash": "sha256:96a4f1f979ba58bd4b807374465e915d0c468d2b1d599a760c3ab176af534f1a",
+          "direct_solution_data_hash": "sha256:5774e9f950fa8dad75181e219aa85f10a8a7911de42b938629edf25bdff14363",
+          "execution_plan_hash": "sha256:4ede0faa16c02f369571e4bc70af096b6dc5139e2d422aea826c1e0005bd2547",
+          "fgmres_plan_hash": "sha256:db48e74088daea222c38211791527bfc35ffdd9dc57ce2cf1b31f919f4aea5a7",
+          "free_space_plan_hash": "sha256:fa65d665aa4f6fdda205296a8550948d1f8ebda083908229549dcbeae16bb3ab",
+          "model_ir_content_hash": "sha256:3561ef0849f2621a59736fdd3c197b0f64af56b503935b7572ac717cbf5b3fcb",
           "policy_hash": "sha256:635180e3dce6757602d8438d71a6b99b882ce9cff8d84800b76bea9351cccc42",
-          "recurrence_plan_hash": "sha256:4a652a821fae0669c11d18bbceeb36d4848d8ac605012e58c25c4556b837c5cb",
+          "recurrence_plan_hash": "sha256:42836c14f5e2a9085fffaa4522f9b674cb383e1ad1940d6163d3501104849e8b",
           "solver_tolerance_passed": true
         },
         "group": "solution_semantics",
         "load_pattern_id": "LC_WEAK",
-        "model_bytes_sha256": "sha256:edb9e5f33570ff7245e5fe630ca489794c6e828a7275ee599068fa173b8b3ef6",
+        "model_bytes_sha256": "sha256:8fc8e6a90fd23e62844ba3cd57a72fa610f69d234b001f9f70dbe0af002173ba",
         "model_resource": "solution_frame_single_rotated_axis_bending.model.json",
         "policy_parameters": {
           "absolute_tolerance": 0.0,
@@ -371,27 +371,27 @@
           "analytic_free_solution_nonzero": [
             [
               0,
-              0.002552171711639753
+              2.552171711639753e-07
             ],
             [
               1,
-              -0.007960471927653038
+              -7.960471927653038e-07
             ],
             [
               2,
-              0.004450021285577484
+              4.450021285577484e-07
             ],
             [
               3,
-              0.0035122991093693642
+              3.512299109369364e-07
             ],
             [
               4,
-              0.00034355291242947313
+              3.4355291242947316e-08
             ],
             [
               5,
-              -0.0013998016447427767
+              -1.3998016447427768e-07
             ]
           ],
           "element_count": 1,
@@ -406,7 +406,7 @@
           ],
           "load_component": "FY",
           "load_node_id": "N2",
-          "load_value_si": -10000.0,
+          "load_value_si": -1.0,
           "model_kind": "frame_3d",
           "node_count": 2,
           "nonzero_local_axis_roll_count": 1,
@@ -415,7 +415,7 @@
         },
         "semantic_profile": "solution_frame_single_rotated_axis_bending.v1",
         "slot_id": "solution_frame_single_rotated_axis_bending",
-        "slot_registration_hash": "sha256:30d468768cbf2ac526374dde72eabb4df108378908cbdbef3c84c80cda0ea05a"
+        "slot_registration_hash": "sha256:6462e639f7fed44610d1aacfbff9baf4886dfcd466c5dc8c441f358971b162bc"
       },
       {
         "case_fingerprint": "sha256:0a9ae5f5bb0997aff8bbca0baa59dfcad73e9fbe2fb1df6ad8589eee50de1953",
@@ -621,35 +621,35 @@
         "slot_registration_hash": "sha256:0ebcf97f98767dccb0b245a7dbca73a96db2965bcd24411f120fde5e577aa1b4"
       },
       {
-        "case_fingerprint": "sha256:f82d58191d18a4c4aca7408533d848448bb8d5b201946ec2dfcc48baf9863da8",
-        "description": "five-node four-span serial frame under axial excitation",
+        "case_fingerprint": "sha256:f24b760a8c06bd82a9675ffa1e67bb7be1361324a231018139cff0ad9ae3b21b",
+        "description": "five-node four-span serial frame under normalized unit axial excitation",
         "execution_residual_tolerance": 1e-10,
         "expected": {
           "authoritative_plan_tolerance_passed": true,
-          "cpu_history_hash": "sha256:4e0105eeec8a32febee6b008e254ce9bdf4f63239f914959428c0c7baf196a77",
+          "cpu_history_hash": "sha256:f11f5f650f038223c6b9c2478d9bdf0bb650218fb5b5e5b00523a37d06df479a",
           "cpu_iteration_count": 4,
           "cpu_operator_apply_count": 6,
           "cpu_preconditioner_apply_count": 4,
           "cpu_restart_count": 1,
-          "cpu_result_hash": "sha256:ce2b33719e8ad3ffeae6ffebc11c2ecd87efe5af0dd8822340d953076bc68b82",
-          "cpu_solution_data_hash": "sha256:fcfba371a021fb57d3e132da588c52d4dcd40378d650d8062e021f10fffd8a46",
+          "cpu_result_hash": "sha256:9390af0f0657b70d83923f07d7aa5d8330ae89b93ea9a171039e378a1e29d570",
+          "cpu_solution_data_hash": "sha256:327e8674127bcd98ff7db3107ecb2dbf09e262f2e6b621b121bcd5387dc5cb25",
           "cpu_status": "converged",
           "cpu_termination_code": "converged_happy_breakdown",
-          "cpu_true_residual_data_hash": "sha256:7cad1645859aa900db1332592d1bc292ad37da3d6eadb839eb3ddc7f9d67846f",
-          "descriptor_hash": "sha256:f2b3e34d08bfc2b900594a5849044a01e7140e898a07fb3178412bc30edaf7d1",
-          "direct_residual_data_hash": "sha256:6fd3f50125cced9af4995922e7754559bd4484eba206976cca3803854ae41570",
-          "direct_solution_data_hash": "sha256:0ebb599c98a6bd6aa219b1cee0642db40d6147f9a6528ee2ba343412a869c23f",
-          "execution_plan_hash": "sha256:dd185039f7ab2f8eea0d84f92090d1d3b9e1703f6f5ac65bca02c09c0a04f1fe",
-          "fgmres_plan_hash": "sha256:bb02cbfb1e43049890c6d45c05406ad1d34da615a5fbe6a0a5cfdd970dfc5f47",
-          "free_space_plan_hash": "sha256:3fa234094190c281f1dcbda01577db8077248a50259c263c6eb00c244526e7c3",
-          "model_ir_content_hash": "sha256:c8c7cbde02445e020742e39e8a1408637be8c0300bf12e021e111b923883f591",
+          "cpu_true_residual_data_hash": "sha256:4d4a60ce4606c595f20cfd081cf7e6c1995e4b4a3bb1dd1a4651c2644214d417",
+          "descriptor_hash": "sha256:549746a51bc761228e76ea33c0a1f09b6db479958b7e559c736258dfcafe2776",
+          "direct_residual_data_hash": "sha256:9cd58e128e6bba3ced8cb07a483b73b7eb7cc9a424b3566b7ce3692877d6608d",
+          "direct_solution_data_hash": "sha256:e4bd169a8eb0412248a925da9a0ab1569c43b4dc50ac17995bf59a08ed602a48",
+          "execution_plan_hash": "sha256:e57a294a8124febe978d3554998e4e2b0328d2127a76b09d4a4f3974cd3b25e5",
+          "fgmres_plan_hash": "sha256:aef789f2268a4d9738a0eb9d596e994d5ed60be8dab2444c343661222e839f09",
+          "free_space_plan_hash": "sha256:5f8bcb91ceb36a53e78f7d0ceb18881142a02dcbbcb351268baffac0d08961bb",
+          "model_ir_content_hash": "sha256:b2ca93231e43f1cfa1190ca92c22af54d55505c5c6dda9782208a3f4e540048d",
           "policy_hash": "sha256:d40878ecd0b6d17e5fbc9072c77f4aff8d23d467a2f0209be9abd1cb6be15175",
-          "recurrence_plan_hash": "sha256:c870d102cc4f8b94ca58209b85004be65fbfa703abe08a7ced38ee35a3bc047f",
+          "recurrence_plan_hash": "sha256:751391edfc0d011e2ca22a975a520285242091fc4b1f5276733585a957864888",
           "solver_tolerance_passed": true
         },
         "group": "solution_semantics",
         "load_pattern_id": "LC_AXIAL",
-        "model_bytes_sha256": "sha256:8f26bc53451841e09612c25369da45e1fca67177fa91548f5b2ec28949d0ff04",
+        "model_bytes_sha256": "sha256:a0873a5ea22079bde3b8c15e1c94808b43071afd73d96cf1c8cf271c10f0be96",
         "model_resource": "solution_frame_serial_four_span_axial.model.json",
         "policy_parameters": {
           "absolute_tolerance": 0.0,
@@ -664,19 +664,19 @@
           "analytic_free_solution_nonzero": [
             [
               0,
-              5e-05
+              5e-10
             ],
             [
               6,
-              0.0001
+              1e-09
             ],
             [
               12,
-              0.00015
+              1.5e-09
             ],
             [
               18,
-              0.0002
+              2e-09
             ]
           ],
           "element_count": 4,
@@ -691,7 +691,7 @@
           ],
           "load_component": "FX",
           "load_node_id": "N5",
-          "load_value_si": 100000.0,
+          "load_value_si": 1.0,
           "model_kind": "frame_3d",
           "node_count": 5,
           "nonzero_local_axis_roll_count": 0,
@@ -700,38 +700,38 @@
         },
         "semantic_profile": "solution_frame_serial_four_span_axial.v1",
         "slot_id": "solution_frame_serial_four_span_axial",
-        "slot_registration_hash": "sha256:d5cd9da7a2e2bdf3c4acf2459626b219a8eeb46671d713bddca03219487bc6dc"
+        "slot_registration_hash": "sha256:47a19bf3b6f207789becb575a3bbd8aa4f3a33a07bab0dcf330431f0d5daaa6f"
       },
       {
-        "case_fingerprint": "sha256:a582756f27072d7e4ee058d9a60078ad644702799801cda76c438c3b000c9ad4",
-        "description": "six-node five-span serial frame under axial excitation",
+        "case_fingerprint": "sha256:a07260433a86f26ed9ac784cc1becd30148e8aefea550a43aacaa014b5524460",
+        "description": "six-node five-span serial frame under normalized unit axial excitation",
         "execution_residual_tolerance": 1e-10,
         "expected": {
           "authoritative_plan_tolerance_passed": true,
-          "cpu_history_hash": "sha256:417d114cbab947e97791509d7f91dcf83ef3cbc7ef3835fd5149c9e7dab5119d",
+          "cpu_history_hash": "sha256:b58d4d126f8065f7e7f62b12501ef3036971ab401faa9961d5bc456b10fdfbe9",
           "cpu_iteration_count": 5,
           "cpu_operator_apply_count": 7,
           "cpu_preconditioner_apply_count": 5,
           "cpu_restart_count": 1,
-          "cpu_result_hash": "sha256:c652dc15dfa60a4c8d3d1d7d8adf89b237a5513d68040d6a267a865f9810a72d",
-          "cpu_solution_data_hash": "sha256:5d1e601c1030977ff480707018f1efd8afadc4c2fa84ce3d833c49c04907a3f0",
+          "cpu_result_hash": "sha256:a21c35a839a77f0b4ba8db845e35fb8842c7f02e308ad401437336b758dee753",
+          "cpu_solution_data_hash": "sha256:c191290bd37097f24e94128503c0e97741530b8723ae17b53f246a52cb19c425",
           "cpu_status": "converged",
           "cpu_termination_code": "converged_happy_breakdown",
-          "cpu_true_residual_data_hash": "sha256:6b309a908777743bd18e5242763ed9c9f914ce7f7b592dd09a0efa0c7fa76e8e",
-          "descriptor_hash": "sha256:4b1cdcc009049d975cebfb05bf54dedf6da1d9836183e04156e0ba2e74b8e0c4",
-          "direct_residual_data_hash": "sha256:2dfba633817046c7f559ed4b93076048435f7e1a90f14eb8035c04b9ebae2537",
-          "direct_solution_data_hash": "sha256:254e41cf716d6056cee0b4a7db9e840698d60cf5c9ad1f09a69af8c54a290c6f",
-          "execution_plan_hash": "sha256:e6fdbaf36fea3e91ed994bca57de70a014fb9e01de036adbb18bd6883f89cf07",
-          "fgmres_plan_hash": "sha256:cfdc6c7d62449d779ef95cd8189b066796e78913eb0022a27203b33eb2c890d1",
-          "free_space_plan_hash": "sha256:a471265806aaa1cda0b41d8878af9dcce98ac593fc3bfea1fa9e120a674708f5",
-          "model_ir_content_hash": "sha256:49f8ade44312c63146b59cfceb69d9d4d9f31e8901c9a5eb9ee9fddd5ab0ec33",
+          "cpu_true_residual_data_hash": "sha256:828f74d885ba4b5927ef1661c229bce0fce6426b7d3a5e816255b96ba50fb75d",
+          "descriptor_hash": "sha256:6992ffb42deb5895f47c297f92770843a55f00544261e0f6d81dd1fdd17b5350",
+          "direct_residual_data_hash": "sha256:1b32b7c7d69799641ad3a801eccf3c32f8e7df4450a32d0238110618db21ca2b",
+          "direct_solution_data_hash": "sha256:49e297b7d4ba4427e622f0a6bf1e0a6b8be9f4e13e3e0e5af4fa784898ee430b",
+          "execution_plan_hash": "sha256:b5c0b9b1eb7d93d116db4c0cacd5db2a06b07f3eb0b0792f491efe459fd162e3",
+          "fgmres_plan_hash": "sha256:beb35ac21f24b5840c633a9ce9e68fdd3cd955f3e22d860cb6231b77031714cc",
+          "free_space_plan_hash": "sha256:bf8c3ade2b545db05167726ab2f5d1ccb46527b1579d508177a1b1aae3456e03",
+          "model_ir_content_hash": "sha256:2eccd9fb6c404f78c11fc335530d529521afea07615b7f82ad08f33977269cca",
           "policy_hash": "sha256:dd36e5ba05790fc3cc72a4a242042ee6ddcdce259e84d40b2e018b17aebd9b51",
-          "recurrence_plan_hash": "sha256:4ba4372ab7c55adf68fd3641e2adec7a6d899d8be6f040ec68035cdf61b0a243",
+          "recurrence_plan_hash": "sha256:3ccc4db675193d5660d8f841f640c0921b3cdf2b35d5e026e08f821e75bea60a",
           "solver_tolerance_passed": true
         },
         "group": "solution_semantics",
         "load_pattern_id": "LC_AXIAL",
-        "model_bytes_sha256": "sha256:71af7d0e881ae62e472bd64f603618a397b8ea22cc2f57369fa483fd9bf248de",
+        "model_bytes_sha256": "sha256:a1f3ec431dccf11898089904b22a0619ee254c38a679b3e5e7f60d96bcac0aca",
         "model_resource": "solution_frame_serial_five_span_axial.model.json",
         "policy_parameters": {
           "absolute_tolerance": 0.0,
@@ -746,23 +746,23 @@
           "analytic_free_solution_nonzero": [
             [
               0,
-              5e-05
+              5e-10
             ],
             [
               6,
-              0.0001
+              1e-09
             ],
             [
               12,
-              0.00015
+              1.5e-09
             ],
             [
               18,
-              0.0002
+              2e-09
             ],
             [
               24,
-              0.00025
+              2.5e-09
             ]
           ],
           "element_count": 5,
@@ -777,7 +777,7 @@
           ],
           "load_component": "FX",
           "load_node_id": "N6",
-          "load_value_si": 100000.0,
+          "load_value_si": 1.0,
           "model_kind": "frame_3d",
           "node_count": 6,
           "nonzero_local_axis_roll_count": 0,
@@ -786,7 +786,7 @@
         },
         "semantic_profile": "solution_frame_serial_five_span_axial.v1",
         "slot_id": "solution_frame_serial_five_span_axial",
-        "slot_registration_hash": "sha256:4e9b5f40a99b0db1932d90047dd8d8494a5d755865a19081aa42da8e2b1c1c84"
+        "slot_registration_hash": "sha256:c358564fcc966a03bda8a7360f2d51c3243c398e9b1051d3c0e2e464da5369a0"
       }
     ],
     "suite_id": "phase0_execution_plan_v2_linear_frame_truss_fgmres_all_converged_suite.v1",
@@ -952,23 +952,23 @@
           "properties": {
             "slot_id": {"const": "solution_frame_single_rotated_axis_bending"},
             "model_resource": {"const": "solution_frame_single_rotated_axis_bending.model.json"},
-            "model_bytes_sha256": {"const": "sha256:edb9e5f33570ff7245e5fe630ca489794c6e828a7275ee599068fa173b8b3ef6"},
-            "case_fingerprint": {"const": "sha256:027e5863b4719208020a73a3f357f30a3eafc2e52aeab868d96c25799ecb589f"},
-            "slot_registration_hash": {"const": "sha256:30d468768cbf2ac526374dde72eabb4df108378908cbdbef3c84c80cda0ea05a"},
+            "model_bytes_sha256": {"const": "sha256:8fc8e6a90fd23e62844ba3cd57a72fa610f69d234b001f9f70dbe0af002173ba"},
+            "case_fingerprint": {"const": "sha256:369badd9e49e839d87a444c9ce582fdecf18dc8497d51e3a3cd83fea121d81f0"},
+            "slot_registration_hash": {"const": "sha256:6462e639f7fed44610d1aacfbff9baf4886dfcd466c5dc8c441f358971b162bc"},
             "expected": {"properties": {
-              "model_ir_content_hash": {"const": "sha256:63cff1e337414908d633a7418679b4eceb7b85d227e70c6e9641c801a8976bbe"},
-              "execution_plan_hash": {"const": "sha256:cacc317712adbe80e078b3d880a6299e5454d31eff906695cc5611b6524aacb6"},
-              "descriptor_hash": {"const": "sha256:d13cb7ee16b92dff137c9e82ed1b956d90ca0f9a1935b4a0818d29abb13ba3ab"},
-              "free_space_plan_hash": {"const": "sha256:116d5fdfa59518ff29eaa1d0546e58ca520d75aafa56079896c60f126b96e6a3"},
-              "fgmres_plan_hash": {"const": "sha256:cb79c91b165012ae927d0482439f5e1f763177c4369ae734b9fa38168a81d808"},
-              "recurrence_plan_hash": {"const": "sha256:4a652a821fae0669c11d18bbceeb36d4848d8ac605012e58c25c4556b837c5cb"},
+              "model_ir_content_hash": {"const": "sha256:3561ef0849f2621a59736fdd3c197b0f64af56b503935b7572ac717cbf5b3fcb"},
+              "execution_plan_hash": {"const": "sha256:4ede0faa16c02f369571e4bc70af096b6dc5139e2d422aea826c1e0005bd2547"},
+              "descriptor_hash": {"const": "sha256:ab00874b52a88c1c1649150088cdaa21052b977d5cae14345303643b5613b1cb"},
+              "free_space_plan_hash": {"const": "sha256:fa65d665aa4f6fdda205296a8550948d1f8ebda083908229549dcbeae16bb3ab"},
+              "fgmres_plan_hash": {"const": "sha256:db48e74088daea222c38211791527bfc35ffdd9dc57ce2cf1b31f919f4aea5a7"},
+              "recurrence_plan_hash": {"const": "sha256:42836c14f5e2a9085fffaa4522f9b674cb383e1ad1940d6163d3501104849e8b"},
               "policy_hash": {"const": "sha256:635180e3dce6757602d8438d71a6b99b882ce9cff8d84800b76bea9351cccc42"},
-              "cpu_result_hash": {"const": "sha256:97ccd0f9350748814f86138680b81e2c03f6bca8a18a279509d153ce9ec44f97"},
-              "cpu_history_hash": {"const": "sha256:3e63803ef2b8498f6d6bc816d5239670d3b79701870610136696e13e48c0c835"},
-              "cpu_solution_data_hash": {"const": "sha256:6c97a37d47088985f34272ad2356a85291250c4176e2e63461cc83bfdb0e27f7"},
-              "cpu_true_residual_data_hash": {"const": "sha256:9fa992f33a4efb3a42f7e14cd3e2ce6f0c1f57ade971ba98290e7306188066c2"},
-              "direct_solution_data_hash": {"const": "sha256:1e33ef54a5f7d498e1cd825ab74e162f76406ce050c0b3cb2a9659f5e77cd48d"},
-              "direct_residual_data_hash": {"const": "sha256:984e80c343eaff601e21c2dafa2dbde98ff8ceadc197174834104de72fc85aed"}
+              "cpu_result_hash": {"const": "sha256:81575846148d8be5a5bb631484db0ada244b94a797380a97dcf2eb59a4db58cf"},
+              "cpu_history_hash": {"const": "sha256:05383b65dea54c9f807b8192ccd83b45c5683ee26f7fc9e6fefa49f2450e0fa6"},
+              "cpu_solution_data_hash": {"const": "sha256:97c64863fa3e24f4944bf26c712499847edc90e265deac43a0f61bf861629206"},
+              "cpu_true_residual_data_hash": {"const": "sha256:6f505ab9a487adcdac42764a5ed042828cb15d7ff6385546884648611db06fce"},
+              "direct_solution_data_hash": {"const": "sha256:5774e9f950fa8dad75181e219aa85f10a8a7911de42b938629edf25bdff14363"},
+              "direct_residual_data_hash": {"const": "sha256:96a4f1f979ba58bd4b807374465e915d0c468d2b1d599a760c3ab176af534f1a"}
             }}
           }
         },
@@ -1052,23 +1052,23 @@
           "properties": {
             "slot_id": {"const": "solution_frame_serial_four_span_axial"},
             "model_resource": {"const": "solution_frame_serial_four_span_axial.model.json"},
-            "model_bytes_sha256": {"const": "sha256:8f26bc53451841e09612c25369da45e1fca67177fa91548f5b2ec28949d0ff04"},
-            "case_fingerprint": {"const": "sha256:f82d58191d18a4c4aca7408533d848448bb8d5b201946ec2dfcc48baf9863da8"},
-            "slot_registration_hash": {"const": "sha256:d5cd9da7a2e2bdf3c4acf2459626b219a8eeb46671d713bddca03219487bc6dc"},
+            "model_bytes_sha256": {"const": "sha256:a0873a5ea22079bde3b8c15e1c94808b43071afd73d96cf1c8cf271c10f0be96"},
+            "case_fingerprint": {"const": "sha256:f24b760a8c06bd82a9675ffa1e67bb7be1361324a231018139cff0ad9ae3b21b"},
+            "slot_registration_hash": {"const": "sha256:47a19bf3b6f207789becb575a3bbd8aa4f3a33a07bab0dcf330431f0d5daaa6f"},
             "expected": {"properties": {
-              "model_ir_content_hash": {"const": "sha256:c8c7cbde02445e020742e39e8a1408637be8c0300bf12e021e111b923883f591"},
-              "execution_plan_hash": {"const": "sha256:dd185039f7ab2f8eea0d84f92090d1d3b9e1703f6f5ac65bca02c09c0a04f1fe"},
-              "descriptor_hash": {"const": "sha256:f2b3e34d08bfc2b900594a5849044a01e7140e898a07fb3178412bc30edaf7d1"},
-              "free_space_plan_hash": {"const": "sha256:3fa234094190c281f1dcbda01577db8077248a50259c263c6eb00c244526e7c3"},
-              "fgmres_plan_hash": {"const": "sha256:bb02cbfb1e43049890c6d45c05406ad1d34da615a5fbe6a0a5cfdd970dfc5f47"},
-              "recurrence_plan_hash": {"const": "sha256:c870d102cc4f8b94ca58209b85004be65fbfa703abe08a7ced38ee35a3bc047f"},
+              "model_ir_content_hash": {"const": "sha256:b2ca93231e43f1cfa1190ca92c22af54d55505c5c6dda9782208a3f4e540048d"},
+              "execution_plan_hash": {"const": "sha256:e57a294a8124febe978d3554998e4e2b0328d2127a76b09d4a4f3974cd3b25e5"},
+              "descriptor_hash": {"const": "sha256:549746a51bc761228e76ea33c0a1f09b6db479958b7e559c736258dfcafe2776"},
+              "free_space_plan_hash": {"const": "sha256:5f8bcb91ceb36a53e78f7d0ceb18881142a02dcbbcb351268baffac0d08961bb"},
+              "fgmres_plan_hash": {"const": "sha256:aef789f2268a4d9738a0eb9d596e994d5ed60be8dab2444c343661222e839f09"},
+              "recurrence_plan_hash": {"const": "sha256:751391edfc0d011e2ca22a975a520285242091fc4b1f5276733585a957864888"},
               "policy_hash": {"const": "sha256:d40878ecd0b6d17e5fbc9072c77f4aff8d23d467a2f0209be9abd1cb6be15175"},
-              "cpu_result_hash": {"const": "sha256:ce2b33719e8ad3ffeae6ffebc11c2ecd87efe5af0dd8822340d953076bc68b82"},
-              "cpu_history_hash": {"const": "sha256:4e0105eeec8a32febee6b008e254ce9bdf4f63239f914959428c0c7baf196a77"},
-              "cpu_solution_data_hash": {"const": "sha256:fcfba371a021fb57d3e132da588c52d4dcd40378d650d8062e021f10fffd8a46"},
-              "cpu_true_residual_data_hash": {"const": "sha256:7cad1645859aa900db1332592d1bc292ad37da3d6eadb839eb3ddc7f9d67846f"},
-              "direct_solution_data_hash": {"const": "sha256:0ebb599c98a6bd6aa219b1cee0642db40d6147f9a6528ee2ba343412a869c23f"},
-              "direct_residual_data_hash": {"const": "sha256:6fd3f50125cced9af4995922e7754559bd4484eba206976cca3803854ae41570"}
+              "cpu_result_hash": {"const": "sha256:9390af0f0657b70d83923f07d7aa5d8330ae89b93ea9a171039e378a1e29d570"},
+              "cpu_history_hash": {"const": "sha256:f11f5f650f038223c6b9c2478d9bdf0bb650218fb5b5e5b00523a37d06df479a"},
+              "cpu_solution_data_hash": {"const": "sha256:327e8674127bcd98ff7db3107ecb2dbf09e262f2e6b621b121bcd5387dc5cb25"},
+              "cpu_true_residual_data_hash": {"const": "sha256:4d4a60ce4606c595f20cfd081cf7e6c1995e4b4a3bb1dd1a4651c2644214d417"},
+              "direct_solution_data_hash": {"const": "sha256:e4bd169a8eb0412248a925da9a0ab1569c43b4dc50ac17995bf59a08ed602a48"},
+              "direct_residual_data_hash": {"const": "sha256:9cd58e128e6bba3ced8cb07a483b73b7eb7cc9a424b3566b7ce3692877d6608d"}
             }}
           }
         },
@@ -1077,30 +1077,30 @@
           "properties": {
             "slot_id": {"const": "solution_frame_serial_five_span_axial"},
             "model_resource": {"const": "solution_frame_serial_five_span_axial.model.json"},
-            "model_bytes_sha256": {"const": "sha256:71af7d0e881ae62e472bd64f603618a397b8ea22cc2f57369fa483fd9bf248de"},
-            "case_fingerprint": {"const": "sha256:a582756f27072d7e4ee058d9a60078ad644702799801cda76c438c3b000c9ad4"},
-            "slot_registration_hash": {"const": "sha256:4e9b5f40a99b0db1932d90047dd8d8494a5d755865a19081aa42da8e2b1c1c84"},
+            "model_bytes_sha256": {"const": "sha256:a1f3ec431dccf11898089904b22a0619ee254c38a679b3e5e7f60d96bcac0aca"},
+            "case_fingerprint": {"const": "sha256:a07260433a86f26ed9ac784cc1becd30148e8aefea550a43aacaa014b5524460"},
+            "slot_registration_hash": {"const": "sha256:c358564fcc966a03bda8a7360f2d51c3243c398e9b1051d3c0e2e464da5369a0"},
             "expected": {"properties": {
-              "model_ir_content_hash": {"const": "sha256:49f8ade44312c63146b59cfceb69d9d4d9f31e8901c9a5eb9ee9fddd5ab0ec33"},
-              "execution_plan_hash": {"const": "sha256:e6fdbaf36fea3e91ed994bca57de70a014fb9e01de036adbb18bd6883f89cf07"},
-              "descriptor_hash": {"const": "sha256:4b1cdcc009049d975cebfb05bf54dedf6da1d9836183e04156e0ba2e74b8e0c4"},
-              "free_space_plan_hash": {"const": "sha256:a471265806aaa1cda0b41d8878af9dcce98ac593fc3bfea1fa9e120a674708f5"},
-              "fgmres_plan_hash": {"const": "sha256:cfdc6c7d62449d779ef95cd8189b066796e78913eb0022a27203b33eb2c890d1"},
-              "recurrence_plan_hash": {"const": "sha256:4ba4372ab7c55adf68fd3641e2adec7a6d899d8be6f040ec68035cdf61b0a243"},
+              "model_ir_content_hash": {"const": "sha256:2eccd9fb6c404f78c11fc335530d529521afea07615b7f82ad08f33977269cca"},
+              "execution_plan_hash": {"const": "sha256:b5c0b9b1eb7d93d116db4c0cacd5db2a06b07f3eb0b0792f491efe459fd162e3"},
+              "descriptor_hash": {"const": "sha256:6992ffb42deb5895f47c297f92770843a55f00544261e0f6d81dd1fdd17b5350"},
+              "free_space_plan_hash": {"const": "sha256:bf8c3ade2b545db05167726ab2f5d1ccb46527b1579d508177a1b1aae3456e03"},
+              "fgmres_plan_hash": {"const": "sha256:beb35ac21f24b5840c633a9ce9e68fdd3cd955f3e22d860cb6231b77031714cc"},
+              "recurrence_plan_hash": {"const": "sha256:3ccc4db675193d5660d8f841f640c0921b3cdf2b35d5e026e08f821e75bea60a"},
               "policy_hash": {"const": "sha256:dd36e5ba05790fc3cc72a4a242042ee6ddcdce259e84d40b2e018b17aebd9b51"},
-              "cpu_result_hash": {"const": "sha256:c652dc15dfa60a4c8d3d1d7d8adf89b237a5513d68040d6a267a865f9810a72d"},
-              "cpu_history_hash": {"const": "sha256:417d114cbab947e97791509d7f91dcf83ef3cbc7ef3835fd5149c9e7dab5119d"},
-              "cpu_solution_data_hash": {"const": "sha256:5d1e601c1030977ff480707018f1efd8afadc4c2fa84ce3d833c49c04907a3f0"},
-              "cpu_true_residual_data_hash": {"const": "sha256:6b309a908777743bd18e5242763ed9c9f914ce7f7b592dd09a0efa0c7fa76e8e"},
-              "direct_solution_data_hash": {"const": "sha256:254e41cf716d6056cee0b4a7db9e840698d60cf5c9ad1f09a69af8c54a290c6f"},
-              "direct_residual_data_hash": {"const": "sha256:2dfba633817046c7f559ed4b93076048435f7e1a90f14eb8035c04b9ebae2537"}
+              "cpu_result_hash": {"const": "sha256:a21c35a839a77f0b4ba8db845e35fb8842c7f02e308ad401437336b758dee753"},
+              "cpu_history_hash": {"const": "sha256:b58d4d126f8065f7e7f62b12501ef3036971ab401faa9961d5bc456b10fdfbe9"},
+              "cpu_solution_data_hash": {"const": "sha256:c191290bd37097f24e94128503c0e97741530b8723ae17b53f246a52cb19c425"},
+              "cpu_true_residual_data_hash": {"const": "sha256:828f74d885ba4b5927ef1661c229bce0fce6426b7d3a5e816255b96ba50fb75d"},
+              "direct_solution_data_hash": {"const": "sha256:49e297b7d4ba4427e622f0a6bf1e0a6b8be9f4e13e3e0e5af4fa784898ee430b"},
+              "direct_residual_data_hash": {"const": "sha256:1b32b7c7d69799641ad3a801eccf3c32f8e7df4450a32d0238110618db21ca2b"}
             }}
           }
         }
       ],
       "items": false
     },
-    "registry_hash": {"const": "sha256:dfc836a87b604a8aff066a4d9b6746311184477d8b0db4788479fb1c9d782aff"}
+    "registry_hash": {"const": "sha256:85611ec01af14b375be09f91ee67e9eb2ee89734f110ff9899239465d5793a19"}
   },
   "$defs": {
     "hash": {

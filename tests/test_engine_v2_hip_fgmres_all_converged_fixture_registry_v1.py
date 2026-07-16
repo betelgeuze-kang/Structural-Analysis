@@ -388,7 +388,7 @@ def test_private_registry_transaction_rejects_clones_transplants_and_collects(
         assert registry_module._TRANSACTION_ISSUANCES[replacement].mint is not old_mint
 
 
-def test_nine_resources_preserve_source_model_bytes_and_tenth_is_physical_new_model() -> (
+def test_seven_resources_preserve_source_bytes_two_are_normalized_and_tenth_is_new() -> (
     None
 ):
     source_dir = (
@@ -405,9 +405,6 @@ def test_nine_resources_preserve_source_model_bytes_and_tenth_is_physical_new_mo
             "frame_single_strong_axis_bending.model.json"
         ),
         "solution_frame_single_torsion.model.json": "frame_single_torsion.model.json",
-        "solution_frame_single_rotated_axis_bending.model.json": (
-            "frame_single_rotated_local_axis_bending.model.json"
-        ),
         "solution_frame_serial_two_span_axial.model.json": (
             "frame_serial_later_column.model.json"
         ),
@@ -415,14 +412,59 @@ def test_nine_resources_preserve_source_model_bytes_and_tenth_is_physical_new_mo
         "solution_frame_zero_free_rhs_edge.model.json": (
             "recurrence_initial_or_early_terminal.model.json"
         ),
-        "solution_frame_serial_four_span_axial.model.json": (
-            "recurrence_later_restart_partial_final_cycle.model.json"
-        ),
     }
     for destination, source in copied.items():
         assert (RESOURCE_DIR / destination).read_bytes() == (
             source_dir / source
         ).read_bytes()
+
+    normalized_derivatives = (
+        (
+            "solution_frame_single_rotated_axis_bending.model.json",
+            "frame_single_rotated_local_axis_bending.model.json",
+            "FY",
+            -1.0,
+            "frame_single_rotated_local_axis_bending_unit_load:recipe-v2",
+        ),
+        (
+            "solution_frame_serial_four_span_axial.model.json",
+            "recurrence_later_restart_partial_final_cycle.model.json",
+            "FX",
+            1.0,
+            "frame_serial_four_span_axial_unit_load:recipe-v2",
+        ),
+    )
+    for (
+        destination,
+        source,
+        component,
+        load,
+        source_ref_suffix,
+    ) in normalized_derivatives:
+        source_payload = json.loads((source_dir / source).read_text(encoding="utf-8"))
+        normalized_payload = json.loads(
+            (RESOURCE_DIR / destination).read_text(encoding="utf-8")
+        )
+        expected_normalized = deepcopy(source_payload)
+        expected_normalized["load_patterns"][0]["nodal_loads"][0]["components_si"][
+            component
+        ] = load
+        expected_normalized["provenance"] = normalized_payload["provenance"]
+        assert normalized_payload == expected_normalized
+        assert normalized_payload["provenance"]["normalizer_id"] == (
+            "engine-v2-fgmres-all-converged-v1-fixture-builder"
+        )
+        assert normalized_payload["provenance"]["normalizer_version"] == "2"
+        assert normalized_payload["provenance"]["source_ref"].endswith(
+            source_ref_suffix
+        )
+        assert normalized_payload["provenance"]["source_sha256"] == sha256_prefixed(
+            normalized_payload["provenance"]["source_ref"].encode("utf-8")
+        )
+        assert (RESOURCE_DIR / destination).read_bytes() != (
+            source_dir / source
+        ).read_bytes()
+
     new_model = json.loads(
         (RESOURCE_DIR / "solution_frame_serial_five_span_axial.model.json").read_text(
             encoding="utf-8"
@@ -432,6 +474,14 @@ def test_nine_resources_preserve_source_model_bytes_and_tenth_is_physical_new_mo
     assert len(new_model["elements"]) == 5
     assert new_model["elements"][-1]["node_ids"] == ["N5", "N6"]
     assert new_model["load_patterns"][0]["nodal_loads"][0]["node_id"] == "N6"
+    assert new_model["load_patterns"][0]["nodal_loads"][0]["components_si"]["FX"] == 1.0
+    assert new_model["provenance"]["normalizer_version"] == "2"
+    assert new_model["provenance"]["source_ref"].endswith(
+        "frame_serial_five_span_axial_unit_load:recipe-v2"
+    )
+    assert new_model["provenance"]["source_sha256"] == sha256_prefixed(
+        new_model["provenance"]["source_ref"].encode("utf-8")
+    )
 
 
 def test_registry_root_byte_mutation_fails_before_parse(

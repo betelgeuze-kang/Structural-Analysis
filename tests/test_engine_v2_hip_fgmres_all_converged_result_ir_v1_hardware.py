@@ -6,6 +6,7 @@ import ast
 import inspect
 import os
 import sys
+from pathlib import Path
 from typing import Any
 
 from structural_analysis.engine_v2.assembly_backend.fgmres_all_converged_fixture_registry_v1 import (
@@ -34,6 +35,7 @@ from tests.test_engine_v2_hip_fgmres_sealed_checkpoint_transaction_hardware_v1 i
 
 
 _REQUIRED_ENV = "ENGINE_V2_REQUIRE_HIP_FGMRES_ALL_CONVERGED_RESULT_IR_V1_HARDWARE"
+_LINUX_PROCESS_STATUS = Path("/proc/self/status")
 
 
 def _hardware_required() -> bool:
@@ -41,6 +43,42 @@ def _hardware_required() -> bool:
         os.environ.get("ENGINE_V2_REQUIRE_HIP_HARDWARE") == "1"
         or os.environ.get(_REQUIRED_ENV) == "1"
     )
+
+
+def _linux_process_rss_kib() -> tuple[int, int]:
+    """Return current and high-water resident memory for this Linux process."""
+    fields: dict[str, int] = {}
+    for line in _LINUX_PROCESS_STATUS.read_text(encoding="ascii").splitlines():
+        name, separator, value = line.partition(":")
+        if not separator or name not in {"VmRSS", "VmHWM"}:
+            continue
+        parts = value.split()
+        assert len(parts) == 2
+        assert parts[1] == "kB"
+        fields[name] = int(parts[0])
+    assert set(fields) == {"VmRSS", "VmHWM"}
+    assert 0 < fields["VmRSS"] <= fields["VmHWM"]
+    return fields["VmRSS"], fields["VmHWM"]
+
+
+def _emit_rss_checkpoint(
+    *,
+    phase: str,
+    previous_peak_rss_kib: int | None,
+) -> int:
+    current_rss_kib, peak_rss_kib = _linux_process_rss_kib()
+    peak_delta_kib = (
+        0 if previous_peak_rss_kib is None else peak_rss_kib - previous_peak_rss_kib
+    )
+    assert peak_delta_kib >= 0
+    print(
+        "actual-gfx1030 all-converged rss: "
+        f"phase={phase} current_rss_kib={current_rss_kib} "
+        f"cumulative_peak_rss_kib={peak_rss_kib} "
+        f"peak_delta_kib={peak_delta_kib}",
+        flush=True,
+    )
+    return peak_rss_kib
 
 
 def _assert_converged_case_and_single_export(
@@ -134,6 +172,10 @@ def test_native_gfx1030_all_converged_ten_result_ir_in_one_live_aggregate() -> N
     family = None
     aggregate = None
     observed_upstream_export_byte_count = 0
+    peak_rss_kib = _emit_rss_checkpoint(
+        phase="baseline_after_registry_replay",
+        previous_peak_rss_kib=None,
+    )
     try:
         for slot_id in HIP_FGMRES_ALL_CONVERGED_FIXTURE_REGISTRY_REQUIRED_SLOT_IDS_V1:
             print(f"actual-gfx1030 all-converged cell: {slot_id}", flush=True)
@@ -176,6 +218,10 @@ def test_native_gfx1030_all_converged_ten_result_ir_in_one_live_aggregate() -> N
             assert bridge.receipt.source_provenance.additional_export_count == 0
             assert bridge.receipt.source_provenance.fallback_count == 0
             bridges.append(bridge)
+            peak_rss_kib = _emit_rss_checkpoint(
+                phase=f"case_complete:{slot_id}",
+                previous_peak_rss_kib=peak_rss_kib,
+            )
 
         assert len(cases) == 10
         assert len(bridges) == 10
@@ -233,6 +279,10 @@ def test_native_gfx1030_all_converged_ten_result_ir_in_one_live_aggregate() -> N
         assert not family_claims.end_to_end_o_n_verified
         assert not family_claims.commercial_ready
         assert not family_receipt.promotion_eligible
+        peak_rss_kib = _emit_rss_checkpoint(
+            phase="family_complete",
+            previous_peak_rss_kib=peak_rss_kib,
+        )
         aggregate = attest_hip_fgmres_all_converged_result_ir_v1(
             family,
             tuple(reversed(bridges)),
@@ -345,6 +395,10 @@ def test_native_gfx1030_all_converged_ten_result_ir_in_one_live_aggregate() -> N
         assert not aggregate_claims.nonlinear_dynamic_shell_solid_contact_verified
         assert not aggregate_claims.commercial_ready
         assert not aggregate_claims.promotion_eligible
+        peak_rss_kib = _emit_rss_checkpoint(
+            phase="aggregate_complete",
+            previous_peak_rss_kib=peak_rss_kib,
+        )
     finally:
         cleanup_errors: list[BaseException] = []
         for opened in reversed(resources):
@@ -366,3 +420,7 @@ def test_native_gfx1030_all_converged_ten_result_ir_in_one_live_aggregate() -> N
     for bridge in bridges:
         assert validate_hip_fgmres_result_ir_v2(bridge) is bridge
     assert validate_hip_fgmres_all_converged_result_ir_result_v1(aggregate) is aggregate
+    _emit_rss_checkpoint(
+        phase="post_close_validation_complete",
+        previous_peak_rss_kib=peak_rss_kib,
+    )

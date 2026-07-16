@@ -138,9 +138,10 @@ standalone/signed provenance 또는 promotion 증거가 아니다.
    뒤 다시 검증했다.
 2. **v0.2.47 contract/harness 완료:** 종료·failure 의미론을 검증하는 현 registry v1과
    canonical 7-ready/3-not-issued disposition을 유지한 채 별도 all-converged registry와
-   exact 10/10 ResultIR vertical slice를 구현했다. 현재 host probe는 `gfx1030` ready이고
-   fallback false지만 신규 required actual `gfx1030` 10/10과 peak RSS는 pending이며 과거
-   `5757.94s` 및 current-source `7820.35s` termination-registry 실행을 재사용하지 않는다.
+   exact 10/10 ResultIR vertical slice를 구현했다. Required actual local `gfx1030` gate는
+   CPU fallback 없이 `1 passed in 1087.52s (0:18:07)`로 통과했고 process peak RSS는
+   `450,868 KiB`였다. 과거 `5757.94s` 및 current-source `7820.35s`
+   termination-registry 실행을 이 증거로 재사용하지 않는다.
 3. **v0.2.45 additive companion 완료:** ResultIRV2를 완화하지 않고 nonconverged
    partial iterate를 `solution_ready=false`인 별도 DiagnosticIR 계약에 결속했다.
    UI 소비와 재시작 checkpoint 자격은 여전히 후속 범위다.

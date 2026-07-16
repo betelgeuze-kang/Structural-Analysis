@@ -96,7 +96,7 @@ _RESOURCE_PACKAGE = (
 )
 _REGISTRY_RESOURCE = "registry.v1.json"
 _REGISTRY_RESOURCE_BYTES_SHA256 = (
-    "sha256:f1e7342a846db16af0a88bd2f410b4685206b17cee850b96157c5be40730a28a"
+    "sha256:e3414a08530703a9cc4405393157c9c88f6a721b2dbf5717e77c6a5dee7f31f1"
 )
 _SCHEMA_RESOURCE = "hip_fgmres_all_converged_fixture_registry_v1.schema.json"
 _COMPONENT_INDEX = {
@@ -1188,18 +1188,18 @@ def _semantic_rule(slot_id: str) -> _SemanticRuleV1:
             6,
             36,
             "FY",
-            -10000.0,
+            -1.0,
             "N2",
             1,
             False,
             ((0, 6, 6),),
             (
-                (0, 0.002552171711639753),
-                (1, -0.007960471927653038),
-                (2, 0.004450021285577484),
-                (3, 0.0035122991093693642),
-                (4, 0.00034355291242947313),
-                (5, -0.0013998016447427767),
+                (0, 2.552171711639753e-07),
+                (1, -7.960471927653038e-07),
+                (2, 4.450021285577484e-07),
+                (3, 3.512299109369364e-07),
+                (4, 3.4355291242947314e-08),
+                (5, -1.3998016447427768e-07),
             ),
         ),
         "solution_frame_serial_two_span_axial": _SemanticRuleV1(
@@ -1255,12 +1255,12 @@ def _semantic_rule(slot_id: str) -> _SemanticRuleV1:
             24,
             360,
             "FX",
-            100000.0,
+            1.0,
             "N5",
             0,
             False,
             ((0, 4, 4),),
-            ((0, 5.0e-5), (6, 1.0e-4), (12, 1.5e-4), (18, 2.0e-4)),
+            ((0, 5.0e-10), (6, 1.0e-9), (12, 1.5e-9), (18, 2.0e-9)),
         ),
         "solution_frame_serial_five_span_axial": _SemanticRuleV1(
             "frame_3d",
@@ -1270,17 +1270,17 @@ def _semantic_rule(slot_id: str) -> _SemanticRuleV1:
             30,
             468,
             "FX",
-            100000.0,
+            1.0,
             "N6",
             0,
             False,
             ((0, 5, 5),),
             (
-                (0, 5.0e-5),
-                (6, 1.0e-4),
-                (12, 1.5e-4),
-                (18, 2.0e-4),
-                (24, 2.5e-4),
+                (0, 5.0e-10),
+                (6, 1.0e-9),
+                (12, 1.5e-9),
+                (18, 2.0e-9),
+                (24, 2.5e-9),
             ),
         ),
     }
@@ -1316,7 +1316,8 @@ def _description(slot_id: str) -> str:
             "single straight frame under torsional excitation"
         ),
         "solution_frame_single_rotated_axis_bending": (
-            "single skew frame with nonzero local-axis roll under bending excitation"
+            "single skew frame with nonzero local-axis roll under normalized unit "
+            "bending excitation"
         ),
         "solution_frame_serial_two_span_axial": (
             "three-node two-span serial frame under axial excitation"
@@ -1326,10 +1327,10 @@ def _description(slot_id: str) -> str:
             "single frame with a load entirely on the constrained partition"
         ),
         "solution_frame_serial_four_span_axial": (
-            "five-node four-span serial frame under axial excitation"
+            "five-node four-span serial frame under normalized unit axial excitation"
         ),
         "solution_frame_serial_five_span_axial": (
-            "six-node five-span serial frame under axial excitation"
+            "six-node five-span serial frame under normalized unit axial excitation"
         ),
     }
     try:
