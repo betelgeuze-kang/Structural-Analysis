@@ -21,6 +21,54 @@ def test_canonical_ci_owns_structural_core_lane() -> None:
     assert "scripts/verify_quality_gate.py --mode pr" in workflow
 
 
+def test_python_and_frontend_source_triggers_are_disjoint() -> None:
+    canonical = _read("ci.yml")
+    frontend = _read("frontend-web-ci.yml")
+
+    assert canonical.count('- "src/structural_analysis/**"') == 2
+    assert '- "src/**"' not in canonical
+
+    frontend_lines = frontend.splitlines()
+    broad_indices = [
+        index
+        for index, line in enumerate(frontend_lines)
+        if line.strip() == '- "src/**"'
+    ]
+    excluded_indices = [
+        index
+        for index, line in enumerate(frontend_lines)
+        if line.strip() == '- "!src/structural_analysis/**"'
+    ]
+    assert len(broad_indices) == 2
+    assert len(excluded_indices) == 2
+    assert all(
+        broad_index < excluded_index
+        for broad_index, excluded_index in zip(
+            broad_indices,
+            excluded_indices,
+            strict=True,
+        )
+    )
+
+
+def test_frontend_lane_keeps_non_python_source_and_self_triggers() -> None:
+    workflow = _read("frontend-web-ci.yml")
+
+    for path in (
+        "index.html",
+        "prototype/**",
+        "src/**",
+        "tests/frontend/**",
+        "scripts/*.mjs",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "vite.config.ts",
+        ".github/workflows/frontend-web-ci.yml",
+    ):
+        assert f'- "{path}"' in workflow
+
+
 def test_legacy_evidence_has_independent_hosted_lane() -> None:
     workflow = _read("legacy-evidence-ci.yml")
 
