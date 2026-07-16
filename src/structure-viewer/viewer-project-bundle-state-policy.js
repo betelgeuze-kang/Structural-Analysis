@@ -69,6 +69,18 @@ function typeIssue(path, field, expected) {
   };
 }
 
+function emptyCounts() {
+  return Object.freeze({
+    recentSelections: 0,
+    auditEvents: 0,
+    exportHistory: 0,
+    reviewNotes: 0,
+    reviewTasks: 0,
+    annotations: 0,
+    receiptIndex: 0,
+  });
+}
+
 export function viewerProjectBundleStateLimits() {
   return Object.freeze({
     policy: VIEWER_PROJECT_BUNDLE_STATE_POLICY,
@@ -91,15 +103,7 @@ export function inspectViewerProjectBundleLocalState(localState) {
       valid: false,
       policy: VIEWER_PROJECT_BUNDLE_STATE_POLICY,
       limits: viewerProjectBundleStateLimits(),
-      counts: Object.freeze({
-        recentSelections: 0,
-        auditEvents: 0,
-        exportHistory: 0,
-        reviewNotes: 0,
-        reviewTasks: 0,
-        annotations: 0,
-        receiptIndex: 0,
-      }),
+      counts: emptyCounts(),
       serialized_bytes: 0,
       issues: Object.freeze(issues),
     });
@@ -121,7 +125,19 @@ export function inspectViewerProjectBundleLocalState(localState) {
     ));
   }
 
-  const auditEvents = auditLines(localState.auditEventsJsonl).length;
+  if (
+    localState.auditEventsJsonl !== undefined
+    && typeof localState.auditEventsJsonl !== 'string'
+  ) {
+    issues.push(typeIssue(
+      '/local_state/auditEventsJsonl',
+      'auditEventsJsonl',
+      'a string',
+    ));
+  }
+  const auditEvents = typeof localState.auditEventsJsonl === 'string'
+    ? auditLines(localState.auditEventsJsonl).length
+    : 0;
   if (auditEvents > VIEWER_PROJECT_BUNDLE_MAX_AUDIT_LINES) {
     issues.push(limitIssue(
       'project_bundle_audit_line_limit_exceeded',
@@ -223,19 +239,38 @@ function objectOrEmpty(value) {
 }
 
 function boundedObjectMerge(current, incoming, limit) {
-  return Object.fromEntries(
-    Object.entries({...objectOrEmpty(current), ...objectOrEmpty(incoming)}).slice(-limit),
-  );
+  const merged = new Map();
+  for (const [key, value] of Object.entries(objectOrEmpty(current))) {
+    merged.set(key, value);
+  }
+  for (const [key, value] of Object.entries(objectOrEmpty(incoming))) {
+    if (merged.has(key)) merged.delete(key);
+    merged.set(key, value);
+  }
+  while (merged.size > limit) {
+    const oldest = merged.keys().next().value;
+    merged.delete(oldest);
+  }
+  return Object.fromEntries(merged);
+}
+
+function rejectedMerge(currentState, inspection, source) {
+  return Object.freeze({
+    valid: false,
+    state: currentState,
+    source,
+    inspection,
+  });
 }
 
 export function mergeViewerProjectBundleLocalState(currentState = {}, incomingState = {}) {
+  const currentInspection = inspectViewerProjectBundleLocalState(currentState);
+  if (!currentInspection.valid) {
+    return rejectedMerge(currentState, currentInspection, 'current_state');
+  }
   const incomingInspection = inspectViewerProjectBundleLocalState(incomingState);
   if (!incomingInspection.valid) {
-    return Object.freeze({
-      valid: false,
-      state: currentState,
-      inspection: incomingInspection,
-    });
+    return rejectedMerge(currentState, incomingInspection, 'incoming_state');
   }
 
   const current = objectOrEmpty(currentState);
@@ -283,6 +318,7 @@ export function mergeViewerProjectBundleLocalState(currentState = {}, incomingSt
   return Object.freeze({
     valid: candidateInspection.valid,
     state: candidateInspection.valid ? candidate : currentState,
+    source: 'merged_state',
     inspection: candidateInspection,
   });
 }
