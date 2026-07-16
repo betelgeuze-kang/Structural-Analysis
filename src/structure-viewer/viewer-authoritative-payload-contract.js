@@ -158,6 +158,15 @@ function validateElement(row, index, nodeIds) {
   return elementId;
 }
 
+export function claimsAuthoritativeViewerContract(payload) {
+  if (!isRecord(payload)) return false;
+  const identity = isRecord(payload.model_identity) ? payload.model_identity : null;
+  return payload.schema_version === AUTHORITATIVE_VIEWER_SCHEMA_VERSION
+    || payload.source === SOURCE
+    || payload.solver_path_id === SOLVER_PATH_ID
+    || identity?.identity_policy === AUTHORITATIVE_VIEWER_IDENTITY_POLICY;
+}
+
 export function validateAuthoritativeViewerPayload(payload) {
   const root = requireExactKeys(payload, [
     'schema_version',
@@ -166,10 +175,12 @@ export function validateAuthoritativeViewerPayload(payload) {
     'analysis_fidelity',
     'reaction_definition',
     'equilibrium_residual_definition',
-    'model_identity',
     'nodes',
     'elements',
-  ], [], '/');
+  ], ['model_identity'], '/');
+  if (!Object.prototype.hasOwnProperty.call(root, 'model_identity')) {
+    fail('viewer_model_identity_missing', '/model_identity', 'Authoritative Viewer payload requires model identity.');
+  }
   const constants = [
     ['schema_version', AUTHORITATIVE_VIEWER_SCHEMA_VERSION],
     ['source', SOURCE],
