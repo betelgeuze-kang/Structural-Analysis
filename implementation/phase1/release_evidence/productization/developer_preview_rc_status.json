@@ -480,14 +480,14 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-16T03:15:35.487186+00:00",
+  "generated_at": "2026-07-16T03:30:07.353008+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:b37ec25ce5caa09d2d3775c7a07ac1fe0658af7e1596cec4569af2ae7db88213",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:8669d788905461b0ee6aa73b2b12f0693a9ffd673433bb5ed19d2fd78668ea9a",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:72e06d12205155989c9daa6786862d8311c893432ed2f172f95cef5742e46ca6",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:53af198ecca38e58f0756ae7f70c2cecf2028a326909932edeb44b8edb1cb61f",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:66b05036515b0ebadbc780f867be7031d0702e2f4c76394ffdb8b7e1b7155bce",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:18cdfd067d83dfa5e4b3a5b201802483d58c15ff3fc32b4fe51b60ed409638f8",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:2d3fd50ad43bed838d61a6527750819eb5474283cb3c5143562958a6feca9712",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:06babb3aa170697f9c7b6a19a422f0acb97a5ec4ddf9fc764f00cb85447abd27",
@@ -1272,13 +1272,14 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 90,
+    "developer_preview_blocker_count": 91,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
       "pm_release::M2::nonlinear_residual_integrated_case_missing",
+      "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
       "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
       "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
       "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
@@ -1292,8 +1293,7 @@
       "missing_artifact:implementation/phase1/release/independent_product_readiness.json",
       "pm_release::M2::contact_material_coupled_case_count_lt_10_or_missing",
       "pm_release::M2::element_material_breadth_gate_not_green",
-      "pm_release::M2::panel_contact_failure_reason_code_missing",
-      "pm_release::M2::rc_steel_composite_material_family_missing"
+      "pm_release::M2::panel_contact_failure_reason_code_missing"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -3247,6 +3247,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "6e56b415bda3b4e16105ab0bae83643b6c03e4e6",
+  "source_commit_sha": "5dcb1e67aea7e60b402e7bb377968c5518930f13",
   "status": "blocked"
 }
