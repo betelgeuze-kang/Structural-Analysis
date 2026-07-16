@@ -351,16 +351,17 @@ function buildBlockedEvidenceMetadataRow(inspection, {
   artifactPath = '',
 } = {}) {
   const normalizedProjectId = normalizeToken(projectId) || 'ingested_project';
-  const sourcePath = normalizeText(artifactPath) || inspection.source_name || 'browser-evidence-ingest';
+  const sourceToken = normalizeToken(inspection.source_type) || 'evidence';
+  const sourcePath = normalizeText(artifactPath) || inspection.source_name || `browser-${sourceToken}-ingest`;
   const errorCode = normalizeToken(inspection.validation_error_code) || 'evidence_ingest_blocked';
   const errorPath = normalizeText(inspection.validation_error_path) || '/';
   const authoritative = inspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND;
   return {
     project_id: normalizedProjectId,
-    drawing_id: `${normalizedProjectId}_${authoritative ? 'blocked_authoritative_viewer' : 'blocked_json_ingest'}`,
-    drawing_title: authoritative ? 'Blocked authoritative Viewer payload' : 'Blocked JSON evidence ingest',
-    source_family: authoritative ? AUTHORITATIVE_VIEWER_PAYLOAD_KIND : 'json_blocked_ingest',
-    source_tool: authoritative ? 'Structural Analysis authoritative CPU solver' : 'Browser JSON ingest',
+    drawing_id: `${normalizedProjectId}_${authoritative ? 'blocked_authoritative_viewer' : `blocked_${sourceToken}_ingest`}`,
+    drawing_title: authoritative ? 'Blocked authoritative Viewer payload' : `Blocked ${sourceToken.toUpperCase()} evidence ingest`,
+    source_family: authoritative ? AUTHORITATIVE_VIEWER_PAYLOAD_KIND : `${sourceToken}_blocked_ingest`,
+    source_tool: authoritative ? 'Structural Analysis authoritative CPU solver' : `Browser ${sourceToken.toUpperCase()} ingest`,
     source_tool_profile: 'generic',
     artifact_path: sourcePath,
     member_count: 0,
@@ -388,11 +389,44 @@ function buildBlockedEvidenceMetadataRow(inspection, {
   };
 }
 
+function blockedDirectRows({
+  sourceType,
+  projectId,
+  generatedAt,
+  errorCode,
+  errorPath,
+} = {}) {
+  const sourceToken = normalizeToken(sourceType) || 'json';
+  const sourceName = `inline-${sourceToken}-ingest-rows`;
+  const inspection = inspectionEnvelope({
+    sourceType: sourceToken,
+    sourceName,
+    generatedAt,
+    validationStatus: 'unavailable',
+    validationErrorCode: errorCode,
+    validationErrorPath: errorPath,
+  });
+  return [buildBlockedEvidenceMetadataRow(inspection, {
+    projectId,
+    artifactPath: sourceName,
+  })];
+}
+
 export function normalizeEvidenceIngestRow(row = {}, {
   sourceType = '',
   projectId = '',
   drawingId = '',
+  rowIndex = 0,
 } = {}) {
+  if (!isRecord(row)) {
+    return blockedDirectRows({
+      sourceType,
+      projectId,
+      generatedAt: '2026-05-17T00:00:00Z',
+      errorCode: 'ingest_row_object_required',
+      errorPath: `/rows/${rowIndex}`,
+    })[0];
+  }
   const type = normalizeToken(sourceType || row.source_type || row.format || row.input_format) || 'json';
   const sourceTool = firstText(
     row.source_tool,
@@ -476,10 +510,32 @@ export function buildEvidenceIngestPreview({
   projectTitle = 'Ingested Evidence Project',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  const normalizedRows = (Array.isArray(rows) ? rows : []).map((row, index) => normalizeEvidenceIngestRow(row, {
+  let sourceRows = rows;
+  if (!Array.isArray(rows)) {
+    sourceRows = blockedDirectRows({
+      sourceType,
+      projectId,
+      generatedAt,
+      errorCode: 'ingest_rows_array_required',
+      errorPath: '/rows',
+    });
+  } else {
+    const invalidIndex = rows.findIndex((row) => !isRecord(row));
+    if (invalidIndex >= 0) {
+      sourceRows = blockedDirectRows({
+        sourceType,
+        projectId,
+        generatedAt,
+        errorCode: 'ingest_row_object_required',
+        errorPath: `/rows/${invalidIndex}`,
+      });
+    }
+  }
+  const normalizedRows = sourceRows.map((row, index) => normalizeEvidenceIngestRow(row, {
     sourceType,
     projectId,
     drawingId: row?.drawing_id || row?.drawingId || `ingest_${index + 1}`,
+    rowIndex: index,
   }));
   const manifest = buildProjectManifestFromRows(normalizedRows, {
     project_id: projectId,
