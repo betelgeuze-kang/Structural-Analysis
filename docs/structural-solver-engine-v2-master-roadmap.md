@@ -776,9 +776,9 @@ public symbols `966/780/93/10`이다. 이는 reproducible/authoritative release 
 v0.2.52 final current-source 검증은 focused `24 passed in 110.20s`, capability
 `16 passed in 0.24s`, wheel exact-resource/isolated replay `2 passed in 38.19s`, ResultIR v3
 인접 public/wheel `6 passed in 12.25s`를 통과했다. Required local `gfx1030` gate는
-`1 passed in 101.22s`, wall `101.91s`, peak RSS `366,876 KiB`였고, 실행 전후
+`1 passed in 100.30s`, wall `101.00s`, peak RSS `366,808 KiB`였고, 실행 전후
 source/schema/hardware-harness aggregate
-`sha256:b1dd33c48ce9ecfbee6714a6a9b4e139738cedb0e96a1080dacc524814c043d3`가
+`sha256:a9749e6a3ca23148a9074b5b3d7e3a6a36435c8bf2c8178ff308e87288a47dac`가
 동일했다. 이는 unsigned process-local non-persistent observation이며 receipt hash는
 allocation lineage에 따라 재실행 시 달라질 수 있다.
 

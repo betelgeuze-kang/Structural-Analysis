@@ -109,12 +109,12 @@ Estimated residual envelope는 estimator와 true residual 간 gap을 CPU/HIP 각
 - composite additional device/D2H/sync/fallback: `0`
 - solution row maximum absolute errors: `0`, `2.71e-20`, `2.71e-20`
 - maximum residual roundoff ratios: `0`, `0.02252`, `0.03053`
-- final current-source required hardware test: `1 passed in 101.22s`
-- final wall clock / peak RSS: `101.91s` / `366,876 KiB`
-- run-scoped parity id: `sha256:12f1a7ef5989ea201f10db6cdce508c10b1b6a235a1147e4e398a2cb9ad70f9f`
-- run-scoped parity receipt: `sha256:30485372c196e234770b8530c58e2c4c833954559509eaa3d654f3ffa67e91e6`
-- run-scoped completion receipt: `sha256:98cc8335e6708959e485ce6901f605ea826d68fdf97e4f63c211433fbb765a3a`
-- 실행 전후 source/schema/hardware-harness aggregate: `sha256:b1dd33c48ce9ecfbee6714a6a9b4e139738cedb0e96a1080dacc524814c043d3`
+- final current-source required hardware test: `1 passed in 100.30s`
+- final wall clock / peak RSS: `101.00s` / `366,808 KiB`
+- run-scoped parity id: `sha256:fb2402824f20e4ded1b93780d0c976aedf5a5aeb4c197a96f35da3468cb4b482`
+- run-scoped parity receipt: `sha256:61c46985cfd1d22963738f4a957692c1117b2c00f11981d21150602f554ccc56`
+- run-scoped completion receipt: `sha256:702e9c6b41c5fd72408e9ab31a3f9143a05720a5eeb12f1897b783b6879abfcb`
+- 실행 전후 source/schema/hardware-harness aggregate: `sha256:a9749e6a3ca23148a9074b5b3d7e3a6a36435c8bf2c8178ff308e87288a47dac`
 
 위 identity는 allocation lineage를 포함한 unsigned local process observation이므로 다른 실행에서 receipt hash가 달라질 수 있고 영속 external evidence가 아니다. Final required gate는 실행 전후 source aggregate 동일성과 history/composite `context_closed`, `reason=null` schema validation을 통과했다.
 

@@ -3169,8 +3169,8 @@
         "five_draft_2020_12_schemas_bound_by_public_validators_and_packaged_in_wheel",
         "public_symbols_engine1066_assembly893_solvers47",
         "public_symbols_engine1066_assembly893_solvers47_unique",
-        "actual_local_gfx1030_process_peak_rss_366876_kib",
-        "engine_source_schema_harness_aggregate_sha256_b1dd33c48ce9ecfbee6714a6a9b4e139738cedb0e96a1080dacc524814c043d3",
+        "actual_local_gfx1030_process_peak_rss_366808_kib",
+        "engine_source_schema_harness_aggregate_sha256_a9749e6a3ca23148a9074b5b3d7e3a6a36435c8bf2c8178ff308e87288a47dac",
         "strict_unsigned_nonpersistent_process_local_nonpromoting_contract"
       ],
       "explicit_exclusions": [
@@ -3207,7 +3207,7 @@
         "cpu_initial_early_later_restart_partial_and_exact_full_cycle_checkpoint_replay",
         "runtime_schema_validation_for_plan_cpu_history_context_completion_and_parity_manifests",
         "public_export_identity_unique_all_and_packaged_kernel_schema_validation",
-        "actual_local_gfx1030_general_multi_restart_history_v2_one_passed_in_101_22_seconds",
+        "actual_local_gfx1030_general_multi_restart_history_v2_one_passed_in_100_30_seconds",
         "actual_local_gfx1030_exact_three_populated_rows_and_end_iterations_2_4_5",
         "actual_local_gfx1030_history_owned_bytes_1472_and_completion_total_bytes_2264",
         "actual_local_gfx1030_history_capture_six_success_and_acknowledged_module_launches_seven",
@@ -3217,10 +3217,10 @@
         "capability_matrix_16_passed_in_0_24_seconds",
         "wheel_exact_resource_and_isolated_replay_2_passed_in_38_19_seconds",
         "result_ir_v3_adjacent_public_wheel_regression_6_passed_in_12_25_seconds",
-        "final_actual_local_gfx1030_required_gate_wall_101_91_seconds_peak_rss_366876_kib",
-        "run_scoped_parity_receipt_sha256_30485372c196e234770b8530c58e2c4c833954559509eaa3d654f3ffa67e91e6",
-        "run_scoped_completion_receipt_sha256_98cc8335e6708959e485ce6901f605ea826d68fdf97e4f63c211433fbb765a3a",
-        "source_schema_harness_aggregate_sha256_b1dd33c48ce9ecfbee6714a6a9b4e139738cedb0e96a1080dacc524814c043d3",
+        "final_actual_local_gfx1030_required_gate_wall_101_00_seconds_peak_rss_366808_kib",
+        "run_scoped_parity_receipt_sha256_61c46985cfd1d22963738f4a957692c1117b2c00f11981d21150602f554ccc56",
+        "run_scoped_completion_receipt_sha256_702e9c6b41c5fd72408e9ab31a3f9143a05720a5eeb12f1897b783b6879abfcb",
+        "source_schema_harness_aggregate_sha256_a9749e6a3ca23148a9074b5b3d7e3a6a36435c8bf2c8178ff308e87288a47dac",
         "source_schema_harness_aggregate_identical_before_and_after_actual_gate"
       ],
       "evidence_paths": [

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.resources
 import json
+from types import SimpleNamespace
 
 from jsonschema import Draft202012Validator
 
@@ -107,3 +108,34 @@ def test_general_history_schemas_are_packaged_and_draft_2020_12_valid() -> None:
     ):
         schema = json.loads(schemas.joinpath(name).read_text(encoding="utf-8"))
         Draft202012Validator.check_schema(schema)
+
+
+def test_completion_v2_telemetry_preserves_nested_export_counts() -> None:
+    base = SimpleNamespace(
+        receipt=SimpleNamespace(
+            telemetry=SimpleNamespace(
+                d2h_operation_attempt_count=3,
+                d2h_operation_success_count=3,
+                d2h_bytes_succeeded=792,
+            )
+        )
+    )
+    history = SimpleNamespace(
+        receipt=SimpleNamespace(
+            telemetry=SimpleNamespace(
+                d2h_operation_attempt_count=2,
+                d2h_operation_success_count=2,
+                d2h_bytes_succeeded=1472,
+            )
+        )
+    )
+
+    row = completion_v2._telemetry(base, history)
+
+    assert row.base_blocking_d2h_attempt_count == 3
+    assert row.history_blocking_d2h_attempt_count == 2
+    assert row.total_blocking_d2h_attempt_count == 5
+    assert row.total_blocking_d2h_success_count == 5
+    assert row.base_d2h_byte_count == 792
+    assert row.history_d2h_byte_count == 1472
+    assert row.total_d2h_byte_count == 2264
