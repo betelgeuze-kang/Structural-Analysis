@@ -1078,6 +1078,11 @@ import {
   setViewerReviewNote,
   writeViewerLocalOpsState,
 } from './viewer-local-ops-state.js';
+import {
+  buildViewerProjectBundleFileFailurePreview,
+  readViewerProjectBundleFile,
+  viewerProjectBundleFileMetadata,
+} from './viewer-project-bundle-file-reader.js';
 
 const VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY='structure-viewer-runtime-ingest-payload-v1';
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
@@ -3237,24 +3242,29 @@ async function previewProjectBundleImportFromInput(event){
   const input=event?.target;
   const file=input instanceof HTMLInputElement?input.files?.[0]:null;
   if(!file)return;
+  const generatedAt=new Date().toISOString();
   try{
-    const text=await file.text();
-    const payload=JSON.parse(text);
-    const preview=buildViewerProjectBundleImportPreview(payload,{currentManifest:projectManifest});
-    const next={...readLocalOpsState(),lastImportPreview:preview};
-    writeLocalOpsState(next);
+    const bundleRead=await readViewerProjectBundleFile(file);
+    const preview=buildViewerProjectBundleImportPreview(bundleRead.payload,{currentManifest:projectManifest});
+    preview.file_read=viewerProjectBundleFileMetadata(bundleRead);
+    window.__STRUCTURE_VIEWER_LAST_IMPORT_PREVIEW__=preview;
+    writeLocalOpsState({...readLocalOpsState(),lastImportPreview:preview});
     auditWorkspaceEvent('project_bundle_import_previewed',file.name,resolveSelectionMemberId(selectedElementData),{
-      status:preview.blocked?'blocked':'mergeable',
+      status:preview.blocked?'blocked':'ready',
     });
   }catch(err){
-    const preview={
-      schema_version:'structure-viewer-project-bundle-import-preview.v1',
-      blocked:true,
-      issues:[{severity:'critical',issue:'import parse failed',value:String(err?.message||err)}],
-      incoming_counts:{reviewTasks:0,receiptIndex:0},
-    };
+    const preview=buildViewerProjectBundleFileFailurePreview(err,{
+      sourceName:file.name,
+      generatedAt,
+    });
+    window.__STRUCTURE_VIEWER_LAST_IMPORT_PREVIEW__=preview;
     writeLocalOpsState({...readLocalOpsState(),lastImportPreview:preview});
-    auditWorkspaceEvent('project_bundle_import_preview_failed',String(err?.message||err),resolveSelectionMemberId(selectedElementData),{status:'blocked'});
+    auditWorkspaceEvent(
+      'project_bundle_import_preview_failed',
+      `${preview.file_read?.error_code||'project_bundle_preview_failed'}@${preview.file_read?.error_path||'/file'}`,
+      resolveSelectionMemberId(selectedElementData),
+      {status:'blocked'},
+    );
   }finally{
     if(input instanceof HTMLInputElement)input.value='';
     renderReportExportPanel();
