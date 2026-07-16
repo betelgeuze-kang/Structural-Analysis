@@ -1,0 +1,61 @@
+name: Codex Temp Runtime Payload Storage Inspect
+
+on:
+  pull_request:
+    paths:
+      - "src/structure-viewer/**"
+      - ".github/workflows/codex-temp-runtime-payload-storage-inspect.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Capture runtime renderable payload storage context
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          source = Path('src/structure-viewer/index.html')
+          output = Path('/tmp/runtime-payload-storage-context.txt')
+          lines = source.read_text(encoding='utf-8').splitlines()
+          patterns = (
+              'readRuntimeIngestRenderablePayload',
+              'writeRuntimeIngestRenderablePayload',
+              'RUNTIME_INGEST',
+              'sessionStorage',
+              'lastIngestRenderablePayload',
+              '__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__',
+          )
+          chunks = []
+          seen = set()
+          for pattern in patterns:
+              matches = [index for index, line in enumerate(lines) if pattern in line]
+              chunks.append(f'=== PATTERN {pattern!r} matches={len(matches)} ===')
+              for index in matches[:30]:
+                  begin = max(0, index - 25)
+                  end = min(len(lines), index + 55)
+                  key = (begin, end)
+                  if key in seen:
+                      continue
+                  seen.add(key)
+                  chunks.append(f'--- lines {begin + 1}-{end} ---')
+                  chunks.extend(
+                      f'{line_number + 1:06d}: {lines[line_number]}'
+                      for line_number in range(begin, end)
+                  )
+          output.write_text('\n'.join(chunks) + '\n', encoding='utf-8')
+          print(f'captured {len(chunks)} lines to {output}')
+          PY
+      - name: Upload runtime storage context
+        uses: actions/upload-artifact@v7
+        with:
+          name: runtime-payload-storage-context-${{ github.run_id }}
+          path: /tmp/runtime-payload-storage-context.txt
+          if-no-files-found: error
+          retention-days: 1
