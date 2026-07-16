@@ -122,6 +122,7 @@ def test_python_validator_rejects_oversized_arrays_before_item_walk() -> None:
 
 def test_browser_and_python_resource_limits_are_identical() -> None:
     script = f"""
+// Python contract: nodes={VIEWER_MAX_NODE_COUNT}, elements={VIEWER_MAX_ELEMENT_COUNT}.
 import {{
   AUTHORITATIVE_VIEWER_MAX_ELEMENT_COUNT,
   AUTHORITATIVE_VIEWER_MAX_NODE_COUNT,
