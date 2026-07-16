@@ -156,21 +156,46 @@ console.log(JSON.stringify({
     valid = payload["valid"]
     assert valid["contract"] == payload["contract"]
     assert valid["resourcePolicy"] == payload["policy"]
+    assert valid["objectPolicy"] == "structure_viewer_local_model_object_budget_v1"
+    assert valid["objectLimits"] == {
+        "policy": "structure_viewer_local_model_object_budget_v1",
+        "max_nodes": 200_000,
+        "max_elements": 100_000,
+        "max_segments": 200_000,
+        "max_json_depth": 64,
+        "max_json_containers": 1_000_000,
+    }
     assert valid["name"] == "model.json"
     assert valid["type"] == "application/json"
     assert valid["lastModified"] == 123
     assert valid["payload"] == {"name": "Aé😀"}
     assert valid["textByteLength"] == len(
-        json.dumps({"name": "Aé😀"}, ensure_ascii=False).encode("utf-8")
+        json.dumps(
+            {"name": "Aé😀"},
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
     )
+    assert valid["maximumJsonDepth"] == 1
+    assert valid["jsonContainerCount"] == 1
+    assert valid["maximumNodeCount"] == 0
+    assert valid["maximumElementCount"] == 0
+    assert valid["maximumSegmentCount"] == 0
     assert payload["metadata"] == {
         "contract": payload["contract"],
         "resource_policy": payload["policy"],
+        "object_policy": valid["objectPolicy"],
+        "object_limits": valid["objectLimits"],
         "file_name": "model.json",
         "file_size": 16,
         "file_type": "application/json",
         "last_modified": 123,
         "text_byte_length": valid["textByteLength"],
+        "maximum_json_depth": 1,
+        "json_container_count": 1,
+        "maximum_node_count": 0,
+        "maximum_element_count": 0,
+        "maximum_segment_count": 0,
     }
     assert payload["metadataHasPayload"] is False
 
