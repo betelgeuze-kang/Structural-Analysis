@@ -162,6 +162,7 @@ import {{
   validateAuthoritativeViewerPayload,
 }} from './src/structure-viewer/viewer-authoritative-payload-contract.js';
 import {{
+  buildEvidenceIngestPreviewFromText,
   extractRenderableEvidencePayloadFromText,
   inspectRenderableEvidencePayloadFromText,
 }} from './src/structure-viewer/viewer-evidence-ingest-model.js';
@@ -189,9 +190,26 @@ const validExtract = extractRenderableEvidencePayloadFromText(
   JSON.stringify(authoritative),
   {{sourceType: 'json', sourceName: 'phase1_core_api_frame_result.json'}},
 );
+const validPreview = buildEvidenceIngestPreviewFromText(
+  JSON.stringify(authoritative),
+  {{
+    sourceType: 'json',
+    projectId: 'authoritative_project',
+    projectTitle: 'Authoritative Preview',
+    artifactPath: 'phase1_core_api_frame_result.json',
+  }},
+);
 const missingIdentity = structuredClone(authoritative);
 delete missingIdentity.model_identity;
 const missingInspection = inspectRenderableEvidencePayloadFromText(JSON.stringify(missingIdentity));
+const missingPreview = buildEvidenceIngestPreviewFromText(
+  JSON.stringify(missingIdentity),
+  {{
+    sourceType: 'json',
+    projectId: 'blocked_authoritative_project',
+    artifactPath: 'missing_identity.json',
+  }},
+);
 
 const downgraded = structuredClone(authoritative);
 downgraded.schema_version = 'legacy-viewer-payload.v1';
@@ -212,6 +230,9 @@ const genericPayload = {{
   }},
 }};
 const genericInspection = inspectRenderableEvidencePayloadFromText(JSON.stringify(genericPayload));
+const validDrawing = validPreview.manifest.projects[0].drawings[0];
+const validRow = validPreview.normalized_rows[0];
+const missingDrawing = missingPreview.manifest.projects[0].drawings[0];
 
 console.log(JSON.stringify({{
   constants: {{
@@ -222,7 +243,37 @@ console.log(JSON.stringify({{
   claimed: claimsAuthoritativeViewerContract(authoritative),
   validInspection,
   validExtract,
+  validPreview: {{
+    rowCount: validPreview.row_count,
+    drawingCount: validPreview.drawing_count,
+    blockedIssues: validPreview.blocked_issues,
+    renderableStatus: validPreview.renderable_payload_validation_status,
+    identity: validPreview.renderable_payload_model_identity,
+    profileCounts: validPreview.commercial_tool_profiles,
+    row: {{
+      drawingId: validRow.drawing_id,
+      nodeCount: validRow.node_count,
+      elementCount: validRow.element_count,
+      memberCount: validRow.member_count,
+      artifactPath: validRow.artifact_path,
+      hasRawNodes: Object.prototype.hasOwnProperty.call(validRow, 'nodes'),
+      hasRawElements: Object.prototype.hasOwnProperty.call(validRow, 'elements'),
+    }},
+    drawing: {{
+      status: validDrawing.commercial_review_status,
+      qualityFlags: validDrawing.quality_flags,
+      geometry: validDrawing.geometry_summary,
+      provenance: validDrawing.provenance,
+      ingestSummary: validDrawing.ingest_summary,
+    }},
+  }},
   missingInspection,
+  missingPreview: {{
+    blockedIssueCount: missingPreview.blocked_issues.length,
+    drawingStatus: missingDrawing.commercial_review_status,
+    validationStatus: missingPreview.renderable_payload_validation_status,
+    errorCode: missingPreview.renderable_payload_error_code,
+  }},
   downgradedInspection,
   missingNodeInspection,
   nonfiniteError,
@@ -263,12 +314,55 @@ console.log(JSON.stringify({{
         "model_identity"
     ]
 
+    preview = payload["validPreview"]
+    assert preview["rowCount"] == 1
+    assert preview["drawingCount"] == 1
+    assert preview["blockedIssues"] == []
+    assert preview["renderableStatus"] == "validated_authoritative_contract"
+    assert preview["identity"] == viewer_payload["model_identity"]
+    assert preview["profileCounts"] == {"generic": 1}
+    assert preview["row"] == {
+        "drawingId": "authoritative_project_authoritative_viewer",
+        "nodeCount": len(viewer_payload["nodes"]),
+        "elementCount": len(viewer_payload["elements"]),
+        "memberCount": len(viewer_payload["elements"]),
+        "artifactPath": "phase1_core_api_frame_result.json",
+        "hasRawNodes": False,
+        "hasRawElements": False,
+    }
+    assert preview["drawing"]["status"] == "needs_review"
+    assert "authoritative_viewer_contract_validated" in preview["drawing"][
+        "qualityFlags"
+    ]
+    assert "engineer_review_required" in preview["drawing"]["qualityFlags"]
+    assert preview["drawing"]["geometry"]["node_count"] == len(
+        viewer_payload["nodes"]
+    )
+    assert preview["drawing"]["geometry"]["element_count"] == len(
+        viewer_payload["elements"]
+    )
+    assert preview["drawing"]["provenance"]["source_input_checksum"] == (
+        viewer_payload["model_identity"]["source_input_checksum"]
+    )
+    assert preview["drawing"]["provenance"]["canonical_model_checksum"] == (
+        viewer_payload["model_identity"]["canonical_model_checksum"]
+    )
+    assert preview["drawing"]["ingestSummary"]["validation_status"] == (
+        "validated_authoritative_contract"
+    )
+
     missing = payload["missingInspection"]
     assert missing["available"] is False
     assert missing["payload_kind"] == "authoritative_viewer_v2"
     assert missing["validation_status"] == "blocked_authoritative_contract"
     assert missing["validation_error_code"] == "viewer_model_identity_missing"
     assert missing["validation_error_path"] == "/model_identity"
+    assert payload["missingPreview"] == {
+        "blockedIssueCount": 1,
+        "drawingStatus": "blocked",
+        "validationStatus": "blocked_authoritative_contract",
+        "errorCode": "viewer_model_identity_missing",
+    }
 
     downgraded = payload["downgradedInspection"]
     assert downgraded["available"] is False
