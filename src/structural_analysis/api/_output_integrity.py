@@ -9,6 +9,8 @@ publication design.
 Path comparison follows existing symlinks and uses ``normcase``. It detects
 case aliases on Windows, but cannot reliably detect every non-existent alias on
 a case-insensitive filesystem whose Python platform reports POSIX semantics.
+Existing targets must be regular files, and every not-yet-created target must
+have a directory as its nearest existing ancestor.
 """
 
 from __future__ import annotations
@@ -22,8 +24,16 @@ import stat
 from typing import Mapping
 
 
-class OutputPathCollisionError(ValueError):
-    """Raised when CLI outputs alias or conflict as file/directory paths."""
+class OutputPathValidationError(ValueError):
+    """Base error for fail-closed CLI output path validation."""
+
+
+class OutputPathCollisionError(OutputPathValidationError):
+    """Raised when outputs alias or conflict with protected paths."""
+
+
+class OutputTargetTypeError(OutputPathValidationError):
+    """Raised when an output target or parent has an unsafe file type."""
 
 
 class OutputRollbackError(OSError):
@@ -39,24 +49,50 @@ class _OriginalTarget:
 def resolve_distinct_output_paths(
     result_path: Path,
     report_path: Path,
+    *,
+    protected_paths: Mapping[str, Path] | None = None,
 ) -> tuple[Path, Path]:
-    """Resolve output targets and reject path aliases before any write."""
+    """Resolve and validate output targets before model loading or any write."""
 
-    if _same_existing_file(result_path, report_path):
+    original_outputs = {
+        "--out": Path(result_path),
+        "--report-out": Path(report_path),
+    }
+    if _same_existing_file(
+        original_outputs["--out"], original_outputs["--report-out"]
+    ):
         raise OutputPathCollisionError(
             "--out and --report-out must refer to distinct output targets"
         )
 
-    resolved_result = _resolved_output_path(result_path)
-    resolved_report = _resolved_output_path(report_path)
-    if (
-        _comparison_key(resolved_result) == _comparison_key(resolved_report)
-        or _is_parent_target(resolved_result, resolved_report)
-        or _is_parent_target(resolved_report, resolved_result)
-    ):
+    resolved_outputs = {
+        label: _resolved_output_path(path)
+        for label, path in original_outputs.items()
+    }
+    resolved_result = resolved_outputs["--out"]
+    resolved_report = resolved_outputs["--report-out"]
+    if _paths_conflict(resolved_result, resolved_report):
         raise OutputPathCollisionError(
             "--out and --report-out must be distinct, non-nested output targets"
         )
+
+    if protected_paths is not None:
+        for protected_label, protected_path_value in protected_paths.items():
+            protected_path = Path(protected_path_value)
+            resolved_protected = _resolved_output_path(protected_path)
+            for output_label, original_output in original_outputs.items():
+                resolved_output = resolved_outputs[output_label]
+                if _same_existing_file(original_output, protected_path) or (
+                    _paths_conflict(resolved_output, resolved_protected)
+                ):
+                    raise OutputPathCollisionError(
+                        f"{output_label} must not alias or nest with "
+                        f"{protected_label}"
+                    )
+
+    for label, target in resolved_outputs.items():
+        _validate_output_target(target, label)
+
     return resolved_result, resolved_report
 
 
@@ -131,6 +167,14 @@ def _comparison_key(path: Path) -> str:
     return os.path.normcase(os.fspath(path))
 
 
+def _paths_conflict(left: Path, right: Path) -> bool:
+    return (
+        _comparison_key(left) == _comparison_key(right)
+        or _is_parent_target(left, right)
+        or _is_parent_target(right, left)
+    )
+
+
 def _is_parent_target(parent: Path, child: Path) -> bool:
     parent_key = _comparison_key(parent)
     return any(parent_key == _comparison_key(candidate) for candidate in child.parents)
@@ -143,17 +187,82 @@ def _same_existing_file(left: Path, right: Path) -> bool:
         return False
 
 
+def _validate_output_target(target: Path, label: str) -> None:
+    try:
+        target_stat = target.stat()
+    except (FileNotFoundError, NotADirectoryError):
+        _validate_nearest_existing_parent(target.parent, label)
+        return
+    except OSError as error:
+        raise OutputTargetTypeError(
+            f"{label} target cannot be inspected safely: {error}"
+        ) from error
+
+    if not stat.S_ISREG(target_stat.st_mode):
+        raise OutputTargetTypeError(
+            f"{label} target must be a regular file or a new file path"
+        )
+
+
+def _validate_nearest_existing_parent(parent: Path, label: str) -> None:
+    candidate = parent
+    while True:
+        try:
+            parent_stat = candidate.stat()
+        except FileNotFoundError:
+            next_candidate = candidate.parent
+            if next_candidate == candidate:  # pragma: no cover - root should exist
+                raise OutputTargetTypeError(
+                    f"{label} has no inspectable existing parent directory"
+                )
+            candidate = next_candidate
+            continue
+        except OSError as error:
+            raise OutputTargetTypeError(
+                f"{label} parent cannot be inspected safely: {error}"
+            ) from error
+
+        if not stat.S_ISDIR(parent_stat.st_mode):
+            raise OutputTargetTypeError(
+                f"{label} nearest existing parent must be a directory: {candidate}"
+            )
+        return
+
+
 def _serialize_json(payload: Mapping[str, object]) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
 def _snapshot_target(target: Path) -> _OriginalTarget | None:
+    flags = os.O_RDONLY
+    flags |= getattr(os, "O_CLOEXEC", 0)
+    flags |= getattr(os, "O_NONBLOCK", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    flags |= getattr(os, "O_BINARY", 0)
+    file_descriptor = -1
     try:
-        with target.open("rb") as handle:
-            payload = handle.read()
-            mode = stat.S_IMODE(os.fstat(handle.fileno()).st_mode)
+        file_descriptor = os.open(target, flags)
     except FileNotFoundError:
         return None
+    except OSError as error:
+        raise OutputTargetTypeError(
+            f"output target cannot be opened as a regular file: {target}: {error}"
+        ) from error
+
+    try:
+        target_stat = os.fstat(file_descriptor)
+        if not stat.S_ISREG(target_stat.st_mode):
+            raise OutputTargetTypeError(
+                f"output target changed to a non-regular file: {target}"
+            )
+        handle = os.fdopen(file_descriptor, "rb")
+        file_descriptor = -1
+        with handle:
+            payload = handle.read()
+            mode = stat.S_IMODE(os.fstat(handle.fileno()).st_mode)
+    finally:
+        if file_descriptor >= 0:
+            os.close(file_descriptor)
     return _OriginalTarget(payload=payload, mode=mode)
 
 
