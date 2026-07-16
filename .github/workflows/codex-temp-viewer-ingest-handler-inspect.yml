@@ -1,0 +1,40 @@
+name: Codex Temp Viewer Ingest Handler Inspect
+
+on:
+  push:
+    branches:
+      - codex/viewer-ingest-file-read-preflight-20260716
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Print evidence ingest handler context
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/structure-viewer/index.html')
+          lines = path.read_text(encoding='utf-8').splitlines()
+          patterns = (
+              'previewEvidenceIngestFromInput',
+              'attachEvidenceIngestPreview',
+              'evidence-ingest-source-select',
+              '.text()',
+              'FileReader',
+          )
+          for pattern in patterns:
+              print(f'=== PATTERN {pattern!r} ===')
+              matches = [index for index, line in enumerate(lines) if pattern in line]
+              print(f'matches={len(matches)}')
+              for index in matches[:20]:
+                  begin = max(0, index - 12)
+                  end = min(len(lines), index + 22)
+                  print(f'--- lines {begin + 1}-{end} ---')
+                  for line_number in range(begin, end):
+                      print(f'{line_number + 1:06d}: {lines[line_number]}')
+          PY
