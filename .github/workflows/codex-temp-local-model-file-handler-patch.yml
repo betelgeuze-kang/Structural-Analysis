@@ -1,4 +1,4 @@
-name: Codex Temp Local Model File Handler Patch
+name: Codex Temp Local Model Handler Context
 
 on:
   pull_request:
@@ -7,124 +7,56 @@ on:
       - ".github/workflows/codex-temp-local-model-file-handler-patch.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  patch:
-    if: github.actor != 'github-actions[bot]'
+  inspect:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 0
-      - name: Patch file-select and drop model handlers
+      - name: Capture local model handler context
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           from pathlib import Path
-          import re
 
-          path = Path('src/structure-viewer/index.html')
-          text = path.read_text(encoding='utf-8')
-
-          import_needle = "} from './viewer-project-bundle-file-reader.js';\n"
-          import_replacement = import_needle + """import {
-            readViewerLocalModelFile,
-            viewerLocalModelFileFailure,
-          } from './viewer-local-model-file-reader.js';
-          """
-          if text.count(import_needle) != 1:
-              raise SystemExit('expected one project-bundle file-reader import terminator')
-          text = text.replace(import_needle, import_replacement, 1)
-
-          select_pattern = re.compile(
-              r"async function handleFileSelect\(event\)\s*\{.*?\n\s*\}\s*\n\s*const dropZone",
-              re.DOTALL,
+          source = Path('src/structure-viewer/index.html')
+          output = Path('/tmp/local-model-handler-context.txt')
+          lines = source.read_text(encoding='utf-8').splitlines()
+          patterns = (
+              'handleFileSelect',
+              "addEventListener('drop'",
+              'addEventListener("drop"',
+              'file.text()',
+              'JSON.parse(text)',
+              'const dropZone',
+              'viewer-project-bundle-file-reader.js',
           )
-          select_replacement = """async function handleFileSelect(event) {
-            const input = event?.target;
-            const file = input?.files?.[0] || null;
-            if (!file) return;
-            try {
-              const fileRead = await readViewerLocalModelFile(file);
-              window.loadStructureData(fileRead.payload, fileRead.name || file.name);
-            } catch (error) {
-              const failure = viewerLocalModelFileFailure(error, {sourceName: file.name});
-              console.warn(`${failure.error_code}@${failure.error_path}`);
-              alert(`Could not load the selected JSON model (${failure.error_code} @ ${failure.error_path}).`);
-            } finally {
-              if (input instanceof HTMLInputElement) input.value = '';
-            }
-          }
-
-          const dropZone"""
-          text, count = select_pattern.subn(select_replacement, text, count=1)
-          if count != 1:
-              raise SystemExit(f'expected one file-select handler; replaced={count}')
-
-          drop_pattern = re.compile(
-              r"dropZone\.addEventListener\((['\"])drop\1,\s*async\s*\(event\)\s*=>\s*\{.*?\n\s*\}\);",
-              re.DOTALL,
-          )
-          drop_replacement = """dropZone.addEventListener('drop', async (event) => {
-            event.preventDefault();
-            const file = event.dataTransfer?.files?.[0] || null;
-            if (!file) return;
-            try {
-              const fileRead = await readViewerLocalModelFile(file);
-              window.loadStructureData(fileRead.payload, fileRead.name || file.name);
-            } catch (error) {
-              const failure = viewerLocalModelFileFailure(error, {sourceName: file.name});
-              console.warn(`${failure.error_code}@${failure.error_path}`);
-              alert(`Could not load the dropped JSON model (${failure.error_code} @ ${failure.error_path}).`);
-            }
-          });"""
-          text, count = drop_pattern.subn(drop_replacement, text, count=1)
-          if count != 1:
-              raise SystemExit(f'expected one model drop handler; replaced={count}')
-
-          path.write_text(text, encoding='utf-8')
-          Path('.github/workflows/codex-temp-local-model-file-handler-patch.yml').unlink()
+          chunks = []
+          seen = set()
+          for pattern in patterns:
+              matches = [index for index, line in enumerate(lines) if pattern in line]
+              chunks.append(f'=== PATTERN {pattern!r} matches={len(matches)} ===')
+              for index in matches[:20]:
+                  begin = max(0, index - 24)
+                  end = min(len(lines), index + 48)
+                  key = (begin, end)
+                  if key in seen:
+                      continue
+                  seen.add(key)
+                  chunks.append(f'--- lines {begin + 1}-{end} ---')
+                  chunks.extend(
+                      f'{line_number + 1:06d}: {lines[line_number]}'
+                      for line_number in range(begin, end)
+                  )
+          output.write_text('\n'.join(chunks) + '\n', encoding='utf-8')
+          print(f'captured {len(chunks)} lines to {output}')
           PY
-
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          text = Path('src/structure-viewer/index.html').read_text(encoding='utf-8')
-          select = re.search(
-              r"async function handleFileSelect\(event\)\s*\{.*?\n\s*\}\s*\n\s*const dropZone",
-              text,
-              re.DOTALL,
-          )
-          drop = re.search(
-              r"dropZone\.addEventListener\((['\"])drop\1,\s*async\s*\(event\)\s*=>\s*\{.*?\n\s*\}\);",
-              text,
-              re.DOTALL,
-          )
-          if select is None or drop is None:
-              raise SystemExit('patched local model handlers not found')
-          for label, handler in (('select', select.group(0)), ('drop', drop.group(0))):
-              required = (
-                  'readViewerLocalModelFile(file)',
-                  'viewerLocalModelFileFailure(error',
-                  'failure.error_code',
-                  'failure.error_path',
-              )
-              missing = [value for value in required if value not in handler]
-              if missing:
-                  raise SystemExit(f'{label} missing contracts: {missing}')
-              if 'file.text()' in handler or 'JSON.parse(' in handler:
-                  raise SystemExit(f'{label} retains direct file parsing')
-              if 'console.error(' in handler:
-                  raise SystemExit(f'{label} retains raw console error')
-          PY
-
-          git diff --check
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/structure-viewer/index.html .github/workflows/codex-temp-local-model-file-handler-patch.yml
-          git commit -m "Use bounded reads for local Viewer models"
-          git push origin HEAD:${{ github.head_ref }}
+      - name: Upload handler context
+        uses: actions/upload-artifact@v7
+        with:
+          name: local-model-handler-context-${{ github.run_id }}
+          path: /tmp/local-model-handler-context.txt
+          if-no-files-found: error
+          retention-days: 1
