@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import FrozenInstanceError
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -18,6 +19,7 @@ from structural_analysis import (
     load_model,
     to_legacy_mapping,
 )
+from structural_analysis.api import core as core_api
 
 
 def _payload() -> dict:
@@ -160,6 +162,65 @@ def test_canonical_checksum_is_source_path_independent(tmp_path: Path) -> None:
     )
 
 
+def test_detached_analysis_snapshot_is_independent_of_legacy_mapping_mutation(
+    tmp_path: Path,
+) -> None:
+    model = load_model(_write(tmp_path / "frame.json"))
+    snapshot = model.detached_analysis_snapshot()
+    original_checksum = snapshot.canonical_model_checksum
+
+    assert snapshot is not model
+    assert snapshot.nodes is not model.nodes
+    assert snapshot.nodes[1] is not model.nodes[1]
+
+    model.nodes[1]["coordinates"][0] = 999.0
+    model.metadata["case_id"] = "mutated-after-snapshot"
+
+    assert snapshot.nodes[1]["coordinates"] == [2.0, 0.0, 0.0]
+    assert snapshot.metadata["case_id"] == "typed-domain-model"
+    assert snapshot.canonical_model_checksum == original_checksum
+    assert model.canonical_model_checksum != original_checksum
+
+
+def test_public_analysis_uses_one_detached_snapshot_and_propagates_both_hashes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = load_model(_write(tmp_path / "frame.json"))
+    expected_source_checksum = model.input_checksum
+    expected_canonical_checksum = model.canonical_model_checksum
+
+    def fake_linear_static(snapshot, **_kwargs):
+        assert snapshot is not model
+        assert snapshot.canonical_model_checksum == expected_canonical_checksum
+        model.nodes[1]["coordinates"][0] = 777.0
+        assert snapshot.nodes[1]["coordinates"] == [2.0, 0.0, 0.0]
+        return SimpleNamespace(
+            status="ready",
+            convergence_history=[],
+            unsupported_features=[],
+            warnings=[],
+            metrics={"node_count": 2},
+        )
+
+    monkeypatch.setattr(core_api, "run_authoritative_linear_static", fake_linear_static)
+    result = core_api.analyze(
+        model,
+        AnalysisConfig(analysis_type="linear_static", load_case="LC1"),
+    )
+    report = core_api.validate(result)
+
+    assert result.input_checksum == expected_source_checksum
+    assert result.canonical_model_checksum == expected_canonical_checksum
+    assert result.metrics["analysis_input_snapshot"] == (
+        "detached_canonical_model_v1"
+    )
+    assert report.input_checksum == expected_source_checksum
+    assert report.canonical_model_checksum == expected_canonical_checksum
+    assert "canonical_model_checksum" in report.passed_fields
+    assert model.canonical_model_checksum != expected_canonical_checksum
+
+
 def test_existing_solver_path_consumes_legacy_mapping_compatibility(
     tmp_path: Path,
 ) -> None:
@@ -175,3 +236,6 @@ def test_existing_solver_path_consumes_legacy_mapping_compatibility(
     assert result.status == "ready"
     assert result.solver == "authoritative_cpu_linear_fea_3d_v1"
     assert result.metrics["node_count"] == 2
+    assert result.input_checksum == model.input_checksum
+    assert result.canonical_model_checksum == model.canonical_model_checksum
+    assert result.metrics["analysis_input_snapshot"] == "detached_canonical_model_v1"
