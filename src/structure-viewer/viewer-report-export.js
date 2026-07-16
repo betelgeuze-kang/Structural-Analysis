@@ -55,15 +55,22 @@ export function buildStructureViewerReportHtml({
   const memberSummaryRows = Array.isArray(memberComparison?.summaryRows) ? memberComparison.summaryRows : [];
   const importIssues = Array.isArray(importPreview?.issues) ? importPreview.issues : [];
   const ingestIssues = Array.isArray(ingestPreview?.blocked_issues) ? ingestPreview.blocked_issues : [];
+  const ingestValidationStatus = normalizeText(ingestPreview?.renderable_payload_validation_status);
+  const ingestValidationErrorCode = normalizeText(ingestPreview?.renderable_payload_error_code);
+  const ingestValidationErrorPath = normalizeText(ingestPreview?.renderable_payload_error_path);
+  const ingestContractBlocked = ingestValidationStatus === 'blocked_authoritative_contract';
   const lineageRows = Array.isArray(explainability?.lineageDrilldown?.rows) ? explainability.lineageDrilldown.rows : [];
   const crosswalkRows = Array.isArray(commercialCrosswalk?.rows) ? commercialCrosswalk.rows : [];
   const mapperRows = Array.isArray(commercialMapper?.rows) ? commercialMapper.rows : [];
   const sheetPackageRows = Array.isArray(drawingSheetPackage?.rows) ? drawingSheetPackage.rows : [];
   const sheetRows = Array.isArray(drawingSheetPackage?.sheets) ? drawingSheetPackage.sheets : [];
   const deliveryRows = Array.isArray(drawingComparisonDelivery?.rows) ? drawingComparisonDelivery.rows : [];
+  const ingestValidationLabel = ingestValidationStatus
+    ? `${ingestValidationStatus}${ingestValidationErrorCode ? ` · ${ingestValidationErrorCode}${ingestValidationErrorPath ? ` @ ${ingestValidationErrorPath}` : ''}` : ''}`
+    : '';
   const ingestRenderableLabel = ingestPreview?.renderable_payload_available
-    ? `${ingestPreview.renderable_payload_kind || 'renderable'} · nodes=${ingestPreview.renderable_node_count || 0} · elements=${ingestPreview.renderable_element_count || 0} · segments=${ingestPreview.renderable_segment_count || 0}`
-    : '--';
+    ? `${ingestPreview.renderable_payload_kind || 'renderable'} · nodes=${ingestPreview.renderable_node_count || 0} · elements=${ingestPreview.renderable_element_count || 0} · segments=${ingestPreview.renderable_segment_count || 0}${ingestValidationLabel ? ` · ${ingestValidationLabel}` : ''}`
+    : ingestValidationLabel || '--';
   const verification = comparison?.verification && typeof comparison.verification === 'object'
     ? comparison.verification
     : {};
@@ -225,13 +232,15 @@ ${mapperRows.length ? mapperRows.map((row) => `<tr><td>${escapeHtml(row.field)}<
 <div class="row muted">Incoming tasks</div><div class="row">${escapeHtml(importPreview?.incoming_counts?.reviewTasks ?? '--')}</div>
 <div class="row muted">Incoming receipts</div><div class="row">${escapeHtml(importPreview?.incoming_counts?.receiptIndex ?? '--')}</div>
 <div class="row muted">Evidence ingest</div><div class="row">${escapeHtml(ingestPreview ? `${ingestPreview.source_type || '--'} · rows=${ingestPreview.row_count || 0} · drawings=${ingestPreview.drawing_count || 0}` : '--')}</div>
-<div class="row muted">Renderable ingest</div><div class="row">${escapeHtml(ingestRenderableLabel)}</div>
+<div class="row muted">Renderable ingest</div><div class="row ${ingestContractBlocked ? 'blocked' : ''}">${escapeHtml(ingestRenderableLabel)}</div>
 </div>
 <table>
 <thead><tr><th>Severity</th><th>Issue</th><th>Value</th></tr></thead>
 <tbody>
 ${importIssues.length ? importIssues.map((issue) => `<tr><td>${escapeHtml(issue.severity)}</td><td>${escapeHtml(issue.issue)}</td><td>${escapeHtml(issue.value)}</td></tr>`).join('') : '<tr><td>info</td><td>No bundle import issue registered</td><td>--</td></tr>'}
-${ingestIssues.length ? ingestIssues.map((issue) => `<tr><td>warning</td><td>${escapeHtml(issue.issue)}</td><td>${escapeHtml(issue.drawing_id)}</td></tr>`).join('') : '<tr><td>info</td><td>No evidence ingest blocked issue registered</td><td>--</td></tr>'}
+${ingestIssues.length ? ingestIssues.map((issue) => `<tr><td>warning</td><td>${escapeHtml(issue.issue)}</td><td>${escapeHtml(issue.drawing_id)}</td></tr>`).join('') : ''}
+${ingestContractBlocked ? `<tr><td>warning</td><td>${escapeHtml(ingestValidationErrorCode || 'blocked_authoritative_contract')}</td><td>${escapeHtml(ingestValidationErrorPath || '--')}</td></tr>` : ''}
+${!ingestIssues.length && !ingestContractBlocked ? '<tr><td>info</td><td>No evidence ingest blocked issue registered</td><td>--</td></tr>' : ''}
 </tbody>
 </table>
 
