@@ -36,6 +36,15 @@ const scalarPreview = buildEvidenceIngestPreviewFromText(
   {sourceType: 'json', projectId: 'scalar_json', artifactPath: 'scalar.json'},
 );
 
+const mixedRowsText = JSON.stringify([
+  {drawing_id: 'candidate', raw_marker: 'SECRET_ROW_MARKER'},
+  null,
+]);
+const mixedRowsPreview = buildEvidenceIngestPreviewFromText(
+  mixedRowsText,
+  {sourceType: 'json', projectId: 'mixed_rows', artifactPath: 'mixed-rows.json'},
+);
+
 const malformedAuthoritative = {
   schema_version: 'structural-analysis-viewer-payload.v2',
   source: 'authoritative_solver_result',
@@ -78,6 +87,7 @@ console.log(JSON.stringify({
   malformed: compact(malformedPreview),
   malformedExtract,
   scalar: compact(scalarPreview),
+  mixedRows: compact(mixedRowsPreview),
   authoritative: compact(authoritativePreview),
 }));
 """
@@ -124,6 +134,18 @@ console.log(JSON.stringify({
     assert scalar["drawingStatus"] == "blocked"
     assert scalar["artifactPath"] == "scalar.json"
     assert scalar["loadModelStatus"] == "json_object_required"
+
+    mixed_rows = payload["mixedRows"]
+    assert mixed_rows["rowCount"] == 1
+    assert mixed_rows["drawingCount"] == 1
+    assert mixed_rows["blockedIssueCount"] == 1
+    assert mixed_rows["validationStatus"] == "unavailable"
+    assert mixed_rows["errorCode"] == "json_row_object_required"
+    assert mixed_rows["errorPath"] == "/1"
+    assert mixed_rows["drawingStatus"] == "blocked"
+    assert mixed_rows["artifactPath"] == "mixed-rows.json"
+    assert mixed_rows["loadModelStatus"] == "json_row_object_required"
+    assert "SECRET_ROW_MARKER" not in mixed_rows["serialized"]
 
     authoritative = payload["authoritative"]
     assert authoritative["blockedIssueCount"] == 1
