@@ -23,12 +23,12 @@
       "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
       "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
       "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-      "evidence_freshness::real_project_corpus_measured_status::input_dependency_newer_than_artifact",
       "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
       "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
       "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
       "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
       "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+      "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
       "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
       "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
       "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
@@ -65,12 +65,12 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-16T06:07:53.768659+00:00",
+  "generated_at": "2026-07-16T06:12:21.021193+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:500b7803686ab0e8a38937948dc8831ce19bf9ef6461e601121ef434e39ba81a",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:9ddb5502fc9eb5911082834fb184629f72eb488fd8b53425594c32a52ef06a2f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:630ef277f2e08f5d62cc1c6041cbcb35fc1e41d79d1c0ad74a0a57d8edc246be",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7a26546a2e6b84ad26b8c13578d421f66ba803844e48202f9e733ee8f4c39e96",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:70b4d52619607d53de23e57abcd17e70cbfe7958f7b2afc82760c29ac35df24d",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:61356ccd385e3429cc523626704fc718b4e13efbb3b19d83977e308b9187c924",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:18bc58bb2a7bb2ae2d64a9e7b2476f32697392860e8eab9d28e5ad6949dababe",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:7ad36778461baa79f656ed870b84fdf37b95fdbf264f3a94bc717228ab82b8e9"
@@ -2289,9 +2289,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -2299,7 +2299,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -2370,9 +2370,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -2380,7 +2380,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -2451,9 +2451,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -2461,7 +2461,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -2532,9 +2532,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -2542,88 +2542,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
-        "reuse_marker_rows_present": true,
-        "source_commit_rows_match": false,
-        "state": "release_evidence_metadata_missing"
-      },
-      "external_input_required": false,
-      "handoff": {
-        "checks": {
-          "acceptance_criteria_present": true,
-          "evidence_artifacts_present": true,
-          "expected_intake_artifact_present": true,
-          "owner_action_present": true,
-          "owner_assigned": true,
-          "reproduction_commands_present": true,
-          "verification_commands_present": true
-        },
-        "expected_intake_artifact": "",
-        "handoff_ready": true,
-        "handoff_state": "local_remediation_ready"
-      },
-      "handoff_ready": true,
-      "handoff_state": "local_remediation_ready",
-      "namespace": "evidence_freshness",
-      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
-      "owner": "release_owner",
-      "owner_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
-      "owner_input_required": false,
-      "reproduction_commands": [
-        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "resolution_type": "release_evidence_metadata_required",
-      "scope": "release_area",
-      "source_intake_artifact": "",
-      "source_intake_blocker_id_count": 0,
-      "source_intake_blocker_ids": [],
-      "source_intake_contract_pass": false,
-      "source_intake_evidence_intake_artifact_count": 0,
-      "source_intake_evidence_intake_artifacts": [],
-      "source_intake_path": "",
-      "source_intake_release_area_blocker_ids": [],
-      "source_intake_status": "",
-      "status": "open",
-      "title": "Evidence Freshness",
-      "verification_commands": [
-        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
-        "`release_evidence_freshness_report.json.contract_pass == true`",
-        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
-        "`evidence_freshness::real_project_corpus_measured_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
-      ],
-      "blocker_code": "real_project_corpus_measured_status::input_dependency_newer_than_artifact",
-      "blocker_id": "evidence_freshness::real_project_corpus_measured_status::input_dependency_newer_than_artifact",
-      "blocker_ids": [
-        "evidence_freshness::real_project_corpus_measured_status::input_dependency_newer_than_artifact"
-      ],
-      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
-      "evidence_artifacts": {
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
-      },
-      "evidence_snapshot": {
-        "artifact_count": 14,
-        "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
-        "max_age_days": 30.0,
-        "pass_count": 2
-      },
-      "evidence_status": {
-        "artifact_count": 14,
-        "blocker_count": 19,
-        "dependency_mtime_rows_pass": false,
-        "engine_version_rows_present": true,
-        "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -2694,9 +2613,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -2704,7 +2623,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -2775,9 +2694,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -2785,7 +2704,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -2856,9 +2775,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -2866,7 +2785,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -2937,9 +2856,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -2947,7 +2866,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3018,9 +2937,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3028,7 +2947,88 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
+        "reuse_marker_rows_present": true,
+        "source_commit_rows_match": false,
+        "state": "release_evidence_metadata_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "evidence_freshness",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "release_evidence_metadata_required",
+      "scope": "release_area",
+      "source_intake_artifact": "",
+      "source_intake_blocker_id_count": 0,
+      "source_intake_blocker_ids": [],
+      "source_intake_contract_pass": false,
+      "source_intake_evidence_intake_artifact_count": 0,
+      "source_intake_evidence_intake_artifacts": [],
+      "source_intake_path": "",
+      "source_intake_release_area_blocker_ids": [],
+      "source_intake_status": "",
+      "status": "open",
+      "title": "Evidence Freshness",
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact` absent from `release_area_blockers`"
+      ],
+      "blocker_code": "g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+      "blocker_id": "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+      "blocker_ids": [
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact"
+      ],
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "evidence_artifacts": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_snapshot": {
+        "artifact_count": 14,
+        "blocker_count": 19,
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
+        "max_age_days": 30.0,
+        "pass_count": 3
+      },
+      "evidence_status": {
+        "artifact_count": 14,
+        "blocker_count": 19,
+        "dependency_mtime_rows_pass": false,
+        "engine_version_rows_present": true,
+        "input_checksum_rows_present": true,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3099,9 +3099,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3109,7 +3109,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3180,9 +3180,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3190,7 +3190,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3261,9 +3261,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3271,7 +3271,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3342,9 +3342,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3352,7 +3352,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3423,9 +3423,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3433,7 +3433,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3504,9 +3504,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3514,7 +3514,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3585,9 +3585,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3595,7 +3595,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3666,9 +3666,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3676,7 +3676,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -3747,9 +3747,9 @@
       "evidence_snapshot": {
         "artifact_count": 14,
         "blocker_count": 19,
-        "current_source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 2
+        "pass_count": 3
       },
       "evidence_status": {
         "artifact_count": 14,
@@ -3757,7 +3757,7 @@
         "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "pass_count": 2,
+        "pass_count": 3,
         "reuse_marker_rows_present": true,
         "source_commit_rows_match": false,
         "state": "release_evidence_metadata_missing"
@@ -5534,7 +5534,7 @@
           "tests/test_verify_quality_gate.py",
           "tests/test_verify_quality_gate_contract.py"
         ],
-        "current_head_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_head_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -5670,7 +5670,7 @@
           "tests/test_verify_quality_gate.py",
           "tests/test_verify_quality_gate_contract.py"
         ],
-        "current_head_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+        "current_head_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "feature_ahead_count": 0,
         "feature_fast_forward_possible": true,
         "feature_synced_to_head": true,
@@ -6248,7 +6248,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "afd8e44046321212a6c81a462786582c4a1192d9",
+  "source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 11,
