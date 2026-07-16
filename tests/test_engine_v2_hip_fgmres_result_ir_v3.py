@@ -384,4 +384,4 @@ print(len(engine_v2.__all__), len(assembly_backend.__all__))
         text=True,
     )
     assert isolated.returncode == 0, isolated.stdout + isolated.stderr
-    assert isolated.stdout.strip() == "966 780"
+    assert isolated.stdout.strip() == "996 810"

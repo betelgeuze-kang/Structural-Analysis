@@ -8,6 +8,14 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+from structural_analysis.engine_v2.assembly_backend.fgmres_high_load_compatibility_registry_v1 import (
+    load_hip_fgmres_high_load_compatibility_registry_v1,
+    validate_hip_fgmres_high_load_compatibility_registry_result_v1,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_high_load_result_ir_aggregate_v1 import (
+    attest_hip_fgmres_high_load_result_ir_aggregate_v1,
+    validate_hip_fgmres_high_load_result_ir_aggregate_result_v1,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_model_case_parity_v2 import (
     attest_hip_fgmres_model_case_parity_v2,
     validate_hip_fgmres_model_case_parity_result_v2,
@@ -17,10 +25,6 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_result_ir_v3 import (
     validate_hip_fgmres_result_ir_v3,
 )
 
-from tests.test_engine_v2_fp64_csr_residual_roundoff_v1_hardware import (
-    _HIGH_LOAD_CASES,
-    _high_load_slot,
-)
 from tests.test_engine_v2_hip_fgmres_model_family_parity_v2_hardware import (
     _attach_cleanup_failures,
     _execute_live_case,
@@ -32,6 +36,11 @@ from tests.test_engine_v2_hip_fgmres_sealed_checkpoint_transaction_hardware_v1 i
 
 ROOT = Path(__file__).resolve().parents[1]
 _REQUIRED_ENV = "ENGINE_V2_REQUIRE_FGMRES_MODEL_CASE_PARITY_V2_HARDWARE"
+_HIGH_LOAD_FIXTURE_DIR = (
+    ROOT
+    / "src/structural_analysis/engine_v2/assembly_backend/fixtures"
+    / "fgmres_high_load_compatibility_v1"
+)
 _SOURCE_PATHS = (
     ROOT
     / "src/structural_analysis/engine_v2/contracts"
@@ -52,6 +61,12 @@ _SOURCE_PATHS = (
     / "src/structural_analysis/engine_v2/assembly_backend"
     / "fgmres_result_ir_v3.py",
     ROOT
+    / "src/structural_analysis/engine_v2/assembly_backend"
+    / "fgmres_high_load_compatibility_registry_v1.py",
+    ROOT
+    / "src/structural_analysis/engine_v2/assembly_backend"
+    / "fgmres_high_load_result_ir_aggregate_v1.py",
+    ROOT
     / "src/structural_analysis/schemas"
     / "fp64_csr_residual_normwise_v1.schema.json",
     ROOT
@@ -61,6 +76,14 @@ _SOURCE_PATHS = (
     / "src/structural_analysis/schemas"
     / "hip_fgmres_model_case_parity_v2.schema.json",
     ROOT / "src/structural_analysis/schemas" / "hip_fgmres_result_ir_v3.schema.json",
+    ROOT
+    / "src/structural_analysis/schemas"
+    / "hip_fgmres_high_load_compatibility_registry_v1.schema.json",
+    ROOT
+    / "src/structural_analysis/schemas"
+    / "hip_fgmres_high_load_result_ir_aggregate_v1.schema.json",
+    ROOT / "scripts/regenerate_engine_v2_high_load_compatibility_registry.py",
+    *tuple(sorted(_HIGH_LOAD_FIXTURE_DIR.glob("*.json"))),
     Path(__file__).resolve(),
 )
 
@@ -120,12 +143,16 @@ def _attest_live_model_case_v2(
 def test_native_gfx1030_high_load_model_case_parity_v2_and_result_ir() -> None:
     required = _hardware_required()
     architecture = _native_gfx1030(required)
+    registry = load_hip_fgmres_high_load_compatibility_registry_v1()
+    assert (
+        validate_hip_fgmres_high_load_compatibility_registry_result_v1(registry)
+        is registry
+    )
     source_before = _source_aggregate()
     resources: list[Any] = []
     results: list[tuple[str, Any]] = []
     try:
-        for specification in _HIGH_LOAD_CASES:
-            slot = _high_load_slot(*specification)
+        for slot in registry.slots:
             print(f"actual-gfx1030 model-case-v2 cell: {slot.slot_id}", flush=True)
             opened, result, audit_context, _ordinal_context = _execute_live_case(
                 slot,
@@ -159,7 +186,34 @@ def test_native_gfx1030_high_load_model_case_parity_v2_and_result_ir() -> None:
             _attach_cleanup_failures(first, cleanup_errors[1:])
             raise first
 
-    assert len(results) == len(_HIGH_LOAD_CASES)
+    assert len(results) == len(registry.slots)
+    aggregate = attest_hip_fgmres_high_load_result_ir_aggregate_v1(
+        tuple(result.bridge for _slot_id, result in reversed(results))
+    )
+    assert (
+        validate_hip_fgmres_high_load_result_ir_aggregate_result_v1(aggregate)
+        is aggregate
+    )
+    assert tuple(row.slot_id for row in aggregate.receipt.observations) == tuple(
+        row.slot_id for row in registry.slots
+    )
+    assert aggregate.receipt.totals.package_global_dof_count == 78
+    assert aggregate.receipt.totals.package_element_count == 10
+    assert aggregate.receipt.totals.package_free_dof_count == 60
+    assert aggregate.receipt.totals.package_csr_nnz == 1188
+    assert aggregate.receipt.totals.result_array_count == 18
+    assert aggregate.receipt.totals.result_array_byte_count == 3392
+    assert aggregate.receipt.totals.detached_completion_payload_byte_count == 960
+    print(
+        "actual-gfx1030 high-load aggregate: "
+        f"registry_hash={registry.registry_hash} "
+        f"registry_receipt_hash={registry.receipt_hash} "
+        f"aggregate_id={aggregate.receipt.attestation_id} "
+        f"aggregate_receipt_hash={aggregate.receipt.receipt_hash} "
+        f"result_arrays={aggregate.receipt.totals.result_array_count} "
+        f"result_array_bytes={aggregate.receipt.totals.result_array_byte_count}",
+        flush=True,
+    )
     assert _source_aggregate() == source_before
     for slot_id, result in results:
         assert validate_hip_fgmres_result_ir_v3(result.bridge) is result.bridge

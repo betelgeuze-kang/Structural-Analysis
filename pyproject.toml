@@ -45,6 +45,7 @@ structural_analysis = [
   "engine_v2/assembly_backend/kernels/*.hip.cpp",
   "engine_v2/assembly_backend/fixtures/fgmres_family_v2/*.json",
   "engine_v2/assembly_backend/fixtures/fgmres_all_converged_v1/*.json",
+  "engine_v2/assembly_backend/fixtures/fgmres_high_load_compatibility_v1/*.json",
   "engine_v2/assembly_backend/fixtures/fgmres_external_trust_anchors_v1/*.json",
   "engine_v2/assembly_backend/fixtures/fgmres_external_trust_anchors_v2/*.json",
   "engine_v2/assembly_backend/fixtures/fgmres_external_reviewer_root_bootstrap_v1/*.json",
