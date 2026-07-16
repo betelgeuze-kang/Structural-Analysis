@@ -1,0 +1,120 @@
+name: Codex Temp Project Bundle File Handler Patch
+
+on:
+  pull_request:
+    paths:
+      - "src/structure-viewer/**"
+      - ".github/workflows/codex-temp-project-bundle-file-handler-patch.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Patch project-bundle input and remove this temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('src/structure-viewer/index.html')
+          text = path.read_text(encoding='utf-8')
+
+          import_needle = "} from './viewer-local-ops-state.js';\n"
+          import_replacement = import_needle + """import {
+            buildViewerProjectBundleFileFailurePreview,
+            readViewerProjectBundleFile,
+            viewerProjectBundleFileMetadata,
+          } from './viewer-project-bundle-file-reader.js';
+          """
+          if text.count(import_needle) != 1:
+              raise SystemExit('expected exactly one Viewer local-ops import terminator')
+          text = text.replace(import_needle, import_replacement, 1)
+
+          handler_pattern = re.compile(
+              r"async function previewProjectBundleImportFromInput\(event\)\{\n.*?\n\}\nfunction mergeProjectBundleImportPreview\(\)\{",
+              re.DOTALL,
+          )
+          handler_replacement = """async function previewProjectBundleImportFromInput(event){
+            const input=event?.target;
+            const file=input instanceof HTMLInputElement?input.files?.[0]:null;
+            if(!file)return;
+            const generatedAt=new Date().toISOString();
+            try{
+              const bundleRead=await readViewerProjectBundleFile(file);
+              const preview=buildViewerProjectBundleImportPreview(bundleRead.payload,{currentManifest:projectManifest});
+              preview.file_read=viewerProjectBundleFileMetadata(bundleRead);
+              window.__STRUCTURE_VIEWER_LAST_IMPORT_PREVIEW__=preview;
+              writeLocalOpsState({...readLocalOpsState(),lastImportPreview:preview});
+              auditWorkspaceEvent('project_bundle_import_previewed',file.name,resolveSelectionMemberId(selectedElementData),{
+                status:preview.blocked?'blocked':'ready',
+              });
+            }catch(err){
+              const preview=buildViewerProjectBundleFileFailurePreview(err,{
+                sourceName:file.name,
+                generatedAt,
+              });
+              window.__STRUCTURE_VIEWER_LAST_IMPORT_PREVIEW__=preview;
+              writeLocalOpsState({...readLocalOpsState(),lastImportPreview:preview});
+              auditWorkspaceEvent(
+                'project_bundle_import_preview_failed',
+                `${preview.file_read?.error_code||'project_bundle_preview_failed'}@${preview.file_read?.error_path||'/file'}`,
+                resolveSelectionMemberId(selectedElementData),
+                {status:'blocked'},
+              );
+            }finally{
+              if(input instanceof HTMLInputElement)input.value='';
+              renderReportExportPanel();
+            }
+          }
+          function mergeProjectBundleImportPreview(){"""
+          text, count = handler_pattern.subn(handler_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'expected exactly one project-bundle handler; replaced={count}')
+
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/codex-temp-project-bundle-file-handler-patch.yml').unlink()
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          text = Path('src/structure-viewer/index.html').read_text(encoding='utf-8')
+          match = re.search(
+              r"async function previewProjectBundleImportFromInput\(event\)\{\n.*?\n\}\nfunction mergeProjectBundleImportPreview\(\)\{",
+              text,
+              re.DOTALL,
+          )
+          if match is None:
+              raise SystemExit('patched project-bundle handler not found')
+          handler = match.group(0)
+          required = (
+              'readViewerProjectBundleFile(file)',
+              'viewerProjectBundleFileMetadata(bundleRead)',
+              'buildViewerProjectBundleFileFailurePreview(err',
+          )
+          missing = [value for value in required if value not in handler]
+          if missing:
+              raise SystemExit(f'missing project-bundle handler contracts: {missing}')
+          if 'file.text()' in handler:
+              raise SystemExit('direct file.text() remains in project-bundle handler')
+          if 'String(err?.message||err)' in handler:
+              raise SystemExit('raw exception text remains in project-bundle handler')
+          PY
+
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/structure-viewer/index.html .github/workflows/codex-temp-project-bundle-file-handler-patch.yml
+          git commit -m "Use bounded file reads for Viewer project bundles"
+          git push origin HEAD:${{ github.head_ref }}
