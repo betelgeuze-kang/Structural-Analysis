@@ -166,8 +166,10 @@ raw residual absolute parity에서 fail-closed했다. Solver/authoritative scale
 parity는 통과했으나 cancellation 계산 순서 차이가 v1 고정 absolute floor를 넘었다.
 Tolerance 규칙을 변경하지 않고 rotated/four/five-span을 명시적 `1 N` normalized fixture로
 고정해 각 strict case parity/ResultIR-ready를 실제 HIP에서 먼저 검증한 뒤 최종 10-slot
-gate를 다시 실행했다. 이 fixed-suite 처리는 일반 load scale의 roundoff-aware residual
-parity나 성능 증거가 아니다.
+gate를 다시 실행했다. 이 fixed-suite 처리는 일반 load scale의 roundoff-aware ResultIR
+또는 성능 증거가 아니다. 별도 downstream v0.2.48은 원래 고하중 세 case의
+componentwise residual vector bound를 actual `gfx1030`에서 `1 passed in 218.17s`로
+통과했지만 terminal metric과 이 v0.2.47 ResultIR authority에 소급하지 않는다.
 별도 restricted namespace에는 `/dev/kfd`가 없었고, non-required mode는 static bound test가
 통과한 뒤 actual gate가 skip되어 `1 passed, 1 skipped in 1.74s`, required mode는 static
 test가 통과한 뒤 actual gate가 `No real gfx agent was detected.`로 fail-closed하여
@@ -223,7 +225,7 @@ Pending 또는 false:
 - end-to-end O(N), performance 또는 speedup
 - nonlinear/dynamic/shell/solid/contact
 - commercial readiness
-- 일반 load scale의 roundoff-aware residual parity
+- 이 v0.2.47 receipt의 일반 load scale roundoff-aware terminal metric/ResultIR parity
 
 ## 실행 gate
 
@@ -243,8 +245,8 @@ PYTHONPATH=src python3 -m pytest -q \
 
 ## 다음 단계
 
-1. Fixed-suite 정규화와 별도로 CSR row roundoff/backward-error bound를 직렬화하는
-   scale-invariant residual parity 계약을 추가한다.
+1. v0.2.48 componentwise bound를 terminal `L2/Linf/scaled Linf` metric과 model-case
+   parity v2/고하중 ResultIR bridge에 결속한다.
 2. Reviewer-root bootstrap/HSM lifecycle 뒤 external `gfx1100`, 동일 final artifact local
    `gfx1030`, durable monotonic ledger 및 signed evidence를 순서대로 검증한다.
 3. Broad iteration host-copy-zero와 GPU result recovery를 별도 authoritative gate로 닫은

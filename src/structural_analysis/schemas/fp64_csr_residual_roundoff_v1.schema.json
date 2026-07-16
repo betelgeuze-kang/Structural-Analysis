@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/fp64_csr_residual_roundoff_v1.schema.json",
+  "title": "FP64 CSR residual roundoff and backward-error receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "promotion_eligible",
+    "comparison_id",
+    "bindings",
+    "arithmetic_model",
+    "summary",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-fp64-csr-residual-roundoff.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_sparse_fp64_residual_roundoff_backward_error"
+    },
+    "status": {"const": "roundoff_bound_verified"},
+    "evidence_scope": {
+      "const": "backend_neutral_value_contract_non_promoting"
+    },
+    "promotion_eligible": {"const": false},
+    "comparison_id": {"$ref": "#/$defs/hash"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "arithmetic_model": {"$ref": "#/$defs/arithmeticModel"},
+    "summary": {"$ref": "#/$defs/summary"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonNegativeFinite": {
+      "type": "number",
+      "minimum": 0
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_id",
+        "execution_plan_hash",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "partition_hash",
+        "load_pattern_id",
+        "reference_solution_sha256",
+        "candidate_solution_sha256",
+        "reference_residual_sha256",
+        "candidate_residual_sha256",
+        "componentwise_bound_sha256",
+        "solution_transport_bound_sha256",
+        "reference_roundoff_bound_sha256",
+        "candidate_roundoff_bound_sha256"
+      ],
+      "properties": {
+        "execution_plan_id": {
+          "type": "string",
+          "pattern": "^SparsePlan:[0-9a-f]{24}$"
+        },
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "operator_hash": {"$ref": "#/$defs/hash"},
+        "numeric_snapshot_hash": {"$ref": "#/$defs/hash"},
+        "partition_hash": {"$ref": "#/$defs/hash"},
+        "load_pattern_id": {"type": "string", "minLength": 1},
+        "reference_solution_sha256": {"$ref": "#/$defs/hash"},
+        "candidate_solution_sha256": {"$ref": "#/$defs/hash"},
+        "reference_residual_sha256": {"$ref": "#/$defs/hash"},
+        "candidate_residual_sha256": {"$ref": "#/$defs/hash"},
+        "componentwise_bound_sha256": {"$ref": "#/$defs/hash"},
+        "solution_transport_bound_sha256": {"$ref": "#/$defs/hash"},
+        "reference_roundoff_bound_sha256": {"$ref": "#/$defs/hash"},
+        "candidate_roundoff_bound_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "arithmeticModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "binary64_unit_roundoff",
+        "binary64_smallest_subnormal",
+        "operation_count_rule",
+        "roundoff_rule",
+        "comparison_rule",
+        "outward_rounding_rule",
+        "caller_tolerance_allowed",
+        "dense_matrix_materialized"
+      ],
+      "properties": {
+        "binary64_unit_roundoff": {"const": 1.1102230246251565e-16},
+        "binary64_smallest_subnormal": {"const": 5e-324},
+        "operation_count_rule": {"const": "k_i=2*row_nnz_i+1"},
+        "roundoff_rule": {
+          "const": "gamma(k_i)*(abs(b_i)+sum_abs_aij_xj)+k_i*eta"
+        },
+        "comparison_rule": {
+          "const": "abs(delta_r_i)<=sum_abs_aij_delta_xj+roundoff_ref_i+roundoff_candidate_i"
+        },
+        "outward_rounding_rule": {
+          "const": "nextafter_positive_infinity_after_each_nonnegative_bound_operation"
+        },
+        "caller_tolerance_allowed": {"const": false},
+        "dense_matrix_materialized": {"const": false}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row_count",
+        "reduced_csr_nnz",
+        "maximum_row_nnz",
+        "same_solution_bytes",
+        "maximum_absolute_difference_upper_bound",
+        "difference_l2_upper_bound",
+        "componentwise_bound_linf",
+        "componentwise_bound_l2",
+        "maximum_solution_transport_bound",
+        "maximum_reference_roundoff_bound",
+        "maximum_candidate_roundoff_bound",
+        "maximum_componentwise_bound_ratio",
+        "reference_componentwise_backward_error",
+        "candidate_componentwise_backward_error",
+        "positive_bound_row_count",
+        "zero_bound_exact_match_row_count",
+        "componentwise_bound_passed"
+      ],
+      "properties": {
+        "row_count": {"type": "integer", "minimum": 1},
+        "reduced_csr_nnz": {"type": "integer", "minimum": 1},
+        "maximum_row_nnz": {"type": "integer", "minimum": 1},
+        "same_solution_bytes": {"type": "boolean"},
+        "maximum_absolute_difference_upper_bound": {
+          "$ref": "#/$defs/nonNegativeFinite"
+        },
+        "difference_l2_upper_bound": {"$ref": "#/$defs/nonNegativeFinite"},
+        "componentwise_bound_linf": {"$ref": "#/$defs/nonNegativeFinite"},
+        "componentwise_bound_l2": {"$ref": "#/$defs/nonNegativeFinite"},
+        "maximum_solution_transport_bound": {
+          "$ref": "#/$defs/nonNegativeFinite"
+        },
+        "maximum_reference_roundoff_bound": {
+          "$ref": "#/$defs/nonNegativeFinite"
+        },
+        "maximum_candidate_roundoff_bound": {
+          "$ref": "#/$defs/nonNegativeFinite"
+        },
+        "maximum_componentwise_bound_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "reference_componentwise_backward_error": {
+          "$ref": "#/$defs/nonNegativeFinite"
+        },
+        "candidate_componentwise_backward_error": {
+          "$ref": "#/$defs/nonNegativeFinite"
+        },
+        "positive_bound_row_count": {"type": "integer", "minimum": 0},
+        "zero_bound_exact_match_row_count": {"type": "integer", "minimum": 0},
+        "componentwise_bound_passed": {"const": true}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "componentwise_roundoff_bound_verified",
+        "solution_transport_bound_included",
+        "no_user_absolute_tolerance_floor",
+        "bound_formula_positive_homogeneous_above_subnormal_range",
+        "subnormal_absolute_guard_included",
+        "sparse_o_nnz_plus_n_work_bound",
+        "dense_matrix_materialized",
+        "actual_backend_verified",
+        "hardware_provenance_verified",
+        "end_to_end_o_n_verified",
+        "performance_speedup_verified",
+        "signed_evidence",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "componentwise_roundoff_bound_verified": {"const": true},
+        "solution_transport_bound_included": {"const": true},
+        "no_user_absolute_tolerance_floor": {"const": true},
+        "bound_formula_positive_homogeneous_above_subnormal_range": {"const": true},
+        "subnormal_absolute_guard_included": {"const": true},
+        "sparse_o_nnz_plus_n_work_bound": {"const": true},
+        "dense_matrix_materialized": {"const": false},
+        "actual_backend_verified": {"const": false},
+        "hardware_provenance_verified": {"const": false},
+        "end_to_end_o_n_verified": {"const": false},
+        "performance_speedup_verified": {"const": false},
+        "signed_evidence": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

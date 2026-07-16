@@ -33,6 +33,10 @@ from structural_analysis.engine_v2.contracts.execution_plan_v2 import (
     ExecutionPlanV2,
     validate_execution_plan_v2,
 )
+from structural_analysis.engine_v2.contracts.fp64_csr_residual_roundoff_v1 import (
+    Fp64CsrResidualRoundoffResultV1,
+    attest_fp64_csr_residual_roundoff_v1,
+)
 from structural_analysis.engine_v2.solvers.cpu_fgmres import (
     CpuFgmresReferenceResultV1,
     FgmresRestartRecord,
@@ -288,6 +292,15 @@ class HipFgmresModelCaseParityReceiptV1:
     def to_dict(self) -> dict[str, Any]:
         validate_hip_fgmres_model_case_parity_receipt_v1(self)
         return _receipt_payload(self, include_hash=True)
+
+
+@dataclass(frozen=True, slots=True)
+class HipFgmresDetachedResidualRoundoffReplayV1:
+    """Detached value replay; it does not assert CPU or HIP provenance."""
+
+    solution_comparison: HipFgmresModelCaseParityVectorComparisonV1
+    cpu_reference_vs_candidate: Fp64CsrResidualRoundoffResultV1
+    candidate_vs_independent_replay: Fp64CsrResidualRoundoffResultV1
 
 
 @dataclass(frozen=True, slots=True, repr=False, eq=False)
@@ -668,14 +681,19 @@ def replay_hip_fgmres_detached_model_case_numerics_v1(
         expected_policy=cpu_result.policy,
         expected_initial_full_state=None,
     )
+    roundoff = replay_hip_fgmres_detached_residual_roundoff_v1(
+        execution_plan=execution_plan,
+        cpu_result=cpu_result,
+        solution_x=solution_x,
+        true_residual=true_residual,
+    )
     free_dof_count = int(execution_plan.array("free_dofs").size)
-    hip_solution = _f64_vector_from_bytes(solution_x, free_dof_count)
     hip_residual = _f64_vector_from_bytes(true_residual, free_dof_count)
-    cpu_solution = _exact_f64_vector(cpu_result.reduced_solution, free_dof_count)
     cpu_residual = _exact_f64_vector(cpu_result.true_residual, free_dof_count)
+    hip_solution = _f64_vector_from_bytes(solution_x, free_dof_count)
     replayed_residual = _replay_true_residual(execution_plan, hip_solution)
     vectors = (
-        _compare_vector("solution_x", cpu_solution, hip_solution),
+        roundoff.solution_comparison,
         _compare_vector("true_residual", cpu_residual, hip_residual),
         _compare_vector("true_residual_replay", hip_residual, replayed_residual),
     )
@@ -690,6 +708,60 @@ def replay_hip_fgmres_detached_model_case_numerics_v1(
     _validate_discrete_parity(cpu_result, outcome, populated)
     _validate_metric_parity(cpu_result, outcome, populated)
     return vectors
+
+
+def replay_hip_fgmres_detached_residual_roundoff_v1(
+    *,
+    execution_plan: ExecutionPlanV2,
+    cpu_result: CpuFgmresReferenceResultV1,
+    solution_x: bytes,
+    true_residual: bytes,
+) -> HipFgmresDetachedResidualRoundoffReplayV1:
+    """Compare detached FGMRES residual bytes using the scale-aware contract.
+
+    The solution vector retains the legacy fixed componentwise gate.  Only the
+    two residual comparisons use the derived CSR roundoff/backward-error bound.
+    No terminal observation, device identity, or live context is accepted, so
+    this adapter cannot establish actual backend provenance by itself.
+    """
+
+    validate_execution_plan_v2(execution_plan)
+    validate_cpu_fgmres_reference_result_v1(
+        cpu_result,
+        expected_plan=execution_plan,
+        expected_policy=cpu_result.policy,
+        expected_initial_full_state=None,
+    )
+    free_dof_count = int(execution_plan.array("free_dofs").size)
+    hip_solution = _f64_vector_from_bytes(solution_x, free_dof_count)
+    hip_residual = _f64_vector_from_bytes(true_residual, free_dof_count)
+    cpu_solution = _exact_f64_vector(cpu_result.reduced_solution, free_dof_count)
+    cpu_residual = _exact_f64_vector(cpu_result.true_residual, free_dof_count)
+    replayed_residual = _replay_true_residual(execution_plan, hip_solution)
+    solution_comparison = _compare_vector(
+        "solution_x",
+        cpu_solution,
+        hip_solution,
+    )
+    cpu_vs_candidate = attest_fp64_csr_residual_roundoff_v1(
+        execution_plan,
+        cpu_solution,
+        hip_solution,
+        cpu_residual,
+        hip_residual,
+    )
+    candidate_vs_replay = attest_fp64_csr_residual_roundoff_v1(
+        execution_plan,
+        hip_solution,
+        hip_solution,
+        hip_residual,
+        replayed_residual,
+    )
+    return HipFgmresDetachedResidualRoundoffReplayV1(
+        solution_comparison=solution_comparison,
+        cpu_reference_vs_candidate=cpu_vs_candidate,
+        candidate_vs_independent_replay=candidate_vs_replay,
+    )
 
 
 def _evaluate_sources(
@@ -1723,6 +1795,7 @@ __all__ = [
     "HIP_FGMRES_MODEL_CASE_PARITY_EVIDENCE_SCOPE_V1",
     "HIP_FGMRES_MODEL_CASE_PARITY_RELATIVE_TOLERANCE_V1",
     "HIP_FGMRES_MODEL_CASE_PARITY_SCHEMA_VERSION_V1",
+    "HipFgmresDetachedResidualRoundoffReplayV1",
     "HipFgmresModelCaseParityBindingsV1",
     "HipFgmresModelCaseParityClaimsV1",
     "HipFgmresModelCaseParityDimensionsV1",
@@ -1735,6 +1808,7 @@ __all__ = [
     "HipFgmresModelCaseParityVectorComparisonV1",
     "attest_hip_fgmres_model_case_parity_v1",
     "replay_hip_fgmres_detached_model_case_numerics_v1",
+    "replay_hip_fgmres_detached_residual_roundoff_v1",
     "validate_hip_fgmres_model_case_parity_receipt_v1",
     "validate_hip_fgmres_model_case_parity_result_v1",
 ]

@@ -233,12 +233,70 @@ def test_all_converged_result_ir_v1_stays_contract_only_after_local_hardware() -
     )
 
 
+def test_fp64_csr_residual_roundoff_contract_stays_nonpromoting() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    capability = rows["fp64_csr_residual_roundoff_backward_error_v1"]
+    assert payload["rows"][1]["capability_id"] == (
+        "fp64_csr_residual_roundoff_backward_error_v1"
+    )
+    assert capability["implementation_state"] == "implemented"
+    assert capability["promotion_state"] == "contract_only"
+    assert {
+        "backend_neutral_execution_plan_v2_bound_value_contract",
+        "componentwise_abs_delta_r_bounded_by_solution_transport_plus_two_path_roundoff",
+        "caller_absolute_or_relative_tolerance_not_accepted",
+        "componentwise_backward_error_for_reference_and_candidate",
+        "detached_fgmres_cpu_vs_candidate_and_candidate_vs_independent_fsum_replay_adapter",
+        "legacy_model_case_parity_v1_solution_and_residual_gate_not_relaxed",
+        "sparse_o_nnz_plus_n_narrow_contract_without_dense_matrix_or_solve",
+        "actual_wheel_contains_contract_module_and_strict_schema_exact_source_bytes",
+        "actual_local_gfx1030_original_scale_three_case_observation_passed",
+        "actual_local_gfx1030_completion_export_three_d2h_and_fallback_zero",
+        "core_schema_adapter_harness_aggregate_sha256_d30dd5e67d1b7cc994bb2a050689eda79d02a6b93d2af7418a51f51671c176f6",
+    }.issubset(capability["supported_scope"])
+    assert {
+        "model_case_parity_v1_terminal_or_history_metric_rule_replacement",
+        "high_load_result_ir_or_aggregate_authority",
+        "core_receipt_actual_backend_or_hardware_provenance",
+        "formal_machine_checked_kernel_instruction_error_proof",
+        "actual_external_gfx1100",
+        "persistent_or_signed_hardware_evidence",
+        "end_to_end_o_n",
+        "performance_speedup",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(capability["explicit_exclusions"])
+    assert {
+        "power_of_two_load_scaling_2_pow_minus_20_one_and_2_pow_20_preserves_bound_and_ratios",
+        "fraction_exact_add_multiply_distance_and_gamma_outward_primitive_checks",
+        "detached_adapter_accepts_high_scale_roundoff_while_legacy_v1_remains_fail_closed",
+        "focused_contract_adapter_and_actual_wheel_20_passed_in_6_85_seconds",
+        "legacy_model_case_parity_v1_24_passed_in_1_83_seconds",
+        "current_contract_legacy_and_capability_three_file_crosscheck_56_passed_in_7_06_seconds",
+        "current_seven_file_adjacent_crosscheck_116_passed_in_264_39_seconds",
+        "single_nonrelease_wheel_1411419_bytes_266_members_sha256_1e61eac1fddf52329d1daa3b789e1f59b838054aff87b908d7adfed19ce56e28",
+        "isolated_wheel_public_symbols_engine_903_assembly_732_contracts_78_elements_10",
+        "actual_local_gfx1030_high_load_three_case_gate_1_passed_in_218_17_seconds",
+        "actual_local_gfx1030_process_peak_rss_428820_kib",
+        "rotated_cpu_hip_ratio_0_021012885183208055_and_hip_replay_ratio_0_03547771831820348",
+        "four_and_five_span_max_ratio_0_0029520720720720497",
+        "actual_local_gfx1030_maximum_hip_componentwise_backward_error_1_2238707852511078e_minus_15",
+        "source_aggregate_identical_before_and_after_actual_gate",
+    }.issubset(capability["verification_cases"])
+    assert capability["claim_level"] == (
+        "backend_neutral_scale_aware_fp64_csr_residual_bound_and_unsigned_local_"
+        "gfx1030_high_load_observation_contract_only_nonpromoting"
+    )
+
+
 def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() -> None:
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
     family_disposition = rows["hip_fgmres_model_family_result_ir_disposition_v1"]
-    assert payload["rows"][2]["capability_id"] == (
+    assert payload["rows"][3]["capability_id"] == (
         "hip_fgmres_model_family_result_ir_disposition_v1"
     )
     assert family_disposition["implementation_state"] == "implemented"
@@ -295,7 +353,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     result_ir = rows["hip_fgmres_result_ir_v2"]
-    assert payload["rows"][3]["capability_id"] == "hip_fgmres_result_ir_v2"
+    assert payload["rows"][4]["capability_id"] == "hip_fgmres_result_ir_v2"
     assert result_ir["implementation_state"] == "implemented"
     assert result_ir["promotion_state"] == "contract_only"
     assert set(result_ir["supported_scope"]) == {
@@ -396,7 +454,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     audited_family = rows["hip_fgmres_model_family_audited_parity_v2"]
-    assert payload["rows"][4]["capability_id"] == (
+    assert payload["rows"][5]["capability_id"] == (
         "hip_fgmres_model_family_audited_parity_v2"
     )
     assert audited_family["implementation_state"] == "implemented"
@@ -457,7 +515,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     ordinal_audit = rows["hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"]
-    assert payload["rows"][5]["capability_id"] == (
+    assert payload["rows"][6]["capability_id"] == (
         "hip_fgmres_recurrence_launch_fence_rolling_ordinal_audit_v1"
     )
     assert ordinal_audit["implementation_state"] == "implemented"
@@ -494,7 +552,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         in ordinal_audit["evidence_paths"]
     )
     family_transfer = rows["hip_fgmres_model_family_host_transfer_audit_v1"]
-    assert payload["rows"][6]["capability_id"] == (
+    assert payload["rows"][7]["capability_id"] == (
         "hip_fgmres_model_family_host_transfer_audit_v1"
     )
     assert family_transfer["implementation_state"] == "implemented"
@@ -544,7 +602,7 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     )
 
     transfer_audit = rows["hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"]
-    assert payload["rows"][7]["capability_id"] == (
+    assert payload["rows"][8]["capability_id"] == (
         "hip_fgmres_bound_runtime_recurrence_host_transfer_audit_v1"
     )
     assert transfer_audit["implementation_state"] == "implemented"
@@ -1857,7 +1915,7 @@ def test_nonconverged_diagnostic_ir_v1_claims_stay_diagnostic_only() -> None:
     rows = {row["capability_id"]: row for row in payload["rows"]}
 
     diagnostic = rows["hip_fgmres_nonconverged_diagnostic_ir_v1"]
-    assert payload["rows"][1]["capability_id"] == (
+    assert payload["rows"][2]["capability_id"] == (
         "hip_fgmres_nonconverged_diagnostic_ir_v1"
     )
     assert diagnostic["implementation_state"] == "implemented"

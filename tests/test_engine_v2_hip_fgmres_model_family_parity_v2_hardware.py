@@ -162,6 +162,8 @@ def _execute_live_case(
     slot: Any,
     architecture: str,
     required: bool,
+    *,
+    parity_attestor: Any = attest_hip_fgmres_model_case_parity_v1,
 ) -> tuple[Any, Any, Any, Any]:
     chain = sealed = global_open = audit_context = ordinal_context = None
     audit_opens: list[Any] = []
@@ -255,7 +257,7 @@ def _execute_live_case(
             device_ordinal=0,
             expected_compiled_architecture=architecture,
         )
-        parity = attest_hip_fgmres_model_case_parity_v1(
+        parity = parity_attestor(
             cpu_result,
             observation,
             device_identity,
