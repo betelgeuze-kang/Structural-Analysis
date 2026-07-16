@@ -1,0 +1,188 @@
+name: Codex Temp Project Bundle State Policy Patch
+
+on:
+  pull_request:
+    paths:
+      - "src/structure-viewer/**"
+      - ".github/workflows/codex-temp-project-bundle-state-policy-patch.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Patch project-bundle state preview and merge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('src/structure-viewer/viewer-local-ops-state.js')
+          text = path.read_text(encoding='utf-8')
+
+          import_block = """import {
+            inspectViewerProjectBundleLocalState,
+            mergeViewerProjectBundleLocalState,
+          } from './viewer-project-bundle-state-policy.js';
+
+          """
+          if "from './viewer-project-bundle-state-policy.js';" not in text:
+              text = import_block + text
+
+          preview_pattern = re.compile(
+              r"export function buildViewerProjectBundleImportPreview\(payload = \{\}, \{\n  currentManifest = null,\n\} = \{\}\) \{\n.*?\n\}\n\nexport function mergeViewerProjectBundleImport",
+              re.DOTALL,
+          )
+          preview_replacement = """export function buildViewerProjectBundleImportPreview(payload = {}, {
+            currentManifest = null,
+          } = {}) {
+            const schemaVersion = normalizeText(payload?.schema_version);
+            const hasLocalState = payload !== null
+              && typeof payload === 'object'
+              && !Array.isArray(payload)
+              && Object.prototype.hasOwnProperty.call(payload, 'local_state');
+            const rawLocalState = hasLocalState ? payload.local_state : {};
+            const stateInspection = inspectViewerProjectBundleLocalState(rawLocalState);
+            const localState = stateInspection.valid ? rawLocalState : {};
+            const manifest = payload?.manifest && typeof payload.manifest === 'object' ? payload.manifest : null;
+            const issues = [...stateInspection.issues];
+            if (schemaVersion !== 'structure-viewer-project-bundle.v1') {
+              issues.push({ severity: 'critical', issue: 'invalid schema version', value: schemaVersion || '--' });
+            }
+            const incomingProject = normalizeText(payload?.project_id);
+            const incomingDrawing = normalizeText(payload?.drawing_id);
+            const projects = Array.isArray(currentManifest?.projects) ? currentManifest.projects : [];
+            const project = projects.find((row) => normalizeText(row?.project_id) === incomingProject);
+            const drawing = project?.drawings?.find((row) => normalizeText(row?.drawing_id) === incomingDrawing);
+            if (currentManifest && incomingProject && !project) {
+              issues.push({ severity: 'critical', issue: 'unknown project', value: incomingProject });
+            }
+            if (currentManifest && incomingDrawing && !drawing) {
+              issues.push({ severity: 'critical', issue: 'unknown drawing', value: incomingDrawing });
+            }
+            const receiptRows = stateInspection.valid
+              ? Object.values(localState.receiptIndex && typeof localState.receiptIndex === 'object' ? localState.receiptIndex : {})
+              : [];
+            receiptRows.forEach((receipt) => {
+              if (!normalizeText(receipt?.receipt_path || receipt?.receiptPath)) {
+                issues.push({ severity: 'warning', issue: 'stale receipt path', value: normalizeText(receipt?.member_id || receipt?.memberId) || '--' });
+              }
+            });
+            return {
+              schema_version: 'structure-viewer-project-bundle-import-preview.v1',
+              source_schema_version: schemaVersion,
+              project_id: incomingProject,
+              drawing_id: incomingDrawing,
+              variant: normalizeText(payload?.variant),
+              blocked: issues.some((issue) => issue.severity === 'critical'),
+              issues,
+              state_policy: stateInspection.policy,
+              state_limits: stateInspection.limits,
+              local_state_serialized_bytes: stateInspection.serialized_bytes,
+              incoming_counts: {
+                recentSelections: stateInspection.counts.recentSelections,
+                auditEvents: stateInspection.counts.auditEvents,
+                exportHistory: stateInspection.counts.exportHistory,
+                reviewNotes: stateInspection.counts.reviewNotes,
+                reviewTasks: stateInspection.counts.reviewTasks,
+                annotations: stateInspection.counts.annotations,
+                receiptIndex: stateInspection.counts.receiptIndex,
+              },
+              manifest,
+              local_state: stateInspection.valid
+                ? readViewerLocalOpsState({storageGet: () => JSON.stringify(localState)})
+                : {},
+            };
+          }
+
+          function storedProjectBundleImportPreview(preview = {}) {
+            return {
+              schema_version: normalizeText(preview.schema_version),
+              source_schema_version: normalizeText(preview.source_schema_version),
+              project_id: normalizeText(preview.project_id),
+              drawing_id: normalizeText(preview.drawing_id),
+              variant: normalizeText(preview.variant),
+              blocked: Boolean(preview.blocked),
+              issues: Array.isArray(preview.issues) ? preview.issues.slice(0, 100) : [],
+              incoming_counts: preview.incoming_counts && typeof preview.incoming_counts === 'object'
+                ? {...preview.incoming_counts}
+                : {},
+              state_policy: normalizeText(preview.state_policy),
+              state_limits: preview.state_limits && typeof preview.state_limits === 'object'
+                ? {...preview.state_limits}
+                : {},
+              local_state_serialized_bytes: Number.isSafeInteger(preview.local_state_serialized_bytes)
+                ? preview.local_state_serialized_bytes
+                : 0,
+              file_read: preview.file_read && typeof preview.file_read === 'object'
+                ? {...preview.file_read}
+                : null,
+            };
+          }
+
+          export function mergeViewerProjectBundleImport"""
+          text, count = preview_pattern.subn(preview_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'expected one project-bundle preview function; replaced={count}')
+
+          merge_pattern = re.compile(
+              r"export function mergeViewerProjectBundleImport\(state = \{\}, preview = \{\}\) \{\n.*?\n\}\n\nexport function mergeViewerEvidenceIngestPreview",
+              re.DOTALL,
+          )
+          merge_replacement = """export function mergeViewerProjectBundleImport(state = {}, preview = {}) {
+            if (!preview || preview.blocked) return state;
+            const incoming = preview.local_state && typeof preview.local_state === 'object'
+              ? preview.local_state
+              : {};
+            const merged = mergeViewerProjectBundleLocalState(state, incoming);
+            if (!merged.valid) return state;
+            const candidate = {
+              ...merged.state,
+              lastImportPreview: storedProjectBundleImportPreview(preview),
+            };
+            const finalInspection = inspectViewerProjectBundleLocalState(candidate);
+            return finalInspection.valid ? candidate : state;
+          }
+
+          export function mergeViewerEvidenceIngestPreview"""
+          text, count = merge_pattern.subn(merge_replacement, text, count=1)
+          if count != 1:
+              raise SystemExit(f'expected one project-bundle merge function; replaced={count}')
+
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/codex-temp-project-bundle-state-policy-patch.yml').unlink()
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+
+          text = Path('src/structure-viewer/viewer-local-ops-state.js').read_text(encoding='utf-8')
+          required = (
+              "from './viewer-project-bundle-state-policy.js';",
+              'inspectViewerProjectBundleLocalState(rawLocalState)',
+              'state_policy: stateInspection.policy',
+              'local_state: stateInspection.valid',
+              'mergeViewerProjectBundleLocalState(state, incoming)',
+              'lastImportPreview: storedProjectBundleImportPreview(preview)',
+              'const finalInspection = inspectViewerProjectBundleLocalState(candidate);',
+          )
+          missing = [value for value in required if value not in text]
+          if missing:
+              raise SystemExit(f'missing project-bundle state contracts: {missing}')
+          PY
+
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/structure-viewer/viewer-local-ops-state.js .github/workflows/codex-temp-project-bundle-state-policy-patch.yml
+          git commit -m "Enforce project-bundle local state limits"
+          git push origin HEAD:${{ github.head_ref }}
