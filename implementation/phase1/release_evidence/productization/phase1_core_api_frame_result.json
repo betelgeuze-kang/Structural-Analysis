@@ -1,5 +1,6 @@
 {
   "analysis_type": "linear_static",
+  "canonical_model_checksum": "sha256:3db2de90887e06a6029f576d6a645176e38f731a7405f82c52f67f9149ec717e",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "convergence_history": [
     {
@@ -20,6 +21,7 @@
   "metrics": {
     "active_dof_count": 12,
     "analysis_fidelity": "cpu_reference_linear_fea",
+    "analysis_input_snapshot": "detached_canonical_model_v1",
     "automatic_support_generation_used": false,
     "claim_boundary": "linear_static_3d_frame_cpu_reference_v1",
     "constrained_dof_count": 6,
