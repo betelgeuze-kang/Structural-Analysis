@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from math import isfinite
 from typing import Any, Mapping
 
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.results.viewer import bind_viewer_model_identity
 from structural_analysis.solvers.linear.static import (
     LinearStaticSolution,
     solve_linear_static,
@@ -52,16 +54,35 @@ def run_authoritative_linear_static(
         )
 
     if matrix_backend == "scipy_sparse_spsolve_cpu":
-        return solve_linear_static_sparse(
+        solution = solve_linear_static_sparse(
             model,
             tolerance=tolerance,
             load_case=normalized_load_case,
         )
-    return solve_linear_static(
-        model,
-        tolerance=tolerance,
-        load_case=normalized_load_case,
+    else:
+        solution = solve_linear_static(
+            model,
+            tolerance=tolerance,
+            load_case=normalized_load_case,
+        )
+    return _bind_viewer_identity(solution, model)
+
+
+def _bind_viewer_identity(
+    solution: LinearStaticSolution,
+    model: CanonicalModel,
+) -> LinearStaticSolution:
+    viewer_payload = solution.metrics.get("viewer_payload")
+    if not isinstance(viewer_payload, Mapping):
+        return solution
+
+    metrics = dict(solution.metrics)
+    metrics["viewer_payload"] = bind_viewer_model_identity(
+        viewer_payload,
+        source_input_checksum=model.input_checksum,
+        canonical_model_checksum=model.canonical_model_checksum,
     )
+    return replace(solution, metrics=metrics)
 
 
 def _public_preflight(
@@ -262,7 +283,9 @@ def _blocked_solution(
             "regularization_used": False,
             "fallback_used": False,
             "stiffness_storage": (
-                "scipy_sparse_csr" if sparse_backend_used else "dense_numpy"
+                "scipy_sparse_csr"
+                if sparse_backend_used
+                else "dense_numpy"
             ),
             "matrix_backend": matrix_backend,
             "sparse_backend_used": sparse_backend_used,
