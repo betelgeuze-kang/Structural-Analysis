@@ -141,59 +141,81 @@ console.log(JSON.stringify({
     assert payload["handoffHasSheetButtons"] is True
 
 
-def test_report_panel_marks_blocked_authoritative_ingest_as_warning() -> None:
+def test_report_surfaces_mark_blocked_authoritative_ingest_as_warning() -> None:
     payload = _run_node(
         """
+import {buildStructureViewerReportHtml} from './src/structure-viewer/viewer-report-export.js';
 import {buildReportExportPanelHtml} from './src/structure-viewer/viewer-report-panel-renderer.js';
 
-const blocked = buildReportExportPanelHtml({
-  ingestPreview: {
-    source_type: 'json',
-    drawing_count: 1,
-    blocked_issues: [],
-    renderable_payload_available: false,
-    renderable_payload_kind: 'authoritative_viewer_v2',
-    renderable_payload_validation_status: 'blocked_authoritative_contract',
-    renderable_payload_error_code: 'viewer_model_identity_missing',
-    renderable_payload_error_path: '/model_identity',
-  },
-});
-const valid = buildReportExportPanelHtml({
-  ingestPreview: {
-    source_type: 'json',
-    drawing_count: 1,
-    blocked_issues: [],
-    renderable_payload_available: true,
-    renderable_payload_kind: 'authoritative_viewer_v2',
-    renderable_payload_validation_status: 'validated_authoritative_contract',
-    renderable_payload_error_code: '',
-    renderable_payload_error_path: '',
-    renderable_element_count: 1,
-    renderable_segment_count: 0,
-  },
-});
+const blockedPreview = {
+  source_type: 'json',
+  row_count: 1,
+  drawing_count: 1,
+  blocked_issues: [],
+  renderable_payload_available: false,
+  renderable_payload_kind: 'authoritative_viewer_v2',
+  renderable_payload_validation_status: 'blocked_authoritative_contract',
+  renderable_payload_error_code: 'viewer_model_identity_missing',
+  renderable_payload_error_path: '/model_identity',
+};
+const validPreview = {
+  source_type: 'json',
+  row_count: 1,
+  drawing_count: 1,
+  blocked_issues: [],
+  renderable_payload_available: true,
+  renderable_payload_kind: 'authoritative_viewer_v2',
+  renderable_payload_validation_status: 'validated_authoritative_contract',
+  renderable_payload_error_code: '',
+  renderable_payload_error_path: '',
+  renderable_node_count: 2,
+  renderable_element_count: 1,
+  renderable_segment_count: 0,
+};
+const blockedPanel = buildReportExportPanelHtml({ingestPreview: blockedPreview});
+const validPanel = buildReportExportPanelHtml({ingestPreview: validPreview});
+const blockedReport = buildStructureViewerReportHtml({ingestPreview: blockedPreview});
+const validReport = buildStructureViewerReportHtml({ingestPreview: validPreview});
 console.log(JSON.stringify({
-  blockedWarn: blocked.includes('prop-value--warn'),
-  blockedCount: blocked.includes('1 blocked'),
-  blockedStatus: blocked.includes('blocked_authoritative_contract'),
-  blockedCode: blocked.includes('viewer_model_identity_missing'),
-  blockedPath: blocked.includes('/model_identity'),
-  validSuccess: valid.includes('prop-value--success'),
-  validCount: valid.includes('0 blocked'),
-  validStatus: valid.includes('validated_authoritative_contract'),
-  validRenderable: valid.includes('renderable authoritative_viewer_v2'),
+  blockedPanelWarn: blockedPanel.includes('prop-value--warn'),
+  blockedPanelCount: blockedPanel.includes('1 blocked'),
+  blockedPanelStatus: blockedPanel.includes('blocked_authoritative_contract'),
+  blockedPanelCode: blockedPanel.includes('viewer_model_identity_missing'),
+  blockedPanelPath: blockedPanel.includes('/model_identity'),
+  validPanelSuccess: validPanel.includes('prop-value--success'),
+  validPanelCount: validPanel.includes('0 blocked'),
+  validPanelStatus: validPanel.includes('validated_authoritative_contract'),
+  validPanelRenderable: validPanel.includes('renderable authoritative_viewer_v2'),
+  blockedReportStatus: blockedReport.includes('blocked_authoritative_contract'),
+  blockedReportCode: blockedReport.includes('viewer_model_identity_missing'),
+  blockedReportPath: blockedReport.includes('/model_identity'),
+  blockedReportTone: blockedReport.includes('class="row blocked"'),
+  blockedReportNoFalseClear: !blockedReport.includes('No evidence ingest blocked issue registered'),
+  validReportStatus: validReport.includes('validated_authoritative_contract'),
+  validReportRenderable: validReport.includes('authoritative_viewer_v2 · nodes=2 · elements=1'),
+  validReportNoError: !validReport.includes('viewer_model_identity_missing'),
+  validReportClear: validReport.includes('No evidence ingest blocked issue registered'),
 }));
 """
     )
 
     assert payload == {
-        "blockedWarn": True,
-        "blockedCount": True,
-        "blockedStatus": True,
-        "blockedCode": True,
-        "blockedPath": True,
-        "validSuccess": True,
-        "validCount": True,
-        "validStatus": True,
-        "validRenderable": True,
+        "blockedPanelWarn": True,
+        "blockedPanelCount": True,
+        "blockedPanelStatus": True,
+        "blockedPanelCode": True,
+        "blockedPanelPath": True,
+        "validPanelSuccess": True,
+        "validPanelCount": True,
+        "validPanelStatus": True,
+        "validPanelRenderable": True,
+        "blockedReportStatus": True,
+        "blockedReportCode": True,
+        "blockedReportPath": True,
+        "blockedReportTone": True,
+        "blockedReportNoFalseClear": True,
+        "validReportStatus": True,
+        "validReportRenderable": True,
+        "validReportNoError": True,
+        "validReportClear": True,
     }
