@@ -137,9 +137,18 @@ def analyze(
     model: CanonicalModel,
     config: AnalysisConfig | None = None,
 ) -> AnalysisResult:
-    """Analyze a canonical model using a conservative Developer Preview contract."""
+    """Analyze one detached canonical snapshot under the Developer Preview contract."""
 
     analysis_config = config or AnalysisConfig()
+    model = model.detached_analysis_snapshot()
+    canonical_model_checksum = model.canonical_model_checksum
+
+    def build_result(**kwargs: Any) -> AnalysisResult:
+        return AnalysisResult(
+            canonical_model_checksum=canonical_model_checksum,
+            **kwargs,
+        )
+
     engine_solver = _engine_owned_solver_id(analysis_config.analysis_type)
     unsupported = list(model.unsupported_features)
     warnings = [
@@ -201,7 +210,7 @@ def analyze(
             matrix_backend=analysis_config.matrix_backend,
             load_case=analysis_config.load_case,
         )
-        return AnalysisResult(
+        return build_result(
             status=solution.status,
             analysis_type=analysis_config.analysis_type,
             solver=engine_solver,
@@ -214,6 +223,7 @@ def analyze(
             metrics={
                 **solution.metrics,
                 "provenance_policy": "engine_owned",
+                "analysis_input_snapshot": "detached_canonical_model_v1",
             },
             developer_preview=True,
             claim_boundary_version=CLAIM_BOUNDARY_VERSION,
@@ -227,7 +237,7 @@ def analyze(
             axial_chain_mesh_problem_from_canonical_model(model)
         )
         if mesh_unsupported or mesh_problem is None:
-            return AnalysisResult(
+            return build_result(
                 status="blocked",
                 analysis_type=analysis_config.analysis_type,
                 solver=engine_solver,
@@ -246,6 +256,7 @@ def analyze(
                         "nonlinear_material_mesh_seed_unsupported_input"
                     ),
                     "provenance_policy": "engine_owned",
+                    "analysis_input_snapshot": "detached_canonical_model_v1",
                 },
                 developer_preview=True,
                 claim_boundary_version=CLAIM_BOUNDARY_VERSION,
@@ -266,7 +277,7 @@ def analyze(
             solution.free_displacements_m,
         )
         series_check = mesh_series_force_equilibrium_check(final_state)
-        return AnalysisResult(
+        return build_result(
             status=solution.status,
             analysis_type=analysis_config.analysis_type,
             solver=engine_solver,
@@ -298,13 +309,14 @@ def analyze(
                     "nonlinear_material_mesh_axial_chain_preview_only"
                 ),
                 "provenance_policy": "engine_owned",
+                "analysis_input_snapshot": "detached_canonical_model_v1",
             },
             developer_preview=True,
             claim_boundary_version=CLAIM_BOUNDARY_VERSION,
         )
 
     if unsupported:
-        return AnalysisResult(
+        return build_result(
             status="blocked",
             analysis_type=analysis_config.analysis_type,
             solver=engine_solver,
@@ -317,12 +329,13 @@ def analyze(
             metrics={
                 **_model_health_metrics(model),
                 "provenance_policy": "engine_owned",
+                "analysis_input_snapshot": "detached_canonical_model_v1",
             },
             developer_preview=True,
             claim_boundary_version=CLAIM_BOUNDARY_VERSION,
         )
 
-    return AnalysisResult(
+    return build_result(
         status="ready",
         analysis_type=analysis_config.analysis_type,
         solver=engine_solver,
@@ -345,6 +358,7 @@ def analyze(
             "unit_force": model.units.force,
             "up_axis": model.coordinate_system.up_axis,
             "provenance_policy": "engine_owned",
+            "analysis_input_snapshot": "detached_canonical_model_v1",
         },
         developer_preview=True,
         claim_boundary_version=CLAIM_BOUNDARY_VERSION,

@@ -135,6 +135,43 @@ class CanonicalModel:
             "metadata": json.loads(json.dumps(self.metadata)),
         }
 
+    def detached_analysis_snapshot(self) -> "CanonicalModel":
+        """Return a deep, source-bound snapshot for one analysis invocation.
+
+        ``CanonicalModel`` remains mapping-compatible for current importers and
+        assembly code, so its nested lists and dictionaries are mutable even
+        though the dataclass is frozen.  Public analysis uses this detached JSON
+        snapshot so caller-side or concurrent mutation cannot change the model
+        semantics after provenance has been captured.
+        """
+
+        payload = self.canonical_payload()
+        units = payload["units"]
+        coordinates = payload["coordinate_system"]
+        return CanonicalModel(
+            schema_version=str(payload["schema_version"]),
+            source_path=self.source_path,
+            source_format=self.source_format,
+            input_checksum=self.input_checksum,
+            units=UnitSystem(
+                length=str(units["length"]),
+                force=str(units["force"]),
+            ),
+            coordinate_system=CoordinateSystem(
+                axis_order=tuple(coordinates["axis_order"]),
+                up_axis=str(coordinates["up_axis"]),
+            ),
+            nodes=payload["nodes"],
+            elements=payload["elements"],
+            materials=payload["materials"],
+            sections=payload["sections"],
+            loads=payload["loads"],
+            supports=payload["supports"],
+            unsupported_features=payload["unsupported_features"],
+            warnings=payload["warnings"],
+            metadata=payload["metadata"],
+        )
+
     @property
     def canonical_model_checksum(self) -> str:
         """Hash normalized model semantics separately from the source-file checksum."""

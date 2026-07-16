@@ -11,7 +11,7 @@
     "pm_milestones": "2/5",
     "pm_release_areas": "4/16",
     "release_ready": false,
-    "snapshot_blocker_count": 119,
+    "snapshot_blocker_count": 117,
     "snapshot_status": "stale_or_inconsistent",
     "structural_scope_owner_decisions": "0/86",
     "structural_scope_release_surface_cleanup_decisions": "0/3",
@@ -19,20 +19,20 @@
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_requirement_progress_percent": 30.8,
-  "generated_at": "2026-07-12T23:56:26.766126+00:00",
+  "generated_at": "2026-07-16T02:59:46.013628+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:9b1aad51e021dbc4dfb333618dd87a69d3475cc8c550c4b40de2951d90c41b2c",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "missing",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:cb43f61999b786d94d70d65fa53fdd8fc55100a00bb1354b907add7278fc691a",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:e3f2e22f8a4309d7d61c88d987ec8d0e6deb243249986a45ce902a7fc49aecc2",
     "implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json": "sha256:2efc4e10b27a897504b74e38d6d426b1e085fe58dfe3a1bd0275916d6437a85b",
     "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json": "sha256:75b0be3db833ba6ff32fe4b5ddb393dd5d6d98e1cf97841acae36066be656fb4",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c1b31c863b692a6c70b5b4ae2c88a44b2feb6e135c551c60b272584fde2dbe64",
     "implementation/phase1/release_evidence/productization/g1_global_connectivity_load_path_audit.json": "sha256:0c518c7e3678c0a5526bb67dbc1ae348c402cfeb0160a063453cb336b7375d14",
     "implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json": "sha256:9d571a56792968bd7bc53c9ac2f5b42eb23adff6507473e75504e5cfdc4c1a61",
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:4e5f08fa9c5f6f82b30083d8127c4b75523a503b4a614f3c8d5b9860215c480d",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:88320c5da2a85e5d38fbb98efc4cfb3fd32300a7330ebe6ac69923667874ea94",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:68dab81832a1fc4136ce4456b02db7da5bce5ce522df9d0787bf33af50284963",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ef1b852638eb4e0f007a05377ecbf7b3c3cbd51ee15ab4ce4de07919df3a6f19",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:bdfbd5d3feb46c5c20472271fdd672627f74fab1ce054e6d28d87e1c954efb2b",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:f4e73a56efcc97bd29a585a130bf70366375d0567e1eda1193c17beb52f661c1",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:a310d081fcade797728b3333295f0576cc803827c81eb0595388df02e09b6936",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:9a74f3781a36ab4cecda3d80cc5249026a609cd044565d0fb936c0ca1833b96a",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:18bc58bb2a7bb2ae2d64a9e7b2476f32697392860e8eab9d28e5ad6949dababe",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:bd71f1cf47437357308ef8615c5591c1f6a8488d224f3538dde1e4e014eaa681",
@@ -216,8 +216,8 @@
       "status": "blocked",
       "summary": {
         "fresh_artifact_count": 14,
-        "fresh_artifact_pass_count": 2,
-        "snapshot_blocker_count": 119,
+        "fresh_artifact_pass_count": 3,
+        "snapshot_blocker_count": 117,
         "stale_or_inconsistent": true
       }
     },
@@ -280,11 +280,11 @@
         "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
         "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
         "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
-        "evidence_freshness::real_project_corpus_measured_status::input_dependency_newer_than_artifact",
         "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
         "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
         "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
-        "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact"
+        "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact"
       ],
       "claim_boundary": "Milestone readiness is not full release readiness until all release areas pass.",
       "evidence_artifacts": [
@@ -518,7 +518,7 @@
     }
   ],
   "schema_version": "structural-product-development-roadmap.v1",
-  "source_commit_sha": "8c4f9ba3f23ea3e6b32a62f7ea9cf8e6b76b9810",
+  "source_commit_sha": "5cca609f50eb0af6afc8117b6399394f21e1762d",
   "stage_average_progress_percent": 27.5,
   "stage_count": 8,
   "status": "blocked",

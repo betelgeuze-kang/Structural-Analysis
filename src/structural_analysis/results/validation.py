@@ -25,6 +25,8 @@ def validate(
         "convergence_history",
         "claim_boundary_version",
     ]
+    if result.canonical_model_checksum is not None:
+        passed_fields.insert(2, "canonical_model_checksum")
     unsupported_fields = [
         item.get("kind", "unsupported_feature") for item in result.unsupported_features
     ]
@@ -93,6 +95,7 @@ def validate(
         warnings=warnings,
         developer_preview=result.developer_preview,
         claim_boundary_version=result.claim_boundary_version,
+        canonical_model_checksum=result.canonical_model_checksum,
     )
 
 

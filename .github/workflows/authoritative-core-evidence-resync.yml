@@ -143,9 +143,29 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
+          exec > >(tee "$RUNNER_TEMP/evidence-staging.log") 2>&1
           runtime_checkpoint_dir="implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints"
-          git restore --source=HEAD --staged --worktree -- "$runtime_checkpoint_dir" || true
-          git clean -fd -- "$runtime_checkpoint_dir"
+
+          # This legacy directory is declared as LFS by a later .gitattributes
+          # rule, while the committed checkpoint blobs are raw NPZ bytes rather
+          # than LFS pointers. Disable filters only in the ephemeral checkout so
+          # Git compares and restores the exact committed bytes. The override is
+          # not tracked and cannot enter the evidence commit.
+          mkdir -p .git/info
+          printf '/%s/** -filter -diff -merge\n' "$runtime_checkpoint_dir" \
+            >> .git/info/attributes
+          while IFS= read -r -d '' path; do
+            restore_path="${path}.evidence-restore"
+            git show "HEAD:${path}" > "$restore_path"
+            mv "$restore_path" "$path"
+          done < <(git diff --name-only -z -- "$runtime_checkpoint_dir")
+          git clean -fdx -- "$runtime_checkpoint_dir"
+          if ! git diff --quiet -- "$runtime_checkpoint_dir"; then
+            echo "Transient nonlinear checkpoints were not restored exactly:" >&2
+            git status --short -- "$runtime_checkpoint_dir" >&2
+            exit 1
+          fi
+
           python - <<'PY'
           from pathlib import Path
           import subprocess
@@ -153,12 +173,12 @@ jobs:
           from scripts.verify_phase1_evidence_source_state import _is_evidence_path
 
           tracked = subprocess.check_output(
-              ["git", "diff", "--name-only"],
-              text=True,
+            ["git", "diff", "--name-only"],
+            text=True,
           ).splitlines()
           untracked = subprocess.check_output(
-              ["git", "ls-files", "--others", "--exclude-standard"],
-              text=True,
+            ["git", "ls-files", "--others", "--exclude-standard"],
+            text=True,
           ).splitlines()
           changed = sorted({path.strip() for path in [*tracked, *untracked] if path.strip()})
           allowed = [path for path in changed if _is_evidence_path(path)]
@@ -166,18 +186,18 @@ jobs:
 
           report = Path("${{ runner.temp }}/generated-evidence-paths.txt")
           report.write_text(
-              "allowed:\n"
-              + "\n".join(f"  {path}" for path in allowed)
-              + "\ndisallowed:\n"
-              + "\n".join(f"  {path}" for path in disallowed)
-              + "\n",
-              encoding="utf-8",
+            "allowed:\n"
+            + "\n".join(f"  {path}" for path in allowed)
+            + "\ndisallowed:\n"
+            + "\n".join(f"  {path}" for path in disallowed)
+            + "\n",
+            encoding="utf-8",
           )
           print(report.read_text(encoding="utf-8"), end="")
           if disallowed:
-              raise SystemExit(2)
+            raise SystemExit(2)
           if allowed:
-              subprocess.check_call(["git", "add", "--", *allowed])
+            subprocess.check_call(["git", "add", "--", *allowed])
           PY
           if ! git diff --cached --quiet; then
             git commit -m "Regenerate authoritative core readiness evidence"
@@ -216,6 +236,7 @@ jobs:
           name: authoritative-core-evidence-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/authoritative-core-evidence-tests.log
+            ${{ runner.temp }}/evidence-staging.log
             ${{ runner.temp }}/generated-evidence-paths.txt
             ${{ runner.temp }}/phase1-evidence-preflight-receipt.json
             ${{ runner.temp }}/phase1-evidence-source-state-receipt.json

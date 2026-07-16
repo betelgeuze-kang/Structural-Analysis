@@ -1,5 +1,6 @@
 {
   "analysis_type": "model_health",
+  "canonical_model_checksum": "sha256:903553ca61a57e8b6901b120fd32cd22ba2e051172be763ee40b85d78c58cddb",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "convergence_history": [
     {
@@ -14,6 +15,7 @@
   "engine_version": "1.0.0",
   "input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
   "metrics": {
+    "analysis_input_snapshot": "detached_canonical_model_v1",
     "element_count": 1,
     "load_count": 0,
     "node_count": 2,

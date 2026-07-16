@@ -21,6 +21,10 @@
     "solver": {"type": "string"},
     "engine_version": {"type": "string"},
     "input_checksum": {"type": "string"},
+    "canonical_model_checksum": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
     "tolerance": {"type": "number"},
     "convergence_history": {
       "type": "array",
