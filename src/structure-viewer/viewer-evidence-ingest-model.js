@@ -26,6 +26,20 @@ function firstText(...values) {
   return values.map(normalizeText).find(Boolean) || '';
 }
 
+function resolveEvidenceSourceType(sourceType = '', text = '', sourceName = '') {
+  const requested = normalizeToken(sourceType);
+  if (requested && requested !== 'auto') return requested;
+  const name = normalizeText(sourceName).toLowerCase();
+  if (name.endsWith('.csv')) return 'csv';
+  if (name.endsWith('.ifc')) return 'ifc';
+  if (name.endsWith('.json')) return 'json';
+  const body = normalizeText(text);
+  if (body.startsWith('{') || body.startsWith('[')) return 'json';
+  if (/^(ISO-10303-21;|#\d+=IFC)/i.test(body)) return 'ifc';
+  if (body.includes(',') && body.includes('\n')) return 'csv';
+  return 'json';
+}
+
 function parseCsvRows(text = '') {
   const lines = normalizeText(text).split(/\r?\n/).filter(Boolean);
   if (!lines.length) return [];
@@ -127,7 +141,7 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
   sourceName = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  const normalizedSourceType = normalizeToken(sourceType);
+  const normalizedSourceType = resolveEvidenceSourceType(sourceType, text, sourceName);
   if (normalizedSourceType !== 'json') {
     return inspectionEnvelope({
       sourceType: normalizedSourceType,
@@ -231,6 +245,52 @@ function buildIfcMetadataRow(text = '', {
     element_count: memberMatches.length,
     load_model_status: 'source_ifc_load_model_missing',
     evidence_level: 'ifc metadata summary',
+  };
+}
+
+function buildAuthoritativeViewerMetadataRow(inspection, {
+  projectId = 'ingested_project',
+  artifactPath = '',
+} = {}) {
+  const identity = inspection.model_identity && typeof inspection.model_identity === 'object'
+    ? inspection.model_identity
+    : {};
+  const sourcePath = normalizeText(artifactPath) || inspection.source_name || 'browser-json-ingest';
+  return {
+    project_id: normalizeToken(projectId),
+    drawing_id: `${normalizeToken(projectId) || 'ingested_project'}_authoritative_viewer`,
+    drawing_title: 'Validated authoritative Viewer payload',
+    source_family: AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
+    source_tool: 'Structural Analysis authoritative CPU solver',
+    source_tool_profile: 'generic',
+    artifact_path: sourcePath,
+    member_count: inspection.element_count,
+    node_count: inspection.node_count,
+    element_count: inspection.element_count,
+    load_model_status: 'authoritative_viewer_payload_validated',
+    evidence_level: 'validated authoritative Viewer contract',
+    quality_flags: [
+      'authoritative_viewer_contract_validated',
+      'engineer_review_required',
+    ],
+    commercial_review_status: 'needs_review',
+    provenance: {
+      source_path: sourcePath,
+      evidence_level: 'validated authoritative Viewer contract',
+      identity_policy: normalizeText(identity.identity_policy),
+      source_input_checksum: normalizeText(identity.source_input_checksum),
+      canonical_model_checksum: normalizeText(identity.canonical_model_checksum),
+      analysis_input_snapshot: normalizeText(identity.analysis_input_snapshot),
+    },
+    ingest_summary: {
+      status: 'validated authoritative Viewer contract',
+      payload_kind: inspection.payload_kind,
+      validation_status: inspection.validation_status,
+      node_count: inspection.node_count,
+      element_count: inspection.element_count,
+      model_identity: identity,
+      preview_only: true,
+    },
   };
 }
 
@@ -365,21 +425,27 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
   artifactPath = '',
   generatedAt = '2026-05-17T00:00:00Z',
 } = {}) {
-  const type = normalizeToken(sourceType);
+  const type = resolveEvidenceSourceType(sourceType, text, artifactPath);
+  const inspection = inspectRenderableEvidencePayloadFromText(text, {
+    sourceType: type,
+    sourceName: artifactPath,
+    generatedAt,
+  });
   let rows = [];
   if (type === 'csv') rows = parseCsvRows(text);
   else if (type === 'ifc') rows = [buildIfcMetadataRow(text, { drawingId: projectId, artifactPath })];
-  else rows = parseJsonRows(text);
+  else if (
+    inspection.available
+    && inspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
+    && inspection.validation_status === 'validated_authoritative_contract'
+  ) {
+    rows = [buildAuthoritativeViewerMetadataRow(inspection, { projectId, artifactPath })];
+  } else rows = parseJsonRows(text);
   const preview = buildEvidenceIngestPreview({
     rows,
-    sourceType: type || 'json',
+    sourceType: type,
     projectId,
     projectTitle,
-    generatedAt,
-  });
-  const inspection = inspectRenderableEvidencePayloadFromText(text, {
-    sourceType: type || 'json',
-    sourceName: artifactPath,
     generatedAt,
   });
   return {
