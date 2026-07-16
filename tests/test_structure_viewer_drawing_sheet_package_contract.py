@@ -158,6 +158,10 @@ const blockedPreview = {
   renderable_payload_error_code: 'viewer_model_identity_missing',
   renderable_payload_error_path: '/model_identity',
 };
+const combinedPreview = {
+  ...blockedPreview,
+  blocked_issues: [{issue: 'blocked quality status', drawing_id: 'drawing-1'}],
+};
 const validPreview = {
   source_type: 'json',
   row_count: 1,
@@ -173,8 +177,10 @@ const validPreview = {
   renderable_segment_count: 0,
 };
 const blockedPanel = buildReportExportPanelHtml({ingestPreview: blockedPreview});
+const combinedPanel = buildReportExportPanelHtml({ingestPreview: combinedPreview});
 const validPanel = buildReportExportPanelHtml({ingestPreview: validPreview});
 const blockedReport = buildStructureViewerReportHtml({ingestPreview: blockedPreview});
+const combinedReport = buildStructureViewerReportHtml({ingestPreview: combinedPreview});
 const validReport = buildStructureViewerReportHtml({ingestPreview: validPreview});
 console.log(JSON.stringify({
   blockedPanelWarn: blockedPanel.includes('prop-value--warn'),
@@ -182,6 +188,7 @@ console.log(JSON.stringify({
   blockedPanelStatus: blockedPanel.includes('blocked_authoritative_contract'),
   blockedPanelCode: blockedPanel.includes('viewer_model_identity_missing'),
   blockedPanelPath: blockedPanel.includes('/model_identity'),
+  combinedPanelCount: combinedPanel.includes('2 blocked'),
   validPanelSuccess: validPanel.includes('prop-value--success'),
   validPanelCount: validPanel.includes('0 blocked'),
   validPanelStatus: validPanel.includes('validated_authoritative_contract'),
@@ -191,6 +198,8 @@ console.log(JSON.stringify({
   blockedReportPath: blockedReport.includes('/model_identity'),
   blockedReportTone: blockedReport.includes('class="row blocked"'),
   blockedReportNoFalseClear: !blockedReport.includes('No evidence ingest blocked issue registered'),
+  combinedReportDrawingIssue: combinedReport.includes('blocked quality status'),
+  combinedReportContractIssue: combinedReport.includes('viewer_model_identity_missing'),
   validReportStatus: validReport.includes('validated_authoritative_contract'),
   validReportRenderable: validReport.includes('authoritative_viewer_v2 · nodes=2 · elements=1'),
   validReportNoError: !validReport.includes('viewer_model_identity_missing'),
@@ -205,6 +214,7 @@ console.log(JSON.stringify({
         "blockedPanelStatus": True,
         "blockedPanelCode": True,
         "blockedPanelPath": True,
+        "combinedPanelCount": True,
         "validPanelSuccess": True,
         "validPanelCount": True,
         "validPanelStatus": True,
@@ -214,6 +224,8 @@ console.log(JSON.stringify({
         "blockedReportPath": True,
         "blockedReportTone": True,
         "blockedReportNoFalseClear": True,
+        "combinedReportDrawingIssue": True,
+        "combinedReportContractIssue": True,
         "validReportStatus": True,
         "validReportRenderable": True,
         "validReportNoError": True,
