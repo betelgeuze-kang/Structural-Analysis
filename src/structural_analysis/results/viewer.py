@@ -16,6 +16,9 @@ REACTION_LABELS = ("FX", "FY", "FZ", "MX", "MY", "MZ")
 DISPLACEMENT_LABELS = ("UX", "UY", "UZ", "RX", "RY", "RZ")
 VIEWER_SCHEMA_VERSION = "structural-analysis-viewer-payload.v2"
 VIEWER_MODEL_IDENTITY_POLICY = "source_bytes_and_detached_canonical_model_v1"
+VIEWER_RESOURCE_LIMIT_POLICY = "authoritative_viewer_large_model_gate_v1"
+VIEWER_MAX_NODE_COUNT = 200_000
+VIEWER_MAX_ELEMENT_COUNT = 100_000
 VIEWER_SCHEMA_RESOURCE = "viewer_payload.schema.json"
 _HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 
@@ -53,6 +56,10 @@ def build_linear_static_viewer_payload(
     :func:`bind_viewer_model_identity` succeeds.
     """
 
+    _validate_resource_counts(
+        node_count=len(node_ids),
+        element_count=len(member_forces),
+    )
     width = len(dof_labels)
     nodes = []
     for index, node_id in enumerate(node_ids):
@@ -139,13 +146,20 @@ def validate_linear_static_viewer_payload(
     *,
     require_bound_identity: bool = True,
 ) -> dict[str, Any]:
-    """Validate JSON shape, finite numerics, IDs, and topology references."""
+    """Validate JSON shape, finite numerics, IDs, topology, and resource bounds."""
 
     if type(payload) is not dict:
         raise ViewerPayloadValidationError(
             "viewer_payload_type_invalid",
             "/",
             "Viewer payload must use an exact dictionary.",
+        )
+    node_rows = payload.get("nodes")
+    element_rows = payload.get("elements")
+    if type(node_rows) is list and type(element_rows) is list:
+        _validate_resource_counts(
+            node_count=len(node_rows),
+            element_count=len(element_rows),
         )
     errors = sorted(
         _schema_validator().iter_errors(payload),
@@ -233,6 +247,41 @@ def validate_linear_static_viewer_payload(
             "Viewer element IDs must be unique.",
         )
     return dict(payload)
+
+
+def _validate_resource_counts(*, node_count: int, element_count: int) -> None:
+    if type(node_count) is not int or node_count < 0:
+        raise ViewerPayloadValidationError(
+            "viewer_resource_count_invalid",
+            "/nodes",
+            "Viewer node count must be a non-negative integer.",
+        )
+    if type(element_count) is not int or element_count < 0:
+        raise ViewerPayloadValidationError(
+            "viewer_resource_count_invalid",
+            "/elements",
+            "Viewer element count must be a non-negative integer.",
+        )
+    if node_count > VIEWER_MAX_NODE_COUNT:
+        raise ViewerPayloadValidationError(
+            "viewer_node_count_limit_exceeded",
+            "/nodes",
+            (
+                f"Viewer payload contains {node_count} nodes; "
+                f"limit is {VIEWER_MAX_NODE_COUNT} under "
+                f"{VIEWER_RESOURCE_LIMIT_POLICY}."
+            ),
+        )
+    if element_count > VIEWER_MAX_ELEMENT_COUNT:
+        raise ViewerPayloadValidationError(
+            "viewer_element_count_limit_exceeded",
+            "/elements",
+            (
+                f"Viewer payload contains {element_count} elements; "
+                f"limit is {VIEWER_MAX_ELEMENT_COUNT} under "
+                f"{VIEWER_RESOURCE_LIMIT_POLICY}."
+            ),
+        )
 
 
 def _validate_identity(identity: Any) -> None:
