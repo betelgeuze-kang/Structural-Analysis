@@ -1,7 +1,9 @@
 name: Frontend Web CI
 
 # Frontend-only verification for the React workbench and static prototype.
-# Structure-viewer browser smoke remains in Viewer Browser CI.
+# Structure-viewer browser smoke remains in Viewer Browser CI. The ordered
+# negative pattern keeps Python-only src/structural_analysis changes out of this
+# lane while mixed Python/frontend pull requests still trigger it.
 
 on:
   pull_request:
@@ -9,6 +11,7 @@ on:
       - "index.html"
       - "prototype/**"
       - "src/**"
+      - "!src/structural_analysis/**"
       - "tests/frontend/**"
       - "scripts/*.mjs"
       - "package.json"
@@ -22,6 +25,7 @@ on:
       - "index.html"
       - "prototype/**"
       - "src/**"
+      - "!src/structural_analysis/**"
       - "tests/frontend/**"
       - "scripts/*.mjs"
       - "package.json"
