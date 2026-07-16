@@ -25,6 +25,7 @@ class AnalysisResult:
     result_schema_version: str = RESULT_SCHEMA_VERSION
     developer_preview: bool = True
     claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
+    canonical_model_checksum: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -45,6 +46,7 @@ class ValidationReport:
     warnings: list[str] = field(default_factory=list)
     developer_preview: bool = True
     claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
+    canonical_model_checksum: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
