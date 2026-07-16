@@ -240,6 +240,58 @@ def test_general_multi_restart_history_v2_stays_contract_only() -> None:
     )
 
 
+def test_restart_trace_ir_v1_stays_diagnostic_and_non_authoritative() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    capability = rows["hip_fgmres_restart_trace_ir_v1"]
+    assert capability["implementation_state"] == "implemented"
+    assert capability["promotion_state"] == "contract_only"
+    assert {
+        "general_history_parity_v2_to_diagnostic_restart_trace_ir_v1_projection",
+        "strict_separation_from_solution_and_result_ir_semantics",
+        "ordered_restart_checkpoint_rows_with_source_row_canonical_hashes",
+        "cpu_reference_and_hip_candidate_vectors_referenced_by_hash_only",
+        "all_five_source_scalar_roundoff_envelopes_preserved_per_restart",
+        "zero_embedded_numeric_vector_bytes_and_zero_result_arrays",
+        "projection_additional_device_d2h_solve_export_state_commit_and_fallback_zero",
+        "required_gfx1030_three_row_trace_harness_collected_current_execution_pending_no_kfd",
+        "public_symbols_engine1085_assembly912_solvers47_unique",
+    }.issubset(capability["supported_scope"])
+    assert {
+        "raw_checkpoint_vector_payload_embedding",
+        "final_solution_authority",
+        "state_commit_authority",
+        "result_ir_ready",
+        "result_ir_issuance_authority",
+        "standalone_detached_or_serialized_provenance_authenticity",
+        "signed_evidence",
+        "actual_external_gfx1100",
+        "multiarchitecture_or_same_artifact_two_isa_parity",
+        "iteration_host_copy_zero_process_wide",
+        "end_to_end_o_n",
+        "performance_or_speedup",
+        "commercial_readiness",
+        "promotion_eligibility",
+    }.issubset(capability["explicit_exclusions"])
+    assert capability["required_contracts"] == [
+        "ADR-001",
+        "ADR-002",
+        "ADR-004",
+        "ADR-007",
+    ]
+    assert {
+        "focused_trace_public_general_history_contracts_fifteen_passed",
+        "required_gfx1030_attached_trace_projection_harness_collected_one_test",
+        "current_namespace_required_gate_failed_closed_before_numerical_path_no_real_gfx_agent",
+        "current_source_schema_hardware_harness_aggregate_sha256_2661f3745b432bba1fd21aea0bf3e8bf0d8e12e5122c92c587dd49221efdeda1",
+    }.issubset(capability["verification_cases"])
+    assert capability["claim_level"] == (
+        "general_history_derived_diagnostic_restart_trace_contract_only_unsigned_"
+        "process_local_nonpersistent_nonpromoting_hardware_replay_pending"
+    )
+
+
 def test_all_converged_result_ir_v1_stays_contract_only_after_local_hardware() -> None:
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}

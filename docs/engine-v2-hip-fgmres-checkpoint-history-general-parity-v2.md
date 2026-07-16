@@ -135,7 +135,8 @@ Estimated residual envelope는 estimator와 true residual 간 gap을 CPU/HIP 각
 
 다음 순서는 다음과 같다.
 
-1. General-history receipt를 ResultIR 중간 이력과 분리한 진단/trace IR로 연결한다.
-2. `gfx1100` external runner에서 동일 fixture/schema/kernel identity를 서명·영속 receipt로 재생한다.
-3. AMG/DD 전처리와 fixed-rank orthogonal coarse correction을 추가하고 iteration/memory/time scaling을 별도 계측한다.
-4. Device recovery와 ResultIR를 연결하되 CPU sparse physics replay와 fail-closed fallback telemetry를 보존한다.
+1. General-history receipt의 ResultIR-분리 진단 trace는 v0.2.53 [diagnostic restart TraceIR v1](engine-v2-hip-fgmres-restart-trace-ir-v1.md)에서 additive contract로 연결했다. Raw vector는 새 wire에 embed하지 않고 source hash로만 참조한다.
+2. 신규 TraceIR projection이 포함된 current-source local `gfx1030` gate를 device-visible namespace에서 재실행한다.
+3. `gfx1100` external runner에서 동일 fixture/schema/kernel/trace identity를 서명·영속 receipt로 재생한다.
+4. AMG/DD 전처리와 fixed-rank orthogonal coarse correction을 추가하고 iteration/memory/time scaling을 별도 계측한다.
+5. Device recovery와 ResultIR를 별도 권한으로 연결하되 CPU sparse physics replay와 fail-closed fallback telemetry를 보존한다.

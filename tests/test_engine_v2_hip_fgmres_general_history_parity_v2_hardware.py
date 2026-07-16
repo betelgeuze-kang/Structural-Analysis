@@ -24,6 +24,10 @@ from structural_analysis.engine_v2.assembly_backend.fgmres_general_history_parit
 from structural_analysis.engine_v2.assembly_backend.fgmres_global_recurrence_context_v1 import (
     open_hip_fgmres_global_recurrence_context_v1,
 )
+from structural_analysis.engine_v2.assembly_backend.fgmres_restart_trace_ir_v1 import (
+    build_hip_fgmres_restart_trace_ir_v1,
+    validate_hip_fgmres_restart_trace_ir_result_v1,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_sealed_checkpoint_transaction_v1 import (
     open_hip_fgmres_sealed_checkpoint_transaction_context_v1,
 )
@@ -56,6 +60,9 @@ _SOURCE_PATHS = (
     / "src/structural_analysis/engine_v2/assembly_backend"
     / "fgmres_general_history_parity_v2.py",
     ROOT
+    / "src/structural_analysis/engine_v2/assembly_backend"
+    / "fgmres_restart_trace_ir_v1.py",
+    ROOT
     / "src/structural_analysis/engine_v2/assembly_backend/kernels"
     / "engine_v2_fgmres_checkpoint_history_v1.hip.cpp",
     ROOT / "src/structural_analysis/engine_v2/solvers/cpu_fgmres.py",
@@ -74,6 +81,9 @@ _SOURCE_PATHS = (
     ROOT
     / "src/structural_analysis/schemas"
     / "hip_fgmres_general_history_parity_v2.schema.json",
+    ROOT
+    / "src/structural_analysis/schemas"
+    / "hip_fgmres_restart_trace_ir_v1.schema.json",
     Path(__file__).resolve(),
 )
 
@@ -158,8 +168,18 @@ def test_native_gfx1030_general_multi_restart_history_v2() -> None:
             expected_export_context=export_open.context,
         )
         assert validate_hip_fgmres_general_history_parity_result_v2(parity) is parity
+        trace = build_hip_fgmres_restart_trace_ir_v1(parity)
+        assert validate_hip_fgmres_restart_trace_ir_result_v1(trace) is trace
         assert parity.receipt.dimensions.populated_restart_count == 3
         assert tuple(row.end_iteration for row in parity.receipt.rows) == (2, 4, 5)
+        assert trace.receipt.dimensions.trace_row_count == 3
+        assert tuple(row.end_iteration for row in trace.receipt.rows) == (2, 4, 5)
+        assert trace.receipt.summary.terminal_trace_row_count == 1
+        assert trace.receipt.claims.result_ir_semantics_separated is True
+        assert trace.receipt.claims.solution_ready is False
+        assert trace.receipt.claims.result_ir_ready is False
+        assert trace.receipt.telemetry.additional_device_operation_count == 0
+        assert trace.receipt.telemetry.additional_d2h_operation_count == 0
         assert exported.receipt.telemetry.total_blocking_d2h_attempt_count == 5
         assert exported.receipt.telemetry.total_blocking_d2h_success_count == 5
         assert exported.receipt.telemetry.composite_fallback_count == 0
@@ -179,6 +199,8 @@ def test_native_gfx1030_general_multi_restart_history_v2() -> None:
             "actual-gfx1030 general-history-v2: "
             f"parity_id={parity.receipt.parity_id} "
             f"receipt_hash={parity.receipt.receipt_hash} "
+            f"trace_id={trace.receipt.trace_id} "
+            f"trace_hash={trace.receipt.receipt_hash} "
             f"completion_hash={exported.receipt.receipt_hash} "
             f"rows={parity.receipt.dimensions.populated_restart_count} "
             f"d2h={exported.receipt.telemetry.total_blocking_d2h_attempt_count}",

@@ -1,0 +1,393 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_restart_trace_ir_v1.schema.json",
+  "title": "HIP FGMRES diagnostic restart trace IR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "artifact_kind",
+    "promotion_eligible",
+    "trace_id",
+    "bindings",
+    "dimensions",
+    "summary",
+    "rows",
+    "telemetry",
+    "claims",
+    "extensions",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-restart-trace-ir.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_general_history_diagnostic_restart_trace_ir_v1"
+    },
+    "status": {"const": "diagnostic_restart_trace_ir_v1_ready"},
+    "evidence_scope": {
+      "const": "derived_from_process_local_general_history_parity_v2_non_promoting"
+    },
+    "artifact_kind": {"const": "solver_restart_diagnostic_trace"},
+    "promotion_eligible": {"const": false},
+    "trace_id": {"$ref": "#/$defs/hash"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "summary": {"$ref": "#/$defs/summary"},
+    "rows": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {"$ref": "#/$defs/row"}
+    },
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "extensions": {"type": "object", "maxProperties": 0},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonnegativeNumber": {
+      "type": "number",
+      "minimum": 0
+    },
+    "nullableNonnegativeInteger": {
+      "oneOf": [
+        {"type": "integer", "minimum": 0, "maximum": 4096},
+        {"type": "null"}
+      ]
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_general_history_schema_version",
+        "source_parity_id",
+        "source_parity_receipt_hash",
+        "source_general_history_bindings_hash",
+        "execution_plan_hash",
+        "operator_hash",
+        "policy_hash",
+        "cpu_checkpoint_history_result_hash",
+        "cpu_base_result_hash",
+        "completion_export_v2_context_id",
+        "completion_export_v2_receipt_hash",
+        "completion_export_v2_payload_hash",
+        "retained_completion_export_v1_receipt_hash",
+        "checkpoint_history_export_v1_receipt_hash",
+        "terminal_observation_receipt_hash",
+        "global_context_id",
+        "history_plan_hash",
+        "history_blob_abi_hash",
+        "recurrence_plan_hash",
+        "recurrence_kernel_identity_hash",
+        "architecture",
+        "device_ordinal"
+      ],
+      "properties": {
+        "source_general_history_schema_version": {
+          "const": "structural-analysis-hip-fgmres-general-history-parity.v2"
+        },
+        "source_parity_id": {"$ref": "#/$defs/hash"},
+        "source_parity_receipt_hash": {"$ref": "#/$defs/hash"},
+        "source_general_history_bindings_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "operator_hash": {"$ref": "#/$defs/hash"},
+        "policy_hash": {"$ref": "#/$defs/hash"},
+        "cpu_checkpoint_history_result_hash": {"$ref": "#/$defs/hash"},
+        "cpu_base_result_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_v2_context_id": {"$ref": "#/$defs/hash"},
+        "completion_export_v2_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_v2_payload_hash": {"$ref": "#/$defs/hash"},
+        "retained_completion_export_v1_receipt_hash": {"$ref": "#/$defs/hash"},
+        "checkpoint_history_export_v1_receipt_hash": {"$ref": "#/$defs/hash"},
+        "terminal_observation_receipt_hash": {"$ref": "#/$defs/hash"},
+        "global_context_id": {"$ref": "#/$defs/hash"},
+        "history_plan_hash": {"$ref": "#/$defs/hash"},
+        "history_blob_abi_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_plan_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_kernel_identity_hash": {"$ref": "#/$defs/hash"},
+        "architecture": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+        "device_ordinal": {"type": "integer", "minimum": 0}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "maximum_restart_count",
+        "trace_row_count",
+        "referenced_vector_count",
+        "referenced_scalar_metric_count",
+        "embedded_numeric_vector_byte_count",
+        "result_array_count"
+      ],
+      "properties": {
+        "free_dof_count": {"type": "integer", "minimum": 1},
+        "maximum_restart_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "trace_row_count": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "referenced_vector_count": {"type": "integer", "minimum": 0, "maximum": 8192},
+        "referenced_scalar_metric_count": {"type": "integer", "minimum": 0, "maximum": 20480},
+        "embedded_numeric_vector_byte_count": {"const": 0},
+        "result_array_count": {"const": 0}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "first_restart_index",
+        "last_restart_index",
+        "first_start_iteration",
+        "last_end_iteration",
+        "terminal_trace_row_count",
+        "monotonic_restart_and_iteration_order_verified",
+        "all_solution_vector_gates_passed",
+        "all_metric_bounds_passed",
+        "result_ir_binding_count"
+      ],
+      "properties": {
+        "first_restart_index": {"$ref": "#/$defs/nullableNonnegativeInteger"},
+        "last_restart_index": {"$ref": "#/$defs/nullableNonnegativeInteger"},
+        "first_start_iteration": {"$ref": "#/$defs/nullableNonnegativeInteger"},
+        "last_end_iteration": {"$ref": "#/$defs/nullableNonnegativeInteger"},
+        "terminal_trace_row_count": {"type": "integer", "minimum": 0, "maximum": 1},
+        "monotonic_restart_and_iteration_order_verified": {"const": true},
+        "all_solution_vector_gates_passed": {"const": true},
+        "all_metric_bounds_passed": {"const": true},
+        "result_ir_binding_count": {"const": 0}
+      }
+    },
+    "vectorReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "value_count",
+        "cpu_reference_sha256",
+        "hip_candidate_sha256",
+        "maximum_absolute_error",
+        "difference_l2",
+        "reference_l2",
+        "relative_l2_error",
+        "fixed_absolute_tolerance",
+        "fixed_relative_tolerance",
+        "fixed_componentwise_gate_passed"
+      ],
+      "properties": {
+        "role": {"enum": ["checkpoint_solution", "checkpoint_true_residual"]},
+        "value_count": {"type": "integer", "minimum": 1},
+        "cpu_reference_sha256": {"$ref": "#/$defs/hash"},
+        "hip_candidate_sha256": {"$ref": "#/$defs/hash"},
+        "maximum_absolute_error": {"$ref": "#/$defs/nonnegativeNumber"},
+        "difference_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "reference_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "relative_l2_error": {"$ref": "#/$defs/nonnegativeNumber"},
+        "fixed_absolute_tolerance": {"const": 1e-12},
+        "fixed_relative_tolerance": {"const": 1e-8},
+        "fixed_componentwise_gate_passed": {"type": "boolean"}
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "cpu_value",
+        "hip_value",
+        "absolute_difference",
+        "vector_transport_bound",
+        "cpu_estimator_or_replay_gap",
+        "hip_estimator_or_replay_gap",
+        "fp_roundoff_guard",
+        "total_bound",
+        "maximum_bound_ratio",
+        "outward_rounding_used",
+        "bound_passed"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "true_residual_l2",
+            "true_residual_linf",
+            "scaled_true_residual",
+            "estimated_residual_l2",
+            "solution_update_l2"
+          ]
+        },
+        "cpu_value": {"$ref": "#/$defs/nonnegativeNumber"},
+        "hip_value": {"$ref": "#/$defs/nonnegativeNumber"},
+        "absolute_difference": {"$ref": "#/$defs/nonnegativeNumber"},
+        "vector_transport_bound": {"$ref": "#/$defs/nonnegativeNumber"},
+        "cpu_estimator_or_replay_gap": {"$ref": "#/$defs/nonnegativeNumber"},
+        "hip_estimator_or_replay_gap": {"$ref": "#/$defs/nonnegativeNumber"},
+        "fp_roundoff_guard": {"$ref": "#/$defs/nonnegativeNumber"},
+        "total_bound": {"$ref": "#/$defs/nonnegativeNumber"},
+        "maximum_bound_ratio": {"type": "number", "minimum": 0, "maximum": 1},
+        "outward_rounding_used": {"const": true},
+        "bound_passed": {"const": true}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "true_residual_l2",
+        "true_residual_linf",
+        "scaled_true_residual",
+        "estimated_residual_l2",
+        "solution_update_l2"
+      ],
+      "properties": {
+        "true_residual_l2": {"$ref": "#/$defs/metric"},
+        "true_residual_linf": {"$ref": "#/$defs/metric"},
+        "scaled_true_residual": {"$ref": "#/$defs/metric"},
+        "estimated_residual_l2": {"$ref": "#/$defs/metric"},
+        "solution_update_l2": {"$ref": "#/$defs/metric"}
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence_index",
+        "semantic_role",
+        "terminal_row_in_trace",
+        "source_history_row_hash",
+        "restart_index",
+        "slot_index",
+        "column_index",
+        "start_iteration",
+        "end_iteration",
+        "arnoldi_step_count",
+        "reorthogonalization_count",
+        "termination_hint",
+        "flags",
+        "solution",
+        "true_residual",
+        "residual_roundoff_receipt_hash",
+        "residual_roundoff_maximum_componentwise_ratio",
+        "metrics"
+      ],
+      "properties": {
+        "sequence_index": {"type": "integer", "minimum": 0, "maximum": 4095},
+        "semantic_role": {"const": "restart_checkpoint_diagnostic"},
+        "terminal_row_in_trace": {"type": "boolean"},
+        "source_history_row_hash": {"$ref": "#/$defs/hash"},
+        "restart_index": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "slot_index": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "column_index": {"type": "integer", "minimum": 0, "maximum": 15},
+        "start_iteration": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "end_iteration": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "arnoldi_step_count": {"type": "integer", "minimum": 1, "maximum": 16},
+        "reorthogonalization_count": {"type": "integer", "minimum": 0, "maximum": 16},
+        "termination_hint": {"type": "string", "minLength": 1},
+        "flags": {"type": "integer", "minimum": 0},
+        "solution": {"$ref": "#/$defs/vectorReference"},
+        "true_residual": {"$ref": "#/$defs/vectorReference"},
+        "residual_roundoff_receipt_hash": {"$ref": "#/$defs/hash"},
+        "residual_roundoff_maximum_componentwise_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "metrics": {"$ref": "#/$defs/metrics"}
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_general_history_receipt_validation_count",
+        "source_row_projection_count",
+        "source_row_hash_count",
+        "vector_reference_projection_count",
+        "scalar_envelope_projection_count",
+        "numeric_vector_payload_copy_count",
+        "state_commit_count",
+        "result_ir_build_count",
+        "additional_device_operation_count",
+        "additional_d2h_operation_count",
+        "additional_solve_count",
+        "additional_export_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "source_general_history_receipt_validation_count": {"const": 1},
+        "source_row_projection_count": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "source_row_hash_count": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "vector_reference_projection_count": {"type": "integer", "minimum": 0, "maximum": 8192},
+        "scalar_envelope_projection_count": {"type": "integer", "minimum": 0, "maximum": 20480},
+        "numeric_vector_payload_copy_count": {"const": 0},
+        "state_commit_count": {"const": 0},
+        "result_ir_build_count": {"const": 0},
+        "additional_device_operation_count": {"const": 0},
+        "additional_d2h_operation_count": {"const": 0},
+        "additional_solve_count": {"const": 0},
+        "additional_export_count": {"const": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "diagnostic_restart_trace_ir_v1_ready",
+        "source_general_history_parity_v2_bound",
+        "ordered_restart_rows_preserved",
+        "source_row_hashes_preserved",
+        "vector_payloads_referenced_by_hash_only",
+        "scalar_roundoff_envelopes_preserved",
+        "result_ir_semantics_separated",
+        "final_solution_authority_absent",
+        "state_commit_authority_absent",
+        "additional_device_transfer_solve_or_export_zero",
+        "raw_checkpoint_vectors_embedded",
+        "solution_ready",
+        "result_ir_ready",
+        "result_ir_issuance_authorized",
+        "standalone_provenance",
+        "signed_evidence",
+        "multi_architecture_parity_verified",
+        "iteration_host_copy_zero_process_wide",
+        "performance_or_speedup_proven",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "diagnostic_restart_trace_ir_v1_ready": {"const": true},
+        "source_general_history_parity_v2_bound": {"const": true},
+        "ordered_restart_rows_preserved": {"const": true},
+        "source_row_hashes_preserved": {"const": true},
+        "vector_payloads_referenced_by_hash_only": {"const": true},
+        "scalar_roundoff_envelopes_preserved": {"const": true},
+        "result_ir_semantics_separated": {"const": true},
+        "final_solution_authority_absent": {"const": true},
+        "state_commit_authority_absent": {"const": true},
+        "additional_device_transfer_solve_or_export_zero": {"const": true},
+        "raw_checkpoint_vectors_embedded": {"const": false},
+        "solution_ready": {"const": false},
+        "result_ir_ready": {"const": false},
+        "result_ir_issuance_authorized": {"const": false},
+        "standalone_provenance": {"const": false},
+        "signed_evidence": {"const": false},
+        "multi_architecture_parity_verified": {"const": false},
+        "iteration_host_copy_zero_process_wide": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}
