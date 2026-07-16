@@ -121,7 +121,7 @@ console.log(JSON.stringify({
         "error_code": "evidence_ingest_file_byte_limit_exceeded",
         "error_path": "/file/size",
     }
-    assert "text" not in json.dumps(oversized)
+    assert '"text":' not in json.dumps(oversized, sort_keys=True)
 
     read_failure = payload["readFailure"]
     assert read_failure["source_type"] == "csv"
