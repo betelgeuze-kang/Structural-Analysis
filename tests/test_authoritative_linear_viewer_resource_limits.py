@@ -89,6 +89,12 @@ def test_python_schema_and_public_exports_share_large_model_gate() -> None:
             / "src/structural_analysis/schemas/viewer_payload.schema.json"
         ).read_text(encoding="utf-8")
     )
+    performance_budget = json.loads(
+        (
+            ROOT
+            / "implementation/phase1/structure_viewer_performance_budget_manifest.json"
+        ).read_text(encoding="utf-8")
+    )
 
     assert VIEWER_RESOURCE_LIMIT_POLICY == "authoritative_viewer_large_model_gate_v1"
     assert VIEWER_MAX_NODE_COUNT == 200_000
@@ -97,6 +103,9 @@ def test_python_schema_and_public_exports_share_large_model_gate() -> None:
     assert schema["properties"]["elements"]["maxItems"] == (
         VIEWER_MAX_ELEMENT_COUNT
     )
+    assert performance_budget["budget_values"][
+        "large_model_element_threshold"
+    ] == VIEWER_MAX_ELEMENT_COUNT
     assert {
         "VIEWER_MAX_NODE_COUNT",
         "VIEWER_MAX_ELEMENT_COUNT",
