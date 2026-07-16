@@ -14,28 +14,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Print evidence ingest handler context
+      - name: Capture evidence ingest handler context
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          path = Path('src/structure-viewer/index.html')
-          lines = path.read_text(encoding='utf-8').splitlines()
+          source = Path('src/structure-viewer/index.html')
+          output = Path('/tmp/viewer-ingest-handler-context.txt')
+          lines = source.read_text(encoding='utf-8').splitlines()
           patterns = (
               'previewEvidenceIngestFromInput',
               'attachEvidenceIngestPreview',
               'evidence-ingest-source-select',
               '.text()',
               'FileReader',
+              'viewer-evidence-ingest-model.js',
           )
+          chunks = []
+          seen = set()
           for pattern in patterns:
-              print(f'=== PATTERN {pattern!r} ===')
               matches = [index for index, line in enumerate(lines) if pattern in line]
-              print(f'matches={len(matches)}')
-              for index in matches[:20]:
-                  begin = max(0, index - 12)
-                  end = min(len(lines), index + 22)
-                  print(f'--- lines {begin + 1}-{end} ---')
-                  for line_number in range(begin, end):
-                      print(f'{line_number + 1:06d}: {lines[line_number]}')
+              chunks.append(f'=== PATTERN {pattern!r} matches={len(matches)} ===')
+              for index in matches[:30]:
+                  begin = max(0, index - 20)
+                  end = min(len(lines), index + 35)
+                  key = (begin, end)
+                  if key in seen:
+                      continue
+                  seen.add(key)
+                  chunks.append(f'--- lines {begin + 1}-{end} ---')
+                  chunks.extend(
+                      f'{line_number + 1:06d}: {lines[line_number]}'
+                      for line_number in range(begin, end)
+                  )
+          output.write_text('\n'.join(chunks) + '\n', encoding='utf-8')
+          print(f'captured {len(chunks)} lines to {output}')
           PY
+      - name: Upload handler context
+        uses: actions/upload-artifact@v7
+        with:
+          name: viewer-ingest-handler-context-${{ github.run_id }}
+          path: /tmp/viewer-ingest-handler-context.txt
+          if-no-files-found: error
+          retention-days: 1
