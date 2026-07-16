@@ -6,8 +6,8 @@ import {
 } from './viewer-commercial-tool-crosswalk-model.js';
 import {
   AUTHORITATIVE_VIEWER_PAYLOAD_KIND,
-  AUTHORITATIVE_VIEWER_SCHEMA_VERSION,
   AuthoritativeViewerPayloadValidationError,
+  claimsAuthoritativeViewerContract,
   validateAuthoritativeViewerPayload,
 } from './viewer-authoritative-payload-contract.js';
 
@@ -147,7 +147,7 @@ export function inspectRenderableEvidencePayloadFromText(text = '', {
       validationErrorPath: '/',
     });
   }
-  if (payload.schema_version === AUTHORITATIVE_VIEWER_SCHEMA_VERSION) {
+  if (claimsAuthoritativeViewerContract(payload)) {
     try {
       validateAuthoritativeViewerPayload(payload);
       return inspectionEnvelope({
