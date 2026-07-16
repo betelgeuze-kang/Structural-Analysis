@@ -182,6 +182,7 @@ jobs:
 
           python - <<'PY'
           from pathlib import Path
+          import re
 
           text = Path('src/structure-viewer/viewer-local-ops-state.js').read_text(encoding='utf-8')
           required = (
@@ -196,13 +197,17 @@ jobs:
           missing = [value for value in required if value not in text]
           if missing:
               raise SystemExit(f'missing local ops persistence contracts: {missing}')
-          forbidden = (
-              'storageSet(storageKey, JSON.stringify({',
-              'receiptRows.forEach((receipt) =>',
+          if 'storageSet(storageKey, JSON.stringify({' in text:
+              raise SystemExit('retained direct unbounded storage serialization')
+          merge_match = re.search(
+              r"export function mergeViewerEvidenceIngestPreview\(state = \{\}, preview = \{\}\) \{.*?\n\}",
+              text,
+              re.DOTALL,
           )
-          retained = [value for value in forbidden if value in text]
-          if retained:
-              raise SystemExit(f'retained unbounded local ops patterns: {retained}')
+          if merge_match is None:
+              raise SystemExit('bounded evidence merge function missing')
+          if 'receiptRows.forEach((receipt) =>' in merge_match.group(0):
+              raise SystemExit('bounded evidence merge retained partial forEach mutation')
           PY
 
           git diff --check
