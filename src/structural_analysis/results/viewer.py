@@ -264,11 +264,11 @@ def _validate_number_sequence(values: Any, path: str) -> None:
 
 
 def _validate_vector(values: Any, labels: tuple[str, ...], path: str) -> None:
-    if type(values) is not dict or tuple(values) != labels:
+    if type(values) is not dict or set(values) != set(labels) or len(values) != len(labels):
         raise ViewerPayloadValidationError(
             "viewer_vector_layout_invalid",
             path,
-            f"Expected exact ordered components {list(labels)}.",
+            f"Expected exact components {list(labels)}.",
         )
     _validate_vector_values(values, path)
 
