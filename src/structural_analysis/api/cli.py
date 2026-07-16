@@ -3,10 +3,14 @@
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 from typing import Sequence
 
+from structural_analysis.api._output_integrity import (
+    OutputPathValidationError,
+    resolve_distinct_output_paths,
+    write_json_pair,
+)
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model
 from structural_analysis.results.validation import validate
 
@@ -29,6 +33,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--report-out", required=True, help="Path for validation report JSON.")
     args = parser.parse_args(argv)
 
+    protected_paths = {"model input": Path(args.model_path)}
+    if args.reference is not None:
+        protected_paths["reference input"] = Path(args.reference)
+
+    try:
+        result_path, report_path = resolve_distinct_output_paths(
+            Path(args.out),
+            Path(args.report_out),
+            protected_paths=protected_paths,
+        )
+    except OutputPathValidationError as error:
+        parser.error(str(error))
+
     model = load_model(args.model_path)
     config = AnalysisConfig(
         analysis_type=args.analysis_type,
@@ -42,14 +59,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     result = analyze(model, config)
     report = validate(result, args.reference)
 
-    _write_json(Path(args.out), result.to_dict())
-    _write_json(Path(args.report_out), report.to_dict())
+    write_json_pair(
+        result_path,
+        result.to_dict(),
+        report_path,
+        report.to_dict(),
+    )
     return 0 if report.contract_pass else 2
-
-
-def _write_json(path: Path, payload: dict[str, object]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
