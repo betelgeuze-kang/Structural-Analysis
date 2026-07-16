@@ -72,12 +72,40 @@ function parseJsonDocument(text = '') {
   }
 }
 
-function parseJsonRowsFromValue(value) {
-  if (Array.isArray(value)) return value;
-  if (isRecord(value) && Array.isArray(value.rows)) return value.rows;
-  if (isRecord(value) && Array.isArray(value.drawings)) return value.drawings;
-  if (isRecord(value)) return [value];
-  return [];
+function selectJsonRows(value) {
+  let rows = [];
+  let pathPrefix = '';
+  if (Array.isArray(value)) rows = value;
+  else if (isRecord(value) && Array.isArray(value.rows)) {
+    rows = value.rows;
+    pathPrefix = '/rows';
+  } else if (isRecord(value) && Array.isArray(value.drawings)) {
+    rows = value.drawings;
+    pathPrefix = '/drawings';
+  } else if (isRecord(value)) rows = [value];
+  else {
+    return {
+      valid: false,
+      rows: [],
+      errorCode: 'json_object_required',
+      errorPath: '/',
+    };
+  }
+  const invalidIndex = rows.findIndex((row) => !isRecord(row));
+  if (invalidIndex >= 0) {
+    return {
+      valid: false,
+      rows: [],
+      errorCode: 'json_row_object_required',
+      errorPath: `${pathPrefix}/${invalidIndex}` || '/',
+    };
+  }
+  return {
+    valid: true,
+    rows,
+    errorCode: '',
+    errorPath: '',
+  };
 }
 
 function resolveRenderablePayloadKind(payload = null) {
@@ -498,26 +526,43 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
     generatedAt,
   });
   const jsonDocument = type === 'json' ? parseJsonDocument(text) : null;
+  const jsonRows = jsonDocument?.parsed ? selectJsonRows(jsonDocument.value) : null;
+  let effectiveInspection = inspection;
+  if (
+    type === 'json'
+    && jsonDocument?.parsed
+    && jsonDocument.value
+    && typeof jsonDocument.value === 'object'
+    && inspection.validation_status !== 'blocked_authoritative_contract'
+    && jsonRows
+    && !jsonRows.valid
+  ) {
+    effectiveInspection = {
+      ...inspection,
+      validation_status: 'unavailable',
+      validation_error_code: jsonRows.errorCode,
+      validation_error_path: jsonRows.errorPath,
+    };
+  }
   let rows = [];
   if (type === 'csv') rows = parseCsvRows(text);
   else if (type === 'ifc') rows = [buildIfcMetadataRow(text, { drawingId: projectId, artifactPath })];
   else if (
-    inspection.available
-    && inspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
-    && inspection.validation_status === 'validated_authoritative_contract'
+    effectiveInspection.available
+    && effectiveInspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
+    && effectiveInspection.validation_status === 'validated_authoritative_contract'
   ) {
-    rows = [buildAuthoritativeViewerMetadataRow(inspection, { projectId, artifactPath })];
+    rows = [buildAuthoritativeViewerMetadataRow(effectiveInspection, { projectId, artifactPath })];
   } else if (
     !jsonDocument?.parsed
-    || !jsonDocument.value
-    || typeof jsonDocument.value !== 'object'
+    || !jsonRows?.valid
     || (
-      inspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
-      && inspection.validation_status === 'blocked_authoritative_contract'
+      effectiveInspection.payload_kind === AUTHORITATIVE_VIEWER_PAYLOAD_KIND
+      && effectiveInspection.validation_status === 'blocked_authoritative_contract'
     )
   ) {
-    rows = [buildBlockedEvidenceMetadataRow(inspection, { projectId, artifactPath })];
-  } else rows = parseJsonRowsFromValue(jsonDocument.value);
+    rows = [buildBlockedEvidenceMetadataRow(effectiveInspection, { projectId, artifactPath })];
+  } else rows = jsonRows.rows;
   const preview = buildEvidenceIngestPreview({
     rows,
     sourceType: type,
@@ -527,14 +572,14 @@ export function buildEvidenceIngestPreviewFromText(text = '', {
   });
   return {
     ...preview,
-    renderable_payload_available: inspection.available,
-    renderable_payload_kind: inspection.payload_kind,
-    renderable_payload_validation_status: inspection.validation_status,
-    renderable_payload_error_code: inspection.validation_error_code,
-    renderable_payload_error_path: inspection.validation_error_path,
-    renderable_payload_model_identity: inspection.model_identity,
-    renderable_node_count: inspection.node_count,
-    renderable_element_count: inspection.element_count,
-    renderable_segment_count: inspection.segment_count,
+    renderable_payload_available: effectiveInspection.available,
+    renderable_payload_kind: effectiveInspection.payload_kind,
+    renderable_payload_validation_status: effectiveInspection.validation_status,
+    renderable_payload_error_code: effectiveInspection.validation_error_code,
+    renderable_payload_error_path: effectiveInspection.validation_error_path,
+    renderable_payload_model_identity: effectiveInspection.model_identity,
+    renderable_node_count: effectiveInspection.node_count,
+    renderable_element_count: effectiveInspection.element_count,
+    renderable_segment_count: effectiveInspection.segment_count,
   };
 }
