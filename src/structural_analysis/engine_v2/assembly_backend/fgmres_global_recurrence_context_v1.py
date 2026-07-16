@@ -435,6 +435,40 @@ class _CompletionExportChildLeaseV1:
     __slots__ = ("__weakref__",)
 
 
+class _CheckpointHistoryChildLeaseV1:
+    """Process-local token for one optional checkpoint-history companion."""
+
+    __slots__ = ()
+
+
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class _CheckpointHistoryChildAuthorityV1:
+    """Private pre-recurrence authority for the three capture sources."""
+
+    global_context_id: str
+    global_open_receipt_hash: str
+    continuation_schedule_hash: str
+    runtime: Any
+    loaded_runtime: Any
+    stream: Any
+    stream_pointer: int
+    device_ordinal: int
+    architecture: str
+    free_dof_count: int
+    restart_dimension: int
+    max_iterations: int
+    maximum_restart_count: int
+    recurrence_plan_hash: str
+    recurrence_kernel_abi_hash: str
+    combined_recurrence_abi_hash: str
+    kernel_identity_hash: str
+    kernel_source_sha256: str
+    direct_generation_binding_hash: str
+    physical_projection_hash: str
+    source_capabilities: tuple[Any, ...]
+    source_snapshot: tuple[Any, ...]
+
+
 @dataclass(frozen=True, slots=True, repr=False, eq=False)
 class _CompletionExportChildAuthorityV1:
     """Private frozen authority for the three completion-output buffers."""
@@ -534,6 +568,11 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
         ) = None
         self._completion_export_capability_consumed = False
         self._completion_export_child_terminal = False
+        self._checkpoint_history_child_token: _CheckpointHistoryChildLeaseV1 | None = (
+            None
+        )
+        self._checkpoint_history_child_owner: Any | None = None
+        self._checkpoint_history_child_terminal = False
         self._child_released = False
         self._closed = False
         self._active_operation: str | None = None
@@ -632,6 +671,7 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                             )
                         )
                     )
+                    self._notify_checkpoint_history_after_launch(launch, index)
                 self._require_current_binding(
                     expected_pending_operation_bounds=(launch_count, launch_count),
                     expected_binding=binding,
@@ -753,6 +793,12 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
             if self._closed:
                 return
             try:
+                if self._checkpoint_history_child_owner is not None:
+                    _fail(
+                        "hip_fgmres_global_recurrence_checkpoint_history_child_active",
+                        "/cleanup/checkpoint_history",
+                        cleanup_owner=self,
+                    )
                 self._reap_completion_export_child_locked()
                 if self._active_completion_export_child_locked() is not None:
                     _fail(
@@ -842,6 +888,37 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
             kernel_launch_accept_lower_bound=row.kernel_launch_accept_lower_bound + 1,
             kernel_launch_accept_upper_bound=row.kernel_launch_accept_upper_bound + 1,
         )
+
+    def _notify_checkpoint_history_after_launch(
+        self,
+        launch: tuple[tuple[str, Any], ...],
+        continuation_index: int,
+    ) -> None:
+        owner = self._checkpoint_history_child_owner
+        if owner is None:
+            return
+        row = dict(launch)
+        if (
+            row.get("submission_kind") != "control"
+            or row.get("mode") != 12
+            or type(row.get("expected_restart")) is not int
+            or type(row.get("expected_column")) is not int
+        ):
+            return
+        try:
+            owner._capture_after_global_finalize_v1(
+                self,
+                expected_restart=row["expected_restart"],
+                expected_column=row["expected_column"],
+                continuation_index=continuation_index,
+            )
+        except Exception as exc:
+            # History is an additive observer.  Its failure must invalidate
+            # history evidence without truncating the authoritative base solve.
+            try:
+                owner._poison_from_global_capture_v1(exc)
+            except Exception:
+                pass
 
     def _reconcile_parent_recovery_progress(
         self,
@@ -1614,6 +1691,152 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 )
             self._completion_export_child_reference = weakref.ref(token)
             return token
+
+    def _reserve_checkpoint_history_child(
+        self,
+        token: _CheckpointHistoryChildLeaseV1,
+        owner: Any,
+    ) -> _CheckpointHistoryChildLeaseV1:
+        """Reserve one pre-recurrence device-only history observer."""
+
+        with self._lock:
+            if (
+                type(token) is not _CheckpointHistoryChildLeaseV1
+                or owner is None
+                or self._closed
+                or self._child_released
+                or self._state != "context_ready"
+                or self._telemetry.continuation_capability_consume_count != 0
+                or self._checkpoint_history_child_terminal
+                or self._checkpoint_history_child_token is not None
+                or self._checkpoint_history_child_owner is not None
+            ):
+                _fail(
+                    "hip_fgmres_global_recurrence_checkpoint_history_reservation_invalid",
+                    "/checkpoint_history/reserve",
+                    cleanup_owner=self,
+                )
+            self._checkpoint_history_child_token = token
+            self._checkpoint_history_child_owner = owner
+            return token
+
+    def _checkpoint_history_child_authority(
+        self,
+        token: _CheckpointHistoryChildLeaseV1,
+    ) -> _CheckpointHistoryChildAuthorityV1:
+        """Return exact source/runtime authority before suffix submission."""
+
+        with self._lock:
+            self._require_checkpoint_history_child_locked(token)
+            binding = self._require_frozen_binding()
+            self._require_current_binding(
+                expected_pending_operation_bounds=(0, 0),
+                consumed=False,
+                expected_binding=binding,
+            )
+            self._require_schedule_unchanged(binding)
+            direct = binding.direct_capabilities
+            if (
+                type(direct) is not tuple
+                or len(direct) != len(_DIRECT_ROLES)
+                or tuple(getattr(row, "role", None) for row in direct) != _DIRECT_ROLES
+                or tuple(getattr(row, "pointer_snapshot", None) for row in direct)
+                != tuple(pointer for _role, pointer in binding.pointer_values[:11])
+            ):
+                _fail(
+                    "hip_fgmres_global_recurrence_checkpoint_history_sources_invalid",
+                    "/checkpoint_history/authority/sources",
+                    cleanup_owner=self,
+                )
+            source_roles = ("solution_x", "true_residual", "solve_record")
+            by_role = {row.role: row for row in direct}
+            sources = tuple(by_role[role] for role in source_roles)
+            source_snapshot = _completion_export_source_snapshot(binding, sources)
+            receipt = self._build_receipt("context_ready")
+            bindings = self._require_bindings()
+            authority = _CheckpointHistoryChildAuthorityV1(
+                global_context_id=self._context_id,
+                global_open_receipt_hash=receipt.receipt_hash,
+                continuation_schedule_hash=bindings.continuation_schedule_hash,
+                runtime=binding.runtime,
+                loaded_runtime=binding.loaded_runtime,
+                stream=binding.stream,
+                stream_pointer=binding.stream_pointer,
+                device_ordinal=binding.device_ordinal,
+                architecture=binding.architecture,
+                free_dof_count=binding.free_dof_count,
+                restart_dimension=binding.restart_dimension,
+                max_iterations=binding.max_iterations,
+                maximum_restart_count=binding.maximum_restart_count,
+                recurrence_plan_hash=bindings.recurrence_plan_hash,
+                recurrence_kernel_abi_hash=bindings.recurrence_kernel_abi_hash,
+                combined_recurrence_abi_hash=bindings.combined_recurrence_abi_hash,
+                kernel_identity_hash=bindings.kernel_identity_hash,
+                kernel_source_sha256=bindings.kernel_source_sha256,
+                direct_generation_binding_hash=(
+                    bindings.direct_generation_binding_hash
+                ),
+                physical_projection_hash=bindings.physical_projection_hash,
+                source_capabilities=sources,
+                source_snapshot=source_snapshot,
+            )
+            self._require_checkpoint_history_child_locked(token)
+            if _completion_export_source_snapshot(binding, sources) != source_snapshot:
+                _fail(
+                    "hip_fgmres_global_recurrence_checkpoint_history_sources_changed",
+                    "/checkpoint_history/authority/sources",
+                    cleanup_owner=self,
+                )
+            return authority
+
+    def _checkpoint_history_child_is_active(
+        self,
+        token: _CheckpointHistoryChildLeaseV1,
+    ) -> bool:
+        with self._lock:
+            return (
+                token is self._checkpoint_history_child_token
+                and self._checkpoint_history_child_owner is not None
+                and not self._closed
+                and not self._child_released
+            )
+
+    def _release_checkpoint_history_child(
+        self,
+        token: _CheckpointHistoryChildLeaseV1,
+        *,
+        terminal: bool,
+    ) -> None:
+        with self._lock:
+            self._require_checkpoint_history_child_locked(token)
+            if type(terminal) is not bool:
+                _fail(
+                    "hip_fgmres_global_recurrence_checkpoint_history_release_invalid",
+                    "/checkpoint_history/release",
+                    cleanup_owner=self,
+                )
+            self._checkpoint_history_child_token = None
+            self._checkpoint_history_child_owner = None
+            if terminal:
+                self._checkpoint_history_child_terminal = True
+
+    def _require_checkpoint_history_child_locked(
+        self,
+        token: _CheckpointHistoryChildLeaseV1,
+    ) -> None:
+        if (
+            type(token) is not _CheckpointHistoryChildLeaseV1
+            or token is not self._checkpoint_history_child_token
+            or self._checkpoint_history_child_owner is None
+            or self._closed
+            or self._child_released
+            or self._checkpoint_history_child_terminal
+        ):
+            _fail(
+                "hip_fgmres_global_recurrence_checkpoint_history_child_invalid",
+                "/checkpoint_history/lifetime",
+                cleanup_owner=self,
+            )
 
     def _consume_completion_export_capability(
         self,
@@ -2952,6 +3175,12 @@ def _mint_completion_export_child_lease_v1() -> _CompletionExportChildLeaseV1:
     """Mint one nonconstructible-by-convention downstream lease token."""
 
     return _CompletionExportChildLeaseV1()
+
+
+def _mint_checkpoint_history_child_lease_v1() -> _CheckpointHistoryChildLeaseV1:
+    """Mint one process-local history companion reservation token."""
+
+    return _CheckpointHistoryChildLeaseV1()
 
 
 @lru_cache(maxsize=1)

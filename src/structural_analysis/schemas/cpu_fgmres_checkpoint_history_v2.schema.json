@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/cpu_fgmres_checkpoint_history_v2.schema.json",
+  "title": "CPU FGMRES checkpoint history v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "base_result_hash", "execution_plan_hash", "policy_hash", "checkpoint_count", "checkpoints", "checkpoint_bundle_hash", "claims", "result_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-cpu-fgmres-checkpoint-history.v2"},
+    "capability_profile": {"const": "phase0_cpu_fgmres_committed_checkpoint_vector_history_reference"},
+    "base_result_hash": {"$ref": "#/$defs/hash"},
+    "execution_plan_hash": {"$ref": "#/$defs/hash"},
+    "policy_hash": {"$ref": "#/$defs/hash"},
+    "checkpoint_count": {"type": "integer", "minimum": 0, "maximum": 4096},
+    "checkpoints": {"type": "array", "items": {"$ref": "#/$defs/checkpoint"}, "maxItems": 4096},
+    "checkpoint_bundle_hash": {"$ref": "#/$defs/hash"},
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deterministic_cpu_reference_replayed", "committed_checkpoint_solution_vectors_retained", "committed_checkpoint_true_residual_vectors_retained", "sparse_true_residual_replayed_per_checkpoint", "hip_execution", "fallback_used", "performance_or_speedup_proven", "commercial_ready"],
+      "properties": {
+        "deterministic_cpu_reference_replayed": {"const": true},
+        "committed_checkpoint_solution_vectors_retained": {"const": true},
+        "committed_checkpoint_true_residual_vectors_retained": {"const": true},
+        "sparse_true_residual_replayed_per_checkpoint": {"const": true},
+        "hip_execution": {"const": false},
+        "fallback_used": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "commercial_ready": {"const": false}
+      }
+    },
+    "result_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dtype", "shape", "byte_length", "sha256"],
+      "properties": {
+        "dtype": {"const": "<f8"},
+        "shape": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"type": "integer", "minimum": 1}},
+        "byte_length": {"type": "integer", "minimum": 8},
+        "sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["restart_index", "solution", "true_residual"],
+      "properties": {
+        "restart_index": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "solution": {"$ref": "#/$defs/vector"},
+        "true_residual": {"$ref": "#/$defs/vector"}
+      }
+    }
+  }
+}

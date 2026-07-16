@@ -1,0 +1,385 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_general_history_parity_v2.schema.json",
+  "title": "HIP FGMRES general multi-restart checkpoint history parity v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "parity_id",
+    "bindings",
+    "dimensions",
+    "rows",
+    "telemetry",
+    "claims",
+    "extensions",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-general-history-parity.v2"
+    },
+    "capability_profile": {
+      "const": "phase0_general_multi_restart_vector_backed_history_parity_v2"
+    },
+    "status": {"const": "general_multi_restart_history_v2_verified"},
+    "evidence_scope": {
+      "const": "process_local_exact_model_general_history_non_promoting"
+    },
+    "actual_backend": {"const": "hip"},
+    "promotion_eligible": {"const": false},
+    "parity_id": {"$ref": "#/$defs/hash"},
+    "bindings": {"$ref": "#/$defs/bindings"},
+    "dimensions": {"$ref": "#/$defs/dimensions"},
+    "rows": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {"$ref": "#/$defs/row"}
+    },
+    "telemetry": {"$ref": "#/$defs/telemetry"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "extensions": {"type": "object", "maxProperties": 0},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonnegativeNumber": {
+      "type": "number",
+      "minimum": 0
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_hash",
+        "operator_hash",
+        "policy_hash",
+        "cpu_checkpoint_history_result_hash",
+        "cpu_base_result_hash",
+        "completion_export_v2_context_id",
+        "completion_export_v2_receipt_hash",
+        "completion_export_v2_payload_hash",
+        "retained_completion_export_v1_receipt_hash",
+        "checkpoint_history_export_v1_receipt_hash",
+        "terminal_observation_receipt_hash",
+        "global_context_id",
+        "history_plan_hash",
+        "history_blob_abi_hash",
+        "recurrence_plan_hash",
+        "recurrence_kernel_identity_hash",
+        "architecture",
+        "device_ordinal"
+      ],
+      "properties": {
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "operator_hash": {"$ref": "#/$defs/hash"},
+        "policy_hash": {"$ref": "#/$defs/hash"},
+        "cpu_checkpoint_history_result_hash": {"$ref": "#/$defs/hash"},
+        "cpu_base_result_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_v2_context_id": {"$ref": "#/$defs/hash"},
+        "completion_export_v2_receipt_hash": {"$ref": "#/$defs/hash"},
+        "completion_export_v2_payload_hash": {"$ref": "#/$defs/hash"},
+        "retained_completion_export_v1_receipt_hash": {"$ref": "#/$defs/hash"},
+        "checkpoint_history_export_v1_receipt_hash": {"$ref": "#/$defs/hash"},
+        "terminal_observation_receipt_hash": {"$ref": "#/$defs/hash"},
+        "global_context_id": {"$ref": "#/$defs/hash"},
+        "history_plan_hash": {"$ref": "#/$defs/hash"},
+        "history_blob_abi_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_plan_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_kernel_identity_hash": {"$ref": "#/$defs/hash"},
+        "architecture": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+        "device_ordinal": {"type": "integer", "minimum": 0}
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "maximum_restart_count",
+        "populated_restart_count",
+        "exported_checkpoint_solution_vector_count",
+        "exported_checkpoint_true_residual_vector_count",
+        "compared_scalar_count",
+        "residual_roundoff_receipt_count"
+      ],
+      "properties": {
+        "free_dof_count": {"type": "integer", "minimum": 1},
+        "maximum_restart_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "populated_restart_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "exported_checkpoint_solution_vector_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "exported_checkpoint_true_residual_vector_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "compared_scalar_count": {"type": "integer", "minimum": 0},
+        "residual_roundoff_receipt_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        }
+      }
+    },
+    "vectorComparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "value_count",
+        "reference_sha256",
+        "candidate_sha256",
+        "maximum_absolute_error",
+        "difference_l2",
+        "reference_l2",
+        "relative_l2_error",
+        "fixed_absolute_tolerance",
+        "fixed_relative_tolerance",
+        "fixed_componentwise_gate_passed"
+      ],
+      "properties": {
+        "name": {
+          "enum": ["checkpoint_solution", "checkpoint_true_residual"]
+        },
+        "value_count": {"type": "integer", "minimum": 1},
+        "reference_sha256": {"$ref": "#/$defs/hash"},
+        "candidate_sha256": {"$ref": "#/$defs/hash"},
+        "maximum_absolute_error": {"$ref": "#/$defs/nonnegativeNumber"},
+        "difference_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "reference_l2": {"$ref": "#/$defs/nonnegativeNumber"},
+        "relative_l2_error": {"$ref": "#/$defs/nonnegativeNumber"},
+        "fixed_absolute_tolerance": {"const": 1e-12},
+        "fixed_relative_tolerance": {"const": 1e-8},
+        "fixed_componentwise_gate_passed": {"type": "boolean"}
+      }
+    },
+    "scalarEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "cpu_value",
+        "hip_value",
+        "absolute_difference",
+        "vector_transport_bound",
+        "cpu_estimator_or_replay_gap",
+        "hip_estimator_or_replay_gap",
+        "fp_roundoff_guard",
+        "total_bound",
+        "maximum_bound_ratio",
+        "outward_rounding_used",
+        "bound_passed"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "true_residual_l2",
+            "true_residual_linf",
+            "scaled_true_residual",
+            "estimated_residual_l2",
+            "solution_update_l2"
+          ]
+        },
+        "cpu_value": {"$ref": "#/$defs/nonnegativeNumber"},
+        "hip_value": {"$ref": "#/$defs/nonnegativeNumber"},
+        "absolute_difference": {"$ref": "#/$defs/nonnegativeNumber"},
+        "vector_transport_bound": {"$ref": "#/$defs/nonnegativeNumber"},
+        "cpu_estimator_or_replay_gap": {"$ref": "#/$defs/nonnegativeNumber"},
+        "hip_estimator_or_replay_gap": {"$ref": "#/$defs/nonnegativeNumber"},
+        "fp_roundoff_guard": {"$ref": "#/$defs/nonnegativeNumber"},
+        "total_bound": {"$ref": "#/$defs/nonnegativeNumber"},
+        "maximum_bound_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "outward_rounding_used": {"const": true},
+        "bound_passed": {"const": true}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "true_residual_l2",
+        "true_residual_linf",
+        "scaled_true_residual",
+        "estimated_residual_l2",
+        "solution_update_l2"
+      ],
+      "properties": {
+        "true_residual_l2": {"$ref": "#/$defs/scalarEnvelope"},
+        "true_residual_linf": {"$ref": "#/$defs/scalarEnvelope"},
+        "scaled_true_residual": {"$ref": "#/$defs/scalarEnvelope"},
+        "estimated_residual_l2": {"$ref": "#/$defs/scalarEnvelope"},
+        "solution_update_l2": {"$ref": "#/$defs/scalarEnvelope"}
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restart_index",
+        "slot_index",
+        "column_index",
+        "start_iteration",
+        "end_iteration",
+        "arnoldi_step_count",
+        "reorthogonalization_count",
+        "termination_hint",
+        "flags",
+        "capture_metadata_matches_solve_record",
+        "gpu_true_residual_l2_tree_replayed",
+        "gpu_true_residual_linf_tree_replayed",
+        "gpu_scaled_true_residual_replayed",
+        "gpu_solution_update_l2_tree_replayed",
+        "solution",
+        "true_residual",
+        "residual_roundoff_receipt_hash",
+        "residual_roundoff_maximum_componentwise_ratio",
+        "metrics"
+      ],
+      "properties": {
+        "restart_index": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "slot_index": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "column_index": {"type": "integer", "minimum": 0, "maximum": 15},
+        "start_iteration": {"type": "integer", "minimum": 0, "maximum": 4096},
+        "end_iteration": {"type": "integer", "minimum": 1, "maximum": 4096},
+        "arnoldi_step_count": {"type": "integer", "minimum": 1, "maximum": 16},
+        "reorthogonalization_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "termination_hint": {"type": "string", "minLength": 1},
+        "flags": {"type": "integer", "minimum": 0},
+        "capture_metadata_matches_solve_record": {"const": true},
+        "gpu_true_residual_l2_tree_replayed": {"const": true},
+        "gpu_true_residual_linf_tree_replayed": {"const": true},
+        "gpu_scaled_true_residual_replayed": {"const": true},
+        "gpu_solution_update_l2_tree_replayed": {"const": true},
+        "solution": {"$ref": "#/$defs/vectorComparison"},
+        "true_residual": {"$ref": "#/$defs/vectorComparison"},
+        "residual_roundoff_receipt_hash": {"$ref": "#/$defs/hash"},
+        "residual_roundoff_maximum_componentwise_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "metrics": {"$ref": "#/$defs/metrics"}
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solve_record_restart_row_inspection_count",
+        "checkpoint_vector_pair_comparison_count",
+        "gpu_tree_metric_replay_count",
+        "scalar_envelope_count",
+        "residual_roundoff_receipt_count",
+        "cpu_checkpoint_replay_count",
+        "additional_d2h_operation_count",
+        "device_allocation_count",
+        "h2d_operation_count",
+        "kernel_launch_count",
+        "explicit_stream_sync_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "solve_record_restart_row_inspection_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "checkpoint_vector_pair_comparison_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "gpu_tree_metric_replay_count": {"type": "integer", "minimum": 0},
+        "scalar_envelope_count": {"type": "integer", "minimum": 0},
+        "residual_roundoff_receipt_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "cpu_checkpoint_replay_count": {"const": 1},
+        "additional_d2h_operation_count": {"const": 0},
+        "device_allocation_count": {"const": 0},
+        "h2d_operation_count": {"const": 0},
+        "kernel_launch_count": {"const": 0},
+        "explicit_stream_sync_count": {"const": 0},
+        "fallback_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_execution_plan_and_policy_bound",
+        "deterministic_cpu_checkpoint_history_replayed",
+        "actual_hip_backend_verified",
+        "solve_record_and_history_blob_rows_cross_bound",
+        "per_restart_checkpoint_solution_vectors_verified",
+        "per_restart_checkpoint_true_residual_vectors_verified",
+        "componentwise_sparse_residual_roundoff_verified",
+        "true_residual_scalar_vector_replay_verified",
+        "estimated_residual_roundoff_envelope_verified",
+        "solution_update_roundoff_envelope_verified",
+        "general_restart_history_metric_v2_verified",
+        "additional_device_or_transfer_work_zero",
+        "formal_machine_proof",
+        "multi_architecture_parity_verified",
+        "iteration_host_copy_zero_process_wide",
+        "performance_or_speedup_proven",
+        "solution_ready",
+        "result_ir_ready",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "exact_execution_plan_and_policy_bound": {"const": true},
+        "deterministic_cpu_checkpoint_history_replayed": {"const": true},
+        "actual_hip_backend_verified": {"const": true},
+        "solve_record_and_history_blob_rows_cross_bound": {"const": true},
+        "per_restart_checkpoint_solution_vectors_verified": {"const": true},
+        "per_restart_checkpoint_true_residual_vectors_verified": {"const": true},
+        "componentwise_sparse_residual_roundoff_verified": {"const": true},
+        "true_residual_scalar_vector_replay_verified": {"const": true},
+        "estimated_residual_roundoff_envelope_verified": {"const": true},
+        "solution_update_roundoff_envelope_verified": {"const": true},
+        "general_restart_history_metric_v2_verified": {"const": true},
+        "additional_device_or_transfer_work_zero": {"const": true},
+        "formal_machine_proof": {"const": false},
+        "multi_architecture_parity_verified": {"const": false},
+        "iteration_host_copy_zero_process_wide": {"const": false},
+        "performance_or_speedup_proven": {"const": false},
+        "solution_ready": {"const": false},
+        "result_ir_ready": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

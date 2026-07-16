@@ -1,16 +1,23 @@
 """Backend-neutral iterative-solver contracts for Engine v2."""
 
 from .cpu_fgmres import (
+    CPU_FGMRES_CHECKPOINT_HISTORY_V2_CAPABILITY_PROFILE,
+    CPU_FGMRES_CHECKPOINT_HISTORY_V2_SCHEMA_VERSION,
     CPU_FGMRES_REFERENCE_CAPABILITY_PROFILE,
     CPU_FGMRES_REFERENCE_RESULT_V1_SCHEMA_VERSION,
     FGMRES_POLICY_V1_SCHEMA_VERSION,
     CpuFgmresArrayDescriptor,
+    CpuFgmresCheckpointHistoryResultV2,
+    CpuFgmresCheckpointVectorV2,
     CpuFgmresReferenceError,
     CpuFgmresReferenceResultV1,
     FgmresPolicyV1,
     FgmresRestartRecord,
     compile_fgmres_policy_v1,
+    solve_cpu_fgmres_checkpoint_history_v2,
     solve_cpu_fgmres_reference_v1,
+    validate_cpu_fgmres_checkpoint_history_result_v2,
+    validate_cpu_fgmres_checkpoint_history_result_v2_shallow,
     validate_cpu_fgmres_reference_result_v1,
     validate_fgmres_policy_v1,
 )
@@ -46,6 +53,8 @@ from .gpu_tree_reference_v2 import (
 )
 
 __all__ = [
+    "CPU_FGMRES_CHECKPOINT_HISTORY_V2_CAPABILITY_PROFILE",
+    "CPU_FGMRES_CHECKPOINT_HISTORY_V2_SCHEMA_VERSION",
     "CPU_FGMRES_REFERENCE_CAPABILITY_PROFILE",
     "CPU_FGMRES_REFERENCE_RESULT_V1_SCHEMA_VERSION",
     "FGMRES_POLICY_V1_SCHEMA_VERSION",
@@ -54,6 +63,8 @@ __all__ = [
     "FGMRES_GPU_TREE_THREADS_PER_BLOCK",
     "FGMRES_GPU_TREE_VALUES_PER_BLOCK",
     "CpuFgmresArrayDescriptor",
+    "CpuFgmresCheckpointHistoryResultV2",
+    "CpuFgmresCheckpointVectorV2",
     "CpuFgmresReferenceError",
     "CpuFgmresReferenceResultV1",
     "FgmresPolicyV1",
@@ -84,6 +95,9 @@ __all__ = [
     "replay_fgmres_gpu_tree_first_column_checkpoint_transaction_v2",
     "replay_fgmres_gpu_tree_initial_v2",
     "solve_cpu_fgmres_reference_v1",
+    "solve_cpu_fgmres_checkpoint_history_v2",
+    "validate_cpu_fgmres_checkpoint_history_result_v2",
+    "validate_cpu_fgmres_checkpoint_history_result_v2_shallow",
     "validate_cpu_fgmres_reference_result_v1",
     "validate_fgmres_policy_v1",
 ]

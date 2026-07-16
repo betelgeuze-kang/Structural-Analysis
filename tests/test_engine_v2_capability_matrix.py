@@ -193,6 +193,53 @@ def test_high_load_registry_result_ir_aggregate_v1_stays_contract_only() -> None
     )
 
 
+def test_general_multi_restart_history_v2_stays_contract_only() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    capability = rows["hip_fgmres_general_multi_restart_history_v2"]
+    assert capability["implementation_state"] == "implemented"
+    assert capability["promotion_state"] == "contract_only"
+    assert {
+        "additive_two_blob_checkpoint_solution_and_true_residual_history_without_recurrence_v2_or_solve_record_v2_abi_change",
+        "exact_five_buffer_completion_export_v2_with_zero_composite_allocation_h2d_kernel_sync_and_fallback",
+        "deterministic_cpu_checkpoint_solution_and_sparse_true_residual_vector_reference_v2",
+        "solve_record_restart_rows_cross_bound_to_captured_vector_metadata",
+        "per_restart_componentwise_fp64_csr_residual_roundoff_receipts",
+        "outward_scalar_envelopes_for_true_residual_estimated_residual_and_solution_update_metrics",
+        "actual_local_gfx1030_three_restart_partial_final_cycle_rows_end_iterations_2_4_5",
+        "five_draft_2020_12_schemas_bound_by_public_validators_and_packaged_in_wheel",
+        "public_symbols_engine1066_assembly893_solvers47_unique",
+    }.issubset(capability["supported_scope"])
+    assert {
+        "formal_machine_proof",
+        "actual_external_gfx1100",
+        "multiarchitecture_or_same_artifact_two_isa_parity",
+        "process_wide_rocm_activity_or_host_transfer_completeness",
+        "iteration_host_copy_zero_process_wide",
+        "persistent_or_cross_process_provenance",
+        "signed_evidence",
+        "end_to_end_o_n",
+        "performance_or_speedup",
+        "solution_ready",
+        "result_ir_ready",
+        "commercial_readiness",
+        "promotion_eligibility",
+    }.issubset(capability["explicit_exclusions"])
+    assert capability["required_contracts"] == [
+        "ADR-001",
+        "ADR-002",
+        "ADR-003",
+        "ADR-004",
+        "ADR-006",
+        "ADR-007",
+    ]
+    assert capability["claim_level"] == (
+        "actual_local_gfx1030_general_multi_restart_vector_backed_history_metric_"
+        "parity_contract_only_unsigned_process_local_nonpersistent_nonpromoting"
+    )
+
+
 def test_all_converged_result_ir_v1_stays_contract_only_after_local_hardware() -> None:
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}

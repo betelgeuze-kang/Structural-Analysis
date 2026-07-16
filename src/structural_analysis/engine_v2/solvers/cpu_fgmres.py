@@ -38,6 +38,12 @@ CPU_FGMRES_REFERENCE_RESULT_V1_SCHEMA_VERSION = (
 CPU_FGMRES_REFERENCE_CAPABILITY_PROFILE = (
     "phase0_cpu_fixed_restart_right_preconditioned_fgmres_reference"
 )
+CPU_FGMRES_CHECKPOINT_HISTORY_V2_SCHEMA_VERSION = (
+    "structural-analysis-cpu-fgmres-checkpoint-history.v2"
+)
+CPU_FGMRES_CHECKPOINT_HISTORY_V2_CAPABILITY_PROFILE = (
+    "phase0_cpu_fgmres_committed_checkpoint_vector_history_reference"
+)
 
 FgmresStatus = Literal[
     "converged",
@@ -103,9 +109,7 @@ class FgmresRestartRecord:
     termination_hint: str
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            name: getattr(self, name) for name in self.__dataclass_fields__
-        }
+        return {name: getattr(self, name) for name in self.__dataclass_fields__}
 
 
 @dataclass(frozen=True, slots=True)
@@ -165,6 +169,50 @@ class CpuFgmresReferenceResultV1:
 
     def to_dict(self) -> dict[str, Any]:
         return _result_payload(self, include_hash=True)
+
+
+@dataclass(frozen=True, slots=True)
+class CpuFgmresCheckpointVectorV2:
+    """One immutable CPU accepted-state vector pair for a restart row."""
+
+    restart_index: int
+    solution: np.ndarray
+    true_residual: np.ndarray
+    solution_sha256: str
+    true_residual_sha256: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "restart_index": self.restart_index,
+            "solution": {
+                "dtype": "<f8",
+                "shape": list(self.solution.shape),
+                "byte_length": int(self.solution.nbytes),
+                "sha256": self.solution_sha256,
+            },
+            "true_residual": {
+                "dtype": "<f8",
+                "shape": list(self.true_residual.shape),
+                "byte_length": int(self.true_residual.nbytes),
+                "sha256": self.true_residual_sha256,
+            },
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class CpuFgmresCheckpointHistoryResultV2:
+    """Additive deterministic CPU result retaining every committed checkpoint."""
+
+    schema_version: str
+    capability_profile: str
+    base_result: CpuFgmresReferenceResultV1
+    checkpoints: tuple[CpuFgmresCheckpointVectorV2, ...]
+    checkpoint_bundle_hash: str
+    result_hash: str
+
+    def to_dict(self) -> dict[str, Any]:
+        validate_cpu_fgmres_checkpoint_history_result_v2_shallow(self)
+        return _checkpoint_history_payload(self, include_hash=True)
 
 
 @dataclass(frozen=True, slots=True)
@@ -302,6 +350,164 @@ def solve_cpu_fgmres_reference_v1(
     return result
 
 
+def solve_cpu_fgmres_checkpoint_history_v2(
+    plan: ExecutionPlanV2,
+    policy: FgmresPolicyV1,
+    *,
+    initial_full_state: np.ndarray | None = None,
+) -> CpuFgmresCheckpointHistoryResultV2:
+    """Replay the CPU oracle while retaining each published checkpoint pair."""
+
+    validate_execution_plan_v2(plan)
+    validate_fgmres_policy_v1(policy)
+    result = _solve_cpu_fgmres_checkpoint_history_v2_unchecked(
+        plan,
+        policy,
+        initial_full_state=initial_full_state,
+    )
+    return validate_cpu_fgmres_checkpoint_history_result_v2(
+        result,
+        expected_plan=plan,
+        expected_policy=policy,
+        expected_initial_full_state=initial_full_state,
+    )
+
+
+def validate_cpu_fgmres_checkpoint_history_result_v2(
+    result: CpuFgmresCheckpointHistoryResultV2,
+    *,
+    expected_plan: ExecutionPlanV2,
+    expected_policy: FgmresPolicyV1,
+    expected_initial_full_state: np.ndarray | None = None,
+) -> CpuFgmresCheckpointHistoryResultV2:
+    """Validate vector lineage, sparse residual replay, metrics, and determinism."""
+
+    validate_cpu_fgmres_checkpoint_history_result_v2_shallow(result)
+    validate_execution_plan_v2(expected_plan)
+    validate_fgmres_policy_v1(expected_policy)
+    validate_cpu_fgmres_reference_result_v1(
+        result.base_result,
+        expected_plan=expected_plan,
+        expected_policy=expected_policy,
+        expected_initial_full_state=expected_initial_full_state,
+    )
+    base = result.base_result
+    if len(result.checkpoints) != len(base.history):
+        _fail("cpu_fgmres_checkpoint_history_count_invalid", "/checkpoints")
+    free = expected_plan.array("free_dofs").astype(np.int64, copy=False)
+    rhs = immutable_array(expected_plan.array("global_load")[free], dtype="<f8")
+    row_ptr = expected_plan.array("reduced_csr_row_ptr")
+    columns = expected_plan.array("reduced_csr_column_indices")
+    values = expected_plan.array("reduced_stiffness_csr_values")
+    previous = _initial_reduced_state(
+        expected_plan,
+        free,
+        expected_initial_full_state,
+    )
+    for index, (checkpoint, history_row) in enumerate(
+        zip(result.checkpoints, base.history, strict=True)
+    ):
+        if (
+            checkpoint.restart_index != index + 1
+            or checkpoint.restart_index != history_row.restart_index
+            or checkpoint.solution.shape != (free.size,)
+            or checkpoint.true_residual.shape != (free.size,)
+            or checkpoint.solution.dtype.str != "<f8"
+            or checkpoint.true_residual.dtype.str != "<f8"
+            or not checkpoint.solution.flags.c_contiguous
+            or not checkpoint.true_residual.flags.c_contiguous
+            or not has_immutable_bytes_backing(checkpoint.solution)
+            or not has_immutable_bytes_backing(checkpoint.true_residual)
+            or not np.isfinite(checkpoint.solution).all()
+            or not np.isfinite(checkpoint.true_residual).all()
+            or checkpoint.solution_sha256 != array_data_hash(checkpoint.solution)
+            or checkpoint.true_residual_sha256
+            != array_data_hash(checkpoint.true_residual)
+        ):
+            _fail(
+                "cpu_fgmres_checkpoint_vector_invalid",
+                f"/checkpoints/{index}",
+            )
+        try:
+            with np.errstate(over="raise", invalid="raise"):
+                replay = rhs - _csr_matvec(
+                    row_ptr,
+                    columns,
+                    values,
+                    checkpoint.solution,
+                )
+        except (FloatingPointError, OverflowError, ValueError) as exc:
+            _fail(
+                "cpu_fgmres_checkpoint_residual_replay_failed",
+                f"/checkpoints/{index}/true_residual",
+                type(exc).__name__,
+            )
+        replay[replay == 0.0] = 0.0
+        update = checkpoint.solution - previous
+        if (
+            not np.array_equal(replay, checkpoint.true_residual)
+            or _stable_l2(checkpoint.true_residual) != history_row.true_residual_l2
+            or _linf(checkpoint.true_residual) != history_row.true_residual_linf
+            or _linf(checkpoint.true_residual) / max(1.0, _linf(rhs))
+            != history_row.scaled_true_residual
+            or _stable_l2(update) != history_row.solution_update_l2
+        ):
+            _fail(
+                "cpu_fgmres_checkpoint_metric_invalid",
+                f"/checkpoints/{index}",
+            )
+        previous = checkpoint.solution
+    expected_bundle_hash = canonical_hash([row.to_dict() for row in result.checkpoints])
+    if (
+        result.checkpoint_bundle_hash != expected_bundle_hash
+        or result.result_hash
+        != canonical_hash(_checkpoint_history_payload(result, include_hash=False))
+    ):
+        _fail("cpu_fgmres_checkpoint_history_hash_invalid", "/result_hash")
+    replayed = _solve_cpu_fgmres_checkpoint_history_v2_unchecked(
+        expected_plan,
+        expected_policy,
+        initial_full_state=expected_initial_full_state,
+    )
+    if _checkpoint_history_payload(
+        result, include_hash=True
+    ) != _checkpoint_history_payload(replayed, include_hash=True) or any(
+        not np.array_equal(left.solution, right.solution)
+        or not np.array_equal(left.true_residual, right.true_residual)
+        for left, right in zip(
+            result.checkpoints,
+            replayed.checkpoints,
+            strict=True,
+        )
+    ):
+        _fail("cpu_fgmres_checkpoint_history_replay_mismatch", "/")
+    return result
+
+
+def validate_cpu_fgmres_checkpoint_history_result_v2_shallow(
+    result: CpuFgmresCheckpointHistoryResultV2,
+) -> CpuFgmresCheckpointHistoryResultV2:
+    if (
+        type(result) is not CpuFgmresCheckpointHistoryResultV2
+        or result.schema_version != CPU_FGMRES_CHECKPOINT_HISTORY_V2_SCHEMA_VERSION
+        or result.capability_profile
+        != CPU_FGMRES_CHECKPOINT_HISTORY_V2_CAPABILITY_PROFILE
+        or type(result.base_result) is not CpuFgmresReferenceResultV1
+        or type(result.checkpoints) is not tuple
+        or any(
+            type(row) is not CpuFgmresCheckpointVectorV2 for row in result.checkpoints
+        )
+        or not _valid_hash(result.checkpoint_bundle_hash)
+        or not _valid_hash(result.result_hash)
+    ):
+        _fail("cpu_fgmres_checkpoint_history_type_invalid", "/")
+    _validate_schema(
+        _checkpoint_history_schema(),
+        _checkpoint_history_payload(result, include_hash=True),
+    )
+    return result
+
+
 def validate_cpu_fgmres_reference_result_v1(
     result: CpuFgmresReferenceResultV1,
     *,
@@ -323,10 +529,7 @@ def validate_cpu_fgmres_reference_result_v1(
         type(result.history) is not tuple
         or any(type(row) is not FgmresRestartRecord for row in result.history)
         or type(result.descriptors) is not tuple
-        or any(
-            type(row) is not CpuFgmresArrayDescriptor
-            for row in result.descriptors
-        )
+        or any(type(row) is not CpuFgmresArrayDescriptor for row in result.descriptors)
     ):
         _fail("cpu_fgmres_result_container_invalid", "/")
     payload = _result_payload(result, include_hash=True)
@@ -345,10 +548,9 @@ def validate_cpu_fgmres_reference_result_v1(
         expected_plan, free, expected_initial_full_state
     )
     rhs = immutable_array(expected_plan.array("global_load")[free], dtype="<f8")
-    if (
-        result.initial_reduced_state_hash != array_data_hash(initial_reduced)
-        or result.rhs_hash != array_data_hash(rhs)
-    ):
+    if result.initial_reduced_state_hash != array_data_hash(
+        initial_reduced
+    ) or result.rhs_hash != array_data_hash(rhs):
         _fail("cpu_fgmres_source_hash_mismatch", "/bindings")
     if tuple(row.name for row in result.descriptors) != _ARRAY_NAMES:
         _fail("cpu_fgmres_descriptor_set_invalid", "/arrays")
@@ -409,8 +611,7 @@ def validate_cpu_fgmres_reference_result_v1(
             result.final_residual_l2 != final_l2,
             result.final_residual_linf != final_linf,
             result.scaled_true_residual != scaled,
-            result.solver_tolerance_passed
-            != (final_l2 <= result.solver_tolerance_l2),
+            result.solver_tolerance_passed != (final_l2 <= result.solver_tolerance_l2),
             result.authoritative_plan_tolerance_passed
             != (scaled <= expected_plan.residual_tolerance),
             (result.status == "converged")
@@ -471,6 +672,66 @@ def solve_cpu_fgmres_reference_v1_unchecked(
     return _build_result(plan, policy, initial_reduced, rhs, outcome)
 
 
+def _solve_cpu_fgmres_checkpoint_history_v2_unchecked(
+    plan: ExecutionPlanV2,
+    policy: FgmresPolicyV1,
+    *,
+    initial_full_state: np.ndarray | None,
+) -> CpuFgmresCheckpointHistoryResultV2:
+    free = plan.array("free_dofs").astype(np.int64, copy=False)
+    initial_reduced = _initial_reduced_state(plan, free, initial_full_state)
+    rhs = immutable_array(plan.array("global_load")[free], dtype="<f8")
+    row_ptr = plan.array("reduced_csr_row_ptr")
+    columns = plan.array("reduced_csr_column_indices")
+    values = plan.array("reduced_stiffness_csr_values")
+    inverse_diagonal = _positive_jacobi_inverse(row_ptr, columns, values)
+    checkpoints: list[CpuFgmresCheckpointVectorV2] = []
+
+    def capture(
+        record: FgmresRestartRecord,
+        solution: np.ndarray,
+        residual: np.ndarray,
+    ) -> None:
+        solution_snapshot = immutable_array(solution, dtype="<f8")
+        residual_snapshot = immutable_array(residual, dtype="<f8")
+        checkpoints.append(
+            CpuFgmresCheckpointVectorV2(
+                restart_index=record.restart_index,
+                solution=solution_snapshot,
+                true_residual=residual_snapshot,
+                solution_sha256=array_data_hash(solution_snapshot),
+                true_residual_sha256=array_data_hash(residual_snapshot),
+            )
+        )
+
+    outcome = _fgmres_core(
+        matvec=lambda vector: _csr_matvec(row_ptr, columns, values, vector),
+        rhs=rhs,
+        initial_solution=initial_reduced,
+        inverse_diagonal=inverse_diagonal,
+        policy=policy,
+        authoritative_tolerance=plan.residual_tolerance,
+        checkpoint_sink=capture,
+    )
+    base = _build_result(plan, policy, initial_reduced, rhs, outcome)
+    rows = tuple(checkpoints)
+    bundle_hash = canonical_hash([row.to_dict() for row in rows])
+    draft = CpuFgmresCheckpointHistoryResultV2(
+        schema_version=CPU_FGMRES_CHECKPOINT_HISTORY_V2_SCHEMA_VERSION,
+        capability_profile=CPU_FGMRES_CHECKPOINT_HISTORY_V2_CAPABILITY_PROFILE,
+        base_result=base,
+        checkpoints=rows,
+        checkpoint_bundle_hash=bundle_hash,
+        result_hash=_ZERO_HASH,
+    )
+    return replace(
+        draft,
+        result_hash=canonical_hash(
+            _checkpoint_history_payload(draft, include_hash=False)
+        ),
+    )
+
+
 def _validate_result_semantics(
     result: CpuFgmresReferenceResultV1,
     *,
@@ -518,13 +779,13 @@ def _validate_result_semantics(
         _fail("cpu_fgmres_count_invariant_invalid", "/counts")
 
     if result.status == "numerical_failure":
-        if (
-            result.restart_count not in {len(result.history), len(result.history) + 1}
-            or not (
-                result.iteration_count
-                <= result.preconditioner_apply_count
-                <= result.iteration_count + 1
-            )
+        if result.restart_count not in {
+            len(result.history),
+            len(result.history) + 1,
+        } or not (
+            result.iteration_count
+            <= result.preconditioner_apply_count
+            <= result.iteration_count + 1
         ):
             _fail("cpu_fgmres_failure_count_invariant_invalid", "/counts")
     elif (
@@ -559,8 +820,7 @@ def _validate_result_semantics(
             or row.preconditioner_apply_count != row.arnoldi_step_count
             or not 0 <= row.reorthogonalization_count <= row.arnoldi_step_count
             or row.true_residual_linf > row.true_residual_l2
-            or row.scaled_true_residual
-            != row.true_residual_linf / max(1.0, _linf(rhs))
+            or row.scaled_true_residual != row.true_residual_linf / max(1.0, _linf(rhs))
         ):
             _fail("cpu_fgmres_history_invariant_invalid", f"/history/{index - 1}")
         if index < len(result.history) and row.termination_hint != "restart_completed":
@@ -640,6 +900,9 @@ def _fgmres_core(
     inverse_diagonal: np.ndarray,
     policy: FgmresPolicyV1,
     authoritative_tolerance: float,
+    checkpoint_sink: (
+        Callable[[FgmresRestartRecord, np.ndarray, np.ndarray], None] | None
+    ) = None,
 ) -> _CoreOutcome:
     validate_fgmres_policy_v1(policy)
     if (
@@ -907,8 +1170,7 @@ def _fgmres_core(
             rotation_scale = max(abs(upper), abs(lower))
             if (
                 not math.isfinite(rotation_norm)
-                or rotation_norm
-                <= _BREAKDOWN_MULTIPLIER * _EPS * rotation_scale
+                or rotation_norm <= _BREAKDOWN_MULTIPLIER * _EPS * rotation_scale
             ):
                 invariant_breakdown = True
                 cosine[column] = 1.0
@@ -1009,7 +1271,8 @@ def _fgmres_core(
                                 tolerance_l2,
                                 history,
                             )
-                        history.append(
+                        _publish_restart_record(
+                            history,
                             _restart_record(
                                 restart_count,
                                 cycle_start,
@@ -1021,7 +1284,10 @@ def _fgmres_core(
                                 b,
                                 update_l2,
                                 candidate_code,
-                            )
+                            ),
+                            solution=candidate_x,
+                            residual=candidate_residual,
+                            checkpoint_sink=checkpoint_sink,
                         )
                         return _CoreOutcome(
                             "converged",
@@ -1060,7 +1326,8 @@ def _fgmres_core(
                     history,
                 )
             if y is None:
-                history.append(
+                _publish_restart_record(
+                    history,
                     _restart_record(
                         restart_count,
                         cycle_start,
@@ -1072,7 +1339,10 @@ def _fgmres_core(
                         b,
                         0.0,
                         "arnoldi_triangular_factor_breakdown",
-                    )
+                    ),
+                    solution=x,
+                    residual=residual,
+                    checkpoint_sink=checkpoint_sink,
                 )
                 return _terminal_outcome(
                     "arnoldi_breakdown",
@@ -1133,7 +1403,8 @@ def _fgmres_core(
             if invariant_breakdown
             else "restart_completed"
         )
-        history.append(
+        _publish_restart_record(
+            history,
             _restart_record(
                 restart_count,
                 cycle_start,
@@ -1145,11 +1416,12 @@ def _fgmres_core(
                 b,
                 update_l2,
                 hint,
-            )
+            ),
+            solution=candidate_x,
+            residual=candidate_residual,
+            checkpoint_sink=checkpoint_sink,
         )
-        if _both_gates(
-            candidate_residual, b, tolerance_l2, authoritative_tolerance
-        ):
+        if _both_gates(candidate_residual, b, tolerance_l2, authoritative_tolerance):
             return _CoreOutcome(
                 "converged",
                 "converged_restart_true_residual",
@@ -1195,8 +1467,7 @@ def _fgmres_core(
         previous_scale = _stable_l2(x)
         x_scale = candidate_scale + previous_scale
         if not all(
-            math.isfinite(value)
-            for value in (candidate_scale, previous_scale, x_scale)
+            math.isfinite(value) for value in (candidate_scale, previous_scale, x_scale)
         ):
             return _CoreOutcome(
                 "numerical_failure",
@@ -1211,9 +1482,9 @@ def _fgmres_core(
                 tolerance_l2,
                 tuple(history),
             )
-        plateau = true_l2 >= (
-            1.0 - policy.stagnation_relative_tolerance
-        ) * previous_true_l2
+        plateau = (
+            true_l2 >= (1.0 - policy.stagnation_relative_tolerance) * previous_true_l2
+        )
         tiny_update = update_l2 <= _SQRT_EPS * x_scale
         stagnant_checkpoints = (
             stagnant_checkpoints + 1 if plateau and tiny_update else 0
@@ -1309,6 +1580,21 @@ def _restart_record(
     )
 
 
+def _publish_restart_record(
+    history: list[FgmresRestartRecord],
+    record: FgmresRestartRecord,
+    *,
+    solution: np.ndarray,
+    residual: np.ndarray,
+    checkpoint_sink: (
+        Callable[[FgmresRestartRecord, np.ndarray, np.ndarray], None] | None
+    ),
+) -> None:
+    history.append(record)
+    if checkpoint_sink is not None:
+        checkpoint_sink(record, solution, residual)
+
+
 def _back_substitute(
     hessenberg: np.ndarray, g: np.ndarray, count: int
 ) -> np.ndarray | None:
@@ -1388,8 +1674,7 @@ def _finite_dot(left: np.ndarray, right: np.ndarray) -> float:
     try:
         with np.errstate(over="raise", invalid="raise"):
             value = math.fsum(
-                float(left[index]) * float(right[index])
-                for index in range(left.size)
+                float(left[index]) * float(right[index]) for index in range(left.size)
             )
     except (FloatingPointError, OverflowError, ValueError) as error:
         raise FloatingPointError("dot arithmetic failed") from error
@@ -1605,12 +1890,52 @@ def _result_payload(
     return payload
 
 
+def _checkpoint_history_payload(
+    result: CpuFgmresCheckpointHistoryResultV2,
+    *,
+    include_hash: bool,
+) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "schema_version": result.schema_version,
+        "capability_profile": result.capability_profile,
+        "base_result_hash": result.base_result.result_hash,
+        "execution_plan_hash": result.base_result.execution_plan_hash,
+        "policy_hash": result.base_result.policy.policy_hash,
+        "checkpoint_count": len(result.checkpoints),
+        "checkpoints": [row.to_dict() for row in result.checkpoints],
+        "checkpoint_bundle_hash": result.checkpoint_bundle_hash,
+        "claims": {
+            "deterministic_cpu_reference_replayed": True,
+            "committed_checkpoint_solution_vectors_retained": True,
+            "committed_checkpoint_true_residual_vectors_retained": True,
+            "sparse_true_residual_replayed_per_checkpoint": True,
+            "hip_execution": False,
+            "fallback_used": False,
+            "performance_or_speedup_proven": False,
+            "commercial_ready": False,
+        },
+    }
+    if include_hash:
+        payload["result_hash"] = result.result_hash
+    return payload
+
+
 @lru_cache(maxsize=1)
 def _result_schema() -> dict[str, Any]:
     path = (
         Path(__file__).parents[2]
         / "schemas"
         / "cpu_fgmres_reference_result_v1.schema.json"
+    )
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+@lru_cache(maxsize=1)
+def _checkpoint_history_schema() -> dict[str, Any]:
+    path = (
+        Path(__file__).parents[2]
+        / "schemas"
+        / "cpu_fgmres_checkpoint_history_v2.schema.json"
     )
     return json.loads(path.read_text(encoding="utf-8"))
 

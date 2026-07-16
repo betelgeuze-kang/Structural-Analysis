@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_checkpoint_history_plan_v1.schema.json",
+  "title": "HIP FGMRES checkpoint history plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "capability_profile", "blob_abi_version", "dimensions", "layout", "buffers", "abi_hash", "plan_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-hip-fgmres-checkpoint-history-plan.v1"},
+    "capability_profile": {"const": "phase0_hip_fgmres_committed_checkpoint_vector_history_plan"},
+    "blob_abi_version": {"const": 1},
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["free_dof_count", "maximum_restart_count"],
+      "properties": {
+        "free_dof_count": {"type": "integer", "minimum": 1, "maximum": 2147483647},
+        "maximum_restart_count": {"type": "integer", "minimum": 1, "maximum": 4096}
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["header_bytes", "restart_bytes", "payload_offset_bytes", "payload_byte_count", "blob_byte_count", "owned_device_byte_length"],
+      "properties": {
+        "header_bytes": {"const": 64},
+        "restart_bytes": {"const": 32},
+        "payload_offset_bytes": {"type": "integer", "minimum": 96},
+        "payload_byte_count": {"type": "integer", "minimum": 8},
+        "blob_byte_count": {"type": "integer", "minimum": 104},
+        "owned_device_byte_length": {"type": "integer", "minimum": 208}
+      }
+    },
+    "buffers": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {"$ref": "#/$defs/solutionBuffer"},
+        {"$ref": "#/$defs/residualBuffer"}
+      ],
+      "items": false
+    },
+    "abi_hash": {"$ref": "#/$defs/hash"},
+    "plan_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "bufferBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "role_code", "dtype", "byte_length", "payload_offset_bytes", "payload_shape", "payload_dtype"],
+      "properties": {
+        "role": {"type": "string"},
+        "role_code": {"type": "integer"},
+        "dtype": {"const": "|u1"},
+        "byte_length": {"type": "integer", "minimum": 104},
+        "payload_offset_bytes": {"type": "integer", "minimum": 96},
+        "payload_shape": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "payload_dtype": {"const": "<f8"}
+      }
+    },
+    "solutionBuffer": {
+      "allOf": [
+        {"$ref": "#/$defs/bufferBase"},
+        {"properties": {"role": {"const": "checkpoint_solution_history"}, "role_code": {"const": 1}}}
+      ]
+    },
+    "residualBuffer": {
+      "allOf": [
+        {"$ref": "#/$defs/bufferBase"},
+        {"properties": {"role": {"const": "checkpoint_true_residual_history"}, "role_code": {"const": 2}}}
+      ]
+    }
+  }
+}
