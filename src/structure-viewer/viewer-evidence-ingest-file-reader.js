@@ -104,10 +104,12 @@ export function buildEvidenceIngestFileReadFailurePreview(error, {
 } = {}) {
   const isResourceLimit = error instanceof EvidenceIngestResourceLimitError;
   const isReadFailure = error instanceof EvidenceIngestFileReadError;
-  const code = normalizeToken(
-    error?.code,
-    isResourceLimit ? 'evidence_ingest_resource_limit' : 'evidence_ingest_file_read_failed',
-  );
+  const fallbackCode = isResourceLimit
+    ? 'evidence_ingest_resource_limit'
+    : isReadFailure
+      ? 'evidence_ingest_file_read_failed'
+      : 'evidence_ingest_file_preview_failed';
+  const code = normalizeToken(error?.code, fallbackCode);
   const path = typeof error?.path === 'string' && error.path.startsWith('/')
     ? error.path
     : '/file';
