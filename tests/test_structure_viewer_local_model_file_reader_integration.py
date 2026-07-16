@@ -15,7 +15,7 @@ def _file_select_handler() -> str:
     text = INDEX.read_text(encoding="utf-8")
     match = re.search(
         r"async function handleFileSelect\(event\)\s*\{.*?"
-        r"\n\s*\}\s*\n\s*const dropZone",
+        r"\n\}\n\nfunction showLoadingIndicator",
         text,
         re.DOTALL,
     )
@@ -26,8 +26,8 @@ def _file_select_handler() -> str:
 def _drop_handler() -> str:
     text = INDEX.read_text(encoding="utf-8")
     match = re.search(
-        r"dropZone\.addEventListener\((['\"])drop\1,\s*async\s*"
-        r"\(event\)\s*=>\s*\{.*?\n\s*\}\);",
+        r"dropZone\.addEventListener\('drop', async \(e\) => \{.*?"
+        r"\n  \}\);",
         text,
         re.DOTALL,
     )
@@ -53,13 +53,18 @@ def test_file_select_and_drop_share_the_bounded_model_reader() -> None:
         assert "failure.error_code" in handler
         assert "failure.error_path" in handler
         assert f"Could not load the {action} JSON model" in handler
+        assert "await window.buildModel?.(fileRead.payload" in handler
+        assert "showLoadingIndicator(" in handler
+        assert "hideLoadingIndicator();" in handler
         assert "file.text()" not in handler
         assert "JSON.parse(" not in handler
         assert "console.error(" not in handler
         assert "String(error" not in handler
+        assert ".message" not in handler
 
     assert "input.value = '';" in select_handler
-    assert "event.preventDefault();" in drop_handler
+    assert "e.preventDefault();" in drop_handler
+    assert "dropZone.classList.remove('drag-over');" in drop_handler
 
 
 def test_temporary_local_model_patch_workflow_is_absent() -> None:
