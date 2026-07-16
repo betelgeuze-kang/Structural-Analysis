@@ -1052,6 +1052,11 @@ import {
   extractRenderableEvidencePayloadFromText,
 } from './viewer-evidence-ingest-model.js';
 import {
+  buildEvidenceIngestFileReadFailurePreview,
+  evidenceIngestFileReadMetadata,
+  readEvidenceIngestFileText,
+} from './viewer-evidence-ingest-file-reader.js';
+import {
   buildReviewTaskModel,
 } from './viewer-review-task-model.js';
 import {
@@ -3284,10 +3289,11 @@ async function previewEvidenceIngestFromInput(event){
   const input=event?.target;
   const file=input instanceof HTMLInputElement?input.files?.[0]:null;
   if(!file)return;
+  const sourceType=inferEvidenceIngestSourceType(file);
+  const generatedAt=new Date().toISOString();
   try{
-    const sourceType=inferEvidenceIngestSourceType(file);
-    const text=await file.text();
-    const generatedAt=new Date().toISOString();
+    const fileRead=await readEvidenceIngestFileText(file);
+    const text=fileRead.text;
     const preview=buildEvidenceIngestPreviewFromText(text,{
       sourceType,
       projectId:workspaceState.projectId||'ingested_project',
@@ -3300,6 +3306,7 @@ async function previewEvidenceIngestFromInput(event){
       sourceName:file.name,
       generatedAt,
     });
+    preview.ingest_file_read=evidenceIngestFileReadMetadata(fileRead);
     if(renderable)preview.renderable_payload=renderable;
     window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
     window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=renderable;
@@ -3314,20 +3321,23 @@ async function previewEvidenceIngestFromInput(event){
       status:preview.blocked_issues?.length?'needs_review':'ready',
     });
   }catch(err){
-    const preview={
-      schema_version:'structure-viewer-evidence-ingest-preview.v1',
-      source_type:'unknown',
-      row_count:0,
-      drawing_count:0,
-      blocked_issues:[{drawing_id:workspaceState.drawingId||'',issue:'evidence ingest parse failed',quality_flags:[String(err?.message||err)]}],
-      manifest:{schema_version:'structure-viewer-project-manifest.v1',projects:[]},
-    };
+    const preview=buildEvidenceIngestFileReadFailurePreview(err,{
+      sourceType,
+      sourceName:file.name,
+      drawingId:workspaceState.drawingId||'',
+      generatedAt,
+    });
     window.__STRUCTURE_VIEWER_LAST_INGEST_PREVIEW__=preview;
     window.__STRUCTURE_VIEWER_LAST_INGEST_RENDERABLE_PAYLOAD__=null;
     writeRuntimeIngestRenderablePayload(null);
     writeLocalOpsState({...readLocalOpsState(),lastIngestPreview:preview,lastIngestRenderablePayload:null});
     rebuildRuntimeProjectManifest({fallbackWorkspace:workspaceState});
-    auditWorkspaceEvent('evidence_ingest_preview_failed',String(err?.message||err),resolveSelectionMemberId(selectedElementData),{status:'blocked'});
+    auditWorkspaceEvent(
+      'evidence_ingest_preview_failed',
+      `${preview.renderable_payload_error_code||'evidence_ingest_file_preview_failed'}@${preview.renderable_payload_error_path||'/file'}`,
+      resolveSelectionMemberId(selectedElementData),
+      {status:'blocked'},
+    );
   }finally{
     if(input instanceof HTMLInputElement)input.value='';
     renderProjectWorkspacePanel();
