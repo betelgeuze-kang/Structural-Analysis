@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from structural_analysis.results.viewer import validate_linear_static_viewer_payload
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = ROOT / "implementation/phase1/release_evidence/productization"
@@ -47,5 +49,13 @@ def test_tracked_frame_result_and_cli_result_are_identical() -> None:
     assert result["metrics"]["claim_boundary"] == (
         "linear_static_3d_frame_cpu_reference_v1"
     )
-    assert result["metrics"]["viewer_payload"]["solver_path_id"] == result["solver"]
+    viewer = result["metrics"]["viewer_payload"]
+    assert viewer["solver_path_id"] == result["solver"]
+    assert validate_linear_static_viewer_payload(viewer) == viewer
+    assert viewer["model_identity"]["source_input_checksum"] == result[
+        "input_checksum"
+    ]
+    assert viewer["model_identity"]["canonical_model_checksum"] == result[
+        "canonical_model_checksum"
+    ]
     assert report["contract_pass"] is True
