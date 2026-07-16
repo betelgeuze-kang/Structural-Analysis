@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Sequence
 
 from structural_analysis.api._output_integrity import (
-    OutputPathCollisionError,
+    OutputPathValidationError,
     resolve_distinct_output_paths,
     write_json_pair,
 )
@@ -33,12 +33,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--report-out", required=True, help="Path for validation report JSON.")
     args = parser.parse_args(argv)
 
+    protected_paths = {"model input": Path(args.model_path)}
+    if args.reference is not None:
+        protected_paths["reference input"] = Path(args.reference)
+
     try:
         result_path, report_path = resolve_distinct_output_paths(
             Path(args.out),
             Path(args.report_out),
+            protected_paths=protected_paths,
         )
-    except OutputPathCollisionError as error:
+    except OutputPathValidationError as error:
         parser.error(str(error))
 
     model = load_model(args.model_path)
