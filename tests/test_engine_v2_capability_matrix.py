@@ -1612,6 +1612,8 @@ def test_hip_fgmres_fixed_rank_coarse_recurrence_overlay_stays_non_promoting() -
         "exact_final_global_recurrence_receipt_process_local_binding",
         "optional_exact_downstream_terminal_outcome_observation_binding",
         "partial_coarse_launch_poison_fenced_before_lease_release_with_deferred_shared_parent_poison_for_cleanup",
+        "healthy_close_rejected_until_parent_fence_acknowledges_pending_coarse_work",
+        "coherently_rehashed_status_terminal_and_reason_semantic_forgery_rejection",
         "strict_pointer_free_recurrence_overlay_receipt_schema_and_hash_validation",
         "public_symbols_engine1211_assembly1019_solvers66_unique",
     }.issubset(overlay["supported_scope"])
@@ -1631,11 +1633,12 @@ def test_hip_fgmres_fixed_rank_coarse_recurrence_overlay_stays_non_promoting() -
         "commercial_readiness",
     }.issubset(overlay["explicit_exclusions"])
     assert {
-        "focused_overlay_7_passed_in_217p72s",
-        "public_api_and_capability_matrix_22_passed_in_1p95s",
+        "focused_overlay_8_passed_in_239p62s",
+        "public_api_and_capability_matrix_22_passed_in_1p99s",
         "adjacent_coarse_context_24_passed_in_190p08s",
         "adjacent_live_checkpoint_context_42_passed_in_204p33s",
         "adjacent_canonical_predecessor_14_passed_in_113p18s",
+        "adjacent_sealed_checkpoint_transaction_30_passed_in_449p24s",
         "adjacent_global_recurrence_54_passed_in_1212p23s",
         "cross_surface_public_count_compatibility_9_passed_in_42p47s",
     }.issubset(overlay["verification_cases"])
@@ -1643,6 +1646,166 @@ def test_hip_fgmres_fixed_rank_coarse_recurrence_overlay_stays_non_promoting() -
         "same_stream_fixed_schedule_coarse_recurrence_overlay_test_double_"
         "integration_nonpromoting_not_jacobi_replacement_actual_device_parity_"
         "on_or_commercial_solver"
+    )
+
+
+def test_hip_fgmres_fixed_rank_coarse_slot_stays_contract_only() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    slot = rows["hip_fgmres_fixed_rank_coarse_slot_v1"]
+    assert slot["implementation_state"] == "implemented"
+    assert slot["promotion_state"] == "contract_only"
+    assert {
+        "byte_identical_frozen_recurrence_v2_and_coarse_v1_source_composition_with_namespaced_coarse_component",
+        "typed_fixed_rank_coarse_selection_replaces_one_logical_apply_jacobi_indexed_source_contract_row",
+        "selected_slot_legacy_jacobi_kernel_launch_count_zero_and_schedule_epoch_claim_count_one",
+        "exact_gate_dot_solve_apply_four_symbol_same_stream_physical_launch_order",
+        "recurrence_rtc_checkpoint_pending_and_audit_ledger_one_logical_reservation_for_four_physical_launches",
+        "inactive_padding_status_bit31_without_epoch_claim_numeric_input_read_or_output_write",
+        "full_extent_alignment_uintptr_and_pairwise_nonoverlap_validation_for_eleven_buffers",
+        "attempted_accepted_rejected_ambiguous_and_baseexception_launch_ownership",
+        "one_shot_task_local_compile_owner_handoff_across_return_store_interruption",
+        "source_only_hiprtc_compilation_for_gfx1030_and_gfx1100",
+        "public_symbols_engine1232_assembly1040_solvers66_unique",
+    }.issubset(slot["supported_scope"])
+    assert {
+        "live_canonical_or_global_recurrence_slot_selection",
+        "actual_recurrence_jacobi_launch_replacement",
+        "live_context_consumption_of_typed_slot_checkpoint_reservation",
+        "coarse_numerical_status_after_gate_direct_terminal_binding",
+        "actual_typed_slot_module_load_or_device_execution_in_this_milestone",
+        "authoritative_full_fgmres_numerical_parity_using_the_typed_slot",
+        "process_wide_or_full_iteration_host_copy_zero",
+        "actual_external_gfx1100_module_load_or_execution",
+        "end_to_end_on_complexity",
+        "performance_or_speedup_claim",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(slot["explicit_exclusions"])
+    assert {
+        "gfx1030_and_gfx1100_hiprtc_source_compilation_with_empty_logs",
+        "all_four_partial_rejected_launch_prefixes_preserved_until_fence",
+        "coherently_rehashed_component_identity_drift_rejected",
+        "typed_slot_recurrence_rtc_logical_reservation_focused_3_passed",
+        "adjacent_full_recurrence_rtc_v2_137_passed_in_44p63s",
+        "selected_slot_plan_rtc_safety_public_capability_and_adjacent_generic_coarse_rtc_69_passed_3_hardware_skipped_in_5p76s",
+        "hardware_only_typed_slot_module_load_skipped_without_dev_kfd",
+    }.issubset(slot["verification_cases"])
+    assert slot["claim_level"] == (
+        "typed_fixed_rank_coarse_recurrence_slot_source_and_hiprtc_owner_"
+        "contract_only_not_live_recurrence_integrated_actual_device_parity_"
+        "on_or_commercial_solver"
+    )
+
+
+def test_hip_fgmres_fixed_rank_coarse_terminal_guard_stays_contract_only() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    guard = rows["hip_fgmres_fixed_rank_coarse_terminal_guard_v1"]
+    assert guard["implementation_state"] == "implemented"
+    assert guard["promotion_state"] == "contract_only"
+    assert {
+        "exact_one_block_one_thread_same_stream_guard_after_typed_slot_apply",
+        "coarse_status_exact_inactive_value_only_no_op_and_mixed_or_known_failure_bits_fail_closed",
+        "first_device_error_wins_terminal_publication_into_frozen_control_and_solve_record",
+        "zero_host_copy_zero_host_status_branch_and_zero_intermediate_sync_guard_contract",
+        "one_logical_recurrence_ledger_row_for_four_slot_plus_one_guard_launch",
+        "uncertain_guard_launch_requires_matching_fence_before_relaunch",
+        "known_successful_guard_module_unload_is_not_retried_after_finalization_interruption",
+        "actual_local_gfx1030_guard_module_load_and_nonfinite_terminal_publication",
+        "actual_guard_launch_window_h2d_async_d2h_async_and_blocking_d2h_delta_zero",
+        "public_guard_plan_and_rtc_owner_engine1249_assembly1057_solvers66_unique",
+    }.issubset(guard["supported_scope"])
+    assert {
+        "strict_public_live_slot_recurrence_receipt_or_schema",
+        "actual_integrated_typed_slot_full_recurrence_device_execution",
+        "authoritative_full_fgmres_numerical_parity_using_the_typed_slot",
+        "process_wide_or_full_iteration_host_copy_zero",
+        "actual_external_gfx1100_module_load_or_execution",
+        "end_to_end_on_complexity",
+        "performance_or_speedup_claim",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(guard["explicit_exclusions"])
+    assert {
+        "terminal_guard_exact_inactive_uncertain_relaunch_and_unload_interruption_safety_4_passed",
+        "guard_and_slot_rtc_lifecycle_safety_8_passed_in_1p89s",
+        "gfx1030_and_gfx1100_guard_hiprtc_compilation_with_empty_logs",
+        "typed_slot_plus_guard_single_recurrence_ledger_success_rejection_and_exception_coverage",
+        "actual_local_gfx1030_guard_nonfinite_status_to_terminal_status6_code43_error4_origin2",
+        "actual_guard_launch_window_bound_runtime_copy_attempt_delta_zero",
+        "current_guard_suites_actual_local_gfx1030_21_passed_in_8p16s",
+    }.issubset(guard["verification_cases"])
+    assert guard["claim_level"] == (
+        "device_direct_coarse_terminal_guard_actual_local_gfx1030_kernel_"
+        "execution_and_private_live_test_double_integration_contract_only_not_"
+        "integrated_full_solve_parity_or_commercial_solver"
+    )
+
+
+def test_hip_fgmres_fixed_rank_coarse_slot_recurrence_stays_private_and_contract_only() -> (
+    None
+):
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    recurrence = rows["hip_fgmres_fixed_rank_coarse_slot_recurrence_v1"]
+    assert recurrence["implementation_state"] == "implemented"
+    assert recurrence["promotion_state"] == "contract_only"
+    assert {
+        "exact_process_local_live_checkpoint_and_fixed_rank_coarse_context_reservation",
+        "exclusive_typed_slot_selector_mutually_exclusive_with_the_additive_coarse_overlay",
+        "all_immutable_apply_jacobi_indexed_coordinates_replaced_across_canonical_prefix_and_global_suffix",
+        "zero_legacy_jacobi_vector_launches_observed_in_the_sealed_test_double_route",
+        "one_logical_recurrence_checkpoint_reservation_per_four_typed_slot_plus_one_terminal_guard_launches",
+        "existing_canonical_and_global_parent_fences_acknowledge_both_physical_owners_without_an_extra_healthy_sync",
+        "post_gate_coarse_status_device_direct_terminal_binding",
+        "partial_global_physical_prefix_retained_poisoned_and_acknowledged_before_lease_release",
+        "open_failure_returns_an_already_reserved_coarse_child_lease",
+        "failed_open_unload_retry_retains_both_parent_leases_until_both_module_owners_close",
+        "healthy_incomplete_close_and_poisoned_parent_fence_bypass_rejected",
+        "live_queue_lock_released_before_slot_callback_with_lock_protected_route_revalidation",
+        "strict_pointer_free_typed_slot_recurrence_receipt_schema_and_canonical_hash_validation",
+        "receipt_binds_live_coarse_recurrence_coarse_slot_guard_and_schedule_hashes_without_serializing_runtime_authority",
+        "one_logical_zero_legacy_four_slot_one_guard_application_rows_with_separate_acceptance_and_parent_fence_acknowledgement",
+        "detached_semantic_validation_and_expected_context_process_local_provenance_freshness_validation",
+        "full_fixed_program_restart_times_dimension_coordinate_count_restart_ceil_and_retained_rank_bounds",
+        "partial_global_prefix_published_only_as_poisoned_slot_five_guard_one_acknowledged_telemetry",
+        "direct_physical_owner_acknowledgement_without_parent_fence_rejected_by_live_receipt_validation",
+        "private_live_context_with_public_strict_receipt_and_guard_owners_engine1263_assembly1071_solvers66",
+    }.issubset(recurrence["supported_scope"])
+    assert {
+        "public_typed_slot_recurrence_context_export",
+        "actual_integrated_typed_slot_full_recurrence_device_execution",
+        "authoritative_full_fgmres_numerical_parity_using_the_typed_slot",
+        "process_wide_or_full_iteration_host_copy_zero",
+        "actual_external_gfx1100_module_load_or_execution",
+        "end_to_end_on_complexity",
+        "performance_or_speedup_claim",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(recurrence["explicit_exclusions"])
+    assert {
+        "focused_live_slot_plus_guard_receipt_replacement_and_lifecycle_7_passed_in_130p89s",
+        "adjacent_canonical_overlay_and_selected_global_regression_26_passed_in_461p50s",
+        "capability_and_public_api_25_passed_in_1p95s",
+        "full_route_logical_four_legacy_jacobi_zero_slot_sixteen_guard_four_parent_fences_two",
+        "partial_global_prefix_slot_total_five_guard_one_all_acknowledged_and_not_promoted",
+        "actual_local_guard_device_terminal_publication_without_launch_window_copy",
+        "open_second_lease_failure_rolls_back_first_lease",
+        "direct_companion_fence_cannot_substitute_for_parent_recurrence_fence",
+        "cross_thread_probe_acquires_live_queue_lock_during_slot_callback",
+        "strict_schema_packaging_pointer_handle_unknown_field_and_unredacted_hex_rejection",
+        "stale_opening_receipt_and_coherently_rehashed_status_context_and_telemetry_rejection",
+        "coherently_rehashed_shortened_schedule_oversized_rank_reason_code_and_container_rejection",
+        "public_receipt_module_14_symbols_and_engine1263_assembly1071_solvers66_unique",
+    }.issubset(recurrence["verification_cases"])
+    assert recurrence["claim_level"] == (
+        "private_live_typed_fixed_rank_coarse_slot_plus_device_terminal_guard_"
+        "with_public_pointer_free_strict_receipt_test_double_integration_contract_"
+        "only_not_integrated_full_solve_device_parity_or_commercial_solver"
     )
 
 

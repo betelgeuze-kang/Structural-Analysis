@@ -2741,7 +2741,7 @@ class HipRtcFgmresV2Kernel:
         self,
         expected_device_ordinal: int | None,
         *,
-        checkpoint_owner_token: object,
+        checkpoint_owner_token: object | None,
     ) -> tuple[object, tuple[Any, ...]]:
         if type(checkpoint_owner_token) is not object:
             raise HipRtcFgmresV2Error(
@@ -3277,6 +3277,261 @@ class HipRtcFgmresV2Kernel:
                     f"{_runtime_error_string(witness.loaded_runtime, status)}.",
                     launch_disposition="rejected",
                 )
+            _finish_rtc_operation_audit_v1(
+                witness.launch_fence_ledger_state,
+                ticket,
+                disposition="success",
+                propagate_base_exception=True,
+            )
+
+    def _launch_fixed_rank_coarse_slot_v1(
+        self,
+        slot_kernel: Any,
+        terminal_guard_kernel: Any | None = None,
+        *,
+        stream: Any,
+        expected_schedule_epoch: int,
+        expected_restart: int,
+        expected_column: int,
+        maximum_restart_count: int,
+        free_dof_count: int,
+        retained_rank: int,
+        restart_dimension: int,
+        logical_index: int,
+        jacobi_inverse: Any,
+        basis_v: Any,
+        preconditioned_basis_z: Any,
+        coarse_physical_basis_z: Any,
+        coarse_operator_basis_az: Any,
+        coarse_cholesky_l: Any,
+        coarse_rhs: Any,
+        coarse_coefficients: Any,
+        coarse_status: Any,
+        control_state: Any,
+        solve_record: Any,
+        checkpoint_owner_token: object,
+        checkpoint_expected_prior_pending_count: int | None,
+        checkpoint_audit_descriptor_hash: str,
+    ) -> None:
+        """Reserve one row around four slot launches and an optional guard."""
+
+        from .fgmres_fixed_rank_coarse_slot_rtc_v1 import (
+            HipRtcFgmresFixedRankCoarseSlotKernelV1,
+        )
+        from .fgmres_fixed_rank_coarse_terminal_guard_rtc_v1 import (
+            HipRtcFgmresFixedRankCoarseTerminalGuardKernelV1,
+        )
+
+        with self._checkpoint_owner_lock:
+            self._require_open()
+            self._require_checkpoint_owner_access(checkpoint_owner_token)
+            if type(slot_kernel) is not HipRtcFgmresFixedRankCoarseSlotKernelV1:
+                raise _launch_contract_error(
+                    "typed fixed-rank coarse slot requires the exact compiler-issued "
+                    "kernel owner."
+                )
+            if (
+                terminal_guard_kernel is not None
+                and type(terminal_guard_kernel)
+                is not HipRtcFgmresFixedRankCoarseTerminalGuardKernelV1
+            ):
+                raise _launch_contract_error(
+                    "typed fixed-rank coarse terminal publication requires the exact "
+                    "compiler-issued guard owner."
+                )
+            witness = self._validated_binding()
+            try:
+                slot_loaded_runtime = slot_kernel._runtime._runtime
+                slot_architecture = slot_kernel.identity.architecture
+                if terminal_guard_kernel is not None:
+                    guard_loaded_runtime = terminal_guard_kernel._runtime._runtime
+                    guard_architecture = terminal_guard_kernel.identity.architecture
+            except Exception as exc:
+                raise _launch_contract_error(
+                    "typed fixed-rank coarse slot or guard binding is unavailable."
+                ) from exc
+            if (
+                slot_loaded_runtime is not witness.loaded_runtime
+                or slot_architecture != witness.identity.architecture
+                or slot_kernel.closed
+                or slot_kernel.unload_disposition != "live"
+            ):
+                raise _launch_contract_error(
+                    "typed fixed-rank coarse slot must share the exact live runtime "
+                    "and architecture with the recurrence module."
+                )
+            if terminal_guard_kernel is not None and (
+                guard_loaded_runtime is not witness.loaded_runtime
+                or guard_architecture != witness.identity.architecture
+                or terminal_guard_kernel.closed
+                or terminal_guard_kernel.unload_disposition != "live"
+            ):
+                raise _launch_contract_error(
+                    "typed fixed-rank coarse terminal guard must share the exact live "
+                    "runtime and architecture with the recurrence module."
+                )
+            stream_value = _runtime_pointer(stream, "stream")
+            _require_expected_prior_pending_count(
+                self._pending_streams,
+                stream_pointer=stream_value,
+                expected_count=checkpoint_expected_prior_pending_count,
+            )
+            if self._pending_streams and stream_value not in self._pending_streams:
+                raise _launch_contract_error(
+                    "all pending FGMRES v2 recurrence work must remain on the "
+                    "first bound stream until its observed completion fence."
+                )
+            _require_expected_device_ordinal(
+                witness,
+                operation="FGMRES v2 typed fixed-rank coarse slot",
+                launch_disposition="not_attempted",
+            )
+            try:
+                _require_hash(
+                    checkpoint_audit_descriptor_hash,
+                    "checkpoint audit descriptor hash",
+                )
+            except (TypeError, ValueError) as exc:
+                raise _launch_contract_error(
+                    "typed-slot checkpoint launch audit descriptor hash is invalid."
+                ) from exc
+
+            prior_pending_count = self._pending_streams.get(stream_value, 0)
+            self._pending_streams[stream_value] = prior_pending_count + 1
+            ticket = None
+            try:
+                ticket = witness.launch_fence_ledger_state.begin(
+                    "launch",
+                    checkpoint_audit_descriptor_hash,
+                )
+            except Exception:
+                _best_effort_poison_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state
+                )
+            except BaseException:
+                _best_effort_restore_pending_reservation_v1(
+                    self._pending_streams,
+                    stream_value=stream_value,
+                    prior_pending_count=prior_pending_count,
+                )
+                _best_effort_poison_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state
+                )
+                raise
+
+            accepted_before = slot_kernel.lifetime_accepted_launch_count
+            try:
+                accepted = slot_kernel.launch_slot(
+                    stream=stream_value,
+                    expected_schedule_epoch=expected_schedule_epoch,
+                    expected_restart=expected_restart,
+                    expected_column=expected_column,
+                    maximum_restart_count=maximum_restart_count,
+                    free_dof_count=free_dof_count,
+                    retained_rank=retained_rank,
+                    restart_dimension=restart_dimension,
+                    logical_index=logical_index,
+                    jacobi_inverse=jacobi_inverse,
+                    basis_v=basis_v,
+                    preconditioned_basis_z=preconditioned_basis_z,
+                    coarse_physical_basis_z=coarse_physical_basis_z,
+                    coarse_operator_basis_az=coarse_operator_basis_az,
+                    coarse_cholesky_l=coarse_cholesky_l,
+                    coarse_rhs=coarse_rhs,
+                    coarse_coefficients=coarse_coefficients,
+                    coarse_status=coarse_status,
+                    control_state=control_state,
+                    solve_record=solve_record,
+                )
+            except BaseException as exc:
+                accepted_delta = (
+                    slot_kernel.lifetime_accepted_launch_count - accepted_before
+                )
+                disposition = getattr(exc, "launch_disposition", None)
+                definitely_rejected = accepted_delta == 0 and disposition in {
+                    "not_attempted",
+                    "rejected",
+                }
+                if definitely_rejected:
+                    _best_effort_restore_pending_reservation_v1(
+                        self._pending_streams,
+                        stream_value=stream_value,
+                        prior_pending_count=prior_pending_count,
+                    )
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
+                    ticket,
+                    disposition=("rejected" if definitely_rejected else "ambiguous"),
+                    propagate_base_exception=False,
+                )
+                if definitely_rejected or not isinstance(exc, Exception):
+                    raise
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_typed_coarse_slot_launch_failed",
+                    "A typed fixed-rank coarse recurrence row accepted a physical "
+                    "launch prefix before failing.",
+                    launch_disposition="ambiguous",
+                ) from exc
+            accepted_delta = (
+                slot_kernel.lifetime_accepted_launch_count - accepted_before
+            )
+            if accepted != 4 or accepted_delta != 4:
+                _finish_rtc_operation_audit_v1(
+                    witness.launch_fence_ledger_state,
+                    ticket,
+                    disposition="ambiguous",
+                    propagate_base_exception=False,
+                )
+                raise HipRtcFgmresV2Error(
+                    "hip_rtc_fgmres_v2_typed_coarse_slot_launch_count_invalid",
+                    "A typed fixed-rank coarse recurrence row did not accept four "
+                    "physical launches.",
+                    launch_disposition="ambiguous",
+                )
+            if terminal_guard_kernel is not None:
+                guard_accepted_before = (
+                    terminal_guard_kernel.lifetime_accepted_launch_count
+                )
+                try:
+                    terminal_guard_kernel.launch_guard(
+                        stream=stream_value,
+                        maximum_restart_count=maximum_restart_count,
+                        coarse_status=coarse_status,
+                        control_state=control_state,
+                        solve_record=solve_record,
+                    )
+                except BaseException as exc:
+                    _finish_rtc_operation_audit_v1(
+                        witness.launch_fence_ledger_state,
+                        ticket,
+                        disposition="ambiguous",
+                        propagate_base_exception=False,
+                    )
+                    if not isinstance(exc, Exception):
+                        raise
+                    raise HipRtcFgmresV2Error(
+                        "hip_rtc_fgmres_v2_typed_coarse_terminal_guard_failed",
+                        "The typed fixed-rank coarse slot was accepted before its "
+                        "device terminal-status guard failed.",
+                        launch_disposition="ambiguous",
+                    ) from exc
+                guard_accepted_delta = (
+                    terminal_guard_kernel.lifetime_accepted_launch_count
+                    - guard_accepted_before
+                )
+                if guard_accepted_delta != 1:
+                    _finish_rtc_operation_audit_v1(
+                        witness.launch_fence_ledger_state,
+                        ticket,
+                        disposition="ambiguous",
+                        propagate_base_exception=False,
+                    )
+                    raise HipRtcFgmresV2Error(
+                        "hip_rtc_fgmres_v2_typed_coarse_terminal_guard_count_invalid",
+                        "A typed fixed-rank coarse recurrence row did not accept one "
+                        "device terminal-status guard.",
+                        launch_disposition="ambiguous",
+                    )
             _finish_rtc_operation_audit_v1(
                 witness.launch_fence_ledger_state,
                 ticket,

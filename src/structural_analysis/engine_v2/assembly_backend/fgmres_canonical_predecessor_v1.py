@@ -618,6 +618,19 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
             return
         n = live._recurrence_plan.free_dof_count  # type: ignore[union-attr]
         if row.submission_kind == "vector":
+            if row.mode == _VECTOR_MODE_CODES[
+                "APPLY_JACOBI_INDEXED"
+            ] and live._enqueue_fixed_rank_coarse_slot_instead_of_jacobi(
+                phase="canonical_prefix",
+                owner=self,
+                expected_schedule_epoch=row.expected_schedule_epoch,
+                expected_restart=row.expected_restart,
+                expected_column=row.expected_column,
+                logical_index=row.logical_index,
+                audit_descriptor_hash=audit_descriptor_hash,
+                expected_prior_pending_count=None,
+            ):
+                return
             kernel.launch_vector(
                 stream,
                 row.mode,
@@ -789,6 +802,10 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
             )
         self._telemetry = replace(self._telemetry, consumed_operation_count=consumed)
         self._require_live()._acknowledge_fixed_rank_coarse_overlay_fence(
+            phase="canonical_prefix",
+            owner=self,
+        )
+        self._require_live()._acknowledge_fixed_rank_coarse_slot_fence(
             phase="canonical_prefix",
             owner=self,
         )

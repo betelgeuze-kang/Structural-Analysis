@@ -474,6 +474,23 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
                 pending_operation_bounds=pending_operation_bounds,
             )
 
+    def _typed_slot_pointer_arguments(
+        self,
+        token: object,
+        child_context: object,
+        pending_operation_bounds: tuple[int, int],
+    ) -> tuple[HipFgmresFixedRankCoarseDimensionsV1, dict[str, object]]:
+        """Return one validated pointer snapshot to the reserved typed route."""
+
+        with self._serialized_operation("/recurrence_slot/pointers"):
+            self._require_recurrence_overlay_child(token, child_context)
+            authority = self._validate_authority(
+                slot_token=token,
+                slot_context=child_context,
+                pending_operation_bounds=pending_operation_bounds,
+            )
+            return self._require_dimensions(), self._pointer_arguments(authority)
+
     def _enqueue_application_locked(
         self,
         logical_index: int,
@@ -1362,6 +1379,8 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
         *,
         overlay_token: object | None = None,
         overlay_context: object | None = None,
+        slot_token: object | None = None,
+        slot_context: object | None = None,
         pending_operation_bounds: tuple[int, int] = (0, 0),
         allow_poisoned_parent_cleanup: bool = False,
     ) -> _HipFgmresFixedRankCoarseParentAuthorityV1:
@@ -1413,6 +1432,8 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
                     self,
                     overlay_token=overlay_token,
                     overlay_context=overlay_context,
+                    slot_token=slot_token,
+                    slot_context=slot_context,
                     pending_operation_bounds=pending_operation_bounds,
                 )
             validate_hip_fgmres_fixed_rank_coarse_plan_v1(

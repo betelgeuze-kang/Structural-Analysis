@@ -1,0 +1,294 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_fixed_rank_coarse_slot_recurrence_v1.schema.json",
+  "title": "HIP FGMRES fixed-rank coarse typed-slot recurrence v1 receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "context_id",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "reason",
+    "bindings",
+    "dimensions",
+    "applications",
+    "application_sequence_hash",
+    "global_context_id",
+    "global_receipt_hash",
+    "telemetry",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-fixed-rank-coarse-slot-recurrence.v1"
+    },
+    "status": {
+      "enum": [
+        "context_ready",
+        "canonical_slot_pending",
+        "canonical_fenced",
+        "global_slot_pending",
+        "global_fenced",
+        "global_receipt_bound",
+        "poisoned",
+        "context_closed",
+        "cleanup_failed"
+      ]
+    },
+    "context_id": { "$ref": "#/$defs/hash" },
+    "evidence_scope": {
+      "const": "pointer_free_live_typed_slot_plus_device_terminal_guard_contract_non_promoting"
+    },
+    "actual_backend": { "enum": ["hip", "test_double"] },
+    "promotion_eligible": { "const": false },
+    "reason": {
+      "anyOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/reason" }
+      ]
+    },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "dimensions": { "$ref": "#/$defs/dimensions" },
+    "applications": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/application" }
+    },
+    "application_sequence_hash": { "$ref": "#/$defs/hash" },
+    "global_context_id": { "$ref": "#/$defs/hash" },
+    "global_receipt_hash": { "$ref": "#/$defs/hash" },
+    "telemetry": { "$ref": "#/$defs/telemetry" },
+    "claims": { "$ref": "#/$defs/claims" },
+    "receipt_hash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "detail"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "detail": { "type": "string", "minLength": 1, "maxLength": 320 }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "live_checkpoint_context_id",
+        "live_checkpoint_opening_receipt_hash",
+        "coarse_context_id",
+        "coarse_context_opening_receipt_hash",
+        "source_fgmres_plan_hash",
+        "recurrence_plan_hash",
+        "recurrence_kernel_identity_hash",
+        "recurrence_kernel_source_sha256",
+        "coarse_plan_hash",
+        "coarse_space_hash",
+        "coarse_kernel_identity_hash",
+        "coarse_kernel_source_sha256",
+        "slot_kernel_identity_hash",
+        "slot_kernel_abi_hash",
+        "slot_combined_source_sha256",
+        "terminal_guard_identity_hash",
+        "terminal_guard_abi_hash",
+        "terminal_guard_combined_source_sha256",
+        "full_schedule_hash",
+        "sealed_prefix_schedule_hash",
+        "continuation_schedule_hash",
+        "schedule_coordinates_hash",
+        "schedule_epochs_hash"
+      ],
+      "properties": {
+        "live_checkpoint_context_id": { "$ref": "#/$defs/hash" },
+        "live_checkpoint_opening_receipt_hash": { "$ref": "#/$defs/hash" },
+        "coarse_context_id": { "$ref": "#/$defs/hash" },
+        "coarse_context_opening_receipt_hash": { "$ref": "#/$defs/hash" },
+        "source_fgmres_plan_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_plan_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_kernel_identity_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_kernel_source_sha256": { "$ref": "#/$defs/hash" },
+        "coarse_plan_hash": { "$ref": "#/$defs/hash" },
+        "coarse_space_hash": { "$ref": "#/$defs/hash" },
+        "coarse_kernel_identity_hash": { "$ref": "#/$defs/hash" },
+        "coarse_kernel_source_sha256": { "$ref": "#/$defs/hash" },
+        "slot_kernel_identity_hash": { "$ref": "#/$defs/hash" },
+        "slot_kernel_abi_hash": { "$ref": "#/$defs/hash" },
+        "slot_combined_source_sha256": { "$ref": "#/$defs/hash" },
+        "terminal_guard_identity_hash": { "$ref": "#/$defs/hash" },
+        "terminal_guard_abi_hash": { "$ref": "#/$defs/hash" },
+        "terminal_guard_combined_source_sha256": { "$ref": "#/$defs/hash" },
+        "full_schedule_hash": { "$ref": "#/$defs/hash" },
+        "sealed_prefix_schedule_hash": { "$ref": "#/$defs/hash" },
+        "continuation_schedule_hash": { "$ref": "#/$defs/hash" },
+        "schedule_coordinates_hash": { "$ref": "#/$defs/hash" },
+        "schedule_epochs_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "restart_dimension",
+        "max_iterations",
+        "maximum_restart_count",
+        "retained_rank",
+        "expected_application_count",
+        "canonical_prefix_application_count",
+        "global_suffix_application_count",
+        "logical_recurrence_launches_per_application",
+        "legacy_jacobi_launches_per_application",
+        "physical_slot_launches_per_application",
+        "physical_terminal_guard_launches_per_application",
+        "total_physical_launches_per_application"
+      ],
+      "properties": {
+        "free_dof_count": { "type": "integer", "minimum": 1 },
+        "restart_dimension": { "type": "integer", "minimum": 1 },
+        "max_iterations": { "type": "integer", "minimum": 1 },
+        "maximum_restart_count": { "type": "integer", "minimum": 1 },
+        "retained_rank": { "type": "integer", "minimum": 1 },
+        "expected_application_count": { "type": "integer", "minimum": 1 },
+        "canonical_prefix_application_count": { "const": 1 },
+        "global_suffix_application_count": { "type": "integer", "minimum": 0 },
+        "logical_recurrence_launches_per_application": { "const": 1 },
+        "legacy_jacobi_launches_per_application": { "const": 0 },
+        "physical_slot_launches_per_application": { "const": 4 },
+        "physical_terminal_guard_launches_per_application": { "const": 1 },
+        "total_physical_launches_per_application": { "const": 5 }
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "phase",
+        "schedule_epoch",
+        "restart_index",
+        "column_index",
+        "logical_index",
+        "recurrence_descriptor_hash",
+        "logical_recurrence_launch_count",
+        "legacy_jacobi_launch_count",
+        "physical_slot_launch_count",
+        "physical_terminal_guard_launch_count",
+        "physical_launch_count"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1 },
+        "phase": { "enum": ["canonical_prefix", "global_suffix"] },
+        "schedule_epoch": { "type": "integer", "minimum": 0 },
+        "restart_index": { "type": "integer", "minimum": 1 },
+        "column_index": { "type": "integer", "minimum": 0 },
+        "logical_index": { "type": "integer", "minimum": 0 },
+        "recurrence_descriptor_hash": { "$ref": "#/$defs/hash" },
+        "logical_recurrence_launch_count": { "const": 1 },
+        "legacy_jacobi_launch_count": { "const": 0 },
+        "physical_slot_launch_count": { "const": 4 },
+        "physical_terminal_guard_launch_count": { "const": 1 },
+        "physical_launch_count": { "const": 5 }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "application_attempt_count",
+        "application_success_count",
+        "logical_recurrence_launch_count",
+        "retained_jacobi_launch_count",
+        "physical_slot_launch_accept_count",
+        "physical_terminal_guard_launch_accept_count",
+        "canonical_application_count",
+        "global_application_count",
+        "parent_fence_ack_count",
+        "physical_slot_launch_ack_count",
+        "physical_terminal_guard_launch_ack_count",
+        "additional_h2d_copy_count",
+        "additional_d2h_copy_count",
+        "additional_allocation_count",
+        "additional_synchronization_count",
+        "additional_csr_apply_count",
+        "host_status_branch_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "application_attempt_count": { "type": "integer", "minimum": 0 },
+        "application_success_count": { "type": "integer", "minimum": 0 },
+        "logical_recurrence_launch_count": { "type": "integer", "minimum": 0 },
+        "retained_jacobi_launch_count": { "const": 0 },
+        "physical_slot_launch_accept_count": { "type": "integer", "minimum": 0 },
+        "physical_terminal_guard_launch_accept_count": { "type": "integer", "minimum": 0 },
+        "canonical_application_count": { "type": "integer", "minimum": 0 },
+        "global_application_count": { "type": "integer", "minimum": 0 },
+        "parent_fence_ack_count": { "type": "integer", "minimum": 0 },
+        "physical_slot_launch_ack_count": { "type": "integer", "minimum": 0 },
+        "physical_terminal_guard_launch_ack_count": { "type": "integer", "minimum": 0 },
+        "additional_h2d_copy_count": { "const": 0 },
+        "additional_d2h_copy_count": { "const": 0 },
+        "additional_allocation_count": { "const": 0 },
+        "additional_synchronization_count": { "const": 0 },
+        "additional_csr_apply_count": { "const": 0 },
+        "host_status_branch_count": { "const": 0 },
+        "fallback_count": { "const": 0 }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_live_and_coarse_contexts_bound",
+        "exact_slot_and_terminal_guard_kernel_identities_bound",
+        "immutable_schedule_hashes_bound",
+        "global_recurrence_receipt_bound",
+        "all_scheduled_jacobi_rows_replaced",
+        "one_logical_row_per_five_physical_launches",
+        "same_stream_slot_then_terminal_guard_order_bound",
+        "both_physical_owners_parent_fenced",
+        "device_terminal_status_binding_contract",
+        "application_window_host_copy_zero_contract",
+        "no_additional_intermediate_synchronization_contract",
+        "legacy_jacobi_launch_zero_observed",
+        "pointer_values_serialized",
+        "actual_integrated_device_execution_proven",
+        "authoritative_numerical_parity_proven",
+        "full_iteration_host_copy_zero_proven",
+        "end_to_end_o_n_proven",
+        "speedup_proven",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "exact_live_and_coarse_contexts_bound": { "type": "boolean" },
+        "exact_slot_and_terminal_guard_kernel_identities_bound": { "type": "boolean" },
+        "immutable_schedule_hashes_bound": { "type": "boolean" },
+        "global_recurrence_receipt_bound": { "type": "boolean" },
+        "all_scheduled_jacobi_rows_replaced": { "type": "boolean" },
+        "one_logical_row_per_five_physical_launches": { "type": "boolean" },
+        "same_stream_slot_then_terminal_guard_order_bound": { "type": "boolean" },
+        "both_physical_owners_parent_fenced": { "type": "boolean" },
+        "device_terminal_status_binding_contract": { "type": "boolean" },
+        "application_window_host_copy_zero_contract": { "type": "boolean" },
+        "no_additional_intermediate_synchronization_contract": { "type": "boolean" },
+        "legacy_jacobi_launch_zero_observed": { "type": "boolean" },
+        "pointer_values_serialized": { "const": false },
+        "actual_integrated_device_execution_proven": { "const": false },
+        "authoritative_numerical_parity_proven": { "const": false },
+        "full_iteration_host_copy_zero_proven": { "const": false },
+        "end_to_end_o_n_proven": { "const": false },
+        "speedup_proven": { "const": false },
+        "commercial_ready": { "const": false },
+        "promotion_eligible": { "const": false }
+      }
+    }
+  }
+}

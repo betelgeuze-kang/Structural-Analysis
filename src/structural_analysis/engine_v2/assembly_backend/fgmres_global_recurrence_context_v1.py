@@ -792,6 +792,10 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 owner=self,
                 receipt=self._build_receipt("recurrence_fenced"),
             )
+            self._require_live_context_for_overlay()._publish_fixed_rank_coarse_slot_global_receipt(
+                owner=self,
+                receipt=self._build_receipt("recurrence_fenced"),
+            )
             return completion
 
     def synchronize_global_recurrence(
@@ -1103,20 +1107,38 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
             )
         elif row["submission_kind"] == "vector":
-            result = submission.kernel.launch_vector(
-                submission.stream_pointer,
-                row["mode"],
-                row["vector_gate"],
-                row["expected_schedule_epoch"],
-                row["expected_restart"],
-                row["expected_column"],
-                submission.free_dof_count,
-                row["logical_index"],
-                *(pointers[role] for role in _DIRECT_ROLES),
-                _checkpoint_owner_token=token,
-                _checkpoint_expected_prior_pending_count=(expected_prior_pending_count),
-                _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
+            replaced = (
+                row["mode"] == _VECTOR_MODE_CODES["APPLY_JACOBI_INDEXED"]
+                and self._require_live_context_for_overlay()._enqueue_fixed_rank_coarse_slot_instead_of_jacobi(
+                    phase="global_suffix",
+                    owner=self,
+                    expected_schedule_epoch=row["expected_schedule_epoch"],
+                    expected_restart=row["expected_restart"],
+                    expected_column=row["expected_column"],
+                    logical_index=row["logical_index"],
+                    audit_descriptor_hash=audit_descriptor_hash,
+                    expected_prior_pending_count=expected_prior_pending_count,
+                )
             )
+            if replaced:
+                result = None
+            else:
+                result = submission.kernel.launch_vector(
+                    submission.stream_pointer,
+                    row["mode"],
+                    row["vector_gate"],
+                    row["expected_schedule_epoch"],
+                    row["expected_restart"],
+                    row["expected_column"],
+                    submission.free_dof_count,
+                    row["logical_index"],
+                    *(pointers[role] for role in _DIRECT_ROLES),
+                    _checkpoint_owner_token=token,
+                    _checkpoint_expected_prior_pending_count=(
+                        expected_prior_pending_count
+                    ),
+                    _checkpoint_audit_descriptor_hash=audit_descriptor_hash,
+                )
         elif row["submission_kind"] == "spmv":
             result = submission.kernel.launch_csr_spmv_indexed(
                 submission.stream_pointer,
@@ -1370,6 +1392,10 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
             consumed_launch_count=consumed,
         )
         self._require_live_context_for_overlay()._acknowledge_fixed_rank_coarse_overlay_fence(
+            phase="global_suffix",
+            owner=self,
+        )
+        self._require_live_context_for_overlay()._acknowledge_fixed_rank_coarse_slot_fence(
             phase="global_suffix",
             owner=self,
         )

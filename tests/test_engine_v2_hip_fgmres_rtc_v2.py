@@ -31,6 +31,21 @@ import structural_analysis.engine_v2.assembly_backend as assembly_backend  # noq
 from structural_analysis.engine_v2.assembly_backend.fgmres_global_schedule_plan_v1 import (  # noqa: E402
     compile_hip_fgmres_global_schedule_plan_v1,
 )
+from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
+    fgmres_fixed_rank_coarse_slot_rtc_v1 as coarse_slot_rtc,
+)
+from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
+    fgmres_fixed_rank_coarse_terminal_guard_rtc_v1 as coarse_guard_rtc,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_fixed_rank_coarse_slot_plan_v1 import (  # noqa: E402
+    HIP_FGMRES_FIXED_RANK_COARSE_SLOT_KERNEL_SYMBOLS_V1,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_fixed_rank_coarse_slot_rtc_v1 import (  # noqa: E402
+    HipRtcFgmresFixedRankCoarseSlotKernelV1,
+)
+from structural_analysis.engine_v2.assembly_backend.fgmres_fixed_rank_coarse_terminal_guard_rtc_v1 import (  # noqa: E402
+    HipRtcFgmresFixedRankCoarseTerminalGuardKernelV1,
+)
 from structural_analysis.engine_v2.assembly_backend.fgmres_recurrence_plan_v2 import (  # noqa: E402
     HIP_FGMRES_CONTROL_STATE_BYTES_V2,
     HIP_FGMRES_RECURRENCE_ABI_VERSION_V2,
@@ -663,6 +678,297 @@ def _compile_fake(
         rtc,
         checked_runtime,
     )
+
+
+class _TypedCoarseSlotRuntime:
+    def __init__(self, loaded_runtime: Any) -> None:
+        self._runtime = loaded_runtime
+        self.launch_statuses: list[int | BaseException] = []
+        self.launches: list[dict[str, Any]] = []
+        self.unloads = 0
+
+    def launch(self, function: Any, **keywords: Any) -> int:
+        self.launches.append({"function": function, **keywords})
+        outcome = self.launch_statuses.pop(0) if self.launch_statuses else 0
+        if isinstance(outcome, BaseException):
+            raise outcome
+        return outcome
+
+    def unload(self, _module: Any) -> int:
+        self.unloads += 1
+        return 0
+
+    def error_string(self, status: int) -> str:
+        return f"status={status}"
+
+
+class _TypedCoarseSlotIdentity:
+    architecture = "gfx1030"
+
+
+def _typed_coarse_slot_kernel(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_runtime: Any,
+) -> tuple[HipRtcFgmresFixedRankCoarseSlotKernelV1, _TypedCoarseSlotRuntime]:
+    monkeypatch.setattr(
+        coarse_slot_rtc,
+        "validate_hip_rtc_fgmres_fixed_rank_coarse_slot_identity_v1",
+        lambda identity: identity,
+    )
+    runtime = _TypedCoarseSlotRuntime(loaded_runtime)
+    functions = {
+        symbol: ctypes.c_void_p(index + 2001)
+        for index, symbol in enumerate(
+            HIP_FGMRES_FIXED_RANK_COARSE_SLOT_KERNEL_SYMBOLS_V1
+        )
+    }
+    return (
+        HipRtcFgmresFixedRankCoarseSlotKernelV1(
+            runtime=runtime,  # type: ignore[arg-type]
+            module=ctypes.c_void_p(2000),
+            functions=functions,
+            identity=_TypedCoarseSlotIdentity(),  # type: ignore[arg-type]
+            _mint=coarse_slot_rtc._KERNEL_MINT,
+        ),
+        runtime,
+    )
+
+
+def _typed_coarse_guard_kernel(
+    monkeypatch: pytest.MonkeyPatch,
+    loaded_runtime: Any,
+) -> tuple[
+    HipRtcFgmresFixedRankCoarseTerminalGuardKernelV1,
+    _TypedCoarseSlotRuntime,
+]:
+    monkeypatch.setattr(
+        coarse_guard_rtc,
+        "validate_hip_rtc_fgmres_fixed_rank_coarse_terminal_guard_identity_v1",
+        lambda identity: identity,
+    )
+    runtime = _TypedCoarseSlotRuntime(loaded_runtime)
+    return (
+        HipRtcFgmresFixedRankCoarseTerminalGuardKernelV1(
+            runtime=runtime,  # type: ignore[arg-type]
+            module=ctypes.c_void_p(2100),
+            function=ctypes.c_void_p(2101),
+            identity=_TypedCoarseSlotIdentity(),  # type: ignore[arg-type]
+            _mint=coarse_guard_rtc._KERNEL_MINT,
+        ),
+        runtime,
+    )
+
+
+def _launch_typed_coarse_slot(
+    recurrence_kernel: Any,
+    slot_kernel: HipRtcFgmresFixedRankCoarseSlotKernelV1,
+    *,
+    terminal_guard_kernel: (
+        HipRtcFgmresFixedRankCoarseTerminalGuardKernelV1 | None
+    ) = None,
+    expected_prior_pending_count: int = 0,
+) -> None:
+    recurrence_kernel._launch_fixed_rank_coarse_slot_v1(
+        slot_kernel,
+        terminal_guard_kernel,
+        stream=11,
+        expected_schedule_epoch=7,
+        expected_restart=1,
+        expected_column=1,
+        maximum_restart_count=4,
+        free_dof_count=513,
+        retained_rank=2,
+        restart_dimension=4,
+        logical_index=1,
+        jacobi_inverse=0x100000,
+        basis_v=0x200000,
+        preconditioned_basis_z=0x300000,
+        coarse_physical_basis_z=0x400000,
+        coarse_operator_basis_az=0x500000,
+        coarse_cholesky_l=0x600000,
+        coarse_rhs=0x700000,
+        coarse_coefficients=0x800000,
+        coarse_status=0x900000,
+        control_state=0xA00000,
+        solve_record=0xB00000,
+        checkpoint_owner_token=None,
+        checkpoint_expected_prior_pending_count=expected_prior_pending_count,
+        checkpoint_audit_descriptor_hash="sha256:" + "3" * 64,
+    )
+
+
+def test_typed_coarse_slot_is_one_recurrence_reservation_and_ledger_row(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recurrence, _rtc, loaded_runtime = _compile_fake(monkeypatch)
+    slot, slot_runtime = _typed_coarse_slot_kernel(monkeypatch, loaded_runtime)
+
+    _launch_typed_coarse_slot(recurrence, slot)
+
+    assert recurrence.pending_stream_count == 1
+    assert slot.pending_accepted_launch_count == 4
+    assert len(slot_runtime.launches) == 4
+    snapshot = recurrence._launch_fence_ledger_state.snapshot()
+    assert snapshot.launch.attempt_count == 1
+    assert snapshot.launch.success_count == 1
+    assert snapshot.launch.rejected_count == 0
+    assert snapshot.launch.ambiguous_count == 0
+    assert snapshot.operation_ordinal == 1
+
+    recurrence.acknowledge_stream_completion(11)
+    assert slot.acknowledge_stream_fence(11) == 4
+    slot.close()
+    recurrence.close()
+
+
+def test_typed_coarse_slot_first_rejection_rolls_back_logical_reservation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recurrence, _rtc, loaded_runtime = _compile_fake(monkeypatch)
+    slot, slot_runtime = _typed_coarse_slot_kernel(monkeypatch, loaded_runtime)
+    slot_runtime.launch_statuses = [7]
+
+    with pytest.raises(Exception) as exc_info:
+        _launch_typed_coarse_slot(recurrence, slot)
+    assert getattr(exc_info.value, "launch_disposition", None) == "rejected"
+    assert recurrence.pending_stream_count == 0
+    assert not slot.pending
+    snapshot = recurrence._launch_fence_ledger_state.snapshot()
+    assert snapshot.launch.attempt_count == 1
+    assert snapshot.launch.rejected_count == 1
+    assert snapshot.launch.ambiguous_count == 0
+
+    slot.close()
+    recurrence.close()
+
+
+def test_typed_coarse_slot_partial_rejection_keeps_one_ambiguous_logical_row(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recurrence, _rtc, loaded_runtime = _compile_fake(monkeypatch)
+    slot, slot_runtime = _typed_coarse_slot_kernel(monkeypatch, loaded_runtime)
+    slot_runtime.launch_statuses = [0, 7]
+
+    with pytest.raises(Exception) as exc_info:
+        _launch_typed_coarse_slot(recurrence, slot)
+    assert getattr(exc_info.value, "launch_disposition", None) == "ambiguous"
+    assert recurrence.pending_stream_count == 1
+    assert slot.pending_accepted_launch_count == 1
+    snapshot = recurrence._launch_fence_ledger_state.snapshot()
+    assert snapshot.launch.attempt_count == 1
+    assert snapshot.launch.rejected_count == 0
+    assert snapshot.launch.ambiguous_count == 1
+
+    recurrence.acknowledge_stream_completion(11)
+    assert slot.acknowledge_stream_fence(11) == 1
+    slot.close()
+    recurrence.close()
+
+
+def test_typed_coarse_slot_and_terminal_guard_share_one_logical_ledger_row(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recurrence, _rtc, loaded_runtime = _compile_fake(monkeypatch)
+    slot, slot_runtime = _typed_coarse_slot_kernel(monkeypatch, loaded_runtime)
+    guard, guard_runtime = _typed_coarse_guard_kernel(
+        monkeypatch,
+        loaded_runtime,
+    )
+
+    _launch_typed_coarse_slot(
+        recurrence,
+        slot,
+        terminal_guard_kernel=guard,
+    )
+
+    assert recurrence.pending_stream_count == 1
+    assert slot.pending_accepted_launch_count == 4
+    assert guard.pending_accepted_launch_count == 1
+    assert len(slot_runtime.launches) == 4
+    assert len(guard_runtime.launches) == 1
+    assert (
+        guard_runtime.launches[0]["grid_x"],
+        guard_runtime.launches[0]["block_x"],
+    ) == (1, 1)
+    snapshot = recurrence._launch_fence_ledger_state.snapshot()
+    assert snapshot.launch.attempt_count == 1
+    assert snapshot.launch.success_count == 1
+    assert snapshot.launch.rejected_count == 0
+    assert snapshot.launch.ambiguous_count == 0
+    assert snapshot.operation_ordinal == 1
+
+    recurrence.acknowledge_stream_completion(11)
+    assert slot.acknowledge_stream_fence(11) == 4
+    assert guard.acknowledge_stream_fence(11) == 1
+    guard.close()
+    slot.close()
+    recurrence.close()
+
+
+@pytest.mark.parametrize(
+    "guard_outcome",
+    (7, RuntimeError("native guard boundary")),
+)
+def test_terminal_guard_failure_after_slot_acceptance_is_one_ambiguous_row(
+    monkeypatch: pytest.MonkeyPatch,
+    guard_outcome: int | BaseException,
+) -> None:
+    recurrence, _rtc, loaded_runtime = _compile_fake(monkeypatch)
+    slot, _slot_runtime = _typed_coarse_slot_kernel(monkeypatch, loaded_runtime)
+    guard, guard_runtime = _typed_coarse_guard_kernel(
+        monkeypatch,
+        loaded_runtime,
+    )
+    guard_runtime.launch_statuses = [guard_outcome]
+
+    with pytest.raises(HipRtcFgmresV2Error) as exc_info:
+        _launch_typed_coarse_slot(
+            recurrence,
+            slot,
+            terminal_guard_kernel=guard,
+        )
+    assert exc_info.value.code == (
+        "hip_rtc_fgmres_v2_typed_coarse_terminal_guard_failed"
+    )
+    assert exc_info.value.launch_disposition == "ambiguous"
+    assert recurrence.pending_stream_count == 1
+    assert slot.pending_accepted_launch_count == 4
+    assert guard.pending == isinstance(guard_outcome, BaseException)
+    snapshot = recurrence._launch_fence_ledger_state.snapshot()
+    assert snapshot.launch.attempt_count == 1
+    assert snapshot.launch.success_count == 0
+    assert snapshot.launch.rejected_count == 0
+    assert snapshot.launch.ambiguous_count == 1
+
+    recurrence.acknowledge_stream_completion(11)
+    assert slot.acknowledge_stream_fence(11) == 4
+    assert guard.acknowledge_stream_fence(11) == 0
+    guard.close()
+    slot.close()
+    recurrence.close()
+
+
+def test_terminal_guard_runtime_mismatch_fails_before_any_reservation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recurrence, _rtc, loaded_runtime = _compile_fake(monkeypatch)
+    slot, slot_runtime = _typed_coarse_slot_kernel(monkeypatch, loaded_runtime)
+    guard, guard_runtime = _typed_coarse_guard_kernel(monkeypatch, object())
+
+    with pytest.raises(HipRtcFgmresV2Error) as exc_info:
+        _launch_typed_coarse_slot(
+            recurrence,
+            slot,
+            terminal_guard_kernel=guard,
+        )
+    assert exc_info.value.launch_disposition == "not_attempted"
+    assert recurrence.pending_stream_count == 0
+    assert slot_runtime.launches == []
+    assert guard_runtime.launches == []
+
+    guard.close()
+    slot.close()
+    recurrence.close()
 
 
 def _compile_sealed_native_runtime_library(

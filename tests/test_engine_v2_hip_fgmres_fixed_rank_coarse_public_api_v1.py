@@ -21,6 +21,21 @@ from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
     fgmres_fixed_rank_coarse_rtc_v1 as coarse_rtc_v1,
 )
 from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
+    fgmres_fixed_rank_coarse_slot_plan_v1 as coarse_slot_plan_v1,
+)
+from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
+    fgmres_fixed_rank_coarse_slot_rtc_v1 as coarse_slot_rtc_v1,
+)
+from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
+    fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1 as coarse_slot_receipt_v1,
+)
+from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
+    fgmres_fixed_rank_coarse_terminal_guard_plan_v1 as coarse_guard_plan_v1,
+)
+from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
+    fgmres_fixed_rank_coarse_terminal_guard_rtc_v1 as coarse_guard_rtc_v1,
+)
+from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
     fgmres_fixed_rank_coarse_recurrence_overlay_v1 as recurrence_overlay_v1,
 )
 
@@ -28,10 +43,15 @@ from structural_analysis.engine_v2.assembly_backend import (  # noqa: E402
 def test_fixed_rank_coarse_public_surface_is_unique_and_identity_preserving() -> None:
     assert len(coarse_plan_v1.__all__) == 16
     assert len(coarse_rtc_v1.__all__) == 8
+    assert len(coarse_slot_plan_v1.__all__) == 12
+    assert len(coarse_slot_rtc_v1.__all__) == 9
+    assert len(coarse_slot_receipt_v1.__all__) == 14
+    assert len(coarse_guard_plan_v1.__all__) == 10
+    assert len(coarse_guard_rtc_v1.__all__) == 7
     assert len(coarse_context_v1.__all__) == 20
     assert len(recurrence_overlay_v1.__all__) == 15
-    assert len(engine_v2.__all__) == 1211
-    assert len(assembly_backend.__all__) == 1019
+    assert len(engine_v2.__all__) == 1263
+    assert len(assembly_backend.__all__) == 1071
     assert len(solvers.__all__) == 66
     assert len(engine_v2.__all__) == len(set(engine_v2.__all__))
     assert len(assembly_backend.__all__) == len(set(assembly_backend.__all__))
@@ -40,6 +60,11 @@ def test_fixed_rank_coarse_public_surface_is_unique_and_identity_preserving() ->
     for module in (
         coarse_plan_v1,
         coarse_rtc_v1,
+        coarse_slot_plan_v1,
+        coarse_slot_rtc_v1,
+        coarse_slot_receipt_v1,
+        coarse_guard_plan_v1,
+        coarse_guard_rtc_v1,
         coarse_context_v1,
         recurrence_overlay_v1,
     ):
@@ -60,6 +85,7 @@ def test_fixed_rank_coarse_schema_and_kernel_source_are_packaged() -> None:
             "hip_fgmres_fixed_rank_coarse_context_v1.schema.json",
             "hip_fgmres_fixed_rank_coarse_application_v1.schema.json",
             "hip_fgmres_fixed_rank_coarse_recurrence_overlay_v1.schema.json",
+            "hip_fgmres_fixed_rank_coarse_slot_recurrence_v1.schema.json",
         )
     )
     kernel = (
@@ -69,10 +95,34 @@ def test_fixed_rank_coarse_schema_and_kernel_source_are_packaged() -> None:
         .joinpath("engine_v2_fgmres_fixed_rank_coarse_v1.hip.cpp")
         .read_text(encoding="utf-8")
     )
+    slot_kernel = (
+        importlib.resources.files(
+            "structural_analysis.engine_v2.assembly_backend.kernels"
+        )
+        .joinpath("engine_v2_fgmres_fixed_rank_coarse_slot_v1.hip.cpp")
+        .read_text(encoding="utf-8")
+    )
+    guard_kernel = (
+        importlib.resources.files(
+            "structural_analysis.engine_v2.assembly_backend.kernels"
+        )
+        .joinpath("engine_v2_fgmres_fixed_rank_coarse_terminal_guard_v1.hip.cpp")
+        .read_text(encoding="utf-8")
+    )
 
     assert "hip-fgmres-fixed-rank-coarse-plan.v1" in schemas[0]
     assert "hip-fgmres-fixed-rank-coarse-context.v1" in schemas[1]
     assert "hip-fgmres-fixed-rank-coarse-application.v1" in schemas[2]
     assert "hip-fgmres-fixed-rank-coarse-recurrence-overlay.v1" in schemas[3]
+    assert "hip-fgmres-fixed-rank-coarse-slot-recurrence.v1" in schemas[4]
     for symbol in coarse_plan_v1.HIP_FGMRES_FIXED_RANK_COARSE_KERNEL_SYMBOLS_V1:
         assert symbol in kernel
+    for symbol in (
+        coarse_slot_plan_v1.HIP_FGMRES_FIXED_RANK_COARSE_SLOT_GATE_SYMBOL_V1,
+        coarse_slot_plan_v1.HIP_FGMRES_FIXED_RANK_COARSE_SLOT_APPLY_SYMBOL_V1,
+    ):
+        assert symbol in slot_kernel
+    assert (
+        coarse_guard_plan_v1.HIP_FGMRES_FIXED_RANK_COARSE_TERMINAL_GUARD_SYMBOL_V1
+        in guard_kernel
+    )

@@ -436,6 +436,9 @@ class HipFgmresLiveCheckpointExecutionContextV1:
         self._fixed_rank_coarse_overlay_token: object | None = None
         self._fixed_rank_coarse_overlay_context: object | None = None
         self._fixed_rank_coarse_overlay_coarse_context: object | None = None
+        self._fixed_rank_coarse_slot_token: object | None = None
+        self._fixed_rank_coarse_slot_context: object | None = None
+        self._fixed_rank_coarse_slot_coarse_context: object | None = None
         self._fixed_rank_coarse_overlay_deferred_poison_detail: str | None = None
         self._closing = False
 
@@ -482,6 +485,11 @@ class HipFgmresLiveCheckpointExecutionContextV1:
                 _fail(
                     "hip_fgmres_live_checkpoint_coarse_overlay_active",
                     "/lifetime/fixed_rank_coarse_overlay",
+                )
+            if self._fixed_rank_coarse_slot_token is not None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_slot_active",
+                    "/lifetime/fixed_rank_coarse_slot",
                 )
             if self._closing:
                 _fail("hip_fgmres_live_checkpoint_cleanup_reentrant", "/cleanup")
@@ -613,19 +621,44 @@ class HipFgmresLiveCheckpointExecutionContextV1:
         *,
         overlay_token: object | None = None,
         overlay_context: object | None = None,
+        slot_token: object | None = None,
+        slot_context: object | None = None,
         pending_operation_bounds: tuple[int, int] = (0, 0),
     ) -> _HipFgmresFixedRankCoarseParentAuthorityV1:
         """Issue the exact parent-three projection for one live coarse child."""
 
         with self._queue_lock:
             self._require_fixed_rank_coarse_child(token, child_context)
-            if overlay_token is None and overlay_context is None:
+            if (
+                overlay_token is None
+                and overlay_context is None
+                and slot_token is None
+                and slot_context is None
+            ):
                 self._validate_authority()
-            elif overlay_token is not None and overlay_context is not None:
+            elif (
+                overlay_token is not None
+                and overlay_context is not None
+                and slot_token is None
+                and slot_context is None
+            ):
                 self._require_fixed_rank_coarse_overlay(
                     overlay_token,
                     overlay_context,
                 )
+                _context_validate_authority_common(
+                    self,
+                    canonical_child_token=None,
+                    pending_operation_bounds=pending_operation_bounds,
+                    force_leased_pending_snapshot=True,
+                )
+            elif (
+                slot_token is not None
+                and slot_context is not None
+                and overlay_token is None
+                and overlay_context is None
+            ):
+                self._require_fixed_rank_coarse_slot(slot_token, slot_context)
                 _context_validate_authority_common(
                     self,
                     canonical_child_token=None,
@@ -730,6 +763,10 @@ class HipFgmresLiveCheckpointExecutionContextV1:
                 self._fixed_rank_coarse_overlay_token is not None
                 and self._fixed_rank_coarse_overlay_context is not None
                 and self._fixed_rank_coarse_overlay_coarse_context is child_context
+            ) or (
+                self._fixed_rank_coarse_slot_token is not None
+                and self._fixed_rank_coarse_slot_context is not None
+                and self._fixed_rank_coarse_slot_coarse_context is child_context
             ):
                 # The integrated recurrence owners still need an unpoisoned
                 # semantic parent long enough to return their exact leases.
@@ -787,6 +824,8 @@ class HipFgmresLiveCheckpointExecutionContextV1:
                 or self._closing
                 or self._fixed_rank_coarse_overlay_token is not None
                 or self._fixed_rank_coarse_overlay_context is not None
+                or self._fixed_rank_coarse_slot_token is not None
+                or self._fixed_rank_coarse_slot_context is not None
                 or coarse_context is not self._fixed_rank_coarse_child_context
             ):
                 _fail(
@@ -915,6 +954,164 @@ class HipFgmresLiveCheckpointExecutionContextV1:
             self._fixed_rank_coarse_overlay_token = None
             self._fixed_rank_coarse_overlay_context = None
             self._fixed_rank_coarse_overlay_coarse_context = None
+
+    def _reserve_fixed_rank_coarse_slot(
+        self,
+        token: object,
+        slot_context: object,
+        coarse_context: object,
+    ) -> object:
+        """Register one exact Jacobi-replacing typed coarse-slot route."""
+
+        if type(token) is not object or slot_context is None or coarse_context is None:
+            _fail(
+                "hip_fgmres_live_checkpoint_coarse_slot_token_invalid",
+                "/lifetime/fixed_rank_coarse_slot",
+            )
+        with self._queue_lock:
+            if (
+                self._closed
+                or self._closing
+                or self._fixed_rank_coarse_slot_token is not None
+                or self._fixed_rank_coarse_slot_context is not None
+                or self._fixed_rank_coarse_overlay_token is not None
+                or self._fixed_rank_coarse_overlay_context is not None
+                or coarse_context is not self._fixed_rank_coarse_child_context
+            ):
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_slot_unavailable",
+                    "/lifetime/fixed_rank_coarse_slot",
+                )
+            self._validate_authority()
+            self._fixed_rank_coarse_slot_token = token
+            self._fixed_rank_coarse_slot_context = slot_context
+            self._fixed_rank_coarse_slot_coarse_context = coarse_context
+            return token
+
+    def _require_fixed_rank_coarse_slot(
+        self,
+        token: object,
+        slot_context: object,
+    ) -> None:
+        with self._queue_lock:
+            if (
+                token is not self._fixed_rank_coarse_slot_token
+                or slot_context is not self._fixed_rank_coarse_slot_context
+                or self._fixed_rank_coarse_slot_coarse_context
+                is not self._fixed_rank_coarse_child_context
+                or self._closed
+                or self._closing
+            ):
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_slot_token_invalid",
+                    "/lifetime/fixed_rank_coarse_slot",
+                )
+
+    def _enqueue_fixed_rank_coarse_slot_instead_of_jacobi(
+        self,
+        *,
+        phase: str,
+        owner: object,
+        expected_schedule_epoch: int,
+        expected_restart: int,
+        expected_column: int,
+        logical_index: int,
+        audit_descriptor_hash: str,
+        expected_prior_pending_count: int | None,
+    ) -> bool:
+        """Replace one Jacobi row when an exact typed-slot route is active."""
+
+        with self._queue_lock:
+            slot = self._fixed_rank_coarse_slot_context
+            token = self._fixed_rank_coarse_slot_token
+            if slot is None and token is None:
+                return False
+            if slot is None or token is None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_slot_invalid",
+                    "/lifetime/fixed_rank_coarse_slot",
+                )
+            self._require_fixed_rank_coarse_slot(token, slot)
+        slot._enqueue_instead_of_jacobi(  # type: ignore[attr-defined]
+            token,
+            self,
+            phase=phase,
+            owner=owner,
+            expected_schedule_epoch=expected_schedule_epoch,
+            expected_restart=expected_restart,
+            expected_column=expected_column,
+            logical_index=logical_index,
+            audit_descriptor_hash=audit_descriptor_hash,
+            expected_prior_pending_count=expected_prior_pending_count,
+        )
+        return True
+
+    def _acknowledge_fixed_rank_coarse_slot_fence(
+        self,
+        *,
+        phase: str,
+        owner: object,
+    ) -> int:
+        """Forward one observed recurrence fence to the typed-slot owner."""
+
+        with self._queue_lock:
+            slot = self._fixed_rank_coarse_slot_context
+            token = self._fixed_rank_coarse_slot_token
+            if slot is None and token is None:
+                return 0
+            if slot is None or token is None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_slot_invalid",
+                    "/lifetime/fixed_rank_coarse_slot",
+                )
+            self._require_fixed_rank_coarse_slot(token, slot)
+        return int(
+            slot._acknowledge_parent_fence(  # type: ignore[attr-defined]
+                token,
+                self,
+                phase=phase,
+                owner=owner,
+            )
+        )
+
+    def _publish_fixed_rank_coarse_slot_global_receipt(
+        self,
+        *,
+        owner: object,
+        receipt: object,
+    ) -> None:
+        """Bind the terminal global recurrence receipt to the typed route."""
+
+        with self._queue_lock:
+            slot = self._fixed_rank_coarse_slot_context
+            token = self._fixed_rank_coarse_slot_token
+            if slot is None and token is None:
+                return
+            if slot is None or token is None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_slot_invalid",
+                    "/lifetime/fixed_rank_coarse_slot",
+                )
+            self._require_fixed_rank_coarse_slot(token, slot)
+        slot._bind_global_recurrence_receipt(  # type: ignore[attr-defined]
+            token,
+            self,
+            owner=owner,
+            receipt=receipt,
+        )
+
+    def _release_fixed_rank_coarse_slot(
+        self,
+        token: object,
+        slot_context: object,
+    ) -> None:
+        """Release the typed route after all physical work is fenced."""
+
+        with self._queue_lock:
+            self._require_fixed_rank_coarse_slot(token, slot_context)
+            self._fixed_rank_coarse_slot_token = None
+            self._fixed_rank_coarse_slot_context = None
+            self._fixed_rank_coarse_slot_coarse_context = None
 
     def _adopt_allocation_owner(self, owner: HipAllocationOwnerV1 | None) -> None:
         if owner is None:
