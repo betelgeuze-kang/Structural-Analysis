@@ -15,6 +15,8 @@ PR A는 동결된 source-quarry에서 Engine v2의 최소 코어 계약을 curre
 - strict Draft 2020-12 `ModelIR v2` schema와 의미 검증
 - backend-neutral `ExecutionPlan v1` topology/CSR/operator binding
 - immutable `StateIR v1` trial/commit/rollback lifecycle
+- legacy public input → v2 core → future result/diagnostic → legacy public output의
+  단방향 outer-boundary adapter와 authority 비승격 원칙
 - unknown-field, exact scalar type, stale hash, mutable-array fail-closed gate
 - core source의 backend/solver/later-result import를 차단하는 AST dependency lint
 
@@ -54,6 +56,7 @@ StateIR v1
 - ResultIR/DiagnosticIR 타입과 결과 권한
 - HIP runtime, kernel, device allocation 또는 hardware provenance
 - AI proposal/runtime과 상용 capability 승격
+- legacy input migration 또는 v1 API/Viewer output adapter의 실제 구현
 
 따라서 이 PR의 PASS는 schema와 lifecycle의 완결성만 의미한다. 수치 정확도,
 solver convergence, CPU/HIP parity, O(N), speedup 또는 commercial readiness의

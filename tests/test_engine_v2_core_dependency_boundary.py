@@ -14,6 +14,12 @@ ALLOWED_INTERNAL_PREFIXES = (
     "structural_analysis.engine_v2.contracts",
     "structural_analysis.model_ir",
 )
+FORBIDDEN_LEGACY_PREFIXES = (
+    "structural_analysis.api",
+    "structural_analysis.model",
+    "structural_analysis.reporting",
+    "structural_analysis.results",
+)
 FORBIDDEN_FRAGMENTS = (
     ".assembly_backend",
     ".backends",
@@ -57,6 +63,11 @@ def test_pr_a_core_import_graph_is_backend_and_solver_neutral() -> None:
                     ALLOWED_INTERNAL_PREFIXES
                 ):
                     violations.append(f"{path}: non-core internal dependency {name}")
+                if any(
+                    name == prefix or name.startswith(f"{prefix}.")
+                    for prefix in FORBIDDEN_LEGACY_PREFIXES
+                ):
+                    violations.append(f"{path}: legacy public API dependency {name}")
                 if any(fragment in name.lower() for fragment in FORBIDDEN_FRAGMENTS):
                     violations.append(f"{path}: later-PR dependency {name}")
 

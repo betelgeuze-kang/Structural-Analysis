@@ -18,6 +18,30 @@ canonical v1은 다수 entity를 `list[dict]`로 보존하고 model, solver opti
 - unknown field는 거부하고 확장은 namespaced `extensions` 안에서만 허용한다.
 - solver tolerance, device pointer, HIP stream, 임시 파일경로는 ModelIR에 넣지 않는다.
 
+### 기존 public API adapter 방향
+
+PR A는 adapter 구현보다 먼저 의존성과 권한의 방향을 다음과 같이 고정한다.
+
+```text
+legacy public model/input API
+  -> outer-boundary input adapter
+  -> ModelIR v2 -> ExecutionPlan v1 -> StateIR v1
+
+NumericalResultIR / DiagnosticIR  # PR E 이후에만 존재
+  -> outer-boundary output adapter
+  -> legacy public result API / Viewer
+```
+
+- Engine v2 core는 legacy `api`, `model`, `results`, `reporting` 또는 Viewer package를
+  import하지 않는다. Adapter가 core에 의존하며 역방향 의존은 금지한다.
+- 입력 adapter는 명시적 migration report와 loss/unsupported disposition을 발행하고
+  legacy 값을 `ModelIR v2`보다 높은 권한으로 승격하지 않는다.
+- 출력 adapter는 PR B의 scale hash와 PR E의 authority axis를 보존하는 투영만
+  수행한다. 누락된 수치·provenance·convergence를 추론하거나 authority를 추가하지
+  않는다.
+- PR A는 이 방향과 비승격 규칙만 고정한다. Legacy input migration과 v1 API/Viewer
+  output adapter 구현은 해당 선행 계약이 merge된 뒤의 별도 PR 범위다.
+
 ## Normative invariants
 
 - canonical units는 `m`, `N`, `kg`, `s`, `rad`다.
@@ -25,6 +49,8 @@ canonical v1은 다수 entity를 `list[dict]`로 보존하고 model, solver opti
 - ID uniqueness, reference integrity, finite number, local-frame handedness, load-combination acyclicity를 semantic validator가 검사한다.
 - blocking unsupported feature가 있으면 schema-valid이어도 analysis-ready가 아니다.
 - schema major version 변경은 명시적 migration report를 요구한다.
+- legacy/public adapter는 outer-boundary에만 존재하며 core import graph에 들어오지
+  않는다.
 
 ## Alternatives considered
 
@@ -41,6 +67,7 @@ adapter와 solver 사이 경계가 명확해지지만 초기 migration/round-tri
 - golden fixture validation
 - unknown field, dangling reference, duplicate ID, cycle, non-finite number rejection
 - deterministic serialization/checksum
+- core import graph가 legacy public API/Viewer에 의존하지 않는 dependency lint
 
 ## Rollback / supersession
 
