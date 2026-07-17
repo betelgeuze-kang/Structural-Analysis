@@ -1,6 +1,6 @@
 # Engine v2 HIP FGMRES Fixed-Rank Coarse HIPRTC Loader v1
 
-Status: v0.2.59 safety-hardened local implementation candidate
+Status: v0.2.59 safety hardening with v0.2.60 internal-owner handoff
 Scope: fixed-source four-symbol loader and current-source local diagnostic
 Promotion: non-promoting process-local observation
 
@@ -10,7 +10,8 @@ This increment loads the v0.2.57 fixed-rank coarse source as one HIPRTC module,
 binds all four exact symbols, and owns their pending same-stream work until an
 external fence is acknowledged. The v0.2.59 revision hardens the launch,
 pointer-range, barrier, and unload boundaries found during adversarial review.
-It is not yet a recurrence-integrated FGMRES child context.
+The additive v0.2.60 allocation-lineage child context consumes this owner, but
+the module is not yet integrated into the canonical recurrence program.
 
 ## Loader contract
 
@@ -65,12 +66,19 @@ The safety-hardened current source is:
 - two-thread serialization: passed without a second native call entering while
   the first application held the module operation lock,
 - reentrant native callback operation: rejected without deadlock,
-- public surfaces: Engine/Assembly/Solvers `1176/984/66`.
+- v0.2.60 compile handoff return-boundary/direct interruption: `2 passed`,
+- v0.2.60 restricted plan/loader/public run: `37 passed, 2 hardware skipped in 12.33s`,
+- v0.2.60 required allocation-lineage live-context `gfx1030` gate:
+  `1 passed in 23.23s`,
+- current public surfaces: Engine/Assembly/Solvers `1196/1004/66`.
 
 Both source-only HIPRTC compilations completed with empty logs. A device-visible
 root namespace then ran the two `gfx1030` hardware tests against these exact
 current bytes: `2 passed in 2.95s`. The loaded current-source identity is
 `sha256:4646cffbb2203dcf7376d18cdb0a5567e8d1be1e9b5cad66f86a70cc1d63ea3d`.
+The separate v0.2.60 live-context gate reused that current source through the
+allocation-lineage parent3/owned6 path and observed `4/4` accepted and fenced
+launches, status `0`, application copy delta `0/0/0`, and exact CPU FP64 parity.
 
 ## Current-source local actual-device observation
 
@@ -122,11 +130,13 @@ v0.2.59 source; the current-source observation above is a separate run.
 ## Claim boundary
 
 This increment establishes current-source compile/load/launch diagnostic
-parity, strict loader contracts, and adversarial lifecycle behavior. It does
-not establish:
+parity, strict loader contracts, and adversarial lifecycle behavior. v0.2.60
+adds a one-shot task-local internal compile handoff so a published kernel is
+recovered across the compiler-return/context-store interruption boundary. The
+loader itself does not establish:
 
-- an allocation-lineage-safe coarse execution context,
-- borrowing of the exact live recurrence-v2 parent allocations,
+- allocation-lineage or exact-parent-delegation authority in its own receipt
+  (the separate v0.2.60 context provides that non-promoting slice),
 - replacement of `APPLY_JACOBI_INDEXED` inside a complete FGMRES solve,
 - binding of device status to canonical terminal failure state,
 - process-wide or full-iteration host-copy zero,
@@ -139,15 +149,10 @@ not establish:
 
 1. Extend the current-source local `gfx1030` run with nonfinite/status
    adversarial device vectors and terminal-state propagation checks.
-2. Add an exact allocation-lineage owner for `Z`, `AZ`, `L`, rank workspace,
-   and device status, with cleanup quarantine for uncertain native outcomes.
-3. Borrow and range-check the canonical parent `jacobi_inverse`, `basis_v`, and
-   `preconditioned_basis_z` capabilities instead of allocating diagnostic
-   stand-ins.
-4. Bind the four-launch result/status to recurrence-v2's control and
+2. Bind the four-launch result/status to recurrence-v2's control and
    solve-record terminal failure path.
-5. Execute an entire FGMRES solve with coarse preconditioning, then audit the
+3. Execute an entire FGMRES solve with coarse preconditioning, then audit the
    full iteration window and compare iteration history/solution/residual against
    the CPU result.
-6. Repeat the same final artifact on external `gfx1100` and preserve signed,
+4. Repeat the same final artifact on external `gfx1100` and preserve signed,
    persistent provenance before any multiarchitecture claim.

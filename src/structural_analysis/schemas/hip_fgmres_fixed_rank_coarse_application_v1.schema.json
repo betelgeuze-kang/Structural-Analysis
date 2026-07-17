@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_fixed_rank_coarse_application_v1.schema.json",
+  "title": "HIP FGMRES fixed-rank coarse application receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "context_id",
+    "sequence",
+    "logical_index",
+    "accepted_launch_count",
+    "application_h2d_copy_count",
+    "application_d2h_copy_count",
+    "application_allocation_count",
+    "application_synchronization_count",
+    "application_csr_apply_count",
+    "promotion_eligible",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-fixed-rank-coarse-application.v1"
+    },
+    "context_id": { "$ref": "#/$defs/hash" },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "logical_index": { "type": "integer", "minimum": 0 },
+    "accepted_launch_count": { "const": 4 },
+    "application_h2d_copy_count": { "const": 0 },
+    "application_d2h_copy_count": { "const": 0 },
+    "application_allocation_count": { "const": 0 },
+    "application_synchronization_count": { "const": 0 },
+    "application_csr_apply_count": { "const": 0 },
+    "promotion_eligible": { "const": false },
+    "receipt_hash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

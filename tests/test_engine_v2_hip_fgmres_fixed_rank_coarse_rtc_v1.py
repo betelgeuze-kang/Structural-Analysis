@@ -307,6 +307,70 @@ def test_rejected_unload_remains_safely_retryable(
     assert kernel.unload_disposition == "terminal"
 
 
+def test_task_local_compile_handoff_preserves_return_boundary_owner(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = _Runtime()
+    kernel = _kernel(monkeypatch, runtime)
+
+    def fake_compile_impl(
+        _loaded_runtime: object,
+        _architecture: str,
+        _hiprtc_library: object,
+        *,
+        _handoff: object,
+    ) -> HipRtcFgmresFixedRankCoarseKernelV1:
+        _handoff.publish(kernel)  # type: ignore[attr-defined]
+        return kernel
+
+    monkeypatch.setattr(rtc_module, "_compile_impl", fake_compile_impl)
+    handoff = rtc_module._HipRtcFgmresFixedRankCoarseKernelHandoffV1()
+
+    def interrupted_compiler(*args: object) -> object:
+        compiled = compile_hip_rtc_fgmres_fixed_rank_coarse_kernel_v1(*args)
+        assert compiled is kernel
+        raise KeyboardInterrupt("after compiler return")
+
+    with pytest.raises(KeyboardInterrupt, match="after compiler return"):
+        rtc_module._compile_fixed_rank_coarse_with_handoff_v1(
+            interrupted_compiler,
+            handoff,
+            object(),
+            "gfx1030",
+            None,
+        )
+    assert handoff.kernel is kernel
+    assert not kernel.closed and runtime.unloads == 0
+    kernel.close()
+    assert runtime.unloads == 1
+
+
+def test_direct_compile_handoff_closes_published_owner_on_interruption(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    runtime = _Runtime()
+    kernel = _kernel(monkeypatch, runtime)
+
+    def interrupted_compile_impl(
+        _loaded_runtime: object,
+        _architecture: str,
+        _hiprtc_library: object,
+        *,
+        _handoff: object,
+    ) -> object:
+        _handoff.publish(kernel)  # type: ignore[attr-defined]
+        raise KeyboardInterrupt("after kernel publication")
+
+    monkeypatch.setattr(rtc_module, "_compile_impl", interrupted_compile_impl)
+    with pytest.raises(KeyboardInterrupt, match="after kernel publication"):
+        compile_hip_rtc_fgmres_fixed_rank_coarse_kernel_v1(
+            object(),
+            "gfx1030",
+        )
+    assert kernel.closed
+    assert runtime.unloads == 1
+
+
 def test_stream_change_and_binding_mutation_fail_closed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

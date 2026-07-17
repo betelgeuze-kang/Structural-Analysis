@@ -332,6 +332,42 @@ class HipFgmresLiveCheckpointContextOpenResultV1:
         return self.context is not None and self.receipt.status == "context_ready"
 
 
+@dataclass(frozen=True, slots=True, repr=False, eq=False)
+class _HipFgmresFixedRankCoarseParentAuthorityV1:
+    """Non-serializable authority for one exact live coarse child.
+
+    The live checkpoint context already owns the exclusive allocation-registry
+    borrow for ``jacobi_inverse``, ``basis_v``, and
+    ``preconditioned_basis_z``.  A coarse child therefore receives a semantic
+    delegation of those exact capabilities instead of attempting an invalid
+    second registry borrow.
+    """
+
+    live_context: HipFgmresLiveCheckpointExecutionContextV1
+    child_context: object
+    child_token: object
+    child_epoch: int
+    live_context_id: str
+    live_opening_receipt_hash: str
+    recurrence_plan: HipFgmresRecurrencePlanV2
+    source_plan: HipFgmresPlanV1
+    runtime: object
+    loaded_runtime: object
+    stream: object
+    architecture: str
+    device_ordinal: int
+    allocation_owner: HipAllocationOwnerV1
+    allocation_runtime_domain: object
+    allocation_runtime_domain_id: str
+    parent_group_lease: HipAllocationBorrowLeaseV1
+    source_capabilities: tuple[
+        HipAllocationCapabilityV1,
+        HipAllocationCapabilityV1,
+        HipAllocationCapabilityV1,
+    ]
+    actual_backend: Literal["hip", "test_double"]
+
+
 @dataclass(slots=True)
 class _OrphanCleanup:
     lease: HipAllocationOrphanLeaseV1
@@ -394,6 +430,9 @@ class HipFgmresLiveCheckpointExecutionContextV1:
         self._semantic_released = False
         self._canonical_predecessor_child_token: object | None = None
         self._canonical_predecessor_child_terminal = False
+        self._fixed_rank_coarse_child_token: object | None = None
+        self._fixed_rank_coarse_child_context: object | None = None
+        self._fixed_rank_coarse_child_epoch = 0
         self._closing = False
 
     @property
@@ -429,6 +468,11 @@ class HipFgmresLiveCheckpointExecutionContextV1:
                 _fail(
                     "hip_fgmres_live_checkpoint_canonical_child_active",
                     "/lifetime/canonical_predecessor_child",
+                )
+            if self._fixed_rank_coarse_child_token is not None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_child_active",
+                    "/lifetime/fixed_rank_coarse_child",
                 )
             if self._closing:
                 _fail("hip_fgmres_live_checkpoint_cleanup_reentrant", "/cleanup")
@@ -488,6 +532,173 @@ class HipFgmresLiveCheckpointExecutionContextV1:
                 )
             self._canonical_predecessor_child_terminal = True
             self._canonical_predecessor_child_token = None
+
+    def _reserve_fixed_rank_coarse_child(
+        self,
+        token: object,
+        child_context: object,
+    ) -> object:
+        """Reserve one non-owning coarse child beside the recurrence chain."""
+
+        if type(token) is not object or child_context is None:
+            _fail(
+                "hip_fgmres_live_checkpoint_coarse_child_token_invalid",
+                "/lifetime/fixed_rank_coarse_child",
+            )
+        with self._queue_lock:
+            if (
+                self._closed
+                or self._closing
+                or self._fixed_rank_coarse_child_token is not None
+                or self._fixed_rank_coarse_child_context is not None
+            ):
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_child_unavailable",
+                    "/lifetime/fixed_rank_coarse_child",
+                )
+            self._validate_authority()
+            self._fixed_rank_coarse_child_epoch += 1
+            self._fixed_rank_coarse_child_token = token
+            self._fixed_rank_coarse_child_context = child_context
+            return token
+
+    def _require_fixed_rank_coarse_child(
+        self,
+        token: object,
+        child_context: object,
+    ) -> None:
+        with self._queue_lock:
+            if (
+                token is not self._fixed_rank_coarse_child_token
+                or child_context is not self._fixed_rank_coarse_child_context
+            ):
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_child_token_invalid",
+                    "/lifetime/fixed_rank_coarse_child",
+                )
+            if self._closed or self._closing:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_child_unavailable",
+                    "/lifetime/fixed_rank_coarse_child",
+                )
+
+    def _fixed_rank_coarse_child_token_is_active(
+        self,
+        token: object,
+        child_context: object,
+    ) -> bool:
+        """Return whether the exact process-local child lease is still active."""
+
+        with self._queue_lock:
+            return (
+                token is self._fixed_rank_coarse_child_token
+                and child_context is self._fixed_rank_coarse_child_context
+            )
+
+    def _fixed_rank_coarse_child_authority(
+        self,
+        token: object,
+        child_context: object,
+    ) -> _HipFgmresFixedRankCoarseParentAuthorityV1:
+        """Issue the exact parent-three projection for one live coarse child."""
+
+        with self._queue_lock:
+            self._require_fixed_rank_coarse_child(token, child_context)
+            self._validate_authority()
+            if (
+                self._recurrence_plan is None
+                or self._source_plan is None
+                or self._runtime is None
+                or self._loaded_runtime is None
+                or self._stream is None
+                or self._architecture is None
+                or self._device_ordinal is None
+                or self._allocation_owner is None
+                or self._group_lease is None
+                or self._opening_receipt is None
+                or self._actual_backend not in {"hip", "test_double"}
+            ):
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_authority_invalid",
+                    "/lifetime/fixed_rank_coarse_child/authority",
+                )
+            try:
+                capabilities = (
+                    self._group_capabilities[2],
+                    self._owned_capabilities["basis_v"],
+                    self._owned_capabilities["preconditioned_basis_z"],
+                )
+            except (IndexError, KeyError) as exc:
+                raise HipFgmresLiveCheckpointContextV1Error(
+                    "hip_fgmres_live_checkpoint_coarse_authority_invalid",
+                    "/lifetime/fixed_rank_coarse_child/authority/capabilities",
+                    type(exc).__name__,
+                ) from exc
+            if tuple(row.role for row in capabilities) != (
+                "jacobi_inverse",
+                "basis_v",
+                "preconditioned_basis_z",
+            ):
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_authority_invalid",
+                    "/lifetime/fixed_rank_coarse_child/authority/capabilities",
+                )
+            for capability in capabilities:
+                validate_hip_allocation_capability_v1(capability)
+            return _HipFgmresFixedRankCoarseParentAuthorityV1(
+                live_context=self,
+                child_context=child_context,
+                child_token=token,
+                child_epoch=self._fixed_rank_coarse_child_epoch,
+                live_context_id=self._context_id,
+                live_opening_receipt_hash=(self._opening_receipt.context_receipt_hash),
+                recurrence_plan=self._recurrence_plan,
+                source_plan=self._source_plan,
+                runtime=self._runtime,
+                loaded_runtime=self._loaded_runtime,
+                stream=self._stream,
+                architecture=self._architecture,
+                device_ordinal=self._device_ordinal,
+                allocation_owner=self._allocation_owner,
+                allocation_runtime_domain=capabilities[0].runtime_domain,
+                allocation_runtime_domain_id=capabilities[0].runtime_domain_id,
+                parent_group_lease=self._group_lease,
+                source_capabilities=capabilities,
+                actual_backend=self._actual_backend,
+            )
+
+    def _release_fixed_rank_coarse_child(
+        self,
+        token: object,
+        child_context: object,
+    ) -> None:
+        """Release the semantic delegation after the coarse child is terminal."""
+
+        with self._queue_lock:
+            self._require_fixed_rank_coarse_child(token, child_context)
+            self._fixed_rank_coarse_child_token = None
+            self._fixed_rank_coarse_child_context = None
+
+    def _poison_fixed_rank_coarse_child(
+        self,
+        token: object,
+        child_context: object,
+        detail: str,
+    ) -> None:
+        """Propagate uncertain same-stream coarse work to the solver chain."""
+
+        with self._queue_lock:
+            self._require_fixed_rank_coarse_child(token, child_context)
+            if self._parent is None or self._source_apply is None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_authority_invalid",
+                    "/lifetime/fixed_rank_coarse_child/authority",
+                )
+            self._parent._poison_fgmres_solver_child(
+                self._token,
+                self._source_apply,
+                _detail(detail),
+            )
 
     def _adopt_allocation_owner(self, owner: HipAllocationOwnerV1 | None) -> None:
         if owner is None:

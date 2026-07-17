@@ -3,7 +3,7 @@
 - Status: Phase 0 planning and implementation tracker
 - Authority: [Engine v2 master roadmap](structural-solver-engine-v2-master-roadmap.md)
 - Machine-readable source: [`validation/capabilities/engine_v2_capability_matrix.json`](../validation/capabilities/engine_v2_capability_matrix.json)
-- Current local candidate milestone: v0.2.59 HIP FGMRES fixed-rank coarse safety hardening
+- Current local candidate milestone: v0.2.60 HIP FGMRES fixed-rank coarse allocation-lineage execution context
 - `origin/main` inclusion은 주장하지 않음
 - Claim boundary: 이 matrix는 미래 목표와 구현상태를 추적하며 현재 release readiness를 승격하지 않는다.
 
@@ -16,6 +16,26 @@ prototype 또는 legacy asset이 존재해도 `promotion_state=non_promoting`이
 
 ## 현재 요약
 
+v0.2.60은 live checkpoint parent가 이미 독점 borrow 중인 `jacobi_inverse`,
+`basis_v`, `preconditioned_basis_z` 세 capability를 중복 registry borrow 없이 exact
+semantic child로 위임하고, 별도 peer allocation-lineage owner가 coarse `Z/AZ/L`,
+`rhs/coefficients/status` 여섯 capability를 소유하는 실행 context를 추가한다. Static
+H2D `3`회와 setup fence `1`회 뒤 ready가 되며 application 경계는 launch `4`,
+H2D/D2H/allocation/sync/additional CSR apply `0`이다. Partial launch, fence 실패,
+known-not-freed, uncertain unload, second-child/parent-close 경쟁과 internal compiler
+return/STORE 중단을 fail-closed로 회수한다. Context/application receipt는 pointer-free
+strict schema이며 공개 표면은 Engine/Assembly/Solvers `1196/1004/66`이다. 현재 증거는
+injected test double 수명주기와 required local `gfx1030` live-context 실행이다. Context
+`24 passed in 190.73s`, plan/loader/public `37 passed, 2 hardware skipped in 12.33s`,
+capability `19 passed in 0.24s`, adjacent live-checkpoint context
+`42 passed in 203.57s`, adjacent RTC/public API `45 passed in 50.81s`, hardware
+`1 passed in 23.23s`를 통과했다. 실제
+`gfx1030` 관찰은 `F=12`, `k=2`, owned `452` bytes, static H2D `3/416` bytes,
+setup+application fence `2`, launch accepted/acknowledged `4/4`, status `0`, application
+copy delta `0/0/0`, CPU exact FP64 equality다. Canonical recurrence row 교체, device
+status terminal 결속, full solve/iteration host-copy-zero, independent external `gfx1100`,
+AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 미증명이다.
+
 v0.2.59는 fixed-rank coarse RTC의 full-extent pointer range·alignment·interior-overlap
 검증, native launch 전 uncertain pre-arm, uncertain unload 재호출 금지, dot barrier 전
 block-uniform status gate, i32 상한에서도 정의된 apply grid를 추가했다. Current source
@@ -26,13 +46,13 @@ device-visible root namespace의 current 37-case suite는 두 hardware case와 a
 two-thread serialization·reentrant fail-closed case를 포함해 `37 passed in 13.58s`였다. Hardware 두
 항목의 별도 current-source 실행은 `2 passed in 2.95s`였다. Additive reentrant
 callback 회귀도 deadlock 없이 fail-closed했다. Public symbols는
-Engine/Assembly/Solvers `1176/984/66`이다.
+당시 Engine/Assembly/Solvers `1176/984/66`이었다.
 Current-source local `gfx1030` identity는 `sha256:4646cffb…ea3d`이며 `4/4`
 launch, status `0`, application copy delta `0/0/0`, CPU exact FP64 parity를 관찰했다.
 v0.2.58의 local `gfx1030` 수치 관찰은 superseded source `sha256:feaad0d5…e50d`에
-결박되므로 current-source 실행/parity 증거로 재사용하지 않는다. Allocation-lineage
-context, live parent borrow, FGMRES recurrence 통합,
-external `gfx1100`, O(N)/speedup/promotion/commercial은 미증명이다.
+결박되므로 current-source 실행/parity 증거로 재사용하지 않는다. v0.2.60이
+allocation-lineage context와 exact live parent delegation을 추가했지만 FGMRES recurrence
+통합, external `gfx1100`, O(N)/speedup/promotion/commercial은 계속 미증명이다.
 
 v0.2.57은 CPU fixed-rank coarse artifact의 `Z/AZ/L`과 exact `HipFgmresPlanV1`을
 결속하고 parent 할당 `3`개를 borrow하며 additive buffer `6`개를 소유하는
@@ -138,7 +158,8 @@ required는 `1 passed, 1 failed in 1.76s`였고 실패 이유는
 
 | Capability | Phase | Implementation | Promotion | 현재 경계 |
 | --- | --- | --- | --- | --- |
-| HIP FGMRES fixed-rank coarse HIPRTC loader v1 v0.2.59 | Phase 0 | implemented | non_promoting | Package-owned fixed source의 exact 4-symbol/identity와 same-stream launch/fence 수명을 유지하면서 full pointer-range·alignment·overlap, launch uncertainty pre-arm, nonretryable uncertain unload, serialized/nonreentrant module operations, block-uniform dot status gate, overflow-safe apply grid를 추가했다. Current source/ABI `d7a20e80…f5912`/`d79dbc97…1191`은 `gfx1030`/`gfx1100` compile을 통과했다. Restricted current run은 `35 passed, 2 hardware skipped in 12.39s`; device-visible root run은 `37 passed in 13.58s`, 별도 hardware run은 `2 passed in 2.95s`였다. Current-source local `gfx1030` identity `4646cffb…ea3d`, `4/4`, status `0`, copy delta `0/0/0`, CPU exact FP64 parity를 기록했다. v0.2.58 관찰은 superseded source에만 유효하다. Allocation lineage, live parent borrow, recurrence/terminal-state 통합, full-iteration host-copy-zero, external `gfx1100`, O(N), speedup, signed evidence, promotion/commercial은 false 또는 미검증이다. |
+| HIP FGMRES fixed-rank coarse execution context v1 v0.2.60 | Phase 0 | implemented | non_promoting | Live checkpoint parent의 exact 3 capability를 중복 registry borrow 없이 semantic delegation하고 peer allocation-lineage owner가 coarse 6개 allocation을 소유한다. `Z/AZ/L` static H2D `3`과 setup fence `1` 뒤 ready가 되며 application은 exact launch `4`, H2D/D2H/allocation/sync/additional CSR apply `0`이다. Fence/known-not-freed 재시도, uncertain unload quarantine, second-child/parent-close exclusion, internal compiler return/STORE handoff, pointer-free strict context/application schema를 구현했다. Context `24 passed in 190.73s`, plan/loader/public `37 passed, 2 hardware skipped in 12.33s`, capability `19 passed in 0.24s`, adjacent live-checkpoint context `42 passed in 203.57s`, adjacent RTC/public API `45 passed in 50.81s`, required local `gfx1030` hardware `1 passed in 23.23s`다. Actual context 관찰은 `F=12`, `k=2`, owned `452` bytes, static H2D `3/416` bytes, fence `2`, launch `4/4`, status `0`, copy delta `0/0/0`, CPU exact FP64 equality다. Recurrence row 교체, terminal status 결속, full solve/iteration host-copy-zero, independent external `gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 미증명이다. |
+| HIP FGMRES fixed-rank coarse HIPRTC loader v1 v0.2.59/v0.2.60 handoff | Phase 0 | implemented | non_promoting | Package-owned fixed source의 exact 4-symbol/identity와 same-stream launch/fence 수명을 유지하면서 full pointer-range·alignment·overlap, launch uncertainty pre-arm, nonretryable uncertain unload, serialized/nonreentrant module operations, block-uniform dot status gate, overflow-safe apply grid를 추가했다. v0.2.60은 internal compile owner의 one-shot task-local return/STORE handoff를 더했다. Current source/ABI `d7a20e80…f5912`/`d79dbc97…1191`은 `gfx1030`/`gfx1100` compile을 통과했다. v0.2.59 restricted/current hardware 검증은 `35 passed, 2 hardware skipped`, device-visible `37 passed`, 별도 hardware `2 passed`였고 local `gfx1030` identity `4646cffb…ea3d`, `4/4`, status `0`, copy delta `0/0/0`, CPU exact FP64 parity를 기록했다. v0.2.58 관찰은 superseded source에만 유효하다. Loader 자체는 recurrence/terminal-state 통합, full-iteration host-copy-zero, external `gfx1100`, O(N), speedup, signed evidence, promotion/commercial 권한을 발행하지 않는다. |
 | HIP FGMRES fixed-rank coarse application plan/source v1 v0.2.57 | Phase 0 | implemented | contract_only | CPU coarse artifact과 exact FGMRES plan을 replay하고 parent borrow `3`, owned extent `6`, static H2D `3`, same-stream launch `4`를 고정한다. Application 경계의 H2D/D2H/allocation/sync/additional CSR apply와 dense `N×N` projector는 `0`이다. Strict plan/schema/source `16 passed in 12.05s`, package source `gfx1030`/`gfx1100` HIPRTC compile을 통과했다. Live context, actual execution at this milestone, recurrence status binding, AMG/DD, mesh-independent iteration, end-to-end O(N), speedup, promotion/commercial은 미증명이다. |
 | HIP FGMRES diagnostic restart TraceIR v1 v0.2.53 | Phase 0 | implemented | contract_only | General-history parity v2의 ordered restart rows를 diagnostic-only TraceIR로 deterministic projection한다. Source receipt/bindings/row hash, CPU/HIP vector hash reference, solution fixed gate와 residual diagnostic gate, 다섯 outward scalar envelope를 보존하고 embedded vector/result array 및 projection 추가 device/D2H/solve/export/state commit/fallback은 0이다. Detached receipt는 standalone provenance가 아니며 attached wrapper도 process-local exact source replay에 한정된다. Exact-resource wheel 포함 final focused `34 passed in 38.76s`, 인접 ResultIR/DiagnosticIR 권한 회귀 `34 passed in 362.33s`, public symbols `1085/912/47`을 확인했다. Current-source actual local `gfx1030` required gate는 3 rows/end `(2,4,5)`, completion D2H `5/5`, trace 추가 device/D2H/solve/export/state commit/fallback 0으로 `1 passed in 103.32s`, peak RSS `358,760 KiB`였다. Trace ID `sha256:567e7df6…6cfe`, receipt `sha256:ccecb0e3…eb48`, source aggregate `sha256:2661f374…deda1`은 전후 동일하다. Final solution/ResultIR/recovery, external `gfx1100`, signed/persistent provenance, process-wide host-copy-zero, end-to-end O(N), speedup, promotion/commercial은 false 또는 미검증이다. |
 | FP64 CSR normwise / FGMRES terminal metric parity v2 v0.2.49 | Phase 0 | implemented | contract_only | Retained v0.2.48 componentwise result를 full replay하고 outward exact-real norm interval과 reverse triangle inequality로 `L2/Linf/scaled-Linf` vector budget을 발행한다. CPU stable-L2와 candidate GPU-tree LASSQ-L2/max-Linf/scaled division을 각 residual에서 재생하고 record-to-interval evaluation error를 더한 total budget으로 terminal record 차이를 caller tolerance 없이 검증한다. Nonzero multiply/divide underflow의 upper bound는 최소 subnormal로 올리도록 v0.2.48 primitive도 보강했다. Legacy v1 schema hash `4da38578…6f050`, fixed `1e-12/1e-8` gate와 terminal/history semantics는 불변이고 migration action은 additive v2다. Focused `14 passed in 9.53s`, componentwise+normwise `34 passed in 14.57s`, legacy/capability cross-check `71 passed in 15.06s`, all-converged adjacent `140 passed in 395.82s (0:06:35)`, capability `13 passed`; actual local RX 6900 XT `gfx1030` 고하중 rotated `10 kN`, 4·5경간 `100 kN` gate는 exact completion D2H 3회, fallback 0으로 `1 passed in 226.25s (0:03:46)`, peak RSS `429,808 KiB`를 기록했다. 최대 ratio는 four-span `0.002952072072072049`, rotated L2 `0.0023069006688603657`; source aggregate `sha256:f88ab168…66dc3`는 전후 동일했다. Single dirty non-release wheel은 `1,427,672` bytes/`270` members, `sha256:da8eeef8…b355ae`, 격리 public symbols `932/746/93/10`이었다. Core actual backend/provenance, restart-history v2, high-load ResultIR/aggregate, formal proof, actual subnormal hardware, external `gfx1100`, signed/persistent evidence, end-to-end O(N), speedup, promotion/commercial은 false 또는 미완료다. |

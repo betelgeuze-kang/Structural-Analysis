@@ -1,7 +1,7 @@
 # Engine v2 HIP FGMRES Fixed-Rank Coarse Application Plan v1
 
-Status: v0.2.57 contract, safety-hardened at v0.2.59
-Scope: fixed-source HIP application plan/source ABI; no live context yet
+Status: v0.2.57 contract, safety-hardened at v0.2.59, consumed by the v0.2.60 live context
+Scope: fixed-source HIP application plan/source ABI; the plan itself owns no live resource
 Promotion: contract-only and non-promoting
 
 ## Purpose
@@ -79,9 +79,10 @@ nonpositive factors, and nonfinite arithmetic. The coarse-dot kernel admits an
 upstream status through one block-uniform shared gate before any barrier.
 Upstream dot/solve failure makes the apply kernel publish NaN rows; a numerical
 failure discovered during apply publishes device status plus at least one
-canonical NaN sentinel without a host read. A live context must still bind this
-status to the canonical FGMRES terminal-state machine rather than treating it
-as a detached diagnostic.
+canonical NaN sentinel without a host read. The v0.2.60 live context owns and
+launches this ABI, but a later recurrence integration must still bind status to
+the canonical FGMRES terminal-state machine rather than treating it as a
+detached diagnostic.
 
 The runtime ABI requires all FP64/u32 pointers to satisfy natural alignment,
 their full derived byte ranges to fit uintptr, and all nine ranges to be
@@ -102,7 +103,7 @@ free-DOF count.
 - deterministic plan replay confirms three parent borrows, six owned extents,
   three static uploads, four application launches, and application transfer
   counts `0/0`
-- Engine/Assembly/Solvers public surfaces are unique at `1176/984/66`; all
+- Current Engine/Assembly/Solvers public surfaces are unique at `1196/1004/66`; all
   `16` plan symbols preserve object identity through both public boundaries,
   and the schema/kernel resources are package-readable
 
@@ -110,7 +111,13 @@ This v0.2.57 plan milestone remains a compile observation. Downstream v0.2.59
 reran the exact safety-hardened source on local `gfx1030` and observed `4/4`
 launches, status `0`, application-window copy deltas `0/0/0`, and exact CPU
 FP64 equality. That diagnostic does not retroactively make this plan a live
-allocation-lineage or recurrence-integration receipt.
+allocation-lineage or recurrence-integration receipt. The additive v0.2.60
+context now provides allocation-lineage ownership and exact parent delegation
+under adversarial test-double verification. Its separate required local
+`gfx1030` gate also opened the live context and observed exact CPU FP64 parity,
+status `0`, and application copy delta `0/0/0`. That downstream process-local
+observation does not retroactively promote this contract-only plan or establish
+recurrence integration.
 
 ## Explicit exclusions
 
@@ -128,9 +135,7 @@ This increment does not establish:
 
 1. Extend the safety-hardened current-source `gfx1030` run with
    nonfinite/status adversarial vectors.
-2. Add an allocation-lineage-safe context that uploads `Z/AZ/L` once, borrows
-   the exact parent allocations, and poisons uncertain launch/cleanup outcomes.
-3. Replace recurrence-v2 `APPLY_JACOBI_INDEXED` in a process-local integrated
+2. Replace recurrence-v2 `APPLY_JACOBI_INDEXED` in a process-local integrated
    path and bind device status to the existing terminal failure state.
-4. Audit the complete application window for H2D/D2H/sync/allocation deltas,
+3. Audit the complete recurrence window for H2D/D2H/sync/allocation deltas,
    then repeat the same artifact on an external `gfx1100` runner.

@@ -1538,7 +1538,8 @@ def test_hip_fgmres_fixed_rank_coarse_plan_and_rtc_stay_non_authoritative() -> N
         "current_source_actual_local_gfx1030_four_of_four_launches_status_zero",
         "current_source_actual_local_gfx1030_application_window_copy_delta_zero",
         "current_source_actual_local_gfx1030_exact_fp64_cpu_parity",
-        "public_symbols_engine1176_assembly984_solvers66_unique",
+        "one_shot_task_local_internal_compile_owner_handoff_across_return_store_interruption",
+        "public_symbols_engine1196_assembly1004_solvers66_unique",
     }.issubset(rtc["supported_scope"])
     assert {
         "allocation_lineage_safe_coarse_execution_context",
@@ -1554,6 +1555,42 @@ def test_hip_fgmres_fixed_rank_coarse_plan_and_rtc_stay_non_authoritative() -> N
         "current_source_actual_local_gfx1030_hardened_fixed_rank_coarse_"
         "diagnostic_nonpromoting_not_allocation_lineage_recurrence_integrated_"
         "or_commercial_solver"
+    )
+
+    context = rows["hip_fgmres_fixed_rank_coarse_execution_context_v1"]
+    assert context["implementation_state"] == "implemented"
+    assert context["promotion_state"] == "non_promoting"
+    assert {
+        "exact_live_checkpoint_parent_semantic_delegation_of_jacobi_inverse_basis_v_and_preconditioned_basis_z",
+        "zero_duplicate_allocation_registry_borrows_for_the_parent_three",
+        "peer_allocation_lineage_owner_with_exact_six_owner_minted_coarse_capabilities",
+        "three_static_z_az_l_h2d_uploads_on_the_exact_parent_stream",
+        "exact_four_launch_same_stream_application",
+        "zero_application_h2d_d2h_allocation_synchronization_and_additional_csr_apply",
+        "one_shot_internal_compile_owner_handoff_across_return_store_interruption",
+        "strict_pointer_free_context_and_application_receipt_schemas",
+        "current_source_actual_local_gfx1030_allocation_lineage_context_open_apply_fence_and_close",
+        "current_source_actual_local_gfx1030_parent3_owned6_static_h2d3_416_bytes_owned452_bytes",
+        "current_source_actual_local_gfx1030_four_of_four_launches_status_zero_and_exact_fp64_cpu_parity",
+        "current_source_actual_local_gfx1030_application_copy_delta_zero_zero_zero",
+        "public_symbols_engine1196_assembly1004_solvers66_unique",
+    }.issubset(context["supported_scope"])
+    assert {
+        "canonical_recurrence_v2_jacobi_replacement",
+        "coarse_device_status_to_terminal_state_machine_binding",
+        "complete_fgmres_solve_using_the_coarse_overlay",
+        "broad_model_or_independent_multiarchitecture_parity_for_this_live_context",
+        "process_wide_or_full_iteration_host_copy_zero",
+        "actual_external_gfx1100_module_load_or_execution",
+        "end_to_end_on_complexity",
+        "performance_or_speedup_claim",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(context["explicit_exclusions"])
+    assert context["claim_level"] == (
+        "allocation_lineage_live_parent_delegated_fixed_rank_coarse_"
+        "application_context_actual_local_gfx1030_nonpromoting_not_recurrence_"
+        "integrated_external_multiarchitecture_or_commercial_solver"
     )
 
 

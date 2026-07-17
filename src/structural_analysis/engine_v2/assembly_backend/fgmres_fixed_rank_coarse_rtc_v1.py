@@ -9,11 +9,13 @@ copy data, synchronize a stream, or integrate the recurrence state machine.
 from __future__ import annotations
 
 import ctypes
+from contextvars import ContextVar, copy_context
 from dataclasses import dataclass, replace
 from functools import wraps
 from pathlib import Path
 import threading
 from typing import Any
+import weakref
 
 from structural_analysis.engine_v2.backends.hip.types import (
     HipRuntimeLibraryIdentity,
@@ -64,6 +66,79 @@ _UINTPTR_MAX = (1 << (8 * ctypes.sizeof(ctypes.c_void_p))) - 1
 _FP64_BYTE_LENGTH = 8
 _U32_BYTE_LENGTH = 4
 _KERNEL_MINT = object()
+
+
+class _HipRtcFgmresFixedRankCoarseKernelHandoffV1:
+    """One-shot strong owner for an internally compiled coarse kernel."""
+
+    __slots__ = ("_kernel", "_lock", "_publication_state", "__weakref__")
+
+    def __init__(self) -> None:
+        self._kernel: HipRtcFgmresFixedRankCoarseKernelV1 | None = None
+        self._lock = threading.RLock()
+        self._publication_state = "empty"
+
+    @property
+    def kernel(self) -> HipRtcFgmresFixedRankCoarseKernelV1 | None:
+        with self._lock:
+            if self._publication_state != "published":
+                return None
+            return self._kernel
+
+    @property
+    def occupied(self) -> bool:
+        with self._lock:
+            return self._publication_state != "empty"
+
+    def publish(self, kernel: HipRtcFgmresFixedRankCoarseKernelV1) -> None:
+        with self._lock:
+            if (
+                self._publication_state != "empty"
+                or self._kernel is not None
+                or type(kernel) is not HipRtcFgmresFixedRankCoarseKernelV1
+                or kernel.closed
+            ):
+                raise HipRtcFgmresFixedRankCoarseV1Error(
+                    "hip_rtc_fgmres_coarse_kernel_handoff_invalid",
+                    "The handoff accepts one exact live coarse kernel.",
+                )
+            self._publication_state = "reserved"
+            try:
+                self._kernel = kernel
+                self._publication_state = "published"
+            except BaseException:
+                self._publication_state = "spent"
+                raise
+
+
+class _HipRtcFgmresFixedRankCoarseKernelHandoffFrameV1:
+    """One-shot weak task-local route that owns no native resource."""
+
+    __slots__ = ("_target_refs",)
+
+    def __init__(
+        self,
+        target: _HipRtcFgmresFixedRankCoarseKernelHandoffV1,
+    ) -> None:
+        self._target_refs = [weakref.ref(target)]
+
+    def claim(self) -> _HipRtcFgmresFixedRankCoarseKernelHandoffV1 | None:
+        try:
+            target_ref = self._target_refs.pop()
+        except IndexError:
+            return None
+        return target_ref()
+
+    def disarm(self) -> None:
+        self._target_refs.clear()
+
+
+_KERNEL_HANDOFF_V1: ContextVar[
+    _HipRtcFgmresFixedRankCoarseKernelHandoffFrameV1 | None
+] = ContextVar(
+    "engine_v2_fgmres_fixed_rank_coarse_kernel_handoff_v1",
+    default=None,
+)
 
 
 def _serialize_kernel_operation(method: Any) -> Any:
@@ -560,7 +635,22 @@ def compile_hip_rtc_fgmres_fixed_rank_coarse_kernel_v1(
     """Compile, load, bind, and identify the package-owned four-symbol source."""
 
     try:
-        return _compile_impl(loaded_runtime, architecture, hiprtc_library)
+        frame = _KERNEL_HANDOFF_V1.get()
+        handoff = None if frame is None else frame.claim()
+        direct_handoff = handoff is None
+        if handoff is None:
+            handoff = _HipRtcFgmresFixedRankCoarseKernelHandoffV1()
+        try:
+            return _compile_impl(
+                loaded_runtime,
+                architecture,
+                hiprtc_library,
+                _handoff=handoff,
+            )
+        except BaseException as primary:
+            if direct_handoff:
+                _recover_direct_compile_handoff_v1(handoff, primary)
+            raise
     except HipRtcFgmresFixedRankCoarseV1Error:
         raise
     except HipRtcError as exc:
@@ -576,11 +666,73 @@ def compile_hip_rtc_fgmres_fixed_rank_coarse_kernel_v1(
         ) from exc
 
 
-def _compile_impl(
+def _recover_direct_compile_handoff_v1(
+    handoff: _HipRtcFgmresFixedRankCoarseKernelHandoffV1,
+    primary: BaseException,
+) -> None:
+    """Close a published owner when a direct compiler call is interrupted."""
+
+    kernel = handoff.kernel
+    if kernel is None or kernel.closed:
+        return
+    try:
+        kernel.close()
+    except BaseException as cleanup:
+        if not isinstance(cleanup, Exception):
+            raise
+        raise HipRtcFgmresFixedRankCoarseV1Error(
+            "hip_rtc_fgmres_coarse_compile_cleanup_failed",
+            "Published coarse kernel cleanup failed after "
+            f"{type(primary).__name__}: {type(cleanup).__name__}.",
+        ) from primary
+
+
+def _compile_fixed_rank_coarse_with_handoff_v1(
+    compiler: Any,
+    handoff: _HipRtcFgmresFixedRankCoarseKernelHandoffV1,
     loaded_runtime: Any,
     architecture: str,
     hiprtc_library: str | Path | None,
 ) -> HipRtcFgmresFixedRankCoarseKernelV1:
+    """Call the public compiler under an isolated one-shot cleanup route."""
+
+    if (
+        not callable(compiler)
+        or type(handoff) is not _HipRtcFgmresFixedRankCoarseKernelHandoffV1
+        or handoff.occupied
+    ):
+        raise HipRtcFgmresFixedRankCoarseV1Error(
+            "hip_rtc_fgmres_coarse_kernel_handoff_invalid",
+            "An exact empty coarse kernel handoff is required.",
+        )
+    frame = _HipRtcFgmresFixedRankCoarseKernelHandoffFrameV1(handoff)
+    isolated_context = copy_context()
+
+    def invoke() -> HipRtcFgmresFixedRankCoarseKernelV1:
+        _KERNEL_HANDOFF_V1.set(frame)
+        return compiler(loaded_runtime, architecture, hiprtc_library)
+
+    try:
+        return isolated_context.run(invoke)
+    finally:
+        frame.disarm()
+
+
+def _compile_impl(
+    loaded_runtime: Any,
+    architecture: str,
+    hiprtc_library: str | Path | None,
+    *,
+    _handoff: _HipRtcFgmresFixedRankCoarseKernelHandoffV1,
+) -> HipRtcFgmresFixedRankCoarseKernelV1:
+    if (
+        type(_handoff) is not _HipRtcFgmresFixedRankCoarseKernelHandoffV1
+        or _handoff.occupied
+    ):
+        raise HipRtcFgmresFixedRankCoarseV1Error(
+            "hip_rtc_fgmres_coarse_kernel_handoff_invalid",
+            "An exact empty coarse kernel handoff is required.",
+        )
     checked_architecture = _validate_architecture(architecture)
     runtime_identity = _runtime_library_identity(loaded_runtime)
     source = _fixed_source()
@@ -647,14 +799,18 @@ def _compile_impl(
             runtime_library=runtime_identity,
             code_object=code_object,
         )
-        return HipRtcFgmresFixedRankCoarseKernelV1(
+        kernel = HipRtcFgmresFixedRankCoarseKernelV1(
             runtime=runtime,
             module=module,
             functions=functions,
             identity=identity,
             _mint=_KERNEL_MINT,
         )
+        _handoff.publish(kernel)
+        return kernel
     except BaseException:
+        if "kernel" in locals() and _handoff.kernel is kernel:
+            raise
         runtime.unload(module)
         raise
 
