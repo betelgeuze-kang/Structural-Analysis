@@ -3,7 +3,7 @@
 - Status: Phase 0 planning and implementation tracker
 - Authority: [Engine v2 master roadmap](structural-solver-engine-v2-master-roadmap.md)
 - Machine-readable source: [`validation/capabilities/engine_v2_capability_matrix.json`](../validation/capabilities/engine_v2_capability_matrix.json)
-- Current local candidate milestone: v0.2.60 HIP FGMRES fixed-rank coarse allocation-lineage execution context
+- Current local candidate milestone: v0.2.61 HIP FGMRES fixed-rank coarse recurrence overlay
 - `origin/main` inclusion은 주장하지 않음
 - Claim boundary: 이 matrix는 미래 목표와 구현상태를 추적하며 현재 release readiness를 승격하지 않는다.
 
@@ -15,6 +15,22 @@
 prototype 또는 legacy asset이 존재해도 `promotion_state=non_promoting`이면 Engine v2 결과를 확정할 수 없다.
 
 ## 현재 요약
+
+v0.2.61은 immutable global schedule의 모든 fixed Jacobi 좌표를 canonical prefix와
+global suffix exact order로 결박하고, 기존 `APPLY_JACOBI_INDEXED` 직후 same stream에
+fixed-rank coarse four-kernel application을 제출한다. Canonical/global parent fence가
+coarse pending을 별도 coarse runtime sync 없이 승인하며 application 추가
+H2D/D2H/allocation/sync/CSR apply는 `0`이다. Exact live/coarse exclusive route, final
+global receipt와 optional terminal-observation receipt 결박, fence-ack STORE 중단 복구,
+partial accepted launch의 fence·poison·lease cleanup, pointer-free strict schema를
+구현했다. 공개 표면은 Engine/Assembly/Solvers `1211/1019/66`이다. Focused overlay
+`7 passed in 217.72s`, public/capability `22 passed in 1.95s`, adjacent coarse/live
+`24 passed in 190.08s`/`42 passed in 204.33s`, adjacent canonical/global
+`14 passed in 113.18s`/`54 passed in 1212.23s`, public-count compatibility
+`9 passed in 42.47s`를 통과했다. 이는 기존 Jacobi launch를 유지하는 test-double 기반
+additive integration이다. Direct coarse device-status terminal binding, current-source
+actual-device integrated full-solve parity, full-iteration host-copy-zero, external
+`gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 미증명이다.
 
 v0.2.60은 live checkpoint parent가 이미 독점 borrow 중인 `jacobi_inverse`,
 `basis_v`, `preconditioned_basis_z` 세 capability를 중복 registry borrow 없이 exact
@@ -158,6 +174,7 @@ required는 `1 passed, 1 failed in 1.76s`였고 실패 이유는
 
 | Capability | Phase | Implementation | Promotion | 현재 경계 |
 | --- | --- | --- | --- | --- |
+| HIP FGMRES fixed-rank coarse recurrence overlay v1 v0.2.61 | Phase 0 | implemented | non_promoting | Immutable schedule의 모든 fixed Jacobi 좌표에서 retained `APPLY_JACOBI_INDEXED` 직후 same stream에 exact four coarse kernels를 제출하고 canonical/global parent fence로 pending을 승인한다. Exact live/coarse route, ordered application/global/optional terminal-observation receipt, zero additional application H2D/D2H/allocation/sync/CSR apply, partial accepted-launch poison cleanup과 strict pointer-free schema를 구현했다. Focused `7 passed in 217.72s`, public/capability `22 passed in 1.95s`, no-overlay coarse/live/canonical/global `24/42/14/54 passed`, public compatibility `9 passed in 42.47s`다. Legacy Jacobi 행 치환, direct coarse-status terminal binding, actual integrated device full-solve parity, full-iteration host-copy-zero, external `gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 미증명이다. |
 | HIP FGMRES fixed-rank coarse execution context v1 v0.2.60 | Phase 0 | implemented | non_promoting | Live checkpoint parent의 exact 3 capability를 중복 registry borrow 없이 semantic delegation하고 peer allocation-lineage owner가 coarse 6개 allocation을 소유한다. `Z/AZ/L` static H2D `3`과 setup fence `1` 뒤 ready가 되며 application은 exact launch `4`, H2D/D2H/allocation/sync/additional CSR apply `0`이다. Fence/known-not-freed 재시도, uncertain unload quarantine, second-child/parent-close exclusion, internal compiler return/STORE handoff, pointer-free strict context/application schema를 구현했다. Context `24 passed in 194.48s`, plan/loader/public `37 passed, 2 hardware skipped in 12.33s`, capability `19 passed in 0.24s`, adjacent live-checkpoint context `42 passed in 208.55s`, adjacent RTC/public API `45 passed in 51.44s`, required local `gfx1030` hardware `1 passed in 23.55s`다. Actual context 관찰은 `F=12`, `k=2`, owned `452` bytes, static H2D `3/416` bytes, fence `2`, launch `4/4`, status `0`, copy delta `0/0/0`, CPU exact FP64 equality다. Recurrence row 교체, terminal status 결속, full solve/iteration host-copy-zero, independent external `gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 미증명이다. |
 | HIP FGMRES fixed-rank coarse HIPRTC loader v1 v0.2.59/v0.2.60 handoff | Phase 0 | implemented | non_promoting | Package-owned fixed source의 exact 4-symbol/identity와 same-stream launch/fence 수명을 유지하면서 full pointer-range·alignment·overlap, launch uncertainty pre-arm, nonretryable uncertain unload, serialized/nonreentrant module operations, block-uniform dot status gate, overflow-safe apply grid를 추가했다. v0.2.60은 internal compile owner의 one-shot task-local return/STORE handoff를 더했다. Current source/ABI `d7a20e80…f5912`/`d79dbc97…1191`은 `gfx1030`/`gfx1100` compile을 통과했다. v0.2.59 restricted/current hardware 검증은 `35 passed, 2 hardware skipped`, device-visible `37 passed`, 별도 hardware `2 passed`였고 local `gfx1030` identity `4646cffb…ea3d`, `4/4`, status `0`, copy delta `0/0/0`, CPU exact FP64 parity를 기록했다. v0.2.58 관찰은 superseded source에만 유효하다. Loader 자체는 recurrence/terminal-state 통합, full-iteration host-copy-zero, external `gfx1100`, O(N), speedup, signed evidence, promotion/commercial 권한을 발행하지 않는다. |
 | HIP FGMRES fixed-rank coarse application plan/source v1 v0.2.57 | Phase 0 | implemented | contract_only | CPU coarse artifact과 exact FGMRES plan을 replay하고 parent borrow `3`, owned extent `6`, static H2D `3`, same-stream launch `4`를 고정한다. Application 경계의 H2D/D2H/allocation/sync/additional CSR apply와 dense `N×N` projector는 `0`이다. Strict plan/schema/source `16 passed in 12.05s`, package source `gfx1030`/`gfx1100` HIPRTC compile을 통과했다. Live context, actual execution at this milestone, recurrence status binding, AMG/DD, mesh-independent iteration, end-to-end O(N), speedup, promotion/commercial은 미증명이다. |
