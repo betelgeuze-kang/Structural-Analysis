@@ -43,7 +43,9 @@ DEFAULT_SOURCE_OUT = (
     / "pocketmd_lite_refinement_sources"
     / "gpcr_chembl_topk_ligand_refinement_source.json"
 )
-DEFAULT_REPORT_OUT = PRODUCTIZATION / "pocketmd_lite_gpcr_chembl_refinement_receipts_report.json"
+DEFAULT_REPORT_OUT = (
+    PRODUCTIZATION / "pocketmd_lite_gpcr_chembl_refinement_receipts_report.json"
+)
 
 SCHEMA_VERSION = "pocketmd-lite-gpcr-chembl-refinement-receipts.v1"
 SOURCE_SCHEMA_VERSION = "pocketmd-lite-gpcr-chembl-rdkit-refinement-source.v1"
@@ -113,9 +115,13 @@ def _round_float(value: float) -> float:
     return round(float(value), 6)
 
 
-def _fetch_chembl_molecule(molecule_id: str, *, timeout: float = 30.0) -> dict[str, Any]:
+def _fetch_chembl_molecule(
+    molecule_id: str, *, timeout: float = 30.0
+) -> dict[str, Any]:
     url = f"{CHEMBL_MOLECULE_URL}/{molecule_id}.json"
-    request = Request(url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+    request = Request(
+        url, headers={"User-Agent": USER_AGENT, "Accept": "application/json"}
+    )
     with urlopen(request, timeout=timeout) as response:
         payload = json.loads(response.read().decode("utf-8"))
     if not isinstance(payload, dict):
@@ -173,7 +179,10 @@ def _distance(
 
 def _topological_distances(mol: Chem.Mol) -> list[list[float]]:
     matrix = Chem.GetDistanceMatrix(mol)
-    return [[float(matrix[i, j]) for j in range(mol.GetNumAtoms())] for i in range(mol.GetNumAtoms())]
+    return [
+        [float(matrix[i, j]) for j in range(mol.GetNumAtoms())]
+        for i in range(mol.GetNumAtoms())
+    ]
 
 
 def _contact_pairs(
@@ -230,8 +239,12 @@ def _clash_count(
         for atom_j in heavy_atoms[offset + 1 :]:
             if topo[atom_i][atom_j] <= 2:
                 continue
-            radius_i = periodic_table.GetRcovalent(mol.GetAtomWithIdx(atom_i).GetAtomicNum())
-            radius_j = periodic_table.GetRcovalent(mol.GetAtomWithIdx(atom_j).GetAtomicNum())
+            radius_i = periodic_table.GetRcovalent(
+                mol.GetAtomWithIdx(atom_i).GetAtomicNum()
+            )
+            radius_j = periodic_table.GetRcovalent(
+                mol.GetAtomWithIdx(atom_j).GetAtomicNum()
+            )
             if _distance(positions, atom_i, atom_j) < 0.75 * (radius_i + radius_j):
                 count += 1
     return count
@@ -297,12 +310,20 @@ def _refinement_metrics(smiles: str, *, seed_base: int) -> dict[str, Any]:
     low = delta - uncertainty
     high = delta + uncertainty
     return {
-        "pre_refinement_energy_proxy": _round_float(float(primary["pre_refinement_energy_proxy"])),
-        "post_refinement_energy_proxy": _round_float(float(primary["post_refinement_energy_proxy"])),
+        "pre_refinement_energy_proxy": _round_float(
+            float(primary["pre_refinement_energy_proxy"])
+        ),
+        "post_refinement_energy_proxy": _round_float(
+            float(primary["post_refinement_energy_proxy"])
+        ),
         "energy_proxy_delta": _round_float(delta),
         "local_min_survived": bool(primary["local_min_survived"]),
-        "contact_persistence_rate": _round_float(float(primary["contact_persistence_rate"])),
-        "h_bond_persistence_rate": _round_float(float(primary["h_bond_persistence_rate"])),
+        "contact_persistence_rate": _round_float(
+            float(primary["contact_persistence_rate"])
+        ),
+        "h_bond_persistence_rate": _round_float(
+            float(primary["h_bond_persistence_rate"])
+        ),
         "clash_count_before": int(primary["clash_count_before"]),
         "clash_count_after": int(primary["clash_count_after"]),
         "uncertainty_low": _round_float(low),
@@ -315,8 +336,12 @@ def _refinement_metrics(smiles: str, *, seed_base: int) -> dict[str, Any]:
                 "seed": int(row["seed"]),
                 "force_field": str(row["force_field"]),
                 "minimize_status": int(row["minimize_status"]),
-                "pre_refinement_energy_proxy": _round_float(float(row["pre_refinement_energy_proxy"])),
-                "post_refinement_energy_proxy": _round_float(float(row["post_refinement_energy_proxy"])),
+                "pre_refinement_energy_proxy": _round_float(
+                    float(row["pre_refinement_energy_proxy"])
+                ),
+                "post_refinement_energy_proxy": _round_float(
+                    float(row["post_refinement_energy_proxy"])
+                ),
                 "energy_proxy_delta": _round_float(float(row["energy_proxy_delta"])),
                 "contact_pair_count_before": int(row["contact_pair_count_before"]),
                 "contact_pair_count_after": int(row["contact_pair_count_after"]),
@@ -376,7 +401,9 @@ def _select_topk_candidates(
     return selected
 
 
-def _receipt_refs_by_slot(bundle_payload: dict[str, Any]) -> dict[tuple[str, int], dict[str, Any]]:
+def _receipt_refs_by_slot(
+    bundle_payload: dict[str, Any],
+) -> dict[tuple[str, int], dict[str, Any]]:
     rows = bundle_payload.get("bundle_rows")
     if not isinstance(rows, list):
         raise ValueError("receipt_bundle_rows_missing")
@@ -554,7 +581,9 @@ def materialize_pocketmd_lite_gpcr_chembl_refinement_receipts(
                 metrics=metrics,
             )
         except Exception as exc:
-            blockers.append(f"{selected['case_id']}:rank_{selected['top_k_rank']}:{exc}")
+            blockers.append(
+                f"{selected['case_id']}:rank_{selected['top_k_rank']}:{exc}"
+            )
             continue
         rows.append(row)
         source_entries.append(source_entry)
@@ -563,7 +592,9 @@ def materialize_pocketmd_lite_gpcr_chembl_refinement_receipts(
         "schema_version": SOURCE_SCHEMA_VERSION,
         **release_evidence_metadata(
             input_paths=[
-                Path("scripts/materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py"),
+                Path(
+                    "scripts/materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py"
+                ),
                 gpcr_rows,
                 receipt_bundle,
             ],
@@ -604,7 +635,9 @@ def materialize_pocketmd_lite_gpcr_chembl_refinement_receipts(
         slot_key = (str(row["case_id"]), int(row["top_k_rank"]))
         bundle_row = receipt_refs.get(slot_key)
         if not bundle_row:
-            blockers.append(f"{row['case_id']}:rank_{row['top_k_rank']}:receipt_slot_missing")
+            blockers.append(
+                f"{row['case_id']}:rank_{row['top_k_rank']}:receipt_slot_missing"
+            )
             continue
         completed_receipts.append(
             _update_receipt(
@@ -631,7 +664,9 @@ def materialize_pocketmd_lite_gpcr_chembl_refinement_receipts(
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
             input_paths=[
-                Path("scripts/materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py"),
+                Path(
+                    "scripts/materialize_pocketmd_lite_gpcr_chembl_refinement_receipts.py"
+                ),
                 gpcr_rows,
                 receipt_bundle,
                 source_out,
@@ -681,7 +716,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--source-out", type=Path, default=DEFAULT_SOURCE_OUT)
     parser.add_argument("--report-out", type=Path, default=DEFAULT_REPORT_OUT)
     parser.add_argument("--target-order", nargs="+", default=list(DEFAULT_TARGET_ORDER))
-    parser.add_argument("--candidates-per-target", type=int, default=DEFAULT_CANDIDATES_PER_TARGET)
+    parser.add_argument(
+        "--candidates-per-target", type=int, default=DEFAULT_CANDIDATES_PER_TARGET
+    )
     return parser
 
 

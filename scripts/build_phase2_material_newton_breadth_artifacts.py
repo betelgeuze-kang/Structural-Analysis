@@ -60,7 +60,9 @@ from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
-DEFAULT_LAWS_OUT = PRODUCTIZATION / "phase2_material_newton_breadth_scalar_axial_laws.json"
+DEFAULT_LAWS_OUT = (
+    PRODUCTIZATION / "phase2_material_newton_breadth_scalar_axial_laws.json"
+)
 DEFAULT_STATE_UPDATED_SEEDS_OUT = (
     PRODUCTIZATION / "phase2_material_newton_breadth_state_updated_seeds.json"
 )
@@ -155,7 +157,8 @@ def _evaluate_material_law(
     residual_gate_passed = bool(metrics.get("residual_gate_passed"))
     increment_gate_passed = bool(metrics.get("increment_gate_passed"))
     no_regularization_or_fallback = (
-        metrics.get("regularization_used") is False and metrics.get("fallback_used") is False
+        metrics.get("regularization_used") is False
+        and metrics.get("fallback_used") is False
     )
     tangent_gate_passed = bool(tangent_check["pass"])
     displacement_gate_passed = displacement_error <= DISPLACEMENT_TOLERANCE_M
@@ -367,9 +370,7 @@ def _state_updated_frame_shell_coupled_material_seed_payload(
         "final_jacobian_kn_per_m": assembly_result.tangent_free.tolist(),
         "component_return_mappings": material_state["component_return_mappings"],
         "component_material_states": material_state["component_material_states"],
-        "component_internal_forces_kn": material_state[
-            "component_internal_forces_kn"
-        ],
+        "component_internal_forces_kn": material_state["component_internal_forces_kn"],
         "jvp_finite_difference_check": jvp_check,
         "direct_residual_newton_parity_check": direct_parity_payload,
         "convergence_history": solution.convergence_history,
@@ -447,12 +448,8 @@ def _state_updated_frame_shell_coupled_load_step_history_payload(
                 "increment_gate_passed": bool(metrics.get("increment_gate_passed")),
                 "regularization_used": metrics.get("regularization_used"),
                 "fallback_used": metrics.get("fallback_used"),
-                "frame_return_mapping": component_states["frame"].get(
-                    "return_mapping"
-                ),
-                "shell_return_mapping": component_states["shell"].get(
-                    "return_mapping"
-                ),
+                "frame_return_mapping": component_states["frame"].get("return_mapping"),
+                "shell_return_mapping": component_states["shell"].get("return_mapping"),
                 "frame_material_state_updated": (
                     component_states["frame"].get("path_dependent_state_updated")
                     is True
@@ -509,17 +506,13 @@ def _state_updated_frame_shell_coupled_load_step_history_payload(
         "material_newton_closure_claim": False,
         "history_id": history.history_id,
         "step_count": len(step_rows),
-        "path_dependent_update_step_count": (
-            history.path_dependent_update_step_count
-        ),
+        "path_dependent_update_step_count": (history.path_dependent_update_step_count),
         "committed_component_state_chain_pass": (
             history.committed_component_state_chain_pass
         ),
         "checkpoint_replay_pass": bool(checkpoint_replay["pass"]),
         "chain_replay_pass": bool(
-            checkpoint_replay[
-                "committed_component_state_chain_replay_pass"
-            ]
+            checkpoint_replay["committed_component_state_chain_replay_pass"]
         ),
         "step_replay_pass": bool(checkpoint_replay["step_replay_pass"]),
         "jvp_finite_difference_pass": all(
@@ -659,9 +652,7 @@ def _state_updated_material_mesh_load_step_history_payload(
         "material_newton_closure_claim": False,
         "history_id": history.history_id,
         "step_count": len(step_rows),
-        "path_dependent_update_step_count": (
-            history.path_dependent_update_step_count
-        ),
+        "path_dependent_update_step_count": (history.path_dependent_update_step_count),
         "committed_element_state_chain_pass": (
             history.committed_element_state_chain_pass
         ),
@@ -737,14 +728,18 @@ def _build_state_updated_material_path_history_payload(
                 }
             )
 
-        history_passed = history.committed_state_chain_pass and all(
-            row["checkpoint_replay_pass"]
-            and row["jvp_finite_difference_pass"]
-            and row["direct_residual_newton_parity_pass"]
-            and row["regularization_used"] is False
-            and row["fallback_used"] is False
-            for row in step_rows
-        ) and bool(history_checkpoint_replay["pass"])
+        history_passed = (
+            history.committed_state_chain_pass
+            and all(
+                row["checkpoint_replay_pass"]
+                and row["jvp_finite_difference_pass"]
+                and row["direct_residual_newton_parity_pass"]
+                and row["regularization_used"] is False
+                and row["fallback_used"] is False
+                for row in step_rows
+            )
+            and bool(history_checkpoint_replay["pass"])
+        )
         histories.append(
             {
                 "history_id": history.history_id,
@@ -760,16 +755,12 @@ def _build_state_updated_material_path_history_payload(
                 )
                 and bool(history_checkpoint_replay["step_replay_pass"]),
                 "chain_replay_pass": bool(
-                    history_checkpoint_replay[
-                        "committed_state_chain_replay_pass"
-                    ]
+                    history_checkpoint_replay["committed_state_chain_replay_pass"]
                 ),
                 "path_history_checkpoint_replay_pass": bool(
                     history_checkpoint_replay["pass"]
                 ),
-                "path_history_checkpoint_replay_check": (
-                    history_checkpoint_replay
-                ),
+                "path_history_checkpoint_replay_check": (history_checkpoint_replay),
                 "jvp_finite_difference_pass": all(
                     row["jvp_finite_difference_pass"] for row in step_rows
                 ),
@@ -793,15 +784,12 @@ def _build_state_updated_material_path_history_payload(
         "history_count": len(histories),
         "step_count": sum(int(history["step_count"]) for history in histories),
         "path_dependent_update_step_count": sum(
-            int(history["path_dependent_update_step_count"])
-            for history in histories
+            int(history["path_dependent_update_step_count"]) for history in histories
         ),
         "checkpoint_replay_pass": all(
             history["checkpoint_replay_pass"] for history in histories
         ),
-        "chain_replay_pass": all(
-            history["chain_replay_pass"] for history in histories
-        ),
+        "chain_replay_pass": all(history["chain_replay_pass"] for history in histories),
         "path_history_checkpoint_replay_pass": all(
             history["path_history_checkpoint_replay_pass"] for history in histories
         ),
@@ -872,9 +860,7 @@ def _build_state_updated_material_seed_payload(
         and {"frame_fiber", "layered_shell", "composite_fiber"}.issubset(
             set(section_integrations)
         )
-        and {"axial", "membrane", "bending", "drilling"}.issubset(
-            set(strain_modes)
-        )
+        and {"axial", "membrane", "bending", "drilling"}.issubset(set(strain_modes))
     )
     return {
         "schema_version": "phase2-material-newton-breadth-state-updated-seeds.v1",
@@ -1194,9 +1180,7 @@ def build_material_newton_breadth_artifacts(
             state_updated_seed_payload["state_updated_material_path_history_count"]
         ),
         "state_updated_material_path_history_step_count": (
-            state_updated_seed_payload[
-                "state_updated_material_path_history_step_count"
-            ]
+            state_updated_seed_payload["state_updated_material_path_history_step_count"]
         ),
         "state_updated_material_path_history_update_step_count": (
             state_updated_seed_payload[
@@ -1219,9 +1203,7 @@ def build_material_newton_breadth_artifacts(
             ]
         ),
         "state_updated_material_path_history_jvp_pass": (
-            state_updated_seed_payload[
-                "state_updated_material_path_history_jvp_pass"
-            ]
+            state_updated_seed_payload["state_updated_material_path_history_jvp_pass"]
         ),
         "state_updated_material_path_history_direct_parity_pass": (
             state_updated_seed_payload[
@@ -1377,7 +1359,9 @@ def build_material_newton_breadth_artifacts(
                 "fallback_used": row["fallback_used"],
                 "displacement_m": row["result"]["metrics"]["displacement_m"],
                 "relative_residual": row["result"]["metrics"]["relative_residual"],
-                "final_increment_abs_m": row["result"]["metrics"]["final_increment_abs_m"],
+                "final_increment_abs_m": row["result"]["metrics"][
+                    "final_increment_abs_m"
+                ],
             }
             for row in law_results
         ],

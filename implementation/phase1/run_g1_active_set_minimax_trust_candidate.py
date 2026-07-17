@@ -56,7 +56,9 @@ def _support_columns_for_active_rows(
     active_rows: np.ndarray,
     strongest_per_row: int,
 ) -> np.ndarray:
-    support: set[int] = {int(row) for row in np.asarray(active_rows, dtype=np.int64).tolist()}
+    support: set[int] = {
+        int(row) for row in np.asarray(active_rows, dtype=np.int64).tolist()
+    }
     count = max(int(strongest_per_row), 0)
     if count <= 0:
         return np.asarray(sorted(support), dtype=np.int64)
@@ -126,10 +128,13 @@ def _active_set_minimax_direction(
     local_direction = np.asarray(solve_result.x[:col_count], dtype=np.float64)
     direction = np.zeros(int(dof_count), dtype=np.float64)
     direction[free_idx[support_cols]] = local_direction
-    active_linear_residual = np.asarray(
-        active_matrix @ local_direction,
-        dtype=np.float64,
-    ) + active_residual
+    active_linear_residual = (
+        np.asarray(
+            active_matrix @ local_direction,
+            dtype=np.float64,
+        )
+        + active_residual
+    )
     return direction, {
         "active_row_count": int(active_rows.size),
         "support_column_count": int(support_cols.size),
@@ -163,7 +168,14 @@ def run_active_set_minimax_trust_iterations(
     residual_gate_n: float = 5.0e-4,
 ) -> dict[str, Any]:
     u = np.asarray(u0, dtype=np.float64).copy()
-    _initial_k, _initial_f, initial_free, initial_residual, initial_rhs, _initial_meta = assemble_residual(u)
+    (
+        _initial_k,
+        _initial_f,
+        initial_free,
+        initial_residual,
+        initial_rhs,
+        _initial_meta,
+    ) = assemble_residual(u)
     initial_inf = _max_abs(initial_residual)
     initial_rhs_inf = _max_abs(initial_rhs)
     history: list[dict[str, Any]] = []
@@ -236,7 +248,14 @@ def run_active_set_minimax_trust_iterations(
             for alpha in alpha_values:
                 alpha_float = float(alpha)
                 trial_u = u + alpha_float * direction
-                _trial_k, _trial_f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(trial_u)
+                (
+                    _trial_k,
+                    _trial_f,
+                    trial_free,
+                    trial_residual,
+                    trial_rhs,
+                    _trial_meta,
+                ) = assemble_residual(trial_u)
                 trial_free = np.asarray(trial_free, dtype=np.int64)
                 trial_residual = np.asarray(trial_residual, dtype=np.float64)
                 trial_stable = bool(
@@ -249,14 +268,18 @@ def run_active_set_minimax_trust_iterations(
                     "free_dof_set_stable": trial_stable,
                     "direct_residual_inf_n": trial_inf,
                     "active_residual_inf_n": active_trial_inf,
-                    "direct_relative_residual_inf": trial_inf / max(_max_abs(trial_rhs), 1.0),
+                    "direct_relative_residual_inf": trial_inf
+                    / max(_max_abs(trial_rhs), 1.0),
                     "improvement_inf_n": residual_before - trial_inf,
-                    "active_improvement_inf_n": _max_abs(residual[active_rows]) - active_trial_inf,
+                    "active_improvement_inf_n": _max_abs(residual[active_rows])
+                    - active_trial_inf,
                     "residual_gate_passed": trial_inf <= float(residual_gate_n),
                 }
                 candidate_rows.append(row)
                 if trial_stable and trial_inf < residual_before:
-                    if attempt_best is None or trial_inf < float(attempt_best["direct_residual_inf_n"]):
+                    if attempt_best is None or trial_inf < float(
+                        attempt_best["direct_residual_inf_n"]
+                    ):
                         attempt_best = row
             attempt = {
                 "active_row_count": int(active_count),
@@ -268,7 +291,9 @@ def run_active_set_minimax_trust_iterations(
             }
             direction_attempts.append(attempt)
             if attempt_best is not None:
-                if best is None or float(attempt_best["direct_residual_inf_n"]) < float(best["direct_residual_inf_n"]):
+                if best is None or float(attempt_best["direct_residual_inf_n"]) < float(
+                    best["direct_residual_inf_n"]
+                ):
                     best = attempt_best
                     best_direction = direction
                     best_attempt = attempt
@@ -293,7 +318,8 @@ def run_active_set_minimax_trust_iterations(
                 "iteration": step,
                 "residual_before_n": residual_before,
                 "residual_after_n": float(best["direct_residual_inf_n"]),
-                "residual_reduction_n": residual_before - float(best["direct_residual_inf_n"]),
+                "residual_reduction_n": residual_before
+                - float(best["direct_residual_inf_n"]),
                 "residual_reduction_ratio": (
                     residual_before - float(best["direct_residual_inf_n"])
                 )
@@ -308,7 +334,9 @@ def run_active_set_minimax_trust_iterations(
             }
         )
 
-    _final_k, _final_f, final_free, final_residual, final_rhs, _final_meta = assemble_residual(u)
+    _final_k, _final_f, final_free, final_residual, final_rhs, _final_meta = (
+        assemble_residual(u)
+    )
     final_residual = np.asarray(final_residual, dtype=np.float64)
     final_rhs = np.asarray(final_rhs, dtype=np.float64)
     final_inf = _max_abs(final_residual)
@@ -326,7 +354,8 @@ def run_active_set_minimax_trust_iterations(
             "initial_relative_residual_inf": initial_inf / max(initial_rhs_inf, 1.0),
             "final_relative_residual_inf": final_inf / max(_max_abs(final_rhs), 1.0),
             "total_reduction_n": initial_inf - final_inf,
-            "total_reduction_ratio": (initial_inf - final_inf) / max(initial_inf, 1.0e-30),
+            "total_reduction_ratio": (initial_inf - final_inf)
+            / max(initial_inf, 1.0e-30),
             "residual_gate_n": float(residual_gate_n),
             "residual_gate_passed": bool(final_inf <= float(residual_gate_n)),
             "steps_taken": len([row for row in history if row.get("accepted") is True]),
@@ -384,8 +413,7 @@ def run_g1_active_set_minimax_trust_candidate(
             steps_taken=int(result["summary"]["steps_taken"]),
             residual_gate_n=float(residual_gate_n),
             frame_tangent_source=str(
-                setup_meta.get("frame_tangent_source")
-                or "force_based_residual_tangent"
+                setup_meta.get("frame_tangent_source") or "force_based_residual_tangent"
             ),
             shell_pressure_load_path_policy=str(shell_pressure_load_path_policy),
         )
@@ -400,9 +428,7 @@ def run_g1_active_set_minimax_trust_candidate(
         "source_commit_sha": _git_head(),
         "engine_version": ENGINE_VERSION,
         "status": (
-            "candidate_created"
-            if result["summary"]["steps_taken"] > 0
-            else "review"
+            "candidate_created" if result["summary"]["steps_taken"] > 0 else "review"
         ),
         "promotes_g1_closure": False,
         "load_scale": setup_meta.get("load_scale"),
@@ -414,7 +440,9 @@ def run_g1_active_set_minimax_trust_candidate(
             "active_row_count_schedule": [
                 int(value)
                 for value in (
-                    active_row_counts if active_row_counts is not None else (active_row_count,)
+                    active_row_counts
+                    if active_row_counts is not None
+                    else (active_row_count,)
                 )
             ],
             "support_strongest_per_row": int(support_strongest_per_row),
@@ -453,7 +481,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT)
     parser.add_argument("--shell-pressure-load-path-policy", default="all_components")
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUT)
-    parser.add_argument("--output-final-checkpoint-npz", type=Path, default=DEFAULT_OUT_NPZ)
+    parser.add_argument(
+        "--output-final-checkpoint-npz", type=Path, default=DEFAULT_OUT_NPZ
+    )
     parser.add_argument("--max-steps", type=int, default=4)
     parser.add_argument("--active-row-count", type=int, default=8)
     parser.add_argument(

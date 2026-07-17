@@ -40,8 +40,7 @@ DEFAULT_CHECKPOINT_NPZ = (
     / "g1_adaptive_fixed_signed_all_components_from_structural_active_set_ls_trust_candidate.npz"
 )
 DEFAULT_OUT = (
-    PRODUCTIZATION
-    / "g1_active_frontier_shell_policy_linearized_active_set_probe.json"
+    PRODUCTIZATION / "g1_active_frontier_shell_policy_linearized_active_set_probe.json"
 )
 DOF_LABELS = ("UX", "UY", "UZ", "RX", "RY", "RZ")
 
@@ -59,7 +58,9 @@ def _parse_int_tuple(value: str) -> tuple[int, ...]:
     return tuple(int(item.strip()) for item in str(value).split(",") if item.strip())
 
 
-def _row_descriptor(*, free: np.ndarray, residual: np.ndarray, row: int) -> dict[str, Any]:
+def _row_descriptor(
+    *, free: np.ndarray, residual: np.ndarray, row: int
+) -> dict[str, Any]:
     row_index = int(row)
     global_dof = int(np.asarray(free, dtype=np.int64)[row_index])
     return {
@@ -161,8 +162,7 @@ def run_linearized_active_set_probe(
                 best.get("linear_active_reduction_ratio") or 0.0
             ),
             "linearized_active_descent_observed": any(
-                bool(row.get("linearized_active_descent_observed"))
-                for row in attempts
+                bool(row.get("linearized_active_descent_observed")) for row in attempts
             ),
             "direct_replay_attempted": False,
             "direct_replay_required_for_candidate": True,
@@ -208,8 +208,7 @@ def run_g1_active_frontier_shell_policy_linearized_active_set_probe(
         "checkpoint_npz": str(checkpoint_npz),
         "mgt_model": str(mgt_path),
         "frame_tangent_source": str(
-            setup_meta.get("frame_tangent_source")
-            or "force_based_residual_tangent"
+            setup_meta.get("frame_tangent_source") or "force_based_residual_tangent"
         ),
         "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
         "summary": result["summary"],
@@ -233,7 +232,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT_NPZ)
     parser.add_argument(
         "--shell-pressure-load-path-policy",
-        choices=("all_components", "attached_components_only", "structural_components_only"),
+        choices=(
+            "all_components",
+            "attached_components_only",
+            "structural_components_only",
+        ),
         default="structural_components_only",
     )
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUT)

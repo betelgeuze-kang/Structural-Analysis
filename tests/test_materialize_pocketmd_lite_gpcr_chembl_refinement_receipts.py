@@ -176,16 +176,16 @@ def test_materializes_gpcr_chembl_refinement_receipts_and_rows(
     assert source_out.is_file()
     receipt = json.loads(
         (
-            tmp_path
-            / "operator_receipts/pocketmd_lite_case_001/"
+            tmp_path / "operator_receipts/pocketmd_lite_case_001/"
             "rank_01_refinement_receipt.json"
         ).read_text(encoding="utf-8")
     )
     assert receipt["status"] == "complete"
     assert receipt["candidate_id"] == "DRD2_CHEMBL11"
-    assert receipt["operator_input_source"]["source_artifact_sha256"] == report[
-        "source_artifact_sha256"
-    ]
+    assert (
+        receipt["operator_input_source"]["source_artifact_sha256"]
+        == report["source_artifact_sha256"]
+    )
 
     rows_report = rows_module.materialize_pocketmd_lite_topk_rows_from_receipt_bundle(
         repo_root=tmp_path,

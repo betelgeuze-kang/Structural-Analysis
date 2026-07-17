@@ -127,9 +127,7 @@ def active_set_load_parameter_direction(
     )
     active_matrix = k_free[active_rows, :][:, support_cols].toarray()
     active_residual = np.asarray(residual, dtype=np.float64)[active_rows]
-    active_load_derivative = np.asarray(load_derivative, dtype=np.float64)[
-        active_rows
-    ]
+    active_load_derivative = np.asarray(load_derivative, dtype=np.float64)[active_rows]
     row_count, col_count = active_matrix.shape
     if row_count <= 0 or col_count <= 0:
         raise ValueError("empty_active_set_load_parameter_matrix")
@@ -169,26 +167,30 @@ def active_set_load_parameter_direction(
         + active_load_derivative * delta_lambda
         + active_residual
     )
-    return direction_free, delta_lambda, {
-        "active_row_count": int(active_rows.size),
-        "support_column_count": int(support_cols.size),
-        "support_strongest_per_row": int(support_strongest_per_row),
-        "displacement_trust_radius_m": float(displacement_trust_radius_m),
-        "load_trust_radius": float(load_trust_radius),
-        "direction_inf_m": _max_abs(direction_free),
-        "delta_load_scale": delta_lambda,
-        "active_linear_residual_inf_n": _max_abs(active_linear_residual),
-        "active_linear_improvement_inf_n": _max_abs(active_residual)
-        - _max_abs(active_linear_residual),
-        "active_load_derivative_inf_n_per_load": _max_abs(active_load_derivative),
-        "solver": "scipy_linprog_highs_active_set_displacement_plus_load_parameter",
-        "solver_stats": {
-            "status": int(solve_result.status),
-            "message": str(solve_result.message),
-            "nit": int(getattr(solve_result, "nit", 0) or 0),
-            "objective": float(solve_result.fun),
+    return (
+        direction_free,
+        delta_lambda,
+        {
+            "active_row_count": int(active_rows.size),
+            "support_column_count": int(support_cols.size),
+            "support_strongest_per_row": int(support_strongest_per_row),
+            "displacement_trust_radius_m": float(displacement_trust_radius_m),
+            "load_trust_radius": float(load_trust_radius),
+            "direction_inf_m": _max_abs(direction_free),
+            "delta_load_scale": delta_lambda,
+            "active_linear_residual_inf_n": _max_abs(active_linear_residual),
+            "active_linear_improvement_inf_n": _max_abs(active_residual)
+            - _max_abs(active_linear_residual),
+            "active_load_derivative_inf_n_per_load": _max_abs(active_load_derivative),
+            "solver": "scipy_linprog_highs_active_set_displacement_plus_load_parameter",
+            "solver_stats": {
+                "status": int(solve_result.status),
+                "message": str(solve_result.message),
+                "nit": int(getattr(solve_result, "nit", 0) or 0),
+                "objective": float(solve_result.fun),
+            },
         },
-    }
+    )
 
 
 def _parse_int_tuple(value: str) -> tuple[int, ...]:
@@ -256,7 +258,8 @@ def run_g1_active_set_load_parameter_probe(
         if output_json is not None:
             output_json.parent.mkdir(parents=True, exist_ok=True)
             output_json.write_text(
-                json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
+                + "\n",
                 encoding="utf-8",
             )
         return payload
@@ -310,9 +313,11 @@ def run_g1_active_set_load_parameter_probe(
             "direction": direction_meta,
         }
         attempts.append(attempt)
-        if best_attempt is None or direction_meta[
-            "active_linear_residual_inf_n"
-        ] < best_attempt["direction"]["active_linear_residual_inf_n"]:
+        if (
+            best_attempt is None
+            or direction_meta["active_linear_residual_inf_n"]
+            < best_attempt["direction"]["active_linear_residual_inf_n"]
+        ):
             best_attempt = attempt
             best_direction = direction
             best_delta_load = delta_load
@@ -358,7 +363,9 @@ def run_g1_active_set_load_parameter_probe(
                 frame_tangent_source=frame_tangent_source,
             )
             trial_free = np.asarray(trial_meta["free"], dtype=np.int64)
-            stable = bool(trial_free.shape == free.shape and np.array_equal(trial_free, free))
+            stable = bool(
+                trial_free.shape == free.shape and np.array_equal(trial_free, free)
+            )
             if not stable:
                 replay_rows.append(
                     {
@@ -417,7 +424,9 @@ def run_g1_active_set_load_parameter_probe(
             "initial_residual_inf_n": initial_inf,
             "load_derivative_inf_n_per_load": _max_abs(load_derivative),
             "active_row_count_schedule": [int(value) for value in active_row_counts],
-            "ready_attempt_count": sum(1 for row in attempts if row.get("status") == "ready"),
+            "ready_attempt_count": sum(
+                1 for row in attempts if row.get("status") == "ready"
+            ),
             "best_linear_active_row_count": (
                 best_attempt.get("active_row_count") if best_attempt else None
             ),
@@ -488,10 +497,14 @@ def run_g1_active_set_load_parameter_probe(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mgt-model", type=Path, default=DEFAULT_MGT_MODEL)
-    parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_INITIAL_CHECKPOINT_NPZ)
+    parser.add_argument(
+        "--checkpoint-npz", type=Path, default=DEFAULT_INITIAL_CHECKPOINT_NPZ
+    )
     parser.add_argument("--load-scale", type=float, default=1.0)
     parser.add_argument("--load-derivative-eps", type=float, default=1.0e-3)
-    parser.add_argument("--frame-tangent-source", default="force_based_residual_tangent")
+    parser.add_argument(
+        "--frame-tangent-source", default="force_based_residual_tangent"
+    )
     parser.add_argument(
         "--active-row-counts",
         default=",".join(str(value) for value in DEFAULT_ACTIVE_ROW_COUNTS),
@@ -503,7 +516,9 @@ def build_parser() -> argparse.ArgumentParser:
         "--alpha-values",
         default=",".join(str(value) for value in DEFAULT_ALPHA_VALUES),
     )
-    parser.add_argument("--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUT)
+    parser.add_argument(
+        "--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUT
+    )
     return parser
 
 
