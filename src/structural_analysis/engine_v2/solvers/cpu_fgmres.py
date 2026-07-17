@@ -900,6 +900,7 @@ def _fgmres_core(
     inverse_diagonal: np.ndarray,
     policy: FgmresPolicyV1,
     authoritative_tolerance: float,
+    right_preconditioner: Callable[[np.ndarray], np.ndarray] | None = None,
     checkpoint_sink: (
         Callable[[FgmresRestartRecord, np.ndarray, np.ndarray], None] | None
     ) = None,
@@ -1028,9 +1029,18 @@ def _fgmres_core(
         candidate_step_count = 0
         candidate_code = ""
         for column in range(width):
-            with np.errstate(over="ignore", invalid="ignore"):
-                z = inverse * basis_v[column]
-            if not np.isfinite(z).all():
+            try:
+                if right_preconditioner is None:
+                    with np.errstate(over="ignore", invalid="ignore"):
+                        z = inverse * basis_v[column]
+                else:
+                    z = np.ascontiguousarray(
+                        right_preconditioner(basis_v[column]),
+                        dtype="<f8",
+                    )
+            except Exception:
+                z = np.full_like(basis_v[column], np.nan)
+            if z.shape != b.shape or not np.isfinite(z).all():
                 return _terminal_outcome(
                     "numerical_failure",
                     "preconditioner_application_nonfinite",

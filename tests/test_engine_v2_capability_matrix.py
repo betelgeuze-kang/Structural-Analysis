@@ -1061,6 +1061,58 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
         "synthetic_tests_package_roots_zero_runner_keys_zero_nonpromoting"
     )
 
+    runner_lifecycle = rows[
+        "hip_fgmres_reviewer_root_registry_v3_runner_key_lifecycle_v1"
+    ]
+    assert runner_lifecycle["implementation_state"] == "implemented"
+    assert runner_lifecycle["promotion_state"] == "contract_only"
+    assert {
+        "exact_detached_registry_v3_genesis_receipt_binding",
+        "attached_bootstrap_source_replay_through_registry_v3_result",
+        "exact_detached_runner_key_v1_proof_of_possession_revalidation",
+        "runner_enrollment_challenge_bound_to_registry_v3_epoch1_hash",
+        "epoch2_enrollment_and_epoch3_activation_transition_hash_chain",
+        "ordered_unique_two_or_three_of_three_reviewer_quorum_per_event",
+        "purpose_separated_enrollment_and_activation_review_messages",
+        "activation_strictly_after_enrollment_inside_runner_key_half_open_validity",
+        "detached_one_enrolled_one_active_runner_key_projection",
+        "public_symbols_engine1152_assembly960_solvers66_unique",
+    }.issubset(runner_lifecycle["supported_scope"])
+    assert {
+        "actual_independent_reviewer_root_material",
+        "package_registry_v3_inclusion",
+        "package_runner_key_enrollment",
+        "package_runner_key_activation",
+        "operational_reviewer_authority",
+        "actual_isolated_runner_process",
+        "actual_hsm_or_hardware_token_key",
+        "runner_hsm_origin_or_non_exportability_attestation",
+        "external_transparency_log_or_monotonic_anchor",
+        "signed_trace_binding",
+        "actual_external_gfx1100_signed_cell",
+        "same_artifact_two_architecture_evidence",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(runner_lifecycle["explicit_exclusions"])
+    assert {
+        "deterministic_epoch2_enrollment_epoch3_activation_and_active_key_projection",
+        "ordered_two_and_three_reviewer_quorum_acceptance",
+        "missing_duplicate_reordered_non_tuple_and_wrong_key_approval_rejection",
+        "enrollment_signature_replay_into_activation_rejection",
+        "foreign_predecessor_registry_hash_rejection",
+        "strict_activation_order_and_runner_key_half_open_validity_boundaries",
+        "attached_foreign_bootstrap_source_substitution_rejection",
+        "coherently_rehashed_package_activation_and_promotion_claim_rejection",
+        "boolean_integer_alias_rejection",
+        "no_private_key_or_signing_api_in_product_module",
+        "focused_unit_public_and_registry_public_twenty_six_passed",
+        "adjacent_trust_chain_one_hundred_forty_four_passed",
+    }.issubset(runner_lifecycle["verification_cases"])
+    assert runner_lifecycle["claim_level"] == (
+        "detached_registry_v3_runner_pop_enrollment_activation_reviewer_quorum_"
+        "contract_synthetic_tests_package_runner_zero_nonpromoting"
+    )
+
     trust_lifecycle = rows["hip_fgmres_reviewed_trust_anchor_lifecycle_v2"]
     assert trust_lifecycle["implementation_state"] == "implemented"
     assert trust_lifecycle["promotion_state"] == "contract_only"
@@ -1400,6 +1452,44 @@ def test_shared_linear_frame_truss_semantics_stays_a_compatibility_contract() ->
         "shared_linear_frame_truss_dependency_and_numeric_compatibility_contract_"
         "only_narrow_native_rtc_shared_oracle_not_broad_native_parity_or_"
         "commercial_readiness"
+    )
+
+
+def test_cpu_fgmres_fixed_rank_coarse_stays_non_promoting() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    coarse = rows["cpu_fgmres_fixed_rank_sparse_coarse_preconditioner_v1"]
+    assert coarse["implementation_state"] == "implemented"
+    assert coarse["promotion_state"] == "non_promoting"
+    assert {
+        "execution_plan_v2_reduced_csr_exact_binding",
+        "fixed_retained_rank_at_most_16",
+        "actual_fgmres_right_preconditioner_consumption",
+        "zero_additional_csr_apply_per_preconditioner_application",
+        "zero_dense_n_by_n_projector",
+        "sparse_true_residual_and_full_deterministic_solve_replay",
+    }.issubset(coarse["supported_scope"])
+    assert {
+        "hip_or_hiprtc_execution",
+        "iteration_host_copy_zero",
+        "amg_hierarchy_or_smoother",
+        "domain_decomposition_ras_or_geneo",
+        "mesh_independent_iteration_count",
+        "measured_complexity_slope",
+        "end_to_end_on_complexity",
+        "performance_or_speedup_claim",
+        "result_ir_or_design_code_authority",
+        "signed_promotion_evidence",
+        "commercial_readiness",
+    }.issubset(coarse["explicit_exclusions"])
+    assert (
+        "focused_numerical_adversarial_public_schema_21_passed_in_7p53s"
+        in coarse["verification_cases"]
+    )
+    assert coarse["claim_level"] == (
+        "deterministic_cpu_fixed_rank_sparse_coarse_fgmres_reference_only_not_"
+        "hip_amg_dd_on_or_commercial_solver"
     )
 
 

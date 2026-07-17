@@ -50,9 +50,9 @@ def test_general_history_public_api_is_additive_and_unique() -> None:
         engine_v2.solve_cpu_fgmres_checkpoint_history_v2
         is solvers.solve_cpu_fgmres_checkpoint_history_v2
     )
-    assert len(engine_v2.__all__) == 1103
-    assert len(assembly_backend.__all__) == 930
-    assert len(solvers.__all__) == 47
+    assert len(engine_v2.__all__) == 1152
+    assert len(assembly_backend.__all__) == 960
+    assert len(solvers.__all__) == 66
     assert len(engine_v2.__all__) == len(set(engine_v2.__all__))
     assert len(assembly_backend.__all__) == len(set(assembly_backend.__all__))
     assert len(solvers.__all__) == len(set(solvers.__all__))

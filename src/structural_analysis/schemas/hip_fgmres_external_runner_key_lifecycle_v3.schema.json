@@ -1,0 +1,504 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_external_runner_key_lifecycle_v3.schema.json",
+  "title": "Detached HIP FGMRES runner-key lifecycle on reviewer-root registry v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "promotion_eligible",
+    "source_registry_receipt",
+    "enrollment_receipt",
+    "enrollment_event",
+    "activation_event",
+    "active_key",
+    "registry_epoch",
+    "predecessor_registry_epoch",
+    "predecessor_registry_hash",
+    "source_registry_hash",
+    "enrollment_registry_hash",
+    "registry_hash",
+    "head_event_hash",
+    "event_count",
+    "reviewer_authority_count",
+    "enrolled_runner_key_count",
+    "active_runner_key_count",
+    "claims",
+    "extensions",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-external-runner-key-lifecycle.v3"
+    },
+    "capability_profile": {
+      "const": "phase0_external_gfx1100_runner_key_enrollment_activation_v3"
+    },
+    "status": {
+      "const": "detached_v3_runner_key_enrollment_activation_verified"
+    },
+    "evidence_scope": {
+      "const": "detached_v3_lineage_runner_pop_and_reviewer_quorum_non_authoritative"
+    },
+    "promotion_eligible": {"const": false},
+    "source_registry_receipt": {
+      "type": "object",
+      "description": "Transitively validated by the strict registry-v3 validator."
+    },
+    "enrollment_receipt": {
+      "type": "object",
+      "description": "Transitively validated by the strict enrollment-v1 validator."
+    },
+    "enrollment_event": {"$ref": "#/$defs/enrollmentEvent"},
+    "activation_event": {"$ref": "#/$defs/activationEvent"},
+    "active_key": {"$ref": "#/$defs/activeKey"},
+    "registry_epoch": {"const": 3},
+    "predecessor_registry_epoch": {"const": 2},
+    "predecessor_registry_hash": {"$ref": "#/$defs/hash"},
+    "source_registry_hash": {"$ref": "#/$defs/hash"},
+    "enrollment_registry_hash": {"$ref": "#/$defs/hash"},
+    "registry_hash": {"$ref": "#/$defs/hash"},
+    "head_event_hash": {"$ref": "#/$defs/hash"},
+    "event_count": {"const": 3},
+    "reviewer_authority_count": {"const": 3},
+    "enrolled_runner_key_count": {"const": 1},
+    "active_runner_key_count": {"const": 1},
+    "claims": {"$ref": "#/$defs/claims"},
+    "extensions": {"type": "object", "maxProperties": 0},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{6})?Z$"
+    },
+    "reviewerRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "key_id",
+        "key_epoch",
+        "public_key_base64",
+        "public_key_sha256",
+        "valid_from_utc",
+        "valid_until_utc"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+        },
+        "key_id": {
+          "type": "string",
+          "pattern": "^ed25519-review:[a-z0-9][a-z0-9._-]{2,63}:v1$"
+        },
+        "key_epoch": {"const": 1},
+        "public_key_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "valid_from_utc": {"$ref": "#/$defs/timestamp"},
+        "valid_until_utc": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "reviewer_key_id",
+        "reviewer_key_epoch",
+        "statement_hash",
+        "algorithm",
+        "signature_base64",
+        "signature_sha256"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+        },
+        "reviewer_key_id": {
+          "type": "string",
+          "pattern": "^ed25519-review:[a-z0-9][a-z0-9._-]{2,63}:v1$"
+        },
+        "reviewer_key_epoch": {"const": 1},
+        "statement_hash": {"$ref": "#/$defs/hash"},
+        "algorithm": {"const": "Ed25519"},
+        "signature_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        },
+        "signature_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "enrollmentStatement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "purpose",
+        "registry_schema_version",
+        "registry_id",
+        "lineage_generation",
+        "lineage_id",
+        "sequence",
+        "event_type",
+        "occurred_at_utc",
+        "previous_event_hash",
+        "predecessor_registry_epoch",
+        "predecessor_registry_hash",
+        "source_registry_receipt_hash",
+        "reviewer_policy_hash",
+        "reviewer_roots",
+        "reviewer_root_commitment_hash",
+        "minimum_reviewer_approvals",
+        "enrollment_receipt_schema_version",
+        "enrollment_receipt_hash",
+        "enrollment_challenge_hash",
+        "runner_id",
+        "key_id",
+        "key_epoch",
+        "public_key_sha256",
+        "allowed_architecture_base",
+        "allowed_suite_id",
+        "allowed_fixture_registry_bytes_sha256",
+        "allowed_fixture_registry_hash",
+        "minimum_run_sequence",
+        "maximum_run_sequence",
+        "valid_from_utc",
+        "valid_until_utc",
+        "runner_declared_key_origin",
+        "attestation_digest_sha256",
+        "statement_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-runner-key-event-action.v3"
+        },
+        "purpose": {"const": "hip_fgmres_external_runner_key_v3_enrollment"},
+        "registry_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v3"
+        },
+        "registry_id": {
+          "const": "structural-analysis-engine-v2-external-trust-registry-reviewer-root-v3"
+        },
+        "lineage_generation": {"const": 1},
+        "lineage_id": {"$ref": "#/$defs/hash"},
+        "sequence": {"const": 2},
+        "event_type": {"const": "runner_key_enrolled"},
+        "occurred_at_utc": {"$ref": "#/$defs/timestamp"},
+        "previous_event_hash": {"$ref": "#/$defs/hash"},
+        "predecessor_registry_epoch": {"const": 1},
+        "predecessor_registry_hash": {"$ref": "#/$defs/hash"},
+        "source_registry_receipt_hash": {"$ref": "#/$defs/hash"},
+        "reviewer_policy_hash": {"$ref": "#/$defs/hash"},
+        "reviewer_roots": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/reviewerRoot"}
+        },
+        "reviewer_root_commitment_hash": {"$ref": "#/$defs/hash"},
+        "minimum_reviewer_approvals": {"const": 2},
+        "enrollment_receipt_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-key-enrollment-receipt.v1"
+        },
+        "enrollment_receipt_hash": {"$ref": "#/$defs/hash"},
+        "enrollment_challenge_hash": {"$ref": "#/$defs/hash"},
+        "runner_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+        },
+        "key_id": {
+          "type": "string",
+          "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v1$"
+        },
+        "key_epoch": {"const": 1},
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "allowed_architecture_base": {"const": "gfx1100"},
+        "allowed_suite_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "allowed_fixture_registry_bytes_sha256": {"$ref": "#/$defs/hash"},
+        "allowed_fixture_registry_hash": {"$ref": "#/$defs/hash"},
+        "minimum_run_sequence": {"type": "integer", "minimum": 1},
+        "maximum_run_sequence": {"type": "integer", "minimum": 1},
+        "valid_from_utc": {"$ref": "#/$defs/timestamp"},
+        "valid_until_utc": {"$ref": "#/$defs/timestamp"},
+        "runner_declared_key_origin": {
+          "enum": [
+            "runner_declared_isolated_hsm",
+            "runner_declared_hardware_token",
+            "runner_declared_software_keystore",
+            "runner_declared_unknown"
+          ]
+        },
+        "attestation_digest_sha256": {
+          "anyOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]
+        },
+        "statement_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "activationStatement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "purpose",
+        "registry_schema_version",
+        "registry_id",
+        "lineage_generation",
+        "lineage_id",
+        "sequence",
+        "event_type",
+        "occurred_at_utc",
+        "previous_event_hash",
+        "predecessor_registry_epoch",
+        "predecessor_registry_hash",
+        "source_registry_receipt_hash",
+        "reviewer_policy_hash",
+        "reviewer_roots",
+        "reviewer_root_commitment_hash",
+        "minimum_reviewer_approvals",
+        "enrollment_event_hash",
+        "enrollment_receipt_hash",
+        "enrollment_challenge_hash",
+        "runner_id",
+        "key_id",
+        "key_epoch",
+        "public_key_sha256",
+        "valid_from_utc",
+        "valid_until_utc",
+        "activated_at_utc",
+        "statement_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-runner-key-event-action.v3"
+        },
+        "purpose": {"const": "hip_fgmres_external_runner_key_v3_activation"},
+        "registry_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v3"
+        },
+        "registry_id": {
+          "const": "structural-analysis-engine-v2-external-trust-registry-reviewer-root-v3"
+        },
+        "lineage_generation": {"const": 1},
+        "lineage_id": {"$ref": "#/$defs/hash"},
+        "sequence": {"const": 3},
+        "event_type": {"const": "runner_key_activated"},
+        "occurred_at_utc": {"$ref": "#/$defs/timestamp"},
+        "previous_event_hash": {"$ref": "#/$defs/hash"},
+        "predecessor_registry_epoch": {"const": 2},
+        "predecessor_registry_hash": {"$ref": "#/$defs/hash"},
+        "source_registry_receipt_hash": {"$ref": "#/$defs/hash"},
+        "reviewer_policy_hash": {"$ref": "#/$defs/hash"},
+        "reviewer_roots": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/reviewerRoot"}
+        },
+        "reviewer_root_commitment_hash": {"$ref": "#/$defs/hash"},
+        "minimum_reviewer_approvals": {"const": 2},
+        "enrollment_event_hash": {"$ref": "#/$defs/hash"},
+        "enrollment_receipt_hash": {"$ref": "#/$defs/hash"},
+        "enrollment_challenge_hash": {"$ref": "#/$defs/hash"},
+        "runner_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+        },
+        "key_id": {
+          "type": "string",
+          "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v1$"
+        },
+        "key_epoch": {"const": 1},
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "valid_from_utc": {"$ref": "#/$defs/timestamp"},
+        "valid_until_utc": {"$ref": "#/$defs/timestamp"},
+        "activated_at_utc": {"$ref": "#/$defs/timestamp"},
+        "statement_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "enrollmentEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement", "approvals", "event_hash"],
+      "properties": {
+        "statement": {"$ref": "#/$defs/enrollmentStatement"},
+        "approvals": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/approval"}
+        },
+        "event_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "activationEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement", "approvals", "event_hash"],
+      "properties": {
+        "statement": {"$ref": "#/$defs/activationStatement"},
+        "approvals": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/approval"}
+        },
+        "event_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "activeKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "runner_id",
+        "key_id",
+        "key_epoch",
+        "public_key_base64",
+        "public_key_sha256",
+        "allowed_architecture_base",
+        "allowed_suite_id",
+        "allowed_fixture_registry_bytes_sha256",
+        "allowed_fixture_registry_hash",
+        "minimum_run_sequence",
+        "maximum_run_sequence",
+        "valid_from_utc",
+        "valid_until_utc",
+        "runner_declared_key_origin",
+        "attestation_digest_sha256",
+        "source_registry_receipt_hash",
+        "source_registry_hash",
+        "lineage_id",
+        "enrollment_receipt_hash",
+        "enrollment_challenge_hash",
+        "enrollment_event_hash",
+        "enrolled_at_utc",
+        "activation_event_hash",
+        "activated_at_utc"
+      ],
+      "properties": {
+        "status": {"const": "active"},
+        "runner_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+        },
+        "key_id": {
+          "type": "string",
+          "pattern": "^ed25519:[a-z0-9][a-z0-9._-]{2,63}:v1$"
+        },
+        "key_epoch": {"const": 1},
+        "public_key_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "allowed_architecture_base": {"const": "gfx1100"},
+        "allowed_suite_id": {"type": "string", "minLength": 1, "maxLength": 256},
+        "allowed_fixture_registry_bytes_sha256": {"$ref": "#/$defs/hash"},
+        "allowed_fixture_registry_hash": {"$ref": "#/$defs/hash"},
+        "minimum_run_sequence": {"type": "integer", "minimum": 1},
+        "maximum_run_sequence": {"type": "integer", "minimum": 1},
+        "valid_from_utc": {"$ref": "#/$defs/timestamp"},
+        "valid_until_utc": {"$ref": "#/$defs/timestamp"},
+        "runner_declared_key_origin": {
+          "enum": [
+            "runner_declared_isolated_hsm",
+            "runner_declared_hardware_token",
+            "runner_declared_software_keystore",
+            "runner_declared_unknown"
+          ]
+        },
+        "attestation_digest_sha256": {
+          "anyOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]
+        },
+        "source_registry_receipt_hash": {"$ref": "#/$defs/hash"},
+        "source_registry_hash": {"$ref": "#/$defs/hash"},
+        "lineage_id": {"$ref": "#/$defs/hash"},
+        "enrollment_receipt_hash": {"$ref": "#/$defs/hash"},
+        "enrollment_challenge_hash": {"$ref": "#/$defs/hash"},
+        "enrollment_event_hash": {"$ref": "#/$defs/hash"},
+        "enrolled_at_utc": {"$ref": "#/$defs/timestamp"},
+        "activation_event_hash": {"$ref": "#/$defs/hash"},
+        "activated_at_utc": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "detached_registry_genesis_signature_chain_verified",
+        "detached_runner_key_possession_verified",
+        "lineage_bound_enrollment_verified",
+        "enrollment_reviewer_quorum_verified",
+        "activation_reviewer_quorum_verified",
+        "detached_active_runner_key_state_verified",
+        "source_bootstrap_replayed_in_detached_receipt",
+        "package_registry_v3_inclusion_verified",
+        "package_runner_key_enrollment_verified",
+        "package_runner_key_activation_verified",
+        "operational_reviewer_authority_verified",
+        "actual_isolated_runner_verified",
+        "runner_hsm_origin_verified",
+        "runner_hsm_non_exportability_verified",
+        "reviewer_human_identity_verified",
+        "reviewer_independence_verified",
+        "reviewer_hsm_verified",
+        "trusted_event_time_verified",
+        "external_monotonic_anchor_verified",
+        "historical_registry_resolution_verified",
+        "signed_trace_binding_verified",
+        "durable_ledger_v3_verified",
+        "actual_external_gfx1100_verified",
+        "same_artifact_two_architecture_verified",
+        "result_ir_verified",
+        "performance_or_speedup_verified",
+        "end_to_end_o_n_verified",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "detached_registry_genesis_signature_chain_verified": {"const": true},
+        "detached_runner_key_possession_verified": {"const": true},
+        "lineage_bound_enrollment_verified": {"const": true},
+        "enrollment_reviewer_quorum_verified": {"const": true},
+        "activation_reviewer_quorum_verified": {"const": true},
+        "detached_active_runner_key_state_verified": {"const": true},
+        "source_bootstrap_replayed_in_detached_receipt": {"const": false},
+        "package_registry_v3_inclusion_verified": {"const": false},
+        "package_runner_key_enrollment_verified": {"const": false},
+        "package_runner_key_activation_verified": {"const": false},
+        "operational_reviewer_authority_verified": {"const": false},
+        "actual_isolated_runner_verified": {"const": false},
+        "runner_hsm_origin_verified": {"const": false},
+        "runner_hsm_non_exportability_verified": {"const": false},
+        "reviewer_human_identity_verified": {"const": false},
+        "reviewer_independence_verified": {"const": false},
+        "reviewer_hsm_verified": {"const": false},
+        "trusted_event_time_verified": {"const": false},
+        "external_monotonic_anchor_verified": {"const": false},
+        "historical_registry_resolution_verified": {"const": false},
+        "signed_trace_binding_verified": {"const": false},
+        "durable_ledger_v3_verified": {"const": false},
+        "actual_external_gfx1100_verified": {"const": false},
+        "same_artifact_two_architecture_verified": {"const": false},
+        "result_ir_verified": {"const": false},
+        "performance_or_speedup_verified": {"const": false},
+        "end_to_end_o_n_verified": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

@@ -1,0 +1,603 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/cpu_fgmres_fixed_rank_coarse_result_v1.schema.json",
+  "title": "Engine v2 CPU FGMRES fixed-rank coarse result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "algorithm_version",
+    "status",
+    "termination_code",
+    "bindings",
+    "policy",
+    "counts",
+    "metrics",
+    "history",
+    "arrays",
+    "complexity",
+    "claims",
+    "result_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-cpu-fgmres-fixed-rank-coarse-result.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_cpu_sparse_fixed_rank_multiplicative_coarse_fgmres_reference"
+    },
+    "algorithm_version": {
+      "const": "jacobi_energy_two_pass_mgs_multiplicative_coarse.v1"
+    },
+    "status": {
+      "enum": [
+        "converged",
+        "max_iterations",
+        "stagnated",
+        "diverged",
+        "arnoldi_breakdown",
+        "numerical_failure"
+      ]
+    },
+    "termination_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bindings": {
+      "$ref": "#/$defs/bindings"
+    },
+    "policy": {
+      "$ref": "#/$defs/policy"
+    },
+    "counts": {
+      "$ref": "#/$defs/counts"
+    },
+    "metrics": {
+      "$ref": "#/$defs/metrics"
+    },
+    "history": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "$ref": "#/$defs/restartRecord"
+      }
+    },
+    "arrays": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/reducedSolutionDescriptor"
+        },
+        {
+          "$ref": "#/$defs/trueResidualDescriptor"
+        }
+      ],
+      "items": false
+    },
+    "complexity": {
+      "$ref": "#/$defs/complexity"
+    },
+    "claims": {
+      "$ref": "#/$defs/claims"
+    },
+    "result_hash": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "finiteNonnegative": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1.7976931348623157e+308
+    },
+    "nonnegativeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9223372036854775807
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_hash",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "partition_hash",
+        "initial_reduced_state_hash",
+        "rhs_hash",
+        "coarse_space_hash",
+        "source_policy_hash"
+      ],
+      "properties": {
+        "execution_plan_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operator_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "numeric_snapshot_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "partition_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "initial_reduced_state_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "rhs_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "coarse_space_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "source_policy_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "source_policy_schema_version",
+        "source_policy_hash",
+        "method",
+        "restart_dimension",
+        "max_iterations",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "stagnation_checkpoint_limit",
+        "stagnation_relative_tolerance",
+        "divergence_factor",
+        "orthogonalization",
+        "source_policy_preconditioner",
+        "effective_preconditioner",
+        "solver_norm",
+        "authoritative_norm",
+        "fallback_forbidden"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-cpu-fgmres-coarse-policy.v1"
+        },
+        "source_policy_schema_version": {
+          "const": "structural-analysis-fgmres-policy.v1"
+        },
+        "source_policy_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "method": {
+          "const": "fixed_restart_right_preconditioned_fgmres"
+        },
+        "restart_dimension": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "max_iterations": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "absolute_tolerance": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "relative_tolerance": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "stagnation_checkpoint_limit": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 16
+        },
+        "stagnation_relative_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "divergence_factor": {
+          "type": "number",
+          "exclusiveMinimum": 1,
+          "maximum": 1.7976931348623157e+308
+        },
+        "orthogonalization": {
+          "const": "dgks_conditional_two_pass_mgs"
+        },
+        "source_policy_preconditioner": {
+          "const": "positive_unshifted_jacobi_right"
+        },
+        "effective_preconditioner": {
+          "const": "fixed_rank_multiplicative_coarse_then_positive_unshifted_jacobi_right"
+        },
+        "solver_norm": {
+          "const": "l2"
+        },
+        "authoritative_norm": {
+          "const": "scaled_true_residual_linf"
+        },
+        "fallback_forbidden": {
+          "const": true
+        }
+      },
+      "anyOf": [
+        {
+          "properties": {
+            "absolute_tolerance": {
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "absolute_tolerance"
+          ]
+        },
+        {
+          "properties": {
+            "relative_tolerance": {
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "relative_tolerance"
+          ]
+        }
+      ]
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iteration_count",
+        "restart_count",
+        "operator_apply_count",
+        "preconditioner_apply_count"
+      ],
+      "properties": {
+        "iteration_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "restart_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        },
+        "operator_apply_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "preconditioner_apply_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4096
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "initial_residual_l2",
+        "solver_tolerance_l2",
+        "final_residual_l2",
+        "final_residual_linf",
+        "scaled_true_residual",
+        "solver_tolerance_passed",
+        "authoritative_plan_tolerance_passed"
+      ],
+      "properties": {
+        "initial_residual_l2": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "solver_tolerance_l2": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "final_residual_l2": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "final_residual_linf": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "scaled_true_residual": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "solver_tolerance_passed": {
+          "type": "boolean"
+        },
+        "authoritative_plan_tolerance_passed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "restartRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restart_index",
+        "start_iteration",
+        "end_iteration",
+        "arnoldi_step_count",
+        "preconditioner_apply_count",
+        "reorthogonalization_count",
+        "estimated_residual_l2",
+        "true_residual_l2",
+        "true_residual_linf",
+        "scaled_true_residual",
+        "solution_update_l2",
+        "termination_hint"
+      ],
+      "properties": {
+        "restart_index": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "start_iteration": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4095
+        },
+        "end_iteration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4096
+        },
+        "arnoldi_step_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "preconditioner_apply_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "reorthogonalization_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 16
+        },
+        "estimated_residual_l2": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "true_residual_l2": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "true_residual_linf": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "scaled_true_residual": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "solution_update_l2": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "termination_hint": {
+          "enum": [
+            "converged_happy_breakdown",
+            "converged_true_residual",
+            "arnoldi_invariant_subspace_breakdown",
+            "arnoldi_triangular_factor_breakdown",
+            "restart_completed"
+          ]
+        }
+      }
+    },
+    "arrayDescriptorBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "byte_length",
+        "data_hash"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "dtype": {
+          "const": "<f8"
+        },
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          ],
+          "items": false
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 17179869176,
+          "multipleOf": 8
+        },
+        "data_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "reducedSolutionDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/arrayDescriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "reduced_solution"
+            }
+          }
+        }
+      ]
+    },
+    "trueResidualDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/arrayDescriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "true_residual"
+            }
+          }
+        }
+      ]
+    },
+    "complexity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "retained_rank",
+        "preconditioner_apply_count",
+        "total_coarse_rhs_dot_count",
+        "total_small_forward_solve_count",
+        "total_small_backward_solve_count",
+        "total_basis_axpy_count",
+        "total_operator_basis_axpy_count",
+        "total_jacobi_multiply_count",
+        "additional_csr_apply_count_inside_preconditioner",
+        "dense_projector_elements",
+        "max_dense_square_dimension",
+        "runtime_complexity"
+      ],
+      "properties": {
+        "free_dof_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "retained_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "preconditioner_apply_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "total_coarse_rhs_dot_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "total_small_forward_solve_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "total_small_backward_solve_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "total_basis_axpy_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "total_operator_basis_axpy_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "total_jacobi_multiply_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "additional_csr_apply_count_inside_preconditioner": {
+          "const": 0
+        },
+        "dense_projector_elements": {
+          "const": 0
+        },
+        "max_dense_square_dimension": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "runtime_complexity": {
+          "const": "O(I*(N*k+k^2)) with fixed k; solver-wide O(N) unproven"
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cpu_reference",
+        "fixed_restart",
+        "right_preconditioned",
+        "positive_unshifted_jacobi_smoother",
+        "fixed_rank_coarse_correction",
+        "true_residual_replay",
+        "additional_csr_apply_inside_preconditioner",
+        "explicit_dense_n_by_n_projector",
+        "fallback_used",
+        "hip_execution",
+        "amg_hierarchy",
+        "domain_decomposition",
+        "mesh_independent_iterations_proven",
+        "end_to_end_o_n_proven",
+        "speedup_proven",
+        "commercial_ready"
+      ],
+      "properties": {
+        "cpu_reference": {
+          "const": true
+        },
+        "fixed_restart": {
+          "const": true
+        },
+        "right_preconditioned": {
+          "const": true
+        },
+        "positive_unshifted_jacobi_smoother": {
+          "const": true
+        },
+        "fixed_rank_coarse_correction": {
+          "const": true
+        },
+        "true_residual_replay": {
+          "const": true
+        },
+        "additional_csr_apply_inside_preconditioner": {
+          "const": false
+        },
+        "explicit_dense_n_by_n_projector": {
+          "const": false
+        },
+        "fallback_used": {
+          "const": false
+        },
+        "hip_execution": {
+          "const": false
+        },
+        "amg_hierarchy": {
+          "const": false
+        },
+        "domain_decomposition": {
+          "const": false
+        },
+        "mesh_independent_iterations_proven": {
+          "const": false
+        },
+        "end_to_end_o_n_proven": {
+          "const": false
+        },
+        "speedup_proven": {
+          "const": false
+        },
+        "commercial_ready": {
+          "const": false
+        }
+      }
+    }
+  }
+}

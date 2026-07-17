@@ -45,8 +45,8 @@ def test_high_load_registry_and_aggregate_public_exports_preserve_identity() -> 
         assert getattr(assembly_backend, name) is value
         assert name in engine_v2.__all__
         assert name in assembly_backend.__all__
-    assert len(engine_v2.__all__) == 1103
-    assert len(assembly_backend.__all__) == 930
+    assert len(engine_v2.__all__) == 1152
+    assert len(assembly_backend.__all__) == 960
     assert len(engine_v2.__all__) == len(set(engine_v2.__all__))
     assert len(assembly_backend.__all__) == len(set(assembly_backend.__all__))
     assert "_HighLoadRegistryTransactionV1" not in registry.__all__
@@ -215,5 +215,5 @@ print(len(engine_v2.__all__), len(assembly_backend.__all__), replayed.registry_h
     )
     assert isolated.returncode == 0, isolated.stdout + isolated.stderr
     assert isolated.stdout.strip() == (
-        "1103 930 sha256:72ea556471edb72a2262f870e76d4fc423e9d665da82f6d8e4d03dd6ae953f9e"
+        "1152 960 sha256:72ea556471edb72a2262f870e76d4fc423e9d665da82f6d8e4d03dd6ae953f9e"
     )

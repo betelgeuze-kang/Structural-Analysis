@@ -1,0 +1,550 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/cpu_fgmres_fixed_rank_coarse_space_v1.schema.json",
+  "title": "Engine v2 CPU FGMRES fixed-rank coarse space v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "algorithm_version",
+    "bindings",
+    "dimensions",
+    "policy",
+    "quality",
+    "arrays",
+    "complexity",
+    "claims",
+    "coarse_space_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-cpu-fgmres-fixed-rank-coarse-space.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_cpu_sparse_fixed_rank_multiplicative_coarse_fgmres_reference"
+    },
+    "algorithm_version": {
+      "const": "jacobi_energy_two_pass_mgs_multiplicative_coarse.v1"
+    },
+    "bindings": {
+      "$ref": "#/$defs/bindings"
+    },
+    "dimensions": {
+      "$ref": "#/$defs/dimensions"
+    },
+    "policy": {
+      "$ref": "#/$defs/policy"
+    },
+    "quality": {
+      "$ref": "#/$defs/quality"
+    },
+    "arrays": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/inverseSqrtDescriptor"
+        },
+        {
+          "$ref": "#/$defs/candidateDescriptor"
+        },
+        {
+          "$ref": "#/$defs/scaledBasisDescriptor"
+        },
+        {
+          "$ref": "#/$defs/physicalBasisDescriptor"
+        },
+        {
+          "$ref": "#/$defs/operatorBasisDescriptor"
+        },
+        {
+          "$ref": "#/$defs/coarseOperatorDescriptor"
+        },
+        {
+          "$ref": "#/$defs/choleskyDescriptor"
+        }
+      ],
+      "items": false
+    },
+    "complexity": {
+      "$ref": "#/$defs/complexity"
+    },
+    "claims": {
+      "$ref": "#/$defs/claims"
+    },
+    "coarse_space_hash": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "finiteNonnegative": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1.7976931348623157e+308
+    },
+    "positiveInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "nonnegativeInteger": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9223372036854775807
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_hash",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "symbolic_reuse_hash",
+        "partition_hash"
+      ],
+      "properties": {
+        "execution_plan_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operator_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "numeric_snapshot_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "symbolic_reuse_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "partition_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "reduced_nnz",
+        "candidate_count",
+        "rank_cap",
+        "retained_rank"
+      ],
+      "properties": {
+        "free_dof_count": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "reduced_nnz": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "candidate_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "rank_cap": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "retained_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "drop_tolerance",
+        "condition_limit"
+      ],
+      "properties": {
+        "drop_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "condition_limit": {
+          "type": "number",
+          "exclusiveMinimum": 1,
+          "maximum": 1.7976931348623157e+308
+        }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scaled_orthogonality_error_frobenius",
+        "scaled_orthogonality_error_max_abs",
+        "coarse_operator_condition_estimate"
+      ],
+      "properties": {
+        "scaled_orthogonality_error_frobenius": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "scaled_orthogonality_error_max_abs": {
+          "$ref": "#/$defs/finiteNonnegative"
+        },
+        "coarse_operator_condition_estimate": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1.7976931348623157e+308
+        }
+      }
+    },
+    "vectorShape": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/positiveInteger"
+        }
+      ],
+      "items": false
+    },
+    "matrixShape": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        {
+          "$ref": "#/$defs/positiveInteger"
+        }
+      ],
+      "items": false
+    },
+    "descriptorBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "byte_length",
+        "data_hash"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "dtype": {
+          "const": "<f8"
+        },
+        "shape": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/vectorShape"
+            },
+            {
+              "$ref": "#/$defs/matrixShape"
+            }
+          ]
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 8,
+          "maximum": 9223372036854775800,
+          "multipleOf": 8
+        },
+        "data_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "inverseSqrtDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/descriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "inverse_sqrt_diagonal"
+            },
+            "shape": {
+              "$ref": "#/$defs/vectorShape"
+            }
+          }
+        }
+      ]
+    },
+    "candidateDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/descriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "candidate_vectors"
+            },
+            "shape": {
+              "$ref": "#/$defs/matrixShape"
+            }
+          }
+        }
+      ]
+    },
+    "scaledBasisDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/descriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "scaled_basis_q"
+            },
+            "shape": {
+              "$ref": "#/$defs/matrixShape"
+            }
+          }
+        }
+      ]
+    },
+    "physicalBasisDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/descriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "physical_basis_z"
+            },
+            "shape": {
+              "$ref": "#/$defs/matrixShape"
+            }
+          }
+        }
+      ]
+    },
+    "operatorBasisDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/descriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "operator_basis_az"
+            },
+            "shape": {
+              "$ref": "#/$defs/matrixShape"
+            }
+          }
+        }
+      ]
+    },
+    "coarseOperatorDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/descriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "coarse_operator_e"
+            },
+            "shape": {
+              "$ref": "#/$defs/matrixShape"
+            }
+          }
+        }
+      ]
+    },
+    "choleskyDescriptor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/descriptorBase"
+        },
+        {
+          "properties": {
+            "name": {
+              "const": "coarse_cholesky_l"
+            },
+            "shape": {
+              "$ref": "#/$defs/matrixShape"
+            }
+          }
+        }
+      ]
+    },
+    "complexity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "reduced_nnz",
+        "candidate_count",
+        "retained_rank",
+        "rank_cap",
+        "basis_scaling_multiply_count",
+        "orthogonalization_dot_count",
+        "orthogonalization_axpy_count",
+        "normalization_divide_count",
+        "operator_basis_csr_apply_count",
+        "operator_basis_csr_multiply_count",
+        "coarse_operator_dot_count",
+        "per_apply_coarse_rhs_dot_count",
+        "per_apply_forward_substitution_row_count",
+        "per_apply_backward_substitution_row_count",
+        "per_apply_basis_axpy_count",
+        "per_apply_operator_basis_axpy_count",
+        "per_apply_jacobi_multiply_count",
+        "retained_scalar_count",
+        "dense_projector_elements",
+        "max_dense_square_dimension",
+        "build_complexity",
+        "application_complexity"
+      ],
+      "properties": {
+        "free_dof_count": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "reduced_nnz": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "candidate_count": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "retained_rank": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "rank_cap": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "basis_scaling_multiply_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "orthogonalization_dot_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "orthogonalization_axpy_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "normalization_divide_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "operator_basis_csr_apply_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "operator_basis_csr_multiply_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "coarse_operator_dot_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "per_apply_coarse_rhs_dot_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "per_apply_forward_substitution_row_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "per_apply_backward_substitution_row_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "per_apply_basis_axpy_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "per_apply_operator_basis_axpy_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "per_apply_jacobi_multiply_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "retained_scalar_count": {
+          "$ref": "#/$defs/nonnegativeInteger"
+        },
+        "dense_projector_elements": {
+          "const": 0
+        },
+        "max_dense_square_dimension": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "build_complexity": {
+          "const": "O(nnz*k + N*k^2 + k^3)"
+        },
+        "application_complexity": {
+          "const": "O(N*k + k^2)"
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sparse_execution_plan_v2_bound",
+        "jacobi_square_root_energy_scaling",
+        "deterministic_two_pass_modified_gram_schmidt",
+        "fixed_rank_bounded",
+        "multiplicative_coarse_then_jacobi",
+        "explicit_dense_n_by_n_projector",
+        "reverse_mode_autograd_used",
+        "hip_execution",
+        "amg_hierarchy",
+        "domain_decomposition",
+        "mesh_independent_iterations_proven",
+        "end_to_end_o_n_proven",
+        "commercial_ready"
+      ],
+      "properties": {
+        "sparse_execution_plan_v2_bound": {
+          "const": true
+        },
+        "jacobi_square_root_energy_scaling": {
+          "const": true
+        },
+        "deterministic_two_pass_modified_gram_schmidt": {
+          "const": true
+        },
+        "fixed_rank_bounded": {
+          "const": true
+        },
+        "multiplicative_coarse_then_jacobi": {
+          "const": true
+        },
+        "explicit_dense_n_by_n_projector": {
+          "const": false
+        },
+        "reverse_mode_autograd_used": {
+          "const": false
+        },
+        "hip_execution": {
+          "const": false
+        },
+        "amg_hierarchy": {
+          "const": false
+        },
+        "domain_decomposition": {
+          "const": false
+        },
+        "mesh_independent_iterations_proven": {
+          "const": false
+        },
+        "end_to_end_o_n_proven": {
+          "const": false
+        },
+        "commercial_ready": {
+          "const": false
+        }
+      }
+    }
+  }
+}

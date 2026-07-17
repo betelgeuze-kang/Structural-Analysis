@@ -3,7 +3,7 @@
 - Status: Phase 0 planning and implementation tracker
 - Authority: [Engine v2 master roadmap](structural-solver-engine-v2-master-roadmap.md)
 - Machine-readable source: [`validation/capabilities/engine_v2_capability_matrix.json`](../validation/capabilities/engine_v2_capability_matrix.json)
-- Current unpublished candidate milestone: v0.2.53 HIP FGMRES diagnostic restart TraceIR v1
+- Current local candidate milestone: v0.2.56 reviewer-root registry v3 runner-key lifecycle
 - `origin/main` inclusion은 주장하지 않음
 - Claim boundary: 이 matrix는 미래 목표와 구현상태를 추적하며 현재 release readiness를 승격하지 않는다.
 
@@ -15,6 +15,26 @@
 prototype 또는 legacy asset이 존재해도 `promotion_state=non_promoting`이면 Engine v2 결과를 확정할 수 없다.
 
 ## 현재 요약
+
+v0.2.56은 v0.2.54의 detached reviewer-root registry-v3 genesis와 v1 runner PoP 사이에
+epoch-2 enrollment와 epoch-3 activation 전이를 추가한다. 두 event는 전용 review domain
+아래 서로 다른 purpose/statement를 사용하고 ordered unique `2..3-of-3` reviewer signature를
+검증한다. Detached receipt는 source genesis, PoP, 두 event와 rolling registry hash를
+재생하고 attached result는 bootstrap source까지 deterministic하게 다시 결박한다. Focused
+unit/public/registry-public `26 passed in 34.97s`, adjacent trust chain `144 passed in 58.66s`,
+capability `18 passed`, public symbols Engine/Assembly/Solvers `1152/960/66`이다. Constructed
+detached state의 reviewer/enrolled/active count `3/1/1`은 synthetic contract일 뿐 package
+count는 계속 `0/0/0`이다. 실제 reviewer, isolated runner/HSM, package activation, external
+`gfx1100`, signed TraceIR, durable ledger, promotion/commercial은 미검증이다.
+
+v0.2.55는 기존 sparse `ExecutionPlanV2`와 CPU FGMRES recurrence 사이에 fixed-rank
+coarse right-preconditioner를 실제로 연결한다. Energy-scaled two-pass MGS basis `Z`,
+retained `AZ`, small SPD `E=Z^TAZ`를 사용해 dense `N×N` projector와 apply-time 추가 CSR
+matvec 없이 multiplicative coarse correction 뒤 Jacobi smoothing을 수행한다. `k<=16`의
+build/apply receipt는 각각 `O(nnz*k+N*k^2+k^3)`/`O(N*k+k^2)`이고 focused/public/schema
+`21 passed in 7.53s`, 기존 CPU FGMRES 인접 회귀 포함 `52 passed in 120.60s`, wall
+`121.19s`, peak RSS `132,432 KiB`다. 이 결과는 CPU 진단 seam이며 HIP/AMG/DD,
+mesh-independent iteration, 전체 O(N), speedup, ResultIR/promotion/commercial 증거는 아니다.
 
 v0.2.53은 검증된 general-history parity v2 receipt를 final solution·ResultIR·StateIR
 commit 권한과 분리된 `solver_restart_diagnostic_trace`로 투영한다. Restart 순서와
@@ -87,6 +107,8 @@ required는 `1 passed, 1 failed in 1.76s`였고 실패 이유는
 
 | Capability | Phase | Implementation | Promotion | 현재 경계 |
 | --- | --- | --- | --- | --- |
+| HIP FGMRES reviewer-root registry-v3 runner-key lifecycle v0.2.56 | Phase 0 | implemented | contract_only | Exact detached registry-v3 genesis receipt와 runner-key v1 PoP를 재검증하고 genesis registry hash에 결박된 epoch-2 enrollment, epoch-3 activation을 구성한다. 각 event는 immutable 세 root 중 ordered unique `2..3-of-3` reviewer quorum, event 시각의 root validity, runner activation의 strict order와 key half-open validity를 검증한다. Detached receipt는 constructed `3 reviewer/1 enrolled/1 active` state와 transition hash chain을 보존하고 attached result는 bootstrap source까지 replay한다. Strict outer schema와 nested 원본 validator, public identity, wrong-key/domain-replay/foreign-predecessor/source-substitution/promotion-claim/bool-int 적대 경계를 검증했다. Focused unit/public/registry-public `26 passed in 34.97s`, adjacent trust chain `144 passed in 58.66s`, capability `18 passed`, public symbols `1152/960/66`이다. 이는 synthetic detached contract이며 actual package count는 `0/0/0`; 실제 reviewer/isolated runner/HSM, package activation, trusted clock/monotonic ledger, external `gfx1100`, signed TraceIR, promotion/commercial은 false 또는 미검증이다. |
+| CPU FGMRES fixed-rank sparse coarse preconditioner v1 v0.2.55 | Phase 0 | implemented | non_promoting | `ExecutionPlanV2` reduced CSR에 결속된 physical candidate를 Jacobi square-root-energy 좌표에서 deterministic two-pass MGS로 직교화하고 `Z=DQ`, retained `AZ`, SPD `E=Z^TAZ=LL^T`를 구성한다. 실제 FGMRES 우측 전처리 호출은 `z_c=ZE^-1Z^Tr`, `z=z_c+diag(A)^-1(r-AZc)`를 사용하며 추가 CSR apply와 dense `N×N` projector는 0이다. `k<=16`, build `O(nnz*k+N*k^2+k^3)`, apply `O(N*k+k^2)` receipt를 재생한다. Teacher-mode frame 회귀는 Jacobi `2`회 대비 coarse `1`회 iteration과 sparse-direct 변위 parity를 보였고 focused/public/schema `21 passed in 7.53s`, 기존 CPU FGMRES 인접 회귀 포함 `52 passed in 120.60s`, wall `121.19s`, peak RSS `132,432 KiB`, public symbols `1152/960/66`이다. 이는 CPU 진단이며 HIP device residency, 실제 AMG/DD hierarchy, mesh-independent iteration, end-to-end O(N), speedup, ResultIR/promotion/commercial은 미증명이다. |
 | HIP FGMRES diagnostic restart TraceIR v1 v0.2.53 | Phase 0 | implemented | contract_only | General-history parity v2의 ordered restart rows를 diagnostic-only TraceIR로 deterministic projection한다. Source receipt/bindings/row hash, CPU/HIP vector hash reference, solution fixed gate와 residual diagnostic gate, 다섯 outward scalar envelope를 보존하고 embedded vector/result array 및 projection 추가 device/D2H/solve/export/state commit/fallback은 0이다. Detached receipt는 standalone provenance가 아니며 attached wrapper도 process-local exact source replay에 한정된다. Focused/public/general-history/capability `32 passed`, 인접 history `5/11/5 passed`, wheel 격리 `2+1 passed`, hardware harness `1 test collected`, public symbols `1085/912/47`, source aggregate `sha256:2661f374…deda1`을 확인했다. 실제 gfx agent 부재로 current-source required gate는 수치 경로 전에 fail-closed했다. Final solution/ResultIR/recovery, external `gfx1100`, signed/persistent provenance, process-wide host-copy-zero, end-to-end O(N), speedup, promotion/commercial은 false 또는 미검증이다. |
 | FP64 CSR normwise / FGMRES terminal metric parity v2 v0.2.49 | Phase 0 | implemented | contract_only | Retained v0.2.48 componentwise result를 full replay하고 outward exact-real norm interval과 reverse triangle inequality로 `L2/Linf/scaled-Linf` vector budget을 발행한다. CPU stable-L2와 candidate GPU-tree LASSQ-L2/max-Linf/scaled division을 각 residual에서 재생하고 record-to-interval evaluation error를 더한 total budget으로 terminal record 차이를 caller tolerance 없이 검증한다. Nonzero multiply/divide underflow의 upper bound는 최소 subnormal로 올리도록 v0.2.48 primitive도 보강했다. Legacy v1 schema hash `4da38578…6f050`, fixed `1e-12/1e-8` gate와 terminal/history semantics는 불변이고 migration action은 additive v2다. Focused `14 passed in 9.53s`, componentwise+normwise `34 passed in 14.57s`, legacy/capability cross-check `71 passed in 15.06s`, all-converged adjacent `140 passed in 395.82s (0:06:35)`, capability `13 passed`; actual local RX 6900 XT `gfx1030` 고하중 rotated `10 kN`, 4·5경간 `100 kN` gate는 exact completion D2H 3회, fallback 0으로 `1 passed in 226.25s (0:03:46)`, peak RSS `429,808 KiB`를 기록했다. 최대 ratio는 four-span `0.002952072072072049`, rotated L2 `0.0023069006688603657`; source aggregate `sha256:f88ab168…66dc3`는 전후 동일했다. Single dirty non-release wheel은 `1,427,672` bytes/`270` members, `sha256:da8eeef8…b355ae`, 격리 public symbols `932/746/93/10`이었다. Core actual backend/provenance, restart-history v2, high-load ResultIR/aggregate, formal proof, actual subnormal hardware, external `gfx1100`, signed/persistent evidence, end-to-end O(N), speedup, promotion/commercial은 false 또는 미완료다. |
 | FP64 CSR residual roundoff/backward-error v1 v0.2.48 | Phase 0 | implemented | contract_only | Backend-neutral public contract가 reduced CSR 각 행에서 `k=2*nnz+1`, `gamma_k`, `|b|+|A||x|`, `|A||delta_x|`, subnormal guard를 계산하고 모든 nonnegative bound 연산을 `nextafter(+inf)`로 outward rounding한다. Caller tolerance는 없고 네 vector immutable snapshot·strict schema·canonical receipt/result replay, componentwise backward error, sparse `O(nnz+n)` narrow work bound를 제공한다. Detached FGMRES adapter는 solution에 legacy fixed gate를 유지하면서 CPU-vs-candidate 및 candidate-vs-independent-`fsum` residual 계약을 발행하며 기존 v1 fixed residual/terminal/history gate는 완화하지 않는다. Focused/adapter `20 passed in 6.85s`, legacy v1 `24 passed in 1.83s`, current 3-file cross-check `56 passed in 7.06s`, 7-file adjacent cross-check `116 passed in 264.39s`, capability `12 passed in 0.31s`다. Required actual local RX 6900 XT `gfx1030` 원래 고하중 rotated `10 kN`, 4·5경간 `100 kN` gate는 strict solution, exact completion D2H 3회, fallback 0으로 `1 passed in 218.17s (0:03:38)`, peak RSS `428,820 KiB`를 기록했다. CPU-HIP/HIP-replay 최대 error/bound는 rotated `0.0210129/0.0354777`, 4·5경간 `0.00295208`이고 최대 HIP backward error는 `1.2238707852511078e-15`; source aggregate `sha256:d30dd5e…c176f6`는 전후 동일했다. Single dirty non-release wheel은 `1,411,419` bytes/`266` members, `sha256:1e61eac1…56e28`, 격리 public symbols `903/732/78/10`이며 reproducible/authoritative artifact 증거가 아니다. Core receipt actual backend/provenance, v1 terminal metric replacement, high-load ResultIR/aggregate, formal machine proof, subnormal hardware acceptance, external `gfx1100`, signed/persistent evidence, end-to-end O(N), speedup, promotion/commercial은 false 또는 미완료다. |
