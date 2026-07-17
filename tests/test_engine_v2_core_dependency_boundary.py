@@ -28,7 +28,6 @@ FORBIDDEN_FRAGMENTS = (
     ".results",
     ".solvers",
     "diagnostic_ir",
-    "equation_scaling",
     "result_ir",
 )
 
@@ -37,7 +36,7 @@ def _python_sources() -> tuple[Path, ...]:
     return tuple(sorted(path for root in CORE_ROOTS for path in root.rglob("*.py")))
 
 
-def test_pr_a_core_import_graph_is_backend_and_solver_neutral() -> None:
+def test_engine_v2_pr_b_import_graph_is_backend_and_solver_neutral() -> None:
     violations: list[str] = []
 
     for path in _python_sources():
@@ -74,7 +73,7 @@ def test_pr_a_core_import_graph_is_backend_and_solver_neutral() -> None:
     assert violations == []
 
 
-def test_pr_a_does_not_materialize_later_runtime_or_result_modules() -> None:
+def test_engine_v2_pr_b_does_not_materialize_later_runtime_or_result_modules() -> None:
     relative_sources = {
         path.relative_to(REPO_ROOT).as_posix() for path in _python_sources()
     }
@@ -87,6 +86,7 @@ def test_pr_a_does_not_materialize_later_runtime_or_result_modules() -> None:
         "src/structural_analysis/engine_v2/__init__.py",
         "src/structural_analysis/engine_v2/contracts/__init__.py",
         "src/structural_analysis/engine_v2/contracts/_canonical.py",
+        "src/structural_analysis/engine_v2/contracts/equation_scaling.py",
         "src/structural_analysis/engine_v2/contracts/execution_plan.py",
         "src/structural_analysis/engine_v2/contracts/state_ir.py",
         "src/structural_analysis/model_ir/__init__.py",

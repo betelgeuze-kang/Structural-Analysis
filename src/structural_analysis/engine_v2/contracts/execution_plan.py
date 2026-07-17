@@ -1,8 +1,8 @@
 """Backend-neutral immutable ExecutionPlan v1 contract.
 
 The contract freezes compiler-produced topology and sparse-pattern arrays.  It
-does not assemble an operator, select a CPU/HIP backend, run a solver, implement
-equation scaling, or create authoritative results.
+does not assemble an operator, select a CPU/HIP backend, run a solver, or create
+authoritative results.  Equation scaling can be bound through a typed extension.
 """
 
 from __future__ import annotations
@@ -395,6 +395,12 @@ def validate_execution_plan(plan: ExecutionPlan) -> ExecutionPlan:
             "/plan_hash",
             "Plan hash does not match the canonical manifest.",
         )
+    if "engine-v2:equation-scaling" in plan.extensions:
+        # Local import preserves the one-way contract dependency while allowing
+        # ExecutionPlan validation to fail closed on the typed PR-B extension.
+        from .equation_scaling import _validate_equation_scaling_binding_semantics
+
+        _validate_equation_scaling_binding_semantics(plan)
     return plan
 
 

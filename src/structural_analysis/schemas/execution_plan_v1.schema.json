@@ -75,7 +75,25 @@
     "extensions": {
       "type": "object",
       "propertyNames": {"pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"},
+      "properties": {
+        "engine-v2:equation-scaling": {"$ref": "#/$defs/equationScalingBinding"}
+      },
       "additionalProperties": true
+    },
+    "equationScalingBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "base_plan_hash", "scaling_hash",
+        "scale_vector_hash", "equation_order_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-equation-scaling.v1"},
+        "base_plan_hash": {"$ref": "#/$defs/sha256"},
+        "scaling_hash": {"$ref": "#/$defs/sha256"},
+        "scale_vector_hash": {"$ref": "#/$defs/sha256"},
+        "equation_order_hash": {"$ref": "#/$defs/sha256"}
+      }
     },
     "solverArtifactBindings": {
       "type": "object",
