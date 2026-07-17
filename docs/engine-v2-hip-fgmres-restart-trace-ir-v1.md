@@ -74,21 +74,33 @@ scaling, memory slope 또는 wall-clock speedup 증거가 아니다.
 
 ## 5. 검증
 
-- pure detached projection/adversarial contract: `8 passed`
+- pure detached projection/adversarial contract: `8 passed in 1.88s`
 - public API/schema resource: `2 passed`
 - general-history public compatibility: `5 passed`
-- capability matrix: `17 passed`
-- combined focused contract: `32 passed`
-- adjacent CPU checkpoint history / HIP history plan / RTC: `5 / 11 / 5 passed`
-- isolated wheel regressions: high-load aggregate public `2 passed`, ResultIR v3 package `1 passed`
-- hardware harness: `1 test collected`
+- capability matrix final replay: `17 passed in 0.34s`
+- trace/public/general-history/capability source contract: `32 tests collected`
+- exact-resource wheel isolated install/replay를 포함한 final focused set: `34 passed in 38.76s`, wall `39.38s`, peak RSS `126,936 KiB`
+- isolated wheel high-load/public regression: `2 passed in 38.84s`
+- 기존 ResultIR v3/DiagnosticIR/family DiagnosticIR 인접 권한 회귀: `34 passed in 362.33s`, wall `362.96s`, peak RSS `136,664 KiB`
 - public symbols: Engine v2 `1085`, assembly backend `912`, solvers `47`, 각각 unique
-- current source/schema/hardware-harness aggregate: `sha256:2661f3745b432bba1fd21aea0bf3e8bf0d8e12e5122c92c587dd49221efdeda1`
 
-현 namespace에 `/dev/kfd`와 `/dev/dri`가 없으므로 TraceIR이 포함된 current-source
-required `gfx1030` gate는 수치 경로 전에 `No real gfx agent was detected.`로
-fail-closed했다. v0.2.52의 이전 hardware 관찰은
-신규 TraceIR 실행 증거로 재분류하지 않는다.
+Current-source actual local RX 6900 XT `gfx1030` required gate는 v0.2.52와 동일한
+`F=24,M=2,I=5,R=3` partial-final fixture를 재실행하고 같은 live parity result에서
+attached trace를 생성했다.
+
+- trace rows: `3`, end iterations `(2,4,5)`, terminal trace row count `1`
+- embedded vector bytes/result arrays: `0/0`
+- trace projection additional device/D2H/solve/export/state-commit/fallback: 모두 `0`
+- retained completion D2H: `5/5`, fallback `0`
+- actual hardware gate: `1 passed in 103.32s`
+- wall clock / peak RSS: `103.90s` / `358,760 KiB`
+- run-scoped trace ID: `sha256:567e7df6979be3d1fccb8a2de851fdb3cbf883fb1edc9962cfbb536f029b6cfe`
+- run-scoped trace receipt: `sha256:ccecb0e39a2c5bc1e1aa6f643ffe887049fc4bbe6c07fa8883eb18327e3feb48`
+- 실행 전후 source/schema/hardware-harness aggregate: `sha256:2661f3745b432bba1fd21aea0bf3e8bf0d8e12e5122c92c587dd49221efdeda1`
+
+Trace identity는 process-local source receipt를 포함한 unsigned observation이며 standalone
+provenance가 아니다. Source aggregate는 required harness가 열거한 source/schema/kernel/harness
+집합에 한정된다.
 
 ## 6. Claim boundary와 다음 순서
 

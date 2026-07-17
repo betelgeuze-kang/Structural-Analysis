@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_fixed_rank_coarse_plan_v1.schema.json",
+  "title": "Engine v2 HIP FGMRES fixed-rank coarse application plan v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "application_abi_version",
+    "source_contract",
+    "dimensions",
+    "memory_plan",
+    "application_schedule",
+    "kernel",
+    "claim_boundary",
+    "plan_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-fixed-rank-coarse-plan.v1"
+    },
+    "capability_profile": {
+      "const": "phase0_hip_fgmres_fixed_rank_coarse_application_plan"
+    },
+    "application_abi_version": { "const": 1 },
+    "source_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fgmres_plan_id",
+        "fgmres_plan_hash",
+        "fgmres_memory_layout_hash",
+        "execution_plan_hash",
+        "operator_hash",
+        "numeric_snapshot_hash",
+        "partition_hash",
+        "coarse_space_schema_version",
+        "coarse_algorithm_version",
+        "coarse_space_hash",
+        "physical_basis_data_hash",
+        "operator_basis_data_hash",
+        "cholesky_data_hash"
+      ],
+      "properties": {
+        "fgmres_plan_id": { "type": "string", "minLength": 1 },
+        "fgmres_plan_hash": { "$ref": "#/$defs/hash" },
+        "fgmres_memory_layout_hash": { "$ref": "#/$defs/hash" },
+        "execution_plan_hash": { "$ref": "#/$defs/hash" },
+        "operator_hash": { "$ref": "#/$defs/hash" },
+        "numeric_snapshot_hash": { "$ref": "#/$defs/hash" },
+        "partition_hash": { "$ref": "#/$defs/hash" },
+        "coarse_space_schema_version": {
+          "const": "structural-analysis-cpu-fgmres-fixed-rank-coarse-space.v1"
+        },
+        "coarse_algorithm_version": {
+          "const": "jacobi_energy_two_pass_mgs_multiplicative_coarse.v1"
+        },
+        "coarse_space_hash": { "$ref": "#/$defs/hash" },
+        "physical_basis_data_hash": { "$ref": "#/$defs/hash" },
+        "operator_basis_data_hash": { "$ref": "#/$defs/hash" },
+        "cholesky_data_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "reduced_nnz",
+        "restart_dimension",
+        "max_iterations",
+        "retained_rank",
+        "rank_cap"
+      ],
+      "properties": {
+        "free_dof_count": { "type": "integer", "minimum": 1 },
+        "reduced_nnz": { "type": "integer", "minimum": 1 },
+        "restart_dimension": { "type": "integer", "minimum": 1 },
+        "max_iterations": { "type": "integer", "minimum": 0 },
+        "retained_rank": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        },
+        "rank_cap": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 16
+        }
+      }
+    },
+    "memory_plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buffers",
+        "borrowed_device_byte_span",
+        "owned_device_byte_length",
+        "static_upload_copy_count",
+        "static_upload_byte_count",
+        "memory_layout_hash"
+      ],
+      "properties": {
+        "buffers": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": { "$ref": "#/$defs/buffer" }
+        },
+        "borrowed_device_byte_span": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "owned_device_byte_length": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "static_upload_copy_count": { "const": 3 },
+        "static_upload_byte_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "memory_layout_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "application_schedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "launches",
+        "kernel_launch_count",
+        "h2d_copy_count",
+        "d2h_copy_count",
+        "csr_apply_count",
+        "allocation_count",
+        "synchronization_count",
+        "dense_projector_element_count",
+        "work_complexity"
+      ],
+      "properties": {
+        "launches": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/launch" }
+        },
+        "kernel_launch_count": { "const": 4 },
+        "h2d_copy_count": { "const": 0 },
+        "d2h_copy_count": { "const": 0 },
+        "csr_apply_count": { "const": 0 },
+        "allocation_count": { "const": 0 },
+        "synchronization_count": { "const": 0 },
+        "dense_projector_element_count": { "const": 0 },
+        "work_complexity": { "const": "O(N*k+k^2) with fixed k<=16" }
+      }
+    },
+    "kernel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_resource",
+        "source_hash",
+        "compile_options",
+        "symbols",
+        "abi_hash"
+      ],
+      "properties": {
+        "source_resource": {
+          "const": "kernels/engine_v2_fgmres_fixed_rank_coarse_v1.hip.cpp"
+        },
+        "source_hash": { "$ref": "#/$defs/hash" },
+        "compile_options": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "-O3" },
+            { "const": "-std=c++17" },
+            { "const": "-ffp-contract=off" }
+          ],
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "symbols": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "engine_v2_fgmres_fixed_rank_coarse_prepare_v1" },
+            { "const": "engine_v2_fgmres_fixed_rank_coarse_dot_v1" },
+            { "const": "engine_v2_fgmres_fixed_rank_coarse_solve_v1" },
+            { "const": "engine_v2_fgmres_fixed_rank_coarse_apply_v1" }
+          ],
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "abi_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compile_time_plan_only",
+        "fixed_source_present",
+        "static_upload_planned",
+        "application_iteration_h2d_zero_planned",
+        "application_iteration_d2h_zero_planned",
+        "application_additional_csr_zero_planned",
+        "kernel_compiled",
+        "device_allocation_performed",
+        "device_upload_performed",
+        "execution_performed",
+        "numerical_parity_proven",
+        "iteration_host_copy_zero_proven",
+        "amg_or_dd_proven",
+        "mesh_independent_iterations_proven",
+        "end_to_end_O_N_proven",
+        "speedup_proven",
+        "promotion_eligible",
+        "commercial_ready",
+        "python_semantic_replay_required"
+      ],
+      "properties": {
+        "compile_time_plan_only": { "const": true },
+        "fixed_source_present": { "const": true },
+        "static_upload_planned": { "const": true },
+        "application_iteration_h2d_zero_planned": { "const": true },
+        "application_iteration_d2h_zero_planned": { "const": true },
+        "application_additional_csr_zero_planned": { "const": true },
+        "kernel_compiled": { "const": false },
+        "device_allocation_performed": { "const": false },
+        "device_upload_performed": { "const": false },
+        "execution_performed": { "const": false },
+        "numerical_parity_proven": { "const": false },
+        "iteration_host_copy_zero_proven": { "const": false },
+        "amg_or_dd_proven": { "const": false },
+        "mesh_independent_iterations_proven": { "const": false },
+        "end_to_end_O_N_proven": { "const": false },
+        "speedup_proven": { "const": false },
+        "promotion_eligible": { "const": false },
+        "commercial_ready": { "const": false },
+        "python_semantic_replay_required": { "const": true }
+      }
+    },
+    "plan_hash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "buffer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "ownership",
+        "dtype",
+        "shape",
+        "element_count",
+        "byte_length",
+        "access",
+        "source",
+        "initialization",
+        "layout",
+        "memory_space"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "jacobi_inverse",
+            "basis_v",
+            "preconditioned_basis_z",
+            "coarse_physical_basis_z",
+            "coarse_operator_basis_az",
+            "coarse_cholesky_l",
+            "coarse_rhs",
+            "coarse_coefficients",
+            "coarse_status"
+          ]
+        },
+        "ownership": { "enum": ["borrowed", "owned"] },
+        "dtype": { "enum": ["<f8", "<u4"] },
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 1 }
+        },
+        "element_count": { "type": "integer", "minimum": 1 },
+        "byte_length": { "type": "integer", "minimum": 1 },
+        "access": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "initialization": { "type": "string", "minLength": 1 },
+        "layout": { "type": "string", "minLength": 1 },
+        "memory_space": { "const": "hip_device" }
+      }
+    },
+    "launch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ordinal",
+        "symbol",
+        "grid",
+        "block",
+        "grid_formula",
+        "reads",
+        "writes"
+      ],
+      "properties": {
+        "ordinal": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "symbol": {
+          "enum": [
+            "engine_v2_fgmres_fixed_rank_coarse_prepare_v1",
+            "engine_v2_fgmres_fixed_rank_coarse_dot_v1",
+            "engine_v2_fgmres_fixed_rank_coarse_solve_v1",
+            "engine_v2_fgmres_fixed_rank_coarse_apply_v1"
+          ]
+        },
+        "grid": { "$ref": "#/$defs/dim3" },
+        "block": { "$ref": "#/$defs/dim3" },
+        "grid_formula": { "type": "string", "minLength": 1 },
+        "reads": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "writes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "dim3": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "integer", "minimum": 1 },
+        { "const": 1 },
+        { "const": 1 }
+      ],
+      "minItems": 3,
+      "maxItems": 3
+    }
+  }
+}

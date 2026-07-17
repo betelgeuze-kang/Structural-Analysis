@@ -14,8 +14,8 @@ def test_runner_key_lifecycle_v3_public_surface_is_unique_and_identity_preservin
 ):
     assert len(lifecycle_v3.__all__) == 30
     assert len(lifecycle_v3.__all__) == len(set(lifecycle_v3.__all__))
-    assert len(engine_v2.__all__) == 1152
-    assert len(assembly_backend.__all__) == 960
+    assert len(engine_v2.__all__) == 1176
+    assert len(assembly_backend.__all__) == 984
     assert len(solvers.__all__) == 66
     assert len(engine_v2.__all__) == len(set(engine_v2.__all__))
     assert len(assembly_backend.__all__) == len(set(assembly_backend.__all__))

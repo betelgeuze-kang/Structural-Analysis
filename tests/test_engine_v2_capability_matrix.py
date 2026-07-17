@@ -1493,6 +1493,70 @@ def test_cpu_fgmres_fixed_rank_coarse_stays_non_promoting() -> None:
     )
 
 
+def test_hip_fgmres_fixed_rank_coarse_plan_and_rtc_stay_non_authoritative() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    plan = rows["hip_fgmres_fixed_rank_coarse_application_plan_v1"]
+    assert plan["implementation_state"] == "implemented"
+    assert plan["promotion_state"] == "contract_only"
+    assert {
+        "exact_cpu_fixed_rank_coarse_artifact_and_hip_fgmres_plan_binding",
+        "three_exact_parent_buffer_borrows_and_six_additive_owned_buffer_extents",
+        "four_kernel_same_stream_application_abi",
+        "zero_application_h2d_d2h_allocation_sync_and_additional_csr_apply",
+        "zero_dense_n_by_n_projector",
+        "package_source_hiprtc_compilation_for_gfx1030_and_gfx1100",
+    }.issubset(plan["supported_scope"])
+    assert {
+        "allocation_lineage_safe_live_context",
+        "canonical_recurrence_v2_integration",
+        "iteration_host_copy_zero_process_wide",
+        "actual_external_gfx1100_execution",
+        "performance_or_speedup_claim",
+        "commercial_readiness",
+    }.issubset(plan["explicit_exclusions"])
+    assert plan["claim_level"] == (
+        "fixed_source_hip_fgmres_fixed_rank_coarse_application_plan_contract_"
+        "only_not_live_context_or_commercial_solver"
+    )
+
+    rtc = rows["hip_fgmres_fixed_rank_coarse_rtc_loader_v1"]
+    assert rtc["implementation_state"] == "implemented"
+    assert rtc["promotion_state"] == "non_promoting"
+    assert {
+        "package_owned_fixed_source_hiprtc_compile_load_and_four_symbol_binding",
+        "exact_four_launch_same_stream_application",
+        "aligned_disjoint_full_extent_uintptr_checked_buffer_ranges",
+        "block_uniform_status_gate_before_dot_barrier",
+        "pessimistic_launch_uncertainty_prearm_across_baseexception_boundaries",
+        "uncertain_unload_is_nonretryable_and_rejected_unload_is_retryable",
+        "serialized_concurrent_launch_fence_and_close_operations",
+        "reentrant_module_operations_fail_closed_without_deadlock",
+        "source_only_hiprtc_compilation_for_gfx1030_and_gfx1100",
+        "current_source_actual_local_gfx1030_compile_load_bind_and_close",
+        "current_source_actual_local_gfx1030_four_of_four_launches_status_zero",
+        "current_source_actual_local_gfx1030_application_window_copy_delta_zero",
+        "current_source_actual_local_gfx1030_exact_fp64_cpu_parity",
+        "public_symbols_engine1176_assembly984_solvers66_unique",
+    }.issubset(rtc["supported_scope"])
+    assert {
+        "allocation_lineage_safe_coarse_execution_context",
+        "exact_live_parent_allocation_borrowing",
+        "canonical_recurrence_v2_jacobi_replacement",
+        "superseded_v0258_hardware_observation_as_current_source_evidence",
+        "actual_external_gfx1100_module_load_or_execution",
+        "end_to_end_on_complexity",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(rtc["explicit_exclusions"])
+    assert rtc["claim_level"] == (
+        "current_source_actual_local_gfx1030_hardened_fixed_rank_coarse_"
+        "diagnostic_nonpromoting_not_allocation_lineage_recurrence_integrated_"
+        "or_commercial_solver"
+    )
+
+
 def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None:
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}
