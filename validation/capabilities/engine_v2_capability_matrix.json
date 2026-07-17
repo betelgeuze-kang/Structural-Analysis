@@ -1485,7 +1485,7 @@
         "ADR-007"
       ],
       "verification_cases": [
-        "focused_test_double_context_lifecycle_and_adversarial_24_passed_in_190p73s",
+        "focused_test_double_context_lifecycle_and_adversarial_24_passed_in_194p48s",
         "exact_parent_three_owned_six_static_upload_three_setup_fence_one",
         "application_four_launches_and_zero_host_runtime_activity_delta",
         "partial_launch_fence_failure_known_not_freed_and_uncertain_unload_paths",
@@ -1493,9 +1493,9 @@
         "strict_context_application_schema_and_pointer_free_forgery_rejection",
         "public_context_plan_loader_object_identity_two_passed",
         "capability_matrix_19_passed_in_0p24s",
-        "adjacent_live_checkpoint_context_42_passed_in_203p57s",
-        "adjacent_rtc_and_public_api_45_passed_in_50p81s",
-        "required_local_gfx1030_live_context_hardware_one_passed_in_23p23s",
+        "adjacent_live_checkpoint_context_42_passed_in_208p55s",
+        "adjacent_rtc_and_public_api_45_passed_in_51p44s",
+        "required_local_gfx1030_live_context_hardware_one_passed_in_23p55s",
         "actual_gfx1030_f12_k2_owned452_static_h2d3_416_bytes_fences2_launches4_status0_copy_delta_zero_zero_zero_cpu_exact"
       ],
       "evidence_paths": [

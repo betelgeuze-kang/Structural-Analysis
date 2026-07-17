@@ -116,12 +116,12 @@ Process-local provenance requires the retained exact context through
 
 The current focused runs are:
 
-- context lifecycle/adversarial suite: `24 passed in 190.73s`,
+- context lifecycle/adversarial suite: `24 passed in 194.48s`,
 - plan/loader/public suite: `37 passed, 2 hardware skipped in 12.33s`,
 - capability matrix: `19 passed in 0.24s`,
-- adjacent live-checkpoint context suite: `42 passed in 203.57s`,
-- adjacent RTC/public API suite: `45 passed in 50.81s`,
-- required local `gfx1030` live-context hardware gate: `1 passed in 23.23s`.
+- adjacent live-checkpoint context suite: `42 passed in 208.55s`,
+- adjacent RTC/public API suite: `45 passed in 51.44s`,
+- required local `gfx1030` live-context hardware gate: `1 passed in 23.55s`.
 
 The current test-double suite covers:
 

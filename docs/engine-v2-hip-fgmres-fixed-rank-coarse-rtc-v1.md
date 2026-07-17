@@ -69,7 +69,7 @@ The safety-hardened current source is:
 - v0.2.60 compile handoff return-boundary/direct interruption: `2 passed`,
 - v0.2.60 restricted plan/loader/public run: `37 passed, 2 hardware skipped in 12.33s`,
 - v0.2.60 required allocation-lineage live-context `gfx1030` gate:
-  `1 passed in 23.23s`,
+  `1 passed in 23.55s`,
 - current public surfaces: Engine/Assembly/Solvers `1196/1004/66`.
 
 Both source-only HIPRTC compilations completed with empty logs. A device-visible
