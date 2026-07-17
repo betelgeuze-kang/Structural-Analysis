@@ -1,0 +1,85 @@
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+CORE_ROOTS = (
+    REPO_ROOT / "src/structural_analysis/engine_v2",
+    REPO_ROOT / "src/structural_analysis/model_ir",
+)
+ALLOWED_EXTERNAL_ROOTS = {"jsonschema", "numpy", "structural_analysis"}
+ALLOWED_INTERNAL_PREFIXES = (
+    "structural_analysis.engine_v2.contracts",
+    "structural_analysis.model_ir",
+)
+FORBIDDEN_FRAGMENTS = (
+    ".assembly_backend",
+    ".backends",
+    ".hip",
+    ".rocm",
+    ".results",
+    ".solvers",
+    "diagnostic_ir",
+    "equation_scaling",
+    "result_ir",
+)
+
+
+def _python_sources() -> tuple[Path, ...]:
+    return tuple(sorted(path for root in CORE_ROOTS for path in root.rglob("*.py")))
+
+
+def test_pr_a_core_import_graph_is_backend_and_solver_neutral() -> None:
+    violations: list[str] = []
+
+    for path in _python_sources():
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            names: list[str] = []
+            if isinstance(node, ast.Import):
+                names.extend(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                names.append(node.module)
+            elif (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "__import__"
+            ):
+                violations.append(f"{path}: dynamic __import__ is forbidden")
+
+            for name in names:
+                root = name.split(".", 1)[0]
+                if root not in sys.stdlib_module_names | ALLOWED_EXTERNAL_ROOTS:
+                    violations.append(f"{path}: undeclared dependency {name}")
+                if name.startswith("structural_analysis") and not name.startswith(
+                    ALLOWED_INTERNAL_PREFIXES
+                ):
+                    violations.append(f"{path}: non-core internal dependency {name}")
+                if any(fragment in name.lower() for fragment in FORBIDDEN_FRAGMENTS):
+                    violations.append(f"{path}: later-PR dependency {name}")
+
+    assert violations == []
+
+
+def test_pr_a_does_not_materialize_later_runtime_or_result_modules() -> None:
+    relative_sources = {
+        path.relative_to(REPO_ROOT).as_posix() for path in _python_sources()
+    }
+
+    assert all(
+        not any(fragment in source.lower() for fragment in FORBIDDEN_FRAGMENTS)
+        for source in relative_sources
+    )
+    assert relative_sources == {
+        "src/structural_analysis/engine_v2/__init__.py",
+        "src/structural_analysis/engine_v2/contracts/__init__.py",
+        "src/structural_analysis/engine_v2/contracts/_canonical.py",
+        "src/structural_analysis/engine_v2/contracts/execution_plan.py",
+        "src/structural_analysis/engine_v2/contracts/state_ir.py",
+        "src/structural_analysis/model_ir/__init__.py",
+        "src/structural_analysis/model_ir/loader.py",
+        "src/structural_analysis/model_ir/types.py",
+        "src/structural_analysis/model_ir/validation.py",
+    }
