@@ -433,6 +433,10 @@ class HipFgmresLiveCheckpointExecutionContextV1:
         self._fixed_rank_coarse_child_token: object | None = None
         self._fixed_rank_coarse_child_context: object | None = None
         self._fixed_rank_coarse_child_epoch = 0
+        self._fixed_rank_coarse_overlay_token: object | None = None
+        self._fixed_rank_coarse_overlay_context: object | None = None
+        self._fixed_rank_coarse_overlay_coarse_context: object | None = None
+        self._fixed_rank_coarse_overlay_deferred_poison_detail: str | None = None
         self._closing = False
 
     @property
@@ -474,10 +478,16 @@ class HipFgmresLiveCheckpointExecutionContextV1:
                     "hip_fgmres_live_checkpoint_coarse_child_active",
                     "/lifetime/fixed_rank_coarse_child",
                 )
+            if self._fixed_rank_coarse_overlay_token is not None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_overlay_active",
+                    "/lifetime/fixed_rank_coarse_overlay",
+                )
             if self._closing:
                 _fail("hip_fgmres_live_checkpoint_cleanup_reentrant", "/cleanup")
             self._closing = True
             try:
+                self._flush_fixed_rank_coarse_overlay_deferred_poison()
                 self._close_locked()
             finally:
                 self._closing = False
@@ -549,6 +559,7 @@ class HipFgmresLiveCheckpointExecutionContextV1:
             if (
                 self._closed
                 or self._closing
+                or self._fixed_rank_coarse_overlay_deferred_poison_detail is not None
                 or self._fixed_rank_coarse_child_token is not None
                 or self._fixed_rank_coarse_child_context is not None
             ):
@@ -599,12 +610,33 @@ class HipFgmresLiveCheckpointExecutionContextV1:
         self,
         token: object,
         child_context: object,
+        *,
+        overlay_token: object | None = None,
+        overlay_context: object | None = None,
+        pending_operation_bounds: tuple[int, int] = (0, 0),
     ) -> _HipFgmresFixedRankCoarseParentAuthorityV1:
         """Issue the exact parent-three projection for one live coarse child."""
 
         with self._queue_lock:
             self._require_fixed_rank_coarse_child(token, child_context)
-            self._validate_authority()
+            if overlay_token is None and overlay_context is None:
+                self._validate_authority()
+            elif overlay_token is not None and overlay_context is not None:
+                self._require_fixed_rank_coarse_overlay(
+                    overlay_token,
+                    overlay_context,
+                )
+                _context_validate_authority_common(
+                    self,
+                    canonical_child_token=None,
+                    pending_operation_bounds=pending_operation_bounds,
+                    force_leased_pending_snapshot=True,
+                )
+            else:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_overlay_authority_invalid",
+                    "/lifetime/fixed_rank_coarse_overlay/authority",
+                )
             if (
                 self._recurrence_plan is None
                 or self._source_plan is None
@@ -694,11 +726,195 @@ class HipFgmresLiveCheckpointExecutionContextV1:
                     "hip_fgmres_live_checkpoint_coarse_authority_invalid",
                     "/lifetime/fixed_rank_coarse_child/authority",
                 )
+            if (
+                self._fixed_rank_coarse_overlay_token is not None
+                and self._fixed_rank_coarse_overlay_context is not None
+                and self._fixed_rank_coarse_overlay_coarse_context is child_context
+            ):
+                # The integrated recurrence owners still need an unpoisoned
+                # semantic parent long enough to return their exact leases.
+                # Their own state machines and the coarse/overlay contexts are
+                # poisoned immediately; publish the shared primitive poison
+                # only once every recurrence/coarse child has been released
+                # and the live context begins terminal cleanup.
+                if self._fixed_rank_coarse_overlay_deferred_poison_detail is None:
+                    self._fixed_rank_coarse_overlay_deferred_poison_detail = _detail(
+                        detail
+                    )
+                return
             self._parent._poison_fgmres_solver_child(
                 self._token,
                 self._source_apply,
                 _detail(detail),
             )
+
+    def _flush_fixed_rank_coarse_overlay_deferred_poison(self) -> None:
+        detail = self._fixed_rank_coarse_overlay_deferred_poison_detail
+        if detail is None:
+            return
+        if self._parent is None or self._source_apply is None:
+            _fail(
+                "hip_fgmres_live_checkpoint_coarse_authority_invalid",
+                "/lifetime/fixed_rank_coarse_overlay/deferred_poison",
+            )
+        self._parent._poison_fgmres_solver_child(
+            self._token,
+            self._source_apply,
+            detail,
+        )
+        self._fixed_rank_coarse_overlay_deferred_poison_detail = None
+
+    def _reserve_fixed_rank_coarse_overlay(
+        self,
+        token: object,
+        overlay_context: object,
+        coarse_context: object,
+    ) -> object:
+        """Register one exact same-stream recurrence overlay route."""
+
+        if (
+            type(token) is not object
+            or overlay_context is None
+            or coarse_context is None
+        ):
+            _fail(
+                "hip_fgmres_live_checkpoint_coarse_overlay_token_invalid",
+                "/lifetime/fixed_rank_coarse_overlay",
+            )
+        with self._queue_lock:
+            if (
+                self._closed
+                or self._closing
+                or self._fixed_rank_coarse_overlay_token is not None
+                or self._fixed_rank_coarse_overlay_context is not None
+                or coarse_context is not self._fixed_rank_coarse_child_context
+            ):
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_overlay_unavailable",
+                    "/lifetime/fixed_rank_coarse_overlay",
+                )
+            self._validate_authority()
+            self._fixed_rank_coarse_overlay_token = token
+            self._fixed_rank_coarse_overlay_context = overlay_context
+            self._fixed_rank_coarse_overlay_coarse_context = coarse_context
+            return token
+
+    def _require_fixed_rank_coarse_overlay(
+        self,
+        token: object,
+        overlay_context: object,
+    ) -> None:
+        if (
+            token is not self._fixed_rank_coarse_overlay_token
+            or overlay_context is not self._fixed_rank_coarse_overlay_context
+            or self._fixed_rank_coarse_overlay_coarse_context
+            is not self._fixed_rank_coarse_child_context
+            or self._closed
+            or self._closing
+        ):
+            _fail(
+                "hip_fgmres_live_checkpoint_coarse_overlay_token_invalid",
+                "/lifetime/fixed_rank_coarse_overlay",
+            )
+
+    def _enqueue_fixed_rank_coarse_overlay_after_jacobi(
+        self,
+        *,
+        phase: str,
+        owner: object,
+        expected_restart: int,
+        expected_column: int,
+        logical_index: int,
+    ) -> object | None:
+        """Invoke the registered overlay immediately after one Jacobi row."""
+
+        with self._queue_lock:
+            overlay = self._fixed_rank_coarse_overlay_context
+            token = self._fixed_rank_coarse_overlay_token
+            if overlay is None and token is None:
+                return None
+            if overlay is None or token is None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_overlay_invalid",
+                    "/lifetime/fixed_rank_coarse_overlay",
+                )
+            self._require_fixed_rank_coarse_overlay(token, overlay)
+            return overlay._enqueue_after_jacobi(  # type: ignore[attr-defined]
+                token,
+                self,
+                phase=phase,
+                owner=owner,
+                expected_restart=expected_restart,
+                expected_column=expected_column,
+                logical_index=logical_index,
+            )
+
+    def _acknowledge_fixed_rank_coarse_overlay_fence(
+        self,
+        *,
+        phase: str,
+        owner: object,
+    ) -> int:
+        """Forward an already-observed exact-stream fence to the overlay."""
+
+        with self._queue_lock:
+            overlay = self._fixed_rank_coarse_overlay_context
+            token = self._fixed_rank_coarse_overlay_token
+            if overlay is None and token is None:
+                return 0
+            if overlay is None or token is None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_overlay_invalid",
+                    "/lifetime/fixed_rank_coarse_overlay",
+                )
+            self._require_fixed_rank_coarse_overlay(token, overlay)
+            return int(
+                overlay._acknowledge_parent_fence(  # type: ignore[attr-defined]
+                    token,
+                    self,
+                    phase=phase,
+                    owner=owner,
+                )
+            )
+
+    def _publish_fixed_rank_coarse_overlay_global_receipt(
+        self,
+        *,
+        owner: object,
+        receipt: object,
+    ) -> None:
+        """Bind the final global receipt after its completion publication."""
+
+        with self._queue_lock:
+            overlay = self._fixed_rank_coarse_overlay_context
+            token = self._fixed_rank_coarse_overlay_token
+            if overlay is None and token is None:
+                return
+            if overlay is None or token is None:
+                _fail(
+                    "hip_fgmres_live_checkpoint_coarse_overlay_invalid",
+                    "/lifetime/fixed_rank_coarse_overlay",
+                )
+            self._require_fixed_rank_coarse_overlay(token, overlay)
+            overlay._bind_global_recurrence_receipt(  # type: ignore[attr-defined]
+                token,
+                self,
+                owner=owner,
+                receipt=receipt,
+            )
+
+    def _release_fixed_rank_coarse_overlay(
+        self,
+        token: object,
+        overlay_context: object,
+    ) -> None:
+        """Release the route after the overlay child becomes terminal."""
+
+        with self._queue_lock:
+            self._require_fixed_rank_coarse_overlay(token, overlay_context)
+            self._fixed_rank_coarse_overlay_token = None
+            self._fixed_rank_coarse_overlay_context = None
+            self._fixed_rank_coarse_overlay_coarse_context = None
 
     def _adopt_allocation_owner(self, owner: HipAllocationOwnerV1 | None) -> None:
         if owner is None:
@@ -2124,6 +2340,7 @@ def _context_validate_authority_common(
     *,
     canonical_child_token: object | None,
     pending_operation_bounds: tuple[int, int],
+    force_leased_pending_snapshot: bool = False,
 ) -> None:
     if (
         type(pending_operation_bounds) is not tuple
@@ -2141,7 +2358,9 @@ def _context_validate_authority_common(
         _context_validate_authority_locked(
             self,
             pending_operation_bounds=pending_operation_bounds,
-            use_leased_pending_snapshot=canonical_child_token is not None,
+            use_leased_pending_snapshot=(
+                canonical_child_token is not None or force_leased_pending_snapshot
+            ),
         )
 
 

@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_fixed_rank_coarse_recurrence_overlay_v1.schema.json",
+  "title": "HIP FGMRES fixed-rank coarse recurrence overlay v1 receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "context_id",
+    "evidence_scope",
+    "actual_backend",
+    "promotion_eligible",
+    "reason",
+    "bindings",
+    "dimensions",
+    "applications",
+    "application_sequence_hash",
+    "global_context_id",
+    "global_receipt_hash",
+    "terminal_observation_receipt_hash",
+    "terminal_outcome_hash",
+    "telemetry",
+    "claims",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-fixed-rank-coarse-recurrence-overlay.v1"
+    },
+    "status": {
+      "enum": [
+        "context_ready",
+        "canonical_overlay_pending",
+        "canonical_fenced",
+        "global_overlay_pending",
+        "recurrence_fenced",
+        "terminal_bound",
+        "poisoned",
+        "cleanup_failed",
+        "context_closed"
+      ]
+    },
+    "context_id": { "$ref": "#/$defs/hash" },
+    "evidence_scope": {
+      "const": "same_stream_canonical_and_global_recurrence_overlay_non_promoting"
+    },
+    "actual_backend": { "enum": ["hip", "test_double"] },
+    "promotion_eligible": { "const": false },
+    "reason": {
+      "anyOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/reason" }
+      ]
+    },
+    "bindings": { "$ref": "#/$defs/bindings" },
+    "dimensions": { "$ref": "#/$defs/dimensions" },
+    "applications": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/application" }
+    },
+    "application_sequence_hash": { "$ref": "#/$defs/hash" },
+    "global_context_id": { "$ref": "#/$defs/hash" },
+    "global_receipt_hash": { "$ref": "#/$defs/hash" },
+    "terminal_observation_receipt_hash": { "$ref": "#/$defs/hash" },
+    "terminal_outcome_hash": { "$ref": "#/$defs/hash" },
+    "telemetry": { "$ref": "#/$defs/telemetry" },
+    "claims": { "$ref": "#/$defs/claims" },
+    "receipt_hash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "reason": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "detail"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "detail": { "type": "string" }
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "live_checkpoint_context_id",
+        "live_checkpoint_opening_receipt_hash",
+        "coarse_context_id",
+        "coarse_context_opening_receipt_hash",
+        "source_fgmres_plan_hash",
+        "recurrence_plan_hash",
+        "recurrence_kernel_identity_hash",
+        "recurrence_kernel_source_sha256",
+        "coarse_plan_hash",
+        "coarse_space_hash",
+        "coarse_kernel_identity_hash",
+        "coarse_kernel_source_sha256",
+        "full_schedule_hash",
+        "sealed_prefix_schedule_hash",
+        "continuation_schedule_hash"
+      ],
+      "properties": {
+        "live_checkpoint_context_id": { "$ref": "#/$defs/hash" },
+        "live_checkpoint_opening_receipt_hash": { "$ref": "#/$defs/hash" },
+        "coarse_context_id": { "$ref": "#/$defs/hash" },
+        "coarse_context_opening_receipt_hash": { "$ref": "#/$defs/hash" },
+        "source_fgmres_plan_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_plan_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_kernel_identity_hash": { "$ref": "#/$defs/hash" },
+        "recurrence_kernel_source_sha256": { "$ref": "#/$defs/hash" },
+        "coarse_plan_hash": { "$ref": "#/$defs/hash" },
+        "coarse_space_hash": { "$ref": "#/$defs/hash" },
+        "coarse_kernel_identity_hash": { "$ref": "#/$defs/hash" },
+        "coarse_kernel_source_sha256": { "$ref": "#/$defs/hash" },
+        "full_schedule_hash": { "$ref": "#/$defs/hash" },
+        "sealed_prefix_schedule_hash": { "$ref": "#/$defs/hash" },
+        "continuation_schedule_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_dof_count",
+        "restart_dimension",
+        "max_iterations",
+        "maximum_restart_count",
+        "retained_rank",
+        "expected_application_count",
+        "canonical_prefix_application_count",
+        "global_suffix_application_count",
+        "retained_jacobi_row_count",
+        "coarse_launches_per_application"
+      ],
+      "properties": {
+        "free_dof_count": { "type": "integer", "minimum": 1 },
+        "restart_dimension": { "type": "integer", "minimum": 1 },
+        "max_iterations": { "type": "integer", "minimum": 1 },
+        "maximum_restart_count": { "type": "integer", "minimum": 1 },
+        "retained_rank": { "type": "integer", "minimum": 1 },
+        "expected_application_count": { "type": "integer", "minimum": 1 },
+        "canonical_prefix_application_count": { "const": 1 },
+        "global_suffix_application_count": { "type": "integer", "minimum": 0 },
+        "retained_jacobi_row_count": { "type": "integer", "minimum": 1 },
+        "coarse_launches_per_application": { "const": 4 }
+      }
+    },
+    "application": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "phase",
+        "restart_index",
+        "column_index",
+        "logical_index",
+        "coarse_application_receipt_hash",
+        "retained_jacobi_launch_count",
+        "accepted_coarse_launch_count"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 1 },
+        "phase": { "enum": ["canonical_prefix", "global_suffix"] },
+        "restart_index": { "type": "integer", "minimum": 1 },
+        "column_index": { "type": "integer", "minimum": 0 },
+        "logical_index": { "type": "integer", "minimum": 0 },
+        "coarse_application_receipt_hash": { "$ref": "#/$defs/hash" },
+        "retained_jacobi_launch_count": { "const": 1 },
+        "accepted_coarse_launch_count": { "const": 4 }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "application_attempt_count",
+        "application_success_count",
+        "canonical_prefix_application_count",
+        "global_suffix_application_count",
+        "retained_jacobi_launch_count",
+        "coarse_kernel_launch_count",
+        "external_parent_fence_ack_count",
+        "externally_acknowledged_coarse_launch_count",
+        "additional_h2d_copy_count",
+        "additional_d2h_copy_count",
+        "additional_allocation_count",
+        "additional_synchronization_count",
+        "additional_csr_apply_count",
+        "host_terminal_branch_count",
+        "fallback_count"
+      ],
+      "properties": {
+        "application_attempt_count": { "type": "integer", "minimum": 0 },
+        "application_success_count": { "type": "integer", "minimum": 0 },
+        "canonical_prefix_application_count": { "type": "integer", "minimum": 0 },
+        "global_suffix_application_count": { "type": "integer", "minimum": 0 },
+        "retained_jacobi_launch_count": { "type": "integer", "minimum": 0 },
+        "coarse_kernel_launch_count": { "type": "integer", "minimum": 0 },
+        "external_parent_fence_ack_count": { "type": "integer", "minimum": 0 },
+        "externally_acknowledged_coarse_launch_count": { "type": "integer", "minimum": 0 },
+        "additional_h2d_copy_count": { "const": 0 },
+        "additional_d2h_copy_count": { "const": 0 },
+        "additional_allocation_count": { "const": 0 },
+        "additional_synchronization_count": { "const": 0 },
+        "additional_csr_apply_count": { "const": 0 },
+        "host_terminal_branch_count": { "const": 0 },
+        "fallback_count": { "const": 0 }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_live_and_coarse_contexts_bound",
+        "fixed_schedule_coordinates_bound",
+        "same_stream_overlay_order_bound",
+        "coarse_output_consumed_by_recurrence",
+        "terminal_observation_bound",
+        "application_window_host_copy_zero",
+        "no_additional_intermediate_synchronization",
+        "canonical_jacobi_row_retained",
+        "canonical_jacobi_row_replaced",
+        "coarse_device_status_directly_terminal_bound",
+        "full_iteration_host_copy_zero_proven",
+        "end_to_end_o_n_proven",
+        "speedup_proven",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "exact_live_and_coarse_contexts_bound": { "type": "boolean" },
+        "fixed_schedule_coordinates_bound": { "type": "boolean" },
+        "same_stream_overlay_order_bound": { "type": "boolean" },
+        "coarse_output_consumed_by_recurrence": { "type": "boolean" },
+        "terminal_observation_bound": { "type": "boolean" },
+        "application_window_host_copy_zero": { "type": "boolean" },
+        "no_additional_intermediate_synchronization": { "type": "boolean" },
+        "canonical_jacobi_row_retained": { "const": true },
+        "canonical_jacobi_row_replaced": { "const": false },
+        "coarse_device_status_directly_terminal_bound": { "const": false },
+        "full_iteration_host_copy_zero_proven": { "const": false },
+        "end_to_end_o_n_proven": { "const": false },
+        "speedup_proven": { "const": false },
+        "commercial_ready": { "const": false },
+        "promotion_eligible": { "const": false }
+      }
+    }
+  }
+}

@@ -1424,11 +1424,29 @@ class HipFgmresSealedCheckpointTransactionExecutionContextV1:
             )
             with self._lock:
                 self._require_global_recurrence_child_locked(token)
+                recovery_cell = self._global_recurrence_recovery_cell
+                poisoned_child = (
+                    type(recovery_cell) is _GlobalRecurrenceRecoveryCellV1
+                    and recovery_cell.lease_reference() is token
+                    and recovery_cell.poisoned
+                )
             self._require_exact_empty_pending_map()
-            self._require_current_binding(
-                expected_pending_operation_bounds=(0, 0),
-                expected_binding=self._require_frozen_binding(),
-            )
+            if poisoned_child:
+                # A coarse/global launch failure intentionally poisons the
+                # upstream primitive chain before cleanup.  Requiring the
+                # ordinary usable-parent projection here would therefore make
+                # the already-fenced child impossible to release.  The frozen
+                # fence authority still proves the exact kernel, runtime,
+                # checkpoint token, binding snapshot, and empty pending map
+                # without reopening numerical authority.
+                self._require_frozen_fence_authority(
+                    expected_pending_operation_bounds=(0, 0),
+                )
+            else:
+                self._require_current_binding(
+                    expected_pending_operation_bounds=(0, 0),
+                    expected_binding=self._require_frozen_binding(),
+                )
             with self._lock:
                 self._require_global_recurrence_child_locked(token)
                 cell = self._global_recurrence_recovery_cell

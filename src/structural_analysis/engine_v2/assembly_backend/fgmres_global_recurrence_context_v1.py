@@ -41,6 +41,7 @@ from .fgmres_global_schedule_plan_v1 import (
 )
 from .fgmres_plan import HipFgmresPlanV1
 from .fgmres_recurrence_plan_v2 import (
+    _VECTOR_MODE_CODES,
     HipFgmresRecurrencePlanV2,
     hip_fgmres_recurrence_kernel_abi_payload_v2,
 )
@@ -671,6 +672,18 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                             )
                         )
                     )
+                    row = dict(launch)
+                    if (
+                        row["submission_kind"] == "vector"
+                        and row["mode"] == _VECTOR_MODE_CODES["APPLY_JACOBI_INDEXED"]
+                    ):
+                        self._require_live_context_for_overlay()._enqueue_fixed_rank_coarse_overlay_after_jacobi(
+                            phase="global_suffix",
+                            owner=self,
+                            expected_restart=row["expected_restart"],
+                            expected_column=row["expected_column"],
+                            logical_index=row["logical_index"],
+                        )
                     self._notify_checkpoint_history_after_launch(launch, index)
                 self._require_current_binding(
                     expected_pending_operation_bounds=(launch_count, launch_count),
@@ -775,6 +788,10 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 self._state = "completion_publication_pending"
             completion = self._mint_completion()
             self._state = "recurrence_fenced"
+            self._require_live_context_for_overlay()._publish_fixed_rank_coarse_overlay_global_receipt(
+                owner=self,
+                receipt=self._build_receipt("recurrence_fenced"),
+            )
             return completion
 
     def synchronize_global_recurrence(
@@ -1351,6 +1368,10 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
         self._telemetry = replace(
             self._telemetry,
             consumed_launch_count=consumed,
+        )
+        self._require_live_context_for_overlay()._acknowledge_fixed_rank_coarse_overlay_fence(
+            phase="global_suffix",
+            owner=self,
         )
         if self._state == "poisoned_fence_observed_ack_pending":
             self._state = "poisoned_fenced"
@@ -2036,6 +2057,11 @@ class HipFgmresGlobalRecurrenceExecutionContextV1:
                 "/sealed_context",
             )
         return self._sealed
+
+    def _require_live_context_for_overlay(self) -> Any:
+        """Recover the exact live context through the active sealed chain."""
+
+        return self._require_sealed()._require_canonical()._require_live()
 
     def _require_continuation(
         self,

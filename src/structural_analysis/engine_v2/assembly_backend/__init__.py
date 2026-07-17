@@ -1128,6 +1128,23 @@ from .fgmres_fixed_rank_coarse_context_v1 import (
     validate_hip_fgmres_fixed_rank_coarse_application_receipt_v1,
     validate_hip_fgmres_fixed_rank_coarse_context_receipt_v1,
 )
+from .fgmres_fixed_rank_coarse_recurrence_overlay_v1 import (
+    HIP_FGMRES_FIXED_RANK_COARSE_RECURRENCE_OVERLAY_V1_CAPABILITY_PROFILE,
+    HIP_FGMRES_FIXED_RANK_COARSE_RECURRENCE_OVERLAY_V1_EVIDENCE_SCOPE,
+    HIP_FGMRES_FIXED_RANK_COARSE_RECURRENCE_OVERLAY_V1_SCHEMA_VERSION,
+    HipFgmresFixedRankCoarseRecurrenceOverlayApplicationV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayBindingsV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayClaimsV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayDimensionsV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayOpenResultV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayReasonV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayReceiptV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayTelemetryV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayV1,
+    HipFgmresFixedRankCoarseRecurrenceOverlayV1Error,
+    open_hip_fgmres_fixed_rank_coarse_recurrence_overlay_v1,
+    validate_hip_fgmres_fixed_rank_coarse_recurrence_overlay_receipt_v1,
+)
 
 __all__ = [
     "HIP_ALLOCATION_LINEAGE_CAPABILITY_PROFILE_V1",
@@ -2134,4 +2151,19 @@ __all__ = [
     "open_hip_fgmres_fixed_rank_coarse_context_v1",
     "validate_hip_fgmres_fixed_rank_coarse_application_receipt_v1",
     "validate_hip_fgmres_fixed_rank_coarse_context_receipt_v1",
+    "HIP_FGMRES_FIXED_RANK_COARSE_RECURRENCE_OVERLAY_V1_CAPABILITY_PROFILE",
+    "HIP_FGMRES_FIXED_RANK_COARSE_RECURRENCE_OVERLAY_V1_EVIDENCE_SCOPE",
+    "HIP_FGMRES_FIXED_RANK_COARSE_RECURRENCE_OVERLAY_V1_SCHEMA_VERSION",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayApplicationV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayBindingsV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayClaimsV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayDimensionsV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayOpenResultV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayReasonV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayReceiptV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayTelemetryV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayV1",
+    "HipFgmresFixedRankCoarseRecurrenceOverlayV1Error",
+    "open_hip_fgmres_fixed_rank_coarse_recurrence_overlay_v1",
+    "validate_hip_fgmres_fixed_rank_coarse_recurrence_overlay_receipt_v1",
 ]

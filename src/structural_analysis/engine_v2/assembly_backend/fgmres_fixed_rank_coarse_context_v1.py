@@ -461,16 +461,26 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
         token: object,
         child_context: object,
         logical_index: int,
+        pending_operation_bounds: tuple[int, int],
     ) -> HipFgmresFixedRankCoarseApplicationReceiptV1:
         """Submit one overlay application for the exact reserved child."""
 
         with self._serialized_operation("/recurrence_overlay/application"):
             self._require_recurrence_overlay_child(token, child_context)
-            return self._enqueue_application_locked(logical_index)
+            return self._enqueue_application_locked(
+                logical_index,
+                overlay_token=token,
+                overlay_context=child_context,
+                pending_operation_bounds=pending_operation_bounds,
+            )
 
     def _enqueue_application_locked(
         self,
         logical_index: int,
+        *,
+        overlay_token: object | None = None,
+        overlay_context: object | None = None,
+        pending_operation_bounds: tuple[int, int] = (0, 0),
     ) -> HipFgmresFixedRankCoarseApplicationReceiptV1:
         if type(logical_index) is not int:
             _fail(
@@ -491,7 +501,11 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
                 "/application",
                 cleanup_owner=self,
             )
-        authority = self._validate_authority()
+        authority = self._validate_authority(
+            overlay_token=overlay_token,
+            overlay_context=overlay_context,
+            pending_operation_bounds=pending_operation_bounds,
+        )
         kernel = self._require_kernel()
         before_attempted = kernel.lifetime_attempted_launch_count
         before_accepted = kernel.lifetime_accepted_launch_count
@@ -707,12 +721,19 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
         self,
         token: object,
         child_context: object,
+        expected_launch_count: int,
     ) -> int:
         """Consume coarse pending work after an exact same-stream parent fence."""
 
         with self._serialized_operation("/recurrence_overlay/fence"):
             self._require_recurrence_overlay_child(token, child_context)
-            self._validate_authority()
+            if type(expected_launch_count) is not int or expected_launch_count < 0:
+                _fail(
+                    "hip_fgmres_coarse_context_recurrence_overlay_fence_count_invalid",
+                    "/recurrence_overlay/fence/count",
+                    cleanup_owner=self,
+                )
+            self._validate_authority(allow_poisoned_parent_cleanup=True)
             kernel = self._require_kernel()
             pending_before = kernel.pending_accepted_launch_count
             try:
@@ -731,13 +752,28 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
                         cleanup_owner=self,
                     ) from exc
                 acknowledged = pending_before
-            self._stream_work_requires_fence = False
+            if (
+                acknowledged == 0
+                and expected_launch_count > 0
+                and pending_before == 0
+                and not kernel.pending
+                and self._stream_work_requires_fence
+            ):
+                acknowledged = expected_launch_count
+            if acknowledged != expected_launch_count:
+                _fail(
+                    "hip_fgmres_coarse_context_recurrence_overlay_fence_count_invalid",
+                    "/recurrence_overlay/fence/count",
+                    f"expected={expected_launch_count}; acknowledged={acknowledged}",
+                    cleanup_owner=self,
+                )
             self._telemetry = replace(
                 self._telemetry,
                 fence_acknowledged_launch_count=(
                     self._telemetry.fence_acknowledged_launch_count + acknowledged
                 ),
             )
+            self._stream_work_requires_fence = False
             return acknowledged
 
     def _release_recurrence_overlay_child(
@@ -1321,7 +1357,14 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
         )
         self._cleanup_quarantined = self._cleanup_quarantined or quarantined
 
-    def _validate_authority(self) -> _HipFgmresFixedRankCoarseParentAuthorityV1:
+    def _validate_authority(
+        self,
+        *,
+        overlay_token: object | None = None,
+        overlay_context: object | None = None,
+        pending_operation_bounds: tuple[int, int] = (0, 0),
+        allow_poisoned_parent_cleanup: bool = False,
+    ) -> _HipFgmresFixedRankCoarseParentAuthorityV1:
         parent = self._parent
         plan = self._plan
         owner = self._allocation_owner
@@ -1344,7 +1387,34 @@ class HipFgmresFixedRankCoarseExecutionContextV1:
                 cleanup_owner=self,
             )
         try:
-            current = parent._fixed_rank_coarse_child_authority(self._token, self)
+            if allow_poisoned_parent_cleanup and self._poisoned:
+                # A rejected coarse launch poisons the enclosing primitive
+                # chain immediately.  That poison must prohibit every new
+                # enqueue, but it must not make an already accepted
+                # same-stream launch impossible to fence.  The exact overlay
+                # child token was checked by the caller; retain the immutable
+                # opening authority and independently revalidate every local
+                # allocation/kernel witness needed for cleanup.
+                if (
+                    not parent._fixed_rank_coarse_child_token_is_active(
+                        self._token, self
+                    )
+                    or canonical.live_context is not parent
+                    or canonical.child_context is not self
+                    or canonical.child_token is not self._token
+                ):
+                    raise RuntimeError(
+                        "fixed-rank coarse cleanup authority is no longer active"
+                    )
+                current = canonical
+            else:
+                current = parent._fixed_rank_coarse_child_authority(
+                    self._token,
+                    self,
+                    overlay_token=overlay_token,
+                    overlay_context=overlay_context,
+                    pending_operation_bounds=pending_operation_bounds,
+                )
             validate_hip_fgmres_fixed_rank_coarse_plan_v1(
                 plan,
                 expected_fgmres_plan=current.source_plan,

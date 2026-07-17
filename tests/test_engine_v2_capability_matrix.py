@@ -1594,6 +1594,58 @@ def test_hip_fgmres_fixed_rank_coarse_plan_and_rtc_stay_non_authoritative() -> N
     )
 
 
+def test_hip_fgmres_fixed_rank_coarse_recurrence_overlay_stays_non_promoting() -> None:
+    payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
+    rows = {row["capability_id"]: row for row in payload["rows"]}
+
+    overlay = rows["hip_fgmres_fixed_rank_coarse_recurrence_overlay_v1"]
+    assert overlay["implementation_state"] == "implemented"
+    assert overlay["promotion_state"] == "non_promoting"
+    assert {
+        "exact_process_local_live_checkpoint_and_fixed_rank_coarse_context_reservation",
+        "every_fixed_recurrence_jacobi_coordinate_bound_in_canonical_prefix_and_global_suffix_order",
+        "canonical_apply_jacobi_indexed_row_retained_without_abi_epoch_or_counter_replacement",
+        "exact_four_coarse_kernels_enqueued_immediately_after_each_retained_jacobi_row_on_the_same_stream",
+        "coarse_preconditioned_basis_output_ordered_before_precondition_accept_and_subsequent_arnoldi_consumption",
+        "canonical_and_global_parent_fences_acknowledge_coarse_pending_work_without_additional_coarse_runtime_synchronization",
+        "zero_overlay_application_h2d_d2h_allocation_synchronization_and_additional_csr_apply",
+        "exact_final_global_recurrence_receipt_process_local_binding",
+        "optional_exact_downstream_terminal_outcome_observation_binding",
+        "partial_coarse_launch_poison_fenced_before_lease_release_with_deferred_shared_parent_poison_for_cleanup",
+        "strict_pointer_free_recurrence_overlay_receipt_schema_and_hash_validation",
+        "public_symbols_engine1211_assembly1019_solvers66_unique",
+    }.issubset(overlay["supported_scope"])
+    assert {
+        "canonical_jacobi_row_removal_or_replacement",
+        "coarse_device_status_direct_terminal_state_machine_binding",
+        "actual_device_integrated_recurrence_overlay_execution",
+        "authoritative_full_fgmres_numerical_parity_using_the_overlay",
+        "process_wide_or_full_iteration_host_copy_zero",
+        "actual_external_gfx1100_module_load_or_execution",
+        "amg_hierarchy_or_domain_decomposition",
+        "mesh_independent_iteration_count",
+        "end_to_end_on_complexity",
+        "performance_or_speedup_claim",
+        "persistent_or_signed_hardware_provenance",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(overlay["explicit_exclusions"])
+    assert {
+        "focused_overlay_7_passed_in_217p72s",
+        "public_api_and_capability_matrix_22_passed_in_1p95s",
+        "adjacent_coarse_context_24_passed_in_190p08s",
+        "adjacent_live_checkpoint_context_42_passed_in_204p33s",
+        "adjacent_canonical_predecessor_14_passed_in_113p18s",
+        "adjacent_global_recurrence_54_passed_in_1212p23s",
+        "cross_surface_public_count_compatibility_9_passed_in_42p47s",
+    }.issubset(overlay["verification_cases"])
+    assert overlay["claim_level"] == (
+        "same_stream_fixed_schedule_coarse_recurrence_overlay_test_double_"
+        "integration_nonpromoting_not_jacobi_replacement_actual_device_parity_"
+        "on_or_commercial_solver"
+    )
+
+
 def test_cpu_fgmres_reference_stays_separate_from_device_solver_claims() -> None:
     payload = json.loads(MATRIX_PATH.read_text(encoding="utf-8"))
     rows = {row["capability_id"]: row for row in payload["rows"]}

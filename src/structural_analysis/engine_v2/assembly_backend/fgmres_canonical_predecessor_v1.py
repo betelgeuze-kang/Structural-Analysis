@@ -27,6 +27,7 @@ from .fgmres_live_checkpoint_context_v1 import (
     validate_hip_fgmres_live_checkpoint_context_receipt_v1,
 )
 from .fgmres_recurrence_plan_v2 import (
+    _VECTOR_MODE_CODES,
     hip_fgmres_first_column_predecessor_validation_schedule_payload_v2,
 )
 from .fgmres_rtc_v2 import (
@@ -390,6 +391,17 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
                         "kernel",
                         lambda row=row: self._dispatch(row, scratch_stage),
                     )
+                    if (
+                        row.submission_kind == "vector"
+                        and row.mode == _VECTOR_MODE_CODES["APPLY_JACOBI_INDEXED"]
+                    ):
+                        self._require_live()._enqueue_fixed_rank_coarse_overlay_after_jacobi(
+                            phase="canonical_prefix",
+                            owner=self,
+                            expected_restart=row.expected_restart,
+                            expected_column=row.expected_column,
+                            logical_index=row.logical_index,
+                        )
             except BaseException as exc:
                 self._poison_after_enqueue_failure(exc)
                 if not isinstance(exc, Exception):
@@ -776,6 +788,10 @@ class HipFgmresCanonicalPredecessorExecutionContextV1:
                 cleanup_owner=self,
             )
         self._telemetry = replace(self._telemetry, consumed_operation_count=consumed)
+        self._require_live()._acknowledge_fixed_rank_coarse_overlay_fence(
+            phase="canonical_prefix",
+            owner=self,
+        )
         if self._state == "poisoned_fence_observed_ack_pending":
             self._state = "poisoned_fenced"
 
