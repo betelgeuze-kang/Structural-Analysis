@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_external_trust_anchor_registry_v3.schema.json",
+  "title": "Detached HIP FGMRES reviewer-root trust registry v3 genesis",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_profile",
+    "status",
+    "evidence_scope",
+    "promotion_eligible",
+    "genesis",
+    "activation_endorsements",
+    "registry_hash",
+    "claims",
+    "extensions",
+    "receipt_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v3"
+    },
+    "capability_profile": {
+      "const": "phase0_external_gfx1100_reviewer_root_registry_v3_genesis"
+    },
+    "status": {
+      "const": "detached_reviewer_root_registry_v3_genesis_verified"
+    },
+    "evidence_scope": {
+      "const": "detached_three_reviewer_root_genesis_activation_non_authoritative"
+    },
+    "promotion_eligible": {"const": false},
+    "genesis": {"$ref": "#/$defs/genesis"},
+    "activation_endorsements": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/endorsement"}
+    },
+    "registry_hash": {"$ref": "#/$defs/hash"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "extensions": {"type": "object", "maxProperties": 0},
+    "receipt_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{6})?Z$"
+    },
+    "reviewerPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "reviewer_count",
+        "minimum_event_approvals",
+        "bootstrap_endorsement_count",
+        "target_genesis_activation_endorsement_count",
+        "target_genesis_binds_bootstrap_plan_and_receipt_hashes",
+        "lineage_bound_runner_enrollment_required",
+        "reviewer_root_set_immutable",
+        "reviewer_rotation_requires_new_lineage"
+      ],
+      "properties": {
+        "algorithm": {"const": "Ed25519"},
+        "reviewer_count": {"const": 3},
+        "minimum_event_approvals": {"const": 2},
+        "bootstrap_endorsement_count": {"const": 3},
+        "target_genesis_activation_endorsement_count": {"const": 3},
+        "target_genesis_binds_bootstrap_plan_and_receipt_hashes": {"const": true},
+        "lineage_bound_runner_enrollment_required": {"const": true},
+        "reviewer_root_set_immutable": {"const": true},
+        "reviewer_rotation_requires_new_lineage": {"const": true}
+      }
+    },
+    "reviewerRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "key_id",
+        "key_epoch",
+        "public_key_base64",
+        "public_key_sha256",
+        "valid_from_utc",
+        "valid_until_utc"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+        },
+        "key_id": {
+          "type": "string",
+          "pattern": "^ed25519-review:[a-z0-9][a-z0-9._-]{2,63}:v1$"
+        },
+        "key_epoch": {"const": 1},
+        "public_key_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{43}=$"
+        },
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "valid_from_utc": {"$ref": "#/$defs/timestamp"},
+        "valid_until_utc": {"$ref": "#/$defs/timestamp"}
+      }
+    },
+    "genesis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purpose",
+        "registry_schema_version",
+        "registry_id",
+        "registry_epoch",
+        "event_count",
+        "lineage_generation",
+        "lineage_id",
+        "predecessor_registry_id",
+        "predecessor_registry_hash",
+        "predecessor_authority_continuity_available",
+        "source_registry_schema_version",
+        "source_registry_id",
+        "source_registry_hash",
+        "source_lineage_commitment_hash",
+        "bootstrap_plan_schema_version",
+        "bootstrap_plan_hash",
+        "bootstrap_receipt_schema_version",
+        "bootstrap_receipt_hash",
+        "bootstrap_at_utc",
+        "activated_at_utc",
+        "reviewer_policy",
+        "reviewer_policy_hash",
+        "reviewer_roots",
+        "reviewer_root_commitment_hash",
+        "reviewer_authority_count",
+        "activation_endorsement_count",
+        "enrolled_runner_key_count",
+        "active_runner_key_count",
+        "genesis_event_hash"
+      ],
+      "properties": {
+        "purpose": {
+          "const": "hip_fgmres_external_reviewer_root_registry_v3_genesis_activation"
+        },
+        "registry_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v3"
+        },
+        "registry_id": {
+          "const": "structural-analysis-engine-v2-external-trust-registry-reviewer-root-v3"
+        },
+        "registry_epoch": {"const": 1},
+        "event_count": {"const": 1},
+        "lineage_generation": {"const": 1},
+        "lineage_id": {"$ref": "#/$defs/hash"},
+        "predecessor_registry_id": {"type": "null"},
+        "predecessor_registry_hash": {"type": "null"},
+        "predecessor_authority_continuity_available": {"const": false},
+        "source_registry_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-trust-anchor-registry.v2"
+        },
+        "source_registry_id": {
+          "const": "structural-analysis-engine-v2-external-trust-registry"
+        },
+        "source_registry_hash": {"$ref": "#/$defs/hash"},
+        "source_lineage_commitment_hash": {"$ref": "#/$defs/hash"},
+        "bootstrap_plan_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-reviewer-root-bootstrap-plan.v1"
+        },
+        "bootstrap_plan_hash": {"$ref": "#/$defs/hash"},
+        "bootstrap_receipt_schema_version": {
+          "const": "structural-analysis-hip-fgmres-external-reviewer-root-bootstrap-receipt.v1"
+        },
+        "bootstrap_receipt_hash": {"$ref": "#/$defs/hash"},
+        "bootstrap_at_utc": {"$ref": "#/$defs/timestamp"},
+        "activated_at_utc": {"$ref": "#/$defs/timestamp"},
+        "reviewer_policy": {"$ref": "#/$defs/reviewerPolicy"},
+        "reviewer_policy_hash": {"$ref": "#/$defs/hash"},
+        "reviewer_roots": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/reviewerRoot"}
+        },
+        "reviewer_root_commitment_hash": {"$ref": "#/$defs/hash"},
+        "reviewer_authority_count": {"const": 3},
+        "activation_endorsement_count": {"const": 3},
+        "enrolled_runner_key_count": {"const": 0},
+        "active_runner_key_count": {"const": 0},
+        "genesis_event_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "endorsement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "reviewer_key_id",
+        "reviewer_key_epoch",
+        "genesis_event_hash",
+        "bootstrap_receipt_hash",
+        "algorithm",
+        "signature_base64",
+        "signature_sha256"
+      ],
+      "properties": {
+        "reviewer_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$"
+        },
+        "reviewer_key_id": {
+          "type": "string",
+          "pattern": "^ed25519-review:[a-z0-9][a-z0-9._-]{2,63}:v1$"
+        },
+        "reviewer_key_epoch": {"const": 1},
+        "genesis_event_hash": {"$ref": "#/$defs/hash"},
+        "bootstrap_receipt_hash": {"$ref": "#/$defs/hash"},
+        "algorithm": {"const": "Ed25519"},
+        "signature_base64": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        },
+        "signature_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "detached_registry_genesis_self_consistent",
+        "bootstrap_receipt_hash_committed",
+        "reviewer_root_set_and_policy_committed",
+        "all_three_root_activation_signatures_verified",
+        "reviewer_root_private_key_possession_verified",
+        "runner_key_counts_zero_verified",
+        "source_bootstrap_receipt_replayed_in_detached_receipt",
+        "predecessor_reviewer_authority_continuity_verified",
+        "package_registry_v3_inclusion_verified",
+        "package_registry_v3_activation_verified",
+        "operational_reviewer_authority_activated",
+        "reviewer_human_identity_verified",
+        "reviewer_independence_verified",
+        "reviewer_hsm_origin_verified",
+        "reviewer_hsm_non_exportability_verified",
+        "trusted_activation_time_verified",
+        "external_monotonic_anchor_verified",
+        "historical_registry_resolution_verified",
+        "runner_key_enrollment_verified",
+        "runner_key_activation_verified",
+        "signed_trace_binding_verified",
+        "actual_external_gfx1100_verified",
+        "same_artifact_two_architecture_verified",
+        "result_ir_verified",
+        "performance_or_speedup_verified",
+        "end_to_end_o_n_verified",
+        "commercial_ready",
+        "promotion_eligible"
+      ],
+      "properties": {
+        "detached_registry_genesis_self_consistent": {"const": true},
+        "bootstrap_receipt_hash_committed": {"const": true},
+        "reviewer_root_set_and_policy_committed": {"const": true},
+        "all_three_root_activation_signatures_verified": {"const": true},
+        "reviewer_root_private_key_possession_verified": {"const": true},
+        "runner_key_counts_zero_verified": {"const": true},
+        "source_bootstrap_receipt_replayed_in_detached_receipt": {"const": false},
+        "predecessor_reviewer_authority_continuity_verified": {"const": false},
+        "package_registry_v3_inclusion_verified": {"const": false},
+        "package_registry_v3_activation_verified": {"const": false},
+        "operational_reviewer_authority_activated": {"const": false},
+        "reviewer_human_identity_verified": {"const": false},
+        "reviewer_independence_verified": {"const": false},
+        "reviewer_hsm_origin_verified": {"const": false},
+        "reviewer_hsm_non_exportability_verified": {"const": false},
+        "trusted_activation_time_verified": {"const": false},
+        "external_monotonic_anchor_verified": {"const": false},
+        "historical_registry_resolution_verified": {"const": false},
+        "runner_key_enrollment_verified": {"const": false},
+        "runner_key_activation_verified": {"const": false},
+        "signed_trace_binding_verified": {"const": false},
+        "actual_external_gfx1100_verified": {"const": false},
+        "same_artifact_two_architecture_verified": {"const": false},
+        "result_ir_verified": {"const": false},
+        "performance_or_speedup_verified": {"const": false},
+        "end_to_end_o_n_verified": {"const": false},
+        "commercial_ready": {"const": false},
+        "promotion_eligible": {"const": false}
+      }
+    }
+  }
+}

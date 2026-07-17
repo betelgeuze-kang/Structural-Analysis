@@ -1,8 +1,9 @@
 # Structural Solver Engine v2 통합 아키텍처 및 마스터 로드맵
 
 - Status: proposed implementation source of truth
-- Version: 0.2.53 HIP FGMRES diagnostic restart TraceIR v1 unpublished candidate milestone
+- Version: 0.2.54 reviewer-root trust-registry v3 genesis activation unpublished candidate milestone
 - 기준일: 2026-07-17
+- 현재 마일스톤: [reviewer-root registry v3 genesis activation v1](engine-v2-hip-fgmres-reviewer-root-registry-v3-genesis-activation-v1.md)은 v0.2.38 bootstrap receipt에 결박된 별도 `3-of-3` activation signature와 detached/attached source-replay 경계를 구현한다. Package reviewer/runner/active key는 계속 `0/0/0`이고 실제 HSM·`gfx1100`·signed TraceIR·promotion은 미검증이다.
 - 감사 기준: v0.2.37 reviewed trust-anchor lifecycle feature-branch publication; `origin/main` 병합으로 해석하지 않음
 - 범위: 독립 구조해석 솔버, ROCm/HIP 가속, 물리제약 AI 보조솔버, 도면 최적화 폐루프
 - Claim boundary: 이 문서는 목표 아키텍처와 구현 순서를 정의한다. 현재 제품 준비도나 G1-G10/AI-G1-AI-G10 폐쇄를 선언하지 않는다.

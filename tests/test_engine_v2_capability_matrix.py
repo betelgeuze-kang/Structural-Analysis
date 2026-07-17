@@ -255,7 +255,10 @@ def test_restart_trace_ir_v1_stays_diagnostic_and_non_authoritative() -> None:
         "all_five_source_scalar_roundoff_envelopes_preserved_per_restart",
         "zero_embedded_numeric_vector_bytes_and_zero_result_arrays",
         "projection_additional_device_d2h_solve_export_state_commit_and_fallback_zero",
-        "required_gfx1030_three_row_trace_harness_collected_current_execution_pending_no_kfd",
+        "actual_local_gfx1030_three_row_trace_end_iterations_2_4_5",
+        "actual_local_gfx1030_required_attached_trace_gate_passed",
+        "actual_local_gfx1030_completion_d2h_five_of_five_trace_additional_device_and_d2h_zero",
+        "actual_local_gfx1030_process_peak_rss_358760_kib",
         "public_symbols_engine1085_assembly912_solvers47_unique",
     }.issubset(capability["supported_scope"])
     assert {
@@ -281,14 +284,19 @@ def test_restart_trace_ir_v1_stays_diagnostic_and_non_authoritative() -> None:
         "ADR-007",
     ]
     assert {
-        "focused_trace_public_general_history_contracts_fifteen_passed",
-        "required_gfx1030_attached_trace_projection_harness_collected_one_test",
-        "current_namespace_required_gate_failed_closed_before_numerical_path_no_real_gfx_agent",
+        "pure_detached_projection_adversarial_contract_eight_passed_in_1_88_seconds",
+        "focused_exact_resource_wheel_trace_public_general_history_capability_thirty_four_passed_in_38_76_seconds",
+        "adjacent_result_ir_v3_diagnostic_ir_family_authority_thirty_four_passed_in_362_33_seconds",
+        "actual_local_gfx1030_attached_trace_projection_one_passed_in_103_32_seconds",
+        "actual_local_gfx1030_wall_103_90_seconds_peak_rss_358760_kib",
+        "run_scoped_trace_id_sha256_567e7df6979be3d1fccb8a2de851fdb3cbf883fb1edc9962cfbb536f029b6cfe",
+        "run_scoped_trace_receipt_sha256_ccecb0e39a2c5bc1e1aa6f643ffe887049fc4bbe6c07fa8883eb18327e3feb48",
         "current_source_schema_hardware_harness_aggregate_sha256_2661f3745b432bba1fd21aea0bf3e8bf0d8e12e5122c92c587dd49221efdeda1",
+        "source_schema_hardware_harness_aggregate_identical_before_and_after_actual_gate",
     }.issubset(capability["verification_cases"])
     assert capability["claim_level"] == (
-        "general_history_derived_diagnostic_restart_trace_contract_only_unsigned_"
-        "process_local_nonpersistent_nonpromoting_hardware_replay_pending"
+        "actual_local_gfx1030_general_history_derived_diagnostic_restart_trace_"
+        "contract_only_unsigned_process_local_nonpersistent_nonpromoting"
     )
 
 
@@ -1001,6 +1009,56 @@ def test_fgmres_registry_family_v2_and_external_signature_claims_stay_bounded() 
     assert reviewer_bootstrap["claim_level"] == (
         "fresh_genesis_bootstrap_contract_pending_reviewer_roots_zero_"
         "target_registry_inactive_non_promoting"
+    )
+
+    registry_v3 = rows["hip_fgmres_reviewer_root_registry_v3_genesis_activation_v1"]
+    assert registry_v3["implementation_state"] == "implemented"
+    assert registry_v3["promotion_state"] == "contract_only"
+    assert {
+        "exact_reviewer_bootstrap_v1_plan_and_receipt_hash_binding",
+        "fresh_registry_v3_lineage_without_predecessor_authority_continuity",
+        "second_domain_separated_three_of_three_reviewer_activation_signatures",
+        "canonical_nonidentity_prime_order_ed25519_reviewer_root_revalidation",
+        "detached_receipt_hash_commitment_separate_from_attached_source_bootstrap_replay",
+        "exact_zero_enrolled_and_active_runner_key_counts",
+        "strict_draft_2020_12_schema_and_additive_public_exports",
+        "synthetic_private_keys_confined_to_tests_and_no_signing_api",
+        "public_symbols_engine1103_assembly930_solvers47_unique",
+    }.issubset(registry_v3["supported_scope"])
+    assert {
+        "actual_independent_reviewer_root_material",
+        "package_registry_v3_inclusion",
+        "package_registry_v3_activation",
+        "operational_reviewer_authority_activation",
+        "predecessor_reviewer_authority_continuity",
+        "reviewer_hsm_origin_or_non_exportability",
+        "external_transparency_log_or_monotonic_anchor",
+        "runner_key_enrollment_or_activation",
+        "isolated_runner_or_hsm_key",
+        "signed_trace_binding",
+        "actual_external_gfx1100_signed_cell",
+        "same_artifact_two_architecture_evidence",
+        "promotion_eligibility",
+        "commercial_readiness",
+    }.issubset(registry_v3["explicit_exclusions"])
+    assert {
+        "deterministic_three_root_second_round_genesis_activation",
+        "bootstrap_and_activation_signature_domain_separation",
+        "missing_duplicate_reordered_and_non_tuple_endorsement_rejection",
+        "wrong_reviewer_key_signature_rejection",
+        "detached_foreign_bootstrap_commitment_valid_but_attached_source_replay_rejected",
+        "boolean_integer_alias_rejection_in_claims_policy_and_genesis",
+        "package_status_remains_zero_reviewer_zero_runner_pending",
+        "no_private_key_or_signing_api_in_product_module",
+        "schema_resource_and_public_export_identity",
+        "focused_unit_and_public_twenty_passed",
+        "bootstrap_and_capability_combined_ninety_one_passed_in_23_74_seconds",
+        "trust_registry_v2_and_key_enrollment_adjacent_fifty_five_passed_in_30_67_seconds",
+        "exact_resource_wheel_isolated_two_passed_in_38_97_seconds",
+    }.issubset(registry_v3["verification_cases"])
+    assert registry_v3["claim_level"] == (
+        "detached_reviewer_root_registry_v3_genesis_activation_contract_"
+        "synthetic_tests_package_roots_zero_runner_keys_zero_nonpromoting"
     )
 
     trust_lifecycle = rows["hip_fgmres_reviewed_trust_anchor_lifecycle_v2"]

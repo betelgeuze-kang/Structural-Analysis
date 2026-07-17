@@ -45,8 +45,8 @@ def test_high_load_registry_and_aggregate_public_exports_preserve_identity() -> 
         assert getattr(assembly_backend, name) is value
         assert name in engine_v2.__all__
         assert name in assembly_backend.__all__
-    assert len(engine_v2.__all__) == 1085
-    assert len(assembly_backend.__all__) == 912
+    assert len(engine_v2.__all__) == 1103
+    assert len(assembly_backend.__all__) == 930
     assert len(engine_v2.__all__) == len(set(engine_v2.__all__))
     assert len(assembly_backend.__all__) == len(set(assembly_backend.__all__))
     assert "_HighLoadRegistryTransactionV1" not in registry.__all__
@@ -64,6 +64,9 @@ def test_high_load_registry_and_aggregate_wheel_resources_and_isolated_replay(
     )
     from structural_analysis.engine_v2.assembly_backend import (
         fgmres_restart_trace_ir_v1 as trace_v1,
+    )
+    from structural_analysis.engine_v2.assembly_backend import (
+        fgmres_external_trust_anchor_registry_v3 as registry_v3,
     )
 
     wheel_dir = tmp_path / "wheel"
@@ -98,6 +101,9 @@ def test_high_load_registry_and_aggregate_wheel_resources_and_isolated_replay(
         "structural_analysis/engine_v2/assembly_backend/fgmres_restart_trace_ir_v1.py": Path(
             inspect.getsourcefile(trace_v1) or ""
         ),
+        "structural_analysis/engine_v2/assembly_backend/fgmres_external_trust_anchor_registry_v3.py": Path(
+            inspect.getsourcefile(registry_v3) or ""
+        ),
         "structural_analysis/schemas/hip_fgmres_high_load_compatibility_registry_v1.schema.json": (
             ROOT
             / "src/structural_analysis/schemas"
@@ -119,6 +125,7 @@ def test_high_load_registry_and_aggregate_wheel_resources_and_isolated_replay(
                 "hip_fgmres_completion_export_v2.schema.json",
                 "hip_fgmres_general_history_parity_v2.schema.json",
                 "hip_fgmres_restart_trace_ir_v1.schema.json",
+                "hip_fgmres_external_trust_anchor_registry_v3.schema.json",
             )
         },
         "structural_analysis/engine_v2/assembly_backend/kernels/engine_v2_fgmres_checkpoint_history_v1.hip.cpp": (
@@ -169,11 +176,13 @@ from structural_analysis.engine_v2 import assembly_backend
 from structural_analysis.engine_v2.assembly_backend import fgmres_high_load_compatibility_registry_v1 as registry
 from structural_analysis.engine_v2.assembly_backend import fgmres_high_load_result_ir_aggregate_v1 as aggregate
 from structural_analysis.engine_v2.assembly_backend import fgmres_restart_trace_ir_v1 as trace_v1
+from structural_analysis.engine_v2.assembly_backend import fgmres_external_trust_anchor_registry_v3 as registry_v3
 
 assert engine_v2.load_hip_fgmres_high_load_compatibility_registry_v1 is registry.load_hip_fgmres_high_load_compatibility_registry_v1
 assert assembly_backend.attest_hip_fgmres_high_load_result_ir_aggregate_v1 is aggregate.attest_hip_fgmres_high_load_result_ir_aggregate_v1
 assert engine_v2.build_hip_fgmres_restart_trace_ir_v1 is trace_v1.build_hip_fgmres_restart_trace_ir_v1
 assert assembly_backend.validate_hip_fgmres_restart_trace_ir_receipt_v1 is trace_v1.validate_hip_fgmres_restart_trace_ir_receipt_v1
+assert engine_v2.verify_hip_fgmres_external_trust_anchor_registry_activation_v3 is registry_v3.verify_hip_fgmres_external_trust_anchor_registry_activation_v3
 assert str(Path(inspect.getsourcefile(registry)).resolve()).startswith(str(root))
 schemas = importlib.resources.files("structural_analysis.schemas")
 for name in (
@@ -185,6 +194,7 @@ for name in (
     "hip_fgmres_completion_export_v2.schema.json",
     "hip_fgmres_general_history_parity_v2.schema.json",
     "hip_fgmres_restart_trace_ir_v1.schema.json",
+    "hip_fgmres_external_trust_anchor_registry_v3.schema.json",
 ):
     json.loads(schemas.joinpath(name).read_text(encoding="utf-8"))
 replayed = registry.load_hip_fgmres_high_load_compatibility_registry_v1()
@@ -205,5 +215,5 @@ print(len(engine_v2.__all__), len(assembly_backend.__all__), replayed.registry_h
     )
     assert isolated.returncode == 0, isolated.stdout + isolated.stderr
     assert isolated.stdout.strip() == (
-        "1085 912 sha256:72ea556471edb72a2262f870e76d4fc423e9d665da82f6d8e4d03dd6ae953f9e"
+        "1103 930 sha256:72ea556471edb72a2262f870e76d4fc423e9d665da82f6d8e4d03dd6ae953f9e"
     )
