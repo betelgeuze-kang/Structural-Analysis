@@ -16,6 +16,7 @@ if str(SRC_ROOT) not in sys.path:
 
 from structural_analysis.engine_v2.contracts.equation_scaling import (  # noqa: E402
     EQUATION_SCALING_EXTENSION_KEY,
+    REFERENCE_EQUATION_SCOPE,
     EquationScalingError,
     bind_equation_scaling_to_execution_plan,
     create_equation_scaling,
@@ -31,8 +32,11 @@ from structural_analysis.engine_v2.contracts._canonical import (  # noqa: E402
     canonical_hash,
 )
 from structural_analysis.engine_v2.contracts.execution_plan import (  # noqa: E402
+    EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY,
+    ExecutionPlanError,
     create_execution_plan,
     validate_execution_plan,
+    validate_execution_plan_manifest,
 )
 from structural_analysis.engine_v2.contracts.state_ir import (  # noqa: E402
     create_initial_state,
@@ -85,15 +89,61 @@ def test_force_and_moment_scaling_is_deterministic_immutable_and_si_explicit() -
     plan = _plan()
     first = _scaling(plan)
     second = _scaling(plan)
+    coordinates = np.asarray([[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]])
+    reference_loads = np.zeros(12)
+    reference_loads[6] = 10.0
+    reference_loads[11] = 40.0
+    constrained_loads = reference_loads.copy()
+    constrained_loads[0] = 1.0e9
+    constrained_loads[3] = 1.0e9
+    constrained_only_change = create_equation_scaling(
+        execution_plan=plan,
+        node_coordinates_m=coordinates,
+        reference_equation_load_si=constrained_loads,
+    )
 
     assert first.characteristic_length_m == 2.0
     assert first.reference_force_n == 20.0
+    assert first.reference_equation_scope == REFERENCE_EQUATION_SCOPE
     np.testing.assert_array_equal(
         first.scale_divisors_si,
         np.asarray([20.0] * 3 + [40.0] * 3 + [20.0] * 3 + [40.0] * 3),
     )
     assert first.scaling_hash == second.scaling_hash
     assert first.scale_vector_content_hash == second.scale_vector_content_hash
+    assert constrained_only_change.reference_force_n == first.reference_force_n
+    np.testing.assert_array_equal(
+        constrained_only_change.scale_divisors_si, first.scale_divisors_si
+    )
+    assert (
+        constrained_only_change.source_reference_load_content_hash
+        != first.source_reference_load_content_hash
+    )
+    assert constrained_only_change.scaling_hash != first.scaling_hash
+    manifest = first.to_manifest()
+    assert manifest["source_commitment"]["model_ir_content_hash"] == _hash("1")
+    assert manifest["source_commitment"]["load_pattern_id"] == "LC1"
+    assert manifest["source_commitment"]["reference_equation_scope"] == "free_equations"
+    free_descriptor = next(row for row in plan.descriptors if row.name == "free_dofs")
+    assert (
+        manifest["source_commitment"]["free_dofs_content_hash"]
+        == free_descriptor.content_hash
+    )
+    validate_equation_scaling(
+        first,
+        execution_plan=plan,
+        node_coordinates_m=coordinates,
+        reference_equation_load_si=reference_loads,
+    )
+    changed_loads = reference_loads.copy()
+    changed_loads[6] = 11.0
+    with pytest.raises(EquationScalingError, match="source_commitment_mismatch"):
+        validate_equation_scaling(
+            first,
+            execution_plan=plan,
+            node_coordinates_m=coordinates,
+            reference_equation_load_si=changed_loads,
+        )
     assert not first.scale_divisors_si.flags.writeable
     with pytest.raises(ValueError):
         first.scale_divisors_si.setflags(write=True)
@@ -107,6 +157,7 @@ def test_scaling_binding_changes_plan_hash_and_state_binds_the_new_plan() -> Non
     assert bound.plan_hash != base.plan_hash
     assert execution_plan_scaling_hash(base) is None
     assert execution_plan_scaling_hash(bound) == scaling.scaling_hash
+    assert bound.required_extensions == (EQUATION_SCALING_EXTENSION_KEY,)
     assert (
         bound.extensions[EQUATION_SCALING_EXTENSION_KEY]["base_plan_hash"]
         == base.plan_hash
@@ -117,6 +168,23 @@ def test_scaling_binding_changes_plan_hash_and_state_binds_the_new_plan() -> Non
     )
     validate_execution_plan(bound)
     validate_equation_scaling_binding(bound, scaling=scaling)
+    payload = deepcopy(bound.to_dict())
+    del payload["extensions"][EQUATION_SCALING_EXTENSION_KEY]
+    without_hash = dict(payload)
+    without_hash.pop("plan_hash")
+    payload["plan_hash"] = canonical_hash(without_hash)
+    with pytest.raises(ExecutionPlanError) as missing_extension:
+        validate_execution_plan_manifest(payload)
+    assert missing_extension.value.code == "required_extension_missing"
+
+    payload = deepcopy(bound.to_dict())
+    del payload["extensions"][EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY]
+    without_hash = dict(payload)
+    without_hash.pop("plan_hash")
+    payload["plan_hash"] = canonical_hash(without_hash)
+    with pytest.raises(ExecutionPlanError) as optional_extension:
+        validate_execution_plan_manifest(payload)
+    assert optional_extension.value.code == "required_extension_declaration_missing"
     state = create_initial_state(bound)
     assert state.execution_plan_hash == bound.plan_hash
 
@@ -159,6 +227,8 @@ def test_residual_trace_separates_dimensions_and_uses_scaled_tie_break() -> None
     assert trace.raw_rotation_linf_nm == 40.0
     assert trace.scaled_l2 == math.sqrt(2.5)
     assert trace.scaled_linf == 1.0
+    assert trace.equation_scope == "free_equations"
+    assert trace.active_equations == bound.free_dofs
     assert (trace.governing_equation, trace.governing_node_id, trace.governing_dof) == (
         7,
         "N2",
@@ -166,6 +236,13 @@ def test_residual_trace_separates_dimensions_and_uses_scaled_tie_break() -> None
     )
     assert trace.to_manifest()["authority"] == "non_authoritative_diagnostic"
     assert "converged" not in trace.to_manifest()
+    with pytest.raises(EquationScalingError, match="residual_scope_mismatch"):
+        trace_scaled_residual(
+            execution_plan=bound,
+            scaling=scaling,
+            raw_residual_si=raw,
+            active_equations=[6],
+        )
 
 
 @pytest.mark.parametrize(
@@ -243,6 +320,14 @@ def test_manifests_reject_unknown_fields_wrong_json_types_and_stale_hashes() -> 
     scaling_without_hash.pop("scaling_hash")
     scaling_payload["scaling_hash"] = canonical_hash(scaling_without_hash)
     with pytest.raises(EquationScalingError, match="scale_vector_hash_mismatch"):
+        validate_equation_scaling_manifest(scaling_payload)
+
+    scaling_payload = deepcopy(scaling.to_manifest())
+    scaling_payload["source_commitment"]["load_pattern_id"] = "LC2"
+    scaling_without_hash = dict(scaling_payload)
+    scaling_without_hash.pop("scaling_hash")
+    scaling_payload["scaling_hash"] = canonical_hash(scaling_without_hash)
+    with pytest.raises(EquationScalingError, match="source_commitment_hash_mismatch"):
         validate_equation_scaling_manifest(scaling_payload)
 
     trace_payload = deepcopy(trace.to_manifest())

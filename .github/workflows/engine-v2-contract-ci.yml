@@ -1,0 +1,79 @@
+name: Engine v2 Contract CI
+
+# Deterministic, backend-neutral contract lane. This workflow does not exercise
+# HIP/ROCm hardware and cannot provide hardware, solver, or readiness evidence.
+
+on:
+  pull_request:
+    paths:
+      - "src/structural_analysis/engine_v2/**"
+      - "src/structural_analysis/model_ir/**"
+      - "src/structural_analysis/schemas/equation_scaling_v1.schema.json"
+      - "src/structural_analysis/schemas/execution_plan_v1.schema.json"
+      - "src/structural_analysis/schemas/model_ir_v2.schema.json"
+      - "src/structural_analysis/schemas/scaled_residual_trace_v1.schema.json"
+      - "src/structural_analysis/schemas/state_ir_v1.schema.json"
+      - "tests/test_engine_v2*.py"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - "requirements*.txt"
+      - ".github/workflows/engine-v2-contract-ci.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "src/structural_analysis/engine_v2/**"
+      - "src/structural_analysis/model_ir/**"
+      - "src/structural_analysis/schemas/equation_scaling_v1.schema.json"
+      - "src/structural_analysis/schemas/execution_plan_v1.schema.json"
+      - "src/structural_analysis/schemas/model_ir_v2.schema.json"
+      - "src/structural_analysis/schemas/scaled_residual_trace_v1.schema.json"
+      - "src/structural_analysis/schemas/state_ir_v1.schema.json"
+      - "tests/test_engine_v2*.py"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - "requirements*.txt"
+      - ".github/workflows/engine-v2-contract-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+concurrency:
+  group: engine-v2-contract-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  engine-v2-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install package and contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Lint Engine v2 contracts
+        run: >-
+          python -m ruff check
+          src/structural_analysis/engine_v2
+          src/structural_analysis/model_ir
+          tests/test_engine_v2*.py
+
+      - name: Compile backend-neutral contract packages
+        run: >-
+          python -m compileall -q
+          src/structural_analysis/engine_v2
+          src/structural_analysis/model_ir
+
+      - name: Run complete Engine v2 contract suite
+        run: python -m pytest -q tests/test_engine_v2*.py
