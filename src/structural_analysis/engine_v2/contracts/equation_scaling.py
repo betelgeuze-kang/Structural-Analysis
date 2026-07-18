@@ -151,6 +151,9 @@ def create_equation_scaling(
     """Create O(N) force/moment nondimensionalization for a base plan."""
 
     plan = validate_execution_plan(execution_plan)
+    _require_nonempty_free_equation_space(
+        plan.array("free_dofs").size, "/execution_plan/arrays/free_dofs"
+    )
     if EQUATION_SCALING_EXTENSION_KEY in plan.extensions:
         _fail(
             "base_plan_already_scaled",
@@ -269,6 +272,9 @@ def bind_equation_scaling_to_execution_plan(
             "Binding requires coordinates and the reference equation-load vector.",
         )
     plan = validate_execution_plan(execution_plan)
+    _require_nonempty_free_equation_space(
+        plan.array("free_dofs").size, "/execution_plan/arrays/free_dofs"
+    )
     validate_equation_scaling(
         scaling,
         execution_plan=plan,
@@ -388,6 +394,9 @@ def _validate_equation_scaling_binding_semantics(
             f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}",
             "Equation-scaling binding is required.",
         )
+    _require_nonempty_free_equation_space(
+        plan.array("free_dofs").size, "/execution_plan/arrays/free_dofs"
+    )
     base_plan = _reconstruct_unbound_execution_plan(plan)
     if binding["base_plan_hash"] != base_plan.plan_hash:
         _fail(
@@ -440,6 +449,10 @@ def _validate_equation_scaling_binding_manifest_semantics(
     """Match manifest-only typed checks to the object-level binding validator."""
 
     binding = payload["extensions"][EQUATION_SCALING_EXTENSION_KEY]
+    _require_nonempty_free_equation_space(
+        payload["array_descriptors"]["free_dofs"]["shape"][0],
+        "/array_descriptors/free_dofs/shape/0",
+    )
     base_payload = _thaw(payload)
     base_payload["capability_profile"] = EXECUTION_PLAN_CAPABILITY_PROFILE
     base_payload["extensions"] = _extensions_without_equation_scaling(
@@ -658,6 +671,9 @@ def validate_equation_scaling(
         _fail("scaling_hash_mismatch", "/scaling_hash", "Scaling hash is stale.")
     if execution_plan is not None:
         plan = validate_execution_plan(execution_plan)
+        _require_nonempty_free_equation_space(
+            plan.array("free_dofs").size, "/execution_plan/arrays/free_dofs"
+        )
         if plan.plan_hash != scaling.base_plan_hash:
             _fail(
                 "base_plan_hash_mismatch",
@@ -1294,6 +1310,16 @@ def _active_equations(value: Any, dof_count: int) -> tuple[int, ...]:
             "Equations must be sorted, unique, and in range.",
         )
     return result
+
+
+def _require_nonempty_free_equation_space(count: int, path: str) -> None:
+    if count == 0:
+        _fail(
+            "free_equation_space_empty",
+            path,
+            "Equation scaling requires at least one free equation; fully "
+            "constrained plans use the no-solve/reaction-only path.",
+        )
 
 
 def _require_free_equation_scope(

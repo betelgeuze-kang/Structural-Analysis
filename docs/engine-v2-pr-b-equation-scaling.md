@@ -60,6 +60,19 @@ r_scaled_j = r_raw_j / s_j
 in N, rotational divisors are in N·m, and scaled residuals are dimensionless.
 The vector is canonical little-endian fp64 with immutable byte backing.
 
+### Fully constrained plans
+
+An unscaled `ExecutionPlan` may represent a fully constrained model with an
+empty `free_dofs` partition. That model has no reduced recurrence space, so it
+is not a zero-length Krylov solve. Creating or binding `EquationScaling` for
+such a plan fails closed with `free_equation_space_empty`.
+
+`ScaledResidualTrace` therefore retains its nonempty `active_equations` and
+non-null governing node/DOF contract. A future compiler/executor must route a
+fully constrained model to a separate `no_solve/reaction_only` disposition;
+reaction observation remains dimensional and is not convergence or ResultIR
+authority in this PR.
+
 ## Hash and replay boundaries
 
 `EquationScaling` records:
