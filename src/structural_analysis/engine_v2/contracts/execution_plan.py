@@ -31,6 +31,7 @@ from ._canonical import (
 
 EXECUTION_PLAN_SCHEMA_VERSION = "structural-analysis-execution-plan.v1"
 EXECUTION_PLAN_CAPABILITY_PROFILE = "engine_v2_core_linear_static"
+EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE = "engine_v2_core_scaled_linear_static"
 EXECUTION_PLAN_RESIDUAL_SIGN = "internal_minus_external"
 EXECUTION_PLAN_DOF_COMPONENTS = ("UX", "UY", "UZ", "RX", "RY", "RZ")
 EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY = "engine-v2:required-extensions"
@@ -42,6 +43,12 @@ _HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 _STABLE_ID_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 _EXTENSION_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$")
 _SUPPORTED_REQUIRED_EXTENSIONS = frozenset({"engine-v2:equation-scaling"})
+_SUPPORTED_CAPABILITY_PROFILES = frozenset(
+    {
+        EXECUTION_PLAN_CAPABILITY_PROFILE,
+        EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE,
+    }
+)
 _INT32_MAX = int(np.iinfo(np.int32).max)
 _STRICT_JSON_TYPE_CHECKER = Draft202012Validator.TYPE_CHECKER.redefine(
     "integer", lambda _checker, value: type(value) is int
@@ -295,7 +302,7 @@ def validate_execution_plan(plan: ExecutionPlan) -> ExecutionPlan:
         _fail("execution_plan_type_invalid", "/", "Expected an ExecutionPlan.")
     if plan.schema_version != EXECUTION_PLAN_SCHEMA_VERSION:
         _fail("schema_version_invalid", "/schema_version", "Unsupported schema.")
-    if plan.capability_profile != EXECUTION_PLAN_CAPABILITY_PROFILE:
+    if plan.capability_profile not in _SUPPORTED_CAPABILITY_PROFILES:
         _fail(
             "capability_profile_invalid",
             "/capability_profile",
@@ -397,6 +404,9 @@ def validate_execution_plan(plan: ExecutionPlan) -> ExecutionPlan:
         )
     _validate_extensions(plan.extensions)
     _validate_required_extensions(plan.extensions)
+    _validate_capability_profile_for_extensions(
+        plan.capability_profile, plan.extensions
+    )
     manifest = _plan_payload(plan, include_plan_hash=True)
     validate_execution_plan_manifest(manifest)
     if plan.plan_hash != canonical_hash(_plan_payload(plan, include_plan_hash=False)):
@@ -428,10 +438,19 @@ def validate_execution_plan_manifest(payload: Any) -> Mapping[str, Any]:
     if not isinstance(payload, Mapping):  # pragma: no cover - schema invariant
         _fail("execution_plan_manifest_type_invalid", "/", "Expected an object.")
     _validate_required_extensions(payload["extensions"])
+    _validate_capability_profile_for_extensions(
+        payload["capability_profile"], payload["extensions"]
+    )
     without_hash = dict(payload)
     claimed_hash = without_hash.pop("plan_hash")
     if claimed_hash != canonical_hash(without_hash):
         _fail("plan_hash_mismatch", "/plan_hash", "Manifest plan hash is stale.")
+    if "engine-v2:equation-scaling" in payload["extensions"]:
+        from .equation_scaling import (
+            _validate_equation_scaling_binding_manifest_semantics,
+        )
+
+        _validate_equation_scaling_binding_manifest_semantics(payload)
     return payload
 
 
@@ -827,6 +846,23 @@ def _validate_required_extensions(extensions: Mapping[str, Any]) -> None:
     _validate_required_extension_keys(required_extensions, extensions)
 
 
+def _validate_capability_profile_for_extensions(
+    capability_profile: Any, extensions: Mapping[str, Any]
+) -> None:
+    has_scaling = "engine-v2:equation-scaling" in extensions
+    expected = (
+        EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE
+        if has_scaling
+        else EXECUTION_PLAN_CAPABILITY_PROFILE
+    )
+    if capability_profile != expected:
+        _fail(
+            "capability_profile_extension_mismatch",
+            "/capability_profile",
+            "Capability profile does not match the plan's required extensions.",
+        )
+
+
 def _validate_required_extension_keys(
     required_extensions: tuple[str, ...], extensions: Mapping[str, Any]
 ) -> None:
@@ -903,6 +939,7 @@ __all__ = [
     "EXECUTION_PLAN_CAPABILITY_PROFILE",
     "EXECUTION_PLAN_DOF_COMPONENTS",
     "EXECUTION_PLAN_RESIDUAL_SIGN",
+    "EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE",
     "EXECUTION_PLAN_SCHEMA_VERSION",
     "ExecutionPlan",
     "ExecutionPlanError",

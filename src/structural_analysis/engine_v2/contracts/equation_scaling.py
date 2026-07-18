@@ -27,9 +27,11 @@ from ._canonical import (
     immutable_array,
 )
 from .execution_plan import (
+    EXECUTION_PLAN_CAPABILITY_PROFILE,
     EXECUTION_PLAN_DOF_COMPONENTS,
     EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY,
     EXECUTION_PLAN_REQUIRED_EXTENSIONS_SCHEMA_VERSION,
+    EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE,
     ExecutionPlan,
     _freeze_extensions,
     _plan_payload,
@@ -252,12 +254,27 @@ def create_equation_scaling(
 
 
 def bind_equation_scaling_to_execution_plan(
-    execution_plan: ExecutionPlan, scaling: EquationScaling
+    execution_plan: ExecutionPlan,
+    scaling: EquationScaling,
+    *,
+    node_coordinates_m: Any,
+    reference_equation_load_si: Any,
 ) -> ExecutionPlan:
-    """Bind scaling hashes into a new plan whose aggregate hash covers them."""
+    """Replay scaling sources and bind their hashes into a capability-gated plan."""
 
+    if node_coordinates_m is None or reference_equation_load_si is None:
+        _fail(
+            "source_replay_required",
+            "/source_commitment",
+            "Binding requires coordinates and the reference equation-load vector.",
+        )
     plan = validate_execution_plan(execution_plan)
-    validate_equation_scaling(scaling, execution_plan=plan)
+    validate_equation_scaling(
+        scaling,
+        execution_plan=plan,
+        node_coordinates_m=node_coordinates_m,
+        reference_equation_load_si=reference_equation_load_si,
+    )
     if EQUATION_SCALING_EXTENSION_KEY in plan.extensions:
         _fail(
             "scaling_binding_exists",
@@ -279,10 +296,14 @@ def bind_equation_scaling_to_execution_plan(
         "scale_vector_hash": scaling.scale_vector_content_hash,
         "equation_order_hash": scaling.equation_order_hash,
         "source_commitment_hash": scaling.source_commitment_hash,
+        "source_model_ir_content_hash": scaling.source_model_ir_content_hash,
+        "source_load_pattern_id": scaling.source_load_pattern_id,
+        "source_free_dofs_content_hash": scaling.source_free_dofs_content_hash,
         "reference_equation_scope": scaling.reference_equation_scope,
     }
     provisional = replace(
         plan,
+        capability_profile=EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE,
         plan_hash=_HASH_ZERO,
         extensions=_freeze_extensions(extensions),
     )
@@ -291,7 +312,12 @@ def bind_equation_scaling_to_execution_plan(
         plan_hash=canonical_hash(_plan_payload(provisional, include_plan_hash=False)),
     )
     validate_execution_plan(bound)
-    validate_equation_scaling_binding(bound, scaling=scaling)
+    validate_equation_scaling_binding(
+        bound,
+        scaling=scaling,
+        node_coordinates_m=node_coordinates_m,
+        reference_equation_load_si=reference_equation_load_si,
+    )
     return bound
 
 
@@ -304,15 +330,24 @@ def execution_plan_scaling_hash(execution_plan: ExecutionPlan) -> str | None:
 
 
 def validate_equation_scaling_binding(
-    execution_plan: ExecutionPlan, *, scaling: EquationScaling | None = None
+    execution_plan: ExecutionPlan,
+    *,
+    scaling: EquationScaling | None = None,
+    node_coordinates_m: Any | None = None,
+    reference_equation_load_si: Any | None = None,
 ) -> ExecutionPlan:
-    """Validate a typed plan extension and its reconstructed base-plan hash."""
+    """Validate a bound plan, scaling identity, and optional full source replay."""
 
     plan = validate_execution_plan(execution_plan)
-    _validate_equation_scaling_binding_semantics(plan)
+    base_plan = _validate_equation_scaling_binding_semantics(plan)
     binding = plan.extensions[EQUATION_SCALING_EXTENSION_KEY]
     if scaling is not None:
-        validate_equation_scaling(scaling)
+        validate_equation_scaling(
+            scaling,
+            execution_plan=base_plan,
+            node_coordinates_m=node_coordinates_m,
+            reference_equation_load_si=reference_equation_load_si,
+        )
         expected = {
             "schema_version": scaling.schema_version,
             "base_plan_hash": scaling.base_plan_hash,
@@ -320,6 +355,9 @@ def validate_equation_scaling_binding(
             "scale_vector_hash": scaling.scale_vector_content_hash,
             "equation_order_hash": scaling.equation_order_hash,
             "source_commitment_hash": scaling.source_commitment_hash,
+            "source_model_ir_content_hash": scaling.source_model_ir_content_hash,
+            "source_load_pattern_id": scaling.source_load_pattern_id,
+            "source_free_dofs_content_hash": scaling.source_free_dofs_content_hash,
             "reference_equation_scope": scaling.reference_equation_scope,
         }
         if _thaw(binding) != expected:
@@ -328,13 +366,19 @@ def validate_equation_scaling_binding(
                 f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}",
                 "Binding does not match the supplied scaling artifact.",
             )
+    elif node_coordinates_m is not None or reference_equation_load_si is not None:
+        _fail(
+            "source_replay_scaling_missing",
+            "/source_commitment",
+            "Source replay requires the scaling artifact.",
+        )
     return plan
 
 
 def _validate_equation_scaling_binding_semantics(
     execution_plan: ExecutionPlan,
 ) -> ExecutionPlan:
-    """Validate binding semantics after the containing plan's core checks."""
+    """Validate binding semantics and return the exact reconstructed base plan."""
 
     plan = execution_plan
     binding = plan.extensions.get(EQUATION_SCALING_EXTENSION_KEY)
@@ -344,32 +388,22 @@ def _validate_equation_scaling_binding_semantics(
             f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}",
             "Equation-scaling binding is required.",
         )
-    extensions = _thaw(plan.extensions)
-    del extensions[EQUATION_SCALING_EXTENSION_KEY]
-    remaining_required_extensions = [
-        key for key in plan.required_extensions if key != EQUATION_SCALING_EXTENSION_KEY
-    ]
-    if remaining_required_extensions:
-        extensions[EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY][
-            "required_extensions"
-        ] = remaining_required_extensions
-    else:
-        del extensions[EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY]
-    base_provisional = replace(
-        plan,
-        plan_hash=_HASH_ZERO,
-        extensions=_freeze_extensions(extensions),
-    )
-    reconstructed_base_hash = canonical_hash(
-        _plan_payload(base_provisional, include_plan_hash=False)
-    )
-    if binding["base_plan_hash"] != reconstructed_base_hash:
+    base_plan = _reconstruct_unbound_execution_plan(plan)
+    if binding["base_plan_hash"] != base_plan.plan_hash:
         _fail(
             "base_plan_hash_mismatch",
             f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}/base_plan_hash",
             "Binding does not identify the exact unbound plan.",
         )
-    if binding["equation_order_hash"] != _equation_order_hash(plan):
+    _validate_binding_plan_identity(
+        binding,
+        model_ir_content_hash=base_plan.model_ir_content_hash,
+        load_pattern_id=base_plan.load_pattern_id,
+        free_dofs_content_hash=next(
+            row.content_hash for row in base_plan.descriptors if row.name == "free_dofs"
+        ),
+    )
+    if binding["equation_order_hash"] != _equation_order_hash(base_plan):
         _fail(
             "equation_order_hash_mismatch",
             f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}/equation_order_hash",
@@ -381,7 +415,129 @@ def _validate_equation_scaling_binding_semantics(
             f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}/reference_equation_scope",
             "Only free-equation scaling is supported.",
         )
-    return plan
+    return base_plan
+
+
+def _reconstruct_unbound_execution_plan(plan: ExecutionPlan) -> ExecutionPlan:
+    extensions = _extensions_without_equation_scaling(plan.extensions)
+    base_provisional = replace(
+        plan,
+        capability_profile=EXECUTION_PLAN_CAPABILITY_PROFILE,
+        plan_hash=_HASH_ZERO,
+        extensions=_freeze_extensions(extensions),
+    )
+    reconstructed_base_hash = canonical_hash(
+        _plan_payload(base_provisional, include_plan_hash=False)
+    )
+    return validate_execution_plan(
+        replace(base_provisional, plan_hash=reconstructed_base_hash)
+    )
+
+
+def _validate_equation_scaling_binding_manifest_semantics(
+    payload: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """Match manifest-only typed checks to the object-level binding validator."""
+
+    binding = payload["extensions"][EQUATION_SCALING_EXTENSION_KEY]
+    base_payload = _thaw(payload)
+    base_payload["capability_profile"] = EXECUTION_PLAN_CAPABILITY_PROFILE
+    base_payload["extensions"] = _extensions_without_equation_scaling(
+        payload["extensions"]
+    )
+    base_payload.pop("plan_hash")
+    reconstructed_base_hash = canonical_hash(base_payload)
+    if binding["base_plan_hash"] != reconstructed_base_hash:
+        _fail(
+            "base_plan_hash_mismatch",
+            f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}/base_plan_hash",
+            "Binding does not identify the exact unbound manifest.",
+        )
+    _validate_binding_plan_identity(
+        binding,
+        model_ir_content_hash=payload["model_ir_content_hash"],
+        load_pattern_id=payload["analysis"]["load_pattern_id"],
+        free_dofs_content_hash=payload["array_descriptors"]["free_dofs"][
+            "content_hash"
+        ],
+    )
+    expected_equation_order_hash = canonical_hash(
+        {
+            "node_ids": list(payload["entity_order"]["node_ids"]),
+            "dof_components": list(payload["dof_layout"]["components"]),
+            "node_dof_indices_data_hash": payload["array_descriptors"][
+                "node_dof_indices"
+            ]["data_hash"],
+            "dof_count": payload["dof_layout"]["dof_count"],
+        }
+    )
+    if binding["equation_order_hash"] != expected_equation_order_hash:
+        _fail(
+            "equation_order_hash_mismatch",
+            f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}/equation_order_hash",
+            "Binding does not match the manifest equation order.",
+        )
+    if binding["reference_equation_scope"] != REFERENCE_EQUATION_SCOPE:
+        _fail(
+            "reference_equation_scope_mismatch",
+            f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}/reference_equation_scope",
+            "Only free-equation scaling is supported.",
+        )
+    return payload
+
+
+def _extensions_without_equation_scaling(
+    extensions: Mapping[str, Any],
+) -> dict[str, Any]:
+    result = _thaw(extensions)
+    del result[EQUATION_SCALING_EXTENSION_KEY]
+    required = result[EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY][
+        "required_extensions"
+    ]
+    remaining = [key for key in required if key != EQUATION_SCALING_EXTENSION_KEY]
+    if remaining:
+        result[EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY][
+            "required_extensions"
+        ] = remaining
+    else:
+        del result[EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY]
+    return result
+
+
+def _validate_binding_plan_identity(
+    binding: Mapping[str, Any],
+    *,
+    model_ir_content_hash: str,
+    load_pattern_id: str,
+    free_dofs_content_hash: str,
+) -> None:
+    comparisons = (
+        (
+            "source_model_ir_content_hash",
+            model_ir_content_hash,
+            "binding_source_model_ir_mismatch",
+            "Binding identifies another ModelIR.",
+        ),
+        (
+            "source_load_pattern_id",
+            load_pattern_id,
+            "binding_source_load_pattern_mismatch",
+            "Binding identifies another load pattern.",
+        ),
+        (
+            "source_free_dofs_content_hash",
+            free_dofs_content_hash,
+            "binding_source_free_dofs_mismatch",
+            "Binding identifies another free-equation partition.",
+        ),
+    )
+    for field, expected, code, message in comparisons:
+        if binding[field] != expected:
+            _fail(
+                code,
+                f"/extensions/{EQUATION_SCALING_EXTENSION_KEY}/{field}",
+                message,
+            )
 
 
 def trace_scaled_residual(

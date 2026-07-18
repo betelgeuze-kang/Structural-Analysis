@@ -121,9 +121,12 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
 
     assert "name: Engine v2 Contract CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
-    assert "python -m pytest -q tests/test_engine_v2*.py" in workflow
+    assert "python -m pytest -q" in workflow
+    assert "tests/test_engine_v2*.py" in workflow
+    assert "tests/test_model_ir_v2_contract.py" in workflow
     assert '- "src/structural_analysis/engine_v2/**"' in workflow
     assert '- "tests/test_engine_v2*.py"' in workflow
+    assert '- "tests/test_model_ir_v2_contract.py"' in workflow
     assert "self-hosted" not in workflow
     assert "does not exercise" in workflow
     assert "hipcc" not in workflow
