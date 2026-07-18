@@ -13,7 +13,8 @@ divisor vector and binds its content hash into `ExecutionPlan v1` through the
 typed `engine-v2:equation-scaling` extension. The extension is covered by the
 aggregate plan hash and appears in `required_extensions`; a consumer cannot
 validate a bound plan after silently dropping the scaling extension. The public
-ExecutionPlan schema version remains v1 through the compatibility rule below.
+ExecutionPlan schema version remains v1, while a distinct scaled capability
+profile makes cross-version negotiation fail closed.
 
 ## Policies
 
@@ -79,14 +80,21 @@ The vector is canonical little-endian fp64 with immutable byte backing.
 
 Binding creates a new plan hash without a circular dependency: the scaling
 artifact identifies the unbound base plan, while the bound plan extension
-identifies the scaling artifact. Validation reconstructs the base-plan hash by
-removing the typed extension and fails closed on stale bindings.
+identifies the scaling artifact and repeats its ModelIR, load-pattern, and
+free-partition identities. Validation reconstructs the exact unbound base plan,
+restores its original capability profile, and passes that plan into
+`validate_equation_scaling`. A self-consistent scaling artifact for another
+source therefore fails before the extension values are compared.
 
 Replay equality is defined after model/unit adapters normalize coordinates to
 meters, translational loads to newtons, and moments to newton-meters.
 `validate_equation_scaling` can replay the commitment against the exact source
 arrays and fails if the committed bytes, characteristic length, or free-scope
-reference force differ.
+reference force differ. `bind_equation_scaling_to_execution_plan` requires both
+source arrays and performs that full replay; callers cannot create a bound plan
+from manifest self-consistency alone. Later artifact readers may call
+`validate_equation_scaling_binding` without arrays for identity checks, but a
+solver compiler path must supply both arrays for derivation authority.
 
 ## Required extension boundary
 
@@ -98,11 +106,31 @@ without its required declaration. Reconstructing the unbound plan removes both
 typed extensions before checking `base_plan_hash`.
 
 An unscaled PR-A plan from merged PR #103 has neither extension; its manifest
-shape and plan hash remain unchanged. The declaration stays inside the existing
-forward-compatible `extensions` namespace, so no top-level v1 field is added.
-This is the backward-compatible path for the extracted backend-neutral plan
-contract. A solver that requires scaled convergence must consume the bound
-plan, where `ExecutionPlan.required_extensions` is non-empty.
+shape, `engine_v2_core_linear_static` capability profile, and plan hash remain
+unchanged. The fixed PR-A regression value is
+`sha256:fcebd59b39c25e38c4cfc72f542a57737e21fb7af2b4b9055eb75e83fc62af33`.
+A bound plan uses `engine_v2_core_scaled_linear_static`. PR-A readers only know
+the original profile and therefore reject scaled plans instead of accepting the
+new extensions as opaque data. PR-B readers require the scaled profile and both
+typed extensions together. This preserves unscaled v1 bytes while providing
+backward fail-closed negotiation for the new contract.
+
+Object-level and manifest-only validation both reconstruct the unbound plan
+hash and recompute the equation-order identity. They also compare the binding's
+ModelIR hash, load-pattern ID, and free-DOF descriptor hash directly with the
+plan. Manifest validation does not recover array bytes or prove source
+derivation; that deeper authority requires the object arrays and the mandatory
+bind-time source replay above.
+
+### Pre-merge migration note
+
+The earlier draft two-argument call
+`bind_equation_scaling_to_execution_plan(plan, scaling)` is intentionally no
+longer valid. Callers must pass keyword-only `node_coordinates_m` and
+`reference_equation_load_si`; explicit `None` values fail closed. Serialized
+bound plans also move from `engine_v2_core_linear_static` to
+`engine_v2_core_scaled_linear_static`. Unscaled PR-A plans require no migration,
+as demonstrated by fixed plan-hash and canonical-manifest-byte regressions.
 
 ## Residual observation boundary
 
@@ -141,7 +169,7 @@ large-vector storage profile. These are follow-up contracts, not claims closed
 by PR B.
 
 Later PR-B follow-ups are Linux/Windows golden hashes, characteristic-length
-refinement tests, a reviewed public extension API, and descriptor-based vector
+refinement tests, a reviewed general extension API, and descriptor-based vector
 artifact storage. They are intentionally not mixed into this pre-merge fix.
 
 ## Review and rollback
@@ -159,26 +187,32 @@ migration or evidence regeneration.
 
 ## Verification
 
-Focused tests cover force/moment policy values, source commitment replay,
+Focused tests cover force/moment policy values, mandatory bind-time source
+commitment replay,
 constrained-load exclusion from free-scope scaling, required extension
-enforcement, plan/state hash binding, SI replay, immutable arrays, dimensional
-norm separation, deterministic governing DOF selection, strict JSON types and
+enforcement, scaled-profile negotiation, reconstructed-base cross-artifact
+validation, manifest-only typed semantics, the fixed PR-A manifest/hash,
+plan/state hash binding, SI replay, immutable arrays, dimensional norm
+separation, deterministic governing DOF selection, strict JSON types and
 unknown fields, malformed active equation sets, invalid geometry/load inputs,
 and stale hashes.
 
-`Engine v2 Contract CI` runs this complete backend-neutral suite on a
-GitHub-hosted Python 3.10 runner. It is a schema/static/CPU contract lane only;
-it does not produce HIP, external, numerical-closure, or readiness evidence.
-The PR body historically records `63 passed`, while a fresh collection of the
-current PR head yields 64 tests. The workflow runs the complete file pattern
-rather than hard-coding or hiding that one-test drift.
+`Engine v2 Contract CI` runs the complete Engine v2 file pattern and
+`tests/test_model_ir_v2_contract.py` on a GitHub-hosted Python 3.10 runner. The
+ModelIR source and schema paths therefore have a matching test owner in this
+lane. It is a schema/static/CPU contract lane only; it does not produce HIP,
+external, numerical-closure, or readiness evidence.
 
 ```bash
-python3 -m pytest -q tests/test_engine_v2*.py
+python3 -m pytest -q tests/test_engine_v2*.py tests/test_model_ir_v2_contract.py
 python3 -m ruff check src/structural_analysis/engine_v2 \
+  src/structural_analysis/model_ir \
   tests/test_engine_v2_equation_scaling_v1.py \
-  tests/test_engine_v2_core_dependency_boundary.py
+  tests/test_engine_v2_core_dependency_boundary.py \
+  tests/test_model_ir_v2_contract.py
 python3 -m ruff format --check src/structural_analysis/engine_v2 \
+  src/structural_analysis/model_ir \
   tests/test_engine_v2_equation_scaling_v1.py \
-  tests/test_engine_v2_core_dependency_boundary.py
+  tests/test_engine_v2_core_dependency_boundary.py \
+  tests/test_model_ir_v2_contract.py
 ```

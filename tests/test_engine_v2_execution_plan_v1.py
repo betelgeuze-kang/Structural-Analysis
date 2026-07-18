@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import replace
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -17,6 +18,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from structural_analysis.engine_v2.contracts._canonical import (  # noqa: E402
+    canonical_json_bytes,
     immutable_array,
 )
 from structural_analysis.engine_v2.contracts.execution_plan import (  # noqa: E402
@@ -31,6 +33,12 @@ from structural_analysis.engine_v2.contracts.state_ir import (  # noqa: E402
 )
 
 SCHEMA = REPO_ROOT / "src/structural_analysis/schemas/execution_plan_v1.schema.json"
+PR_A_GOLDEN_PLAN_HASH = (
+    "sha256:fcebd59b39c25e38c4cfc72f542a57737e21fb7af2b4b9055eb75e83fc62af33"
+)
+PR_A_GOLDEN_MANIFEST_BYTES_HASH = (
+    "sha256:e0690a230b01ca6a301bf0c80b6d26aa811d6e95f93901a5092948f6947934b5"
+)
 
 
 def _hash(character: str) -> str:
@@ -77,6 +85,11 @@ def test_execution_plan_manifest_is_strict_deterministic_and_backend_neutral() -
     Draft202012Validator(schema).validate(manifest)
     assert first.schema_version == EXECUTION_PLAN_SCHEMA_VERSION
     assert first.plan_hash == second.plan_hash
+    assert first.plan_hash == PR_A_GOLDEN_PLAN_HASH
+    assert (
+        "sha256:" + hashlib.sha256(canonical_json_bytes(manifest)).hexdigest()
+        == PR_A_GOLDEN_MANIFEST_BYTES_HASH
+    )
     assert manifest == second.to_dict()
     assert manifest["execution_policy"] == {
         "precision": "fp64",

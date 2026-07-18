@@ -25,7 +25,12 @@
   "properties": {
     "schema_version": {"const": "structural-analysis-execution-plan.v1"},
     "plan_id": {"$ref": "#/$defs/stableId"},
-    "capability_profile": {"const": "engine_v2_core_linear_static"},
+    "capability_profile": {
+      "enum": [
+        "engine_v2_core_linear_static",
+        "engine_v2_core_scaled_linear_static"
+      ]
+    },
     "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
     "solver_artifact_bindings": {"$ref": "#/$defs/solverArtifactBindings"},
     "analysis": {"$ref": "#/$defs/analysis"},
@@ -63,6 +68,27 @@
     "extensions": {"$ref": "#/$defs/extensions"},
     "plan_hash": {"$ref": "#/$defs/sha256"}
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "extensions": {"required": ["engine-v2:equation-scaling"]}
+        }
+      },
+      "then": {
+        "properties": {
+          "capability_profile": {
+            "const": "engine_v2_core_scaled_linear_static"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "capability_profile": {"const": "engine_v2_core_linear_static"}
+        }
+      }
+    }
+  ],
   "$defs": {
     "stableId": {
       "type": "string",
@@ -105,7 +131,8 @@
       "required": [
         "schema_version", "base_plan_hash", "scaling_hash",
         "scale_vector_hash", "equation_order_hash", "source_commitment_hash",
-        "reference_equation_scope"
+        "source_model_ir_content_hash", "source_load_pattern_id",
+        "source_free_dofs_content_hash", "reference_equation_scope"
       ],
       "properties": {
         "schema_version": {"const": "structural-analysis-equation-scaling.v1"},
@@ -114,6 +141,9 @@
         "scale_vector_hash": {"$ref": "#/$defs/sha256"},
         "equation_order_hash": {"$ref": "#/$defs/sha256"},
         "source_commitment_hash": {"$ref": "#/$defs/sha256"},
+        "source_model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "source_load_pattern_id": {"$ref": "#/$defs/stableId"},
+        "source_free_dofs_content_hash": {"$ref": "#/$defs/sha256"},
         "reference_equation_scope": {"const": "free_equations"}
       }
     },
