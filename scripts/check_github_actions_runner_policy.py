@@ -22,6 +22,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/authoritative-core-evidence-resync.yml",
         ".github/workflows/authoritative-linear-core-ci.yml",
         ".github/workflows/ci.yml",
+        ".github/workflows/engine-v2-contract-ci.yml",
         ".github/workflows/frontend-web-ci.yml",
         ".github/workflows/legacy-evidence-ci.yml",
         ".github/workflows/nightly-full-quality.yml",
@@ -218,12 +219,12 @@ def check_runner_policy(
         "rows": rows,
         "blockers": blockers,
         "claim_boundary": (
-            "Deterministic structural-core, frontend, viewer, legacy-evidence, "
-            "science-quarantine, workflow-contract, and canonical nightly lanes may use "
-            "explicitly allowlisted GitHub-hosted runners. Hardware, GPU, private-corpus, "
-            "release-publication, and other non-allowlisted lanes must remain self-hosted. "
-            "Science-quarantine execution does not promote that code into the structural "
-            "product surface."
+            "Deterministic structural-core, Engine v2 contract, frontend, viewer, "
+            "legacy-evidence, science-quarantine, workflow-contract, and canonical "
+            "nightly lanes may use explicitly allowlisted GitHub-hosted runners. "
+            "Hardware, GPU, private-corpus, release-publication, and other non-allowlisted "
+            "lanes must remain self-hosted. Science-quarantine execution does not promote "
+            "that code into the structural product surface."
         ),
     }
 

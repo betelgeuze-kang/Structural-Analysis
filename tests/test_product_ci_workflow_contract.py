@@ -95,9 +95,7 @@ def test_quarantine_control_plane_path_does_not_match_product_tokens() -> None:
 
 
 def test_pr_quality_gate_no_longer_lints_all_product_domains_together() -> None:
-    gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(
-        encoding="utf-8"
-    )
+    gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
 
     assert '"scripts/check_product_ci_boundaries.py"' in gate
     assert '_lane_command("core")' in gate
@@ -107,11 +105,25 @@ def test_pr_quality_gate_no_longer_lints_all_product_domains_together() -> None:
 
 
 def test_runner_policy_allowlists_all_deterministic_product_lanes() -> None:
-    policy = (
-        ROOT / "scripts" / "check_github_actions_runner_policy.py"
-    ).read_text(encoding="utf-8")
+    policy = (ROOT / "scripts" / "check_github_actions_runner_policy.py").read_text(
+        encoding="utf-8"
+    )
 
     assert '".github/workflows/ci.yml"' in policy
+    assert '".github/workflows/engine-v2-contract-ci.yml"' in policy
     assert '".github/workflows/legacy-evidence-ci.yml"' in policy
     assert '".github/workflows/science-quarantine-ci.yml"' in policy
     assert '".github/workflows/molecular-quarantine-ci.yml"' not in policy
+
+
+def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
+    workflow = _read("engine-v2-contract-ci.yml")
+
+    assert "name: Engine v2 Contract CI" in workflow
+    assert "runs-on: ubuntu-latest" in workflow
+    assert "python -m pytest -q tests/test_engine_v2*.py" in workflow
+    assert '- "src/structural_analysis/engine_v2/**"' in workflow
+    assert '- "tests/test_engine_v2*.py"' in workflow
+    assert "self-hosted" not in workflow
+    assert "does not exercise" in workflow
+    assert "hipcc" not in workflow

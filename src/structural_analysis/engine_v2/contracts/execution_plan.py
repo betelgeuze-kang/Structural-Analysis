@@ -33,10 +33,15 @@ EXECUTION_PLAN_SCHEMA_VERSION = "structural-analysis-execution-plan.v1"
 EXECUTION_PLAN_CAPABILITY_PROFILE = "engine_v2_core_linear_static"
 EXECUTION_PLAN_RESIDUAL_SIGN = "internal_minus_external"
 EXECUTION_PLAN_DOF_COMPONENTS = ("UX", "UY", "UZ", "RX", "RY", "RZ")
+EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY = "engine-v2:required-extensions"
+EXECUTION_PLAN_REQUIRED_EXTENSIONS_SCHEMA_VERSION = (
+    "structural-analysis-required-extensions.v1"
+)
 
 _HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 _STABLE_ID_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 _EXTENSION_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$")
+_SUPPORTED_REQUIRED_EXTENSIONS = frozenset({"engine-v2:equation-scaling"})
 _INT32_MAX = int(np.iinfo(np.int32).max)
 _STRICT_JSON_TYPE_CHECKER = Draft202012Validator.TYPE_CHECKER.redefine(
     "integer", lambda _checker, value: type(value) is int
@@ -174,6 +179,10 @@ class ExecutionPlan:
     @property
     def free_dofs(self) -> tuple[int, ...]:
         return tuple(int(value) for value in self.array("free_dofs"))
+
+    @property
+    def required_extensions(self) -> tuple[str, ...]:
+        return _required_extensions_from_mapping(self.extensions)
 
     def to_dict(self) -> dict[str, Any]:
         validate_execution_plan(self)
@@ -387,6 +396,7 @@ def validate_execution_plan(plan: ExecutionPlan) -> ExecutionPlan:
             "CSR pattern hash is stale.",
         )
     _validate_extensions(plan.extensions)
+    _validate_required_extensions(plan.extensions)
     manifest = _plan_payload(plan, include_plan_hash=True)
     validate_execution_plan_manifest(manifest)
     if plan.plan_hash != canonical_hash(_plan_payload(plan, include_plan_hash=False)):
@@ -417,6 +427,7 @@ def validate_execution_plan_manifest(payload: Any) -> Mapping[str, Any]:
         _fail("execution_plan_schema_invalid", path or "/", error.message)
     if not isinstance(payload, Mapping):  # pragma: no cover - schema invariant
         _fail("execution_plan_manifest_type_invalid", "/", "Expected an object.")
+    _validate_required_extensions(payload["extensions"])
     without_hash = dict(payload)
     claimed_hash = without_hash.pop("plan_hash")
     if claimed_hash != canonical_hash(without_hash):
@@ -705,6 +716,36 @@ def _freeze_extensions(value: Mapping[str, Any]) -> Mapping[str, Any]:
     return _freeze(normalized)
 
 
+def _required_extension_tuple(value: Any, *, path: str) -> tuple[str, ...]:
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
+        _fail(
+            "required_extensions_invalid",
+            path,
+            "Expected a sorted sequence of extension keys.",
+        )
+    result = tuple(value)
+    if not result:
+        _fail(
+            "required_extensions_invalid",
+            path,
+            "At least one required extension key is needed.",
+        )
+    for index, key in enumerate(result):
+        if not isinstance(key, str) or _EXTENSION_KEY_PATTERN.fullmatch(key) is None:
+            _fail(
+                "extension_key_invalid",
+                f"{path}/{index}",
+                "Invalid extension key.",
+            )
+    if result != tuple(sorted(set(result))):
+        _fail(
+            "required_extensions_invalid",
+            path,
+            "Required extension keys must be sorted and unique.",
+        )
+    return result
+
+
 def _freeze(value: Any) -> Any:
     if isinstance(value, dict):
         return MappingProxyType({key: _freeze(item) for key, item in value.items()})
@@ -747,6 +788,70 @@ def _validate_extensions(value: Any) -> None:
         canonical_json_bytes(_thaw(value))
     except CanonicalContractError as exc:
         _fail("extensions_invalid", "/extensions", str(exc))
+
+
+def _required_extensions_from_mapping(extensions: Mapping[str, Any]) -> tuple[str, ...]:
+    declaration = extensions.get(EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY)
+    if declaration is None:
+        return ()
+    declaration_path = f"/extensions/{EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY}"
+    if not isinstance(declaration, Mapping):
+        _fail(
+            "required_extensions_declaration_invalid",
+            declaration_path,
+            "Required-extension declaration must be an object.",
+        )
+    if set(declaration) != {"schema_version", "required_extensions"}:
+        _fail(
+            "required_extensions_declaration_invalid",
+            declaration_path,
+            "Required-extension declaration fields are invalid.",
+        )
+    if (
+        declaration["schema_version"]
+        != EXECUTION_PLAN_REQUIRED_EXTENSIONS_SCHEMA_VERSION
+    ):
+        _fail(
+            "required_extensions_declaration_invalid",
+            f"{declaration_path}/schema_version",
+            "Required-extension declaration schema is unsupported.",
+        )
+    return _required_extension_tuple(
+        declaration["required_extensions"],
+        path=f"{declaration_path}/required_extensions",
+    )
+
+
+def _validate_required_extensions(extensions: Mapping[str, Any]) -> None:
+    required_extensions = _required_extensions_from_mapping(extensions)
+    _validate_required_extension_keys(required_extensions, extensions)
+
+
+def _validate_required_extension_keys(
+    required_extensions: tuple[str, ...], extensions: Mapping[str, Any]
+) -> None:
+    for index, key in enumerate(required_extensions):
+        if key not in extensions:
+            _fail(
+                "required_extension_missing",
+                f"/extensions/{EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY}/"
+                f"required_extensions/{index}",
+                f"Required extension {key!r} is absent.",
+            )
+        if key not in _SUPPORTED_REQUIRED_EXTENSIONS:
+            _fail(
+                "required_extension_unsupported",
+                f"/extensions/{EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY}/"
+                f"required_extensions/{index}",
+                f"Required extension {key!r} is not supported by this reader.",
+            )
+    for key in sorted(_SUPPORTED_REQUIRED_EXTENSIONS):
+        if key in extensions and key not in required_extensions:
+            _fail(
+                "required_extension_declaration_missing",
+                f"/extensions/{EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY}",
+                f"Typed extension {key!r} must be declared as required.",
+            )
 
 
 def _require_hash(value: Any, path: str) -> str:

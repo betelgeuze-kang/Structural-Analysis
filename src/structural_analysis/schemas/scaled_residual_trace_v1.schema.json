@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": [
     "schema_version", "authority", "execution_plan_hash", "scaling_hash",
-    "residual_sign", "active_equations", "vectors", "vector_hashes",
+    "residual_sign", "equation_scope", "active_equations", "vectors", "vector_hashes",
     "norms", "governing", "trace_hash"
   ],
   "properties": {
@@ -15,6 +15,7 @@
     "execution_plan_hash": {"$ref": "#/$defs/sha256"},
     "scaling_hash": {"$ref": "#/$defs/sha256"},
     "residual_sign": {"const": "internal_minus_external"},
+    "equation_scope": {"const": "free_equations"},
     "active_equations": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}},
     "vectors": {
       "type": "object", "additionalProperties": false,

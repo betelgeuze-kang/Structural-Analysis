@@ -87,6 +87,7 @@ def test_execution_plan_manifest_is_strict_deterministic_and_backend_neutral() -
     assert "backend" not in manifest
     assert "solver_policy" not in manifest
     assert "equation_scaling" not in manifest
+    assert "required_extensions" not in manifest
 
     manifest["operator_graph"][0]["depends_on"].append("forged")
     assert _plan().to_dict()["operator_graph"][0]["depends_on"] == []
