@@ -51,8 +51,20 @@ def _hash(character: str) -> str:
     return "sha256:" + character * 64
 
 
-def _plan():
+def _plan(*, fully_constrained: bool = False):
     dof_count = 12
+    constrained_dofs = (
+        np.arange(dof_count, dtype="<i4")
+        if fully_constrained
+        else np.arange(6, dtype="<i4")
+    )
+    free_dofs = (
+        np.asarray([], dtype="<i4")
+        if fully_constrained
+        else np.arange(6, dof_count, dtype="<i4")
+    )
+    global_to_free = np.full(dof_count, -1, dtype="<i4")
+    global_to_free[free_dofs] = np.arange(free_dofs.size, dtype="<i4")
     return create_execution_plan(
         model_ir_content_hash=_hash("1"),
         solver_buffer_schema_version="solver-model-buffers.v1",
@@ -66,12 +78,10 @@ def _plan():
         node_ids=("N1", "N2"),
         element_ids=("E1",),
         node_dof_indices=np.arange(dof_count, dtype="<i4").reshape(2, 6),
-        global_to_free=np.asarray(
-            [-1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5], dtype="<i4"
-        ),
+        global_to_free=global_to_free,
         element_global_dofs=np.arange(dof_count, dtype="<i4").reshape(1, 12),
-        constrained_dofs=np.arange(6, dtype="<i4"),
-        free_dofs=np.arange(6, dof_count, dtype="<i4"),
+        constrained_dofs=constrained_dofs,
+        free_dofs=free_dofs,
         csr_row_ptr=np.arange(0, dof_count * dof_count + 1, dof_count, dtype="<i8"),
         csr_column_indices=np.tile(np.arange(dof_count, dtype="<i4"), dof_count),
     )
@@ -266,6 +276,38 @@ def test_binding_requires_exact_source_replay() -> None:
             node_coordinates_m=coordinates,
             reference_equation_load_si=changed_loads,
         )
+
+
+def test_fully_constrained_plan_uses_no_solve_path_instead_of_scaling() -> None:
+    plan = _plan(fully_constrained=True)
+    coordinates, loads = _source_arrays()
+
+    assert plan.free_dofs == ()
+    with pytest.raises(EquationScalingError) as create_error:
+        create_equation_scaling(
+            execution_plan=plan,
+            node_coordinates_m=coordinates,
+            reference_equation_load_si=loads,
+        )
+    assert create_error.value.code == "free_equation_space_empty"
+
+    with pytest.raises(EquationScalingError) as bind_error:
+        bind_equation_scaling_to_execution_plan(
+            plan,
+            _scaling(),
+            node_coordinates_m=coordinates,
+            reference_equation_load_si=loads,
+        )
+    assert bind_error.value.code == "free_equation_space_empty"
+
+    bound_manifest = deepcopy(_bind(_plan()).to_dict())
+    bound_manifest["array_descriptors"]["free_dofs"]["shape"] = [0]
+    without_hash = dict(bound_manifest)
+    without_hash.pop("plan_hash")
+    bound_manifest["plan_hash"] = canonical_hash(without_hash)
+    with pytest.raises(EquationScalingError) as manifest_error:
+        validate_execution_plan_manifest(bound_manifest)
+    assert manifest_error.value.code == "free_equation_space_empty"
 
 
 @pytest.mark.parametrize(
