@@ -5,9 +5,11 @@ material parent.  A converged equilibrium and spherical-constraint pair
 commits apex displacement, load factor, and both material states atomically;
 a rejected attempt retains the exact accepted bytes before reducing the arc.
 
-The tangent solve intentionally materializes a dense 2x2 matrix.  This module
-is a Level-1 verification bridge, not a general truss/frame/shell formulation,
-production sparse solver, or ROCm/HIP backend.
+The default tangent solve intentionally materializes a dense 2x2 matrix.  A
+bound external state-tangent solver may be supplied for integration evidence;
+its profile and contract hash become part of the path/checkpoint identity.  The
+physical loop remains a Level-1 verification bridge, not a general
+truss/frame/shell formulation, production sparse solver, or ROCm/HIP backend.
 """
 
 from __future__ import annotations
@@ -37,6 +39,7 @@ from structural_analysis.solvers.nonlinear.vector_arc_length import (
     VECTOR_ARC_LENGTH_STATE_TANGENT_SOLVER_MODE,
     VectorArcLengthConfig,
     VectorArcLengthResult,
+    VectorArcLengthStateTangentSolver,
     VectorArcLengthTangentSolve,
     build_vector_arc_length_path_contract_hash,
     create_vector_arc_length_checkpoint,
@@ -52,6 +55,9 @@ MATERIAL_GEOMETRIC_ARC_LENGTH_CHECKPOINT_SCHEMA_VERSION = (
 )
 MATERIAL_GEOMETRIC_ARC_LENGTH_PROFILE = (
     "accepted-material-geometric-parent-vector-arc-length-dense-2x2.v1"
+)
+MATERIAL_GEOMETRIC_ARC_LENGTH_EXTERNAL_SOLVER_PROFILE = (
+    "accepted-material-geometric-parent-vector-arc-length-external-state-tangent.v1"
 )
 MATERIAL_GEOMETRIC_ARC_LENGTH_DENSE_SOLVER_PROFILE = (
     "material-geometric-truss-dense-state-tangent-solve.v1"
@@ -176,6 +182,14 @@ def _source_problem_contract_hash(problem: StatefulTwoBarTrussProblem) -> str:
     )
 
 
+def build_material_geometric_source_problem_contract_hash(
+    problem: StatefulTwoBarTrussProblem,
+) -> str:
+    """Return the canonical source identity shared by bounded solver adapters."""
+
+    return _source_problem_contract_hash(problem)
+
+
 def _metric_weights(config: VectorArcLengthConfig) -> np.ndarray:
     values = (
         np.ones(2, dtype=np.float64)
@@ -265,24 +279,49 @@ def _dense_solver_contract_hash(problem: StatefulTwoBarTrussProblem) -> str:
 def build_material_geometric_arc_length_path_contract_hash(
     problem: StatefulTwoBarTrussProblem,
     config: VectorArcLengthConfig,
+    *,
+    state_tangent_solver: VectorArcLengthStateTangentSolver | None = None,
 ) -> str:
-    """Bind source, controls, tangent action, and dense reference solver."""
+    """Bind source, controls, tangent action, and the selected state solver."""
 
     _validate_config(config)
-    return canonical_hash(
-        {
-            "schema_version": MATERIAL_GEOMETRIC_ARC_LENGTH_SCHEMA_VERSION,
-            "profile": MATERIAL_GEOMETRIC_ARC_LENGTH_PROFILE,
-            "source_problem_contract_hash": _source_problem_contract_hash(problem),
-            "config": asdict(config),
-            "equilibrium_linearization_mode": (
-                VECTOR_ARC_LENGTH_LOAD_COUPLED_EQUILIBRIUM_MODE
-            ),
-            "tangent_solver_mode": VECTOR_ARC_LENGTH_STATE_TANGENT_SOLVER_MODE,
-            "tangent_solver_contract_hash": _dense_solver_contract_hash(problem),
-            "tangent_action": MATERIAL_GEOMETRIC_ARC_LENGTH_TANGENT_ACTION,
-        }
+    solver = (
+        state_tangent_solver
+        or create_dense_material_geometric_state_tangent_solver(problem)
     )
+    solver_profile = str(solver.profile).strip()
+    if not solver_profile:
+        raise MaterialGeometricArcLengthError(
+            "state tangent solver profile must be non-empty"
+        )
+    solver_contract_hash = _require_hash(
+        solver.contract_hash,
+        name="state_tangent_solver.contract_hash",
+    )
+    default_dense_solver = bool(
+        solver_profile == MATERIAL_GEOMETRIC_ARC_LENGTH_DENSE_SOLVER_PROFILE
+        and solver_contract_hash == _dense_solver_contract_hash(problem)
+    )
+    path_profile = (
+        MATERIAL_GEOMETRIC_ARC_LENGTH_PROFILE
+        if default_dense_solver
+        else MATERIAL_GEOMETRIC_ARC_LENGTH_EXTERNAL_SOLVER_PROFILE
+    )
+    payload = {
+        "schema_version": MATERIAL_GEOMETRIC_ARC_LENGTH_SCHEMA_VERSION,
+        "profile": path_profile,
+        "source_problem_contract_hash": _source_problem_contract_hash(problem),
+        "config": asdict(config),
+        "equilibrium_linearization_mode": (
+            VECTOR_ARC_LENGTH_LOAD_COUPLED_EQUILIBRIUM_MODE
+        ),
+        "tangent_solver_mode": VECTOR_ARC_LENGTH_STATE_TANGENT_SOLVER_MODE,
+        "tangent_solver_contract_hash": solver_contract_hash,
+        "tangent_action": MATERIAL_GEOMETRIC_ARC_LENGTH_TANGENT_ACTION,
+    }
+    if not default_dense_solver:
+        payload["tangent_solver_profile"] = solver_profile
+    return canonical_hash(payload)
 
 
 @dataclass(frozen=True)
@@ -664,6 +703,8 @@ def validate_material_geometric_arc_length_checkpoint(
     checkpoint: MaterialGeometricArcLengthCheckpoint,
     problem: StatefulTwoBarTrussProblem,
     config: VectorArcLengthConfig,
+    *,
+    state_tangent_solver: VectorArcLengthStateTangentSolver | None = None,
 ) -> MaterialGeometricArcLengthCheckpoint:
     if type(checkpoint) is not MaterialGeometricArcLengthCheckpoint:
         raise MaterialGeometricArcLengthError("checkpoint type is invalid")
@@ -672,6 +713,7 @@ def validate_material_geometric_arc_length_checkpoint(
     path_hash = build_material_geometric_arc_length_path_contract_hash(
         problem,
         config,
+        state_tangent_solver=state_tangent_solver,
     )
     if checkpoint.source_problem_contract_hash != source_hash:
         raise MaterialGeometricArcLengthError(
@@ -749,6 +791,7 @@ class MaterialGeometricArcLengthResult:
     source_case_id: str
     source_problem_contract_hash: str
     path_contract_hash: str
+    profile: str
     config: VectorArcLengthConfig
     initial_checkpoint: MaterialGeometricArcLengthCheckpoint
     final_checkpoint: MaterialGeometricArcLengthCheckpoint
@@ -769,7 +812,7 @@ class MaterialGeometricArcLengthResult:
             "schema_version": MATERIAL_GEOMETRIC_ARC_LENGTH_SCHEMA_VERSION,
             "status": self.status,
             "terminal_reason": self.terminal_reason,
-            "profile": MATERIAL_GEOMETRIC_ARC_LENGTH_PROFILE,
+            "profile": self.profile,
             "source_case_id": self.source_case_id,
             "source_problem_contract_hash": self.source_problem_contract_hash,
             "path_contract_hash": self.path_contract_hash,
@@ -798,6 +841,7 @@ class MaterialGeometricArcLengthResult:
                 ),
                 "dense_2x2_state_tangent_solves": bool(
                     self.metrics["tangent_solve_count"] > 0
+                    and self.metrics["dense_2x2_state_tangent_solver"]
                 ),
                 "material_state_embedded_in_memory_checkpoint": True,
                 "durable_serialized_checkpoint": False,
@@ -846,7 +890,7 @@ def _single_vector_attempt(
     metric_weights: np.ndarray,
     previous_tangent_displacements: tuple[float, float] | None,
     previous_tangent_load_factor: float | None,
-    solver: DenseMaterialGeometricStateTangentSolver,
+    solver: VectorArcLengthStateTangentSolver,
 ) -> VectorArcLengthResult:
     local_config = _single_attempt_config(
         config,
@@ -889,6 +933,7 @@ def stateful_material_geometric_arc_length_continuation(
     config: VectorArcLengthConfig = MATERIAL_GEOMETRIC_ARC_LENGTH_CONFIG,
     initial_state: StatefulTwoBarTrussAcceptedState | None = None,
     checkpoint: MaterialGeometricArcLengthCheckpoint | None = None,
+    state_tangent_solver: VectorArcLengthStateTangentSolver | None = None,
 ) -> MaterialGeometricArcLengthResult:
     """Trace the bounded path with material commit/rollback per arc attempt."""
 
@@ -898,9 +943,32 @@ def stateful_material_geometric_arc_length_continuation(
         )
     metric_weights = _validate_config(config)
     source_hash = _source_problem_contract_hash(problem)
+    solver = (
+        state_tangent_solver
+        or create_dense_material_geometric_state_tangent_solver(problem)
+    )
+    solver_profile = str(solver.profile).strip()
+    if not solver_profile:
+        raise MaterialGeometricArcLengthError(
+            "state tangent solver profile must be non-empty"
+        )
+    solver_contract_hash = _require_hash(
+        solver.contract_hash,
+        name="state_tangent_solver.contract_hash",
+    )
+    default_dense_solver = bool(
+        solver_profile == MATERIAL_GEOMETRIC_ARC_LENGTH_DENSE_SOLVER_PROFILE
+        and solver_contract_hash == _dense_solver_contract_hash(problem)
+    )
+    path_profile = (
+        MATERIAL_GEOMETRIC_ARC_LENGTH_PROFILE
+        if default_dense_solver
+        else MATERIAL_GEOMETRIC_ARC_LENGTH_EXTERNAL_SOLVER_PROFILE
+    )
     path_hash = build_material_geometric_arc_length_path_contract_hash(
         problem,
         config,
+        state_tangent_solver=solver,
     )
     if checkpoint is None:
         accepted = initial_state or problem.initial_state()
@@ -926,6 +994,7 @@ def stateful_material_geometric_arc_length_continuation(
             checkpoint,
             problem,
             config,
+            state_tangent_solver=solver,
         )
         accepted = initial_checkpoint.accepted_state
         current_arc_length_m = initial_checkpoint.current_arc_length_m
@@ -941,7 +1010,6 @@ def stateful_material_geometric_arc_length_continuation(
             "initial or checkpoint state already reached the target"
         )
 
-    solver = create_dense_material_geometric_state_tangent_solver(problem)
     checkpoints = [initial_checkpoint]
     attempts: list[MaterialGeometricArcLengthAttempt] = []
     terminal_reason = "maximum_attempt_count_exhausted"
@@ -1199,6 +1267,10 @@ def stateful_material_geometric_arc_length_continuation(
         ),
         "accepted_material_parent_rebind_count": len(committed),
         "tangent_solve_count": tangent_solve_count,
+        "tangent_solver_mode": VECTOR_ARC_LENGTH_STATE_TANGENT_SOLVER_MODE,
+        "tangent_solver_profile": solver_profile,
+        "tangent_solver_contract_hash": solver_contract_hash,
+        "dense_2x2_state_tangent_solver": default_dense_solver,
         "fallback_count": fallback_count,
         "regularization_count": regularization_count,
         "maximum_accepted_residual_inf_norm_kn": max(
@@ -1229,6 +1301,7 @@ def stateful_material_geometric_arc_length_continuation(
         source_case_id=problem.case_id,
         source_problem_contract_hash=source_hash,
         path_contract_hash=path_hash,
+        profile=path_profile,
         config=config,
         initial_checkpoint=initial_checkpoint,
         final_checkpoint=checkpoints[-1],
@@ -1646,6 +1719,7 @@ __all__ = [
     "MATERIAL_GEOMETRIC_ARC_LENGTH_CLAIM_BOUNDARY",
     "MATERIAL_GEOMETRIC_ARC_LENGTH_CONFIG",
     "MATERIAL_GEOMETRIC_ARC_LENGTH_DENSE_SOLVER_PROFILE",
+    "MATERIAL_GEOMETRIC_ARC_LENGTH_EXTERNAL_SOLVER_PROFILE",
     "MATERIAL_GEOMETRIC_ARC_LENGTH_PROFILE",
     "MATERIAL_GEOMETRIC_ARC_LENGTH_SCHEMA_VERSION",
     "DenseMaterialGeometricStateTangentSolver",
@@ -1658,6 +1732,7 @@ __all__ = [
     "analytic_monotonic_symmetric_load_factor",
     "build_material_geometric_arc_length_benchmark",
     "build_material_geometric_arc_length_path_contract_hash",
+    "build_material_geometric_source_problem_contract_hash",
     "create_dense_material_geometric_state_tangent_solver",
     "finite_difference_material_geometric_arc_length_linearization_check",
     "stateful_material_geometric_arc_length_continuation",

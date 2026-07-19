@@ -126,10 +126,12 @@ def test_stateful_arc_length_crosses_limit_point_without_fallback(
     assert metrics["material_and_geometric_tangent_terms_active"] is True
     assert metrics["material_state_changed_step_count"] == 11
     assert metrics["tangent_solve_count"] == 117
+    assert metrics["dense_2x2_state_tangent_solver"] is True
     assert metrics["maximum_accepted_residual_inf_norm_kn"] <= 1.0e-8
     assert metrics["maximum_accepted_constraint_residual_m2"] <= 1.0e-12
     assert metrics["fallback_count"] == 0
     assert metrics["regularization_count"] == 0
+    assert result.to_dict()["claims"]["dense_2x2_state_tangent_solves"] is True
     assert result.final_state.material_states[
         0
     ].dissipated_energy_density_mj_per_m3 == pytest.approx(1.7477601986809785)
