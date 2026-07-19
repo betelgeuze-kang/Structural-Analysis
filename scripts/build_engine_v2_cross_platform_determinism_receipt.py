@@ -222,7 +222,21 @@ def _git_head(repo_root: Path) -> str:
 def _tracked_source_clean(repo_root: Path) -> bool:
     try:
         result = subprocess.run(
-            ["git", "diff", "--quiet", "HEAD", "--"],
+            [
+                "git",
+                "-c",
+                "filter.lfs.process=",
+                "-c",
+                "filter.lfs.clean=cat",
+                "-c",
+                "filter.lfs.smudge=cat",
+                "-c",
+                "filter.lfs.required=false",
+                "diff",
+                "--quiet",
+                "HEAD",
+                "--",
+            ],
             cwd=repo_root,
             check=False,
             stdout=subprocess.DEVNULL,
@@ -305,14 +319,10 @@ def compute_engine_v2_cross_platform_goldens(
         element_global_dofs=np.arange(dof_count, dtype="<i4").reshape(1, 12),
         constrained_dofs=constrained,
         free_dofs=free,
-        csr_row_ptr=np.arange(
-            0, dof_count * dof_count + 1, dof_count, dtype="<i8"
-        ),
+        csr_row_ptr=np.arange(0, dof_count * dof_count + 1, dof_count, dtype="<i8"),
         csr_column_indices=np.tile(np.arange(dof_count, dtype="<i4"), dof_count),
     )
-    coordinates = np.asarray(
-        [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]], dtype="<f8"
-    )
+    coordinates = np.asarray([[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]], dtype="<f8")
     right_hand_side = np.zeros(dof_count, dtype="<f8")
     right_hand_side[6] = 4.0
     scaling = create_equation_scaling(
@@ -466,7 +476,9 @@ def build_run_receipt(
         actual_python_implementation or platform_module.python_implementation()
     )
     release = platform_release or platform_module.release()
-    head_sha = checkout_head_sha if checkout_head_sha is not None else _git_head(repo_root)
+    head_sha = (
+        checkout_head_sha if checkout_head_sha is not None else _git_head(repo_root)
+    )
     tracked_clean = (
         tracked_source_clean
         if tracked_source_clean is not None
@@ -507,9 +519,7 @@ def build_run_receipt(
     for name in sorted(set(EXPECTED_GOLDENS) | set(observed_goldens)):
         if observed_goldens.get(name) != EXPECTED_GOLDENS.get(name):
             blockers.append(f"golden_hash_mismatch:{name}")
-    for name in sorted(
-        set(EXPECTED_BINARY_ARTIFACTS) | set(observed_binary_artifacts)
-    ):
+    for name in sorted(set(EXPECTED_BINARY_ARTIFACTS) | set(observed_binary_artifacts)):
         if observed_binary_artifacts.get(name) != EXPECTED_BINARY_ARTIFACTS.get(name):
             blockers.append(f"binary_artifact_mismatch:{name}")
     if origin_kind not in ("local", "github_actions"):
@@ -603,7 +613,9 @@ def _load_run_receipts(
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except Exception as exc:
-            blockers.append(f"receipt_json_invalid:{path.name}:{exc.__class__.__name__}")
+            blockers.append(
+                f"receipt_json_invalid:{path.name}:{exc.__class__.__name__}"
+            )
             continue
         if not isinstance(payload, dict):
             blockers.append(f"receipt_payload_invalid:{path.name}")
@@ -710,9 +722,7 @@ def build_matrix_receipt(
                 "receipt_hash": payload["receipt_hash"],
                 "contract_pass": payload["contract_pass"],
                 "actual_system": payload["coordinate"]["actual_system"],
-                "actual_python_version": payload["coordinate"][
-                    "actual_python_version"
-                ],
+                "actual_python_version": payload["coordinate"]["actual_python_version"],
                 "numpy_version": payload["coordinate"]["numpy_version"],
                 "runner_name": execution["runner_name"],
             }

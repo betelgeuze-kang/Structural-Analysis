@@ -75,6 +75,34 @@ def _write_four_receipts(directory: Path) -> list[dict]:
     return receipts
 
 
+def test_tracked_source_clean_compares_committed_raw_bytes(monkeypatch) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run(command: list[str], **kwargs: object):
+        observed["command"] = command
+        observed["kwargs"] = kwargs
+        return module.subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    assert module._tracked_source_clean(REPO_ROOT) is True
+    assert observed["command"] == [
+        "git",
+        "-c",
+        "filter.lfs.process=",
+        "-c",
+        "filter.lfs.clean=cat",
+        "-c",
+        "filter.lfs.smudge=cat",
+        "-c",
+        "filter.lfs.required=false",
+        "diff",
+        "--quiet",
+        "HEAD",
+        "--",
+    ]
+
+
 def test_local_coordinate_receipt_passes_without_claiming_matrix() -> None:
     receipt = _build_run("ubuntu-latest", "3.10", origin_kind="local")
 
@@ -194,14 +222,15 @@ def test_matrix_blocks_missing_or_tampered_coordinate(tmp_path: Path) -> None:
 
     assert matrix["contract_pass"] is False
     assert "matrix_job_result_not_success:failure" in matrix["blockers"]
-    assert "run_receipt_hash_invalid:ubuntu-latest-python-3.10.json" in (
-        matrix["blockers"]
+    assert (
+        "run_receipt_hash_invalid:ubuntu-latest-python-3.10.json"
+        in (matrix["blockers"])
     )
-    assert "required_coordinate_missing:ubuntu-latest|python-3.10" in (
-        matrix["blockers"]
+    assert (
+        "required_coordinate_missing:ubuntu-latest|python-3.10" in (matrix["blockers"])
     )
-    assert "required_coordinate_missing:windows-latest|python-3.12" in (
-        matrix["blockers"]
+    assert (
+        "required_coordinate_missing:windows-latest|python-3.12" in (matrix["blockers"])
     )
     assert matrix["claims"]["four_way_github_actions_exact_replay"] is False
 

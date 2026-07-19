@@ -55,6 +55,10 @@ def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     assert "os: [ubuntu-latest, windows-latest]" in workflow
     assert 'python-version: ["3.10", "3.12"]' in workflow
     assert "fail-fast: false" in workflow
+    assert 'GIT_CONFIG_COUNT: "5"' in workflow
+    assert "GIT_CONFIG_KEY_0: core.longpaths" in workflow
+    assert "GIT_CONFIG_KEY_4: filter.lfs.process" in workflow
+    assert 'GIT_CONFIG_VALUE_4: ""' in workflow
     assert (
         'ENGINE_V2_SOURCE_SHA: "${{ github.event.pull_request.head.sha || github.sha }}"'
         in workflow
