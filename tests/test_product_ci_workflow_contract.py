@@ -21,6 +21,18 @@ def test_canonical_ci_owns_structural_core_lane() -> None:
     assert "scripts/verify_quality_gate.py --mode pr" in workflow
 
 
+def test_pr_quality_gate_pins_reproducible_openblas_execution() -> None:
+    workflow = _read("ci.yml")
+
+    quality_gate = workflow.split("- name: PR quality gate", 1)[1].split(
+        "- name: Upload quality-gate log",
+        1,
+    )[0]
+    assert "OPENBLAS_CORETYPE: Haswell" in quality_gate
+    assert 'OPENBLAS_NUM_THREADS: "1"' in quality_gate
+    assert 'OMP_NUM_THREADS: "1"' in quality_gate
+
+
 def test_python_and_frontend_source_triggers_are_disjoint() -> None:
     canonical = _read("ci.yml")
     frontend = _read("frontend-web-ci.yml")
