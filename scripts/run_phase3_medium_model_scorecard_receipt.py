@@ -24,12 +24,18 @@ for candidate in (SCRIPT_DIR, SRC_ROOT):
 
 from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION  # noqa: E402
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model, validate  # noqa: E402
+from structural_analysis.benchmark.acceptance import (  # noqa: E402
+    BENCHMARK_DECISION_SCHEMA_VERSION,
+)
+from structural_analysis.benchmark.medium_corpus import (  # noqa: E402
+    REQUIRED_CORE_METRIC_FAMILIES,
+)
 
 
 DEFAULT_TIMEOUT_SECONDS = 3600
 DEFAULT_MEMORY_LIMIT_GB = 32.0
 SCHEMA_VERSION = "phase3-medium-model-scorecard-receipt.v1"
-ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS = {"PASS", "APPROVED_REVIEW"}
+ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS = {"PASS", "REVIEW"}
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 MEDIUM_RECEIPT_DIR = PRODUCTIZATION / "medium_model_scorecard_receipts"
 SUPPORTED_REVIEW_EVIDENCE_URI_SCHEMES = {"https", "operator-review", "ticket", "jira"}
@@ -121,14 +127,28 @@ def _is_generated_review_evidence_ref_path(path: Path) -> bool:
     return False
 
 
-def _review_evidence_ref_resolution(*, review_path: Path, evidence_ref: str) -> dict[str, Any]:
+def _review_evidence_ref_resolution(
+    *, review_path: Path, evidence_ref: str
+) -> dict[str, Any]:
     text = evidence_ref.strip()
     if not text:
-        return {"kind": "missing", "resolvable": False, "resolved_path": "", "blockers": []}
+        return {
+            "kind": "missing",
+            "resolvable": False,
+            "resolved_path": "",
+            "blockers": [],
+        }
     parsed = urlparse(text)
     if parsed.scheme:
-        if parsed.scheme in SUPPORTED_REVIEW_EVIDENCE_URI_SCHEMES and bool(parsed.netloc or parsed.path):
-            return {"kind": f"{parsed.scheme}_reference", "resolvable": True, "resolved_path": "", "blockers": []}
+        if parsed.scheme in SUPPORTED_REVIEW_EVIDENCE_URI_SCHEMES and bool(
+            parsed.netloc or parsed.path
+        ):
+            return {
+                "kind": f"{parsed.scheme}_reference",
+                "resolvable": True,
+                "resolved_path": "",
+                "blockers": [],
+            }
         return {
             "kind": "unsupported_uri",
             "resolvable": False,
@@ -136,7 +156,9 @@ def _review_evidence_ref_resolution(*, review_path: Path, evidence_ref: str) -> 
             "blockers": ["scorecard_or_review_evidence_ref_unsupported_uri"],
         }
     path = Path(text).expanduser()
-    candidates = [path] if path.is_absolute() else [ROOT / path, review_path.parent / path]
+    candidates = (
+        [path] if path.is_absolute() else [ROOT / path, review_path.parent / path]
+    )
     for candidate in candidates:
         if not candidate.exists():
             continue
@@ -168,6 +190,9 @@ def _scorecard_or_review_status(path: Path | None) -> dict[str, Any]:
             "present": False,
             "contract_pass": False,
             "decision": "",
+            "schema_version": "",
+            "metric_families": [],
+            "benchmark_credit": False,
             "evidence_ref": "",
             "reviewer": "",
             "blockers": ["scorecard_or_review_missing"],
@@ -178,19 +203,27 @@ def _scorecard_or_review_status(path: Path | None) -> dict[str, Any]:
             "present": False,
             "contract_pass": False,
             "decision": "",
+            "schema_version": "",
+            "metric_families": [],
+            "benchmark_credit": False,
             "evidence_ref": "",
             "reviewer": "",
             "blockers": ["scorecard_or_review_path_missing"],
         }
     payload = _load_json_object(path)
     decision = _normalized_decision(payload.get("decision") or payload.get("status"))
-    evidence_ref = str(
-        payload.get("evidence_ref")
-        or payload.get("review_evidence_ref")
-        or payload.get("scorecard_ref")
-        or ""
-    ).strip()
-    reviewer = str(payload.get("reviewer") or payload.get("approved_by") or "").strip()
+    review = payload.get("review") if isinstance(payload.get("review"), dict) else None
+    evidence_ref = str((review or {}).get("evidence_ref") or "").strip()
+    reviewer = str((review or {}).get("engineer_id") or "").strip()
+    metric_families = (
+        [
+            str(value).strip()
+            for value in payload.get("metric_families", [])
+            if isinstance(value, str) and value.strip()
+        ]
+        if isinstance(payload.get("metric_families"), list)
+        else []
+    )
     evidence_ref_resolution = _review_evidence_ref_resolution(
         review_path=path,
         evidence_ref=evidence_ref,
@@ -198,19 +231,77 @@ def _scorecard_or_review_status(path: Path | None) -> dict[str, Any]:
     blockers: list[str] = []
     if not payload:
         blockers.append("scorecard_or_review_json_invalid_or_empty")
+    if payload.get("schema_version") != BENCHMARK_DECISION_SCHEMA_VERSION:
+        blockers.append("scientific_decision_schema_mismatch")
     if decision not in ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS:
         blockers.append("scorecard_or_review_decision_not_accepted")
-    if not evidence_ref:
-        blockers.append("scorecard_or_review_evidence_ref_missing")
-    else:
-        blockers.extend(str(blocker) for blocker in evidence_ref_resolution["blockers"])
-    if not reviewer:
-        blockers.append("scorecard_or_review_reviewer_missing")
+    if payload.get("decision_contract_pass") is not True:
+        blockers.append("scientific_decision_contract_not_passed")
+    if payload.get("benchmark_credit") is not True:
+        blockers.append("scientific_decision_benchmark_credit_missing")
+    if payload.get("hard_blockers"):
+        blockers.append("scientific_decision_hard_blockers_present")
+    if payload.get("decision_blockers"):
+        blockers.append("scientific_decision_blockers_present")
+    if payload.get("metric_family_count") != len(metric_families):
+        blockers.append("scientific_decision_metric_family_count_mismatch")
+    if len(metric_families) != len(set(metric_families)):
+        blockers.append("scientific_decision_metric_family_duplicate")
+    missing_core_families = sorted(
+        set(REQUIRED_CORE_METRIC_FAMILIES) - set(metric_families)
+    )
+    blockers.extend(
+        f"scientific_decision_metric_family_missing:{family}"
+        for family in missing_core_families
+    )
+    if decision == "PASS":
+        if payload.get("numerical_pass") is not True:
+            blockers.append("scientific_decision_pass_without_numerical_pass")
+        if review is not None:
+            blockers.append("scientific_decision_pass_review_must_be_null")
+    elif decision == "REVIEW":
+        if review is None:
+            blockers.append("scientific_decision_review_missing")
+        else:
+            if review.get("contract_pass") is not True:
+                blockers.append("scientific_decision_review_contract_not_passed")
+            if not reviewer:
+                blockers.append("scorecard_or_review_reviewer_missing")
+            if not str(review.get("reason") or "").strip():
+                blockers.append("scientific_decision_review_reason_missing")
+            if not review.get("scope"):
+                blockers.append("scientific_decision_review_scope_missing")
+            if not evidence_ref:
+                blockers.append("scorecard_or_review_evidence_ref_missing")
+            else:
+                blockers.extend(
+                    str(blocker) for blocker in evidence_ref_resolution["blockers"]
+                )
+            for timestamp_name in ("approved_at", "expires_at"):
+                timestamp = str(review.get(timestamp_name) or "").strip()
+                try:
+                    parsed_timestamp = datetime.fromisoformat(
+                        timestamp.replace("Z", "+00:00")
+                    )
+                except ValueError:
+                    parsed_timestamp = None
+                if (
+                    parsed_timestamp is None
+                    or parsed_timestamp.tzinfo is None
+                    or parsed_timestamp.utcoffset() is None
+                ):
+                    blockers.append(
+                        f"scientific_decision_review_{timestamp_name}_invalid"
+                    )
     return {
         "path": str(path),
         "present": True,
         "contract_pass": not blockers,
         "decision": decision,
+        "schema_version": payload.get("schema_version", ""),
+        "metric_families": metric_families,
+        "missing_core_metric_families": missing_core_families,
+        "benchmark_credit": payload.get("benchmark_credit") is True,
         "evidence_ref": evidence_ref,
         "evidence_ref_kind": evidence_ref_resolution["kind"],
         "evidence_ref_resolved_path": evidence_ref_resolution["resolved_path"],
@@ -285,26 +376,35 @@ def build_medium_model_scorecard_receipt(
     if report_payload is not None and report_out is not None:
         _write_json(report_out, report_payload)
 
-    blockers: list[str] = []
+    execution_blockers: list[str] = []
     if not source_sha256_match:
-        blockers.append("source_sha256_mismatch")
-    blockers.extend(scorecard_or_review_status["blockers"])
+        execution_blockers.append("source_sha256_mismatch")
+    if analysis_type == "model_health":
+        execution_blockers.append("benchmark_analysis_type_model_health_only")
     if crashed:
-        blockers.append("scorecard_execution_crashed")
+        execution_blockers.append("scorecard_execution_crashed")
     if oom:
-        blockers.append("scorecard_execution_oom")
+        execution_blockers.append("scorecard_execution_oom")
     if exit_code != 0:
-        blockers.append("validation_contract_not_pass")
+        execution_blockers.append("validation_contract_not_pass")
     peak_memory_gb = _peak_memory_gb()
     if runtime_seconds > timeout_seconds:
-        blockers.append("runtime_seconds_above_declared_timeout")
+        execution_blockers.append("runtime_seconds_above_declared_timeout")
     if peak_memory_gb > memory_limit_gb:
-        blockers.append("peak_memory_above_declared_limit")
-    blockers = sorted(dict.fromkeys(blockers))
+        execution_blockers.append("peak_memory_above_declared_limit")
+    execution_blockers = sorted(dict.fromkeys(execution_blockers))
     validation_contract_pass = bool(
         report_payload is not None and report_payload.get("contract_pass") is True
     )
-    contract_pass = bool(not blockers and validation_contract_pass and not crashed and not oom)
+    execution_contract_pass = bool(
+        not execution_blockers and validation_contract_pass and not crashed and not oom
+    )
+    blockers = sorted(
+        dict.fromkeys([*execution_blockers, *scorecard_or_review_status["blockers"]])
+    )
+    contract_pass = bool(
+        execution_contract_pass and scorecard_or_review_status["contract_pass"]
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -338,6 +438,12 @@ def build_medium_model_scorecard_receipt(
         "analysis_result_status": str((result_payload or {}).get("status", "")),
         "validation_report_status": str((report_payload or {}).get("status", "")),
         "validation_contract_pass": validation_contract_pass,
+        "execution_contract_pass": execution_contract_pass,
+        "execution_blockers": execution_blockers,
+        "scientific_decision_contract_pass": scorecard_or_review_status[
+            "contract_pass"
+        ],
+        "scientific_benchmark_credit": scorecard_or_review_status["benchmark_credit"],
         "engine_version": ANALYSIS_ENGINE_VERSION,
         "claim_boundary_version": CLAIM_BOUNDARY_VERSION,
         "contract_pass": contract_pass,
@@ -346,10 +452,11 @@ def build_medium_model_scorecard_receipt(
         "medium_model_scorecard_receipt_claim": contract_pass,
         "blockers": blockers,
         "claim_boundary": (
-            "This is a single operator-attached medium-model scorecard receipt. It "
-            "does not acquire sources, approve licenses, create reference outputs, "
-            "satisfy the required 5/5 medium-model quantity gate, or close Phase 3/"
-            "Developer Preview RC by itself."
+            "This is a single operator-attached medium-model scorecard receipt. Its "
+            "benchmark claim requires a non-model-health analysis and a scientific "
+            "decision covering every core metric family. It does not acquire sources, "
+            "approve licenses, create reference outputs, satisfy the required 5/5 "
+            "medium-model quantity gate, or close Phase 3/Developer Preview RC by itself."
         ),
     }
 
@@ -374,7 +481,9 @@ def build_parser() -> argparse.ArgumentParser:
         default="numpy_linalg_solve_dense",
     )
     parser.add_argument("--reference", type=Path)
-    parser.add_argument("--memory-limit-gb", type=float, default=DEFAULT_MEMORY_LIMIT_GB)
+    parser.add_argument(
+        "--memory-limit-gb", type=float, default=DEFAULT_MEMORY_LIMIT_GB
+    )
     parser.add_argument("--timeout-seconds", type=int, default=DEFAULT_TIMEOUT_SECONDS)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -383,8 +492,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    runner_command = "python3 scripts/run_phase3_medium_model_scorecard_receipt.py " + " ".join(
-        sys.argv[1:] if argv is None else argv
+    runner_command = (
+        "python3 scripts/run_phase3_medium_model_scorecard_receipt.py "
+        + " ".join(sys.argv[1:] if argv is None else argv)
     )
     payload = build_medium_model_scorecard_receipt(
         model_path=args.model,

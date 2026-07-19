@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_text_file_row_and_renderable_resource_budgets_fail_closed() -> None:
-    script = """
+    script = r"""
 import {
   STRUCTURE_VIEWER_INGEST_MAX_ELEMENT_COUNT,
   STRUCTURE_VIEWER_INGEST_MAX_NODE_COUNT,

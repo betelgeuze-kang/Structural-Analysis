@@ -25,9 +25,11 @@ def _project_bundle_handler() -> str:
 
 def test_runtime_preflights_project_bundle_and_persists_metadata_only() -> None:
     text = INDEX.read_text(encoding="utf-8")
+    ingest_facade = (INDEX.parent / "viewer-ingest.js").read_text(encoding="utf-8")
     handler = _project_bundle_handler()
 
-    assert "from './viewer-project-bundle-file-reader.js';" in text
+    assert "from './viewer-ingest.js';" in text
+    assert "export * from './viewer-project-bundle-file-reader.js';" in ingest_facade
     assert "buildViewerProjectBundleFileFailurePreview," in text
     assert "readViewerProjectBundleFile," in text
     assert "viewerProjectBundleFileMetadata," in text

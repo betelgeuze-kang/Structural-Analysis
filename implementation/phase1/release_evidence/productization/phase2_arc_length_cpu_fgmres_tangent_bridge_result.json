@@ -1,0 +1,532 @@
+{
+  "analysis_type": "arc_length_schur_tangent_solve_bridge",
+  "blockers_remaining": [
+    "complete_continuation_loop_not_using_engine_v2_tangent_adapter",
+    "frame_shell_residual_assembly_not_connected",
+    "production_sparse_nonlinear_backend_not_verified",
+    "production_rocm_hip_parity_not_verified",
+    "g1_full_load_full_mesh_not_closed"
+  ],
+  "case_id": "coupled_shallow_arch_cpu_fgmres_tangent_bridge",
+  "claim_boundary": "This receipt verifies deterministic CPU FGMRES tangent solves and Schur equivalence to one dense augmented arc-length correction on three analytic two-DOF states. It does not run the complete continuation loop through the Engine v2 adapter, assemble a frame/shell residual, prove a production sparse nonlinear backend, establish ROCm/HIP parity, close full-building G1, or provide release-readiness evidence.",
+  "claims": {
+    "complete_arc_length_backend_integration": false,
+    "engine_v2_cpu_fgmres_tangent_bridge": true,
+    "frame_shell_residual_assembly": false,
+    "g1_full_building_closure": false,
+    "indefinite_tangent_solve": true,
+    "production_rocm_hip_parity": false,
+    "production_sparse_nonlinear_backend": false,
+    "schur_augmented_increment_equivalence": true
+  },
+  "contract_pass": true,
+  "linear_solver_profile": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1",
+  "schema_version": "phase2-arc-length-cpu-fgmres-tangent-bridge.v1",
+  "state_rows": [
+    {
+      "accepted_free_displacements_m": [
+        0.03,
+        0.010499999999999999
+      ],
+      "accepted_load_factor": 17.935581328250834,
+      "augmented_linear_residual_inf_norm": 4.440892098500626e-16,
+      "consistent_tangent_determinant": 135130.20224713054,
+      "consistent_tangent_kn_per_m": [
+        [
+          386.82550561782597,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "constraint_displacement_gradient_m": [
+        0.024,
+        -0.008
+      ],
+      "constraint_load_factor_gradient_m2": 4e-06,
+      "constraint_residual_m2": 2.1751099999999955e-05,
+      "contract_pass": true,
+      "direct_augmented_correction": [
+        0.0011976963251058598,
+        0.00861919371378705,
+        4.6144344769389365
+      ],
+      "maximum_correction_absolute_error": 8.881784197001252e-16,
+      "reference_load_tangent_solve": {
+        "claim_boundary": {
+          "arc_length_integration": false,
+          "description": "This receipt covers one deterministic Engine v2 reduced-CSR tangent linear solve. It does not prove nonlinear residual assembly, augmented arc-length integration, state commit/rollback, a sparse production nonlinear path, ROCm/HIP parity, full-building equilibrium, or G1 closure.",
+          "g1_closure": false,
+          "nonlinear_residual_assembly": false,
+          "production_sparse_nonlinear_backend": false,
+          "rocm_hip_parity": false,
+          "state_commit_rollback": false
+        },
+        "contract_pass": true,
+        "explicit_residual": {
+          "data_hash": "sha256:374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+          "gate_passed": true,
+          "inf_norm": 0.0,
+          "tolerance": 1e-12
+        },
+        "profile": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1",
+        "schema_version": "structural-analysis-cpu-fgmres-tangent-solve.v1",
+        "solution_artifact": {
+          "data_hash": "sha256:a23a1ce4d5071503faa49db63b5476ea36e8816f1780b3e6dcbfb927ec97a37c",
+          "descriptor": {
+            "artifact_uri": "artifact://arc-length-fgmres-bridge/pre_limit_positive_tangent-reference-load/solution_free.f64le",
+            "byte_length": 16,
+            "byte_order": "little",
+            "content_hash": "sha256:4583786745338c774fc02533ef2abf30aef14f0bd0232ce4b224953d5a614d08",
+            "data_hash": "sha256:a23a1ce4d5071503faa49db63b5476ea36e8816f1780b3e6dcbfb927ec97a37c",
+            "dtype": "<f8",
+            "equation_scope": "free_equations",
+            "layout": "C",
+            "name": "solution_free",
+            "shape": [
+              2
+            ]
+          }
+        },
+        "solve_hash": "sha256:0b186f159b2ab643474b446b75a3c43b3d0688f82cff814227100a238b5f063d",
+        "solver": {
+          "converged": true,
+          "fallback_count": 0,
+          "free_count": 2,
+          "iteration_count": 2,
+          "matvec_count": 5,
+          "preconditioner_profile": "identity_right_preconditioner.v1",
+          "regularization_count": 0,
+          "run_hash": "sha256:bffd755ebcad29b1ab24897d6a8bc76bb4e9b6d99a8fe3c145043cb0303ebc20",
+          "terminal_reason": "converged_scaled_residual"
+        },
+        "source": {
+          "execution_plan_hash": "sha256:8f9d3dac05437476e9f409277db918620b2df63573ac46e85b72ec152aae6c6e",
+          "operator_numeric_values_hash": "sha256:d0c19cda1615c7e53d5d8ab1e18b86804099e2341a816b6e7a79f53da74ac21d",
+          "reduced_csr_identity_hash": "sha256:5ad95e634932b49d7749a877db5cbde5f7de38ba9e57998718963f6496967473",
+          "right_hand_side_free_data_hash": "sha256:3239b05c38b825ebb79f103172438292a22a0951351a6b81be1df5d44776cc65",
+          "scaling_hash": "sha256:550fd26f5576980cb31f66d87f2628a1643a430c2a1fdd214c56b8194335cb50"
+        },
+        "status": "ready"
+      },
+      "reference_load_tangent_solve_direct_absolute_error": 4.336808689942018e-19,
+      "residual_kn": [
+        5.357822110333437,
+        -3.2799999999999994
+      ],
+      "residual_tangent_solve": {
+        "claim_boundary": {
+          "arc_length_integration": false,
+          "description": "This receipt covers one deterministic Engine v2 reduced-CSR tangent linear solve. It does not prove nonlinear residual assembly, augmented arc-length integration, state commit/rollback, a sparse production nonlinear path, ROCm/HIP parity, full-building equilibrium, or G1 closure.",
+          "g1_closure": false,
+          "nonlinear_residual_assembly": false,
+          "production_sparse_nonlinear_backend": false,
+          "rocm_hip_parity": false,
+          "state_commit_rollback": false
+        },
+        "contract_pass": true,
+        "explicit_residual": {
+          "data_hash": "sha256:096812c825c1ffacdcf18c47241616b095081839b331c376f5c8ee3142282f67",
+          "gate_passed": true,
+          "inf_norm": 4.440892098500626e-16,
+          "tolerance": 1e-12
+        },
+        "profile": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1",
+        "schema_version": "structural-analysis-cpu-fgmres-tangent-solve.v1",
+        "solution_artifact": {
+          "data_hash": "sha256:2baab09a588782964e7d25f8d7086e0605b063ffa1e852cbc97c8176b6c75ee4",
+          "descriptor": {
+            "artifact_uri": "artifact://arc-length-fgmres-bridge/pre_limit_positive_tangent-residual/solution_free.f64le",
+            "byte_length": 16,
+            "byte_order": "little",
+            "content_hash": "sha256:365eafef45d7af05bc40f1a1a40f941df75db18f4fef3dc881a9fe690a36a970",
+            "data_hash": "sha256:2baab09a588782964e7d25f8d7086e0605b063ffa1e852cbc97c8176b6c75ee4",
+            "dtype": "<f8",
+            "equation_scope": "free_equations",
+            "layout": "C",
+            "name": "solution_free",
+            "shape": [
+              2
+            ]
+          }
+        },
+        "solve_hash": "sha256:eb38a0a3b676e8281b8bd88fea03745ad7ed7c90a55bbaf1be3ac247fc0051f5",
+        "solver": {
+          "converged": true,
+          "fallback_count": 0,
+          "free_count": 2,
+          "iteration_count": 2,
+          "matvec_count": 5,
+          "preconditioner_profile": "identity_right_preconditioner.v1",
+          "regularization_count": 0,
+          "run_hash": "sha256:b6e75496f3f7576c2b25af742c986b751d8ba4d1556b4891c6c2abe60fa78aca",
+          "terminal_reason": "converged_scaled_residual"
+        },
+        "source": {
+          "execution_plan_hash": "sha256:8f9d3dac05437476e9f409277db918620b2df63573ac46e85b72ec152aae6c6e",
+          "operator_numeric_values_hash": "sha256:d0c19cda1615c7e53d5d8ab1e18b86804099e2341a816b6e7a79f53da74ac21d",
+          "reduced_csr_identity_hash": "sha256:5ad95e634932b49d7749a877db5cbde5f7de38ba9e57998718963f6496967473",
+          "right_hand_side_free_data_hash": "sha256:a7055ad6411f08a99a6c0d25d77d8a3b8e3cc4b6fe0133381af24cf716f57e50",
+          "scaling_hash": "sha256:550fd26f5576980cb31f66d87f2628a1643a430c2a1fdd214c56b8194335cb50"
+        },
+        "status": "ready"
+      },
+      "residual_tangent_solve_direct_absolute_error": 1.734723475976807e-18,
+      "schur_correction": [
+        0.0011976963251058622,
+        0.00861919371378705,
+        4.614434476938937
+      ],
+      "schur_denominator": 6.675429074317161e-05,
+      "state_id": "pre_limit_positive_tangent",
+      "trial_free_displacements_m": [
+        0.041999999999999996,
+        0.006499999999999999
+      ],
+      "trial_load_factor": 18.435581328250834
+    },
+    {
+      "accepted_free_displacements_m": [
+        0.2,
+        0.06999999999999999
+      ],
+      "accepted_load_factor": 0.0,
+      "augmented_linear_residual_inf_norm": 8.881784197001252e-16,
+      "consistent_tangent_determinant": -153626.90546039076,
+      "consistent_tangent_kn_per_m": [
+        [
+          -335.06726365097717,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "constraint_displacement_gradient_m": [
+        0.024,
+        -0.008
+      ],
+      "constraint_load_factor_gradient_m2": 4e-06,
+      "constraint_residual_m2": 2.1751099999999955e-05,
+      "contract_pass": true,
+      "direct_augmented_correction": [
+        0.00327620119394811,
+        0.009346670417881852,
+        -6.401641327924958
+      ],
+      "maximum_correction_absolute_error": 1.7763568394002505e-15,
+      "reference_load_tangent_solve": {
+        "claim_boundary": {
+          "arc_length_integration": false,
+          "description": "This receipt covers one deterministic Engine v2 reduced-CSR tangent linear solve. It does not prove nonlinear residual assembly, augmented arc-length integration, state commit/rollback, a sparse production nonlinear path, ROCm/HIP parity, full-building equilibrium, or G1 closure.",
+          "g1_closure": false,
+          "nonlinear_residual_assembly": false,
+          "production_sparse_nonlinear_backend": false,
+          "rocm_hip_parity": false,
+          "state_commit_rollback": false
+        },
+        "contract_pass": true,
+        "explicit_residual": {
+          "data_hash": "sha256:374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+          "gate_passed": true,
+          "inf_norm": 0.0,
+          "tolerance": 1e-12
+        },
+        "profile": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1",
+        "schema_version": "structural-analysis-cpu-fgmres-tangent-solve.v1",
+        "solution_artifact": {
+          "data_hash": "sha256:c87b72f92955a557e3c07a014069b56bf5e71ca915e1f727ad7e16829778ed89",
+          "descriptor": {
+            "artifact_uri": "artifact://arc-length-fgmres-bridge/descending_negative_tangent-reference-load/solution_free.f64le",
+            "byte_length": 16,
+            "byte_order": "little",
+            "content_hash": "sha256:c887082855698c4453660267791d69a2978b0dba8ffc240ba351dbf90ab7de11",
+            "data_hash": "sha256:c87b72f92955a557e3c07a014069b56bf5e71ca915e1f727ad7e16829778ed89",
+            "dtype": "<f8",
+            "equation_scope": "free_equations",
+            "layout": "C",
+            "name": "solution_free",
+            "shape": [
+              2
+            ]
+          }
+        },
+        "solve_hash": "sha256:026825c578937fc806b6d7cca82b43ff1769a0850cda6c3dae02e3cb3cc1c1c3",
+        "solver": {
+          "converged": true,
+          "fallback_count": 0,
+          "free_count": 2,
+          "iteration_count": 2,
+          "matvec_count": 5,
+          "preconditioner_profile": "identity_right_preconditioner.v1",
+          "regularization_count": 0,
+          "run_hash": "sha256:6c1976ee926523c4176bbbcd864e0f90a7d13a7af081b90734f8c34af96f6b5a",
+          "terminal_reason": "converged_scaled_residual"
+        },
+        "source": {
+          "execution_plan_hash": "sha256:8f9d3dac05437476e9f409277db918620b2df63573ac46e85b72ec152aae6c6e",
+          "operator_numeric_values_hash": "sha256:ce81e17ca142fcb2b0b6c2e390ac98b05430e0415a2f817dc1748d8f66ad74f2",
+          "reduced_csr_identity_hash": "sha256:419c537f1b639c12b248bcb11280e8b0329ee83fbc9a7445cf8349c497b23d9d",
+          "right_hand_side_free_data_hash": "sha256:3239b05c38b825ebb79f103172438292a22a0951351a6b81be1df5d44776cc65",
+          "scaling_hash": "sha256:550fd26f5576980cb31f66d87f2628a1643a430c2a1fdd214c56b8194335cb50"
+        },
+        "status": "ready"
+      },
+      "reference_load_tangent_solve_direct_absolute_error": 4.336808689942018e-19,
+      "residual_kn": [
+        -3.995359700195241,
+        -3.280000000000005
+      ],
+      "residual_tangent_solve": {
+        "claim_boundary": {
+          "arc_length_integration": false,
+          "description": "This receipt covers one deterministic Engine v2 reduced-CSR tangent linear solve. It does not prove nonlinear residual assembly, augmented arc-length integration, state commit/rollback, a sparse production nonlinear path, ROCm/HIP parity, full-building equilibrium, or G1 closure.",
+          "g1_closure": false,
+          "nonlinear_residual_assembly": false,
+          "production_sparse_nonlinear_backend": false,
+          "rocm_hip_parity": false,
+          "state_commit_rollback": false
+        },
+        "contract_pass": true,
+        "explicit_residual": {
+          "data_hash": "sha256:acbfb6a8f86c9d03a71dd5aac4c8ad0467d5749acbf6c41c246f701a70dd9ac0",
+          "gate_passed": true,
+          "inf_norm": 8.881784197001252e-16,
+          "tolerance": 1e-12
+        },
+        "profile": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1",
+        "schema_version": "structural-analysis-cpu-fgmres-tangent-solve.v1",
+        "solution_artifact": {
+          "data_hash": "sha256:4da5ddbcbecfcaaa221731c0d172bab5f83ae83edfbcc5f165530bdb60c7c974",
+          "descriptor": {
+            "artifact_uri": "artifact://arc-length-fgmres-bridge/descending_negative_tangent-residual/solution_free.f64le",
+            "byte_length": 16,
+            "byte_order": "little",
+            "content_hash": "sha256:f7b55e7e68691e4aa332a50f4794dc4a5f3a167351d32da2d6493f7f59b390db",
+            "data_hash": "sha256:4da5ddbcbecfcaaa221731c0d172bab5f83ae83edfbcc5f165530bdb60c7c974",
+            "dtype": "<f8",
+            "equation_scope": "free_equations",
+            "layout": "C",
+            "name": "solution_free",
+            "shape": [
+              2
+            ]
+          }
+        },
+        "solve_hash": "sha256:812d8dfa49f1e7effd8e257aa761965ca6689a2face0c3b640ad6570b29e5aed",
+        "solver": {
+          "converged": true,
+          "fallback_count": 0,
+          "free_count": 2,
+          "iteration_count": 2,
+          "matvec_count": 5,
+          "preconditioner_profile": "identity_right_preconditioner.v1",
+          "regularization_count": 0,
+          "run_hash": "sha256:04012cfced274d5e9ca534af52b9f0f4e16ae8ed3e1e53e71fbc9a5118da4137",
+          "terminal_reason": "converged_scaled_residual"
+        },
+        "source": {
+          "execution_plan_hash": "sha256:8f9d3dac05437476e9f409277db918620b2df63573ac46e85b72ec152aae6c6e",
+          "operator_numeric_values_hash": "sha256:ce81e17ca142fcb2b0b6c2e390ac98b05430e0415a2f817dc1748d8f66ad74f2",
+          "reduced_csr_identity_hash": "sha256:419c537f1b639c12b248bcb11280e8b0329ee83fbc9a7445cf8349c497b23d9d",
+          "right_hand_side_free_data_hash": "sha256:594edd259eab34ebc463ace04cc9f1b806c8cf43f9c6dc9b22024ac6fe0a4684",
+          "scaling_hash": "sha256:550fd26f5576980cb31f66d87f2628a1643a430c2a1fdd214c56b8194335cb50"
+        },
+        "status": "ready"
+      },
+      "residual_tangent_solve_direct_absolute_error": 3.469446951953614e-18,
+      "schur_correction": [
+        0.003276201193948107,
+        0.009346670417881849,
+        -6.401641327924956
+      ],
+      "schur_denominator": -5.11986644174537e-05,
+      "state_id": "descending_negative_tangent",
+      "trial_free_displacements_m": [
+        0.21200000000000002,
+        0.06599999999999999
+      ],
+      "trial_load_factor": 0.5
+    },
+    {
+      "accepted_free_displacements_m": [
+        0.44,
+        0.154
+      ],
+      "accepted_load_factor": 39.32819380993287,
+      "augmented_linear_residual_inf_norm": 6.776263578034403e-21,
+      "consistent_tangent_determinant": 550384.4648095245,
+      "consistent_tangent_kn_per_m": [
+        [
+          1424.9611620238124,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "constraint_displacement_gradient_m": [
+        0.024,
+        -0.008
+      ],
+      "constraint_load_factor_gradient_m2": 4e-06,
+      "constraint_residual_m2": 2.1751099999999955e-05,
+      "contract_pass": true,
+      "direct_augmented_correction": [
+        -0.0006181137740216441,
+        0.007983660179092437,
+        14.238228002314756
+      ],
+      "maximum_correction_absolute_error": 1.3010426069826053e-18,
+      "reference_load_tangent_solve": {
+        "claim_boundary": {
+          "arc_length_integration": false,
+          "description": "This receipt covers one deterministic Engine v2 reduced-CSR tangent linear solve. It does not prove nonlinear residual assembly, augmented arc-length integration, state commit/rollback, a sparse production nonlinear path, ROCm/HIP parity, full-building equilibrium, or G1 closure.",
+          "g1_closure": false,
+          "nonlinear_residual_assembly": false,
+          "production_sparse_nonlinear_backend": false,
+          "rocm_hip_parity": false,
+          "state_commit_rollback": false
+        },
+        "contract_pass": true,
+        "explicit_residual": {
+          "data_hash": "sha256:4462aff636067420c595c2dde72a2fa828a027ef701f3e2679c6cf78e8de8ed2",
+          "gate_passed": true,
+          "inf_norm": 1.1102230246251565e-16,
+          "tolerance": 1e-12
+        },
+        "profile": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1",
+        "schema_version": "structural-analysis-cpu-fgmres-tangent-solve.v1",
+        "solution_artifact": {
+          "data_hash": "sha256:9aba772eeacffc37f903f911b34ccd8e454b842674b3eaf122ddb232e6fa94c6",
+          "descriptor": {
+            "artifact_uri": "artifact://arc-length-fgmres-bridge/rehardening_positive_tangent-reference-load/solution_free.f64le",
+            "byte_length": 16,
+            "byte_order": "little",
+            "content_hash": "sha256:652f7269cd260fc15244bc72c382929caa32cda6aa9cdd724c1f282130e38d05",
+            "data_hash": "sha256:9aba772eeacffc37f903f911b34ccd8e454b842674b3eaf122ddb232e6fa94c6",
+            "dtype": "<f8",
+            "equation_scope": "free_equations",
+            "layout": "C",
+            "name": "solution_free",
+            "shape": [
+              2
+            ]
+          }
+        },
+        "solve_hash": "sha256:ff454880937bb1f8b581961e78ba86ba672d4fe38b1e2e3fdbd56996db537cf9",
+        "solver": {
+          "converged": true,
+          "fallback_count": 0,
+          "free_count": 2,
+          "iteration_count": 2,
+          "matvec_count": 5,
+          "preconditioner_profile": "identity_right_preconditioner.v1",
+          "regularization_count": 0,
+          "run_hash": "sha256:cc8fdeae47de52c3187933533fc9c990ba78be127046ca25e7dd97ed0c6ee409",
+          "terminal_reason": "converged_scaled_residual"
+        },
+        "source": {
+          "execution_plan_hash": "sha256:8f9d3dac05437476e9f409277db918620b2df63573ac46e85b72ec152aae6c6e",
+          "operator_numeric_values_hash": "sha256:08a8b3f8622e6760b901adc574788b07e8914fdb48cc3094186070771592a6fc",
+          "reduced_csr_identity_hash": "sha256:3613ff54aefdd2f45346bf8a8408d907ec65eedb14440ffb3a8d1a5639618291",
+          "right_hand_side_free_data_hash": "sha256:3239b05c38b825ebb79f103172438292a22a0951351a6b81be1df5d44776cc65",
+          "scaling_hash": "sha256:550fd26f5576980cb31f66d87f2628a1643a430c2a1fdd214c56b8194335cb50"
+        },
+        "status": "ready"
+      },
+      "reference_load_tangent_solve_direct_absolute_error": 0.0,
+      "residual_kn": [
+        16.236728549080503,
+        -3.280000000000005
+      ],
+      "residual_tangent_solve": {
+        "claim_boundary": {
+          "arc_length_integration": false,
+          "description": "This receipt covers one deterministic Engine v2 reduced-CSR tangent linear solve. It does not prove nonlinear residual assembly, augmented arc-length integration, state commit/rollback, a sparse production nonlinear path, ROCm/HIP parity, full-building equilibrium, or G1 closure.",
+          "g1_closure": false,
+          "nonlinear_residual_assembly": false,
+          "production_sparse_nonlinear_backend": false,
+          "rocm_hip_parity": false,
+          "state_commit_rollback": false
+        },
+        "contract_pass": true,
+        "explicit_residual": {
+          "data_hash": "sha256:668b4fba95cff929cbd631b063686b30e81d122903e4cd274854000831031e1c",
+          "gate_passed": true,
+          "inf_norm": 4.440892098500626e-16,
+          "tolerance": 1e-12
+        },
+        "profile": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1",
+        "schema_version": "structural-analysis-cpu-fgmres-tangent-solve.v1",
+        "solution_artifact": {
+          "data_hash": "sha256:68196ca0385fad2228890654af01c57a937fd65357ebef1f21cac385d2b29123",
+          "descriptor": {
+            "artifact_uri": "artifact://arc-length-fgmres-bridge/rehardening_positive_tangent-residual/solution_free.f64le",
+            "byte_length": 16,
+            "byte_order": "little",
+            "content_hash": "sha256:36f2357f44e5260140d5e4f0be403ef0f67705a8314582d071f14e33a4bbf618",
+            "data_hash": "sha256:68196ca0385fad2228890654af01c57a937fd65357ebef1f21cac385d2b29123",
+            "dtype": "<f8",
+            "equation_scope": "free_equations",
+            "layout": "C",
+            "name": "solution_free",
+            "shape": [
+              2
+            ]
+          }
+        },
+        "solve_hash": "sha256:9f4790e8532eb188e7e8e406ab0b0582ed3d27c21402d8f7bcfe9aa3db91d6e7",
+        "solver": {
+          "converged": true,
+          "fallback_count": 0,
+          "free_count": 2,
+          "iteration_count": 2,
+          "matvec_count": 5,
+          "preconditioner_profile": "identity_right_preconditioner.v1",
+          "regularization_count": 0,
+          "run_hash": "sha256:17b1d0c701afe97b4ec574da111f9891e66bd5261fce6592172bde07c31f9b96",
+          "terminal_reason": "converged_scaled_residual"
+        },
+        "source": {
+          "execution_plan_hash": "sha256:8f9d3dac05437476e9f409277db918620b2df63573ac46e85b72ec152aae6c6e",
+          "operator_numeric_values_hash": "sha256:08a8b3f8622e6760b901adc574788b07e8914fdb48cc3094186070771592a6fc",
+          "reduced_csr_identity_hash": "sha256:3613ff54aefdd2f45346bf8a8408d907ec65eedb14440ffb3a8d1a5639618291",
+          "right_hand_side_free_data_hash": "sha256:1c5dd3f1ea8894098550bd6a427c6442ab75e140496f79ffd66fd26515d54d3c",
+          "scaling_hash": "sha256:550fd26f5576980cb31f66d87f2628a1643a430c2a1fdd214c56b8194335cb50"
+        },
+        "status": "ready"
+      },
+      "residual_tangent_solve_direct_absolute_error": 0.0,
+      "schur_correction": [
+        -0.0006181137740216454,
+        0.007983660179092437,
+        14.238228002314756
+      ],
+      "schur_denominator": 1.9407411622591358e-05,
+      "state_id": "rehardening_positive_tangent",
+      "trial_free_displacements_m": [
+        0.452,
+        0.15
+      ],
+      "trial_load_factor": 39.82819380993287
+    }
+  ],
+  "status": "partial",
+  "verification": {
+    "all_tangent_solves_ready": true,
+    "deterministic_replay_exact": true,
+    "fallback_count": 0,
+    "maximum_augmented_linear_residual_inf_norm": 8.881784197001252e-16,
+    "maximum_correction_absolute_error": 1.7763568394002505e-15,
+    "maximum_tangent_solve_explicit_residual_inf_norm": 8.881784197001252e-16,
+    "positive_negative_positive_determinant_coverage": true,
+    "regularization_count": 0,
+    "schur_augmented_correction_equivalence": true,
+    "tangent_solve_count": 6
+  }
+}

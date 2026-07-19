@@ -26,6 +26,9 @@ from structural_analysis.engine_v2.contracts.state_ir import (  # noqa: E402
     validate_state_ir,
     validate_state_ir_manifest,
 )
+from structural_analysis.engine_v2.contracts._canonical import (  # noqa: E402
+    canonical_hash,
+)
 
 SCHEMA_PATH = REPO_ROOT / "src/structural_analysis/schemas/state_ir_v1.schema.json"
 
@@ -48,6 +51,11 @@ def _plan(**changes: object) -> SimpleNamespace:
     }
     values.update(changes)
     return SimpleNamespace(**values)
+
+
+def _rehash_manifest(payload: dict) -> None:
+    without_hash = {key: value for key, value in payload.items() if key != "state_hash"}
+    payload["state_hash"] = canonical_hash(without_hash)
 
 
 def test_initial_state_is_schema_valid_deterministic_and_deeply_immutable() -> None:
@@ -275,3 +283,48 @@ def test_state_manifest_rejects_stale_hash_after_schema_valid_change() -> None:
         validate_state_ir_manifest(payload)
 
     assert error.value.code == "state_hash_mismatch"
+
+
+@pytest.mark.parametrize(
+    ("mutate", "expected_code"),
+    [
+        (
+            lambda payload: payload.update({"role": "trial"}),
+            "initial_state_lineage_invalid",
+        ),
+        (
+            lambda payload: payload.update({"dof_count": 6}),
+            "state_vector_shape_invalid",
+        ),
+        (
+            lambda payload: payload["vector_hashes"].update(
+                {"displacement": _hash("f")}
+            ),
+            "vector_hash_mismatch",
+        ),
+    ],
+)
+def test_state_manifest_rejects_coherently_rehashed_semantic_forgery(
+    mutate, expected_code: str
+) -> None:
+    payload = deepcopy(create_initial_state(_plan()).to_dict())
+    mutate(payload)
+    _rehash_manifest(payload)
+
+    with pytest.raises(StateIRError) as error:
+        validate_state_ir_manifest(payload)
+
+    assert error.value.code == expected_code
+
+
+def test_state_manifest_requires_parent_for_non_initial_state() -> None:
+    accepted = create_initial_state(_plan())
+    trial = open_trial_state(accepted, np.zeros(accepted.dof_count))
+    payload = deepcopy(trial.to_dict())
+    payload["parent_state_hash"] = None
+    _rehash_manifest(payload)
+
+    with pytest.raises(StateIRError) as error:
+        validate_state_ir_manifest(payload)
+
+    assert error.value.code == "state_parent_missing"

@@ -25,9 +25,11 @@ def _evidence_ingest_handler() -> str:
 
 def test_runtime_uses_pre_read_validation_and_persists_metadata_only() -> None:
     text = INDEX.read_text(encoding="utf-8")
+    ingest_facade = (INDEX.parent / "viewer-ingest.js").read_text(encoding="utf-8")
     handler = _evidence_ingest_handler()
 
-    assert "from './viewer-evidence-ingest-file-reader.js';" in text
+    assert "from './viewer-ingest.js';" in text
+    assert "export * from './viewer-evidence-ingest-file-reader.js';" in ingest_facade
     assert "buildEvidenceIngestFileReadFailurePreview," in text
     assert "evidenceIngestFileReadMetadata," in text
     assert "readEvidenceIngestFileText," in text

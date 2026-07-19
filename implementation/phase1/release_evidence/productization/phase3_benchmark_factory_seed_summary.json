@@ -25,15 +25,15 @@
   "contract_pass": true,
   "engine_version": "1.0.0",
   "full_phase3_quantity_gates_met": false,
-  "generated_at": "2026-07-01T10:43:53.768017+00:00",
+  "generated_at": "2026-07-18T14:04:27.262843+00:00",
   "input_checksums": {
-    "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
-    "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70",
-    "src/structural_analysis/api/core.py": "sha256:57abbdac42cb3fe4f04d2940c58717c76605ccfab550a18d1e3c69dc913edb6f",
-    "src/structural_analysis/benchmark/__init__.py": "sha256:e12ee630f324fbbc3c326d656e1285e560c00fd981cf2730f502b9ee28ec7060",
+    "pyproject.toml": "sha256:52f2ba90a76ea3d8facbe71dae55253865b1805f41df1b57cfe90039230c289a",
+    "setup.cfg": "sha256:14f978f1149338462bb9d83bf4bdf4a1b1153967f39d7df29e2faf1c38913431",
+    "src/structural_analysis/api/core.py": "sha256:1a4d8fbe22023d8bd7c480a3988765d007d73e26c6330d8552f7dbecae2598e1",
+    "src/structural_analysis/benchmark/__init__.py": "sha256:6aa5ec8459e563c481973c72e30724a08baa719b79325e4339c8a71da4cac4a2",
     "src/structural_analysis/benchmark/cli.py": "sha256:c1e8e9eb0129547376d63a631afa4bb3ed1301ac2273415957d28c84fa09883a",
     "src/structural_analysis/benchmark/factory.py": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
-    "src/structural_analysis/solvers/linear/static.py": "sha256:b095b9bb6e1b5e43db45fb0630843eef3eb069260bb1cec4a33928c2c7006f65",
+    "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
     "tests/test_structural_analysis_benchmark_cli.py": "sha256:19fad9ae063c2f3074bdec43ecc4de17a69e533f769c1819955f1687375c3985"
   },
   "lane_case_counts": {
@@ -55,14 +55,14 @@
     "expected_output_comparison_pass_count": 88,
     "expected_output_contract_pass": true,
     "factory_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-    "factory_scorecard_checksum": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+    "factory_scorecard_checksum": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
     "invocation_surfaces": [
       "python_api_factory",
       "package_cli"
     ],
     "module_command": "python -m structural_analysis.benchmark.cli",
     "package_cli_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-    "package_cli_scorecard_checksum": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+    "package_cli_scorecard_checksum": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
     "phase3_closure_claim": false,
     "same_manifest_as_python_factory": true,
     "same_scorecard_as_python_factory": true,
@@ -121,6 +121,6 @@
   "scorecard_expected_output_comparison_pass_count": 88,
   "scorecard_expected_output_contract_pass": true,
   "scorecard_reproducible_from_manifest": true,
-  "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
   "status": "ready"
 }

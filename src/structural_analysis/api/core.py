@@ -4,12 +4,23 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from importlib import metadata
+from math import isfinite
+from numbers import Integral, Real
 from pathlib import Path
 from typing import Any
 
 from structural_analysis.analyses.linear_static import (
     AUTHORITATIVE_CPU_SOLVER_ID,
     run_authoritative_linear_static,
+)
+from structural_analysis.analyses.buckling import (
+    AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID,
+    run_authoritative_linear_buckling,
+)
+from structural_analysis.analyses.modal import (
+    AUTHORITATIVE_CPU_MODAL_SOLVER_ID,
+    EIGEN_BACKEND,
+    run_authoritative_modal,
 )
 from structural_analysis.assembly.nonlinear_static import (
     axial_chain_mesh_problem_from_canonical_model,
@@ -35,7 +46,9 @@ NONLINEAR_MATERIAL_MESH_SOLVER_ID = (
 )
 UNSUPPORTED_ANALYSIS_SOLVER_ID = "unsupported_analysis_type"
 SUPPORTED_ANALYSIS_TYPES = {
+    "linear_buckling",
     "linear_static",
+    "modal",
     "model_health",
     "nonlinear_static_material_mesh",
 }
@@ -76,6 +89,8 @@ class AnalysisConfig:
     load_case: str | None = None
     reference: str | None = None
     matrix_backend: str = "numpy_linalg_solve_dense"
+    mode_count: int = 6
+    eigen_backend: str = EIGEN_BACKEND
     developer_preview: bool = True
     claim_boundary_version: str = CLAIM_BOUNDARY_VERSION
 
@@ -98,8 +113,12 @@ def load_model(path: str | Path) -> CanonicalModel:
 
 
 def _engine_owned_solver_id(analysis_type: str) -> str:
+    if analysis_type == "linear_buckling":
+        return AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID
     if analysis_type == "linear_static":
         return AUTHORITATIVE_CPU_SOLVER_ID
+    if analysis_type == "modal":
+        return AUTHORITATIVE_CPU_MODAL_SOLVER_ID
     if analysis_type == "nonlinear_static_material_mesh":
         return NONLINEAR_MATERIAL_MESH_SOLVER_ID
     if analysis_type == "model_health":
@@ -133,6 +152,91 @@ def _engine_owned_metadata_warnings(
     return warnings
 
 
+def _normalized_positive_tolerance(value: Any) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, Real):
+        return None
+    normalized = float(value)
+    if not isfinite(normalized) or normalized <= 0.0:
+        return None
+    return normalized
+
+
+def _normalized_nonnegative_iteration_count(value: Any) -> int | None:
+    if isinstance(value, bool) or not isinstance(value, Integral):
+        return None
+    normalized = int(value)
+    return normalized if normalized >= 0 else None
+
+
+def _configuration_receipt_value(value: Any) -> Any:
+    """Return a deterministic JSON-safe representation for rejected values."""
+
+    if value is None or isinstance(value, (bool, str)):
+        return value
+    if isinstance(value, Integral):
+        return int(value)
+    if isinstance(value, Real):
+        normalized = float(value)
+        if isfinite(normalized):
+            return normalized
+        if normalized != normalized:
+            return "nan"
+        return "positive_infinity" if normalized > 0.0 else "negative_infinity"
+    value_type = type(value)
+    return f"<{value_type.__module__}.{value_type.__qualname__}>"
+
+
+def _public_configuration_preflight(
+    config: AnalysisConfig,
+) -> tuple[list[dict[str, Any]], float | None, int | None]:
+    unsupported: list[dict[str, Any]] = []
+    tolerance = _normalized_positive_tolerance(config.tolerance)
+    max_iterations = _normalized_nonnegative_iteration_count(
+        config.max_iterations
+    )
+
+    if config.analysis_type == "linear_static" and tolerance is None:
+        unsupported.append(
+            {
+                "kind": "linear_static_tolerance_invalid",
+                "tolerance": _configuration_receipt_value(config.tolerance),
+                "detail": (
+                    "Authoritative CPU linear static requires a finite positive "
+                    "numeric tolerance; boolean gates are not numeric tolerances."
+                ),
+            }
+        )
+    if config.analysis_type == "nonlinear_static_material_mesh":
+        if tolerance is None:
+            unsupported.append(
+                {
+                    "kind": "nonlinear_static_material_mesh_tolerance_invalid",
+                    "tolerance": _configuration_receipt_value(config.tolerance),
+                    "detail": (
+                        "Material-mesh Newton requires a finite positive numeric "
+                        "tolerance; boolean gates are not numeric tolerances."
+                    ),
+                }
+            )
+        if max_iterations is None:
+            unsupported.append(
+                {
+                    "kind": (
+                        "nonlinear_static_material_mesh_max_iterations_invalid"
+                    ),
+                    "max_iterations": _configuration_receipt_value(
+                        config.max_iterations
+                    ),
+                    "detail": (
+                        "Material-mesh Newton max_iterations must be a "
+                        "non-negative integer; zero selects the bounded default."
+                    ),
+                }
+            )
+
+    return unsupported, tolerance, max_iterations
+
+
 def analyze(
     model: CanonicalModel,
     config: AnalysisConfig | None = None,
@@ -150,7 +254,12 @@ def analyze(
         )
 
     engine_solver = _engine_owned_solver_id(analysis_config.analysis_type)
-    unsupported = list(model.unsupported_features)
+    (
+        configuration_unsupported,
+        normalized_tolerance,
+        normalized_max_iterations,
+    ) = _public_configuration_preflight(analysis_config)
+    unsupported = [*configuration_unsupported, *model.unsupported_features]
     warnings = [
         *model.warnings,
         *_engine_owned_metadata_warnings(
@@ -206,8 +315,61 @@ def analyze(
     if not unsupported and analysis_config.analysis_type == "linear_static":
         solution = run_authoritative_linear_static(
             model,
-            tolerance=analysis_config.tolerance,
+            tolerance=normalized_tolerance,
             matrix_backend=analysis_config.matrix_backend,
+            load_case=analysis_config.load_case,
+        )
+        return build_result(
+            status=solution.status,
+            analysis_type=analysis_config.analysis_type,
+            solver=engine_solver,
+            engine_version=ANALYSIS_ENGINE_VERSION,
+            input_checksum=model.input_checksum,
+            tolerance=normalized_tolerance,
+            convergence_history=solution.convergence_history,
+            unsupported_features=solution.unsupported_features,
+            warnings=warnings + solution.warnings,
+            metrics={
+                **solution.metrics,
+                "provenance_policy": "engine_owned",
+                "analysis_input_snapshot": "detached_canonical_model_v1",
+            },
+            developer_preview=True,
+            claim_boundary_version=CLAIM_BOUNDARY_VERSION,
+        )
+
+    if not unsupported and analysis_config.analysis_type == "modal":
+        solution = run_authoritative_modal(
+            model,
+            tolerance=analysis_config.tolerance,
+            mode_count=analysis_config.mode_count,
+            eigen_backend=analysis_config.eigen_backend,
+        )
+        return build_result(
+            status=solution.status,
+            analysis_type=analysis_config.analysis_type,
+            solver=engine_solver,
+            engine_version=ANALYSIS_ENGINE_VERSION,
+            input_checksum=model.input_checksum,
+            tolerance=analysis_config.tolerance,
+            convergence_history=solution.convergence_history,
+            unsupported_features=solution.unsupported_features,
+            warnings=warnings + solution.warnings,
+            metrics={
+                **solution.metrics,
+                "provenance_policy": "engine_owned",
+                "analysis_input_snapshot": "detached_canonical_model_v1",
+            },
+            developer_preview=True,
+            claim_boundary_version=CLAIM_BOUNDARY_VERSION,
+        )
+
+    if not unsupported and analysis_config.analysis_type == "linear_buckling":
+        solution = run_authoritative_linear_buckling(
+            model,
+            tolerance=analysis_config.tolerance,
+            mode_count=analysis_config.mode_count,
+            eigen_backend=analysis_config.eigen_backend,
             load_case=analysis_config.load_case,
         )
         return build_result(
@@ -262,11 +424,11 @@ def analyze(
                 claim_boundary_version=CLAIM_BOUNDARY_VERSION,
             )
         cfg = NewtonRaphsonConfig(
-            residual_tolerance=analysis_config.tolerance,
-            increment_tolerance=min(analysis_config.tolerance, 1.0e-12),
+            residual_tolerance=normalized_tolerance,
+            increment_tolerance=min(normalized_tolerance, 1.0e-12),
             max_iterations=(
-                analysis_config.max_iterations
-                if analysis_config.max_iterations > 0
+                normalized_max_iterations
+                if normalized_max_iterations > 0
                 else 25
             ),
             matrix_backend=analysis_config.matrix_backend,
@@ -283,7 +445,7 @@ def analyze(
             solver=engine_solver,
             engine_version=ANALYSIS_ENGINE_VERSION,
             input_checksum=model.input_checksum,
-            tolerance=analysis_config.tolerance,
+            tolerance=normalized_tolerance,
             convergence_history=solution.convergence_history,
             unsupported_features=solution.unsupported_features,
             warnings=warnings + solution.warnings,
@@ -316,18 +478,42 @@ def analyze(
         )
 
     if unsupported:
+        blocked_tolerance = analysis_config.tolerance
+        if analysis_config.analysis_type in {
+            "linear_static",
+            "nonlinear_static_material_mesh",
+        }:
+            blocked_tolerance = (
+                normalized_tolerance
+                if normalized_tolerance is not None
+                else 0.0
+            )
         return build_result(
             status="blocked",
             analysis_type=analysis_config.analysis_type,
             solver=engine_solver,
             engine_version=ANALYSIS_ENGINE_VERSION,
             input_checksum=model.input_checksum,
-            tolerance=analysis_config.tolerance,
+            tolerance=blocked_tolerance,
             convergence_history=[],
             unsupported_features=unsupported,
             warnings=warnings,
             metrics={
                 **_model_health_metrics(model),
+                **(
+                    {
+                        "claim_boundary": "public_analysis_configuration_invalid",
+                        "configuration_error_count": len(
+                            configuration_unsupported
+                        ),
+                        "solver_executed": False,
+                        "convergence_claim": False,
+                        "regularization_used": False,
+                        "fallback_used": False,
+                    }
+                    if configuration_unsupported
+                    else {}
+                ),
                 "provenance_policy": "engine_owned",
                 "analysis_input_snapshot": "detached_canonical_model_v1",
             },

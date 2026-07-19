@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/cpu_hip_primitive_parity_v1.schema.json",
+  "title": "Engine v2 CPU/HIP primitive parity receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "source",
+    "cpu_reference",
+    "fixture",
+    "hardware_execution",
+    "primitive_comparison",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "engine-v2-cpu-hip-primitive-parity-receipt.v1"
+    },
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "source": {
+      "type": "object",
+      "required": [
+        "repository_base_commit_sha",
+        "worktree_clean",
+        "exact_source_commit_claim",
+        "input_checksums"
+      ],
+      "properties": {
+        "repository_base_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktree_clean": {"type": "boolean"},
+        "exact_source_commit_claim": {"const": false},
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 4,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "cpu_reference": {
+      "type": "object",
+      "required": [
+        "run_hash",
+        "execution_plan_hash",
+        "scaling_hash",
+        "reduced_csr_identity_hash",
+        "operator_numeric_values_hash",
+        "preconditioner_profile",
+        "preconditioner_contract_hash",
+        "terminal_reason",
+        "converged",
+        "iteration_count",
+        "restart_count",
+        "result_ir_authority"
+      ],
+      "properties": {
+        "run_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "scaling_hash": {"$ref": "#/$defs/hash"},
+        "reduced_csr_identity_hash": {"$ref": "#/$defs/hash"},
+        "operator_numeric_values_hash": {"$ref": "#/$defs/hash"},
+        "preconditioner_profile": {
+          "const": "operator_derived_left_scaled_jacobi_right.v1"
+        },
+        "preconditioner_contract_hash": {"$ref": "#/$defs/hash"},
+        "terminal_reason": {"type": "string", "minLength": 1},
+        "converged": {"const": true},
+        "iteration_count": {"type": "integer", "minimum": 1},
+        "restart_count": {"type": "integer", "minimum": 1},
+        "result_ir_authority": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "fixture": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "fixture_hash",
+        "execution_plan_hash",
+        "scaling_hash",
+        "reduced_csr_identity_hash",
+        "operator_numeric_values_hash",
+        "preconditioner_profile",
+        "preconditioner_derivation_profile",
+        "preconditioner_contract_hash",
+        "binary_profile",
+        "dimension",
+        "nnz",
+        "arrays"
+      ],
+      "properties": {
+        "schema_version": {"const": "engine-v2-hip-primitive-fixture.v1"},
+        "fixture_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "scaling_hash": {"$ref": "#/$defs/hash"},
+        "reduced_csr_identity_hash": {"$ref": "#/$defs/hash"},
+        "operator_numeric_values_hash": {"$ref": "#/$defs/hash"},
+        "preconditioner_profile": {
+          "const": "operator_derived_left_scaled_jacobi_right.v1"
+        },
+        "preconditioner_derivation_profile": {
+          "const": "exact_positive_diagonal_inverse_of_left_scaled_reduced_operator.v1"
+        },
+        "preconditioner_contract_hash": {"$ref": "#/$defs/hash"},
+        "binary_profile": {"const": "canonical_little_endian_mixed_numeric.v1"},
+        "dimension": {"type": "integer", "minimum": 1},
+        "nnz": {"type": "integer", "minimum": 1},
+        "arrays": {"type": "object", "minProperties": 9}
+      },
+      "additionalProperties": true
+    },
+    "hardware_execution": {
+      "type": "object",
+      "required": [
+        "actual_hardware",
+        "backend",
+        "device_name",
+        "gcn_arch_name",
+        "compiler",
+        "binary_sha256",
+        "runtime_output"
+      ],
+      "properties": {
+        "actual_hardware": {"const": true},
+        "backend": {"const": "amd_rocm_hip"},
+        "device_name": {"type": "string", "minLength": 1},
+        "gcn_arch_name": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+        "compiler": {
+          "type": "object",
+          "required": ["path", "version_first_line", "version_output_sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "version_first_line": {"type": "string", "minLength": 1},
+            "version_output_sha256": {"$ref": "#/$defs/hash"}
+          },
+          "additionalProperties": false
+        },
+        "binary_sha256": {"$ref": "#/$defs/hash"},
+        "runtime_output": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "primitive_comparison": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "fixture_hash",
+        "operation_rows",
+        "maximum_absolute_error",
+        "maximum_relative_error",
+        "contract_pass",
+        "operator_derived_scaled_jacobi_apply_probe_claim",
+        "full_recurrence_parity_claim",
+        "performance_claim"
+      ],
+      "properties": {
+        "schema_version": {"const": "engine-v2-cpu-hip-primitive-parity.v1"},
+        "fixture_hash": {"$ref": "#/$defs/hash"},
+        "operation_rows": {
+          "type": "array",
+          "minItems": 7,
+          "maxItems": 7,
+          "items": {"type": "object"}
+        },
+        "maximum_absolute_error": {"type": "number", "minimum": 0},
+        "maximum_relative_error": {"type": "number", "minimum": 0},
+        "contract_pass": {"const": true},
+        "operator_derived_scaled_jacobi_apply_probe_claim": {"const": true},
+        "full_recurrence_parity_claim": {"const": false},
+        "performance_claim": {"const": false}
+      },
+      "additionalProperties": true
+    },
+    "claims": {
+      "type": "object",
+      "required": [
+        "gfx1030_local_primitive_parity",
+        "gfx1030_local_operator_derived_scaled_jacobi_apply_parity",
+        "full_fgmres_recurrence_parity",
+        "device_resident_restart_checkpoint",
+        "independent_gfx1100_parity",
+        "same_source_commit_cross_device",
+        "signed_receipt",
+        "production_preconditioner_parity",
+        "performance"
+      ],
+      "properties": {
+        "gfx1030_local_primitive_parity": {"const": true},
+        "gfx1030_local_operator_derived_scaled_jacobi_apply_parity": {
+          "const": true
+        },
+        "full_fgmres_recurrence_parity": {"const": false},
+        "device_resident_restart_checkpoint": {"const": false},
+        "independent_gfx1100_parity": {"const": false},
+        "same_source_commit_cross_device": {"const": false},
+        "signed_receipt": {"const": false},
+        "production_preconditioner_parity": {"const": false},
+        "performance": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 6,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

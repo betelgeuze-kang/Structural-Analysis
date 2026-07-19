@@ -21,6 +21,9 @@ from mgt_shell_force_based_assembly import (  # noqa: E402
     assemble_shell_internal_force_components,
     assemble_shell_internal_forces,
 )
+from mgt_state_updated_frame_axial_geometry import (  # noqa: E402
+    prepack_state_updated_frame_axial_geometry,
+)
 from run_mgt_full_frame_6dof_sparse_equilibrium import (  # noqa: E402
     FrameElement,
     _assemble_sparse_frame,
@@ -77,7 +80,11 @@ def test_force_based_frame_matches_reference_stiffness_at_small_strain() -> None
         include_geometric=False,
     )
 
-    assert meta["frame_internal_force_model"] == "corotational_force_based_6dof"
+    assert meta["frame_internal_force_model"] == (
+        "reference_geometry_linear_force_recovery_6dof"
+    )
+    assert meta["state_updated_geometry"] is False
+    assert meta["full_corotational_frame_claim"] is False
     np.testing.assert_allclose(f_force, f_quasi, rtol=1.0e-9, atol=1.0e-6)
 
 
@@ -129,7 +136,9 @@ def test_assemble_physical_internal_forces_defaults_to_force_based_frame() -> No
     )
 
     assert meta["use_force_based_frame"] is True
-    assert "corotational_force_based_6dof" in meta["physical_internal_force_model"]
+    assert "reference_geometry_linear_force_recovery_6dof" in meta[
+        "physical_internal_force_model"
+    ]
     assert "component_internal_force_inf_n" in meta
 
 
@@ -439,3 +448,124 @@ def test_assemble_physical_residual_reports_nonzero_imbalance() -> None:
     residual, _rhs = assemble_physical_residual(u=u, f_ext=f_ext, free=free, f_int=f_int)
 
     assert float(residual[0]) == -0.75
+
+
+def _state_updated_axial_fixture() -> tuple[dict[str, object], object]:
+    node_xyz = np.asarray(
+        [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]], dtype=np.float64
+    )
+    elements = [
+        FrameElement(
+            elem_id=1,
+            node_i=0,
+            node_j=1,
+            section_id=1,
+            material_id=1,
+            length_m=2.0,
+        )
+    ]
+    section_props = {
+        1: {"A_m2": 0.01, "Iy_m4": 1.0e-4, "Iz_m4": 5.0e-5}
+    }
+    material_props = {1: {"E_kN_per_m2": 210000.0, "poisson": 0.3}}
+    spring_stiffness = coo_matrix(
+        (
+            np.array([], dtype=np.float64),
+            (
+                np.array([], dtype=np.int64),
+                np.array([], dtype=np.int64),
+            ),
+        ),
+        shape=(12, 12),
+    ).tocsr()
+    packed = prepack_state_updated_frame_axial_geometry(
+        node_xyz=node_xyz,
+        frame_elements=elements,
+        section_props=section_props,
+        material_props=material_props,
+    )
+    kwargs: dict[str, object] = {
+        "node_xyz": node_xyz,
+        "frame_elements": elements,
+        "elem_type_code": np.asarray([], dtype=np.int32),
+        "elem_section_id": np.asarray([], dtype=np.int32),
+        "elem_material_id": np.asarray([], dtype=np.int32),
+        "conn_ptr": np.asarray([0], dtype=np.int64),
+        "conn_idx": np.asarray([], dtype=np.int64),
+        "section_props": section_props,
+        "material_props": material_props,
+        "plate_thickness_props": {},
+        "spring_stiffness": spring_stiffness,
+        "base_axial_forces": {},
+        "frame_gravity_load_scale": 0.0,
+        "load_scale": 1.0,
+    }
+    return kwargs, packed
+
+
+def test_physical_internal_force_adds_state_updated_axial_correction() -> None:
+    kwargs, packed = _state_updated_axial_fixture()
+    displacement = np.zeros(12, dtype=np.float64)
+    displacement[6] = 0.01
+    displacement[7] = 0.20
+
+    reference, _reference_meta = assemble_physical_internal_forces(
+        u=displacement,
+        **kwargs,
+    )
+    state_updated, meta = assemble_physical_internal_forces(
+        u=displacement,
+        state_updated_frame_axial_geometry=packed,
+        include_component_forces=True,
+        **kwargs,
+    )
+    correction, correction_meta = packed.assemble_correction(displacement)
+
+    np.testing.assert_allclose(
+        state_updated - reference,
+        correction,
+        rtol=1.0e-12,
+        atol=1.0e-8,
+    )
+    np.testing.assert_array_equal(
+        meta["component_forces"][
+            "frame_state_updated_axial_geometry_correction"
+        ],
+        correction,
+    )
+    assert correction_meta["correction_inf_n"] > 0.0
+    assert meta["state_updated_frame_axial_geometry_meta"][
+        "state_updated_frame_axial_geometry_applied"
+    ] is True
+    assert "finite_chord_state_updated_axial_geometry" in meta[
+        "physical_internal_force_model"
+    ]
+
+
+def test_physical_internal_force_batch_state_update_matches_scalar() -> None:
+    kwargs, packed = _state_updated_axial_fixture()
+    states = np.zeros((2, 12), dtype=np.float64)
+    states[1, 6] = 0.01
+    states[1, 7] = 0.20
+
+    batch, meta = assemble_physical_internal_forces_batch(
+        u_batch=states,
+        state_updated_frame_axial_geometry=packed,
+        **kwargs,
+    )
+    scalar_rows = np.vstack(
+        [
+            assemble_physical_internal_forces(
+                u=state,
+                state_updated_frame_axial_geometry=packed,
+                **kwargs,
+            )[0]
+            for state in states
+        ]
+    )
+
+    np.testing.assert_allclose(batch, scalar_rows, rtol=1.0e-12, atol=1.0e-8)
+    assert meta["state_updated_frame_axial_geometry_meta"]["batch_size"] == 2
+    assert meta["component_internal_force_inf_n"][
+        "frame_state_updated_axial_geometry_correction_inf_n"
+    ] > 0.0

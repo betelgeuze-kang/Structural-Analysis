@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/medium_benchmark_source_license_receipt_v1.schema.json",
+  "title": "Medium benchmark source and license approval receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "case_id",
+    "source_path",
+    "source_sha256",
+    "license_id",
+    "spdx",
+    "approval_status",
+    "local_execution_allowed",
+    "commercial_use_allowed",
+    "approved_by",
+    "approved_at",
+    "evidence_ref",
+    "contract_pass",
+    "blockers",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "medium-benchmark-source-license-receipt.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "case_id": {"type": "string", "minLength": 1},
+    "source_path": {"type": "string", "minLength": 1},
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^(?:sha256:)?[0-9a-f]{64}$"
+    },
+    "license_id": {"type": "string", "minLength": 1},
+    "spdx": {"type": "string", "minLength": 1},
+    "approval_status": {"enum": ["approved", "review_required", "rejected"]},
+    "local_execution_allowed": {"type": "boolean"},
+    "commercial_use_allowed": {"type": "boolean"},
+    "approved_by": {"type": "string", "minLength": 1},
+    "approved_at": {"type": "string", "format": "date-time"},
+    "evidence_ref": {"type": "string", "minLength": 1},
+    "contract_pass": {"type": "boolean"},
+    "blockers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  }
+}

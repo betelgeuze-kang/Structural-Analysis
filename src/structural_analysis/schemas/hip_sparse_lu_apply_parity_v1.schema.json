@@ -1,0 +1,325 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_sparse_lu_apply_parity_v1.schema.json",
+  "title": "Engine v2 HIP canonical sparse-LU apply parity receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "source",
+    "fixture",
+    "hardware_execution",
+    "comparison",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "engine-v2-hip-sparse-lu-apply-parity-receipt.v1"
+    },
+    "receipt_hash": {"$ref": "#/$defs/sha256"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_base_commit_sha",
+        "worktree_clean",
+        "exact_source_commit_claim",
+        "input_checksums"
+      ],
+      "properties": {
+        "repository_base_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktree_clean": {"type": "boolean"},
+        "exact_source_commit_claim": {"const": false},
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 6,
+          "additionalProperties": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    },
+    "fixture": {"$ref": "#/$defs/fixture"},
+    "hardware_execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_hardware",
+        "backend",
+        "device_name",
+        "gcn_arch_name",
+        "compiler",
+        "binary_sha256",
+        "runtime_output"
+      ],
+      "properties": {
+        "actual_hardware": {"const": true},
+        "backend": {"const": "amd_rocm_hip"},
+        "device_name": {"type": "string", "minLength": 1},
+        "gcn_arch_name": {
+          "type": "string",
+          "pattern": "^gfx[0-9a-f]+$"
+        },
+        "compiler": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "version_first_line",
+            "version_output_sha256"
+          ],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "version_first_line": {"type": "string", "minLength": 1},
+            "version_output_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_output": {"$ref": "#/$defs/runtime_output"}
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "contract_pass",
+        "canonical_cpu_max_abs_error_m",
+        "device_order_cpu_max_abs_error_m",
+        "comparison_tolerance_m",
+        "solution_data_hash",
+        "canonical_solution_data_hash",
+        "device_order_solution_data_hash",
+        "actual_hardware_execution_required_for_claim",
+        "production_performance_claim"
+      ],
+      "properties": {
+        "profile": {
+          "const": "engine-v2-cpu-hip-canonical-sparse-lu-apply-parity.v1"
+        },
+        "contract_pass": {"const": true},
+        "canonical_cpu_max_abs_error_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1e-11
+        },
+        "device_order_cpu_max_abs_error_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1e-11
+        },
+        "comparison_tolerance_m": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1e-8
+        },
+        "solution_data_hash": {"$ref": "#/$defs/sha256"},
+        "canonical_solution_data_hash": {"$ref": "#/$defs/sha256"},
+        "device_order_solution_data_hash": {"$ref": "#/$defs/sha256"},
+        "actual_hardware_execution_required_for_claim": {"const": true},
+        "production_performance_claim": {"const": false}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_hardware_sparse_lu_apply",
+        "canonical_sparse_lu_apply_numerical_parity",
+        "same_stream_level_schedule_executed",
+        "gfx1030_local_sparse_lu_apply",
+        "gfx1100_independent_sparse_lu_apply",
+        "actual_mgt_factor_apply",
+        "production_scale_factor_apply",
+        "production_current_tangent_fgmres",
+        "performance"
+      ],
+      "properties": {
+        "actual_hardware_sparse_lu_apply": {"const": true},
+        "canonical_sparse_lu_apply_numerical_parity": {"const": true},
+        "same_stream_level_schedule_executed": {"const": true},
+        "gfx1030_local_sparse_lu_apply": {"type": "boolean"},
+        "gfx1100_independent_sparse_lu_apply": {"type": "boolean"},
+        "actual_mgt_factor_apply": {"const": false},
+        "production_scale_factor_apply": {"const": false},
+        "production_current_tangent_fgmres": {"const": false},
+        "performance": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 100}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "array_descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dtype", "shape", "byte_length", "data_hash"],
+      "properties": {
+        "dtype": {"enum": ["<i8", "<f8"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "fixture_hash",
+        "parity_profile",
+        "schedule_profile",
+        "execution_profile",
+        "accumulation_profile",
+        "factor_contract_hash",
+        "schedule_contract_hash",
+        "preconditioner_contract_hash",
+        "dimension",
+        "lower_nnz",
+        "upper_nnz",
+        "lower_level_count",
+        "upper_level_count",
+        "expected_kernel_invocation_count",
+        "binary_profile",
+        "arrays",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "engine-v2-hip-sparse-lu-apply-fixture.v1"
+        },
+        "fixture_hash": {"$ref": "#/$defs/sha256"},
+        "parity_profile": {
+          "const": "engine-v2-cpu-hip-canonical-sparse-lu-apply-parity.v1"
+        },
+        "schedule_profile": {
+          "const": "csr_triangular_dependency_level_schedule.v1"
+        },
+        "execution_profile": {
+          "const": "same_stream_level_scheduled_csr_forward_backward.v1"
+        },
+        "accumulation_profile": {
+          "const": "ascending_column_sequential_fp64.v1"
+        },
+        "factor_contract_hash": {"$ref": "#/$defs/sha256"},
+        "schedule_contract_hash": {"$ref": "#/$defs/sha256"},
+        "preconditioner_contract_hash": {"$ref": "#/$defs/sha256"},
+        "dimension": {"const": 8},
+        "lower_nnz": {"const": 19},
+        "upper_nnz": {"const": 19},
+        "lower_level_count": {"const": 6},
+        "upper_level_count": {"const": 6},
+        "expected_kernel_invocation_count": {"const": 14},
+        "binary_profile": {
+          "const": "canonical_little_endian_mixed_numeric.v1"
+        },
+        "arrays": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lower_row_pointer",
+            "lower_column_indices",
+            "lower_numeric_values",
+            "upper_row_pointer",
+            "upper_column_indices",
+            "upper_numeric_values",
+            "row_permutation",
+            "column_permutation",
+            "lower_level_pointer",
+            "lower_level_rows",
+            "upper_level_pointer",
+            "upper_level_rows",
+            "right_hand_side_kn"
+          ],
+          "properties": {
+            "lower_row_pointer": {"$ref": "#/$defs/array_descriptor"},
+            "lower_column_indices": {"$ref": "#/$defs/array_descriptor"},
+            "lower_numeric_values": {"$ref": "#/$defs/array_descriptor"},
+            "upper_row_pointer": {"$ref": "#/$defs/array_descriptor"},
+            "upper_column_indices": {"$ref": "#/$defs/array_descriptor"},
+            "upper_numeric_values": {"$ref": "#/$defs/array_descriptor"},
+            "row_permutation": {"$ref": "#/$defs/array_descriptor"},
+            "column_permutation": {"$ref": "#/$defs/array_descriptor"},
+            "lower_level_pointer": {"$ref": "#/$defs/array_descriptor"},
+            "lower_level_rows": {"$ref": "#/$defs/array_descriptor"},
+            "upper_level_pointer": {"$ref": "#/$defs/array_descriptor"},
+            "upper_level_rows": {"$ref": "#/$defs/array_descriptor"},
+            "right_hand_side_kn": {"$ref": "#/$defs/array_descriptor"}
+          }
+        },
+        "claim_boundary": {"type": "string", "minLength": 80}
+      }
+    },
+    "runtime_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "cpu_backend",
+        "device_name",
+        "gcn_arch_name",
+        "execution_profile",
+        "accumulation_profile",
+        "dimension",
+        "lower_level_count",
+        "upper_level_count",
+        "kernel_invocation_count",
+        "mid_apply_d2h_transfer_count",
+        "blocking_d2h_synchronization_count",
+        "solution_m"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "engine-v2-hip-sparse-lu-apply-output.v1"
+        },
+        "status": {"const": "ok"},
+        "cpu_backend": {"const": false},
+        "device_name": {"type": "string", "minLength": 1},
+        "gcn_arch_name": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+        "execution_profile": {
+          "const": "same_stream_level_scheduled_csr_forward_backward.v1"
+        },
+        "accumulation_profile": {
+          "const": "ascending_column_sequential_fp64.v1"
+        },
+        "dimension": {"const": 8},
+        "lower_level_count": {"const": 6},
+        "upper_level_count": {"const": 6},
+        "kernel_invocation_count": {"const": 14},
+        "mid_apply_d2h_transfer_count": {"const": 0},
+        "blocking_d2h_synchronization_count": {"const": 1},
+        "solution_m": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {"type": "number"}
+        }
+      }
+    }
+  }
+}

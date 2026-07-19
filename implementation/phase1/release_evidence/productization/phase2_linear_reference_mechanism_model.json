@@ -9,14 +9,14 @@
   },
   "elements": [
     {
-      "id": "E1",
+      "id": "F1",
       "material": "M1",
       "nodes": [
         "N1",
         "N2"
       ],
       "section": "S1",
-      "type": "truss"
+      "type": "frame"
     }
   ],
   "loads": [
@@ -34,11 +34,12 @@
     {
       "elastic_modulus": 200000.0,
       "id": "M1",
+      "poisson_ratio": 0.3,
       "type": "elastic"
     }
   ],
   "metadata": {
-    "case_id": "phase2_axial_bar_mechanism_guard",
+    "case_id": "phase2_pinned_frame_rotation_mechanism_guard",
     "claim_boundary": "mechanism_must_block_not_regularize_or_pass",
     "truth_class": "negative_mechanism_guard"
   },
@@ -65,12 +66,19 @@
     {
       "area": 0.01,
       "id": "S1",
-      "type": "bar"
+      "iy": 0.0001,
+      "iz": 0.0001,
+      "torsional_constant": 0.0001,
+      "type": "frame"
     }
   ],
   "supports": [
     {
-      "dofs": "all",
+      "dofs": [
+        "UX",
+        "UY",
+        "UZ"
+      ],
       "id": "SUP1",
       "node": "N1"
     }

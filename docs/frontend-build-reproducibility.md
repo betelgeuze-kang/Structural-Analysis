@@ -10,6 +10,10 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - `npm run verify:frontend-smoke`
   - Runs the contract check, executes `npm ci`, and then runs `npm run build`.
   - This is the clean-checkout smoke path for CI or local verification.
+- `npm run verify:workbench-viewer-delivery`
+  - Runs after every `npm run build` and verifies that the production output contains distinct Workbench and Static Viewer HTML entries with existing emitted assets.
+  - Rejects the historical failure mode where the iframe path was absent from `dist/` and a static server silently returned the Workbench SPA fallback.
+  - Also rejects legacy `App` ownership markers in the eager Workbench graph and requires exactly one separately emitted lazy legacy chunk.
 - `npm run verify:frontend-browser-smoke`
   - Starts a local static HTTP server and runs the Playwright structure-viewer smoke against the source HTML.
   - The PR quality gate uses `-- --mode minimal`; the full gate runs desktop and mobile coverage.
@@ -38,7 +42,9 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - `package.json` contains only the dependencies needed by the active workbench entry.
 - Dependency versions are pinned exactly instead of using floating `^` or `~` ranges.
 - `package-lock.json` is the source of truth for deterministic installs.
-- `vite.config.ts` declares the React/Vite build entry explicitly.
+- `vite.config.ts` declares both Workbench and Static Viewer as explicit Vite build entries, preserving `dist/src/structure-viewer/index.html` for the embedded and direct-open Viewer path.
+- Every production build passes `workbench_viewer_production_delivery_v1`; an iframe `src` string alone is not delivery evidence.
+- The default Workbench request graph excludes the legacy `App` chunk. Browser E2E proves it is fetched only after navigating to `/#/legacy`.
 - Browser smoke must load `src/structure-viewer/index.html`, verify a nonblank canvas, and exercise real-drawing selection controls.
 - Browser verification commands must not run `playwright install` implicitly; this keeps sandboxed quality gates from mutating the user home cache or stalling on network prompts.
 - Source viewer reports must preserve selected-member sheet evidence through `structure-viewer-drawing-sheet-package.v1`, including SVG sheet link, revision, callout, and viewer deep-link.

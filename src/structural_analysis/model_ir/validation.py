@@ -58,7 +58,10 @@ class ModelIRValidationReport:
     analysis_ready: bool
     issues: tuple[ModelIRValidationIssue, ...]
     blocking_feature_ids: tuple[str, ...]
+    derived_blocking_feature_ids: tuple[str, ...]
     content_hash: str | None
+    semantic_hash: str | None
+    provenance_hash: str | None
 
     @property
     def contract_valid(self) -> bool:
@@ -73,7 +76,10 @@ class ModelIRValidationReport:
             "analysis_ready": self.analysis_ready,
             "issues": [asdict(issue) for issue in self.issues],
             "blocking_feature_ids": list(self.blocking_feature_ids),
+            "derived_blocking_feature_ids": list(self.derived_blocking_feature_ids),
             "content_hash": self.content_hash,
+            "semantic_hash": self.semantic_hash,
+            "provenance_hash": self.provenance_hash,
             "claim_boundary": "model_ir_contract_validation_not_solver_readiness",
         }
 
@@ -137,6 +143,85 @@ def model_ir_v2_content_hash(payload: dict[str, Any]) -> str:
     return f"sha256:{hashlib.sha256(canonical).hexdigest()}"
 
 
+def model_ir_v2_semantic_projection(payload: dict[str, Any]) -> dict[str, Any]:
+    """Project normalized physical meaning without source/provenance metadata."""
+
+    keys = (
+        "schema_version",
+        "capability_profile",
+        "units",
+        "coordinate_system",
+        "dof_components",
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+    )
+    return _without_source_metadata({key: payload[key] for key in keys})
+
+
+def model_ir_v2_semantic_hash(payload: dict[str, Any]) -> str:
+    return model_ir_v2_content_hash(model_ir_v2_semantic_projection(payload))
+
+
+def model_ir_v2_provenance_projection(payload: dict[str, Any]) -> dict[str, Any]:
+    """Project document/source identity without normalized physical values."""
+
+    source_families = (
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+    )
+    return {
+        "schema_version": payload["schema_version"],
+        "capability_profile": payload["capability_profile"],
+        "model_id": payload["model_id"],
+        "provenance": payload["provenance"],
+        "entity_source_metadata": {
+            family: [_source_metadata(row) for row in payload[family]]
+            for family in source_families
+        },
+        "roundtrip_map": payload["roundtrip_map"],
+        "unsupported_features": payload["unsupported_features"],
+        "extensions": payload["extensions"],
+    }
+
+
+def model_ir_v2_provenance_hash(payload: dict[str, Any]) -> str:
+    return model_ir_v2_content_hash(model_ir_v2_provenance_projection(payload))
+
+
+def derive_model_ir_v2_blocking_feature_ids(
+    payload: dict[str, Any],
+) -> tuple[str, ...]:
+    """Derive fail-closed blockers from unsupported roundtrip content."""
+
+    derived: set[str] = set()
+    for row in payload["roundtrip_map"]:
+        if row["mapping_status"] != "unsupported":
+            continue
+        identity = {
+            "source_entity_id": row["source_entity_id"],
+            "entity_kind": row["entity_kind"],
+            "model_ir_entity_id": row["model_ir_entity_id"],
+            "mapping_status": row["mapping_status"],
+        }
+        digest = model_ir_v2_content_hash(identity).removeprefix("sha256:")[:16]
+        derived.add(f"derived.roundtrip.unsupported.{digest}")
+    return tuple(sorted(derived))
+
+
 def validate_model_ir_v2(payload: Any) -> ModelIRValidationReport:
     schema = load_model_ir_v2_schema()
     validator = _StrictDraft202012Validator(schema)
@@ -165,20 +250,31 @@ def validate_model_ir_v2(payload: Any) -> ModelIRValidationReport:
             analysis_ready=False,
             issues=schema_issues,
             blocking_feature_ids=(),
+            derived_blocking_feature_ids=(),
             content_hash=None,
+            semantic_hash=None,
+            provenance_hash=None,
         )
 
     semantic_issues = tuple(sorted(_semantic_issues(payload)))
-    blocking_feature_ids = tuple(
+    declared_blocking_feature_ids = tuple(
         sorted(
             str(row["feature_id"])
             for row in payload["unsupported_features"]
             if bool(row["blocking"])
         )
     )
+    derived_blocking_feature_ids = derive_model_ir_v2_blocking_feature_ids(payload)
+    blocking_feature_ids = tuple(
+        sorted({*declared_blocking_feature_ids, *derived_blocking_feature_ids})
+    )
     content_hash: str | None
+    semantic_hash: str | None
+    provenance_hash: str | None
     try:
         content_hash = model_ir_v2_content_hash(payload)
+        semantic_hash = model_ir_v2_semantic_hash(payload)
+        provenance_hash = model_ir_v2_provenance_hash(payload)
     except ValueError as exc:
         semantic_issues = tuple(
             sorted(
@@ -189,6 +285,8 @@ def validate_model_ir_v2(payload: Any) -> ModelIRValidationReport:
             )
         )
         content_hash = None
+        semantic_hash = None
+        provenance_hash = None
 
     semantics_valid = not semantic_issues
     return ModelIRValidationReport(
@@ -198,7 +296,10 @@ def validate_model_ir_v2(payload: Any) -> ModelIRValidationReport:
         analysis_ready=semantics_valid and not blocking_feature_ids,
         issues=semantic_issues,
         blocking_feature_ids=blocking_feature_ids,
+        derived_blocking_feature_ids=derived_blocking_feature_ids,
         content_hash=content_hash,
+        semantic_hash=semantic_hash,
+        provenance_hash=provenance_hash,
     )
 
 
@@ -227,6 +328,8 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
     constraint_ids = {str(row["id"]) for row in payload["constraints"]}
     load_pattern_ids = {str(row["id"]) for row in payload["load_patterns"]}
     load_combination_ids = {str(row["id"]) for row in payload["load_combinations"]}
+    time_function_ids = {str(row["id"]) for row in payload["time_functions"]}
+    construction_stage_ids = {str(row["id"]) for row in payload["construction_stages"]}
 
     node_coordinates = {
         str(row["id"]): tuple(float(value) for value in row["coordinates_m"])
@@ -377,15 +480,18 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
                 "Time-function coordinates must be strictly increasing.",
             )
 
-    all_entity_ids = (
-        node_ids
-        | material_ids
-        | set(section_by_id)
-        | element_ids
-        | constraint_ids
-        | load_pattern_ids
-        | load_combination_ids
-    )
+    entity_ids_by_kind = {
+        "node": node_ids,
+        "material": material_ids,
+        "section": set(section_by_id),
+        "element": element_ids,
+        "constraint": constraint_ids,
+        "load_pattern": load_pattern_ids,
+        "load_combination": load_combination_ids,
+        "time_function": time_function_ids,
+        "construction_stage": construction_stage_ids,
+    }
+    all_entity_ids = set().union(*entity_ids_by_kind.values())
     for index, row in enumerate(payload["roundtrip_map"]):
         entity_id = str(row["model_ir_entity_id"])
         if entity_id not in all_entity_ids:
@@ -393,6 +499,12 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
                 f"/roundtrip_map/{index}/model_ir_entity_id",
                 "model_ir_entity",
                 entity_id,
+            )
+        elif entity_id not in entity_ids_by_kind[str(row["entity_kind"])]:
+            yield ModelIRValidationIssue(
+                "roundtrip_entity_kind_mismatch",
+                f"/roundtrip_map/{index}/entity_kind",
+                f"Entity {entity_id} is not a {row['entity_kind']}.",
             )
 
 
@@ -480,33 +592,68 @@ def _load_combination_issues(
                 else:
                     graph[str(combination["id"])].append(ref_id)
 
-    visiting: set[str] = set()
-    visited: set[str] = set()
+    # Iterative depth-first traversal avoids recursion failure for imported
+    # combination graphs whose valid dependency depth exceeds Python's stack.
+    state = {combination_id: 0 for combination_id in graph}
+    for root in sorted(graph):
+        if state[root] != 0:
+            continue
+        stack: list[tuple[str, int]] = [(root, 0)]
+        trail: list[str] = []
+        trail_positions: dict[str, int] = {}
+        while stack:
+            node, child_index = stack[-1]
+            if state[node] == 0:
+                state[node] = 1
+                trail_positions[node] = len(trail)
+                trail.append(node)
+            children = graph[node]
+            if child_index < len(children):
+                child = children[child_index]
+                stack[-1] = (node, child_index + 1)
+                if state[child] == 0:
+                    stack.append((child, 0))
+                elif state[child] == 1:
+                    cycle = (*trail[trail_positions[child] :], child)
+                    yield ModelIRValidationIssue(
+                        "load_combination_cycle",
+                        "/load_combinations",
+                        "Load-combination graph contains a cycle: "
+                        + " -> ".join(cycle),
+                    )
+                    return
+                continue
+            stack.pop()
+            state[node] = 2
+            trail_positions.pop(node)
+            assert trail.pop() == node
 
-    def visit(node: str, trail: tuple[str, ...]) -> tuple[str, ...] | None:
-        if node in visiting:
-            start = trail.index(node) if node in trail else 0
-            return (*trail[start:], node)
-        if node in visited:
-            return None
-        visiting.add(node)
-        for child in graph[node]:
-            cycle = visit(child, (*trail, node))
-            if cycle is not None:
-                return cycle
-        visiting.remove(node)
-        visited.add(node)
-        return None
 
-    for combination_id in sorted(graph):
-        cycle = visit(combination_id, ())
-        if cycle is not None:
-            yield ModelIRValidationIssue(
-                "load_combination_cycle",
-                "/load_combinations",
-                "Load-combination graph contains a cycle: " + " -> ".join(cycle),
-            )
-            break
+def _without_source_metadata(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _without_source_metadata(item)
+            for key, item in value.items()
+            if key not in {"source_id", "extensions"}
+        }
+    if isinstance(value, list):
+        return [_without_source_metadata(item) for item in value]
+    return value
+
+
+def _source_metadata(row: dict[str, Any]) -> dict[str, Any]:
+    metadata = {
+        "id": row["id"],
+        "index": row["index"],
+        "extensions": row["extensions"],
+    }
+    if "source_id" in row:
+        metadata["source_id"] = row["source_id"]
+    if "nodal_loads" in row:
+        metadata["nodal_loads"] = [
+            _source_metadata(load) for load in row["nodal_loads"]
+        ]
+    return metadata
 
 
 def _normalize_value(value: Any, path: str) -> Any:

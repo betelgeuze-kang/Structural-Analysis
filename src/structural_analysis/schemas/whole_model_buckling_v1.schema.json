@@ -1,0 +1,372 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/whole_model_buckling_v1.schema.json",
+  "title": "Bounded whole-model frame linear-buckling receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "numeric_serialization_profile",
+    "status",
+    "truth_class",
+    "analysis_scope",
+    "solver_contract",
+    "source",
+    "tolerance_policy",
+    "verification",
+    "summary",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary",
+    "contract_pass"
+  ],
+  "properties": {
+    "schema_version": {"const": "phase2-whole-model-buckling-result.v1"},
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "numeric_serialization_profile": {
+      "const": "binary64-json-round-trip-plus-semantic-12e"
+    },
+    "status": {"enum": ["partial", "blocked"]},
+    "truth_class": {
+      "const": "analytic_and_invariant_whole_model_linear_buckling_truth"
+    },
+    "analysis_scope": {
+      "const": "public_api_dense_reference_state_frame_linear_buckling"
+    },
+    "solver_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solver_id",
+        "eigen_backend",
+        "maximum_dense_free_dof_count",
+        "geometric_stiffness_formulation",
+        "geometric_stiffness_sign_convention",
+        "reference_load_factor",
+        "mode_shape_storage_profile",
+        "claim_boundary"
+      ],
+      "properties": {
+        "solver_id": {"const": "authoritative_cpu_linear_buckling_fea_3d_v1"},
+        "eigen_backend": {"const": "scipy_linalg_eigh_dense"},
+        "maximum_dense_free_dof_count": {"const": 512},
+        "geometric_stiffness_formulation": {
+          "const": "euler_bernoulli_constant_axial_compression_initial_stress_v1"
+        },
+        "geometric_stiffness_sign_convention": {
+          "const": "positive_compression_K_minus_lambda_Kg"
+        },
+        "reference_load_factor": {"const": 1.0},
+        "mode_shape_storage_profile": {
+          "const": "inline_max_component_normalized_small_dense_v1"
+        },
+        "claim_boundary": {
+          "const": "dense_reference_state_frame_linear_buckling_preview_v1"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_checksums", "source_set_hash"],
+      "properties": {
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 16,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        },
+        "source_set_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "tolerance_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "euler_load_relative_tolerance",
+        "load_scale_invariance_relative_tolerance",
+        "residual_relative_tolerance",
+        "orthogonality_tolerance",
+        "repeated_eigenvalue_relative_tolerance",
+        "compression_force_relative_tolerance"
+      ],
+      "properties": {
+        "euler_load_relative_tolerance": {"const": 3e-6},
+        "load_scale_invariance_relative_tolerance": {"const": 1e-12},
+        "residual_relative_tolerance": {"const": 1e-8},
+        "orthogonality_tolerance": {"const": 1e-8},
+        "repeated_eigenvalue_relative_tolerance": {"const": 1e-10},
+        "compression_force_relative_tolerance": {"const": 1e-12}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "euler_two_plane",
+        "reference_load_scale",
+        "repeated_cluster",
+        "reference_sign"
+      ],
+      "properties": {
+        "euler_two_plane": {"$ref": "#/$defs/eulerCase"},
+        "reference_load_scale": {"$ref": "#/$defs/loadScaleCase"},
+        "repeated_cluster": {"$ref": "#/$defs/repeatedCase"},
+        "reference_sign": {"$ref": "#/$defs/referenceSignCase"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_count",
+        "passing_case_count",
+        "euler_two_plane_contract_pass",
+        "reference_load_scale_contract_pass",
+        "repeated_cluster_contract_pass",
+        "reference_sign_contract_pass",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_count": {"const": 4},
+        "passing_case_count": {"type": "integer", "minimum": 0, "maximum": 4},
+        "euler_two_plane_contract_pass": {"type": "boolean"},
+        "reference_load_scale_contract_pass": {"type": "boolean"},
+        "repeated_cluster_contract_pass": {"type": "boolean"},
+        "reference_sign_contract_pass": {"type": "boolean"},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "whole_model_frame_linear_buckling_evidence",
+        "reference_static_initial_stress_assembly_evidence",
+        "repeated_cluster_fail_closed_evidence",
+        "reference_axial_sign_fail_closed_evidence",
+        "general_frame_shell_linear_buckling",
+        "mixed_tension_compression_reference",
+        "nonlinear_buckling_or_imperfection_sensitivity",
+        "sparse_buckling_backend",
+        "large_mode_binary_vector_artifacts",
+        "rocm_hip_buckling_parity",
+        "independent_code_to_code_or_verification_level_2",
+        "release_readiness"
+      ],
+      "properties": {
+        "whole_model_frame_linear_buckling_evidence": {"type": "boolean"},
+        "reference_static_initial_stress_assembly_evidence": {"type": "boolean"},
+        "repeated_cluster_fail_closed_evidence": {"type": "boolean"},
+        "reference_axial_sign_fail_closed_evidence": {"type": "boolean"},
+        "general_frame_shell_linear_buckling": {"const": false},
+        "mixed_tension_compression_reference": {"const": false},
+        "nonlinear_buckling_or_imperfection_sensitivity": {"const": false},
+        "sparse_buckling_backend": {"const": false},
+        "large_mode_binary_vector_artifacts": {"const": false},
+        "rocm_hip_buckling_parity": {"const": false},
+        "independent_code_to_code_or_verification_level_2": {"const": false},
+        "release_readiness": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 10,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 900},
+    "contract_pass": {"type": "boolean"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"contract_pass": {"const": true}},
+        "required": ["contract_pass"]
+      },
+      "then": {"properties": {"status": {"const": "partial"}}},
+      "else": {"properties": {"status": {"const": "blocked"}}}
+    }
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nonnegative": {"type": "number", "minimum": 0},
+    "positive": {"type": "number", "exclusiveMinimum": 0},
+    "twoPositive": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/positive"}
+    },
+    "eulerCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "public_status",
+        "solver_id",
+        "element_count",
+        "free_dof_count",
+        "reference_compression_force_kn",
+        "expected_load_factors",
+        "actual_load_factors",
+        "maximum_load_factor_relative_error",
+        "maximum_reference_compression_relative_error",
+        "maximum_residual_relative_inf",
+        "stiffness_orthogonality_error_inf",
+        "geometric_diagonalization_error_inf",
+        "stiffness_matrix_hash",
+        "geometric_stiffness_matrix_hash",
+        "reference_load_pattern_hash",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "public_two_plane_pinned_euler_column_16_element"},
+        "truth_basis": {
+          "const": "analytic_euler_load_with_finite_element_convergence"
+        },
+        "public_status": {"const": "ready"},
+        "solver_id": {"const": "authoritative_cpu_linear_buckling_fea_3d_v1"},
+        "element_count": {"const": 16},
+        "free_dof_count": {"const": 80},
+        "reference_compression_force_kn": {"const": 100.0},
+        "expected_load_factors": {"$ref": "#/$defs/twoPositive"},
+        "actual_load_factors": {"$ref": "#/$defs/twoPositive"},
+        "maximum_load_factor_relative_error": {"$ref": "#/$defs/nonnegative"},
+        "maximum_reference_compression_relative_error": {
+          "$ref": "#/$defs/nonnegative"
+        },
+        "maximum_residual_relative_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_orthogonality_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "geometric_diagonalization_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "geometric_stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "reference_load_pattern_hash": {"$ref": "#/$defs/hash"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "loadScaleCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "low_reference_load_kn",
+        "high_reference_load_kn",
+        "low_reference_critical_load_factor",
+        "high_reference_critical_load_factor",
+        "low_reference_physical_critical_load_kn",
+        "high_reference_physical_critical_load_kn",
+        "physical_critical_load_relative_error",
+        "load_factor_ratio_relative_error",
+        "stiffness_matrix_hash_equal",
+        "geometric_stiffness_matrix_hash_distinct",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "public_reference_load_scale_invariance"},
+        "truth_basis": {"const": "linear_reference_load_homogeneity_invariant"},
+        "low_reference_load_kn": {"const": 100.0},
+        "high_reference_load_kn": {"const": 200.0},
+        "low_reference_critical_load_factor": {"$ref": "#/$defs/positive"},
+        "high_reference_critical_load_factor": {"$ref": "#/$defs/positive"},
+        "low_reference_physical_critical_load_kn": {"$ref": "#/$defs/positive"},
+        "high_reference_physical_critical_load_kn": {"$ref": "#/$defs/positive"},
+        "physical_critical_load_relative_error": {"$ref": "#/$defs/nonnegative"},
+        "load_factor_ratio_relative_error": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_matrix_hash_equal": {"type": "boolean"},
+        "geometric_stiffness_matrix_hash_distinct": {"type": "boolean"},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "repeatedCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "incomplete_selection_status",
+        "incomplete_selection_blocker_kind",
+        "incomplete_selection_detail",
+        "complete_selection_status",
+        "complete_load_factors",
+        "repeated_load_factor_relative_gap",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "public_symmetric_column_repeated_cluster"},
+        "truth_basis": {
+          "const": "complete_repeated_eigenspace_selection_invariant"
+        },
+        "incomplete_selection_status": {"const": "blocked"},
+        "incomplete_selection_blocker_kind": {
+          "const": "buckling_generalized_eigen_contract_failed"
+        },
+        "incomplete_selection_detail": {"type": "string", "minLength": 20},
+        "complete_selection_status": {"const": "ready"},
+        "complete_load_factors": {"$ref": "#/$defs/twoPositive"},
+        "repeated_load_factor_relative_gap": {"$ref": "#/$defs/nonnegative"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "referenceSignCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "tension_status",
+        "tension_blocker_kind",
+        "zero_compression_status",
+        "zero_compression_blocker_kind",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "public_reference_axial_sign_fail_closed"},
+        "truth_basis": {"const": "positive_compression_initial_stress_sign_invariant"},
+        "tension_status": {"const": "blocked"},
+        "tension_blocker_kind": {
+          "const": "buckling_reference_tension_not_supported"
+        },
+        "zero_compression_status": {"const": "blocked"},
+        "zero_compression_blocker_kind": {
+          "const": "buckling_reference_compression_missing"
+        },
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    }
+  }
+}

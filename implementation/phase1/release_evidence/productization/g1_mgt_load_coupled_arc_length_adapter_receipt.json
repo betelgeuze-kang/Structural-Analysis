@@ -1,0 +1,2243 @@
+{
+  "adapter_metadata": {
+    "actual_mgt_semantic_load_case_consumed": true,
+    "all_frame_source_material_properties_resolved": false,
+    "apply_shell_material_tangent": false,
+    "apply_state_updated_frame_axial_geometry": false,
+    "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+    "checkpoint_load_factor": 0.656,
+    "checkpoint_nonfree_displacement_inf_m": 0.0,
+    "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+    "checkpoint_schema": "mgt-uncoarsened-boundary-pdelta-checkpoint.v1",
+    "checkpoint_sha256": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "claim_boundary": "This adapter evaluates the real MGT frame/shell/spring physical residual against the complete authored LIVE nodal and uniform global-Z plate-face load vector at one retained checkpoint, then audits its load derivative, zero-state free map, and sparse-predictor preflight. It does not establish that the retained historical checkpoint was generated under LIVE, run a full continuation path, connect material-state commit/rollback, use Engine v2 production Krylov or ROCm/HIP, create a load-1.0 checkpoint, or close G1.",
+    "dgn_material_property_alias_audit": {
+      "alias_material_count": 24,
+      "alias_rows": [
+        {
+          "dgn_material_id": 8,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 9,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 10,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 11,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 12,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 13,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 14,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 15,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 16,
+          "material_name": "C40+Q235",
+          "material_type": "SRC",
+          "source_material_id": 3,
+          "source_material_name": "C40+Q235",
+          "source_material_type": "SRC"
+        },
+        {
+          "dgn_material_id": 17,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 18,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 19,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 20,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 21,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 22,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 23,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 24,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 25,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 26,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 27,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 28,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 29,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 30,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 31,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        }
+      ],
+      "ambiguous_identity_rows": [],
+      "claim_boundary": "Copies analysis elastic properties only from one exact *MATERIAL type/name identity to a distinct *DGN-MATL id. DGN numeric design fields, fuzzy matching, and inferred database values are not consumed. The identity inheritance remains engineer-review-required.",
+      "contract_pass": true,
+      "dgn_material_row_count": 29,
+      "dgn_numeric_elastic_override_consumed_count": 0,
+      "dgn_unique_material_id_count": 29,
+      "duplicate_dgn_material_ids": [],
+      "engineer_review_required": true,
+      "exact_unique_identity_match_row_count": 29,
+      "existing_source_id_row_count": 5,
+      "fuzzy_name_match_count": 0,
+      "resolution_policy": "exact_normalized_type_and_name_unique_source_material.v1",
+      "schema_version": "mgt-dgn-material-property-alias-audit.v1",
+      "source_material_count": 6,
+      "unresolved_identity_rows": []
+    },
+    "element_count": 12728,
+    "force_conversion_divisor": 1000.0,
+    "force_unit_input": "N",
+    "force_unit_protocol": "kN",
+    "frame_connectivity_audit": {
+      "beam_end_offset_applied_element_count": 708,
+      "beam_end_offset_max_abs_m": 0.523,
+      "edge_index_used_for_element_binding": false,
+      "frame_connectivity_source": "elem_conn_ptr/elem_conn_idx",
+      "frame_local_axis_angle_array_present": true,
+      "frame_local_axis_max_abs_angle_deg": 270.0,
+      "frame_local_axis_nonzero_angle_count": 150,
+      "invalid_line_connectivity_element_id_head": [],
+      "line_element_row_accounting_exact": true,
+      "line_elements_solved": 5572,
+      "line_node_count": 8076,
+      "raw_line_element_count": 5576,
+      "skipped_invalid_line_connectivity_count": 0,
+      "skipped_short_or_degenerate_line_count": 4
+    },
+    "frame_element_count": 5572,
+    "frame_gravity_load_scale": 0.0,
+    "frame_source_property_coverage_audit": {
+      "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
+      "exact_source_property_coverage": false,
+      "fallback_allowed_for_state_updated_geometry": false,
+      "frame_element_count": 5572,
+      "material_property_resolved_element_count": 5493,
+      "missing_material_element_count": 79,
+      "missing_material_id_counts": [
+        {
+          "element_count": 5,
+          "material_id": 16
+        },
+        {
+          "element_count": 9,
+          "material_id": 26
+        },
+        {
+          "element_count": 9,
+          "material_id": 27
+        },
+        {
+          "element_count": 14,
+          "material_id": 28
+        },
+        {
+          "element_count": 17,
+          "material_id": 29
+        },
+        {
+          "element_count": 15,
+          "material_id": 30
+        },
+        {
+          "element_count": 10,
+          "material_id": 31
+        }
+      ],
+      "missing_section_element_count": 0,
+      "missing_section_id_counts": [],
+      "resolved_source_property_element_count": 5493,
+      "schema_version": "mgt-state-updated-frame-axial-property-coverage.v1",
+      "section_property_resolved_element_count": 5572,
+      "source_material_property_count": 6,
+      "source_property_coverage_ratio": 0.9858219669777458,
+      "source_section_property_count": 183,
+      "unresolved_element_head": [
+        {
+          "element_id": 1261,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 1485,
+          "material_id": 31,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 370
+        },
+        {
+          "element_id": 1488,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 1489,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 2996,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 2997,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 2998,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 2999,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 3088,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 3089,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 3097,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 3099,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 3797,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 3829,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 3832,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 3834,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 4363,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 4364,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 21892,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 21893,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 21894,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 21925,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 21926,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 22043,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 22044,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 22057,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22058,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22059,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22060,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22061,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22072,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 22073,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        }
+      ],
+      "unresolved_element_head_limit": 32,
+      "unresolved_source_property_element_count": 79
+    },
+    "free_dof_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+    "free_equation_count": 70560,
+    "full_unit_predictor_vector_artifact": {
+      "artifact_path": "implementation/phase1/release_evidence/productization/g1_mgt_live_full_unit_predictor_free_displacement.f64le",
+      "byte_length": 564480,
+      "byte_order": "little",
+      "claim_boundary": "One deterministic free-DOF displacement vector for the full-unit zero-state LIVE predictor. It is not a continuation trace, an accepted material/geometric nonlinear checkpoint, a production ROCm/HIP result, or G1 closure.",
+      "data_sha256": "sha256:5974fb0760380dc4c212d54ec379dd7d60246737c4af23500a2400632e1562bb",
+      "dtype": "<f8",
+      "equation_count": 70560,
+      "equation_order": "adapter_free_global_dof_order",
+      "free_dof_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+      "g1_full_load_checkpoint_claim": false,
+      "large_vector_binary_trace_claim": false,
+      "layout": "C",
+      "load_factor": 1.0,
+      "maximum_translation_m": 0.003460998957181514,
+      "persisted_nonlinear_continuation_checkpoint": false,
+      "promotes_g1_closure": false,
+      "reference_load_hash": "sha256:010766b31f80c5f2de534b006b6b3143d9d59fffd24d709eb16637392fbdc805",
+      "residual_gate_passed": true,
+      "residual_inf_n": 0.00024772050528554246,
+      "residual_tolerance_n": 0.0005,
+      "schema_version": "g1-mgt-live-full-unit-predictor-vector.v1",
+      "semantic_load_target": "LIVE",
+      "status": "ready"
+    },
+    "global_dof_count": 78282,
+    "historical_checkpoint_state_consumed": true,
+    "initial_displacement_hash": "sha256:b8dc295b50c41dc23e7762c03c9182cb51d36194ba1ff0f74a9c9e54e1e73c45",
+    "initial_load_factor": 0.656,
+    "initial_state_component_audit": {
+      "component_force_at_residual_argmax_n": {
+        "frame": -1276959794140.9329,
+        "material_stress_correction": 0.0,
+        "shell_bending_drilling": 0.0,
+        "shell_membrane": -64728646.72888785,
+        "spring": 0.0
+      },
+      "component_internal_force_free_inf_n": {
+        "frame": 1276959794140.9329,
+        "material_stress_correction": 0.0,
+        "shell_bending_drilling": 347838.82372304593,
+        "shell_membrane": 34171425819.74918,
+        "spring": 0.9176081954801703
+      },
+      "component_sum_matches_internal_exact": true,
+      "dominant_component_at_residual_argmax": "frame",
+      "dominant_component_by_free_inf": "frame",
+      "external_force_at_residual_argmax_n": 0.0,
+      "external_force_free_inf_n": 117724.5742799998,
+      "hotspot_checkpoint_dofs": [
+        -0.0015716098619179164,
+        0.00382961666472269,
+        -0.001391551279289657,
+        -8.986360425741336e-05,
+        2.153157283001228e-05,
+        -5.7973521674409144e-05
+      ],
+      "hotspot_connected_frame_element_count": 3,
+      "hotspot_connected_frame_elements": [
+        {
+          "axial_translation_jump_m": 0.0018588673644754203,
+          "axial_translation_strain": 0.0046208896231890815,
+          "checkpoint_node_i_dofs": [
+            -0.0015716098619179164,
+            0.00382961666472269,
+            -0.001391551279289657,
+            -8.986360425741336e-05,
+            2.153157283001228e-05,
+            -5.7973521674409144e-05
+          ],
+          "checkpoint_node_j_dofs": [
+            -1.7394914325081166e-05,
+            -6.211050052519163e-05,
+            -0.0013766712410422594,
+            3.3483239105164146e-05,
+            6.46553122396209e-05,
+            -1.4865659313572061e-06
+          ],
+          "element_force_at_hotspot_dof_n": -1276939552442.1929,
+          "element_force_inf_n": 1276939552442.1929,
+          "element_id": 16441,
+          "material_elastic_modulus_n_per_m2": 2.8e+16,
+          "material_id": 5,
+          "material_name": "RigidBar",
+          "nodal_translation_jump_inf_m": 0.003891727165247882,
+          "node_ids": [
+            336,
+            2294
+          ],
+          "reference_length_m": 0.4022747817102226,
+          "section_area_m2": 0.010000000000000002,
+          "section_id": 1140
+        },
+        {
+          "axial_translation_jump_m": -0.0018656419774874347,
+          "axial_translation_strain": -0.0021355688228627593,
+          "checkpoint_node_i_dofs": [
+            -1.6973779183007722e-05,
+            -6.036776735536227e-05,
+            -0.0014165314512192082,
+            -3.131422157781139e-05,
+            4.4144681224355235e-05,
+            -1.3153800406741831e-06
+          ],
+          "checkpoint_node_j_dofs": [
+            -0.0015716098619179164,
+            0.00382961666472269,
+            -0.001391551279289657,
+            -8.986360425741336e-05,
+            2.153157283001228e-05,
+            -5.7973521674409144e-05
+          ],
+          "element_force_at_hotspot_dof_n": -21370386.465699524,
+          "element_force_inf_n": 21370386.465699524,
+          "element_id": 22219,
+          "material_elastic_modulus_n_per_m2": 32500000000.0,
+          "material_id": 1,
+          "material_name": "C40",
+          "nodal_translation_jump_inf_m": 0.0038899844320780526,
+          "node_ids": [
+            815,
+            336
+          ],
+          "reference_length_m": 0.8736042395423792,
+          "section_area_m2": 0.32000000000000006,
+          "section_id": 203
+        },
+        {
+          "axial_translation_jump_m": 0.00370220755342307,
+          "axial_translation_strain": 0.001468188851906513,
+          "checkpoint_node_i_dofs": [
+            -8.987136176724542e-06,
+            -2.3615984489135366e-05,
+            -0.001611965579503594,
+            -3.156056311474157e-05,
+            6.424204653221622e-07,
+            -1.392418456876648e-06
+          ],
+          "checkpoint_node_j_dofs": [
+            -0.0015716098619179164,
+            0.00382961666472269,
+            -0.001391551279289657,
+            -8.986360425741336e-05,
+            2.153157283001228e-05,
+            -5.7973521674409144e-05
+          ],
+          "element_force_at_hotspot_dof_n": 1128687.7257271975,
+          "element_force_inf_n": 15228176.30014587,
+          "element_id": 2905,
+          "material_elastic_modulus_n_per_m2": 32500000000.0,
+          "material_id": 1,
+          "material_name": "C40",
+          "nodal_translation_jump_inf_m": 0.0038532326492118256,
+          "node_ids": [
+            2277,
+            336
+          ],
+          "reference_length_m": 2.5216153552831964,
+          "section_area_m2": 0.32000000000000006,
+          "section_id": 634
+        }
+      ],
+      "hotspot_connected_shell_element_count": 4,
+      "hotspot_connected_shell_elements": [
+        {
+          "element_id": 19494,
+          "maximum_perimeter_edge_engineering_strain_abs": 0.004664272204824238,
+          "maximum_perimeter_translation_jump_m": 0.004193847789379232,
+          "node_ids": [
+            15,
+            2294,
+            336
+          ]
+        },
+        {
+          "element_id": 21048,
+          "maximum_perimeter_edge_engineering_strain_abs": 0.0029757227378871542,
+          "maximum_perimeter_translation_jump_m": 0.004191510633995445,
+          "node_ids": [
+            336,
+            815,
+            821,
+            814
+          ]
+        },
+        {
+          "element_id": 25830,
+          "maximum_perimeter_edge_engineering_strain_abs": 0.0014961040994025954,
+          "maximum_perimeter_translation_jump_m": 0.004184458396449454,
+          "node_ids": [
+            2283,
+            2277,
+            336,
+            2297
+          ]
+        },
+        {
+          "element_id": 25831,
+          "maximum_perimeter_edge_engineering_strain_abs": 0.0014961040994025954,
+          "maximum_perimeter_translation_jump_m": 0.006714415448707063,
+          "node_ids": [
+            2269,
+            2454,
+            336,
+            2277
+          ]
+        }
+      ],
+      "hotspot_dominant_frame_element_id": 16441,
+      "hotspot_maximum_connected_frame_force_inf_n": 1276939552442.1929,
+      "hotspot_maximum_perimeter_edge_engineering_strain_abs": 0.004664272204824238,
+      "hotspot_maximum_perimeter_translation_jump_m": 0.006714415448707063,
+      "hotspot_node_reference_xyz_m": [
+        119.585,
+        175.528,
+        0.0
+      ],
+      "internal_force_at_residual_argmax_n": -1277024522787.6619,
+      "internal_force_free_inf_n": 1277024522787.6619,
+      "physical_internal_force_model": "reference_geometry_linear_force_recovery_6dof_plus_force_consistent_shell_plus_springs",
+      "residual_argmax_dof_label": "Dx",
+      "residual_argmax_free_equation_index": 1866,
+      "residual_argmax_global_dof_index": 2010,
+      "residual_argmax_node_id": 336,
+      "residual_at_argmax_n": -1277024522787.6619,
+      "residual_inf_n": 1277024522787.6619,
+      "shell_internal_force_model": "membrane_bending_drilling_force_consistent_reference_geometry_split",
+      "use_force_based_frame": true
+    },
+    "initial_state_policy": "historical_checkpoint",
+    "material_analysis_property_binding": {
+      "dgn_alias_material_count_applied": 0,
+      "dgn_alias_material_count_available": 24,
+      "dgn_alias_resolution_enabled": false,
+      "engineer_review_required": false,
+      "resolution_policy": "MATERIAL_rows_only.v1",
+      "resolved_material_count": 6,
+      "source_material_count": 6
+    },
+    "material_property_count": 6,
+    "material_state_commit_rollback_connected": false,
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "negative_load_derivative_mode": "analytic_reference_load_minus_linear_geometric_frame_derivative",
+    "node_count": 13047,
+    "plate_thickness_property_count": 25,
+    "pressure_load_path": {
+      "authored_pressure_rows_assembled_by": "mgt_semantic_load_assembly:uniform_global_z_plate_face",
+      "benchmark_pressure_filter_used": false,
+      "benchmark_pressure_vector_disabled": true
+    },
+    "reference_load_contract": {
+      "benchmark_bridge_proxy": false,
+      "checkpoint_reference_load_contract_matches": false,
+      "frame_component": "authored_live_nodal_force_and_nodal_moment_rows",
+      "load_case": "LIVE",
+      "production_load_case_claim": false,
+      "selected_case_row_accounting_exact": true,
+      "shell_component": "authored_live_uniform_global_z_plate_face_pressure_rows",
+      "source_mgt_load_combination_consumed": false,
+      "source_mgt_nodal_load_rows_consumed": true,
+      "source_mgt_pressure_load_rows_consumed": true,
+      "source_mgt_selfweight_rows_consumed": false
+    },
+    "reference_load_free_hash": "sha256:010766b31f80c5f2de534b006b6b3143d9d59fffd24d709eb16637392fbdc805",
+    "reference_load_inf_n": 179458.19249999968,
+    "reference_operator": {
+      "coupled_stiffness_nnz": 1384452,
+      "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+      "frame_equilibrium_meta": {
+        "local_axis_max_abs_angle_deg": 270.0,
+        "local_axis_roll_transform_applied_count": 150,
+        "material_usage_head": {
+          "1": 2108,
+          "2": 1692,
+          "3": 1687,
+          "5": 6,
+          "26": 9,
+          "27": 9,
+          "28": 14,
+          "29": 17,
+          "30": 15,
+          "31": 10
+        },
+        "real_section_material_coverage_pct": 98.58219669777459,
+        "real_section_material_element_count": 5493,
+        "section_usage_head": {
+          "4": 448,
+          "6": 200,
+          "29": 138,
+          "44": 76,
+          "48": 34,
+          "93": 56,
+          "248": 58,
+          "256": 38,
+          "1053": 84,
+          "1088": 3384
+        },
+        "total_gravity_n": 144988968.40598,
+        "unique_material_count": 11,
+        "unique_section_count": 182
+      },
+      "frame_equilibrium_stiffness_nnz": 691920,
+      "newton_tangent_model": "equilibrium_operator_consistent_with_force_based_f_int",
+      "shell_meta": {
+        "assembled_membrane_triangle_count": 14120,
+        "assembled_triangle_count": 14120,
+        "include_membrane": true,
+        "material_tangent_override_enabled": false,
+        "material_tangent_override_surface_element_count": 0,
+        "material_tangent_reduction_surface_element_count": 0,
+        "max_material_tangent_ratio": 1.0,
+        "min_material_tangent_ratio": 1.0,
+        "pressure_load_filter_enabled": true,
+        "pressure_loaded_triangle_count": 0,
+        "pressure_suppressed_triangle_count": 14120,
+        "shell_tangent_model": "mindlin_cst_bending_drilling_plus_cst_membrane",
+        "skipped_degenerate_triangle_count": 0,
+        "source_plate_thickness_coverage_count": 7152,
+        "source_plate_thickness_coverage_pct": 100.0,
+        "source_thickness_table_count": 25,
+        "surface_element_count": 7152,
+        "surface_material_coverage_pct": 96.33668903803132,
+        "surface_node_count": 7894,
+        "surface_quad_count": 6968,
+        "surface_stiffness_nnz": 1901664,
+        "surface_total_area_m2": 11404.192103423085,
+        "surface_tri_count": 184,
+        "thickness_max_m": 0.85,
+        "thickness_min_m": 0.140625,
+        "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+        "unique_surface_material_count": 20,
+        "unique_surface_section_count": 15
+      },
+      "shell_stiffness_nnz": 1901664,
+      "spring_stiffness_nnz": 40608,
+      "stiffness_unit_audit": {
+        "claim_boundary": "Diagonal audit only; it does not prove unit conversion correctness but flags solver-hostile stiffness scale separation across coupled components.",
+        "cross_component_diag_max_ratio": 691921363756394.2,
+        "imbalance_ratio_threshold": 100000000.0,
+        "per_component": {
+          "frame": {
+            "diag_abs_max": 691921363756394.2,
+            "diag_abs_mean": 141972227648.43234,
+            "diag_abs_median": 22769.172589384318,
+            "diag_abs_min": 2197.75238651581,
+            "free_diag_count": 70560,
+            "nonzero_diag_count": 43086,
+            "unit": "N_per_m_or_Nm_per_rad"
+          },
+          "shell": {
+            "diag_abs_max": 936561378488.6742,
+            "diag_abs_mean": 22775105512.83593,
+            "diag_abs_median": 6701456070.4574375,
+            "diag_abs_min": 411.94743221423107,
+            "free_diag_count": 70560,
+            "nonzero_diag_count": 44988,
+            "unit": "N_per_m_or_Nm_per_rad"
+          },
+          "spring": {
+            "diag_abs_max": 1000000000.0,
+            "diag_abs_mean": 166700000.5,
+            "diag_abs_median": 50000.5,
+            "diag_abs_min": 1.0,
+            "free_diag_count": 70560,
+            "nonzero_diag_count": 20304,
+            "unit": "N_per_m_or_Nm_per_rad"
+          }
+        },
+        "unit_consistency_warning": true
+      }
+    },
+    "reference_preconditioner_contract": {
+      "approximate_for_state_dependent_adapter": false,
+      "available": true,
+      "claim_boundary": "The zero-state linear reference-geometry CSR is exposed as a fixed right-preconditioner candidate. For a state-dependent adapter it is approximate, not the current Jacobian. The adapter does not factorize it, run Krylov, establish preconditioner effectiveness, or promote G1 closure.",
+      "csr_column_index_hash": "sha256:35eac43fbeda16f3fa8658e110dbbd0f34985f2ca1bac524927a44974fd90733",
+      "csr_row_pointer_hash": "sha256:3af537a8aade96dcf3b69a55d2e48c421c8900a758060a9c38dee5fcf7079dd3",
+      "equation_count": 70560,
+      "exact_for_adapter_residual_model": true,
+      "factorization_executed_by_adapter": false,
+      "intended_use": "fixed_right_preconditioner",
+      "operator_classification": "zero_state_linear_reference_geometry",
+      "operator_nnz": 1264133,
+      "operator_numeric_values_hash": "sha256:b980afc98b448341aff4268e5514c6ab8069362ded38e1a8180579ed64f14799",
+      "production_preconditioner_claim": false,
+      "promotes_g1_closure": false,
+      "schema_version": "zero_state_linear_reference_geometry_csr_preconditioner.v1",
+      "status": "ready"
+    },
+    "residual_evaluation_contract": {
+      "claim_boundary": "The finite-chord axial path evaluates its nonlinear residual from the same reference CSR, load-frame delta, and axial correction parents used by the analytic tangent. Component force assembly remains a diagnostic cross-check. This is not a full corotational frame, material-state update, production solver, or G1 closure claim.",
+      "component_force_assembly_retained_for_diagnostics": true,
+      "finite_chord_correction_parent_matches_analytic_tangent": false,
+      "full_corotational_frame_claim": false,
+      "load_frame_delta_parent_matches_analytic_tangent": false,
+      "material_state_update_claim": false,
+      "mode": "component_internal_force_sum",
+      "prescribed_background_term_included": true,
+      "prescribed_background_term_inf_n": 0.0,
+      "promotes_g1_closure": false,
+      "reference_csr_parent_matches_analytic_tangent": false,
+      "residual_formula": {
+        "current_state_variables": [
+          "u_f",
+          "load_factor"
+        ],
+        "displacement_unit": "m",
+        "expression": "sum(F_component_internal(u,load_factor))_f - load_factor*F_external_LIVE_f",
+        "force_unit": "N",
+        "free_equation_order": "adapter_free_global_dof_order",
+        "load_factor_unit": "dimensionless",
+        "prescribed_background_term": "K0_fp*u_prescribed",
+        "residual_sign_convention": "internal_minus_external",
+        "schema_version": "mgt-residual-formula.v1"
+      },
+      "residual_formula_hash": "sha256:2fc498657a1500da4ff969e09251d4c947bf028618f8aaddaf868e79304174d3",
+      "schema_version": "mgt-residual-evaluation-contract.v1"
+    },
+    "residual_parent_equivalence_audit": {
+      "applicable": false,
+      "claim_boundary": "The parent/component comparison applies only to the analytic finite-chord axial residual path without shell material updates.",
+      "contract_pass": true,
+      "schema_version": "mgt-residual-parent-component-equivalence.v1",
+      "status": "not_applicable"
+    },
+    "restrained_dof_count": 7707,
+    "roundtrip_derivation": "parse_midas_mgt_to_json_npz:no_resolve_rigid_links:no_drop_unreferenced_nodes",
+    "roundtrip_generated_uncoarsened": true,
+    "roundtrip_json": null,
+    "roundtrip_json_hash_mode": "canonical_json_without_generated_at.v1",
+    "roundtrip_json_sha256": "sha256:cc33b8253fd25c84ea2e9d2a2c8d86758f003f20a729ef6fa7613feb198f97d6",
+    "roundtrip_npz": null,
+    "roundtrip_sha256": "sha256:d95097f6d0a40d950f38dda4fe287bca2428ea3e476bebeb3424d458eac409de",
+    "schema_version": "g1-mgt-load-coupled-arc-length-adapter.v1",
+    "section_property_count": 183,
+    "semantic_load_assembly": {
+      "actual_mgt_semantic_load_case_consumed": true,
+      "actual_mgt_semantic_load_target_consumed": true,
+      "assembled_applied_moment_resultant_n_m": [
+        1810.0,
+        2960.0,
+        0.0
+      ],
+      "assembled_force_resultant_n": [
+        0.0,
+        0.0,
+        -50628330.359766744
+      ],
+      "authored_nodal_moment_resultant_n_m": [
+        1810.0,
+        2960.0,
+        0.0
+      ],
+      "case_factors": {
+        "LIVE": 1.0
+      },
+      "claim_boundary": "Consumes authored MGT nodal loads and uniform unprojected global-direction PLATE/FACE pressures in an explicit force/length unit system. Selfweight, projected or nonuniform pressure, envelope selection, follower loads, production load recovery, and G1 closure remain outside this contract.",
+      "combination_expansion_mode": null,
+      "connectivity_index_hash": "sha256:cd84900389d1ee294f2d247300af03c228057dfd56c124dd6e9190a77ed235db",
+      "connectivity_pointer_hash": "sha256:dce1233cdeaf432b953eb7e932438f6c81cbc6cdedd3284fd96336b972585826",
+      "contract_pass": true,
+      "element_count": 12728,
+      "element_id_hash": "sha256:c407a3734713d7e0bce240cedf0992f7a6570c484f0934f373acf96e2e600b2c",
+      "global_dof_count": 78282,
+      "nodal_force_resultant_n": [
+        0.0,
+        0.0,
+        -22964.0
+      ],
+      "nodal_load_row_count_consumed": 6,
+      "nodal_load_target_count_consumed": 6,
+      "node_count": 13047,
+      "node_id_hash": "sha256:a80a114fbf3b202ed2abcc71bee2efd54581f22563a8552d2736b82f5fa311fd",
+      "pressure_force_resultant_n": [
+        0.0,
+        0.0,
+        -50605366.359766565
+      ],
+      "pressure_load_element_count_consumed": 3644,
+      "pressure_load_row_count_consumed": 3644,
+      "pressure_loaded_area_m2": 7802.903986433339,
+      "production_load_case_claim": false,
+      "promotes_g1_closure": false,
+      "reference_load_hash": "sha256:e2e447325a332289f25ab5b536bc83b0400553663aa11044a7a287a49d2b2e5e",
+      "reference_load_inf_n": 179458.19249999968,
+      "reference_load_l1_n": 50638576.35976667,
+      "resultant_applied_moment_error_inf_n_m": 0.0,
+      "resultant_force_error_inf_n": 1.7881393432617188e-07,
+      "resultant_gate_passed": true,
+      "resultant_moment_about_origin_n_m": [
+        -9490891919.244497,
+        6615330872.895246,
+        0.0
+      ],
+      "schema_version": "mgt-semantic-load-assembly.v1",
+      "selected_case_row_accounting_exact": true,
+      "selected_target_row_counts": {
+        "nodal_loads": 6,
+        "pressure_loads": 3644,
+        "selfweight": 0
+      },
+      "selected_target_rows_consumed": {
+        "nodal_loads": 6,
+        "pressure_loads": 3644,
+        "selfweight": 0
+      },
+      "selfweight_row_count_consumed": 0,
+      "source_mgt_load_combination_consumed": false,
+      "source_mgt_nodal_load_rows_consumed": true,
+      "source_mgt_pressure_load_rows_consumed": true,
+      "source_mgt_selfweight_rows_consumed": false,
+      "source_row_counts": {
+        "nodal_loads": 12,
+        "pressure_loads": 7278,
+        "selfweight": 1
+      },
+      "status": "ready",
+      "target_kind": "static_load_case",
+      "target_name": "LIVE",
+      "unbound_source_row_counts": {
+        "nodal_loads": 0,
+        "pressure_loads": 0,
+        "selfweight": 0
+      },
+      "unit_contract": {
+        "force_to_newton": 1000.0,
+        "length_to_metre": 1.0,
+        "moment_to_n_m": 1000.0,
+        "pressure_to_n_per_m2": 1000.0,
+        "source_force_unit": "KN",
+        "source_length_unit": "M"
+      },
+      "unsupported_features": [
+        "selfweight",
+        "projected_pressure",
+        "nonuniform_pressure",
+        "envelope_selection",
+        "follower_load"
+      ],
+      "unsupported_selected_row_count": 0
+    },
+    "source_material_properties_consumed": true,
+    "spring_assembly": {
+      "distinct_elastic_link_node_count": 3384,
+      "elastic_link_row_count": 1692,
+      "elastic_link_rows_skipped": 0,
+      "elastic_link_type_counts": {
+        "GEN": 1692
+      },
+      "finite_spring_component_count": 10152,
+      "finite_spring_dof_counts": {
+        "SDx": 1692,
+        "SDy": 1692,
+        "SDz": 1692,
+        "SRx": 1692,
+        "SRy": 1692,
+        "SRz": 1692
+      },
+      "mapped_elastic_link_node_count": 3384,
+      "missing_elastic_link_node_count": 0,
+      "stiffness_abs_max_n_per_m_or_nm_per_rad": 1000000000.0,
+      "stiffness_abs_min_nonzero_n_per_m_or_nm_per_rad": 1.0
+    },
+    "state_invariant_tangent_contract": {
+      "available": true,
+      "claim_boundary": "Exact CSR Jacobian only for the adapter's current linear reference-geometry residual with state-independent material operators. It is not a corotational or material-state-updated nonlinear tangent, quadratic-convergence proof, production Krylov solve, or G1 closure.",
+      "csr_column_index_hash": "sha256:35eac43fbeda16f3fa8658e110dbbd0f34985f2ca1bac524927a44974fd90733",
+      "csr_row_pointer_hash": "sha256:3af537a8aade96dcf3b69a55d2e48c421c8900a758060a9c38dee5fcf7079dd3",
+      "current_state_reassembly_required": false,
+      "equation_count": 70560,
+      "exact_for_adapter_residual_model": true,
+      "force_unit": "N",
+      "material_state_commit_rollback_claim": false,
+      "nonlinear_current_tangent_claim": false,
+      "operator_classification": "state_invariant_linear_reference_geometry",
+      "operator_nnz": 1264133,
+      "operator_numeric_values_hash": "sha256:b980afc98b448341aff4268e5514c6ab8069362ded38e1a8180579ed64f14799",
+      "promotes_g1_closure": false,
+      "quadratic_convergence_claim": false,
+      "rotation_tangent_unit": "N_m_per_rad",
+      "schema_version": "linear_reference_geometry_residual_exact_csr.v1",
+      "status": "ready",
+      "translation_tangent_unit": "N_per_m"
+    },
+    "state_updated_frame_axial_geometry": {
+      "connected_to_centered_tangent_action": false,
+      "connected_to_physical_residual": false,
+      "fallback_allowed_for_state_updated_geometry": false,
+      "full_corotational_frame_claim": false,
+      "preflight_status": "blocked",
+      "prepack_executed": false,
+      "source_property_coverage_audit": {
+        "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
+        "exact_source_property_coverage": false,
+        "fallback_allowed_for_state_updated_geometry": false,
+        "frame_element_count": 5572,
+        "material_property_resolved_element_count": 5493,
+        "missing_material_element_count": 79,
+        "missing_material_id_counts": [
+          {
+            "element_count": 5,
+            "material_id": 16
+          },
+          {
+            "element_count": 9,
+            "material_id": 26
+          },
+          {
+            "element_count": 9,
+            "material_id": 27
+          },
+          {
+            "element_count": 14,
+            "material_id": 28
+          },
+          {
+            "element_count": 17,
+            "material_id": 29
+          },
+          {
+            "element_count": 15,
+            "material_id": 30
+          },
+          {
+            "element_count": 10,
+            "material_id": 31
+          }
+        ],
+        "missing_section_element_count": 0,
+        "missing_section_id_counts": [],
+        "resolved_source_property_element_count": 5493,
+        "schema_version": "mgt-state-updated-frame-axial-property-coverage.v1",
+        "section_property_resolved_element_count": 5572,
+        "source_material_property_count": 6,
+        "source_property_coverage_ratio": 0.9858219669777458,
+        "source_section_property_count": 183,
+        "unresolved_element_head": [
+          {
+            "element_id": 1261,
+            "material_id": 27,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 307
+          },
+          {
+            "element_id": 1485,
+            "material_id": 31,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 370
+          },
+          {
+            "element_id": 1488,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 1489,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 2996,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 2997,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 2998,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 2999,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 3088,
+            "material_id": 28,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 241
+          },
+          {
+            "element_id": 3089,
+            "material_id": 28,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 241
+          },
+          {
+            "element_id": 3097,
+            "material_id": 28,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 241
+          },
+          {
+            "element_id": 3099,
+            "material_id": 28,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 241
+          },
+          {
+            "element_id": 3797,
+            "material_id": 27,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 307
+          },
+          {
+            "element_id": 3829,
+            "material_id": 27,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 307
+          },
+          {
+            "element_id": 3832,
+            "material_id": 27,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 307
+          },
+          {
+            "element_id": 3834,
+            "material_id": 27,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 307
+          },
+          {
+            "element_id": 4363,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 4364,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 21892,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 21893,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 21894,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 21925,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 21926,
+            "material_id": 30,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 642
+          },
+          {
+            "element_id": 22043,
+            "material_id": 28,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 241
+          },
+          {
+            "element_id": 22044,
+            "material_id": 28,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 241
+          },
+          {
+            "element_id": 22057,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 22058,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 22059,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 22060,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 22061,
+            "material_id": 29,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 48
+          },
+          {
+            "element_id": 22072,
+            "material_id": 28,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 241
+          },
+          {
+            "element_id": 22073,
+            "material_id": 28,
+            "missing_material_property": true,
+            "missing_section_property": false,
+            "section_id": 241
+          }
+        ],
+        "unresolved_element_head_limit": 32,
+        "unresolved_source_property_element_count": 79
+      },
+      "state_updated_frame_axial_geometry_applied": false
+    },
+    "tangent_action_mode": "centered_physical_residual_difference",
+    "uncoarsened_parser_report": {
+      "checks": {
+        "dummy_node_removed": false,
+        "element_skip_budget_pass": true,
+        "has_elements": true,
+        "has_nodes": true,
+        "rigid_link_resolution_applied": false,
+        "shell_beam_mix_pass": true,
+        "strict_element_slot_parse": true,
+        "synthetic_source_blocked": true,
+        "unknown_section_policy_pass": true
+      },
+      "coarsening": {
+        "applied": false,
+        "dropped_degenerate_elements": 0,
+        "dummy_node_removed_count": 0,
+        "elastic_link_count": 1692,
+        "element_count_post": 12728,
+        "element_count_pre": 12728,
+        "merge_pair_count": 0,
+        "merged_node_count": 0,
+        "node_count_post": 13047,
+        "node_count_pre": 13047,
+        "rigid_like_link_count": 0,
+        "support_node_count": 2133,
+        "support_node_count_mapped": 2133
+      },
+      "contract_pass": true,
+      "metrics": {
+        "beam_element_count": 5576,
+        "bound_nodal_load_row_count": 12,
+        "bound_pressure_row_count": 7278,
+        "bound_selfweight_row_count": 1,
+        "edge_count_undirected": 19119,
+        "element_count": 12728,
+        "element_count_pre_coarsening": 12728,
+        "element_rows_skipped": 0,
+        "element_rows_total": 12728,
+        "element_skip_ratio": 0.0,
+        "line_count": 37281,
+        "load_case_row_count": 0,
+        "load_combination_row_count": 8,
+        "nodal_load_row_count": 12,
+        "node_count": 13047,
+        "node_count_pre_coarsening": 13047,
+        "pressure_load_row_count": 7278,
+        "selfweight_row_count": 1,
+        "shell_element_count": 7152,
+        "static_load_case_count": 6
+      },
+      "reason_code": "PASS",
+      "schema_version": "1.1"
+    },
+    "uncoarsened_parser_run": {
+      "profile": "no_resolve_rigid_links_no_drop_unreferenced_nodes",
+      "return_code": 0
+    },
+    "zero_state_sparse_predictor_audit": {
+      "claim_boundary": "This is one zero-state CPU sparse-direct predictor direction and three load levels that subtract the scaled sparse-solve residual floor before classifying a linear or quadratic remainder. It is not an arc-length corrector, continuation path, production Krylov solve, material-state Newton path, ROCm/HIP proof, full-load checkpoint, or G1 closure.",
+      "contract_pass": true,
+      "equation_count": 70560,
+      "explicit_linear_relative_residual_inf": 1.378969925590373e-09,
+      "explicit_linear_residual_inf_n": 0.0002474674503583074,
+      "explicit_linear_residual_tolerance_n": 0.0005,
+      "failure": null,
+      "fallback_count": 0,
+      "full_arc_length_continuation_executed": false,
+      "full_unit_predictor_rotation_inf_rad": 0.0016765239266973192,
+      "full_unit_predictor_translation_inf_m": 0.003460998957181514,
+      "linear_model_consistency_gate_passed": true,
+      "linear_residual_gate_passed": true,
+      "loaded_component_count": 1,
+      "measurable_quadratic_remainder_gate_passed": false,
+      "minimum_observed_remainder_order": null,
+      "nonlinear_remainder_relative_noise_tolerance": 2e-11,
+      "operator_nnz": 1264133,
+      "predictor_direction_hash": "sha256:5974fb0760380dc4c212d54ec379dd7d60246737c4af23500a2400632e1562bb",
+      "predictor_load_factors": [
+        0.25,
+        0.5,
+        1.0
+      ],
+      "predictor_remainder_gate_passed": true,
+      "predictor_rows": [
+        {
+          "load_factor": 0.25,
+          "maximum_predictor_translation_m": 0.0008652497392953785,
+          "nonlinear_remainder_above_noise": false,
+          "nonlinear_remainder_inf_n": 3.7430436350405216e-07,
+          "nonlinear_remainder_noise_tolerance_n": 8.972909624999984e-07,
+          "observed_remainder_order_from_previous": null,
+          "residual_inf_n": 6.193012632138561e-05,
+          "residual_over_load_factor_squared_n": 0.0009908820211421698,
+          "residual_relative_to_scaled_reference_load": 1.3803800307725874e-09,
+          "scaled_linear_solve_residual_floor_inf_n": 6.186686258957685e-05
+        },
+        {
+          "load_factor": 0.5,
+          "maximum_predictor_translation_m": 0.001730499478590757,
+          "nonlinear_remainder_above_noise": false,
+          "nonlinear_remainder_inf_n": 7.486087270081043e-07,
+          "nonlinear_remainder_noise_tolerance_n": 1.7945819249999967e-06,
+          "observed_remainder_order_from_previous": null,
+          "residual_inf_n": 0.00012386025264277123,
+          "residual_over_load_factor_squared_n": 0.0004954410105710849,
+          "residual_relative_to_scaled_reference_load": 1.3803800307725874e-09,
+          "scaled_linear_solve_residual_floor_inf_n": 0.0001237337251791537
+        },
+        {
+          "load_factor": 1.0,
+          "maximum_predictor_translation_m": 0.003460998957181514,
+          "nonlinear_remainder_above_noise": false,
+          "nonlinear_remainder_inf_n": 1.4972174540162086e-06,
+          "nonlinear_remainder_noise_tolerance_n": 3.5891638499999935e-06,
+          "observed_remainder_order_from_previous": null,
+          "residual_inf_n": 0.00024772050528554246,
+          "residual_over_load_factor_squared_n": 0.00024772050528554246,
+          "residual_relative_to_scaled_reference_load": 1.3803800307725874e-09,
+          "scaled_linear_solve_residual_floor_inf_n": 0.0002474674503583074
+        }
+      ],
+      "production_solver_claim": false,
+      "quadratic_remainder_gate_passed": false,
+      "regularization_count": 0,
+      "remainder_classification": "linear_within_numerical_floor",
+      "right_hand_side_inf_n": 179458.19249999968,
+      "solve_finite": true,
+      "solved_component_count": 1,
+      "solver_profile": "scipy_sparse_component_spsolve_cpu_diagnostic_no_regularization.v1",
+      "sparse_direct_solve_attempted": true,
+      "status": "ready",
+      "unloaded_component_zero_solution_count": 2170,
+      "zero_state_equilibrium_gate_passed": true,
+      "zero_state_equilibrium_tolerance_n": 1e-12,
+      "zero_state_load_direction_error_inf_n": 0.0,
+      "zero_state_load_direction_gate_passed": true,
+      "zero_state_residual_inf_n": 0.0
+    },
+    "zero_to_unit_free_map_audit": {
+      "fixed_free_map_exact": true,
+      "free_graph_component_count": 2171,
+      "free_graph_component_size_counts": {
+        "1": 1127,
+        "2": 2,
+        "4": 1040,
+        "65261": 1,
+        "8": 1
+      },
+      "free_graph_largest_components_head": [
+        {
+          "anchored_to_restrained_dof": true,
+          "component_index": 0,
+          "distinct_node_count": 12604,
+          "dof_labels": [
+            "Dx",
+            "Dy",
+            "Dz",
+            "Rx",
+            "Ry",
+            "Rz"
+          ],
+          "free_equation_count": 65261,
+          "global_dof_head": [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33
+          ],
+          "node_id_head": [
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43
+          ],
+          "reference_load_inf_n": 179458.19249999968,
+          "restrained_coupling_nnz": 38058
+        },
+        {
+          "anchored_to_restrained_dof": true,
+          "component_index": 1041,
+          "distinct_node_count": 2,
+          "dof_labels": [
+            "Dx",
+            "Dy",
+            "Rx",
+            "Ry"
+          ],
+          "free_equation_count": 8,
+          "global_dof_head": [
+            14628,
+            14629,
+            14631,
+            14632,
+            50604,
+            50605,
+            50607,
+            50608
+          ],
+          "node_id_head": [
+            2439,
+            8450
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 16
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 1,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            551,
+            26165,
+            26171,
+            67331
+          ],
+          "node_id_head": [
+            92,
+            4361,
+            4362,
+            11237
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 2,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            557,
+            26177,
+            26183,
+            67337
+          ],
+          "node_id_head": [
+            93,
+            4363,
+            4364,
+            11238
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 3,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            563,
+            26189,
+            26195,
+            67343
+          ],
+          "node_id_head": [
+            94,
+            4365,
+            4366,
+            11239
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 4,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            569,
+            26201,
+            26207,
+            67349
+          ],
+          "node_id_head": [
+            95,
+            4367,
+            4368,
+            11240
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 5,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            575,
+            26213,
+            26219,
+            67355
+          ],
+          "node_id_head": [
+            96,
+            4369,
+            4370,
+            11241
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 6,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            581,
+            26225,
+            26231,
+            67361
+          ],
+          "node_id_head": [
+            97,
+            4371,
+            4372,
+            11242
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 7,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            587,
+            26237,
+            26243,
+            67367
+          ],
+          "node_id_head": [
+            98,
+            4373,
+            4374,
+            11243
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 8,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            593,
+            26249,
+            26255,
+            67373
+          ],
+          "node_id_head": [
+            99,
+            4375,
+            4376,
+            11244
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 9,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            599,
+            26261,
+            26267,
+            67379
+          ],
+          "node_id_head": [
+            100,
+            4377,
+            4378,
+            11245
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 10,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            605,
+            26273,
+            26279,
+            67385
+          ],
+          "node_id_head": [
+            101,
+            4379,
+            4380,
+            11246
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 11,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            611,
+            26285,
+            26291,
+            67391
+          ],
+          "node_id_head": [
+            102,
+            4381,
+            4382,
+            11247
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 12,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            617,
+            26297,
+            26303,
+            67397
+          ],
+          "node_id_head": [
+            103,
+            4383,
+            4384,
+            11248
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 13,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            623,
+            26309,
+            26315,
+            67403
+          ],
+          "node_id_head": [
+            104,
+            4385,
+            4386,
+            11249
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        },
+        {
+          "anchored_to_restrained_dof": false,
+          "component_index": 14,
+          "distinct_node_count": 4,
+          "dof_labels": [
+            "Rz"
+          ],
+          "free_equation_count": 4,
+          "global_dof_head": [
+            629,
+            26321,
+            26327,
+            67409
+          ],
+          "node_id_head": [
+            105,
+            4387,
+            4388,
+            11250
+          ],
+          "reference_load_inf_n": 0.0,
+          "restrained_coupling_nnz": 0
+        }
+      ],
+      "free_graph_loaded_component_count": 1,
+      "free_graph_unanchored_component_count": 2167,
+      "free_graph_unanchored_loaded_component_count": 0,
+      "free_graph_unanchored_loaded_components": [],
+      "unit_load_active_dof_count": 78252,
+      "unit_load_free_dof_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+      "unit_load_free_equation_count": 70560,
+      "unit_load_tangent_nnz": 1384452,
+      "unit_only_free_equation_count": 0,
+      "unit_only_free_global_dof_head": [],
+      "zero_only_free_equation_count": 0,
+      "zero_only_free_global_dof_head": [],
+      "zero_state_active_dof_count": 78252,
+      "zero_state_external_force_inf_n": 0.0,
+      "zero_state_free_dof_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+      "zero_state_free_equation_count": 70560,
+      "zero_state_operator": {
+        "coupled_stiffness_nnz": 1384452,
+        "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+        "frame_equilibrium_meta": {
+          "local_axis_max_abs_angle_deg": 270.0,
+          "local_axis_roll_transform_applied_count": 150,
+          "material_usage_head": {
+            "1": 2108,
+            "2": 1692,
+            "3": 1687,
+            "5": 6,
+            "26": 9,
+            "27": 9,
+            "28": 14,
+            "29": 17,
+            "30": 15,
+            "31": 10
+          },
+          "real_section_material_coverage_pct": 98.58219669777459,
+          "real_section_material_element_count": 5493,
+          "section_usage_head": {
+            "4": 448,
+            "6": 200,
+            "29": 138,
+            "44": 76,
+            "48": 34,
+            "93": 56,
+            "248": 58,
+            "256": 38,
+            "1053": 84,
+            "1088": 3384
+          },
+          "total_gravity_n": 144988968.40598,
+          "unique_material_count": 11,
+          "unique_section_count": 182
+        },
+        "frame_equilibrium_stiffness_nnz": 691920,
+        "newton_tangent_model": "equilibrium_operator_consistent_with_force_based_f_int",
+        "shell_meta": {
+          "assembled_membrane_triangle_count": 14120,
+          "assembled_triangle_count": 14120,
+          "include_membrane": true,
+          "material_tangent_override_enabled": false,
+          "material_tangent_override_surface_element_count": 0,
+          "material_tangent_reduction_surface_element_count": 0,
+          "max_material_tangent_ratio": 1.0,
+          "min_material_tangent_ratio": 1.0,
+          "pressure_load_filter_enabled": true,
+          "pressure_loaded_triangle_count": 0,
+          "pressure_suppressed_triangle_count": 14120,
+          "shell_tangent_model": "mindlin_cst_bending_drilling_plus_cst_membrane",
+          "skipped_degenerate_triangle_count": 0,
+          "source_plate_thickness_coverage_count": 7152,
+          "source_plate_thickness_coverage_pct": 100.0,
+          "source_thickness_table_count": 25,
+          "surface_element_count": 7152,
+          "surface_material_coverage_pct": 96.33668903803132,
+          "surface_node_count": 7894,
+          "surface_quad_count": 6968,
+          "surface_stiffness_nnz": 1901664,
+          "surface_total_area_m2": 11404.192103423085,
+          "surface_tri_count": 184,
+          "thickness_max_m": 0.85,
+          "thickness_min_m": 0.140625,
+          "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+          "unique_surface_material_count": 20,
+          "unique_surface_section_count": 15
+        },
+        "shell_stiffness_nnz": 1901664,
+        "spring_stiffness_nnz": 40608,
+        "stiffness_unit_audit": {
+          "claim_boundary": "Diagonal audit only; it does not prove unit conversion correctness but flags solver-hostile stiffness scale separation across coupled components.",
+          "cross_component_diag_max_ratio": 691921363756394.2,
+          "imbalance_ratio_threshold": 100000000.0,
+          "per_component": {
+            "frame": {
+              "diag_abs_max": 691921363756394.2,
+              "diag_abs_mean": 141972227648.43234,
+              "diag_abs_median": 22769.172589384318,
+              "diag_abs_min": 2197.75238651581,
+              "free_diag_count": 70560,
+              "nonzero_diag_count": 43086,
+              "unit": "N_per_m_or_Nm_per_rad"
+            },
+            "shell": {
+              "diag_abs_max": 936561378488.6742,
+              "diag_abs_mean": 22775105512.83593,
+              "diag_abs_median": 6701456070.4574375,
+              "diag_abs_min": 411.94743221423107,
+              "free_diag_count": 70560,
+              "nonzero_diag_count": 44988,
+              "unit": "N_per_m_or_Nm_per_rad"
+            },
+            "spring": {
+              "diag_abs_max": 1000000000.0,
+              "diag_abs_mean": 166700000.5,
+              "diag_abs_median": 50000.5,
+              "diag_abs_min": 1.0,
+              "free_diag_count": 70560,
+              "nonzero_diag_count": 20304,
+              "unit": "N_per_m_or_Nm_per_rad"
+            }
+          },
+          "unit_consistency_warning": true
+        }
+      },
+      "zero_state_tangent_nnz": 1384452,
+      "zero_tangent_on_unit_map_nonpositive_diagonal_count": 0,
+      "zero_tangent_on_unit_map_zero_diagonal_count": 0,
+      "zero_tangent_on_unit_map_zero_row_count": 0,
+      "zero_tangent_structural_rank": 70560,
+      "zero_tangent_structural_rank_deficiency": 0
+    }
+  },
+  "artifacts": {
+    "full_unit_predictor_vector": "implementation/phase1/release_evidence/productization/g1_mgt_live_full_unit_predictor_free_displacement.f64le",
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_load_coupled_arc_length_adapter_receipt.json",
+    "schema": "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/g1_mgt_load_coupled_arc_length_adapter_summary.json"
+  },
+  "blockers_remaining": [
+    "source_commit_exact_replay_not_claimed_for_dirty_worktree",
+    "current_direct_probe_replay_not_executed_by_adapter_receipt_builder",
+    "historical_checkpoint_reference_load_contract_not_proven_live",
+    "frame_source_material_property_binding_incomplete",
+    "initial_checkpoint_physical_residual_gate_failed",
+    "current_source_diverges_from_stored_direct_residual_receipt",
+    "stored_direct_residual_receipt_missing_source_commit_or_checksums",
+    "initial_checkpoint_not_required_to_satisfy_arc_length_residual_gate",
+    "full_arc_length_continuation_not_executed",
+    "large_vector_binary_trace_not_connected",
+    "engine_v2_production_matrix_free_krylov_not_connected",
+    "material_state_commit_rollback_not_connected",
+    "production_rocm_hip_nonlinear_parity_not_verified",
+    "g1_full_load_checkpoint_not_created"
+  ],
+  "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+  "claim_boundary": "This adapter evaluates the real MGT frame/shell/spring physical residual against the complete authored LIVE nodal and uniform global-Z plate-face load vector at one retained checkpoint, then audits its load derivative, zero-state free map, and sparse-predictor preflight. It does not establish that the retained historical checkpoint was generated under LIVE, run a full continuation path, connect material-state commit/rollback, use Engine v2 production Krylov or ROCm/HIP, create a load-1.0 checkpoint, or close G1.",
+  "claims": {
+    "actual_mgt_frame_shell_spring_residual_adapter_evaluated": true,
+    "actual_mgt_semantic_load_case_consumed": true,
+    "all_frame_source_material_properties_resolved": false,
+    "authoritative_element_connectivity_consumed": true,
+    "engine_v2_production_matrix_free_krylov": false,
+    "full_arc_length_continuation": false,
+    "full_unit_semantic_live_predictor_binary_artifact": true,
+    "g1_full_building_closure": false,
+    "initial_checkpoint_physical_residual_gate": false,
+    "initial_state_component_breakdown_recorded": true,
+    "large_vector_binary_trace": false,
+    "load_1p0_checkpoint": false,
+    "load_factor_coupled_residual_and_derivative_audited": true,
+    "material_state_commit_rollback": false,
+    "production_rocm_hip_nonlinear_parity": false,
+    "source_material_properties_consumed": true,
+    "state_invariant_linear_reference_tangent_bound": true,
+    "stored_direct_residual_receipt_equivalence": false,
+    "stored_direct_residual_receipt_replay_provenance_complete": false,
+    "two_step_centered_tangent_action_audited": true,
+    "zero_state_sparse_direct_predictor_contract": true,
+    "zero_to_unit_fixed_free_map_compatible": true
+  },
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_closure_pass": false,
+  "generated_at": "2026-07-19T01:50:12.434869+00:00",
+  "initial_state_audit": {
+    "blockers_remaining": [
+      "initial_checkpoint_not_required_to_satisfy_arc_length_residual_gate",
+      "full_arc_length_continuation_not_executed",
+      "large_vector_binary_trace_not_connected",
+      "engine_v2_production_matrix_free_krylov_not_connected",
+      "material_state_commit_rollback_not_connected",
+      "production_rocm_hip_nonlinear_parity_not_verified",
+      "g1_full_load_checkpoint_not_created"
+    ],
+    "claim_boundary": "This adapter evaluates the real MGT frame/shell/spring physical residual against the complete authored LIVE nodal and uniform global-Z plate-face load vector at one retained checkpoint, then audits its load derivative, zero-state free map, and sparse-predictor preflight. It does not establish that the retained historical checkpoint was generated under LIVE, run a full continuation path, connect material-state commit/rollback, use Engine v2 production Krylov or ROCm/HIP, create a load-1.0 checkpoint, or close G1.",
+    "claims": {
+      "actual_mgt_load_derivative_evaluated": true,
+      "actual_mgt_residual_adapter_evaluated": true,
+      "actual_mgt_tangent_action_evaluated": true,
+      "engine_v2_production_krylov": false,
+      "full_arc_length_continuation": false,
+      "g1_full_building_closure": false,
+      "material_state_commit_rollback": false,
+      "production_rocm_hip_nonlinear_parity": false
+    },
+    "contract_pass": true,
+    "equation_count": 70560,
+    "load_difference_step": 0.1,
+    "load_factor": 0.656,
+    "maximum_negative_load_derivative_error_kn": 1.818401074160647e-08,
+    "maximum_tangent_step_comparison_error_kn": 7.275957614183426e-05,
+    "negative_load_derivative_absolute_tolerance_kn": 1e-06,
+    "negative_load_derivative_gate_passed": true,
+    "negative_load_derivative_inf_norm_kn": 179.45819249999968,
+    "negative_load_derivative_relative_error": 1.0132728123630522e-10,
+    "negative_load_derivative_relative_tolerance": 1e-08,
+    "promotes_g1_closure": false,
+    "residual_equilibrium_gate_passed": false,
+    "residual_equilibrium_gate_required_by_adapter_audit": false,
+    "residual_equilibrium_tolerance_kn": 1e-06,
+    "residual_finite": true,
+    "residual_inf_norm_kn": 1277024522.7876618,
+    "schema_version": "g1-mgt-load-coupled-adapter-audit.v1",
+    "status": "partial",
+    "tangent_action_inf_norm_kn": 21537185.127563134,
+    "tangent_difference_step_m": 1e-07,
+    "tangent_direction_nonzero_count": 16,
+    "tangent_reference_step_m": 2e-07,
+    "tangent_step_comparison_gate_passed": true,
+    "tangent_step_comparison_relative_error": 3.3783233839930677e-12
+  },
+  "input_checksums": {
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
+    "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
+    "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
+    "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
+    "implementation/phase1/mgt_shell_load_path.py": "sha256:3518c70ddbaf5bf3e4fa71a3ebedd84304ebe674315bb599c5d1b3cbeb5d5863",
+    "implementation/phase1/mgt_state_updated_frame_axial_geometry.py": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
+    "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
+    "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_probe.json": "sha256:f3cc02959943f08b62f68056861f9918fe22112ec177fd4ad31dda762777c4b5",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py": "sha256:a6598d5613aefccaa9a6eda7c26adaba2cf4406dd3ea0a4acb57f32fe0870603",
+    "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:3f3b8033f63dccf39848e5f11c34d45b9fc1b35c06014b9376128b86b1c47e9f",
+    "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
+    "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
+    "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:508bd5999af421d421e828db6a69e8baea851167a97ac89f20ecdcd73e1356c9",
+    "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
+    "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
+    "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json": "sha256:609f8bcfb286bc5c1a4464cd1738121c82e59585638815133c93d7f056172658",
+    "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:42642fa2b9997bac8ba8a1aa76de3211749352aae46ee8e2bb7a545c3032cdda",
+    "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
+    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:9857bee3bd4b418e6356f3826b41735a0def626bb3f20748397c02713ffb9eda",
+    "tests/test_mgt_physical_residual_assembly.py": "sha256:07956e81f561e06af794e1808e3398bb8c13e54c1d0938456fd2f560fea16982",
+    "tests/test_mgt_semantic_load_assembly.py": "sha256:8349d6213e690ce12d33375a18f278a145c52eb48e63b386208f13ecadf9f968",
+    "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
+    "tests/test_parse_mgt_section_material_properties.py": "sha256:d7859a725762191c56523c0cfed9aabd13ed7ec5b2cdca275ba2a10d7a472cfa"
+  },
+  "schema_version": "g1-mgt-load-coupled-arc-length-adapter-receipt.v1",
+  "source_commit_exact_replay_claim": false,
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_tree_state": "working_tree_with_uncommitted_goal_changes",
+  "status": "partial",
+  "stored_receipt_comparison": {
+    "absolute_difference_n": 1277024480032.994,
+    "comparison_load_factor": 0.656,
+    "current_adapter_initial_residual_inf_n": 1277024522787.6619,
+    "current_adapter_load_factor": 0.656,
+    "current_to_stored_ratio": 29868657.172590453,
+    "equivalence_absolute_tolerance_n": 4.275466805918372e-05,
+    "load_factor_matches": true,
+    "relative_difference_to_stored": 29868656.172590457,
+    "stored_base_direct_residual_inf_n": 42754.66805918372,
+    "stored_receipt_equivalent_to_current_adapter": false,
+    "stored_receipt_generated_at": "2026-06-04T07:16:56.554987+00:00",
+    "stored_receipt_input_checksums_present": false,
+    "stored_receipt_load_factor": 0.656,
+    "stored_receipt_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_probe.json",
+    "stored_receipt_replay_provenance_complete": false,
+    "stored_receipt_sha256": "sha256:f3cc02959943f08b62f68056861f9918fe22112ec177fd4ad31dda762777c4b5",
+    "stored_receipt_source_commit_sha": null,
+    "stored_receipt_source_commit_sha_present": false
+  }
+}

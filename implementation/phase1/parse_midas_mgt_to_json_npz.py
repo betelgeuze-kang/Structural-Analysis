@@ -453,6 +453,32 @@ def _parse_static_load_cases(rows: list[str]) -> list[dict]:
     return cases
 
 
+def _parse_unit_system(rows: list[str]) -> dict[str, object]:
+    """Preserve the authored MGT unit tuple without guessing conversions."""
+
+    for row in rows:
+        toks = _split_csv_like(row)
+        if len(toks) < 2:
+            continue
+        normalized = [str(token).strip().upper() for token in toks]
+        return {
+            "force": normalized[0],
+            "length": normalized[1],
+            "heat": normalized[2] if len(normalized) >= 3 else "",
+            "temperature": normalized[3] if len(normalized) >= 4 else "",
+            "raw_tokens": normalized,
+            "source": "MGT:*UNIT",
+        }
+    return {
+        "force": "",
+        "length": "",
+        "heat": "",
+        "temperature": "",
+        "raw_tokens": [],
+        "source": "MGT:*UNIT:missing",
+    }
+
+
 def _parse_loadcase_rows(rows: list[str]) -> list[dict]:
     out: list[dict] = []
     for row in rows:
@@ -1271,17 +1297,66 @@ def _parse_pressure_rows(rows: list[str], element_ids: set[int]) -> list[dict]:
         if not elems:
             continue
         numeric_tail = [float(v) for v in (_as_float(tok) for tok in toks[4:]) if v is not None]
-        out.append(
-            {
-                "element_ids": elems,
-                "command": str(toks[1]).strip().upper() if len(toks) >= 2 else "",
-                "element_type": str(toks[2]).strip().upper() if len(toks) >= 3 else "",
-                "load_type": str(toks[3]).strip().upper() if len(toks) >= 4 else "",
-                "tag_tokens": [str(tok).strip() for tok in toks[4:] if _as_float(tok) is None][:6],
-                "numeric_values": numeric_tail,
-                "raw_token_count": int(len(toks)),
-            }
-        )
+        command = str(toks[1]).strip().upper() if len(toks) >= 2 else ""
+        element_type = str(toks[2]).strip().upper() if len(toks) >= 3 else ""
+        load_type = str(toks[3]).strip().upper() if len(toks) >= 4 else ""
+        parsed: dict[str, object] = {
+            "element_ids": elems,
+            "command": command,
+            "element_type": element_type,
+            "load_type": load_type,
+            "tag_tokens": [str(tok).strip() for tok in toks[4:] if _as_float(tok) is None][:6],
+            "numeric_values": numeric_tail,
+            "raw_token_count": int(len(toks)),
+        }
+        if element_type == "PLATE" and load_type == "FACE":
+            direction_vector = [
+                _as_float(toks[index]) if len(toks) > index else None
+                for index in (5, 6, 7)
+            ]
+            corner_pressures = [
+                _as_float(toks[index]) if len(toks) > index else None
+                for index in (10, 11, 12, 13)
+            ]
+            parsed.update(
+                {
+                    "direction": (
+                        str(toks[4]).strip().upper()
+                        if len(toks) >= 5
+                        else ""
+                    ),
+                    "direction_vector": [
+                        float(value) if value is not None else None
+                        for value in direction_vector
+                    ],
+                    "projected": (
+                        str(toks[8]).strip().upper()
+                        if len(toks) >= 9
+                        else ""
+                    ),
+                    "uniform_pressure": (
+                        float(value)
+                        if len(toks) >= 10
+                        and (value := _as_float(toks[9])) is not None
+                        else None
+                    ),
+                    "corner_pressures": [
+                        float(value) if value is not None else None
+                        for value in corner_pressures
+                    ],
+                    "group": (
+                        str(toks[14]).strip()
+                        if len(toks) >= 15
+                        else ""
+                    ),
+                    "pressure_load_key": (
+                        str(toks[15]).strip()
+                        if len(toks) >= 16
+                        else ""
+                    ),
+                }
+            )
+        out.append(parsed)
     return out
 
 
@@ -4406,6 +4481,7 @@ def main() -> None:
         secs = _parse_sections_table(sections.get("SECTION", []))
         constraint_info = _parse_constraint_rows(sections.get("CONSTRAINT", []), set(raw_nodes.keys()))
         elastic_links = _parse_elastic_links(sections.get("ELASTICLINK", []), set(raw_nodes.keys()))
+        unit_system = _parse_unit_system(sections.get("UNIT", []))
         static_load_cases = _parse_static_load_cases(sections.get("STLDCASE", []))
         contextual_loads = _parse_contextual_load_blocks(
             blocks=blocks,
@@ -4622,8 +4698,10 @@ def main() -> None:
                     "coarsening": coarsening,
                     "constraint_summary": constraint_info,
                     "diagnostics": parser_diagnostics,
+                    "unit_system": unit_system,
                 },
                 "model": {
+                    "units": unit_system,
                     "nodes": [{"id": int(nid), "x": float(x), "y": float(y), "z": float(z)} for nid, (x, y, z) in sorted(nodes.items())],
                     "elements": elems,
                     "materials": mats,

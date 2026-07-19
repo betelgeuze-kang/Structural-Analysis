@@ -53,7 +53,7 @@ Current non-promoting readiness summary:
 
 | Topic | Use | Avoid until closed |
 | --- | --- | --- |
-| Developer Preview | `Developer Preview candidate`, `deliverables 10/10`, `final gates 6/9` | `Developer Preview ready` |
+| Developer Preview | `Developer Preview candidate`, `deliverables 10/10`, `final gates 5/9` | `Developer Preview ready` |
 | G1 | `direct residual terminal slice ready`, `full-load lane open` | `G1 closed`, `full-load solved` |
 | Commercial | `engineer-in-loop assist`, `workstation delivery preparation` | `independent commercial solver ready` |
 | GPU/HIP | `remediation path identified` | `production HIP solver truth ready` |
@@ -66,7 +66,7 @@ Current non-promoting readiness summary:
 Recommended process:
 
 1. Confirm `product_readiness_snapshot.json` still reports release readiness as blocked.
-2. Confirm Developer Preview final gates are still `6/9` before using the current block.
+2. Confirm Developer Preview final gates are still `5/9` before using the current block.
 3. Confirm G1 full-load/HIP/Newton lane is still open before using the G1 wording.
 4. Insert the README block into `README.md` or replace equivalent readiness text.
 5. Insert the current-state block into `docs/commercialization-gap-current-state.md`.

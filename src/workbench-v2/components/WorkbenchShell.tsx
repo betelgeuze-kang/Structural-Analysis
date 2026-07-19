@@ -38,20 +38,25 @@ export function WorkbenchShell({
             <StateChip state={dataModeChipState(dataMode)} srLabel="Data mode" />
           </div>
         </div>
-        <div className="wb2-mode-switch" role="group" aria-label="Data provider">
-          <span className="wb2-mode-label">Provider</span>
-          {(['demo', 'live'] as ProviderMode[]).map((m) => (
-            <button
-              key={m}
-              type="button"
-              className={`wb2-mode-btn${providerMode === m ? ' is-active' : ''}`}
-              aria-pressed={providerMode === m}
-              data-wb2-provider={m}
-              onClick={() => onProviderModeChange(m)}
-            >
-              {m === 'demo' ? 'Demo' : 'Live'}
-            </button>
-          ))}
+        <div className="wb2-header-actions">
+          <div className="wb2-mode-switch" role="group" aria-label="Data provider">
+            <span className="wb2-mode-label">Provider</span>
+            {(['demo', 'live'] as ProviderMode[]).map((m) => (
+              <button
+                key={m}
+                type="button"
+                className={`wb2-mode-btn${providerMode === m ? ' is-active' : ''}`}
+                aria-pressed={providerMode === m}
+                data-wb2-provider={m}
+                onClick={() => onProviderModeChange(m)}
+              >
+                {m === 'demo' ? 'Demo' : 'Live'}
+              </button>
+            ))}
+          </div>
+          <a className="wb2-legacy-link" href="#/legacy" data-wb2-legacy-link>
+            Legacy desk
+          </a>
         </div>
       </header>
 

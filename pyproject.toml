@@ -21,6 +21,7 @@ ml = [
 ]
 dev = [
   "beautifulsoup4>=4.12",
+  "cryptography>=42",
   "h5py>=3.10",
   "pypdf>=4.0",
   "pytest>=8.0",

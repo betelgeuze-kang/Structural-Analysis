@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/shallow_arch_arc_length_v1.schema.json",
+  "title": "Phase 2 shallow-arch scalar arc-length benchmark v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "contract_pass",
+    "case_id",
+    "analysis_type",
+    "truth_basis",
+    "solver_result",
+    "verification",
+    "exact_first_limit_point",
+    "computed_first_limit_bracket",
+    "consistent_tangent_finite_difference_rows",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase2-shallow-arch-arc-length-benchmark.v1"
+    },
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "case_id": {"type": "string", "minLength": 1},
+    "analysis_type": {
+      "const": "scalar_spherical_arc_length_continuation"
+    },
+    "truth_basis": {
+      "const": "exact_two_bar_corotational_truss_equilibrium"
+    },
+    "solver_result": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "terminal_reason",
+        "case_id",
+        "equilibrium_formula",
+        "constraint_formula",
+        "config",
+        "initial_checkpoint",
+        "final_checkpoint",
+        "checkpoints",
+        "attempts",
+        "metrics"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-scalar-arc-length.v1"
+        },
+        "status": {"enum": ["ready", "blocked"]},
+        "terminal_reason": {"type": "string", "minLength": 1},
+        "case_id": {"type": "string", "minLength": 1},
+        "equilibrium_formula": {"type": "string", "minLength": 1},
+        "constraint_formula": {"type": "string", "minLength": 1},
+        "config": {"type": "object"},
+        "initial_checkpoint": {"$ref": "#/$defs/checkpoint"},
+        "final_checkpoint": {"$ref": "#/$defs/checkpoint"},
+        "checkpoints": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/checkpoint"}
+        },
+        "attempts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "object"}
+        },
+        "metrics": {
+          "type": "object",
+          "required": [
+            "contract_pass",
+            "target_displacement_reached",
+            "accepted_step_count",
+            "rejected_step_count",
+            "rollback_exact",
+            "fallback_count",
+            "regularization_count",
+            "consistent_tangent_sign_change_observed",
+            "descending_load_branch_observed",
+            "negative_load_branch_observed",
+            "rehardening_branch_observed",
+            "claim_boundary"
+          ]
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path_gate_passed",
+        "limit_point_gate_passed",
+        "tangent_finite_difference_gate_passed",
+        "rollback_evidence_passed",
+        "checkpoint_restart_exact",
+        "deterministic_replay_exact",
+        "restart_checkpoint_state_hash",
+        "final_checkpoint_state_hash",
+        "restarted_final_checkpoint_state_hash"
+      ],
+      "properties": {
+        "path_gate_passed": {"type": "boolean"},
+        "limit_point_gate_passed": {"type": "boolean"},
+        "tangent_finite_difference_gate_passed": {"type": "boolean"},
+        "rollback_evidence_passed": {"type": "boolean"},
+        "checkpoint_restart_exact": {"type": "boolean"},
+        "deterministic_replay_exact": {"type": "boolean"},
+        "restart_checkpoint_state_hash": {"$ref": "#/$defs/sha256"},
+        "final_checkpoint_state_hash": {"$ref": "#/$defs/sha256"},
+        "restarted_final_checkpoint_state_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "exact_first_limit_point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["displacement_m", "load_kn"],
+      "properties": {
+        "displacement_m": {"type": "number"},
+        "load_kn": {"type": "number"}
+      }
+    },
+    "computed_first_limit_bracket": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "below_step_index",
+        "below_displacement_m",
+        "below_load_kn",
+        "above_step_index",
+        "above_displacement_m",
+        "above_load_kn",
+        "first_local_maximum_step_index",
+        "first_local_maximum_load_kn",
+        "first_limit_load_relative_error",
+        "relative_tolerance",
+        "contract_pass"
+      ],
+      "properties": {
+        "below_step_index": {"type": "integer", "minimum": 0},
+        "below_displacement_m": {"type": "number"},
+        "below_load_kn": {"type": "number"},
+        "above_step_index": {"type": "integer", "minimum": 0},
+        "above_displacement_m": {"type": "number"},
+        "above_load_kn": {"type": "number"},
+        "first_local_maximum_step_index": {"type": "integer", "minimum": 0},
+        "first_local_maximum_load_kn": {"type": "number"},
+        "first_limit_load_relative_error": {"type": "number", "minimum": 0},
+        "relative_tolerance": {"type": "number", "minimum": 0},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "consistent_tangent_finite_difference_rows": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "displacement_m",
+          "finite_difference_step_m",
+          "consistent_tangent_kn_per_m",
+          "finite_difference_tangent_kn_per_m",
+          "absolute_error_kn_per_m",
+          "allowed_error_kn_per_m",
+          "contract_pass"
+        ],
+        "properties": {
+          "displacement_m": {"type": "number"},
+          "finite_difference_step_m": {"type": "number", "exclusiveMinimum": 0},
+          "consistent_tangent_kn_per_m": {"type": "number"},
+          "finite_difference_tangent_kn_per_m": {"type": "number"},
+          "absolute_error_kn_per_m": {"type": "number", "minimum": 0},
+          "allowed_error_kn_per_m": {"type": "number", "minimum": 0},
+          "contract_pass": {"type": "boolean"}
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scalar_arc_length_path_following",
+        "shallow_arch_limit_point_crossing",
+        "failed_step_rollback",
+        "checkpoint_restart",
+        "multi_dof_frame_shell_arc_length",
+        "lee_frame_snapthrough",
+        "material_geometric_coupling",
+        "production_rocm_hip_parity",
+        "geometric_nonlinear_benchmark_breadth"
+      ],
+      "properties": {
+        "scalar_arc_length_path_following": {"type": "boolean"},
+        "shallow_arch_limit_point_crossing": {"type": "boolean"},
+        "failed_step_rollback": {"type": "boolean"},
+        "checkpoint_restart": {"type": "boolean"},
+        "multi_dof_frame_shell_arc_length": {"type": "boolean"},
+        "lee_frame_snapthrough": {"type": "boolean"},
+        "material_geometric_coupling": {"type": "boolean"},
+        "production_rocm_hip_parity": {"type": "boolean"},
+        "geometric_nonlinear_benchmark_breadth": {"type": "boolean"}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "case_id",
+        "step_index",
+        "displacement_m",
+        "load_kn",
+        "previous_tangent_displacement",
+        "previous_tangent_load_kn",
+        "current_arc_length_m",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-scalar-arc-length-checkpoint.v1"
+        },
+        "case_id": {"type": "string", "minLength": 1},
+        "step_index": {"type": "integer", "minimum": 0},
+        "displacement_m": {"type": "number"},
+        "load_kn": {"type": "number"},
+        "previous_tangent_displacement": {"type": ["number", "null"]},
+        "previous_tangent_load_kn": {"type": ["number", "null"]},
+        "current_arc_length_m": {"type": "number", "exclusiveMinimum": 0},
+        "state_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

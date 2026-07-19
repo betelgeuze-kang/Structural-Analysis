@@ -410,7 +410,7 @@ def validate_state_ir(
 
 
 def validate_state_ir_manifest(payload: Any) -> Mapping[str, Any]:
-    """Reject unknown fields, wrong JSON types, and stale state hashes."""
+    """Reject malformed lifecycle semantics, vector receipts, and stale hashes."""
 
     errors = sorted(
         _state_schema_validator().iter_errors(payload),
@@ -422,6 +422,7 @@ def validate_state_ir_manifest(payload: Any) -> Mapping[str, Any]:
         raise StateIRError("state_schema_invalid", path or "/", error.message)
     if not isinstance(payload, Mapping):  # pragma: no cover - schema invariant
         raise StateIRError("state_manifest_type_invalid", "/", "Expected an object.")
+    _validate_state_ir_manifest_semantics(payload)
     without_hash = dict(payload)
     claimed_hash = without_hash.pop("state_hash")
     try:
@@ -435,6 +436,88 @@ def validate_state_ir_manifest(payload: Any) -> Mapping[str, Any]:
             "Manifest state hash does not match its canonical payload.",
         )
     return payload
+
+
+def _validate_state_ir_manifest_semantics(payload: Mapping[str, Any]) -> None:
+    role = str(payload["role"])
+    epoch = int(payload["epoch"])
+    parent_state_hash = payload["parent_state_hash"]
+    load_step = int(payload["step"]["load_step"])
+    iteration = int(payload["step"]["iteration"])
+    load_factor = _require_finite(payload["load_factor"], "/load_factor")
+    time_s = _require_finite(payload["time_s"], "/time_s")
+    dof_count = int(payload["dof_count"])
+
+    if dof_count % len(STATE_IR_DOF_COMPONENTS) != 0:
+        raise StateIRError(
+            "dof_count_invalid",
+            "/dof_count",
+            "Global DOF count must be divisible by six.",
+        )
+    if parent_state_hash == payload["state_hash"]:
+        raise StateIRError(
+            "state_parent_cycle",
+            "/parent_state_hash",
+            "State cannot parent itself.",
+        )
+    if epoch == 0:
+        if role != "committed" or parent_state_hash is not None:
+            raise StateIRError(
+                "initial_state_lineage_invalid",
+                "/parent_state_hash",
+                "Epoch zero must be an unparented committed state.",
+            )
+        if load_step != 0 or iteration != 0 or load_factor != 0.0 or time_s != 0.0:
+            raise StateIRError(
+                "initial_state_coordinates_invalid",
+                "/step",
+                "Epoch zero must use zero step, iteration, factor, and time.",
+            )
+    elif parent_state_hash is None:
+        raise StateIRError(
+            "state_parent_missing",
+            "/parent_state_hash",
+            "Every non-initial state must identify its parent snapshot.",
+        )
+    if role == "trial" and epoch == 0:
+        raise StateIRError(
+            "trial_epoch_invalid", "/epoch", "A trial epoch must be positive."
+        )
+
+    kinematics = payload["kinematics"]
+    arrays = {
+        "displacement": _immutable_f64_vector(
+            kinematics["displacement_si"],
+            dof_count,
+            "/kinematics/displacement_si",
+        ),
+        "velocity": _immutable_f64_vector(
+            kinematics["velocity_si"], dof_count, "/kinematics/velocity_si"
+        ),
+        "acceleration": _immutable_f64_vector(
+            kinematics["acceleration_si"],
+            dof_count,
+            "/kinematics/acceleration_si",
+        ),
+    }
+    if epoch == 0 and any(np.any(array != 0.0) for array in arrays.values()):
+        raise StateIRError(
+            "initial_state_nonzero",
+            "/kinematics",
+            "The initial linear-static state must contain zero vectors.",
+        )
+
+    expected_vector_hashes = {
+        name: array_data_hash(array) for name, array in arrays.items()
+    }
+    expected_vector_hashes["constitutive"] = _CONSTITUTIVE_HASH
+    for name, expected_hash in expected_vector_hashes.items():
+        if payload["vector_hashes"][name] != expected_hash:
+            raise StateIRError(
+                "vector_hash_mismatch",
+                f"/vector_hashes/{name}",
+                "Claimed vector hash does not match canonical FP64 bytes.",
+            )
 
 
 def _build_state(

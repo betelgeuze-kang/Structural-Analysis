@@ -1,0 +1,175 @@
+{
+  "artifacts": {
+    "action_vector": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_action.f64le",
+    "hip_source": "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp",
+    "host_parser_receipt": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json",
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_hardware_parity_receipt.json",
+    "runner": "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py",
+    "schema": "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json"
+  },
+  "blockers_remaining": [
+    "device_resident_current_tangent_fgmres_not_integrated",
+    "production_preconditioner_not_integrated_on_device",
+    "independent_gfx1100_hardware_receipt_not_attached",
+    "same_clean_source_commit_cross_device_not_verified",
+    "signed_hardware_receipt_not_attached",
+    "model_size_performance_sweep_not_executed",
+    "g1_full_building_closure_not_established"
+  ],
+  "case_id": "g1_actual_mgt_hip_current_tangent_hardware_parity",
+  "claim_boundary": "This receipt proves one actual 70,560-equation MGT current-tangent action for one declared state, load factor, and normalized direction on a local AMD Radeon RX 6900 XT gfx1030. The action used one kernel, no mid-action device-to-host transfer, and matches both the canonical CPU tolerance and the device-order CPU action bitwise. It does not establish an independent gfx1100 run, a clean exact-source cross-device receipt, device-resident FGMRES or preconditioning, a performance sweep, production readiness, or G1 closure.",
+  "claims": {
+    "actual_hardware_execution": true,
+    "actual_mgt_current_tangent_action_executed": true,
+    "actual_mgt_fixture_constructed": true,
+    "cpu_hip_numerical_parity": true,
+    "deterministic_free_row_schedule_executed": true,
+    "device_order_bitwise_parity": true,
+    "device_resident_current_tangent_fgmres": false,
+    "g1_full_building_closure": false,
+    "independent_gfx1100_hardware_execution": false,
+    "local_gfx1030_hardware_execution": true,
+    "mid_action_d2h_transfer_count_zero": true,
+    "performance": false,
+    "production_preconditioner_integration": false,
+    "single_kernel_invocation": true
+  },
+  "comparison": {
+    "actual_mgt_context": {
+      "actual_mgt_fixture_identity_pass": true,
+      "canonical_relative_max_error": 4.508122065356342e-17,
+      "canonical_scale_n_per_m": 1386386594992514.2,
+      "device_order_bitwise_match": true,
+      "equation_count": 70560,
+      "fixture_hash": "sha256:e1163543967ed51afb8db7a4fea0a684ef2e115543294f6073ab79a18060115d"
+    },
+    "generic_comparison": {
+      "action_data_hash": "sha256:9c2eb32c3e568252b0b1a5c3b9e2f8176df19f597742fe6d1439b5cb733a97ab",
+      "actual_hardware_execution_required_for_claim": true,
+      "actual_mgt_scale_claim": false,
+      "canonical_action_data_hash": "sha256:a4b5fd93cc47de5f86eb129d59d061b444d40e00fa2781a3a35e3b2cfcb2e8e0",
+      "canonical_cpu_max_abs_error_n_per_m": 0.0625,
+      "comparison_tolerance_n_per_m": 13863.865949925143,
+      "contract_pass": true,
+      "device_order_action_data_hash": "sha256:9c2eb32c3e568252b0b1a5c3b9e2f8176df19f597742fe6d1439b5cb733a97ab",
+      "device_order_cpu_max_abs_error_n_per_m": 0.0,
+      "production_performance_claim": false,
+      "profile": "engine-v2-cpu-hip-current-tangent-operator-parity.v1"
+    }
+  },
+  "contract_pass": true,
+  "contract_scope": "actual_mgt_single_state_direction_local_gfx1030_hardware_parity",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "fixture": {
+    "accumulation_profile": "reference_then_sorted_frame_then_sorted_geometry_sequential_fp64.v1",
+    "array_count": 21,
+    "binary_profile": "canonical_little_endian_mixed_numeric.v1",
+    "dimensions": {
+      "equation_count": 70560,
+      "frame_element_count": 5572,
+      "frame_incidence_count": 61494,
+      "geometry_element_count": 5572,
+      "geometry_incidence_count": 61494,
+      "global_dof_count": 78282,
+      "reference_nnz": 1262462
+    },
+    "execution_contract_hash": "sha256:586adf46e4ab752ce77d4495df657b21632a0646490adaef79e04c786bf5f5c5",
+    "execution_profile": "one_thread_per_free_row_reference_frame_geometry.v1",
+    "expected_kernel_invocation_count": 1,
+    "fixture_binary_ephemeral": true,
+    "fixture_binary_persisted": false,
+    "fixture_byte_length": 36123072,
+    "fixture_hash": "sha256:e1163543967ed51afb8db7a4fea0a684ef2e115543294f6073ab79a18060115d",
+    "load_factor": 1.0,
+    "operator_contract_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+    "parity_profile": "engine-v2-cpu-hip-current-tangent-operator-parity.v1",
+    "schedule_contract_hash": "sha256:28c279ec2c02123e179509db764536cf5de694c65ece634607e6fdac58313b8b",
+    "schedule_profile": "free_row_sorted_element_local_incidence.v1",
+    "schema_version": "engine-v2-hip-current-tangent-operator-fixture.v1"
+  },
+  "generated_at": "2026-07-19T04:01:15.517506+00:00",
+  "hardware_execution": {
+    "action_artifact": {
+      "byte_length": 564480,
+      "data_hash": "sha256:9c2eb32c3e568252b0b1a5c3b9e2f8176df19f597742fe6d1439b5cb733a97ab",
+      "dtype": "<f8",
+      "file_sha256": "sha256:9c2eb32c3e568252b0b1a5c3b9e2f8176df19f597742fe6d1439b5cb733a97ab",
+      "format": "canonical_little_endian_float64_vector.v1",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_action.f64le",
+      "persisted": true,
+      "shape": [
+        70560
+      ]
+    },
+    "actual_hardware": true,
+    "backend": "amd_rocm_hip",
+    "binary_byte_length": 56912,
+    "binary_sha256": "sha256:2b579ec5b651a5c7503318a9fe59efcf688d1690726f8bb3e51662de942e39d4",
+    "compiler": {
+      "path": "/opt/rocm-6.0.2/bin/hipcc",
+      "version_first_line": "HIP version: 6.0.32831-204d35d16",
+      "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
+    },
+    "device_name": "AMD Radeon RX 6900 XT",
+    "gcn_arch_name": "gfx1030",
+    "runtime_metadata": {
+      "accumulation_profile": "reference_then_sorted_frame_then_sorted_geometry_sequential_fp64.v1",
+      "blocking_d2h_synchronization_count": 1,
+      "cpu_backend": false,
+      "device_name": "AMD Radeon RX 6900 XT",
+      "equation_count": 70560,
+      "execution_profile": "one_thread_per_free_row_reference_frame_geometry.v1",
+      "gcn_arch_name": "gfx1030",
+      "kernel_invocation_count": 1,
+      "mid_action_d2h_transfer_count": 0,
+      "schema_version": "engine-v2-hip-current-tangent-operator-output.v1",
+      "status": "ok"
+    },
+    "runtime_output_hash": "sha256:f532b25d0596f6cbc076f1fcb9ed4791190770496fa211f3631bcf38a8427b18"
+  },
+  "host_parser_prerequisite": {
+    "architecture": "gfx1030",
+    "binary_byte_length": 56912,
+    "binary_sha256": "sha256:2b579ec5b651a5c7503318a9fe59efcf688d1690726f8bb3e51662de942e39d4",
+    "contract_pass": true,
+    "fixture_hash": "sha256:e1163543967ed51afb8db7a4fea0a684ef2e115543294f6073ab79a18060115d",
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json",
+    "receipt_hash": "sha256:7b7df9d1615293c43739e45b1accaa383a11056535c02b8bd23a136b7cc1d5fa",
+    "target_binary_identity_pass": true
+  },
+  "input_checksums": {
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
+    "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json": "sha256:063ee2f7543738c103bd370f5195395b91736e0473811afab08cfd52d9b50d26",
+    "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json": "sha256:a228aa6632d95640ed151b18d178cadf12eeb884e39400c9428a636eefd48df8",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:59b76bf3ff310021d7fe974c34fbb5f3619e1e3ff5b415543184191fc8611c97",
+    "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:c76c79d6b3c47bc6baa5522ff766bb37810e617a5d19682b05c4c20cd4bc04d2",
+    "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py": "sha256:27245fbff4bd679f8b095d3387cb8d585c4f23997ea130d2e51b64d0e27ad4d1",
+    "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
+    "src/structural_analysis/engine_v2_backends/__init__.py": "sha256:51f33964c3aec095bbf7dafa6eb8dedad1debbe8a4d36caeebff535733f7ebf8",
+    "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py": "sha256:11b2364da86bf40a8e20737f85ec30e21e4f4a141d605f5efbf0eb58d7683f7a",
+    "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json": "sha256:1d56e13e619e3c27d6f4fa1e263e3099742932bef943b90ce64b8a20428fc1cd",
+    "tests/test_engine_v2_hip_current_tangent_operator.py": "sha256:dfb8edf183b407c7502ee3c523b95483a1c8fea942d9deae57a45a3133ac287b",
+    "tests/test_engine_v2_hip_current_tangent_operator_runner.py": "sha256:8d580c84cb47ca8026bc4f529a81960dec92b13eb2e158a3604ba135a2914c12",
+    "tests/test_run_g1_mgt_hip_current_tangent_hardware_parity.py": "sha256:bc61b32e58904e72c8f428b06787cdc47f139ac68bb81e22da3c16432b90ef95"
+  },
+  "inputs": {
+    "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+    "checkpoint_sha256": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "direction_data_hash": "sha256:c240387fb39527236a859f5ea70740e007e445b53c66154c8b2c9ad761824044",
+    "direction_policy": "normalized_current_right_hand_side",
+    "load_factor": 1.0,
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "state_data_hash": "sha256:7da92568f855e09df91d4a561cf678c65bddd0cd2d161393aa548cafb316a58d",
+    "state_policy": "full_unit_zero_state_linear_predictor"
+  },
+  "receipt_hash": "sha256:b5632a9b197a8a3d8ece590f4dd69ce9b5271d560ca6c3caced0efe1664e0cd9",
+  "schema_version": "g1-mgt-hip-current-tangent-hardware-parity-receipt.v1",
+  "source_commit_exact_replay_claim": false,
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_tree_state": "working_tree_with_uncommitted_goal_changes",
+  "status": "partial"
+}

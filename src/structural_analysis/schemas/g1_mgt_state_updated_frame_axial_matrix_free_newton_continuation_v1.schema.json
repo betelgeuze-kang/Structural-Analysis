@@ -1,0 +1,1590 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/g1-mgt-state-updated-frame-axial-matrix-free-newton-continuation-v1.schema.json",
+  "title": "G1 actual-MGT state-updated frame axial matrix-free Newton continuation receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "diagnostic_execution_ready",
+    "readiness_pass",
+    "engineer_review_required",
+    "evidence_closure_pass",
+    "source_commit_sha",
+    "engine_version",
+    "source_commit_exact_replay_claim",
+    "source_tree_state",
+    "input_checksums",
+    "case_id",
+    "inputs",
+    "adapter_binding",
+    "linear_solver_config",
+    "matrix_free_operator_recurrence_binding_audit",
+    "continuation",
+    "restart_replay",
+    "strict_g1_gate_full_load_probe",
+    "local_quadratic_convergence_audit",
+    "iteration_limited_failure_rollback",
+    "adaptive_step_reduction_replay",
+    "final_vector_artifact",
+    "claims",
+    "blockers_remaining",
+    "artifacts",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "g1-mgt-state-updated-frame-axial-matrix-free-newton-continuation-receipt.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "diagnostic_execution_ready": {"type": "boolean"},
+    "readiness_pass": {"const": false},
+    "engineer_review_required": {"const": true},
+    "evidence_closure_pass": {"const": false},
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "engine_version": {"type": "string", "minLength": 1},
+    "source_commit_exact_replay_claim": {"const": false},
+    "source_tree_state": {
+      "const": "working_tree_with_uncommitted_goal_changes"
+    },
+    "input_checksums": {
+      "type": "object",
+      "minProperties": 15,
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "case_id": {
+      "const": "g1_real_mgt_state_updated_frame_axial_matrix_free_newton_continuation"
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mgt_path",
+        "mgt_sha256",
+        "checkpoint_npz",
+        "checkpoint_sha256",
+        "node_count",
+        "element_count",
+        "frame_element_count",
+        "global_dof_count",
+        "free_equation_count",
+        "semantic_load_case",
+        "initial_state_policy",
+        "target_load_factors"
+      ],
+      "properties": {
+        "mgt_path": {"type": "string", "minLength": 1},
+        "mgt_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_npz": {"type": "string", "minLength": 1},
+        "checkpoint_sha256": {"$ref": "#/$defs/sha256"},
+        "node_count": {"const": 13047},
+        "element_count": {"const": 12728},
+        "frame_element_count": {"const": 5572},
+        "global_dof_count": {"const": 78282},
+        "free_equation_count": {"const": 70560},
+        "semantic_load_case": {"const": "LIVE"},
+        "initial_state_policy": {"const": "zero_state"},
+        "target_load_factors": {
+          "const": [0.25, 0.5, 0.75, 1.0]
+        }
+      }
+    },
+    "adapter_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "material_analysis_property_binding",
+        "frame_source_property_coverage_audit",
+        "state_updated_frame_axial_geometry",
+        "residual_evaluation_contract",
+        "residual_parent_equivalence_audit",
+        "reference_preconditioner_contract"
+      ],
+      "properties": {
+        "material_analysis_property_binding": {
+          "type": "object",
+          "required": [
+            "resolution_policy",
+            "dgn_alias_resolution_enabled",
+            "source_material_count",
+            "dgn_alias_material_count_applied",
+            "resolved_material_count",
+            "engineer_review_required"
+          ],
+          "properties": {
+            "resolution_policy": {
+              "const": "exact_normalized_type_and_name_unique_source_material.v1"
+            },
+            "dgn_alias_resolution_enabled": {"const": true},
+            "source_material_count": {"const": 6},
+            "dgn_alias_material_count_applied": {"const": 24},
+            "resolved_material_count": {"const": 30},
+            "engineer_review_required": {"const": true}
+          }
+        },
+        "frame_source_property_coverage_audit": {
+          "type": "object",
+          "required": [
+            "frame_element_count",
+            "source_material_property_count",
+            "resolved_source_property_element_count",
+            "unresolved_source_property_element_count",
+            "exact_source_property_coverage",
+            "fallback_allowed_for_state_updated_geometry"
+          ],
+          "properties": {
+            "frame_element_count": {"const": 5572},
+            "source_material_property_count": {"const": 30},
+            "resolved_source_property_element_count": {"const": 5572},
+            "unresolved_source_property_element_count": {"const": 0},
+            "exact_source_property_coverage": {"const": true},
+            "fallback_allowed_for_state_updated_geometry": {"const": false}
+          }
+        },
+        "state_updated_frame_axial_geometry": {
+          "type": "object",
+          "required": [
+            "formulation_profile",
+            "element_count",
+            "real_property_element_count",
+            "property_fallback_count",
+            "connected_to_physical_residual",
+            "connected_to_consistent_state_tangent_action",
+            "consistent_state_tangent_action_mode",
+            "finite_chord_extension_evaluation",
+            "finite_chord_correction_evaluation",
+            "full_corotational_frame_claim"
+          ],
+          "properties": {
+            "formulation_profile": {
+              "const": "finite_chord_conservative_axial_replacement.v1"
+            },
+            "element_count": {"const": 5572},
+            "real_property_element_count": {"const": 5572},
+            "property_fallback_count": {"const": 0},
+            "connected_to_physical_residual": {"const": true},
+            "connected_to_consistent_state_tangent_action": {"const": true},
+            "consistent_state_tangent_action_mode": {
+              "const": "analytic_reference_plus_exact_finite_chord_axial_correction"
+            },
+            "finite_chord_extension_evaluation": {
+              "const": "difference_of_squares_cancellation_stable"
+            },
+            "finite_chord_correction_evaluation": {
+              "const": "second_order_decomposition_cancellation_stable"
+            },
+            "full_corotational_frame_claim": {"const": false}
+          }
+        },
+        "residual_evaluation_contract": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "residual_formula_hash",
+            "mode",
+            "reference_csr_parent_matches_analytic_tangent",
+            "load_frame_delta_parent_matches_analytic_tangent",
+            "finite_chord_correction_parent_matches_analytic_tangent",
+            "component_force_assembly_retained_for_diagnostics",
+            "promotes_g1_closure"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "mgt-residual-evaluation-contract.v1"
+            },
+            "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+            "mode": {
+              "const": "reference_csr_plus_load_frame_delta_plus_finite_chord_correction"
+            },
+            "reference_csr_parent_matches_analytic_tangent": {"const": true},
+            "load_frame_delta_parent_matches_analytic_tangent": {
+              "const": true
+            },
+            "finite_chord_correction_parent_matches_analytic_tangent": {
+              "const": true
+            },
+            "component_force_assembly_retained_for_diagnostics": {
+              "const": true
+            },
+            "promotes_g1_closure": {"const": false}
+          }
+        },
+        "residual_parent_equivalence_audit": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "status",
+            "applicable",
+            "parent_component_difference_inf_n",
+            "comparison_tolerance_n",
+            "parent_component_gate_passed",
+            "parent_repeat_bytes_exact",
+            "contract_pass"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "mgt-residual-parent-component-equivalence.v1"
+            },
+            "status": {"const": "ready"},
+            "applicable": {"const": true},
+            "parent_component_difference_inf_n": {
+              "type": "number",
+              "minimum": 0
+            },
+            "comparison_tolerance_n": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "parent_component_gate_passed": {"const": true},
+            "parent_repeat_bytes_exact": {"const": true},
+            "contract_pass": {"const": true}
+          }
+        },
+        "reference_preconditioner_contract": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "available",
+            "equation_count",
+            "operator_nnz",
+            "intended_use",
+            "exact_for_adapter_residual_model",
+            "approximate_for_state_dependent_adapter",
+            "factorization_executed_by_adapter",
+            "production_preconditioner_claim"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "zero_state_linear_reference_geometry_csr_preconditioner.v1"
+            },
+            "available": {"const": true},
+            "equation_count": {"const": 70560},
+            "operator_nnz": {"type": "integer", "minimum": 1},
+            "intended_use": {"const": "fixed_right_preconditioner"},
+            "exact_for_adapter_residual_model": {"const": false},
+            "approximate_for_state_dependent_adapter": {"const": true},
+            "factorization_executed_by_adapter": {"const": false},
+            "production_preconditioner_claim": {"const": false}
+          }
+        }
+      }
+    },
+    "linear_solver_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_iterations",
+        "restart_length",
+        "relative_tolerance_l2",
+        "absolute_tolerance_l2_kn",
+        "explicit_residual_tolerance_inf_kn",
+        "arnoldi_breakdown_tolerance",
+        "orthogonalization",
+        "recurrence_profile",
+        "accumulation_profile",
+        "preconditioner_application",
+        "terminal_gate"
+      ],
+      "properties": {
+        "max_iterations": {"const": 12},
+        "restart_length": {"const": 8},
+        "relative_tolerance_l2": {"const": 1e-8},
+        "absolute_tolerance_l2_kn": {"const": 1e-10},
+        "explicit_residual_tolerance_inf_kn": {"const": 1e-7},
+        "arnoldi_breakdown_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "orthogonalization": {
+          "const": "two_pass_modified_gram_schmidt_fp64"
+        },
+        "recurrence_profile": {
+          "const": "right_preconditioned_fgmres_two_pass_modified_gram_schmidt_explicit_replay.v1"
+        },
+        "accumulation_profile": {
+          "const": "ascending_index_python_fsum_fp64.v1"
+        },
+        "preconditioner_application": {"const": "fixed_right"},
+        "terminal_gate": {"const": "explicit_raw_residual_l2_and_inf"}
+      }
+    },
+    "matrix_free_operator_recurrence_binding_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "solve_receipt_count",
+        "expected_solve_receipt_count",
+        "all_solve_receipts_operator_bound",
+        "operator_binding_hashes",
+        "single_operator_binding_hash",
+        "free_equation_order_data_hash",
+        "residual_formula_hash",
+        "reference_load_free_n_data_hash",
+        "current_tangent_action_contract",
+        "recurrence_profile",
+        "accumulation_profile",
+        "all_solve_receipts_use_deterministic_host_arithmetic",
+        "reference_preconditioner_pattern_hashes",
+        "reference_preconditioner_values_hashes",
+        "operator_callback_formula_parent_arrays_bound",
+        "operator_callback_outputs_in_deterministic_contract",
+        "preconditioner_callback_outputs_in_deterministic_contract",
+        "cross_platform_end_to_end_deterministic_claim",
+        "production_solver_claim",
+        "rocm_hip_parity_claim",
+        "contract_pass",
+        "promotes_g1_closure",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-matrix-free-operator-recurrence-binding-audit.v1"
+        },
+        "status": {"const": "ready"},
+        "solve_receipt_count": {"const": 20},
+        "expected_solve_receipt_count": {"const": 20},
+        "all_solve_receipts_operator_bound": {"const": true},
+        "operator_binding_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/sha256"}
+        },
+        "single_operator_binding_hash": {"const": true},
+        "free_equation_order_data_hash": {"$ref": "#/$defs/sha256"},
+        "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+        "reference_load_free_n_data_hash": {"$ref": "#/$defs/sha256"},
+        "current_tangent_action_contract": {
+          "const": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1"
+        },
+        "recurrence_profile": {
+          "const": "right_preconditioned_fgmres_two_pass_modified_gram_schmidt_explicit_replay.v1"
+        },
+        "accumulation_profile": {
+          "const": "ascending_index_python_fsum_fp64.v1"
+        },
+        "all_solve_receipts_use_deterministic_host_arithmetic": {
+          "const": true
+        },
+        "reference_preconditioner_pattern_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/sha256"}
+        },
+        "reference_preconditioner_values_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/sha256"}
+        },
+        "operator_callback_formula_parent_arrays_bound": {"const": true},
+        "operator_callback_outputs_in_deterministic_contract": {
+          "const": false
+        },
+        "preconditioner_callback_outputs_in_deterministic_contract": {
+          "const": false
+        },
+        "cross_platform_end_to_end_deterministic_claim": {"const": false},
+        "production_solver_claim": {"const": false},
+        "rocm_hip_parity_claim": {"const": false},
+        "contract_pass": {"const": true},
+        "promotes_g1_closure": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "continuation": {
+      "allOf": [
+        {"$ref": "#/$defs/continuation"},
+        {
+          "properties": {
+            "initial_checkpoint": {
+              "properties": {
+                "step_index": {"const": 0},
+                "load_factor": {"const": 0.0}
+              }
+            },
+            "final_checkpoint": {
+              "properties": {
+                "step_index": {"const": 4},
+                "load_factor": {"const": 1.0}
+              }
+            },
+            "checkpoints": {"minItems": 5, "maxItems": 5},
+            "attempts": {"minItems": 4, "maxItems": 4},
+            "metrics": {
+              "properties": {
+                "target_load_factor_reached": {"const": true},
+                "accepted_step_count": {"const": 4},
+                "failed_step_count": {"const": 0},
+                "checkpoint_count": {"const": 5},
+                "tangent_solve_count": {"const": 4},
+                "restart_checkpoint_consumed": {"const": false}
+              }
+            }
+          }
+        }
+      ]
+    },
+    "restart_replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "restart_load_factor",
+        "restart_checkpoint",
+        "restart_result",
+        "restart_checkpoint_consumed",
+        "final_vector_bytes_exact",
+        "final_state_hash_exact",
+        "final_data_hash_exact",
+        "contract_pass"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-state-updated-frame-axial-newton-restart-replay.v1"
+        },
+        "restart_load_factor": {"const": 0.5},
+        "restart_checkpoint": {
+          "allOf": [
+            {"$ref": "#/$defs/checkpoint"},
+            {
+              "properties": {
+                "step_index": {"const": 2},
+                "load_factor": {"const": 0.5}
+              }
+            }
+          ]
+        },
+        "restart_result": {
+          "allOf": [
+            {"$ref": "#/$defs/continuation"},
+            {
+              "properties": {
+                "initial_checkpoint": {
+                  "properties": {
+                    "step_index": {"const": 2},
+                    "load_factor": {"const": 0.5}
+                  }
+                },
+                "final_checkpoint": {
+                  "properties": {
+                    "step_index": {"const": 4},
+                    "load_factor": {"const": 1.0}
+                  }
+                },
+                "checkpoints": {"minItems": 3, "maxItems": 3},
+                "attempts": {"minItems": 2, "maxItems": 2},
+                "metrics": {
+                  "properties": {
+                    "target_load_factor_reached": {"const": true},
+                    "accepted_step_count": {"const": 2},
+                    "failed_step_count": {"const": 0},
+                    "checkpoint_count": {"const": 3},
+                    "restart_checkpoint_consumed": {"const": true}
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "restart_checkpoint_consumed": {"const": true},
+        "final_vector_bytes_exact": {"const": true},
+        "final_state_hash_exact": {"const": true},
+        "final_data_hash_exact": {"const": true},
+        "contract_pass": {"const": true}
+      }
+    },
+    "strict_g1_gate_full_load_probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "configured_residual_tolerance_inf_n",
+        "result",
+        "final_residual_inf_n",
+        "full_load_target_reached",
+        "residual_gate_passed",
+        "rollback_performed",
+        "contract_pass",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-state-updated-frame-axial-strict-g1-gate-full-load-probe.v1"
+        },
+        "configured_residual_tolerance_inf_n": {"const": 0.0005},
+        "result": {
+          "type": "object",
+          "required": [
+            "status",
+            "terminal_reason",
+            "config",
+            "initial_checkpoint",
+            "final_checkpoint",
+            "checkpoints",
+            "attempts",
+            "metrics",
+            "claims"
+          ],
+          "properties": {
+            "status": {"const": "ready"},
+            "terminal_reason": {"const": "target_load_factor_reached"},
+            "config": {
+              "type": "object",
+              "required": [
+                "target_load_factors",
+                "residual_tolerance_inf_kn",
+                "maximum_newton_iterations"
+              ],
+              "properties": {
+                "target_load_factors": {"const": [1.0]},
+                "residual_tolerance_inf_kn": {"const": 5e-7},
+                "maximum_newton_iterations": {"const": 4}
+              }
+            },
+            "initial_checkpoint": {
+              "properties": {
+                "step_index": {"const": 0},
+                "load_factor": {"const": 0.0}
+              }
+            },
+            "final_checkpoint": {
+              "properties": {
+                "step_index": {"const": 1},
+                "load_factor": {"const": 1.0}
+              }
+            },
+            "checkpoints": {"minItems": 2, "maxItems": 2},
+            "attempts": {
+              "minItems": 1,
+              "maxItems": 1,
+              "items": {
+                "properties": {
+                  "accepted": {"const": true},
+                  "newton_solve_count": {"const": 2},
+                  "rollback_performed": {"const": false},
+                  "rollback_exact": {"const": true}
+                }
+              }
+            },
+            "metrics": {
+              "properties": {
+                "contract_pass": {"const": true},
+                "target_load_factor_reached": {"const": true},
+                "accepted_step_count": {"const": 1},
+                "failed_step_count": {"const": 0},
+                "checkpoint_count": {"const": 2},
+                "tangent_solve_count": {"const": 2},
+                "final_residual_inf_kn": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5e-7
+                },
+                "residual_and_increment_acceptance_gate": {"const": true},
+                "fallback_count": {"const": 0},
+                "regularization_count": {"const": 0}
+              }
+            }
+          }
+        },
+        "final_residual_inf_n": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.0005
+        },
+        "full_load_target_reached": {"const": true},
+        "residual_gate_passed": {"const": true},
+        "rollback_performed": {"const": false},
+        "contract_pass": {"const": true},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "local_quadratic_convergence_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "reference_load_factor",
+        "reference_state_data_hash",
+        "reference_residual_inf_n",
+        "perturbation_direction",
+        "perturbation_direction_data_hash",
+        "perturbation_inf_m",
+        "rows",
+        "minimum_observed_order",
+        "maximum_observed_order",
+        "quadratic_order_lower_gate",
+        "quadratic_order_upper_gate",
+        "normalized_coefficient_relative_spread",
+        "normalized_coefficient_relative_spread_gate",
+        "fallback_count",
+        "regularization_count",
+        "contract_pass",
+        "local_directional_quadratic_convergence_claim",
+        "global_quadratic_convergence_claim",
+        "promotes_g1_closure",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-state-updated-frame-axial-local-quadratic-convergence-audit.v1"
+        },
+        "status": {"const": "ready"},
+        "reference_load_factor": {"const": 1.0},
+        "reference_state_data_hash": {"$ref": "#/$defs/sha256"},
+        "reference_residual_inf_n": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.0005
+        },
+        "perturbation_direction": {
+          "const": "full_unit_zero_state_predictor_normalized_by_infinity_norm"
+        },
+        "perturbation_direction_data_hash": {"$ref": "#/$defs/sha256"},
+        "perturbation_inf_m": {"const": [0.000004, 0.000002, 0.000001]},
+        "rows": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": [
+              "probe_index",
+              "perturbation_inf_m",
+              "state_data_hash",
+              "residual_before_inf_n",
+              "correction_inf_m",
+              "independent_linear_residual_inf_kn",
+              "corrected_state_reference_difference_inf_m",
+              "residual_after_inf_n",
+              "residual_after_over_perturbation_squared_n_per_m2",
+              "residual_descent",
+              "observed_order_from_previous",
+              "tangent_solve"
+            ],
+            "properties": {
+              "probe_index": {"type": "integer", "minimum": 1, "maximum": 3},
+              "perturbation_inf_m": {"type": "number", "exclusiveMinimum": 0},
+              "state_data_hash": {"$ref": "#/$defs/sha256"},
+              "residual_before_inf_n": {"type": "number", "exclusiveMinimum": 0},
+              "correction_inf_m": {"type": "number", "exclusiveMinimum": 0},
+              "independent_linear_residual_inf_kn": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1e-7
+              },
+              "corrected_state_reference_difference_inf_m": {
+                "type": "number",
+                "minimum": 0
+              },
+              "residual_after_inf_n": {"type": "number", "exclusiveMinimum": 0},
+              "residual_after_over_perturbation_squared_n_per_m2": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "residual_descent": {"const": true},
+              "observed_order_from_previous": {"type": ["number", "null"]},
+              "tangent_solve": {
+                "type": "object",
+                "required": [
+                  "contract_pass",
+                  "fallback_count",
+                  "regularization_count"
+                ],
+                "properties": {
+                  "contract_pass": {"const": true},
+                  "fallback_count": {"const": 0},
+                  "regularization_count": {"const": 0}
+                }
+              }
+            }
+          }
+        },
+        "minimum_observed_order": {"type": "number", "minimum": 1.95, "maximum": 2.05},
+        "maximum_observed_order": {"type": "number", "minimum": 1.95, "maximum": 2.05},
+        "quadratic_order_lower_gate": {"const": 1.95},
+        "quadratic_order_upper_gate": {"const": 2.05},
+        "normalized_coefficient_relative_spread": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.001
+        },
+        "normalized_coefficient_relative_spread_gate": {"const": 0.001},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0},
+        "contract_pass": {"const": true},
+        "local_directional_quadratic_convergence_claim": {"const": true},
+        "global_quadratic_convergence_claim": {"const": false},
+        "promotes_g1_closure": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "iteration_limited_failure_rollback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "configured_residual_tolerance_inf_n",
+        "configured_maximum_newton_iterations",
+        "failure_result",
+        "rejected_trial_residual_inf_n",
+        "accepted_state_hash_before",
+        "accepted_state_hash_after",
+        "initial_final_checkpoint_state_hash_exact",
+        "rollback_performed",
+        "rollback_exact",
+        "contract_pass",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-state-updated-frame-axial-iteration-limited-failure-rollback.v1"
+        },
+        "configured_residual_tolerance_inf_n": {"const": 0.0005},
+        "configured_maximum_newton_iterations": {"const": 1},
+        "failure_result": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "status",
+            "terminal_reason",
+            "case_id",
+            "path_contract_hash",
+            "solver_profile",
+            "solver_contract_hash",
+            "config",
+            "initial_checkpoint",
+            "final_checkpoint",
+            "checkpoints",
+            "attempts",
+            "metrics",
+            "claims",
+            "claim_boundary"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "load-controlled-matrix-free-newton-continuation.v1"
+            },
+            "status": {"const": "blocked"},
+            "terminal_reason": {
+              "const": "maximum_newton_iterations_exhausted"
+            },
+            "case_id": {"type": "string", "minLength": 1},
+            "path_contract_hash": {"$ref": "#/$defs/sha256"},
+            "solver_profile": {
+              "const": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1"
+            },
+            "solver_contract_hash": {"$ref": "#/$defs/sha256"},
+            "config": {
+              "type": "object",
+              "required": [
+                "target_load_factors",
+                "residual_tolerance_inf_kn",
+                "increment_absolute_tolerance_inf_m",
+                "increment_relative_tolerance",
+                "tangent_solve_residual_tolerance_inf_kn",
+                "maximum_newton_iterations",
+                "maximum_line_search_backtracks",
+                "line_search_reduction",
+                "minimum_line_search_alpha",
+                "accepted_trial_policy",
+                "line_search_acceptance",
+                "step_acceptance"
+              ],
+              "properties": {
+                "target_load_factors": {"const": [1.0]},
+                "residual_tolerance_inf_kn": {"const": 5e-7},
+                "increment_absolute_tolerance_inf_m": {"const": 1e-10},
+                "increment_relative_tolerance": {"const": 0.0001},
+                "tangent_solve_residual_tolerance_inf_kn": {"const": 1e-7},
+                "maximum_newton_iterations": {"const": 1},
+                "maximum_line_search_backtracks": {"const": 6},
+                "line_search_reduction": {"const": 0.5},
+                "minimum_line_search_alpha": {"const": 0.015625},
+                "accepted_trial_policy": {
+                  "const": "immutable_accepted_copy_trial_then_commit"
+                },
+                "line_search_acceptance": {
+                  "const": "strict_residual_inf_decrease"
+                },
+                "step_acceptance": {
+                  "const": "residual_and_absolute_or_relative_increment"
+                }
+              }
+            },
+            "initial_checkpoint": {
+              "allOf": [
+                {"$ref": "#/$defs/checkpoint"},
+                {
+                  "properties": {
+                    "step_index": {"const": 0},
+                    "load_factor": {"const": 0.0}
+                  }
+                }
+              ]
+            },
+            "final_checkpoint": {
+              "allOf": [
+                {"$ref": "#/$defs/checkpoint"},
+                {
+                  "properties": {
+                    "step_index": {"const": 0},
+                    "load_factor": {"const": 0.0}
+                  }
+                }
+              ]
+            },
+            "checkpoints": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "items": {"$ref": "#/$defs/checkpoint"}
+            },
+            "attempts": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "target_load_factor",
+                  "accepted",
+                  "terminal_reason",
+                  "newton_solve_count",
+                  "history",
+                  "accepted_state_hash_before",
+                  "accepted_state_hash_after",
+                  "rejected_trial_state_data_hash",
+                  "rollback_performed",
+                  "rollback_exact",
+                  "attempt_index"
+                ],
+                "properties": {
+                  "target_load_factor": {"const": 1.0},
+                  "accepted": {"const": false},
+                  "terminal_reason": {
+                    "const": "maximum_newton_iterations_exhausted"
+                  },
+                  "newton_solve_count": {"const": 1},
+                  "history": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "accepted_state_hash_before": {"$ref": "#/$defs/sha256"},
+                  "accepted_state_hash_after": {"$ref": "#/$defs/sha256"},
+                  "rejected_trial_state_data_hash": {"$ref": "#/$defs/sha256"},
+                  "rollback_performed": {"const": true},
+                  "rollback_exact": {"const": true},
+                  "attempt_index": {"const": 1}
+                }
+              }
+            },
+            "metrics": {
+              "type": "object",
+              "required": [
+                "contract_pass",
+                "equation_count",
+                "target_load_factor",
+                "final_load_factor",
+                "target_load_factor_reached",
+                "accepted_step_count",
+                "failed_step_count",
+                "checkpoint_count",
+                "tangent_solve_count",
+                "maximum_tangent_solve_iterations",
+                "maximum_independent_tangent_residual_inf_kn",
+                "maximum_accepted_increment_inf_m",
+                "maximum_accepted_relative_increment",
+                "residual_and_increment_acceptance_gate",
+                "maximum_line_search_backtrack_count",
+                "minimum_accepted_line_search_alpha",
+                "fallback_count",
+                "regularization_count",
+                "rollback_exact",
+                "restart_checkpoint_consumed",
+                "production_solver_claim",
+                "rocm_hip_parity_claim",
+                "g1_full_building_closure_claim"
+              ],
+              "properties": {
+                "contract_pass": {"const": false},
+                "equation_count": {"const": 70560},
+                "target_load_factor": {"const": 1.0},
+                "final_load_factor": {"const": 0.0},
+                "target_load_factor_reached": {"const": false},
+                "accepted_step_count": {"const": 0},
+                "failed_step_count": {"const": 1},
+                "checkpoint_count": {"const": 1},
+                "tangent_solve_count": {"const": 1},
+                "maximum_tangent_solve_iterations": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 3
+                },
+                "maximum_independent_tangent_residual_inf_kn": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1e-7
+                },
+                "maximum_accepted_increment_inf_m": {"const": 0.0},
+                "maximum_accepted_relative_increment": {"const": 0.0},
+                "residual_and_increment_acceptance_gate": {"const": false},
+                "maximum_line_search_backtrack_count": {"const": 0},
+                "minimum_accepted_line_search_alpha": {"const": 1.0},
+                "fallback_count": {"const": 0},
+                "regularization_count": {"const": 0},
+                "rollback_exact": {"const": true},
+                "restart_checkpoint_consumed": {"const": false},
+                "production_solver_claim": {"const": false},
+                "rocm_hip_parity_claim": {"const": false},
+                "g1_full_building_closure_claim": {"const": false}
+              }
+            },
+            "claims": {
+              "type": "object",
+              "required": [
+                "load_controlled_matrix_free_newton_path",
+                "current_state_tangent_solver",
+                "accepted_trial_displacement_state",
+                "residual_and_increment_acceptance_gate",
+                "failed_step_rollback_exact",
+                "checkpoint_restart_consumed",
+                "material_state_commit_rollback",
+                "arc_length_branch",
+                "production_matrix_free_krylov",
+                "rocm_hip_parity",
+                "g1_full_building_closure"
+              ],
+              "properties": {
+                "load_controlled_matrix_free_newton_path": {"const": false},
+                "current_state_tangent_solver": {"const": true},
+                "accepted_trial_displacement_state": {"const": true},
+                "residual_and_increment_acceptance_gate": {"const": true},
+                "failed_step_rollback_exact": {"const": true},
+                "checkpoint_restart_consumed": {"const": false},
+                "material_state_commit_rollback": {"const": false},
+                "arc_length_branch": {"const": false},
+                "production_matrix_free_krylov": {"const": false},
+                "rocm_hip_parity": {"const": false},
+                "g1_full_building_closure": {"const": false}
+              }
+            },
+            "claim_boundary": {"type": "string", "minLength": 1}
+          }
+        },
+        "rejected_trial_residual_inf_n": {
+          "type": "number",
+          "exclusiveMinimum": 0.0005
+        },
+        "accepted_state_hash_before": {"$ref": "#/$defs/sha256"},
+        "accepted_state_hash_after": {"$ref": "#/$defs/sha256"},
+        "initial_final_checkpoint_state_hash_exact": {"const": true},
+        "rollback_performed": {"const": true},
+        "rollback_exact": {"const": true},
+        "contract_pass": {"const": true},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "adaptive_step_reduction_replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "result",
+        "restart_load_factor",
+        "restart_checkpoint",
+        "restart_result",
+        "final_vector_bytes_exact",
+        "final_state_hash_exact",
+        "final_data_hash_exact",
+        "contract_pass",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-state-updated-frame-axial-adaptive-step-reduction-replay.v1"
+        },
+        "result": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "status",
+            "terminal_reason",
+            "initial_checkpoint",
+            "final_checkpoint",
+            "checkpoints",
+            "attempts",
+            "metrics",
+            "claims"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "adaptive-load-controlled-matrix-free-newton-continuation.v1"
+            },
+            "status": {"const": "ready"},
+            "terminal_reason": {"const": "target_load_factor_reached"},
+            "initial_checkpoint": {
+              "allOf": [
+                {"$ref": "#/$defs/checkpoint"},
+                {"properties": {"step_index": {"const": 0}, "load_factor": {"const": 0.0}}}
+              ]
+            },
+            "final_checkpoint": {
+              "allOf": [
+                {"$ref": "#/$defs/checkpoint"},
+                {"properties": {"step_index": {"const": 3}, "load_factor": {"const": 1.0}}}
+              ]
+            },
+            "checkpoints": {"type": "array", "minItems": 4, "maxItems": 4},
+            "attempts": {"type": "array", "minItems": 5, "maxItems": 5},
+            "metrics": {
+              "type": "object",
+              "required": [
+                "contract_pass",
+                "target_load_factor_reached",
+                "attempt_count",
+                "accepted_step_count",
+                "failed_step_count",
+                "failed_step_reduction_count",
+                "fast_step_growth_count",
+                "checkpoint_count",
+                "tangent_solve_count",
+                "residual_and_increment_acceptance_gate",
+                "rollback_exact",
+                "restart_checkpoint_consumed",
+                "fallback_count",
+                "regularization_count"
+              ],
+              "properties": {
+                "contract_pass": {"const": true},
+                "target_load_factor_reached": {"const": true},
+                "attempt_count": {"const": 5},
+                "accepted_step_count": {"const": 3},
+                "failed_step_count": {"const": 2},
+                "failed_step_reduction_count": {"const": 2},
+                "fast_step_growth_count": {"const": 2},
+                "checkpoint_count": {"const": 4},
+                "tangent_solve_count": {"const": 5},
+                "residual_and_increment_acceptance_gate": {"const": true},
+                "rollback_exact": {"const": true},
+                "restart_checkpoint_consumed": {"const": false},
+                "fallback_count": {"const": 0},
+                "regularization_count": {"const": 0}
+              }
+            },
+            "claims": {
+              "type": "object",
+              "required": [
+                "adaptive_load_controlled_matrix_free_newton_path",
+                "failed_step_reduction_exercised",
+                "failed_step_rollback_exact",
+                "residual_and_increment_acceptance_gate",
+                "checkpoint_restart_consumed",
+                "g1_full_building_closure"
+              ],
+              "properties": {
+                "adaptive_load_controlled_matrix_free_newton_path": {"const": true},
+                "failed_step_reduction_exercised": {"const": true},
+                "failed_step_rollback_exact": {"const": true},
+                "residual_and_increment_acceptance_gate": {"const": true},
+                "checkpoint_restart_consumed": {"const": false},
+                "g1_full_building_closure": {"const": false}
+              }
+            }
+          }
+        },
+        "restart_load_factor": {"const": 0.5},
+        "restart_checkpoint": {
+          "allOf": [
+            {"$ref": "#/$defs/checkpoint"},
+            {"properties": {"step_index": {"const": 1}, "load_factor": {"const": 0.5}}}
+          ]
+        },
+        "restart_result": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "status",
+            "terminal_reason",
+            "initial_checkpoint",
+            "final_checkpoint",
+            "checkpoints",
+            "attempts",
+            "metrics",
+            "claims"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "adaptive-load-controlled-matrix-free-newton-continuation.v1"
+            },
+            "status": {"const": "ready"},
+            "terminal_reason": {"const": "target_load_factor_reached"},
+            "initial_checkpoint": {
+              "allOf": [
+                {"$ref": "#/$defs/checkpoint"},
+                {"properties": {"step_index": {"const": 1}, "load_factor": {"const": 0.5}}}
+              ]
+            },
+            "final_checkpoint": {
+              "allOf": [
+                {"$ref": "#/$defs/checkpoint"},
+                {"properties": {"step_index": {"const": 3}, "load_factor": {"const": 1.0}}}
+              ]
+            },
+            "checkpoints": {"type": "array", "minItems": 3, "maxItems": 3},
+            "attempts": {"type": "array", "minItems": 3, "maxItems": 3},
+            "metrics": {
+              "type": "object",
+              "required": [
+                "contract_pass",
+                "target_load_factor_reached",
+                "attempt_count",
+                "accepted_step_count",
+                "failed_step_count",
+                "failed_step_reduction_count",
+                "fast_step_growth_count",
+                "checkpoint_count",
+                "tangent_solve_count",
+                "rollback_exact",
+                "restart_checkpoint_consumed",
+                "fallback_count",
+                "regularization_count"
+              ],
+              "properties": {
+                "contract_pass": {"const": true},
+                "target_load_factor_reached": {"const": true},
+                "attempt_count": {"const": 3},
+                "accepted_step_count": {"const": 2},
+                "failed_step_count": {"const": 1},
+                "failed_step_reduction_count": {"const": 1},
+                "fast_step_growth_count": {"const": 1},
+                "checkpoint_count": {"const": 3},
+                "tangent_solve_count": {"const": 3},
+                "rollback_exact": {"const": true},
+                "restart_checkpoint_consumed": {"const": true},
+                "fallback_count": {"const": 0},
+                "regularization_count": {"const": 0}
+              }
+            },
+            "claims": {
+              "type": "object",
+              "required": ["checkpoint_restart_consumed"],
+              "properties": {
+                "checkpoint_restart_consumed": {"const": true}
+              }
+            }
+          }
+        },
+        "final_vector_bytes_exact": {"const": true},
+        "final_state_hash_exact": {"const": true},
+        "final_data_hash_exact": {"const": true},
+        "contract_pass": {"const": true},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "final_vector_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "artifact_path",
+        "dtype",
+        "layout",
+        "byte_order",
+        "equation_order",
+        "equation_count",
+        "byte_length",
+        "data_sha256",
+        "data_hash",
+        "load_factor",
+        "residual_inf_n",
+        "local_residual_tolerance_n",
+        "local_residual_gate_passed",
+        "accepted_displacement_checkpoint",
+        "engineer_review_required",
+        "full_corotational_frame_checkpoint_claim",
+        "production_solver_checkpoint_claim",
+        "g1_full_load_checkpoint_claim",
+        "promotes_g1_closure",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-state-updated-frame-axial-live-load-1p0-diagnostic-vector.v1"
+        },
+        "status": {"const": "ready"},
+        "artifact_path": {"type": "string", "minLength": 1},
+        "dtype": {"const": "<f8"},
+        "layout": {"const": "C"},
+        "byte_order": {"const": "little"},
+        "equation_order": {"const": "adapter_free_global_dof_order"},
+        "equation_count": {"const": 70560},
+        "byte_length": {"const": 564480},
+        "data_sha256": {"$ref": "#/$defs/sha256"},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "load_factor": {"const": 1.0},
+        "residual_inf_n": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.0005
+        },
+        "local_residual_tolerance_n": {"const": 0.0005},
+        "local_residual_gate_passed": {"const": true},
+        "accepted_displacement_checkpoint": {"const": true},
+        "engineer_review_required": {"const": true},
+        "full_corotational_frame_checkpoint_claim": {"const": false},
+        "production_solver_checkpoint_claim": {"const": false},
+        "g1_full_load_checkpoint_claim": {"const": false},
+        "promotes_g1_closure": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_mgt_state_updated_axial_load_controlled_continuation",
+        "all_actual_tangent_solves_operator_bound",
+        "all_actual_tangent_solves_deterministic_host_arithmetic",
+        "all_actual_tangent_operator_formula_parent_arrays_bound",
+        "residual_tangent_parent_consistency_audited",
+        "residual_formula_hash_verified",
+        "semantic_live_target_load_1p0_reached",
+        "accepted_displacement_checkpoints",
+        "residual_and_increment_acceptance_gate",
+        "diagnostic_load_1p0_binary_checkpoint",
+        "local_g1_candidate_residual_gate_passed",
+        "direct_full_load_local_residual_gate_passed",
+        "actual_local_directional_quadratic_convergence",
+        "midpoint_restart_exact",
+        "actual_iteration_limited_failure_rollback_exercised",
+        "actual_adaptive_step_reduction_path",
+        "actual_adaptive_failed_step_rollback_exact",
+        "adaptive_midpoint_restart_exact",
+        "material_state_commit_rollback",
+        "full_corotational_frame",
+        "arc_length_branch",
+        "production_matrix_free_krylov",
+        "cross_platform_deterministic_recurrence",
+        "production_rocm_hip_nonlinear_parity",
+        "g1_full_load_checkpoint",
+        "g1_full_building_closure"
+      ],
+      "properties": {
+        "actual_mgt_state_updated_axial_load_controlled_continuation": {"const": true},
+        "all_actual_tangent_solves_operator_bound": {"const": true},
+        "all_actual_tangent_solves_deterministic_host_arithmetic": {"const": true},
+        "all_actual_tangent_operator_formula_parent_arrays_bound": {
+          "const": true
+        },
+        "residual_tangent_parent_consistency_audited": {"const": true},
+        "residual_formula_hash_verified": {"const": true},
+        "semantic_live_target_load_1p0_reached": {"const": true},
+        "accepted_displacement_checkpoints": {"const": true},
+        "residual_and_increment_acceptance_gate": {"const": true},
+        "diagnostic_load_1p0_binary_checkpoint": {"const": true},
+        "local_g1_candidate_residual_gate_passed": {"const": true},
+        "direct_full_load_local_residual_gate_passed": {"const": true},
+        "actual_local_directional_quadratic_convergence": {"const": true},
+        "midpoint_restart_exact": {"const": true},
+        "actual_iteration_limited_failure_rollback_exercised": {"const": true},
+        "actual_adaptive_step_reduction_path": {"const": true},
+        "actual_adaptive_failed_step_rollback_exact": {"const": true},
+        "adaptive_midpoint_restart_exact": {"const": true},
+        "material_state_commit_rollback": {"const": false},
+        "full_corotational_frame": {"const": false},
+        "arc_length_branch": {"const": false},
+        "production_matrix_free_krylov": {"const": false},
+        "cross_platform_deterministic_recurrence": {"const": false},
+        "production_rocm_hip_nonlinear_parity": {"const": false},
+        "g1_full_load_checkpoint": {"const": false},
+        "g1_full_building_closure": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 10,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt", "schema", "final_vector"],
+      "properties": {
+        "receipt": {"type": "string", "minLength": 1},
+        "schema": {"type": "string", "minLength": 1},
+        "final_vector": {"type": "string", "minLength": 1}
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "case_id",
+        "path_contract_hash",
+        "step_index",
+        "load_factor",
+        "equation_count",
+        "displacement_inf_m",
+        "displacement_data_hash",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "load-controlled-matrix-free-newton-checkpoint.v1"
+        },
+        "case_id": {"type": "string", "minLength": 1},
+        "path_contract_hash": {"$ref": "#/$defs/sha256"},
+        "step_index": {"type": "integer", "minimum": 0, "maximum": 4},
+        "load_factor": {"type": "number", "minimum": 0, "maximum": 1},
+        "equation_count": {"const": 70560},
+        "displacement_inf_m": {"type": "number", "minimum": 0},
+        "displacement_data_hash": {"$ref": "#/$defs/sha256"},
+        "state_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "continuation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "terminal_reason",
+        "case_id",
+        "path_contract_hash",
+        "solver_profile",
+        "solver_contract_hash",
+        "config",
+        "initial_checkpoint",
+        "final_checkpoint",
+        "checkpoints",
+        "attempts",
+        "metrics",
+        "claims",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "load-controlled-matrix-free-newton-continuation.v1"
+        },
+        "status": {"const": "ready"},
+        "terminal_reason": {"const": "target_load_factor_reached"},
+        "case_id": {"type": "string", "minLength": 1},
+        "path_contract_hash": {"$ref": "#/$defs/sha256"},
+        "solver_profile": {
+          "const": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1"
+        },
+        "solver_contract_hash": {"$ref": "#/$defs/sha256"},
+        "config": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "target_load_factors",
+            "residual_tolerance_inf_kn",
+            "increment_absolute_tolerance_inf_m",
+            "increment_relative_tolerance",
+            "tangent_solve_residual_tolerance_inf_kn",
+            "maximum_newton_iterations",
+            "maximum_line_search_backtracks",
+            "line_search_reduction",
+            "minimum_line_search_alpha",
+            "accepted_trial_policy",
+            "line_search_acceptance",
+            "step_acceptance"
+          ],
+          "properties": {
+            "target_load_factors": {"const": [0.25, 0.5, 0.75, 1.0]},
+            "residual_tolerance_inf_kn": {"const": 5e-7},
+            "increment_absolute_tolerance_inf_m": {"const": 1e-10},
+            "increment_relative_tolerance": {"const": 0.0001},
+            "tangent_solve_residual_tolerance_inf_kn": {"const": 1e-7},
+            "maximum_newton_iterations": {"const": 4},
+            "maximum_line_search_backtracks": {"const": 6},
+            "line_search_reduction": {"const": 0.5},
+            "minimum_line_search_alpha": {"const": 0.015625},
+            "accepted_trial_policy": {
+              "const": "immutable_accepted_copy_trial_then_commit"
+            },
+            "line_search_acceptance": {
+              "const": "strict_residual_inf_decrease"
+            },
+            "step_acceptance": {
+              "const": "residual_and_absolute_or_relative_increment"
+            }
+          }
+        },
+        "initial_checkpoint": {"$ref": "#/$defs/checkpoint"},
+        "final_checkpoint": {"$ref": "#/$defs/checkpoint"},
+        "checkpoints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/checkpoint"}
+        },
+        "attempts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "target_load_factor",
+              "accepted",
+              "terminal_reason",
+              "newton_solve_count",
+              "history",
+              "accepted_state_hash_before",
+              "accepted_state_hash_after",
+              "rollback_performed",
+              "rollback_exact",
+              "attempt_index"
+            ]
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "required": [
+            "contract_pass",
+            "equation_count",
+            "target_load_factor",
+            "final_load_factor",
+            "target_load_factor_reached",
+            "accepted_step_count",
+            "failed_step_count",
+            "checkpoint_count",
+            "tangent_solve_count",
+            "maximum_tangent_solve_iterations",
+            "maximum_independent_tangent_residual_inf_kn",
+            "maximum_checkpoint_residual_inf_kn",
+            "final_residual_inf_kn",
+            "maximum_accepted_increment_inf_m",
+            "maximum_accepted_relative_increment",
+            "residual_and_increment_acceptance_gate",
+            "maximum_line_search_backtrack_count",
+            "minimum_accepted_line_search_alpha",
+            "fallback_count",
+            "regularization_count",
+            "rollback_exact",
+            "restart_checkpoint_consumed",
+            "production_solver_claim",
+            "rocm_hip_parity_claim",
+            "g1_full_building_closure_claim"
+          ],
+          "properties": {
+            "contract_pass": {"const": true},
+            "equation_count": {"const": 70560},
+            "target_load_factor": {"const": 1.0},
+            "final_load_factor": {"const": 1.0},
+            "target_load_factor_reached": {"const": true},
+            "accepted_step_count": {"type": "integer", "minimum": 1},
+            "failed_step_count": {"const": 0},
+            "checkpoint_count": {"type": "integer", "minimum": 2},
+            "tangent_solve_count": {"type": "integer", "minimum": 1},
+            "maximum_tangent_solve_iterations": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12
+            },
+            "maximum_independent_tangent_residual_inf_kn": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1e-7
+            },
+            "maximum_checkpoint_residual_inf_kn": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5e-7
+            },
+            "final_residual_inf_kn": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 5e-7
+            },
+            "maximum_accepted_increment_inf_m": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1e-6
+            },
+            "maximum_accepted_relative_increment": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 0.0001
+            },
+            "residual_and_increment_acceptance_gate": {"const": true},
+            "maximum_line_search_backtrack_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "minimum_accepted_line_search_alpha": {
+              "type": "number",
+              "minimum": 0.015625,
+              "maximum": 1.0
+            },
+            "fallback_count": {"const": 0},
+            "regularization_count": {"const": 0},
+            "rollback_exact": {"const": true},
+            "restart_checkpoint_consumed": {"type": "boolean"},
+            "production_solver_claim": {"const": false},
+            "rocm_hip_parity_claim": {"const": false},
+            "g1_full_building_closure_claim": {"const": false}
+          }
+        },
+        "claims": {
+          "type": "object",
+          "required": [
+            "load_controlled_matrix_free_newton_path",
+            "current_state_tangent_solver",
+            "accepted_trial_displacement_state",
+            "residual_and_increment_acceptance_gate",
+            "failed_step_rollback_exact",
+            "checkpoint_restart_consumed",
+            "material_state_commit_rollback",
+            "arc_length_branch",
+            "production_matrix_free_krylov",
+            "rocm_hip_parity",
+            "g1_full_building_closure"
+          ],
+          "properties": {
+            "load_controlled_matrix_free_newton_path": {"const": true},
+            "current_state_tangent_solver": {"const": true},
+            "accepted_trial_displacement_state": {"const": true},
+            "residual_and_increment_acceptance_gate": {"const": true},
+            "failed_step_rollback_exact": {"const": false},
+            "checkpoint_restart_consumed": {"type": "boolean"},
+            "material_state_commit_rollback": {"const": false},
+            "arc_length_branch": {"const": false},
+            "production_matrix_free_krylov": {"const": false},
+            "rocm_hip_parity": {"const": false},
+            "g1_full_building_closure": {"const": false}
+          }
+        },
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

@@ -1,0 +1,1332 @@
+{
+  "adapter_binding": {
+    "all_frame_source_material_properties_resolved": false,
+    "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+    "dgn_material_property_alias_audit": {
+      "alias_material_count": 24,
+      "alias_rows": [
+        {
+          "dgn_material_id": 8,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 9,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 10,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 11,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 12,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 13,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 14,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 15,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 16,
+          "material_name": "C40+Q235",
+          "material_type": "SRC",
+          "source_material_id": 3,
+          "source_material_name": "C40+Q235",
+          "source_material_type": "SRC"
+        },
+        {
+          "dgn_material_id": 17,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 18,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 19,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 20,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 21,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 22,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 23,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 24,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 25,
+          "material_name": "C40WBR",
+          "material_type": "CONC",
+          "source_material_id": 4,
+          "source_material_name": "C40WBR",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 26,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 27,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 28,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 29,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 30,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        },
+        {
+          "dgn_material_id": 31,
+          "material_name": "C40",
+          "material_type": "CONC",
+          "source_material_id": 1,
+          "source_material_name": "C40",
+          "source_material_type": "CONC"
+        }
+      ],
+      "ambiguous_identity_rows": [],
+      "claim_boundary": "Copies analysis elastic properties only from one exact *MATERIAL type/name identity to a distinct *DGN-MATL id. DGN numeric design fields, fuzzy matching, and inferred database values are not consumed. The identity inheritance remains engineer-review-required.",
+      "contract_pass": true,
+      "dgn_material_row_count": 29,
+      "dgn_numeric_elastic_override_consumed_count": 0,
+      "dgn_unique_material_id_count": 29,
+      "duplicate_dgn_material_ids": [],
+      "engineer_review_required": true,
+      "exact_unique_identity_match_row_count": 29,
+      "existing_source_id_row_count": 5,
+      "fuzzy_name_match_count": 0,
+      "resolution_policy": "exact_normalized_type_and_name_unique_source_material.v1",
+      "schema_version": "mgt-dgn-material-property-alias-audit.v1",
+      "source_material_count": 6,
+      "unresolved_identity_rows": []
+    },
+    "frame_source_property_coverage_audit": {
+      "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
+      "exact_source_property_coverage": false,
+      "fallback_allowed_for_state_updated_geometry": false,
+      "frame_element_count": 5572,
+      "material_property_resolved_element_count": 5493,
+      "missing_material_element_count": 79,
+      "missing_material_id_counts": [
+        {
+          "element_count": 5,
+          "material_id": 16
+        },
+        {
+          "element_count": 9,
+          "material_id": 26
+        },
+        {
+          "element_count": 9,
+          "material_id": 27
+        },
+        {
+          "element_count": 14,
+          "material_id": 28
+        },
+        {
+          "element_count": 17,
+          "material_id": 29
+        },
+        {
+          "element_count": 15,
+          "material_id": 30
+        },
+        {
+          "element_count": 10,
+          "material_id": 31
+        }
+      ],
+      "missing_section_element_count": 0,
+      "missing_section_id_counts": [],
+      "resolved_source_property_element_count": 5493,
+      "schema_version": "mgt-state-updated-frame-axial-property-coverage.v1",
+      "section_property_resolved_element_count": 5572,
+      "source_material_property_count": 6,
+      "source_property_coverage_ratio": 0.9858219669777458,
+      "source_section_property_count": 183,
+      "unresolved_element_head": [
+        {
+          "element_id": 1261,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 1485,
+          "material_id": 31,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 370
+        },
+        {
+          "element_id": 1488,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 1489,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 2996,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 2997,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 2998,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 2999,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 3088,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 3089,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 3097,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 3099,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 3797,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 3829,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 3832,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 3834,
+          "material_id": 27,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 307
+        },
+        {
+          "element_id": 4363,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 4364,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 21892,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 21893,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 21894,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 21925,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 21926,
+          "material_id": 30,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 642
+        },
+        {
+          "element_id": 22043,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 22044,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 22057,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22058,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22059,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22060,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22061,
+          "material_id": 29,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 48
+        },
+        {
+          "element_id": 22072,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        },
+        {
+          "element_id": 22073,
+          "material_id": 28,
+          "missing_material_property": true,
+          "missing_section_property": false,
+          "section_id": 241
+        }
+      ],
+      "unresolved_element_head_limit": 32,
+      "unresolved_source_property_element_count": 79
+    },
+    "free_dof_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+    "free_equation_count": 70560,
+    "global_dof_count": 78282,
+    "historical_checkpoint_free_vector_used_as_initial_state": false,
+    "historical_checkpoint_nonfree_displacement_inf_m": 0.0,
+    "historical_checkpoint_used_for_operator_binding": true,
+    "initial_load_factor": 0.0,
+    "initial_state_policy": "zero_state",
+    "material_analysis_property_binding": {
+      "dgn_alias_material_count_applied": 0,
+      "dgn_alias_material_count_available": 24,
+      "dgn_alias_resolution_enabled": false,
+      "engineer_review_required": false,
+      "resolution_policy": "MATERIAL_rows_only.v1",
+      "resolved_material_count": 6,
+      "source_material_count": 6
+    },
+    "node_count": 13047,
+    "reference_load_free_hash": "sha256:010766b31f80c5f2de534b006b6b3143d9d59fffd24d709eb16637392fbdc805",
+    "reference_load_inf_n": 179458.19249999968,
+    "semantic_load_assembly": {
+      "actual_mgt_semantic_load_case_consumed": true,
+      "actual_mgt_semantic_load_target_consumed": true,
+      "assembled_applied_moment_resultant_n_m": [
+        1810.0,
+        2960.0,
+        0.0
+      ],
+      "assembled_force_resultant_n": [
+        0.0,
+        0.0,
+        -50628330.359766744
+      ],
+      "authored_nodal_moment_resultant_n_m": [
+        1810.0,
+        2960.0,
+        0.0
+      ],
+      "case_factors": {
+        "LIVE": 1.0
+      },
+      "claim_boundary": "Consumes authored MGT nodal loads and uniform unprojected global-direction PLATE/FACE pressures in an explicit force/length unit system. Selfweight, projected or nonuniform pressure, envelope selection, follower loads, production load recovery, and G1 closure remain outside this contract.",
+      "combination_expansion_mode": null,
+      "connectivity_index_hash": "sha256:cd84900389d1ee294f2d247300af03c228057dfd56c124dd6e9190a77ed235db",
+      "connectivity_pointer_hash": "sha256:dce1233cdeaf432b953eb7e932438f6c81cbc6cdedd3284fd96336b972585826",
+      "contract_pass": true,
+      "element_count": 12728,
+      "element_id_hash": "sha256:c407a3734713d7e0bce240cedf0992f7a6570c484f0934f373acf96e2e600b2c",
+      "global_dof_count": 78282,
+      "nodal_force_resultant_n": [
+        0.0,
+        0.0,
+        -22964.0
+      ],
+      "nodal_load_row_count_consumed": 6,
+      "nodal_load_target_count_consumed": 6,
+      "node_count": 13047,
+      "node_id_hash": "sha256:a80a114fbf3b202ed2abcc71bee2efd54581f22563a8552d2736b82f5fa311fd",
+      "pressure_force_resultant_n": [
+        0.0,
+        0.0,
+        -50605366.359766565
+      ],
+      "pressure_load_element_count_consumed": 3644,
+      "pressure_load_row_count_consumed": 3644,
+      "pressure_loaded_area_m2": 7802.903986433339,
+      "production_load_case_claim": false,
+      "promotes_g1_closure": false,
+      "reference_load_hash": "sha256:e2e447325a332289f25ab5b536bc83b0400553663aa11044a7a287a49d2b2e5e",
+      "reference_load_inf_n": 179458.19249999968,
+      "reference_load_l1_n": 50638576.35976667,
+      "resultant_applied_moment_error_inf_n_m": 0.0,
+      "resultant_force_error_inf_n": 1.7881393432617188e-07,
+      "resultant_gate_passed": true,
+      "resultant_moment_about_origin_n_m": [
+        -9490891919.244497,
+        6615330872.895246,
+        0.0
+      ],
+      "schema_version": "mgt-semantic-load-assembly.v1",
+      "selected_case_row_accounting_exact": true,
+      "selected_target_row_counts": {
+        "nodal_loads": 6,
+        "pressure_loads": 3644,
+        "selfweight": 0
+      },
+      "selected_target_rows_consumed": {
+        "nodal_loads": 6,
+        "pressure_loads": 3644,
+        "selfweight": 0
+      },
+      "selfweight_row_count_consumed": 0,
+      "source_mgt_load_combination_consumed": false,
+      "source_mgt_nodal_load_rows_consumed": true,
+      "source_mgt_pressure_load_rows_consumed": true,
+      "source_mgt_selfweight_rows_consumed": false,
+      "source_row_counts": {
+        "nodal_loads": 12,
+        "pressure_loads": 7278,
+        "selfweight": 1
+      },
+      "status": "ready",
+      "target_kind": "static_load_case",
+      "target_name": "LIVE",
+      "unbound_source_row_counts": {
+        "nodal_loads": 0,
+        "pressure_loads": 0,
+        "selfweight": 0
+      },
+      "unit_contract": {
+        "force_to_newton": 1000.0,
+        "length_to_metre": 1.0,
+        "moment_to_n_m": 1000.0,
+        "pressure_to_n_per_m2": 1000.0,
+        "source_force_unit": "KN",
+        "source_length_unit": "M"
+      },
+      "unsupported_features": [
+        "selfweight",
+        "projected_pressure",
+        "nonuniform_pressure",
+        "envelope_selection",
+        "follower_load"
+      ],
+      "unsupported_selected_row_count": 0
+    },
+    "state_invariant_tangent_contract": {
+      "available": true,
+      "claim_boundary": "Exact CSR Jacobian only for the adapter's current linear reference-geometry residual with state-independent material operators. It is not a corotational or material-state-updated nonlinear tangent, quadratic-convergence proof, production Krylov solve, or G1 closure.",
+      "csr_column_index_hash": "sha256:35eac43fbeda16f3fa8658e110dbbd0f34985f2ca1bac524927a44974fd90733",
+      "csr_row_pointer_hash": "sha256:3af537a8aade96dcf3b69a55d2e48c421c8900a758060a9c38dee5fcf7079dd3",
+      "current_state_reassembly_required": false,
+      "equation_count": 70560,
+      "exact_for_adapter_residual_model": true,
+      "force_unit": "N",
+      "material_state_commit_rollback_claim": false,
+      "nonlinear_current_tangent_claim": false,
+      "operator_classification": "state_invariant_linear_reference_geometry",
+      "operator_nnz": 1264133,
+      "operator_numeric_values_hash": "sha256:b980afc98b448341aff4268e5514c6ab8069362ded38e1a8180579ed64f14799",
+      "promotes_g1_closure": false,
+      "quadratic_convergence_claim": false,
+      "rotation_tangent_unit": "N_m_per_rad",
+      "schema_version": "linear_reference_geometry_residual_exact_csr.v1",
+      "status": "ready",
+      "translation_tangent_unit": "N_per_m"
+    },
+    "state_updated_frame_axial_geometry_applied": false
+  },
+  "artifacts": {
+    "full_load_checkpoint_vector": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_full_load_free_displacement.f64le",
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_continuation_receipt.json",
+    "restart_checkpoint_vector": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_restart_0p75_free_displacement.f64le",
+    "schema": "src/structural_analysis/schemas/g1_mgt_semantic_live_linear_newton_continuation_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_continuation_summary.json"
+  },
+  "blockers_remaining": [
+    "source_commit_exact_replay_not_claimed_for_dirty_worktree",
+    "raw_material_table_binding_incomplete_source_derived_alias_available",
+    "dgn_exact_type_name_material_inheritance_engineer_review_required",
+    "state_updated_nonlinear_current_tangent_not_connected",
+    "quadratic_convergence_not_demonstrated",
+    "material_state_commit_rollback_not_connected",
+    "nonlinear_failed_step_rollback_not_demonstrated",
+    "arc_length_branch_not_executed",
+    "production_matrix_free_krylov_not_connected",
+    "production_rocm_hip_nonlinear_parity_not_verified",
+    "g1_full_load_checkpoint_not_created"
+  ],
+  "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+  "claim_boundary": "This receipt proves deterministic zero-state adaptive load-controlled Newton control flow for the current actual-MGT semantic LIVE adapter using its state-invariant linear reference-geometry CSR Jacobian. It does not prove a raw-*MATERIAL-complete model. An exact unique type/name source-derived DGN-MATL alias contract is available for this input, but the aliases are not applied by this linear-reference path and remain engineer-review-required. The receipt also does not prove a state-updated nonlinear tangent, quadratic convergence, material commit/rollback, arc-length branch, production Krylov/HIP execution, G1 checkpoint, or G1 closure.",
+  "claims": {
+    "actual_linear_failed_step_rollback_exact": true,
+    "actual_mgt_semantic_live_load_consumed": true,
+    "adaptive_load_controlled_newton_path": true,
+    "dgn_alias_applied_to_linear_reference_adapter": false,
+    "dgn_alias_engineer_review_required": true,
+    "dgn_exact_type_name_alias_contract_pass": true,
+    "dgn_numeric_elastic_override_consumed": false,
+    "full_arc_length_continuation": false,
+    "full_load_linear_reference_checkpoint": true,
+    "g1_full_building_closure": false,
+    "g1_full_load_checkpoint": false,
+    "line_search_history_recorded": true,
+    "material_state_commit_rollback": false,
+    "nonlinear_current_tangent": false,
+    "persisted_linear_reference_full_load_checkpoint": true,
+    "persisted_linear_reference_restart_checkpoint": true,
+    "production_matrix_free_krylov": false,
+    "production_rocm_hip_nonlinear_parity": false,
+    "quadratic_convergence": false,
+    "raw_material_table_property_coverage_complete": false,
+    "restart_replay_byte_identical": true,
+    "source_property_coverage_complete": false,
+    "state_invariant_linear_reference_tangent": true,
+    "zero_state_initial_policy": true
+  },
+  "contract_pass": true,
+  "direct_continuation": {
+    "attempts": [
+      {
+        "accepted": true,
+        "accepted_state_hash_after": "sha256:5948b02a09ef9538ca55b5d84036125cf499337abb27acef1cb0c2a539eb0ff6",
+        "accepted_state_hash_before": "sha256:2df507baeb247c46f6aefebae31c1b75381df3eedd7d7d1402e51170802adc86",
+        "attempt_index": 1,
+        "final_residual_inf_n": 1.7482288967585191e-06,
+        "history": [
+          {
+            "accepted_alpha": 1.0,
+            "accepted_residual_inf_n": 1.7482288967585191e-06,
+            "converged": false,
+            "correction_committed": true,
+            "correction_inf_m": 0.0008652497392953908,
+            "failure": null,
+            "iteration": 1,
+            "line_search": [
+              {
+                "alpha": 1.0,
+                "candidate_residual_inf_n": 1.7482288967585191e-06,
+                "candidate_state_hash": "sha256:e936806c955612e3438299889484c995b86e50acc87e2fd95b2a73f9e54c5b1e",
+                "sufficient_decrease": true
+              }
+            ],
+            "residual_inf_n": 44864.54812499992,
+            "tangent_solve_explicit_residual_inf_n": 1.4843044482404366e-06,
+            "tangent_solve_residual_gate_passed": true,
+            "trial_state_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78"
+          },
+          {
+            "converged": true,
+            "correction_committed": false,
+            "correction_inf_m": 5.099188618922373e-10,
+            "failure": null,
+            "iteration": 2,
+            "line_search": [],
+            "residual_inf_n": 1.7482288967585191e-06,
+            "tangent_solve_explicit_residual_inf_n": 3.5327361949812714e-17,
+            "tangent_solve_residual_gate_passed": true,
+            "trial_state_hash": "sha256:e936806c955612e3438299889484c995b86e50acc87e2fd95b2a73f9e54c5b1e"
+          }
+        ],
+        "increment_gate_passed": true,
+        "newton_iterations": 2,
+        "requested_load_increment": 0.25,
+        "residual_gate_passed": true,
+        "rollback_exact": true,
+        "rollback_performed": false,
+        "start_load_factor": 0.0,
+        "target_load_factor": 0.25,
+        "terminal_reason": "equilibrium_and_increment_gates_passed"
+      },
+      {
+        "accepted": true,
+        "accepted_state_hash_after": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+        "accepted_state_hash_before": "sha256:5948b02a09ef9538ca55b5d84036125cf499337abb27acef1cb0c2a539eb0ff6",
+        "attempt_index": 2,
+        "final_residual_inf_n": 3.843175363726914e-06,
+        "history": [
+          {
+            "accepted_alpha": 1.0,
+            "accepted_residual_inf_n": 3.843175363726914e-06,
+            "converged": false,
+            "correction_committed": true,
+            "correction_inf_m": 0.001730499478590803,
+            "failure": null,
+            "iteration": 1,
+            "line_search": [
+              {
+                "alpha": 1.0,
+                "candidate_residual_inf_n": 3.843175363726914e-06,
+                "candidate_state_hash": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
+                "sufficient_decrease": true
+              }
+            ],
+            "residual_inf_n": 89729.09625000178,
+            "tangent_solve_explicit_residual_inf_n": 4.2724750528577715e-06,
+            "tangent_solve_residual_gate_passed": true,
+            "trial_state_hash": "sha256:e936806c955612e3438299889484c995b86e50acc87e2fd95b2a73f9e54c5b1e"
+          },
+          {
+            "converged": true,
+            "correction_committed": false,
+            "correction_inf_m": 8.626425263030739e-10,
+            "failure": null,
+            "iteration": 2,
+            "line_search": [],
+            "residual_inf_n": 3.843175363726914e-06,
+            "tangent_solve_explicit_residual_inf_n": 4.5895495074864713e-17,
+            "tangent_solve_residual_gate_passed": true,
+            "trial_state_hash": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8"
+          }
+        ],
+        "increment_gate_passed": true,
+        "newton_iterations": 2,
+        "requested_load_increment": 0.5,
+        "residual_gate_passed": true,
+        "rollback_exact": true,
+        "rollback_performed": false,
+        "start_load_factor": 0.25,
+        "target_load_factor": 0.75,
+        "terminal_reason": "equilibrium_and_increment_gates_passed"
+      },
+      {
+        "accepted": true,
+        "accepted_state_hash_after": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+        "accepted_state_hash_before": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+        "attempt_index": 3,
+        "final_residual_inf_n": 1.8550488967150613e-06,
+        "history": [
+          {
+            "accepted_alpha": 1.0,
+            "accepted_residual_inf_n": 1.8550488967150613e-06,
+            "converged": false,
+            "correction_committed": true,
+            "correction_inf_m": 0.000865249739295265,
+            "failure": null,
+            "iteration": 1,
+            "line_search": [
+              {
+                "alpha": 1.0,
+                "candidate_residual_inf_n": 1.8550488967150613e-06,
+                "candidate_state_hash": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
+                "sufficient_decrease": true
+              }
+            ],
+            "residual_inf_n": 44864.5481250023,
+            "tangent_solve_explicit_residual_inf_n": 1.8550489686575133e-06,
+            "tangent_solve_residual_gate_passed": true,
+            "trial_state_hash": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8"
+          },
+          {
+            "converged": true,
+            "correction_committed": false,
+            "correction_inf_m": 7.223446807417054e-10,
+            "failure": null,
+            "iteration": 2,
+            "line_search": [],
+            "residual_inf_n": 1.8550488967150613e-06,
+            "tangent_solve_explicit_residual_inf_n": 4.9068724513560025e-17,
+            "tangent_solve_residual_gate_passed": true,
+            "trial_state_hash": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2"
+          }
+        ],
+        "increment_gate_passed": true,
+        "newton_iterations": 2,
+        "requested_load_increment": 0.5,
+        "residual_gate_passed": true,
+        "rollback_exact": true,
+        "rollback_performed": false,
+        "start_load_factor": 0.75,
+        "target_load_factor": 1.0,
+        "terminal_reason": "equilibrium_and_increment_gates_passed"
+      }
+    ],
+    "blockers_remaining": [
+      "linear_reference_geometry_operator_only",
+      "nonlinear_current_tangent_not_connected",
+      "quadratic_convergence_not_demonstrated",
+      "material_state_commit_rollback_not_connected",
+      "actual_failed_step_rollback_not_exercised",
+      "arc_length_branch_not_executed",
+      "production_matrix_free_krylov_not_connected",
+      "production_rocm_hip_nonlinear_parity_not_verified",
+      "g1_full_load_checkpoint_not_created"
+    ],
+    "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+    "checkpoints": [
+      {
+        "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+        "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
+        "displacement_inf_m": 0.0,
+        "equation_count": 70560,
+        "load_factor": 0.0,
+        "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+        "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+        "state_hash": "sha256:2df507baeb247c46f6aefebae31c1b75381df3eedd7d7d1402e51170802adc86",
+        "step_index": 0
+      },
+      {
+        "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+        "displacement_data_hash": "sha256:e936806c955612e3438299889484c995b86e50acc87e2fd95b2a73f9e54c5b1e",
+        "displacement_inf_m": 0.0008652497392953908,
+        "equation_count": 70560,
+        "load_factor": 0.25,
+        "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+        "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+        "state_hash": "sha256:5948b02a09ef9538ca55b5d84036125cf499337abb27acef1cb0c2a539eb0ff6",
+        "step_index": 1
+      },
+      {
+        "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+        "displacement_data_hash": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
+        "displacement_inf_m": 0.002595749217886194,
+        "equation_count": 70560,
+        "load_factor": 0.75,
+        "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+        "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+        "state_hash": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+        "step_index": 2
+      },
+      {
+        "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+        "displacement_data_hash": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
+        "displacement_inf_m": 0.003460998957181459,
+        "equation_count": 70560,
+        "load_factor": 1.0,
+        "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+        "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+        "state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+        "step_index": 3
+      }
+    ],
+    "claim_boundary": "This continuation starts from zero and reaches the requested LIVE load with an exact sparse Jacobian only for the current linear reference-geometry adapter residual. It exercises Newton control flow, line search, displacement-state commit, rollback support, and restart hashes, but it is not a material/geometric nonlinear path, quadratic-convergence proof, production Krylov/HIP result, G1 checkpoint, or G1 closure.",
+    "claims": {
+      "actual_mgt_semantic_live_load": true,
+      "adaptive_load_stepping": true,
+      "displacement_state_commit": true,
+      "failed_step_rollback_exact": false,
+      "full_arc_length_continuation": false,
+      "full_load_linear_reference_checkpoint": true,
+      "g1_full_building_closure": false,
+      "g1_full_load_checkpoint": false,
+      "line_search_history_recorded": true,
+      "material_state_commit_rollback": false,
+      "nonlinear_current_tangent": false,
+      "production_matrix_free_krylov": false,
+      "quadratic_convergence": false,
+      "restart_checkpoint_consumed": false,
+      "restart_checkpoint_contract": true,
+      "state_invariant_linear_reference_tangent": true,
+      "zero_state_initial_policy": true
+    },
+    "config": {
+      "armijo_decrease": 0.0001,
+      "failed_step_reduction": 0.5,
+      "increment_tolerance_m": 1e-08,
+      "initial_load_increment": 0.25,
+      "line_search_alphas": [
+        1.0,
+        0.5,
+        0.25,
+        0.125
+      ],
+      "maximum_attempt_count": 16,
+      "maximum_load_increment": 0.5,
+      "maximum_newton_iterations": 4,
+      "minimum_load_increment": 0.0625,
+      "residual_tolerance_n": 0.0005,
+      "schema_version": "g1-mgt-semantic-live-linear-newton-continuation.v1",
+      "solver_profile": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1",
+      "successful_step_growth": 2.0,
+      "tangent_solve_residual_tolerance_n": 0.0005,
+      "target_load_factor": 1.0
+    },
+    "final_checkpoint": {
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "displacement_data_hash": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
+      "displacement_inf_m": 0.003460998957181459,
+      "equation_count": 70560,
+      "load_factor": 1.0,
+      "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+      "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+      "state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+      "step_index": 3
+    },
+    "initial_checkpoint": {
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
+      "displacement_inf_m": 0.0,
+      "equation_count": 70560,
+      "load_factor": 0.0,
+      "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+      "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+      "state_hash": "sha256:2df507baeb247c46f6aefebae31c1b75381df3eedd7d7d1402e51170802adc86",
+      "step_index": 0
+    },
+    "metrics": {
+      "accepted_step_count": 3,
+      "all_accepted_increment_gates_passed": true,
+      "attempt_count": 3,
+      "checkpoint_count": 4,
+      "convergence_classification": "one_correction_linear_operator",
+      "displacement_state_commit_count": 3,
+      "failed_step_count": 0,
+      "failed_step_rollback_exercised": false,
+      "fallback_count": 0,
+      "final_load_factor": 1.0,
+      "final_residual_inf_n": 1.8550488967150613e-06,
+      "line_search_candidate_count": 3,
+      "material_state_commit_count": 0,
+      "maximum_tangent_solve_explicit_residual_inf_n": 4.2724750528577715e-06,
+      "minimum_accepted_line_search_alpha": 1.0,
+      "nonlinear_current_tangent_claim": false,
+      "production_solver_claim": false,
+      "quadratic_convergence_claim": false,
+      "regularization_count": 0,
+      "residual_gate_passed": true,
+      "restart_checkpoint_consumed": false,
+      "rollback_exact": true,
+      "target_load_factor": 1.0,
+      "target_load_factor_reached": true
+    },
+    "operator_classification": "state_invariant_linear_reference_geometry",
+    "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+    "schema_version": "g1-mgt-semantic-live-linear-newton-continuation.v1",
+    "solver_profile": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1",
+    "status": "ready",
+    "tangent_consistency_audit": {
+      "all_gates_passed": true,
+      "maximum_error_inf_kn": 9.06263396416307e-06,
+      "maximum_relative_error": 5.0499973491948825e-08,
+      "rows": [
+        {
+          "absolute_tolerance_kn": 0.0001,
+          "csr_action_inf_kn": 179.4581925000004,
+          "direction_hash": "sha256:5974fb0760380dc4c212d54ec379dd7d60246737c4af23500a2400632e1562bb",
+          "error_inf_kn": 1.2797798376595892e-09,
+          "finite_difference_action_inf_kn": 179.45819250000042,
+          "gate_passed": true,
+          "load_factor": 0.0,
+          "relative_error": 7.131353658649975e-12,
+          "relative_tolerance": 5e-08
+        },
+        {
+          "absolute_tolerance_kn": 0.0001,
+          "csr_action_inf_kn": 179.4581925000004,
+          "direction_hash": "sha256:5974fb0760380dc4c212d54ec379dd7d60246737c4af23500a2400632e1562bb",
+          "error_inf_kn": 9.06263396416307e-06,
+          "finite_difference_action_inf_kn": 179.45819250630038,
+          "gate_passed": true,
+          "load_factor": 1.0,
+          "relative_error": 5.0499973491948825e-08,
+          "relative_tolerance": 5e-08
+        }
+      ]
+    },
+    "terminal_reason": "target_load_factor_reached"
+  },
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_closure_pass": false,
+  "failed_step_rollback_audit": {
+    "actual_linear_failed_step_rollback_contract_pass": true,
+    "attempts": [
+      {
+        "accepted": false,
+        "accepted_state_hash_after": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+        "accepted_state_hash_before": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+        "attempt_index": 1,
+        "final_residual_inf_n": 44864.54812499992,
+        "history": [
+          {
+            "accepted_alpha": 1.0,
+            "accepted_residual_inf_n": 1.7482288967585191e-06,
+            "converged": false,
+            "correction_committed": true,
+            "correction_inf_m": 0.0008652497392953908,
+            "failure": null,
+            "iteration": 1,
+            "line_search": [
+              {
+                "alpha": 1.0,
+                "candidate_residual_inf_n": 1.7482288967585191e-06,
+                "candidate_state_hash": "sha256:e936806c955612e3438299889484c995b86e50acc87e2fd95b2a73f9e54c5b1e",
+                "sufficient_decrease": true
+              }
+            ],
+            "residual_inf_n": 44864.54812499992,
+            "tangent_solve_explicit_residual_inf_n": 1.4843044482404366e-06,
+            "tangent_solve_residual_gate_passed": true,
+            "trial_state_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78"
+          }
+        ],
+        "increment_gate_passed": false,
+        "newton_iterations": 1,
+        "rejected_trial_state_hash": "sha256:e936806c955612e3438299889484c995b86e50acc87e2fd95b2a73f9e54c5b1e",
+        "requested_load_increment": 0.25,
+        "residual_gate_passed": false,
+        "rollback_exact": true,
+        "rollback_performed": true,
+        "start_load_factor": 0.0,
+        "target_load_factor": 0.25,
+        "terminal_reason": "maximum_newton_iterations_exhausted"
+      }
+    ],
+    "blockers_remaining": [
+      "linear_reference_geometry_operator_only",
+      "nonlinear_current_tangent_not_connected",
+      "quadratic_convergence_not_demonstrated",
+      "material_state_commit_rollback_not_connected",
+      "nonlinear_failed_step_rollback_not_demonstrated",
+      "arc_length_branch_not_executed",
+      "production_matrix_free_krylov_not_connected",
+      "production_rocm_hip_nonlinear_parity_not_verified",
+      "g1_full_load_checkpoint_not_created"
+    ],
+    "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+    "checkpoints": [
+      {
+        "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+        "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
+        "displacement_inf_m": 0.0,
+        "equation_count": 70560,
+        "load_factor": 0.0,
+        "path_contract_hash": "sha256:dc752a8ff7e10b59b48a4fb92301b63806674647264497d3e939fbbe5e4609a1",
+        "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+        "state_hash": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+        "step_index": 0
+      }
+    ],
+    "claim_boundary": "This continuation starts from zero and reaches the requested LIVE load with an exact sparse Jacobian only for the current linear reference-geometry adapter residual. It exercises Newton control flow, line search, displacement-state commit, rollback support, and restart hashes, but it is not a material/geometric nonlinear path, quadratic-convergence proof, production Krylov/HIP result, G1 checkpoint, or G1 closure.",
+    "claims": {
+      "actual_mgt_semantic_live_load": true,
+      "adaptive_load_stepping": true,
+      "displacement_state_commit": false,
+      "failed_step_rollback_exact": true,
+      "full_arc_length_continuation": false,
+      "full_load_linear_reference_checkpoint": false,
+      "g1_full_building_closure": false,
+      "g1_full_load_checkpoint": false,
+      "line_search_history_recorded": true,
+      "material_state_commit_rollback": false,
+      "nonlinear_current_tangent": false,
+      "production_matrix_free_krylov": false,
+      "quadratic_convergence": false,
+      "restart_checkpoint_consumed": false,
+      "restart_checkpoint_contract": true,
+      "state_invariant_linear_reference_tangent": true,
+      "zero_state_initial_policy": true
+    },
+    "config": {
+      "armijo_decrease": 0.0001,
+      "failed_step_reduction": 0.5,
+      "increment_tolerance_m": 1e-08,
+      "initial_load_increment": 0.25,
+      "line_search_alphas": [
+        1.0,
+        0.5,
+        0.25,
+        0.125
+      ],
+      "maximum_attempt_count": 2,
+      "maximum_load_increment": 0.25,
+      "maximum_newton_iterations": 1,
+      "minimum_load_increment": 0.25,
+      "residual_tolerance_n": 0.0005,
+      "schema_version": "g1-mgt-semantic-live-linear-newton-continuation.v1",
+      "solver_profile": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1",
+      "successful_step_growth": 1.0,
+      "tangent_solve_residual_tolerance_n": 0.0005,
+      "target_load_factor": 0.25
+    },
+    "final_checkpoint": {
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
+      "displacement_inf_m": 0.0,
+      "equation_count": 70560,
+      "load_factor": 0.0,
+      "path_contract_hash": "sha256:dc752a8ff7e10b59b48a4fb92301b63806674647264497d3e939fbbe5e4609a1",
+      "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+      "state_hash": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+      "step_index": 0
+    },
+    "initial_checkpoint": {
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
+      "displacement_inf_m": 0.0,
+      "equation_count": 70560,
+      "load_factor": 0.0,
+      "path_contract_hash": "sha256:dc752a8ff7e10b59b48a4fb92301b63806674647264497d3e939fbbe5e4609a1",
+      "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+      "state_hash": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+      "step_index": 0
+    },
+    "metrics": {
+      "accepted_step_count": 0,
+      "all_accepted_increment_gates_passed": true,
+      "attempt_count": 1,
+      "checkpoint_count": 1,
+      "convergence_classification": "one_correction_linear_operator",
+      "displacement_state_commit_count": 0,
+      "failed_step_count": 1,
+      "failed_step_rollback_exercised": true,
+      "fallback_count": 0,
+      "final_load_factor": 0.0,
+      "final_residual_inf_n": 0.0,
+      "line_search_candidate_count": 1,
+      "material_state_commit_count": 0,
+      "maximum_tangent_solve_explicit_residual_inf_n": 1.4843044482404366e-06,
+      "minimum_accepted_line_search_alpha": null,
+      "nonlinear_current_tangent_claim": false,
+      "production_solver_claim": false,
+      "quadratic_convergence_claim": false,
+      "regularization_count": 0,
+      "residual_gate_passed": true,
+      "restart_checkpoint_consumed": false,
+      "rollback_exact": true,
+      "target_load_factor": 0.25,
+      "target_load_factor_reached": false
+    },
+    "operator_classification": "state_invariant_linear_reference_geometry",
+    "path_contract_hash": "sha256:dc752a8ff7e10b59b48a4fb92301b63806674647264497d3e939fbbe5e4609a1",
+    "schema_version": "g1-mgt-semantic-live-linear-newton-continuation.v1",
+    "solver_profile": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1",
+    "status": "partial",
+    "tangent_consistency_audit": {
+      "all_gates_passed": true,
+      "maximum_error_inf_kn": 1.2797798376595892e-09,
+      "maximum_relative_error": 7.131353658649975e-12,
+      "rows": [
+        {
+          "absolute_tolerance_kn": 0.0001,
+          "csr_action_inf_kn": 179.4581925000004,
+          "direction_hash": "sha256:5974fb0760380dc4c212d54ec379dd7d60246737c4af23500a2400632e1562bb",
+          "error_inf_kn": 1.2797798376595892e-09,
+          "finite_difference_action_inf_kn": 179.45819250000042,
+          "gate_passed": true,
+          "load_factor": 0.0,
+          "relative_error": 7.131353658649975e-12,
+          "relative_tolerance": 5e-08
+        },
+        {
+          "absolute_tolerance_kn": 0.0001,
+          "csr_action_inf_kn": 179.4581925000004,
+          "direction_hash": "sha256:5974fb0760380dc4c212d54ec379dd7d60246737c4af23500a2400632e1562bb",
+          "error_inf_kn": 1.2797798376595892e-09,
+          "finite_difference_action_inf_kn": 179.45819250000042,
+          "gate_passed": true,
+          "load_factor": 0.0,
+          "relative_error": 7.131353658649975e-12,
+          "relative_tolerance": 5e-08
+        }
+      ]
+    },
+    "terminal_reason": "minimum_load_increment_exhausted"
+  },
+  "full_load_checkpoint_artifact": {
+    "artifact_path": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_full_load_free_displacement.f64le",
+    "byte_length": 564480,
+    "byte_order": "little",
+    "checkpoint": {
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "displacement_data_hash": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
+      "displacement_inf_m": 0.003460998957181459,
+      "equation_count": 70560,
+      "load_factor": 1.0,
+      "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+      "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+      "state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+      "step_index": 3
+    },
+    "claim_boundary": "A deterministic little-endian free-DOF vector for one accepted state of the linear reference-geometry diagnostic only.",
+    "data_sha256": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
+    "dtype": "<f8",
+    "equation_count": 70560,
+    "equation_order": "adapter_free_global_dof_order",
+    "g1_full_load_checkpoint_claim": false,
+    "layout": "C",
+    "linear_reference_geometry_checkpoint": true,
+    "persisted_nonlinear_continuation_checkpoint": false,
+    "promotes_g1_closure": false,
+    "residual_gate_passed": true,
+    "residual_inf_n": 1.8550488967150613e-06,
+    "residual_tolerance_n": 0.0005,
+    "role": "full_load_checkpoint",
+    "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1",
+    "status": "ready"
+  },
+  "generated_at": "2026-07-19T01:50:48.398163+00:00",
+  "input_checksums": {
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
+    "implementation/phase1/g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:ac8d129417de659f5145b69e4b126a223176756f30cf75b5586664e26d050f00",
+    "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
+    "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
+    "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
+    "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py": "sha256:4844ff9de2988c47b8082e5de2e9e874207b1c25af97709fa225a2421e7955a5",
+    "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
+    "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
+    "src/structural_analysis/schemas/g1_mgt_semantic_live_linear_newton_continuation_v1.schema.json": "sha256:1d41bac404099a0b8784bfcff98285622f18790fa9d8c791157fb457de7ddfeb",
+    "tests/test_build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py": "sha256:bbc379afae6c915fe0d800e93447b29c2684a8355eb455e6878720d2817f72f9",
+    "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
+    "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:56433cf9f99c5534deeda47ed6ef51c537bb01c73731e79e8694e0d72a2bd646"
+  },
+  "restart_checkpoint_artifact": {
+    "artifact_path": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_restart_0p75_free_displacement.f64le",
+    "byte_length": 564480,
+    "byte_order": "little",
+    "checkpoint": {
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "displacement_data_hash": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
+      "displacement_inf_m": 0.002595749217886194,
+      "equation_count": 70560,
+      "load_factor": 0.75,
+      "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+      "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
+      "state_hash": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+      "step_index": 2
+    },
+    "claim_boundary": "A deterministic little-endian free-DOF vector for one accepted state of the linear reference-geometry diagnostic only.",
+    "data_sha256": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
+    "dtype": "<f8",
+    "equation_count": 70560,
+    "equation_order": "adapter_free_global_dof_order",
+    "g1_full_load_checkpoint_claim": false,
+    "layout": "C",
+    "linear_reference_geometry_checkpoint": true,
+    "persisted_nonlinear_continuation_checkpoint": false,
+    "promotes_g1_closure": false,
+    "residual_gate_passed": true,
+    "residual_inf_n": 3.843175363726914e-06,
+    "residual_tolerance_n": 0.0005,
+    "role": "restart_checkpoint",
+    "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1",
+    "status": "ready"
+  },
+  "restart_replay_audit": {
+    "checkpoint_state_hash_validated_on_reload": true,
+    "contract_pass": true,
+    "direct_final_data_sha256": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
+    "direct_final_residual_inf_n": 1.8550488967150613e-06,
+    "direct_final_state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+    "final_displacement_bytes_identical": true,
+    "final_state_hash_identical": true,
+    "restart_checkpoint_consumed": true,
+    "restarted_final_data_sha256": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
+    "restarted_final_residual_inf_n": 1.8550488967150613e-06,
+    "restarted_final_state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+    "serialization_roundtrip_byte_exact": true,
+    "serialized_checkpoint_data_sha256": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
+    "serialized_checkpoint_load_factor": 0.75,
+    "serialized_checkpoint_state_hash": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+    "status": "ready"
+  },
+  "schema_version": "g1-mgt-semantic-live-linear-newton-continuation-receipt.v1",
+  "source_commit_exact_replay_claim": false,
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_tree_state": "working_tree_with_uncommitted_goal_changes",
+  "status": "partial"
+}

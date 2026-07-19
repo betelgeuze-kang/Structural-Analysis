@@ -1,4 +1,5 @@
 {
+  "canonical_model_checksum": "sha256:7ff671bd5732868696378eba5b4ea806873a07fadd7d40d167d8f82cc6ab7384",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "comparisons": [
     {
@@ -23,8 +24,11 @@
   "contract_pass": true,
   "convergence_history": [
     {
+      "increment_definition": "single_direct_linear_solve; no iterative relative increment",
+      "increment_norm": 0.1,
       "iteration": 1,
-      "relative_increment": 0.1,
+      "relative_increment": 0.0,
+      "relative_increment_applicable": false,
       "relative_residual": 0.0,
       "residual_norm": 0.0,
       "status": "ready",
@@ -38,6 +42,7 @@
   "passed_fields": [
     "engine_version",
     "input_checksum",
+    "canonical_model_checksum",
     "tolerance",
     "convergence_history",
     "claim_boundary_version"
@@ -45,5 +50,7 @@
   "status": "pass",
   "tolerance": 1e-08,
   "unsupported_fields": [],
-  "warnings": []
+  "warnings": [
+    "Requested solver identifier was ignored; solver provenance is engine-owned."
+  ]
 }

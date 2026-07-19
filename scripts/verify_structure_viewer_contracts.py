@@ -52,7 +52,9 @@ STRUCTURE_VIEWER_CONTRACT_TESTS = [
     "tests/test_structure_viewer_explainability_report_contract.py",
     "tests/test_structure_viewer_pdf_export_contract.py",
     "tests/test_structure_viewer_local_ops_state_contract.py",
+    "tests/test_structure_viewer_module_boundaries.py",
     "tests/test_viewer_shared_selection_contract.py",
+    "tests/test_release_viewer_bundler.py",
     "tests/test_generate_selfcontained_viewer.py",
     "tests/test_structure_viewer_singlefile_offline_contract.py",
 ]

@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_current_tangent_operator_parity_v1.schema.json",
+  "title": "Engine v2 HIP current-tangent operator parity receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "source",
+    "fixture",
+    "hardware_execution",
+    "comparison",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "engine-v2-hip-current-tangent-operator-parity-receipt.v1"
+    },
+    "receipt_hash": {"$ref": "#/$defs/sha256"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "source": {"$ref": "#/$defs/source"},
+    "fixture": {"$ref": "#/$defs/fixture"},
+    "hardware_execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_hardware",
+        "backend",
+        "device_name",
+        "gcn_arch_name",
+        "compiler",
+        "binary_sha256",
+        "runtime_output"
+      ],
+      "properties": {
+        "actual_hardware": {"const": true},
+        "backend": {"const": "amd_rocm_hip"},
+        "device_name": {"type": "string", "minLength": 1},
+        "gcn_arch_name": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+        "compiler": {"$ref": "#/$defs/compiler"},
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime_output": {"$ref": "#/$defs/runtime_output"}
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "contract_pass",
+        "canonical_cpu_max_abs_error_n_per_m",
+        "device_order_cpu_max_abs_error_n_per_m",
+        "comparison_tolerance_n_per_m",
+        "action_data_hash",
+        "canonical_action_data_hash",
+        "device_order_action_data_hash",
+        "actual_hardware_execution_required_for_claim",
+        "actual_mgt_scale_claim",
+        "production_performance_claim"
+      ],
+      "properties": {
+        "profile": {
+          "const": "engine-v2-cpu-hip-current-tangent-operator-parity.v1"
+        },
+        "contract_pass": {"const": true},
+        "canonical_cpu_max_abs_error_n_per_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "device_order_cpu_max_abs_error_n_per_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "comparison_tolerance_n_per_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "action_data_hash": {"$ref": "#/$defs/sha256"},
+        "canonical_action_data_hash": {"$ref": "#/$defs/sha256"},
+        "device_order_action_data_hash": {"$ref": "#/$defs/sha256"},
+        "actual_hardware_execution_required_for_claim": {"const": true},
+        "actual_mgt_scale_claim": {"const": false},
+        "production_performance_claim": {"const": false}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_hardware_current_tangent_action",
+        "current_tangent_numerical_parity",
+        "deterministic_free_row_schedule_executed",
+        "gfx1030_local_current_tangent_action",
+        "gfx1100_independent_current_tangent_action",
+        "actual_mgt_current_tangent_action",
+        "production_current_tangent_fgmres",
+        "performance"
+      ],
+      "properties": {
+        "actual_hardware_current_tangent_action": {"const": true},
+        "current_tangent_numerical_parity": {"const": true},
+        "deterministic_free_row_schedule_executed": {"const": true},
+        "gfx1030_local_current_tangent_action": {"type": "boolean"},
+        "gfx1100_independent_current_tangent_action": {"type": "boolean"},
+        "actual_mgt_current_tangent_action": {"const": false},
+        "production_current_tangent_fgmres": {"const": false},
+        "performance": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 100}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_base_commit_sha",
+        "worktree_clean",
+        "exact_source_commit_claim",
+        "input_checksums"
+      ],
+      "properties": {
+        "repository_base_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktree_clean": {"type": "boolean"},
+        "exact_source_commit_claim": {"const": false},
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 10,
+          "additionalProperties": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    },
+    "compiler": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "version_first_line", "version_output_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "version_first_line": {"type": "string", "minLength": 1},
+        "version_output_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "fixture_hash",
+        "operator_contract_hash",
+        "schedule_contract_hash",
+        "execution_contract_hash",
+        "dimensions",
+        "fixture_byte_length",
+        "arrays",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "engine-v2-hip-current-tangent-operator-fixture.v1"
+        },
+        "fixture_hash": {"$ref": "#/$defs/sha256"},
+        "operator_contract_hash": {"$ref": "#/$defs/sha256"},
+        "schedule_contract_hash": {"$ref": "#/$defs/sha256"},
+        "execution_contract_hash": {"$ref": "#/$defs/sha256"},
+        "dimensions": {
+          "type": "object",
+          "required": ["equation_count", "global_dof_count"],
+          "properties": {
+            "equation_count": {"const": 5},
+            "global_dof_count": {"const": 12}
+          }
+        },
+        "fixture_byte_length": {"const": 2600},
+        "arrays": {"type": "object", "minProperties": 21},
+        "claim_boundary": {"type": "string", "minLength": 100}
+      }
+    },
+    "runtime_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "cpu_backend",
+        "device_name",
+        "gcn_arch_name",
+        "execution_profile",
+        "accumulation_profile",
+        "equation_count",
+        "kernel_invocation_count",
+        "mid_action_d2h_transfer_count",
+        "blocking_d2h_synchronization_count",
+        "action_n_per_m"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "engine-v2-hip-current-tangent-operator-output.v1"
+        },
+        "status": {"const": "ok"},
+        "cpu_backend": {"const": false},
+        "device_name": {"type": "string", "minLength": 1},
+        "gcn_arch_name": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+        "execution_profile": {
+          "const": "one_thread_per_free_row_reference_frame_geometry.v1"
+        },
+        "accumulation_profile": {
+          "const": "reference_then_sorted_frame_then_sorted_geometry_sequential_fp64.v1"
+        },
+        "equation_count": {"const": 5},
+        "kernel_invocation_count": {"const": 1},
+        "mid_action_d2h_transfer_count": {"const": 0},
+        "blocking_d2h_synchronization_count": {"const": 1},
+        "action_n_per_m": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"type": "number"}
+        }
+      }
+    }
+  }
+}

@@ -53,3 +53,22 @@ def axial_global_stiffness(properties: AxialElementProperties) -> np.ndarray:
     local = np.outer(direction, direction)
     stiffness = properties.elastic_modulus * properties.area / properties.length
     return stiffness * np.block([[local, -local], [-local, local]])
+
+
+def axial_global_consistent_mass(
+    properties: AxialElementProperties,
+    *,
+    density_kg_per_m3: float,
+) -> np.ndarray:
+    """Return the 6x6 translational consistent mass in kN*s^2/m units."""
+
+    density = float(density_kg_per_m3)
+    if not math.isfinite(density) or density <= 0.0:
+        raise ValueError(
+            f"Element {properties.element_id} density must be finite and positive."
+        )
+    mass_kn_s2_per_m = density * properties.area * properties.length / 1000.0
+    identity = np.eye(3, dtype=float)
+    return (mass_kn_s2_per_m / 6.0) * np.block(
+        [[2.0 * identity, identity], [identity, 2.0 * identity]]
+    )

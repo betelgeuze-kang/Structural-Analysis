@@ -556,6 +556,7 @@ def build_structural_product_development_roadmap(
             next_actions=[
                 "close_medium_model_pass_or_approved_review_gate",
                 "close_large_model_crash_oom_free_gate",
+                "acquire_checksum_and_execute_ifc_import_evidence",
                 "attach_linux_windows_parity_receipts",
                 "attach_human_new_user_workflow_observation",
             ],

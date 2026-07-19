@@ -44,10 +44,39 @@ MOLECULAR_TOKENS = (
     "public_benchmark_vina_gnina",
 )
 
-CORE_PREFIXES = (
-    "src/structural_analysis/",
-)
+CORE_PREFIXES = ("src/structural_analysis/",)
 CORE_EXACT_PATHS = {
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py",
+    "implementation/phase1/release_viewer_bundler.py",
+    "scripts/build_analytic_frame_verification_artifact.py",
+    "scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
+    "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py",
+    "scripts/build_phase2_modal_buckling_kernel_artifacts.py",
+    "scripts/build_phase2_newton_globalization_artifacts.py",
+    "scripts/build_phase2_whole_model_modal_artifacts.py",
+    "scripts/build_phase2_whole_model_buckling_artifacts.py",
+    "scripts/run_external_code_to_code_technical_receipt.py",
+    "scripts/run_external_modal_buckling_technical_receipt.py",
+    "scripts/build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py",
+    "scripts/build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts.py",
+    "scripts/build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py",
+    "scripts/build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py",
+    "scripts/build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py",
+    "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py",
+    "scripts/build_phase2_shallow_arch_arc_length_artifacts.py",
+    "scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+    "scripts/build_phase2_state_updated_composite_section_artifacts.py",
+    "scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
+    "scripts/build_phase2_state_updated_steel_material_artifacts.py",
+    "scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
+    "scripts/build_medium_benchmark_corpus_plan.py",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
+    "scripts/build_phase6_benchmark_scale_status.py",
+    "scripts/build_phase6_silent_import_loss_status.py",
+    "scripts/build_developer_preview_rc_status.py",
+    "scripts/build_developer_preview_final_gate_owner_packet.py",
+    "scripts/build_structural_product_development_roadmap.py",
+    "scripts/build_verification_hierarchy_status.py",
     "scripts/check_git_remote_safety.py",
     "scripts/check_product_ci_boundaries.py",
     "scripts/check_repo_hygiene.py",
@@ -55,19 +84,84 @@ CORE_EXACT_PATHS = {
     "scripts/plan_source_boundary_cleanup.py",
     "scripts/report_source_boundary_footprint.py",
     "scripts/run_product_ci_lane.py",
+    "scripts/run_engine_v2_hip_fgmres_recurrence.py",
+    "scripts/run_engine_v2_hip_primitive_parity.py",
+    "scripts/run_phase3_medium_model_scorecard_receipt.py",
     "scripts/verify_quality_gate.py",
     "scripts/verify_release_artifacts_manifest.py",
     "scripts/verify_open_data_external_artifacts_manifest.py",
     "scripts/verify_structure_viewer_contracts.py",
     "tests/test_authoritative_linear_frame.py",
     "tests/test_authoritative_linear_frame_reference_cases.py",
+    "tests/test_analytic_frame_verification.py",
+    "tests/test_benchmark_scientific_acceptance.py",
+    "tests/test_build_medium_benchmark_corpus_plan.py",
+    "tests/test_build_phase2_adaptive_newton_continuation_artifacts.py",
+    "tests/test_build_phase2_geometric_nonlinear_benchmark_artifacts.py",
+    "tests/test_build_phase2_modal_buckling_kernel_artifacts.py",
+    "tests/test_build_phase2_newton_globalization_artifacts.py",
+    "tests/test_build_phase2_whole_model_modal_artifacts.py",
+    "tests/test_whole_model_modal_analysis.py",
+    "tests/test_build_phase2_whole_model_buckling_artifacts.py",
+    "tests/test_whole_model_buckling_analysis.py",
+    "tests/test_external_code_to_code_technical_receipt.py",
+    "tests/test_external_modal_buckling_technical_receipt.py",
+    "tests/test_build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py",
+    "tests/test_build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts.py",
+    "tests/test_build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py",
+    "tests/test_build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py",
+    "tests/test_build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py",
+    "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py",
+    "tests/test_build_phase2_shallow_arch_arc_length_artifacts.py",
+    "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py",
+    "tests/test_build_phase2_state_updated_composite_section_artifacts.py",
+    "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py",
+    "tests/test_build_phase2_state_updated_steel_material_artifacts.py",
+    "tests/test_build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
+    "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
+    "tests/test_build_phase6_benchmark_scale_status.py",
+    "tests/test_build_phase6_silent_import_loss_status.py",
+    "tests/test_build_developer_preview_rc_status.py",
+    "tests/test_build_developer_preview_final_gate_owner_packet.py",
+    "tests/test_build_structural_product_development_roadmap.py",
+    "tests/test_build_verification_hierarchy_status.py",
     "tests/test_check_product_ci_boundaries.py",
     "tests/test_elastic_material_contract.py",
     "tests/test_mgt_frame_kernel_extraction.py",
     "tests/test_midas_explicit_adapter.py",
     "tests/test_midas_mgt_nodal_load_contract.py",
+    "tests/test_medium_benchmark_corpus_contract.py",
+    "tests/test_nonlinear_adaptive_continuation.py",
+    "tests/test_nonlinear_fully_constrained_no_solve.py",
+    "tests/test_nonlinear_line_search_acceptance.py",
+    "tests/test_nonlinear_newton_config_contract.py",
+    "tests/test_nonlinear_arc_length.py",
+    "tests/test_geometric_nonlinear_benchmarks.py",
+    "tests/test_modal_generalized_eigen_v1.py",
+    "tests/test_buckling_generalized_eigen_v1.py",
+    "tests/test_coupled_shallow_arch_vector_arc_length_benchmark.py",
+    "tests/test_arc_length_cpu_fgmres_tangent_bridge.py",
+    "tests/test_arc_length_cpu_fgmres_continuation.py",
+    "tests/test_sparse_chain_cpu_fgmres_arc_length.py",
+    "tests/test_load_coupled_sparse_chain_arc_length.py",
+    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py",
+    "tests/test_engine_v2_cpu_fgmres_tangent.py",
+    "tests/test_nonlinear_vector_arc_length.py",
+    "tests/test_shallow_arch_arc_length_benchmark.py",
+    "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py",
+    "tests/test_engine_v2_hip_fgmres_recurrence.py",
+    "tests/test_engine_v2_hip_fgmres_recurrence_runner.py",
+    "tests/test_engine_v2_hip_primitive_parity.py",
+    "tests/test_engine_v2_hip_primitive_parity_runner.py",
+    "tests/test_state_updated_concrete_damage_newton.py",
+    "tests/test_state_updated_composite_section_newton.py",
+    "tests/test_state_updated_bilinear_link_newton.py",
+    "tests/test_state_updated_steel_material_newton.py",
     "tests/test_product_ci_workflow_contract.py",
+    "tests/test_run_phase3_medium_model_scorecard_receipt.py",
+    "tests/test_verification_hierarchy_contract.py",
     "tests/test_project_ops_api_service.py",
+    "tests/test_release_viewer_bundler.py",
     "tests/test_result_validation_tolerance.py",
     "tests/test_runtime_dependency_contract.py",
     "tests/test_source_boundary_ci_contract.py",
@@ -111,9 +205,7 @@ def _git_tracked_python_paths(repo_root: Path) -> list[str]:
         stdout=subprocess.PIPE,
     )
     return sorted(
-        row
-        for row in completed.stdout.decode("utf-8", "replace").split("\0")
-        if row
+        row for row in completed.stdout.decode("utf-8", "replace").split("\0") if row
     )
 
 
@@ -202,7 +294,9 @@ def build_report(
 
     lane_paths = {lane: [] for lane in LANES}
     for path in python_paths:
-        lane_paths[classify_path(path, quarantined_paths=quarantined_paths)].append(path)
+        lane_paths[classify_path(path, quarantined_paths=quarantined_paths)].append(
+            path
+        )
 
     blockers: list[str] = []
     declared_count = manifest.get("path_count")
@@ -284,9 +378,7 @@ def main(argv: list[str] | None = None) -> int:
         print(
             "Product CI boundaries: "
             f"{payload['status']} | "
-            + " | ".join(
-                f"{lane}={payload['lane_counts'][lane]}" for lane in LANES
-            )
+            + " | ".join(f"{lane}={payload['lane_counts'][lane]}" for lane in LANES)
         )
     return 1 if args.fail_blocked and not payload["contract_pass"] else 0
 

@@ -1,0 +1,601 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural.local/schemas/g1-mgt-state-updated-matrix-free-newton-diagnostic-v1.schema.json",
+  "title": "G1 actual-MGT state-updated matrix-free Newton diagnostic receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "readiness_pass",
+    "evidence_closure_pass",
+    "source_commit_sha",
+    "engine_version",
+    "source_commit_exact_replay_claim",
+    "source_tree_state",
+    "input_checksums",
+    "case_id",
+    "inputs",
+    "adapter_binding",
+    "solver_binding",
+    "newton_attempts",
+    "metrics",
+    "claims",
+    "blockers_remaining",
+    "artifacts",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "g1-mgt-state-updated-matrix-free-newton-diagnostic-receipt.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "readiness_pass": {"const": false},
+    "evidence_closure_pass": {"const": false},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "engine_version": {"type": "string", "minLength": 1},
+    "source_commit_exact_replay_claim": {"const": false},
+    "source_tree_state": {
+      "const": "working_tree_with_uncommitted_goal_changes"
+    },
+    "input_checksums": {
+      "type": "object",
+      "minProperties": 10,
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "case_id": {
+      "const": "g1_real_mgt_state_updated_matrix_free_newton_diagnostic"
+    },
+    "inputs": {"$ref": "#/$defs/inputs"},
+    "adapter_binding": {"$ref": "#/$defs/adapter_binding"},
+    "solver_binding": {"$ref": "#/$defs/solver_binding"},
+    "newton_attempts": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/newton_attempt"}
+    },
+    "metrics": {"$ref": "#/$defs/metrics"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt", "schema"],
+      "properties": {
+        "receipt": {"type": "string", "minLength": 1},
+        "schema": {
+          "const": "src/structural_analysis/schemas/g1_mgt_state_updated_matrix_free_newton_diagnostic_v1.schema.json"
+        }
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mgt_path",
+        "mgt_sha256",
+        "operator_checkpoint",
+        "operator_checkpoint_sha256",
+        "initial_state_policy",
+        "load_factor",
+        "free_equation_count",
+        "initial_state_data_hash"
+      ],
+      "properties": {
+        "mgt_path": {"type": "string", "minLength": 1},
+        "mgt_sha256": {"$ref": "#/$defs/sha256"},
+        "operator_checkpoint": {"type": "string", "minLength": 1},
+        "operator_checkpoint_sha256": {"$ref": "#/$defs/sha256"},
+        "initial_state_policy": {
+          "const": "full_unit_zero_state_linear_predictor"
+        },
+        "load_factor": {"const": 1.0},
+        "free_equation_count": {"const": 70560},
+        "initial_state_data_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "adapter_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_mgt_semantic_live_target_consumed",
+        "semantic_target_name",
+        "frame_element_count",
+        "exact_frame_source_property_coverage",
+        "dgn_alias_contract_pass",
+        "dgn_alias_engineer_review_required",
+        "state_updated_frame_axial_geometry",
+        "residual_evaluation_contract",
+        "residual_parent_equivalence_audit",
+        "reference_preconditioner_contract"
+      ],
+      "properties": {
+        "actual_mgt_semantic_live_target_consumed": {"const": true},
+        "semantic_target_name": {"const": "LIVE"},
+        "frame_element_count": {"const": 5572},
+        "exact_frame_source_property_coverage": {"const": true},
+        "dgn_alias_contract_pass": {"const": true},
+        "dgn_alias_engineer_review_required": {"const": true},
+        "state_updated_frame_axial_geometry": {
+          "type": "object",
+          "required": [
+            "state_updated_frame_axial_geometry_applied",
+            "connected_to_physical_residual",
+            "connected_to_consistent_state_tangent_action",
+            "consistent_state_tangent_action_mode",
+            "connected_to_centered_tangent_action",
+            "centered_tangent_action_available_for_independent_audit",
+            "finite_chord_extension_evaluation",
+            "finite_chord_correction_evaluation",
+            "property_fallback_count",
+            "full_corotational_frame_claim"
+          ],
+          "properties": {
+            "state_updated_frame_axial_geometry_applied": {"const": true},
+            "connected_to_physical_residual": {"const": true},
+            "connected_to_consistent_state_tangent_action": {"const": true},
+            "consistent_state_tangent_action_mode": {
+              "const": "analytic_reference_plus_exact_finite_chord_axial_correction"
+            },
+            "connected_to_centered_tangent_action": {"const": false},
+            "centered_tangent_action_available_for_independent_audit": {
+              "const": true
+            },
+            "finite_chord_extension_evaluation": {
+              "const": "difference_of_squares_cancellation_stable"
+            },
+            "finite_chord_correction_evaluation": {
+              "const": "second_order_decomposition_cancellation_stable"
+            },
+            "property_fallback_count": {"const": 0},
+            "full_corotational_frame_claim": {"const": false}
+          }
+        },
+        "residual_evaluation_contract": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "residual_formula_hash",
+            "mode",
+            "reference_csr_parent_matches_analytic_tangent",
+            "load_frame_delta_parent_matches_analytic_tangent",
+            "finite_chord_correction_parent_matches_analytic_tangent",
+            "component_force_assembly_retained_for_diagnostics",
+            "promotes_g1_closure"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "mgt-residual-evaluation-contract.v1"
+            },
+            "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+            "mode": {
+              "const": "reference_csr_plus_load_frame_delta_plus_finite_chord_correction"
+            },
+            "reference_csr_parent_matches_analytic_tangent": {"const": true},
+            "load_frame_delta_parent_matches_analytic_tangent": {
+              "const": true
+            },
+            "finite_chord_correction_parent_matches_analytic_tangent": {
+              "const": true
+            },
+            "component_force_assembly_retained_for_diagnostics": {
+              "const": true
+            },
+            "promotes_g1_closure": {"const": false}
+          }
+        },
+        "residual_parent_equivalence_audit": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "status",
+            "applicable",
+            "parent_component_difference_inf_n",
+            "comparison_tolerance_n",
+            "parent_component_gate_passed",
+            "parent_repeat_bytes_exact",
+            "contract_pass"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "mgt-residual-parent-component-equivalence.v1"
+            },
+            "status": {"const": "ready"},
+            "applicable": {"const": true},
+            "parent_component_difference_inf_n": {
+              "type": "number",
+              "minimum": 0
+            },
+            "comparison_tolerance_n": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "parent_component_gate_passed": {"const": true},
+            "parent_repeat_bytes_exact": {"const": true},
+            "contract_pass": {"const": true}
+          }
+        },
+        "reference_preconditioner_contract": {
+          "type": "object",
+          "required": [
+            "status",
+            "available",
+            "operator_classification",
+            "equation_count",
+            "operator_nnz",
+            "intended_use",
+            "exact_for_adapter_residual_model",
+            "approximate_for_state_dependent_adapter",
+            "factorization_executed_by_adapter",
+            "production_preconditioner_claim",
+            "promotes_g1_closure"
+          ],
+          "properties": {
+            "status": {"const": "ready"},
+            "available": {"const": true},
+            "operator_classification": {
+              "const": "zero_state_linear_reference_geometry"
+            },
+            "equation_count": {"const": 70560},
+            "operator_nnz": {"const": 1262462},
+            "intended_use": {"const": "fixed_right_preconditioner"},
+            "exact_for_adapter_residual_model": {"const": false},
+            "approximate_for_state_dependent_adapter": {"const": true},
+            "factorization_executed_by_adapter": {"const": false},
+            "production_preconditioner_claim": {"const": false},
+            "promotes_g1_closure": {"const": false}
+          }
+        }
+      }
+    },
+    "solver_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "contract_hash",
+        "reference_preconditioner_contract",
+        "reference_preconditioner_pattern_hash",
+        "reference_preconditioner_values_hash",
+        "operator_binding",
+        "recurrence_profile",
+        "accumulation_profile",
+        "deterministic_host_recurrence_arithmetic",
+        "operator_callback_formula_parent_arrays_bound",
+        "cross_platform_end_to_end_deterministic_claim",
+        "config"
+      ],
+      "properties": {
+        "profile": {
+          "const": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1"
+        },
+        "contract_hash": {"$ref": "#/$defs/sha256"},
+        "reference_preconditioner_contract": {
+          "const": "zero_state_linear_reference_geometry_csr_preconditioner.v1"
+        },
+        "reference_preconditioner_pattern_hash": {"$ref": "#/$defs/sha256"},
+        "reference_preconditioner_values_hash": {"$ref": "#/$defs/sha256"},
+        "operator_binding": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "status",
+            "binding_hash",
+            "equation_count",
+            "free_equation_order_data_hash",
+            "residual_formula_hash",
+            "current_tangent_action_contract",
+            "reference_load_free_n_data_hash",
+            "current_tangent_operator_profile",
+            "current_tangent_operator_contract_hash",
+            "current_tangent_operator_array_bundle_hash",
+            "operator_callback_outputs_in_contract"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "matrix-free-current-state-tangent-operator-binding.v1"
+            },
+            "status": {"const": "ready"},
+            "binding_hash": {"$ref": "#/$defs/sha256"},
+            "equation_count": {"const": 70560},
+            "free_equation_order_data_hash": {"$ref": "#/$defs/sha256"},
+            "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+            "current_tangent_action_contract": {
+              "const": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1"
+            },
+            "reference_load_free_n_data_hash": {"$ref": "#/$defs/sha256"},
+            "current_tangent_operator_profile": {
+              "const": "reference_csr_load_frame_delta_finite_chord_axial.v1"
+            },
+            "current_tangent_operator_contract_hash": {
+              "$ref": "#/$defs/sha256"
+            },
+            "current_tangent_operator_array_bundle_hash": {
+              "$ref": "#/$defs/sha256"
+            },
+            "operator_callback_outputs_in_contract": {"const": true}
+          }
+        },
+        "recurrence_profile": {
+          "const": "right_preconditioned_fgmres_two_pass_modified_gram_schmidt_explicit_replay.v1"
+        },
+        "accumulation_profile": {
+          "const": "ascending_index_python_fsum_fp64.v1"
+        },
+        "deterministic_host_recurrence_arithmetic": {"const": true},
+        "operator_callback_formula_parent_arrays_bound": {"const": true},
+        "cross_platform_end_to_end_deterministic_claim": {"const": false},
+        "config": {
+          "type": "object",
+          "required": [
+            "max_iterations",
+            "restart_length",
+            "relative_tolerance_l2",
+            "absolute_tolerance_l2_kn",
+            "explicit_residual_tolerance_inf_kn",
+            "recurrence_profile",
+            "accumulation_profile",
+            "preconditioner_application",
+            "terminal_gate"
+          ],
+          "properties": {
+            "max_iterations": {"const": 30},
+            "restart_length": {"const": 15},
+            "relative_tolerance_l2": {"const": 1e-6},
+            "absolute_tolerance_l2_kn": {"const": 1e-10},
+            "explicit_residual_tolerance_inf_kn": {"const": 5e-7},
+            "recurrence_profile": {
+              "const": "right_preconditioned_fgmres_two_pass_modified_gram_schmidt_explicit_replay.v1"
+            },
+            "accumulation_profile": {
+              "const": "ascending_index_python_fsum_fp64.v1"
+            },
+            "preconditioner_application": {"const": "fixed_right"},
+            "terminal_gate": {"const": "explicit_raw_residual_l2_and_inf"}
+          }
+        }
+      }
+    },
+    "newton_attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "attempt_index",
+        "accepted",
+        "rejection_reason",
+        "state_before_data_hash",
+        "trial_state_data_hash",
+        "state_after_data_hash",
+        "before_residual_inf_kn",
+        "before_residual_l2_kn",
+        "trial_residual_inf_kn",
+        "trial_residual_l2_kn",
+        "accepted_after_residual_inf_kn",
+        "accepted_after_residual_l2_kn",
+        "residual_descent",
+        "trial_residual_reduction_factor_inf",
+        "correction_inf_m",
+        "relative_correction_inf",
+        "trial_residual_gate_passed",
+        "rollback_exercised",
+        "rollback_byte_exact",
+        "tangent_solve"
+      ],
+      "properties": {
+        "attempt_index": {"type": "integer", "minimum": 1, "maximum": 2},
+        "accepted": {"type": "boolean"},
+        "rejection_reason": {
+          "type": ["string", "null"]
+        },
+        "state_before_data_hash": {"$ref": "#/$defs/sha256"},
+        "trial_state_data_hash": {"$ref": "#/$defs/sha256"},
+        "state_after_data_hash": {"$ref": "#/$defs/sha256"},
+        "before_residual_inf_kn": {"type": "number", "minimum": 0},
+        "before_residual_l2_kn": {"type": "number", "minimum": 0},
+        "trial_residual_inf_kn": {"type": "number", "minimum": 0},
+        "trial_residual_l2_kn": {"type": "number", "minimum": 0},
+        "accepted_after_residual_inf_kn": {"type": "number", "minimum": 0},
+        "accepted_after_residual_l2_kn": {"type": "number", "minimum": 0},
+        "residual_descent": {"type": "boolean"},
+        "trial_residual_reduction_factor_inf": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "correction_inf_m": {"type": "number", "minimum": 0},
+        "relative_correction_inf": {"type": "number", "minimum": 0},
+        "trial_residual_gate_passed": {"type": "boolean"},
+        "rollback_exercised": {"type": "boolean"},
+        "rollback_byte_exact": {"type": "boolean"},
+        "tangent_solve": {"$ref": "#/$defs/tangent_solve"}
+      }
+    },
+    "tangent_solve": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "contract_pass",
+        "profile",
+        "equation_count",
+        "converged",
+        "terminal_reason",
+        "iteration_count",
+        "operator_action_count",
+        "preconditioner_application_count",
+        "explicit_residual_inf_kn",
+        "fallback_count",
+        "regularization_count",
+        "matrix_free_current_state_operator_action",
+        "materialized_current_tangent",
+        "operator_binding_ready",
+        "deterministic_host_recurrence_arithmetic_claim",
+        "cross_platform_deterministic_recurrence_claim",
+        "production_solver_claim",
+        "rocm_hip_parity_claim",
+        "promotes_g1_closure"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "matrix-free-cpu-fgmres-state-tangent-solve.v1"
+        },
+        "status": {"const": "ready"},
+        "contract_pass": {"const": true},
+        "profile": {
+          "const": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1"
+        },
+        "equation_count": {"const": 70560},
+        "converged": {"const": true},
+        "terminal_reason": {"const": "converged_explicit_residual"},
+        "iteration_count": {"type": "integer", "minimum": 1},
+        "operator_action_count": {"type": "integer", "minimum": 1},
+        "preconditioner_application_count": {"type": "integer", "minimum": 1},
+        "explicit_residual_inf_kn": {"type": "number", "minimum": 0},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0},
+        "matrix_free_current_state_operator_action": {"const": true},
+        "materialized_current_tangent": {"const": false},
+        "operator_binding_ready": {"const": true},
+        "deterministic_host_recurrence_arithmetic_claim": {"const": true},
+        "cross_platform_deterministic_recurrence_claim": {"const": false},
+        "production_solver_claim": {"const": false},
+        "rocm_hip_parity_claim": {"const": false},
+        "promotes_g1_closure": {"const": false}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximum_newton_attempts",
+        "attempt_count",
+        "accepted_attempt_count",
+        "rejected_attempt_count",
+        "initial_residual_inf_kn",
+        "initial_residual_l2_kn",
+        "final_accepted_residual_inf_kn",
+        "final_accepted_residual_l2_kn",
+        "residual_gate_kn",
+        "residual_gate_passed",
+        "accepted_residual_reduction_factor_inf",
+        "final_accepted_state_data_hash",
+        "total_tangent_iteration_count",
+        "total_tangent_operator_action_count",
+        "maximum_tangent_explicit_residual_inf_kn",
+        "fallback_count",
+        "regularization_count",
+        "line_search_executed"
+      ],
+      "properties": {
+        "maximum_newton_attempts": {"const": 2},
+        "attempt_count": {"const": 2},
+        "accepted_attempt_count": {"const": 2},
+        "rejected_attempt_count": {"const": 0},
+        "initial_residual_inf_kn": {"type": "number", "exclusiveMinimum": 0},
+        "initial_residual_l2_kn": {"type": "number", "exclusiveMinimum": 0},
+        "final_accepted_residual_inf_kn": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "final_accepted_residual_l2_kn": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "residual_gate_kn": {"const": 5e-7},
+        "residual_gate_passed": {"const": true},
+        "accepted_residual_reduction_factor_inf": {
+          "type": "number",
+          "exclusiveMinimum": 1
+        },
+        "final_accepted_state_data_hash": {"$ref": "#/$defs/sha256"},
+        "total_tangent_iteration_count": {"type": "integer", "minimum": 2},
+        "total_tangent_operator_action_count": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "maximum_tangent_explicit_residual_inf_kn": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5e-7
+        },
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0},
+        "line_search_executed": {"const": false}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_mgt_semantic_live_load_consumed",
+        "exact_source_derived_alias_frame_property_coverage",
+        "dgn_alias_engineer_review_required",
+        "analytic_current_state_tangent_action",
+        "fixed_zero_state_csr_right_preconditioner",
+        "local_cpu_matrix_free_state_tangent_diagnostic",
+        "all_tangent_solves_operator_bound",
+        "all_tangent_solves_deterministic_host_arithmetic",
+        "all_tangent_operator_formula_parent_arrays_bound",
+        "explicit_tangent_residual_replay",
+        "cancellation_stable_finite_chord_evaluation",
+        "residual_parent_operator_matches_analytic_tangent",
+        "residual_formula_hash_verified",
+        "first_full_newton_step_residual_descent",
+        "second_full_newton_step_residual_descent",
+        "full_load_residual_gate_passed",
+        "globalized_newton",
+        "full_nonlinear_continuation",
+        "persisted_load_1p0_checkpoint",
+        "full_corotational_frame",
+        "material_state_commit_rollback",
+        "production_matrix_free_state_tangent_krylov",
+        "cross_platform_deterministic_recurrence",
+        "production_rocm_hip_nonlinear_parity",
+        "g1_full_building_closure"
+      ],
+      "properties": {
+        "actual_mgt_semantic_live_load_consumed": {"const": true},
+        "exact_source_derived_alias_frame_property_coverage": {"const": true},
+        "dgn_alias_engineer_review_required": {"const": true},
+        "analytic_current_state_tangent_action": {"const": true},
+        "fixed_zero_state_csr_right_preconditioner": {"const": true},
+        "local_cpu_matrix_free_state_tangent_diagnostic": {"const": true},
+        "all_tangent_solves_operator_bound": {"const": true},
+        "all_tangent_solves_deterministic_host_arithmetic": {"const": true},
+        "all_tangent_operator_formula_parent_arrays_bound": {"const": true},
+        "explicit_tangent_residual_replay": {"const": true},
+        "cancellation_stable_finite_chord_evaluation": {"const": true},
+        "residual_parent_operator_matches_analytic_tangent": {"const": true},
+        "residual_formula_hash_verified": {"const": true},
+        "first_full_newton_step_residual_descent": {"const": true},
+        "second_full_newton_step_residual_descent": {"const": true},
+        "full_load_residual_gate_passed": {"const": true},
+        "globalized_newton": {"const": false},
+        "full_nonlinear_continuation": {"const": false},
+        "persisted_load_1p0_checkpoint": {"const": false},
+        "full_corotational_frame": {"const": false},
+        "material_state_commit_rollback": {"const": false},
+        "production_matrix_free_state_tangent_krylov": {"const": false},
+        "cross_platform_deterministic_recurrence": {"const": false},
+        "production_rocm_hip_nonlinear_parity": {"const": false},
+        "g1_full_building_closure": {"const": false}
+      }
+    }
+  }
+}

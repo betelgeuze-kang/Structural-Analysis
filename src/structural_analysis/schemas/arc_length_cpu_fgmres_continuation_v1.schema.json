@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/arc_length_cpu_fgmres_continuation_v1.schema.json",
+  "title": "Phase 2 complete short-path CPU FGMRES arc-length integration v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "contract_pass",
+    "case_id",
+    "analysis_type",
+    "tangent_solver_profile",
+    "tangent_solver_mode",
+    "tangent_solver_contract_hash",
+    "solver_result",
+    "verification",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase2-arc-length-cpu-fgmres-continuation.v1"
+    },
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "case_id": {"type": "string", "minLength": 1},
+    "analysis_type": {
+      "const": "complete_short_path_arc_length_cpu_fgmres_integration"
+    },
+    "tangent_solver_profile": {
+      "const": "vector_arc_length_schur_engine_v2_cpu_fgmres.v1"
+    },
+    "tangent_solver_mode": {"const": "materialized_tangent_matrix"},
+    "tangent_solver_contract_hash": {"$ref": "#/$defs/sha256"},
+    "solver_result": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "terminal_reason",
+        "case_id",
+        "path_contract_hash",
+        "residual_formula",
+        "constraint_formula",
+        "config",
+        "reference_load_kn",
+        "initial_checkpoint",
+        "final_checkpoint",
+        "checkpoints",
+        "attempts",
+        "metrics"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-vector-arc-length.v1"},
+        "status": {"enum": ["ready", "blocked"]},
+        "terminal_reason": {"type": "string", "minLength": 1},
+        "case_id": {"type": "string", "minLength": 1},
+        "path_contract_hash": {"$ref": "#/$defs/sha256"},
+        "residual_formula": {"type": "string", "minLength": 1},
+        "constraint_formula": {"type": "string", "minLength": 1},
+        "config": {"type": "object"},
+        "reference_load_kn": {"type": "array", "minItems": 2, "maxItems": 2},
+        "initial_checkpoint": {"type": "object"},
+        "final_checkpoint": {"type": "object"},
+        "checkpoints": {"type": "array", "minItems": 2},
+        "attempts": {"type": "array", "minItems": 1},
+        "metrics": {
+          "type": "object",
+          "required": [
+            "contract_pass",
+            "equation_count",
+            "target_monitor_displacement_reached",
+            "accepted_step_count",
+            "rejected_step_count",
+            "rollback_exact",
+            "fallback_count",
+            "regularization_count",
+            "tangent_linear_solver_profile",
+            "tangent_linear_solver_mode",
+            "external_tangent_solver_contract_hash",
+            "external_tangent_solve_count",
+            "maximum_external_tangent_explicit_residual_inf_norm_kn",
+            "negative_load_factor_observed",
+            "claim_boundary"
+          ],
+          "properties": {
+            "tangent_linear_solver_profile": {
+              "const": "vector_arc_length_schur_engine_v2_cpu_fgmres.v1"
+            },
+            "tangent_linear_solver_mode": {
+              "const": "materialized_tangent_matrix"
+            },
+            "external_tangent_solver_contract_hash": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path_gate_passed",
+        "limit_point_crossed",
+        "negative_load_branch_reached",
+        "external_tangent_integration_gate_passed",
+        "all_tangent_solves_ready",
+        "rollback_evidence_passed",
+        "checkpoint_restart_exact",
+        "deterministic_replay_exact",
+        "dense_augmented_reference_gate_passed",
+        "exact_scalar_reduction_gate_passed",
+        "same_dense_reference_checkpoint_count",
+        "maximum_dense_reference_displacement_absolute_error_m",
+        "maximum_dense_reference_load_factor_absolute_error",
+        "maximum_coupling_relation_absolute_error_m",
+        "maximum_reduced_equilibrium_absolute_error_kn",
+        "tangent_solve_count",
+        "maximum_tangent_solve_explicit_residual_inf_norm_kn",
+        "maximum_tangent_solve_iteration_count",
+        "tangent_solve_hashes",
+        "restart_checkpoint_state_hash",
+        "final_checkpoint_state_hash",
+        "restarted_final_checkpoint_state_hash",
+        "fallback_count",
+        "regularization_count"
+      ],
+      "properties": {
+        "path_gate_passed": {"type": "boolean"},
+        "limit_point_crossed": {"type": "boolean"},
+        "negative_load_branch_reached": {"type": "boolean"},
+        "external_tangent_integration_gate_passed": {"type": "boolean"},
+        "all_tangent_solves_ready": {"type": "boolean"},
+        "rollback_evidence_passed": {"type": "boolean"},
+        "checkpoint_restart_exact": {"type": "boolean"},
+        "deterministic_replay_exact": {"type": "boolean"},
+        "dense_augmented_reference_gate_passed": {"type": "boolean"},
+        "exact_scalar_reduction_gate_passed": {"type": "boolean"},
+        "same_dense_reference_checkpoint_count": {"type": "boolean"},
+        "maximum_dense_reference_displacement_absolute_error_m": {"type": "number", "minimum": 0},
+        "maximum_dense_reference_load_factor_absolute_error": {"type": "number", "minimum": 0},
+        "maximum_coupling_relation_absolute_error_m": {"type": "number", "minimum": 0},
+        "maximum_reduced_equilibrium_absolute_error_kn": {"type": "number", "minimum": 0},
+        "tangent_solve_count": {"type": "integer", "minimum": 1},
+        "maximum_tangent_solve_explicit_residual_inf_norm_kn": {"type": "number", "minimum": 0},
+        "maximum_tangent_solve_iteration_count": {"type": "integer", "minimum": 0},
+        "tangent_solve_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/sha256"}
+        },
+        "restart_checkpoint_state_hash": {"$ref": "#/$defs/sha256"},
+        "final_checkpoint_state_hash": {"$ref": "#/$defs/sha256"},
+        "restarted_final_checkpoint_state_hash": {"$ref": "#/$defs/sha256"},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "complete_short_path_cpu_fgmres_arc_length_integration",
+        "engine_v2_cpu_fgmres_every_tangent_solve",
+        "failed_step_rollback",
+        "checkpoint_restart",
+        "dense_augmented_path_equivalence",
+        "general_frame_shell_arc_length",
+        "lee_frame_snapthrough",
+        "production_scale_sparse_preconditioner",
+        "production_rocm_hip_nonlinear_parity",
+        "g1_full_building_closure"
+      ],
+      "properties": {
+        "complete_short_path_cpu_fgmres_arc_length_integration": {"type": "boolean"},
+        "engine_v2_cpu_fgmres_every_tangent_solve": {"type": "boolean"},
+        "failed_step_rollback": {"type": "boolean"},
+        "checkpoint_restart": {"type": "boolean"},
+        "dense_augmented_path_equivalence": {"type": "boolean"},
+        "general_frame_shell_arc_length": {"const": false},
+        "lee_frame_snapthrough": {"const": false},
+        "production_scale_sparse_preconditioner": {"const": false},
+        "production_rocm_hip_nonlinear_parity": {"const": false},
+        "g1_full_building_closure": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

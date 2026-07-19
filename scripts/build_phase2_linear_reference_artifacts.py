@@ -92,9 +92,38 @@ def analytic_axial_bar_payload() -> dict[str, Any]:
 
 def mechanism_payload() -> dict[str, Any]:
     payload = analytic_axial_bar_payload()
-    payload["supports"] = [{"id": "SUP1", "node": "N1", "dofs": "all"}]
+    payload["elements"] = [
+        {
+            "id": "F1",
+            "type": "frame",
+            "nodes": ["N1", "N2"],
+            "section": "S1",
+            "material": "M1",
+        }
+    ]
+    payload["materials"] = [
+        {
+            "id": "M1",
+            "type": "elastic",
+            "elastic_modulus": 200000.0,
+            "poisson_ratio": 0.3,
+        }
+    ]
+    payload["sections"] = [
+        {
+            "id": "S1",
+            "type": "frame",
+            "area": 0.01,
+            "iy": 1.0e-4,
+            "iz": 1.0e-4,
+            "torsional_constant": 1.0e-4,
+        }
+    ]
+    payload["supports"] = [
+        {"id": "SUP1", "node": "N1", "dofs": ["UX", "UY", "UZ"]}
+    ]
     payload["metadata"] = {
-        "case_id": "phase2_axial_bar_mechanism_guard",
+        "case_id": "phase2_pinned_frame_rotation_mechanism_guard",
         "truth_class": "negative_mechanism_guard",
         "claim_boundary": "mechanism_must_block_not_regularize_or_pass",
     }
@@ -518,8 +547,7 @@ def build_tangent_jacobian_verification(
         }
 
     constrained = set(assembly.constrained_dofs)
-    all_dofs = set(range(assembly.loads.shape[0]))
-    free = sorted(all_dofs - constrained)
+    free = sorted(set(assembly.active_dofs) - constrained)
     free_stiffness = assembly.stiffness[np.ix_(free, free)]
     try:
         free_displacements = np.linalg.solve(free_stiffness, assembly.loads[free])

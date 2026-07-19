@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/canonical_sparse_lu_binary_artifacts_v1.schema.json",
+  "title": "Canonical sparse-LU binary artifact bundle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "storage_profile",
+    "factor_contract_hash",
+    "dimension",
+    "source_operator_pattern_hash",
+    "source_operator_numeric_values_hash",
+    "artifact_count",
+    "total_byte_length",
+    "artifacts",
+    "claim_boundary",
+    "bundle_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "canonical-sparse-lu-binary-artifacts.v1"
+    },
+    "storage_profile": {
+      "const": "canonical_little_endian_sparse_lu_arrays.v1"
+    },
+    "factor_contract_hash": {"$ref": "#/$defs/sha256"},
+    "dimension": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "source_operator_pattern_hash": {"$ref": "#/$defs/sha256"},
+    "source_operator_numeric_values_hash": {"$ref": "#/$defs/sha256"},
+    "artifact_count": {"const": 8},
+    "total_byte_length": {"type": "integer", "minimum": 64},
+    "artifacts": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {"$ref": "#/$defs/artifact"}
+    },
+    "claim_boundary": {
+      "const": {
+        "descriptor_only_manifest": true,
+        "canonical_little_endian_binary": true,
+        "writer_and_byte_validation_required": true,
+        "readback_reconstructs_factor_contract": true,
+        "artifact_presence_proven_by_manifest": false,
+        "hip_execution_proven_by_manifest": false
+      }
+    },
+    "bundle_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "artifact_uri"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "lower_row_pointer",
+            "lower_column_indices",
+            "lower_numeric_values",
+            "upper_row_pointer",
+            "upper_column_indices",
+            "upper_numeric_values",
+            "row_permutation",
+            "column_permutation"
+          ]
+        },
+        "dtype": {"enum": ["<i8", "<f8"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_uri": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

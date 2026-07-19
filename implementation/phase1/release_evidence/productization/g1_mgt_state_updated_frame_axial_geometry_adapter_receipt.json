@@ -1,0 +1,803 @@
+{
+  "artifacts": {
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.json",
+    "schema": "src/structural_analysis/schemas/g1_mgt_state_updated_frame_axial_geometry_adapter_v1.schema.json"
+  },
+  "blockers_remaining": [
+    "dgn_exact_type_name_material_inheritance_engineer_review_required",
+    "full_corotational_frame_not_implemented",
+    "full_nonlinear_continuation_not_executed",
+    "production_matrix_free_state_tangent_krylov_not_executed",
+    "current_tangent_operator_hip_execution_not_performed",
+    "production_rocm_hip_nonlinear_parity_not_executed",
+    "accepted_semantic_live_load_1p0_checkpoint_not_produced",
+    "g1_full_building_closure_not_established"
+  ],
+  "callback_replay": {
+    "analytic_centered_error_inf_kn_per_m": 0.004287494433810934,
+    "analytic_centered_gate_passed": true,
+    "analytic_centered_reference_step_m": 2e-07,
+    "analytic_centered_relative_error": 6.223363281848047e-08,
+    "analytic_centered_relative_tolerance": 0.005,
+    "contract_pass": true,
+    "equation_count": 70560,
+    "finite": true,
+    "full_unit_predictor_residual_inf_n": 3823.8140951064206,
+    "predictor_residual_replay_matches": true,
+    "predictor_residual_replay_tolerance_n": 3.8238140951064205e-09,
+    "recorded_full_unit_predictor_residual_inf_n": 3823.8140951064206,
+    "schema_version": "g1-mgt-state-updated-frame-axial-callback-replay.v1",
+    "tangent_probe_direction": "full_unit_zero_state_predictor_normalized_by_infinity_norm",
+    "tangent_probe_load_factor": 1.0,
+    "tangent_state_dependence_detected": true,
+    "tangent_state_dependence_tolerance_kn_per_m": 6.889352653234992e-08,
+    "tangent_state_difference_inf_kn_per_m": 2935.9022702476345,
+    "zero_state_residual_inf_n": 0.0
+  },
+  "case_id": "g1_real_mgt_state_updated_frame_axial_geometry_adapter",
+  "claim_boundary": "This receipt connects conservative finite-chord frame axial geometry to the actual uncoarsened MGT semantic-LIVE residual and analytic consistent state-tangent callback. The solve residual uses the same reference CSR, load-frame delta, and finite-chord correction parents as that tangent; the component sum remains a scale-relative diagnostic cross-check. Property binding uses exact unique DGN-MATL type/name aliases to source *MATERIAL elastic properties. The aliases consume no DGN numeric elastic fields or synthetic fallback and remain engineer-review-required. Bending and torsion remain reference-geometry terms. This is not a full corotational frame, nonlinear continuation, production Krylov/HIP result, accepted load-1.0 checkpoint, or G1 closure.",
+  "claims": {
+    "accepted_semantic_live_load_1p0_checkpoint": false,
+    "actual_mgt_source_and_semantic_live_load_consumed": true,
+    "authoritative_element_connectivity_consumed": true,
+    "backend_neutral_current_tangent_operator_contract": true,
+    "dgn_alias_engineer_review_required": true,
+    "dgn_exact_type_name_source_alias_applied": true,
+    "dgn_numeric_elastic_override_consumed": false,
+    "exact_frame_source_property_coverage_after_alias": true,
+    "finite_chord_axial_geometry_connected_to_consistent_state_tangent": true,
+    "finite_chord_axial_geometry_connected_to_physical_residual": true,
+    "full_corotational_frame": false,
+    "full_nonlinear_continuation": false,
+    "g1_full_building_closure": false,
+    "measurable_quadratic_predictor_remainder": true,
+    "operator_callback_formula_and_parent_arrays_in_contract": true,
+    "production_matrix_free_state_tangent_krylov": false,
+    "production_rocm_hip_nonlinear_parity": false,
+    "residual_formula_hash_verified": true,
+    "residual_parent_component_equivalence_audited": true,
+    "residual_parent_matches_analytic_tangent": true,
+    "state_dependent_tangent_action_detected": true,
+    "synthetic_property_fallback_used": false,
+    "zero_state_reference_preconditioner_exposed": true
+  },
+  "contract_pass": true,
+  "current_tangent_operator_contract": {
+    "array_total_byte_length": 31271000,
+    "contract_pass": true,
+    "cpu_hip_numerical_parity": false,
+    "cpu_reference_evaluator_executed": true,
+    "hip_execution": false,
+    "manifest": {
+      "array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
+      "array_descriptors": [
+        {
+          "byte_length": 564488,
+          "content_hash": "sha256:877eb38ad630191db8c2b7d3a0ed95acd7d35cfe9f2319a5d0e30c0b05d54f1f",
+          "data_hash": "sha256:5001155b82c3df20681fae81509fbbe145d27426794b2014ec5d72e8c9bef1ce",
+          "dtype": "<i8",
+          "layout": "C",
+          "name": "reference_row_pointer",
+          "shape": [
+            70561
+          ]
+        },
+        {
+          "byte_length": 10099696,
+          "content_hash": "sha256:f15d80156d8d21bdda6d9b669a49a5241a1bf51c928453daedaa9265d44d9485",
+          "data_hash": "sha256:427a65aa722016f7210e3639360528832abc65157e182afe629b2e7f9dd94ce4",
+          "dtype": "<i8",
+          "layout": "C",
+          "name": "reference_column_indices",
+          "shape": [
+            1262462
+          ]
+        },
+        {
+          "byte_length": 10099696,
+          "content_hash": "sha256:555870498ee6e6a9951f36761d3533f5e1def28f572bde8e5f5a675aaccf485d",
+          "data_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "reference_values_n_per_m",
+          "shape": [
+            1262462
+          ]
+        },
+        {
+          "byte_length": 564480,
+          "content_hash": "sha256:c26244be1212cbc977e192f7003840c3b2d8c7e6fffc32284bc8a0e4604b7ac4",
+          "data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+          "dtype": "<i8",
+          "layout": "C",
+          "name": "free_global_dofs",
+          "shape": [
+            70560
+          ]
+        },
+        {
+          "byte_length": 626256,
+          "content_hash": "sha256:b658d5c0be9a8a345fd36f2555a39ce65564b8ce6eb3c2306ba25dd6544ca14b",
+          "data_hash": "sha256:12ba98e8f05cefe565c66d8644823cf70806a4585fc97aeb1021f76b1ce8e112",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "background_global_displacements_m",
+          "shape": [
+            78282
+          ]
+        },
+        {
+          "byte_length": 534912,
+          "content_hash": "sha256:5db8737843a97c0a3848782bda2d12953cd30a82df29305f3a8242522dfbc080",
+          "data_hash": "sha256:a0bacaf234154e79e080c2f9c16fcbbd50f13a76a486c258e1d455b8608f9c0a",
+          "dtype": "<i8",
+          "layout": "C",
+          "name": "frame_dofs",
+          "shape": [
+            5572,
+            12
+          ]
+        },
+        {
+          "byte_length": 6418944,
+          "content_hash": "sha256:e8120e72f2db2b4c87811eab68f47837017a5e9cb5cd5af6756695657a81b46b",
+          "data_hash": "sha256:69e78e75bd31c06005ff3b9c9424399a43230a94cac2047b907ce8e7562b4536",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "frame_stiffness_delta_n_per_m",
+          "shape": [
+            5572,
+            12,
+            12
+          ]
+        },
+        {
+          "byte_length": 534912,
+          "content_hash": "sha256:1fe25a766143660ab43097fc25933f7268c7bc826f0c7b34253e0fd5222c75ce",
+          "data_hash": "sha256:a0bacaf234154e79e080c2f9c16fcbbd50f13a76a486c258e1d455b8608f9c0a",
+          "dtype": "<i8",
+          "layout": "C",
+          "name": "geometry_dofs",
+          "shape": [
+            5572,
+            12
+          ]
+        },
+        {
+          "byte_length": 1604736,
+          "content_hash": "sha256:0450efff08131b8859cff0d1255f8d5be48df48e6ebd6c9d562e7cc63314fc1d",
+          "data_hash": "sha256:e5c0d815bef8b79bd3b49f73565fb8a100d7a30db094c9612777761bfa347e1d",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "geometry_relative_translation_operators",
+          "shape": [
+            5572,
+            3,
+            12
+          ]
+        },
+        {
+          "byte_length": 133728,
+          "content_hash": "sha256:ecf7c68ba0daa7b309fe177651ca24be49eed2571e1279030586204b376ab164",
+          "data_hash": "sha256:5e69129e8fe57fc21f3d981b88cf2c89aae7a822c524343f26ddaa104fb2cf3b",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "geometry_reference_chords_m",
+          "shape": [
+            5572,
+            3
+          ]
+        },
+        {
+          "byte_length": 44576,
+          "content_hash": "sha256:5998bb45fb5699de20cc56521ec24012ae56e6ef9f2728113c8e423fccf6f266",
+          "data_hash": "sha256:93b72afd9be0e60f29538aef524dbb27f7bcd6ecbc019a8e3ecd6749984e0fe4",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "geometry_reference_lengths_m",
+          "shape": [
+            5572
+          ]
+        },
+        {
+          "byte_length": 44576,
+          "content_hash": "sha256:4c92780be2193d0a0199bbda6ab84ccc06fc9085f64bab9d5558a4461826dad0",
+          "data_hash": "sha256:5f6fdeb12cd2241b5ecb8ac1c61d22f5b78c723c84375159351dd4e90951185e",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "geometry_axial_stiffness_n_per_m",
+          "shape": [
+            5572
+          ]
+        }
+      ],
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "claim_boundary": {
+        "cpu_hip_numerical_parity": false,
+        "cpu_reference_evaluator": true,
+        "cross_platform_bit_identity": false,
+        "description": "This contract binds the current-tangent formula, equation order, and all numeric parent arrays to immutable canonical bytes. Its NumPy evaluator is a CPU reference path. It does not establish HIP execution, CPU/HIP numerical parity, cross-platform bit identity, performance, a production nonlinear solver, or G1 closure.",
+        "g1_closure": false,
+        "hip_execution": false,
+        "immutable_backend_neutral_parent_arrays": true,
+        "performance": false,
+        "production_nonlinear_solver": false
+      },
+      "contract_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+      "dimensions": {
+        "equation_count": 70560,
+        "frame_element_count": 5572,
+        "geometry_element_count": 5572,
+        "global_dof_count": 78282,
+        "reference_nnz": 1262462
+      },
+      "evaluation_contract": {
+        "action_expression": "K_reference_ff*v_f + load_factor*K_frame_delta*v_global + K_finite_chord_axial_correction(u_global)*v_global",
+        "direction_embedding": "zero_global_vector_plus_free_scatter",
+        "element_scatter": "element_then_local_dof_numpy_add_at",
+        "frame_load_delta_action": "load_factor_times_prepacked_12x12_stiffness_delta",
+        "geometry_action": "stable_finite_chord_conservative_axial_correction_tangent",
+        "output_order": "free_global_dofs",
+        "reference_csr_action": "row_major_stored_entry_numpy_add_reduceat_fp64",
+        "reference_evaluator": "numpy_fp64_array_formula_reference.v1",
+        "state_embedding": "background_global_displacements_plus_free_scatter"
+      },
+      "profile": "reference_csr_load_frame_delta_finite_chord_axial.v1",
+      "residual_formula_hash": "sha256:2da9d3377eaf3cd9b196e82535c3a3593502079652306bc5705e13d910cca62f",
+      "schema_version": "structural-analysis-current-tangent-operator.v1",
+      "source_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
+      "units": {
+        "displacement": "m",
+        "force": "N",
+        "load_factor": "dimensionless",
+        "tangent_action": "N/m"
+      }
+    },
+    "operator_binding": {
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
+      "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
+      "current_tangent_operator_contract_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+      "current_tangent_operator_profile": "reference_csr_load_frame_delta_finite_chord_axial.v1",
+      "displacement_unit": "m",
+      "equation_count": 70560,
+      "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+      "load_factor_unit": "dimensionless",
+      "operator_callback_outputs_in_contract": true,
+      "operator_callback_reference_evaluator": "numpy_fp64_array_formula_reference.v1",
+      "reference_load_free_n_data_hash": "sha256:010766b31f80c5f2de534b006b6b3143d9d59fffd24d709eb16637392fbdc805",
+      "residual_force_unit": "kN",
+      "residual_formula_hash": "sha256:2da9d3377eaf3cd9b196e82535c3a3593502079652306bc5705e13d910cca62f",
+      "schema_version": "matrix-free-current-state-tangent-operator-binding.v1",
+      "tangent_action_unit": "kN/m"
+    },
+    "operator_callback_outputs_in_contract": true,
+    "residual_centered_difference_gate_passed": true
+  },
+  "dgn_material_property_alias_audit": {
+    "alias_material_count": 24,
+    "alias_rows": [
+      {
+        "dgn_material_id": 8,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 9,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 10,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 11,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 12,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 13,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 14,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 15,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 16,
+        "material_name": "C40+Q235",
+        "material_type": "SRC",
+        "source_material_id": 3,
+        "source_material_name": "C40+Q235",
+        "source_material_type": "SRC"
+      },
+      {
+        "dgn_material_id": 17,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 18,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 19,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 20,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 21,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 22,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 23,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 24,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 25,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 26,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 27,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 28,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 29,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 30,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 31,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      }
+    ],
+    "ambiguous_identity_rows": [],
+    "claim_boundary": "Copies analysis elastic properties only from one exact *MATERIAL type/name identity to a distinct *DGN-MATL id. DGN numeric design fields, fuzzy matching, and inferred database values are not consumed. The identity inheritance remains engineer-review-required.",
+    "contract_pass": true,
+    "dgn_material_row_count": 29,
+    "dgn_numeric_elastic_override_consumed_count": 0,
+    "dgn_unique_material_id_count": 29,
+    "duplicate_dgn_material_ids": [],
+    "engineer_review_required": true,
+    "exact_unique_identity_match_row_count": 29,
+    "existing_source_id_row_count": 5,
+    "fuzzy_name_match_count": 0,
+    "resolution_policy": "exact_normalized_type_and_name_unique_source_material.v1",
+    "schema_version": "mgt-dgn-material-property-alias-audit.v1",
+    "source_material_count": 6,
+    "unresolved_identity_rows": []
+  },
+  "diagnostic_execution_ready": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engineer_review_required": true,
+  "evidence_closure_pass": false,
+  "frame_connectivity_audit": {
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "edge_index_used_for_element_binding": false,
+    "frame_connectivity_source": "elem_conn_ptr/elem_conn_idx",
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "invalid_line_connectivity_element_id_head": [],
+    "line_element_row_accounting_exact": true,
+    "line_elements_solved": 5572,
+    "line_node_count": 8076,
+    "raw_line_element_count": 5576,
+    "skipped_invalid_line_connectivity_count": 0,
+    "skipped_short_or_degenerate_line_count": 4
+  },
+  "frame_source_property_coverage_audit": {
+    "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
+    "exact_source_property_coverage": true,
+    "fallback_allowed_for_state_updated_geometry": false,
+    "frame_element_count": 5572,
+    "material_property_resolved_element_count": 5572,
+    "missing_material_element_count": 0,
+    "missing_material_id_counts": [],
+    "missing_section_element_count": 0,
+    "missing_section_id_counts": [],
+    "resolved_source_property_element_count": 5572,
+    "schema_version": "mgt-state-updated-frame-axial-property-coverage.v1",
+    "section_property_resolved_element_count": 5572,
+    "source_material_property_count": 30,
+    "source_property_coverage_ratio": 1.0,
+    "source_section_property_count": 183,
+    "unresolved_element_head": [],
+    "unresolved_element_head_limit": 32,
+    "unresolved_source_property_element_count": 0
+  },
+  "generated_at": "2026-07-19T01:51:31.348521+00:00",
+  "input_checksums": {
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
+    "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
+    "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
+    "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
+    "implementation/phase1/mgt_shell_load_path.py": "sha256:3518c70ddbaf5bf3e4fa71a3ebedd84304ebe674315bb599c5d1b3cbeb5d5863",
+    "implementation/phase1/mgt_state_updated_frame_axial_geometry.py": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
+    "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py": "sha256:a6598d5613aefccaa9a6eda7c26adaba2cf4406dd3ea0a4acb57f32fe0870603",
+    "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
+    "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
+    "scripts/build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py": "sha256:70e687cc216b7bc6d96780bf1069db82300d49ceb094c58b564617d3cb7f2fe0",
+    "src/structural_analysis/engine_v2/contracts/_canonical.py": "sha256:78883ad07598edeb838de0ccce2717b362a323574bfe86822dfcfda665ecf11b",
+    "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
+    "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
+    "src/structural_analysis/schemas/g1_mgt_state_updated_frame_axial_geometry_adapter_v1.schema.json": "sha256:6b54c97408ca8eb257e27780cdc8b20437a8ce1b474325b37baa55bb65bd9315",
+    "tests/test_build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py": "sha256:006da2710f67ecd05b04182ebed2590cfe9c2162337ad44b90969490e9e97188",
+    "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
+    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:9857bee3bd4b418e6356f3826b41735a0def626bb3f20748397c02713ffb9eda",
+    "tests/test_mgt_physical_residual_assembly.py": "sha256:07956e81f561e06af794e1808e3398bb8c13e54c1d0938456fd2f560fea16982",
+    "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
+    "tests/test_parse_mgt_section_material_properties.py": "sha256:d7859a725762191c56523c0cfed9aabd13ed7ec5b2cdca275ba2a10d7a472cfa"
+  },
+  "inputs": {
+    "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+    "checkpoint_sha256": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "element_count": 12728,
+    "frame_element_count": 5572,
+    "free_equation_count": 70560,
+    "global_dof_count": 78282,
+    "historical_checkpoint_equilibrium_claim": false,
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "node_count": 13047,
+    "roundtrip_derivation": "parse_midas_mgt_to_json_npz:no_resolve_rigid_links:no_drop_unreferenced_nodes",
+    "roundtrip_generated_uncoarsened": true,
+    "roundtrip_sha256": "sha256:d95097f6d0a40d950f38dda4fe287bca2428ea3e476bebeb3424d458eac409de",
+    "semantic_load_case": "LIVE"
+  },
+  "material_analysis_property_binding": {
+    "dgn_alias_material_count_applied": 24,
+    "dgn_alias_material_count_available": 24,
+    "dgn_alias_resolution_enabled": true,
+    "engineer_review_required": true,
+    "resolution_policy": "exact_normalized_type_and_name_unique_source_material.v1",
+    "resolved_material_count": 30,
+    "source_material_count": 6
+  },
+  "readiness_pass": false,
+  "reference_preconditioner_contract": {
+    "approximate_for_state_dependent_adapter": true,
+    "available": true,
+    "claim_boundary": "The zero-state linear reference-geometry CSR is exposed as a fixed right-preconditioner candidate. For a state-dependent adapter it is approximate, not the current Jacobian. The adapter does not factorize it, run Krylov, establish preconditioner effectiveness, or promote G1 closure.",
+    "csr_column_index_hash": "sha256:427a65aa722016f7210e3639360528832abc65157e182afe629b2e7f9dd94ce4",
+    "csr_row_pointer_hash": "sha256:5001155b82c3df20681fae81509fbbe145d27426794b2014ec5d72e8c9bef1ce",
+    "equation_count": 70560,
+    "exact_for_adapter_residual_model": false,
+    "factorization_executed_by_adapter": false,
+    "intended_use": "fixed_right_preconditioner",
+    "operator_classification": "zero_state_linear_reference_geometry",
+    "operator_nnz": 1262462,
+    "operator_numeric_values_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1",
+    "production_preconditioner_claim": false,
+    "promotes_g1_closure": false,
+    "schema_version": "zero_state_linear_reference_geometry_csr_preconditioner.v1",
+    "status": "ready"
+  },
+  "residual_evaluation_contract": {
+    "claim_boundary": "The finite-chord axial path evaluates its nonlinear residual from the same reference CSR, load-frame delta, and axial correction parents used by the analytic tangent. Component force assembly remains a diagnostic cross-check. This is not a full corotational frame, material-state update, production solver, or G1 closure claim.",
+    "component_force_assembly_retained_for_diagnostics": true,
+    "finite_chord_correction_parent_matches_analytic_tangent": true,
+    "full_corotational_frame_claim": false,
+    "load_frame_delta_parent_matches_analytic_tangent": true,
+    "material_state_update_claim": false,
+    "mode": "reference_csr_plus_load_frame_delta_plus_finite_chord_correction",
+    "prescribed_background_term_included": true,
+    "prescribed_background_term_inf_n": 0.0,
+    "promotes_g1_closure": false,
+    "reference_csr_parent_matches_analytic_tangent": true,
+    "residual_formula": {
+      "current_state_variables": [
+        "u_f",
+        "load_factor"
+      ],
+      "displacement_unit": "m",
+      "expression": "K0_ff*u_f + K0_fp*u_prescribed + load_factor*(F_frame_unit(u)-F_frame_zero(u))_f + F_finite_chord_axial_correction(u)_f - load_factor*F_external_LIVE_f",
+      "force_unit": "N",
+      "free_equation_order": "adapter_free_global_dof_order",
+      "load_factor_unit": "dimensionless",
+      "prescribed_background_term": "K0_fp*u_prescribed",
+      "residual_sign_convention": "internal_minus_external",
+      "schema_version": "mgt-residual-formula.v1"
+    },
+    "residual_formula_hash": "sha256:2da9d3377eaf3cd9b196e82535c3a3593502079652306bc5705e13d910cca62f",
+    "schema_version": "mgt-residual-evaluation-contract.v1"
+  },
+  "residual_parent_equivalence_audit": {
+    "applicable": true,
+    "claim_boundary": "At the full-unit linear predictor, the tangent-parent residual is byte-repeatable and agrees with the retained component-force diagnostic within a scale-relative floating-point tolerance. This does not make the component summation the nonlinear solve residual or establish a production/G1 operator.",
+    "comparison_relative_tolerance": 1e-09,
+    "comparison_scale_n": 179458.2387319392,
+    "comparison_tolerance_n": 0.0001794582387319392,
+    "component_internal_force_inf_n": 179458.2387319392,
+    "component_sum_residual_inf_n": 3823.8140951476234,
+    "contract_pass": true,
+    "parent_component_difference_inf_n": 1.922977389767766e-06,
+    "parent_component_gate_passed": true,
+    "parent_repeat_bytes_exact": true,
+    "parent_repeat_data_hash": "sha256:2c4c7dc7a6f8270596913ef51d8831174fc5c0839e099df221b91958cff5581a",
+    "parent_residual_inf_n": 3823.8140951064206,
+    "probe_load_factor": 1.0,
+    "probe_state": "full_unit_zero_state_linear_predictor",
+    "schema_version": "mgt-residual-parent-component-equivalence.v1",
+    "status": "ready"
+  },
+  "schema_version": "g1-mgt-state-updated-frame-axial-geometry-adapter-receipt.v1",
+  "source_commit_exact_replay_claim": false,
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_tree_state": "working_tree_with_uncommitted_goal_changes",
+  "state_dependent_tangent_contract": {
+    "available": false,
+    "claim_boundary": "Exact CSR Jacobian only for the adapter's current linear reference-geometry residual with state-independent material operators. It is not a corotational or material-state-updated nonlinear tangent, quadratic-convergence proof, production Krylov solve, or G1 closure.",
+    "csr_column_index_hash": "sha256:427a65aa722016f7210e3639360528832abc65157e182afe629b2e7f9dd94ce4",
+    "csr_row_pointer_hash": "sha256:5001155b82c3df20681fae81509fbbe145d27426794b2014ec5d72e8c9bef1ce",
+    "current_state_reassembly_required": true,
+    "equation_count": 70560,
+    "exact_for_adapter_residual_model": false,
+    "force_unit": "N",
+    "material_state_commit_rollback_claim": false,
+    "nonlinear_current_tangent_claim": false,
+    "operator_classification": "state_dependent_frame_axial_geometry",
+    "operator_nnz": 1262462,
+    "operator_numeric_values_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1",
+    "promotes_g1_closure": false,
+    "quadratic_convergence_claim": false,
+    "rotation_tangent_unit": "N_m_per_rad",
+    "schema_version": "linear_reference_geometry_residual_exact_csr.v1",
+    "status": "blocked",
+    "translation_tangent_unit": "N_per_m"
+  },
+  "state_updated_frame_axial_geometry": {
+    "beam_end_offset_element_count": 706,
+    "centered_tangent_action_available_for_independent_audit": true,
+    "claim_boundary": "Replaces the reference linear axial force with a conservative finite-chord extension force and exact axial tangent action. Bending/torsion remain reference-geometry small-rotation terms; this is not a complete 3D corotational beam or material update.",
+    "connected_to_centered_tangent_action": false,
+    "connected_to_consistent_state_tangent_action": true,
+    "connected_to_physical_residual": true,
+    "conservative_energy_gradient": true,
+    "consistent_state_tangent_action_mode": "analytic_reference_plus_exact_finite_chord_axial_correction",
+    "consistent_tangent_action_available": true,
+    "element_count": 5572,
+    "finite_chord_correction_evaluation": "second_order_decomposition_cancellation_stable",
+    "finite_chord_extension_evaluation": "difference_of_squares_cancellation_stable",
+    "finite_chord_translation_geometry": true,
+    "finite_nodal_rotation_objectivity_claim": false,
+    "formulation_profile": "finite_chord_conservative_axial_replacement.v1",
+    "frame_bending_torsion_state_update_connected": false,
+    "full_corotational_frame_claim": false,
+    "material_state_update_claim": false,
+    "preflight_status": "ready",
+    "prepack_executed": true,
+    "property_fallback_count": 0,
+    "real_property_element_count": 5572,
+    "reference_linear_axial_contribution_replaced": true,
+    "rigid_end_offset_rotation_map": "small_rotation_linearized_offset_transform",
+    "schema_version": "mgt-state-updated-frame-axial-geometry.v1",
+    "source_property_coverage_audit": {
+      "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
+      "exact_source_property_coverage": true,
+      "fallback_allowed_for_state_updated_geometry": false,
+      "frame_element_count": 5572,
+      "material_property_resolved_element_count": 5572,
+      "missing_material_element_count": 0,
+      "missing_material_id_counts": [],
+      "missing_section_element_count": 0,
+      "missing_section_id_counts": [],
+      "resolved_source_property_element_count": 5572,
+      "schema_version": "mgt-state-updated-frame-axial-property-coverage.v1",
+      "section_property_resolved_element_count": 5572,
+      "source_material_property_count": 30,
+      "source_property_coverage_ratio": 1.0,
+      "source_section_property_count": 183,
+      "unresolved_element_head": [],
+      "unresolved_element_head_limit": 32,
+      "unresolved_source_property_element_count": 0
+    },
+    "state_updated_frame_axial_geometry_applied": true
+  },
+  "status": "partial",
+  "zero_state_sparse_predictor_audit": {
+    "claim_boundary": "This is one zero-state CPU sparse-direct predictor direction and three load levels that subtract the scaled sparse-solve residual floor before classifying a linear or quadratic remainder. It is not an arc-length corrector, continuation path, production Krylov solve, material-state Newton path, ROCm/HIP proof, full-load checkpoint, or G1 closure.",
+    "contract_pass": true,
+    "equation_count": 70560,
+    "explicit_linear_relative_residual_inf": 4.787153154577641e-10,
+    "explicit_linear_residual_inf_n": 8.590938523411751e-05,
+    "explicit_linear_residual_tolerance_n": 0.0005,
+    "failure": null,
+    "fallback_count": 0,
+    "full_arc_length_continuation_executed": false,
+    "full_unit_predictor_rotation_inf_rad": 0.0011278554442209958,
+    "full_unit_predictor_translation_inf_m": 0.0026048642604111333,
+    "linear_model_consistency_gate_passed": false,
+    "linear_residual_gate_passed": true,
+    "loaded_component_count": 1,
+    "measurable_quadratic_remainder_gate_passed": true,
+    "minimum_observed_remainder_order": 1.9999997268745022,
+    "nonlinear_remainder_relative_noise_tolerance": 2e-11,
+    "operator_nnz": 1262462,
+    "predictor_direction_hash": "sha256:7da92568f855e09df91d4a561cf678c65bddd0cd2d161393aa548cafb316a58d",
+    "predictor_load_factors": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "predictor_remainder_gate_passed": true,
+    "predictor_rows": [
+      {
+        "load_factor": 0.25,
+        "maximum_predictor_translation_m": 0.0006512160651027833,
+        "nonlinear_remainder_above_noise": true,
+        "nonlinear_remainder_inf_n": 238.98845360620342,
+        "nonlinear_remainder_noise_tolerance_n": 8.972909624999984e-07,
+        "observed_remainder_order_from_previous": null,
+        "residual_inf_n": 238.98843442087022,
+        "residual_over_load_factor_squared_n": 3823.8149507339235,
+        "residual_relative_to_scaled_reference_load": 0.005326888253839303,
+        "scaled_linear_solve_residual_floor_inf_n": 2.1477346308529377e-05
+      },
+      {
+        "load_factor": 0.5,
+        "maximum_predictor_translation_m": 0.0013024321302055667,
+        "nonlinear_remainder_above_noise": true,
+        "nonlinear_remainder_inf_n": 955.953723939418,
+        "nonlinear_remainder_noise_tolerance_n": 1.7945819249999967e-06,
+        "observed_remainder_order_from_previous": 1.999999863442317,
+        "residual_inf_n": 955.9536855687516,
+        "residual_over_load_factor_squared_n": 3823.814742275006,
+        "residual_relative_to_scaled_reference_load": 0.010653775926877824,
+        "scaled_linear_solve_residual_floor_inf_n": 4.2954692617058754e-05
+      },
+      {
+        "load_factor": 1.0,
+        "maximum_predictor_translation_m": 0.0026048642604111333,
+        "nonlinear_remainder_above_noise": true,
+        "nonlinear_remainder_inf_n": 3823.8141718477536,
+        "nonlinear_remainder_noise_tolerance_n": 3.5891638499999935e-06,
+        "observed_remainder_order_from_previous": 1.9999997268745022,
+        "residual_inf_n": 3823.8140951064206,
+        "residual_over_load_factor_squared_n": 3823.8140951064206,
+        "residual_relative_to_scaled_reference_load": 0.021307548247519695,
+        "scaled_linear_solve_residual_floor_inf_n": 8.590938523411751e-05
+      }
+    ],
+    "production_solver_claim": false,
+    "quadratic_remainder_gate_passed": true,
+    "regularization_count": 0,
+    "remainder_classification": "measurable_quadratic",
+    "right_hand_side_inf_n": 179458.19249999968,
+    "solve_finite": true,
+    "solved_component_count": 1,
+    "solver_profile": "scipy_sparse_component_spsolve_cpu_diagnostic_no_regularization.v1",
+    "sparse_direct_solve_attempted": true,
+    "status": "ready",
+    "unloaded_component_zero_solution_count": 2170,
+    "zero_state_equilibrium_gate_passed": true,
+    "zero_state_equilibrium_tolerance_n": 1e-12,
+    "zero_state_load_direction_error_inf_n": 0.0,
+    "zero_state_load_direction_gate_passed": true,
+    "zero_state_residual_inf_n": 0.0
+  }
+}

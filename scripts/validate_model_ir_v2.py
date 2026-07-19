@@ -49,7 +49,10 @@ def build_report(path: Path) -> dict[str, Any]:
                 }
             ],
             "blocking_feature_ids": [],
+            "derived_blocking_feature_ids": [],
             "content_hash": None,
+            "semantic_hash": None,
+            "provenance_hash": None,
             "claim_boundary": "model_ir_contract_validation_not_solver_readiness",
         }
 

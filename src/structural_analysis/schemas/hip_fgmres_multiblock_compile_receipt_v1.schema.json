@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_multiblock_compile_receipt_v1.schema.json",
+  "title": "Engine v2 HIP FGMRES multi-block target compile receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "contract_scope",
+    "source",
+    "target_compile",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "engine-v2-hip-fgmres-multiblock-compile-receipt.v1"
+    },
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "contract_scope": {"const": "target_compile_only"},
+    "source": {
+      "type": "object",
+      "required": [
+        "repository_base_commit_sha",
+        "worktree_clean",
+        "exact_source_commit_claim",
+        "input_checksums"
+      ],
+      "properties": {
+        "repository_base_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktree_clean": {"type": "boolean"},
+        "exact_source_commit_claim": {"const": false},
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 10,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "target_compile": {
+      "type": "object",
+      "required": [
+        "compile_succeeded",
+        "backend",
+        "architecture",
+        "compiler",
+        "binary_sha256",
+        "source_path",
+        "recurrence_execution_profile",
+        "operator_blocks_per_case"
+      ],
+      "properties": {
+        "compile_succeeded": {"const": true},
+        "backend": {"const": "amd_rocm_hip"},
+        "architecture": {
+          "type": "string",
+          "pattern": "^gfx[0-9a-f]+$"
+        },
+        "compiler": {
+          "type": "object",
+          "required": [
+            "path",
+            "version_first_line",
+            "version_output_sha256"
+          ],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "version_first_line": {"type": "string", "minLength": 1},
+            "version_output_sha256": {"$ref": "#/$defs/hash"}
+          },
+          "additionalProperties": false
+        },
+        "binary_sha256": {"$ref": "#/$defs/hash"},
+        "source_path": {
+          "const": "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp"
+        },
+        "recurrence_execution_profile": {
+          "const": "same_stream_fixed_kernel_sequence_device_guarded.v1"
+        },
+        "operator_blocks_per_case": {"const": 4}
+      },
+      "additionalProperties": false
+    },
+    "claims": {
+      "type": "object",
+      "required": [
+        "declared_target_compile",
+        "gfx1030_target_compile",
+        "actual_hardware_execution",
+        "numerical_parity",
+        "checkpoint_resume_parity",
+        "production_recurrence",
+        "performance"
+      ],
+      "properties": {
+        "declared_target_compile": {"const": true},
+        "gfx1030_target_compile": {"type": "boolean"},
+        "actual_hardware_execution": {"const": false},
+        "numerical_parity": {"const": false},
+        "checkpoint_resume_parity": {"const": false},
+        "production_recurrence": {"const": false},
+        "performance": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {
+      "const": [
+        "actual_hardware_execution_not_performed",
+        "multi_block_numerical_parity_not_verified",
+        "checkpoint_resume_runtime_not_verified",
+        "production_scale_multi_block_operator_not_verified",
+        "production_scale_preconditioner_effectiveness_not_verified",
+        "independent_gfx1100_receipt_not_attached",
+        "same_clean_source_commit_cross_device_not_verified",
+        "signed_hardware_receipt_not_attached",
+        "wheel_hash_cross_device_identity_not_verified",
+        "model_size_performance_sweep_not_executed"
+      ]
+    },
+    "claim_boundary": {"type": "string", "minLength": 80}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

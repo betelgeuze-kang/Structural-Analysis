@@ -103,7 +103,7 @@ def test_contract_artifacts_cover_model_health_and_authoritative_frame_path(
     assert frame_cli_result == frame_result
     assert frame_cli_report == frame_report
 
-    assert summary["schema_version"] == "phase1-core-api-contract-artifacts.v2"
+    assert summary["schema_version"] == "phase1-core-api-contract-artifacts.v3"
     assert summary["contract_pass"] is True
     assert "source_commit_sha" in summary
     assert summary["engine_version"]
@@ -165,6 +165,28 @@ def test_contract_artifacts_cover_model_health_and_authoritative_frame_path(
     assert frame_contract["fallback_used"] is False
     assert frame_contract["regularization_used"] is False
 
+    configuration_guard = summary["public_configuration_guard"]
+    assert configuration_guard["status"] == "ready"
+    assert configuration_guard["contract_pass"] is True
+    assert configuration_guard["expected_unsupported_kinds"] == [
+        "nonlinear_static_material_mesh_tolerance_invalid",
+        "nonlinear_static_material_mesh_max_iterations_invalid",
+    ]
+    assert configuration_guard["observed_unsupported_kinds"] == (
+        configuration_guard["expected_unsupported_kinds"]
+    )
+    assert configuration_guard["python_api_status"] == "blocked"
+    assert configuration_guard["python_api_contract_pass"] is False
+    assert configuration_guard["cli_returncode"] == 2
+    assert configuration_guard["cli_status"] == "blocked"
+    assert configuration_guard["cli_contract_pass"] is False
+    assert configuration_guard["python_api_cli_equal"] is True
+    assert configuration_guard["strict_json_serializable"] is True
+    assert configuration_guard["solver_executed"] is False
+    assert configuration_guard["convergence_claim"] is False
+    assert configuration_guard["regularization_used"] is False
+    assert configuration_guard["fallback_used"] is False
+
     schema_validation = summary["schema_validation"]
     assert schema_validation["contract_pass"] is True
     assert all(row["schema_valid"] is True for row in schema_validation["checks"].values())
@@ -174,6 +196,7 @@ def test_contract_artifacts_cover_model_health_and_authoritative_frame_path(
     assert summary["expected_frame_model_input_checksum"] == frame_result["input_checksum"]
     assert summary["artifacts"]["frame_result"] == str(paths["frame_result_out"])
     assert "6-DOF CPU Euler-Bernoulli frame/truss" in summary["claim_boundary"]
+    assert "blocked before solver execution" in summary["claim_boundary"]
     assert "shell coupling" in summary["claim_boundary"]
 
 

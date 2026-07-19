@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "run_id": "phase1-midas-mgt-converter",
-  "generated_at": "2026-03-15T14:52:48.518346+00:00",
+  "generated_at": "2026-07-18T18:29:35.303950+00:00",
   "inputs": {
     "mgt": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
     "json_out": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
@@ -22,11 +22,11 @@
   "source_provenance": {
     "source_family": "midas_mgt",
     "path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
-    "sha256": "2d6e9c5117e4dac12e785ec261cb9ba3e39822f44e8ad97a77a3ea527fc187f1",
-    "size_bytes": 2204342
+    "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "size_bytes": 2205887
   },
   "metrics": {
-    "line_count": 37266,
+    "line_count": 37281,
     "section_count": 33,
     "node_count": 11355,
     "element_count": 12728,
@@ -42,7 +42,7 @@
     "merged_node_count": 1692,
     "dummy_node_removed_count": 1692,
     "typed_section_count": 27,
-    "typed_row_total": 9347,
+    "typed_row_total": 9362,
     "unknown_section_count": 0,
     "unknown_row_total": 0,
     "static_load_case_count": 6,
@@ -59,6 +59,12 @@
     "pressure_load_row_count": 7278,
     "semantic_load_case_count": 6,
     "semantic_load_combination_count": 8,
+    "load_pattern_count": 2,
+    "load_pattern_primitive_count": 5,
+    "load_pattern_combination_count": 8,
+    "load_combination_editor_combo_count": 8,
+    "load_combination_editor_case_count": 2,
+    "load_combination_editor_edge_count": 15,
     "bound_nodal_load_row_count": 12,
     "bound_selfweight_row_count": 1,
     "bound_pressure_row_count": 7278,
@@ -69,10 +75,20 @@
     "surface_load_pending_case_count": 2,
     "member_row_count": 242,
     "group_row_count": 5,
-    "thickness_row_count": 34,
+    "thickness_row_count": 25,
     "design_section_row_count": 183,
     "section_color_row_count": 183,
-    "section_scale_row_count": 163
+    "section_scale_row_count": 163,
+    "section_usage_summary_count": 183,
+    "used_section_count": 182,
+    "unused_section_count": 1,
+    "derived_section_template_count": 183,
+    "derived_load_pattern_count": 2,
+    "derived_load_pattern_primitive_count": 5,
+    "design_material_row_count": 29,
+    "design_material_rebar_payload_row_count": 29,
+    "design_material_rebar_payload_available_count": 23,
+    "group_local_rebar_payload_row_count": 0
   },
   "coarsening": {
     "applied": true,
@@ -173,11 +189,11 @@
       "PRESSURE": 7278,
       "MEMBER": 282,
       "GROUP": 51,
-      "THICKNESS": 34,
+      "THICKNESS": 25,
       "DGN-SECT": 183,
       "SECT-COLOR": 183,
       "SECT-SCALE": 163,
-      "DGN-MATL": 5,
+      "DGN-MATL": 29,
       "MATL-COLOR": 6,
       "BNDR-GROUP": 1,
       "DOMAIN-ELEMENT": 4,
@@ -191,7 +207,7 @@
       "THIK-COLOR": 19,
       "VERSION": 1
     },
-    "typed_row_total": 9347,
+    "typed_row_total": 9362,
     "row_parse": {
       "node_rows": 13047,
       "node_rows_parsed": 13047,
@@ -211,6 +227,35 @@
     "unsupported_element_type_count": {},
     "unresolved_elements_head": [],
     "warnings_head": []
+  },
+  "section_productization": {
+    "section_row_count": 183,
+    "used_section_count": 182,
+    "unused_section_count": 1,
+    "derived_template_count": 183,
+    "family_counts": {
+      "steel": 183
+    },
+    "shape_counts": {
+      "h_beam": 182,
+      "pipe": 1
+    }
+  },
+  "load_pattern_productization": {
+    "pattern_count": 2,
+    "primitive_count": 5,
+    "combination_count": 8,
+    "primitive_kind_counts": {
+      "point_load": 2,
+      "self_weight": 1,
+      "surface_pressure": 2
+    }
+  },
+  "load_combination_editor_seed": {
+    "combination_count": 8,
+    "case_count": 2,
+    "graph_edge_count": 15,
+    "stage_count": 3
   },
   "checks": {
     "has_nodes": true,
@@ -235,7 +280,10 @@
       "node_count": 11355,
       "edge_count_directed": 38238,
       "element_count": 12728,
-      "elem_conn_index_count": 39576
+      "elem_conn_index_count": 39576,
+      "elem_angle_nonzero_count": 150,
+      "elem_angle_max_abs_deg": 270.0,
+      "elem_lcaxis_nonzero_count": 0
     }
   },
   "contract_pass": true,

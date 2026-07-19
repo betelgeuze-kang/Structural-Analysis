@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node ./scripts/verify-workbench-viewer-delivery.mjs",
     "preview": "vite preview",
     "verify:frontend-contract": "node ./scripts/verify-frontend-build-contract.mjs",
     "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
@@ -21,6 +21,7 @@
     "verify:workbench-prototype-browser-smoke": "node ./scripts/verify-workbench-prototype-browser-smoke.mjs",
     "build:benchmark-catalog": "node ./scripts/build-benchmark-catalog.mjs",
     "verify:workbench-v2-e2e": "node ./scripts/verify-workbench-v2-e2e.mjs",
+    "verify:workbench-viewer-delivery": "node ./scripts/verify-workbench-viewer-delivery.mjs",
     "build:evidence-bundle": "node ./scripts/build-workbench-evidence-bundle.mjs",
     "verify:evidence-bundle-contract": "node ./scripts/verify-evidence-bundle-contract.mjs",
     "capture:readme-viewer-image": "node ./scripts/capture-readme-viewer-image.mjs",

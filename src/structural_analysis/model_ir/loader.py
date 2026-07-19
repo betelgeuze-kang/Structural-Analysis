@@ -38,7 +38,11 @@ def parse_model_ir_v2(
         raise ModelIRValidationError(report)
     if not isinstance(payload, dict):  # pragma: no cover - report invariant
         raise TypeError("ModelIR v2 root must be an object.")
-    if report.content_hash is None:  # pragma: no cover - report invariant
+    if (
+        report.content_hash is None
+        or report.semantic_hash is None
+        or report.provenance_hash is None
+    ):  # pragma: no cover - report invariant
         raise ModelIRValidationError(report)
     return ModelIRDocument(
         schema_version=str(payload["schema_version"]),
@@ -46,6 +50,9 @@ def parse_model_ir_v2(
         capability_profile=str(payload["capability_profile"]),
         canonical_json=canonicalize_model_ir_v2(payload),
         content_hash=report.content_hash,
+        semantic_hash=report.semantic_hash,
+        provenance_hash=report.provenance_hash,
         analysis_ready=report.analysis_ready,
         blocking_feature_ids=report.blocking_feature_ids,
+        derived_blocking_feature_ids=report.derived_blocking_feature_ids,
     )

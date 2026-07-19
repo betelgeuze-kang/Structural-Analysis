@@ -233,8 +233,10 @@
     ],
     "matrix_backend": "numpy_linalg_solve_dense",
     "metrics": {
+      "active_equation_count": 2,
       "case_id": "phase2_frame_shell_material_coupled_2dof_seed",
       "contract_pass": true,
+      "convergence_claim": true,
       "fallback_used": false,
       "final_increment_abs_m": 2.9434602357932303e-17,
       "free_displacements_m": [
@@ -243,23 +245,32 @@
       ],
       "globalization": "backtracking_line_search",
       "increment_gate_passed": true,
+      "increment_norm_applicable": true,
       "increment_tolerance": 1e-12,
       "iteration_count": 5,
       "line_search_step_count": 4,
       "line_search_used": false,
+      "linear_solve_count": 5,
       "matrix_backend": "numpy_linalg_solve_dense",
+      "newton_iteration_count": 5,
+      "reaction_observation_only": false,
       "regularization_used": false,
       "relative_residual": 7.105427357601002e-17,
       "residual_formula": "F_internal_minus_F_external",
+      "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
       "residual_gate_passed": true,
       "residual_kn": [
         0.0,
         -3.552713678800501e-15
       ],
+      "residual_norm_applicable": true,
       "residual_tolerance": 1e-10,
+      "solver_executed": true,
       "sparse_backend_used": false,
       "stiffness_storage": "numpy_dense_ndarray",
-      "tangent_definition": "dF_internal_du_consistent"
+      "tangent_definition": "dF_internal_du_consistent",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "residual_and_increment_converged"
     },
     "sparse_backend_used": false,
     "state": {
@@ -594,8 +605,10 @@
     ],
     "matrix_backend": "scipy_sparse_spsolve_cpu",
     "metrics": {
+      "active_equation_count": 2,
       "case_id": "phase2_frame_shell_material_coupled_2dof_seed",
       "contract_pass": true,
+      "convergence_claim": true,
       "fallback_used": false,
       "final_increment_abs_m": 2.9434602357932303e-17,
       "free_displacements_m": [
@@ -604,23 +617,32 @@
       ],
       "globalization": "backtracking_line_search",
       "increment_gate_passed": true,
+      "increment_norm_applicable": true,
       "increment_tolerance": 1e-12,
       "iteration_count": 5,
       "line_search_step_count": 4,
       "line_search_used": false,
+      "linear_solve_count": 5,
       "matrix_backend": "scipy_sparse_spsolve_cpu",
+      "newton_iteration_count": 5,
+      "reaction_observation_only": false,
       "regularization_used": false,
       "relative_residual": 7.105427357601002e-17,
       "residual_formula": "F_internal_minus_F_external",
+      "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
       "residual_gate_passed": true,
       "residual_kn": [
         0.0,
         -3.552713678800501e-15
       ],
+      "residual_norm_applicable": true,
       "residual_tolerance": 1e-10,
+      "solver_executed": true,
       "sparse_backend_used": true,
       "stiffness_storage": "scipy_sparse_csr",
-      "tangent_definition": "dF_internal_du_consistent"
+      "tangent_definition": "dF_internal_du_consistent",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "residual_and_increment_converged"
     },
     "sparse_backend_used": true,
     "state": {

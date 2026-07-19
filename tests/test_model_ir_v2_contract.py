@@ -22,6 +22,8 @@ from structural_analysis.model_ir import (  # noqa: E402
     canonicalize_model_ir_v2,
     load_model_ir_v2,
     model_ir_v2_content_hash,
+    model_ir_v2_provenance_hash,
+    model_ir_v2_semantic_hash,
     parse_model_ir_v2,
     validate_model_ir_v2,
 )
@@ -59,6 +61,9 @@ def test_schema_is_draft_2020_12_and_golden_fixture_is_analysis_ready() -> None:
     assert report.blocking_feature_ids == ()
     assert report.content_hash is not None
     assert document.content_hash == report.content_hash
+    assert document.semantic_hash == report.semantic_hash
+    assert document.provenance_hash == report.provenance_hash
+    assert document.derived_blocking_feature_ids == ()
     assert canonicalize_model_ir_v2(document.to_dict()) == canonicalize_model_ir_v2(
         payload
     )
@@ -95,6 +100,32 @@ def test_canonical_hash_is_key_order_independent_and_normalizes_signed_zero() ->
 
     assert model_ir_v2_content_hash(reordered) == model_ir_v2_content_hash(payload)
     assert canonicalize_model_ir_v2(reordered) == canonicalize_model_ir_v2(payload)
+
+
+def test_semantic_and_provenance_hashes_change_on_separate_axes() -> None:
+    payload = _payload()
+    baseline = validate_model_ir_v2(payload)
+
+    provenance_changed = deepcopy(payload)
+    provenance_changed["provenance"]["source_ref"] = "another/source/model.mgt"
+    provenance_changed["provenance"]["source_sha256"] = "sha256:" + "a" * 64
+    provenance_changed["nodes"][0]["source_id"] = "source:N1001"
+    provenance_report = validate_model_ir_v2(provenance_changed)
+
+    physical_changed = deepcopy(payload)
+    physical_changed["nodes"][1]["coordinates_m"][0] = 3.25
+    physical_report = validate_model_ir_v2(physical_changed)
+
+    assert baseline.contract_valid is True
+    assert provenance_report.contract_valid is True
+    assert physical_report.contract_valid is True
+    assert baseline.semantic_hash == provenance_report.semantic_hash
+    assert baseline.provenance_hash != provenance_report.provenance_hash
+    assert baseline.content_hash != provenance_report.content_hash
+    assert baseline.semantic_hash != physical_report.semantic_hash
+    assert baseline.provenance_hash == physical_report.provenance_hash
+    assert model_ir_v2_semantic_hash(payload) == baseline.semantic_hash
+    assert model_ir_v2_provenance_hash(payload) == baseline.provenance_hash
 
 
 def test_unknown_element_field_is_rejected_instead_of_silently_ignored() -> None:
@@ -197,6 +228,105 @@ def test_load_combination_cycle_is_blocked() -> None:
     assert "load_combination_cycle" in _issue_codes(payload)
 
 
+def test_deep_acyclic_load_combination_chain_is_validated_iteratively() -> None:
+    payload = _payload()
+    combination_count = 1100
+    payload["load_combinations"] = [
+        {
+            "id": f"C{index}",
+            "index": index,
+            "combination_type": "linear",
+            "terms": [
+                {
+                    "ref_id": (
+                        f"C{index + 1}"
+                        if index + 1 < combination_count
+                        else payload["load_patterns"][0]["id"]
+                    ),
+                    "ref_kind": (
+                        "load_combination"
+                        if index + 1 < combination_count
+                        else "load_pattern"
+                    ),
+                    "factor": 1.0,
+                }
+            ],
+            "source_id": f"generated:C{index}",
+            "extensions": {},
+        }
+        for index in range(combination_count)
+    ]
+
+    report = validate_model_ir_v2(payload)
+
+    assert report.schema_valid is True
+    assert report.semantics_valid is True
+    assert "load_combination_cycle" not in _issue_codes(payload)
+
+
+def test_self_weight_only_load_pattern_is_contract_valid() -> None:
+    payload = _payload()
+    payload["load_patterns"][0]["self_weight"] = [0.0, 0.0, -1.0]
+    payload["load_patterns"][0]["nodal_loads"] = []
+
+    report = validate_model_ir_v2(payload)
+
+    assert report.schema_valid is True
+    assert report.semantics_valid is True
+    assert report.analysis_ready is True
+    assert "load_pattern_all_zero" not in _issue_codes(payload)
+
+
+def test_roundtrip_map_accepts_time_function_and_construction_stage_ids() -> None:
+    payload = _payload()
+    payload["time_functions"] = [
+        {
+            "id": "TF1",
+            "index": 0,
+            "type": "piecewise_linear",
+            "points": [[0.0, 0.0], [1.0, 1.0]],
+            "extensions": {},
+        }
+    ]
+    payload["construction_stages"] = [
+        {
+            "id": "ST1",
+            "index": 0,
+            "active_element_ids": [payload["elements"][0]["id"]],
+            "active_constraint_ids": [payload["constraints"][0]["id"]],
+            "load_pattern_ids": [payload["load_patterns"][0]["id"]],
+            "extensions": {},
+        }
+    ]
+    payload["roundtrip_map"].extend(
+        [
+            {
+                "source_entity_id": "SOURCE:TF1",
+                "entity_kind": "time_function",
+                "model_ir_entity_id": "TF1",
+                "mapping_status": "exact",
+                "extensions": {},
+            },
+            {
+                "source_entity_id": "SOURCE:ST1",
+                "entity_kind": "construction_stage",
+                "model_ir_entity_id": "ST1",
+                "mapping_status": "exact",
+                "extensions": {},
+            },
+        ]
+    )
+
+    report = validate_model_ir_v2(payload)
+
+    assert report.schema_valid is True
+    assert report.semantics_valid is True
+    assert "dangling_reference" not in _issue_codes(payload)
+
+    payload["roundtrip_map"][-1]["entity_kind"] = "time_function"
+    assert "roundtrip_entity_kind_mismatch" in _issue_codes(payload)
+
+
 def test_non_finite_number_is_blocked_even_when_jsonschema_accepts_number_type() -> (
     None
 ):
@@ -238,6 +368,32 @@ def test_blocking_unsupported_feature_is_valid_but_not_analysis_ready(
     document = load_model_ir_v2(path, require_analysis_ready=False)
     assert document.analysis_ready is False
     assert document.blocking_feature_ids == ("UF1",)
+
+
+def test_unsupported_roundtrip_content_derives_blocker_without_declared_row() -> None:
+    payload = _payload()
+    payload["unsupported_features"] = []
+    payload["roundtrip_map"].append(
+        {
+            "source_entity_id": "SOURCE:UNSUPPORTED:NODE:1",
+            "entity_kind": "node",
+            "model_ir_entity_id": payload["nodes"][0]["id"],
+            "mapping_status": "unsupported",
+            "extensions": {},
+        }
+    )
+
+    report = validate_model_ir_v2(payload)
+    document = parse_model_ir_v2(payload, require_analysis_ready=False)
+
+    assert report.contract_valid is True
+    assert report.analysis_ready is False
+    assert len(report.derived_blocking_feature_ids) == 1
+    assert report.derived_blocking_feature_ids[0].startswith(
+        "derived.roundtrip.unsupported."
+    )
+    assert report.blocking_feature_ids == report.derived_blocking_feature_ids
+    assert document.derived_blocking_feature_ids == report.derived_blocking_feature_ids
 
 
 def test_execution_plan_fields_are_rejected_from_authoritative_model_ir() -> None:
@@ -293,6 +449,8 @@ def test_validation_cli_emits_machine_readable_claim_bounded_report(
         report["claim_boundary"] == "model_ir_contract_validation_not_solver_readiness"
     )
     assert report["content_hash"].startswith("sha256:")
+    assert report["semantic_hash"].startswith("sha256:")
+    assert report["provenance_hash"].startswith("sha256:")
 
 
 def test_file_loader_rejects_duplicate_json_object_keys(tmp_path: Path) -> None:

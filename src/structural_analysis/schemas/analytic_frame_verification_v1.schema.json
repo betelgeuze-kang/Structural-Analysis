@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/analytic_frame_verification_v1.schema.json",
+  "title": "Analytic frame verification artifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "numeric_serialization_profile",
+    "source",
+    "tolerance_policy",
+    "cases",
+    "summary",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary",
+    "contract_pass"
+  ],
+  "properties": {
+    "schema_version": {"const": "analytic-frame-verification.v1"},
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "numeric_serialization_profile": {
+      "const": "binary64_round_trip_decimal_17_significant_digits"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_checksums", "source_set_hash"],
+      "properties": {
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 10,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        },
+        "source_set_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "tolerance_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparison_absolute_tolerance",
+        "comparison_relative_tolerance",
+        "zero_reference_absolute_tolerance",
+        "free_relative_residual_tolerance",
+        "energy_balance_absolute_tolerance",
+        "stiffness_symmetry_absolute_tolerance"
+      ],
+      "properties": {
+        "comparison_absolute_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "comparison_relative_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "zero_reference_absolute_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "free_relative_residual_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "energy_balance_absolute_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "stiffness_symmetry_absolute_tolerance": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/case"}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_count", "passing_case_count", "categories", "contract_pass"],
+      "properties": {
+        "case_count": {"const": 3},
+        "passing_case_count": {"type": "integer", "minimum": 0, "maximum": 3},
+        "categories": {
+          "const": ["cantilever_beam", "simply_supported_beam", "portal_frame"]
+        },
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cantilever_beam_analytic_evidence",
+        "simply_supported_beam_analytic_evidence",
+        "portal_frame_analytic_evidence",
+        "code_to_code_evidence",
+        "published_benchmark_evidence",
+        "experimental_evidence",
+        "customer_shadow_evidence",
+        "release_readiness"
+      ],
+      "properties": {
+        "cantilever_beam_analytic_evidence": {"type": "boolean"},
+        "simply_supported_beam_analytic_evidence": {"type": "boolean"},
+        "portal_frame_analytic_evidence": {"type": "boolean"},
+        "code_to_code_evidence": {"const": false},
+        "published_benchmark_evidence": {"const": false},
+        "experimental_evidence": {"const": false},
+        "customer_shadow_evidence": {"const": false},
+        "release_readiness": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 5,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "claim_boundary": {"type": "string", "minLength": 200},
+    "contract_pass": {"type": "boolean"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "category",
+        "structural_family",
+        "truth_basis",
+        "formula_profile",
+        "formula",
+        "parameters",
+        "model_payload_hash",
+        "solver_input_checksum",
+        "canonical_model_checksum",
+        "solver_id",
+        "analysis_type",
+        "status",
+        "comparisons",
+        "numerical_checks",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "category": {
+          "enum": ["cantilever_beam", "simply_supported_beam", "portal_frame"]
+        },
+        "structural_family": {"type": "string", "minLength": 1},
+        "truth_basis": {"const": "analytic_closed_form"},
+        "formula_profile": {"type": "string", "minLength": 1},
+        "formula": {"type": "string", "minLength": 20},
+        "parameters": {
+          "type": "object",
+          "minProperties": 4,
+          "additionalProperties": {"type": "number"}
+        },
+        "model_payload_hash": {"$ref": "#/$defs/hash"},
+        "solver_input_checksum": {"$ref": "#/$defs/hash"},
+        "canonical_model_checksum": {"$ref": "#/$defs/hash"},
+        "solver_id": {"const": "authoritative_cpu_linear_fea_3d_v1"},
+        "analysis_type": {"const": "linear_static"},
+        "status": {"enum": ["ready", "blocked", "degraded"]},
+        "comparisons": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"$ref": "#/$defs/comparison"}
+        },
+        "numerical_checks": {"$ref": "#/$defs/numericalChecks"},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantity",
+        "unit",
+        "expected",
+        "actual",
+        "absolute_error",
+        "relative_error",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "zero_reference_absolute_tolerance",
+        "contract_pass"
+      ],
+      "properties": {
+        "quantity": {"type": "string", "minLength": 1},
+        "unit": {"enum": ["m", "rad", "kN", "kN*m"]},
+        "expected": {"type": "number"},
+        "actual": {"type": "number"},
+        "absolute_error": {"type": "number", "minimum": 0},
+        "relative_error": {"type": "number", "minimum": 0},
+        "absolute_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "relative_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "zero_reference_absolute_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "numericalChecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relative_residual",
+        "energy_balance_error",
+        "stiffness_symmetry_error",
+        "residual_formula",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "relative_residual": {"type": "number", "minimum": 0},
+        "energy_balance_error": {"type": "number", "minimum": 0},
+        "stiffness_symmetry_error": {"type": "number", "minimum": 0},
+        "residual_formula": {"const": "F_internal_minus_F_external"},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    }
+  }
+}

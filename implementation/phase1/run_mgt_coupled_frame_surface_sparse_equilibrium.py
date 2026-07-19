@@ -50,7 +50,8 @@ def _load_json(path: Path) -> dict[str, Any]:
 def _select_frame_elements(
     *,
     node_xyz: np.ndarray,
-    edge_index: np.ndarray,
+    conn_ptr: np.ndarray,
+    conn_idx: np.ndarray,
     elem_id: np.ndarray,
     elem_type_code: np.ndarray,
     elem_section_id: np.ndarray,
@@ -58,27 +59,74 @@ def _select_frame_elements(
     elem_angle_deg: np.ndarray | None = None,
     beam_end_offsets: dict[int, tuple[np.ndarray, np.ndarray]] | None = None,
 ) -> tuple[list[FrameElement], dict[str, Any]]:
+    node_xyz = np.asarray(node_xyz, dtype=np.float64)
+    elem_id = np.asarray(elem_id, dtype=np.int64)
+    elem_type_code = np.asarray(elem_type_code, dtype=np.int32)
+    elem_section_id = np.asarray(elem_section_id, dtype=np.int32)
+    elem_material_id = np.asarray(elem_material_id, dtype=np.int32)
+    conn_ptr = np.asarray(conn_ptr, dtype=np.int64)
+    conn_idx = np.asarray(conn_idx, dtype=np.int64)
+    if node_xyz.ndim != 2 or node_xyz.shape[1] != 3 or not np.all(np.isfinite(node_xyz)):
+        raise ValueError("node_xyz must be a finite (n_nodes, 3) array")
+    if elem_id.ndim != 1:
+        raise ValueError("elem_id must be one-dimensional")
     n_elem = int(elem_id.shape[0])
-    edge = np.asarray(edge_index[:, :n_elem], dtype=np.int64)
-    line_mask = np.asarray(elem_type_code, dtype=np.int32) == 1
+    element_arrays = {
+        "elem_type_code": elem_type_code,
+        "elem_section_id": elem_section_id,
+        "elem_material_id": elem_material_id,
+    }
+    for name, values in element_arrays.items():
+        if values.shape != (n_elem,):
+            raise ValueError(f"{name} must have one entry per elem_id")
+    if conn_ptr.shape != (n_elem + 1,):
+        raise ValueError("conn_ptr must have exactly len(elem_id) + 1 entries")
+    if conn_idx.ndim != 1:
+        raise ValueError("conn_idx must be one-dimensional")
+    if (
+        int(conn_ptr[0]) != 0
+        or int(conn_ptr[-1]) != int(conn_idx.shape[0])
+        or np.any(np.diff(conn_ptr) < 0)
+    ):
+        raise ValueError("conn_ptr must be monotonic and span conn_idx exactly")
+    line_mask = elem_type_code == 1
     angle_array = (
         np.asarray(elem_angle_deg, dtype=np.float64)
         if elem_angle_deg is not None
         else np.zeros(n_elem, dtype=np.float64)
     )
+    if angle_array.shape != (n_elem,) or not np.all(np.isfinite(angle_array)):
+        raise ValueError("elem_angle_deg must be finite with one entry per elem_id")
     elements: list[FrameElement] = []
     skipped_short = 0
+    skipped_invalid_connectivity = 0
+    invalid_connectivity_element_ids: list[int] = []
     offset_applied_count = 0
     max_abs_offset = 0.0
     nonzero_angle_count = 0
     max_abs_angle_deg = 0.0
     beam_end_offsets = beam_end_offsets or {}
     for idx in np.where(line_mask)[0]:
-        i = int(edge[0, idx])
-        j = int(edge[1, idx])
-        if i < 0 or j < 0 or i >= node_xyz.shape[0] or j >= node_xyz.shape[0]:
-            continue
         elem_id_int = int(elem_id[idx])
+        start = int(conn_ptr[idx])
+        end = int(conn_ptr[idx + 1])
+        connectivity = conn_idx[start:end]
+        if int(connectivity.shape[0]) != 2:
+            skipped_invalid_connectivity += 1
+            invalid_connectivity_element_ids.append(elem_id_int)
+            continue
+        i = int(connectivity[0])
+        j = int(connectivity[1])
+        if (
+            i < 0
+            or j < 0
+            or i >= node_xyz.shape[0]
+            or j >= node_xyz.shape[0]
+            or i == j
+        ):
+            skipped_invalid_connectivity += 1
+            invalid_connectivity_element_ids.append(elem_id_int)
+            continue
         offset_i, offset_j = beam_end_offsets.get(
             elem_id_int,
             (
@@ -113,9 +161,17 @@ def _select_frame_elements(
             )
         )
     return elements, {
+        "frame_connectivity_source": "elem_conn_ptr/elem_conn_idx",
+        "edge_index_used_for_element_binding": False,
         "raw_line_element_count": int(np.count_nonzero(line_mask)),
         "line_elements_solved": len(elements),
         "skipped_short_or_degenerate_line_count": skipped_short,
+        "skipped_invalid_line_connectivity_count": int(skipped_invalid_connectivity),
+        "invalid_line_connectivity_element_id_head": invalid_connectivity_element_ids[:32],
+        "line_element_row_accounting_exact": bool(
+            int(np.count_nonzero(line_mask))
+            == len(elements) + skipped_short + skipped_invalid_connectivity
+        ),
         "line_node_count": len({node for elem in elements for node in (elem.node_i, elem.node_j)}),
         "beam_end_offset_applied_element_count": int(offset_applied_count),
         "beam_end_offset_max_abs_m": float(max_abs_offset),
@@ -337,7 +393,6 @@ def run_mgt_coupled_frame_surface_sparse_equilibrium(
     started = time.perf_counter()
     with np.load(roundtrip_npz, allow_pickle=False) as archive:
         node_xyz = np.asarray(archive["node_xyz"], dtype=np.float64)
-        edge_index = np.asarray(archive["edge_index"], dtype=np.int64)
         elem_id = np.asarray(archive["elem_id"], dtype=np.int64)
         elem_type_code = np.asarray(archive["elem_type_code"], dtype=np.int32)
         elem_section_id = np.asarray(archive["elem_section_id"], dtype=np.int32)
@@ -351,7 +406,8 @@ def run_mgt_coupled_frame_surface_sparse_equilibrium(
         conn_idx = np.asarray(archive["elem_conn_idx"], dtype=np.int64)
     frame_elements, frame_select_meta = _select_frame_elements(
         node_xyz=node_xyz,
-        edge_index=edge_index,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
         elem_id=elem_id,
         elem_type_code=elem_type_code,
         elem_section_id=elem_section_id,

@@ -1,0 +1,899 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/g1-mgt-state-updated-frame-axial-geometry-adapter-v1.schema.json",
+  "title": "G1 actual-MGT state-updated frame axial geometry adapter receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "readiness_pass",
+    "diagnostic_execution_ready",
+    "engineer_review_required",
+    "evidence_closure_pass",
+    "source_commit_sha",
+    "engine_version",
+    "source_commit_exact_replay_claim",
+    "source_tree_state",
+    "input_checksums",
+    "case_id",
+    "inputs",
+    "frame_connectivity_audit",
+    "material_analysis_property_binding",
+    "dgn_material_property_alias_audit",
+    "frame_source_property_coverage_audit",
+    "state_updated_frame_axial_geometry",
+    "state_dependent_tangent_contract",
+    "current_tangent_operator_contract",
+    "residual_evaluation_contract",
+    "residual_parent_equivalence_audit",
+    "reference_preconditioner_contract",
+    "zero_state_sparse_predictor_audit",
+    "callback_replay",
+    "claims",
+    "blockers_remaining",
+    "artifacts",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "g1-mgt-state-updated-frame-axial-geometry-adapter-receipt.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "readiness_pass": {"const": false},
+    "diagnostic_execution_ready": {"type": "boolean"},
+    "engineer_review_required": {"const": true},
+    "evidence_closure_pass": {"const": false},
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "engine_version": {"type": "string", "minLength": 1},
+    "source_commit_exact_replay_claim": {"const": false},
+    "source_tree_state": {
+      "const": "working_tree_with_uncommitted_goal_changes"
+    },
+    "input_checksums": {
+      "type": "object",
+      "minProperties": 10,
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "case_id": {
+      "const": "g1_real_mgt_state_updated_frame_axial_geometry_adapter"
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mgt_path",
+        "mgt_sha256",
+        "checkpoint_npz",
+        "checkpoint_sha256",
+        "roundtrip_derivation",
+        "roundtrip_generated_uncoarsened",
+        "roundtrip_sha256",
+        "node_count",
+        "element_count",
+        "frame_element_count",
+        "global_dof_count",
+        "free_equation_count",
+        "semantic_load_case",
+        "historical_checkpoint_equilibrium_claim"
+      ],
+      "properties": {
+        "mgt_path": {"type": "string", "minLength": 1},
+        "mgt_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_npz": {"type": "string", "minLength": 1},
+        "checkpoint_sha256": {"$ref": "#/$defs/sha256"},
+        "roundtrip_derivation": {
+          "const": "parse_midas_mgt_to_json_npz:no_resolve_rigid_links:no_drop_unreferenced_nodes"
+        },
+        "roundtrip_generated_uncoarsened": {"const": true},
+        "roundtrip_sha256": {"$ref": "#/$defs/sha256"},
+        "node_count": {"const": 13047},
+        "element_count": {"const": 12728},
+        "frame_element_count": {"const": 5572},
+        "global_dof_count": {"const": 78282},
+        "free_equation_count": {"const": 70560},
+        "semantic_load_case": {"const": "LIVE"},
+        "historical_checkpoint_equilibrium_claim": {"const": false}
+      }
+    },
+    "frame_connectivity_audit": {
+      "type": "object",
+      "required": [
+        "frame_connectivity_source",
+        "edge_index_used_for_element_binding",
+        "raw_line_element_count",
+        "line_elements_solved",
+        "skipped_invalid_line_connectivity_count",
+        "line_element_row_accounting_exact"
+      ],
+      "properties": {
+        "frame_connectivity_source": {
+          "const": "elem_conn_ptr/elem_conn_idx"
+        },
+        "edge_index_used_for_element_binding": {"const": false},
+        "raw_line_element_count": {"type": "integer", "minimum": 1},
+        "line_elements_solved": {"const": 5572},
+        "skipped_invalid_line_connectivity_count": {"const": 0},
+        "line_element_row_accounting_exact": {"const": true}
+      }
+    },
+    "material_analysis_property_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolution_policy",
+        "dgn_alias_resolution_enabled",
+        "source_material_count",
+        "dgn_alias_material_count_available",
+        "dgn_alias_material_count_applied",
+        "resolved_material_count",
+        "engineer_review_required"
+      ],
+      "properties": {
+        "resolution_policy": {
+          "const": "exact_normalized_type_and_name_unique_source_material.v1"
+        },
+        "dgn_alias_resolution_enabled": {"const": true},
+        "source_material_count": {"const": 6},
+        "dgn_alias_material_count_available": {"const": 24},
+        "dgn_alias_material_count_applied": {"const": 24},
+        "resolved_material_count": {"const": 30},
+        "engineer_review_required": {"const": true}
+      }
+    },
+    "dgn_material_property_alias_audit": {
+      "$ref": "#/$defs/dgn_material_property_alias_audit"
+    },
+    "frame_source_property_coverage_audit": {
+      "$ref": "#/$defs/frame_source_property_coverage"
+    },
+    "state_updated_frame_axial_geometry": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "formulation_profile",
+        "state_updated_frame_axial_geometry_applied",
+        "preflight_status",
+        "prepack_executed",
+        "element_count",
+        "real_property_element_count",
+        "property_fallback_count",
+        "source_property_coverage_audit",
+        "beam_end_offset_element_count",
+        "reference_linear_axial_contribution_replaced",
+        "conservative_energy_gradient",
+        "consistent_tangent_action_available",
+        "finite_chord_translation_geometry",
+        "finite_chord_extension_evaluation",
+        "finite_chord_correction_evaluation",
+        "frame_bending_torsion_state_update_connected",
+        "finite_nodal_rotation_objectivity_claim",
+        "full_corotational_frame_claim",
+        "material_state_update_claim",
+        "connected_to_physical_residual",
+        "connected_to_consistent_state_tangent_action",
+        "consistent_state_tangent_action_mode",
+        "connected_to_centered_tangent_action",
+        "centered_tangent_action_available_for_independent_audit",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mgt-state-updated-frame-axial-geometry.v1"
+        },
+        "formulation_profile": {
+          "const": "finite_chord_conservative_axial_replacement.v1"
+        },
+        "state_updated_frame_axial_geometry_applied": {"const": true},
+        "preflight_status": {"const": "ready"},
+        "prepack_executed": {"const": true},
+        "element_count": {"const": 5572},
+        "real_property_element_count": {"const": 5572},
+        "property_fallback_count": {"const": 0},
+        "source_property_coverage_audit": {
+          "$ref": "#/$defs/frame_source_property_coverage"
+        },
+        "beam_end_offset_element_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reference_linear_axial_contribution_replaced": {"const": true},
+        "conservative_energy_gradient": {"const": true},
+        "consistent_tangent_action_available": {"const": true},
+        "finite_chord_translation_geometry": {"const": true},
+        "finite_chord_extension_evaluation": {
+          "const": "difference_of_squares_cancellation_stable"
+        },
+        "finite_chord_correction_evaluation": {
+          "const": "second_order_decomposition_cancellation_stable"
+        },
+        "frame_bending_torsion_state_update_connected": {"const": false},
+        "finite_nodal_rotation_objectivity_claim": {"const": false},
+        "full_corotational_frame_claim": {"const": false},
+        "material_state_update_claim": {"const": false},
+        "connected_to_physical_residual": {"const": true},
+        "connected_to_consistent_state_tangent_action": {"const": true},
+        "consistent_state_tangent_action_mode": {
+          "const": "analytic_reference_plus_exact_finite_chord_axial_correction"
+        },
+        "connected_to_centered_tangent_action": {"const": false},
+        "centered_tangent_action_available_for_independent_audit": {
+          "const": true
+        },
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "state_dependent_tangent_contract": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "available",
+        "operator_classification",
+        "equation_count",
+        "operator_nnz",
+        "current_state_reassembly_required",
+        "exact_for_adapter_residual_model",
+        "nonlinear_current_tangent_claim",
+        "quadratic_convergence_claim",
+        "material_state_commit_rollback_claim",
+        "promotes_g1_closure",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "linear_reference_geometry_residual_exact_csr.v1"
+        },
+        "status": {"const": "blocked"},
+        "available": {"const": false},
+        "operator_classification": {
+          "const": "state_dependent_frame_axial_geometry"
+        },
+        "equation_count": {"const": 70560},
+        "operator_nnz": {"type": "integer", "minimum": 1},
+        "current_state_reassembly_required": {"const": true},
+        "exact_for_adapter_residual_model": {"const": false},
+        "nonlinear_current_tangent_claim": {"const": false},
+        "quadratic_convergence_claim": {"const": false},
+        "material_state_commit_rollback_claim": {"const": false},
+        "promotes_g1_closure": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "current_tangent_operator_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest",
+        "operator_binding",
+        "array_total_byte_length",
+        "residual_centered_difference_gate_passed",
+        "operator_callback_outputs_in_contract",
+        "cpu_reference_evaluator_executed",
+        "hip_execution",
+        "cpu_hip_numerical_parity",
+        "contract_pass"
+      ],
+      "properties": {
+        "manifest": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "contract_hash",
+            "array_bundle_hash",
+            "profile",
+            "case_id",
+            "residual_formula_hash",
+            "source_action_contract",
+            "dimensions",
+            "array_descriptors"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "structural-analysis-current-tangent-operator.v1"
+            },
+            "contract_hash": {"$ref": "#/$defs/sha256"},
+            "array_bundle_hash": {"$ref": "#/$defs/sha256"},
+            "profile": {
+              "const": "reference_csr_load_frame_delta_finite_chord_axial.v1"
+            },
+            "case_id": {
+              "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+            },
+            "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+            "source_action_contract": {
+              "const": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1"
+            },
+            "dimensions": {
+              "type": "object",
+              "required": [
+                "equation_count",
+                "global_dof_count",
+                "reference_nnz",
+                "frame_element_count",
+                "geometry_element_count"
+              ],
+              "properties": {
+                "equation_count": {"const": 70560},
+                "global_dof_count": {"const": 78282},
+                "reference_nnz": {"const": 1262462},
+                "frame_element_count": {"const": 5572},
+                "geometry_element_count": {"const": 5572}
+              }
+            },
+            "array_descriptors": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12
+            }
+          }
+        },
+        "operator_binding": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "case_id",
+            "equation_count",
+            "residual_formula_hash",
+            "current_tangent_operator_profile",
+            "current_tangent_operator_contract_hash",
+            "current_tangent_operator_array_bundle_hash",
+            "operator_callback_reference_evaluator",
+            "operator_callback_outputs_in_contract"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "matrix-free-current-state-tangent-operator-binding.v1"
+            },
+            "case_id": {
+              "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+            },
+            "equation_count": {"const": 70560},
+            "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+            "current_tangent_operator_profile": {
+              "const": "reference_csr_load_frame_delta_finite_chord_axial.v1"
+            },
+            "current_tangent_operator_contract_hash": {
+              "$ref": "#/$defs/sha256"
+            },
+            "current_tangent_operator_array_bundle_hash": {
+              "$ref": "#/$defs/sha256"
+            },
+            "operator_callback_reference_evaluator": {
+              "const": "numpy_fp64_array_formula_reference.v1"
+            },
+            "operator_callback_outputs_in_contract": {"const": true}
+          }
+        },
+        "array_total_byte_length": {"const": 31271000},
+        "residual_centered_difference_gate_passed": {"const": true},
+        "operator_callback_outputs_in_contract": {"const": true},
+        "cpu_reference_evaluator_executed": {"const": true},
+        "hip_execution": {"const": false},
+        "cpu_hip_numerical_parity": {"const": false},
+        "contract_pass": {"const": true}
+      }
+    },
+    "residual_evaluation_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "residual_formula",
+        "residual_formula_hash",
+        "mode",
+        "reference_csr_parent_matches_analytic_tangent",
+        "load_frame_delta_parent_matches_analytic_tangent",
+        "finite_chord_correction_parent_matches_analytic_tangent",
+        "prescribed_background_term_included",
+        "prescribed_background_term_inf_n",
+        "component_force_assembly_retained_for_diagnostics",
+        "full_corotational_frame_claim",
+        "material_state_update_claim",
+        "promotes_g1_closure",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mgt-residual-evaluation-contract.v1"
+        },
+        "residual_formula": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "expression",
+            "residual_sign_convention",
+            "force_unit",
+            "displacement_unit",
+            "load_factor_unit",
+            "free_equation_order",
+            "prescribed_background_term",
+            "current_state_variables"
+          ],
+          "properties": {
+            "schema_version": {"const": "mgt-residual-formula.v1"},
+            "expression": {
+              "const": "K0_ff*u_f + K0_fp*u_prescribed + load_factor*(F_frame_unit(u)-F_frame_zero(u))_f + F_finite_chord_axial_correction(u)_f - load_factor*F_external_LIVE_f"
+            },
+            "residual_sign_convention": {"const": "internal_minus_external"},
+            "force_unit": {"const": "N"},
+            "displacement_unit": {"const": "m"},
+            "load_factor_unit": {"const": "dimensionless"},
+            "free_equation_order": {
+              "const": "adapter_free_global_dof_order"
+            },
+            "prescribed_background_term": {"const": "K0_fp*u_prescribed"},
+            "current_state_variables": {"const": ["u_f", "load_factor"]}
+          }
+        },
+        "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+        "mode": {
+          "const": "reference_csr_plus_load_frame_delta_plus_finite_chord_correction"
+        },
+        "reference_csr_parent_matches_analytic_tangent": {"const": true},
+        "load_frame_delta_parent_matches_analytic_tangent": {"const": true},
+        "finite_chord_correction_parent_matches_analytic_tangent": {
+          "const": true
+        },
+        "prescribed_background_term_included": {"const": true},
+        "prescribed_background_term_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "component_force_assembly_retained_for_diagnostics": {
+          "const": true
+        },
+        "full_corotational_frame_claim": {"const": false},
+        "material_state_update_claim": {"const": false},
+        "promotes_g1_closure": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "residual_parent_equivalence_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "applicable",
+        "probe_state",
+        "probe_load_factor",
+        "parent_residual_inf_n",
+        "component_sum_residual_inf_n",
+        "parent_component_difference_inf_n",
+        "component_internal_force_inf_n",
+        "comparison_scale_n",
+        "comparison_relative_tolerance",
+        "comparison_tolerance_n",
+        "parent_component_gate_passed",
+        "parent_repeat_bytes_exact",
+        "parent_repeat_data_hash",
+        "contract_pass",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mgt-residual-parent-component-equivalence.v1"
+        },
+        "status": {"const": "ready"},
+        "applicable": {"const": true},
+        "probe_state": {
+          "const": "full_unit_zero_state_linear_predictor"
+        },
+        "probe_load_factor": {"const": 1.0},
+        "parent_residual_inf_n": {"type": "number", "minimum": 0},
+        "component_sum_residual_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "parent_component_difference_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "component_internal_force_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "comparison_scale_n": {"type": "number", "minimum": 1},
+        "comparison_relative_tolerance": {"const": 1e-9},
+        "comparison_tolerance_n": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "parent_component_gate_passed": {"const": true},
+        "parent_repeat_bytes_exact": {"const": true},
+        "parent_repeat_data_hash": {"$ref": "#/$defs/sha256"},
+        "contract_pass": {"const": true},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "reference_preconditioner_contract": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "available",
+        "operator_classification",
+        "equation_count",
+        "operator_nnz",
+        "csr_row_pointer_hash",
+        "csr_column_index_hash",
+        "operator_numeric_values_hash",
+        "intended_use",
+        "exact_for_adapter_residual_model",
+        "approximate_for_state_dependent_adapter",
+        "factorization_executed_by_adapter",
+        "production_preconditioner_claim",
+        "promotes_g1_closure",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "zero_state_linear_reference_geometry_csr_preconditioner.v1"
+        },
+        "status": {"const": "ready"},
+        "available": {"const": true},
+        "operator_classification": {
+          "const": "zero_state_linear_reference_geometry"
+        },
+        "equation_count": {"const": 70560},
+        "operator_nnz": {"type": "integer", "minimum": 1},
+        "csr_row_pointer_hash": {"$ref": "#/$defs/sha256"},
+        "csr_column_index_hash": {"$ref": "#/$defs/sha256"},
+        "operator_numeric_values_hash": {"$ref": "#/$defs/sha256"},
+        "intended_use": {"const": "fixed_right_preconditioner"},
+        "exact_for_adapter_residual_model": {"const": false},
+        "approximate_for_state_dependent_adapter": {"const": true},
+        "factorization_executed_by_adapter": {"const": false},
+        "production_preconditioner_claim": {"const": false},
+        "promotes_g1_closure": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "zero_state_sparse_predictor_audit": {
+      "type": "object",
+      "required": [
+        "status",
+        "contract_pass",
+        "equation_count",
+        "operator_nnz",
+        "sparse_direct_solve_attempted",
+        "loaded_component_count",
+        "solved_component_count",
+        "regularization_count",
+        "fallback_count",
+        "explicit_linear_residual_inf_n",
+        "linear_residual_gate_passed",
+        "predictor_load_factors",
+        "predictor_rows",
+        "minimum_observed_remainder_order",
+        "remainder_classification",
+        "linear_model_consistency_gate_passed",
+        "measurable_quadratic_remainder_gate_passed",
+        "predictor_remainder_gate_passed",
+        "quadratic_remainder_gate_passed",
+        "predictor_direction_hash",
+        "full_arc_length_continuation_executed",
+        "production_solver_claim",
+        "failure",
+        "claim_boundary"
+      ],
+      "properties": {
+        "status": {"const": "ready"},
+        "contract_pass": {"const": true},
+        "equation_count": {"const": 70560},
+        "operator_nnz": {"type": "integer", "minimum": 1},
+        "sparse_direct_solve_attempted": {"const": true},
+        "loaded_component_count": {"const": 1},
+        "solved_component_count": {"const": 1},
+        "regularization_count": {"const": 0},
+        "fallback_count": {"const": 0},
+        "explicit_linear_residual_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "linear_residual_gate_passed": {"const": true},
+        "predictor_load_factors": {
+          "const": [0.25, 0.5, 1.0]
+        },
+        "predictor_rows": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "object",
+            "required": [
+              "load_factor",
+              "residual_inf_n",
+              "nonlinear_remainder_inf_n",
+              "nonlinear_remainder_above_noise",
+              "observed_remainder_order_from_previous"
+            ],
+            "properties": {
+              "load_factor": {"type": "number", "exclusiveMinimum": 0},
+              "residual_inf_n": {"type": "number", "minimum": 0},
+              "nonlinear_remainder_inf_n": {
+                "type": "number",
+                "minimum": 0
+              },
+              "nonlinear_remainder_above_noise": {"type": "boolean"},
+              "observed_remainder_order_from_previous": {
+                "type": ["number", "null"]
+              }
+            }
+          }
+        },
+        "minimum_observed_remainder_order": {
+          "type": "number",
+          "minimum": 1.8,
+          "maximum": 2.2
+        },
+        "remainder_classification": {"const": "measurable_quadratic"},
+        "linear_model_consistency_gate_passed": {"const": false},
+        "measurable_quadratic_remainder_gate_passed": {"const": true},
+        "predictor_remainder_gate_passed": {"const": true},
+        "quadratic_remainder_gate_passed": {"const": true},
+        "predictor_direction_hash": {"$ref": "#/$defs/sha256"},
+        "full_arc_length_continuation_executed": {"const": false},
+        "production_solver_claim": {"const": false},
+        "failure": {"const": null},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "callback_replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "equation_count",
+        "zero_state_residual_inf_n",
+        "full_unit_predictor_residual_inf_n",
+        "recorded_full_unit_predictor_residual_inf_n",
+        "predictor_residual_replay_tolerance_n",
+        "predictor_residual_replay_matches",
+        "tangent_probe_load_factor",
+        "tangent_probe_direction",
+        "tangent_state_difference_inf_kn_per_m",
+        "tangent_state_dependence_tolerance_kn_per_m",
+        "tangent_state_dependence_detected",
+        "analytic_centered_reference_step_m",
+        "analytic_centered_error_inf_kn_per_m",
+        "analytic_centered_relative_error",
+        "analytic_centered_relative_tolerance",
+        "analytic_centered_gate_passed",
+        "finite",
+        "contract_pass"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-state-updated-frame-axial-callback-replay.v1"
+        },
+        "equation_count": {"const": 70560},
+        "zero_state_residual_inf_n": {"type": "number", "minimum": 0},
+        "full_unit_predictor_residual_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "recorded_full_unit_predictor_residual_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "predictor_residual_replay_tolerance_n": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "predictor_residual_replay_matches": {"const": true},
+        "tangent_probe_load_factor": {"const": 1.0},
+        "tangent_probe_direction": {
+          "const": "full_unit_zero_state_predictor_normalized_by_infinity_norm"
+        },
+        "tangent_state_difference_inf_kn_per_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "tangent_state_dependence_tolerance_kn_per_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "tangent_state_dependence_detected": {"const": true},
+        "analytic_centered_reference_step_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "analytic_centered_error_inf_kn_per_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "analytic_centered_relative_error": {
+          "type": "number",
+          "minimum": 0
+        },
+        "analytic_centered_relative_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "analytic_centered_gate_passed": {"const": true},
+        "finite": {"const": true},
+        "contract_pass": {"const": true}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_mgt_source_and_semantic_live_load_consumed",
+        "authoritative_element_connectivity_consumed",
+        "dgn_exact_type_name_source_alias_applied",
+        "dgn_numeric_elastic_override_consumed",
+        "dgn_alias_engineer_review_required",
+        "exact_frame_source_property_coverage_after_alias",
+        "synthetic_property_fallback_used",
+        "finite_chord_axial_geometry_connected_to_physical_residual",
+        "finite_chord_axial_geometry_connected_to_consistent_state_tangent",
+        "measurable_quadratic_predictor_remainder",
+        "state_dependent_tangent_action_detected",
+        "backend_neutral_current_tangent_operator_contract",
+        "operator_callback_formula_and_parent_arrays_in_contract",
+        "residual_parent_matches_analytic_tangent",
+        "residual_formula_hash_verified",
+        "residual_parent_component_equivalence_audited",
+        "zero_state_reference_preconditioner_exposed",
+        "full_corotational_frame",
+        "full_nonlinear_continuation",
+        "production_matrix_free_state_tangent_krylov",
+        "production_rocm_hip_nonlinear_parity",
+        "accepted_semantic_live_load_1p0_checkpoint",
+        "g1_full_building_closure"
+      ],
+      "properties": {
+        "actual_mgt_source_and_semantic_live_load_consumed": {"const": true},
+        "authoritative_element_connectivity_consumed": {"const": true},
+        "dgn_exact_type_name_source_alias_applied": {"const": true},
+        "dgn_numeric_elastic_override_consumed": {"const": false},
+        "dgn_alias_engineer_review_required": {"const": true},
+        "exact_frame_source_property_coverage_after_alias": {"const": true},
+        "synthetic_property_fallback_used": {"const": false},
+        "finite_chord_axial_geometry_connected_to_physical_residual": {
+          "const": true
+        },
+        "finite_chord_axial_geometry_connected_to_consistent_state_tangent": {
+          "const": true
+        },
+        "measurable_quadratic_predictor_remainder": {"const": true},
+        "state_dependent_tangent_action_detected": {"const": true},
+        "backend_neutral_current_tangent_operator_contract": {"const": true},
+        "operator_callback_formula_and_parent_arrays_in_contract": {
+          "const": true
+        },
+        "residual_parent_matches_analytic_tangent": {"const": true},
+        "residual_formula_hash_verified": {"const": true},
+        "residual_parent_component_equivalence_audited": {"const": true},
+        "zero_state_reference_preconditioner_exposed": {"const": true},
+        "full_corotational_frame": {"const": false},
+        "full_nonlinear_continuation": {"const": false},
+        "production_matrix_free_state_tangent_krylov": {"const": false},
+        "production_rocm_hip_nonlinear_parity": {"const": false},
+        "accepted_semantic_live_load_1p0_checkpoint": {"const": false},
+        "g1_full_building_closure": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt", "schema"],
+      "properties": {
+        "receipt": {"type": "string", "minLength": 1},
+        "schema": {"type": "string", "minLength": 1}
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "dgn_material_property_alias_audit": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "resolution_policy",
+        "source_material_count",
+        "dgn_material_row_count",
+        "dgn_unique_material_id_count",
+        "existing_source_id_row_count",
+        "exact_unique_identity_match_row_count",
+        "alias_material_count",
+        "alias_rows",
+        "unresolved_identity_rows",
+        "ambiguous_identity_rows",
+        "duplicate_dgn_material_ids",
+        "dgn_numeric_elastic_override_consumed_count",
+        "fuzzy_name_match_count",
+        "contract_pass",
+        "engineer_review_required",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mgt-dgn-material-property-alias-audit.v1"
+        },
+        "resolution_policy": {
+          "const": "exact_normalized_type_and_name_unique_source_material.v1"
+        },
+        "source_material_count": {"const": 6},
+        "dgn_material_row_count": {"const": 29},
+        "dgn_unique_material_id_count": {"const": 29},
+        "existing_source_id_row_count": {"const": 5},
+        "exact_unique_identity_match_row_count": {"const": 29},
+        "alias_material_count": {"const": 24},
+        "alias_rows": {"type": "array", "minItems": 24, "maxItems": 24},
+        "unresolved_identity_rows": {"const": []},
+        "ambiguous_identity_rows": {"const": []},
+        "duplicate_dgn_material_ids": {"const": []},
+        "dgn_numeric_elastic_override_consumed_count": {"const": 0},
+        "fuzzy_name_match_count": {"const": 0},
+        "contract_pass": {"const": true},
+        "engineer_review_required": {"const": true},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "frame_source_property_coverage": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "frame_element_count",
+        "source_section_property_count",
+        "source_material_property_count",
+        "section_property_resolved_element_count",
+        "material_property_resolved_element_count",
+        "resolved_source_property_element_count",
+        "unresolved_source_property_element_count",
+        "source_property_coverage_ratio",
+        "exact_source_property_coverage",
+        "missing_section_element_count",
+        "missing_material_element_count",
+        "missing_section_id_counts",
+        "missing_material_id_counts",
+        "unresolved_element_head",
+        "fallback_allowed_for_state_updated_geometry",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mgt-state-updated-frame-axial-property-coverage.v1"
+        },
+        "frame_element_count": {"const": 5572},
+        "source_section_property_count": {"const": 183},
+        "source_material_property_count": {"const": 30},
+        "section_property_resolved_element_count": {"const": 5572},
+        "material_property_resolved_element_count": {"const": 5572},
+        "resolved_source_property_element_count": {"const": 5572},
+        "unresolved_source_property_element_count": {"const": 0},
+        "source_property_coverage_ratio": {"const": 1.0},
+        "exact_source_property_coverage": {"const": true},
+        "missing_section_element_count": {"const": 0},
+        "missing_material_element_count": {"const": 0},
+        "missing_section_id_counts": {"const": []},
+        "missing_material_id_counts": {"const": []},
+        "unresolved_element_head": {"const": []},
+        "fallback_allowed_for_state_updated_geometry": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

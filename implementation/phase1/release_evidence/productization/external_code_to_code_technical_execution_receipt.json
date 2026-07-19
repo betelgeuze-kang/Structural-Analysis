@@ -1,0 +1,267 @@
+{
+  "artifact_hash": "sha256:aed6262abbc42efbfc6242df7085a9553c0b5226cbb30cf0549d188f5a2fe450",
+  "blockers_remaining": [
+    "opensees_commercial_redistribution_license_approval_missing",
+    "calculix_product_legal_approval_missing",
+    "external_runtime_assets_not_bundled",
+    "independent_clean_runner_reproduction_missing",
+    "verification_hierarchy_operator_manifest_not_attached",
+    "code_to_code_structural_family_breadth_insufficient",
+    "verification_level_2_not_achieved",
+    "release_readiness_not_established",
+    "external_runtime_current_source_rerun_missing"
+  ],
+  "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system and a linear cantilever with OpenSees, and one axial member with CalculiX. It is a technical code-to-code execution receipt only. OpenSeesPy declares commercial redistribution licensing requirements, and no product/legal approval is attached for either runtime. The external packages are not bundled. Therefore this receipt does not enter the verification-hierarchy operator manifest, does not achieve Verification Level 2, and does not prove broad frame/shell modal, buckling, nonlinear, sparse/HIP, commercial-equivalence, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
+  "claims": {
+    "actual_external_solver_execution": true,
+    "commercial_equivalence": false,
+    "external_runtime_redistribution_approval": false,
+    "opensees_technical_comparison": true,
+    "product_legal_license_approval": false,
+    "release_readiness": false,
+    "second_solver_technical_comparison": true,
+    "verification_level_2": false
+  },
+  "comparisons": [
+    {
+      "analysis_type": "modal",
+      "case_id": "two_dof_shear_modal",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 0.3819660112501052,
+          "quantity": "eigenvalue_mode_1",
+          "reference_value": 0.3819660112501052,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 2.618033988749895,
+          "quantity": "eigenvalue_mode_2",
+          "reference_value": 2.618033988749895,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        }
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "deterministic-modal-solution.v1",
+      "reference_solver": "OpenSees 3.7.1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "case_id": "cantilever_tip_load",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -0.0026666666666666666,
+          "quantity": "tip_displacement_y_m",
+          "reference_value": -0.0026666666666666666,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.552713678800501e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 10.0,
+          "quantity": "base_reaction_y_kn",
+          "reference_value": 9.999999999999996,
+          "relative_error": 3.552713678800502e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.552713678800501e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 20.0,
+          "quantity": "base_reaction_mz_kn_m",
+          "reference_value": 19.999999999999996,
+          "relative_error": 1.7763568394002508e-16,
+          "relative_tolerance": 1e-10
+        }
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "authoritative_cpu_linear_fea_3d_v1",
+      "reference_solver": "OpenSees 3.7.1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "case_id": "axial_member_tip_load",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 5e-06,
+          "quantity": "tip_displacement_x_m",
+          "reference_value": 5e-06,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -10.0,
+          "quantity": "base_reaction_x_kn",
+          "reference_value": -10.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        }
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "authoritative_cpu_linear_fea_3d_v1",
+      "reference_solver": "CalculiX CrunchiX 2.17"
+    }
+  ],
+  "engine_version": "1.0.0",
+  "execution_environment": {
+    "machine": "x86_64",
+    "python_executable_sha256": "sha256:7d51cd6b48b521277f5caa4610a82126e315fa2be4df069823a8b1eeb5bd4a86",
+    "python_version": "3.10.12",
+    "system": "Linux"
+  },
+  "external_assets": [
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/calculix-ccx",
+      "bundled_in_repository": false,
+      "distribution": "calculix-ccx",
+      "filename": "calculix-ccx_2.17-3_amd64.deb",
+      "kind": "calculix_ubuntu_runtime_package",
+      "sha256": "sha256:3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e",
+      "version": "2.17-3"
+    },
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/libarpack2",
+      "bundled_in_repository": false,
+      "distribution": "libarpack2",
+      "filename": "libarpack2_3.8.0-1_amd64.deb",
+      "kind": "calculix_runtime_dependency",
+      "sha256": "sha256:07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a",
+      "version": "3.8.0-1"
+    },
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/libspooles2.2",
+      "bundled_in_repository": false,
+      "distribution": "libspooles2.2",
+      "filename": "libspooles2.2_2.2-14_amd64.deb",
+      "kind": "calculix_runtime_dependency",
+      "sha256": "sha256:34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917",
+      "version": "2.2-14"
+    },
+    {
+      "authority_url": "https://pypi.org/project/openseespy/3.7.1.2/",
+      "bundled_in_repository": false,
+      "distribution": "openseespy",
+      "filename": "openseespy-3.7.1.2-py3-none-any.whl",
+      "kind": "opensees_python_meta_wheel",
+      "sha256": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
+      "version": "3.7.1.2"
+    },
+    {
+      "authority_url": "https://pypi.org/project/openseespylinux/3.7.1.2/",
+      "bundled_in_repository": false,
+      "distribution": "openseespylinux",
+      "filename": "openseespylinux-3.7.1.2-py3-none-any.whl",
+      "kind": "opensees_linux_runtime_wheel",
+      "sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a",
+      "version": "3.7.1.2"
+    }
+  ],
+  "generated_at": "2026-07-19T06:27:05.994193+00:00",
+  "internal_source": {
+    "input_checksums": {
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:2d91483a92465a69c7cb1cc957b9a47891a654ad308dcfc9fc73442fc0cf6ac9",
+      "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
+      "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
+      "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json": "sha256:096634d444fa46811302dc775b0919d54c9d6b22565cd9bd76dc15d68967704d",
+      "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
+      "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
+      "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
+      "tests/test_external_code_to_code_technical_receipt.py": "sha256:b686b936d1a7eab184767834aa03d1e98f8afe9d2545bd20b6c33615f898a019"
+    },
+    "source_set_hash": "sha256:5ec318512c792642229e283f7f6555f3ed433b40a3cedf262feb5146c9dd1bf1"
+  },
+  "replay_provenance": {
+    "current_product_replay_generated_at": "2026-07-19T06:27:05.994193+00:00",
+    "current_product_replay_pass": true,
+    "external_execution_generated_at": "2026-07-19T06:18:41.104165+00:00",
+    "external_execution_reused": true,
+    "external_runtime_executed_in_this_generation": false,
+    "reuse_reason": "sandbox_mpi_socket_policy"
+  },
+  "runtimes": {
+    "calculix": {
+      "actual_external_execution": true,
+      "binary_sha256": "sha256:85f6961eb174eaf4daf2b053e1c3fd50874c9c597bd4e1e31b7f5cdfc4dda4c3",
+      "distribution_version": "2.17-3",
+      "execution_outputs": {
+        "dat_sha256": "sha256:0f2336b9654d2eecaf7c1695d97e38769fbe75ad3ea66d3924216862de26c07d",
+        "frd_sha256": "sha256:60ff0f9e0ba9252b2772236dd739f793cfcaf961ed0005ff5f1ef77d8ca0f3ef",
+        "input_deck_sha256": "sha256:96482e7037bd037ba97f5e7359eea54b70522c4f48ca5b095dfe9eb9149d5600",
+        "return_code": 0,
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "sha256:fe125307f58130bffd638ff8337e3483a78c4d8235c8d183d9ece48d60fee361",
+        "version_return_code": 201,
+        "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
+      },
+      "independent_from_product": true,
+      "license": {
+        "commercial_redistribution_approved": false,
+        "declared_license_posture": "GPL-2_ubuntu_package",
+        "license_file_sha256": "sha256:258824ecc9a05cb4a07afbe2ca850383e8a7b1779822df7ee717ff8ebc168def",
+        "product_legal_approval": false
+      },
+      "name": "CalculiX CrunchiX",
+      "runtime_version": "2.17",
+      "version_verified": true
+    },
+    "opensees": {
+      "actual_external_execution": true,
+      "distribution_version": "3.7.1.2",
+      "execution_outputs": {
+        "driver_sha256": "sha256:4f764a287a45b66b4bea8b61524124e64651911a42ae280b7cdf0b9597d5de29",
+        "return_code": 0,
+        "stderr_sha256": "sha256:28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea",
+        "stdout_sha256": "sha256:8965f6681e4a6218535d60a8a69a18449cfd003553685cbe507ca5ee81644cb8"
+      },
+      "independent_from_product": true,
+      "license": {
+        "commercial_redistribution_approved": false,
+        "declared_license_posture": "internal_use_allowed_commercial_redistribution_requires_license",
+        "license_file_sha256": "sha256:aeb25d4e6647320e0581d01b5bbc7f15606b7aaffa8f09c23a424cb95fa49761",
+        "product_legal_approval": false
+      },
+      "name": "OpenSees",
+      "runtime_version": "3.7.1",
+      "version_verified": true
+    }
+  },
+  "schema_version": "external-code-to-code-technical-execution.v1",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "status": "partial",
+  "technical_contract_pass": true,
+  "truth_class": "external_code_to_code_technical_execution",
+  "verification_hierarchy_credit": false,
+  "verification_hierarchy_operator_manifest_attached": false
+}

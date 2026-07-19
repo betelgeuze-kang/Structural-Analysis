@@ -31,8 +31,13 @@ def test_mgt_uncoarsened_boundary_global_equilibrium_cli(tmp_path: Path) -> None
     assert payload["uncoarsened_boundary_global_equilibrium_ready"] is True
     assert payload["global_frame_shell_tangent_integration_ready"] is True
     assert payload["roundtrip_policy"]["parser_coarsening"]["applied"] is False
-    assert payload["mesh_fingerprint"]["node_count"] == 13047
-    assert payload["mesh_fingerprint"]["elastic_link_spring_stiffness_nnz"] == 1692 * 6 * 4
+    mesh = payload["mesh_fingerprint"]
+    assert mesh["node_count"] == 13047
+    assert mesh["frame_connectivity_source"] == "elem_conn_ptr/elem_conn_idx"
+    assert mesh["edge_index_used_for_element_binding"] is False
+    assert mesh["skipped_invalid_line_connectivity_count"] == 0
+    assert mesh["line_element_row_accounting_exact"] is True
+    assert mesh["elastic_link_spring_stiffness_nnz"] == 1692 * 6 * 4
     assert payload["boundary_summary"]["support_constraint_row_count"] == 8
     assert payload["boundary_summary"]["authored_support_node_count"] == 2133
     assert payload["boundary_summary"]["authored_support_restrained_dof_count"] == 7707

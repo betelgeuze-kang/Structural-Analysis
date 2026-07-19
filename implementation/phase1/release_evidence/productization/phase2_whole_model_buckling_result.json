@@ -1,0 +1,166 @@
+{
+  "analysis_scope": "public_api_dense_reference_state_frame_linear_buckling",
+  "artifact_hash": "sha256:8dcf165fe866448b76e67ea47bfa3bea2e0cb9f8755a6029ae0ada997af2bbe8",
+  "blockers_remaining": [
+    "general_frame_shell_linear_buckling_not_verified",
+    "mixed_tension_compression_reference_not_supported",
+    "distributed_thermal_settlement_follower_loads_not_supported",
+    "nonlinear_buckling_and_imperfection_sensitivity_not_connected",
+    "sparse_buckling_backend_not_connected",
+    "large_mode_binary_vector_artifacts_not_connected",
+    "rocm_hip_buckling_parity_not_verified",
+    "independent_code_to_code_buckling_evidence_not_attached",
+    "verification_level_2_not_achieved",
+    "release_readiness_not_established"
+  ],
+  "claim_boundary": "This receipt proves a bounded public-API whole-model linear-buckling slice for explicit 3D frame, beam, and column elements. It runs the authoritative dense linear-static solver at reference load factor 1.0, recovers constant element axial compression, assembles a positive-semidefinite consistent Euler-Bernoulli initial-stress matrix, and solves K phi = lambda Kg phi with the strict symmetric generalized-eigen kernel. It covers two-plane Euler column convergence, physical critical-load invariance under reference-load scaling, deterministic replay, complete repeated-mode cluster selection, and fail-closed tension or zero-compression reference states. It does not prove general frame/shell stability, truss or shell geometric stiffness, mixed tension-compression initial stress, distributed/thermal/settlement/follower load conversion, nonlinear buckling, imperfection sensitivity, sparse or large-mode execution, ROCm/HIP parity, an independent second-solver buckling comparison, Verification Level 2, commercial equivalence, or release readiness.",
+  "claims": {
+    "general_frame_shell_linear_buckling": false,
+    "independent_code_to_code_or_verification_level_2": false,
+    "large_mode_binary_vector_artifacts": false,
+    "mixed_tension_compression_reference": false,
+    "nonlinear_buckling_or_imperfection_sensitivity": false,
+    "reference_axial_sign_fail_closed_evidence": true,
+    "reference_static_initial_stress_assembly_evidence": true,
+    "release_readiness": false,
+    "repeated_cluster_fail_closed_evidence": true,
+    "rocm_hip_buckling_parity": false,
+    "sparse_buckling_backend": false,
+    "whole_model_frame_linear_buckling_evidence": true
+  },
+  "contract_pass": true,
+  "numeric_serialization_profile": "binary64-json-round-trip-plus-semantic-12e",
+  "schema_version": "phase2-whole-model-buckling-result.v1",
+  "solver_contract": {
+    "claim_boundary": "dense_reference_state_frame_linear_buckling_preview_v1",
+    "eigen_backend": "scipy_linalg_eigh_dense",
+    "geometric_stiffness_formulation": "euler_bernoulli_constant_axial_compression_initial_stress_v1",
+    "geometric_stiffness_sign_convention": "positive_compression_K_minus_lambda_Kg",
+    "maximum_dense_free_dof_count": 512,
+    "mode_shape_storage_profile": "inline_max_component_normalized_small_dense_v1",
+    "reference_load_factor": 1.0,
+    "solver_id": "authoritative_cpu_linear_buckling_fea_3d_v1"
+  },
+  "source": {
+    "input_checksums": {
+      "scripts/build_phase2_whole_model_buckling_artifacts.py": "sha256:ea2dec4cf343c0739a05a1d668172c35864b90a7413cd3f4db6ed396d3de806a",
+      "src/structural_analysis/__init__.py": "sha256:72402a389d301cb2e05fbc574c28ce89ced833040b95dd5860101926d849ee6d",
+      "src/structural_analysis/analyses/__init__.py": "sha256:a10e34597dc201e15c41b13dad6e7a52e65982aaf37d9c5513f2319b46fb1ed7",
+      "src/structural_analysis/analyses/buckling.py": "sha256:bc498580f2a3e3e287640d787d03e88a461df274c41c41e2d5eb331ad4ba0e92",
+      "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
+      "src/structural_analysis/api/cli.py": "sha256:f2da57b8355a61078b761715e72bfe0b44241667c4c37c5605c1770ce8f202d2",
+      "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
+      "src/structural_analysis/assembly/__init__.py": "sha256:1b9f29b096a6c78d0c34fda4455c8e9f4c018afa5b0532cd13d9ad14fc943a1f",
+      "src/structural_analysis/assembly/buckling.py": "sha256:fba3d394c496253c04421c13cfe50e00cc741129727b7ecf337a1628f54a0232",
+      "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
+      "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
+      "src/structural_analysis/schemas/whole_model_buckling_v1.schema.json": "sha256:7f02fee50ac6f5344fdb13e53f85a7b48bcabcba78eb81531a885d9937febd5f",
+      "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
+      "src/structural_analysis/solvers/buckling/solver.py": "sha256:589128f26a0f1c35a4b121de87e3bc28dedbefba17807ca485424475aa18542b",
+      "tests/test_build_phase2_whole_model_buckling_artifacts.py": "sha256:52f262ba249aca17868f367937cfd4372571b081d3b68c5c456c230df03e4245",
+      "tests/test_whole_model_buckling_analysis.py": "sha256:4747e72942b847ff78c6f999676a91b0ab58b3d6158f1971c932d4e175bc0611"
+    },
+    "source_set_hash": "sha256:6b08e3de7c16202e1f57206d35babc3ddc62bf4c3047950503e4a87606353783"
+  },
+  "status": "partial",
+  "summary": {
+    "case_count": 4,
+    "contract_pass": true,
+    "euler_two_plane_contract_pass": true,
+    "passing_case_count": 4,
+    "reference_load_scale_contract_pass": true,
+    "reference_sign_contract_pass": true,
+    "repeated_cluster_contract_pass": true
+  },
+  "tolerance_policy": {
+    "compression_force_relative_tolerance": 1e-12,
+    "euler_load_relative_tolerance": 3e-06,
+    "load_scale_invariance_relative_tolerance": 1e-12,
+    "orthogonality_tolerance": 1e-08,
+    "repeated_eigenvalue_relative_tolerance": 1e-10,
+    "residual_relative_tolerance": 1e-08
+  },
+  "truth_class": "analytic_and_invariant_whole_model_linear_buckling_truth",
+  "verification": {
+    "euler_two_plane": {
+      "actual_load_factors": [
+        131.59499646070574,
+        175.45999528098105
+      ],
+      "case_id": "public_two_plane_pinned_euler_column_16_element",
+      "contract_pass": true,
+      "deterministic_replay_raw_exact": true,
+      "deterministic_replay_semantic_exact": true,
+      "element_count": 16,
+      "expected_load_factors": [
+        131.59472534785812,
+        175.45963379714416
+      ],
+      "fallback_used": false,
+      "free_dof_count": 80,
+      "geometric_diagonalization_error_inf": 7.008282842946301e-16,
+      "geometric_stiffness_matrix_hash": "sha256:f2f293509d2ed740b497c8c09c91dc7087df65125fb03c3fcf8a1cbaba5efd40",
+      "maximum_load_factor_relative_error": 2.060210824908061e-06,
+      "maximum_reference_compression_relative_error": 3.4106051316484808e-15,
+      "maximum_residual_relative_inf": 1.3479787340941666e-12,
+      "public_status": "ready",
+      "raw_result_hash": "sha256:6140b31a9dca9388a94d393795defc2021c069b4922f1983c15dba591348c6e7",
+      "reference_compression_force_kn": 100.0,
+      "reference_load_pattern_hash": "sha256:6047dfea8b7d96f83cf6e00405fd0dfe86afee3923547f6d4562dd4f5a2c0032",
+      "regularization_used": false,
+      "semantic_result_hash": "sha256:8cb096160c55452a57de4d6f42a5a480ccdb16a809fe5a13b89c17b06d63a9d4",
+      "solver_id": "authoritative_cpu_linear_buckling_fea_3d_v1",
+      "stiffness_matrix_hash": "sha256:a9216cc879674ab8f4420a2ab7d9edf9c509916d90d553783327bb751141e328",
+      "stiffness_orthogonality_error_inf": 9.259260025373806e-14,
+      "truth_basis": "analytic_euler_load_with_finite_element_convergence"
+    },
+    "reference_load_scale": {
+      "case_id": "public_reference_load_scale_invariance",
+      "contract_pass": true,
+      "fallback_used": false,
+      "geometric_stiffness_matrix_hash_distinct": true,
+      "high_reference_critical_load_factor": 65.79749823035287,
+      "high_reference_load_kn": 200.0,
+      "high_reference_physical_critical_load_kn": 13159.499646070575,
+      "load_factor_ratio_relative_error": 0.0,
+      "low_reference_critical_load_factor": 131.59499646070574,
+      "low_reference_load_kn": 100.0,
+      "low_reference_physical_critical_load_kn": 13159.499646070575,
+      "physical_critical_load_relative_error": 0.0,
+      "regularization_used": false,
+      "stiffness_matrix_hash_equal": true,
+      "truth_basis": "linear_reference_load_homogeneity_invariant"
+    },
+    "reference_sign": {
+      "case_id": "public_reference_axial_sign_fail_closed",
+      "contract_pass": true,
+      "fallback_used": false,
+      "regularization_used": false,
+      "tension_blocker_kind": "buckling_reference_tension_not_supported",
+      "tension_status": "blocked",
+      "truth_basis": "positive_compression_initial_stress_sign_invariant",
+      "zero_compression_blocker_kind": "buckling_reference_compression_missing",
+      "zero_compression_status": "blocked"
+    },
+    "repeated_cluster": {
+      "case_id": "public_symmetric_column_repeated_cluster",
+      "complete_load_factors": [
+        175.45999528097767,
+        175.45999528097985
+      ],
+      "complete_selection_status": "ready",
+      "contract_pass": true,
+      "deterministic_replay_raw_exact": true,
+      "deterministic_replay_semantic_exact": true,
+      "fallback_used": false,
+      "incomplete_selection_blocker_kind": "buckling_generalized_eigen_contract_failed",
+      "incomplete_selection_detail": "requested mode_count cuts a repeated or clustered eigenvalue group",
+      "incomplete_selection_status": "blocked",
+      "raw_result_hash": "sha256:1e8a6e972bb45927e436a50725cbc47ae6d15919f31373d772b2489eaa4a1ce9",
+      "regularization_used": false,
+      "repeated_load_factor_relative_gap": 1.2472766926936891e-14,
+      "semantic_result_hash": "sha256:c9f588da5ad296d456843104759cbc7ed95cd5a5588ac025da0bdcd1759043ef",
+      "truth_basis": "complete_repeated_eigenspace_selection_invariant"
+    }
+  }
+}

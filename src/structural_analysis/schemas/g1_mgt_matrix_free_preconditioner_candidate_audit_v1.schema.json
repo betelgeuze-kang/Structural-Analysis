@@ -1,0 +1,1939 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/g1-mgt-matrix-free-preconditioner-candidate-audit-v1.schema.json",
+  "title": "G1 actual-MGT matrix-free preconditioner candidate audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "diagnostic_execution_ready",
+    "readiness_pass",
+    "evidence_closure_pass",
+    "source_commit_sha",
+    "engine_version",
+    "source_commit_exact_replay_claim",
+    "source_tree_state",
+    "input_checksums",
+    "case_id",
+    "inputs",
+    "operator_binding",
+    "current_tangent_operator_contract",
+    "hip_current_tangent_execution_preparation",
+    "host_recurrence_contract",
+    "fixed_reference_splu_baseline",
+    "node_block_jacobi_candidate",
+    "host_ilut_candidate",
+    "hip_triangular_apply_compile_evidence",
+    "comparison",
+    "claims",
+    "blockers_remaining",
+    "artifacts",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "g1-mgt-matrix-free-preconditioner-candidate-audit.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "diagnostic_execution_ready": {"const": true},
+    "readiness_pass": {"const": false},
+    "evidence_closure_pass": {"const": false},
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "engine_version": {"type": "string", "minLength": 1},
+    "source_commit_exact_replay_claim": {"const": false},
+    "source_tree_state": {
+      "const": "working_tree_with_uncommitted_goal_changes"
+    },
+    "input_checksums": {
+      "type": "object",
+      "minProperties": 9,
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "case_id": {
+      "const": "g1_real_mgt_matrix_free_preconditioner_candidate_audit"
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mgt_path",
+        "mgt_sha256",
+        "checkpoint_npz",
+        "checkpoint_sha256",
+        "load_factor",
+        "state_policy",
+        "equation_count",
+        "state_data_hash",
+        "right_hand_side_data_hash",
+        "right_hand_side_inf_kn"
+      ],
+      "properties": {
+        "mgt_path": {"type": "string", "minLength": 1},
+        "mgt_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_npz": {"type": "string", "minLength": 1},
+        "checkpoint_sha256": {"$ref": "#/$defs/sha256"},
+        "load_factor": {"const": 1.0},
+        "state_policy": {
+          "const": "full_unit_zero_state_linear_predictor"
+        },
+        "equation_count": {"const": 70560},
+        "state_data_hash": {"$ref": "#/$defs/sha256"},
+        "right_hand_side_data_hash": {"$ref": "#/$defs/sha256"},
+        "right_hand_side_inf_kn": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "operator_binding": {"$ref": "#/$defs/operator_binding"},
+    "current_tangent_operator_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "manifest",
+        "reference_preconditioner_pattern_hash",
+        "reference_preconditioner_numeric_values_hash",
+        "array_total_byte_length",
+        "analytic_callback_parity_probes",
+        "analytic_callback_parity_pass",
+        "operator_callback_outputs_in_contract",
+        "cpu_reference_evaluator_executed",
+        "hip_execution",
+        "cpu_hip_numerical_parity",
+        "contract_pass"
+      ],
+      "properties": {
+        "manifest": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "contract_hash",
+            "array_bundle_hash",
+            "profile",
+            "case_id",
+            "residual_formula_hash",
+            "source_action_contract",
+            "dimensions",
+            "array_descriptors",
+            "claim_boundary"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "structural-analysis-current-tangent-operator.v1"
+            },
+            "contract_hash": {"$ref": "#/$defs/sha256"},
+            "array_bundle_hash": {"$ref": "#/$defs/sha256"},
+            "profile": {
+              "const": "reference_csr_load_frame_delta_finite_chord_axial.v1"
+            },
+            "case_id": {
+              "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+            },
+            "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+            "source_action_contract": {
+              "const": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1"
+            },
+            "dimensions": {
+              "type": "object",
+              "required": [
+                "equation_count",
+                "global_dof_count",
+                "reference_nnz",
+                "frame_element_count",
+                "geometry_element_count"
+              ],
+              "properties": {
+                "equation_count": {"const": 70560},
+                "global_dof_count": {"const": 78282},
+                "reference_nnz": {"const": 1262462},
+                "frame_element_count": {"const": 5572},
+                "geometry_element_count": {"const": 5572}
+              }
+            },
+            "array_descriptors": {
+              "type": "array",
+              "minItems": 12,
+              "maxItems": 12
+            },
+            "claim_boundary": {
+              "type": "object",
+              "required": [
+                "immutable_backend_neutral_parent_arrays",
+                "cpu_reference_evaluator",
+                "hip_execution",
+                "cpu_hip_numerical_parity",
+                "g1_closure"
+              ],
+              "properties": {
+                "immutable_backend_neutral_parent_arrays": {"const": true},
+                "cpu_reference_evaluator": {"const": true},
+                "hip_execution": {"const": false},
+                "cpu_hip_numerical_parity": {"const": false},
+                "g1_closure": {"const": false}
+              }
+            }
+          }
+        },
+        "reference_preconditioner_pattern_hash": {"$ref": "#/$defs/sha256"},
+        "reference_preconditioner_numeric_values_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "array_total_byte_length": {
+          "type": "integer",
+          "minimum": 20000000
+        },
+        "analytic_callback_parity_probes": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/current_tangent_parity_probe"}
+        },
+        "analytic_callback_parity_pass": {"const": true},
+        "operator_callback_outputs_in_contract": {"const": true},
+        "cpu_reference_evaluator_executed": {"const": true},
+        "hip_execution": {"const": true},
+        "cpu_hip_numerical_parity": {"const": true},
+        "contract_pass": {"const": true}
+      }
+    },
+    "hip_current_tangent_execution_preparation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compile_evidence",
+        "actual_mgt_host_parser_receipt",
+        "actual_mgt_hardware_parity_receipt",
+        "actual_mgt_fixture",
+        "actual_hardware_execution",
+        "numerical_parity",
+        "production_current_tangent_fgmres",
+        "performance",
+        "contract_pass"
+      ],
+      "properties": {
+        "compile_evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "receipt",
+            "schema_version",
+            "receipt_hash",
+            "contract_scope",
+            "compiler",
+            "targets",
+            "dual_target_compile_pass",
+            "dual_target_host_fixture_parser_execution",
+            "host_parser_fixture_scope"
+          ],
+          "properties": {
+            "receipt": {
+              "const": "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json"
+            },
+            "schema_version": {
+              "const": "engine-v2-hip-current-tangent-target-compile-host-parse-receipt.v1"
+            },
+            "receipt_hash": {"$ref": "#/$defs/sha256"},
+            "contract_scope": {
+              "const": "target_compile_and_host_fixture_parser_only"
+            },
+            "compiler": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "version_first_line",
+                "version_output_sha256"
+              ],
+              "properties": {
+                "path": {"type": "string", "minLength": 1},
+                "version_first_line": {"type": "string", "minLength": 1},
+                "version_output_sha256": {"$ref": "#/$defs/sha256"}
+              }
+            },
+            "targets": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "prefixItems": [
+                {"$ref": "#/$defs/hip_current_tangent_gfx1030_compile_target"},
+                {"$ref": "#/$defs/hip_current_tangent_gfx1100_compile_target"}
+              ],
+              "items": false
+            },
+            "dual_target_compile_pass": {"const": true},
+            "dual_target_host_fixture_parser_execution": {"const": true},
+            "host_parser_fixture_scope": {
+              "const": "five_equation_synthetic_fixture_only"
+            }
+          }
+        },
+        "actual_mgt_host_parser_receipt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "receipt",
+            "schema_version",
+            "receipt_hash",
+            "contract_scope",
+            "compiler",
+            "targets",
+            "synthetic_and_actual_parser_binary_identity",
+            "dual_target_host_fixture_parser_execution",
+            "hip_runtime_api_call_count",
+            "actual_hardware_execution",
+            "current_tangent_action_executed",
+            "cpu_hip_numerical_parity",
+            "contract_pass"
+          ],
+          "properties": {
+            "receipt": {
+              "const": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json"
+            },
+            "schema_version": {
+              "const": "g1-mgt-hip-current-tangent-host-parser-receipt.v1"
+            },
+            "receipt_hash": {"$ref": "#/$defs/sha256"},
+            "contract_scope": {
+              "const": "actual_mgt_dual_target_compile_and_host_fixture_parser_only"
+            },
+            "compiler": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "version_first_line",
+                "version_output_sha256"
+              ],
+              "properties": {
+                "path": {"type": "string", "minLength": 1},
+                "version_first_line": {"type": "string", "minLength": 1},
+                "version_output_sha256": {"$ref": "#/$defs/sha256"}
+              }
+            },
+            "targets": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "prefixItems": [
+                {"$ref": "#/$defs/actual_mgt_hip_current_tangent_gfx1030_target"},
+                {"$ref": "#/$defs/actual_mgt_hip_current_tangent_gfx1100_target"}
+              ],
+              "items": false
+            },
+            "synthetic_and_actual_parser_binary_identity": {"const": true},
+            "dual_target_host_fixture_parser_execution": {"const": true},
+            "hip_runtime_api_call_count": {"const": 0},
+            "actual_hardware_execution": {"const": false},
+            "current_tangent_action_executed": {"const": false},
+            "cpu_hip_numerical_parity": {"const": false},
+            "contract_pass": {"const": true}
+          }
+        },
+        "actual_mgt_hardware_parity_receipt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "receipt",
+            "schema_version",
+            "receipt_hash",
+            "contract_scope",
+            "device_name",
+            "gcn_arch_name",
+            "binary_sha256",
+            "binary_byte_length",
+            "runtime_output_hash",
+            "action_artifact",
+            "kernel_invocation_count",
+            "mid_action_d2h_transfer_count",
+            "blocking_d2h_synchronization_count",
+            "canonical_cpu_max_abs_error_n_per_m",
+            "comparison_tolerance_n_per_m",
+            "canonical_relative_max_error",
+            "device_order_cpu_max_abs_error_n_per_m",
+            "device_order_bitwise_match",
+            "actual_hardware_execution",
+            "cpu_hip_numerical_parity",
+            "independent_gfx1100_hardware_execution",
+            "contract_pass"
+          ],
+          "properties": {
+            "receipt": {
+              "const": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_hardware_parity_receipt.json"
+            },
+            "schema_version": {
+              "const": "g1-mgt-hip-current-tangent-hardware-parity-receipt.v1"
+            },
+            "receipt_hash": {"$ref": "#/$defs/sha256"},
+            "contract_scope": {
+              "const": "actual_mgt_single_state_direction_local_gfx1030_hardware_parity"
+            },
+            "device_name": {"const": "AMD Radeon RX 6900 XT"},
+            "gcn_arch_name": {"const": "gfx1030"},
+            "binary_sha256": {
+              "const": "sha256:2b579ec5b651a5c7503318a9fe59efcf688d1690726f8bb3e51662de942e39d4"
+            },
+            "binary_byte_length": {"const": 56912},
+            "runtime_output_hash": {"$ref": "#/$defs/sha256"},
+            "action_artifact": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "format",
+                "dtype",
+                "shape",
+                "byte_length",
+                "file_sha256",
+                "data_hash",
+                "persisted"
+              ],
+              "properties": {
+                "path": {
+                  "const": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_action.f64le"
+                },
+                "format": {
+                  "const": "canonical_little_endian_float64_vector.v1"
+                },
+                "dtype": {"const": "<f8"},
+                "shape": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 1,
+                  "prefixItems": [{"const": 70560}],
+                  "items": false
+                },
+                "byte_length": {"const": 564480},
+                "file_sha256": {"$ref": "#/$defs/sha256"},
+                "data_hash": {"$ref": "#/$defs/sha256"},
+                "persisted": {"const": true}
+              }
+            },
+            "kernel_invocation_count": {"const": 1},
+            "mid_action_d2h_transfer_count": {"const": 0},
+            "blocking_d2h_synchronization_count": {"const": 1},
+            "canonical_cpu_max_abs_error_n_per_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "comparison_tolerance_n_per_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "canonical_relative_max_error": {
+              "type": "number",
+              "minimum": 0
+            },
+            "device_order_cpu_max_abs_error_n_per_m": {"const": 0.0},
+            "device_order_bitwise_match": {"const": true},
+            "actual_hardware_execution": {"const": true},
+            "cpu_hip_numerical_parity": {"const": true},
+            "independent_gfx1100_hardware_execution": {"const": false},
+            "contract_pass": {"const": true}
+          }
+        },
+        "actual_mgt_fixture": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "fixture_schema_version",
+            "fixture_hash",
+            "parity_profile",
+            "schedule_profile",
+            "execution_profile",
+            "accumulation_profile",
+            "operator_contract_hash",
+            "schedule_contract_hash",
+            "execution_contract_hash",
+            "load_factor",
+            "state_data_hash",
+            "direction_data_hash",
+            "dimensions",
+            "expected_kernel_invocation_count",
+            "binary_profile",
+            "array_count",
+            "fixture_byte_length",
+            "fixture_binary_materialized",
+            "fixture_binary_ephemeral",
+            "fixture_binary_sha256",
+            "fixture_binary_readback_sha256",
+            "fixture_binary_roundtrip_pass",
+            "fixture_binary_persisted",
+            "actual_mgt_fixture_contract_pass",
+            "host_fixture_parser_execution",
+            "host_fixture_parser_target_count",
+            "host_fixture_parser_hip_runtime_api_call_count",
+            "host_fixture_parser_binding_pass",
+            "device_execution",
+            "cpu_hip_numerical_parity"
+          ],
+          "properties": {
+            "fixture_schema_version": {
+              "const": "engine-v2-hip-current-tangent-operator-fixture.v1"
+            },
+            "fixture_hash": {"$ref": "#/$defs/sha256"},
+            "parity_profile": {
+              "const": "engine-v2-cpu-hip-current-tangent-operator-parity.v1"
+            },
+            "schedule_profile": {
+              "const": "free_row_sorted_element_local_incidence.v1"
+            },
+            "execution_profile": {
+              "const": "one_thread_per_free_row_reference_frame_geometry.v1"
+            },
+            "accumulation_profile": {
+              "const": "reference_then_sorted_frame_then_sorted_geometry_sequential_fp64.v1"
+            },
+            "operator_contract_hash": {"$ref": "#/$defs/sha256"},
+            "schedule_contract_hash": {"$ref": "#/$defs/sha256"},
+            "execution_contract_hash": {"$ref": "#/$defs/sha256"},
+            "load_factor": {"const": 1.0},
+            "state_data_hash": {"$ref": "#/$defs/sha256"},
+            "direction_data_hash": {"$ref": "#/$defs/sha256"},
+            "dimensions": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "equation_count",
+                "global_dof_count",
+                "reference_nnz",
+                "frame_element_count",
+                "geometry_element_count",
+                "frame_incidence_count",
+                "geometry_incidence_count"
+              ],
+              "properties": {
+                "equation_count": {"const": 70560},
+                "global_dof_count": {"const": 78282},
+                "reference_nnz": {"const": 1262462},
+                "frame_element_count": {"const": 5572},
+                "geometry_element_count": {"const": 5572},
+                "frame_incidence_count": {"const": 61494},
+                "geometry_incidence_count": {"const": 61494}
+              }
+            },
+            "expected_kernel_invocation_count": {"const": 1},
+            "binary_profile": {
+              "const": "canonical_little_endian_mixed_numeric.v1"
+            },
+            "array_count": {"const": 21},
+            "fixture_byte_length": {"const": 36123072},
+            "fixture_binary_materialized": {"const": true},
+            "fixture_binary_ephemeral": {"const": true},
+            "fixture_binary_sha256": {"$ref": "#/$defs/sha256"},
+            "fixture_binary_readback_sha256": {"$ref": "#/$defs/sha256"},
+            "fixture_binary_roundtrip_pass": {"const": true},
+            "fixture_binary_persisted": {"const": false},
+            "actual_mgt_fixture_contract_pass": {"const": true},
+            "host_fixture_parser_execution": {"const": true},
+            "host_fixture_parser_target_count": {"const": 2},
+            "host_fixture_parser_hip_runtime_api_call_count": {"const": 0},
+            "host_fixture_parser_binding_pass": {"const": true},
+            "device_execution": {"const": true},
+            "cpu_hip_numerical_parity": {"const": true}
+          }
+        },
+        "actual_hardware_execution": {"const": true},
+        "numerical_parity": {"const": true},
+        "production_current_tangent_fgmres": {"const": false},
+        "performance": {"const": false},
+        "contract_pass": {"const": true}
+      }
+    },
+    "host_recurrence_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "accumulation_profile",
+        "deterministic_host_arithmetic",
+        "operator_callback_outputs_in_contract",
+        "preconditioner_callback_outputs_in_contract",
+        "cross_platform_end_to_end_deterministic_claim"
+      ],
+      "properties": {
+        "profile": {
+          "const": "right_preconditioned_fgmres_two_pass_modified_gram_schmidt_explicit_replay.v1"
+        },
+        "accumulation_profile": {
+          "const": "ascending_index_python_fsum_fp64.v1"
+        },
+        "deterministic_host_arithmetic": {"const": true},
+        "operator_callback_outputs_in_contract": {"const": true},
+        "preconditioner_callback_outputs_in_contract": {"const": false},
+        "cross_platform_end_to_end_deterministic_claim": {"const": false}
+      }
+    },
+    "fixed_reference_splu_baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "contract_hash",
+        "config",
+        "iteration_count",
+        "operator_action_count",
+        "explicit_residual_inf_kn",
+        "solution_data_hash",
+        "residual_gate_passed",
+        "production_preconditioner_claim"
+      ],
+      "properties": {
+        "profile": {
+          "const": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1"
+        },
+        "contract_hash": {"$ref": "#/$defs/sha256"},
+        "config": {"$ref": "#/$defs/config"},
+        "iteration_count": {"const": 3},
+        "operator_action_count": {"const": 6},
+        "explicit_residual_inf_kn": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5e-7
+        },
+        "solution_data_hash": {"$ref": "#/$defs/sha256"},
+        "residual_gate_passed": {"const": true},
+        "production_preconditioner_claim": {"const": false}
+      }
+    },
+    "node_block_jacobi_candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "construction",
+        "config",
+        "converged",
+        "terminal_reason",
+        "iteration_count",
+        "restart_count",
+        "operator_action_count",
+        "preconditioner_application_count",
+        "explicit_residual_check_count",
+        "explicit_observations",
+        "iteration_30_explicit_residual_inf_kn",
+        "iteration_120_explicit_residual_inf_kn",
+        "iteration_30_to_120_residual_ratio",
+        "final_explicit_residual_l2_kn",
+        "final_explicit_residual_inf_kn",
+        "independent_residual_inf_kn",
+        "solution_data_hash",
+        "explicit_residual_data_hash",
+        "independent_residual_data_hash",
+        "residual_gate_kn",
+        "residual_gate_passed",
+        "residual_gate_exceedance_factor",
+        "initial_to_final_reduction_factor",
+        "candidate_counterevidence_pass",
+        "portable_apply_topology_candidate",
+        "production_preconditioner_effectiveness_claim",
+        "hip_apply_parity_claim",
+        "performance_claim"
+      ],
+      "properties": {
+        "profile": {
+          "const": "free_global_node_6x6_block_jacobi_inverse.v1"
+        },
+        "construction": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "block_count",
+            "singular_block_count",
+            "inverse_operator_nnz",
+            "inverse_pattern_hash",
+            "inverse_numeric_values_hash",
+            "source_force_unit",
+            "apply_input_force_unit",
+            "apply_output_displacement_unit",
+            "input_conversion_to_n",
+            "batched_numpy_linalg_inverse",
+            "deterministic_construction_claim",
+            "fallback_exercised"
+          ],
+          "properties": {
+            "block_count": {"const": 12606},
+            "singular_block_count": {"const": 0},
+            "inverse_operator_nnz": {"const": 408132},
+            "inverse_pattern_hash": {"$ref": "#/$defs/sha256"},
+            "inverse_numeric_values_hash": {"$ref": "#/$defs/sha256"},
+            "source_force_unit": {"const": "N"},
+            "apply_input_force_unit": {"const": "kN"},
+            "apply_output_displacement_unit": {"const": "m"},
+            "input_conversion_to_n": {"const": 1000.0},
+            "batched_numpy_linalg_inverse": {"const": true},
+            "deterministic_construction_claim": {"const": false},
+            "fallback_exercised": {"const": false}
+          }
+        },
+        "config": {"$ref": "#/$defs/config"},
+        "converged": {"const": false},
+        "terminal_reason": {"const": "max_iterations"},
+        "iteration_count": {"const": 120},
+        "restart_count": {"const": 7},
+        "operator_action_count": {"const": 129},
+        "preconditioner_application_count": {"const": 120},
+        "explicit_residual_check_count": {"const": 9},
+        "explicit_observations": {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {"$ref": "#/$defs/observation"}
+        },
+        "iteration_30_explicit_residual_inf_kn": {
+          "type": "number",
+          "exclusiveMinimum": 5e-7
+        },
+        "iteration_120_explicit_residual_inf_kn": {
+          "type": "number",
+          "exclusiveMinimum": 5e-7
+        },
+        "iteration_30_to_120_residual_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "final_explicit_residual_l2_kn": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "final_explicit_residual_inf_kn": {
+          "type": "number",
+          "exclusiveMinimum": 5e-7
+        },
+        "independent_residual_inf_kn": {
+          "type": "number",
+          "exclusiveMinimum": 5e-7
+        },
+        "solution_data_hash": {"$ref": "#/$defs/sha256"},
+        "explicit_residual_data_hash": {"$ref": "#/$defs/sha256"},
+        "independent_residual_data_hash": {"$ref": "#/$defs/sha256"},
+        "residual_gate_kn": {"const": 5e-7},
+        "residual_gate_passed": {"const": false},
+        "residual_gate_exceedance_factor": {
+          "type": "number",
+          "exclusiveMinimum": 100000
+        },
+        "initial_to_final_reduction_factor": {
+          "type": "number",
+          "exclusiveMinimum": 1
+        },
+        "candidate_counterevidence_pass": {"const": true},
+        "portable_apply_topology_candidate": {"const": true},
+        "production_preconditioner_effectiveness_claim": {"const": false},
+        "hip_apply_parity_claim": {"const": false},
+        "performance_claim": {"const": false}
+      }
+    },
+    "host_ilut_candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "construction",
+        "canonical_factor_manifest",
+        "canonical_binary_artifact_manifest",
+        "apply_backend",
+        "source_force_unit",
+        "apply_input_force_unit",
+        "apply_output_displacement_unit",
+        "input_conversion_to_n",
+        "superlu_reference_apply_solution_data_hash",
+        "canonical_apply_solution_data_hash",
+        "canonical_repeat_apply_solution_data_hash",
+        "canonical_apply_repeat_byte_exact",
+        "canonical_apply_superlu_difference_inf_m",
+        "canonical_factor_contract_pass",
+        "full_scale_ephemeral_binary_roundtrip_pass",
+        "ephemeral_binary_file_count",
+        "ephemeral_binary_total_byte_length",
+        "factor_artifact_bytes_persisted",
+        "state_tangent_solver_integration",
+        "config",
+        "converged",
+        "terminal_reason",
+        "iteration_count",
+        "restart_count",
+        "operator_action_count",
+        "preconditioner_application_count",
+        "explicit_residual_check_count",
+        "explicit_observations",
+        "final_explicit_residual_l2_kn",
+        "final_explicit_residual_inf_kn",
+        "independent_residual_inf_kn",
+        "solution_data_hash",
+        "explicit_residual_data_hash",
+        "independent_residual_data_hash",
+        "residual_gate_kn",
+        "residual_gate_passed",
+        "initial_to_final_reduction_factor",
+        "cpu_diagnostic_effectiveness_pass",
+        "factor_apply_topology_portable_in_principle",
+        "serialized_backend_neutral_factor_contract_implemented",
+        "production_preconditioner_effectiveness_claim",
+        "hip_apply_parity_claim",
+        "performance_claim"
+      ],
+      "properties": {
+        "profile": {
+          "const": "canonical_csr_ilut_fixed_reference_factor.v1"
+        },
+        "construction": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "factorization_backend",
+            "scipy_version",
+            "drop_tolerance",
+            "fill_factor",
+            "column_permutation",
+            "reference_preconditioner_contract_hash",
+            "reference_matrix_nnz",
+            "lower_factor",
+            "upper_factor",
+            "factor_nnz",
+            "factor_fill_ratio",
+            "row_permutation_data_hash",
+            "column_permutation_data_hash",
+            "factor_contract_hash",
+            "deterministic_construction_claim",
+            "serialized_backend_neutral_factor_artifact_claim"
+          ],
+          "properties": {
+            "factorization_backend": {
+              "const": "scipy.sparse.linalg.spilu_superlu"
+            },
+            "scipy_version": {"type": "string", "minLength": 1},
+            "drop_tolerance": {"const": 1e-6},
+            "fill_factor": {"const": 20.0},
+            "column_permutation": {"const": "COLAMD"},
+            "reference_preconditioner_contract_hash": {
+              "$ref": "#/$defs/sha256"
+            },
+            "reference_matrix_nnz": {"const": 1262462},
+            "lower_factor": {"$ref": "#/$defs/factor_component"},
+            "upper_factor": {"$ref": "#/$defs/factor_component"},
+            "factor_nnz": {
+              "type": "integer",
+              "minimum": 10000000
+            },
+            "factor_fill_ratio": {
+              "type": "number",
+              "exclusiveMinimum": 8.0
+            },
+            "row_permutation_data_hash": {"$ref": "#/$defs/sha256"},
+            "column_permutation_data_hash": {"$ref": "#/$defs/sha256"},
+            "factor_contract_hash": {"$ref": "#/$defs/sha256"},
+            "deterministic_construction_claim": {"const": false},
+            "serialized_backend_neutral_factor_artifact_claim": {
+              "const": true
+            }
+          }
+        },
+        "canonical_factor_manifest": {
+          "$ref": "#/$defs/canonical_factor_manifest"
+        },
+        "canonical_binary_artifact_manifest": {
+          "$ref": "#/$defs/canonical_binary_artifact_manifest"
+        },
+        "apply_backend": {
+          "const": "canonical_csr_sparse_lu_ordered_python_fsum"
+        },
+        "source_force_unit": {"const": "N"},
+        "apply_input_force_unit": {"const": "kN"},
+        "apply_output_displacement_unit": {"const": "m"},
+        "input_conversion_to_n": {"const": 1000.0},
+        "superlu_reference_apply_solution_data_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "canonical_apply_solution_data_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "canonical_repeat_apply_solution_data_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "canonical_apply_repeat_byte_exact": {"const": true},
+        "canonical_apply_superlu_difference_inf_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1e-9
+        },
+        "canonical_factor_contract_pass": {"const": true},
+        "full_scale_ephemeral_binary_roundtrip_pass": {"const": true},
+        "ephemeral_binary_file_count": {"const": 8},
+        "ephemeral_binary_total_byte_length": {
+          "type": "integer",
+          "minimum": 100000000
+        },
+        "factor_artifact_bytes_persisted": {"const": false},
+        "state_tangent_solver_integration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile",
+            "contract_hash",
+            "state_operator_binding_hash",
+            "operator_binding_hash",
+            "preconditioner_profile",
+            "factor_contract_hash",
+            "binary_artifact_bundle_hash",
+            "canonical_factor_source_binding_pass",
+            "binary_artifact_bundle_bound",
+            "operator_callback_outputs_in_contract",
+            "preconditioner_callback_outputs_in_contract",
+            "matrix_free_current_state_operator_action",
+            "materialized_current_tangent",
+            "integration_pass",
+            "production_solver_claim",
+            "rocm_hip_parity_claim"
+          ],
+          "properties": {
+            "profile": {
+              "const": "matrix_free_cpu_fgmres_canonical_sparse_lu_fixed_right.v1"
+            },
+            "contract_hash": {"$ref": "#/$defs/sha256"},
+            "state_operator_binding_hash": {"$ref": "#/$defs/sha256"},
+            "operator_binding_hash": {"$ref": "#/$defs/sha256"},
+            "preconditioner_profile": {
+              "const": "canonical_sparse_lu_binary_artifact_fixed_right.v1"
+            },
+            "factor_contract_hash": {"$ref": "#/$defs/sha256"},
+            "binary_artifact_bundle_hash": {"$ref": "#/$defs/sha256"},
+            "canonical_factor_source_binding_pass": {"const": true},
+            "binary_artifact_bundle_bound": {"const": true},
+            "operator_callback_outputs_in_contract": {"const": true},
+            "preconditioner_callback_outputs_in_contract": {"const": true},
+            "matrix_free_current_state_operator_action": {"const": true},
+            "materialized_current_tangent": {"const": false},
+            "integration_pass": {"const": true},
+            "production_solver_claim": {"const": false},
+            "rocm_hip_parity_claim": {"const": false}
+          }
+        },
+        "config": {"$ref": "#/$defs/config"},
+        "converged": {"const": true},
+        "terminal_reason": {"const": "converged_explicit_residual"},
+        "iteration_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "restart_count": {"type": "integer", "minimum": 0, "maximum": 1},
+        "operator_action_count": {"type": "integer", "minimum": 3},
+        "preconditioner_application_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "explicit_residual_check_count": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 3
+        },
+        "explicit_observations": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": {"$ref": "#/$defs/observation"}
+        },
+        "final_explicit_residual_l2_kn": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "final_explicit_residual_inf_kn": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5e-7
+        },
+        "independent_residual_inf_kn": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5e-7
+        },
+        "solution_data_hash": {"$ref": "#/$defs/sha256"},
+        "explicit_residual_data_hash": {"$ref": "#/$defs/sha256"},
+        "independent_residual_data_hash": {"$ref": "#/$defs/sha256"},
+        "residual_gate_kn": {"const": 5e-7},
+        "residual_gate_passed": {"const": true},
+        "initial_to_final_reduction_factor": {
+          "type": "number",
+          "exclusiveMinimum": 1000000
+        },
+        "cpu_diagnostic_effectiveness_pass": {"const": true},
+        "factor_apply_topology_portable_in_principle": {"const": true},
+        "serialized_backend_neutral_factor_contract_implemented": {
+          "const": true
+        },
+        "production_preconditioner_effectiveness_claim": {"const": false},
+        "hip_apply_parity_claim": {"const": false},
+        "performance_claim": {"const": false}
+      }
+    },
+    "hip_triangular_apply_compile_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt",
+        "schema_version",
+        "receipt_hash",
+        "contract_scope",
+        "compiler",
+        "targets",
+        "dual_target_compile_pass",
+        "dual_target_host_fixture_parser_execution",
+        "actual_mgt_dependency_schedule",
+        "actual_hardware_execution",
+        "numerical_parity",
+        "actual_mgt_factor_apply",
+        "production_scale_factor_apply",
+        "production_current_tangent_fgmres",
+        "performance"
+      ],
+      "properties": {
+        "receipt": {
+          "const": "implementation/phase1/release_evidence/productization/engine_v2_hip_sparse_lu_apply_compile_receipt.json"
+        },
+        "schema_version": {
+          "const": "engine-v2-hip-sparse-lu-apply-target-compile-host-parse-receipt.v1"
+        },
+        "receipt_hash": {"$ref": "#/$defs/sha256"},
+        "contract_scope": {
+          "const": "target_compile_and_host_fixture_parser_only"
+        },
+        "compiler": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "version_first_line", "version_output_sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "version_first_line": {"type": "string", "minLength": 1},
+            "version_output_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "prefixItems": [
+            {"$ref": "#/$defs/gfx1030_compile_target"},
+            {"$ref": "#/$defs/gfx1100_compile_target"}
+          ],
+          "items": false
+        },
+        "dual_target_compile_pass": {"const": true},
+        "dual_target_host_fixture_parser_execution": {"const": true},
+        "actual_mgt_dependency_schedule": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schedule_profile",
+            "execution_profile",
+            "factor_contract_hash",
+            "right_hand_side_data_hash",
+            "dimension",
+            "lower_nnz",
+            "upper_nnz",
+            "lower_level_count",
+            "upper_level_count",
+            "lower_maximum_level_width",
+            "upper_maximum_level_width",
+            "lower_level_pointer_data_hash",
+            "lower_level_rows_data_hash",
+            "upper_level_pointer_data_hash",
+            "upper_level_rows_data_hash",
+            "schedule_contract_hash",
+            "expected_kernel_invocation_count",
+            "schedule_array_total_byte_length",
+            "declared_fixture_binary_byte_length",
+            "schedule_constructed",
+            "fixture_binary_materialized",
+            "fixture_binary_ephemeral",
+            "fixture_binary_sha256",
+            "fixture_binary_readback_sha256",
+            "fixture_binary_roundtrip_pass",
+            "fixture_binary_persisted",
+            "device_execution"
+          ],
+          "properties": {
+            "schedule_profile": {
+              "const": "csr_triangular_dependency_level_schedule.v1"
+            },
+            "execution_profile": {
+              "const": "same_stream_level_scheduled_csr_forward_backward.v1"
+            },
+            "factor_contract_hash": {"$ref": "#/$defs/sha256"},
+            "right_hand_side_data_hash": {"$ref": "#/$defs/sha256"},
+            "dimension": {"const": 70560},
+            "lower_nnz": {"type": "integer", "minimum": 5000000},
+            "upper_nnz": {"type": "integer", "minimum": 5000000},
+            "lower_level_count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 70560
+            },
+            "upper_level_count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 70560
+            },
+            "lower_maximum_level_width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 70560
+            },
+            "upper_maximum_level_width": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 70560
+            },
+            "lower_level_pointer_data_hash": {
+              "$ref": "#/$defs/sha256"
+            },
+            "lower_level_rows_data_hash": {"$ref": "#/$defs/sha256"},
+            "upper_level_pointer_data_hash": {
+              "$ref": "#/$defs/sha256"
+            },
+            "upper_level_rows_data_hash": {"$ref": "#/$defs/sha256"},
+            "schedule_contract_hash": {"$ref": "#/$defs/sha256"},
+            "expected_kernel_invocation_count": {
+              "type": "integer",
+              "minimum": 4,
+              "maximum": 141122
+            },
+            "schedule_array_total_byte_length": {
+              "type": "integer",
+              "minimum": 1000000
+            },
+            "declared_fixture_binary_byte_length": {
+              "type": "integer",
+              "minimum": 200000000
+            },
+            "schedule_constructed": {"const": true},
+            "fixture_binary_materialized": {"const": true},
+            "fixture_binary_ephemeral": {"const": true},
+            "fixture_binary_sha256": {"$ref": "#/$defs/sha256"},
+            "fixture_binary_readback_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "fixture_binary_roundtrip_pass": {"const": true},
+            "fixture_binary_persisted": {"const": false},
+            "device_execution": {"const": false}
+          }
+        },
+        "actual_hardware_execution": {"const": false},
+        "numerical_parity": {"const": false},
+        "actual_mgt_factor_apply": {"const": false},
+        "production_scale_factor_apply": {"const": false},
+        "production_current_tangent_fgmres": {"const": false},
+        "performance": {"const": false}
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "same_operator_binding",
+        "operator_binding_rechecked_before_and_after",
+        "same_state_and_right_hand_side",
+        "state_and_right_hand_side_hashes_unchanged",
+        "same_host_recurrence_profile",
+        "baseline_gate_passed",
+        "node_block_jacobi_gate_passed",
+        "node_block_jacobi_iteration_budget_over_baseline",
+        "node_block_jacobi_final_residual_over_baseline",
+        "node_block_jacobi_is_insufficient_at_120_iterations",
+        "host_ilut_gate_passed",
+        "host_ilut_iterations_over_baseline",
+        "host_ilut_final_residual_over_baseline",
+        "effective_host_factorized_candidate_identified",
+        "canonical_factor_contract_and_ordered_cpu_apply_implemented",
+        "canonical_factor_current_tangent_solver_api_integrated",
+        "persisted_factor_artifact_and_hip_apply_required",
+        "stronger_backend_neutral_preconditioner_required",
+        "contract_pass"
+      ],
+      "properties": {
+        "same_operator_binding": {"const": true},
+        "operator_binding_rechecked_before_and_after": {"const": true},
+        "same_state_and_right_hand_side": {"const": true},
+        "state_and_right_hand_side_hashes_unchanged": {"const": true},
+        "same_host_recurrence_profile": {"const": true},
+        "baseline_gate_passed": {"const": true},
+        "node_block_jacobi_gate_passed": {"const": false},
+        "node_block_jacobi_iteration_budget_over_baseline": {"const": 40.0},
+        "node_block_jacobi_final_residual_over_baseline": {
+          "type": "number",
+          "exclusiveMinimum": 1000000
+        },
+        "node_block_jacobi_is_insufficient_at_120_iterations": {"const": true},
+        "host_ilut_gate_passed": {"const": true},
+        "host_ilut_iterations_over_baseline": {
+          "type": "number",
+          "minimum": 1.0,
+          "maximum": 10.0
+        },
+        "host_ilut_final_residual_over_baseline": {
+          "type": "number",
+          "exclusiveMinimum": 1.0
+        },
+        "effective_host_factorized_candidate_identified": {"const": true},
+        "canonical_factor_contract_and_ordered_cpu_apply_implemented": {
+          "const": true
+        },
+        "canonical_factor_current_tangent_solver_api_integrated": {
+          "const": true
+        },
+        "persisted_factor_artifact_and_hip_apply_required": {"const": true},
+        "stronger_backend_neutral_preconditioner_required": {"const": true},
+        "contract_pass": {"const": true}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_mgt_preconditioner_candidate_compared",
+        "fixed_reference_splu_baseline_gate_passed",
+        "node_block_jacobi_portable_apply_topology_candidate",
+        "node_block_jacobi_120_iteration_gate_passed",
+        "node_block_jacobi_production_effectiveness",
+        "deterministic_node_block_inverse_construction",
+        "host_ilut_cpu_diagnostic_effectiveness",
+        "deterministic_host_ilut_factor_construction",
+        "canonical_backend_neutral_ilut_factor_contract",
+        "serialized_backend_neutral_ilut_factor_artifact",
+        "full_scale_ephemeral_ilut_factor_binary_roundtrip",
+        "backend_neutral_ilut_triangular_apply",
+        "actual_current_tangent_canonical_factor_cpu_integration",
+        "backend_neutral_current_tangent_operator_contract",
+        "actual_current_tangent_analytic_callback_parity_probes",
+        "operator_callback_formula_and_parent_arrays_in_contract",
+        "actual_mgt_current_tangent_hip_fixture_constructed",
+        "actual_mgt_current_tangent_hip_fixture_ephemeral_roundtrip",
+        "hip_current_tangent_operator_dual_target_compile",
+        "hip_current_tangent_fixture_parser_dual_target_execution",
+        "actual_mgt_current_tangent_host_parser_execution",
+        "actual_mgt_current_tangent_hip_execution",
+        "actual_mgt_current_tangent_cpu_hip_numerical_parity",
+        "actual_mgt_hip_dependency_schedule_constructed",
+        "actual_mgt_hip_fixture_binary_ephemeral_roundtrip",
+        "hip_triangular_fixture_parser_dual_target_execution",
+        "hip_triangular_factor_apply_dual_target_compile",
+        "cross_platform_end_to_end_determinism",
+        "production_rocm_hip_preconditioner_parity",
+        "production_matrix_free_krylov",
+        "performance",
+        "g1_full_building_closure"
+      ],
+      "properties": {
+        "actual_mgt_preconditioner_candidate_compared": {"const": true},
+        "fixed_reference_splu_baseline_gate_passed": {"const": true},
+        "node_block_jacobi_portable_apply_topology_candidate": {"const": true},
+        "node_block_jacobi_120_iteration_gate_passed": {"const": false},
+        "node_block_jacobi_production_effectiveness": {"const": false},
+        "deterministic_node_block_inverse_construction": {"const": false},
+        "host_ilut_cpu_diagnostic_effectiveness": {"const": true},
+        "deterministic_host_ilut_factor_construction": {"const": false},
+        "canonical_backend_neutral_ilut_factor_contract": {"const": true},
+        "serialized_backend_neutral_ilut_factor_artifact": {"const": true},
+        "full_scale_ephemeral_ilut_factor_binary_roundtrip": {"const": true},
+        "backend_neutral_ilut_triangular_apply": {"const": true},
+        "actual_current_tangent_canonical_factor_cpu_integration": {
+          "const": true
+        },
+        "backend_neutral_current_tangent_operator_contract": {"const": true},
+        "actual_current_tangent_analytic_callback_parity_probes": {
+          "const": true
+        },
+        "operator_callback_formula_and_parent_arrays_in_contract": {
+          "const": true
+        },
+        "actual_mgt_current_tangent_hip_fixture_constructed": {
+          "const": true
+        },
+        "actual_mgt_current_tangent_hip_fixture_ephemeral_roundtrip": {
+          "const": true
+        },
+        "hip_current_tangent_operator_dual_target_compile": {
+          "const": true
+        },
+        "hip_current_tangent_fixture_parser_dual_target_execution": {
+          "const": true
+        },
+        "actual_mgt_current_tangent_host_parser_execution": {
+          "const": true
+        },
+        "actual_mgt_current_tangent_hip_execution": {"const": true},
+        "actual_mgt_current_tangent_cpu_hip_numerical_parity": {
+          "const": true
+        },
+        "actual_mgt_hip_dependency_schedule_constructed": {"const": true},
+        "actual_mgt_hip_fixture_binary_ephemeral_roundtrip": {"const": true},
+        "hip_triangular_fixture_parser_dual_target_execution": {
+          "const": true
+        },
+        "hip_triangular_factor_apply_dual_target_compile": {"const": true},
+        "cross_platform_end_to_end_determinism": {"const": false},
+        "production_rocm_hip_preconditioner_parity": {"const": false},
+        "production_matrix_free_krylov": {"const": false},
+        "performance": {"const": false},
+        "g1_full_building_closure": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 7,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt",
+        "schema",
+        "factor_contract_module",
+        "factor_binary_artifact_schema",
+        "hip_triangular_apply_source",
+        "hip_triangular_apply_compile_receipt",
+        "hip_current_tangent_operator_module",
+        "hip_current_tangent_operator_source",
+        "hip_current_tangent_operator_compile_receipt",
+        "hip_current_tangent_actual_mgt_host_parser_receipt",
+        "hip_current_tangent_actual_mgt_host_parser_builder",
+        "hip_current_tangent_actual_mgt_host_parser_schema",
+        "hip_current_tangent_actual_mgt_hardware_receipt",
+        "hip_current_tangent_actual_mgt_hardware_action",
+        "hip_current_tangent_actual_mgt_hardware_runner",
+        "hip_current_tangent_actual_mgt_hardware_schema"
+      ],
+      "properties": {
+        "receipt": {"type": "string", "minLength": 1},
+        "schema": {"type": "string", "minLength": 1},
+        "factor_contract_module": {
+          "const": "src/structural_analysis/solvers/nonlinear/canonical_sparse_lu.py"
+        },
+        "factor_binary_artifact_schema": {
+          "const": "src/structural_analysis/schemas/canonical_sparse_lu_binary_artifacts_v1.schema.json"
+        },
+        "hip_triangular_apply_source": {
+          "const": "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp"
+        },
+        "hip_triangular_apply_compile_receipt": {
+          "const": "implementation/phase1/release_evidence/productization/engine_v2_hip_sparse_lu_apply_compile_receipt.json"
+        },
+        "hip_current_tangent_operator_module": {
+          "const": "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py"
+        },
+        "hip_current_tangent_operator_source": {
+          "const": "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp"
+        },
+        "hip_current_tangent_operator_compile_receipt": {
+          "const": "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json"
+        },
+        "hip_current_tangent_actual_mgt_host_parser_receipt": {
+          "const": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json"
+        },
+        "hip_current_tangent_actual_mgt_host_parser_builder": {
+          "const": "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
+        },
+        "hip_current_tangent_actual_mgt_host_parser_schema": {
+          "const": "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json"
+        },
+        "hip_current_tangent_actual_mgt_hardware_receipt": {
+          "const": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_hardware_parity_receipt.json"
+        },
+        "hip_current_tangent_actual_mgt_hardware_action": {
+          "const": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_action.f64le"
+        },
+        "hip_current_tangent_actual_mgt_hardware_runner": {
+          "const": "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py"
+        },
+        "hip_current_tangent_actual_mgt_hardware_schema": {
+          "const": "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json"
+        }
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "current_tangent_parity_probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "probe",
+        "state_data_hash",
+        "direction_data_hash",
+        "contract_action_data_hash",
+        "analytic_callback_action_data_hash",
+        "action_bytes_exact",
+        "difference_inf_n_per_m",
+        "reference_inf_n_per_m",
+        "relative_difference",
+        "relative_tolerance",
+        "absolute_tolerance_n_per_m",
+        "gate_passed"
+      ],
+      "properties": {
+        "probe": {
+          "enum": [
+            "normalized_full_unit_predictor",
+            "normalized_current_right_hand_side"
+          ]
+        },
+        "state_data_hash": {"$ref": "#/$defs/sha256"},
+        "direction_data_hash": {"$ref": "#/$defs/sha256"},
+        "contract_action_data_hash": {"$ref": "#/$defs/sha256"},
+        "analytic_callback_action_data_hash": {"$ref": "#/$defs/sha256"},
+        "action_bytes_exact": {"type": "boolean"},
+        "difference_inf_n_per_m": {"type": "number", "minimum": 0},
+        "reference_inf_n_per_m": {"type": "number", "exclusiveMinimum": 0},
+        "relative_difference": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1e-11
+        },
+        "relative_tolerance": {"const": 1e-11},
+        "absolute_tolerance_n_per_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "gate_passed": {"const": true}
+      }
+    },
+    "actual_mgt_hip_current_tangent_gfx1030_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "target_compile",
+        "binary_sha256",
+        "binary_byte_length",
+        "host_fixture_parser_execution",
+        "host_fixture_validation"
+      ],
+      "properties": {
+        "architecture": {"const": "gfx1030"},
+        "target_compile": {"const": true},
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "binary_byte_length": {"type": "integer", "minimum": 10000},
+        "host_fixture_parser_execution": {"const": true},
+        "host_fixture_validation": {
+          "$ref": "#/$defs/actual_mgt_hip_current_tangent_host_fixture_validation"
+        }
+      }
+    },
+    "actual_mgt_hip_current_tangent_gfx1100_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "target_compile",
+        "binary_sha256",
+        "binary_byte_length",
+        "host_fixture_parser_execution",
+        "host_fixture_validation"
+      ],
+      "properties": {
+        "architecture": {"const": "gfx1100"},
+        "target_compile": {"const": true},
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "binary_byte_length": {"type": "integer", "minimum": 10000},
+        "host_fixture_parser_execution": {"const": true},
+        "host_fixture_validation": {
+          "$ref": "#/$defs/actual_mgt_hip_current_tangent_host_fixture_validation"
+        }
+      }
+    },
+    "actual_mgt_hip_current_tangent_host_fixture_validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "contract_pass",
+        "fixture_hash",
+        "runtime_output_hash",
+        "equation_count",
+        "fixture_byte_length",
+        "actual_hardware_execution",
+        "hip_runtime_api_call_count"
+      ],
+      "properties": {
+        "profile": {
+          "const": "engine-v2-hip-current-tangent-host-fixture-parser.v1"
+        },
+        "contract_pass": {"const": true},
+        "fixture_hash": {"$ref": "#/$defs/sha256"},
+        "runtime_output_hash": {"$ref": "#/$defs/sha256"},
+        "equation_count": {"const": 70560},
+        "fixture_byte_length": {"const": 36123072},
+        "actual_hardware_execution": {"const": false},
+        "hip_runtime_api_call_count": {"const": 0}
+      }
+    },
+    "hip_current_tangent_gfx1030_compile_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "target_compile",
+        "binary_sha256",
+        "binary_byte_length",
+        "host_fixture_parser_execution",
+        "host_fixture_validation"
+      ],
+      "properties": {
+        "architecture": {"const": "gfx1030"},
+        "target_compile": {"const": true},
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "binary_byte_length": {"type": "integer", "minimum": 10000},
+        "host_fixture_parser_execution": {"const": true},
+        "host_fixture_validation": {
+          "$ref": "#/$defs/hip_current_tangent_host_fixture_validation"
+        }
+      }
+    },
+    "hip_current_tangent_gfx1100_compile_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "target_compile",
+        "binary_sha256",
+        "binary_byte_length",
+        "host_fixture_parser_execution",
+        "host_fixture_validation"
+      ],
+      "properties": {
+        "architecture": {"const": "gfx1100"},
+        "target_compile": {"const": true},
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "binary_byte_length": {"type": "integer", "minimum": 10000},
+        "host_fixture_parser_execution": {"const": true},
+        "host_fixture_validation": {
+          "$ref": "#/$defs/hip_current_tangent_host_fixture_validation"
+        }
+      }
+    },
+    "hip_current_tangent_host_fixture_validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "contract_pass",
+        "fixture_hash",
+        "runtime_output_hash",
+        "equation_count",
+        "fixture_byte_length",
+        "actual_hardware_execution",
+        "hip_runtime_api_call_count"
+      ],
+      "properties": {
+        "profile": {
+          "const": "engine-v2-hip-current-tangent-host-fixture-parser.v1"
+        },
+        "contract_pass": {"const": true},
+        "fixture_hash": {"$ref": "#/$defs/sha256"},
+        "runtime_output_hash": {"$ref": "#/$defs/sha256"},
+        "equation_count": {"const": 5},
+        "fixture_byte_length": {"const": 2600},
+        "actual_hardware_execution": {"const": false},
+        "hip_runtime_api_call_count": {"const": 0}
+      }
+    },
+    "gfx1030_compile_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "target_compile",
+        "binary_sha256",
+        "binary_byte_length",
+        "host_fixture_parser_execution",
+        "host_fixture_validation"
+      ],
+      "properties": {
+        "architecture": {"const": "gfx1030"},
+        "target_compile": {"const": true},
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "binary_byte_length": {"type": "integer", "minimum": 10000},
+        "host_fixture_parser_execution": {"const": true},
+        "host_fixture_validation": {
+          "$ref": "#/$defs/host_fixture_validation"
+        }
+      }
+    },
+    "gfx1100_compile_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "architecture",
+        "target_compile",
+        "binary_sha256",
+        "binary_byte_length",
+        "host_fixture_parser_execution",
+        "host_fixture_validation"
+      ],
+      "properties": {
+        "architecture": {"const": "gfx1100"},
+        "target_compile": {"const": true},
+        "binary_sha256": {"$ref": "#/$defs/sha256"},
+        "binary_byte_length": {"type": "integer", "minimum": 10000},
+        "host_fixture_parser_execution": {"const": true},
+        "host_fixture_validation": {
+          "$ref": "#/$defs/host_fixture_validation"
+        }
+      }
+    },
+    "host_fixture_validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "contract_pass",
+        "fixture_hash",
+        "runtime_output_hash",
+        "dimension",
+        "fixture_byte_length",
+        "actual_hardware_execution",
+        "hip_runtime_api_call_count"
+      ],
+      "properties": {
+        "profile": {
+          "const": "engine-v2-hip-sparse-lu-host-fixture-parser.v1"
+        },
+        "contract_pass": {"const": true},
+        "fixture_hash": {"$ref": "#/$defs/sha256"},
+        "runtime_output_hash": {"$ref": "#/$defs/sha256"},
+        "dimension": {"const": 8},
+        "fixture_byte_length": {"const": 1232},
+        "actual_hardware_execution": {"const": false},
+        "hip_runtime_api_call_count": {"const": 0}
+      }
+    },
+    "factor_component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nnz", "pattern_hash", "numeric_values_hash"],
+      "properties": {
+        "nnz": {"type": "integer", "minimum": 70560},
+        "pattern_hash": {"$ref": "#/$defs/sha256"},
+        "numeric_values_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "array_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "byte_length",
+        "data_hash",
+        "content_hash"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "dtype": {"enum": ["<i8", "<f8"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "canonical_factor_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "profile",
+        "contract_hash",
+        "dimension",
+        "source_operator_pattern_hash",
+        "source_operator_numeric_values_hash",
+        "lower_nnz",
+        "upper_nnz",
+        "factor_nnz",
+        "array_count",
+        "total_byte_length",
+        "arrays",
+        "apply_contract",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {"const": "canonical-sparse-lu-factor.v1"},
+        "profile": {"const": "canonical_csr_sparse_lu_factor.v1"},
+        "contract_hash": {"$ref": "#/$defs/sha256"},
+        "dimension": {"const": 70560},
+        "source_operator_pattern_hash": {"$ref": "#/$defs/sha256"},
+        "source_operator_numeric_values_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "lower_nnz": {"type": "integer", "minimum": 5000000},
+        "upper_nnz": {"type": "integer", "minimum": 5000000},
+        "factor_nnz": {"type": "integer", "minimum": 10000000},
+        "array_count": {"const": 8},
+        "total_byte_length": {"type": "integer", "minimum": 100000000},
+        "arrays": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lower_row_pointer",
+            "lower_column_indices",
+            "lower_numeric_values",
+            "upper_row_pointer",
+            "upper_column_indices",
+            "upper_numeric_values",
+            "row_permutation",
+            "column_permutation"
+          ],
+          "properties": {
+            "lower_row_pointer": {"$ref": "#/$defs/array_artifact"},
+            "lower_column_indices": {"$ref": "#/$defs/array_artifact"},
+            "lower_numeric_values": {"$ref": "#/$defs/array_artifact"},
+            "upper_row_pointer": {"$ref": "#/$defs/array_artifact"},
+            "upper_column_indices": {"$ref": "#/$defs/array_artifact"},
+            "upper_numeric_values": {"$ref": "#/$defs/array_artifact"},
+            "row_permutation": {"$ref": "#/$defs/array_artifact"},
+            "column_permutation": {"$ref": "#/$defs/array_artifact"}
+          }
+        },
+        "apply_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "profile",
+            "factor_force_unit",
+            "input_force_unit",
+            "output_displacement_unit",
+            "input_conversion_to_n",
+            "row_permutation_application",
+            "column_permutation_application",
+            "lower_diagonal",
+            "upper_diagonal",
+            "row_order",
+            "within_row_accumulation"
+          ],
+          "properties": {
+            "profile": {
+              "const": "inverse_row_permutation_csr_forward_backward_column_permutation_python_fsum_fp64.v1"
+            },
+            "factor_force_unit": {"const": "N"},
+            "input_force_unit": {"const": "kN"},
+            "output_displacement_unit": {"const": "m"},
+            "input_conversion_to_n": {"const": 1000.0},
+            "row_permutation_application": {"const": "inverse_gather_rhs"},
+            "column_permutation_application": {
+              "const": "forward_gather_solution"
+            },
+            "lower_diagonal": {"const": "explicit_unit"},
+            "upper_diagonal": {"const": "explicit_nonzero"},
+            "row_order": {"const": "lower_ascending_upper_descending"},
+            "within_row_accumulation": {
+              "const": "ascending_column_python_fsum_fp64"
+            }
+          }
+        },
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "canonical_binary_artifact_manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "storage_profile",
+        "factor_contract_hash",
+        "dimension",
+        "source_operator_pattern_hash",
+        "source_operator_numeric_values_hash",
+        "artifact_count",
+        "total_byte_length",
+        "artifacts",
+        "claim_boundary",
+        "bundle_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "canonical-sparse-lu-binary-artifacts.v1"
+        },
+        "storage_profile": {
+          "const": "canonical_little_endian_sparse_lu_arrays.v1"
+        },
+        "factor_contract_hash": {"$ref": "#/$defs/sha256"},
+        "dimension": {"const": 70560},
+        "source_operator_pattern_hash": {"$ref": "#/$defs/sha256"},
+        "source_operator_numeric_values_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifact_count": {"const": 8},
+        "total_byte_length": {"type": "integer", "minimum": 100000000},
+        "artifacts": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {"$ref": "#/$defs/binary_array_artifact"}
+        },
+        "claim_boundary": {
+          "const": {
+            "descriptor_only_manifest": true,
+            "canonical_little_endian_binary": true,
+            "writer_and_byte_validation_required": true,
+            "readback_reconstructs_factor_contract": true,
+            "artifact_presence_proven_by_manifest": false,
+            "hip_execution_proven_by_manifest": false
+          }
+        },
+        "bundle_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "binary_array_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "artifact_uri"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "dtype": {"enum": ["<i8", "<f8"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_uri": {"type": "string", "minLength": 1}
+      }
+    },
+    "operator_binding": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "binding_hash",
+        "case_id",
+        "equation_count",
+        "free_equation_order_data_hash",
+        "residual_formula_hash",
+        "current_tangent_action_contract",
+        "reference_load_free_n_data_hash",
+        "current_tangent_operator_profile",
+        "current_tangent_operator_contract_hash",
+        "current_tangent_operator_array_bundle_hash",
+        "operator_callback_reference_evaluator",
+        "operator_callback_outputs_in_contract"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "matrix-free-current-state-tangent-operator-binding.v1"
+        },
+        "status": {"const": "ready"},
+        "binding_hash": {"$ref": "#/$defs/sha256"},
+        "case_id": {"type": "string", "minLength": 1},
+        "equation_count": {"const": 70560},
+        "free_equation_order_data_hash": {"$ref": "#/$defs/sha256"},
+        "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+        "current_tangent_action_contract": {
+          "const": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1"
+        },
+        "reference_load_free_n_data_hash": {"$ref": "#/$defs/sha256"},
+        "current_tangent_operator_profile": {
+          "const": "reference_csr_load_frame_delta_finite_chord_axial.v1"
+        },
+        "current_tangent_operator_contract_hash": {"$ref": "#/$defs/sha256"},
+        "current_tangent_operator_array_bundle_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operator_callback_reference_evaluator": {
+          "const": "numpy_fp64_array_formula_reference.v1"
+        },
+        "operator_callback_outputs_in_contract": {"const": true}
+      }
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_iterations",
+        "restart_length",
+        "relative_tolerance_l2",
+        "absolute_tolerance_l2_kn",
+        "explicit_residual_tolerance_inf_kn",
+        "arnoldi_breakdown_tolerance",
+        "orthogonalization",
+        "recurrence_profile",
+        "accumulation_profile",
+        "preconditioner_application",
+        "terminal_gate"
+      ],
+      "properties": {
+        "max_iterations": {"enum": [30, 120]},
+        "restart_length": {"const": 15},
+        "relative_tolerance_l2": {"const": 1e-6},
+        "absolute_tolerance_l2_kn": {"const": 1e-10},
+        "explicit_residual_tolerance_inf_kn": {"const": 5e-7},
+        "arnoldi_breakdown_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "orthogonalization": {
+          "const": "two_pass_modified_gram_schmidt_fp64"
+        },
+        "recurrence_profile": {
+          "const": "right_preconditioned_fgmres_two_pass_modified_gram_schmidt_explicit_replay.v1"
+        },
+        "accumulation_profile": {
+          "const": "ascending_index_python_fsum_fp64.v1"
+        },
+        "preconditioner_application": {"const": "fixed_right"},
+        "terminal_gate": {"const": "explicit_raw_residual_l2_and_inf"}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iteration",
+        "restart_index",
+        "inner_iteration",
+        "projected_residual_l2_kn",
+        "explicit_residual_l2_kn",
+        "explicit_residual_inf_kn",
+        "candidate_solution_data_hash",
+        "explicit_residual_data_hash"
+      ],
+      "properties": {
+        "iteration": {"type": "integer", "minimum": 0, "maximum": 120},
+        "restart_index": {"type": "integer", "minimum": 0, "maximum": 7},
+        "inner_iteration": {"type": "integer", "minimum": 0, "maximum": 15},
+        "projected_residual_l2_kn": {"type": "number", "minimum": 0},
+        "explicit_residual_l2_kn": {"type": "number", "minimum": 0},
+        "explicit_residual_inf_kn": {"type": "number", "minimum": 0},
+        "candidate_solution_data_hash": {"$ref": "#/$defs/sha256"},
+        "explicit_residual_data_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

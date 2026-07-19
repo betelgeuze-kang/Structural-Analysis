@@ -1,10 +1,10 @@
 # Structural Product Development Roadmap
 
-Structural product roadmap: BLOCKED | evidence_progress=30.8% | stage_average=27.5% | ready_stages=0/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
+Structural product roadmap: BLOCKED | evidence_progress=28.8% | stage_average=26.1% | ready_stages=0/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
 
 ## Current Position
 
-- `developer_preview_final_gates`: `6/9`
+- `developer_preview_final_gates`: `5/9`
 - `g1_direct_residual_terminal_gate_ready`: `True`
 - `g1_full_load_hip_newton_lane_ready`: `False`
 - `limited_commercial_ready`: `False`
@@ -29,7 +29,7 @@ Structural product roadmap: BLOCKED | evidence_progress=30.8% | stage_average=27
 - `pm_release_gate`: partial (6/21, 28.6%)
   - first blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
   - next action: `collect_30_pr_ci_and_nightly_ci_streak_evidence`
-- `developer_preview_rc`: partial (6/9, 66.7%)
+- `developer_preview_rc`: partial (5/9, 55.6%)
   - first blocker: `selected_medium_models_pass_or_approved_review::medium_structural_models_current_below_required:3/5`
   - next action: `close_medium_model_pass_or_approved_review_gate`
 - `g1_solver_closure`: partial (1/2, 50.0%)
@@ -55,7 +55,7 @@ Structural product roadmap: BLOCKED | evidence_progress=30.8% | stage_average=27
   - current `ci_nightly_consecutive_pass_count`: `0`
 - `close_developer_preview_medium_large_and_parity_gates`
   - exit condition: five selected medium models have PASS or approved REVIEW receipts
-  - current `developer_preview_final_gates`: `6/9`
+  - current `developer_preview_final_gates`: `5/9`
 - `continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path`
   - exit condition: full-load 1.0 checkpoint passes residual and increment gates
   - current `active_terminal_requirement`: `full_load_checkpoint_1p0`

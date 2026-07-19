@@ -2117,3 +2117,19 @@ select {
     overflow-x: auto;
   }
 }
+/* Explicit compatibility boundary: Workbench v2 is the default product shell;
+   the former App remains reachable only through #/legacy. */
+.legacy-surface-route__notice {
+  position: relative;
+  z-index: 100;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+  background: #111827;
+  color: #e5e7eb;
+  font-size: 0.82rem;
+}
+
+.legacy-surface-route__notice a {
+  color: #7dd3fc;
+  font-weight: 700;
+}

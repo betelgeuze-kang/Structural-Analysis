@@ -11,6 +11,7 @@ CORE_ROOTS = (
 )
 ALLOWED_EXTERNAL_ROOTS = {"jsonschema", "numpy", "structural_analysis"}
 ALLOWED_INTERNAL_PREFIXES = (
+    "structural_analysis.engine_v2.cpu_fgmres",
     "structural_analysis.engine_v2.contracts",
     "structural_analysis.model_ir",
 )
@@ -84,11 +85,18 @@ def test_engine_v2_pr_b_does_not_materialize_later_runtime_or_result_modules() -
     )
     assert relative_sources == {
         "src/structural_analysis/engine_v2/__init__.py",
+        "src/structural_analysis/engine_v2/cpu_fgmres.py",
+        "src/structural_analysis/engine_v2/cpu_fgmres_checkpoint.py",
+        "src/structural_analysis/engine_v2/cpu_fgmres_tangent.py",
         "src/structural_analysis/engine_v2/contracts/__init__.py",
         "src/structural_analysis/engine_v2/contracts/_canonical.py",
+        "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py",
         "src/structural_analysis/engine_v2/contracts/equation_scaling.py",
         "src/structural_analysis/engine_v2/contracts/execution_plan.py",
+        "src/structural_analysis/engine_v2/contracts/execution_plan_reduced_csr.py",
         "src/structural_analysis/engine_v2/contracts/state_ir.py",
+        "src/structural_analysis/engine_v2/contracts/state_ir_binary.py",
+        "src/structural_analysis/engine_v2/contracts/vector_artifact.py",
         "src/structural_analysis/model_ir/__init__.py",
         "src/structural_analysis/model_ir/loader.py",
         "src/structural_analysis/model_ir/types.py",

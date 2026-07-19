@@ -32,7 +32,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert payload["deliverable_count"] == 10
     assert payload["final_gate_count"] == 9
     assert payload["deliverable_pass_count"] == 10
-    assert payload["final_gate_pass_count"] == 6
+    assert payload["final_gate_pass_count"] == 5
 
     deliverables = {row["item"]: row for row in payload["deliverables"]}
     assert deliverables["installable_python_package"]["contract_pass"] is True
@@ -69,6 +69,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert medium_gate_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
     assert medium_gate_grouping["blocker_count"] == len(medium_blockers)
     assert medium_gate_grouping["unassigned_blockers"] == []
+    assert "scientific_medium_corpus_contract_blocked" in medium_gate_grouping[
+        "groups"
+    ]["medium_scientific_corpus"]["blockers"]
     assert "medium_model_pass_or_review_below_required:0/5" in medium_gate_grouping[
         "groups"
     ]["medium_quantity_shortfall"]["blockers"]
@@ -104,7 +107,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "scorecard/review gaps remain visible" in " ".join(
         final_gates["large_models_crash_oom_free"]["notes"]
     )
-    assert final_gates["silent_import_loss_zero"]["contract_pass"] is True
+    assert final_gates["silent_import_loss_zero"]["contract_pass"] is False
     assert final_gates["silent_import_loss_zero"]["evidence"] == (
         "implementation/phase1/release_evidence/productization/"
         "phase3_ifc_import_health_execution_receipt.json; "
@@ -118,13 +121,16 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "phase6_silent_import_loss_status.json"
     )
     silent_blockers = final_gates["silent_import_loss_zero"]["blockers"]
-    assert silent_blockers == []
-    assert "import_health_execution_missing" not in silent_blockers
-    assert "dirty_import_execution_missing" not in silent_blockers
-    assert "source_file_not_acquired" not in silent_blockers
-    assert "source_sha256_missing" not in silent_blockers
-    assert "ifc_import_health_execution_count_below_required:0/10" not in silent_blockers
-    assert "silent_data_loss_negative_gate_not_executed" not in silent_blockers
+    assert silent_blockers == [
+        "dirty_import_execution_missing",
+        "ifc_import_health_execution_count_below_required:0/10",
+        "import_health_execution_missing",
+        "phase3_ifc_import_case_count_below_minimum",
+        "silent_data_loss_negative_gate_not_executed",
+        "silent_import_loss_gate_not_executed",
+        "source_file_not_acquired",
+        "source_sha256_missing",
+    ]
     assert "product_legal_license_review_pending" not in silent_blockers
     assert "per_file_license_review_pending" not in silent_blockers
     assert "phase3_ifc_import_case_quantity_credit_missing" not in silent_blockers
@@ -452,7 +458,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "run_medium_scorecard_receipts" in {
         row["id"] for row in medium_scorecard_handoff["operator_next_actions"]
     }
-    assert "Attach product legal license approval" in medium_scorecard_handoff["owner_action"]
+    assert "five-archetype scientific corpus" in medium_scorecard_handoff["owner_action"]
+    assert "product/legal license approval" in medium_scorecard_handoff["owner_action"]
     assert "parser-only" in medium_scorecard_handoff["claim_boundary"]
     large_runner_handoff = payload["known_limitations"]["large_model_runner_handoff"]
     assert large_runner_handoff["runner_readiness_receipt"].endswith(
@@ -491,7 +498,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     )
     assert ifc_handoff["silent_import_loss_status"] == "blocked"
     assert ifc_handoff["silent_import_loss_contract_pass"] is False
-    assert ifc_handoff["technical_silent_import_loss_zero"] is True
+    assert ifc_handoff["technical_silent_import_loss_zero"] is False
     assert ifc_handoff["product_release_credit_ready"] is False
     assert ifc_handoff["import_health_receipt"].endswith(
         "phase3_ifc_import_health_execution_receipt.json"
@@ -511,8 +518,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert ifc_handoff["dirty_selected_file_count"] == 8
     assert ifc_handoff["dirty_expected_contract_count"] == 8
     assert ifc_handoff["dirty_execution_count"] == 0
-    assert ifc_handoff["import_health_execution_count"] == 10
-    assert ifc_handoff["import_health_contract_pass_count"] == 10
+    assert ifc_handoff["import_health_execution_count"] == 0
+    assert ifc_handoff["import_health_contract_pass_count"] == 0
     assert ifc_handoff["selected_import_case_count"] == 10
     assert ifc_handoff["required_ifc_import_case_count"] == 10
     assert ifc_handoff["evidence_requirements"]["clean_dirty_import_case_count"] == {
@@ -520,10 +527,10 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "required": 10,
         "contract_pass": True,
     }
-    assert ifc_handoff["evidence_requirements"]["source_files_acquired"] is True
-    assert ifc_handoff["evidence_requirements"]["selected_file_checksums_ready"] is True
-    assert ifc_handoff["evidence_requirements"]["import_health_execution_ready"] is True
-    assert ifc_handoff["evidence_requirements"]["silent_data_loss_negative_gate_executed"] is True
+    assert ifc_handoff["evidence_requirements"]["source_files_acquired"] is False
+    assert ifc_handoff["evidence_requirements"]["selected_file_checksums_ready"] is False
+    assert ifc_handoff["evidence_requirements"]["import_health_execution_ready"] is False
+    assert ifc_handoff["evidence_requirements"]["silent_data_loss_negative_gate_executed"] is False
     assert ifc_handoff["evidence_requirements"]["product_license_review_ready"] is False
     assert ifc_handoff["evidence_requirements"]["source_license_review_ready"] == {
         "blocker_count": 3,
@@ -535,15 +542,13 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "required": 10,
         "contract_pass": False,
     }
-    assert ifc_handoff["evidence_requirements"]["technical_silent_import_loss_zero"] is True
+    assert ifc_handoff["evidence_requirements"]["technical_silent_import_loss_zero"] is False
     assert ifc_handoff["evidence_requirements"]["product_release_credit_ready"] is False
-    assert "source_file_not_acquired" not in ifc_handoff["import_health_blockers"]
-    assert "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review" in ifc_handoff[
-        "import_health_blockers"
-    ]
+    assert "source_file_not_acquired" in ifc_handoff["import_health_blockers"]
+    assert "import_health_execution_missing" in ifc_handoff["import_health_blockers"]
     assert "selected_file_checksums_missing" not in ifc_handoff["source_license_blockers"]
     assert "product_legal_license_review_pending" in ifc_handoff["source_license_blockers"]
-    assert "ifc_import_health_execution_count_below_required:0/10" not in ifc_handoff[
+    assert "ifc_import_health_execution_count_below_required:0/10" in ifc_handoff[
         "silent_import_loss_blockers"
     ]
     assert "phase3_ifc_import_case_quantity_credit_missing" in ifc_handoff[
@@ -552,10 +557,18 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert ifc_handoff["silent_import_loss_direct_blockers"] == ifc_handoff[
         "silent_import_loss_blockers"
     ]
-    assert ifc_handoff["silent_import_loss_technical_direct_blockers"] == []
+    assert ifc_handoff["silent_import_loss_technical_direct_blockers"] == [
+        "dirty_import_execution_missing",
+        "ifc_import_health_execution_count_below_required:0/10",
+        "import_health_execution_missing",
+        "phase3_ifc_import_case_count_below_minimum",
+        "silent_data_loss_negative_gate_not_executed",
+        "silent_import_loss_gate_not_executed",
+        "source_file_not_acquired",
+        "source_sha256_missing",
+    ]
     assert ifc_handoff["silent_import_loss_product_release_credit_blockers"] == [
         "per_file_license_review_pending",
-        "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
         "phase3_ifc_import_case_quantity_credit_missing",
         "phase3_ifc_source_license_quantity_credit_below_required:0/10",
         "phase3_ifc_source_license_review_blockers_not_cleared:3",
@@ -573,7 +586,17 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     grouping = ifc_handoff["silent_import_loss_blocker_grouping"]
     assert grouping["schema_version"] == "phase6-silent-import-loss-blocker-groups.v1"
     assert grouping["groups"]["source_acquisition"]["scope"] == "direct_silent_import_loss"
-    assert grouping["groups"]["source_acquisition"]["blockers"] == []
+    assert grouping["groups"]["source_acquisition"]["blockers"] == [
+        "phase3_ifc_import_case_count_below_minimum",
+        "source_file_not_acquired",
+    ]
+    assert grouping["groups"]["checksum"]["blockers"] == ["source_sha256_missing"]
+    assert "ifc_import_health_execution_count_below_required:0/10" in grouping[
+        "groups"
+    ]["import_execution"]["blockers"]
+    assert "silent_import_loss_gate_not_executed" in grouping["groups"][
+        "silent_loss_gate"
+    ]["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in grouping["groups"][
         "quantity_credit"
     ]["blockers"]
@@ -589,6 +612,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "gui_task_runner_not_implemented" in grouping["groups"][
         "query_gui_spillover"
     ]["blockers"]
+    assert "acquire/checksum all selected clean/dirty IFC source files" in ifc_handoff[
+        "owner_action"
+    ]
     assert "complete product/legal and per-file license review" in ifc_handoff["owner_action"]
     assert "close or explicitly defer the ifc-bench query/GUI spillover blockers" in ifc_handoff[
         "owner_action"

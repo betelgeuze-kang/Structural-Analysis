@@ -1,0 +1,379 @@
+{
+  "artifact_hash": "sha256:8ce540c18fc5e2c8e829365905018d0872aa355c10e8a1ed366f7ac6590a0674",
+  "blockers_remaining": [
+    "independent_code_to_code_evidence_not_included",
+    "published_benchmark_evidence_not_included",
+    "experimental_evidence_not_included",
+    "customer_shadow_evidence_not_included",
+    "release_readiness_not_established"
+  ],
+  "cases": [
+    {
+      "analysis_type": "linear_static",
+      "canonical_model_checksum": "sha256:6cbc311e5a60af55fe9965731eee945f60d07f56b0cc219d0e538a412697d2e4",
+      "case_id": "analytic_cantilever_tip_load",
+      "category": "cantilever_beam",
+      "comparisons": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "actual": -0.0026666666666666666,
+          "contract_pass": true,
+          "expected": -0.0026666666666666666,
+          "quantity": "tip_displacement_UY",
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10,
+          "unit": "m",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "actual": 10.0,
+          "contract_pass": true,
+          "expected": 10.0,
+          "quantity": "base_reaction_UY",
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10,
+          "unit": "kN",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "actual": 20.0,
+          "contract_pass": true,
+          "expected": 20.0,
+          "quantity": "base_reaction_RZ",
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10,
+          "unit": "kN*m",
+          "zero_reference_absolute_tolerance": 1e-12
+        }
+      ],
+      "contract_pass": true,
+      "formula": "delta=P*L^3/(3*E*Iz); reaction_y=-P; reaction_mz=-P*L",
+      "formula_profile": "euler_bernoulli_cantilever_tip_load.v1",
+      "model_payload_hash": "sha256:6cbc311e5a60af55fe9965731eee945f60d07f56b0cc219d0e538a412697d2e4",
+      "numerical_checks": {
+        "contract_pass": true,
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 8.326672684688674e-17,
+        "residual_formula": "F_internal_minus_F_external",
+        "stiffness_symmetry_error": 0.0
+      },
+      "parameters": {
+        "E_kN_per_m2": 200000000.0,
+        "Iz_m4": 5e-05,
+        "L_m": 2.0,
+        "P_kN": -10.0
+      },
+      "solver_id": "authoritative_cpu_linear_fea_3d_v1",
+      "solver_input_checksum": "sha256:346d4b672184ee3894083c967a559e1530bb5e081bbfdc8824f76dd6a66b5cb0",
+      "status": "ready",
+      "structural_family": "cantilever_frame_beam",
+      "truth_basis": "analytic_closed_form"
+    },
+    {
+      "analysis_type": "linear_static",
+      "canonical_model_checksum": "sha256:98273ce806560edf6c5fee0e8109d50a128f880a5d054dae85446235be86cad9",
+      "case_id": "analytic_simply_supported_midpoint_load",
+      "category": "simply_supported_beam",
+      "comparisons": [
+        {
+          "absolute_error": 5.204170427930421e-18,
+          "absolute_tolerance": 1e-10,
+          "actual": -0.013500000000000005,
+          "contract_pass": true,
+          "expected": -0.0135,
+          "quantity": "midpoint_displacement_UY",
+          "relative_error": 3.854941057726238e-16,
+          "relative_tolerance": 1e-10,
+          "unit": "m",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "actual": 15.0,
+          "contract_pass": true,
+          "expected": 15.0,
+          "quantity": "left_reaction_UY",
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10,
+          "unit": "kN",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "actual": 15.0,
+          "contract_pass": true,
+          "expected": 15.0,
+          "quantity": "right_reaction_UY",
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10,
+          "unit": "kN",
+          "zero_reference_absolute_tolerance": 1e-12
+        }
+      ],
+      "contract_pass": true,
+      "formula": "delta_mid=P*L^3/(48*E*Iz); reaction_left=reaction_right=-P/2",
+      "formula_profile": "euler_bernoulli_simply_supported_midpoint_load.v1",
+      "model_payload_hash": "sha256:98273ce806560edf6c5fee0e8109d50a128f880a5d054dae85446235be86cad9",
+      "numerical_checks": {
+        "contract_pass": true,
+        "energy_balance_error": 5.551115123125783e-17,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 2.3684757858670006e-16,
+        "residual_formula": "F_internal_minus_F_external",
+        "stiffness_symmetry_error": 0.0
+      },
+      "parameters": {
+        "E_kN_per_m2": 200000000.0,
+        "Iz_m4": 5e-05,
+        "L_m": 6.0,
+        "P_kN": -30.0
+      },
+      "solver_id": "authoritative_cpu_linear_fea_3d_v1",
+      "solver_input_checksum": "sha256:e7cb7e23af89526447a0701e88b7f7453722c7e1163eb03964f2958c8044f185",
+      "status": "ready",
+      "structural_family": "simply_supported_frame_beam",
+      "truth_basis": "analytic_closed_form"
+    },
+    {
+      "analysis_type": "linear_static",
+      "canonical_model_checksum": "sha256:cb5e9dad466d66b351e6a7fef040aacfa61ff115d5c2bbe7a9b448f1d2431fe2",
+      "case_id": "analytic_fixed_base_portal_roof_shear",
+      "category": "portal_frame",
+      "comparisons": [
+        {
+          "absolute_error": 2.688821387764051e-17,
+          "absolute_tolerance": 1e-10,
+          "actual": 0.0029950988804305027,
+          "contract_pass": true,
+          "expected": 0.0029950988804305296,
+          "quantity": "left_roof_sway_UX",
+          "relative_error": 8.97740440334827e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "m",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 2.688821387764051e-17,
+          "absolute_tolerance": 1e-10,
+          "actual": 0.0029950988804305027,
+          "contract_pass": true,
+          "expected": 0.0029950988804305296,
+          "quantity": "right_roof_sway_UX",
+          "relative_error": 8.97740440334827e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "m",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 4.489274620447792e-20,
+          "absolute_tolerance": 1e-10,
+          "actual": 5.004084266307847e-06,
+          "contract_pass": true,
+          "expected": 5.004084266307892e-06,
+          "quantity": "left_roof_vertical_UY",
+          "relative_error": 8.971221069704455e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "m",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 4.489274620447792e-20,
+          "absolute_tolerance": 1e-10,
+          "actual": -5.004084266307847e-06,
+          "contract_pass": true,
+          "expected": -5.004084266307892e-06,
+          "quantity": "right_roof_vertical_UY",
+          "relative_error": 8.971221069704455e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "m",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 4.445228907190568e-18,
+          "absolute_tolerance": 1e-10,
+          "actual": -0.000496732586953682,
+          "contract_pass": true,
+          "expected": -0.0004967325869536864,
+          "quantity": "left_joint_rotation_RZ",
+          "relative_error": 8.94893756508273e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "rad",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 4.445228907190568e-18,
+          "absolute_tolerance": 1e-10,
+          "actual": -0.000496732586953682,
+          "contract_pass": true,
+          "expected": -0.0004967325869536864,
+          "quantity": "right_joint_rotation_RZ",
+          "relative_error": 8.94893756508273e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "rad",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 9.237055564881302e-14,
+          "absolute_tolerance": 1e-10,
+          "actual": -9.999999999999908,
+          "contract_pass": true,
+          "expected": -10.0,
+          "quantity": "left_base_reaction_UX",
+          "relative_error": 9.237055564881303e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "kN",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 9.237055564881302e-14,
+          "absolute_tolerance": 1e-10,
+          "actual": -9.999999999999908,
+          "contract_pass": true,
+          "expected": -10.0,
+          "quantity": "right_base_reaction_UX",
+          "relative_error": 9.237055564881303e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "kN",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 6.128431095930864e-14,
+          "absolute_tolerance": 1e-10,
+          "actual": -6.672112355077129,
+          "contract_pass": true,
+          "expected": -6.67211235507719,
+          "quantity": "left_base_reaction_UY",
+          "relative_error": 9.185143729282963e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "kN",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 6.128431095930864e-14,
+          "absolute_tolerance": 1e-10,
+          "actual": 6.672112355077129,
+          "contract_pass": true,
+          "expected": 6.67211235507719,
+          "quantity": "right_base_reaction_UY",
+          "relative_error": 9.185143729282963e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "kN",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 1.4921397450962104e-13,
+          "absolute_tolerance": 1e-10,
+          "actual": 16.655775289845472,
+          "contract_pass": true,
+          "expected": 16.65577528984562,
+          "quantity": "left_base_reaction_RZ",
+          "relative_error": 8.95869282053721e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "kN*m",
+          "zero_reference_absolute_tolerance": 1e-12
+        },
+        {
+          "absolute_error": 1.4921397450962104e-13,
+          "absolute_tolerance": 1e-10,
+          "actual": 16.655775289845472,
+          "contract_pass": true,
+          "expected": 16.65577528984562,
+          "quantity": "right_base_reaction_RZ",
+          "relative_error": 8.95869282053721e-15,
+          "relative_tolerance": 1e-10,
+          "unit": "kN*m",
+          "zero_reference_absolute_tolerance": 1e-12
+        }
+      ],
+      "contract_pass": true,
+      "formula": "closed_form_6dof_slope_deflection_with_finite_column_EA_and_column_beam_EI; symmetric_roof_shear",
+      "formula_profile": "finite_ea_ei_portal_slope_deflection.v1",
+      "model_payload_hash": "sha256:cb5e9dad466d66b351e6a7fef040aacfa61ff115d5c2bbe7a9b448f1d2431fe2",
+      "numerical_checks": {
+        "contract_pass": true,
+        "energy_balance_error": 4.2674197509029455e-16,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 1.4210854715202004e-14,
+        "residual_formula": "F_internal_minus_F_external",
+        "stiffness_symmetry_error": 0.0
+      },
+      "parameters": {
+        "A_m2": 0.02,
+        "E_kN_per_m2": 200000000.0,
+        "H_m": 3.0,
+        "Ib_m4": 9e-05,
+        "Ic_m4": 5e-05,
+        "L_m": 4.0,
+        "P_total_kN": 20.0
+      },
+      "solver_id": "authoritative_cpu_linear_fea_3d_v1",
+      "solver_input_checksum": "sha256:29192b81f81dd1995d7109a486d3a094a01b80b65f5f92a39d27502acacaf33e",
+      "status": "ready",
+      "structural_family": "one_bay_fixed_base_portal_frame",
+      "truth_basis": "analytic_closed_form"
+    }
+  ],
+  "claim_boundary": "This receipt proves three repository-generated Level 1 analytic frame families under the narrow small-displacement, linear-elastic, prismatic Euler-Bernoulli assumptions and the authoritative CPU 6-DOF path. It does not prove an independent solver comparison, distributed-member loading, shear deformation, nonlinear response, published or experimental truth, customer validation, ResultIR authority, or release readiness.",
+  "claims": {
+    "cantilever_beam_analytic_evidence": true,
+    "code_to_code_evidence": false,
+    "customer_shadow_evidence": false,
+    "experimental_evidence": false,
+    "portal_frame_analytic_evidence": true,
+    "published_benchmark_evidence": false,
+    "release_readiness": false,
+    "simply_supported_beam_analytic_evidence": true
+  },
+  "contract_pass": true,
+  "numeric_serialization_profile": "binary64_round_trip_decimal_17_significant_digits",
+  "schema_version": "analytic-frame-verification.v1",
+  "source": {
+    "input_checksums": {
+      "scripts/build_analytic_frame_verification_artifact.py": "sha256:11747769b63eab8cdc366ece6eb5a8edcd183f05c6b4d2756f9c7e47e0068680",
+      "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
+      "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
+      "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
+      "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
+      "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
+      "src/structural_analysis/io/neutral/loader.py": "sha256:db5c085e71cc5a27994b22a62f89a624bf2a5ed6d970302ad38770f9d01a5fc7",
+      "src/structural_analysis/materials/elastic.py": "sha256:f57e5ad59bbfef197fce1ee39dd79277c994ec02928cfc9b3d74c409aa99fe3b",
+      "src/structural_analysis/model/entities.py": "sha256:1d2673252d58ec423eaa504e1caa6d0dea5ae39b338ff08adbc9fdc892484640",
+      "src/structural_analysis/model/schema.py": "sha256:ee8265c7e5ebd9d7c6d8c7c666bebec656654c34fa07381b9b4f53a8f01b6802",
+      "src/structural_analysis/results/schema.py": "sha256:d968361004fa20409e24b8eb6f8d475ce1b06e5cd4c6a7e00829356a28c210b4",
+      "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
+      "src/structural_analysis/schemas/analytic_frame_verification_v1.schema.json": "sha256:8310a8ade94f872975c04e77d690c42e2ff04baa0566da536f1ae21bfab5e75c",
+      "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
+      "tests/test_analytic_frame_verification.py": "sha256:8bd6190ebef7fc3278259b5736b252956cd4c5ff7fd544c24278c6e5fa27ea1c"
+    },
+    "source_set_hash": "sha256:d3e34ffb06c4733a6672f1bf34cb7dbb8ad54404add98b72d76a80c2945260ca"
+  },
+  "summary": {
+    "case_count": 3,
+    "categories": [
+      "cantilever_beam",
+      "simply_supported_beam",
+      "portal_frame"
+    ],
+    "contract_pass": true,
+    "passing_case_count": 3
+  },
+  "tolerance_policy": {
+    "comparison_absolute_tolerance": 1e-10,
+    "comparison_relative_tolerance": 1e-10,
+    "energy_balance_absolute_tolerance": 1e-10,
+    "free_relative_residual_tolerance": 1e-10,
+    "stiffness_symmetry_absolute_tolerance": 1e-10,
+    "zero_reference_absolute_tolerance": 1e-12
+  }
+}

@@ -6,12 +6,29 @@ on:
       - "src/structural_analysis/io/midas/**"
       - "src/workbench-v2/model/**"
       - "src/structure-viewer/viewer-force-diagram-overlay.js"
+      - "src/structure-viewer/viewer-contracts.js"
+      - "src/structure-viewer/viewer-ingest.js"
+      - "src/structure-viewer/viewer-renderer.js"
+      - "src/structure-viewer/viewer-report.js"
+      - "src/structure-viewer/viewer-shell.js"
+      - "src/structure-viewer/viewer-state.js"
+      - "src/structure-viewer/viewer-storage.js"
+      - "src/structure-viewer/viewer-runtime-ingest-payload-storage.js"
+      - "src/structure-viewer/viewer-report-panel-renderer.js"
+      - "src/structure-viewer/index.html"
       - "src/structure-viewer/viewer-story-analysis-panel.js"
+      - "implementation/phase1/generate_selfcontained_viewer.py"
+      - "implementation/phase1/release_viewer_bundler.py"
       - "scripts/verify-workbench-v2-e2e.mjs"
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
       - "tests/test_midas_mgt_nodal_load_contract.py"
       - "tests/test_structure_viewer_dom_safety_contract.py"
+      - "tests/test_structure_viewer_evidence_ingest_resource_policy.py"
+      - "tests/test_structure_viewer_local_ops_persistence_policy.py"
+      - "tests/test_structure_viewer_runtime_ingest_payload_storage.py"
+      - "tests/test_structure_viewer_module_boundaries.py"
+      - "tests/test_release_viewer_bundler.py"
       - "tests/test_verify_quality_gate_contract.py"
       - ".github/workflows/runtime-input-viewer-ci.yml"
   push:
@@ -20,12 +37,29 @@ on:
       - "src/structural_analysis/io/midas/**"
       - "src/workbench-v2/model/**"
       - "src/structure-viewer/viewer-force-diagram-overlay.js"
+      - "src/structure-viewer/viewer-contracts.js"
+      - "src/structure-viewer/viewer-ingest.js"
+      - "src/structure-viewer/viewer-renderer.js"
+      - "src/structure-viewer/viewer-report.js"
+      - "src/structure-viewer/viewer-shell.js"
+      - "src/structure-viewer/viewer-state.js"
+      - "src/structure-viewer/viewer-storage.js"
+      - "src/structure-viewer/viewer-runtime-ingest-payload-storage.js"
+      - "src/structure-viewer/viewer-report-panel-renderer.js"
+      - "src/structure-viewer/index.html"
       - "src/structure-viewer/viewer-story-analysis-panel.js"
+      - "implementation/phase1/generate_selfcontained_viewer.py"
+      - "implementation/phase1/release_viewer_bundler.py"
       - "scripts/verify-workbench-v2-e2e.mjs"
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
       - "tests/test_midas_mgt_nodal_load_contract.py"
       - "tests/test_structure_viewer_dom_safety_contract.py"
+      - "tests/test_structure_viewer_evidence_ingest_resource_policy.py"
+      - "tests/test_structure_viewer_local_ops_persistence_policy.py"
+      - "tests/test_structure_viewer_runtime_ingest_payload_storage.py"
+      - "tests/test_structure_viewer_module_boundaries.py"
+      - "tests/test_release_viewer_bundler.py"
       - "tests/test_verify_quality_gate_contract.py"
       - ".github/workflows/runtime-input-viewer-ci.yml"
   workflow_dispatch:
@@ -57,8 +91,14 @@ jobs:
         run: >-
           python -m ruff check
           src/structural_analysis/io/midas
+          implementation/phase1/release_viewer_bundler.py
           tests/test_midas_mgt_nodal_load_contract.py
+          tests/test_release_viewer_bundler.py
           tests/test_structure_viewer_dom_safety_contract.py
+          tests/test_structure_viewer_evidence_ingest_resource_policy.py
+          tests/test_structure_viewer_local_ops_persistence_policy.py
+          tests/test_structure_viewer_runtime_ingest_payload_storage.py
+          tests/test_structure_viewer_module_boundaries.py
           tests/test_verify_quality_gate_contract.py
 
       - name: Compile MIDAS adapter
@@ -69,7 +109,12 @@ jobs:
           python -m pytest -q
           --junitxml=python-contracts-junit.xml
           tests/test_midas_mgt_nodal_load_contract.py
+          tests/test_release_viewer_bundler.py
           tests/test_structure_viewer_dom_safety_contract.py
+          tests/test_structure_viewer_evidence_ingest_resource_policy.py
+          tests/test_structure_viewer_local_ops_persistence_policy.py
+          tests/test_structure_viewer_runtime_ingest_payload_storage.py
+          tests/test_structure_viewer_module_boundaries.py
           tests/test_verify_quality_gate_contract.py
           tests/test_authoritative_linear_frame.py
           tests/test_authoritative_linear_frame_reference_cases.py
@@ -108,6 +153,14 @@ jobs:
       - name: Check viewer JavaScript syntax
         run: >-
           node --check src/structure-viewer/viewer-force-diagram-overlay.js
+          && node --check src/structure-viewer/viewer-contracts.js
+          && node --check src/structure-viewer/viewer-ingest.js
+          && node --check src/structure-viewer/viewer-renderer.js
+          && node --check src/structure-viewer/viewer-report.js
+          && node --check src/structure-viewer/viewer-shell.js
+          && node --check src/structure-viewer/viewer-state.js
+          && node --check src/structure-viewer/viewer-storage.js
+          && node --check src/structure-viewer/viewer-runtime-ingest-payload-storage.js
           && node --check src/structure-viewer/viewer-story-analysis-panel.js
 
       - name: Build frontend

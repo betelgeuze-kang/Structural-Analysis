@@ -19,8 +19,9 @@ def _read(name: str) -> dict[str, object]:
 def test_tracked_phase1_summary_exposes_authoritative_frame_contract() -> None:
     summary = _read("phase1_core_api_contract_summary.json")
     contract = summary["authoritative_linear_static_contract"]
+    configuration_guard = summary["public_configuration_guard"]
 
-    assert summary["schema_version"] == "phase1-core-api-contract-artifacts.v2"
+    assert summary["schema_version"] == "phase1-core-api-contract-artifacts.v3"
     assert summary["contract_pass"] is True
     assert "linear_static_3d_frame_cpu_reference_v1" in summary[
         "supported_preview_analysis_types"
@@ -34,6 +35,12 @@ def test_tracked_phase1_summary_exposes_authoritative_frame_contract() -> None:
     assert contract["viewer_solver_path_id"] == contract["solver_path_id"]
     assert contract["fallback_used"] is False
     assert contract["regularization_used"] is False
+    assert configuration_guard["status"] == "ready"
+    assert configuration_guard["contract_pass"] is True
+    assert configuration_guard["python_api_cli_equal"] is True
+    assert configuration_guard["strict_json_serializable"] is True
+    assert configuration_guard["solver_executed"] is False
+    assert configuration_guard["convergence_claim"] is False
 
 
 def test_tracked_frame_result_and_cli_result_are_identical() -> None:

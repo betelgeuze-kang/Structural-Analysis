@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/geometric_nonlinear_benchmark_v1.schema.json",
+  "title": "Narrow geometric-nonlinear benchmark receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "contract_pass",
+    "truth_class",
+    "analysis_type",
+    "benchmarks",
+    "verification",
+    "implemented_benchmarks_contract_pass",
+    "geometric_nonlinear_benchmark_breadth_claim",
+    "general_frame_pdelta_claim",
+    "lee_frame_snapthrough_claim",
+    "arc_length_path_following_claim",
+    "continuum_cantilever_large_rotation_claim",
+    "general_2d_3d_geometric_stiffness_claim",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase2-geometric-nonlinear-benchmark-result.v1"
+    },
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "truth_class": {
+      "const": "analytic_and_semianalytic_geometric_seed_truth"
+    },
+    "analysis_type": {"const": "geometric_nonlinear_benchmark_seed"},
+    "benchmarks": {
+      "type": "object",
+      "required": [
+        "euler_column",
+        "modal_pdelta_column",
+        "two_bar_shallow_arch"
+      ],
+      "properties": {
+        "euler_column": {
+          "$ref": "#/$defs/benchmark"
+        },
+        "modal_pdelta_column": {
+          "allOf": [
+            {"$ref": "#/$defs/benchmark"},
+            {
+              "type": "object",
+              "required": ["general_frame_pdelta_claim"],
+              "properties": {
+                "general_frame_pdelta_claim": {"const": false}
+              }
+            }
+          ]
+        },
+        "two_bar_shallow_arch": {
+          "allOf": [
+            {"$ref": "#/$defs/benchmark"},
+            {
+              "type": "object",
+              "required": ["arc_length_solver_claim", "lee_frame_claim"],
+              "properties": {
+                "arc_length_solver_claim": {"const": false},
+                "lee_frame_claim": {"const": false}
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "required": [
+        "euler_column_gate_passed",
+        "modal_pdelta_column_gate_passed",
+        "two_bar_shallow_arch_gate_passed",
+        "deterministic_replay_exact"
+      ],
+      "properties": {
+        "euler_column_gate_passed": {"type": "boolean"},
+        "modal_pdelta_column_gate_passed": {"type": "boolean"},
+        "two_bar_shallow_arch_gate_passed": {"type": "boolean"},
+        "deterministic_replay_exact": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "implemented_benchmarks_contract_pass": {"type": "boolean"},
+    "geometric_nonlinear_benchmark_breadth_claim": {"const": false},
+    "general_frame_pdelta_claim": {"const": false},
+    "lee_frame_snapthrough_claim": {"const": false},
+    "arc_length_path_following_claim": {"const": false},
+    "continuum_cantilever_large_rotation_claim": {"const": false},
+    "general_2d_3d_geometric_stiffness_claim": {"const": false},
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "benchmark": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "formulation",
+        "truth_basis",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "formulation": {"type": "string", "minLength": 1},
+        "truth_basis": {"type": "string", "minLength": 1},
+        "contract_pass": {"type": "boolean"}
+      },
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"contract_pass": {"const": true}},
+        "required": ["contract_pass"]
+      },
+      "then": {"properties": {"status": {"const": "partial"}}},
+      "else": {"properties": {"status": {"const": "blocked"}}}
+    }
+  ],
+  "additionalProperties": true
+}

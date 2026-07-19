@@ -1,0 +1,293 @@
+{
+  "analysis_scope": "dense_symmetric_generalized_eigen_matrix_kernels",
+  "artifact_hash": "sha256:e610ce8c74cda751e9012f50eb92b3bd33c75f7c192524e92c35a1e4553d5324",
+  "blockers_remaining": [
+    "whole_model_modal_assembly_not_connected",
+    "whole_model_buckling_assembly_not_connected",
+    "independent_code_to_code_evidence_not_attached",
+    "published_or_experimental_modal_buckling_evidence_not_attached",
+    "sparse_production_path_not_verified",
+    "rocm_hip_modal_buckling_parity_not_verified",
+    "verification_level_2_not_achieved",
+    "release_readiness_not_established"
+  ],
+  "claim_boundary": "This receipt proves only strict dense symmetric generalized-eigen matrix kernels for K phi = omega^2 M phi and K phi = lambda Kg phi. It covers a closed-form two-DOF modal system, a diagonal buckling problem with singular geometric stiffness, a finite-element Euler-column bridge to pi^2 EI/L^2, and deterministic coordinate-axis bases for complete repeated-eigenvalue clusters. It does not prove whole-model mass or geometric-stiffness assembly, a general frame/shell modal or buckling workflow, sparse or ROCm/HIP parity, an independent second solver, published or experimental validation, Verification Level 2, commercial equivalence, or release readiness.",
+  "claims": {
+    "buckling_matrix_kernel_evidence": true,
+    "euler_column_analytic_bridge_evidence": true,
+    "independent_code_to_code_evidence": false,
+    "modal_matrix_kernel_evidence": true,
+    "published_or_experimental_evidence": false,
+    "release_readiness": false,
+    "repeated_eigenspace_determinism_evidence": true,
+    "sparse_rocm_hip_parity": false,
+    "verification_level_2": false,
+    "whole_model_buckling_workflow": false,
+    "whole_model_modal_workflow": false
+  },
+  "contract_pass": true,
+  "numeric_serialization_profile": "binary64-json-round-trip-plus-semantic-12e",
+  "schema_version": "phase2-modal-buckling-kernel-result.v1",
+  "semantic_hash_profile": "canonical-json-scientific-12e",
+  "source": {
+    "input_checksums": {
+      "scripts/build_phase2_modal_buckling_kernel_artifacts.py": "sha256:2930eda233d6beb368e2193f8fdbecf9d352614b7ebae83cefea105bc830f645",
+      "src/structural_analysis/benchmark/geometric_nonlinear.py": "sha256:9c6a0c2d6fb7565fb256c35ab0fcf124f92d9cfb9dbc7b29c3724b656c68c7dd",
+      "src/structural_analysis/schemas/modal_buckling_kernel_v1.schema.json": "sha256:08196f499271f6eed1ac2905c8a8d4b6237b87a2a6ce1de962bb51ded448c5e4",
+      "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
+      "src/structural_analysis/solvers/buckling/__init__.py": "sha256:3106196c1dfa87b96508ed7523e5ce46716e8b6609baef44c2180452b563e823",
+      "src/structural_analysis/solvers/buckling/solver.py": "sha256:589128f26a0f1c35a4b121de87e3bc28dedbefba17807ca485424475aa18542b",
+      "src/structural_analysis/solvers/modal/__init__.py": "sha256:31560958dad11385c572193c91095d80701239514bef91fbafdb08514739332f",
+      "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
+      "tests/test_buckling_generalized_eigen_v1.py": "sha256:5a31bc9ecdaa8cb5a8ba101966afeb1891493e3cb8b6e643ae27867d06b0c361",
+      "tests/test_build_phase2_modal_buckling_kernel_artifacts.py": "sha256:001dcd0f06a933f8faf072f0f7df878ec52f13506fa6b041e2a268ea80fa25ef",
+      "tests/test_modal_generalized_eigen_v1.py": "sha256:6c5bd492de2b741c7aef041cf31ad30442845b2a29150250769020323af87209"
+    },
+    "source_set_hash": "sha256:d0afe11cfb8a89b4f3a3e6f4fc35667a5299949fcf78993e6848f94cef9baf86"
+  },
+  "status": "partial",
+  "summary": {
+    "buckling_kernel_contract_pass": true,
+    "case_count": 4,
+    "contract_pass": true,
+    "euler_column_bridge_contract_pass": true,
+    "modal_kernel_contract_pass": true,
+    "passing_case_count": 4,
+    "repeated_eigenspace_contract_pass": true
+  },
+  "tolerance_policy": {
+    "cluster_relative_tolerance": 1e-10,
+    "diagonal_buckling_relative_tolerance": 1e-12,
+    "euler_column_relative_tolerance": 3e-06,
+    "modal_eigenvalue_relative_tolerance": 1e-12,
+    "orthogonality_tolerance": 1e-08,
+    "residual_relative_tolerance": 1e-09
+  },
+  "truth_class": "analytic_and_semianalytic_matrix_kernel_truth",
+  "verification": {
+    "buckling_singular_geometric": {
+      "actual_load_factors": [
+        2.0,
+        4.0
+      ],
+      "case_id": "analytic_diagonal_buckling_singular_kg",
+      "contract_pass": true,
+      "deterministic_replay_raw_exact": true,
+      "deterministic_replay_semantic_exact": true,
+      "expected_load_factors": [
+        2.0,
+        4.0
+      ],
+      "fallback_used": false,
+      "finite_positive_eigenvalue_count": 2,
+      "geometric_diagonalization_error_inf": 5.551115123125783e-17,
+      "geometric_stiffness_matrix_hash": "sha256:905f209ff044ab2e09c372531698614d357b7590202bf3e4cbdf922c2692d44b",
+      "geometric_stiffness_positive_rank": 2,
+      "maximum_load_factor_relative_error": 0.0,
+      "maximum_residual_relative_inf": 0.0,
+      "raw_result_hash": "sha256:de25faf5707714a20f753e0cf75b45130837ea427fb1f0bd101c1d0921193ae1",
+      "regularization_applied": false,
+      "semantic_result_hash": "sha256:90e7fd6089c7e9d55fff2054d8311b812bd0d809f85f55eddb4d6a04bbf2f952",
+      "stiffness_matrix_hash": "sha256:a0a0ef4b00935a418c81a8af49ce0c0489714a5cccd48cfa512cc1b2ca690d8e",
+      "stiffness_normalized_modes": [
+        [
+          0.408248290463863,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.3535533905932738,
+          0.0
+        ]
+      ],
+      "stiffness_orthogonality_error_inf": 2.220446049250313e-16,
+      "truth_basis": "analytic_closed_form"
+    },
+    "euler_column": {
+      "actual_critical_load_kn": 10966.2497050622,
+      "case_id": "pinned_pinned_euler_column_16_element",
+      "contract_pass": true,
+      "critical_load_relative_error": 2.060210905758971e-06,
+      "critical_mode_stiffness_normalized": [
+        -0.007796976004127455,
+        -0.0014525574156507386,
+        -0.007647159296505381,
+        -0.0028492938644215943,
+        -0.007203466545694905,
+        -0.004136533547885121,
+        -0.0064829486152839485,
+        -0.005264808566898156,
+        -0.0055132946052671656,
+        -0.006190759945223962,
+        -0.004331767775461287,
+        -0.006878803890673006,
+        -0.002983773539327822,
+        -0.00730249926028117,
+        -0.0015211145593974306,
+        -0.007445563678605509,
+        -2.601263408358806e-16,
+        -0.007302499260281269,
+        0.0015211145593969203,
+        -0.0068788038906731856,
+        0.0029837735393274914,
+        -0.006190759945224179,
+        0.004331767775461213,
+        -0.005264808566898365,
+        0.005513294605267321,
+        -0.004136533547885285,
+        0.006482948615284243,
+        -0.002849293864421699,
+        0.007203466545695221,
+        -0.0014525574156507874,
+        0.007647159296505654,
+        0.0077969760041277075
+      ],
+      "deterministic_replay_raw_exact": true,
+      "deterministic_replay_semantic_exact": true,
+      "element_count": 16,
+      "expected_critical_load_kn": 10966.227112321509,
+      "fallback_used": false,
+      "flexural_rigidity_kn_m2": 10000.0,
+      "geometric_stiffness_matrix_hash": "sha256:6fc7af994e69c35abf1b3be4e1b2d222c5daf0dc1a9b1ddfc783e4c4e05aa05a",
+      "length_m": 3.0,
+      "raw_result_hash": "sha256:7359f69012b4abd65b0fc35f71c068281b4b031be4982112a89f6c1d9cad50de",
+      "regularization_applied": false,
+      "residual_relative_inf": 1.6298096166665298e-12,
+      "semantic_result_hash": "sha256:e109d5dd2a359c37a07e6de1eb9a2b925f4ed9d9fb697cf5e88968bf19df690f",
+      "stiffness_matrix_hash": "sha256:d7342c53285f95b5940ab0ea98976905f9a7cd28114bc9b1fd1fae7fbcb156f9",
+      "symmetry_projection_applied": false,
+      "truth_basis": "analytic_closed_form_with_fe_convergence_bridge"
+    },
+    "modal_two_dof": {
+      "actual_eigenvalues": [
+        0.3819660112501052,
+        2.618033988749895
+      ],
+      "case_id": "analytic_two_dof_shear_modal",
+      "contract_pass": true,
+      "deterministic_replay_raw_exact": true,
+      "deterministic_replay_semantic_exact": true,
+      "expected_eigenvalues": [
+        0.3819660112501051,
+        2.618033988749895
+      ],
+      "fallback_used": false,
+      "mass_matrix_hash": "sha256:7b38b86d9a7e623764dc234b5d8aa67afbf388f139b4dc5a266ed0b4b7a258ea",
+      "mass_normalized_modes": [
+        [
+          0.5257311121191336,
+          0.85065080835204
+        ],
+        [
+          0.85065080835204,
+          -0.5257311121191336
+        ]
+      ],
+      "mass_orthogonality_error_inf": 2.5851585790883854e-17,
+      "maximum_eigenvalue_relative_error": 2.906601613561372e-16,
+      "maximum_residual_relative_inf": 1.7084575627408797e-16,
+      "raw_result_hash": "sha256:f01cc454e0928fb7810839d126037668ee38c08e4f0ce8cb729897f4a7725f88",
+      "regularization_applied": false,
+      "semantic_result_hash": "sha256:462e15a6737fc1b7a9c46236254c9ed18137ac894b2b05a99479aa774dd843f0",
+      "stiffness_diagonalization_error_inf": 1.6962698412563933e-16,
+      "stiffness_matrix_hash": "sha256:48ae3de8e7a2456873b3100c5bbf8d3b33801ce5f2e9a752030c0fd862626aeb",
+      "truth_basis": "analytic_closed_form"
+    },
+    "repeated_eigenspace": {
+      "buckling_axis_basis": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "buckling_incomplete_cluster_rejected": true,
+      "buckling_load_factors": [
+        4.0,
+        4.0,
+        9.0
+      ],
+      "buckling_normalized_modes": [
+        [
+          0.5,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.3333333333333333
+        ]
+      ],
+      "buckling_raw_result_hash": "sha256:2a336668db976e1724e7907fe3457c74a73a91fe119c3e65453e5ab2e5e43275",
+      "buckling_replay_raw_exact": true,
+      "buckling_replay_semantic_exact": true,
+      "buckling_semantic_result_hash": "sha256:8beea820c109d02c18a074e9b81916aa080959aafb43b5f2d23c5c0e8597c032",
+      "case_id": "complete_repeated_eigenvalue_cluster",
+      "contract_pass": true,
+      "fallback_used": false,
+      "modal_axis_basis": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "modal_eigenvalues": [
+        4.0,
+        4.0,
+        9.0
+      ],
+      "modal_incomplete_cluster_rejected": true,
+      "modal_normalized_modes": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "modal_raw_result_hash": "sha256:a6f794fc8ca7c95c9a40b53a187d1bc156ef4d2e467ae93726edc4a33fa5307c",
+      "modal_replay_raw_exact": true,
+      "modal_replay_semantic_exact": true,
+      "modal_semantic_result_hash": "sha256:68932944db7a3edac85d1807a124477a3b929ca03a259b0defbd22ef605e7b72",
+      "regularization_applied": false,
+      "truth_basis": "coordinate_axis_projector_invariant"
+    }
+  }
+}

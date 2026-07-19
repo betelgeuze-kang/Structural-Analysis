@@ -4,13 +4,13 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-07-01T10:43:33.774876+00:00",
+  "generated_at": "2026-07-18T14:04:27.259176+00:00",
   "input_checksums": {
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
     "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
     "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
-    "src/structure-viewer/viewer-report-export.js": "sha256:023d1e05065a8fcc42de376c028f192f94fb7208151436a1fecb4b86441a3473"
+    "src/structure-viewer/viewer-report-export.js": "sha256:06ccfafbd47ed9116183c25f55ced03be05bb64c69e8067c04c55e3c29611373"
   },
   "operator_reference_contract": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
   "package_path": "",
@@ -23,7 +23,7 @@
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
   "status": "blocked",
   "truth_class": "comparison_reference",
   "validation_result": {

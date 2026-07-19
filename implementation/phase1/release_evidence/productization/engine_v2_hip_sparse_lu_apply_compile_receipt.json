@@ -1,0 +1,86 @@
+{
+  "blockers_remaining": [
+    "actual_hardware_execution_not_performed",
+    "numerical_parity_not_evaluated",
+    "actual_mgt_70560_factor_not_executed",
+    "production_scale_level_schedule_not_executed",
+    "current_tangent_fgmres_not_connected_to_hip_factor_apply",
+    "independent_cross_device_receipts_not_attached",
+    "model_size_performance_sweep_not_executed"
+  ],
+  "claim_boundary": "This dual-target receipt proves only that the canonical sparse-LU level-scheduled HIP source compiles with warnings treated as errors for declared gfx1030 and gfx1100 targets and that each resulting binary runs the same host-only, zero-HIP-runtime-call fixture parser successfully. It does not launch a kernel, access hardware, verify numerical parity, execute the actual 70,560-equation MGT factor, establish production-size schedule execution or current-tangent FGMRES integration, measure performance, or close G1.",
+  "claims": {
+    "actual_hardware_execution": false,
+    "actual_mgt_factor_apply": false,
+    "declared_target_compile": true,
+    "dual_target_host_fixture_parser_execution": true,
+    "gfx1030_target_compile": true,
+    "gfx1100_target_compile": true,
+    "numerical_parity": false,
+    "performance": false,
+    "production_current_tangent_fgmres": false,
+    "production_scale_factor_apply": false
+  },
+  "compiler": {
+    "path": "/opt/rocm-6.0.2/bin/hipcc",
+    "version_first_line": "HIP version: 6.0.32831-204d35d16",
+    "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
+  },
+  "contract_pass": true,
+  "contract_scope": "target_compile_and_host_fixture_parser_only",
+  "generated_at": "2026-07-19T01:05:40.950019+00:00",
+  "receipt_hash": "sha256:137b2a511fe1d5421c5d76ce5196c1a6c10491bd789341fa1dd83ed1b8eef955",
+  "schema_version": "engine-v2-hip-sparse-lu-apply-target-compile-host-parse-receipt.v1",
+  "source": {
+    "exact_source_commit_claim": false,
+    "input_checksums": {
+      "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp": "sha256:452d5964ec9ca38c0653a27d7d0879fdbf8e110ebdc38c1d2bc6600d3d7706e2",
+      "scripts/run_engine_v2_hip_sparse_lu_apply.py": "sha256:cb545a75f67852b1ccd2de2268a1faed0bfb459e727c0eb94dacbb8adb3625b5",
+      "src/structural_analysis/engine_v2_backends/hip_sparse_lu_apply.py": "sha256:b9da2c5044c215fd3d391fb0ac6e794fa22c1ab718b5cd150ac6b87aa7341a9e",
+      "src/structural_analysis/schemas/hip_sparse_lu_apply_compile_receipt_v1.schema.json": "sha256:3b437db4778b9730d3cd8cb0a0253f7d97d703fb9ad9172ffa14f13ccfa65928",
+      "src/structural_analysis/schemas/hip_sparse_lu_apply_parity_v1.schema.json": "sha256:1ebe3b5c22eb0aa3407ebd75eb990cd4e76cf657ad9d595ef01fc4cc5c227140",
+      "src/structural_analysis/solvers/nonlinear/canonical_sparse_lu.py": "sha256:49f74473bf9fadea781bcdaf270af556ac8c80108d36d04f265e68fabe26abf1",
+      "tests/test_engine_v2_hip_sparse_lu_apply.py": "sha256:7165332c163870173744138ee67315aa1ce3aa5f96c929133577de902e377977",
+      "tests/test_engine_v2_hip_sparse_lu_apply_runner.py": "sha256:38c7dbe811fa0920b8f6c79400d204636f87c1a28a2bf76a44adc078a02ffd58"
+    },
+    "repository_base_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+    "worktree_clean": false
+  },
+  "status": "partial",
+  "targets": [
+    {
+      "architecture": "gfx1030",
+      "binary_byte_length": 57936,
+      "binary_sha256": "sha256:be3b38976dcecec4d4be06fb5a21e60158fbea7b486dc8f3d378dafe71605751",
+      "host_fixture_parser_execution": true,
+      "host_fixture_validation": {
+        "actual_hardware_execution": false,
+        "contract_pass": true,
+        "dimension": 8,
+        "fixture_byte_length": 1232,
+        "fixture_hash": "sha256:101104d49783906875453f094cec2a74e2650edfedf773169063ae80c030c5e1",
+        "hip_runtime_api_call_count": 0,
+        "profile": "engine-v2-hip-sparse-lu-host-fixture-parser.v1",
+        "runtime_output_hash": "sha256:81f886fd1afdef7a21344207db6b233dea208f70a5418cb32edc4f28ff85d7bc"
+      },
+      "target_compile": true
+    },
+    {
+      "architecture": "gfx1100",
+      "binary_byte_length": 58192,
+      "binary_sha256": "sha256:9c23f463c1a124a64702d2c3b270e872c5e64f9a7e5cdf388190c104806824aa",
+      "host_fixture_parser_execution": true,
+      "host_fixture_validation": {
+        "actual_hardware_execution": false,
+        "contract_pass": true,
+        "dimension": 8,
+        "fixture_byte_length": 1232,
+        "fixture_hash": "sha256:101104d49783906875453f094cec2a74e2650edfedf773169063ae80c030c5e1",
+        "hip_runtime_api_call_count": 0,
+        "profile": "engine-v2-hip-sparse-lu-host-fixture-parser.v1",
+        "runtime_output_hash": "sha256:81f886fd1afdef7a21344207db6b233dea208f70a5418cb32edc4f28ff85d7bc"
+      },
+      "target_compile": true
+    }
+  ]
+}

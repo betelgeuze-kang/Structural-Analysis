@@ -125,6 +125,73 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
     assert "tests/test_engine_v2*.py" in workflow
     assert "tests/test_model_ir_v2_contract.py" in workflow
     assert '- "src/structural_analysis/engine_v2/**"' in workflow
+    assert '- "src/structural_analysis/engine_v2_backends/**"' in workflow
+    assert (
+        '- "src/structural_analysis/schemas/cpu_fgmres_checkpoint_v1.schema.json"'
+        in workflow
+    )
+    assert "scripts/run_engine_v2_hip_primitive_parity.py --check" in workflow
+    assert "scripts/run_engine_v2_hip_current_tangent_operator.py" in workflow
+    assert "scripts/run_engine_v2_hip_sparse_lu_apply.py" in workflow
+    assert "scripts/run_engine_v2_hip_fgmres_recurrence.py --check" in workflow
+    assert "--compile-only --check" in workflow
+    assert "hip_fgmres_multiblock_compile_receipt_v1.schema.json" in workflow
+    assert "hip_fgmres_device_receipt_v1.schema.json" in workflow
+    assert "run_engine_v2_hip_fgmres_device_receipt.py" in workflow
+    assert "engine_v2_hip_fgmres_gfx1030_device_receipt.json" in workflow
+    assert "Check committed gfx1030 device receipt offline" in workflow
+    assert "engine_v2_hip_fgmres_multiblock_compile_receipt.json" in workflow
+    assert "hip_fgmres_stage4_status_v1.schema.json" in workflow
+    assert "build_engine_v2_hip_fgmres_stage4_status.py --check" in workflow
+    assert "engine_v2_hip_fgmres_stage4_status.json" in workflow
+    assert "hip_current_tangent_operator_compile_receipt_v1.schema.json" in (
+        workflow
+    )
+    assert "hip_current_tangent_operator_parity_v1.schema.json" in workflow
+    assert "engine_v2_current_tangent_operator.hip.cpp" in workflow
+    assert (
+        "engine_v2_hip_current_tangent_operator_compile_receipt.json"
+        in workflow
+    )
+    assert "Check committed HIP current-tangent compile receipt offline" in (
+        workflow
+    )
+    assert (
+        "build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
+        in workflow
+    )
+    assert "--check-source-only" in workflow
+    assert (
+        "g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json"
+        in workflow
+    )
+    assert (
+        "g1_mgt_hip_current_tangent_host_parser_receipt.json" in workflow
+    )
+    assert (
+        "Check actual-MGT HIP current-tangent parser receipt sources offline"
+        in workflow
+    )
+    assert (
+        "run_g1_mgt_hip_current_tangent_hardware_parity.py" in workflow
+    )
+    assert (
+        "g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json"
+        in workflow
+    )
+    assert (
+        "g1_mgt_hip_current_tangent_hardware_parity_receipt.json" in workflow
+    )
+    assert "g1_mgt_hip_current_tangent_action.f64le" in workflow
+    assert (
+        "Check actual-MGT HIP current-tangent hardware receipt sources offline"
+        in workflow
+    )
+    assert "hip_sparse_lu_apply_compile_receipt_v1.schema.json" in workflow
+    assert "hip_sparse_lu_apply_parity_v1.schema.json" in workflow
+    assert "engine_v2_sparse_lu_apply.hip.cpp" in workflow
+    assert "engine_v2_hip_sparse_lu_apply_compile_receipt.json" in workflow
+    assert "Check committed HIP sparse-LU compile receipt offline" in workflow
     assert '- "tests/test_engine_v2*.py"' in workflow
     assert '- "tests/test_model_ir_v2_contract.py"' in workflow
     assert "self-hosted" not in workflow

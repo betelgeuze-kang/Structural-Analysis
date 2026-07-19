@@ -1,0 +1,47 @@
+{
+  "artifacts": {
+    "result": "implementation/phase1/release_evidence/productization/phase2_modal_buckling_kernel_result.json",
+    "schema": "src/structural_analysis/schemas/modal_buckling_kernel_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_modal_buckling_kernel_summary.json"
+  },
+  "blockers_remaining": [
+    "whole_model_modal_assembly_not_connected",
+    "whole_model_buckling_assembly_not_connected",
+    "independent_code_to_code_evidence_not_attached",
+    "published_or_experimental_modal_buckling_evidence_not_attached",
+    "sparse_production_path_not_verified",
+    "rocm_hip_modal_buckling_parity_not_verified",
+    "verification_level_2_not_achieved",
+    "release_readiness_not_established"
+  ],
+  "buckling_kernel_contract_pass": true,
+  "case_count": 4,
+  "claim_boundary": "This receipt proves only strict dense symmetric generalized-eigen matrix kernels for K phi = omega^2 M phi and K phi = lambda Kg phi. It covers a closed-form two-DOF modal system, a diagonal buckling problem with singular geometric stiffness, a finite-element Euler-column bridge to pi^2 EI/L^2, and deterministic coordinate-axis bases for complete repeated-eigenvalue clusters. It does not prove whole-model mass or geometric-stiffness assembly, a general frame/shell modal or buckling workflow, sparse or ROCm/HIP parity, an independent second solver, published or experimental validation, Verification Level 2, commercial equivalence, or release readiness.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "claims": {
+    "buckling_matrix_kernel_evidence": true,
+    "euler_column_analytic_bridge_evidence": true,
+    "independent_code_to_code_evidence": false,
+    "modal_matrix_kernel_evidence": true,
+    "published_or_experimental_evidence": false,
+    "release_readiness": false,
+    "repeated_eigenspace_determinism_evidence": true,
+    "sparse_rocm_hip_parity": false,
+    "verification_level_2": false,
+    "whole_model_buckling_workflow": false,
+    "whole_model_modal_workflow": false
+  },
+  "contract_pass": true,
+  "engine_version": "1.0.0",
+  "euler_column_bridge_contract_pass": true,
+  "generated_at": "2026-07-18T15:03:47.299579+00:00",
+  "modal_kernel_contract_pass": true,
+  "passing_case_count": 4,
+  "repeated_eigenspace_contract_pass": true,
+  "result_artifact_hash": "sha256:e610ce8c74cda751e9012f50eb92b3bd33c75f7c192524e92c35a1e4553d5324",
+  "schema_version": "phase2-modal-buckling-kernel-artifacts.v1",
+  "semantic_hash_profile": "canonical-json-scientific-12e",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_set_hash": "sha256:d0afe11cfb8a89b4f3a3e6f4fc35667a5299949fcf78993e6848f94cef9baf86",
+  "status": "partial"
+}

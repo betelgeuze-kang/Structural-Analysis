@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/state_ir_binary_manifest_v1.schema.json",
+  "title": "Engine v2 StateIR binary storage manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "storage_profile",
+    "source_state",
+    "artifacts",
+    "claim_boundary",
+    "manifest_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-state-ir-binary-manifest.v1"
+    },
+    "storage_profile": {
+      "const": "canonical_little_endian_fp64_binary.v1"
+    },
+    "source_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state_hash", "dof_count", "vector_hashes"],
+      "properties": {
+        "state_hash": {"$ref": "#/$defs/sha256"},
+        "dof_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647,
+          "multipleOf": 6
+        },
+        "vector_hashes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "displacement",
+            "velocity",
+            "acceleration",
+            "constitutive"
+          ],
+          "properties": {
+            "displacement": {"$ref": "#/$defs/sha256"},
+            "velocity": {"$ref": "#/$defs/sha256"},
+            "acceleration": {"$ref": "#/$defs/sha256"},
+            "constitutive": {"$ref": "#/$defs/sha256"}
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"$ref": "#/$defs/vectorDescriptor"}
+    },
+    "claim_boundary": {
+      "const": {
+        "inline_vectors": false,
+        "canonical_little_endian_binary": true,
+        "solver_or_result_authority": false
+      }
+    },
+    "manifest_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "vectorDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_order",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "artifact_uri"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "displacement",
+            "velocity",
+            "acceleration",
+            "constitutive"
+          ]
+        },
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 0}
+        },
+        "layout": {"const": "C"},
+        "byte_order": {"const": "little"},
+        "byte_length": {"type": "integer", "minimum": 0},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_uri": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

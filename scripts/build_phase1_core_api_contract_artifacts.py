@@ -46,7 +46,7 @@ DEFAULT_FRAME_REPORT_OUT = PRODUCTIZATION / "phase1_core_api_frame_report.json"
 DEFAULT_FRAME_CLI_RESULT_OUT = PRODUCTIZATION / "phase1_core_api_frame_cli_result.json"
 DEFAULT_FRAME_CLI_REPORT_OUT = PRODUCTIZATION / "phase1_core_api_frame_cli_report.json"
 DEFAULT_SUMMARY_OUT = PRODUCTIZATION / "phase1_core_api_contract_summary.json"
-SCHEMA_VERSION = "phase1-core-api-contract-artifacts.v2"
+SCHEMA_VERSION = "phase1-core-api-contract-artifacts.v3"
 AUTHORITATIVE_CPU_SOLVER_ID = "authoritative_cpu_linear_fea_3d_v1"
 
 
@@ -297,6 +297,54 @@ def _run_cli_reference_mismatch_contract(
         }
 
 
+def _run_cli_invalid_configuration_contract(
+    *,
+    repo_root: Path,
+    model_path: Path,
+) -> dict[str, Any]:
+    with TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+        result_path = tmp_path / "phase1_core_api_invalid_config_result.json"
+        report_path = tmp_path / "phase1_core_api_invalid_config_report.json"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "structural_analysis.api.cli",
+                str(model_path),
+                "--analysis-type",
+                "nonlinear_static_material_mesh",
+                "--tolerance",
+                "inf",
+                "--max-iterations",
+                "-1",
+                "--out",
+                str(result_path),
+                "--report-out",
+                str(report_path),
+            ],
+            cwd=repo_root,
+            env=_env(),
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        return {
+            "returncode": completed.returncode,
+            "stderr": completed.stderr.strip(),
+            "result": _read_json(result_path) if result_path.exists() else {},
+            "report": _read_json(report_path) if report_path.exists() else {},
+        }
+
+
+def _strict_json_serializable(*payloads: dict[str, Any]) -> bool:
+    try:
+        json.dumps(payloads, allow_nan=False, sort_keys=True)
+    except (TypeError, ValueError):
+        return False
+    return True
+
+
 @contextmanager
 def _model_path_for_generation(
     *,
@@ -413,11 +461,32 @@ def build_contract_artifacts(
             write_outputs=write_cli_outputs,
             load_case="LC1",
         )
+        invalid_configuration_result = analyze(
+            frame_model,
+            AnalysisConfig(
+                analysis_type="nonlinear_static_material_mesh",
+                tolerance=float("inf"),
+                max_iterations=-1,
+            ),
+        )
+        invalid_configuration_report = validate(invalid_configuration_result)
+        cli_invalid_configuration = _run_cli_invalid_configuration_contract(
+            repo_root=repo_root,
+            model_path=frame_model_path,
+        )
 
     result_payload = result.to_dict()
     report_payload = report.to_dict()
     frame_result_payload = frame_result.to_dict()
     frame_report_payload = frame_report.to_dict()
+    invalid_configuration_result_payload = invalid_configuration_result.to_dict()
+    invalid_configuration_report_payload = invalid_configuration_report.to_dict()
+    cli_invalid_configuration_result_payload = cli_invalid_configuration[
+        "result"
+    ]
+    cli_invalid_configuration_report_payload = cli_invalid_configuration[
+        "report"
+    ]
     mismatch_report_payload = mismatch_report.to_dict()
     cli_mismatch_report_payload = cli_mismatch_contract["report"]
 
@@ -452,6 +521,40 @@ def build_contract_artifacts(
         and "reference_mismatch:node_count"
         in cli_mismatch_report_payload.get("developer_preview_blocked_fields", [])
     )
+    expected_configuration_kinds = [
+        "nonlinear_static_material_mesh_tolerance_invalid",
+        "nonlinear_static_material_mesh_max_iterations_invalid",
+    ]
+    configuration_kinds = [
+        row.get("kind")
+        for row in invalid_configuration_result_payload.get(
+            "unsupported_features", []
+        )
+    ]
+    invalid_configuration_metrics = invalid_configuration_result_payload.get(
+        "metrics", {}
+    )
+    public_configuration_guard_pass = bool(
+        invalid_configuration_result_payload.get("status") == "blocked"
+        and invalid_configuration_report_payload.get("contract_pass") is False
+        and invalid_configuration_result_payload.get("convergence_history") == []
+        and configuration_kinds == expected_configuration_kinds
+        and invalid_configuration_metrics.get("solver_executed") is False
+        and invalid_configuration_metrics.get("convergence_claim") is False
+        and invalid_configuration_metrics.get("regularization_used") is False
+        and invalid_configuration_metrics.get("fallback_used") is False
+        and cli_invalid_configuration["returncode"] == 2
+        and cli_invalid_configuration_result_payload
+        == invalid_configuration_result_payload
+        and cli_invalid_configuration_report_payload
+        == invalid_configuration_report_payload
+        and _strict_json_serializable(
+            invalid_configuration_result_payload,
+            invalid_configuration_report_payload,
+            cli_invalid_configuration_result_payload,
+            cli_invalid_configuration_report_payload,
+        )
+    )
     schema_validation = _schema_validation_summary(
         repo_root=repo_root,
         payloads={
@@ -463,6 +566,22 @@ def build_contract_artifacts(
             "frame_python_api_validation_report": (frame_report_payload, "report"),
             "frame_cli_result": (frame_cli_result_payload, "result"),
             "frame_cli_validation_report": (frame_cli_report_payload, "report"),
+            "invalid_configuration_python_api_result": (
+                invalid_configuration_result_payload,
+                "result",
+            ),
+            "invalid_configuration_python_api_validation_report": (
+                invalid_configuration_report_payload,
+                "report",
+            ),
+            "invalid_configuration_cli_result": (
+                cli_invalid_configuration_result_payload,
+                "result",
+            ),
+            "invalid_configuration_cli_validation_report": (
+                cli_invalid_configuration_report_payload,
+                "report",
+            ),
         },
     )
     contract_pass = bool(
@@ -470,6 +589,7 @@ def build_contract_artifacts(
         and cli_contract_pass
         and reference_mismatch_contract_pass
         and frame_contract_pass
+        and public_configuration_guard_pass
         and schema_validation["contract_pass"]
     )
 
@@ -553,6 +673,48 @@ def build_contract_artifacts(
             ),
             "mismatch_field": "node_count",
         },
+        "public_configuration_guard": {
+            "status": "ready" if public_configuration_guard_pass else "blocked",
+            "contract_pass": public_configuration_guard_pass,
+            "analysis_type": "nonlinear_static_material_mesh",
+            "requested_tolerance": "positive_infinity",
+            "requested_max_iterations": -1,
+            "expected_unsupported_kinds": expected_configuration_kinds,
+            "observed_unsupported_kinds": configuration_kinds,
+            "python_api_status": invalid_configuration_result_payload.get(
+                "status"
+            ),
+            "python_api_contract_pass": invalid_configuration_report_payload.get(
+                "contract_pass"
+            ),
+            "cli_returncode": cli_invalid_configuration["returncode"],
+            "cli_status": cli_invalid_configuration_result_payload.get("status"),
+            "cli_contract_pass": cli_invalid_configuration_report_payload.get(
+                "contract_pass"
+            ),
+            "python_api_cli_equal": (
+                cli_invalid_configuration_result_payload
+                == invalid_configuration_result_payload
+                and cli_invalid_configuration_report_payload
+                == invalid_configuration_report_payload
+            ),
+            "strict_json_serializable": _strict_json_serializable(
+                invalid_configuration_result_payload,
+                invalid_configuration_report_payload,
+                cli_invalid_configuration_result_payload,
+                cli_invalid_configuration_report_payload,
+            ),
+            "solver_executed": invalid_configuration_metrics.get(
+                "solver_executed"
+            ),
+            "convergence_claim": invalid_configuration_metrics.get(
+                "convergence_claim"
+            ),
+            "regularization_used": invalid_configuration_metrics.get(
+                "regularization_used"
+            ),
+            "fallback_used": invalid_configuration_metrics.get("fallback_used"),
+        },
         "authoritative_linear_static_contract": {
             "status": "ready" if frame_contract_pass else "blocked",
             "contract_pass": frame_contract_pass,
@@ -626,7 +788,10 @@ def build_contract_artifacts(
             "result and validation report schema, and that the CLI emits the same JSON "
             "envelopes as the Python API. Reference mismatches remain blocking. They also "
             "prove the deterministic fail-closed 6-DOF CPU Euler-Bernoulli frame/truss "
-            "reference path used by the Python API, CLI, and viewer payload. This does not "
+            "reference path used by the Python API, CLI, and viewer payload. The public "
+            "configuration guard also proves that non-finite tolerance and "
+            "negative iteration-limit requests are blocked before solver execution and "
+            "remain strict-JSON serializable. This does not "
             "close shell coupling, Timoshenko shear, geometric/material nonlinearity, "
             "dynamics, construction stages, design-code closure, external benchmarks, or "
             "commercial solver readiness."

@@ -1,0 +1,4685 @@
+{
+  "analysis_type": "state_updated_concrete_damage_newton_seed",
+  "claim_boundary": "This receipt verifies one small-strain uniaxial asymmetric concrete damage seed at material-point, one-element, and two-element displacement-controlled axial-chain scope. It records irreversible tension/compression damage, nonnegative damage dissipation, same-parent consistent tangents, commit, and exact rollback. The two-element post-peak path localizes and is explicit counter-evidence for mesh objectivity. It does not close crack-band/fracture-energy regularization, multiaxial concrete, frame-shell integration points, published/experimental validation, general material breadth, G1, or HIP parity.",
+  "contract_pass": true,
+  "damage_algorithm": "history_max_exponential_tension_compression_damage",
+  "element_benchmark": {
+    "assembly": {
+      "displacements_m": [
+        0.0,
+        -0.002
+      ],
+      "element_responses": [
+        {
+          "area_m2": 0.01,
+          "element_id": "bar-1",
+          "elongation_m": -0.002,
+          "generalized_deformation": -0.002,
+          "internal_force_kn": -201.0960138106918,
+          "length_m": 1.0,
+          "material_response": {
+            "active_branch": "compression",
+            "active_damage": 0.6648399769821803,
+            "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+            "compressive_damage_increment": 0.6648399769821803,
+            "consistent_tangent_mpa": -8043.840552427671,
+            "damage_evolved": true,
+            "stress_mpa": -20.10960138106918,
+            "tensile_damage_increment": 0.0,
+            "total_strain": -0.002,
+            "trial_state": {
+              "compressive_damage": 0.6648399769821803,
+              "compressive_history_strain": 0.002,
+              "dissipated_energy_density_mj_per_m3": 0.03989039861893082,
+              "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+              "state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+              "tensile_damage": 0.0,
+              "tensile_history_strain": 0.0
+            }
+          },
+          "node_i": 0,
+          "node_j": 1,
+          "response_kind": "stress_strain",
+          "tangent_kn_per_m": -80438.40552427672,
+          "total_strain": -0.002
+        }
+      ],
+      "external_forces_kn": [
+        0.0,
+        0.0
+      ],
+      "free_node_indices": [],
+      "internal_forces_kn": [
+        201.0960138106918,
+        -201.0960138106918
+      ],
+      "jacobian_kn_per_m": [],
+      "parent_state_hash": "sha256:85d69b3d1829c56945065135b2a247eb79e3261ecc83cf664fabbeaa493d02f6",
+      "reactions_kn": [
+        201.0960138106918,
+        -201.0960138106918
+      ],
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_kn": [],
+      "target_load_factor": 1.0,
+      "trial_material_states": [
+        {
+          "compressive_damage": 0.6648399769821803,
+          "compressive_history_strain": 0.002,
+          "dissipated_energy_density_mj_per_m3": 0.03989039861893082,
+          "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+          "state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+          "tensile_damage": 0.0,
+          "tensile_history_strain": 0.0
+        }
+      ]
+    },
+    "contract_pass": true,
+    "expected_force_kn": -201.0960138106918,
+    "force_abs_error_kn": 0.0
+  },
+  "g1_material_newton_breadth_claim": false,
+  "material_newton_breadth_closure_claim": false,
+  "material_point": {
+    "compression_finite_difference_tangent": {
+      "absolute_error_mpa": 2.9885095500503667e-06,
+      "active_branch": "compression",
+      "analytic_consistent_tangent_mpa": -8043.840552427671,
+      "damage_algorithm": "history_max_exponential_tension_compression_damage",
+      "finite_difference_epsilon": 1e-09,
+      "finite_difference_tangent_mpa": -8043.840555416181,
+      "pass": true,
+      "relative_error": 3.715276961871286e-10,
+      "relative_tolerance": 1e-06,
+      "same_committed_parent_state": true,
+      "tangent_definition": "algorithmic_consistent_d_stress_d_total_strain",
+      "total_strain": -0.002
+    },
+    "compression_response": {
+      "active_branch": "compression",
+      "active_damage": 0.6648399769821803,
+      "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+      "compressive_damage_increment": 0.6648399769821803,
+      "consistent_tangent_mpa": -8043.840552427671,
+      "damage_evolved": true,
+      "stress_mpa": -20.10960138106918,
+      "tensile_damage_increment": 0.0,
+      "total_strain": -0.002,
+      "trial_state": {
+        "compressive_damage": 0.6648399769821803,
+        "compressive_history_strain": 0.002,
+        "dissipated_energy_density_mj_per_m3": 0.03989039861893082,
+        "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+        "state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+        "tensile_damage": 0.0,
+        "tensile_history_strain": 0.0
+      }
+    },
+    "contract_pass": true,
+    "cyclic_path": {
+      "cumulative_dissipated_energy_density_mj_per_m3": 0.0659399929438307,
+      "damage_algorithm": "history_max_exponential_tension_compression_damage",
+      "damage_evolution_step_count": 4,
+      "damage_irreversible": true,
+      "dissipation_nonnegative_monotonic": true,
+      "energy_damage_gate_passed": true,
+      "final_state": {
+        "compressive_damage": 0.8502236786275928,
+        "compressive_history_strain": 0.003,
+        "dissipated_energy_density_mj_per_m3": 0.0659399929438307,
+        "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+        "state_hash": "sha256:e9340fb423ada850fe3400834d24cd50d6e6244989e9917da76b4d0fa10e1397",
+        "tensile_damage": 0.8983575850648502,
+        "tensile_history_strain": 0.0004
+      },
+      "history": [
+        {
+          "active_branch": "tension",
+          "active_damage": 0.0,
+          "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+          "compressive_damage_increment": 0.0,
+          "consistent_tangent_mpa": 30000.0,
+          "damage_evolved": false,
+          "increment_sign": 0,
+          "parent_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+          "step_index": 1,
+          "stress_mpa": 0.0,
+          "tensile_damage_increment": 0.0,
+          "total_strain": 0.0,
+          "trial_state": {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        },
+        {
+          "active_branch": "compression",
+          "active_damage": 0.0,
+          "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+          "compressive_damage_increment": 0.0,
+          "consistent_tangent_mpa": 30000.0,
+          "damage_evolved": false,
+          "increment_sign": -1,
+          "parent_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+          "step_index": 2,
+          "stress_mpa": -15.0,
+          "tensile_damage_increment": 0.0,
+          "total_strain": -0.0005,
+          "trial_state": {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0005,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:38e43eb1b625e3902654f8582ee7cb1def8205452e8a8b269dbf11dc17716452",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        },
+        {
+          "active_branch": "compression",
+          "active_damage": 0.6648399769821803,
+          "committed_state_hash": "sha256:38e43eb1b625e3902654f8582ee7cb1def8205452e8a8b269dbf11dc17716452",
+          "compressive_damage_increment": 0.6648399769821803,
+          "consistent_tangent_mpa": -8043.840552427671,
+          "damage_evolved": true,
+          "increment_sign": -1,
+          "parent_state_hash": "sha256:38e43eb1b625e3902654f8582ee7cb1def8205452e8a8b269dbf11dc17716452",
+          "step_index": 3,
+          "stress_mpa": -20.10960138106918,
+          "tensile_damage_increment": 0.0,
+          "total_strain": -0.002,
+          "trial_state": {
+            "compressive_damage": 0.6648399769821803,
+            "compressive_history_strain": 0.002,
+            "dissipated_energy_density_mj_per_m3": 0.03989039861893082,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        },
+        {
+          "active_branch": "tension",
+          "active_damage": 0.0,
+          "committed_state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+          "compressive_damage_increment": 0.0,
+          "consistent_tangent_mpa": 30000.0,
+          "damage_evolved": false,
+          "increment_sign": 1,
+          "parent_state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+          "step_index": 4,
+          "stress_mpa": 0.0,
+          "tensile_damage_increment": 0.0,
+          "total_strain": 0.0,
+          "trial_state": {
+            "compressive_damage": 0.6648399769821803,
+            "compressive_history_strain": 0.002,
+            "dissipated_energy_density_mj_per_m3": 0.03989039861893082,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        },
+        {
+          "active_branch": "tension",
+          "active_damage": 0.6295908896591411,
+          "committed_state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+          "compressive_damage_increment": 0.0,
+          "consistent_tangent_mpa": -6667.363986135464,
+          "damage_evolved": true,
+          "increment_sign": 1,
+          "parent_state_hash": "sha256:aa4e038f10c31aba19890c94f3f2d789b8bbdfb9f8cd4ea3eef68e16e1b17ba0",
+          "step_index": 5,
+          "stress_mpa": 2.2224546620451533,
+          "tensile_damage_increment": 0.6295908896591411,
+          "total_strain": 0.0002,
+          "trial_state": {
+            "compressive_damage": 0.6648399769821803,
+            "compressive_history_strain": 0.002,
+            "dissipated_energy_density_mj_per_m3": 0.040268153152726305,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:1482b79694551b6bf1738c46b12530d696b8bab1d79852a516c4a7084093e2e1",
+            "tensile_damage": 0.6295908896591411,
+            "tensile_history_strain": 0.0002
+          }
+        },
+        {
+          "active_branch": "tension",
+          "active_damage": 0.6295908896591411,
+          "committed_state_hash": "sha256:1482b79694551b6bf1738c46b12530d696b8bab1d79852a516c4a7084093e2e1",
+          "compressive_damage_increment": 0.0,
+          "consistent_tangent_mpa": 11112.273310225766,
+          "damage_evolved": false,
+          "increment_sign": -1,
+          "parent_state_hash": "sha256:1482b79694551b6bf1738c46b12530d696b8bab1d79852a516c4a7084093e2e1",
+          "step_index": 6,
+          "stress_mpa": 0.0,
+          "tensile_damage_increment": 0.0,
+          "total_strain": 0.0,
+          "trial_state": {
+            "compressive_damage": 0.6648399769821803,
+            "compressive_history_strain": 0.002,
+            "dissipated_energy_density_mj_per_m3": 0.040268153152726305,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:1482b79694551b6bf1738c46b12530d696b8bab1d79852a516c4a7084093e2e1",
+            "tensile_damage": 0.6295908896591411,
+            "tensile_history_strain": 0.0002
+          }
+        },
+        {
+          "active_branch": "compression",
+          "active_damage": 0.8502236786275928,
+          "committed_state_hash": "sha256:1482b79694551b6bf1738c46b12530d696b8bab1d79852a516c4a7084093e2e1",
+          "compressive_damage_increment": 0.1853837016454125,
+          "consistent_tangent_mpa": -5391.947569406659,
+          "damage_evolved": true,
+          "increment_sign": -1,
+          "parent_state_hash": "sha256:1482b79694551b6bf1738c46b12530d696b8bab1d79852a516c4a7084093e2e1",
+          "step_index": 7,
+          "stress_mpa": -13.479868923516644,
+          "tensile_damage_increment": 0.0,
+          "total_strain": -0.003,
+          "trial_state": {
+            "compressive_damage": 0.8502236786275928,
+            "compressive_history_strain": 0.003,
+            "dissipated_energy_density_mj_per_m3": 0.065294952874857,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:0cf3d7e2e86441fdd47199b20e36299a32703327ac1c496b4d4623ab8c803751",
+            "tensile_damage": 0.6295908896591411,
+            "tensile_history_strain": 0.0002
+          }
+        },
+        {
+          "active_branch": "tension",
+          "active_damage": 0.6295908896591411,
+          "committed_state_hash": "sha256:0cf3d7e2e86441fdd47199b20e36299a32703327ac1c496b4d4623ab8c803751",
+          "compressive_damage_increment": 0.0,
+          "consistent_tangent_mpa": 11112.273310225766,
+          "damage_evolved": false,
+          "increment_sign": 1,
+          "parent_state_hash": "sha256:0cf3d7e2e86441fdd47199b20e36299a32703327ac1c496b4d4623ab8c803751",
+          "step_index": 8,
+          "stress_mpa": 0.0,
+          "tensile_damage_increment": 0.0,
+          "total_strain": 0.0,
+          "trial_state": {
+            "compressive_damage": 0.8502236786275928,
+            "compressive_history_strain": 0.003,
+            "dissipated_energy_density_mj_per_m3": 0.065294952874857,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:0cf3d7e2e86441fdd47199b20e36299a32703327ac1c496b4d4623ab8c803751",
+            "tensile_damage": 0.6295908896591411,
+            "tensile_history_strain": 0.0002
+          }
+        },
+        {
+          "active_branch": "tension",
+          "active_damage": 0.8983575850648502,
+          "committed_state_hash": "sha256:0cf3d7e2e86441fdd47199b20e36299a32703327ac1c496b4d4623ab8c803751",
+          "compressive_damage_increment": 0.0,
+          "consistent_tangent_mpa": -3659.126937665391,
+          "damage_evolved": true,
+          "increment_sign": 1,
+          "parent_state_hash": "sha256:0cf3d7e2e86441fdd47199b20e36299a32703327ac1c496b4d4623ab8c803751",
+          "step_index": 9,
+          "stress_mpa": 1.2197089792217979,
+          "tensile_damage_increment": 0.2687666954057091,
+          "total_strain": 0.0004,
+          "trial_state": {
+            "compressive_damage": 0.8502236786275928,
+            "compressive_history_strain": 0.003,
+            "dissipated_energy_density_mj_per_m3": 0.0659399929438307,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:e9340fb423ada850fe3400834d24cd50d6e6244989e9917da76b4d0fa10e1397",
+            "tensile_damage": 0.8983575850648502,
+            "tensile_history_strain": 0.0004
+          }
+        },
+        {
+          "active_branch": "tension",
+          "active_damage": 0.8983575850648502,
+          "committed_state_hash": "sha256:e9340fb423ada850fe3400834d24cd50d6e6244989e9917da76b4d0fa10e1397",
+          "compressive_damage_increment": 0.0,
+          "consistent_tangent_mpa": 3049.2724480544944,
+          "damage_evolved": false,
+          "increment_sign": -1,
+          "parent_state_hash": "sha256:e9340fb423ada850fe3400834d24cd50d6e6244989e9917da76b4d0fa10e1397",
+          "step_index": 10,
+          "stress_mpa": 0.0,
+          "tensile_damage_increment": 0.0,
+          "total_strain": 0.0,
+          "trial_state": {
+            "compressive_damage": 0.8502236786275928,
+            "compressive_history_strain": 0.003,
+            "dissipated_energy_density_mj_per_m3": 0.0659399929438307,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:e9340fb423ada850fe3400834d24cd50d6e6244989e9917da76b4d0fa10e1397",
+            "tensile_damage": 0.8983575850648502,
+            "tensile_history_strain": 0.0004
+          }
+        }
+      ],
+      "material_id": "concrete_asymmetric_exponential_damage_1d",
+      "reversal_count": 4,
+      "step_count": 10,
+      "strain_path": [
+        0.0,
+        -0.0005,
+        -0.002,
+        0.0,
+        0.0002,
+        0.0,
+        -0.003,
+        0.0,
+        0.0004,
+        0.0
+      ],
+      "stress_strain_work_density_mj_per_m3": 0.009972599654732708
+    },
+    "parameters": {
+      "compressive_softening_rate": 400.0,
+      "compressive_strength_mpa": 30.0,
+      "elastic_modulus_mpa": 30000.0,
+      "tensile_softening_rate": 3000.0,
+      "tensile_strength_mpa": 3.0
+    },
+    "tension_finite_difference_tangent": {
+      "absolute_error_mpa": 4.7330104280263186e-08,
+      "active_branch": "tension",
+      "analytic_consistent_tangent_mpa": -4939.304724846237,
+      "damage_algorithm": "history_max_exponential_tension_compression_damage",
+      "finite_difference_epsilon": 1e-09,
+      "finite_difference_tangent_mpa": -4939.304724893567,
+      "pass": true,
+      "relative_error": 9.58234142585383e-12,
+      "relative_tolerance": 1e-06,
+      "same_committed_parent_state": true,
+      "tangent_definition": "algorithmic_consistent_d_stress_d_total_strain",
+      "total_strain": 0.0003
+    },
+    "tension_response": {
+      "active_branch": "tension",
+      "active_damage": 0.8170627879686578,
+      "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+      "compressive_damage_increment": 0.0,
+      "consistent_tangent_mpa": -4939.304724846237,
+      "damage_evolved": true,
+      "stress_mpa": 1.6464349082820793,
+      "tensile_damage_increment": 0.8170627879686578,
+      "total_strain": 0.0003,
+      "trial_state": {
+        "compressive_damage": 0.0,
+        "compressive_history_strain": 0.0,
+        "dissipated_energy_density_mj_per_m3": 0.0011030347637576879,
+        "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+        "state_hash": "sha256:187d7a793a73054c6377664314204b8b9f40deb60bdd557384ae90edc917103d",
+        "tensile_damage": 0.8170627879686578,
+        "tensile_history_strain": 0.0003
+      }
+    }
+  },
+  "mesh_objectivity_claim": false,
+  "production_nonlinear_closure_claim": false,
+  "residual_formula": "F_internal_minus_F_external",
+  "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+  "rollback_probe": {
+    "accepted_state_hash_after": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+    "exact": true,
+    "load_step": {
+      "accepted_state": {
+        "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          },
+          {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "step_index": 0
+      },
+      "committed": false,
+      "metrics": {
+        "accepted_state_hash_after": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "active_equation_count": 1,
+        "committed": false,
+        "convergence_claim": false,
+        "fallback_used": false,
+        "increment_gate_applicable": true,
+        "increment_gate_passed": false,
+        "iterative_solver_contract_pass": false,
+        "material_state_changed": false,
+        "no_solve_contract_pass": false,
+        "no_solve_reaction_only": false,
+        "parent_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "regularization_used": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "residual_gate_applicable": true,
+        "residual_gate_passed": false,
+        "rollback_exact": true,
+        "solver_contract_pass": false,
+        "solver_executed": true,
+        "state_updated_element_count": 1,
+        "target_load_factor": 0.75,
+        "terminal_contract_pass": false,
+        "terminal_disposition": "solve_free_equations",
+        "terminal_reason": "max_iterations_exceeded",
+        "trial_parent_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "yielded_element_count": 0
+      },
+      "parent_state": {
+        "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          },
+          {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "step_index": 0
+      },
+      "status": "blocked",
+      "trial_assembly": {
+        "displacements_m": [
+          0.0,
+          -0.0005477828430972512,
+          -0.003
+        ],
+        "element_responses": [
+          {
+            "area_m2": 0.01,
+            "element_id": "bar-1",
+            "elongation_m": -0.0005477828430972512,
+            "generalized_deformation": -0.0005477828430972512,
+            "internal_force_kn": -164.33485292917536,
+            "length_m": 1.0,
+            "material_response": {
+              "active_branch": "compression",
+              "active_damage": 0.0,
+              "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+              "compressive_damage_increment": 0.0,
+              "consistent_tangent_mpa": 30000.0,
+              "damage_evolved": false,
+              "stress_mpa": -16.433485292917535,
+              "tensile_damage_increment": 0.0,
+              "total_strain": -0.0005477828430972512,
+              "trial_state": {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0005477828430972512,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:09276858824a7179a5dbab438e48e84caafa2ecdf06e689d0460784d931d6008",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            },
+            "node_i": 0,
+            "node_j": 1,
+            "response_kind": "stress_strain",
+            "tangent_kn_per_m": 300000.0,
+            "total_strain": -0.0005477828430972512
+          },
+          {
+            "area_m2": 0.01,
+            "element_id": "bar-2",
+            "elongation_m": -0.002452217156902749,
+            "generalized_deformation": -0.002452217156902749,
+            "internal_force_kn": -167.82061010286137,
+            "length_m": 1.0,
+            "material_response": {
+              "active_branch": "compression",
+              "active_damage": 0.7718790800800235,
+              "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+              "compressive_damage_increment": 0.7718790800800235,
+              "consistent_tangent_mpa": -6712.824404114454,
+              "damage_evolved": true,
+              "stress_mpa": -16.782061010286135,
+              "tensile_damage_increment": 0.0,
+              "total_strain": -0.002452217156902749,
+              "trial_state": {
+                "compressive_damage": 0.7718790800800235,
+                "compressive_history_strain": 0.002452217156902749,
+                "dissipated_energy_density_mj_per_m3": 0.06962390580031685,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:18beaf1289584ef755dfca06c64b43174eaa8c99274fb31ea442deafdaa2c39e",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            },
+            "node_i": 1,
+            "node_j": 2,
+            "response_kind": "stress_strain",
+            "tangent_kn_per_m": -67128.24404114454,
+            "total_strain": -0.002452217156902749
+          }
+        ],
+        "external_forces_kn": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "free_node_indices": [
+          1
+        ],
+        "internal_forces_kn": [
+          164.33485292917536,
+          3.485757173686011,
+          -167.82061010286137
+        ],
+        "jacobian_kn_per_m": [
+          [
+            232871.75595885544
+          ]
+        ],
+        "parent_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "reactions_kn": [
+          164.33485292917536,
+          0.0,
+          -167.82061010286137
+        ],
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_kn": [
+          3.485757173686011
+        ],
+        "target_load_factor": 0.75,
+        "trial_material_states": [
+          {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0005477828430972512,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:09276858824a7179a5dbab438e48e84caafa2ecdf06e689d0460784d931d6008",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          },
+          {
+            "compressive_damage": 0.7718790800800235,
+            "compressive_history_strain": 0.002452217156902749,
+            "dissipated_energy_density_mj_per_m3": 0.06962390580031685,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:18beaf1289584ef755dfca06c64b43174eaa8c99274fb31ea442deafdaa2c39e",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        ]
+      },
+      "trial_solution": {
+        "convergence_history": [
+          {
+            "accepted": true,
+            "free_displacements_m": [
+              0.0
+            ],
+            "increment_abs_m": 0.0005477828430972512,
+            "increment_gate_passed": false,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": [
+              -0.0005477828430972512
+            ],
+            "relative_residual": 134.79868923516645,
+            "residual_gate_passed": false,
+            "residual_kn": [
+              134.79868923516645
+            ]
+          }
+        ],
+        "line_search_history": [
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_free_displacements_m": [
+                  -0.0005477828430972512
+                ],
+                "trial_relative_residual": 3.485757173686011,
+                "trial_residual_kn": [
+                  3.485757173686011
+                ]
+              }
+            ],
+            "iteration": 0,
+            "newton_increment_m": [
+              -0.0005477828430972512
+            ],
+            "selected_alpha": 1.0,
+            "starting_free_displacements_m": [
+              0.0
+            ]
+          }
+        ],
+        "metrics": {
+          "active_equation_count": 1,
+          "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.75",
+          "contract_pass": false,
+          "convergence_claim": false,
+          "detail": "max_iterations_exceeded",
+          "fallback_used": false,
+          "free_displacements_m": [
+            -0.0005477828430972512
+          ],
+          "globalization": "backtracking_line_search",
+          "increment_gate_passed": false,
+          "increment_norm_applicable": true,
+          "matrix_backend": "numpy_linalg_solve_dense",
+          "reaction_observation_only": false,
+          "regularization_used": false,
+          "relative_residual": 3.485757173686011,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+          "residual_gate_passed": false,
+          "residual_kn": [
+            3.485757173686011
+          ],
+          "residual_norm_applicable": true,
+          "solver_executed": true,
+          "sparse_backend_used": false,
+          "stiffness_storage": "numpy_dense_ndarray",
+          "terminal_disposition": "solve_free_equations",
+          "terminal_reason": "max_iterations_exceeded"
+        },
+        "status": "blocked",
+        "unsupported_features": [
+          {
+            "detail": "max_iterations_exceeded",
+            "fallback_used": false,
+            "guard_outcome": "blocked",
+            "kind": "newton_vector_reference_blocked",
+            "regularization_used": false
+          }
+        ]
+      }
+    },
+    "parent_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980"
+  },
+  "schema_version": "phase2-state-updated-concrete-damage-result.v1",
+  "state_updated_concrete_seed_contract_pass": true,
+  "status": "ready",
+  "structure_benchmark": {
+    "consistent_jacobian_finite_difference": {
+      "analytic_jacobian_kn_per_m": [
+        [
+          206337.20307213368
+        ]
+      ],
+      "finite_difference_epsilon": 1e-09,
+      "finite_difference_jacobian_kn_per_m": [
+        [
+          206337.20303919743
+        ]
+      ],
+      "max_abs_error_kn_per_m": 3.2936251955106854e-05,
+      "parent_state_hash": "sha256:67f0bdb0c9fec23dd66afcd2124f99d5085ee603ef4335f6030a620fc3b4df25",
+      "pass": true,
+      "relative_error": 1.5962342934149704e-10,
+      "relative_tolerance": 1e-06,
+      "same_committed_parent_state": true
+    },
+    "contract_pass": true,
+    "deterministic_replay_exact": true,
+    "final_element_compressive_damage": [
+      0.0,
+      0.9053433493153551
+    ],
+    "final_element_strains": [
+      -0.00034588617581756835,
+      -0.0036541138241824316
+    ],
+    "load_factors": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "localization_observed": true,
+    "maximum_residual_inf_norm_kn": 2.2743051886209287e-10,
+    "maximum_series_force_spread_kn": 2.2743051886209287e-10,
+    "mesh_objectivity_claim": false,
+    "path": {
+      "contract_pass": true,
+      "final_state": {
+        "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+        "displacements_m": [
+          0.0,
+          -0.00034588617581756835,
+          -0.004
+        ],
+        "load_factor": 1.0,
+        "material_states": [
+          {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0009999999999987365,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          },
+          {
+            "compressive_damage": 0.9053433493153551,
+            "compressive_history_strain": 0.0036541138241824316,
+            "dissipated_energy_density_mj_per_m3": 0.06097385134725038,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:68852e7ac06e75ddbaf08c9367e6b08156bf191cb18e214f86bfc4154bb1b0af",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:1a81754540242e2adab770c2f9067d7e84c27485adf688181e98d9b518e411cf",
+        "step_index": 10
+      },
+      "initial_state": {
+        "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          },
+          {
+            "compressive_damage": 0.0,
+            "compressive_history_strain": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+            "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+            "tensile_damage": 0.0,
+            "tensile_history_strain": 0.0
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "step_index": 0
+      },
+      "status": "ready",
+      "steps": [
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0002,
+              -0.0004
+            ],
+            "load_factor": 0.1,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0002,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0002,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:ec011bec0f38355fae23ccbda7b05d912eb8562fa549baa57547192efcc78c8c",
+            "step_index": 1
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:ec011bec0f38355fae23ccbda7b05d912eb8562fa549baa57547192efcc78c8c",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.1,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "load_factor": 0.0,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+            "step_index": 0
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0002,
+              -0.0004
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0002,
+                "generalized_deformation": -0.0002,
+                "internal_force_kn": -60.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -6.0,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0002,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0002,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0002
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.0002,
+                "generalized_deformation": -0.0002,
+                "internal_force_kn": -60.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:bc5b031eab283a0514f5fb4f005a780720e7334ae14dda84243b22dc46c4c0ce",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -6.0,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0002,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0002,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0002
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              60.0,
+              0.0,
+              -60.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                600000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+            "reactions_kn": [
+              60.0,
+              0.0,
+              -60.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0
+            ],
+            "target_load_factor": 0.1,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0002,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0002,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.0
+                ],
+                "increment_abs_m": 0.0002,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.0002
+                ],
+                "relative_residual": 120.0,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  120.0
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0002
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0002
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  -0.0002
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.0
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.1",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                -0.0002
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0004,
+              -0.0008
+            ],
+            "load_factor": 0.2,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0004,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0004,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:f6ce6ed1e1c56a364124f96e2df302cbb458d37dead9db7dfdfd4f5cbd18a358",
+            "step_index": 2
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:f6ce6ed1e1c56a364124f96e2df302cbb458d37dead9db7dfdfd4f5cbd18a358",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:ec011bec0f38355fae23ccbda7b05d912eb8562fa549baa57547192efcc78c8c",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.2,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:ec011bec0f38355fae23ccbda7b05d912eb8562fa549baa57547192efcc78c8c",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0002,
+              -0.0004
+            ],
+            "load_factor": 0.1,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0002,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0002,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:ec011bec0f38355fae23ccbda7b05d912eb8562fa549baa57547192efcc78c8c",
+            "step_index": 1
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0004,
+              -0.0008
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0004,
+                "generalized_deformation": -0.0004,
+                "internal_force_kn": -120.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -12.0,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0004,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0004,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0004
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.0004,
+                "generalized_deformation": -0.0004,
+                "internal_force_kn": -120.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:1cca86b275dc071ae3e835b58828abc697e963d4ab089721e06d1356927e3eb8",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -12.0,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0004,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0004,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0004
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              120.0,
+              0.0,
+              -120.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                600000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:ec011bec0f38355fae23ccbda7b05d912eb8562fa549baa57547192efcc78c8c",
+            "reactions_kn": [
+              120.0,
+              0.0,
+              -120.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0
+            ],
+            "target_load_factor": 0.2,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0004,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0004,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0002
+                ],
+                "increment_abs_m": 0.0002,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.0002
+                ],
+                "relative_residual": 120.0,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  120.0
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0004
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0004
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  -0.0002
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0002
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.2",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                -0.0004
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0006,
+              -0.0012
+            ],
+            "load_factor": 0.3,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0006,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0006,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:29c8b2a1875684b00daea69d8f08c73227f229c97b779622761399677ee8d4ca",
+            "step_index": 3
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:29c8b2a1875684b00daea69d8f08c73227f229c97b779622761399677ee8d4ca",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:f6ce6ed1e1c56a364124f96e2df302cbb458d37dead9db7dfdfd4f5cbd18a358",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.3,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:f6ce6ed1e1c56a364124f96e2df302cbb458d37dead9db7dfdfd4f5cbd18a358",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0004,
+              -0.0008
+            ],
+            "load_factor": 0.2,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0004,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0004,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:f6ce6ed1e1c56a364124f96e2df302cbb458d37dead9db7dfdfd4f5cbd18a358",
+            "step_index": 2
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0006,
+              -0.0012
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0006,
+                "generalized_deformation": -0.0006,
+                "internal_force_kn": -180.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -18.0,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0006,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0006,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0006
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.0006,
+                "generalized_deformation": -0.0006,
+                "internal_force_kn": -180.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:60f8ad123866cdc4ed95b879d4bffa20173de0c46b7df5fee6fa3762d3c2e3b6",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -18.0,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0006,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0006,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0006
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              180.0,
+              0.0,
+              -180.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                600000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:f6ce6ed1e1c56a364124f96e2df302cbb458d37dead9db7dfdfd4f5cbd18a358",
+            "reactions_kn": [
+              180.0,
+              0.0,
+              -180.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0
+            ],
+            "target_load_factor": 0.3,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0006,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0006,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0004
+                ],
+                "increment_abs_m": 0.00019999999999999993,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.00019999999999999996
+                ],
+                "relative_residual": 119.99999999999997,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  119.99999999999997
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0006
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0006
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  -0.00019999999999999996
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0004
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.3",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                -0.0006
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0007999999999999999,
+              -0.0016
+            ],
+            "load_factor": 0.4,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0007999999999999999,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c95adc83775fdf9db833868f51cb1c566f16c87d7dc7b961113af154a3b8f3ff",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0008000000000000001,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:506cc5d7a2d489440d01882c7b0335beed3754749bb5a7f759adf8ab2153b3e4",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:cfc07fa3e2ed8e14e9d8351e0d486d58f9e7a9668a8a0a4ae037d70fea4ad4d8",
+            "step_index": 4
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:cfc07fa3e2ed8e14e9d8351e0d486d58f9e7a9668a8a0a4ae037d70fea4ad4d8",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:29c8b2a1875684b00daea69d8f08c73227f229c97b779622761399677ee8d4ca",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.4,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:29c8b2a1875684b00daea69d8f08c73227f229c97b779622761399677ee8d4ca",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0006,
+              -0.0012
+            ],
+            "load_factor": 0.3,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0006,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0006,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:29c8b2a1875684b00daea69d8f08c73227f229c97b779622761399677ee8d4ca",
+            "step_index": 3
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0007999999999999999,
+              -0.0016
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0007999999999999999,
+                "generalized_deformation": -0.0007999999999999999,
+                "internal_force_kn": -239.99999999999997,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -23.999999999999996,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0007999999999999999,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0007999999999999999,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:c95adc83775fdf9db833868f51cb1c566f16c87d7dc7b961113af154a3b8f3ff",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0007999999999999999
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.0008000000000000001,
+                "generalized_deformation": -0.0008000000000000001,
+                "internal_force_kn": -240.00000000000006,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:c9334ddf65b11f375d7f1913b2b911a4cb43289705cb6e1e36f4f628c3a56711",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -24.000000000000004,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0008000000000000001,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0008000000000000001,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:506cc5d7a2d489440d01882c7b0335beed3754749bb5a7f759adf8ab2153b3e4",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0008000000000000001
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              239.99999999999997,
+              8.526512829121202e-14,
+              -240.00000000000006
+            ],
+            "jacobian_kn_per_m": [
+              [
+                600000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:29c8b2a1875684b00daea69d8f08c73227f229c97b779622761399677ee8d4ca",
+            "reactions_kn": [
+              239.99999999999997,
+              0.0,
+              -240.00000000000006
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              8.526512829121202e-14
+            ],
+            "target_load_factor": 0.4,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0007999999999999999,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c95adc83775fdf9db833868f51cb1c566f16c87d7dc7b961113af154a3b8f3ff",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0008000000000000001,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:506cc5d7a2d489440d01882c7b0335beed3754749bb5a7f759adf8ab2153b3e4",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0006
+                ],
+                "increment_abs_m": 0.00019999999999999998,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.0002
+                ],
+                "relative_residual": 120.0,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  120.0
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0007999999999999999
+                ],
+                "increment_abs_m": 1.4210854715202005e-19,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -1.4210854715202005e-19
+                ],
+                "relative_residual": 8.526512829121202e-14,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  8.526512829121202e-14
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0007999999999999999
+                    ],
+                    "trial_relative_residual": 8.526512829121202e-14,
+                    "trial_residual_kn": [
+                      8.526512829121202e-14
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  -0.0002
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0006
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.4",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 1.4210854715202005e-19,
+              "free_displacements_m": [
+                -0.0007999999999999999
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 8.526512829121202e-14,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                8.526512829121202e-14
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0009999999999987365,
+              -0.002
+            ],
+            "load_factor": 0.5,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 1.768918345135262e-12,
+                "compressive_history_strain": 0.0010000000000012636,
+                "dissipated_energy_density_mj_per_m3": 2.6533775177095982e-14,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:44012e9ebbad6521dbfb7107300439be3c42cc6bb67cf3957b9ea8025ab2bb2e",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:67f0bdb0c9fec23dd66afcd2124f99d5085ee603ef4335f6030a620fc3b4df25",
+            "step_index": 5
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:67f0bdb0c9fec23dd66afcd2124f99d5085ee603ef4335f6030a620fc3b4df25",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:cfc07fa3e2ed8e14e9d8351e0d486d58f9e7a9668a8a0a4ae037d70fea4ad4d8",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 1,
+            "target_load_factor": 0.5,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:cfc07fa3e2ed8e14e9d8351e0d486d58f9e7a9668a8a0a4ae037d70fea4ad4d8",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0007999999999999999,
+              -0.0016
+            ],
+            "load_factor": 0.4,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0007999999999999999,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:c95adc83775fdf9db833868f51cb1c566f16c87d7dc7b961113af154a3b8f3ff",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0008000000000000001,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:506cc5d7a2d489440d01882c7b0335beed3754749bb5a7f759adf8ab2153b3e4",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:cfc07fa3e2ed8e14e9d8351e0d486d58f9e7a9668a8a0a4ae037d70fea4ad4d8",
+            "step_index": 4
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0009999999999987365,
+              -0.002
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0009999999999987365,
+                "generalized_deformation": -0.0009999999999987365,
+                "internal_force_kn": -299.99999999962097,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:c95adc83775fdf9db833868f51cb1c566f16c87d7dc7b961113af154a3b8f3ff",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -29.999999999962096,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0009999999999987365,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0009999999999987365,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0009999999999987365
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.0010000000000012636,
+                "generalized_deformation": -0.0010000000000012636,
+                "internal_force_kn": -299.9999999998484,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 1.768918345135262e-12,
+                  "committed_state_hash": "sha256:506cc5d7a2d489440d01882c7b0335beed3754749bb5a7f759adf8ab2153b3e4",
+                  "compressive_damage_increment": 1.768918345135262e-12,
+                  "consistent_tangent_mpa": -11999.999999993932,
+                  "damage_evolved": true,
+                  "stress_mpa": -29.99999999998484,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0010000000000012636,
+                  "trial_state": {
+                    "compressive_damage": 1.768918345135262e-12,
+                    "compressive_history_strain": 0.0010000000000012636,
+                    "dissipated_energy_density_mj_per_m3": 2.6533775177095982e-14,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:44012e9ebbad6521dbfb7107300439be3c42cc6bb67cf3957b9ea8025ab2bb2e",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": -119999.99999993932,
+                "total_strain": -0.0010000000000012636
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              299.99999999962097,
+              2.2743051886209287e-10,
+              -299.9999999998484
+            ],
+            "jacobian_kn_per_m": [
+              [
+                180000.00000006068
+              ]
+            ],
+            "parent_state_hash": "sha256:cfc07fa3e2ed8e14e9d8351e0d486d58f9e7a9668a8a0a4ae037d70fea4ad4d8",
+            "reactions_kn": [
+              299.99999999962097,
+              0.0,
+              -299.9999999998484
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              2.2743051886209287e-10
+            ],
+            "target_load_factor": 0.5,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 1.768918345135262e-12,
+                "compressive_history_strain": 0.0010000000000012636,
+                "dissipated_energy_density_mj_per_m3": 2.6533775177095982e-14,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:44012e9ebbad6521dbfb7107300439be3c42cc6bb67cf3957b9ea8025ab2bb2e",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0007999999999999999
+                ],
+                "increment_abs_m": 0.0001951893313506673,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.00019518933135066722
+                ],
+                "relative_residual": 36.93490391599076,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  36.93490391599076
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0009951893313506672
+                ],
+                "increment_abs_m": 4.807590878374559e-06,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -4.8075908783746466e-06
+                ],
+                "relative_residual": 0.8664754215802759,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.8664754215802759
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0009999969222290418
+                ],
+                "increment_abs_m": 3.077769694702706e-09,
+                "increment_gate_passed": false,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -3.0777696947824418e-09
+                ],
+                "relative_residual": 0.0005539989997487282,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0005539989997487282
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0009999999999987365
+                ],
+                "increment_abs_m": 1.2635028825667566e-15,
+                "increment_gate_passed": true,
+                "iteration": 3,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -1.2635028825667566e-15
+                ],
+                "relative_residual": 2.2743051886209287e-10,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  2.2743051886209287e-10
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0009951893313506672
+                    ],
+                    "trial_relative_residual": 0.8664754215802759,
+                    "trial_residual_kn": [
+                      0.8664754215802759
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  -0.00019518933135066722
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0007999999999999999
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0009999969222290418
+                    ],
+                    "trial_relative_residual": 0.0005539989997487282,
+                    "trial_residual_kn": [
+                      0.0005539989997487282
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  -4.8075908783746466e-06
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0009951893313506672
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0009999999999987365
+                    ],
+                    "trial_relative_residual": 2.2743051886209287e-10,
+                    "trial_residual_kn": [
+                      2.2743051886209287e-10
+                    ]
+                  }
+                ],
+                "iteration": 2,
+                "newton_increment_m": [
+                  -3.0777696947824418e-09
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0009999969222290418
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.5",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 1.2635028825667566e-15,
+              "free_displacements_m": [
+                -0.0009999999999987365
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 4,
+              "line_search_step_count": 3,
+              "line_search_used": false,
+              "linear_solve_count": 4,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 4,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 2.2743051886209287e-10,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                2.2743051886209287e-10
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0007805233077319381,
+              -0.0024
+            ],
+            "load_factor": 0.6,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.5180398017095857,
+                "compressive_history_strain": 0.0016194766922680618,
+                "dissipated_energy_density_mj_per_m3": 0.020379981782284968,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:2658e190e4421703c43bfe29ba13c8296ee47fd0ddb679394d7a40c4bad7afc5",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:da3f443ad8d6ec1ecc62459a09f270a75d872925d10b77a1e6162dfd95270652",
+            "step_index": 6
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:da3f443ad8d6ec1ecc62459a09f270a75d872925d10b77a1e6162dfd95270652",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:67f0bdb0c9fec23dd66afcd2124f99d5085ee603ef4335f6030a620fc3b4df25",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 1,
+            "target_load_factor": 0.6,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:67f0bdb0c9fec23dd66afcd2124f99d5085ee603ef4335f6030a620fc3b4df25",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0009999999999987365,
+              -0.002
+            ],
+            "load_factor": 0.5,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 1.768918345135262e-12,
+                "compressive_history_strain": 0.0010000000000012636,
+                "dissipated_energy_density_mj_per_m3": 2.6533775177095982e-14,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:44012e9ebbad6521dbfb7107300439be3c42cc6bb67cf3957b9ea8025ab2bb2e",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:67f0bdb0c9fec23dd66afcd2124f99d5085ee603ef4335f6030a620fc3b4df25",
+            "step_index": 5
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0007805233077319381,
+              -0.0024
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0007805233077319381,
+                "generalized_deformation": -0.0007805233077319381,
+                "internal_force_kn": -234.15699231958143,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -23.415699231958143,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0007805233077319381,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0009999999999987365,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0007805233077319381
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.0016194766922680618,
+                "generalized_deformation": -0.0016194766922680618,
+                "internal_force_kn": -234.15699231966576,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.5180398017095857,
+                  "committed_state_hash": "sha256:44012e9ebbad6521dbfb7107300439be3c42cc6bb67cf3957b9ea8025ab2bb2e",
+                  "compressive_damage_increment": 0.5180398017078168,
+                  "consistent_tangent_mpa": -9366.279692786633,
+                  "damage_evolved": true,
+                  "stress_mpa": -23.415699231966578,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0016194766922680618,
+                  "trial_state": {
+                    "compressive_damage": 0.5180398017095857,
+                    "compressive_history_strain": 0.0016194766922680618,
+                    "dissipated_energy_density_mj_per_m3": 0.020379981782284968,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:2658e190e4421703c43bfe29ba13c8296ee47fd0ddb679394d7a40c4bad7afc5",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": -93662.79692786632,
+                "total_strain": -0.0016194766922680618
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              234.15699231958143,
+              8.432721188000869e-11,
+              -234.15699231966576
+            ],
+            "jacobian_kn_per_m": [
+              [
+                206337.20307213368
+              ]
+            ],
+            "parent_state_hash": "sha256:67f0bdb0c9fec23dd66afcd2124f99d5085ee603ef4335f6030a620fc3b4df25",
+            "reactions_kn": [
+              234.15699231958143,
+              0.0,
+              -234.15699231966576
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              8.432721188000869e-11
+            ],
+            "target_load_factor": 0.6,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.5180398017095857,
+                "compressive_history_strain": 0.0016194766922680618,
+                "dissipated_energy_density_mj_per_m3": 0.020379981782284968,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:2658e190e4421703c43bfe29ba13c8296ee47fd0ddb679394d7a40c4bad7afc5",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0009999999999987365
+                ],
+                "increment_abs_m": 0.00022431600834298387,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00022431600834298387
+                ],
+                "relative_residual": 44.35686330988676,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -44.35686330988676
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0007756839916557526
+                ],
+                "increment_abs_m": 4.8371945617294064e-06,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -4.83719456172941e-06
+                ],
+                "relative_residual": 0.9989693585325199,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.9989693585325199
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.000780521186217482
+                ],
+                "increment_abs_m": 2.121514456080928e-09,
+                "increment_gate_passed": false,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -2.1215144560838586e-09
+                ],
+                "relative_residual": 0.00043774752776926107,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.00043774752776926107
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0007805233077319381
+                ],
+                "increment_abs_m": 4.0868641536508877e-16,
+                "increment_gate_passed": true,
+                "iteration": 3,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -4.0868641536508877e-16
+                ],
+                "relative_residual": 8.432721188000869e-11,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  8.432721188000869e-11
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0007756839916557526
+                    ],
+                    "trial_relative_residual": 0.9989693585325199,
+                    "trial_residual_kn": [
+                      0.9989693585325199
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00022431600834298387
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0009999999999987365
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.000780521186217482
+                    ],
+                    "trial_relative_residual": 0.00043774752776926107,
+                    "trial_residual_kn": [
+                      0.00043774752776926107
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  -4.83719456172941e-06
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0007756839916557526
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0007805233077319381
+                    ],
+                    "trial_relative_residual": 8.432721188000869e-11,
+                    "trial_residual_kn": [
+                      8.432721188000869e-11
+                    ]
+                  }
+                ],
+                "iteration": 2,
+                "newton_increment_m": [
+                  -2.1215144560838586e-09
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.000780521186217482
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.6",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 4.0868641536508877e-16,
+              "free_displacements_m": [
+                -0.0007805233077319381
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 4,
+              "line_search_step_count": 3,
+              "line_search_used": false,
+              "linear_solve_count": 4,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 4,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 8.432721188000869e-11,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                8.432721188000869e-11
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0006250030243812004,
+              -0.0028
+            ],
+            "load_factor": 0.7,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.7126418880635982,
+                "compressive_history_strain": 0.0021749969756187995,
+                "dissipated_energy_density_mj_per_m3": 0.03418878580074275,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:8ff2dfe001cf151b5584f714230e75282a8d285a176bcc8228fffa626a05e150",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:5b0e70a11fbd2d7d79d476cd2d6ad23cc7c5c2269ceafdc199e5afa54b71d548",
+            "step_index": 7
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:5b0e70a11fbd2d7d79d476cd2d6ad23cc7c5c2269ceafdc199e5afa54b71d548",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:da3f443ad8d6ec1ecc62459a09f270a75d872925d10b77a1e6162dfd95270652",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 1,
+            "target_load_factor": 0.7,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:da3f443ad8d6ec1ecc62459a09f270a75d872925d10b77a1e6162dfd95270652",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0007805233077319381,
+              -0.0024
+            ],
+            "load_factor": 0.6,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.5180398017095857,
+                "compressive_history_strain": 0.0016194766922680618,
+                "dissipated_energy_density_mj_per_m3": 0.020379981782284968,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:2658e190e4421703c43bfe29ba13c8296ee47fd0ddb679394d7a40c4bad7afc5",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:da3f443ad8d6ec1ecc62459a09f270a75d872925d10b77a1e6162dfd95270652",
+            "step_index": 6
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0006250030243812004,
+              -0.0028
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0006250030243812004,
+                "generalized_deformation": -0.0006250030243812004,
+                "internal_force_kn": -187.50090731436012,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -18.75009073143601,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0006250030243812004,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0009999999999987365,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0006250030243812004
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.0021749969756187995,
+                "generalized_deformation": -0.0021749969756187995,
+                "internal_force_kn": -187.50090731436075,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.7126418880635982,
+                  "committed_state_hash": "sha256:2658e190e4421703c43bfe29ba13c8296ee47fd0ddb679394d7a40c4bad7afc5",
+                  "compressive_damage_increment": 0.19460208635401244,
+                  "consistent_tangent_mpa": -7500.036292574429,
+                  "damage_evolved": true,
+                  "stress_mpa": -18.750090731436075,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0021749969756187995,
+                  "trial_state": {
+                    "compressive_damage": 0.7126418880635982,
+                    "compressive_history_strain": 0.0021749969756187995,
+                    "dissipated_energy_density_mj_per_m3": 0.03418878580074275,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:8ff2dfe001cf151b5584f714230e75282a8d285a176bcc8228fffa626a05e150",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": -75000.3629257443,
+                "total_strain": -0.0021749969756187995
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              187.50090731436012,
+              6.252776074688882e-13,
+              -187.50090731436075
+            ],
+            "jacobian_kn_per_m": [
+              [
+                224999.6370742557
+              ]
+            ],
+            "parent_state_hash": "sha256:da3f443ad8d6ec1ecc62459a09f270a75d872925d10b77a1e6162dfd95270652",
+            "reactions_kn": [
+              187.50090731436012,
+              0.0,
+              -187.50090731436075
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              6.252776074688882e-13
+            ],
+            "target_load_factor": 0.7,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.7126418880635982,
+                "compressive_history_strain": 0.0021749969756187995,
+                "dissipated_energy_density_mj_per_m3": 0.03418878580074275,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:8ff2dfe001cf151b5584f714230e75282a8d285a176bcc8228fffa626a05e150",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0007805233077319381
+                ],
+                "increment_abs_m": 0.0001572379374959505,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00015723793749595054
+                ],
+                "relative_residual": 34.62156567136941,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -34.62156567136941
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0006232853702359876
+                ],
+                "increment_abs_m": 1.7174575899644388e-06,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -1.7174575899644718e-06
+                ],
+                "relative_residual": 0.3865158044094983,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.3865158044094983
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.000625002827825952
+                ],
+                "increment_abs_m": 1.9655524831439092e-10,
+                "increment_gate_passed": false,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -1.9655524828120696e-10
+                ],
+                "relative_residual": 4.422486068733633e-05,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  4.422486068733633e-05
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0006250030243812004
+                ],
+                "increment_abs_m": 2.77901607131273e-18,
+                "increment_gate_passed": true,
+                "iteration": 3,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -2.77901607131273e-18
+                ],
+                "relative_residual": 6.252776074688882e-13,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  6.252776074688882e-13
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0006232853702359876
+                    ],
+                    "trial_relative_residual": 0.3865158044094983,
+                    "trial_residual_kn": [
+                      0.3865158044094983
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00015723793749595054
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0007805233077319381
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.000625002827825952
+                    ],
+                    "trial_relative_residual": 4.422486068733633e-05,
+                    "trial_residual_kn": [
+                      4.422486068733633e-05
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  -1.7174575899644718e-06
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0006232853702359876
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0006250030243812004
+                    ],
+                    "trial_relative_residual": 6.252776074688882e-13,
+                    "trial_residual_kn": [
+                      6.252776074688882e-13
+                    ]
+                  }
+                ],
+                "iteration": 2,
+                "newton_increment_m": [
+                  -1.9655524828120696e-10
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.000625002827825952
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.7",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 2.77901607131273e-18,
+              "free_displacements_m": [
+                -0.0006250030243812004
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 4,
+              "line_search_step_count": 3,
+              "line_search_used": false,
+              "linear_solve_count": 4,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 4,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 6.252776074688882e-13,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                6.252776074688882e-13
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0005083022040744231,
+              -0.0032
+            ],
+            "load_factor": 0.8,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.8111592598382179,
+                "compressive_history_strain": 0.002691697795925577,
+                "dissipated_energy_density_mj_per_m3": 0.04489551144394524,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:aa6bd91d91af0110ff3e134f4a152869fd4178ef48a67495d5ccb57f3bdb299f",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:b0bd5bfaf77e2e9c1703c7f3c378153975f8db2a2e151df67794aed26b578abf",
+            "step_index": 8
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:b0bd5bfaf77e2e9c1703c7f3c378153975f8db2a2e151df67794aed26b578abf",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:5b0e70a11fbd2d7d79d476cd2d6ad23cc7c5c2269ceafdc199e5afa54b71d548",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 1,
+            "target_load_factor": 0.8,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:5b0e70a11fbd2d7d79d476cd2d6ad23cc7c5c2269ceafdc199e5afa54b71d548",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0006250030243812004,
+              -0.0028
+            ],
+            "load_factor": 0.7,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.7126418880635982,
+                "compressive_history_strain": 0.0021749969756187995,
+                "dissipated_energy_density_mj_per_m3": 0.03418878580074275,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:8ff2dfe001cf151b5584f714230e75282a8d285a176bcc8228fffa626a05e150",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:5b0e70a11fbd2d7d79d476cd2d6ad23cc7c5c2269ceafdc199e5afa54b71d548",
+            "step_index": 7
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0005083022040744231,
+              -0.0032
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0005083022040744231,
+                "generalized_deformation": -0.0005083022040744231,
+                "internal_force_kn": -152.49066122232693,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -15.249066122232694,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0005083022040744231,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0009999999999987365,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0005083022040744231
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.002691697795925577,
+                "generalized_deformation": -0.002691697795925577,
+                "internal_force_kn": -152.49066122232705,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.8111592598382179,
+                  "committed_state_hash": "sha256:8ff2dfe001cf151b5584f714230e75282a8d285a176bcc8228fffa626a05e150",
+                  "compressive_damage_increment": 0.09851737177461972,
+                  "consistent_tangent_mpa": -6099.626448893082,
+                  "damage_evolved": true,
+                  "stress_mpa": -15.249066122232705,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.002691697795925577,
+                  "trial_state": {
+                    "compressive_damage": 0.8111592598382179,
+                    "compressive_history_strain": 0.002691697795925577,
+                    "dissipated_energy_density_mj_per_m3": 0.04489551144394524,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:aa6bd91d91af0110ff3e134f4a152869fd4178ef48a67495d5ccb57f3bdb299f",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": -60996.26448893082,
+                "total_strain": -0.002691697795925577
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              152.49066122232693,
+              1.1368683772161603e-13,
+              -152.49066122232705
+            ],
+            "jacobian_kn_per_m": [
+              [
+                239003.7355110692
+              ]
+            ],
+            "parent_state_hash": "sha256:5b0e70a11fbd2d7d79d476cd2d6ad23cc7c5c2269ceafdc199e5afa54b71d548",
+            "reactions_kn": [
+              152.49066122232693,
+              0.0,
+              -152.49066122232705
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              1.1368683772161603e-13
+            ],
+            "target_load_factor": 0.8,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.8111592598382179,
+                "compressive_history_strain": 0.002691697795925577,
+                "dissipated_energy_density_mj_per_m3": 0.04489551144394524,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:aa6bd91d91af0110ff3e134f4a152869fd4178ef48a67495d5ccb57f3bdb299f",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0006250030243812004
+                ],
+                "increment_abs_m": 0.00011742683773049555,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00011742683773049557
+                ],
+                "relative_residual": 27.72317372089836,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -27.72317372089836
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0005075761866507048
+                ],
+                "increment_abs_m": 7.259905265621707e-07,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -7.259905265621508e-07
+                ],
+                "relative_residual": 0.17352730593452748,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.17352730593452748
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.000508302177177267
+                ],
+                "increment_abs_m": 2.6897156160318736e-11,
+                "increment_gate_passed": false,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -2.6897156122097867e-11
+                ],
+                "relative_residual": 6.428520805457083e-06,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  6.428520805457083e-06
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0005083022040744231
+                ],
+                "increment_abs_m": 4.756697106784373e-19,
+                "increment_gate_passed": true,
+                "iteration": 3,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -4.756697106784373e-19
+                ],
+                "relative_residual": 1.1368683772161603e-13,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  1.1368683772161603e-13
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0005075761866507048
+                    ],
+                    "trial_relative_residual": 0.17352730593452748,
+                    "trial_residual_kn": [
+                      0.17352730593452748
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00011742683773049557
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0006250030243812004
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.000508302177177267
+                    ],
+                    "trial_relative_residual": 6.428520805457083e-06,
+                    "trial_residual_kn": [
+                      6.428520805457083e-06
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  -7.259905265621508e-07
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0005075761866507048
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0005083022040744231
+                    ],
+                    "trial_relative_residual": 1.1368683772161603e-13,
+                    "trial_residual_kn": [
+                      1.1368683772161603e-13
+                    ]
+                  }
+                ],
+                "iteration": 2,
+                "newton_increment_m": [
+                  -2.6897156122097867e-11
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.000508302177177267
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.8",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 4.756697106784373e-19,
+              "free_displacements_m": [
+                -0.0005083022040744231
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 4,
+              "line_search_step_count": 3,
+              "line_search_used": false,
+              "linear_solve_count": 4,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 4,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 1.1368683772161603e-13,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                1.1368683772161603e-13
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0004177360125057904,
+              -0.0036000000000000003
+            ],
+            "load_factor": 0.9,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.8687299312227313,
+                "compressive_history_strain": 0.00318226398749421,
+                "dissipated_energy_density_mj_per_m3": 0.053640615097190605,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:8b903a6654c7a11fa7489bd9adc861a23474f31957f31a381abb70f000beac25",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:a7c8c17f5eb18262711484a3b6237d6024560baaae6dbcad11a34f2fab9689ab",
+            "step_index": 9
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:a7c8c17f5eb18262711484a3b6237d6024560baaae6dbcad11a34f2fab9689ab",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:b0bd5bfaf77e2e9c1703c7f3c378153975f8db2a2e151df67794aed26b578abf",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 1,
+            "target_load_factor": 0.9,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:b0bd5bfaf77e2e9c1703c7f3c378153975f8db2a2e151df67794aed26b578abf",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0005083022040744231,
+              -0.0032
+            ],
+            "load_factor": 0.8,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.8111592598382179,
+                "compressive_history_strain": 0.002691697795925577,
+                "dissipated_energy_density_mj_per_m3": 0.04489551144394524,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:aa6bd91d91af0110ff3e134f4a152869fd4178ef48a67495d5ccb57f3bdb299f",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:b0bd5bfaf77e2e9c1703c7f3c378153975f8db2a2e151df67794aed26b578abf",
+            "step_index": 8
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.0004177360125057904,
+              -0.0036000000000000003
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.0004177360125057904,
+                "generalized_deformation": -0.0004177360125057904,
+                "internal_force_kn": -125.32080375173713,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -12.532080375173711,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0004177360125057904,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0009999999999987365,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.0004177360125057904
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.00318226398749421,
+                "generalized_deformation": -0.00318226398749421,
+                "internal_force_kn": -125.32080375173705,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.8687299312227313,
+                  "committed_state_hash": "sha256:aa6bd91d91af0110ff3e134f4a152869fd4178ef48a67495d5ccb57f3bdb299f",
+                  "compressive_damage_increment": 0.05757067138451344,
+                  "consistent_tangent_mpa": -5012.832150069485,
+                  "damage_evolved": true,
+                  "stress_mpa": -12.532080375173704,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.00318226398749421,
+                  "trial_state": {
+                    "compressive_damage": 0.8687299312227313,
+                    "compressive_history_strain": 0.00318226398749421,
+                    "dissipated_energy_density_mj_per_m3": 0.053640615097190605,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:8b903a6654c7a11fa7489bd9adc861a23474f31957f31a381abb70f000beac25",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": -50128.321500694845,
+                "total_strain": -0.00318226398749421
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              125.32080375173713,
+              -8.526512829121202e-14,
+              -125.32080375173705
+            ],
+            "jacobian_kn_per_m": [
+              [
+                249871.67849930516
+              ]
+            ],
+            "parent_state_hash": "sha256:b0bd5bfaf77e2e9c1703c7f3c378153975f8db2a2e151df67794aed26b578abf",
+            "reactions_kn": [
+              125.32080375173713,
+              0.0,
+              -125.32080375173705
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              -8.526512829121202e-14
+            ],
+            "target_load_factor": 0.9,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.8687299312227313,
+                "compressive_history_strain": 0.00318226398749421,
+                "dissipated_energy_density_mj_per_m3": 0.053640615097190605,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:8b903a6654c7a11fa7489bd9adc861a23474f31957f31a381abb70f000beac25",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0005083022040744231
+                ],
+                "increment_abs_m": 9.090586289599187e-05,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  9.090586289599188e-05
+                ],
+                "relative_residual": 22.546691386370213,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -22.546691386370213
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.00041739634117843126
+                ],
+                "increment_abs_m": 3.39666698619622e-07,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -3.3966669861963913e-07
+                ],
+                "relative_residual": 0.08487540138006011,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.08487540138006011
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0004177360078770509
+                ],
+                "increment_abs_m": 4.628739503232532e-12,
+                "increment_gate_passed": false,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -4.628739513214841e-12
+                ],
+                "relative_residual": 1.1565909119326534e-06,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  1.1565909119326534e-06
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0004177360125057904
+                ],
+                "increment_abs_m": 3.412356646551647e-19,
+                "increment_gate_passed": true,
+                "iteration": 3,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  3.412356646551647e-19
+                ],
+                "relative_residual": 8.526512829121202e-14,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  -8.526512829121202e-14
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.00041739634117843126
+                    ],
+                    "trial_relative_residual": 0.08487540138006011,
+                    "trial_residual_kn": [
+                      0.08487540138006011
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  9.090586289599188e-05
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0005083022040744231
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0004177360078770509
+                    ],
+                    "trial_relative_residual": 1.1565909119326534e-06,
+                    "trial_residual_kn": [
+                      1.1565909119326534e-06
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  -3.3966669861963913e-07
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.00041739634117843126
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0004177360125057904
+                    ],
+                    "trial_relative_residual": 8.526512829121202e-14,
+                    "trial_residual_kn": [
+                      -8.526512829121202e-14
+                    ]
+                  }
+                ],
+                "iteration": 2,
+                "newton_increment_m": [
+                  -4.628739513214841e-12
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0004177360078770509
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=0.9",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 3.412356646551647e-19,
+              "free_displacements_m": [
+                -0.0004177360125057904
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 4,
+              "line_search_step_count": 3,
+              "line_search_used": false,
+              "linear_solve_count": 4,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 4,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 8.526512829121202e-14,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                -8.526512829121202e-14
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.00034588617581756835,
+              -0.004
+            ],
+            "load_factor": 1.0,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.9053433493153551,
+                "compressive_history_strain": 0.0036541138241824316,
+                "dissipated_energy_density_mj_per_m3": 0.06097385134725038,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:68852e7ac06e75ddbaf08c9367e6b08156bf191cb18e214f86bfc4154bb1b0af",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:1a81754540242e2adab770c2f9067d7e84c27485adf688181e98d9b518e411cf",
+            "step_index": 10
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:1a81754540242e2adab770c2f9067d7e84c27485adf688181e98d9b518e411cf",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:a7c8c17f5eb18262711484a3b6237d6024560baaae6dbcad11a34f2fab9689ab",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 1,
+            "target_load_factor": 1.0,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:a7c8c17f5eb18262711484a3b6237d6024560baaae6dbcad11a34f2fab9689ab",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.0004177360125057904,
+              -0.0036000000000000003
+            ],
+            "load_factor": 0.9,
+            "material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.8687299312227313,
+                "compressive_history_strain": 0.00318226398749421,
+                "dissipated_energy_density_mj_per_m3": 0.053640615097190605,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:8b903a6654c7a11fa7489bd9adc861a23474f31957f31a381abb70f000beac25",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:a7c8c17f5eb18262711484a3b6237d6024560baaae6dbcad11a34f2fab9689ab",
+            "step_index": 9
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.00034588617581756835,
+              -0.004
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.00034588617581756835,
+                "generalized_deformation": -0.00034588617581756835,
+                "internal_force_kn": -103.76585274527051,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.0,
+                  "committed_state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                  "compressive_damage_increment": 0.0,
+                  "consistent_tangent_mpa": 30000.0,
+                  "damage_evolved": false,
+                  "stress_mpa": -10.37658527452705,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.00034588617581756835,
+                  "trial_state": {
+                    "compressive_damage": 0.0,
+                    "compressive_history_strain": 0.0009999999999987365,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 300000.0,
+                "total_strain": -0.00034588617581756835
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.0036541138241824316,
+                "generalized_deformation": -0.0036541138241824316,
+                "internal_force_kn": -103.76585274527052,
+                "length_m": 1.0,
+                "material_response": {
+                  "active_branch": "compression",
+                  "active_damage": 0.9053433493153551,
+                  "committed_state_hash": "sha256:8b903a6654c7a11fa7489bd9adc861a23474f31957f31a381abb70f000beac25",
+                  "compressive_damage_increment": 0.03661341809262375,
+                  "consistent_tangent_mpa": -4150.634109810824,
+                  "damage_evolved": true,
+                  "stress_mpa": -10.376585274527052,
+                  "tensile_damage_increment": 0.0,
+                  "total_strain": -0.0036541138241824316,
+                  "trial_state": {
+                    "compressive_damage": 0.9053433493153551,
+                    "compressive_history_strain": 0.0036541138241824316,
+                    "dissipated_energy_density_mj_per_m3": 0.06097385134725038,
+                    "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                    "state_hash": "sha256:68852e7ac06e75ddbaf08c9367e6b08156bf191cb18e214f86bfc4154bb1b0af",
+                    "tensile_damage": 0.0,
+                    "tensile_history_strain": 0.0
+                  }
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": -41506.34109810824,
+                "total_strain": -0.0036541138241824316
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              103.76585274527051,
+              1.4210854715202004e-14,
+              -103.76585274527052
+            ],
+            "jacobian_kn_per_m": [
+              [
+                258493.65890189176
+              ]
+            ],
+            "parent_state_hash": "sha256:a7c8c17f5eb18262711484a3b6237d6024560baaae6dbcad11a34f2fab9689ab",
+            "reactions_kn": [
+              103.76585274527051,
+              0.0,
+              -103.76585274527052
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              1.4210854715202004e-14
+            ],
+            "target_load_factor": 1.0,
+            "trial_material_states": [
+              {
+                "compressive_damage": 0.0,
+                "compressive_history_strain": 0.0009999999999987365,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:bd44ace14be3be3455b96b3eb836b542f982e2e70ef5cc419bd6be2f3d21dc75",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              },
+              {
+                "compressive_damage": 0.9053433493153551,
+                "compressive_history_strain": 0.0036541138241824316,
+                "dissipated_energy_density_mj_per_m3": 0.06097385134725038,
+                "schema_version": "uniaxial-asymmetric-concrete-damage-state.v1",
+                "state_hash": "sha256:68852e7ac06e75ddbaf08c9367e6b08156bf191cb18e214f86bfc4154bb1b0af",
+                "tensile_damage": 0.0,
+                "tensile_history_strain": 0.0
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0004177360125057904
+                ],
+                "increment_abs_m": 7.201962788164722e-05,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  7.201962788164722e-05
+                ],
+                "relative_residual": 18.52945920644096,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -18.52945920644096
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.00034571638462414317
+                ],
+                "increment_abs_m": 1.6979026766110244e-07,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -1.6979026766112854e-07
+                ],
+                "relative_residual": 0.0438901861501364,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0438901861501364
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.0003458861748918043
+                ],
+                "increment_abs_m": 9.257640769429198e-13,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -9.257640737740152e-13
+                ],
+                "relative_residual": 2.3930414272399503e-07,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  2.3930414272399503e-07
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.00034588617581756835
+                ],
+                "increment_abs_m": 5.497564147442227e-20,
+                "increment_gate_passed": true,
+                "iteration": 3,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -5.497564147442227e-20
+                ],
+                "relative_residual": 1.4210854715202004e-14,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  1.4210854715202004e-14
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.00034571638462414317
+                    ],
+                    "trial_relative_residual": 0.0438901861501364,
+                    "trial_residual_kn": [
+                      0.0438901861501364
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  7.201962788164722e-05
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0004177360125057904
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.0003458861748918043
+                    ],
+                    "trial_relative_residual": 2.3930414272399503e-07,
+                    "trial_residual_kn": [
+                      2.3930414272399503e-07
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  -1.6979026766112854e-07
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.00034571638462414317
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.00034588617581756835
+                    ],
+                    "trial_relative_residual": 1.4210854715202004e-14,
+                    "trial_residual_kn": [
+                      1.4210854715202004e-14
+                    ]
+                  }
+                ],
+                "iteration": 2,
+                "newton_increment_m": [
+                  -9.257640737740152e-13
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.0003458861748918043
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_concrete_damage_two_element_chain@load=1",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 5.497564147442227e-20,
+              "free_displacements_m": [
+                -0.00034588617581756835
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 4,
+              "line_search_step_count": 3,
+              "line_search_used": false,
+              "linear_solve_count": 4,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 4,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 1.4210854715202004e-14,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                1.4210854715202004e-14
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-09,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        }
+      ]
+    }
+  },
+  "tangent_definition": "algorithmic_consistent_d_stress_d_total_strain",
+  "truth_class": "analytic_1d_damage_and_axial_chain_truth",
+  "verification": {
+    "compression_tangent_gate_passed": true,
+    "cyclic_energy_damage_gate_passed": true,
+    "element_contract_pass": true,
+    "fallback_count": 0,
+    "line_search_history_present": true,
+    "material_point_contract_pass": true,
+    "regularization_count": 0,
+    "rollback_exact_gate_passed": true,
+    "structure_contract_pass": true,
+    "tension_tangent_gate_passed": true
+  }
+}

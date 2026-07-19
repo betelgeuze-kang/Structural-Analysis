@@ -1,0 +1,536 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/external_modal_buckling_technical_receipt_v1.schema.json",
+  "title": "Non-promoting external whole-model modal and buckling technical receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "generated_at",
+    "source_commit_sha",
+    "engine_version",
+    "status",
+    "truth_class",
+    "internal_source",
+    "execution_environment",
+    "external_assets",
+    "runtimes",
+    "product_evidence",
+    "mode_vector_storage_profile",
+    "mode_vector_artifacts",
+    "comparisons",
+    "technical_contract_pass",
+    "verification_hierarchy_operator_manifest_attached",
+    "verification_hierarchy_credit",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "external-modal-buckling-technical-execution.v1"
+    },
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "minLength": 20},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "engine_version": {"type": "string", "minLength": 1},
+    "status": {"enum": ["partial", "blocked"]},
+    "truth_class": {
+      "const": "external_code_to_code_modal_buckling_technical_execution"
+    },
+    "internal_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_checksums", "source_set_hash"],
+      "properties": {
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 11,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        },
+        "source_set_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "execution_environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "system",
+        "machine",
+        "python_version",
+        "python_executable_sha256"
+      ],
+      "properties": {
+        "system": {"type": "string", "minLength": 1},
+        "machine": {"type": "string", "minLength": 1},
+        "python_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+"
+        },
+        "python_executable_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "external_assets": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/externalAsset"}
+    },
+    "runtimes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["opensees", "calculix"],
+      "properties": {
+        "opensees": {"$ref": "#/$defs/openseesRuntime"},
+        "calculix": {"$ref": "#/$defs/calculixRuntime"}
+      }
+    },
+    "replay_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "external_runtime_executed_in_this_generation",
+        "external_execution_reused",
+        "external_execution_generated_at",
+        "current_product_replay_generated_at",
+        "current_product_replay_pass",
+        "reuse_reason"
+      ],
+      "properties": {
+        "external_runtime_executed_in_this_generation": {"type": "boolean"},
+        "external_execution_reused": {"type": "boolean"},
+        "external_execution_generated_at": {"type": "string", "minLength": 20},
+        "current_product_replay_generated_at": {"type": "string", "minLength": 20},
+        "current_product_replay_pass": {"type": "boolean"},
+        "reuse_reason": {"type": ["string", "null"]}
+      }
+    },
+    "product_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modal_model_hash",
+        "modal_semantic_result_hash",
+        "buckling_model_hash",
+        "buckling_semantic_result_hash"
+      ],
+      "properties": {
+        "modal_model_hash": {"$ref": "#/$defs/hash"},
+        "modal_semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "buckling_model_hash": {"$ref": "#/$defs/hash"},
+        "buckling_semantic_result_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "mode_vector_storage_profile": {
+      "const": "canonical_little_endian_fp64_binary.v1"
+    },
+    "mode_vector_artifacts": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        {"$ref": "#/$defs/productModalModes"},
+        {"$ref": "#/$defs/openseesModalModes"},
+        {"$ref": "#/$defs/productBucklingModes"},
+        {"$ref": "#/$defs/calculixBucklingModes"}
+      ],
+      "items": false
+    },
+    "comparisons": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {"$ref": "#/$defs/modalCase"},
+        {"$ref": "#/$defs/bucklingCase"}
+      ],
+      "items": false
+    },
+    "technical_contract_pass": {"type": "boolean"},
+    "verification_hierarchy_operator_manifest_attached": {"const": false},
+    "verification_hierarchy_credit": {"const": false},
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_external_solver_execution",
+        "whole_model_frame_modal_technical_comparison",
+        "modal_mac_comparison",
+        "whole_model_frame_buckling_technical_comparison",
+        "buckling_repeated_mode_subspace_comparison",
+        "product_legal_license_approval",
+        "external_runtime_redistribution_approval",
+        "verification_level_2",
+        "commercial_equivalence",
+        "release_readiness"
+      ],
+      "properties": {
+        "actual_external_solver_execution": {"type": "boolean"},
+        "whole_model_frame_modal_technical_comparison": {"type": "boolean"},
+        "modal_mac_comparison": {"type": "boolean"},
+        "whole_model_frame_buckling_technical_comparison": {"type": "boolean"},
+        "buckling_repeated_mode_subspace_comparison": {"type": "boolean"},
+        "product_legal_license_approval": {"const": false},
+        "external_runtime_redistribution_approval": {"const": false},
+        "verification_level_2": {"const": false},
+        "commercial_equivalence": {"const": false},
+        "release_readiness": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 10,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 900}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"technical_contract_pass": {"const": true}},
+        "required": ["technical_contract_pass"]
+      },
+      "then": {"properties": {"status": {"const": "partial"}}},
+      "else": {"properties": {"status": {"const": "blocked"}}}
+    }
+  ],
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "externalAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "filename",
+        "kind",
+        "authority_url",
+        "sha256",
+        "bundled_in_repository",
+        "distribution",
+        "version"
+      ],
+      "properties": {
+        "filename": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "minLength": 1},
+        "authority_url": {"type": "string", "pattern": "^https://"},
+        "sha256": {"$ref": "#/$defs/hash"},
+        "bundled_in_repository": {"const": false},
+        "distribution": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "architecture": {"type": "string", "minLength": 1}
+      }
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "declared_license_posture",
+        "license_file_sha256",
+        "product_legal_approval",
+        "commercial_redistribution_approved"
+      ],
+      "properties": {
+        "declared_license_posture": {"type": "string", "minLength": 1},
+        "license_file_sha256": {"$ref": "#/$defs/hash"},
+        "product_legal_approval": {"const": false},
+        "commercial_redistribution_approved": {"const": false}
+      }
+    },
+    "openseesOutputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "return_code",
+        "stdout_sha256",
+        "stderr_sha256",
+        "driver_sha256"
+      ],
+      "properties": {
+        "return_code": {"const": 0},
+        "stdout_sha256": {"$ref": "#/$defs/hash"},
+        "stderr_sha256": {"$ref": "#/$defs/hash"},
+        "driver_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "calculixOutputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "return_code",
+        "version_return_code",
+        "version_stdout_sha256",
+        "version_stderr_sha256",
+        "stdout_sha256",
+        "stderr_sha256",
+        "input_deck_sha256",
+        "dat_sha256",
+        "frd_sha256"
+      ],
+      "properties": {
+        "return_code": {"const": 0},
+        "version_return_code": {"enum": [0, 201]},
+        "version_stdout_sha256": {"$ref": "#/$defs/hash"},
+        "version_stderr_sha256": {"$ref": "#/$defs/hash"},
+        "stdout_sha256": {"$ref": "#/$defs/hash"},
+        "stderr_sha256": {"$ref": "#/$defs/hash"},
+        "input_deck_sha256": {"$ref": "#/$defs/hash"},
+        "dat_sha256": {"$ref": "#/$defs/hash"},
+        "frd_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "openseesRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "distribution_version",
+        "runtime_version",
+        "version_verified",
+        "actual_external_execution",
+        "independent_from_product",
+        "execution_outputs",
+        "license"
+      ],
+      "properties": {
+        "name": {"const": "OpenSees"},
+        "distribution_version": {"const": "3.7.1.2"},
+        "runtime_version": {"const": "3.7.1"},
+        "version_verified": {"const": true},
+        "actual_external_execution": {"const": true},
+        "independent_from_product": {"const": true},
+        "execution_outputs": {"$ref": "#/$defs/openseesOutputs"},
+        "license": {"$ref": "#/$defs/license"}
+      }
+    },
+    "calculixRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "distribution_version",
+        "runtime_version",
+        "version_verified",
+        "actual_external_execution",
+        "independent_from_product",
+        "binary_sha256",
+        "execution_outputs",
+        "license"
+      ],
+      "properties": {
+        "name": {"const": "CalculiX CrunchiX"},
+        "distribution_version": {"const": "2.17-3"},
+        "runtime_version": {"const": "2.17"},
+        "version_verified": {"const": true},
+        "actual_external_execution": {"const": true},
+        "independent_from_product": {"const": true},
+        "binary_sha256": {"$ref": "#/$defs/hash"},
+        "execution_outputs": {"$ref": "#/$defs/calculixOutputs"},
+        "license": {"$ref": "#/$defs/license"}
+      }
+    },
+    "modeVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_order",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "artifact_path"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "layout": {"const": "C"},
+        "byte_order": {"const": "little"},
+        "byte_length": {"type": "integer", "minimum": 32},
+        "data_hash": {"$ref": "#/$defs/hash"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "artifact_path": {"type": "string", "minLength": 1}
+      }
+    },
+    "productModalModes": {
+      "allOf": [
+        {"$ref": "#/$defs/modeVector"},
+        {
+          "properties": {
+            "name": {"const": "product_modal_modes"},
+            "shape": {"const": [2, 2]},
+            "byte_length": {"const": 32}
+          }
+        }
+      ]
+    },
+    "openseesModalModes": {
+      "allOf": [
+        {"$ref": "#/$defs/modeVector"},
+        {
+          "properties": {
+            "name": {"const": "opensees_modal_modes"},
+            "shape": {"const": [2, 2]},
+            "byte_length": {"const": 32}
+          }
+        }
+      ]
+    },
+    "productBucklingModes": {
+      "allOf": [
+        {"$ref": "#/$defs/modeVector"},
+        {
+          "properties": {
+            "name": {"const": "product_buckling_modes"},
+            "shape": {"const": [34, 2]},
+            "byte_length": {"const": 544}
+          }
+        }
+      ]
+    },
+    "calculixBucklingModes": {
+      "allOf": [
+        {"$ref": "#/$defs/modeVector"},
+        {
+          "properties": {
+            "name": {"const": "calculix_buckling_modes"},
+            "shape": {"const": [34, 2]},
+            "byte_length": {"const": 544}
+          }
+        }
+      ]
+    },
+    "valueMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric_kind",
+        "quantity",
+        "product_value",
+        "reference_value",
+        "absolute_error",
+        "relative_error",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "contract_pass"
+      ],
+      "properties": {
+        "metric_kind": {"const": "value_error"},
+        "quantity": {"type": "string", "minLength": 1},
+        "product_value": {"type": "number"},
+        "reference_value": {"type": "number"},
+        "absolute_error": {"type": "number", "minimum": 0},
+        "relative_error": {"type": "number", "minimum": 0},
+        "absolute_tolerance": {"type": "number", "minimum": 0},
+        "relative_tolerance": {"type": "number", "minimum": 0},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "thresholdMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric_kind",
+        "quantity",
+        "observed_value",
+        "minimum_accepted",
+        "contract_pass"
+      ],
+      "properties": {
+        "metric_kind": {"const": "minimum_threshold"},
+        "quantity": {"type": "string", "minLength": 1},
+        "observed_value": {"type": "number", "minimum": 0, "maximum": 1},
+        "minimum_accepted": {"type": "number", "minimum": 0, "maximum": 1},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "caseBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "analysis_type",
+        "reference_solver",
+        "product_solver_id",
+        "metrics",
+        "external_return_code",
+        "product_regularization_applied",
+        "product_fallback_used",
+        "mode_vector_artifacts",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "analysis_type": {"type": "string", "minLength": 1},
+        "reference_solver": {"type": "string", "minLength": 1},
+        "product_solver_id": {"type": "string", "minLength": 1},
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {"$ref": "#/$defs/valueMetric"},
+              {"$ref": "#/$defs/thresholdMetric"}
+            ]
+          }
+        },
+        "external_return_code": {"const": 0},
+        "product_regularization_applied": {"const": false},
+        "product_fallback_used": {"const": false},
+        "mode_vector_artifacts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "modalCase": {
+      "allOf": [
+        {"$ref": "#/$defs/caseBase"},
+        {
+          "properties": {
+            "case_id": {"const": "whole_model_frame_consistent_mass_modal"},
+            "analysis_type": {"const": "modal"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 4, "maxItems": 4},
+            "mode_vector_artifacts": {
+              "const": ["product_modal_modes", "opensees_modal_modes"]
+            }
+          }
+        }
+      ]
+    },
+    "bucklingCase": {
+      "allOf": [
+        {"$ref": "#/$defs/caseBase"},
+        {
+          "properties": {
+            "case_id": {
+              "const": "whole_model_frame_repeated_mode_linear_buckling"
+            },
+            "analysis_type": {"const": "linear_buckling"},
+            "reference_solver": {"const": "CalculiX CrunchiX 2.17 B32"},
+            "metrics": {"minItems": 3, "maxItems": 3},
+            "mode_vector_artifacts": {
+              "const": ["product_buckling_modes", "calculix_buckling_modes"]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

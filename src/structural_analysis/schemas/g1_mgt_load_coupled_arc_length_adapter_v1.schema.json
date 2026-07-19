@@ -1,0 +1,1523 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/g1-mgt-load-coupled-arc-length-adapter-v1.schema.json",
+  "title": "G1 real-MGT load-coupled arc-length adapter receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "evidence_closure_pass",
+    "source_commit_sha",
+    "engine_version",
+    "source_commit_exact_replay_claim",
+    "source_tree_state",
+    "input_checksums",
+    "case_id",
+    "adapter_metadata",
+    "initial_state_audit",
+    "stored_receipt_comparison",
+    "claims",
+    "blockers_remaining",
+    "artifacts",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "g1-mgt-load-coupled-arc-length-adapter-receipt.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "evidence_closure_pass": {"const": false},
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "engine_version": {"type": "string", "minLength": 1},
+    "source_commit_exact_replay_claim": {"const": false},
+    "source_tree_state": {
+      "const": "working_tree_with_uncommitted_goal_changes"
+    },
+    "input_checksums": {
+      "type": "object",
+      "minProperties": 8,
+      "additionalProperties": {"type": "string", "minLength": 1}
+    },
+    "case_id": {
+      "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+    },
+    "adapter_metadata": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "case_id",
+        "mgt_path",
+        "roundtrip_npz",
+        "roundtrip_json",
+        "roundtrip_derivation",
+        "roundtrip_generated_uncoarsened",
+        "checkpoint_npz",
+        "mgt_sha256",
+        "roundtrip_sha256",
+        "roundtrip_json_sha256",
+        "roundtrip_json_hash_mode",
+        "checkpoint_sha256",
+        "checkpoint_schema",
+        "checkpoint_load_factor",
+        "initial_state_policy",
+        "initial_load_factor",
+        "historical_checkpoint_state_consumed",
+        "node_count",
+        "element_count",
+        "frame_element_count",
+        "frame_connectivity_audit",
+        "frame_source_property_coverage_audit",
+        "material_analysis_property_binding",
+        "dgn_material_property_alias_audit",
+        "section_property_count",
+        "material_property_count",
+        "plate_thickness_property_count",
+        "source_material_properties_consumed",
+        "all_frame_source_material_properties_resolved",
+        "actual_mgt_semantic_load_case_consumed",
+        "global_dof_count",
+        "free_equation_count",
+        "restrained_dof_count",
+        "reference_load_inf_n",
+        "reference_load_contract",
+        "semantic_load_assembly",
+        "full_unit_predictor_vector_artifact",
+        "state_invariant_tangent_contract",
+        "reference_preconditioner_contract",
+        "zero_to_unit_free_map_audit",
+        "zero_state_sparse_predictor_audit",
+        "initial_state_component_audit",
+        "apply_shell_material_tangent",
+        "apply_state_updated_frame_axial_geometry",
+        "state_updated_frame_axial_geometry",
+        "material_state_commit_rollback_connected",
+        "force_unit_input",
+        "force_unit_protocol",
+        "force_conversion_divisor",
+        "uncoarsened_parser_report",
+        "uncoarsened_parser_run",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-load-coupled-arc-length-adapter.v1"
+        },
+        "case_id": {
+          "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+        },
+        "mgt_path": {"type": "string", "minLength": 1},
+        "roundtrip_npz": {"type": ["string", "null"]},
+        "roundtrip_json": {"type": ["string", "null"]},
+        "roundtrip_derivation": {"type": "string", "minLength": 1},
+        "roundtrip_generated_uncoarsened": {"type": "boolean"},
+        "checkpoint_npz": {"type": "string", "minLength": 1},
+        "mgt_sha256": {"$ref": "#/$defs/sha256"},
+        "roundtrip_sha256": {"$ref": "#/$defs/sha256"},
+        "roundtrip_json_sha256": {"$ref": "#/$defs/sha256"},
+        "roundtrip_json_hash_mode": {
+          "const": "canonical_json_without_generated_at.v1"
+        },
+        "checkpoint_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_schema": {"type": "string", "minLength": 1},
+        "checkpoint_load_factor": {"type": "number"},
+        "initial_state_policy": {"const": "historical_checkpoint"},
+        "initial_load_factor": {"const": 0.656},
+        "historical_checkpoint_state_consumed": {"const": true},
+        "node_count": {"type": "integer", "minimum": 1},
+        "element_count": {"type": "integer", "minimum": 1},
+        "frame_element_count": {"type": "integer", "minimum": 1},
+        "frame_connectivity_audit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "frame_connectivity_source",
+            "edge_index_used_for_element_binding",
+            "raw_line_element_count",
+            "line_elements_solved",
+            "skipped_short_or_degenerate_line_count",
+            "skipped_invalid_line_connectivity_count",
+            "invalid_line_connectivity_element_id_head",
+            "line_element_row_accounting_exact",
+            "line_node_count",
+            "beam_end_offset_applied_element_count",
+            "beam_end_offset_max_abs_m",
+            "frame_local_axis_angle_array_present",
+            "frame_local_axis_nonzero_angle_count",
+            "frame_local_axis_max_abs_angle_deg"
+          ],
+          "properties": {
+            "frame_connectivity_source": {
+              "const": "elem_conn_ptr/elem_conn_idx"
+            },
+            "edge_index_used_for_element_binding": {"const": false},
+            "raw_line_element_count": {"type": "integer", "minimum": 1},
+            "line_elements_solved": {"type": "integer", "minimum": 1},
+            "skipped_short_or_degenerate_line_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "skipped_invalid_line_connectivity_count": {
+              "const": 0
+            },
+            "invalid_line_connectivity_element_id_head": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {"type": "integer"}
+            },
+            "line_element_row_accounting_exact": {"const": true},
+            "line_node_count": {"type": "integer", "minimum": 2},
+            "beam_end_offset_applied_element_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "beam_end_offset_max_abs_m": {"type": "number", "minimum": 0},
+            "frame_local_axis_angle_array_present": {"type": "boolean"},
+            "frame_local_axis_nonzero_angle_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "frame_local_axis_max_abs_angle_deg": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "frame_source_property_coverage_audit": {
+          "$ref": "#/$defs/frame_source_property_coverage"
+        },
+        "material_analysis_property_binding": {
+          "$ref": "#/$defs/material_analysis_property_binding"
+        },
+        "dgn_material_property_alias_audit": {
+          "$ref": "#/$defs/dgn_material_property_alias_audit"
+        },
+        "section_property_count": {"type": "integer", "minimum": 1},
+        "material_property_count": {"type": "integer", "minimum": 1},
+        "plate_thickness_property_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "source_material_properties_consumed": {"type": "boolean"},
+        "all_frame_source_material_properties_resolved": {
+          "type": "boolean"
+        },
+        "actual_mgt_semantic_load_case_consumed": {"const": true},
+        "global_dof_count": {"type": "integer", "minimum": 1},
+        "free_equation_count": {"type": "integer", "minimum": 1},
+        "restrained_dof_count": {"type": "integer", "minimum": 1},
+        "reference_load_inf_n": {"type": "number", "exclusiveMinimum": 0},
+        "reference_load_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "benchmark_bridge_proxy",
+            "load_case",
+            "selected_case_row_accounting_exact",
+            "frame_component",
+            "shell_component",
+            "source_mgt_nodal_load_rows_consumed",
+            "source_mgt_selfweight_rows_consumed",
+            "source_mgt_pressure_load_rows_consumed",
+            "source_mgt_load_combination_consumed",
+            "production_load_case_claim",
+            "checkpoint_reference_load_contract_matches"
+          ],
+          "properties": {
+            "benchmark_bridge_proxy": {"const": false},
+            "load_case": {"const": "LIVE"},
+            "selected_case_row_accounting_exact": {"const": true},
+            "frame_component": {"type": "string", "minLength": 1},
+            "shell_component": {"type": "string", "minLength": 1},
+            "source_mgt_nodal_load_rows_consumed": {"const": true},
+            "source_mgt_selfweight_rows_consumed": {"const": false},
+            "source_mgt_pressure_load_rows_consumed": {"const": true},
+            "source_mgt_load_combination_consumed": {"const": false},
+            "production_load_case_claim": {"const": false},
+            "checkpoint_reference_load_contract_matches": {"const": false}
+          }
+        },
+        "semantic_load_assembly": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "status",
+            "contract_pass",
+            "target_kind",
+            "target_name",
+            "case_factors",
+            "unit_contract",
+            "selected_target_row_counts",
+            "selected_target_rows_consumed",
+            "selected_case_row_accounting_exact",
+            "unsupported_selected_row_count",
+            "nodal_load_row_count_consumed",
+            "pressure_load_row_count_consumed",
+            "selfweight_row_count_consumed",
+            "resultant_gate_passed",
+            "reference_load_hash",
+            "source_mgt_nodal_load_rows_consumed",
+            "source_mgt_selfweight_rows_consumed",
+            "source_mgt_pressure_load_rows_consumed",
+            "source_mgt_load_combination_consumed",
+            "actual_mgt_semantic_load_case_consumed",
+            "actual_mgt_semantic_load_target_consumed",
+            "production_load_case_claim",
+            "promotes_g1_closure",
+            "claim_boundary"
+          ],
+          "properties": {
+            "schema_version": {"const": "mgt-semantic-load-assembly.v1"},
+            "status": {"const": "ready"},
+            "contract_pass": {"const": true},
+            "target_kind": {"const": "static_load_case"},
+            "target_name": {"const": "LIVE"},
+            "case_factors": {
+              "type": "object",
+              "required": ["LIVE"],
+              "properties": {"LIVE": {"const": 1.0}}
+            },
+            "unit_contract": {
+              "type": "object",
+              "required": [
+                "source_force_unit",
+                "source_length_unit",
+                "force_to_newton",
+                "length_to_metre",
+                "pressure_to_n_per_m2",
+                "moment_to_n_m"
+              ],
+              "properties": {
+                "source_force_unit": {"const": "KN"},
+                "source_length_unit": {"const": "M"},
+                "force_to_newton": {"const": 1000.0},
+                "length_to_metre": {"const": 1.0},
+                "pressure_to_n_per_m2": {"const": 1000.0},
+                "moment_to_n_m": {"const": 1000.0}
+              }
+            },
+            "selected_target_row_counts": {
+              "type": "object",
+              "required": ["nodal_loads", "selfweight", "pressure_loads"],
+              "properties": {
+                "nodal_loads": {"const": 6},
+                "selfweight": {"const": 0},
+                "pressure_loads": {"const": 3644}
+              }
+            },
+            "selected_target_rows_consumed": {
+              "type": "object",
+              "required": ["nodal_loads", "selfweight", "pressure_loads"],
+              "properties": {
+                "nodal_loads": {"const": 6},
+                "selfweight": {"const": 0},
+                "pressure_loads": {"const": 3644}
+              }
+            },
+            "selected_case_row_accounting_exact": {"const": true},
+            "unsupported_selected_row_count": {"const": 0},
+            "nodal_load_row_count_consumed": {"const": 6},
+            "pressure_load_row_count_consumed": {"const": 3644},
+            "selfweight_row_count_consumed": {"const": 0},
+            "resultant_gate_passed": {"const": true},
+            "reference_load_hash": {"$ref": "#/$defs/sha256"},
+            "source_mgt_nodal_load_rows_consumed": {"const": true},
+            "source_mgt_selfweight_rows_consumed": {"const": false},
+            "source_mgt_pressure_load_rows_consumed": {"const": true},
+            "source_mgt_load_combination_consumed": {"const": false},
+            "actual_mgt_semantic_load_case_consumed": {"const": true},
+            "actual_mgt_semantic_load_target_consumed": {"const": true},
+            "production_load_case_claim": {"const": false},
+            "promotes_g1_closure": {"const": false},
+            "claim_boundary": {"type": "string", "minLength": 1}
+          }
+        },
+        "full_unit_predictor_vector_artifact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "status",
+            "artifact_path",
+            "dtype",
+            "layout",
+            "byte_order",
+            "equation_order",
+            "equation_count",
+            "byte_length",
+            "data_sha256",
+            "free_dof_hash",
+            "reference_load_hash",
+            "semantic_load_target",
+            "load_factor",
+            "residual_inf_n",
+            "residual_tolerance_n",
+            "residual_gate_passed",
+            "maximum_translation_m",
+            "persisted_nonlinear_continuation_checkpoint",
+            "large_vector_binary_trace_claim",
+            "g1_full_load_checkpoint_claim",
+            "promotes_g1_closure",
+            "claim_boundary"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "g1-mgt-live-full-unit-predictor-vector.v1"
+            },
+            "status": {"const": "ready"},
+            "artifact_path": {"type": "string", "minLength": 1},
+            "dtype": {"const": "<f8"},
+            "layout": {"const": "C"},
+            "byte_order": {"const": "little"},
+            "equation_order": {"const": "adapter_free_global_dof_order"},
+            "equation_count": {"const": 70560},
+            "byte_length": {"const": 564480},
+            "data_sha256": {"$ref": "#/$defs/sha256"},
+            "free_dof_hash": {"$ref": "#/$defs/sha256"},
+            "reference_load_hash": {"$ref": "#/$defs/sha256"},
+            "semantic_load_target": {"const": "LIVE"},
+            "load_factor": {"const": 1.0},
+            "residual_inf_n": {"type": "number", "minimum": 0},
+            "residual_tolerance_n": {"const": 0.0005},
+            "residual_gate_passed": {"const": true},
+            "maximum_translation_m": {"type": "number", "minimum": 0},
+            "persisted_nonlinear_continuation_checkpoint": {"const": false},
+            "large_vector_binary_trace_claim": {"const": false},
+            "g1_full_load_checkpoint_claim": {"const": false},
+            "promotes_g1_closure": {"const": false},
+            "claim_boundary": {"type": "string", "minLength": 1}
+          }
+        },
+        "state_invariant_tangent_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "status",
+            "available",
+            "operator_classification",
+            "equation_count",
+            "operator_nnz",
+            "csr_row_pointer_hash",
+            "csr_column_index_hash",
+            "operator_numeric_values_hash",
+            "force_unit",
+            "translation_tangent_unit",
+            "rotation_tangent_unit",
+            "current_state_reassembly_required",
+            "exact_for_adapter_residual_model",
+            "nonlinear_current_tangent_claim",
+            "quadratic_convergence_claim",
+            "material_state_commit_rollback_claim",
+            "promotes_g1_closure",
+            "claim_boundary"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "linear_reference_geometry_residual_exact_csr.v1"
+            },
+            "status": {"const": "ready"},
+            "available": {"const": true},
+            "operator_classification": {
+              "const": "state_invariant_linear_reference_geometry"
+            },
+            "equation_count": {"const": 70560},
+            "operator_nnz": {"type": "integer", "minimum": 1},
+            "csr_row_pointer_hash": {"$ref": "#/$defs/sha256"},
+            "csr_column_index_hash": {"$ref": "#/$defs/sha256"},
+            "operator_numeric_values_hash": {"$ref": "#/$defs/sha256"},
+            "force_unit": {"const": "N"},
+            "translation_tangent_unit": {"const": "N_per_m"},
+            "rotation_tangent_unit": {"const": "N_m_per_rad"},
+            "current_state_reassembly_required": {"const": false},
+            "exact_for_adapter_residual_model": {"const": true},
+            "nonlinear_current_tangent_claim": {"const": false},
+            "quadratic_convergence_claim": {"const": false},
+            "material_state_commit_rollback_claim": {"const": false},
+            "promotes_g1_closure": {"const": false},
+            "claim_boundary": {"type": "string", "minLength": 1}
+          }
+        },
+        "reference_preconditioner_contract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version",
+            "status",
+            "available",
+            "operator_classification",
+            "equation_count",
+            "operator_nnz",
+            "csr_row_pointer_hash",
+            "csr_column_index_hash",
+            "operator_numeric_values_hash",
+            "intended_use",
+            "exact_for_adapter_residual_model",
+            "approximate_for_state_dependent_adapter",
+            "factorization_executed_by_adapter",
+            "production_preconditioner_claim",
+            "promotes_g1_closure",
+            "claim_boundary"
+          ],
+          "properties": {
+            "schema_version": {
+              "const": "zero_state_linear_reference_geometry_csr_preconditioner.v1"
+            },
+            "status": {"const": "ready"},
+            "available": {"const": true},
+            "operator_classification": {
+              "const": "zero_state_linear_reference_geometry"
+            },
+            "equation_count": {"const": 70560},
+            "operator_nnz": {"type": "integer", "minimum": 1},
+            "csr_row_pointer_hash": {"$ref": "#/$defs/sha256"},
+            "csr_column_index_hash": {"$ref": "#/$defs/sha256"},
+            "operator_numeric_values_hash": {"$ref": "#/$defs/sha256"},
+            "intended_use": {"const": "fixed_right_preconditioner"},
+            "exact_for_adapter_residual_model": {"const": true},
+            "approximate_for_state_dependent_adapter": {"const": false},
+            "factorization_executed_by_adapter": {"const": false},
+            "production_preconditioner_claim": {"const": false},
+            "promotes_g1_closure": {"const": false},
+            "claim_boundary": {"type": "string", "minLength": 1}
+          }
+        },
+        "zero_to_unit_free_map_audit": {
+          "type": "object",
+          "required": [
+            "zero_state_active_dof_count",
+            "zero_state_free_equation_count",
+            "unit_load_active_dof_count",
+            "unit_load_free_equation_count",
+            "fixed_free_map_exact",
+            "zero_state_free_dof_hash",
+            "unit_load_free_dof_hash",
+            "zero_only_free_equation_count",
+            "unit_only_free_equation_count",
+            "zero_only_free_global_dof_head",
+            "unit_only_free_global_dof_head",
+            "zero_tangent_on_unit_map_zero_row_count",
+            "zero_tangent_on_unit_map_zero_diagonal_count",
+            "zero_tangent_on_unit_map_nonpositive_diagonal_count",
+            "zero_state_external_force_inf_n",
+            "zero_state_tangent_nnz",
+            "unit_load_tangent_nnz",
+            "zero_tangent_structural_rank",
+            "zero_tangent_structural_rank_deficiency",
+            "free_graph_component_count",
+            "free_graph_unanchored_component_count",
+            "free_graph_unanchored_loaded_component_count",
+            "free_graph_loaded_component_count",
+            "free_graph_component_size_counts",
+            "free_graph_largest_components_head",
+            "free_graph_unanchored_loaded_components",
+            "zero_state_operator"
+          ],
+          "properties": {
+            "zero_state_active_dof_count": {"type": "integer", "minimum": 0},
+            "zero_state_free_equation_count": {"type": "integer", "minimum": 0},
+            "unit_load_active_dof_count": {"type": "integer", "minimum": 0},
+            "unit_load_free_equation_count": {"type": "integer", "minimum": 0},
+            "fixed_free_map_exact": {"type": "boolean"},
+            "zero_state_free_dof_hash": {"$ref": "#/$defs/sha256"},
+            "unit_load_free_dof_hash": {"$ref": "#/$defs/sha256"},
+            "zero_only_free_equation_count": {"type": "integer", "minimum": 0},
+            "unit_only_free_equation_count": {"type": "integer", "minimum": 0},
+            "zero_only_free_global_dof_head": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {"type": "integer", "minimum": 0}
+            },
+            "unit_only_free_global_dof_head": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {"type": "integer", "minimum": 0}
+            },
+            "zero_tangent_on_unit_map_zero_row_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "zero_tangent_on_unit_map_zero_diagonal_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "zero_tangent_on_unit_map_nonpositive_diagonal_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "zero_state_external_force_inf_n": {"type": "number", "minimum": 0},
+            "zero_state_tangent_nnz": {"type": "integer", "minimum": 0},
+            "unit_load_tangent_nnz": {"type": "integer", "minimum": 0},
+            "zero_tangent_structural_rank": {"type": "integer", "minimum": 0},
+            "zero_tangent_structural_rank_deficiency": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "free_graph_component_count": {"type": "integer", "minimum": 0},
+            "free_graph_unanchored_component_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "free_graph_unanchored_loaded_component_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "free_graph_loaded_component_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "free_graph_component_size_counts": {
+              "type": "object",
+              "additionalProperties": {"type": "integer", "minimum": 0}
+            },
+            "free_graph_largest_components_head": {
+              "type": "array",
+              "maxItems": 16,
+              "items": {"$ref": "#/$defs/free_graph_component"}
+            },
+            "free_graph_unanchored_loaded_components": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/free_graph_component"}
+            },
+            "zero_state_operator": {"type": "object"}
+          }
+        },
+        "zero_state_sparse_predictor_audit": {
+          "type": "object",
+          "required": [
+            "solver_profile",
+            "status",
+            "contract_pass",
+            "sparse_direct_solve_attempted",
+            "solve_finite",
+            "equation_count",
+            "operator_nnz",
+            "right_hand_side_inf_n",
+            "explicit_linear_residual_inf_n",
+            "explicit_linear_relative_residual_inf",
+            "explicit_linear_residual_tolerance_n",
+            "nonlinear_remainder_relative_noise_tolerance",
+            "linear_residual_gate_passed",
+            "predictor_direction_hash",
+            "full_unit_predictor_translation_inf_m",
+            "full_unit_predictor_rotation_inf_rad",
+            "fallback_count",
+            "regularization_count",
+            "loaded_component_count",
+            "unloaded_component_zero_solution_count",
+            "solved_component_count",
+            "failure",
+            "zero_state_residual_inf_n",
+            "zero_state_equilibrium_tolerance_n",
+            "zero_state_equilibrium_gate_passed",
+            "zero_state_load_direction_error_inf_n",
+            "zero_state_load_direction_gate_passed",
+            "predictor_load_factors",
+            "predictor_rows",
+            "minimum_observed_remainder_order",
+            "remainder_classification",
+            "linear_model_consistency_gate_passed",
+            "measurable_quadratic_remainder_gate_passed",
+            "predictor_remainder_gate_passed",
+            "quadratic_remainder_gate_passed",
+            "full_arc_length_continuation_executed",
+            "production_solver_claim",
+            "claim_boundary"
+          ],
+          "properties": {
+            "solver_profile": {"type": "string", "minLength": 1},
+            "status": {"enum": ["ready", "blocked"]},
+            "contract_pass": {"type": "boolean"},
+            "sparse_direct_solve_attempted": {"type": "boolean"},
+            "solve_finite": {"type": "boolean"},
+            "equation_count": {"type": "integer", "minimum": 1},
+            "operator_nnz": {"type": "integer", "minimum": 1},
+            "right_hand_side_inf_n": {"type": "number", "minimum": 0},
+            "explicit_linear_residual_inf_n": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "explicit_linear_relative_residual_inf": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "explicit_linear_residual_tolerance_n": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "nonlinear_remainder_relative_noise_tolerance": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "linear_residual_gate_passed": {"type": "boolean"},
+            "predictor_direction_hash": {
+              "anyOf": [
+                {"$ref": "#/$defs/sha256"},
+                {"type": "null"}
+              ]
+            },
+            "full_unit_predictor_translation_inf_m": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "full_unit_predictor_rotation_inf_rad": {
+              "type": ["number", "null"],
+              "minimum": 0
+            },
+            "fallback_count": {"const": 0},
+            "regularization_count": {"const": 0},
+            "loaded_component_count": {"type": "integer", "minimum": 1},
+            "unloaded_component_zero_solution_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "solved_component_count": {"type": "integer", "minimum": 0},
+            "failure": {"type": ["string", "null"]},
+            "zero_state_residual_inf_n": {"type": "number", "minimum": 0},
+            "zero_state_equilibrium_tolerance_n": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "zero_state_equilibrium_gate_passed": {"type": "boolean"},
+            "zero_state_load_direction_error_inf_n": {
+              "type": "number",
+              "minimum": 0
+            },
+            "zero_state_load_direction_gate_passed": {"type": "boolean"},
+            "predictor_load_factors": {
+              "type": "array",
+              "items": {"type": "number", "exclusiveMinimum": 0}
+            },
+            "predictor_rows": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "load_factor",
+                  "residual_inf_n",
+                  "residual_relative_to_scaled_reference_load",
+                  "scaled_linear_solve_residual_floor_inf_n",
+                  "nonlinear_remainder_inf_n",
+                  "nonlinear_remainder_noise_tolerance_n",
+                  "nonlinear_remainder_above_noise",
+                  "residual_over_load_factor_squared_n",
+                  "maximum_predictor_translation_m",
+                  "observed_remainder_order_from_previous"
+                ],
+                "properties": {
+                  "load_factor": {"type": "number", "exclusiveMinimum": 0},
+                  "residual_inf_n": {"type": "number", "minimum": 0},
+                  "residual_relative_to_scaled_reference_load": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "scaled_linear_solve_residual_floor_inf_n": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "nonlinear_remainder_inf_n": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "nonlinear_remainder_noise_tolerance_n": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "nonlinear_remainder_above_noise": {
+                    "type": "boolean"
+                  },
+                  "residual_over_load_factor_squared_n": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "maximum_predictor_translation_m": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "observed_remainder_order_from_previous": {
+                    "type": ["number", "null"]
+                  }
+                }
+              }
+            },
+            "minimum_observed_remainder_order": {
+              "type": ["number", "null"]
+            },
+            "remainder_classification": {
+              "enum": [
+                "linear_within_numerical_floor",
+                "measurable_quadratic",
+                "remainder_contract_failed"
+              ]
+            },
+            "linear_model_consistency_gate_passed": {"type": "boolean"},
+            "measurable_quadratic_remainder_gate_passed": {
+              "type": "boolean"
+            },
+            "predictor_remainder_gate_passed": {"type": "boolean"},
+            "quadratic_remainder_gate_passed": {
+              "type": "boolean",
+              "description": "Legacy narrow flag; true only when a measurable quadratic remainder was observed. Use predictor_remainder_gate_passed for the broader predictor contract."
+            },
+            "full_arc_length_continuation_executed": {"const": false},
+            "production_solver_claim": {"const": false},
+            "claim_boundary": {"type": "string", "minLength": 1}
+          }
+        },
+        "initial_state_component_audit": {
+          "type": "object",
+          "required": [
+            "physical_internal_force_model",
+            "use_force_based_frame",
+            "shell_internal_force_model",
+            "residual_inf_n",
+            "internal_force_free_inf_n",
+            "external_force_free_inf_n",
+            "component_internal_force_free_inf_n",
+            "dominant_component_by_free_inf",
+            "residual_argmax_free_equation_index",
+            "residual_argmax_global_dof_index",
+            "residual_argmax_node_id",
+            "residual_argmax_dof_label",
+            "residual_at_argmax_n",
+            "internal_force_at_residual_argmax_n",
+            "external_force_at_residual_argmax_n",
+            "component_force_at_residual_argmax_n",
+            "dominant_component_at_residual_argmax",
+            "component_sum_matches_internal_exact",
+            "hotspot_node_reference_xyz_m",
+            "hotspot_checkpoint_dofs",
+            "hotspot_connected_frame_element_count",
+            "hotspot_connected_frame_elements",
+            "hotspot_dominant_frame_element_id",
+            "hotspot_maximum_connected_frame_force_inf_n",
+            "hotspot_connected_shell_element_count",
+            "hotspot_connected_shell_elements",
+            "hotspot_maximum_perimeter_translation_jump_m",
+            "hotspot_maximum_perimeter_edge_engineering_strain_abs"
+          ],
+          "properties": {
+            "physical_internal_force_model": {"type": "string", "minLength": 1},
+            "use_force_based_frame": {"type": "boolean"},
+            "shell_internal_force_model": {"type": "string", "minLength": 1},
+            "residual_inf_n": {"type": "number", "minimum": 0},
+            "internal_force_free_inf_n": {"type": "number", "minimum": 0},
+            "external_force_free_inf_n": {"type": "number", "minimum": 0},
+            "component_internal_force_free_inf_n": {
+              "type": "object",
+              "minProperties": 3,
+              "additionalProperties": {"type": "number", "minimum": 0}
+            },
+            "dominant_component_by_free_inf": {"type": "string", "minLength": 1},
+            "residual_argmax_free_equation_index": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "residual_argmax_global_dof_index": {"type": "integer", "minimum": 0},
+            "residual_argmax_node_id": {"type": "integer", "minimum": 1},
+            "residual_argmax_dof_label": {
+              "enum": ["Dx", "Dy", "Dz", "Rx", "Ry", "Rz"]
+            },
+            "residual_at_argmax_n": {"type": "number"},
+            "internal_force_at_residual_argmax_n": {"type": "number"},
+            "external_force_at_residual_argmax_n": {"type": "number"},
+            "component_force_at_residual_argmax_n": {
+              "type": "object",
+              "minProperties": 3,
+              "additionalProperties": {"type": "number"}
+            },
+            "dominant_component_at_residual_argmax": {
+              "type": "string",
+              "minLength": 1
+            },
+            "component_sum_matches_internal_exact": {"type": "boolean"},
+            "hotspot_node_reference_xyz_m": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {"type": "number"}
+            },
+            "hotspot_checkpoint_dofs": {
+              "type": "array",
+              "minItems": 6,
+              "maxItems": 6,
+              "items": {"type": "number"}
+            },
+            "hotspot_connected_frame_element_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "hotspot_connected_frame_elements": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "element_id",
+                  "node_ids",
+                  "section_id",
+                  "material_id",
+                  "section_area_m2",
+                  "material_name",
+                  "material_elastic_modulus_n_per_m2",
+                  "reference_length_m",
+                  "nodal_translation_jump_inf_m",
+                  "axial_translation_jump_m",
+                  "axial_translation_strain",
+                  "element_force_inf_n",
+                  "element_force_at_hotspot_dof_n",
+                  "checkpoint_node_i_dofs",
+                  "checkpoint_node_j_dofs"
+                ],
+                "properties": {
+                  "element_id": {"type": "integer", "minimum": 1},
+                  "node_ids": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {"type": "integer", "minimum": 1}
+                  },
+                  "section_id": {"type": "integer", "minimum": 0},
+                  "material_id": {"type": "integer", "minimum": 0},
+                  "section_area_m2": {"type": "number", "minimum": 0},
+                  "material_name": {"type": "string", "minLength": 1},
+                  "material_elastic_modulus_n_per_m2": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "reference_length_m": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "nodal_translation_jump_inf_m": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "axial_translation_jump_m": {"type": "number"},
+                  "axial_translation_strain": {"type": "number"},
+                  "element_force_inf_n": {"type": "number", "minimum": 0},
+                  "element_force_at_hotspot_dof_n": {"type": "number"},
+                  "checkpoint_node_i_dofs": {
+                    "type": "array",
+                    "minItems": 6,
+                    "maxItems": 6,
+                    "items": {"type": "number"}
+                  },
+                  "checkpoint_node_j_dofs": {
+                    "type": "array",
+                    "minItems": 6,
+                    "maxItems": 6,
+                    "items": {"type": "number"}
+                  }
+                }
+              }
+            },
+            "hotspot_dominant_frame_element_id": {
+              "type": ["integer", "null"],
+              "minimum": 1
+            },
+            "hotspot_maximum_connected_frame_force_inf_n": {
+              "type": "number",
+              "minimum": 0
+            },
+            "hotspot_connected_shell_element_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "hotspot_connected_shell_elements": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "element_id",
+                  "node_ids",
+                  "maximum_perimeter_translation_jump_m",
+                  "maximum_perimeter_edge_engineering_strain_abs"
+                ],
+                "properties": {
+                  "element_id": {"type": "integer", "minimum": 1},
+                  "node_ids": {
+                    "type": "array",
+                    "minItems": 3,
+                    "maxItems": 4,
+                    "items": {"type": "integer", "minimum": 1}
+                  },
+                  "maximum_perimeter_translation_jump_m": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "maximum_perimeter_edge_engineering_strain_abs": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            },
+            "hotspot_maximum_perimeter_translation_jump_m": {
+              "type": "number",
+              "minimum": 0
+            },
+            "hotspot_maximum_perimeter_edge_engineering_strain_abs": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "apply_shell_material_tangent": {"type": "boolean"},
+        "apply_state_updated_frame_axial_geometry": {"const": false},
+        "state_updated_frame_axial_geometry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state_updated_frame_axial_geometry_applied",
+            "connected_to_physical_residual",
+            "connected_to_centered_tangent_action",
+            "preflight_status",
+            "prepack_executed",
+            "source_property_coverage_audit",
+            "fallback_allowed_for_state_updated_geometry",
+            "full_corotational_frame_claim"
+          ],
+          "properties": {
+            "state_updated_frame_axial_geometry_applied": {"const": false},
+            "connected_to_physical_residual": {"const": false},
+            "connected_to_centered_tangent_action": {"const": false},
+            "preflight_status": {"const": "blocked"},
+            "prepack_executed": {"const": false},
+            "source_property_coverage_audit": {
+              "$ref": "#/$defs/frame_source_property_coverage"
+            },
+            "fallback_allowed_for_state_updated_geometry": {"const": false},
+            "full_corotational_frame_claim": {"const": false}
+          }
+        },
+        "material_state_commit_rollback_connected": {"type": "boolean"},
+        "force_unit_input": {"const": "N"},
+        "force_unit_protocol": {"const": "kN"},
+        "force_conversion_divisor": {"const": 1000.0},
+        "uncoarsened_parser_report": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "contract_pass",
+            "reason_code",
+            "metrics",
+            "checks",
+            "coarsening"
+          ],
+          "properties": {
+            "contract_pass": {"type": "boolean"},
+            "reason_code": {"type": ["string", "null"]},
+            "metrics": {"type": "object"},
+            "checks": {"type": "object"},
+            "coarsening": {"type": "object"}
+          }
+        },
+        "uncoarsened_parser_run": {
+          "type": "object",
+          "required": ["return_code", "profile"],
+          "properties": {
+            "return_code": {"type": ["integer", "null"]},
+            "profile": {"type": "string", "minLength": 1}
+          }
+        },
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "initial_state_audit": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "contract_pass",
+        "promotes_g1_closure",
+        "equation_count",
+        "load_factor",
+        "residual_inf_norm_kn",
+        "residual_finite",
+        "residual_equilibrium_tolerance_kn",
+        "residual_equilibrium_gate_required_by_adapter_audit",
+        "residual_equilibrium_gate_passed",
+        "load_difference_step",
+        "maximum_negative_load_derivative_error_kn",
+        "negative_load_derivative_absolute_tolerance_kn",
+        "negative_load_derivative_relative_error",
+        "negative_load_derivative_relative_tolerance",
+        "negative_load_derivative_gate_passed",
+        "tangent_difference_step_m",
+        "tangent_reference_step_m",
+        "maximum_tangent_step_comparison_error_kn",
+        "tangent_step_comparison_relative_error",
+        "tangent_step_comparison_gate_passed",
+        "claims",
+        "blockers_remaining",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-load-coupled-adapter-audit.v1"
+        },
+        "status": {"enum": ["partial", "blocked"]},
+        "contract_pass": {"type": "boolean"},
+        "promotes_g1_closure": {"const": false},
+        "equation_count": {"type": "integer", "minimum": 1},
+        "load_factor": {"type": "number"},
+        "residual_inf_norm_kn": {"type": "number", "minimum": 0},
+        "residual_finite": {"type": "boolean"},
+        "residual_equilibrium_tolerance_kn": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "residual_equilibrium_gate_required_by_adapter_audit": {
+          "const": false
+        },
+        "residual_equilibrium_gate_passed": {"type": "boolean"},
+        "load_difference_step": {"type": "number", "exclusiveMinimum": 0},
+        "maximum_negative_load_derivative_error_kn": {
+          "type": "number",
+          "minimum": 0
+        },
+        "negative_load_derivative_absolute_tolerance_kn": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "negative_load_derivative_relative_error": {
+          "type": "number",
+          "minimum": 0
+        },
+        "negative_load_derivative_relative_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "negative_load_derivative_gate_passed": {"type": "boolean"},
+        "tangent_difference_step_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "tangent_reference_step_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maximum_tangent_step_comparison_error_kn": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tangent_step_comparison_relative_error": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tangent_step_comparison_gate_passed": {"type": "boolean"},
+        "claims": {"type": "object"},
+        "blockers_remaining": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "stored_receipt_comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stored_receipt_path",
+        "stored_receipt_sha256",
+        "stored_receipt_generated_at",
+        "stored_receipt_source_commit_sha",
+        "stored_receipt_source_commit_sha_present",
+        "stored_receipt_input_checksums_present",
+        "stored_receipt_replay_provenance_complete",
+        "stored_receipt_load_factor",
+        "current_adapter_load_factor",
+        "comparison_load_factor",
+        "load_factor_matches",
+        "stored_base_direct_residual_inf_n",
+        "current_adapter_initial_residual_inf_n",
+        "absolute_difference_n",
+        "relative_difference_to_stored",
+        "current_to_stored_ratio",
+        "equivalence_absolute_tolerance_n",
+        "stored_receipt_equivalent_to_current_adapter"
+      ],
+      "properties": {
+        "stored_receipt_path": {"type": "string", "minLength": 1},
+        "stored_receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "stored_receipt_generated_at": {"type": "string", "minLength": 1},
+        "stored_receipt_source_commit_sha": {
+          "type": ["string", "null"]
+        },
+        "stored_receipt_source_commit_sha_present": {"type": "boolean"},
+        "stored_receipt_input_checksums_present": {"type": "boolean"},
+        "stored_receipt_replay_provenance_complete": {"type": "boolean"},
+        "stored_receipt_load_factor": {"type": "number"},
+        "current_adapter_load_factor": {"type": "number"},
+        "comparison_load_factor": {"type": "number"},
+        "load_factor_matches": {"type": "boolean"},
+        "stored_base_direct_residual_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "current_adapter_initial_residual_inf_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "absolute_difference_n": {"type": "number", "minimum": 0},
+        "relative_difference_to_stored": {"type": "number", "minimum": 0},
+        "current_to_stored_ratio": {"type": "number", "minimum": 0},
+        "equivalence_absolute_tolerance_n": {
+          "type": "number",
+          "minimum": 0
+        },
+        "stored_receipt_equivalent_to_current_adapter": {"type": "boolean"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_mgt_frame_shell_spring_residual_adapter_evaluated",
+        "source_material_properties_consumed",
+        "all_frame_source_material_properties_resolved",
+        "authoritative_element_connectivity_consumed",
+        "actual_mgt_semantic_load_case_consumed",
+        "full_unit_semantic_live_predictor_binary_artifact",
+        "state_invariant_linear_reference_tangent_bound",
+        "load_factor_coupled_residual_and_derivative_audited",
+        "two_step_centered_tangent_action_audited",
+        "initial_state_component_breakdown_recorded",
+        "zero_to_unit_fixed_free_map_compatible",
+        "zero_state_sparse_direct_predictor_contract",
+        "initial_checkpoint_physical_residual_gate",
+        "stored_direct_residual_receipt_equivalence",
+        "stored_direct_residual_receipt_replay_provenance_complete",
+        "full_arc_length_continuation",
+        "large_vector_binary_trace",
+        "engine_v2_production_matrix_free_krylov",
+        "material_state_commit_rollback",
+        "production_rocm_hip_nonlinear_parity",
+        "load_1p0_checkpoint",
+        "g1_full_building_closure"
+      ],
+      "properties": {
+        "actual_mgt_frame_shell_spring_residual_adapter_evaluated": {
+          "type": "boolean"
+        },
+        "source_material_properties_consumed": {"type": "boolean"},
+        "all_frame_source_material_properties_resolved": {
+          "type": "boolean"
+        },
+        "authoritative_element_connectivity_consumed": {"const": true},
+        "actual_mgt_semantic_load_case_consumed": {"const": true},
+        "full_unit_semantic_live_predictor_binary_artifact": {"const": true},
+        "state_invariant_linear_reference_tangent_bound": {"const": true},
+        "load_factor_coupled_residual_and_derivative_audited": {
+          "type": "boolean"
+        },
+        "two_step_centered_tangent_action_audited": {"type": "boolean"},
+        "initial_state_component_breakdown_recorded": {"type": "boolean"},
+        "zero_to_unit_fixed_free_map_compatible": {"type": "boolean"},
+        "zero_state_sparse_direct_predictor_contract": {"type": "boolean"},
+        "initial_checkpoint_physical_residual_gate": {"type": "boolean"},
+        "stored_direct_residual_receipt_equivalence": {"type": "boolean"},
+        "stored_direct_residual_receipt_replay_provenance_complete": {
+          "type": "boolean"
+        },
+        "full_arc_length_continuation": {"const": false},
+        "large_vector_binary_trace": {"const": false},
+        "engine_v2_production_matrix_free_krylov": {"const": false},
+        "material_state_commit_rollback": {"const": false},
+        "production_rocm_hip_nonlinear_parity": {"const": false},
+        "load_1p0_checkpoint": {"const": false},
+        "g1_full_building_closure": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt",
+        "summary",
+        "schema",
+        "full_unit_predictor_vector"
+      ],
+      "properties": {
+        "receipt": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1},
+        "schema": {"type": "string", "minLength": 1},
+        "full_unit_predictor_vector": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "material_analysis_property_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resolution_policy",
+        "dgn_alias_resolution_enabled",
+        "source_material_count",
+        "dgn_alias_material_count_available",
+        "dgn_alias_material_count_applied",
+        "resolved_material_count",
+        "engineer_review_required"
+      ],
+      "properties": {
+        "resolution_policy": {"const": "MATERIAL_rows_only.v1"},
+        "dgn_alias_resolution_enabled": {"const": false},
+        "source_material_count": {"type": "integer", "minimum": 1},
+        "dgn_alias_material_count_available": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dgn_alias_material_count_applied": {"const": 0},
+        "resolved_material_count": {"type": "integer", "minimum": 1},
+        "engineer_review_required": {"const": false}
+      }
+    },
+    "dgn_material_property_alias_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "resolution_policy",
+        "source_material_count",
+        "dgn_material_row_count",
+        "dgn_unique_material_id_count",
+        "existing_source_id_row_count",
+        "exact_unique_identity_match_row_count",
+        "alias_material_count",
+        "alias_rows",
+        "unresolved_identity_rows",
+        "ambiguous_identity_rows",
+        "duplicate_dgn_material_ids",
+        "dgn_numeric_elastic_override_consumed_count",
+        "fuzzy_name_match_count",
+        "contract_pass",
+        "engineer_review_required",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mgt-dgn-material-property-alias-audit.v1"
+        },
+        "resolution_policy": {
+          "const": "exact_normalized_type_and_name_unique_source_material.v1"
+        },
+        "source_material_count": {"type": "integer", "minimum": 1},
+        "dgn_material_row_count": {"type": "integer", "minimum": 1},
+        "dgn_unique_material_id_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "existing_source_id_row_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "exact_unique_identity_match_row_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "alias_material_count": {"type": "integer", "minimum": 0},
+        "alias_rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dgn_material_id",
+              "material_type",
+              "material_name",
+              "source_material_id",
+              "source_material_type",
+              "source_material_name"
+            ],
+            "properties": {
+              "dgn_material_id": {"type": "integer"},
+              "material_type": {"type": "string", "minLength": 1},
+              "material_name": {"type": "string", "minLength": 1},
+              "source_material_id": {"type": "integer"},
+              "source_material_type": {"type": "string", "minLength": 1},
+              "source_material_name": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "unresolved_identity_rows": {"type": "array"},
+        "ambiguous_identity_rows": {"type": "array"},
+        "duplicate_dgn_material_ids": {
+          "type": "array",
+          "items": {"type": "integer"}
+        },
+        "dgn_numeric_elastic_override_consumed_count": {"const": 0},
+        "fuzzy_name_match_count": {"const": 0},
+        "contract_pass": {"type": "boolean"},
+        "engineer_review_required": {"type": "boolean"},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "frame_source_property_coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "frame_element_count",
+        "source_section_property_count",
+        "source_material_property_count",
+        "section_property_resolved_element_count",
+        "material_property_resolved_element_count",
+        "resolved_source_property_element_count",
+        "unresolved_source_property_element_count",
+        "source_property_coverage_ratio",
+        "exact_source_property_coverage",
+        "missing_section_element_count",
+        "missing_material_element_count",
+        "missing_section_id_counts",
+        "missing_material_id_counts",
+        "unresolved_element_head",
+        "unresolved_element_head_limit",
+        "fallback_allowed_for_state_updated_geometry",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mgt-state-updated-frame-axial-property-coverage.v1"
+        },
+        "frame_element_count": {"type": "integer", "minimum": 1},
+        "source_section_property_count": {"type": "integer", "minimum": 0},
+        "source_material_property_count": {"type": "integer", "minimum": 0},
+        "section_property_resolved_element_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "material_property_resolved_element_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resolved_source_property_element_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unresolved_source_property_element_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_property_coverage_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "exact_source_property_coverage": {"type": "boolean"},
+        "missing_section_element_count": {"type": "integer", "minimum": 0},
+        "missing_material_element_count": {"type": "integer", "minimum": 0},
+        "missing_section_id_counts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["section_id", "element_count"],
+            "properties": {
+              "section_id": {"type": "integer"},
+              "element_count": {"type": "integer", "minimum": 1}
+            }
+          }
+        },
+        "missing_material_id_counts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["material_id", "element_count"],
+            "properties": {
+              "material_id": {"type": "integer"},
+              "element_count": {"type": "integer", "minimum": 1}
+            }
+          }
+        },
+        "unresolved_element_head": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "element_id",
+              "section_id",
+              "material_id",
+              "missing_section_property",
+              "missing_material_property"
+            ],
+            "properties": {
+              "element_id": {"type": "integer", "minimum": 1},
+              "section_id": {"type": "integer"},
+              "material_id": {"type": "integer"},
+              "missing_section_property": {"type": "boolean"},
+              "missing_material_property": {"type": "boolean"}
+            }
+          }
+        },
+        "unresolved_element_head_limit": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 32
+        },
+        "fallback_allowed_for_state_updated_geometry": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "free_graph_component": {
+      "type": "object",
+      "required": [
+        "component_index",
+        "free_equation_count",
+        "restrained_coupling_nnz",
+        "anchored_to_restrained_dof",
+        "reference_load_inf_n",
+        "global_dof_head",
+        "distinct_node_count",
+        "node_id_head",
+        "dof_labels"
+      ],
+      "properties": {
+        "component_index": {"type": "integer", "minimum": 0},
+        "free_equation_count": {"type": "integer", "minimum": 1},
+        "restrained_coupling_nnz": {"type": "integer", "minimum": 0},
+        "anchored_to_restrained_dof": {"type": "boolean"},
+        "reference_load_inf_n": {"type": "number", "minimum": 0},
+        "global_dof_head": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {"type": "integer", "minimum": 0}
+        },
+        "distinct_node_count": {"type": "integer", "minimum": 1},
+        "node_id_head": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "dof_labels": {
+          "type": "array",
+          "items": {"enum": ["Dx", "Dy", "Dz", "Rx", "Ry", "Rz"]}
+        }
+      }
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

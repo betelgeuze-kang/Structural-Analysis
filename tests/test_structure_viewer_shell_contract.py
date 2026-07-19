@@ -18,6 +18,18 @@ def _read_viewer_html(page_name: str) -> str:
 
 def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None:
     text = (ROOT / "src" / "structure-viewer" / "index.html").read_text(encoding="utf-8")
+    state_facade_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-state.js"
+    ).read_text(encoding="utf-8")
+    shell_facade_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-shell.js"
+    ).read_text(encoding="utf-8")
+    report_facade_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-report.js"
+    ).read_text(encoding="utf-8")
+    storage_facade_text = (
+        ROOT / "src" / "structure-viewer" / "viewer-storage.js"
+    ).read_text(encoding="utf-8")
     stats_text = (ROOT / "src" / "structure-viewer" / "viewer-stats-summary.js").read_text(encoding="utf-8")
     analysis_cockpit_text = (
         ROOT / "src" / "structure-viewer" / "viewer-analysis-cockpit-model.js"
@@ -130,21 +142,33 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "data-real-drawing-browser-sort" in renderer_text
     assert "data-real-drawing-next-review" in renderer_text
     assert "REAL_DRAWING_BROWSER_STATE_KEY" in text
-    assert "viewer-real-drawing-browser-state.js" in text
-    assert "viewer-real-drawing-quality.js" in text
-    assert "viewer-real-drawing-panel-events.js" in text
-    assert "viewer-real-drawing-panel-model.js" in text
-    assert "viewer-real-drawing-panel-renderer.js" in text
-    assert "viewer-real-drawing-selection.js" in text
-    assert "viewer-real-drawing-tree-model.js" in text
-    assert "viewer-search-results-model.js" in text
-    assert "viewer-selection-summary-model.js" in text
-    assert "viewer-side-panel-model.js" in text
-    assert "viewer-stats-summary.js" in text
-    assert "viewer-analysis-cockpit-model.js" in text
-    assert "viewer-panel-zone-evidence.js" in text
-    assert "viewer-drawing-handoff-panel-renderer.js" in text
-    assert "viewer-stage-result-callouts-renderer.js" in text
+    assert "from './viewer-state.js';" in text
+    assert "from './viewer-shell.js';" in text
+    assert "from './viewer-report.js';" in text
+    for leaf in (
+        "viewer-real-drawing-browser-state.js",
+        "viewer-real-drawing-quality.js",
+        "viewer-real-drawing-selection.js",
+    ):
+        assert f"export * from './{leaf}';" in state_facade_text
+    for leaf in (
+        "viewer-real-drawing-panel-events.js",
+        "viewer-real-drawing-panel-model.js",
+        "viewer-real-drawing-panel-renderer.js",
+        "viewer-real-drawing-tree-model.js",
+        "viewer-search-results-model.js",
+        "viewer-selection-summary-model.js",
+        "viewer-side-panel-model.js",
+        "viewer-stats-summary.js",
+        "viewer-analysis-cockpit-model.js",
+        "viewer-panel-zone-evidence.js",
+    ):
+        assert f"export * from './{leaf}';" in shell_facade_text
+    for leaf in (
+        "viewer-drawing-handoff-panel-renderer.js",
+        "viewer-stage-result-callouts-renderer.js",
+    ):
+        assert f"export * from './{leaf}';" in report_facade_text
     assert "buildAnalysisCockpitModel" in text
     assert "buildDrawingHandoffPanelHtml" in text
     assert "buildStageResultCalloutsHtml" in text
@@ -985,21 +1009,23 @@ def test_index_html_exposes_compact_enterprise_viewer_shell_primitives() -> None
     assert "Optimization Cockpit" in text
     assert "function getViewerModelBounds()" in text
     assert "function setViewerCameraPose(" in text
-    assert "viewer-viewport-command-state.js" in text
+    assert "export * from './viewer-viewport-command-state.js';" in state_facade_text
     assert "buildViewerRenderModeButtonStates" in text
     assert "getViewerLegendDisplayForRenderMode" in text
     assert 'id="midas33-view-toolbar"' in text
-    assert "viewer-midas33-view-presets.js" in text
+    assert "export * from './viewer-midas33-view-presets.js';" in state_facade_text
     assert "setMidas33ViewPreset('review')" in text
     assert "buildMidas33CameraPoseFromBounds" in text
     assert "buildMidas33ViewButtonStates" in text
     assert "function setMidas33ViewPreset(" in text
     assert "function applyDefaultViewPreset()" in text
-    assert "viewer-project-workspace.js" in text
-    assert "viewer-explainability-model.js" in text
-    assert "viewer-optimization-comparison-model.js" in text
-    assert "viewer-report-export.js" in text
-    assert "viewer-local-ops-state.js" in text
+    assert "export * from './viewer-project-workspace.js';" in state_facade_text
+    assert "export * from './viewer-explainability-model.js';" in report_facade_text
+    assert "export * from './viewer-optimization-comparison-model.js';" in (
+        state_facade_text
+    )
+    assert "export * from './viewer-report-export.js';" in report_facade_text
+    assert "export * from './viewer-local-ops-state.js';" in storage_facade_text
     assert 'id="project-workspace-section"' in text
     assert 'id="project-drawing-list"' in text
     assert 'id="project-workspace-query"' in text

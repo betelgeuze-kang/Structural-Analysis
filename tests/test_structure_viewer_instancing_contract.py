@@ -3,6 +3,9 @@ from pathlib import Path
 
 def test_index_html_uses_instanced_mesh_pipeline_for_large_line_models() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    renderer_facade_text = Path("src/structure-viewer/viewer-renderer.js").read_text(
+        encoding="utf-8"
+    )
     mesh_builder_text = Path("src/structure-viewer/viewer-render-mesh-builders.js").read_text(encoding="utf-8")
 
     assert "const INSTANCED_LINE_ELEMENT_THRESHOLD=" in text
@@ -16,7 +19,8 @@ def test_index_html_uses_instanced_mesh_pipeline_for_large_line_models() -> None
     assert "const LARGE_MODEL_PICK_SPATIAL_INDEX_SURFACE_FACET_BVH_THRESHOLD=1024;" in text
     assert "function buildInstancedLineElements(" in text
     assert "function buildInstancedSurfaceElements(" in text
-    assert "from './viewer-render-mesh-builders.js';" in text
+    assert "from './viewer-renderer.js';" in text
+    assert "export * from './viewer-render-mesh-builders.js';" in renderer_facade_text
     assert "const renderMeshBuilderToolkit=createViewerRenderMeshBuilderToolkit(THREE,{colors:COLORS});" in text
     assert "function createInstancedSurfaceWireframe(" in mesh_builder_text
     assert "function createInstancedLineGroupObjects(" in mesh_builder_text
@@ -74,6 +78,9 @@ def test_index_html_exposes_bounded_loadcomb_authoring_draft_contract() -> None:
 
 def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_models() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    renderer_facade_text = Path("src/structure-viewer/viewer-renderer.js").read_text(
+        encoding="utf-8"
+    )
     geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
     deformed_text = Path("src/structure-viewer/viewer-deformed-rendering.js").read_text(encoding="utf-8")
     picking_text = Path("src/structure-viewer/viewer-large-model-picking.js").read_text(encoding="utf-8")
@@ -87,9 +94,10 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "let surfaceRenderLodProfile=null,pickTargetMeshes=[],pickAccelerationRecords=[],pickAnalyticRecords=[],pickAnalyticSpatialIndex=null,largeModelBuildProfile=null;" in text
     assert "const SURFACE_LOD_MEDIUM_ELEMENT_THRESHOLD=" in text
     assert "const SURFACE_LOD_COARSE_ELEMENT_THRESHOLD=" in text
-    assert "from './viewer-render-picking-geometry.js';" in text
-    assert "from './viewer-large-model-picking.js';" in text
-    assert "from './viewer-pick-broadphase.js';" in text
+    assert "from './viewer-renderer.js';" in text
+    assert "export * from './viewer-render-picking-geometry.js';" in renderer_facade_text
+    assert "export * from './viewer-large-model-picking.js';" in renderer_facade_text
+    assert "export * from './viewer-pick-broadphase.js';" in renderer_facade_text
     assert "const renderPickingGeometryToolkit=createViewerRenderPickingGeometryToolkit(THREE,{" in text
     assert "const largeModelPickingToolkit=createViewerLargeModelPickingToolkit(THREE,{" in text
     assert "const pickBroadphaseToolkit=createViewerPickBroadphaseToolkit(THREE,{" in text
@@ -114,7 +122,7 @@ def test_index_html_adds_surface_lod_and_pick_target_optimization_for_large_mode
     assert "function buildPickMeshTriangleBvh(" in geometry_text
     assert "function buildLocalGeometryTriangleEntries(" in geometry_text
     assert "async function buildPickMeshLocalTriangleCatalogs(" in text
-    assert "from './viewer-deformed-rendering.js';" in text
+    assert "export * from './viewer-deformed-rendering.js';" in renderer_facade_text
     assert "function resolvePickRecordWorldMatrix(" in geometry_text
     assert "function createLocalRayFromWorldRay(" in geometry_text
     assert "function intersectPickTriangleBvhClosest(" in geometry_text
@@ -328,11 +336,15 @@ def test_index_html_streams_large_model_geometry_builds() -> None:
 
 def test_index_html_supports_midas33_preset_and_nested_model_payloads() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    ingest_facade_text = Path("src/structure-viewer/viewer-ingest.js").read_text(
+        encoding="utf-8"
+    )
     loader_text = Path("src/structure-viewer/viewer-data-loader.js").read_text(encoding="utf-8")
     normalizer_text = Path("src/structure-viewer/viewer-model-normalizer.js").read_text(encoding="utf-8")
     direct_normalizer_text = Path("src/structure-viewer/viewer-direct-model-normalizer.js").read_text(encoding="utf-8")
 
-    assert "viewer-data-loader.js" in text
+    assert "from './viewer-ingest.js';" in text
+    assert "export * from './viewer-data-loader.js';" in ingest_facade_text
     assert "buildArtifactCandidates" in text
     assert "loadPresetSidecarIfNeeded" in text
     assert "readEmbeddedPayload" in text
@@ -349,8 +361,8 @@ def test_index_html_supports_midas33_preset_and_nested_model_payloads() -> None:
     assert "real_drawing_private_3d: './index.real_drawing_private.data.js'" in loader_text
     assert "./index.html?preset=real_drawing_private_3d" in text
     assert "function updateSuiteRouteTabs()" in text
-    assert "from './viewer-model-normalizer.js';" in text
-    assert "from './viewer-direct-model-normalizer.js';" in text
+    assert "export * from './viewer-model-normalizer.js';" in ingest_facade_text
+    assert "export * from './viewer-direct-model-normalizer.js';" in ingest_facade_text
     assert "export function extractModelPayload(" in normalizer_text
     assert "Array.isArray(payload.model.nodes)" in normalizer_text
     assert "export function buildDirectModelMeta(" in direct_normalizer_text
@@ -447,13 +459,17 @@ def test_index_html_adds_non_destructive_section_edit_preview_export() -> None:
 
 def test_index_html_uses_vertex_color_contour_interpolation() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    renderer_facade_text = Path("src/structure-viewer/viewer-renderer.js").read_text(
+        encoding="utf-8"
+    )
     geometry_text = Path("src/structure-viewer/viewer-render-picking-geometry.js").read_text(encoding="utf-8")
     mesh_builder_text = Path("src/structure-viewer/viewer-render-mesh-builders.js").read_text(encoding="utf-8")
     contour_text = Path("src/structure-viewer/viewer-contour-materials.js").read_text(encoding="utf-8")
 
     assert "const NODE_CONTOUR_FIELDS=new Set(['disp_mag','stress_vm']);" in text
     assert "const CONTOUR_LUT_SIZE=256;" in text
-    assert "from './viewer-contour-materials.js';" in text
+    assert "from './viewer-renderer.js';" in text
+    assert "export * from './viewer-contour-materials.js';" in renderer_facade_text
     assert "const contourMaterialToolkit=createViewerContourMaterialToolkit(THREE,{" in text
     assert "const CONTOUR_SURFACE_TESSELLATION_MIN=10;" in text
     assert "const CONTOUR_SURFACE_TESSELLATION_MAX=20;" in text

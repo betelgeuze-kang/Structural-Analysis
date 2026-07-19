@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/stateful_nonlinear_no_solve_reaction_only_v1.schema.json",
+  "title": "Fully constrained stateful nonlinear no-solve receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "source_commit_sha",
+    "engine_version",
+    "claim_boundary_version",
+    "input_checksums",
+    "reused_evidence",
+    "reuse_policy",
+    "status",
+    "contract_pass",
+    "truth_class",
+    "analysis_type",
+    "evidence_scope",
+    "residual_formula",
+    "residual_formula_hash",
+    "terminal_disposition",
+    "engine_v2_terminal_disposition",
+    "engine_v2_reference",
+    "load_factors",
+    "reaction_balance_tolerance_kn",
+    "cases",
+    "verification",
+    "newton_convergence_claim",
+    "full_building_equilibrium_claim",
+    "material_newton_breadth_closure_claim",
+    "g1_closure_claim",
+    "production_rocm_hip_parity_claim",
+    "external_validation_claim",
+    "release_readiness_claim",
+    "blockers_remaining",
+    "artifact_path",
+    "schema_path",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "stateful-nonlinear-no-solve-reaction-only.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "engine_version": {"type": "string", "minLength": 1},
+    "claim_boundary_version": {"type": "string", "minLength": 1},
+    "input_checksums": {
+      "type": "object",
+      "minProperties": 8,
+      "additionalProperties": {"$ref": "#/$defs/hash"}
+    },
+    "reused_evidence": {"const": false},
+    "reuse_policy": {
+      "const": "fresh_local_deterministic_fixture_recomputation"
+    },
+    "status": {"enum": ["ready", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "truth_class": {
+      "const": "deterministic_local_stateful_axial_fixture_truth"
+    },
+    "analysis_type": {
+      "const": "fully_constrained_prescribed_displacement_state_transition"
+    },
+    "evidence_scope": {
+      "const": "three_one_element_stateful_axial_fixtures"
+    },
+    "residual_formula": {"const": "F_internal_minus_F_external"},
+    "residual_formula_hash": {"$ref": "#/$defs/hash"},
+    "terminal_disposition": {"const": "no_solve_reaction_only"},
+    "engine_v2_terminal_disposition": {
+      "const": "no_solve_reaction_only"
+    },
+    "engine_v2_reference": {"$ref": "#/$defs/engineV2Reference"},
+    "load_factors": {
+      "type": "array",
+      "prefixItems": [{"const": 0.5}, {"const": 1.0}],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "reaction_balance_tolerance_kn": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "cases": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/case"},
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "verification": {"$ref": "#/$defs/verification"},
+    "newton_convergence_claim": {"const": false},
+    "full_building_equilibrium_claim": {"const": false},
+    "material_newton_breadth_closure_claim": {"const": false},
+    "g1_closure_claim": {"const": false},
+    "production_rocm_hip_parity_claim": {"const": false},
+    "external_validation_claim": {"const": false},
+    "release_readiness_claim": {"const": false},
+    "blockers_remaining": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "artifact_path": {"type": "string", "minLength": 1},
+    "schema_path": {
+      "const": "src/structural_analysis/schemas/stateful_nonlinear_no_solve_reaction_only_v1.schema.json"
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "count": {"type": "integer", "minimum": 0},
+    "engineV2Reference": {
+      "type": "object",
+      "required": [
+        "identity_hash",
+        "terminal_disposition",
+        "free_count",
+        "free_nnz",
+        "free_csr_row_ptr",
+        "free_csr_column_index_count",
+        "free_csr_global_value_index_count",
+        "solver_executed",
+        "fully_constrained_recurrence_allowed"
+      ],
+      "properties": {
+        "identity_hash": {"$ref": "#/$defs/hash"},
+        "terminal_disposition": {"const": "no_solve_reaction_only"},
+        "free_count": {"const": 0},
+        "free_nnz": {"const": 0},
+        "free_csr_row_ptr": {
+          "type": "array",
+          "prefixItems": [{"const": 0}],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "free_csr_column_index_count": {"const": 0},
+        "free_csr_global_value_index_count": {"const": 0},
+        "solver_executed": {"const": false},
+        "fully_constrained_recurrence_allowed": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "case": {
+      "type": "object",
+      "required": [
+        "case_id",
+        "material_family",
+        "status",
+        "contract_pass",
+        "active_equation_count",
+        "terminal_disposition",
+        "initial_state_hash",
+        "final_state_hash",
+        "committed_step_count",
+        "material_state_changed",
+        "state_hash_chain_exact",
+        "deterministic_replay_exact",
+        "final_state_hash_replay_exact",
+        "maximum_reaction_balance_abs_kn",
+        "newton_iteration_count",
+        "linear_solve_count",
+        "line_search_step_count",
+        "solver_executed",
+        "residual_norm_applicable",
+        "increment_norm_applicable",
+        "convergence_claim",
+        "regularization_count",
+        "fallback_count",
+        "steps"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "material_family": {
+          "enum": [
+            "uniaxial_concrete_damage",
+            "perfect_bond_composite_section",
+            "bilinear_force_deformation_link"
+          ]
+        },
+        "status": {"enum": ["ready", "blocked"]},
+        "contract_pass": {"type": "boolean"},
+        "active_equation_count": {"const": 0},
+        "terminal_disposition": {"const": "no_solve_reaction_only"},
+        "initial_state_hash": {"$ref": "#/$defs/hash"},
+        "final_state_hash": {"$ref": "#/$defs/hash"},
+        "committed_step_count": {"$ref": "#/$defs/count"},
+        "material_state_changed": {"type": "boolean"},
+        "state_hash_chain_exact": {"type": "boolean"},
+        "deterministic_replay_exact": {"type": "boolean"},
+        "final_state_hash_replay_exact": {"type": "boolean"},
+        "maximum_reaction_balance_abs_kn": {
+          "type": "number",
+          "minimum": 0
+        },
+        "newton_iteration_count": {"$ref": "#/$defs/count"},
+        "linear_solve_count": {"$ref": "#/$defs/count"},
+        "line_search_step_count": {"$ref": "#/$defs/count"},
+        "solver_executed": {"type": "boolean"},
+        "residual_norm_applicable": {"type": "boolean"},
+        "increment_norm_applicable": {"type": "boolean"},
+        "convergence_claim": {"type": "boolean"},
+        "regularization_count": {"$ref": "#/$defs/count"},
+        "fallback_count": {"$ref": "#/$defs/count"},
+        "steps": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/step"},
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "additionalProperties": false
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "load_factor",
+        "status",
+        "contract_pass",
+        "committed",
+        "parent_state_hash",
+        "accepted_state_hash",
+        "parent_binding_exact",
+        "accepted_binding_exact",
+        "active_equation_count",
+        "residual_dimension",
+        "jacobian_shape",
+        "terminal_disposition",
+        "terminal_reason",
+        "solver_executed",
+        "newton_iteration_count",
+        "linear_solve_count",
+        "line_search_step_count",
+        "matrix_backend",
+        "residual_norm_applicable",
+        "increment_norm_applicable",
+        "residual_gate_passed",
+        "increment_gate_passed",
+        "convergence_claim",
+        "reaction_observation_only",
+        "terminal_contract_pass",
+        "iterative_solver_contract_pass",
+        "no_solve_contract_pass",
+        "material_state_changed",
+        "reaction_balance_abs_kn",
+        "regularization_used",
+        "fallback_used"
+      ],
+      "properties": {
+        "load_factor": {"type": "number"},
+        "status": {"enum": ["ready", "blocked"]},
+        "contract_pass": {"type": "boolean"},
+        "committed": {"type": "boolean"},
+        "parent_state_hash": {"$ref": "#/$defs/hash"},
+        "accepted_state_hash": {"$ref": "#/$defs/hash"},
+        "parent_binding_exact": {"type": "boolean"},
+        "accepted_binding_exact": {"type": "boolean"},
+        "active_equation_count": {"const": 0},
+        "residual_dimension": {"const": 0},
+        "jacobian_shape": {
+          "type": "array",
+          "prefixItems": [{"const": 0}, {"const": 0}],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "terminal_disposition": {"const": "no_solve_reaction_only"},
+        "terminal_reason": {"const": "free_equation_space_empty"},
+        "solver_executed": {"type": "boolean"},
+        "newton_iteration_count": {"$ref": "#/$defs/count"},
+        "linear_solve_count": {"$ref": "#/$defs/count"},
+        "line_search_step_count": {"$ref": "#/$defs/count"},
+        "matrix_backend": {"type": "null"},
+        "residual_norm_applicable": {"type": "boolean"},
+        "increment_norm_applicable": {"type": "boolean"},
+        "residual_gate_passed": {"type": "null"},
+        "increment_gate_passed": {"type": "null"},
+        "convergence_claim": {"type": "boolean"},
+        "reaction_observation_only": {"type": "boolean"},
+        "terminal_contract_pass": {"type": "boolean"},
+        "iterative_solver_contract_pass": {"type": "boolean"},
+        "no_solve_contract_pass": {"type": "boolean"},
+        "material_state_changed": {"type": "boolean"},
+        "reaction_balance_abs_kn": {"type": "number", "minimum": 0},
+        "regularization_used": {"type": "boolean"},
+        "fallback_used": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "required": [
+        "case_count",
+        "ready_case_count",
+        "committed_step_count",
+        "material_state_changed_case_count",
+        "deterministic_replay_exact_case_count",
+        "state_hash_chain_exact_case_count",
+        "maximum_reaction_balance_abs_kn",
+        "newton_iteration_count",
+        "linear_solve_count",
+        "line_search_step_count",
+        "solver_executed",
+        "residual_norm_applicable",
+        "increment_norm_applicable",
+        "convergence_claim",
+        "regularization_count",
+        "fallback_count",
+        "engine_v2_terminal_disposition_aligned"
+      ],
+      "properties": {
+        "case_count": {"$ref": "#/$defs/count"},
+        "ready_case_count": {"$ref": "#/$defs/count"},
+        "committed_step_count": {"$ref": "#/$defs/count"},
+        "material_state_changed_case_count": {"$ref": "#/$defs/count"},
+        "deterministic_replay_exact_case_count": {"$ref": "#/$defs/count"},
+        "state_hash_chain_exact_case_count": {"$ref": "#/$defs/count"},
+        "maximum_reaction_balance_abs_kn": {
+          "type": "number",
+          "minimum": 0
+        },
+        "newton_iteration_count": {"$ref": "#/$defs/count"},
+        "linear_solve_count": {"$ref": "#/$defs/count"},
+        "line_search_step_count": {"$ref": "#/$defs/count"},
+        "solver_executed": {"type": "boolean"},
+        "residual_norm_applicable": {"type": "boolean"},
+        "increment_norm_applicable": {"type": "boolean"},
+        "convergence_claim": {"type": "boolean"},
+        "regularization_count": {"$ref": "#/$defs/count"},
+        "fallback_count": {"$ref": "#/$defs/count"},
+        "engine_v2_terminal_disposition_aligned": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

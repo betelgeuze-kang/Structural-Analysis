@@ -1,0 +1,4313 @@
+{
+  "analysis_type": "state_updated_bilinear_link_newton_seed",
+  "claim_boundary": "This receipt verifies one translational 1D bilinear force-deformation link with combined linear isotropic/kinematic hardening at material-point, one-element, and two-element scope. It records a native kN-m return mapping, cyclic dissipation, same-parent consistent tangent, commit, and exact rollback. It does not close gap/contact, friction, compression-only, uplift, viscous or viscoelastic devices, multi-DOF coupling, rate dependence, degradation/pinching, frame-shell connection integration, published validation, G1, or HIP parity.",
+  "contract_pass": true,
+  "element_benchmark": {
+    "assembly": {
+      "displacements_m": [
+        0.0,
+        0.03
+      ],
+      "element_responses": [
+        {
+          "area_m2": 1.0,
+          "element_id": "link-1",
+          "elongation_m": 0.03,
+          "generalized_deformation": 0.03,
+          "internal_force_kn": 109.52380952380952,
+          "length_m": 1.0,
+          "material_response": {
+            "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+            "consistent_tangent_kn_per_m": 476.1904761904762,
+            "damage_evolved": false,
+            "deformation_m": 0.03,
+            "final_yield_function_kn": 0.0,
+            "force_kn": 109.52380952380952,
+            "plastic_multiplier_increment_m": 0.01904761904761905,
+            "trial_state": {
+              "accumulated_plastic_deformation_m": 0.01904761904761905,
+              "backforce_kn": 5.714285714285714,
+              "dissipated_energy_kn_m": 1.9047619047619049,
+              "plastic_deformation_m": 0.01904761904761905,
+              "schema_version": "bilinear-combined-hardening-link-state.v1",
+              "state_hash": "sha256:31d74fd46c78c7b4d5706ed407f3d44e73ec49b3ba6bbf6f601ba185875fac4b"
+            },
+            "trial_yield_function_kn": 200.0,
+            "yielded": true
+          },
+          "node_i": 0,
+          "node_j": 1,
+          "response_kind": "force_deformation",
+          "tangent_kn_per_m": 476.1904761904762,
+          "total_strain": null
+        }
+      ],
+      "external_forces_kn": [
+        0.0,
+        0.0
+      ],
+      "free_node_indices": [],
+      "internal_forces_kn": [
+        -109.52380952380952,
+        109.52380952380952
+      ],
+      "jacobian_kn_per_m": [],
+      "parent_state_hash": "sha256:aad292659678acc746b2db708c6b884da50609fb9c9ef1db7233051d86dbe25b",
+      "reactions_kn": [
+        -109.52380952380952,
+        109.52380952380952
+      ],
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_kn": [],
+      "target_load_factor": 1.0,
+      "trial_material_states": [
+        {
+          "accumulated_plastic_deformation_m": 0.01904761904761905,
+          "backforce_kn": 5.714285714285714,
+          "dissipated_energy_kn_m": 1.9047619047619049,
+          "plastic_deformation_m": 0.01904761904761905,
+          "schema_version": "bilinear-combined-hardening-link-state.v1",
+          "state_hash": "sha256:31d74fd46c78c7b4d5706ed407f3d44e73ec49b3ba6bbf6f601ba185875fac4b"
+        }
+      ]
+    },
+    "contract_pass": true,
+    "force_abs_error_kn": 0.0,
+    "tangent_abs_error_kn_per_m": 0.0
+  },
+  "g1_material_newton_breadth_claim": false,
+  "link_spring_material_breadth_closure_claim": false,
+  "material_newton_breadth_closure_claim": false,
+  "material_point": {
+    "contract_pass": true,
+    "cyclic_path": {
+      "cumulative_dissipated_energy_kn_m": 9.836845347360411,
+      "deformation_path_m": [
+        0.0,
+        0.005,
+        0.03,
+        0.0,
+        -0.03,
+        0.0,
+        0.03,
+        0.0
+      ],
+      "dissipation_nonnegative_monotonic": true,
+      "energy_gate_passed": true,
+      "final_state": {
+        "accumulated_plastic_deformation_m": 0.0983684534736041,
+        "backforce_kn": 3.4856414765452675,
+        "dissipated_energy_kn_m": 9.836845347360411,
+        "plastic_deformation_m": 0.011618804921817556,
+        "schema_version": "bilinear-combined-hardening-link-state.v1",
+        "state_hash": "sha256:f6498e2cb7ee65f818f2c8174c49c73a31d55243d5e4937bce90e4381793264a"
+      },
+      "force_deformation_work_kn_m": 8.578065312292717,
+      "history": [
+        {
+          "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+          "consistent_tangent_kn_per_m": 10000.0,
+          "damage_evolved": false,
+          "deformation_m": 0.0,
+          "final_yield_function_kn": -100.0,
+          "force_kn": 0.0,
+          "parent_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+          "plastic_flow_direction": 0,
+          "plastic_multiplier_increment_m": 0.0,
+          "step_index": 1,
+          "trial_state": {
+            "accumulated_plastic_deformation_m": 0.0,
+            "backforce_kn": 0.0,
+            "dissipated_energy_kn_m": 0.0,
+            "plastic_deformation_m": 0.0,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+          },
+          "trial_yield_function_kn": -100.0,
+          "yielded": false
+        },
+        {
+          "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+          "consistent_tangent_kn_per_m": 10000.0,
+          "damage_evolved": false,
+          "deformation_m": 0.005,
+          "final_yield_function_kn": -50.0,
+          "force_kn": 50.0,
+          "parent_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+          "plastic_flow_direction": 0,
+          "plastic_multiplier_increment_m": 0.0,
+          "step_index": 2,
+          "trial_state": {
+            "accumulated_plastic_deformation_m": 0.0,
+            "backforce_kn": 0.0,
+            "dissipated_energy_kn_m": 0.0,
+            "plastic_deformation_m": 0.0,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+          },
+          "trial_yield_function_kn": -50.0,
+          "yielded": false
+        },
+        {
+          "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+          "consistent_tangent_kn_per_m": 476.1904761904762,
+          "damage_evolved": false,
+          "deformation_m": 0.03,
+          "final_yield_function_kn": 0.0,
+          "force_kn": 109.52380952380952,
+          "parent_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+          "plastic_flow_direction": 1,
+          "plastic_multiplier_increment_m": 0.01904761904761905,
+          "step_index": 3,
+          "trial_state": {
+            "accumulated_plastic_deformation_m": 0.01904761904761905,
+            "backforce_kn": 5.714285714285714,
+            "dissipated_energy_kn_m": 1.9047619047619049,
+            "plastic_deformation_m": 0.01904761904761905,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:31d74fd46c78c7b4d5706ed407f3d44e73ec49b3ba6bbf6f601ba185875fac4b"
+          },
+          "trial_yield_function_kn": 200.0,
+          "yielded": true
+        },
+        {
+          "committed_state_hash": "sha256:31d74fd46c78c7b4d5706ed407f3d44e73ec49b3ba6bbf6f601ba185875fac4b",
+          "consistent_tangent_kn_per_m": 476.1904761904762,
+          "damage_evolved": false,
+          "deformation_m": 0.0,
+          "final_yield_function_kn": -1.4210854715202004e-14,
+          "force_kn": -102.49433106575962,
+          "parent_state_hash": "sha256:31d74fd46c78c7b4d5706ed407f3d44e73ec49b3ba6bbf6f601ba185875fac4b",
+          "plastic_flow_direction": -1,
+          "plastic_multiplier_increment_m": 0.008798185941043086,
+          "step_index": 4,
+          "trial_state": {
+            "accumulated_plastic_deformation_m": 0.027845804988662133,
+            "backforce_kn": 3.074829931972789,
+            "dissipated_energy_kn_m": 2.7845804988662133,
+            "plastic_deformation_m": 0.010249433106575964,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:2829e54bc31584f62d770d252d02f85934c28a3e3667ad2d8383be24736181ad"
+          },
+          "trial_yield_function_kn": 92.3809523809524,
+          "yielded": true
+        },
+        {
+          "committed_state_hash": "sha256:2829e54bc31584f62d770d252d02f85934c28a3e3667ad2d8383be24736181ad",
+          "consistent_tangent_kn_per_m": 476.1904761904762,
+          "damage_evolved": false,
+          "deformation_m": -0.03,
+          "final_yield_function_kn": -1.4210854715202004e-14,
+          "force_kn": -116.78004535147392,
+          "parent_state_hash": "sha256:2829e54bc31584f62d770d252d02f85934c28a3e3667ad2d8383be24736181ad",
+          "plastic_flow_direction": -1,
+          "plastic_multiplier_increment_m": 0.02857142857142857,
+          "step_index": 5,
+          "trial_state": {
+            "accumulated_plastic_deformation_m": 0.05641723356009071,
+            "backforce_kn": -5.496598639455782,
+            "dissipated_energy_kn_m": 5.64172335600907,
+            "plastic_deformation_m": -0.01832199546485261,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:284793b93e85b5ff67d874f73afba4bd7617e32e202abd6073691d23d78a9024"
+          },
+          "trial_yield_function_kn": 300.0,
+          "yielded": true
+        },
+        {
+          "committed_state_hash": "sha256:284793b93e85b5ff67d874f73afba4bd7617e32e202abd6073691d23d78a9024",
+          "consistent_tangent_kn_per_m": 476.1904761904762,
+          "damage_evolved": false,
+          "deformation_m": 0.0,
+          "final_yield_function_kn": -1.4210854715202004e-14,
+          "force_kn": 109.47413886189396,
+          "parent_state_hash": "sha256:284793b93e85b5ff67d874f73afba4bd7617e32e202abd6073691d23d78a9024",
+          "plastic_flow_direction": 1,
+          "plastic_multiplier_increment_m": 0.007374581578663212,
+          "step_index": 6,
+          "trial_state": {
+            "accumulated_plastic_deformation_m": 0.06379181513875391,
+            "backforce_kn": -3.2842241658568185,
+            "dissipated_energy_kn_m": 6.379181513875391,
+            "plastic_deformation_m": -0.010947413886189396,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:e1b208f7a57ccf90952e52d62aaad936a0205f0e38dd175564a5b20d799e3218"
+          },
+          "trial_yield_function_kn": 77.43310657596372,
+          "yielded": true
+        },
+        {
+          "committed_state_hash": "sha256:e1b208f7a57ccf90952e52d62aaad936a0205f0e38dd175564a5b20d799e3218",
+          "consistent_tangent_kn_per_m": 476.1904761904762,
+          "damage_evolved": false,
+          "deformation_m": 0.03,
+          "final_yield_function_kn": -2.842170943040401e-14,
+          "force_kn": 123.75985314760823,
+          "parent_state_hash": "sha256:e1b208f7a57ccf90952e52d62aaad936a0205f0e38dd175564a5b20d799e3218",
+          "plastic_flow_direction": 1,
+          "plastic_multiplier_increment_m": 0.02857142857142857,
+          "step_index": 7,
+          "trial_state": {
+            "accumulated_plastic_deformation_m": 0.09236324371018248,
+            "backforce_kn": 5.287204405571753,
+            "dissipated_energy_kn_m": 9.236324371018249,
+            "plastic_deformation_m": 0.017624014685239175,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:9aefb1755081847bd1799e283956343ff578b6543e46920315f5f05c09f7a351"
+          },
+          "trial_yield_function_kn": 300.0,
+          "yielded": true
+        },
+        {
+          "committed_state_hash": "sha256:9aefb1755081847bd1799e283956343ff578b6543e46920315f5f05c09f7a351",
+          "consistent_tangent_kn_per_m": 476.1904761904762,
+          "damage_evolved": false,
+          "deformation_m": 0.0,
+          "final_yield_function_kn": 1.4210854715202004e-14,
+          "force_kn": -116.18804921817556,
+          "parent_state_hash": "sha256:9aefb1755081847bd1799e283956343ff578b6543e46920315f5f05c09f7a351",
+          "plastic_flow_direction": -1,
+          "plastic_multiplier_increment_m": 0.0060052097634216185,
+          "step_index": 8,
+          "trial_state": {
+            "accumulated_plastic_deformation_m": 0.0983684534736041,
+            "backforce_kn": 3.4856414765452675,
+            "dissipated_energy_kn_m": 9.836845347360411,
+            "plastic_deformation_m": 0.011618804921817556,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:f6498e2cb7ee65f818f2c8174c49c73a31d55243d5e4937bce90e4381793264a"
+          },
+          "trial_yield_function_kn": 63.05470251592699,
+          "yielded": true
+        }
+      ],
+      "material_id": "bilinear_combined_hardening_link_1d",
+      "plastic_flow_reversal_count": 3,
+      "return_mapping_algorithm": "backward_euler_1d_link_return_mapping",
+      "step_count": 8,
+      "yielded_step_count": 6
+    },
+    "finite_difference_tangent": {
+      "absolute_error_kn_per_m": 1.5807870568096405e-08,
+      "analytic_consistent_tangent_kn_per_m": 476.1904761904762,
+      "deformation_m": 0.03,
+      "finite_difference_epsilon_m": 1e-08,
+      "finite_difference_tangent_kn_per_m": 476.1904762062841,
+      "pass": true,
+      "relative_error": 3.319652819190044e-11,
+      "relative_tolerance": 1e-07,
+      "return_mapping_algorithm": "backward_euler_1d_link_return_mapping",
+      "same_committed_parent_state": true,
+      "tangent_definition": "algorithmic_consistent_d_force_d_deformation"
+    },
+    "monotonic_response": {
+      "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+      "consistent_tangent_kn_per_m": 476.1904761904762,
+      "damage_evolved": false,
+      "deformation_m": 0.03,
+      "final_yield_function_kn": 0.0,
+      "force_kn": 109.52380952380952,
+      "plastic_multiplier_increment_m": 0.01904761904761905,
+      "trial_state": {
+        "accumulated_plastic_deformation_m": 0.01904761904761905,
+        "backforce_kn": 5.714285714285714,
+        "dissipated_energy_kn_m": 1.9047619047619049,
+        "plastic_deformation_m": 0.01904761904761905,
+        "schema_version": "bilinear-combined-hardening-link-state.v1",
+        "state_hash": "sha256:31d74fd46c78c7b4d5706ed407f3d44e73ec49b3ba6bbf6f601ba185875fac4b"
+      },
+      "trial_yield_function_kn": 200.0,
+      "yielded": true
+    },
+    "parameters": {
+      "initial_stiffness_kn_per_m": 10000.0,
+      "isotropic_hardening_kn_per_m": 200.0,
+      "kinematic_hardening_kn_per_m": 300.0,
+      "yield_force_kn": 100.0
+    }
+  },
+  "production_nonlinear_closure_claim": false,
+  "residual_formula": "F_internal_minus_F_external",
+  "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+  "return_mapping_algorithm": "backward_euler_1d_link_return_mapping",
+  "rollback_probe": {
+    "accepted_state_hash_after": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+    "exact": true,
+    "load_step": {
+      "accepted_state": {
+        "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "accumulated_plastic_deformation_m": 0.0,
+            "backforce_kn": 0.0,
+            "dissipated_energy_kn_m": 0.0,
+            "plastic_deformation_m": 0.0,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+          },
+          {
+            "accumulated_plastic_deformation_m": 0.0,
+            "backforce_kn": 0.0,
+            "dissipated_energy_kn_m": 0.0,
+            "plastic_deformation_m": 0.0,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "step_index": 0
+      },
+      "committed": false,
+      "metrics": {
+        "accepted_state_hash_after": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "active_equation_count": 1,
+        "committed": false,
+        "convergence_claim": false,
+        "fallback_used": false,
+        "increment_gate_applicable": true,
+        "increment_gate_passed": false,
+        "iterative_solver_contract_pass": false,
+        "material_state_changed": false,
+        "no_solve_contract_pass": false,
+        "no_solve_reaction_only": false,
+        "parent_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "regularization_used": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "residual_gate_applicable": true,
+        "residual_gate_passed": false,
+        "rollback_exact": true,
+        "solver_contract_pass": false,
+        "solver_executed": true,
+        "state_updated_element_count": 2,
+        "target_load_factor": 1.0,
+        "terminal_contract_pass": false,
+        "terminal_disposition": "solve_free_equations",
+        "terminal_reason": "max_iterations_exceeded",
+        "trial_parent_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "yielded_element_count": 2
+      },
+      "parent_state": {
+        "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "accumulated_plastic_deformation_m": 0.0,
+            "backforce_kn": 0.0,
+            "dissipated_energy_kn_m": 0.0,
+            "plastic_deformation_m": 0.0,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+          },
+          {
+            "accumulated_plastic_deformation_m": 0.0,
+            "backforce_kn": 0.0,
+            "dissipated_energy_kn_m": 0.0,
+            "plastic_deformation_m": 0.0,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "step_index": 0
+      },
+      "status": "blocked",
+      "trial_assembly": {
+        "displacements_m": [
+          0.0,
+          0.011818181818181821,
+          0.06
+        ],
+        "element_responses": [
+          {
+            "area_m2": 1.0,
+            "element_id": "link-1",
+            "elongation_m": 0.011818181818181821,
+            "generalized_deformation": 0.011818181818181821,
+            "internal_force_kn": 100.86580086580086,
+            "length_m": 1.0,
+            "material_response": {
+              "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+              "consistent_tangent_kn_per_m": 476.1904761904762,
+              "damage_evolved": false,
+              "deformation_m": 0.011818181818181821,
+              "final_yield_function_kn": 0.0,
+              "force_kn": 100.86580086580086,
+              "plastic_multiplier_increment_m": 0.0017316017316017349,
+              "trial_state": {
+                "accumulated_plastic_deformation_m": 0.0017316017316017349,
+                "backforce_kn": 0.5194805194805204,
+                "dissipated_energy_kn_m": 0.1731601731601735,
+                "plastic_deformation_m": 0.0017316017316017349,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:232cbd0ef007bf2506fcc46bb390149ea6780e8a9f867b27d91aa860039d268d"
+              },
+              "trial_yield_function_kn": 18.181818181818215,
+              "yielded": true
+            },
+            "node_i": 0,
+            "node_j": 1,
+            "response_kind": "force_deformation",
+            "tangent_kn_per_m": 476.1904761904762,
+            "total_strain": null
+          },
+          {
+            "area_m2": 1.0,
+            "element_id": "link-2",
+            "elongation_m": 0.04818181818181817,
+            "generalized_deformation": 0.04818181818181817,
+            "internal_force_kn": 118.18181818181819,
+            "length_m": 1.0,
+            "material_response": {
+              "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+              "consistent_tangent_kn_per_m": 476.1904761904762,
+              "damage_evolved": false,
+              "deformation_m": 0.04818181818181817,
+              "final_yield_function_kn": 1.4210854715202004e-14,
+              "force_kn": 118.18181818181819,
+              "plastic_multiplier_increment_m": 0.036363636363636355,
+              "trial_state": {
+                "accumulated_plastic_deformation_m": 0.036363636363636355,
+                "backforce_kn": 10.909090909090907,
+                "dissipated_energy_kn_m": 3.6363636363636354,
+                "plastic_deformation_m": 0.036363636363636355,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:5def65c84814190dee386f6872d768d046d0f8b68c4c45dbc6d83ce83b3211bb"
+              },
+              "trial_yield_function_kn": 381.81818181818176,
+              "yielded": true
+            },
+            "node_i": 1,
+            "node_j": 2,
+            "response_kind": "force_deformation",
+            "tangent_kn_per_m": 476.1904761904762,
+            "total_strain": null
+          }
+        ],
+        "external_forces_kn": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "free_node_indices": [
+          1
+        ],
+        "internal_forces_kn": [
+          -100.86580086580086,
+          -17.316017316017323,
+          118.18181818181819
+        ],
+        "jacobian_kn_per_m": [
+          [
+            952.3809523809524
+          ]
+        ],
+        "parent_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "reactions_kn": [
+          -100.86580086580086,
+          0.0,
+          118.18181818181819
+        ],
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_kn": [
+          -17.316017316017323
+        ],
+        "target_load_factor": 1.0,
+        "trial_material_states": [
+          {
+            "accumulated_plastic_deformation_m": 0.0017316017316017349,
+            "backforce_kn": 0.5194805194805204,
+            "dissipated_energy_kn_m": 0.1731601731601735,
+            "plastic_deformation_m": 0.0017316017316017349,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:232cbd0ef007bf2506fcc46bb390149ea6780e8a9f867b27d91aa860039d268d"
+          },
+          {
+            "accumulated_plastic_deformation_m": 0.036363636363636355,
+            "backforce_kn": 10.909090909090907,
+            "dissipated_energy_kn_m": 3.6363636363636354,
+            "plastic_deformation_m": 0.036363636363636355,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:5def65c84814190dee386f6872d768d046d0f8b68c4c45dbc6d83ce83b3211bb"
+          }
+        ]
+      },
+      "trial_solution": {
+        "convergence_history": [
+          {
+            "accepted": true,
+            "free_displacements_m": [
+              0.0
+            ],
+            "increment_abs_m": 0.011818181818181821,
+            "increment_gate_passed": false,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": [
+              0.011818181818181821
+            ],
+            "relative_residual": 123.80952380952385,
+            "residual_gate_passed": false,
+            "residual_kn": [
+              -123.80952380952385
+            ]
+          }
+        ],
+        "line_search_history": [
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_free_displacements_m": [
+                  0.011818181818181821
+                ],
+                "trial_relative_residual": 17.316017316017323,
+                "trial_residual_kn": [
+                  -17.316017316017323
+                ]
+              }
+            ],
+            "iteration": 0,
+            "newton_increment_m": [
+              0.011818181818181821
+            ],
+            "selected_alpha": 1.0,
+            "starting_free_displacements_m": [
+              0.0
+            ]
+          }
+        ],
+        "metrics": {
+          "active_equation_count": 1,
+          "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=1",
+          "contract_pass": false,
+          "convergence_claim": false,
+          "detail": "max_iterations_exceeded",
+          "fallback_used": false,
+          "free_displacements_m": [
+            0.011818181818181821
+          ],
+          "globalization": "backtracking_line_search",
+          "increment_gate_passed": false,
+          "increment_norm_applicable": true,
+          "matrix_backend": "numpy_linalg_solve_dense",
+          "reaction_observation_only": false,
+          "regularization_used": false,
+          "relative_residual": 17.316017316017323,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+          "residual_gate_passed": false,
+          "residual_kn": [
+            -17.316017316017323
+          ],
+          "residual_norm_applicable": true,
+          "solver_executed": true,
+          "sparse_backend_used": false,
+          "stiffness_storage": "numpy_dense_ndarray",
+          "terminal_disposition": "solve_free_equations",
+          "terminal_reason": "max_iterations_exceeded"
+        },
+        "status": "blocked",
+        "unsupported_features": [
+          {
+            "detail": "max_iterations_exceeded",
+            "fallback_used": false,
+            "guard_outcome": "blocked",
+            "kind": "newton_vector_reference_blocked",
+            "regularization_used": false
+          }
+        ]
+      }
+    },
+    "parent_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015"
+  },
+  "schema_version": "phase2-state-updated-bilinear-link-result.v1",
+  "state_updated_bilinear_link_seed_contract_pass": true,
+  "status": "ready",
+  "structure_benchmark": {
+    "consistent_jacobian_finite_difference": {
+      "analytic_jacobian_kn_per_m": [
+        [
+          952.3809523809524
+        ]
+      ],
+      "finite_difference_epsilon": 1e-08,
+      "finite_difference_jacobian_kn_per_m": [
+        [
+          952.3809524125681
+        ]
+      ],
+      "max_abs_error_kn_per_m": 3.161574113619281e-08,
+      "parent_state_hash": "sha256:b6e0468ca2575120bf80b5ae39a54ea92cfd687fc687c5b016dd691ed61e1264",
+      "pass": true,
+      "relative_error": 3.319652819190044e-11,
+      "relative_tolerance": 1e-07,
+      "same_committed_parent_state": true
+    },
+    "contract_pass": true,
+    "deterministic_replay_exact": true,
+    "load_factors": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "maximum_link_deformation_spread_m": 2.0816681711721685e-17,
+    "maximum_residual_inf_norm_kn": 1.4210854715202004e-14,
+    "maximum_series_force_spread_kn": 1.4210854715202004e-14,
+    "path": {
+      "contract_pass": true,
+      "final_state": {
+        "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.03,
+          0.06
+        ],
+        "load_factor": 1.0,
+        "material_states": [
+          {
+            "accumulated_plastic_deformation_m": 0.019047619047619042,
+            "backforce_kn": 5.7142857142857135,
+            "dissipated_energy_kn_m": 1.9047619047619047,
+            "plastic_deformation_m": 0.019047619047619042,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:287db43a2a7a8d8b325643a8990389367ad2b8e448d8410c2a0c21a2ef533c08"
+          },
+          {
+            "accumulated_plastic_deformation_m": 0.019047619047619046,
+            "backforce_kn": 5.714285714285714,
+            "dissipated_energy_kn_m": 1.9047619047619047,
+            "plastic_deformation_m": 0.019047619047619046,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:90a32b817889599bc47f4e3cd3a8f1032b422b3df25ec180c92699887efa1eb0"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:ee8597f6ba207106e5acf627e5fb14b94020e7020488a9d9122c776bc4fd9e31",
+        "step_index": 10
+      },
+      "initial_state": {
+        "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "accumulated_plastic_deformation_m": 0.0,
+            "backforce_kn": 0.0,
+            "dissipated_energy_kn_m": 0.0,
+            "plastic_deformation_m": 0.0,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+          },
+          {
+            "accumulated_plastic_deformation_m": 0.0,
+            "backforce_kn": 0.0,
+            "dissipated_energy_kn_m": 0.0,
+            "plastic_deformation_m": 0.0,
+            "schema_version": "bilinear-combined-hardening-link-state.v1",
+            "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "step_index": 0
+      },
+      "status": "ready",
+      "steps": [
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.003,
+              0.006
+            ],
+            "load_factor": 0.1,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:4ef298b5a38bb2cc806a4c208a1b649968a12dec25f0fa2c4dbc645bbffc7af5",
+            "step_index": 1
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:4ef298b5a38bb2cc806a4c208a1b649968a12dec25f0fa2c4dbc645bbffc7af5",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": false,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.1,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "load_factor": 0.0,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+            "step_index": 0
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.003,
+              0.006
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.003,
+                "generalized_deformation": 0.003,
+                "internal_force_kn": 30.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+                  "consistent_tangent_kn_per_m": 10000.0,
+                  "damage_evolved": false,
+                  "deformation_m": 0.003,
+                  "final_yield_function_kn": -70.0,
+                  "force_kn": 30.0,
+                  "plastic_multiplier_increment_m": 0.0,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0,
+                    "backforce_kn": 0.0,
+                    "dissipated_energy_kn_m": 0.0,
+                    "plastic_deformation_m": 0.0,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+                  },
+                  "trial_yield_function_kn": -70.0,
+                  "yielded": false
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 10000.0,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.003,
+                "generalized_deformation": 0.003,
+                "internal_force_kn": 30.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+                  "consistent_tangent_kn_per_m": 10000.0,
+                  "damage_evolved": false,
+                  "deformation_m": 0.003,
+                  "final_yield_function_kn": -70.0,
+                  "force_kn": 30.0,
+                  "plastic_multiplier_increment_m": 0.0,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0,
+                    "backforce_kn": 0.0,
+                    "dissipated_energy_kn_m": 0.0,
+                    "plastic_deformation_m": 0.0,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+                  },
+                  "trial_yield_function_kn": -70.0,
+                  "yielded": false
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 10000.0,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -30.0,
+              0.0,
+              30.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                20000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+            "reactions_kn": [
+              -30.0,
+              0.0,
+              30.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0
+            ],
+            "target_load_factor": 0.1,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.0
+                ],
+                "increment_abs_m": 0.003,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.003
+                ],
+                "relative_residual": 60.0,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -60.0
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.003
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.003
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.003
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.0
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.1",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.003
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.006,
+              0.012
+            ],
+            "load_factor": 0.2,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:847857b35ac47777ab26ec032ea850529767709b6e98806b44bdbff2c562b701",
+            "step_index": 2
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:847857b35ac47777ab26ec032ea850529767709b6e98806b44bdbff2c562b701",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": false,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:4ef298b5a38bb2cc806a4c208a1b649968a12dec25f0fa2c4dbc645bbffc7af5",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.2,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:4ef298b5a38bb2cc806a4c208a1b649968a12dec25f0fa2c4dbc645bbffc7af5",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.003,
+              0.006
+            ],
+            "load_factor": 0.1,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:4ef298b5a38bb2cc806a4c208a1b649968a12dec25f0fa2c4dbc645bbffc7af5",
+            "step_index": 1
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.006,
+              0.012
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.006,
+                "generalized_deformation": 0.006,
+                "internal_force_kn": 60.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+                  "consistent_tangent_kn_per_m": 10000.0,
+                  "damage_evolved": false,
+                  "deformation_m": 0.006,
+                  "final_yield_function_kn": -40.0,
+                  "force_kn": 60.0,
+                  "plastic_multiplier_increment_m": 0.0,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0,
+                    "backforce_kn": 0.0,
+                    "dissipated_energy_kn_m": 0.0,
+                    "plastic_deformation_m": 0.0,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+                  },
+                  "trial_yield_function_kn": -40.0,
+                  "yielded": false
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 10000.0,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.006,
+                "generalized_deformation": 0.006,
+                "internal_force_kn": 60.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+                  "consistent_tangent_kn_per_m": 10000.0,
+                  "damage_evolved": false,
+                  "deformation_m": 0.006,
+                  "final_yield_function_kn": -40.0,
+                  "force_kn": 60.0,
+                  "plastic_multiplier_increment_m": 0.0,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0,
+                    "backforce_kn": 0.0,
+                    "dissipated_energy_kn_m": 0.0,
+                    "plastic_deformation_m": 0.0,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+                  },
+                  "trial_yield_function_kn": -40.0,
+                  "yielded": false
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 10000.0,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -60.0,
+              0.0,
+              60.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                20000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:4ef298b5a38bb2cc806a4c208a1b649968a12dec25f0fa2c4dbc645bbffc7af5",
+            "reactions_kn": [
+              -60.0,
+              0.0,
+              60.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0
+            ],
+            "target_load_factor": 0.2,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.003
+                ],
+                "increment_abs_m": 0.003,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0030000000000000005
+                ],
+                "relative_residual": 60.000000000000014,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -60.000000000000014
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.006
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.006
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.0030000000000000005
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.003
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.2",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.006
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.009,
+              0.018
+            ],
+            "load_factor": 0.3,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:c582208fe356f7bee20e94ae04f015e157701544ddd05fc35d7a73779bbf20af",
+            "step_index": 3
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:c582208fe356f7bee20e94ae04f015e157701544ddd05fc35d7a73779bbf20af",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": false,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:847857b35ac47777ab26ec032ea850529767709b6e98806b44bdbff2c562b701",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.3,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:847857b35ac47777ab26ec032ea850529767709b6e98806b44bdbff2c562b701",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.006,
+              0.012
+            ],
+            "load_factor": 0.2,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:847857b35ac47777ab26ec032ea850529767709b6e98806b44bdbff2c562b701",
+            "step_index": 2
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.009,
+              0.018
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.009,
+                "generalized_deformation": 0.009,
+                "internal_force_kn": 90.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+                  "consistent_tangent_kn_per_m": 10000.0,
+                  "damage_evolved": false,
+                  "deformation_m": 0.009,
+                  "final_yield_function_kn": -10.0,
+                  "force_kn": 90.0,
+                  "plastic_multiplier_increment_m": 0.0,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0,
+                    "backforce_kn": 0.0,
+                    "dissipated_energy_kn_m": 0.0,
+                    "plastic_deformation_m": 0.0,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+                  },
+                  "trial_yield_function_kn": -10.0,
+                  "yielded": false
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 10000.0,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.009,
+                "generalized_deformation": 0.009,
+                "internal_force_kn": 90.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+                  "consistent_tangent_kn_per_m": 10000.0,
+                  "damage_evolved": false,
+                  "deformation_m": 0.009,
+                  "final_yield_function_kn": -10.0,
+                  "force_kn": 90.0,
+                  "plastic_multiplier_increment_m": 0.0,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0,
+                    "backforce_kn": 0.0,
+                    "dissipated_energy_kn_m": 0.0,
+                    "plastic_deformation_m": 0.0,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+                  },
+                  "trial_yield_function_kn": -10.0,
+                  "yielded": false
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 10000.0,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -90.0,
+              0.0,
+              90.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                20000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:847857b35ac47777ab26ec032ea850529767709b6e98806b44bdbff2c562b701",
+            "reactions_kn": [
+              -90.0,
+              0.0,
+              90.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0
+            ],
+            "target_load_factor": 0.3,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.006
+                ],
+                "increment_abs_m": 0.003909090909090909,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.003909090909090908
+                ],
+                "relative_residual": 40.95238095238095,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -40.95238095238095
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.009909090909090909
+                ],
+                "increment_abs_m": 0.0009090909090909097,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.0009090909090909101
+                ],
+                "relative_residual": 18.1818181818182,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  18.1818181818182
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.009
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.009909090909090909
+                    ],
+                    "trial_relative_residual": 18.1818181818182,
+                    "trial_residual_kn": [
+                      18.1818181818182
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.003909090909090908
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.006
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.009
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  -0.0009090909090909101
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.009909090909090909
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.3",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.009
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.011999999999999995,
+              0.024
+            ],
+            "load_factor": 0.4,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0019047619047619006,
+                "backforce_kn": 0.5714285714285702,
+                "dissipated_energy_kn_m": 0.19047619047619008,
+                "plastic_deformation_m": 0.0019047619047619006,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:9c16c46199d2cbd31a161072c22b801c74f9df1d3de7639ee243d47de2a49d57"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0019047619047619102,
+                "backforce_kn": 0.5714285714285731,
+                "dissipated_energy_kn_m": 0.19047619047619102,
+                "plastic_deformation_m": 0.0019047619047619102,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:e8e57cb214d2bc8f92c722013460b5255297512772df3b36f09de0fc7d4a026e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:bdf82157945d03191abcc20353f2f0fa9fd01d664256ff4ef8162913f01fcb37",
+            "step_index": 4
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:bdf82157945d03191abcc20353f2f0fa9fd01d664256ff4ef8162913f01fcb37",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:c582208fe356f7bee20e94ae04f015e157701544ddd05fc35d7a73779bbf20af",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 0.4,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:c582208fe356f7bee20e94ae04f015e157701544ddd05fc35d7a73779bbf20af",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.009,
+              0.018
+            ],
+            "load_factor": 0.3,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0,
+                "backforce_kn": 0.0,
+                "dissipated_energy_kn_m": 0.0,
+                "plastic_deformation_m": 0.0,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:c582208fe356f7bee20e94ae04f015e157701544ddd05fc35d7a73779bbf20af",
+            "step_index": 3
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.011999999999999995,
+              0.024
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.011999999999999995,
+                "generalized_deformation": 0.011999999999999995,
+                "internal_force_kn": 100.95238095238095,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.011999999999999995,
+                  "final_yield_function_kn": 0.0,
+                  "force_kn": 100.95238095238095,
+                  "plastic_multiplier_increment_m": 0.0019047619047619006,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0019047619047619006,
+                    "backforce_kn": 0.5714285714285702,
+                    "dissipated_energy_kn_m": 0.19047619047619008,
+                    "plastic_deformation_m": 0.0019047619047619006,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:9c16c46199d2cbd31a161072c22b801c74f9df1d3de7639ee243d47de2a49d57"
+                  },
+                  "trial_yield_function_kn": 19.999999999999957,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.012000000000000005,
+                "generalized_deformation": 0.012000000000000005,
+                "internal_force_kn": 100.95238095238096,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:19076af0ce44cfd673cb4fed12b9d4e808877d6efc7dc4776189a3590ac8d25e",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.012000000000000005,
+                  "final_yield_function_kn": 1.4210854715202004e-14,
+                  "force_kn": 100.95238095238096,
+                  "plastic_multiplier_increment_m": 0.0019047619047619102,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0019047619047619102,
+                    "backforce_kn": 0.5714285714285731,
+                    "dissipated_energy_kn_m": 0.19047619047619102,
+                    "plastic_deformation_m": 0.0019047619047619102,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:e8e57cb214d2bc8f92c722013460b5255297512772df3b36f09de0fc7d4a026e"
+                  },
+                  "trial_yield_function_kn": 20.000000000000057,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -100.95238095238095,
+              -1.4210854715202004e-14,
+              100.95238095238096
+            ],
+            "jacobian_kn_per_m": [
+              [
+                952.3809523809524
+              ]
+            ],
+            "parent_state_hash": "sha256:c582208fe356f7bee20e94ae04f015e157701544ddd05fc35d7a73779bbf20af",
+            "reactions_kn": [
+              -100.95238095238095,
+              0.0,
+              100.95238095238096
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              -1.4210854715202004e-14
+            ],
+            "target_load_factor": 0.4,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0019047619047619006,
+                "backforce_kn": 0.5714285714285702,
+                "dissipated_energy_kn_m": 0.19047619047619008,
+                "plastic_deformation_m": 0.0019047619047619006,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:9c16c46199d2cbd31a161072c22b801c74f9df1d3de7639ee243d47de2a49d57"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0019047619047619102,
+                "backforce_kn": 0.5714285714285731,
+                "dissipated_energy_kn_m": 0.19047619047619102,
+                "plastic_deformation_m": 0.0019047619047619102,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:e8e57cb214d2bc8f92c722013460b5255297512772df3b36f09de0fc7d4a026e"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.009
+                ],
+                "increment_abs_m": 0.0011818181818181814,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0011818181818181817
+                ],
+                "relative_residual": 12.38095238095238,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -12.38095238095238
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.01018181818181818
+                ],
+                "increment_abs_m": 0.0018181818181818143,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0018181818181818143
+                ],
+                "relative_residual": 1.731601731601728,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -1.731601731601728
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.011999999999999995
+                ],
+                "increment_abs_m": 1.4921397450962103e-17,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  1.4921397450962103e-17
+                ],
+                "relative_residual": 1.4210854715202004e-14,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  -1.4210854715202004e-14
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.01018181818181818
+                    ],
+                    "trial_relative_residual": 1.731601731601728,
+                    "trial_residual_kn": [
+                      -1.731601731601728
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.0011818181818181817
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.009
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.011999999999999995
+                    ],
+                    "trial_relative_residual": 1.4210854715202004e-14,
+                    "trial_residual_kn": [
+                      -1.4210854715202004e-14
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.0018181818181818143
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.01018181818181818
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.4",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 1.4921397450962103e-17,
+              "free_displacements_m": [
+                0.011999999999999995
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 1.4210854715202004e-14,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                -1.4210854715202004e-14
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.015000000000000006,
+              0.03
+            ],
+            "load_factor": 0.5,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.004761904761904766,
+                "backforce_kn": 1.4285714285714297,
+                "dissipated_energy_kn_m": 0.4761904761904766,
+                "plastic_deformation_m": 0.004761904761904766,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:aeac308b5bd9f983353c805a7e71cbcb19017b557bce8b5b2512a27212248935"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.004761904761904754,
+                "backforce_kn": 1.4285714285714262,
+                "dissipated_energy_kn_m": 0.4761904761904754,
+                "plastic_deformation_m": 0.004761904761904754,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:4ec80a1f3ce1e1cee46646a255081e08156f9db61934bd5ee2f714a267e9fa05"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:b6e0468ca2575120bf80b5ae39a54ea92cfd687fc687c5b016dd691ed61e1264",
+            "step_index": 5
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:b6e0468ca2575120bf80b5ae39a54ea92cfd687fc687c5b016dd691ed61e1264",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:bdf82157945d03191abcc20353f2f0fa9fd01d664256ff4ef8162913f01fcb37",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 0.5,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:bdf82157945d03191abcc20353f2f0fa9fd01d664256ff4ef8162913f01fcb37",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.011999999999999995,
+              0.024
+            ],
+            "load_factor": 0.4,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.0019047619047619006,
+                "backforce_kn": 0.5714285714285702,
+                "dissipated_energy_kn_m": 0.19047619047619008,
+                "plastic_deformation_m": 0.0019047619047619006,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:9c16c46199d2cbd31a161072c22b801c74f9df1d3de7639ee243d47de2a49d57"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0019047619047619102,
+                "backforce_kn": 0.5714285714285731,
+                "dissipated_energy_kn_m": 0.19047619047619102,
+                "plastic_deformation_m": 0.0019047619047619102,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:e8e57cb214d2bc8f92c722013460b5255297512772df3b36f09de0fc7d4a026e"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:bdf82157945d03191abcc20353f2f0fa9fd01d664256ff4ef8162913f01fcb37",
+            "step_index": 4
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.015000000000000006,
+              0.03
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.015000000000000006,
+                "generalized_deformation": 0.015000000000000006,
+                "internal_force_kn": 102.3809523809524,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:9c16c46199d2cbd31a161072c22b801c74f9df1d3de7639ee243d47de2a49d57",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.015000000000000006,
+                  "final_yield_function_kn": 1.4210854715202004e-14,
+                  "force_kn": 102.3809523809524,
+                  "plastic_multiplier_increment_m": 0.0028571428571428654,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.004761904761904766,
+                    "backforce_kn": 1.4285714285714297,
+                    "dissipated_energy_kn_m": 0.4761904761904766,
+                    "plastic_deformation_m": 0.004761904761904766,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:aeac308b5bd9f983353c805a7e71cbcb19017b557bce8b5b2512a27212248935"
+                  },
+                  "trial_yield_function_kn": 30.000000000000085,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.014999999999999993,
+                "generalized_deformation": 0.014999999999999993,
+                "internal_force_kn": 102.38095238095238,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:e8e57cb214d2bc8f92c722013460b5255297512772df3b36f09de0fc7d4a026e",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.014999999999999993,
+                  "final_yield_function_kn": 0.0,
+                  "force_kn": 102.38095238095238,
+                  "plastic_multiplier_increment_m": 0.0028571428571428437,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.004761904761904754,
+                    "backforce_kn": 1.4285714285714262,
+                    "dissipated_energy_kn_m": 0.4761904761904754,
+                    "plastic_deformation_m": 0.004761904761904754,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:4ec80a1f3ce1e1cee46646a255081e08156f9db61934bd5ee2f714a267e9fa05"
+                  },
+                  "trial_yield_function_kn": 29.999999999999858,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -102.3809523809524,
+              1.4210854715202004e-14,
+              102.38095238095238
+            ],
+            "jacobian_kn_per_m": [
+              [
+                952.3809523809524
+              ]
+            ],
+            "parent_state_hash": "sha256:bdf82157945d03191abcc20353f2f0fa9fd01d664256ff4ef8162913f01fcb37",
+            "reactions_kn": [
+              -102.3809523809524,
+              0.0,
+              102.38095238095238
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              1.4210854715202004e-14
+            ],
+            "target_load_factor": 0.5,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.004761904761904766,
+                "backforce_kn": 1.4285714285714297,
+                "dissipated_energy_kn_m": 0.4761904761904766,
+                "plastic_deformation_m": 0.004761904761904766,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:aeac308b5bd9f983353c805a7e71cbcb19017b557bce8b5b2512a27212248935"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.004761904761904754,
+                "backforce_kn": 1.4285714285714262,
+                "dissipated_energy_kn_m": 0.4761904761904754,
+                "plastic_deformation_m": 0.004761904761904754,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:4ec80a1f3ce1e1cee46646a255081e08156f9db61934bd5ee2f714a267e9fa05"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.011999999999999995
+                ],
+                "increment_abs_m": 0.0002727272727272752,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00027272727272727447
+                ],
+                "relative_residual": 2.8571428571428754,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.8571428571428754
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.01227272727272727
+                ],
+                "increment_abs_m": 0.002727272727272736,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0027272727272727366
+                ],
+                "relative_residual": 2.5974025974026063,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.5974025974026063
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.015000000000000006
+                ],
+                "increment_abs_m": 1.4921397450962103e-17,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -1.4921397450962103e-17
+                ],
+                "relative_residual": 1.4210854715202004e-14,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  1.4210854715202004e-14
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.01227272727272727
+                    ],
+                    "trial_relative_residual": 2.5974025974026063,
+                    "trial_residual_kn": [
+                      -2.5974025974026063
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00027272727272727447
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.011999999999999995
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.015000000000000006
+                    ],
+                    "trial_relative_residual": 1.4210854715202004e-14,
+                    "trial_residual_kn": [
+                      1.4210854715202004e-14
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.0027272727272727366
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.01227272727272727
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.5",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 1.4921397450962103e-17,
+              "free_displacements_m": [
+                0.015000000000000006
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 1.4210854715202004e-14,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                1.4210854715202004e-14
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.017999999999999995,
+              0.036
+            ],
+            "load_factor": 0.6,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.007619047619047616,
+                "backforce_kn": 2.2857142857142847,
+                "dissipated_energy_kn_m": 0.7619047619047616,
+                "plastic_deformation_m": 0.007619047619047616,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:a115a2b7049494a6d43c83da965272e73067314ac7bee3a55c0bd27870e85af6"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0076190476190476225,
+                "backforce_kn": 2.285714285714287,
+                "dissipated_energy_kn_m": 0.7619047619047623,
+                "plastic_deformation_m": 0.0076190476190476225,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:d28572791bae8b1dabdf95153ed601b5f6906296aaedf4435fba39e6fdbd5334"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:6ae3c1a6d083aaa2a37319867d5f6381befb401fc4ea02f8dc6f9e5d8e6c598c",
+            "step_index": 6
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:6ae3c1a6d083aaa2a37319867d5f6381befb401fc4ea02f8dc6f9e5d8e6c598c",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:b6e0468ca2575120bf80b5ae39a54ea92cfd687fc687c5b016dd691ed61e1264",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 0.6,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:b6e0468ca2575120bf80b5ae39a54ea92cfd687fc687c5b016dd691ed61e1264",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.015000000000000006,
+              0.03
+            ],
+            "load_factor": 0.5,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.004761904761904766,
+                "backforce_kn": 1.4285714285714297,
+                "dissipated_energy_kn_m": 0.4761904761904766,
+                "plastic_deformation_m": 0.004761904761904766,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:aeac308b5bd9f983353c805a7e71cbcb19017b557bce8b5b2512a27212248935"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.004761904761904754,
+                "backforce_kn": 1.4285714285714262,
+                "dissipated_energy_kn_m": 0.4761904761904754,
+                "plastic_deformation_m": 0.004761904761904754,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:4ec80a1f3ce1e1cee46646a255081e08156f9db61934bd5ee2f714a267e9fa05"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:b6e0468ca2575120bf80b5ae39a54ea92cfd687fc687c5b016dd691ed61e1264",
+            "step_index": 5
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.017999999999999995,
+              0.036
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.017999999999999995,
+                "generalized_deformation": 0.017999999999999995,
+                "internal_force_kn": 103.8095238095238,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:aeac308b5bd9f983353c805a7e71cbcb19017b557bce8b5b2512a27212248935",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.017999999999999995,
+                  "final_yield_function_kn": 0.0,
+                  "force_kn": 103.8095238095238,
+                  "plastic_multiplier_increment_m": 0.00285714285714285,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.007619047619047616,
+                    "backforce_kn": 2.2857142857142847,
+                    "dissipated_energy_kn_m": 0.7619047619047616,
+                    "plastic_deformation_m": 0.007619047619047616,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:a115a2b7049494a6d43c83da965272e73067314ac7bee3a55c0bd27870e85af6"
+                  },
+                  "trial_yield_function_kn": 29.99999999999993,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.018000000000000002,
+                "generalized_deformation": 0.018000000000000002,
+                "internal_force_kn": 103.8095238095238,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:4ec80a1f3ce1e1cee46646a255081e08156f9db61934bd5ee2f714a267e9fa05",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.018000000000000002,
+                  "final_yield_function_kn": -1.4210854715202004e-14,
+                  "force_kn": 103.8095238095238,
+                  "plastic_multiplier_increment_m": 0.0028571428571428693,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0076190476190476225,
+                    "backforce_kn": 2.285714285714287,
+                    "dissipated_energy_kn_m": 0.7619047619047623,
+                    "plastic_deformation_m": 0.0076190476190476225,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:d28572791bae8b1dabdf95153ed601b5f6906296aaedf4435fba39e6fdbd5334"
+                  },
+                  "trial_yield_function_kn": 30.000000000000128,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -103.8095238095238,
+              0.0,
+              103.8095238095238
+            ],
+            "jacobian_kn_per_m": [
+              [
+                952.3809523809524
+              ]
+            ],
+            "parent_state_hash": "sha256:b6e0468ca2575120bf80b5ae39a54ea92cfd687fc687c5b016dd691ed61e1264",
+            "reactions_kn": [
+              -103.8095238095238,
+              0.0,
+              103.8095238095238
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0
+            ],
+            "target_load_factor": 0.6,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.007619047619047616,
+                "backforce_kn": 2.2857142857142847,
+                "dissipated_energy_kn_m": 0.7619047619047616,
+                "plastic_deformation_m": 0.007619047619047616,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:a115a2b7049494a6d43c83da965272e73067314ac7bee3a55c0bd27870e85af6"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0076190476190476225,
+                "backforce_kn": 2.285714285714287,
+                "dissipated_energy_kn_m": 0.7619047619047623,
+                "plastic_deformation_m": 0.0076190476190476225,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:d28572791bae8b1dabdf95153ed601b5f6906296aaedf4435fba39e6fdbd5334"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.015000000000000006
+                ],
+                "increment_abs_m": 0.00027272727272726824,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00027272727272726764
+                ],
+                "relative_residual": 2.8571428571428044,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.8571428571428044
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.015272727272727275
+                ],
+                "increment_abs_m": 0.0027272727272727205,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0027272727272727214
+                ],
+                "relative_residual": 2.597402597402592,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.597402597402592
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.017999999999999995
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.015272727272727275
+                    ],
+                    "trial_relative_residual": 2.597402597402592,
+                    "trial_residual_kn": [
+                      -2.597402597402592
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00027272727272726764
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.015000000000000006
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.017999999999999995
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.0027272727272727214
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.015272727272727275
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.6",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.017999999999999995
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.021000000000000005,
+              0.041999999999999996
+            ],
+            "load_factor": 0.7,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.010476190476190481,
+                "backforce_kn": 3.142857142857144,
+                "dissipated_energy_kn_m": 1.0476190476190481,
+                "plastic_deformation_m": 0.010476190476190481,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:bb2d8ac0f5bc60f92fa9d79f18079040fd201af77585eef2647f97a02c5eacab"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.010476190476190469,
+                "backforce_kn": 3.1428571428571406,
+                "dissipated_energy_kn_m": 1.047619047619047,
+                "plastic_deformation_m": 0.010476190476190469,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:385fc85f15a0e0afd4cdfd6185ad90f6ab65a70643deb691990f51ded737225c"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:d9adf94d2c8c371caaaf5f09dda12b49f77d1d1ec3607ecfd9810566c1188ff1",
+            "step_index": 7
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:d9adf94d2c8c371caaaf5f09dda12b49f77d1d1ec3607ecfd9810566c1188ff1",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:6ae3c1a6d083aaa2a37319867d5f6381befb401fc4ea02f8dc6f9e5d8e6c598c",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 0.7,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:6ae3c1a6d083aaa2a37319867d5f6381befb401fc4ea02f8dc6f9e5d8e6c598c",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.017999999999999995,
+              0.036
+            ],
+            "load_factor": 0.6,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.007619047619047616,
+                "backforce_kn": 2.2857142857142847,
+                "dissipated_energy_kn_m": 0.7619047619047616,
+                "plastic_deformation_m": 0.007619047619047616,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:a115a2b7049494a6d43c83da965272e73067314ac7bee3a55c0bd27870e85af6"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0076190476190476225,
+                "backforce_kn": 2.285714285714287,
+                "dissipated_energy_kn_m": 0.7619047619047623,
+                "plastic_deformation_m": 0.0076190476190476225,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:d28572791bae8b1dabdf95153ed601b5f6906296aaedf4435fba39e6fdbd5334"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:6ae3c1a6d083aaa2a37319867d5f6381befb401fc4ea02f8dc6f9e5d8e6c598c",
+            "step_index": 6
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.021000000000000005,
+              0.041999999999999996
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.021000000000000005,
+                "generalized_deformation": 0.021000000000000005,
+                "internal_force_kn": 105.23809523809523,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:a115a2b7049494a6d43c83da965272e73067314ac7bee3a55c0bd27870e85af6",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.021000000000000005,
+                  "final_yield_function_kn": -1.4210854715202004e-14,
+                  "force_kn": 105.23809523809523,
+                  "plastic_multiplier_increment_m": 0.0028571428571428654,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.010476190476190481,
+                    "backforce_kn": 3.142857142857144,
+                    "dissipated_energy_kn_m": 1.0476190476190481,
+                    "plastic_deformation_m": 0.010476190476190481,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:bb2d8ac0f5bc60f92fa9d79f18079040fd201af77585eef2647f97a02c5eacab"
+                  },
+                  "trial_yield_function_kn": 30.000000000000085,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.02099999999999999,
+                "generalized_deformation": 0.02099999999999999,
+                "internal_force_kn": 105.23809523809521,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:d28572791bae8b1dabdf95153ed601b5f6906296aaedf4435fba39e6fdbd5334",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.02099999999999999,
+                  "final_yield_function_kn": -1.4210854715202004e-14,
+                  "force_kn": 105.23809523809521,
+                  "plastic_multiplier_increment_m": 0.0028571428571428463,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.010476190476190469,
+                    "backforce_kn": 3.1428571428571406,
+                    "dissipated_energy_kn_m": 1.047619047619047,
+                    "plastic_deformation_m": 0.010476190476190469,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:385fc85f15a0e0afd4cdfd6185ad90f6ab65a70643deb691990f51ded737225c"
+                  },
+                  "trial_yield_function_kn": 29.999999999999886,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -105.23809523809523,
+              1.4210854715202004e-14,
+              105.23809523809521
+            ],
+            "jacobian_kn_per_m": [
+              [
+                952.3809523809524
+              ]
+            ],
+            "parent_state_hash": "sha256:6ae3c1a6d083aaa2a37319867d5f6381befb401fc4ea02f8dc6f9e5d8e6c598c",
+            "reactions_kn": [
+              -105.23809523809523,
+              0.0,
+              105.23809523809521
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              1.4210854715202004e-14
+            ],
+            "target_load_factor": 0.7,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.010476190476190481,
+                "backforce_kn": 3.142857142857144,
+                "dissipated_energy_kn_m": 1.0476190476190481,
+                "plastic_deformation_m": 0.010476190476190481,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:bb2d8ac0f5bc60f92fa9d79f18079040fd201af77585eef2647f97a02c5eacab"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.010476190476190469,
+                "backforce_kn": 3.1428571428571406,
+                "dissipated_energy_kn_m": 1.047619047619047,
+                "plastic_deformation_m": 0.010476190476190469,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:385fc85f15a0e0afd4cdfd6185ad90f6ab65a70643deb691990f51ded737225c"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.017999999999999995
+                ],
+                "increment_abs_m": 0.0002727272727272717,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0002727272727272731
+                ],
+                "relative_residual": 2.857142857142861,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.857142857142861
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.018272727272727267
+                ],
+                "increment_abs_m": 0.002727272727272738,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0027272727272727366
+                ],
+                "relative_residual": 2.5974025974026063,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.5974025974026063
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.021000000000000005
+                ],
+                "increment_abs_m": 1.4921397450962103e-17,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -1.4921397450962103e-17
+                ],
+                "relative_residual": 1.4210854715202004e-14,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  1.4210854715202004e-14
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.018272727272727267
+                    ],
+                    "trial_relative_residual": 2.5974025974026063,
+                    "trial_residual_kn": [
+                      -2.5974025974026063
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.0002727272727272731
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.017999999999999995
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.021000000000000005
+                    ],
+                    "trial_relative_residual": 1.4210854715202004e-14,
+                    "trial_residual_kn": [
+                      1.4210854715202004e-14
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.0027272727272727366
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.018272727272727267
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.7",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 1.4921397450962103e-17,
+              "free_displacements_m": [
+                0.021000000000000005
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 1.4210854715202004e-14,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                1.4210854715202004e-14
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.023999999999999997,
+              0.048
+            ],
+            "load_factor": 0.8,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.013333333333333329,
+                "backforce_kn": 3.9999999999999987,
+                "dissipated_energy_kn_m": 1.333333333333333,
+                "plastic_deformation_m": 0.013333333333333329,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:79da91b79f196bcd0c6704706ed047e9d8d063dee6cd2d3008f5adefc796e119"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.013333333333333338,
+                "backforce_kn": 4.000000000000002,
+                "dissipated_energy_kn_m": 1.333333333333334,
+                "plastic_deformation_m": 0.013333333333333338,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:081117243a8ae49a20381fd5b298a86aac6d1a8547a9dc2be6a8a36392e80a90"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:15f64ab0bf3bcddcf7313487ffae4cbeec27be343d3e5842e912436bad7ec8b3",
+            "step_index": 8
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:15f64ab0bf3bcddcf7313487ffae4cbeec27be343d3e5842e912436bad7ec8b3",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:d9adf94d2c8c371caaaf5f09dda12b49f77d1d1ec3607ecfd9810566c1188ff1",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 0.8,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:d9adf94d2c8c371caaaf5f09dda12b49f77d1d1ec3607ecfd9810566c1188ff1",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.021000000000000005,
+              0.041999999999999996
+            ],
+            "load_factor": 0.7,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.010476190476190481,
+                "backforce_kn": 3.142857142857144,
+                "dissipated_energy_kn_m": 1.0476190476190481,
+                "plastic_deformation_m": 0.010476190476190481,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:bb2d8ac0f5bc60f92fa9d79f18079040fd201af77585eef2647f97a02c5eacab"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.010476190476190469,
+                "backforce_kn": 3.1428571428571406,
+                "dissipated_energy_kn_m": 1.047619047619047,
+                "plastic_deformation_m": 0.010476190476190469,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:385fc85f15a0e0afd4cdfd6185ad90f6ab65a70643deb691990f51ded737225c"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:d9adf94d2c8c371caaaf5f09dda12b49f77d1d1ec3607ecfd9810566c1188ff1",
+            "step_index": 7
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.023999999999999997,
+              0.048
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.023999999999999997,
+                "generalized_deformation": 0.023999999999999997,
+                "internal_force_kn": 106.66666666666667,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:bb2d8ac0f5bc60f92fa9d79f18079040fd201af77585eef2647f97a02c5eacab",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.023999999999999997,
+                  "final_yield_function_kn": 0.0,
+                  "force_kn": 106.66666666666667,
+                  "plastic_multiplier_increment_m": 0.002857142857142849,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.013333333333333329,
+                    "backforce_kn": 3.9999999999999987,
+                    "dissipated_energy_kn_m": 1.333333333333333,
+                    "plastic_deformation_m": 0.013333333333333329,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:79da91b79f196bcd0c6704706ed047e9d8d063dee6cd2d3008f5adefc796e119"
+                  },
+                  "trial_yield_function_kn": 29.999999999999915,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.024000000000000004,
+                "generalized_deformation": 0.024000000000000004,
+                "internal_force_kn": 106.66666666666666,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:385fc85f15a0e0afd4cdfd6185ad90f6ab65a70643deb691990f51ded737225c",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.024000000000000004,
+                  "final_yield_function_kn": -1.4210854715202004e-14,
+                  "force_kn": 106.66666666666666,
+                  "plastic_multiplier_increment_m": 0.0028571428571428693,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.013333333333333338,
+                    "backforce_kn": 4.000000000000002,
+                    "dissipated_energy_kn_m": 1.333333333333334,
+                    "plastic_deformation_m": 0.013333333333333338,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:081117243a8ae49a20381fd5b298a86aac6d1a8547a9dc2be6a8a36392e80a90"
+                  },
+                  "trial_yield_function_kn": 30.000000000000128,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -106.66666666666667,
+              1.4210854715202004e-14,
+              106.66666666666666
+            ],
+            "jacobian_kn_per_m": [
+              [
+                952.3809523809524
+              ]
+            ],
+            "parent_state_hash": "sha256:d9adf94d2c8c371caaaf5f09dda12b49f77d1d1ec3607ecfd9810566c1188ff1",
+            "reactions_kn": [
+              -106.66666666666667,
+              0.0,
+              106.66666666666666
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              1.4210854715202004e-14
+            ],
+            "target_load_factor": 0.8,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.013333333333333329,
+                "backforce_kn": 3.9999999999999987,
+                "dissipated_energy_kn_m": 1.333333333333333,
+                "plastic_deformation_m": 0.013333333333333329,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:79da91b79f196bcd0c6704706ed047e9d8d063dee6cd2d3008f5adefc796e119"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.013333333333333338,
+                "backforce_kn": 4.000000000000002,
+                "dissipated_energy_kn_m": 1.333333333333334,
+                "plastic_deformation_m": 0.013333333333333338,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:081117243a8ae49a20381fd5b298a86aac6d1a8547a9dc2be6a8a36392e80a90"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.021000000000000005
+                ],
+                "increment_abs_m": 0.0002727272727272717,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00027272727272727035
+                ],
+                "relative_residual": 2.857142857142833,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.857142857142833
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.021272727272727276
+                ],
+                "increment_abs_m": 0.0027272727272727205,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0027272727272727214
+                ],
+                "relative_residual": 2.597402597402592,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.597402597402592
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.023999999999999997
+                ],
+                "increment_abs_m": 1.4921397450962103e-17,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -1.4921397450962103e-17
+                ],
+                "relative_residual": 1.4210854715202004e-14,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  1.4210854715202004e-14
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.021272727272727276
+                    ],
+                    "trial_relative_residual": 2.597402597402592,
+                    "trial_residual_kn": [
+                      -2.597402597402592
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00027272727272727035
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.021000000000000005
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.023999999999999997
+                    ],
+                    "trial_relative_residual": 1.4210854715202004e-14,
+                    "trial_residual_kn": [
+                      1.4210854715202004e-14
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.0027272727272727214
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.021272727272727276
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.8",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 1.4921397450962103e-17,
+              "free_displacements_m": [
+                0.023999999999999997
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 1.4210854715202004e-14,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                1.4210854715202004e-14
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.02699999999999999,
+              0.054
+            ],
+            "load_factor": 0.9,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.01619047619047618,
+                "backforce_kn": 4.857142857142854,
+                "dissipated_energy_kn_m": 1.6190476190476182,
+                "plastic_deformation_m": 0.01619047619047618,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:4232510fb31c6bc6e961bf26bde650be18323d33564e97899948b0a8c5f34a5d"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0161904761904762,
+                "backforce_kn": 4.85714285714286,
+                "dissipated_energy_kn_m": 1.61904761904762,
+                "plastic_deformation_m": 0.0161904761904762,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:9df96964206f2c6f8afbfe840044435850408ea6b01cd5046a2656ef42ad8248"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:6b8dee3b529a63eea685464de4d6be56c982e120d0c708a775345d0ab2267915",
+            "step_index": 9
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:6b8dee3b529a63eea685464de4d6be56c982e120d0c708a775345d0ab2267915",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:15f64ab0bf3bcddcf7313487ffae4cbeec27be343d3e5842e912436bad7ec8b3",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 0.9,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:15f64ab0bf3bcddcf7313487ffae4cbeec27be343d3e5842e912436bad7ec8b3",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.023999999999999997,
+              0.048
+            ],
+            "load_factor": 0.8,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.013333333333333329,
+                "backforce_kn": 3.9999999999999987,
+                "dissipated_energy_kn_m": 1.333333333333333,
+                "plastic_deformation_m": 0.013333333333333329,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:79da91b79f196bcd0c6704706ed047e9d8d063dee6cd2d3008f5adefc796e119"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.013333333333333338,
+                "backforce_kn": 4.000000000000002,
+                "dissipated_energy_kn_m": 1.333333333333334,
+                "plastic_deformation_m": 0.013333333333333338,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:081117243a8ae49a20381fd5b298a86aac6d1a8547a9dc2be6a8a36392e80a90"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:15f64ab0bf3bcddcf7313487ffae4cbeec27be343d3e5842e912436bad7ec8b3",
+            "step_index": 8
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.02699999999999999,
+              0.054
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.02699999999999999,
+                "generalized_deformation": 0.02699999999999999,
+                "internal_force_kn": 108.0952380952381,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:79da91b79f196bcd0c6704706ed047e9d8d063dee6cd2d3008f5adefc796e119",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.02699999999999999,
+                  "final_yield_function_kn": 0.0,
+                  "force_kn": 108.0952380952381,
+                  "plastic_multiplier_increment_m": 0.00285714285714285,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.01619047619047618,
+                    "backforce_kn": 4.857142857142854,
+                    "dissipated_energy_kn_m": 1.6190476190476182,
+                    "plastic_deformation_m": 0.01619047619047618,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:4232510fb31c6bc6e961bf26bde650be18323d33564e97899948b0a8c5f34a5d"
+                  },
+                  "trial_yield_function_kn": 29.99999999999993,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.02700000000000001,
+                "generalized_deformation": 0.02700000000000001,
+                "internal_force_kn": 108.0952380952381,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:081117243a8ae49a20381fd5b298a86aac6d1a8547a9dc2be6a8a36392e80a90",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.02700000000000001,
+                  "final_yield_function_kn": 0.0,
+                  "force_kn": 108.0952380952381,
+                  "plastic_multiplier_increment_m": 0.002857142857142861,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.0161904761904762,
+                    "backforce_kn": 4.85714285714286,
+                    "dissipated_energy_kn_m": 1.61904761904762,
+                    "plastic_deformation_m": 0.0161904761904762,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:9df96964206f2c6f8afbfe840044435850408ea6b01cd5046a2656ef42ad8248"
+                  },
+                  "trial_yield_function_kn": 30.000000000000043,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -108.0952380952381,
+              0.0,
+              108.0952380952381
+            ],
+            "jacobian_kn_per_m": [
+              [
+                952.3809523809524
+              ]
+            ],
+            "parent_state_hash": "sha256:15f64ab0bf3bcddcf7313487ffae4cbeec27be343d3e5842e912436bad7ec8b3",
+            "reactions_kn": [
+              -108.0952380952381,
+              0.0,
+              108.0952380952381
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0
+            ],
+            "target_load_factor": 0.9,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.01619047619047618,
+                "backforce_kn": 4.857142857142854,
+                "dissipated_energy_kn_m": 1.6190476190476182,
+                "plastic_deformation_m": 0.01619047619047618,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:4232510fb31c6bc6e961bf26bde650be18323d33564e97899948b0a8c5f34a5d"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0161904761904762,
+                "backforce_kn": 4.85714285714286,
+                "dissipated_energy_kn_m": 1.61904761904762,
+                "plastic_deformation_m": 0.0161904761904762,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:9df96964206f2c6f8afbfe840044435850408ea6b01cd5046a2656ef42ad8248"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.023999999999999997
+                ],
+                "increment_abs_m": 0.0002727272727272717,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00027272727272727176
+                ],
+                "relative_residual": 2.857142857142847,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.857142857142847
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.02427272727272727
+                ],
+                "increment_abs_m": 0.0027272727272727205,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0027272727272727214
+                ],
+                "relative_residual": 2.597402597402592,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.597402597402592
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.02699999999999999
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.02427272727272727
+                    ],
+                    "trial_relative_residual": 2.597402597402592,
+                    "trial_residual_kn": [
+                      -2.597402597402592
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00027272727272727176
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.023999999999999997
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.02699999999999999
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.0027272727272727214
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.02427272727272727
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=0.9",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.02699999999999999
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.03,
+              0.06
+            ],
+            "load_factor": 1.0,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.019047619047619042,
+                "backforce_kn": 5.7142857142857135,
+                "dissipated_energy_kn_m": 1.9047619047619047,
+                "plastic_deformation_m": 0.019047619047619042,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:287db43a2a7a8d8b325643a8990389367ad2b8e448d8410c2a0c21a2ef533c08"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.019047619047619046,
+                "backforce_kn": 5.714285714285714,
+                "dissipated_energy_kn_m": 1.9047619047619047,
+                "plastic_deformation_m": 0.019047619047619046,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:90a32b817889599bc47f4e3cd3a8f1032b422b3df25ec180c92699887efa1eb0"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:ee8597f6ba207106e5acf627e5fb14b94020e7020488a9d9122c776bc4fd9e31",
+            "step_index": 10
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:ee8597f6ba207106e5acf627e5fb14b94020e7020488a9d9122c776bc4fd9e31",
+            "active_equation_count": 1,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:6b8dee3b529a63eea685464de4d6be56c982e120d0c708a775345d0ab2267915",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 1.0,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:6b8dee3b529a63eea685464de4d6be56c982e120d0c708a775345d0ab2267915",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.02699999999999999,
+              0.054
+            ],
+            "load_factor": 0.9,
+            "material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.01619047619047618,
+                "backforce_kn": 4.857142857142854,
+                "dissipated_energy_kn_m": 1.6190476190476182,
+                "plastic_deformation_m": 0.01619047619047618,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:4232510fb31c6bc6e961bf26bde650be18323d33564e97899948b0a8c5f34a5d"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.0161904761904762,
+                "backforce_kn": 4.85714285714286,
+                "dissipated_energy_kn_m": 1.61904761904762,
+                "plastic_deformation_m": 0.0161904761904762,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:9df96964206f2c6f8afbfe840044435850408ea6b01cd5046a2656ef42ad8248"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:6b8dee3b529a63eea685464de4d6be56c982e120d0c708a775345d0ab2267915",
+            "step_index": 9
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.03,
+              0.06
+            ],
+            "element_responses": [
+              {
+                "area_m2": 1.0,
+                "element_id": "link-1",
+                "elongation_m": 0.03,
+                "generalized_deformation": 0.03,
+                "internal_force_kn": 109.52380952380953,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:4232510fb31c6bc6e961bf26bde650be18323d33564e97899948b0a8c5f34a5d",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.03,
+                  "final_yield_function_kn": 1.4210854715202004e-14,
+                  "force_kn": 109.52380952380953,
+                  "plastic_multiplier_increment_m": 0.0028571428571428654,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.019047619047619042,
+                    "backforce_kn": 5.7142857142857135,
+                    "dissipated_energy_kn_m": 1.9047619047619047,
+                    "plastic_deformation_m": 0.019047619047619042,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:287db43a2a7a8d8b325643a8990389367ad2b8e448d8410c2a0c21a2ef533c08"
+                  },
+                  "trial_yield_function_kn": 30.000000000000085,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              },
+              {
+                "area_m2": 1.0,
+                "element_id": "link-2",
+                "elongation_m": 0.03,
+                "generalized_deformation": 0.03,
+                "internal_force_kn": 109.52380952380952,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:9df96964206f2c6f8afbfe840044435850408ea6b01cd5046a2656ef42ad8248",
+                  "consistent_tangent_kn_per_m": 476.1904761904762,
+                  "damage_evolved": false,
+                  "deformation_m": 0.03,
+                  "final_yield_function_kn": 0.0,
+                  "force_kn": 109.52380952380952,
+                  "plastic_multiplier_increment_m": 0.0028571428571428463,
+                  "trial_state": {
+                    "accumulated_plastic_deformation_m": 0.019047619047619046,
+                    "backforce_kn": 5.714285714285714,
+                    "dissipated_energy_kn_m": 1.9047619047619047,
+                    "plastic_deformation_m": 0.019047619047619046,
+                    "schema_version": "bilinear-combined-hardening-link-state.v1",
+                    "state_hash": "sha256:90a32b817889599bc47f4e3cd3a8f1032b422b3df25ec180c92699887efa1eb0"
+                  },
+                  "trial_yield_function_kn": 29.999999999999886,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "force_deformation",
+                "tangent_kn_per_m": 476.1904761904762,
+                "total_strain": null
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1
+            ],
+            "internal_forces_kn": [
+              -109.52380952380953,
+              1.4210854715202004e-14,
+              109.52380952380952
+            ],
+            "jacobian_kn_per_m": [
+              [
+                952.3809523809524
+              ]
+            ],
+            "parent_state_hash": "sha256:6b8dee3b529a63eea685464de4d6be56c982e120d0c708a775345d0ab2267915",
+            "reactions_kn": [
+              -109.52380952380953,
+              0.0,
+              109.52380952380952
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              1.4210854715202004e-14
+            ],
+            "target_load_factor": 1.0,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_deformation_m": 0.019047619047619042,
+                "backforce_kn": 5.7142857142857135,
+                "dissipated_energy_kn_m": 1.9047619047619047,
+                "plastic_deformation_m": 0.019047619047619042,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:287db43a2a7a8d8b325643a8990389367ad2b8e448d8410c2a0c21a2ef533c08"
+              },
+              {
+                "accumulated_plastic_deformation_m": 0.019047619047619046,
+                "backforce_kn": 5.714285714285714,
+                "dissipated_energy_kn_m": 1.9047619047619047,
+                "plastic_deformation_m": 0.019047619047619046,
+                "schema_version": "bilinear-combined-hardening-link-state.v1",
+                "state_hash": "sha256:90a32b817889599bc47f4e3cd3a8f1032b422b3df25ec180c92699887efa1eb0"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.02699999999999999
+                ],
+                "increment_abs_m": 0.0002727272727272717,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0002727272727272731
+                ],
+                "relative_residual": 2.857142857142861,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.857142857142861
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.02727272727272726
+                ],
+                "increment_abs_m": 0.002727272727272738,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0027272727272727366
+                ],
+                "relative_residual": 2.5974025974026063,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  -2.5974025974026063
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.03
+                ],
+                "increment_abs_m": 1.4921397450962103e-17,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -1.4921397450962103e-17
+                ],
+                "relative_residual": 1.4210854715202004e-14,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  1.4210854715202004e-14
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.02727272727272726
+                    ],
+                    "trial_relative_residual": 2.5974025974026063,
+                    "trial_residual_kn": [
+                      -2.5974025974026063
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.0002727272727272731
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.02699999999999999
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.03
+                    ],
+                    "trial_relative_residual": 1.4210854715202004e-14,
+                    "trial_residual_kn": [
+                      1.4210854715202004e-14
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.0027272727272727366
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.02727272727272726
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 1,
+              "case_id": "phase2_state_updated_bilinear_link_two_element_chain@load=1",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 1.4921397450962103e-17,
+              "free_displacements_m": [
+                0.03
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 1.4210854715202004e-14,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                1.4210854715202004e-14
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        }
+      ]
+    }
+  },
+  "tangent_definition": "algorithmic_consistent_d_force_d_deformation",
+  "truth_class": "analytic_1d_force_deformation_link_truth",
+  "verification": {
+    "cyclic_energy_gate_passed": true,
+    "element_contract_pass": true,
+    "fallback_count": 0,
+    "line_search_history_present": true,
+    "material_point_contract_pass": true,
+    "regularization_count": 0,
+    "rollback_exact_gate_passed": true,
+    "structure_contract_pass": true
+  }
+}

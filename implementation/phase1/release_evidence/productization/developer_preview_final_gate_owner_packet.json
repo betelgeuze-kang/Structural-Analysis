@@ -3,27 +3,28 @@
     "developer_preview_final_gate_action_register": "docs/developer_preview_final_gate_action_register.md",
     "developer_preview_rc_status": "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
   },
-  "blocked_final_gate_count": 3,
+  "blocked_final_gate_count": 4,
   "blocked_gate_items": [
     "selected_medium_models_pass_or_approved_review",
+    "silent_import_loss_zero",
     "linux_windows_reproducibility_confirmed",
     "new_user_core_workflow_observation_passed"
   ],
   "blockers": [],
-  "claim_boundary": "This packet is a Developer Preview owner-evidence handoff for blocked RC final gates. It does not create benchmark, Windows, or human UX evidence; does not promote Developer Preview readiness; and does not close Commercial Release, G1, customer shadow, external benchmark, license, SLA, or GitHub CI streak gates.",
+  "claim_boundary": "This packet is a Developer Preview owner-evidence handoff for blocked RC final gates. It does not acquire IFC sources, run import evidence, or create benchmark, Windows, or human UX evidence; does not promote Developer Preview readiness; and does not close Commercial Release, G1, customer shadow, external benchmark, license, SLA, or GitHub CI streak gates.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "evidence_intake_artifact_count": 12,
-  "evidence_refresh_command_count": 12,
+  "evidence_intake_artifact_count": 16,
+  "evidence_refresh_command_count": 17,
   "final_gate_count": 9,
-  "final_gate_pass_count": 6,
-  "generated_at": "2026-07-02T22:05:48.061650+00:00",
+  "final_gate_pass_count": 5,
+  "generated_at": "2026-07-19T06:32:44.666328+00:00",
   "input_checksums": {
-    "docs/developer_preview_final_gate_action_register.md": "sha256:25abda7d736edfe0f37503a7f00a6125b37f7c448be98b5cde8dbe8949a460cb",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:34e810d4a3953d8d585694c74fdbd9b3b7e51ca1365aa6e86526b25a1bdfec23",
+    "docs/developer_preview_final_gate_action_register.md": "sha256:983780912d2a3400d15846b046f4910e86cc1c8a1c2509643ee99adccc0b3dcf",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:378a7ea7a2787230ebc1548e485ac21a193f6dc22e628cdc1887c70ea3d1a8b8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
-    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:549709a01a1944322065cab7ba5afdfc5a79d1c8ec21af95c5618f4e3defa956"
+    "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:072c1fc82c9896565ffb00614e6dc2c22f632e78a12dc863dd5ae19301479168"
   },
   "nearest_abf_slice": [
     {
@@ -52,11 +53,20 @@
       "verification_commands": []
     },
     {
-      "closure_decision_required": "",
-      "contract_pass": true,
-      "current_blocker_count": 0,
-      "current_blockers": [],
-      "current_evidence_gap_state": "ready",
+      "closure_decision_required": "technical_IFC_import_and_silent_loss_evidence_passes",
+      "contract_pass": false,
+      "current_blocker_count": 8,
+      "current_blockers": [
+        "dirty_import_execution_missing",
+        "ifc_import_health_execution_count_below_required:0/10",
+        "import_health_execution_missing",
+        "phase3_ifc_import_case_count_below_minimum",
+        "silent_data_loss_negative_gate_not_executed",
+        "silent_import_loss_gate_not_executed",
+        "source_file_not_acquired",
+        "source_sha256_missing"
+      ],
+      "current_evidence_gap_state": "owner_evidence_required",
       "current_evidence_refs": [
         "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
         "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
@@ -64,18 +74,28 @@
         "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
         "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json"
       ],
-      "evidence_refresh_commands": [],
+      "evidence_refresh_commands": [
+        "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --out implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+        "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --out implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+        "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --out implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+        "python3 scripts/build_phase6_silent_import_loss_status.py --out implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
+        "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+      ],
       "gate": "silent_import_loss_zero",
-      "owner": "",
-      "owner_action_if_blocked": "Regenerate IFC import-health and silent-data-loss receipts without counting product/license credit blockers as DP technical closure.",
-      "owner_review_required": false,
+      "owner": "ifc_import_validation_owner",
+      "owner_action_if_blocked": "Acquire and SHA256-bind every selected clean and dirty IFC file, run the import-health and negative silent-loss contracts, and regenerate the Phase 3 and Phase 6 receipts. Keep product/license quantity credit separate from the Developer Preview technical gate.",
+      "owner_review_required": true,
       "owner_unblock_slot_ids": [],
       "present": true,
-      "ready_for_dp_final_gate": true,
+      "ready_for_dp_final_gate": false,
       "slice_goal": "keep_ifc_import_loss_technical_gate_green",
       "slice_id": "B",
-      "status": "ready",
-      "verification_commands": []
+      "status": "blocked",
+      "verification_commands": [
+        "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --check",
+        "python3 scripts/build_phase6_silent_import_loss_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
     },
     {
       "closure_decision_required": "accepted_human_new_user_observation",
@@ -143,26 +163,29 @@
     }
   ],
   "nearest_abf_slice_summary": {
-    "blocked_count": 1,
+    "blocked_count": 2,
     "blocked_gates": [
+      "silent_import_loss_zero",
       "new_user_core_workflow_observation_passed"
     ],
     "blocked_slice_ids": [
+      "B",
       "F"
     ],
-    "claim_boundary": "A/B/F slice tracking only reports current DP final-gate state. It does not create missing human observation, benchmark, or platform replay evidence and does not promote Developer Preview.",
-    "completion_ratio": 0.6667,
-    "ready_count": 2,
+    "claim_boundary": "A/B/F slice tracking only reports current DP final-gate state. It does not acquire IFC inputs or create missing import execution, human observation, benchmark, or platform replay evidence and does not promote Developer Preview.",
+    "completion_ratio": 0.3333,
+    "ready_count": 1,
     "ready_slice_ids": [
-      "A",
-      "B"
+      "A"
     ],
     "slice_count": 3
   },
-  "owner_packet_blocker_id_count": 32,
+  "owner_packet_blocker_id_count": 34,
   "owner_packet_blocker_ids": [
     "developer_preview_rc::selected_medium_models_pass_or_approved_review",
     "product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review",
+    "developer_preview_rc::silent_import_loss_zero",
+    "product_readiness_snapshot::final_gate_blocked:silent_import_loss_zero",
     "developer_preview_rc::linux_windows_reproducibility_confirmed",
     "product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed",
     "developer_preview_rc::new_user_core_workflow_observation_passed",
@@ -194,17 +217,18 @@
     "ux_new_user_observation::evidence_ref_missing",
     "ux_new_user_observation::approval_decision_not_accepted"
   ],
-  "owner_packet_count": 3,
+  "owner_packet_count": 4,
   "owner_packet_gate_ids": [
     "selected_medium_models_pass_or_approved_review",
+    "silent_import_loss_zero",
     "linux_windows_reproducibility_confirmed",
     "new_user_core_workflow_observation_passed"
   ],
   "owner_packets": [
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 7,
-        "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
+        "blocker_count": 8,
+        "grouping_policy": "Preserve every blocker while separating source/license prerequisites, reference/normalization preparation, the medium scientific corpus, medium scorecard execution, large runner execution, and quantity shortfalls. This grouping does not acquire sources, create benchmark evidence, or promote RC readiness.",
         "groups": {
           "large_quantity_shortfall": {
             "blocker_count": 0,
@@ -226,6 +250,14 @@
             ],
             "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
             "scope": "medium_model_quantity_gate"
+          },
+          "medium_scientific_corpus": {
+            "blocker_count": 1,
+            "blockers": [
+              "scientific_medium_corpus_contract_blocked"
+            ],
+            "description": "Five-archetype medium corpus, independent-reference, and scientific credit prerequisites.",
+            "scope": "medium_model_scientific_corpus"
           },
           "medium_scorecard_execution": {
             "blocker_count": 2,
@@ -264,7 +296,7 @@
       ],
       "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
       "contract_pass": false,
-      "current_blocker_count": 7,
+      "current_blocker_count": 8,
       "current_blockers": [
         "medium_structural_models_current_below_required:3/5",
         "license_review_pending",
@@ -272,6 +304,7 @@
         "normalization_receipts_missing",
         "opensees_medium_scorecard_execution_missing",
         "reference_outputs_missing",
+        "scientific_medium_corpus_contract_blocked",
         "medium_model_pass_or_review_below_required:0/5"
       ],
       "current_evidence_gap_state": "owner_evidence_required",
@@ -324,6 +357,32 @@
             "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
             "python3 scripts/build_phase6_benchmark_scale_status.py --check",
             "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        },
+        {
+          "action": "Populate the five-archetype scientific medium corpus with complete artifact chains and valid per-case PASS or scoped REVIEW decisions.",
+          "clears_blockers": [
+            "scientific_medium_corpus_contract_blocked"
+          ],
+          "evidence_artifacts": [
+            "implementation/phase1/release_evidence/productization/medium_benchmark_case_evidence.json",
+            "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json"
+          ],
+          "minimum_evidence": [
+            "all five required structural archetype slots are uniquely populated",
+            "each case has a complete checksum-bound comparison artifact chain",
+            "OpenSees and a second independent reference solver are represented",
+            "scientific PASS or scoped, unexpired engineer REVIEW grants case credit",
+            "medium_benchmark_corpus_plan.json contract_pass=true and credit_count=5"
+          ],
+          "owner": "benchmark_operator_and_reviewer",
+          "remaining_case_count": 5,
+          "slot_id": "complete_scientific_medium_corpus",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
+          "validation_commands": [
+            "python3 scripts/build_medium_benchmark_corpus_plan.py",
+            "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
+            "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
           ]
         },
         {
@@ -413,13 +472,13 @@
           ]
         },
         {
-          "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+          "action": "Attach per-case scientific PASS decisions or scoped, unexpired engineer REVIEW records referenced by each scorecard receipt.",
           "clears_blockers": [
             "medium_model_pass_or_review_missing"
           ],
           "evidence_artifacts": [],
           "minimum_evidence": [
-            "each selected case has PASS or APPROVED_REVIEW decision",
+            "each selected case has PASS or scoped engineer REVIEW decision",
             "decision is referenced by the corresponding scorecard receipt",
             "medium_model_pass_or_review_missing is absent from the readiness receipt blockers"
           ],
@@ -444,6 +503,7 @@
           "slot_id": "rerun_medium_model_and_dp_rc_checks",
           "source_artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
           "validation_commands": [
+            "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
             "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
             "python3 scripts/build_phase6_benchmark_scale_status.py --check",
             "python3 scripts/build_developer_preview_rc_status.py --check",
@@ -451,9 +511,10 @@
           ]
         }
       ],
-      "owner_unblock_plan_count": 7,
+      "owner_unblock_plan_count": 8,
       "owner_unblock_slot_ids": [
         "select_additional_medium_model_cases",
+        "complete_scientific_medium_corpus",
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
@@ -488,13 +549,14 @@
       "upstream_handoff_sources": [
         {
           "artifact": "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json",
-          "blocker_count": 5,
+          "blocker_count": 6,
           "blockers": [
             "license_review_pending",
             "medium_model_pass_or_review_missing",
             "normalization_receipts_missing",
             "opensees_medium_scorecard_execution_missing",
-            "reference_outputs_missing"
+            "reference_outputs_missing",
+            "scientific_medium_corpus_contract_blocked"
           ],
           "case_input_requirements": {
             "case_fields": [
@@ -520,7 +582,7 @@
               },
               {
                 "field": "scorecard_or_review_path",
-                "required_artifact": "PASS scorecard or pre-approved REVIEW record",
+                "required_artifact": "benchmark-scientific-decision.v1 PASS or scoped engineer REVIEW",
                 "runner_argument": "--scorecard-or-review"
               },
               {
@@ -573,6 +635,31 @@
                 "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                 "python3 scripts/build_phase6_benchmark_scale_status.py --check",
                 "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "action": "Populate the five-archetype scientific medium corpus with complete artifact chains and valid per-case PASS or scoped REVIEW decisions.",
+              "clears_blockers": [
+                "scientific_medium_corpus_contract_blocked"
+              ],
+              "evidence_artifacts": [
+                "implementation/phase1/release_evidence/productization/medium_benchmark_case_evidence.json",
+                "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json"
+              ],
+              "minimum_evidence": [
+                "all five required structural archetype slots are uniquely populated",
+                "each case has a complete checksum-bound comparison artifact chain",
+                "OpenSees and a second independent reference solver are represented",
+                "scientific PASS or scoped, unexpired engineer REVIEW grants case credit",
+                "medium_benchmark_corpus_plan.json contract_pass=true and credit_count=5"
+              ],
+              "owner": "benchmark_operator_and_reviewer",
+              "remaining_case_count": 5,
+              "slot_id": "complete_scientific_medium_corpus",
+              "validation_commands": [
+                "python3 scripts/build_medium_benchmark_corpus_plan.py",
+                "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
               ]
             },
             {
@@ -658,13 +745,13 @@
               ]
             },
             {
-              "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+              "action": "Attach per-case scientific PASS decisions or scoped, unexpired engineer REVIEW records referenced by each scorecard receipt.",
               "clears_blockers": [
                 "medium_model_pass_or_review_missing"
               ],
               "evidence_artifacts": [],
               "minimum_evidence": [
-                "each selected case has PASS or APPROVED_REVIEW decision",
+                "each selected case has PASS or scoped engineer REVIEW decision",
                 "decision is referenced by the corresponding scorecard receipt",
                 "medium_model_pass_or_review_missing is absent from the readiness receipt blockers"
               ],
@@ -687,6 +774,7 @@
               "owner": "release_engineering",
               "slot_id": "rerun_medium_model_and_dp_rc_checks",
               "validation_commands": [
+                "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
                 "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                 "python3 scripts/build_phase6_benchmark_scale_status.py --check",
                 "python3 scripts/build_developer_preview_rc_status.py --check",
@@ -694,7 +782,7 @@
               ]
             }
           ],
-          "gate_unblock_plan_count": 7,
+          "gate_unblock_plan_count": 8,
           "missing_evidence_breakdown": [
             {
               "blocker": "license_review_pending",
@@ -705,6 +793,23 @@
               "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
               "spdx": "GPL-3.0",
               "status": "identified_review_required"
+            },
+            {
+              "blocker": "scientific_medium_corpus_contract_blocked",
+              "current_case_count": 0,
+              "evidence_type": "scientific_benchmark_corpus",
+              "id": "scientific_corpus_contract",
+              "remaining_case_count": 5,
+              "required": "Five diverse medium archetypes with complete artifact chains, OpenSees plus a second independent solver, and scientific PASS/REVIEW credit.",
+              "required_artifacts": [
+                "five diverse medium archetype case rows",
+                "complete per-case normalization/reference/output/comparison chain",
+                "OpenSees and a second independent reference solver",
+                "benchmark-scientific-decision.v1 PASS or scoped REVIEW"
+              ],
+              "required_case_count": 5,
+              "scientific_corpus_plan_path": "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json",
+              "status": "blocked"
             },
             {
               "blocker": "reference_outputs_missing",
@@ -747,26 +852,26 @@
               "remaining_case_count": 5,
               "required": "OpenSees medium scorecard execution retaining residual, increment, and convergence history.",
               "required_case_count": 5,
-              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
               "status": "missing"
             },
             {
               "accepted_decisions": [
                 "PASS",
-                "APPROVED_REVIEW"
+                "REVIEW"
               ],
               "blocker": "medium_model_pass_or_review_missing",
               "current_case_count": 0,
               "evidence_type": "operator_attached",
               "id": "pass_or_approved_review",
               "remaining_case_count": 5,
-              "required": "Per-case PASS or explicit pre-approved REVIEW decision for selected medium models.",
+              "required": "Per-case scientific PASS or scoped, unexpired engineer REVIEW decision covering every required core metric family.",
               "required_case_count": 5,
               "status": "missing"
             }
           ],
-          "missing_evidence_count": 5,
-          "operator_next_action_count": 6,
+          "missing_evidence_count": 6,
+          "operator_next_action_count": 7,
           "operator_next_actions": [
             {
               "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
@@ -789,6 +894,24 @@
               ]
             },
             {
+              "action": "Populate the five-archetype scientific medium corpus with complete artifact chains and valid per-case PASS or scoped REVIEW decisions.",
+              "clears_blockers": [
+                "scientific_medium_corpus_contract_blocked"
+              ],
+              "evidence_artifacts": [
+                "implementation/phase1/release_evidence/productization/medium_benchmark_case_evidence.json",
+                "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json"
+              ],
+              "id": "complete_scientific_medium_corpus",
+              "owner": "benchmark_operator_and_reviewer",
+              "remaining_case_count": 5,
+              "validation_commands": [
+                "python3 scripts/build_medium_benchmark_corpus_plan.py",
+                "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
               "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
               "clears_blockers": [
                 "license_review_pending"
@@ -845,7 +968,7 @@
               "owner": "benchmark_operator",
               "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
               "remaining_case_count": 5,
-              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
               "validation_commands": [
                 "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                 "python3 scripts/build_phase6_benchmark_scale_status.py --check",
@@ -855,9 +978,9 @@
             {
               "accepted_decisions": [
                 "PASS",
-                "APPROVED_REVIEW"
+                "REVIEW"
               ],
-              "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+              "action": "Attach per-case scientific PASS decisions or scoped, unexpired engineer REVIEW records referenced by each scorecard receipt.",
               "clears_blockers": [
                 "medium_model_pass_or_review_missing"
               ],
@@ -871,7 +994,7 @@
             }
           ],
           "present": true,
-          "recommended_next_action_count": 6,
+          "recommended_next_action_count": 7,
           "recommended_next_actions": [
             {
               "action": "Select and attach additional authoritative medium structural model cases until the RC medium-model set reaches five cases.",
@@ -894,6 +1017,24 @@
               ]
             },
             {
+              "action": "Populate the five-archetype scientific medium corpus with complete artifact chains and valid per-case PASS or scoped REVIEW decisions.",
+              "clears_blockers": [
+                "scientific_medium_corpus_contract_blocked"
+              ],
+              "evidence_artifacts": [
+                "implementation/phase1/release_evidence/productization/medium_benchmark_case_evidence.json",
+                "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json"
+              ],
+              "id": "complete_scientific_medium_corpus",
+              "owner": "benchmark_operator_and_reviewer",
+              "remaining_case_count": 5,
+              "validation_commands": [
+                "python3 scripts/build_medium_benchmark_corpus_plan.py",
+                "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
+                "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+              ]
+            },
+            {
               "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
               "clears_blockers": [
                 "license_review_pending"
@@ -950,7 +1091,7 @@
               "owner": "benchmark_operator",
               "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
               "remaining_case_count": 5,
-              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+              "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
               "validation_commands": [
                 "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                 "python3 scripts/build_phase6_benchmark_scale_status.py --check",
@@ -960,9 +1101,9 @@
             {
               "accepted_decisions": [
                 "PASS",
-                "APPROVED_REVIEW"
+                "REVIEW"
               ],
-              "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+              "action": "Attach per-case scientific PASS decisions or scoped, unexpired engineer REVIEW records referenced by each scorecard receipt.",
               "clears_blockers": [
                 "medium_model_pass_or_review_missing"
               ],
@@ -975,11 +1116,12 @@
               ]
             }
           ],
-          "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+          "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
           "status": "blocked",
-          "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=4/9",
-          "validation_command_count": 4,
+          "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=4/10",
+          "validation_command_count": 5,
           "validation_commands": [
+            "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
             "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
             "python3 scripts/build_phase6_benchmark_scale_status.py --check",
             "python3 scripts/build_developer_preview_rc_status.py --check",
@@ -992,19 +1134,173 @@
       "upstream_intake_blocker_ids": [],
       "upstream_intake_contract_pass": false,
       "upstream_intake_status": "",
-      "upstream_validation_command_count": 4,
+      "upstream_validation_command_count": 5,
       "upstream_validation_commands": [
+        "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
         "python3 scripts/build_developer_preview_rc_status.py --check",
         "python3 scripts/build_product_readiness_snapshot.py --check"
       ],
-      "verification_command_count": 4,
+      "verification_command_count": 5,
       "verification_commands": [
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
         "python3 scripts/build_developer_preview_rc_status.py --check",
+        "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
         "python3 scripts/build_product_readiness_snapshot.py --check"
+      ]
+    },
+    {
+      "blocker_grouping_metadata": {},
+      "blocker_ids": [
+        "developer_preview_rc::silent_import_loss_zero",
+        "product_readiness_snapshot::final_gate_blocked:silent_import_loss_zero"
+      ],
+      "closure_decision_required": "technical_IFC_import_and_silent_loss_evidence_passes",
+      "contract_pass": false,
+      "current_blocker_count": 8,
+      "current_blockers": [
+        "dirty_import_execution_missing",
+        "ifc_import_health_execution_count_below_required:0/10",
+        "import_health_execution_missing",
+        "phase3_ifc_import_case_count_below_minimum",
+        "silent_data_loss_negative_gate_not_executed",
+        "silent_import_loss_gate_not_executed",
+        "source_file_not_acquired",
+        "source_sha256_missing"
+      ],
+      "current_evidence_gap_state": "owner_evidence_required",
+      "current_evidence_refs": [
+        "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json"
+      ],
+      "evidence_intake_artifact_count": 4,
+      "evidence_intake_artifacts": [
+        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json"
+      ],
+      "evidence_refresh_command_count": 5,
+      "evidence_refresh_commands": [
+        "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --out implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+        "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --out implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+        "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --out implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+        "python3 scripts/build_phase6_silent_import_loss_status.py --out implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
+        "python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+      ],
+      "gate": "silent_import_loss_zero",
+      "gate_id": "silent_import_loss_zero",
+      "human_observation_evidence_policy": {},
+      "notes": [
+        "Requires acquired/checksummed clean and dirty IFC files plus executed import-health and negative/import-hardening contracts. Product/legal license review and IFC quantity credit remain release/product-credit requirements and are surfaced in the IFC import handoff."
+      ],
+      "owner": "ifc_import_validation_owner",
+      "owner_action": "Acquire and SHA256-bind every selected clean and dirty IFC file, run the import-health and negative silent-loss contracts, and regenerate the Phase 3 and Phase 6 receipts. Keep product/license quantity credit separate from the Developer Preview technical gate.",
+      "owner_unblock_plan": [],
+      "owner_unblock_plan_count": 0,
+      "owner_unblock_slot_ids": [],
+      "prohibited_substitutes": [
+        "selected_ifc_case_contracts_without_acquired_source_files",
+        "expected_import_contracts_without_execution_receipts",
+        "source_urls_without_file_sha256_bindings",
+        "product_or_license_quantity_credit_used_as_technical_execution_evidence"
+      ],
+      "release_surface_impact_count": 2,
+      "release_surface_impacts": [
+        "developer_preview_rc::silent_import_loss_zero",
+        "product_readiness_snapshot::final_gate_blocked:silent_import_loss_zero"
+      ],
+      "required_owner_evidence": [
+        "selected_clean_and_dirty_ifc_source_files",
+        "per_file_sha256_bindings",
+        "phase3_ifc_import_health_execution_receipt",
+        "clean_ifc_import_health_execution_receipts",
+        "dirty_ifc_negative_import_execution_receipts",
+        "visible_entity_accounting_and_zero_silent_loss_decision"
+      ],
+      "required_owner_evidence_count": 6,
+      "status": "blocked",
+      "upstream_handoff_artifact_count": 2,
+      "upstream_handoff_artifacts": [
+        "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json"
+      ],
+      "upstream_handoff_source_count": 2,
+      "upstream_handoff_sources": [
+        {
+          "artifact": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+          "blocker_count": 3,
+          "blockers": [
+            "import_health_execution_missing",
+            "source_file_not_acquired",
+            "source_sha256_missing"
+          ],
+          "contract_pass": false,
+          "gate_unblock_plan": [],
+          "gate_unblock_plan_count": 0,
+          "missing_evidence_breakdown": [],
+          "missing_evidence_count": 0,
+          "operator_next_action_count": 0,
+          "operator_next_actions": [],
+          "present": true,
+          "recommended_next_action_count": 0,
+          "recommended_next_actions": [],
+          "status": "blocked",
+          "summary_line": "",
+          "validation_command_count": 0,
+          "validation_commands": []
+        },
+        {
+          "artifact": "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
+          "blocker_count": 13,
+          "blockers": [
+            "dirty_import_execution_missing",
+            "ifc_import_health_execution_count_below_required:0/10",
+            "import_health_execution_missing",
+            "per_file_license_review_pending",
+            "phase3_ifc_import_case_count_below_minimum",
+            "phase3_ifc_import_case_quantity_credit_missing",
+            "phase3_ifc_source_license_quantity_credit_below_required:0/10",
+            "phase3_ifc_source_license_review_blockers_not_cleared:3",
+            "product_legal_license_review_pending",
+            "silent_data_loss_negative_gate_not_executed",
+            "silent_import_loss_gate_not_executed",
+            "source_file_not_acquired",
+            "source_sha256_missing"
+          ],
+          "contract_pass": false,
+          "gate_unblock_plan": [],
+          "gate_unblock_plan_count": 0,
+          "missing_evidence_breakdown": [],
+          "missing_evidence_count": 0,
+          "operator_next_action_count": 0,
+          "operator_next_actions": [],
+          "present": true,
+          "recommended_next_action_count": 0,
+          "recommended_next_actions": [],
+          "status": "blocked",
+          "summary_line": "Phase 6 silent import loss: BLOCKED | selected=10/10 | executed=0/10",
+          "validation_command_count": 0,
+          "validation_commands": []
+        }
+      ],
+      "upstream_intake_artifact": "",
+      "upstream_intake_blocker_id_count": 0,
+      "upstream_intake_blocker_ids": [],
+      "upstream_intake_contract_pass": false,
+      "upstream_intake_status": "",
+      "upstream_validation_command_count": 0,
+      "upstream_validation_commands": [],
+      "verification_command_count": 3,
+      "verification_commands": [
+        "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --check",
+        "python3 scripts/build_phase6_silent_import_loss_status.py --check",
+        "python3 scripts/build_developer_preview_rc_status.py --check"
       ]
     },
     {
@@ -1821,21 +2117,20 @@
     }
   ],
   "owner_review_required": true,
-  "owner_unblock_plan_count": 14,
+  "owner_unblock_plan_count": 15,
   "ready_gate_items": [
     "analytic_component_benchmark_all_pass",
     "large_models_crash_oom_free",
-    "silent_import_loss_zero",
     "residual_and_convergence_history_present",
     "unsupported_features_explicitly_blocked",
     "benchmark_results_clean_checkout_regenerated"
   ],
-  "release_surface_impact_count": 8,
+  "release_surface_impact_count": 10,
   "required_closure_evidence_policy": "Each blocked final gate must attach the named owner evidence and pass its verification commands before Developer Preview RC closure. Handoff packets, templates, Linux-only replays, parser-only rows, and automated smoke tests do not substitute for the missing receipts.",
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
   "status": "ready_for_owner_review",
-  "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3"
+  "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=4/9 | handoff_rows=4"
 }

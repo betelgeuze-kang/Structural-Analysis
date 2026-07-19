@@ -108,7 +108,8 @@ def _coupled_system(model: dict[str, Any]) -> tuple[Any, np.ndarray, dict[str, A
     )
     coupled_frame_elements, coupled_frame_meta = _select_coupled_frame_elements(
         node_xyz=model["node_xyz"],
-        edge_index=model["edge_index"],
+        conn_ptr=model["conn_ptr"],
+        conn_idx=model["conn_idx"],
         elem_id=model["elem_id"],
         elem_type_code=model["elem_type_code"],
         elem_section_id=model["elem_section_id"],

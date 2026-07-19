@@ -1,6 +1,49 @@
 {
   "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
   "claim_boundary": "This records a scalar Newton-Raphson solve with explicit R=F_internal-F_external, consistent tangent, backtracking line search, and separate residual/increment gates for one cubic-spring axial case. It does not close general nonlinear equilibrium, frame/shell/material coupling, sparse production backends, full-mesh/full-load G1, or GPU/HIP parity.",
+  "configuration_guard": {
+    "case_count": 5,
+    "cases": [
+      {
+        "case_id": "infinite_residual_and_increment_tolerances",
+        "exception_type": "ValueError",
+        "expected_message_fragment": "residual_tolerance",
+        "message": "residual_tolerance must be a finite positive number",
+        "rejected_before_solver_invocation": true
+      },
+      {
+        "case_id": "zero_residual_tolerance",
+        "exception_type": "ValueError",
+        "expected_message_fragment": "residual_tolerance",
+        "message": "residual_tolerance must be a finite positive number",
+        "rejected_before_solver_invocation": true
+      },
+      {
+        "case_id": "negative_iteration_limit",
+        "exception_type": "ValueError",
+        "expected_message_fragment": "max_iterations",
+        "message": "max_iterations must be a non-negative integer",
+        "rejected_before_solver_invocation": true
+      },
+      {
+        "case_id": "nondecreasing_line_search_alphas",
+        "exception_type": "ValueError",
+        "expected_message_fragment": "line_search_alphas",
+        "message": "line_search_alphas must be strictly decreasing",
+        "rejected_before_solver_invocation": true
+      },
+      {
+        "case_id": "empty_matrix_backend",
+        "exception_type": "ValueError",
+        "expected_message_fragment": "matrix_backend",
+        "message": "matrix_backend must be a non-empty string",
+        "rejected_before_solver_invocation": true
+      }
+    ],
+    "contract_pass": true,
+    "infinite_tolerance_false_pass_prevented": true,
+    "rejected_case_count": 5
+  },
   "contract_pass": true,
   "convergence_history": [
     {
@@ -226,29 +269,247 @@
   ],
   "matrix_backend": "numpy_linalg_solve_scalar",
   "metrics": {
+    "active_equation_count": 1,
     "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
     "contract_pass": true,
+    "convergence_claim": true,
     "displacement_m": 0.3930027389711051,
     "external_force_kn": 100.0,
     "fallback_used": false,
     "final_increment_abs_m": 5.0450936265225813e-17,
     "globalization": "backtracking_line_search",
     "increment_gate_passed": true,
+    "increment_norm_applicable": true,
     "increment_tolerance": 1e-12,
     "internal_force_kn": 99.99999999999997,
     "iteration_count": 7,
     "line_search_step_count": 6,
     "line_search_used": true,
+    "linear_solve_count": 7,
     "matrix_backend": "numpy_linalg_solve_scalar",
+    "newton_iteration_count": 7,
+    "reaction_observation_only": false,
     "regularization_used": false,
     "relative_residual": 2.842170943040401e-16,
     "residual_formula": "F_internal_minus_F_external",
+    "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
     "residual_gate_passed": true,
     "residual_kn": -2.842170943040401e-14,
+    "residual_norm_applicable": true,
     "residual_tolerance": 1e-10,
+    "solver_executed": true,
     "sparse_backend_used": false,
     "tangent_definition": "dF_internal_du_consistent",
-    "tangent_kn_per_m": 563.3534585163718
+    "tangent_kn_per_m": 563.3534585163718,
+    "terminal_disposition": "solve_free_equations",
+    "terminal_reason": "residual_and_increment_converged"
+  },
+  "non_descent_line_search_guard": {
+    "scalar": {
+      "accepted": false,
+      "all_attempts_rejected": true,
+      "attempt_count": 6,
+      "case_id": "phase2_constant_residual_scalar_line_search_guard",
+      "convergence_claim": false,
+      "convergence_history": [
+        {
+          "accepted": false,
+          "displacement_m": 0.0,
+          "external_force_kn": 1.0,
+          "increment_abs": 0.0,
+          "increment_gate_passed": true,
+          "internal_force_kn": 0.0,
+          "iteration": 0,
+          "line_search_alpha": 0.0,
+          "line_search_attempt_count": 6,
+          "newton_increment_m": 1.0,
+          "relative_residual": 1.0,
+          "residual_gate_passed": false,
+          "residual_kn": -1.0,
+          "tangent_kn_per_m": 1.0
+        }
+      ],
+      "fallback_used": false,
+      "guard_passed": true,
+      "increment_gate_passed_on_unchanged_state": true,
+      "line_search_history": [
+        {
+          "attempt_count": 6,
+          "attempts": [
+            {
+              "accepted": false,
+              "alpha": 1.0,
+              "trial_displacement_m": 1.0,
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": -1.0
+            },
+            {
+              "accepted": false,
+              "alpha": 0.5,
+              "trial_displacement_m": 0.5,
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": -1.0
+            },
+            {
+              "accepted": false,
+              "alpha": 0.25,
+              "trial_displacement_m": 0.25,
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": -1.0
+            },
+            {
+              "accepted": false,
+              "alpha": 0.125,
+              "trial_displacement_m": 0.125,
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": -1.0
+            },
+            {
+              "accepted": false,
+              "alpha": 0.0625,
+              "trial_displacement_m": 0.0625,
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": -1.0
+            },
+            {
+              "accepted": false,
+              "alpha": 0.03125,
+              "trial_displacement_m": 0.03125,
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": -1.0
+            }
+          ],
+          "iteration": 0,
+          "newton_increment_m": 1.0,
+          "selected_alpha": 0.0,
+          "starting_displacement_m": 0.0
+        }
+      ],
+      "regularization_used": false,
+      "selected_alpha": 0.0,
+      "solver_executed": true,
+      "status": "blocked",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "line_search_failed_to_reduce_residual"
+    },
+    "vector": {
+      "accepted": false,
+      "all_attempts_rejected": true,
+      "attempt_count": 6,
+      "case_id": "phase2_constant_residual_vector_line_search_guard",
+      "convergence_claim": false,
+      "convergence_history": [
+        {
+          "accepted": false,
+          "free_displacements_m": [
+            0.0
+          ],
+          "increment_abs_m": 0.0,
+          "increment_gate_passed": true,
+          "iteration": 0,
+          "line_search_alpha": 0.0,
+          "line_search_attempt_count": 6,
+          "newton_increment_m": [
+            -1.0
+          ],
+          "relative_residual": 1.0,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            1.0
+          ]
+        }
+      ],
+      "fallback_used": false,
+      "guard_passed": true,
+      "increment_gate_passed_on_unchanged_state": true,
+      "line_search_history": [
+        {
+          "attempt_count": 6,
+          "attempts": [
+            {
+              "accepted": false,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                -1.0
+              ],
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": [
+                1.0
+              ]
+            },
+            {
+              "accepted": false,
+              "alpha": 0.5,
+              "trial_free_displacements_m": [
+                -0.5
+              ],
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": [
+                1.0
+              ]
+            },
+            {
+              "accepted": false,
+              "alpha": 0.25,
+              "trial_free_displacements_m": [
+                -0.25
+              ],
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": [
+                1.0
+              ]
+            },
+            {
+              "accepted": false,
+              "alpha": 0.125,
+              "trial_free_displacements_m": [
+                -0.125
+              ],
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": [
+                1.0
+              ]
+            },
+            {
+              "accepted": false,
+              "alpha": 0.0625,
+              "trial_free_displacements_m": [
+                -0.0625
+              ],
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": [
+                1.0
+              ]
+            },
+            {
+              "accepted": false,
+              "alpha": 0.03125,
+              "trial_free_displacements_m": [
+                -0.03125
+              ],
+              "trial_relative_residual": 1.0,
+              "trial_residual_kn": [
+                1.0
+              ]
+            }
+          ],
+          "iteration": 0,
+          "newton_increment_m": [
+            -1.0
+          ],
+          "selected_alpha": 0.0,
+          "starting_free_displacements_m": [
+            0.0
+          ]
+        }
+      ],
+      "regularization_used": false,
+      "selected_alpha": 0.0,
+      "solver_executed": true,
+      "status": "blocked",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "line_search_failed_to_reduce_residual"
+    }
   },
   "nonlinear_newton_closure_claim": false,
   "problem": {

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import hashlib
+import math
 from typing import Any, Protocol
 import warnings
 
@@ -11,7 +13,12 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import MatrixRankWarning, spsolve
 
 RESIDUAL_FORMULA = "F_internal_minus_F_external"
+RESIDUAL_FORMULA_HASH = (
+    "sha256:" + hashlib.sha256(RESIDUAL_FORMULA.encode("utf-8")).hexdigest()
+)
 GLOBALIZATION = "backtracking_line_search"
+SOLVE_FREE_EQUATIONS_DISPOSITION = "solve_free_equations"
+NO_SOLVE_REACTION_ONLY_DISPOSITION = "no_solve_reaction_only"
 MATRIX_BACKEND = "numpy_linalg_solve_scalar"
 VECTOR_MATRIX_BACKEND = "numpy_linalg_solve_dense"
 VECTOR_SPARSE_MATRIX_BACKEND = "scipy_sparse_spsolve_cpu"
@@ -133,6 +140,57 @@ class NewtonRaphsonConfig:
     line_search_alphas: tuple[float, ...] = (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125)
     matrix_backend: str = VECTOR_MATRIX_BACKEND
 
+    def __post_init__(self) -> None:
+        for name in ("residual_tolerance", "increment_tolerance"):
+            value = getattr(self, name)
+            if isinstance(value, (bool, np.bool_)) or not isinstance(
+                value,
+                (int, float, np.integer, np.floating),
+            ):
+                raise ValueError(f"{name} must be a finite positive number")
+            normalized = float(value)
+            if not math.isfinite(normalized) or normalized <= 0.0:
+                raise ValueError(f"{name} must be a finite positive number")
+            object.__setattr__(self, name, normalized)
+
+        if (
+            isinstance(self.max_iterations, (bool, np.bool_))
+            or not isinstance(self.max_iterations, (int, np.integer))
+            or int(self.max_iterations) < 0
+        ):
+            raise ValueError("max_iterations must be a non-negative integer")
+        object.__setattr__(self, "max_iterations", int(self.max_iterations))
+
+        if not isinstance(self.line_search_alphas, (tuple, list)) or not (
+            self.line_search_alphas
+        ):
+            raise ValueError("line_search_alphas must be a non-empty sequence")
+        normalized_alphas: list[float] = []
+        previous_alpha = math.inf
+        for value in self.line_search_alphas:
+            if isinstance(value, (bool, np.bool_)) or not isinstance(
+                value,
+                (int, float, np.integer, np.floating),
+            ):
+                raise ValueError(
+                    "line_search_alphas must contain finite positive numbers"
+                )
+            alpha = float(value)
+            if not math.isfinite(alpha) or alpha <= 0.0 or alpha > 1.0:
+                raise ValueError(
+                    "line_search_alphas must be finite in the interval (0, 1]"
+                )
+            if alpha >= previous_alpha:
+                raise ValueError(
+                    "line_search_alphas must be strictly decreasing"
+                )
+            normalized_alphas.append(alpha)
+            previous_alpha = alpha
+        object.__setattr__(self, "line_search_alphas", tuple(normalized_alphas))
+
+        if not isinstance(self.matrix_backend, str) or not self.matrix_backend.strip():
+            raise ValueError("matrix_backend must be a non-empty string")
+
 
 def _vector_backend_metadata(matrix_backend: str) -> dict[str, Any]:
     sparse_backend = matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
@@ -191,6 +249,88 @@ class NewtonRaphsonVectorSolution:
     line_search_history: list[dict[str, Any]] = field(default_factory=list)
     unsupported_features: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+
+
+def _no_solve_reaction_only_vector_solution(
+    problem: VectorEquilibriumProblem,
+    cfg: NewtonRaphsonConfig,
+    *,
+    free_displacements_m: np.ndarray,
+) -> NewtonRaphsonVectorSolution:
+    """Route F=0 to a reaction-only terminal state without Newton recurrence."""
+    detail = "free_equation_space_empty"
+    residual_kn = np.asarray([], dtype=float)
+    jacobian_kn_per_m = np.empty((0, 0), dtype=float)
+    try:
+        assembled_residual, assembled_jacobian = problem.assemble(
+            free_displacements_m
+        )
+        residual_kn = np.asarray(assembled_residual, dtype=float)
+        jacobian_kn_per_m = np.asarray(assembled_jacobian, dtype=float)
+        assembly_contract_valid = bool(
+            residual_kn.shape == (0,)
+            and jacobian_kn_per_m.shape == (0, 0)
+            and np.all(np.isfinite(residual_kn))
+            and np.all(np.isfinite(jacobian_kn_per_m))
+        )
+    except (TypeError, ValueError, ArithmeticError, AttributeError, LookupError):
+        assembly_contract_valid = False
+    if not assembly_contract_valid:
+        detail = "zero_equation_assembly_contract_invalid"
+
+    contract_pass = assembly_contract_valid
+    metrics = {
+        "case_id": problem.case_id,
+        "free_displacements_m": [],
+        "active_equation_count": 0,
+        "residual_kn": residual_kn.tolist(),
+        "relative_residual": None,
+        "residual_formula": RESIDUAL_FORMULA,
+        "residual_formula_hash": RESIDUAL_FORMULA_HASH,
+        "tangent_definition": "not_applicable_no_free_equations",
+        "globalization": "not_applicable_no_free_equations",
+        "matrix_backend": None,
+        "sparse_backend_used": False,
+        "stiffness_storage": "none",
+        "terminal_disposition": NO_SOLVE_REACTION_ONLY_DISPOSITION,
+        "terminal_reason": detail,
+        "solver_executed": False,
+        "newton_iteration_count": 0,
+        "linear_solve_count": 0,
+        "line_search_step_count": 0,
+        "line_search_used": False,
+        "residual_norm_applicable": False,
+        "increment_norm_applicable": False,
+        "residual_gate_passed": None,
+        "increment_gate_passed": None,
+        "convergence_claim": False,
+        "reaction_observation_only": True,
+        "assembly_contract_valid": assembly_contract_valid,
+        "regularization_used": False,
+        "fallback_used": False,
+        "contract_pass": contract_pass,
+    }
+    unsupported = []
+    if not contract_pass:
+        unsupported.append(
+            {
+                "kind": "newton_vector_no_solve_contract_blocked",
+                "detail": detail,
+                "guard_outcome": "blocked",
+                "regularization_used": False,
+                "fallback_used": False,
+            }
+        )
+    return NewtonRaphsonVectorSolution(
+        status="ready" if contract_pass else "blocked",
+        problem=problem,
+        config=cfg,
+        free_displacements_m=free_displacements_m,
+        metrics=metrics,
+        convergence_history=[],
+        line_search_history=[],
+        unsupported_features=unsupported,
+    )
 
 
 def _relative_residual(problem: ScalarAxialEquilibriumProblem, residual: float) -> float:
@@ -282,17 +422,32 @@ def newton_raphson_vector(
 ) -> NewtonRaphsonVectorSolution:
     """Solve assembled R(u)=F_internal(u)-F_external with Newton and line search."""
     cfg = config or NewtonRaphsonConfig()
+    free_displacements_m = np.asarray(
+        problem.initial_free_displacements_m(),
+        dtype=float,
+    ).copy()
+    if free_displacements_m.ndim != 1 or not np.all(
+        np.isfinite(free_displacements_m)
+    ):
+        raise ValueError(
+            "initial_free_displacements_m must be a finite one-dimensional vector"
+        )
+    if free_displacements_m.size == 0:
+        return _no_solve_reaction_only_vector_solution(
+            problem,
+            cfg,
+            free_displacements_m=free_displacements_m,
+        )
     if cfg.matrix_backend not in VECTOR_MATRIX_BACKENDS:
         return _blocked_vector_solution(
             problem,
             cfg,
-            free_displacements_m=problem.initial_free_displacements_m().astype(float).copy(),
+            free_displacements_m=free_displacements_m,
             history=[],
             line_search_history=[],
             detail="unsupported_matrix_backend",
         )
     backend_metadata = _vector_backend_metadata(cfg.matrix_backend)
-    free_displacements_m = problem.initial_free_displacements_m().astype(float).copy()
     history: list[dict[str, Any]] = []
     line_search_history: list[dict[str, Any]] = []
     regularization_used = False
@@ -352,7 +507,7 @@ def newton_raphson_vector(
         )
         increment_abs = float(np.linalg.norm(next_displacement_m - free_displacements_m, ord=np.inf))
         increment_gate_passed = increment_abs <= cfg.increment_tolerance
-        accepted = line_search_alpha > 0.0 or increment_gate_passed
+        accepted = line_search_alpha > 0.0
         line_search_history.append(
             {
                 "iteration": iteration,
@@ -423,8 +578,19 @@ def newton_raphson_vector(
         "residual_kn": final_residual.tolist(),
         "relative_residual": final_relative_residual,
         "residual_formula": RESIDUAL_FORMULA,
+        "residual_formula_hash": RESIDUAL_FORMULA_HASH,
+        "active_equation_count": int(free_displacements_m.size),
         "tangent_definition": "dF_internal_du_consistent",
         "globalization": GLOBALIZATION,
+        "terminal_disposition": SOLVE_FREE_EQUATIONS_DISPOSITION,
+        "terminal_reason": "residual_and_increment_converged",
+        "solver_executed": True,
+        "newton_iteration_count": len(history),
+        "linear_solve_count": len(history),
+        "residual_norm_applicable": True,
+        "increment_norm_applicable": True,
+        "convergence_claim": contract_pass,
+        "reaction_observation_only": False,
         **backend_metadata,
         "residual_tolerance": cfg.residual_tolerance,
         "increment_tolerance": cfg.increment_tolerance,
@@ -473,7 +639,16 @@ def _blocked_vector_solution(
             "residual_kn": residual_kn.tolist(),
             "relative_residual": _relative_residual_vector(problem, residual_kn),
             "residual_formula": RESIDUAL_FORMULA,
+            "residual_formula_hash": RESIDUAL_FORMULA_HASH,
             "globalization": GLOBALIZATION,
+            "active_equation_count": int(free_displacements_m.size),
+            "terminal_disposition": SOLVE_FREE_EQUATIONS_DISPOSITION,
+            "terminal_reason": detail,
+            "solver_executed": detail != "unsupported_matrix_backend",
+            "residual_norm_applicable": True,
+            "increment_norm_applicable": True,
+            "convergence_claim": False,
+            "reaction_observation_only": False,
             **backend_metadata,
             "residual_gate_passed": False,
             "increment_gate_passed": False,
@@ -578,7 +753,7 @@ def newton_raphson_scalar(
         )
         increment_abs = abs(next_displacement_m - displacement_m)
         increment_gate_passed = increment_abs <= cfg.increment_tolerance
-        accepted = line_search_alpha > 0.0 or increment_gate_passed
+        accepted = line_search_alpha > 0.0
         line_search_history.append(
             {
                 "iteration": iteration,
@@ -655,8 +830,19 @@ def newton_raphson_scalar(
         "relative_residual": final_relative_residual,
         "tangent_kn_per_m": problem.tangent_stiffness(displacement_m),
         "residual_formula": RESIDUAL_FORMULA,
+        "residual_formula_hash": RESIDUAL_FORMULA_HASH,
+        "active_equation_count": 1,
         "tangent_definition": "dF_internal_du_consistent",
         "globalization": GLOBALIZATION,
+        "terminal_disposition": SOLVE_FREE_EQUATIONS_DISPOSITION,
+        "terminal_reason": "residual_and_increment_converged",
+        "solver_executed": True,
+        "newton_iteration_count": len(history),
+        "linear_solve_count": len(history),
+        "residual_norm_applicable": True,
+        "increment_norm_applicable": True,
+        "convergence_claim": contract_pass,
+        "reaction_observation_only": False,
         "matrix_backend": MATRIX_BACKEND,
         "sparse_backend_used": SPARSE_BACKEND_USED,
         "residual_tolerance": cfg.residual_tolerance,
@@ -705,7 +891,16 @@ def _blocked_solution(
             "residual_kn": residual_kn,
             "relative_residual": _relative_residual(problem, residual_kn),
             "residual_formula": RESIDUAL_FORMULA,
+            "residual_formula_hash": RESIDUAL_FORMULA_HASH,
             "globalization": GLOBALIZATION,
+            "active_equation_count": 1,
+            "terminal_disposition": SOLVE_FREE_EQUATIONS_DISPOSITION,
+            "terminal_reason": detail,
+            "solver_executed": detail != "unsupported_matrix_backend",
+            "residual_norm_applicable": True,
+            "increment_norm_applicable": True,
+            "convergence_claim": False,
+            "reaction_observation_only": False,
             "matrix_backend": (
                 cfg.matrix_backend
                 if detail == "unsupported_matrix_backend"
@@ -790,4 +985,77 @@ def finite_difference_tangent_check(
         "finite_difference_tangent_kn_per_m": fd,
         "abs_error": error,
         "pass": error <= 1.0e-6,
+    }
+
+
+def assess_quadratic_convergence(
+    convergence_history: list[dict[str, Any]],
+    *,
+    minimum_observed_order: float = 1.8,
+    minimum_order_sample_count: int = 2,
+) -> dict[str, Any]:
+    """Assess local Newton order from consecutive accepted full-step residuals."""
+
+    samples: list[dict[str, float | int]] = []
+    for row in convergence_history:
+        if not isinstance(row, dict) or row.get("accepted") is not True:
+            continue
+        residual = float(row.get("relative_residual", math.nan))
+        alpha = float(row.get("line_search_alpha", math.nan))
+        if not math.isfinite(residual) or residual <= 0.0 or alpha != 1.0:
+            continue
+        samples.append(
+            {
+                "iteration": int(row.get("iteration", len(samples))),
+                "relative_residual": residual,
+            }
+        )
+
+    order_rows: list[dict[str, float | int]] = []
+    for previous, current, following in zip(
+        samples,
+        samples[1:],
+        samples[2:],
+        strict=False,
+    ):
+        residual_previous = float(previous["relative_residual"])
+        residual_current = float(current["relative_residual"])
+        residual_following = float(following["relative_residual"])
+        if not (
+            residual_following < residual_current < residual_previous
+            and residual_previous > 0.0
+        ):
+            continue
+        denominator = math.log(residual_current / residual_previous)
+        if denominator == 0.0:
+            continue
+        observed_order = math.log(residual_following / residual_current) / denominator
+        quadratic_ratio = residual_following / (residual_current**2)
+        if not math.isfinite(observed_order) or not math.isfinite(quadratic_ratio):
+            continue
+        order_rows.append(
+            {
+                "ending_iteration": int(following["iteration"]),
+                "observed_order": observed_order,
+                "quadratic_ratio": quadratic_ratio,
+            }
+        )
+
+    observed_orders = [float(row["observed_order"]) for row in order_rows]
+    minimum_order = min(observed_orders) if observed_orders else None
+    passed = bool(
+        len(observed_orders) >= minimum_order_sample_count
+        and minimum_order is not None
+        and minimum_order >= minimum_observed_order
+    )
+    return {
+        "method": "consecutive_full_step_relative_residual_order",
+        "minimum_observed_order_required": minimum_observed_order,
+        "minimum_order_sample_count_required": minimum_order_sample_count,
+        "full_step_sample_count": len(samples),
+        "order_sample_count": len(order_rows),
+        "minimum_observed_order": minimum_order,
+        "samples": samples,
+        "order_samples": order_rows,
+        "pass": passed,
     }

@@ -3,12 +3,16 @@ from pathlib import Path
 
 def test_index_viewer_publishes_shared_selection_contract() -> None:
     text = Path("src/structure-viewer/index.html").read_text(encoding="utf-8")
+    state_facade = Path("src/structure-viewer/viewer-state.js").read_text(
+        encoding="utf-8"
+    )
     shared_selection_module = Path("src/structure-viewer/viewer-shared-selection-state.js").read_text(
         encoding="utf-8"
     )
 
     assert "structural-viewer-selection-v1" in shared_selection_module
-    assert "viewer-shared-selection-state.js" in text
+    assert "from './viewer-state.js';" in text
+    assert "export * from './viewer-shared-selection-state.js';" in state_facade
     assert "publishSharedSelection" in text
     assert "BroadcastChannel" in text
     assert "window.addEventListener('storage'" in text

@@ -181,6 +181,11 @@ provenance ModelIR hashes, global versus reduced CSR identity, and the StateIR
 large-vector storage profile. These are follow-up contracts, not claims closed
 by PR B.
 
+The stacked local follow-up implementation is documented in
+`docs/engine-v2-pr-a-followup-and-pr-c-fgmres.md`. That document does not amend
+PR B's exact-head scope or promote PR #104: the follow-up still requires its own
+review and approved integration path.
+
 Later PR-B follow-ups are Linux/Windows golden hashes, characteristic-length
 refinement tests, a reviewed general extension API, and descriptor-based vector
 artifact storage. They are intentionally not mixed into this pre-merge fix.

@@ -1,0 +1,292 @@
+{
+  "blockers_remaining": [
+    "full_fgmres_recurrence_not_covered_by_this_primitive_receipt",
+    "device_resident_restart_checkpoint_not_covered_by_this_primitive_receipt",
+    "production_scale_preconditioner_effectiveness_not_verified",
+    "independent_gfx1100_receipt_not_attached",
+    "same_clean_source_commit_cross_device_not_verified",
+    "signed_hardware_receipt_not_attached",
+    "wheel_hash_cross_device_identity_not_verified",
+    "model_size_performance_sweep_not_executed"
+  ],
+  "claim_boundary": "This local development receipt binds the deterministic CPU FGMRES run and one actual gfx1030 HIP execution to the same reduced-CSR fixture. It verifies FP64 SpMV, dot, L2/Linf norm, operator-derived left-scaled Jacobi preconditioner apply, AXPY, solution update, same-stream ordering, and runtime status propagation within the declared tolerance. This primitive receipt does not cover the full device-resident FGMRES recurrence or restart/checkpoint parity, production-scale preconditioner effectiveness, gfx1100 independent evidence, a clean same-commit/wheel pair, a signed receipt, or performance.",
+  "claims": {
+    "device_resident_restart_checkpoint": false,
+    "full_fgmres_recurrence_parity": false,
+    "gfx1030_local_operator_derived_scaled_jacobi_apply_parity": true,
+    "gfx1030_local_primitive_parity": true,
+    "independent_gfx1100_parity": false,
+    "performance": false,
+    "production_preconditioner_parity": false,
+    "same_source_commit_cross_device": false,
+    "signed_receipt": false
+  },
+  "contract_pass": true,
+  "cpu_reference": {
+    "converged": true,
+    "execution_plan_hash": "sha256:6cd369872a4b47bae89697b2190b4eb234ad2f59b512b1773232fb1e28d88b32",
+    "iteration_count": 6,
+    "operator_numeric_values_hash": "sha256:69b0c8d2ab056f09130e0534f4d8042e407460f2c0de1f0218b0460da9ad0c71",
+    "preconditioner_contract_hash": "sha256:7a80362388b9ce461d6816e704fff162f9ccbba9e9de8f204884c61d1cf1c1bc",
+    "preconditioner_profile": "operator_derived_left_scaled_jacobi_right.v1",
+    "reduced_csr_identity_hash": "sha256:072393d9675686c81fd718f47d44baf37049578e58af0a267398fbe8bdc6cfa2",
+    "restart_count": 1,
+    "result_ir_authority": false,
+    "run_hash": "sha256:b0e12765288cfd8d37aa987fa2f6e626bf6d56422d4c9c3adb4390e349aac930",
+    "scaling_hash": "sha256:4251990d6afa6356827cf9ce9ffd40d5d58b80bb29d6b2cf02d106944b956a81",
+    "terminal_reason": "converged_scaled_residual"
+  },
+  "fixture": {
+    "arrays": {
+      "column_indices": {
+        "byte_length": 144,
+        "data_hash": "sha256:f7c19bc2f6239c274665e4427bdc72dbb28605cf766bba74bcac6930a5770b38",
+        "dtype": "<i4",
+        "shape": [
+          36
+        ]
+      },
+      "direction": {
+        "byte_length": 48,
+        "data_hash": "sha256:6c614f8ea1714fc8d603e9dd0ef4b2eeeaa92392a5dae6b53fca1c6dfebe4c47",
+        "dtype": "<f8",
+        "shape": [
+          6
+        ]
+      },
+      "inverse_diagonal": {
+        "byte_length": 48,
+        "data_hash": "sha256:d51d98d8919b16559049897952cdef09de53f8043b83dee2dc313ec549533050",
+        "dtype": "<f8",
+        "shape": [
+          6
+        ]
+      },
+      "row_ptr": {
+        "byte_length": 56,
+        "data_hash": "sha256:d81ee2a043271a318af1f2a3255de6ce32fcda013767d9fc3d7b81c97dda6e77",
+        "dtype": "<i8",
+        "shape": [
+          7
+        ]
+      },
+      "scale_divisors": {
+        "byte_length": 48,
+        "data_hash": "sha256:9f14e44c211bf2be92fa01e0c87d618b9cfeb11bc81e762f103b25e22dbfabcc",
+        "dtype": "<f8",
+        "shape": [
+          6
+        ]
+      },
+      "solution": {
+        "byte_length": 48,
+        "data_hash": "sha256:e8b9ab0cddc5b60e0d8b26ac1a86f63e4daba7820d678b783d0600a0e1b93b19",
+        "dtype": "<f8",
+        "shape": [
+          6
+        ]
+      },
+      "values": {
+        "byte_length": 288,
+        "data_hash": "sha256:8b686c957fade65b4e92ad0f24f1c1c3b63b2d21aa7a0ff4de083ee3058ccf14",
+        "dtype": "<f8",
+        "shape": [
+          36
+        ]
+      },
+      "x": {
+        "byte_length": 48,
+        "data_hash": "sha256:ad9dc178ed7e78b881fb94b0f4f01282ed34cb54eac206fe40606796d9d83c56",
+        "dtype": "<f8",
+        "shape": [
+          6
+        ]
+      },
+      "y": {
+        "byte_length": 48,
+        "data_hash": "sha256:dfff82a0767fb6efc548109b551ba82fe2acb4b80860f775edbfcf3633c392ed",
+        "dtype": "<f8",
+        "shape": [
+          6
+        ]
+      }
+    },
+    "axpy_alpha": 1.25,
+    "binary_profile": "canonical_little_endian_mixed_numeric.v1",
+    "dimension": 6,
+    "execution_plan_hash": "sha256:6cd369872a4b47bae89697b2190b4eb234ad2f59b512b1773232fb1e28d88b32",
+    "fixture_hash": "sha256:0b244f67766249d0d25d219d541dacaf3f7dcdb5923b898d582e05fd99280ba5",
+    "nnz": 36,
+    "operator_numeric_values_hash": "sha256:69b0c8d2ab056f09130e0534f4d8042e407460f2c0de1f0218b0460da9ad0c71",
+    "preconditioner_contract_hash": "sha256:7a80362388b9ce461d6816e704fff162f9ccbba9e9de8f204884c61d1cf1c1bc",
+    "preconditioner_derivation_profile": "exact_positive_diagonal_inverse_of_left_scaled_reduced_operator.v1",
+    "preconditioner_profile": "operator_derived_left_scaled_jacobi_right.v1",
+    "reduced_csr_identity_hash": "sha256:072393d9675686c81fd718f47d44baf37049578e58af0a267398fbe8bdc6cfa2",
+    "scaling_hash": "sha256:4251990d6afa6356827cf9ce9ffd40d5d58b80bb29d6b2cf02d106944b956a81",
+    "schema_version": "engine-v2-hip-primitive-fixture.v1",
+    "update_alpha": -0.4
+  },
+  "generated_at": "2026-07-18T13:31:35.913208+00:00",
+  "hardware_execution": {
+    "actual_hardware": true,
+    "backend": "amd_rocm_hip",
+    "binary_sha256": "sha256:43dfaca6386b6bddce3807bc61aa3c7498e2a6c053afacc01d91493652e56ca9",
+    "compiler": {
+      "path": "/opt/rocm-6.0.2/bin/hipcc",
+      "version_first_line": "HIP version: 6.0.32831-204d35d16",
+      "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
+    },
+    "device_name": "AMD Radeon RX 6900 XT",
+    "gcn_arch_name": "gfx1030",
+    "runtime_output": {
+      "backend": "amd_rocm_hip",
+      "blocking_d2h_synchronization_count": 1,
+      "cpu_backend": false,
+      "device_index": 0,
+      "device_name": "AMD Radeon RX 6900 XT",
+      "fixture_dimension": 6,
+      "fixture_nnz": 36,
+      "gcn_arch_name": "gfx1030",
+      "kernel_invocation_count": 6,
+      "operations": {
+        "axpy": [
+          -1.375,
+          -0.75,
+          3.75,
+          -0.1875,
+          1.0625,
+          0.875
+        ],
+        "dot": -2.125,
+        "l2_norm": 2.850438562747845,
+        "linf_norm": 2,
+        "preconditioner_apply": [
+          0.5,
+          -1,
+          2,
+          0.5,
+          -1.5,
+          3
+        ],
+        "solution_update": [
+          -0.30000000000000004,
+          0.4,
+          -0.2,
+          -0.4,
+          0.10000000000000003,
+          -0.05000000000000002
+        ],
+        "spmv": [
+          3,
+          -6.5,
+          8.75,
+          -0.25,
+          -4.75,
+          6.75
+        ]
+      },
+      "preconditioner_profile": "operator_derived_left_scaled_jacobi_right.v1",
+      "production_full_recurrence_claim": false,
+      "reduction_profile": "single_thread_ascending_index_fp64_probe.v1",
+      "runtime_status": "success",
+      "runtime_status_code": 0,
+      "same_stream_ordering": true,
+      "schema_version": "engine-v2-hip-primitive-output.v1"
+    }
+  },
+  "primitive_comparison": {
+    "absolute_tolerance": 1e-12,
+    "contract_pass": true,
+    "cpu_fallback_absent": true,
+    "device_name": "AMD Radeon RX 6900 XT",
+    "fixture_hash": "sha256:0b244f67766249d0d25d219d541dacaf3f7dcdb5923b898d582e05fd99280ba5",
+    "full_recurrence_parity_claim": false,
+    "gcn_arch_name": "gfx1030",
+    "maximum_absolute_error": 2.7755575615628914e-17,
+    "maximum_relative_error": 5.551115123125778e-16,
+    "operation_rows": [
+      {
+        "component_count": 6,
+        "contract_pass": true,
+        "maximum_absolute_error": 0.0,
+        "maximum_allowed_error": 8.75e-12,
+        "maximum_relative_error": 0.0,
+        "operation": "spmv"
+      },
+      {
+        "component_count": 1,
+        "contract_pass": true,
+        "maximum_absolute_error": 0.0,
+        "maximum_allowed_error": 2.125e-12,
+        "maximum_relative_error": 0.0,
+        "operation": "dot"
+      },
+      {
+        "component_count": 1,
+        "contract_pass": true,
+        "maximum_absolute_error": 0.0,
+        "maximum_allowed_error": 2.850438562747845e-12,
+        "maximum_relative_error": 0.0,
+        "operation": "l2_norm"
+      },
+      {
+        "component_count": 1,
+        "contract_pass": true,
+        "maximum_absolute_error": 0.0,
+        "maximum_allowed_error": 2e-12,
+        "maximum_relative_error": 0.0,
+        "operation": "linf_norm"
+      },
+      {
+        "component_count": 6,
+        "contract_pass": true,
+        "maximum_absolute_error": 0.0,
+        "maximum_allowed_error": 3e-12,
+        "maximum_relative_error": 0.0,
+        "operation": "preconditioner_apply"
+      },
+      {
+        "component_count": 6,
+        "contract_pass": true,
+        "maximum_absolute_error": 0.0,
+        "maximum_allowed_error": 3.75e-12,
+        "maximum_relative_error": 0.0,
+        "operation": "axpy"
+      },
+      {
+        "component_count": 6,
+        "contract_pass": true,
+        "maximum_absolute_error": 2.7755575615628914e-17,
+        "maximum_allowed_error": 1e-12,
+        "maximum_relative_error": 5.551115123125778e-16,
+        "operation": "solution_update"
+      }
+    ],
+    "operator_derived_scaled_jacobi_apply_probe_claim": true,
+    "performance_claim": false,
+    "relative_tolerance": 1e-12,
+    "runtime_status_propagation_pass": true,
+    "same_stream_ordering_pass": true,
+    "schema_version": "engine-v2-cpu-hip-primitive-parity.v1"
+  },
+  "receipt_hash": "sha256:bc6e91341bc457e1c1874ccc8e962842be9cab4af3e5b0faedbf1b4c9bd2cb27",
+  "schema_version": "engine-v2-cpu-hip-primitive-parity-receipt.v1",
+  "source": {
+    "exact_source_commit_claim": false,
+    "input_checksums": {
+      "implementation/phase1/hip_kernels/engine_v2_primitive_parity.hip.cpp": "sha256:6962baf4821852b9422b6574c50354ffc153656a5059057d71ceecfb0d2b0ce6",
+      "scripts/run_engine_v2_hip_primitive_parity.py": "sha256:55b1529ced44ccfc32c3da2de6fd250e215ac784539484571514306bf734a6f8",
+      "src/structural_analysis/engine_v2/contracts/execution_plan_reduced_csr.py": "sha256:fe976afefabdf7d47ea03f28d511b9a92bbb0b055e9efa47c2752934c86769d0",
+      "src/structural_analysis/engine_v2/cpu_fgmres.py": "sha256:c6e3edd7d2778469c1f52a21b07bf93c1e82077e600b3f86c618f6c2e97cd848",
+      "src/structural_analysis/engine_v2_backends/hip_primitive_parity.py": "sha256:c0a6b1bec36392da8db16ad48c1a64f9c119ff49ae527f21d12abc9c3fc81942",
+      "src/structural_analysis/schemas/cpu_fgmres_run_v1.schema.json": "sha256:e111ffd7141c5db5e01ecaecc47c10ae65d765836594f9a5723ecbcc0b80332f",
+      "src/structural_analysis/schemas/cpu_hip_primitive_parity_v1.schema.json": "sha256:dc4106909c952567e05cbba8b8f8e7dc59d2f2d939cc85af572f36c430fe91e6",
+      "tests/test_engine_v2_cpu_fgmres_v1.py": "sha256:7d4cf202c3d89e5154af4e87dd0ce3062ae60606dd38a7481e8fd7988e9f62df",
+      "tests/test_engine_v2_hip_primitive_parity.py": "sha256:4ca7735abdb862e4acad98afeadd6c8ebfd62153a2f6ec59e00b81ded86f04e2",
+      "tests/test_engine_v2_hip_primitive_parity_runner.py": "sha256:6d9801210df47177cf37c7e08b72eccba42a0258dd4d15f14a8270da46822015"
+    },
+    "repository_base_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+    "worktree_clean": false
+  },
+  "status": "partial"
+}

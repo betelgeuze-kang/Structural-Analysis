@@ -22,12 +22,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--solver", default="developer_preview_model_health")
     parser.add_argument("--tolerance", type=float, default=1.0e-8)
     parser.add_argument("--max-iterations", type=int, default=0)
+    parser.add_argument("--mode-count", type=int, default=6)
     parser.add_argument("--load-case")
     parser.add_argument("--reference")
     parser.add_argument(
         "--matrix-backend",
         default="numpy_linalg_solve_dense",
         choices=["numpy_linalg_solve_dense", "scipy_sparse_spsolve_cpu"],
+    )
+    parser.add_argument(
+        "--eigen-backend",
+        default="scipy_linalg_eigh_dense",
+        choices=["scipy_linalg_eigh_dense"],
     )
     parser.add_argument("--out", required=True, help="Path for the analysis result JSON.")
     parser.add_argument("--report-out", required=True, help="Path for validation report JSON.")
@@ -55,6 +61,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         load_case=args.load_case,
         reference=args.reference,
         matrix_backend=args.matrix_backend,
+        mode_count=args.mode_count,
+        eigen_backend=args.eigen_backend,
     )
     result = analyze(model, config)
     report = validate(result, args.reference)

@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/arc_length_cpu_fgmres_tangent_bridge_v1.schema.json",
+  "title": "Phase 2 arc-length CPU FGMRES tangent bridge v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "contract_pass",
+    "case_id",
+    "analysis_type",
+    "linear_solver_profile",
+    "state_rows",
+    "verification",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase2-arc-length-cpu-fgmres-tangent-bridge.v1"
+    },
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "case_id": {"type": "string", "minLength": 1},
+    "analysis_type": {"const": "arc_length_schur_tangent_solve_bridge"},
+    "linear_solver_profile": {
+      "const": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1"
+    },
+    "state_rows": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "state_id",
+          "accepted_free_displacements_m",
+          "accepted_load_factor",
+          "trial_free_displacements_m",
+          "trial_load_factor",
+          "consistent_tangent_kn_per_m",
+          "consistent_tangent_determinant",
+          "residual_kn",
+          "constraint_residual_m2",
+          "constraint_displacement_gradient_m",
+          "constraint_load_factor_gradient_m2",
+          "schur_denominator",
+          "schur_correction",
+          "direct_augmented_correction",
+          "maximum_correction_absolute_error",
+          "augmented_linear_residual_inf_norm",
+          "residual_tangent_solve_direct_absolute_error",
+          "reference_load_tangent_solve_direct_absolute_error",
+          "residual_tangent_solve",
+          "reference_load_tangent_solve",
+          "contract_pass"
+        ],
+        "properties": {
+          "state_id": {"type": "string", "minLength": 1},
+          "accepted_free_displacements_m": {"$ref": "#/$defs/vector2"},
+          "accepted_load_factor": {"type": "number"},
+          "trial_free_displacements_m": {"$ref": "#/$defs/vector2"},
+          "trial_load_factor": {"type": "number"},
+          "consistent_tangent_kn_per_m": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"$ref": "#/$defs/vector2"}
+          },
+          "consistent_tangent_determinant": {"type": "number"},
+          "residual_kn": {"$ref": "#/$defs/vector2"},
+          "constraint_residual_m2": {"type": "number"},
+          "constraint_displacement_gradient_m": {"$ref": "#/$defs/vector2"},
+          "constraint_load_factor_gradient_m2": {"type": "number"},
+          "schur_denominator": {"type": "number"},
+          "schur_correction": {"$ref": "#/$defs/vector3"},
+          "direct_augmented_correction": {"$ref": "#/$defs/vector3"},
+          "maximum_correction_absolute_error": {"type": "number", "minimum": 0},
+          "augmented_linear_residual_inf_norm": {"type": "number", "minimum": 0},
+          "residual_tangent_solve_direct_absolute_error": {"type": "number", "minimum": 0},
+          "reference_load_tangent_solve_direct_absolute_error": {"type": "number", "minimum": 0},
+          "residual_tangent_solve": {"$ref": "#/$defs/tangentSolve"},
+          "reference_load_tangent_solve": {"$ref": "#/$defs/tangentSolve"},
+          "contract_pass": {"type": "boolean"}
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "all_tangent_solves_ready",
+        "positive_negative_positive_determinant_coverage",
+        "schur_augmented_correction_equivalence",
+        "deterministic_replay_exact",
+        "maximum_correction_absolute_error",
+        "maximum_augmented_linear_residual_inf_norm",
+        "maximum_tangent_solve_explicit_residual_inf_norm",
+        "tangent_solve_count",
+        "fallback_count",
+        "regularization_count"
+      ],
+      "properties": {
+        "all_tangent_solves_ready": {"type": "boolean"},
+        "positive_negative_positive_determinant_coverage": {"type": "boolean"},
+        "schur_augmented_correction_equivalence": {"type": "boolean"},
+        "deterministic_replay_exact": {"type": "boolean"},
+        "maximum_correction_absolute_error": {"type": "number", "minimum": 0},
+        "maximum_augmented_linear_residual_inf_norm": {"type": "number", "minimum": 0},
+        "maximum_tangent_solve_explicit_residual_inf_norm": {"type": "number", "minimum": 0},
+        "tangent_solve_count": {"type": "integer", "minimum": 1},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine_v2_cpu_fgmres_tangent_bridge",
+        "schur_augmented_increment_equivalence",
+        "indefinite_tangent_solve",
+        "complete_arc_length_backend_integration",
+        "frame_shell_residual_assembly",
+        "production_sparse_nonlinear_backend",
+        "production_rocm_hip_parity",
+        "g1_full_building_closure"
+      ],
+      "properties": {
+        "engine_v2_cpu_fgmres_tangent_bridge": {"type": "boolean"},
+        "schur_augmented_increment_equivalence": {"type": "boolean"},
+        "indefinite_tangent_solve": {"type": "boolean"},
+        "complete_arc_length_backend_integration": {"const": false},
+        "frame_shell_residual_assembly": {"const": false},
+        "production_sparse_nonlinear_backend": {"const": false},
+        "production_rocm_hip_parity": {"const": false},
+        "g1_full_building_closure": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "vector2": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {"type": "number"}
+    },
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "tangentSolve": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "contract_pass",
+        "profile",
+        "source",
+        "solver",
+        "explicit_residual",
+        "solution_artifact",
+        "claim_boundary",
+        "solve_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-cpu-fgmres-tangent-solve.v1"
+        },
+        "status": {"enum": ["ready", "blocked"]},
+        "contract_pass": {"type": "boolean"},
+        "profile": {
+          "const": "engine_v2_reduced_csr_cpu_fgmres_tangent_solve.v1"
+        },
+        "source": {
+          "type": "object",
+          "required": [
+            "execution_plan_hash",
+            "scaling_hash",
+            "reduced_csr_identity_hash",
+            "operator_numeric_values_hash",
+            "right_hand_side_free_data_hash"
+          ]
+        },
+        "solver": {
+          "type": "object",
+          "required": [
+            "run_hash",
+            "free_count",
+            "preconditioner_profile",
+            "converged",
+            "terminal_reason",
+            "iteration_count",
+            "matvec_count",
+            "fallback_count",
+            "regularization_count"
+          ]
+        },
+        "explicit_residual": {
+          "type": "object",
+          "required": ["inf_norm", "tolerance", "data_hash", "gate_passed"]
+        },
+        "solution_artifact": {
+          "type": "object",
+          "required": ["data_hash", "descriptor"]
+        },
+        "claim_boundary": {
+          "type": "object",
+          "required": [
+            "description",
+            "nonlinear_residual_assembly",
+            "arc_length_integration",
+            "state_commit_rollback",
+            "production_sparse_nonlinear_backend",
+            "rocm_hip_parity",
+            "g1_closure"
+          ],
+          "properties": {
+            "nonlinear_residual_assembly": {"const": false},
+            "arc_length_integration": {"const": false},
+            "state_commit_rollback": {"const": false},
+            "production_sparse_nonlinear_backend": {"const": false},
+            "rocm_hip_parity": {"const": false},
+            "g1_closure": {"const": false}
+          }
+        },
+        "solve_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

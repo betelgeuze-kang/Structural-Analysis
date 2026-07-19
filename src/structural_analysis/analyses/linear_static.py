@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from math import isfinite
+from numbers import Real
 from typing import Any, Mapping
 
 from structural_analysis.model.schema import CanonicalModel
@@ -92,11 +93,16 @@ def _public_preflight(
     load_case: str | None,
 ) -> list[dict[str, Any]]:
     unsupported: list[dict[str, Any]] = []
-    if not isfinite(tolerance) or tolerance <= 0.0:
+    if (
+        isinstance(tolerance, bool)
+        or not isinstance(tolerance, Real)
+        or not isfinite(float(tolerance))
+        or float(tolerance) <= 0.0
+    ):
         unsupported.append(
             {
                 "kind": "linear_static_tolerance_invalid",
-                "tolerance": tolerance,
+                "tolerance": _tolerance_receipt_value(tolerance),
                 "detail": "Authoritative CPU v1 requires a finite positive tolerance.",
             }
         )
@@ -200,6 +206,20 @@ def _public_preflight(
                 )
 
     return unsupported
+
+
+def _tolerance_receipt_value(value: Any) -> Any:
+    if value is None or isinstance(value, (bool, str)):
+        return value
+    if isinstance(value, Real):
+        normalized = float(value)
+        if isfinite(normalized):
+            return normalized
+        if normalized != normalized:
+            return "nan"
+        return "positive_infinity" if normalized > 0.0 else "negative_infinity"
+    value_type = type(value)
+    return f"<{value_type.__module__}.{value_type.__qualname__}>"
 
 
 def _load_case_label(load: Mapping[str, Any]) -> str | None:

@@ -18,22 +18,22 @@
     "supports_gui_story_member_mode_traceability": false,
     "supports_two_reference_solver_comparison": false
   },
-  "generated_at": "2026-07-01T10:43:33.772547+00:00",
+  "generated_at": "2026-07-19T06:15:18.499631+00:00",
   "input_checksums": {
     "scripts/build_phase4_analytic_physical_fallback_scorecard.py": "sha256:fa8d16def88ffb4da71236dfc3c8c86c1f30813b9328c4e76ceafea7b498f7fe",
-    "src/structural_analysis/api/core.py": "sha256:57abbdac42cb3fe4f04d2940c58717c76605ccfab550a18d1e3c69dc913edb6f",
+    "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
     "src/structural_analysis/benchmark/cli.py": "sha256:c1e8e9eb0129547376d63a631afa4bb3ed1301ac2273415957d28c84fa09883a",
     "src/structural_analysis/benchmark/factory.py": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
-    "src/structural_analysis/solvers/linear/static.py": "sha256:b095b9bb6e1b5e43db45fb0630843eef3eb069260bb1cec4a33928c2c7006f65",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6",
+    "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:2531dbc71d29277e550f792e3dd79f36012ad23d9f99aa6311f7cd50b989a8e6",
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
-    "src/structure-viewer/viewer-report-export.js": "sha256:023d1e05065a8fcc42de376c028f192f94fb7208151436a1fecb4b86441a3473"
+    "src/structure-viewer/viewer-report-export.js": "sha256:06ccfafbd47ed9116183c25f55ced03be05bb64c69e8067c04c55e3c29611373"
   },
   "operator_reference_package_attached": false,
   "pass_count": 30,
   "phase3_closure_claim": false,
   "phase3_seed_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-  "phase3_seed_scorecard_checksum": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+  "phase3_seed_scorecard_checksum": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
   "phase4_closure_claim": false,
   "physical_equilibrium_pass_count": 30,
   "remaining_blockers": [
@@ -272,7 +272,7 @@
       "lane": "analytic-small",
       "physical_equilibrium_contract_pass": true,
       "regularization_used": false,
-      "relative_residual": 0.0,
+      "relative_residual": 7.105427357601002e-16,
       "residual_formula": "F_internal_minus_F_external"
     },
     {
@@ -293,7 +293,7 @@
       "lane": "analytic-small",
       "physical_equilibrium_contract_pass": true,
       "regularization_used": false,
-      "relative_residual": 2.842170943040401e-16,
+      "relative_residual": 5.684341886080802e-16,
       "residual_formula": "F_internal_minus_F_external"
     },
     {
@@ -314,7 +314,7 @@
       "lane": "analytic-small",
       "physical_equilibrium_contract_pass": true,
       "regularization_used": false,
-      "relative_residual": 2.842170943040401e-16,
+      "relative_residual": 5.684341886080802e-16,
       "residual_formula": "F_internal_minus_F_external"
     },
     {
@@ -335,7 +335,7 @@
       "lane": "analytic-small",
       "physical_equilibrium_contract_pass": true,
       "regularization_used": false,
-      "relative_residual": 0.0,
+      "relative_residual": 7.579122514774402e-16,
       "residual_formula": "F_internal_minus_F_external"
     },
     {
@@ -356,7 +356,7 @@
       "lane": "analytic-small",
       "physical_equilibrium_contract_pass": true,
       "regularization_used": false,
-      "relative_residual": 2.842170943040401e-16,
+      "relative_residual": 5.684341886080802e-16,
       "residual_formula": "F_internal_minus_F_external"
     },
     {
@@ -681,7 +681,7 @@
     "element-patch",
     "nonlinear-material-mesh"
   ],
-  "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
   "status": "ready",
   "truth_class": "analytic_physical_fallback",
   "two_reference_solver_comparison_available": false

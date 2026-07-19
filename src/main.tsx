@@ -1,19 +1,57 @@
-import React from 'react'
+import React, { lazy, Suspense, useEffect, useState, type ReactElement } from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
 import { WorkbenchPage } from './workbench-v2/WorkbenchPage'
 import './index.css'
 
-// Lightweight entry-point routing: /workbench-v2 (path or hash) renders the
-// Workbench v2 surface; everything else renders the existing App. This keeps
-// route selection out of App.tsx.
-function isWorkbenchV2Route(): boolean {
-  const path = window.location.pathname.replace(/\/+$/, '')
-  return path.endsWith('/workbench-v2') || window.location.hash.replace(/\/+$/, '') === '#/workbench-v2'
+const LegacyApp = lazy(() => import('./App'))
+
+export type ProductSurface = 'workbench-v2' | 'legacy-app'
+
+export function resolveProductSurface(location: Pick<Location, 'pathname' | 'hash'>): ProductSurface {
+  const path = location.pathname.replace(/\/+$/, '')
+  const hash = location.hash.replace(/\/+$/, '')
+  const legacyRoute = path.endsWith('/legacy') || hash === '#/legacy'
+  return legacyRoute ? 'legacy-app' : 'workbench-v2'
 }
 
-const Root = isWorkbenchV2Route() ? <WorkbenchPage /> : <App />
+function LegacyAppSurface(): ReactElement {
+  return (
+    <div className="legacy-surface-route" data-legacy-surface>
+      <aside className="legacy-surface-route__notice" role="note">
+        <strong>Legacy evidence desk.</strong> This surface is retained for compatibility and historical
+        evidence browsing. <a href="#/workbench-v2">Return to Workbench v2</a> for the product shell.
+      </aside>
+      <Suspense
+        fallback={(
+          <p className="legacy-surface-route__loading" role="status" data-legacy-loading>
+            Loading legacy evidence desk…
+          </p>
+        )}
+      >
+        <LegacyApp />
+      </Suspense>
+    </div>
+  )
+}
+
+function RootRouter(): ReactElement {
+  const [surface, setSurface] = useState<ProductSurface>(() => resolveProductSurface(window.location))
+
+  useEffect(() => {
+    const updateSurface = () => setSurface(resolveProductSurface(window.location))
+    window.addEventListener('hashchange', updateSurface)
+    window.addEventListener('popstate', updateSurface)
+    return () => {
+      window.removeEventListener('hashchange', updateSurface)
+      window.removeEventListener('popstate', updateSurface)
+    }
+  }, [])
+
+  return surface === 'legacy-app' ? <LegacyAppSurface /> : <WorkbenchPage />
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>{Root}</React.StrictMode>,
+  <React.StrictMode>
+    <RootRouter />
+  </React.StrictMode>,
 )

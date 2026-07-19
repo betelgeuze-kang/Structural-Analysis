@@ -1,0 +1,46 @@
+{
+  "artifacts": {
+    "result": "implementation/phase1/release_evidence/productization/phase2_whole_model_modal_result.json",
+    "schema": "src/structural_analysis/schemas/whole_model_modal_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_whole_model_modal_summary.json"
+  },
+  "axial_bar_contract_pass": true,
+  "blockers_remaining": [
+    "general_frame_shell_modal_workflow_not_verified",
+    "nodal_lumped_mass_not_connected",
+    "sparse_modal_backend_not_connected",
+    "large_mode_binary_vector_artifacts_not_connected",
+    "rocm_hip_modal_parity_not_verified",
+    "independent_code_to_code_modal_evidence_not_attached",
+    "verification_level_2_not_achieved",
+    "release_readiness_not_established"
+  ],
+  "cantilever_bending_contract_pass": true,
+  "case_count": 4,
+  "claim_boundary": "This receipt proves a bounded public-API whole-model modal slice for explicit 3D frame and truss elements using dense binary64 stiffness matrices, element consistent mass assembled from explicit kg/m3 material density, and the strict symmetric generalized-eigen kernel. It covers one-element cantilever bending and axial analytic checks, free-free rigid-body-mode exclusion, deterministic replay, directional effective-mass bookkeeping, and fail-closed repeated-mode cluster selection. It does not prove a general frame/shell workflow, nodal or nonstructural lumped mass, sparse extraction, binary large-mode vector storage, ROCm/HIP parity, an independent second-solver modal comparison, Verification Level 2, commercial equivalence, or release readiness.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "claims": {
+    "consistent_mass_assembly_evidence": true,
+    "general_frame_shell_modal_workflow": false,
+    "independent_code_to_code_or_verification_level_2": false,
+    "large_mode_binary_vector_artifacts": false,
+    "nodal_lumped_mass_support": false,
+    "release_readiness": false,
+    "repeated_cluster_fail_closed_evidence": true,
+    "rigid_body_mode_exclusion_evidence": true,
+    "rocm_hip_modal_parity": false,
+    "sparse_modal_backend": false,
+    "whole_model_frame_truss_modal_evidence": true
+  },
+  "contract_pass": true,
+  "engine_version": "1.0.0",
+  "free_free_rigid_mode_contract_pass": true,
+  "generated_at": "2026-07-19T06:15:18.368644+00:00",
+  "passing_case_count": 4,
+  "repeated_cluster_contract_pass": true,
+  "result_artifact_hash": "sha256:de5d28933a3778025ca07989ad9082237737f8f7617f7251ec7cc30e5fc44ebc",
+  "schema_version": "phase2-whole-model-modal-artifacts.v1",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_set_hash": "sha256:683299e02afcebce8a1812df39b212ba8152df836788a584a5c1a8dfcd231abd",
+  "status": "partial"
+}

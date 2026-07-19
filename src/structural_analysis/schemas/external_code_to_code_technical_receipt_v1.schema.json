@@ -1,0 +1,474 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/external_code_to_code_technical_receipt_v1.schema.json",
+  "title": "Non-promoting external code-to-code technical execution receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "generated_at",
+    "source_commit_sha",
+    "engine_version",
+    "status",
+    "truth_class",
+    "internal_source",
+    "execution_environment",
+    "external_assets",
+    "runtimes",
+    "comparisons",
+    "technical_contract_pass",
+    "verification_hierarchy_operator_manifest_attached",
+    "verification_hierarchy_credit",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "external-code-to-code-technical-execution.v1"},
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "minLength": 20},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "engine_version": {"type": "string", "minLength": 1},
+    "status": {"enum": ["partial", "blocked"]},
+    "truth_class": {"const": "external_code_to_code_technical_execution"},
+    "internal_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_checksums", "source_set_hash"],
+      "properties": {
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 8,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        },
+        "source_set_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "execution_environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "machine", "python_version", "python_executable_sha256"],
+      "properties": {
+        "system": {"type": "string", "minLength": 1},
+        "machine": {"type": "string", "minLength": 1},
+        "python_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+"},
+        "python_executable_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "external_assets": {
+      "type": "array",
+      "prefixItems": [
+        {"$ref": "#/$defs/calculixAsset"},
+        {"$ref": "#/$defs/arpackAsset"},
+        {"$ref": "#/$defs/spoolesAsset"},
+        {"$ref": "#/$defs/openseespyAsset"},
+        {"$ref": "#/$defs/openseesLinuxAsset"}
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "runtimes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["opensees", "calculix"],
+      "properties": {
+        "opensees": {"$ref": "#/$defs/openseesRuntime"},
+        "calculix": {"$ref": "#/$defs/calculixRuntime"}
+      }
+    },
+    "replay_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "external_runtime_executed_in_this_generation",
+        "external_execution_reused",
+        "external_execution_generated_at",
+        "current_product_replay_generated_at",
+        "current_product_replay_pass",
+        "reuse_reason"
+      ],
+      "properties": {
+        "external_runtime_executed_in_this_generation": {"type": "boolean"},
+        "external_execution_reused": {"type": "boolean"},
+        "external_execution_generated_at": {"type": "string", "minLength": 20},
+        "current_product_replay_generated_at": {"type": "string", "minLength": 20},
+        "current_product_replay_pass": {"type": "boolean"},
+        "reuse_reason": {"type": ["string", "null"]}
+      }
+    },
+    "comparisons": {
+      "type": "array",
+      "prefixItems": [
+        {"$ref": "#/$defs/modalCase"},
+        {"$ref": "#/$defs/cantileverCase"},
+        {"$ref": "#/$defs/axialCase"}
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "technical_contract_pass": {"type": "boolean"},
+    "verification_hierarchy_operator_manifest_attached": {"const": false},
+    "verification_hierarchy_credit": {"const": false},
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_external_solver_execution",
+        "opensees_technical_comparison",
+        "second_solver_technical_comparison",
+        "product_legal_license_approval",
+        "external_runtime_redistribution_approval",
+        "verification_level_2",
+        "commercial_equivalence",
+        "release_readiness"
+      ],
+      "properties": {
+        "actual_external_solver_execution": {"type": "boolean"},
+        "opensees_technical_comparison": {"type": "boolean"},
+        "second_solver_technical_comparison": {"type": "boolean"},
+        "product_legal_license_approval": {"const": false},
+        "external_runtime_redistribution_approval": {"const": false},
+        "verification_level_2": {"const": false},
+        "commercial_equivalence": {"const": false},
+        "release_readiness": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 500}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"technical_contract_pass": {"const": true}},
+        "required": ["technical_contract_pass"]
+      },
+      "then": {"properties": {"status": {"const": "partial"}}},
+      "else": {"properties": {"status": {"const": "blocked"}}}
+    }
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "assetBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "filename",
+        "kind",
+        "authority_url",
+        "sha256",
+        "bundled_in_repository",
+        "distribution",
+        "version"
+      ],
+      "properties": {
+        "filename": {"type": "string"},
+        "kind": {"type": "string"},
+        "authority_url": {"type": "string", "pattern": "^https://"},
+        "sha256": {"$ref": "#/$defs/hash"},
+        "bundled_in_repository": {"const": false},
+        "distribution": {"type": "string"},
+        "version": {"type": "string"},
+        "architecture": {"type": "string"}
+      }
+    },
+    "calculixAsset": {
+      "allOf": [
+        {"$ref": "#/$defs/assetBase"},
+        {
+          "required": ["architecture"],
+          "properties": {
+            "filename": {"const": "calculix-ccx_2.17-3_amd64.deb"},
+            "kind": {"const": "calculix_ubuntu_runtime_package"},
+            "authority_url": {"const": "https://packages.ubuntu.com/jammy/calculix-ccx"},
+            "sha256": {"const": "sha256:3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e"},
+            "distribution": {"const": "calculix-ccx"},
+            "version": {"const": "2.17-3"},
+            "architecture": {"const": "amd64"}
+          }
+        }
+      ]
+    },
+    "arpackAsset": {
+      "allOf": [
+        {"$ref": "#/$defs/assetBase"},
+        {
+          "required": ["architecture"],
+          "properties": {
+            "filename": {"const": "libarpack2_3.8.0-1_amd64.deb"},
+            "kind": {"const": "calculix_runtime_dependency"},
+            "authority_url": {"const": "https://packages.ubuntu.com/jammy/libarpack2"},
+            "sha256": {"const": "sha256:07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a"},
+            "distribution": {"const": "libarpack2"},
+            "version": {"const": "3.8.0-1"},
+            "architecture": {"const": "amd64"}
+          }
+        }
+      ]
+    },
+    "spoolesAsset": {
+      "allOf": [
+        {"$ref": "#/$defs/assetBase"},
+        {
+          "required": ["architecture"],
+          "properties": {
+            "filename": {"const": "libspooles2.2_2.2-14_amd64.deb"},
+            "kind": {"const": "calculix_runtime_dependency"},
+            "authority_url": {"const": "https://packages.ubuntu.com/jammy/libspooles2.2"},
+            "sha256": {"const": "sha256:34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917"},
+            "distribution": {"const": "libspooles2.2"},
+            "version": {"const": "2.2-14"},
+            "architecture": {"const": "amd64"}
+          }
+        }
+      ]
+    },
+    "openseespyAsset": {
+      "allOf": [
+        {"$ref": "#/$defs/assetBase"},
+        {
+          "properties": {
+            "filename": {"const": "openseespy-3.7.1.2-py3-none-any.whl"},
+            "kind": {"const": "opensees_python_meta_wheel"},
+            "authority_url": {"const": "https://pypi.org/project/openseespy/3.7.1.2/"},
+            "sha256": {"const": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65"},
+            "distribution": {"const": "openseespy"},
+            "version": {"const": "3.7.1.2"}
+          }
+        }
+      ]
+    },
+    "openseesLinuxAsset": {
+      "allOf": [
+        {"$ref": "#/$defs/assetBase"},
+        {
+          "properties": {
+            "filename": {"const": "openseespylinux-3.7.1.2-py3-none-any.whl"},
+            "kind": {"const": "opensees_linux_runtime_wheel"},
+            "authority_url": {"const": "https://pypi.org/project/openseespylinux/3.7.1.2/"},
+            "sha256": {"const": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a"},
+            "distribution": {"const": "openseespylinux"},
+            "version": {"const": "3.7.1.2"}
+          }
+        }
+      ]
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "declared_license_posture",
+        "license_file_sha256",
+        "product_legal_approval",
+        "commercial_redistribution_approved"
+      ],
+      "properties": {
+        "declared_license_posture": {"type": "string", "minLength": 1},
+        "license_file_sha256": {"$ref": "#/$defs/hash"},
+        "product_legal_approval": {"const": false},
+        "commercial_redistribution_approved": {"const": false}
+      }
+    },
+    "openseesOutputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["return_code", "stdout_sha256", "stderr_sha256", "driver_sha256"],
+      "properties": {
+        "return_code": {"const": 0},
+        "stdout_sha256": {"$ref": "#/$defs/hash"},
+        "stderr_sha256": {"$ref": "#/$defs/hash"},
+        "driver_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "calculixOutputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "return_code",
+        "version_return_code",
+        "version_stdout_sha256",
+        "version_stderr_sha256",
+        "stdout_sha256",
+        "stderr_sha256",
+        "input_deck_sha256",
+        "dat_sha256",
+        "frd_sha256"
+      ],
+      "properties": {
+        "return_code": {"const": 0},
+        "version_return_code": {"enum": [0, 201]},
+        "version_stdout_sha256": {"$ref": "#/$defs/hash"},
+        "version_stderr_sha256": {"$ref": "#/$defs/hash"},
+        "stdout_sha256": {"$ref": "#/$defs/hash"},
+        "stderr_sha256": {"$ref": "#/$defs/hash"},
+        "input_deck_sha256": {"$ref": "#/$defs/hash"},
+        "dat_sha256": {"$ref": "#/$defs/hash"},
+        "frd_sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "openseesRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "distribution_version",
+        "runtime_version",
+        "version_verified",
+        "actual_external_execution",
+        "independent_from_product",
+        "execution_outputs",
+        "license"
+      ],
+      "properties": {
+        "name": {"const": "OpenSees"},
+        "distribution_version": {"const": "3.7.1.2"},
+        "runtime_version": {"const": "3.7.1"},
+        "version_verified": {"const": true},
+        "actual_external_execution": {"const": true},
+        "independent_from_product": {"const": true},
+        "execution_outputs": {"$ref": "#/$defs/openseesOutputs"},
+        "license": {
+          "allOf": [
+            {"$ref": "#/$defs/license"},
+            {
+              "properties": {
+                "declared_license_posture": {"const": "internal_use_allowed_commercial_redistribution_requires_license"}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "calculixRuntime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "distribution_version",
+        "runtime_version",
+        "version_verified",
+        "actual_external_execution",
+        "independent_from_product",
+        "binary_sha256",
+        "execution_outputs",
+        "license"
+      ],
+      "properties": {
+        "name": {"const": "CalculiX CrunchiX"},
+        "distribution_version": {"const": "2.17-3"},
+        "runtime_version": {"const": "2.17"},
+        "version_verified": {"const": true},
+        "actual_external_execution": {"const": true},
+        "independent_from_product": {"const": true},
+        "binary_sha256": {"$ref": "#/$defs/hash"},
+        "execution_outputs": {"$ref": "#/$defs/calculixOutputs"},
+        "license": {
+          "allOf": [
+            {"$ref": "#/$defs/license"},
+            {
+              "properties": {
+                "declared_license_posture": {"const": "GPL-2_ubuntu_package"}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantity",
+        "product_value",
+        "reference_value",
+        "absolute_error",
+        "relative_error",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "contract_pass"
+      ],
+      "properties": {
+        "quantity": {"type": "string", "minLength": 1},
+        "product_value": {"type": "number"},
+        "reference_value": {"type": "number"},
+        "absolute_error": {"type": "number", "minimum": 0},
+        "relative_error": {"type": "number", "minimum": 0},
+        "absolute_tolerance": {"const": 1e-10},
+        "relative_tolerance": {"const": 1e-10},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "analysis_type",
+        "reference_solver",
+        "product_solver_id",
+        "metrics",
+        "external_return_code",
+        "product_regularization_applied",
+        "product_fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"type": "string"},
+        "analysis_type": {"type": "string"},
+        "reference_solver": {"type": "string"},
+        "product_solver_id": {"type": "string", "minLength": 1},
+        "metrics": {"type": "array", "items": {"$ref": "#/$defs/metric"}},
+        "external_return_code": {"const": 0},
+        "product_regularization_applied": {"const": false},
+        "product_fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "modalCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "two_dof_shear_modal"},
+            "analysis_type": {"const": "modal"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 2, "maxItems": 2}
+          }
+        }
+      ]
+    },
+    "cantileverCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "cantilever_tip_load"},
+            "analysis_type": {"const": "linear_static"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 3, "maxItems": 3}
+          }
+        }
+      ]
+    },
+    "axialCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "axial_member_tip_load"},
+            "analysis_type": {"const": "linear_static"},
+            "reference_solver": {"const": "CalculiX CrunchiX 2.17"},
+            "metrics": {"minItems": 2, "maxItems": 2}
+          }
+        }
+      ]
+    }
+  }
+}

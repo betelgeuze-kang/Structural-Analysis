@@ -57,6 +57,18 @@ def test_canonical_arrays_are_little_endian_bytes_backed_and_zero_stable() -> No
         positive.setflags(write=True)
 
 
+def test_empty_canonical_array_hashes_are_stable() -> None:
+    first = immutable_array(np.empty((0, 12), dtype=np.int64), dtype="<i8")
+    second = immutable_array(np.empty((0, 12), dtype=">i8"), dtype="<i8")
+    metadata = {"name": "empty", "dtype": "<i8", "shape": [0, 12]}
+
+    assert array_data_hash(first) == array_data_hash(second)
+    assert array_content_hash(metadata, first) == array_content_hash(
+        metadata,
+        second,
+    )
+
+
 def test_object_arrays_and_non_string_mapping_keys_fail_closed() -> None:
     with pytest.raises(CanonicalContractError):
         immutable_array([object()], dtype=object)

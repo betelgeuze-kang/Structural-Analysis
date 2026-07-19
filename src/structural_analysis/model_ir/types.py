@@ -16,8 +16,11 @@ class ModelIRDocument:
     capability_profile: str
     canonical_json: str
     content_hash: str
+    semantic_hash: str
+    provenance_hash: str
     analysis_ready: bool
     blocking_feature_ids: tuple[str, ...] = ()
+    derived_blocking_feature_ids: tuple[str, ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         payload = json.loads(self.canonical_json)

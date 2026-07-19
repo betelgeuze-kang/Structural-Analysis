@@ -20,16 +20,25 @@ for candidate in (SCRIPT_DIR, SRC_ROOT):
 
 from release_evidence_metadata import git_head, input_checksums  # noqa: E402
 from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION  # noqa: E402
+from structural_analysis.benchmark.acceptance import (  # noqa: E402
+    BENCHMARK_DECISION_SCHEMA_VERSION,
+)
+from structural_analysis.benchmark.medium_corpus import (  # noqa: E402
+    REQUIRED_CORE_METRIC_FAMILIES,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_medium_model_scorecard_readiness_receipt.json"
-SOURCE_LICENSE_RECEIPT = PRODUCTIZATION / "phase3_opensees_medium_source_license_receipt.json"
+SOURCE_LICENSE_RECEIPT = (
+    PRODUCTIZATION / "phase3_opensees_medium_source_license_receipt.json"
+)
+SCIENTIFIC_CORPUS_PLAN = PRODUCTIZATION / "medium_benchmark_corpus_plan.json"
 MEDIUM_RECEIPT_DIR = PRODUCTIZATION / "medium_model_scorecard_receipts"
 MEDIUM_RECEIPT_SCHEMA_VERSION = "phase3-medium-model-scorecard-receipt.v1"
 NORMALIZATION_RECEIPT_SCHEMA_VERSION = "phase3-medium-normalization-receipt.v1"
 NORMALIZATION_MIN_MAPPING_COVERAGE = 0.99
-ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS = {"PASS", "APPROVED_REVIEW"}
+ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS = {"PASS", "REVIEW"}
 SUPPORTED_REVIEW_EVIDENCE_URI_SCHEMES = {"https", "operator-review", "ticket", "jira"}
 GENERATED_REVIEW_EVIDENCE_REF_PATHS = {
     DEFAULT_OUT,
@@ -40,13 +49,19 @@ GENERATED_REVIEW_EVIDENCE_REF_PATHS = {
 }
 MEDIUM_MODEL_INPUTS = [
     Path("implementation/phase1/opensees_topology_report.json"),
-    Path("implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"),
+    Path(
+        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+    ),
     SOURCE_LICENSE_RECEIPT,
+    SCIENTIFIC_CORPUS_PLAN,
     MEDIUM_RECEIPT_DIR,
     Path("scripts/build_phase3_opensees_source_license_receipt.py"),
     Path("scripts/build_phase3_medium_model_scorecard_readiness_receipt.py"),
+    Path("scripts/build_medium_benchmark_corpus_plan.py"),
     Path("scripts/run_phase3_medium_model_scorecard_receipt.py"),
     Path("src/structural_analysis/benchmark/acquisition.py"),
+    Path("src/structural_analysis/benchmark/acceptance.py"),
+    Path("src/structural_analysis/benchmark/medium_corpus.py"),
 ]
 RUNNER_SCRIPT = Path("scripts/run_phase3_medium_model_scorecard_receipt.py")
 RUNNER_COMMAND_TEMPLATE = (
@@ -62,7 +77,7 @@ RUNNER_COMMAND_TEMPLATE = (
     "medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json "
     "--report-out implementation/phase1/release_evidence/productization/"
     "medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json "
-    "--analysis-type model_health --fail-blocked"
+    "--analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked"
 )
 RESOURCE_ENVELOPE = {
     "default_timeout_seconds": 3600,
@@ -93,6 +108,16 @@ REQUIRED_EVIDENCE = (
         "blocker": "",
     },
     {
+        "id": "scientific_corpus_contract",
+        "required": (
+            "Five diverse medium archetypes with complete artifact chains, OpenSees "
+            "plus a second independent solver, and scientific PASS/REVIEW credit."
+        ),
+        "status": "missing",
+        "contract_pass": False,
+        "blocker": "scientific_medium_corpus_contract_blocked",
+    },
+    {
         "id": "reference_outputs",
         "required": "Reference displacement/reaction/member/modal outputs or approved REVIEW baseline.",
         "status": "missing",
@@ -115,7 +140,10 @@ REQUIRED_EVIDENCE = (
     },
     {
         "id": "pass_or_approved_review",
-        "required": "Per-case PASS or explicit pre-approved REVIEW decision for selected medium models.",
+        "required": (
+            "Per-case scientific PASS or scoped, unexpired engineer REVIEW decision "
+            "covering every required core metric family."
+        ),
         "status": "missing",
         "contract_pass": False,
         "blocker": "medium_model_pass_or_review_missing",
@@ -157,7 +185,9 @@ def _receipt_files(repo_root: Path, receipt_dir: Path) -> list[Path]:
     resolved = receipt_dir if receipt_dir.is_absolute() else repo_root / receipt_dir
     if not resolved.exists():
         return []
-    return sorted(path for path in resolved.glob("*.scorecard_receipt.json") if path.is_file())
+    return sorted(
+        path for path in resolved.glob("*.scorecard_receipt.json") if path.is_file()
+    )
 
 
 def _safe_dict(value: Any) -> dict[str, Any]:
@@ -238,11 +268,23 @@ def _review_evidence_ref_resolution(
 ) -> dict[str, Any]:
     text = evidence_ref.strip()
     if not text:
-        return {"kind": "missing", "resolvable": False, "resolved_path": "", "blockers": []}
+        return {
+            "kind": "missing",
+            "resolvable": False,
+            "resolved_path": "",
+            "blockers": [],
+        }
     parsed = urlparse(text)
     if parsed.scheme:
-        if parsed.scheme in SUPPORTED_REVIEW_EVIDENCE_URI_SCHEMES and bool(parsed.netloc or parsed.path):
-            return {"kind": f"{parsed.scheme}_reference", "resolvable": True, "resolved_path": "", "blockers": []}
+        if parsed.scheme in SUPPORTED_REVIEW_EVIDENCE_URI_SCHEMES and bool(
+            parsed.netloc or parsed.path
+        ):
+            return {
+                "kind": f"{parsed.scheme}_reference",
+                "resolvable": True,
+                "resolved_path": "",
+                "blockers": [],
+            }
         return {
             "kind": "unsupported_uri",
             "resolvable": False,
@@ -250,7 +292,9 @@ def _review_evidence_ref_resolution(
             "blockers": ["scorecard_or_review_evidence_ref_unsupported_uri"],
         }
     path = Path(text).expanduser()
-    candidates = [path] if path.is_absolute() else [repo_root / path, review_path.parent / path]
+    candidates = (
+        [path] if path.is_absolute() else [repo_root / path, review_path.parent / path]
+    )
     for candidate in candidates:
         if not candidate.exists():
             continue
@@ -282,6 +326,9 @@ def _scorecard_or_review_status(repo_root: Path, receipt_ref: str) -> dict[str, 
             "present": False,
             "contract_pass": False,
             "decision": "",
+            "schema_version": "",
+            "metric_families": [],
+            "benchmark_credit": False,
             "evidence_ref": "",
             "reviewer": "",
             "blockers": ["scorecard_or_review_missing"],
@@ -293,19 +340,27 @@ def _scorecard_or_review_status(repo_root: Path, receipt_ref: str) -> dict[str, 
             "present": False,
             "contract_pass": False,
             "decision": "",
+            "schema_version": "",
+            "metric_families": [],
+            "benchmark_credit": False,
             "evidence_ref": "",
             "reviewer": "",
             "blockers": ["scorecard_or_review_path_missing"],
         }
     payload = _try_load_json(path)
     decision = _normalized_decision(payload.get("decision") or payload.get("status"))
-    evidence_ref = str(
-        payload.get("evidence_ref")
-        or payload.get("review_evidence_ref")
-        or payload.get("scorecard_ref")
-        or ""
-    ).strip()
-    reviewer = str(payload.get("reviewer") or payload.get("approved_by") or "").strip()
+    review = payload.get("review") if isinstance(payload.get("review"), dict) else None
+    evidence_ref = str((review or {}).get("evidence_ref") or "").strip()
+    reviewer = str((review or {}).get("engineer_id") or "").strip()
+    metric_families = (
+        [
+            str(value).strip()
+            for value in payload.get("metric_families", [])
+            if isinstance(value, str) and value.strip()
+        ]
+        if isinstance(payload.get("metric_families"), list)
+        else []
+    )
     evidence_ref_resolution = _review_evidence_ref_resolution(
         repo_root,
         review_path=path,
@@ -314,22 +369,77 @@ def _scorecard_or_review_status(repo_root: Path, receipt_ref: str) -> dict[str, 
     blockers: list[str] = []
     if not payload:
         blockers.append("scorecard_or_review_json_invalid_or_empty")
+    if payload.get("schema_version") != BENCHMARK_DECISION_SCHEMA_VERSION:
+        blockers.append("scientific_decision_schema_mismatch")
     if decision not in ACCEPTED_SCORECARD_OR_REVIEW_DECISIONS:
         blockers.append("scorecard_or_review_decision_not_accepted")
-    if not evidence_ref:
-        blockers.append("scorecard_or_review_evidence_ref_missing")
-    else:
-        if evidence_ref_resolution["resolvable"] is not True:
-            blockers.extend(str(blocker) for blocker in evidence_ref_resolution["blockers"])
+    if payload.get("decision_contract_pass") is not True:
+        blockers.append("scientific_decision_contract_not_passed")
+    if payload.get("benchmark_credit") is not True:
+        blockers.append("scientific_decision_benchmark_credit_missing")
+    if payload.get("hard_blockers"):
+        blockers.append("scientific_decision_hard_blockers_present")
+    if payload.get("decision_blockers"):
+        blockers.append("scientific_decision_blockers_present")
+    if payload.get("metric_family_count") != len(metric_families):
+        blockers.append("scientific_decision_metric_family_count_mismatch")
+    if len(metric_families) != len(set(metric_families)):
+        blockers.append("scientific_decision_metric_family_duplicate")
+    missing_core_families = sorted(
+        set(REQUIRED_CORE_METRIC_FAMILIES) - set(metric_families)
+    )
+    blockers.extend(
+        f"scientific_decision_metric_family_missing:{family}"
+        for family in missing_core_families
+    )
+    if decision == "PASS":
+        if payload.get("numerical_pass") is not True:
+            blockers.append("scientific_decision_pass_without_numerical_pass")
+        if review is not None:
+            blockers.append("scientific_decision_pass_review_must_be_null")
+    elif decision == "REVIEW":
+        if review is None:
+            blockers.append("scientific_decision_review_missing")
         else:
-            blockers.extend(str(blocker) for blocker in evidence_ref_resolution["blockers"])
-    if not reviewer:
-        blockers.append("scorecard_or_review_reviewer_missing")
+            if review.get("contract_pass") is not True:
+                blockers.append("scientific_decision_review_contract_not_passed")
+            if not reviewer:
+                blockers.append("scorecard_or_review_reviewer_missing")
+            if not str(review.get("reason") or "").strip():
+                blockers.append("scientific_decision_review_reason_missing")
+            if not review.get("scope"):
+                blockers.append("scientific_decision_review_scope_missing")
+            if not evidence_ref:
+                blockers.append("scorecard_or_review_evidence_ref_missing")
+            else:
+                blockers.extend(
+                    str(blocker) for blocker in evidence_ref_resolution["blockers"]
+                )
+            for timestamp_name in ("approved_at", "expires_at"):
+                timestamp = str(review.get(timestamp_name) or "").strip()
+                try:
+                    parsed_timestamp = datetime.fromisoformat(
+                        timestamp.replace("Z", "+00:00")
+                    )
+                except ValueError:
+                    parsed_timestamp = None
+                if (
+                    parsed_timestamp is None
+                    or parsed_timestamp.tzinfo is None
+                    or parsed_timestamp.utcoffset() is None
+                ):
+                    blockers.append(
+                        f"scientific_decision_review_{timestamp_name}_invalid"
+                    )
     return {
         "path": _relative_path(repo_root, path),
         "present": True,
         "contract_pass": not blockers,
         "decision": decision,
+        "schema_version": payload.get("schema_version", ""),
+        "metric_families": metric_families,
+        "missing_core_metric_families": missing_core_families,
+        "benchmark_credit": payload.get("benchmark_credit") is True,
         "evidence_ref": evidence_ref,
         "evidence_ref_kind": evidence_ref_resolution["kind"],
         "evidence_ref_resolved_path": evidence_ref_resolution["resolved_path"],
@@ -407,8 +517,17 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         relative_path = _relative_path(repo_root, path)
         schema_pass = payload.get("schema_version") == MEDIUM_RECEIPT_SCHEMA_VERSION
         case_id = str(payload.get("case_id") or path.stem)
-        blockers = [str(blocker) for blocker in _safe_list(payload.get("blockers")) if str(blocker)]
+        blockers = [
+            str(blocker)
+            for blocker in _safe_list(payload.get("blockers"))
+            if str(blocker)
+        ]
         contract_pass = bool(payload.get("contract_pass") is True)
+        execution_contract_pass = bool(
+            payload.get("execution_contract_pass") is True
+            if "execution_contract_pass" in payload
+            else contract_pass
+        )
         validation_pass = bool(payload.get("validation_contract_pass") is True)
         crashed = bool(payload.get("crashed") is True)
         oom = bool(payload.get("oom") is True)
@@ -426,7 +545,7 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
         )
         scorecard_execution_pass = bool(
             schema_pass
-            and contract_pass
+            and execution_contract_pass
             and validation_pass
             and not crashed
             and not oom
@@ -446,15 +565,23 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
                 "schema_pass": schema_pass,
                 "case_id": case_id,
                 "contract_pass": contract_pass,
+                "execution_contract_pass": execution_contract_pass,
                 "validation_contract_pass": validation_pass,
                 "crashed": crashed,
                 "oom": oom,
                 "scorecard_or_review_path": scorecard_or_review_path,
-                "scorecard_or_review_contract_pass": scorecard_or_review_status["contract_pass"],
+                "scorecard_or_review_contract_pass": scorecard_or_review_status[
+                    "contract_pass"
+                ],
+                "scientific_benchmark_credit": scorecard_or_review_status[
+                    "benchmark_credit"
+                ],
                 "scorecard_or_review_status": scorecard_or_review_status,
                 "reference_output_sha256": reference_output_sha256,
                 "normalization_receipt": normalization_receipt,
-                "normalization_receipt_contract_pass": normalization_status["contract_pass"],
+                "normalization_receipt_contract_pass": normalization_status[
+                    "contract_pass"
+                ],
                 "normalization_receipt_status": normalization_status,
                 "scorecard_execution_pass": scorecard_execution_pass,
                 "pass_or_approved_review": pass_or_review_pass,
@@ -478,7 +605,9 @@ def _medium_scorecard_receipt_inventory(repo_root: Path) -> dict[str, Any]:
     }
 
 
-def _scorecard_evidence_row(row: dict[str, Any], *, current: int, required: int) -> dict[str, Any]:
+def _scorecard_evidence_row(
+    row: dict[str, Any], *, current: int, required: int
+) -> dict[str, Any]:
     enriched = dict(row)
     ready = current >= required
     enriched.update(
@@ -493,7 +622,9 @@ def _scorecard_evidence_row(row: dict[str, Any], *, current: int, required: int)
     return enriched
 
 
-def _pass_review_evidence_row(row: dict[str, Any], *, current: int, required: int) -> dict[str, Any]:
+def _pass_review_evidence_row(
+    row: dict[str, Any], *, current: int, required: int
+) -> dict[str, Any]:
     enriched = dict(row)
     ready = current >= required
     enriched.update(
@@ -508,7 +639,9 @@ def _pass_review_evidence_row(row: dict[str, Any], *, current: int, required: in
     return enriched
 
 
-def _normalization_evidence_row(row: dict[str, Any], *, current: int, required: int) -> dict[str, Any]:
+def _normalization_evidence_row(
+    row: dict[str, Any], *, current: int, required: int
+) -> dict[str, Any]:
     enriched = dict(row)
     ready = current >= required
     enriched.update(
@@ -556,8 +689,34 @@ def _missing_evidence_breakdown(
                 {
                     "evidence_type": "product_legal_review",
                     "source_license_receipt_path": SOURCE_LICENSE_RECEIPT.as_posix(),
-                    "license_review_status": str(row.get("license_review_status") or ""),
+                    "license_review_status": str(
+                        row.get("license_review_status") or ""
+                    ),
                     "spdx": str(row.get("spdx") or ""),
+                }
+            )
+        elif row_id == "scientific_corpus_contract":
+            item.update(
+                {
+                    "evidence_type": "scientific_benchmark_corpus",
+                    "scientific_corpus_plan_path": SCIENTIFIC_CORPUS_PLAN.as_posix(),
+                    "required_case_count": required_medium_model_count,
+                    "current_case_count": int(
+                        _as_float(row.get("current_medium_benchmark_credit_count"))
+                    ),
+                    "remaining_case_count": max(
+                        required_medium_model_count
+                        - int(
+                            _as_float(row.get("current_medium_benchmark_credit_count"))
+                        ),
+                        0,
+                    ),
+                    "required_artifacts": [
+                        "five diverse medium archetype case rows",
+                        "complete per-case normalization/reference/output/comparison chain",
+                        "OpenSees and a second independent reference solver",
+                        "benchmark-scientific-decision.v1 PASS or scoped REVIEW",
+                    ],
                 }
             )
         elif row_id == "reference_outputs":
@@ -596,7 +755,9 @@ def _missing_evidence_breakdown(
                 {
                     "required_case_count": required_medium_model_count,
                     "current_case_count": current_scorecard_count,
-                    "remaining_case_count": max(required_medium_model_count - current_scorecard_count, 0),
+                    "remaining_case_count": max(
+                        required_medium_model_count - current_scorecard_count, 0
+                    ),
                     "runner_command_template": RUNNER_COMMAND_TEMPLATE,
                     "receipt_directory": MEDIUM_RECEIPT_DIR.as_posix(),
                 }
@@ -610,7 +771,7 @@ def _missing_evidence_breakdown(
                         required_medium_model_count - pass_or_approved_review_count,
                         0,
                     ),
-                    "accepted_decisions": ["PASS", "APPROVED_REVIEW"],
+                    "accepted_decisions": ["PASS", "REVIEW"],
                 }
             )
         rows.append(item)
@@ -658,6 +819,29 @@ def _operator_next_actions(
                     "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                     "python3 scripts/build_phase6_benchmark_scale_status.py --check",
                     "python3 scripts/build_developer_preview_rc_status.py --check",
+                ],
+            }
+        )
+    if "scientific_medium_corpus_contract_blocked" in blocker_set:
+        actions.append(
+            {
+                "id": "complete_scientific_medium_corpus",
+                "owner": "benchmark_operator_and_reviewer",
+                "action": (
+                    "Populate the five-archetype scientific medium corpus with complete "
+                    "artifact chains and valid per-case PASS or scoped REVIEW decisions."
+                ),
+                "clears_blockers": ["scientific_medium_corpus_contract_blocked"],
+                "remaining_case_count": required_medium_model_count,
+                "evidence_artifacts": [
+                    "implementation/phase1/release_evidence/productization/"
+                    "medium_benchmark_case_evidence.json",
+                    SCIENTIFIC_CORPUS_PLAN.as_posix(),
+                ],
+                "validation_commands": [
+                    "python3 scripts/build_medium_benchmark_corpus_plan.py",
+                    "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
+                    "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                 ],
             }
         )
@@ -712,7 +896,9 @@ def _operator_next_actions(
                 "remaining_case_count": required_medium_model_count,
                 "schema_version_required": NORMALIZATION_RECEIPT_SCHEMA_VERSION,
                 "minimum_mapping_coverage": NORMALIZATION_MIN_MAPPING_COVERAGE,
-                "evidence_artifacts": ["OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"],
+                "evidence_artifacts": [
+                    "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT_PER_CASE"
+                ],
                 "validation_commands": [
                     "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                 ],
@@ -728,7 +914,9 @@ def _operator_next_actions(
                     "retain receipt, result, and validation report artifacts."
                 ),
                 "clears_blockers": ["opensees_medium_scorecard_execution_missing"],
-                "remaining_case_count": max(required_medium_model_count - current_scorecard_count, 0),
+                "remaining_case_count": max(
+                    required_medium_model_count - current_scorecard_count, 0
+                ),
                 "receipt_directory": MEDIUM_RECEIPT_DIR.as_posix(),
                 "runner_command_template": RUNNER_COMMAND_TEMPLATE,
                 "validation_commands": [
@@ -744,15 +932,15 @@ def _operator_next_actions(
                 "id": "attach_medium_pass_or_approved_review_decisions",
                 "owner": "benchmark_reviewer",
                 "action": (
-                    "Attach per-case PASS decisions or explicit pre-approved REVIEW records "
-                    "referenced by each scorecard receipt."
+                    "Attach per-case scientific PASS decisions or scoped, unexpired "
+                    "engineer REVIEW records referenced by each scorecard receipt."
                 ),
                 "clears_blockers": ["medium_model_pass_or_review_missing"],
                 "remaining_case_count": max(
                     required_medium_model_count - pass_or_approved_review_count,
                     0,
                 ),
-                "accepted_decisions": ["PASS", "APPROVED_REVIEW"],
+                "accepted_decisions": ["PASS", "REVIEW"],
                 "validation_commands": [
                     "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
                     "python3 scripts/build_developer_preview_rc_status.py --check",
@@ -764,6 +952,7 @@ def _operator_next_actions(
 
 def _validation_commands() -> list[str]:
     return [
+        "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
         "python3 scripts/build_developer_preview_rc_status.py --check",
@@ -783,6 +972,13 @@ def _medium_gate_minimum_evidence(action_id: str) -> list[str]:
             "source license receipt records approved commercial-use boundary",
             "license_review_pending is absent from the readiness receipt blockers",
         ],
+        "complete_scientific_medium_corpus": [
+            "all five required structural archetype slots are uniquely populated",
+            "each case has a complete checksum-bound comparison artifact chain",
+            "OpenSees and a second independent reference solver are represented",
+            "scientific PASS or scoped, unexpired engineer REVIEW grants case credit",
+            "medium_benchmark_corpus_plan.json contract_pass=true and credit_count=5",
+        ],
         "attach_medium_reference_outputs": [
             "reference displacement, reaction, member, or modal outputs attached per selected case",
             "reference output SHA256 or approved REVIEW baseline recorded per selected case",
@@ -799,7 +995,7 @@ def _medium_gate_minimum_evidence(action_id: str) -> list[str]:
             "opensees_medium_scorecard_execution_missing is absent from the readiness receipt blockers",
         ],
         "attach_medium_pass_or_approved_review_decisions": [
-            "each selected case has PASS or APPROVED_REVIEW decision",
+            "each selected case has PASS or scoped engineer REVIEW decision",
             "decision is referenced by the corresponding scorecard receipt",
             "medium_model_pass_or_review_missing is absent from the readiness receipt blockers",
         ],
@@ -827,7 +1023,8 @@ def _gate_unblock_plan(
                 "evidence_artifacts": _safe_list(row.get("evidence_artifacts")),
                 "remaining_case_count": row.get("remaining_case_count"),
                 "minimum_evidence": _medium_gate_minimum_evidence(action_id),
-                "validation_commands": _safe_list(row.get("validation_commands")) or validation_commands,
+                "validation_commands": _safe_list(row.get("validation_commands"))
+                or validation_commands,
             }
         )
     plan.append(
@@ -856,7 +1053,9 @@ def _case_input_requirements(
         "schema_version": "phase3-medium-model-scorecard-case-inputs.v1",
         "required_case_count": required_medium_model_count,
         "current_valid_scorecard_case_count": current_scorecard_count,
-        "remaining_case_count": max(required_medium_model_count - current_scorecard_count, 0),
+        "remaining_case_count": max(
+            required_medium_model_count - current_scorecard_count, 0
+        ),
         "case_fields": [
             {
                 "field": "model",
@@ -881,7 +1080,9 @@ def _case_input_requirements(
             {
                 "field": "scorecard_or_review_path",
                 "runner_argument": "--scorecard-or-review",
-                "required_artifact": "PASS scorecard or pre-approved REVIEW record",
+                "required_artifact": (
+                    "benchmark-scientific-decision.v1 PASS or scoped engineer REVIEW"
+                ),
             },
             {
                 "field": "reference_output_sha256",
@@ -945,14 +1146,12 @@ def _case_readiness_ledger(
         case_id = str(row.get("case_id") or "")
         receipt = receipts_by_case.get(case_id, {})
         authoritative_source_pass = case_id in source_verified_by_case
-        scorecard_execution_pass = bool(
-            receipt.get("scorecard_execution_pass") is True
-        )
-        pass_or_approved_review = bool(
-            receipt.get("pass_or_approved_review") is True
-        )
+        scorecard_execution_pass = bool(receipt.get("scorecard_execution_pass") is True)
+        pass_or_approved_review = bool(receipt.get("pass_or_approved_review") is True)
         reference_outputs_pass = bool(receipt.get("reference_output_sha256"))
-        normalization_pass = bool(receipt.get("normalization_receipt_contract_pass") is True)
+        normalization_pass = bool(
+            receipt.get("normalization_receipt_contract_pass") is True
+        )
         blockers = []
         if authoritative_source_pass is not True:
             blockers.append("source_url_verification_pending")
@@ -978,7 +1177,9 @@ def _case_readiness_ledger(
                 "license_approval_pass": license_approved,
                 "reference_outputs_pass": reference_outputs_pass,
                 "normalization_pass": normalization_pass,
-                "normalization_receipt_status": receipt.get("normalization_receipt_status"),
+                "normalization_receipt_status": receipt.get(
+                    "normalization_receipt_status"
+                ),
                 "scorecard_execution_pass": scorecard_execution_pass,
                 "pass_or_approved_review": pass_or_approved_review,
                 "scorecard_receipt_path": receipt.get("path"),
@@ -1019,7 +1220,9 @@ def _case_readiness_ledger(
     }
 
 
-def _selected_medium_candidate_rows(canonical_report: dict[str, Any]) -> list[dict[str, Any]]:
+def _selected_medium_candidate_rows(
+    canonical_report: dict[str, Any],
+) -> list[dict[str, Any]]:
     rows = [
         row
         for row in _safe_list(canonical_report.get("rows"))
@@ -1051,7 +1254,7 @@ def _case_blocker_next_inputs(blockers: list[str]) -> list[str]:
             "medium scorecard receipt, result artifact, and validation report"
         ),
         "medium_model_pass_or_review_missing": (
-            "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+            "scientific PASS or scoped REVIEW decision covering every core metric family"
         ),
         "source_url_verification_pending": "verified authoritative source URL/checksum",
     }
@@ -1133,7 +1336,9 @@ def _medium_model_case_execution_queue(
         "selected_case_count": len(case_rows),
         "missing_case_count": missing_case_count,
         "case_ready_count": sum(
-            1 for row in case_rows if row.get("ready_for_medium_scorecard_credit") is True
+            1
+            for row in case_rows
+            if row.get("ready_for_medium_scorecard_credit") is True
         ),
         "queue_rows": queue_rows,
         "next_case_slot": (
@@ -1200,15 +1405,25 @@ def _license_approval_evidence_row(
     source_license_receipt: dict[str, Any],
 ) -> dict[str, Any]:
     license_evidence = _safe_dict(source_license_receipt.get("license_evidence"))
-    redistribution_allowed = bool(source_license_receipt.get("redistribution_allowed") is True)
-    commercial_use_allowed = bool(source_license_receipt.get("commercial_use_allowed") is True)
+    redistribution_allowed = bool(
+        source_license_receipt.get("redistribution_allowed") is True
+    )
+    commercial_use_allowed = bool(
+        source_license_receipt.get("commercial_use_allowed") is True
+    )
     review_status = str(source_license_receipt.get("license_review_status") or "")
-    approved = redistribution_allowed and commercial_use_allowed and review_status.startswith("approved")
+    approved = (
+        redistribution_allowed
+        and commercial_use_allowed
+        and review_status.startswith("approved")
+    )
     identified = bool(license_evidence.get("spdx") or review_status)
     enriched = dict(row)
     enriched.update(
         {
-            "status": "ready" if approved else ("identified_review_required" if identified else "missing"),
+            "status": "ready"
+            if approved
+            else ("identified_review_required" if identified else "missing"),
             "contract_pass": approved,
             "blocker": "" if approved else row["blocker"],
             "source_license_receipt_path": SOURCE_LICENSE_RECEIPT.as_posix(),
@@ -1225,20 +1440,66 @@ def _license_approval_evidence_row(
     return enriched
 
 
+def _scientific_corpus_evidence_row(
+    row: dict[str, Any],
+    *,
+    scientific_corpus_plan: dict[str, Any],
+) -> dict[str, Any]:
+    required_count = 5
+    credit_count = int(
+        _as_float(scientific_corpus_plan.get("medium_benchmark_credit_count"))
+    )
+    contract_pass = bool(
+        scientific_corpus_plan.get("contract_pass") is True
+        and credit_count == required_count
+    )
+    enriched = dict(row)
+    enriched.update(
+        {
+            "status": "ready" if contract_pass else "blocked",
+            "contract_pass": contract_pass,
+            "blocker": "" if contract_pass else row["blocker"],
+            "scientific_corpus_plan_path": SCIENTIFIC_CORPUS_PLAN.as_posix(),
+            "scientific_corpus_schema_version": scientific_corpus_plan.get(
+                "schema_version"
+            ),
+            "required_medium_benchmark_credit_count": required_count,
+            "current_medium_benchmark_credit_count": credit_count,
+            "slot_rows": _safe_list(scientific_corpus_plan.get("slot_rows")),
+            "reference_solver_diversity": _safe_dict(
+                scientific_corpus_plan.get("reference_solver_diversity")
+            ),
+            "scientific_corpus_blockers": _safe_list(
+                scientific_corpus_plan.get("blockers")
+            ),
+            "claim_boundary": (
+                "Parser-ready candidates and legacy scorecard counts do not satisfy "
+                "this row. Credit requires the five-archetype scientific corpus "
+                "contract and complete per-case evidence chains."
+            ),
+        }
+    )
+    return enriched
+
+
 def build_phase3_medium_model_scorecard_readiness_receipt(
     *,
     repo_root: Path = ROOT,
     source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
-    topology_report = _load_json(repo_root / "implementation/phase1/opensees_topology_report.json")
+    topology_report = _load_json(
+        repo_root / "implementation/phase1/opensees_topology_report.json"
+    )
     canonical_report = _load_json(
-        repo_root / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+        repo_root
+        / "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
     )
     topology_metrics = _safe_dict(topology_report.get("metrics"))
     topology_source = _safe_dict(topology_report.get("source_provenance"))
     canonical_rows = _selected_medium_candidate_rows(canonical_report)
     source_license_receipt = _try_load_json(repo_root / SOURCE_LICENSE_RECEIPT)
+    scientific_corpus_plan = _try_load_json(repo_root / SCIENTIFIC_CORPUS_PLAN)
     receipt_inventory = _medium_scorecard_receipt_inventory(repo_root)
     required_medium_model_count = 5
     case_readiness_ledger = _case_readiness_ledger(
@@ -1252,8 +1513,12 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         required_medium_model_count=required_medium_model_count,
     )
     current_scorecard_count = int(receipt_inventory["valid_scorecard_case_count"])
-    pass_or_approved_review_count = int(receipt_inventory["pass_or_approved_review_count"])
-    normalization_receipt_count = int(receipt_inventory["valid_normalization_case_count"])
+    pass_or_approved_review_count = int(
+        receipt_inventory["pass_or_approved_review_count"]
+    )
+    normalization_receipt_count = int(
+        receipt_inventory["valid_normalization_case_count"]
+    )
     runner_script = repo_root / RUNNER_SCRIPT
     runner_command_ready = runner_script.exists()
     evidence_rows: list[dict[str, Any]] = []
@@ -1270,6 +1535,13 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
                 _license_approval_evidence_row(
                     row,
                     source_license_receipt=source_license_receipt,
+                )
+            )
+        elif row["id"] == "scientific_corpus_contract":
+            evidence_rows.append(
+                _scientific_corpus_evidence_row(
+                    row,
+                    scientific_corpus_plan=scientific_corpus_plan,
                 )
             )
         elif row["id"] == "scorecard_execution":
@@ -1308,7 +1580,9 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
                 ),
                 "status": "ready" if runner_command_ready else "missing",
                 "contract_pass": runner_command_ready,
-                "blocker": "" if runner_command_ready else "opensees_medium_runner_command_missing",
+                "blocker": ""
+                if runner_command_ready
+                else "opensees_medium_runner_command_missing",
                 "runner_command_template": RUNNER_COMMAND_TEMPLATE,
                 "runner_script": RUNNER_SCRIPT.as_posix(),
             },
@@ -1325,8 +1599,12 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
             },
         ]
     )
-    blockers = sorted({str(row["blocker"]) for row in evidence_rows if str(row.get("blocker", ""))})
-    evidence_pass_count = sum(1 for row in evidence_rows if row["contract_pass"] is True)
+    blockers = sorted(
+        {str(row["blocker"]) for row in evidence_rows if str(row.get("blocker", ""))}
+    )
+    evidence_pass_count = sum(
+        1 for row in evidence_rows if row["contract_pass"] is True
+    )
     missing_evidence = _missing_evidence_breakdown(
         evidence_rows,
         required_medium_model_count=required_medium_model_count,
@@ -1350,10 +1628,18 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
     summary = {
         "required_medium_model_count": required_medium_model_count,
         "local_candidate_case_count": len(canonical_rows),
-        "missing_candidate_case_count": max(required_medium_model_count - len(canonical_rows), 0),
+        "missing_candidate_case_count": max(
+            required_medium_model_count - len(canonical_rows), 0
+        ),
         "current_medium_model_scorecard_count": current_scorecard_count,
         "pass_or_approved_review_count": pass_or_approved_review_count,
         "normalization_receipt_count": normalization_receipt_count,
+        "scientific_medium_benchmark_credit_count": int(
+            _as_float(scientific_corpus_plan.get("medium_benchmark_credit_count"))
+        ),
+        "scientific_corpus_contract_pass": bool(
+            scientific_corpus_plan.get("contract_pass") is True
+        ),
         "remaining_scorecard_case_count": max(
             required_medium_model_count - current_scorecard_count,
             0,
@@ -1365,8 +1651,12 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "required_evidence_pass_count": evidence_pass_count,
         "required_evidence_count": len(evidence_rows),
         "runner_command_ready": runner_command_ready,
-        "source_url_verified": bool(source_license_receipt.get("source_url_verified") is True),
-        "license_review_status": str(source_license_receipt.get("license_review_status") or ""),
+        "source_url_verified": bool(
+            source_license_receipt.get("source_url_verified") is True
+        ),
+        "license_review_status": str(
+            source_license_receipt.get("license_review_status") or ""
+        ),
     }
     return {
         "schema_version": "phase3-medium-model-scorecard-readiness-receipt.v1",
@@ -1386,11 +1676,15 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "current_medium_model_scorecard_count": current_scorecard_count,
         "pass_or_approved_review_count": pass_or_approved_review_count,
         "scorecard_receipt_inventory": receipt_inventory,
+        "scientific_corpus_plan_path": SCIENTIFIC_CORPUS_PLAN.as_posix(),
+        "scientific_corpus_plan": scientific_corpus_plan,
         "local_candidate_artifact_count": len(canonical_rows),
         "case_selection_summary": {
             "required_candidate_case_count": required_medium_model_count,
             "local_candidate_case_count": len(canonical_rows),
-            "missing_candidate_case_count": max(required_medium_model_count - len(canonical_rows), 0),
+            "missing_candidate_case_count": max(
+                required_medium_model_count - len(canonical_rows), 0
+            ),
             "current_scorecard_credit_count": current_scorecard_count,
             "claim_boundary": (
                 "Candidate selection counts parser/topology-ready local source rows only. "
@@ -1400,8 +1694,12 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         },
         "local_topology_contract_pass": bool(topology_report.get("contract_pass")),
         "source_license_receipt_path": SOURCE_LICENSE_RECEIPT.as_posix(),
-        "source_url_verified": bool(source_license_receipt.get("source_url_verified") is True),
-        "license_review_status": str(source_license_receipt.get("license_review_status") or ""),
+        "source_url_verified": bool(
+            source_license_receipt.get("source_url_verified") is True
+        ),
+        "license_review_status": str(
+            source_license_receipt.get("license_review_status") or ""
+        ),
         "required_evidence_count": len(evidence_rows),
         "required_evidence_pass_count": evidence_pass_count,
         "summary": summary,
@@ -1419,7 +1717,9 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
             "node_count": topology_metrics.get("node_count"),
             "beam_element_count": topology_metrics.get("beam_element_count"),
             "shell_element_count": topology_metrics.get("shell_element_count"),
-            "canonical_candidate_case_ids": sorted(str(row.get("case_id")) for row in canonical_rows),
+            "canonical_candidate_case_ids": sorted(
+                str(row.get("case_id")) for row in canonical_rows
+            ),
             "claim_boundary": (
                 "Local checksum and topology/parser evidence is retained only as parser input "
                 "evidence. It is not reference-output ingest, normalization, medium scorecard "
@@ -1443,7 +1743,7 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
                 "convergence_history_retained": True,
                 "node_member_mapping_coverage": "OPERATOR_RECORDED_COVERAGE",
             },
-            "decision": "PASS|APPROVED_REVIEW",
+            "decision": "PASS|REVIEW",
             "contract_pass": False,
         },
         "normalization_receipt_template": {
@@ -1479,8 +1779,9 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
         "blocked_by": blockers,
         "blockers": blockers,
         "owner_action": (
-            "Attach product legal license approval, ingest reference outputs, normalize five "
-            "selected medium models, run the medium scorecard, and record PASS or pre-approved "
+            "Complete the five-archetype scientific corpus, attach product/legal license "
+            "approval, ingest reference outputs, normalize five selected medium models, "
+            "run numerical scorecards, and record scientific PASS or scoped engineer "
             "REVIEW rows before promoting this RC gate."
         ),
         "summary_line": (
@@ -1493,9 +1794,9 @@ def build_phase3_medium_model_scorecard_readiness_receipt(
             "It preserves local topology/parser evidence as parser-only, reads the source "
             "license receipt for upstream source identity, and implements the operator "
             "scorecard runner command plus normalization receipt validation, but it does "
-            "not prove product license approval, reference outputs, attached normalization "
-            "receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP "
-            "RC readiness."
+            "not prove the five-archetype scientific corpus, product license approval, "
+            "reference outputs, attached normalization receipts, numerical scorecard "
+            "execution, scientific PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness."
         ),
     }
 
@@ -1528,11 +1829,17 @@ def check_phase3_medium_model_scorecard_readiness_receipt(
     )
     resolved = out_path if out_path.is_absolute() else repo_root / out_path
     if not resolved.exists():
-        return False, f"phase3_medium_model_scorecard_readiness_missing:{out_path.as_posix()}"
+        return (
+            False,
+            f"phase3_medium_model_scorecard_readiness_missing:{out_path.as_posix()}",
+        )
     try:
         existing = _load_json(resolved)
     except Exception as exc:
-        return False, f"phase3_medium_model_scorecard_readiness_unreadable:{out_path.as_posix()}:{exc.__class__.__name__}"
+        return (
+            False,
+            f"phase3_medium_model_scorecard_readiness_unreadable:{out_path.as_posix()}:{exc.__class__.__name__}",
+        )
     if _strip_volatile(existing) != _strip_volatile(expected):
         return False, "phase3_medium_model_scorecard_readiness_mismatch"
     return True, "phase3_medium_model_scorecard_readiness_consistent"

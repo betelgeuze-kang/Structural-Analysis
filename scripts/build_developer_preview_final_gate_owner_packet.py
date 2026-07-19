@@ -116,6 +116,76 @@ GATE_HANDOFFS: dict[str, dict[str, Any]] = {
         ],
         "closure_decision_required": "five_PASS_or_explicit_APPROVED_REVIEW_rows",
     },
+    "silent_import_loss_zero": {
+        "owner": "ifc_import_validation_owner",
+        "owner_action": (
+            "Acquire and SHA256-bind every selected clean and dirty IFC file, run "
+            "the import-health and negative silent-loss contracts, and regenerate "
+            "the Phase 3 and Phase 6 receipts. Keep product/license quantity credit "
+            "separate from the Developer Preview technical gate."
+        ),
+        "required_owner_evidence": [
+            "selected_clean_and_dirty_ifc_source_files",
+            "per_file_sha256_bindings",
+            "phase3_ifc_import_health_execution_receipt",
+            "clean_ifc_import_health_execution_receipts",
+            "dirty_ifc_negative_import_execution_receipts",
+            "visible_entity_accounting_and_zero_silent_loss_decision",
+        ],
+        "verification_commands": [
+            "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --check",
+            "python3 scripts/build_phase6_silent_import_loss_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check",
+        ],
+        "evidence_refresh_commands": [
+            (
+                "python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "phase3_buildingsmart_ifc_acquisition_receipt.json"
+            ),
+            (
+                "python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
+            ),
+            (
+                "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "phase3_ifc_import_health_execution_receipt.json"
+            ),
+            (
+                "python3 scripts/build_phase6_silent_import_loss_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "phase6_silent_import_loss_status.json"
+            ),
+            (
+                "python3 scripts/build_developer_preview_rc_status.py "
+                "--out implementation/phase1/release_evidence/productization/"
+                "developer_preview_rc_status.json"
+            ),
+        ],
+        "prohibited_substitutes": [
+            "selected_ifc_case_contracts_without_acquired_source_files",
+            "expected_import_contracts_without_execution_receipts",
+            "source_urls_without_file_sha256_bindings",
+            "product_or_license_quantity_credit_used_as_technical_execution_evidence",
+        ],
+        "release_surface_impacts": [
+            "developer_preview_rc::silent_import_loss_zero",
+            "product_readiness_snapshot::final_gate_blocked:silent_import_loss_zero",
+        ],
+        "evidence_intake_artifacts": [
+            "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+            "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+            "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+            "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
+        ],
+        "upstream_handoff_artifacts": [
+            "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+            "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
+        ],
+        "closure_decision_required": "technical_IFC_import_and_silent_loss_evidence_passes",
+    },
     "linux_windows_reproducibility_confirmed": {
         "owner": "release_reproducibility_owner",
         "owner_action": (
@@ -621,8 +691,9 @@ def _nearest_abf_slice_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "claim_boundary": (
             "A/B/F slice tracking only reports current DP final-gate state. "
-            "It does not create missing human observation, benchmark, or "
-            "platform replay evidence and does not promote Developer Preview."
+            "It does not acquire IFC inputs or create missing import execution, "
+            "human observation, benchmark, or platform replay evidence and does "
+            "not promote Developer Preview."
         ),
     }
 
@@ -761,10 +832,11 @@ def build_owner_packet(
         },
         "claim_boundary": (
             "This packet is a Developer Preview owner-evidence handoff for blocked "
-            "RC final gates. It does not create benchmark, Windows, or human UX "
-            "evidence; does not promote Developer Preview readiness; and does not "
-            "close Commercial Release, G1, customer shadow, external benchmark, "
-            "license, SLA, or GitHub CI streak gates."
+            "RC final gates. It does not acquire IFC sources, run import evidence, "
+            "or create benchmark, Windows, or human UX evidence; does not promote "
+            "Developer Preview readiness; and does not close Commercial Release, "
+            "G1, customer shadow, external benchmark, license, SLA, or GitHub CI "
+            "streak gates."
         ),
     }
 

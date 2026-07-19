@@ -1,0 +1,534 @@
+{
+  "blockers": [
+    "verification_hierarchy_slot_count_below_minimum:level=2:category=opensees_code_to_code:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=2:category=second_solver_code_to_code:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=3:category=material_cyclic:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=3:category=nafems:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=3:category=nonlinear_snap_through:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=3:category=shell_patch:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=4:category=failure_mode:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=4:category=load_displacement:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=4:category=strain_distribution:current=0:required=1",
+    "verification_hierarchy_slot_count_below_minimum:level=5:category=completed_customer_shadow:current=0:required=3"
+  ],
+  "claim_boundary": "Hierarchy promotion is contiguous: higher-level evidence remains visible but cannot bypass an incomplete lower level. This readiness report does not create published, experimental, customer, license, or engineer-review evidence.",
+  "contract_pass": false,
+  "evidence_count": 5,
+  "evidence_rows": [
+    {
+      "blockers": [],
+      "category": "single_bar",
+      "claim_boundary": "This row validates declared evidence metadata and artifact hashes. It does not independently rerun a solver, authenticate a reviewer, or fetch source bytes.",
+      "decision": {
+        "benchmark_credit": true,
+        "blockers": [],
+        "contract_pass": true,
+        "decision": "PASS",
+        "failing_metric_families": [],
+        "metric_families": [
+          "analytic_manifest_integrity",
+          "analytic_expected_output_comparison"
+        ],
+        "review": null,
+        "schema_version": "benchmark-scientific-decision.v1"
+      },
+      "evidence_id": "repository-analytic-single_bar",
+      "level": 1,
+      "level_id": "analytic",
+      "ready_for_hierarchy_credit": true,
+      "schema_version": "structural-verification-evidence.v1",
+      "source_sha256": "sha256:180923190287fb7bb1fd768bbdbf3c6059566389eb36b04df03dafbbf38e1eec",
+      "source_url_or_doi": "generated://structural_analysis/phase3_benchmark_factory_seed",
+      "truth_basis": "analytic_closed_form"
+    },
+    {
+      "blockers": [],
+      "category": "patch_tests",
+      "claim_boundary": "This row validates declared evidence metadata and artifact hashes. It does not independently rerun a solver, authenticate a reviewer, or fetch source bytes.",
+      "decision": {
+        "benchmark_credit": true,
+        "blockers": [],
+        "contract_pass": true,
+        "decision": "PASS",
+        "failing_metric_families": [],
+        "metric_families": [
+          "analytic_manifest_integrity",
+          "analytic_expected_output_comparison"
+        ],
+        "review": null,
+        "schema_version": "benchmark-scientific-decision.v1"
+      },
+      "evidence_id": "repository-analytic-patch_tests",
+      "level": 1,
+      "level_id": "analytic",
+      "ready_for_hierarchy_credit": true,
+      "schema_version": "structural-verification-evidence.v1",
+      "source_sha256": "sha256:180923190287fb7bb1fd768bbdbf3c6059566389eb36b04df03dafbbf38e1eec",
+      "source_url_or_doi": "generated://structural_analysis/phase3_benchmark_factory_seed",
+      "truth_basis": "analytic_closed_form"
+    },
+    {
+      "blockers": [],
+      "category": "cantilever_beam",
+      "claim_boundary": "This row validates declared evidence metadata and artifact hashes. It does not independently rerun a solver, authenticate a reviewer, or fetch source bytes.",
+      "decision": {
+        "benchmark_credit": true,
+        "blockers": [],
+        "contract_pass": true,
+        "decision": "PASS",
+        "failing_metric_families": [],
+        "metric_families": [
+          "analytic_frame_artifact_integrity",
+          "analytic_closed_form_frame_comparison"
+        ],
+        "review": null,
+        "schema_version": "benchmark-scientific-decision.v1"
+      },
+      "evidence_id": "repository-analytic-cantilever_beam",
+      "level": 1,
+      "level_id": "analytic",
+      "ready_for_hierarchy_credit": true,
+      "schema_version": "structural-verification-evidence.v1",
+      "source_sha256": "sha256:6cbc311e5a60af55fe9965731eee945f60d07f56b0cc219d0e538a412697d2e4",
+      "source_url_or_doi": "generated://structural_analysis/analytic_frame_verification/cantilever_beam",
+      "truth_basis": "analytic_closed_form"
+    },
+    {
+      "blockers": [],
+      "category": "simply_supported_beam",
+      "claim_boundary": "This row validates declared evidence metadata and artifact hashes. It does not independently rerun a solver, authenticate a reviewer, or fetch source bytes.",
+      "decision": {
+        "benchmark_credit": true,
+        "blockers": [],
+        "contract_pass": true,
+        "decision": "PASS",
+        "failing_metric_families": [],
+        "metric_families": [
+          "analytic_frame_artifact_integrity",
+          "analytic_closed_form_frame_comparison"
+        ],
+        "review": null,
+        "schema_version": "benchmark-scientific-decision.v1"
+      },
+      "evidence_id": "repository-analytic-simply_supported_beam",
+      "level": 1,
+      "level_id": "analytic",
+      "ready_for_hierarchy_credit": true,
+      "schema_version": "structural-verification-evidence.v1",
+      "source_sha256": "sha256:98273ce806560edf6c5fee0e8109d50a128f880a5d054dae85446235be86cad9",
+      "source_url_or_doi": "generated://structural_analysis/analytic_frame_verification/simply_supported_beam",
+      "truth_basis": "analytic_closed_form"
+    },
+    {
+      "blockers": [],
+      "category": "portal_frame",
+      "claim_boundary": "This row validates declared evidence metadata and artifact hashes. It does not independently rerun a solver, authenticate a reviewer, or fetch source bytes.",
+      "decision": {
+        "benchmark_credit": true,
+        "blockers": [],
+        "contract_pass": true,
+        "decision": "PASS",
+        "failing_metric_families": [],
+        "metric_families": [
+          "analytic_frame_artifact_integrity",
+          "analytic_closed_form_frame_comparison"
+        ],
+        "review": null,
+        "schema_version": "benchmark-scientific-decision.v1"
+      },
+      "evidence_id": "repository-analytic-portal_frame",
+      "level": 1,
+      "level_id": "analytic",
+      "ready_for_hierarchy_credit": true,
+      "schema_version": "structural-verification-evidence.v1",
+      "source_sha256": "sha256:cb5e9dad466d66b351e6a7fef040aacfa61ff115d5c2bbe7a9b448f1d2431fe2",
+      "source_url_or_doi": "generated://structural_analysis/analytic_frame_verification/portal_frame",
+      "truth_basis": "analytic_closed_form"
+    }
+  ],
+  "highest_verified_level": 1,
+  "input_blockers": [],
+  "level_rows": [
+    {
+      "blockers": [],
+      "claim_boundary": "Each generated analytic case proves only its named closed-form family and declared modeling assumptions; case volume cannot substitute for another structural family or a higher verification level.",
+      "evidence_count": 5,
+      "intrinsic_contract_pass": true,
+      "label": "Analytic",
+      "level": 1,
+      "level_id": "analytic",
+      "promotion_contract_pass": true,
+      "ready_evidence_count": 5,
+      "slot_rows": [
+        {
+          "blockers": [],
+          "category": "single_bar",
+          "contract_pass": true,
+          "label": "Single bar",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 1,
+          "ready_evidence_ids": [
+            "repository-analytic-single_bar"
+          ]
+        },
+        {
+          "blockers": [],
+          "category": "cantilever_beam",
+          "contract_pass": true,
+          "label": "Cantilever beam",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 1,
+          "ready_evidence_ids": [
+            "repository-analytic-cantilever_beam"
+          ]
+        },
+        {
+          "blockers": [],
+          "category": "simply_supported_beam",
+          "contract_pass": true,
+          "label": "Simply supported beam",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 1,
+          "ready_evidence_ids": [
+            "repository-analytic-simply_supported_beam"
+          ]
+        },
+        {
+          "blockers": [],
+          "category": "portal_frame",
+          "contract_pass": true,
+          "label": "Portal frame",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 1,
+          "ready_evidence_ids": [
+            "repository-analytic-portal_frame"
+          ]
+        },
+        {
+          "blockers": [],
+          "category": "patch_tests",
+          "contract_pass": true,
+          "label": "Element and rigid-body patch tests",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 1,
+          "ready_evidence_ids": [
+            "repository-analytic-patch_tests"
+          ]
+        }
+      ],
+      "status": "ready",
+      "truth_basis": "analytic_closed_form"
+    },
+    {
+      "blockers": [
+        "verification_hierarchy_slot_count_below_minimum:level=2:category=opensees_code_to_code:current=0:required=1",
+        "verification_hierarchy_slot_count_below_minimum:level=2:category=second_solver_code_to_code:current=0:required=1"
+      ],
+      "claim_boundary": "Requires version-verified independent solver outputs; parser compatibility and solver input generation do not count.",
+      "evidence_count": 0,
+      "intrinsic_contract_pass": false,
+      "label": "Code-to-code",
+      "level": 2,
+      "level_id": "code_to_code",
+      "promotion_contract_pass": false,
+      "ready_evidence_count": 0,
+      "slot_rows": [
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=2:category=opensees_code_to_code:current=0:required=1"
+          ],
+          "category": "opensees_code_to_code",
+          "contract_pass": false,
+          "label": "OpenSees comparison",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        },
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=2:category=second_solver_code_to_code:current=0:required=1"
+          ],
+          "category": "second_solver_code_to_code",
+          "contract_pass": false,
+          "label": "Second independent open-source or commercial solver",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        }
+      ],
+      "status": "missing",
+      "truth_basis": "code_to_code"
+    },
+    {
+      "blockers": [
+        "verification_hierarchy_slot_count_below_minimum:level=3:category=material_cyclic:current=0:required=1",
+        "verification_hierarchy_slot_count_below_minimum:level=3:category=nafems:current=0:required=1",
+        "verification_hierarchy_slot_count_below_minimum:level=3:category=nonlinear_snap_through:current=0:required=1",
+        "verification_hierarchy_slot_count_below_minimum:level=3:category=shell_patch:current=0:required=1"
+      ],
+      "claim_boundary": "A publication URL or submission-readiness packet is not a passed published benchmark without checksum-bound outputs and a scientific decision.",
+      "evidence_count": 0,
+      "intrinsic_contract_pass": false,
+      "label": "Published benchmark",
+      "level": 3,
+      "level_id": "published_benchmark",
+      "promotion_contract_pass": false,
+      "ready_evidence_count": 0,
+      "slot_rows": [
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=3:category=nafems:current=0:required=1"
+          ],
+          "category": "nafems",
+          "contract_pass": false,
+          "label": "NAFEMS benchmark",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        },
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=3:category=shell_patch:current=0:required=1"
+          ],
+          "category": "shell_patch",
+          "contract_pass": false,
+          "label": "Published shell patch",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        },
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=3:category=nonlinear_snap_through:current=0:required=1"
+          ],
+          "category": "nonlinear_snap_through",
+          "contract_pass": false,
+          "label": "Nonlinear snap-through",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        },
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=3:category=material_cyclic:current=0:required=1"
+          ],
+          "category": "material_cyclic",
+          "contract_pass": false,
+          "label": "Material cyclic benchmark",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        }
+      ],
+      "status": "missing",
+      "truth_basis": "published_benchmark"
+    },
+    {
+      "blockers": [
+        "verification_hierarchy_slot_count_below_minimum:level=4:category=failure_mode:current=0:required=1",
+        "verification_hierarchy_slot_count_below_minimum:level=4:category=load_displacement:current=0:required=1",
+        "verification_hierarchy_slot_count_below_minimum:level=4:category=strain_distribution:current=0:required=1"
+      ],
+      "claim_boundary": "Experimental credit requires measurement data and publication/dataset provenance, not a numerical model labeled as experimental.",
+      "evidence_count": 0,
+      "intrinsic_contract_pass": false,
+      "label": "Experimental",
+      "level": 4,
+      "level_id": "experimental",
+      "promotion_contract_pass": false,
+      "ready_evidence_count": 0,
+      "slot_rows": [
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=4:category=load_displacement:current=0:required=1"
+          ],
+          "category": "load_displacement",
+          "contract_pass": false,
+          "label": "Load-displacement response",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        },
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=4:category=failure_mode:current=0:required=1"
+          ],
+          "category": "failure_mode",
+          "contract_pass": false,
+          "label": "Failure mode",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        },
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=4:category=strain_distribution:current=0:required=1"
+          ],
+          "category": "strain_distribution",
+          "contract_pass": false,
+          "label": "Strain distribution",
+          "minimum_evidence_count": 1,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        }
+      ],
+      "status": "missing",
+      "truth_basis": "experimental"
+    },
+    {
+      "blockers": [
+        "verification_hierarchy_slot_count_below_minimum:level=5:category=completed_customer_shadow:current=0:required=3"
+      ],
+      "claim_boundary": "Only privacy-safe derived metadata is stored. Raw customer data remains customer-held and three distinct reviewed completed projects are required.",
+      "evidence_count": 0,
+      "intrinsic_contract_pass": false,
+      "label": "Customer shadow",
+      "level": 5,
+      "level_id": "customer_shadow",
+      "promotion_contract_pass": false,
+      "ready_evidence_count": 0,
+      "slot_rows": [
+        {
+          "blockers": [
+            "verification_hierarchy_slot_count_below_minimum:level=5:category=completed_customer_shadow:current=0:required=3"
+          ],
+          "category": "completed_customer_shadow",
+          "contract_pass": false,
+          "label": "Reviewed completed-project shadow case",
+          "minimum_evidence_count": 3,
+          "ready_evidence_count": 0,
+          "ready_evidence_ids": []
+        }
+      ],
+      "status": "missing",
+      "truth_basis": "customer_shadow"
+    }
+  ],
+  "policy": [
+    {
+      "claim_boundary": "Each generated analytic case proves only its named closed-form family and declared modeling assumptions; case volume cannot substitute for another structural family or a higher verification level.",
+      "label": "Analytic",
+      "level": 1,
+      "level_id": "analytic",
+      "slots": [
+        {
+          "category": "single_bar",
+          "label": "Single bar",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "cantilever_beam",
+          "label": "Cantilever beam",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "simply_supported_beam",
+          "label": "Simply supported beam",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "portal_frame",
+          "label": "Portal frame",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "patch_tests",
+          "label": "Element and rigid-body patch tests",
+          "minimum_evidence_count": 1
+        }
+      ],
+      "truth_basis": "analytic_closed_form"
+    },
+    {
+      "claim_boundary": "Requires version-verified independent solver outputs; parser compatibility and solver input generation do not count.",
+      "label": "Code-to-code",
+      "level": 2,
+      "level_id": "code_to_code",
+      "slots": [
+        {
+          "category": "opensees_code_to_code",
+          "label": "OpenSees comparison",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "second_solver_code_to_code",
+          "label": "Second independent open-source or commercial solver",
+          "minimum_evidence_count": 1
+        }
+      ],
+      "truth_basis": "code_to_code"
+    },
+    {
+      "claim_boundary": "A publication URL or submission-readiness packet is not a passed published benchmark without checksum-bound outputs and a scientific decision.",
+      "label": "Published benchmark",
+      "level": 3,
+      "level_id": "published_benchmark",
+      "slots": [
+        {
+          "category": "nafems",
+          "label": "NAFEMS benchmark",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "shell_patch",
+          "label": "Published shell patch",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "nonlinear_snap_through",
+          "label": "Nonlinear snap-through",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "material_cyclic",
+          "label": "Material cyclic benchmark",
+          "minimum_evidence_count": 1
+        }
+      ],
+      "truth_basis": "published_benchmark"
+    },
+    {
+      "claim_boundary": "Experimental credit requires measurement data and publication/dataset provenance, not a numerical model labeled as experimental.",
+      "label": "Experimental",
+      "level": 4,
+      "level_id": "experimental",
+      "slots": [
+        {
+          "category": "load_displacement",
+          "label": "Load-displacement response",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "failure_mode",
+          "label": "Failure mode",
+          "minimum_evidence_count": 1
+        },
+        {
+          "category": "strain_distribution",
+          "label": "Strain distribution",
+          "minimum_evidence_count": 1
+        }
+      ],
+      "truth_basis": "experimental"
+    },
+    {
+      "claim_boundary": "Only privacy-safe derived metadata is stored. Raw customer data remains customer-held and three distinct reviewed completed projects are required.",
+      "label": "Customer shadow",
+      "level": 5,
+      "level_id": "customer_shadow",
+      "slots": [
+        {
+          "category": "completed_customer_shadow",
+          "label": "Reviewed completed-project shadow case",
+          "minimum_evidence_count": 3
+        }
+      ],
+      "truth_basis": "customer_shadow"
+    }
+  ],
+  "ready_evidence_count": 5,
+  "required_level_count": 5,
+  "schema_version": "structural-verification-hierarchy.v1",
+  "status": "blocked",
+  "summary_line": "Structural verification hierarchy: BLOCKED | highest_level=1/5 | evidence=5/5"
+}

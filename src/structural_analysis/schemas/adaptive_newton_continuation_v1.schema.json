@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/adaptive_newton_continuation_v1.schema.json",
+  "title": "Adaptive consistent-Newton continuation receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "terminal_reason",
+    "contract_pass",
+    "case_id",
+    "residual_formula",
+    "residual_formula_hash",
+    "initial_checkpoint",
+    "final_checkpoint",
+    "checkpoints",
+    "attempts",
+    "metrics",
+    "verification",
+    "analytic_seed_full_load_pass",
+    "g1_full_load_claim",
+    "full_mesh_closure_claim",
+    "production_nonlinear_closure_claim",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-adaptive-continuation.v1"},
+    "status": {"enum": ["ready", "blocked"]},
+    "terminal_reason": {"type": "string", "minLength": 1},
+    "contract_pass": {"type": "boolean"},
+    "case_id": {"type": "string", "minLength": 1},
+    "residual_formula": {"const": "F_internal_minus_F_external"},
+    "residual_formula_hash": {"$ref": "#/$defs/hash"},
+    "config": {"type": "object"},
+    "newton_config": {"type": "object"},
+    "initial_checkpoint": {"$ref": "#/$defs/checkpoint"},
+    "final_checkpoint": {"$ref": "#/$defs/checkpoint"},
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/checkpoint"}
+    },
+    "attempts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "attempt_index",
+          "trial_load_factor",
+          "outcome",
+          "committed",
+          "accepted_state_hash_before",
+          "accepted_state_hash_after",
+          "trial_state_hash",
+          "residual_gate_passed",
+          "increment_gate_passed",
+          "regularization_used",
+          "fallback_used"
+        ],
+        "properties": {
+          "attempt_index": {"type": "integer", "minimum": 1},
+          "trial_load_factor": {"type": "number", "minimum": 0},
+          "outcome": {"enum": ["committed", "rolled_back"]},
+          "committed": {"type": "boolean"},
+          "rollback_exact": {"type": ["boolean", "null"]},
+          "accepted_state_hash_before": {"$ref": "#/$defs/hash"},
+          "accepted_state_hash_after": {"$ref": "#/$defs/hash"},
+          "trial_state_hash": {"$ref": "#/$defs/hash"},
+          "residual_gate_passed": {"type": ["boolean", "null"]},
+          "increment_gate_passed": {"type": ["boolean", "null"]},
+          "terminal_disposition": {
+            "enum": ["solve_free_equations", "no_solve_reaction_only"]
+          },
+          "solver_executed": {"type": "boolean"},
+          "no_solve_contract_pass": {"type": "boolean"},
+          "iterative_solver_contract_pass": {"type": "boolean"},
+          "residual_norm_applicable": {"type": "boolean"},
+          "increment_norm_applicable": {"type": "boolean"},
+          "convergence_claim": {"type": "boolean"},
+          "regularization_used": {"type": "boolean"},
+          "fallback_used": {"type": "boolean"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "metrics": {"type": "object"},
+    "verification": {"type": "object"},
+    "analytic_seed_full_load_pass": {"type": "boolean"},
+    "g1_full_load_claim": {"const": false},
+    "full_mesh_closure_claim": {"const": false},
+    "production_nonlinear_closure_claim": {"const": false},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "case_id",
+        "step_index",
+        "load_factor",
+        "free_displacements_m",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-continuation-checkpoint.v1"},
+        "case_id": {"type": "string", "minLength": 1},
+        "step_index": {"type": "integer", "minimum": 0},
+        "load_factor": {"type": "number", "minimum": 0},
+        "free_displacements_m": {
+          "type": "array",
+          "items": {"type": "number"}
+        },
+        "state_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}

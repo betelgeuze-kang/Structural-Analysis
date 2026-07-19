@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_stage4_status_v1.schema.json",
+  "title": "Engine v2 HIP FGMRES Stage 4 cross-device evidence status",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "source",
+    "local_legacy_gfx1030",
+    "device_receipts",
+    "identity_gates",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "engine-v2-hip-fgmres-stage4-status.v1"
+    },
+    "status_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["partial", "ready"]},
+    "contract_pass": {"const": true},
+    "source": {
+      "type": "object",
+      "required": ["repository_commit_sha", "worktree_clean", "input_checksums"],
+      "properties": {
+        "repository_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktree_clean": {"type": "boolean"},
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 4,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "local_legacy_gfx1030": {
+      "type": "object",
+      "required": [
+        "path",
+        "receipt_hash",
+        "actual_hardware",
+        "contract_pass",
+        "gcn_arch_name",
+        "source_commit_sha",
+        "worktree_clean",
+        "fixture_hash",
+        "preconditioner_contract_hash",
+        "binary_sha256",
+        "signed_receipt",
+        "wheel_identity_bound_at_execution",
+        "cross_device_eligible"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "receipt_hash": {"$ref": "#/$defs/hash"},
+        "actual_hardware": {"const": true},
+        "contract_pass": {"const": true},
+        "gcn_arch_name": {"const": "gfx1030"},
+        "source_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktree_clean": {"type": "boolean"},
+        "fixture_hash": {"$ref": "#/$defs/hash"},
+        "preconditioner_contract_hash": {"$ref": "#/$defs/hash"},
+        "binary_sha256": {"$ref": "#/$defs/hash"},
+        "signed_receipt": {"const": false},
+        "wheel_identity_bound_at_execution": {"const": false},
+        "cross_device_eligible": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "device_receipts": {
+      "type": "object",
+      "required": ["gfx1030", "gfx1100"],
+      "properties": {
+        "gfx1030": {"$ref": "#/$defs/deviceRow"},
+        "gfx1100": {"$ref": "#/$defs/deviceRow"}
+      },
+      "additionalProperties": false
+    },
+    "identity_gates": {
+      "type": "object",
+      "required": [
+        "architecture_pair_exact",
+        "actual_hardware_pair",
+        "numerical_parity_pair",
+        "checkpoint_resume_pair",
+        "direct_device_runner_pair",
+        "clean_exact_source_pair",
+        "same_source_commit",
+        "same_source_set",
+        "wheel_bound_at_execution_pair",
+        "same_wheel_hash",
+        "same_fixture_identity",
+        "signed_receipt_pair",
+        "distinct_signer_pair",
+        "independent_organization_pair",
+        "independent_runner_pair",
+        "gfx1100_independence_attested",
+        "stage4_contract_pass"
+      ],
+      "properties": {
+        "architecture_pair_exact": {"type": "boolean"},
+        "actual_hardware_pair": {"type": "boolean"},
+        "numerical_parity_pair": {"type": "boolean"},
+        "checkpoint_resume_pair": {"type": "boolean"},
+        "direct_device_runner_pair": {"type": "boolean"},
+        "clean_exact_source_pair": {"type": "boolean"},
+        "same_source_commit": {"type": "boolean"},
+        "same_source_set": {"type": "boolean"},
+        "wheel_bound_at_execution_pair": {"type": "boolean"},
+        "same_wheel_hash": {"type": "boolean"},
+        "same_fixture_identity": {"type": "boolean"},
+        "signed_receipt_pair": {"type": "boolean"},
+        "distinct_signer_pair": {"type": "boolean"},
+        "independent_organization_pair": {"type": "boolean"},
+        "independent_runner_pair": {"type": "boolean"},
+        "gfx1100_independence_attested": {"type": "boolean"},
+        "stage4_contract_pass": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "claims": {
+      "type": "object",
+      "required": [
+        "local_gfx1030_actual_hardware",
+        "independent_gfx1100_actual_hardware",
+        "same_source_commit_cross_device",
+        "same_wheel_hash_cross_device",
+        "same_fixture_cross_device",
+        "signed_cross_device_receipts",
+        "stage4_cross_device_evidence",
+        "production_recurrence",
+        "performance"
+      ],
+      "properties": {
+        "local_gfx1030_actual_hardware": {"const": true},
+        "independent_gfx1100_actual_hardware": {"type": "boolean"},
+        "same_source_commit_cross_device": {"type": "boolean"},
+        "same_wheel_hash_cross_device": {"type": "boolean"},
+        "same_fixture_cross_device": {"type": "boolean"},
+        "signed_cross_device_receipts": {"type": "boolean"},
+        "stage4_cross_device_evidence": {"type": "boolean"},
+        "production_recurrence": {"const": false},
+        "performance": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 100}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nullableHash": {
+      "oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]
+    },
+    "nullableString": {
+      "oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]
+    },
+    "deviceRow": {
+      "type": "object",
+      "required": [
+        "expected_architecture",
+        "path",
+        "attached",
+        "receipt_hash",
+        "gcn_arch_name",
+        "actual_hardware",
+        "numerical_parity",
+        "checkpoint_resume_parity",
+        "evidence_origin",
+        "source_commit_sha",
+        "source_set_hash",
+        "exact_source_commit",
+        "wheel_sha256",
+        "wheel_bound_at_execution",
+        "fixture_identity_hash",
+        "signature_verified",
+        "signer_id",
+        "public_key_sha256",
+        "organization_id",
+        "runner_id",
+        "execution_location",
+        "independent_from_local_gfx1030"
+      ],
+      "properties": {
+        "expected_architecture": {"enum": ["gfx1030", "gfx1100"]},
+        "path": {"type": "string", "minLength": 1},
+        "attached": {"type": "boolean"},
+        "receipt_hash": {"$ref": "#/$defs/nullableHash"},
+        "gcn_arch_name": {"$ref": "#/$defs/nullableString"},
+        "actual_hardware": {"type": "boolean"},
+        "numerical_parity": {"type": "boolean"},
+        "checkpoint_resume_parity": {"type": "boolean"},
+        "evidence_origin": {"$ref": "#/$defs/nullableString"},
+        "source_commit_sha": {"$ref": "#/$defs/nullableString"},
+        "source_set_hash": {"$ref": "#/$defs/nullableHash"},
+        "exact_source_commit": {"type": "boolean"},
+        "wheel_sha256": {"$ref": "#/$defs/nullableHash"},
+        "wheel_bound_at_execution": {"type": "boolean"},
+        "fixture_identity_hash": {"$ref": "#/$defs/nullableHash"},
+        "signature_verified": {"type": "boolean"},
+        "signer_id": {"$ref": "#/$defs/nullableString"},
+        "public_key_sha256": {"$ref": "#/$defs/nullableHash"},
+        "organization_id": {"$ref": "#/$defs/nullableString"},
+        "runner_id": {"$ref": "#/$defs/nullableString"},
+        "execution_location": {"$ref": "#/$defs/nullableString"},
+        "independent_from_local_gfx1030": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

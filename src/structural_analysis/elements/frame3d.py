@@ -163,6 +163,117 @@ def local_frame_stiffness(props: FrameProps, length_m: float) -> np.ndarray:
     return 0.5 * (k + k.T)
 
 
+def local_frame_consistent_mass(
+    props: FrameProps,
+    length_m: float,
+    *,
+    density_kg_per_m3: float,
+) -> np.ndarray:
+    """Return a symmetric 12x12 Euler-Bernoulli mass in kN*s^2/m units.
+
+    Distributed translational mass uses the standard cubic-Hermite consistent
+    beam matrix. Torsional rotary inertia uses the explicit polar area moment
+    ``Iy + Iz``. No density, section, or inertia fallback is applied.
+    """
+
+    length = float(length_m)
+    density = float(density_kg_per_m3)
+    if not np.isfinite(length) or length <= 0.0:
+        raise ValueError("Frame element length must be positive.")
+    if not np.isfinite(density) or density <= 0.0:
+        raise ValueError("Frame material density must be finite and positive.")
+
+    mass = np.zeros((12, 12), dtype=float)
+    translational_mass = density * props.area_m2 * length / 1000.0
+    axial = (translational_mass / 6.0) * np.array(
+        [[2.0, 1.0], [1.0, 2.0]],
+        dtype=float,
+    )
+    _scatter_submatrix(mass, (0, 6), axial)
+
+    length_squared = length * length
+    bending_z = (translational_mass / 420.0) * np.array(
+        [
+            [156.0, 22.0 * length, 54.0, -13.0 * length],
+            [22.0 * length, 4.0 * length_squared, 13.0 * length, -3.0 * length_squared],
+            [54.0, 13.0 * length, 156.0, -22.0 * length],
+            [-13.0 * length, -3.0 * length_squared, -22.0 * length, 4.0 * length_squared],
+        ],
+        dtype=float,
+    )
+    _scatter_submatrix(mass, (1, 5, 7, 11), bending_z)
+    bending_y = (translational_mass / 420.0) * np.array(
+        [
+            [156.0, -22.0 * length, 54.0, 13.0 * length],
+            [-22.0 * length, 4.0 * length_squared, -13.0 * length, -3.0 * length_squared],
+            [54.0, -13.0 * length, 156.0, 22.0 * length],
+            [13.0 * length, -3.0 * length_squared, 22.0 * length, 4.0 * length_squared],
+        ],
+        dtype=float,
+    )
+    _scatter_submatrix(mass, (2, 4, 8, 10), bending_y)
+
+    polar_rotary_mass = (
+        density * (props.iy_m4 + props.iz_m4) * length / 1000.0
+    )
+    torsion = (polar_rotary_mass / 6.0) * np.array(
+        [[2.0, 1.0], [1.0, 2.0]],
+        dtype=float,
+    )
+    _scatter_submatrix(mass, (3, 9), torsion)
+    return 0.5 * (mass + mass.T)
+
+
+def local_frame_geometric_stiffness(
+    length_m: float,
+    *,
+    compression_force_kn: float,
+) -> np.ndarray:
+    """Return the 12x12 initial-stress matrix for constant axial compression.
+
+    Positive ``compression_force_kn`` produces the positive-semidefinite matrix
+    used by the stability equation ``K phi = lambda Kg phi`` (equivalently,
+    ``K - lambda Kg`` loses positive definiteness). Axial and torsional rows are
+    zero in this bounded Euler-Bernoulli formulation.
+    """
+
+    length = float(length_m)
+    compression = float(compression_force_kn)
+    if not np.isfinite(length) or length <= 0.0:
+        raise ValueError("Frame element length must be positive.")
+    if not np.isfinite(compression) or compression < 0.0:
+        raise ValueError(
+            "Frame geometric stiffness requires finite nonnegative compression."
+        )
+
+    geometric = np.zeros((12, 12), dtype=float)
+    if compression == 0.0:
+        return geometric
+    coefficient = compression / (30.0 * length)
+    length_squared = length * length
+    bending_z = coefficient * np.array(
+        [
+            [36.0, 3.0 * length, -36.0, 3.0 * length],
+            [3.0 * length, 4.0 * length_squared, -3.0 * length, -length_squared],
+            [-36.0, -3.0 * length, 36.0, -3.0 * length],
+            [3.0 * length, -length_squared, -3.0 * length, 4.0 * length_squared],
+        ],
+        dtype=float,
+    )
+    _scatter_submatrix(geometric, (1, 5, 7, 11), bending_z)
+    bending_y = coefficient * np.array(
+        [
+            [36.0, -3.0 * length, -36.0, -3.0 * length],
+            [-3.0 * length, 4.0 * length_squared, 3.0 * length, -length_squared],
+            [-36.0, 3.0 * length, 36.0, 3.0 * length],
+            [-3.0 * length, -length_squared, 3.0 * length, 4.0 * length_squared],
+        ],
+        dtype=float,
+    )
+    _scatter_submatrix(geometric, (2, 4, 8, 10), bending_y)
+    return 0.5 * (geometric + geometric.T)
+
+
 def frame_rotation_matrix(
     start: np.ndarray,
     end: np.ndarray,
@@ -222,6 +333,59 @@ def frame3d_global_stiffness(properties: Frame3DProperties) -> np.ndarray:
     )
     local = local_frame_stiffness(properties.props, properties.length_m)
     return rigid.T @ transform.T @ local @ transform @ rigid
+
+
+def frame3d_global_consistent_mass(
+    properties: Frame3DProperties,
+    *,
+    density_kg_per_m3: float,
+) -> np.ndarray:
+    """Transform the explicit local consistent mass to global reference DOFs."""
+
+    start, end = properties.end_points
+    rotation = frame_rotation_matrix(
+        start,
+        end,
+        roll_deg=properties.local_axis_angle_deg,
+    )
+    transform = frame_transform(rotation)
+    rigid = rigid_end_offset_transform(
+        properties.offset_i_global_m,
+        properties.offset_j_global_m,
+    )
+    local = local_frame_consistent_mass(
+        properties.props,
+        properties.length_m,
+        density_kg_per_m3=density_kg_per_m3,
+    )
+    global_mass = rigid.T @ transform.T @ local @ transform @ rigid
+    return 0.5 * (global_mass + global_mass.T)
+
+
+def frame3d_global_geometric_stiffness(
+    properties: Frame3DProperties,
+    *,
+    compression_force_kn: float,
+) -> np.ndarray:
+    """Transform constant-compression initial stress to global reference DOFs."""
+
+    start, end = properties.end_points
+    rotation = frame_rotation_matrix(
+        start,
+        end,
+        roll_deg=properties.local_axis_angle_deg,
+    )
+    transform = frame_transform(rotation)
+    rigid = rigid_end_offset_transform(
+        properties.offset_i_global_m,
+        properties.offset_j_global_m,
+    )
+    local = local_frame_geometric_stiffness(
+        properties.length_m,
+        compression_force_kn=compression_force_kn,
+    )
+    global_geometric = rigid.T @ transform.T @ local @ transform @ rigid
+    return 0.5 * (global_geometric + global_geometric.T)
 
 
 def frame3d_local_end_forces(

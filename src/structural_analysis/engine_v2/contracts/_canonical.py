@@ -135,7 +135,10 @@ def array_data_hash(array: np.ndarray) -> str:
     """Hash the exact C-order bytes of an array, excluding metadata."""
 
     checked = _contract_array(array)
-    return sha256_prefixed(memoryview(checked).cast("B"))
+    raw_bytes: bytes | memoryview = (
+        b"" if checked.nbytes == 0 else memoryview(checked).cast("B")
+    )
+    return sha256_prefixed(raw_bytes)
 
 
 def raw_array_hash(array: np.ndarray) -> str:
@@ -151,7 +154,10 @@ def array_content_hash(metadata: Any, array: np.ndarray) -> str:
     digest = hashlib.sha256()
     digest.update(canonical_json_bytes(metadata))
     digest.update(b"\0")
-    digest.update(memoryview(checked).cast("B"))
+    raw_bytes: bytes | memoryview = (
+        b"" if checked.nbytes == 0 else memoryview(checked).cast("B")
+    )
+    digest.update(raw_bytes)
     return f"sha256:{digest.hexdigest()}"
 
 
