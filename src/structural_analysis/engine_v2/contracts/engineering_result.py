@@ -1079,12 +1079,16 @@ def validate_engineering_result_ir_manifest(
     ):
         name, filename, scope, unit_profile = spec
         expected_shape = expected_shapes[name]
+        expected_uri = (
+            "artifact://engine-v2/engineering-results/"
+            f"{checked['engineering_result_id']}/{filename}"
+        )
         if (
             artifact["shape"] != expected_shape
             or artifact["byte_length"] != 8 * math.prod(expected_shape)
             or artifact["equation_scope"] != scope
             or artifact["unit_profile"] != unit_profile
-            or not artifact["artifact_uri"].endswith(f"/{filename}")
+            or artifact["artifact_uri"] != expected_uri
         ):
             _fail(
                 "engineering_result_descriptor_semantics_invalid",

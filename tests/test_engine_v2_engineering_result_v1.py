@@ -382,6 +382,19 @@ def test_manifests_cannot_rehash_themselves_into_broader_authority() -> None:
         validate_engineering_result_ir_manifest(gate_manifest)
     assert gate_error.value.code == "engineering_result_manifest_gate_failed"
 
+    foreign_artifact_manifest = deepcopy(result.to_manifest())
+    foreign_artifact_manifest["outputs"]["artifacts"][0]["artifact_uri"] = (
+        "artifact://engine-v2/engineering-results/engineering.other/"
+        "reaction_global.f64le"
+    )
+    _rehash(foreign_artifact_manifest, "engineering_result_hash")
+    with pytest.raises(EngineeringRecoveryError) as artifact_uri_error:
+        validate_engineering_result_ir_manifest(foreign_artifact_manifest)
+    assert (
+        artifact_uri_error.value.code
+        == "engineering_result_descriptor_semantics_invalid"
+    )
+
 
 def test_engineering_result_artifacts_are_hash_bound_and_no_overwrite(
     tmp_path: Path,
