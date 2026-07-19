@@ -148,6 +148,14 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
         '- "src/structural_analysis/schemas/cpu_fgmres_checkpoint_v1.schema.json"'
         in workflow
     )
+    assert (
+        '- "src/structural_analysis/schemas/numerical_result_ir_v1.schema.json"'
+        in workflow
+    )
+    assert (
+        '- "src/structural_analysis/schemas/diagnostic_ir_v1.schema.json"'
+        in workflow
+    )
     assert "scripts/run_engine_v2_hip_primitive_parity.py --check" in workflow
     assert "scripts/run_engine_v2_hip_current_tangent_operator.py" in workflow
     assert "scripts/run_engine_v2_hip_sparse_lu_apply.py" in workflow

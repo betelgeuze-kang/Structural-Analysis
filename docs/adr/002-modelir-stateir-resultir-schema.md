@@ -27,7 +27,7 @@ legacy public model/input API
   -> outer-boundary input adapter
   -> ModelIR v2 -> ExecutionPlan v1 -> StateIR v1
 
-NumericalResultIR / DiagnosticIR  # PR E 이후에만 존재
+NumericalResultIR / DiagnosticIR  # 후속 Result authority slice에서 도입
   -> outer-boundary output adapter
   -> legacy public result API / Viewer
 ```
@@ -72,3 +72,16 @@ adapter와 solver 사이 경계가 명확해지지만 초기 migration/round-tri
 ## Rollback / supersession
 
 v2 migration은 v1 API를 즉시 제거하지 않는다. v2 adapter 실패 시 v1은 기존 claim boundary로만 유지한다.
+
+## 구현 상태 메모
+
+PR #104 병합 이후 후속 Result authority slice에서 backend-neutral
+`NumericalResultIR`와 `DiagnosticIR` v1 타입·strict schema가 도입됐다.
+NumericalResultIR v1은 committed global displacement state에만 권위를 부여하며
+reaction/member-force/engineering-design 권위는 각각 `not_evaluated` 또는
+`not_authoritative`로 고정한다. DiagnosticIR는 모든 결과 권위를
+`not_authoritative`로 고정한다.
+
+이는 본 ADR의 단방향 경계를 구현한 것이며 output adapter나 engineering-result
+recovery를 구현한 것은 아니다. 상세 계약은
+`docs/engine-v2-result-diagnostic-authority.md`를 따른다.

@@ -303,6 +303,7 @@ def _pr_commands(
             "-q",
             "tests/test_project_ops_api_service.py",
             "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py",
+            "tests/test_engine_v2_result_ir_v1.py",
             "tests/test_engine_v2_hip_primitive_parity.py",
             "tests/test_engine_v2_hip_primitive_parity_runner.py",
             "tests/test_engine_v2_hip_fgmres_recurrence.py",

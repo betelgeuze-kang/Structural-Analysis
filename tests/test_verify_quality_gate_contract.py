@@ -36,6 +36,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
 
     assert "tests/test_structural_analysis_core_api.py" in targets
     assert "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py" in targets
+    assert "tests/test_engine_v2_result_ir_v1.py" in targets
     assert "tests/test_engine_v2_hip_primitive_parity.py" in targets
     assert "tests/test_engine_v2_hip_primitive_parity_runner.py" in targets
     assert "tests/test_engine_v2_hip_fgmres_recurrence.py" in targets

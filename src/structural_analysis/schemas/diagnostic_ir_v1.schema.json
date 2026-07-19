@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/diagnostic_ir_v1.schema.json",
+  "title": "Engine v2 non-authoritative DiagnosticIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "diagnostic_id",
+    "authority_profile",
+    "status",
+    "bindings",
+    "source",
+    "entries",
+    "summary",
+    "authority",
+    "claim_boundary",
+    "extensions",
+    "diagnostic_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-diagnostic-ir.v1"},
+    "diagnostic_id": {"$ref": "#/$defs/stable_id"},
+    "authority_profile": {
+      "const": "non_authoritative_stable_observation.v1"
+    },
+    "status": {"enum": ["observed", "partial", "blocked"]},
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "operator_hash",
+        "load_pattern_id",
+        "state_hash",
+        "state_epoch",
+        "equation_scaling_hash",
+        "reduced_csr_identity_hash"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+        "state_hash": {
+          "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+        },
+        "state_epoch": {
+          "oneOf": [
+            {"type": "integer", "minimum": 0},
+            {"type": "null"}
+          ]
+        },
+        "equation_scaling_hash": {
+          "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+        },
+        "reduced_csr_identity_hash": {
+          "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_profile",
+        "receipt_schema_version",
+        "receipt_hash",
+        "backend_receipt_hash"
+      ],
+      "properties": {
+        "authority_profile": {
+          "enum": [
+            "non_authoritative_solver_recurrence",
+            "operator_probe",
+            "backend_probe",
+            "validation_gate"
+          ]
+        },
+        "receipt_schema_version": {"$ref": "#/$defs/stable_id"},
+        "receipt_hash": {"$ref": "#/$defs/sha256"},
+        "backend_receipt_hash": {
+          "oneOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/entry"}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_count",
+        "info_count",
+        "warning_count",
+        "error_count",
+        "partial_count",
+        "unsupported_count",
+        "fallback_count",
+        "failed_count"
+      ],
+      "properties": {
+        "entry_count": {"type": "integer", "minimum": 1},
+        "info_count": {"type": "integer", "minimum": 0},
+        "warning_count": {"type": "integer", "minimum": 0},
+        "error_count": {"type": "integer", "minimum": 0},
+        "partial_count": {"type": "integer", "minimum": 0},
+        "unsupported_count": {"type": "integer", "minimum": 0},
+        "fallback_count": {"type": "integer", "minimum": 0},
+        "failed_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "authority": {
+      "const": {
+        "numerical_state": "not_authoritative",
+        "convergence": "not_authoritative",
+        "displacement": "not_authoritative",
+        "reaction": "not_authoritative",
+        "member_force": "not_authoritative",
+        "engineering_design": "not_authoritative",
+        "code_compliance": "not_authoritative",
+        "release_readiness": "not_authoritative",
+        "commercial_use": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": {
+        "description": "Stable sanitized observations only; diagnostics cannot become solver, engineering-result, readiness, or commercial authority.",
+        "stable_code_path_only": true,
+        "raw_exception_or_payload_included": false,
+        "numerical_result_authority": false,
+        "solver_convergence_authority": false,
+        "fallback_promoted": false,
+        "engineering_result_authority": false,
+        "release_readiness": false,
+        "commercial_claim": false
+      }
+    },
+    "extensions": {"$ref": "#/$defs/extensions"},
+    "diagnostic_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "minLength": 71,
+      "maxLength": 71
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "extensions": {"const": {}},
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "path",
+        "severity",
+        "disposition",
+        "occurrence_count",
+        "evidence_hashes"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,127}$"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^/(?:[^~]|~[01])*$",
+          "not": {"pattern": "[\\u0000-\\u001F\\u007F]"},
+          "maxLength": 512
+        },
+        "severity": {"enum": ["info", "warning", "error"]},
+        "disposition": {
+          "enum": ["observed", "partial", "unsupported", "fallback", "failed"]
+        },
+        "occurrence_count": {"type": "integer", "minimum": 1},
+        "evidence_hashes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/sha256"}
+        }
+      }
+    }
+  }
+}
