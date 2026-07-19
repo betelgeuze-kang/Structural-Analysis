@@ -545,7 +545,9 @@ def create_diagnostic_ir(
         ),
         backend_receipt_hash=normalized_backend_hash,
         entries=normalized_entries,
-        extensions=_freeze_extensions({} if extensions is None else extensions),
+        extensions=_freeze_diagnostic_extensions(
+            {} if extensions is None else extensions
+        ),
         _execution_plan=plan,
         _state=checked_state,
         _equation_scaling=equation_scaling,
@@ -832,6 +834,64 @@ def validate_numerical_result_ir_manifest(payload: Any) -> Mapping[str, Any]:
     state = manifest["numerical_state"]
     descriptor = state["displacement_artifact"]
     dof_count = int(state["dof_count"])
+    bindings = manifest["bindings"]
+    source = manifest["source_terminal"]
+    _require_stable_id(manifest["result_id"], "/result_id")
+    _require_stable_id(bindings["load_pattern_id"], "/bindings/load_pattern_id")
+    _require_stable_id(
+        source["run_schema_version"], "/source_terminal/run_schema_version"
+    )
+    for path, value in (
+        ("/result_hash", manifest["result_hash"]),
+        ("/bindings/model_ir_content_hash", bindings["model_ir_content_hash"]),
+        ("/bindings/execution_plan_hash", bindings["execution_plan_hash"]),
+        (
+            "/bindings/reduced_csr_identity_hash",
+            bindings["reduced_csr_identity_hash"],
+        ),
+        ("/bindings/equation_scaling_hash", bindings["equation_scaling_hash"]),
+        ("/bindings/operator_hash", bindings["operator_hash"]),
+        ("/bindings/state_hash", bindings["state_hash"]),
+        ("/source_terminal/run_hash", source["run_hash"]),
+        ("/source_terminal/solution_data_hash", source["solution_data_hash"]),
+        (
+            "/source_terminal/convergence_receipt_hash",
+            source["convergence_receipt_hash"],
+        ),
+        (
+            "/source_terminal/full_residual_receipt_hash",
+            source["full_residual_receipt_hash"],
+        ),
+        (
+            "/source_terminal/boundary_condition_receipt_hash",
+            source["boundary_condition_receipt_hash"],
+        ),
+        ("/source_terminal/backend_receipt_hash", source["backend_receipt_hash"]),
+        (
+            "/numerical_state/displacement_artifact/data_hash",
+            descriptor["data_hash"],
+        ),
+        (
+            "/numerical_state/displacement_artifact/content_hash",
+            descriptor["content_hash"],
+        ),
+    ):
+        _require_hash(value, path)
+    for index, value in enumerate(manifest["diagnostic_ir_hashes"]):
+        _require_hash(value, f"/diagnostic_ir_hashes/{index}")
+    _freeze_extensions(manifest["extensions"])
+    if bindings["state_epoch"] != state["epoch"]:
+        _fail(
+            "numerical_result_state_epoch_mismatch",
+            "/bindings/state_epoch",
+            "Binding state epoch must match the numerical-state epoch.",
+        )
+    if int(source["free_solution_value_count"]) > dof_count:
+        _fail(
+            "result_source_solution_size_impossible",
+            "/source_terminal/free_solution_value_count",
+            "Free-solution value count cannot exceed the global DOF count.",
+        )
     if descriptor["shape"] != [dof_count] or descriptor["byte_length"] != dof_count * 8:
         _fail(
             "numerical_result_artifact_shape_mismatch",
@@ -869,6 +929,33 @@ def validate_diagnostic_ir_manifest(payload: Any) -> Mapping[str, Any]:
         schema_name="diagnostic_ir_v1.schema.json",
         code="diagnostic_schema_invalid",
     )
+    _require_stable_id(manifest["diagnostic_id"], "/diagnostic_id")
+    bindings = manifest["bindings"]
+    _require_stable_id(bindings["load_pattern_id"], "/bindings/load_pattern_id")
+    source = manifest["source"]
+    _require_stable_id(
+        source["receipt_schema_version"], "/source/receipt_schema_version"
+    )
+    for path, value in (
+        ("/diagnostic_hash", manifest["diagnostic_hash"]),
+        ("/bindings/model_ir_content_hash", bindings["model_ir_content_hash"]),
+        ("/bindings/execution_plan_hash", bindings["execution_plan_hash"]),
+        ("/bindings/operator_hash", bindings["operator_hash"]),
+        ("/source/receipt_hash", source["receipt_hash"]),
+    ):
+        _require_hash(value, path)
+    for path, value in (
+        ("/bindings/state_hash", bindings["state_hash"]),
+        ("/bindings/equation_scaling_hash", bindings["equation_scaling_hash"]),
+        (
+            "/bindings/reduced_csr_identity_hash",
+            bindings["reduced_csr_identity_hash"],
+        ),
+        ("/source/backend_receipt_hash", source["backend_receipt_hash"]),
+    ):
+        if value is not None:
+            _require_hash(value, path)
+    _freeze_diagnostic_extensions(manifest["extensions"])
     entries = manifest["entries"]
     keys = [
         (
@@ -902,7 +989,6 @@ def validate_diagnostic_ir_manifest(payload: Any) -> Mapping[str, Any]:
             "/summary",
             "Diagnostic summary does not match entries.",
         )
-    bindings = manifest["bindings"]
     if (bindings["state_hash"] is None) != (bindings["state_epoch"] is None):
         _fail(
             "diagnostic_state_binding_incomplete",
@@ -964,22 +1050,22 @@ def write_numerical_result_displacement_artifact(
 ) -> Path:
     checked = validate_numerical_result_ir(result)
     destination = Path(target)
-    if destination.exists():
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    raw = checked.displacement_global_si.tobytes(order="C")
+    try:
+        handle = destination.open("xb")
+    except FileExistsError:
         _fail(
             "numerical_result_artifact_target_exists",
             "/numerical_state/displacement_artifact/artifact_uri",
             "Result artifacts are immutable and cannot overwrite a target.",
         )
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    raw = checked.displacement_global_si.tobytes(order="C")
-    created = False
     try:
-        destination.write_bytes(raw)
-        created = True
+        with handle:
+            handle.write(raw)
         validate_numerical_result_displacement_bytes(checked, destination.read_bytes())
     except Exception:
-        if created:
-            destination.unlink(missing_ok=True)
+        destination.unlink(missing_ok=True)
         raise
     return destination
 
@@ -1161,7 +1247,11 @@ def _validate_diagnostic_entry(entry: DiagnosticEntry, path: str) -> None:
 
 
 def _validate_diagnostic_entry_mapping(row: Mapping[str, Any], path: str) -> None:
+    _require_diagnostic_code(row["code"], f"{path}/code")
+    _require_json_pointer(row["path"], f"{path}/path")
     evidence_hashes = tuple(row["evidence_hashes"])
+    for index, value in enumerate(evidence_hashes):
+        _require_hash(value, f"{path}/evidence_hashes/{index}")
     if evidence_hashes != tuple(sorted(set(evidence_hashes))):
         _fail(
             "diagnostic_evidence_hashes_not_canonical",
@@ -1267,6 +1357,17 @@ def _freeze_extensions(value: Mapping[str, Any]) -> Mapping[str, Any]:
                 "Extension keys must be namespaced.",
             )
     return _freeze(normalized)
+
+
+def _freeze_diagnostic_extensions(value: Mapping[str, Any]) -> Mapping[str, Any]:
+    frozen = _freeze_extensions(value)
+    if frozen:
+        _fail(
+            "diagnostic_extensions_not_supported",
+            "/extensions",
+            "DiagnosticIR v1 does not allow extension payloads.",
+        )
+    return frozen
 
 
 def _validate_extensions(value: Mapping[str, Any]) -> None:

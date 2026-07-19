@@ -147,19 +147,15 @@
   "$defs": {
     "sha256": {
       "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "minLength": 71,
+      "maxLength": 71
     },
     "stable_id": {
       "type": "string",
       "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
     },
-    "extensions": {
-      "type": "object",
-      "propertyNames": {
-        "pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"
-      },
-      "additionalProperties": true
-    },
+    "extensions": {"const": {}},
     "entry": {
       "type": "object",
       "additionalProperties": false,
@@ -179,6 +175,7 @@
         "path": {
           "type": "string",
           "pattern": "^/(?:[^~]|~[01])*$",
+          "not": {"pattern": "[\\u0000-\\u001F\\u007F]"},
           "maxLength": 512
         },
         "severity": {"enum": ["info", "warning", "error"]},

@@ -65,8 +65,9 @@ DiagnosticIR entry는 다음 공개 필드만 가진다.
 - 선택적인 evidence hash
 
 raw exception, payload, 자유형 메시지 필드는 스키마에 없으며 unknown field로
-거부된다. fallback·unsupported·partial은 그대로 `partial`, failed는 `blocked`로
-집계된다. DiagnosticIR의 numerical, convergence, displacement, reaction,
+거부된다. v1의 `extensions`는 빈 객체로 고정되어 namespaced key를 통한 우회도
+허용하지 않는다. fallback·unsupported·partial은 그대로 `partial`, failed는
+`blocked`로 집계된다. DiagnosticIR의 numerical, convergence, displacement, reaction,
 member-force, engineering, readiness, commercial 권위는 모두
 `not_authoritative`로 고정된다.
 
@@ -75,8 +76,8 @@ member-force, engineering, readiness, commercial 권위는 모두
 NumericalResultIR는 StateIR의 global displacement를 flat node-major six-DOF
 little-endian FP64 artifact로 보존한다. descriptor는 dtype, shape, byte length,
 unit profile, data/content hash와 canonical artifact URI를 가진다. write helper는
-기존 target overwrite를 거부하고 write/readback hash 검증에 실패하면 이번 호출이
-만든 파일만 제거한다.
+배타 생성(`xb`)으로 동시 작성 경합에서도 기존 target overwrite를 거부하고,
+write/readback hash 검증에 실패하면 이번 호출이 만든 파일만 제거한다.
 
 이 state projection은 engineering-result recovery가 아니다. reaction과 local-axis
 member force는 residual과 동일한 element/material law, operator hash, state epoch를

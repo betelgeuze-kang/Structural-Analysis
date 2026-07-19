@@ -185,6 +185,7 @@ def test_numerical_result_ir_is_deterministic_bound_and_schema_valid() -> None:
 
 def test_numerical_result_artifact_roundtrip_is_hash_bound_and_no_overwrite(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     result = _result()
     target = tmp_path / "displacement_global.f64le"
@@ -204,6 +205,22 @@ def test_numerical_result_artifact_roundtrip_is_hash_bound_and_no_overwrite(
     with pytest.raises(ResultIRError) as overwrite_error:
         write_numerical_result_displacement_artifact(result, target)
     assert overwrite_error.value.code == "numerical_result_artifact_target_exists"
+
+    race_target = tmp_path / "race" / "displacement_global.f64le"
+    original_open = Path.open
+
+    def racing_open(path: Path, *args, **kwargs):
+        mode = args[0] if args else kwargs.get("mode", "r")
+        if path == race_target and mode == "xb" and not path.exists():
+            with original_open(path, "wb") as winner:
+                winner.write(b"concurrent-winner")
+        return original_open(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", racing_open)
+    with pytest.raises(ResultIRError) as race_error:
+        write_numerical_result_displacement_artifact(result, race_target)
+    assert race_error.value.code == "numerical_result_artifact_target_exists"
+    assert race_target.read_bytes() == b"concurrent-winner"
 
 
 def test_numerical_result_rejects_unbound_solution_and_nonconverged_terminal() -> None:
@@ -246,6 +263,31 @@ def test_numerical_result_manifest_cannot_coherently_promote_engineering_authori
     with pytest.raises(ResultIRError) as error:
         validate_numerical_result_ir_manifest(manifest)
     assert error.value.code == "numerical_result_schema_invalid"
+
+
+def test_numerical_result_manifest_rejects_impossible_cross_bindings() -> None:
+    epoch = deepcopy(_result().to_manifest())
+    epoch["numerical_state"]["epoch"] += 1
+    _rehash(epoch, "result_hash")
+    with pytest.raises(ResultIRError) as epoch_error:
+        validate_numerical_result_ir_manifest(epoch)
+    assert epoch_error.value.code == "numerical_result_state_epoch_mismatch"
+
+    value_count = deepcopy(_result().to_manifest())
+    value_count["source_terminal"]["free_solution_value_count"] = (
+        value_count["numerical_state"]["dof_count"] + 1
+    )
+    _rehash(value_count, "result_hash")
+    with pytest.raises(ResultIRError) as count_error:
+        validate_numerical_result_ir_manifest(value_count)
+    assert count_error.value.code == "result_source_solution_size_impossible"
+
+    noncanonical_hash = deepcopy(_result().to_manifest())
+    noncanonical_hash["bindings"]["state_hash"] += "\n"
+    _rehash(noncanonical_hash, "result_hash")
+    with pytest.raises(ResultIRError) as hash_error:
+        validate_numerical_result_ir_manifest(noncanonical_hash)
+    assert hash_error.value.code == "numerical_result_schema_invalid"
 
 
 def test_diagnostic_ir_is_sanitized_non_authoritative_and_canonical() -> None:
@@ -338,6 +380,20 @@ def test_diagnostic_manifest_rejects_authority_status_and_raw_shape_tampering() 
         validate_diagnostic_ir_manifest(unknown)
     assert unknown_error.value.code == "diagnostic_schema_invalid"
 
+    raw_extension = deepcopy(diagnostic.to_manifest())
+    raw_extension["extensions"]["private:raw_exception"] = "solver stack trace"
+    _rehash(raw_extension, "diagnostic_hash")
+    with pytest.raises(ResultIRError) as extension_error:
+        validate_diagnostic_ir_manifest(raw_extension)
+    assert extension_error.value.code == "diagnostic_schema_invalid"
+
+    control_path = deepcopy(diagnostic.to_manifest())
+    control_path["entries"][0]["path"] = "/solver\nprivate"
+    _rehash(control_path, "diagnostic_hash")
+    with pytest.raises(ResultIRError) as path_error:
+        validate_diagnostic_ir_manifest(control_path)
+    assert path_error.value.code == "diagnostic_schema_invalid"
+
 
 def test_diagnostic_entry_rejects_unstable_or_inconsistent_public_metadata() -> None:
     with pytest.raises(ResultIRError) as code_error:
@@ -357,6 +413,25 @@ def test_diagnostic_entry_rejects_unstable_or_inconsistent_public_metadata() -> 
             disposition="partial",
         )
     assert path_error.value.code == "diagnostic_path_invalid"
+
+    plan = _base_plan()
+    entry = create_diagnostic_entry(
+        code="solver_partial",
+        path="/solver",
+        severity="warning",
+        disposition="partial",
+    )
+    with pytest.raises(ResultIRError) as extension_error:
+        create_diagnostic_ir(
+            diagnostic_id="diagnostic.extensions.invalid",
+            execution_plan=plan,
+            source_authority_profile="validation_gate",
+            source_receipt_schema_version="solver-validation-gate.v1",
+            source_receipt_hash=_hash("7"),
+            entries=(entry,),
+            extensions={"private:raw_exception": "solver stack trace"},
+        )
+    assert extension_error.value.code == "diagnostic_extensions_not_supported"
 
     with pytest.raises(ResultIRError) as severity_error:
         create_diagnostic_entry(
