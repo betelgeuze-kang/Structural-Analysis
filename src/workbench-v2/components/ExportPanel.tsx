@@ -1,7 +1,10 @@
 import { useState, type ReactElement } from 'react'
 import type { WorkbenchCaseV2 } from '../model/caseSchema'
 import type { DataMode, RunStatus } from '../model/workbenchState'
-import { loadDraft } from '../model/reviewDraft'
+import {
+  reviewDraftPersistenceMetadata,
+  type ReviewDraftState,
+} from '../model/reviewDraft'
 import { canonicalJson, sha256Hex } from '../model/checksum'
 import { evidenceManifestUrl, type EvidenceManifest } from '../model/evidence/evidenceSources'
 
@@ -30,6 +33,8 @@ interface ExportPanelProps {
   viewerDeepLink: string
   /** Base URL used to locate the published evidence manifest. */
   baseUrl: string
+  /** Exact in-memory reviewer draft and its fail-closed persistence receipt. */
+  reviewDraftState: ReviewDraftState
 }
 
 interface EvidenceManifestRef {
@@ -67,13 +72,13 @@ export function ExportPanel({
   comparisonRows,
   viewerDeepLink,
   baseUrl,
+  reviewDraftState,
 }: ExportPanelProps): ReactElement {
   const [busy, setBusy] = useState(false)
 
   async function exportBundle(): Promise<void> {
     setBusy(true)
     try {
-      const reviewerDraft = loadDraft(caseV2.provenance.sourceCommitSha)
       // Checksum computed in-browser over the canonical analysis payload so the
       // export can be integrity-checked; null when Web Crypto is unavailable.
       const analysisResultSha256 = await sha256Hex(
@@ -105,9 +110,10 @@ export function ExportPanel({
         // Reference to the published evidence manifest, by checksum + commit.
         evidence_manifest: evidenceManifest,
         // Human reviewer draft (not an automated verdict).
-        reviewer_draft: reviewerDraft,
+        reviewer_draft: reviewDraftState.draft,
+        reviewer_draft_persistence: reviewDraftPersistenceMetadata(reviewDraftState.receipt),
         claim_boundary:
-          'Workbench v2 export. Values reflect the attached case only and are not a validated verdict. evidence_manifest and checksums are references for integrity, not a pass/fail result; reviewer_draft is a human note.',
+          'Workbench v2 export. Values reflect the attached case only and are not a validated verdict. evidence_manifest and checksums are references for integrity, not a pass/fail result; reviewer_draft is a human note and reviewer_draft_persistence states whether that exact in-memory note was saved.',
       }
       const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
@@ -130,7 +136,7 @@ export function ExportPanel({
         <li>provenance + source checksum + analysis result checksum</li>
         <li>displayed blockers ({blockers.length})</li>
         <li>selected comparison rows ({comparisonRows.length})</li>
-        <li>viewer deep link + reviewer draft</li>
+        <li>viewer deep link + reviewer draft + persistence receipt</li>
         <li>evidence manifest reference (checksum + commit, if published)</li>
       </ul>
       <div className="wb2-actions">

@@ -21,6 +21,13 @@ import { ComparePanel } from './components/ComparePanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
+import {
+  createReviewDraftState,
+  loadReviewDraftState,
+  updateReviewDraftState,
+  type ReviewDraft,
+  type ReviewDraftState,
+} from './model/reviewDraft'
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
@@ -45,6 +52,36 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const [errors, setErrors] = useState<string[]>([])
   const [warnings, setWarnings] = useState<string[]>([])
   const [compareIds, setCompareIds] = useState<string[]>([])
+  const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
+    () => new Map(),
+  )
+
+  const reviewSourceCommitSha = caseV2?.provenance.sourceCommitSha ?? null
+
+  useEffect(() => {
+    if (!reviewSourceCommitSha) return
+    setReviewDraftStates((previous) => {
+      if (previous.has(reviewSourceCommitSha)) return previous
+      const next = new Map(previous)
+      next.set(reviewSourceCommitSha, loadReviewDraftState(reviewSourceCommitSha))
+      return next
+    })
+  }, [reviewSourceCommitSha])
+
+  const reviewDraftState = useMemo(() => {
+    if (!reviewSourceCommitSha) return null
+    return reviewDraftStates.get(reviewSourceCommitSha) ?? createReviewDraftState(reviewSourceCommitSha)
+  }, [reviewDraftStates, reviewSourceCommitSha])
+
+  function updateReviewDraft(patch: Partial<ReviewDraft>): void {
+    if (!reviewSourceCommitSha) return
+    setReviewDraftStates((previous) => {
+      const current = previous.get(reviewSourceCommitSha) ?? loadReviewDraftState(reviewSourceCommitSha)
+      const next = new Map(previous)
+      next.set(reviewSourceCommitSha, updateReviewDraftState(current, patch))
+      return next
+    })
+  }
 
   function toggleCompare(id: string): void {
     setCompareIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -210,7 +247,11 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
 
       {/* Decision: Review + Export */}
       <div id="wb2-sec-review" className="wb2-section">
-        <ReviewDecision dataMode={state.dataMode} sourceCommitSha={caseV2?.provenance.sourceCommitSha ?? null} />
+        <ReviewDecision
+          dataMode={state.dataMode}
+          draftState={reviewDraftState}
+          onDraftChange={updateReviewDraft}
+        />
       </div>
       <div id="wb2-sec-export" className="wb2-section">
         {caseV2 ? (
@@ -224,6 +265,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
             comparisonRows={comparisonRows}
             viewerDeepLink={viewerDeepLink}
             baseUrl={baseUrl}
+            reviewDraftState={reviewDraftState ?? createReviewDraftState(caseV2.provenance.sourceCommitSha)}
           />
         ) : (
           <section className="wb2-panel"><h2 className="wb2-panel__title">Export</h2><p className="wb2-unavailable" data-wb2-unavailable>Nothing to export until a valid case is loaded.</p></section>

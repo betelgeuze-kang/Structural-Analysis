@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
 
 // End-to-end smoke for the Workbench v2 product shell. The runner builds and
 // serves dist; the embedded Viewer must resolve to its emitted production entry,
@@ -175,11 +176,93 @@ test.describe('Workbench v2 — commercial layout, review draft, benchmarks', ()
     await draft.locator('[data-wb2-decision="review"]').click()
     await draft.locator('[data-wb2-review-reviewer]').fill('QA')
     await expect(draft.locator('[data-wb2-review-state="review"]')).toBeVisible()
+    await expect(draft.locator('[data-wb2-persistence-display="Saved locally"]')).toBeVisible()
     // Reload: the draft is restored from localStorage for the same source commit.
     await page.reload({ waitUntil: 'load' })
     await page.locator('[data-wb2-root]').waitFor({ state: 'visible' })
     await expect(page.locator('[data-wb2-review-reviewer]')).toHaveValue('QA')
     await expect(page.locator('[data-wb2-review-state="review"]')).toBeVisible()
+    await expect(page.locator('[data-wb2-persistence-display="Saved locally"]')).toBeVisible()
+  })
+
+  test('quota failure retains and exports the exact draft as Session-only', async ({ page }) => {
+    await page.addInitScript(() => {
+      const nativeSetItem = Storage.prototype.setItem
+      Storage.prototype.setItem = function setItem(key: string, value: string): void {
+        if (String(key).startsWith('wb2-review-draft:')) {
+          throw new DOMException('SECRET_QUOTA_DETAIL', 'QuotaExceededError')
+        }
+        nativeSetItem.call(this, key, value)
+      }
+    })
+    await open(page)
+
+    const draft = page.locator('[data-wb2-review-draft]')
+    await draft.locator('[data-wb2-review-reviewer]').fill('SESSION-QA')
+    const persistence = draft.locator('[data-wb2-persistence-display="Session-only"]')
+    await expect(persistence).toBeVisible()
+    await expect(persistence).toHaveAttribute('data-wb2-persistence', 'memory_only')
+    await expect(persistence).toHaveAttribute('data-wb2-persistence-error-code', 'review_draft_storage_quota_exceeded')
+    await expect(draft.locator('[data-wb2-review-reviewer]')).toHaveValue('SESSION-QA')
+    await expect(draft.locator('[data-wb2-review-meta]')).not.toContainText('Saved locally')
+    await expect(draft).not.toContainText('SECRET_QUOTA_DETAIL')
+
+    const downloadPromise = page.waitForEvent('download')
+    await page.locator('[data-wb2-export]').click()
+    const download = await downloadPromise
+    const downloadPath = await download.path()
+    expect(downloadPath).not.toBeNull()
+    const bundle = JSON.parse(await readFile(downloadPath!, 'utf8')) as {
+      reviewer_draft: { reviewer: string }
+      reviewer_draft_persistence: { display_status: string; persistence: string; error_code: string }
+    }
+    expect(bundle.reviewer_draft.reviewer).toBe('SESSION-QA')
+    expect(bundle.reviewer_draft_persistence).toMatchObject({
+      display_status: 'Session-only',
+      persistence: 'memory_only',
+      error_code: 'review_draft_storage_quota_exceeded',
+    })
+  })
+
+  test('read denial is surfaced as Storage unavailable without leaking exception text', async ({ page }) => {
+    await page.addInitScript(() => {
+      const nativeGetItem = Storage.prototype.getItem
+      Storage.prototype.getItem = function getItem(key: string): string | null {
+        if (String(key).startsWith('wb2-review-draft:')) {
+          throw new DOMException('SECRET_STORAGE_DETAIL', 'SecurityError')
+        }
+        return nativeGetItem.call(this, key)
+      }
+    })
+    await open(page)
+
+    const draft = page.locator('[data-wb2-review-draft]')
+    const persistence = draft.locator('[data-wb2-persistence-display="Storage unavailable"]')
+    await expect(persistence).toBeVisible()
+    await expect(persistence).toHaveAttribute('data-wb2-persistence', 'none')
+    await expect(persistence).toHaveAttribute('data-wb2-persistence-error-code', 'review_draft_storage_access_denied')
+    await expect(draft).not.toContainText('SECRET_STORAGE_DETAIL')
+  })
+
+  test('serialization failure keeps the previous validated draft', async ({ page }) => {
+    await open(page)
+    const draft = page.locator('[data-wb2-review-draft]')
+    await draft.locator('[data-wb2-review-reviewer]').fill('SAFE-QA')
+    await expect(draft.locator('[data-wb2-persistence-display="Saved locally"]')).toBeVisible()
+
+    await page.evaluate(() => {
+      Date.prototype.toISOString = function toISOString(): string {
+        throw new Error('SECRET_TIMESTAMP_DETAIL')
+      }
+    })
+    await draft.locator('[data-wb2-decision="pass"]').click()
+
+    const persistence = draft.locator('[data-wb2-persistence-display="Previous state retained"]')
+    await expect(persistence).toBeVisible()
+    await expect(persistence).toHaveAttribute('data-wb2-persistence-error-code', 'review_draft_serialization_failed')
+    await expect(draft.locator('[data-wb2-review-reviewer]')).toHaveValue('SAFE-QA')
+    await expect(draft.locator('[data-wb2-decision="pass"]')).toHaveAttribute('aria-checked', 'false')
+    await expect(draft).not.toContainText('SECRET_TIMESTAMP_DETAIL')
   })
 
   test('benchmark cards expose copy buttons and a geometry-only exclusion', async ({ page }) => {
