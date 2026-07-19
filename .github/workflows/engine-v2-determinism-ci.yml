@@ -37,7 +37,7 @@ env:
   ENGINE_V2_SOURCE_SHA: "${{ github.event.pull_request.head.sha || github.sha }}"
   # Keep checkout faithful to committed bytes: historical evidence contains both
   # direct NPZ blobs and LFS pointers, plus paths longer than Win32's default.
-  GIT_CONFIG_COUNT: "5"
+  GIT_CONFIG_COUNT: "6"
   GIT_CONFIG_KEY_0: core.longpaths
   GIT_CONFIG_VALUE_0: "true"
   GIT_CONFIG_KEY_1: filter.lfs.required
@@ -48,6 +48,8 @@ env:
   GIT_CONFIG_VALUE_3: cat
   GIT_CONFIG_KEY_4: filter.lfs.process
   GIT_CONFIG_VALUE_4: ""
+  GIT_CONFIG_KEY_5: core.autocrlf
+  GIT_CONFIG_VALUE_5: "false"
 
 concurrency:
   group: engine-v2-determinism-${{ github.workflow }}-${{ github.ref }}

@@ -51,14 +51,20 @@ def test_engine_v2_cross_platform_golden_hashes_and_written_bytes(
 
 def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     workflow = WORKFLOW.read_text(encoding="utf-8")
+    attributes = (REPO_ROOT / ".gitattributes").read_text(encoding="utf-8")
 
     assert "os: [ubuntu-latest, windows-latest]" in workflow
     assert 'python-version: ["3.10", "3.12"]' in workflow
     assert "fail-fast: false" in workflow
-    assert 'GIT_CONFIG_COUNT: "5"' in workflow
+    assert 'GIT_CONFIG_COUNT: "6"' in workflow
     assert "GIT_CONFIG_KEY_0: core.longpaths" in workflow
     assert "GIT_CONFIG_KEY_4: filter.lfs.process" in workflow
     assert 'GIT_CONFIG_VALUE_4: ""' in workflow
+    assert "GIT_CONFIG_KEY_5: core.autocrlf" in workflow
+    assert (
+        "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json text eol=lf"
+        in attributes
+    )
     assert (
         'ENGINE_V2_SOURCE_SHA: "${{ github.event.pull_request.head.sha || github.sha }}"'
         in workflow
