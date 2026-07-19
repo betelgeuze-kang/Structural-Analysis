@@ -430,6 +430,10 @@ class StatefulAxialMatrixFreeLoadStepResult:
             "claims": {
                 "consistent_residual_tangent_matrix_free_newton": bool(
                     self.metrics["solver_contract_pass"]
+                    and self.metrics["tangent_solve_count"] > 0
+                ),
+                "matrix_free_tangent_solve_executed": bool(
+                    self.metrics["tangent_solve_count"] > 0
                 ),
                 "accepted_trial_material_state_separation": True,
                 "material_state_commit_performed": self.committed,
@@ -441,6 +445,7 @@ class StatefulAxialMatrixFreeLoadStepResult:
                     and self.metrics["rollback_exact"]
                 ),
                 "current_tangent_operator_parent_bound": True,
+                "materialized_reference_predictor": True,
                 "residual_and_increment_acceptance_policy": True,
                 "residual_and_increment_acceptance_gate_passed": bool(
                     self.metrics[
@@ -692,6 +697,10 @@ def solve_stateful_axial_matrix_free_load_step(
             "solver_profile": str(solver.profile),
             "solver_contract_hash": str(solver.contract_hash),
             "solver_contract_pass": solver_contract,
+            "predictor_profile": (
+                "accepted_state_dense_reference_tangent_solve.v1"
+            ),
+            "predictor_materialized_tangent": True,
             "residual_and_increment_acceptance_gate": bool(
                 newton_result.metrics[
                     "residual_and_increment_acceptance_gate"

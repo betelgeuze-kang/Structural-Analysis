@@ -239,6 +239,14 @@ def test_cyclic_matrix_free_path_commits_and_restarts_deterministically() -> Non
     assert first.to_dict() == replay.to_dict()
     assert resumed.status == "ready"
     assert resumed.final_state.state_hash == first.final_state.state_hash
+    assert first.steps[0].metrics["tangent_solve_count"] == 0
+    assert first.steps[0].to_dict()["claims"][
+        "consistent_residual_tangent_matrix_free_newton"
+    ] is False
+    assert first.steps[1].metrics["tangent_solve_count"] > 0
+    assert first.steps[1].to_dict()["claims"][
+        "consistent_residual_tangent_matrix_free_newton"
+    ] is True
     assert all(
         state.dissipated_energy_density_mj_per_m3 > 0.0
         for state in first.final_state.material_states
