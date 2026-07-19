@@ -112,6 +112,42 @@ jobs:
           tail -n 300 ci-quality-gate.log
           exit "$code"
 
+      - name: Diagnose G1 MGT fixture drift
+        if: failure()
+        shell: bash
+        run: |
+          PYTHONPATH=src:implementation/phase1:scripts python - <<'PY'
+          import json
+          from pathlib import Path
+
+          from build_g1_mgt_hip_current_tangent_host_parser_receipt import (
+              DEFAULT_CHECKPOINT,
+              DEFAULT_MGT,
+              build_actual_fixture,
+              summarize_actual_fixture,
+          )
+          from structural_analysis.engine_v2.contracts._canonical import array_data_hash
+
+          root = Path.cwd()
+          fixture, state, direction, metadata = build_actual_fixture(
+              mgt_path=root / DEFAULT_MGT,
+              checkpoint_npz=root / DEFAULT_CHECKPOINT,
+          )
+          expected = json.loads(
+              (root / "implementation/phase1/release_evidence/productization/"
+               "g1_mgt_hip_current_tangent_hardware_parity_receipt.json").read_text()
+          )
+          print(json.dumps({
+              "expected_fixture": expected["fixture"],
+              "observed_fixture": summarize_actual_fixture(fixture),
+              "expected_state_data_hash": expected["inputs"]["state_data_hash"],
+              "observed_state_data_hash": array_data_hash(state),
+              "expected_direction_data_hash": expected["inputs"]["direction_data_hash"],
+              "observed_direction_data_hash": array_data_hash(direction),
+              "free_equation_count": metadata["free_equation_count"],
+          }, indent=2, sort_keys=True))
+          PY
+
       - name: Upload quality-gate log
         if: always()
         uses: actions/upload-artifact@v7
