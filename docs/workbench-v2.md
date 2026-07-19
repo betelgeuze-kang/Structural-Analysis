@@ -111,16 +111,30 @@ single-commit rule.
 ## Review
 
 The automated verdict is always UNAVAILABLE. A reviewer can record a **draft**
-decision (pass/review/fail) with a comment; it is stored in the browser
-(localStorage), keyed by the case source commit, and included in the export. It
-is a human note, never an automated result.
+decision (pass/review/fail) with a comment. The draft is keyed by the case source
+commit and remains a human note, never an automated result. Workbench reports
+the exact persistence outcome instead of assuming that browser storage worked:
+
+| UI status | Meaning |
+| --- | --- |
+| `Saved locally` | The exact current draft was serialized, written to localStorage, and read back successfully. |
+| `Session-only` | The current validated draft remains in Workbench memory and is included in export, but was not verified in localStorage and will not survive reload. |
+| `Storage unavailable` | No persisted draft could be restored because storage was inaccessible or the stored entry was invalid. |
+| `Previous state retained` | A replacement failed validation or serialization; the prior validated draft remains current. |
+
+Storage errors expose only stable error codes and paths in the persistence
+receipt; browser exception messages are not rendered. Corrupted entries are
+removed best-effort. The export uses the exact in-memory draft shown in Review
+and includes `reviewer_draft_persistence`, so a session-only edit is neither
+dropped nor mislabeled as saved.
 
 ## Export bundle
 
 The export JSON includes provenance, source + analysis checksums, the viewer
 deep link, displayed blockers, selected comparison rows, an evidence manifest
-reference (commit + checksum, or unavailable), and the reviewer draft. A claim
-boundary states the references are for integrity, not a verdict.
+reference (commit + checksum, or unavailable), the reviewer draft, and its
+persistence receipt. A claim boundary states the references are for integrity,
+not a verdict.
 
 ## Local development
 

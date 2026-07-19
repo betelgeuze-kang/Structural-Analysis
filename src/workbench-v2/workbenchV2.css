@@ -253,6 +253,11 @@
 .wb2-review-input, .wb2-review-textarea { font: inherit; font-size: 13px; color: var(--wb2-text); background: rgba(10, 18, 29, 0.6); border: 1px solid var(--wb2-border); border-radius: 9px; padding: 8px 10px; }
 .wb2-review-textarea { resize: vertical; min-height: 56px; }
 .wb2-review-meta { margin: 4px 0 6px; color: var(--wb2-dim); font-size: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.wb2-persistence-status { font-weight: 750; }
+.wb2-persistence-status[data-wb2-persistence-display="Saved locally"] { color: #9de3d9; }
+.wb2-persistence-status[data-wb2-persistence-display="Session-only"],
+.wb2-persistence-status[data-wb2-persistence-display="Previous state retained"] { color: #f0cb7c; }
+.wb2-persistence-status[data-wb2-persistence-display="Storage unavailable"] { color: #f0a6a6; }
 
 
 

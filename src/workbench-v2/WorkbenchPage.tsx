@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState, type ReactElement } from 'react'
 import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
 import type { WorkbenchCaseV2 } from './model/caseSchema'
@@ -21,6 +21,12 @@ import { ComparePanel } from './components/ComparePanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
+import {
+  loadReviewDraftState,
+  updateReviewDraftState,
+  type ReviewDraft,
+  type ReviewDraftState,
+} from './model/reviewDraft'
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
@@ -45,6 +51,27 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const [errors, setErrors] = useState<string[]>([])
   const [warnings, setWarnings] = useState<string[]>([])
   const [compareIds, setCompareIds] = useState<string[]>([])
+  const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
+    () => new Map(),
+  )
+  const reviewDraftStatesRef = useRef<ReadonlyMap<string, ReviewDraftState>>(reviewDraftStates)
+
+  const reviewSourceCommitSha = caseV2?.provenance.sourceCommitSha ?? null
+
+  const reviewDraftState = useMemo(() => {
+    if (!reviewSourceCommitSha) return null
+    return reviewDraftStates.get(reviewSourceCommitSha) ?? null
+  }, [reviewDraftStates, reviewSourceCommitSha])
+
+  function updateReviewDraft(patch: Partial<ReviewDraft>): void {
+    if (!reviewSourceCommitSha) return
+    const current = reviewDraftStatesRef.current.get(reviewSourceCommitSha)
+      ?? loadReviewDraftState(reviewSourceCommitSha)
+    const next = new Map(reviewDraftStatesRef.current)
+    next.set(reviewSourceCommitSha, updateReviewDraftState(current, patch))
+    reviewDraftStatesRef.current = next
+    setReviewDraftStates(next)
+  }
 
   function toggleCompare(id: string): void {
     setCompareIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -85,6 +112,13 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
         setSourceLabel(res.sourcePath)
         if (res.status === 'ready' && res.caseV2) {
           const w = res.validation?.warnings ?? []
+          const reviewCommitSha = res.caseV2.provenance.sourceCommitSha
+          if (!reviewDraftStatesRef.current.has(reviewCommitSha)) {
+            const nextReviewStates = new Map(reviewDraftStatesRef.current)
+            nextReviewStates.set(reviewCommitSha, loadReviewDraftState(reviewCommitSha))
+            reviewDraftStatesRef.current = nextReviewStates
+            setReviewDraftStates(nextReviewStates)
+          }
           setCaseV2(res.caseV2)
           setWarnings(w)
           setLoadState('ready')
@@ -210,10 +244,23 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
 
       {/* Decision: Review + Export */}
       <div id="wb2-sec-review" className="wb2-section">
-        <ReviewDecision dataMode={state.dataMode} sourceCommitSha={caseV2?.provenance.sourceCommitSha ?? null} />
+        {caseV2 && !reviewDraftState ? (
+          <section className="wb2-panel" aria-labelledby="wb2-verdict-title">
+            <h2 id="wb2-verdict-title" className="wb2-panel__title">Review decision</h2>
+            <p className="wb2-empty" role="status" data-wb2-review-loading>
+              Loading reviewer draft persistence…
+            </p>
+          </section>
+        ) : (
+          <ReviewDecision
+            dataMode={state.dataMode}
+            draftState={reviewDraftState}
+            onDraftChange={updateReviewDraft}
+          />
+        )}
       </div>
       <div id="wb2-sec-export" className="wb2-section">
-        {caseV2 ? (
+        {caseV2 && reviewDraftState ? (
           <ExportPanel
             caseV2={caseV2}
             dataMode={state.dataMode}
@@ -224,7 +271,15 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
             comparisonRows={comparisonRows}
             viewerDeepLink={viewerDeepLink}
             baseUrl={baseUrl}
+            reviewDraftState={reviewDraftState}
           />
+        ) : caseV2 ? (
+          <section className="wb2-panel" aria-labelledby="wb2-export-title">
+            <h2 id="wb2-export-title" className="wb2-panel__title">Export</h2>
+            <p className="wb2-empty" role="status" data-wb2-export-loading>
+              Export remains unavailable until reviewer draft persistence is loaded.
+            </p>
+          </section>
         ) : (
           <section className="wb2-panel"><h2 className="wb2-panel__title">Export</h2><p className="wb2-unavailable" data-wb2-unavailable>Nothing to export until a valid case is loaded.</p></section>
         )}

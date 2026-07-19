@@ -60,4 +60,62 @@ test.describe('Workbench v2 — live evidence provider guardrails', () => {
     )
     await expect(page.getByText('Case & provenance')).toHaveCount(0)
   })
+
+  test('never writes a draft for a commit key that the read policy rejects', async ({ page }) => {
+    const sourceCommitSha = 'c'.repeat(257)
+    await page.addInitScript(() => {
+      const nativeSetItem = Storage.prototype.setItem
+      const writeCounter = window as unknown as { __reviewDraftWrites: number }
+      writeCounter.__reviewDraftWrites = 0
+      Storage.prototype.setItem = function setItem(key: string, value: string): void {
+        if (String(key).startsWith('wb2-review-draft:')) {
+          writeCounter.__reviewDraftWrites += 1
+        }
+        nativeSetItem.call(this, key, value)
+      }
+    })
+    await page.route('**/evidence/workbench-case.json', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          schemaVersion: 'workbench-case.v2',
+          provenance: {
+            sourcePath: 'guard/overlong-commit.workbench-case.json',
+            sourceSha256: 'sha256:guard',
+            sourceCommitSha,
+            engineVersion: 'guard',
+            generatedAt: '2026-07-19T00:00:00Z',
+          },
+          model: {
+            unitSystem: 'SI',
+            coordinateSystem: 'global_xyz',
+            nodeCount: 0,
+            elementCount: 0,
+            dofCount: 0,
+          },
+          residualHistory: [],
+        }),
+      })
+    })
+
+    await openLive(page)
+    const draft = page.locator('[data-wb2-review-draft]')
+    const unavailable = draft.locator('[data-wb2-persistence-display="Storage unavailable"]')
+    await expect(unavailable).toHaveAttribute(
+      'data-wb2-persistence-error-code',
+      'review_draft_source_commit_invalid',
+    )
+
+    await draft.locator('[data-wb2-decision="pass"]').click()
+    const retained = draft.locator('[data-wb2-persistence-display="Previous state retained"]')
+    await expect(retained).toHaveAttribute(
+      'data-wb2-persistence-error-code',
+      'review_draft_source_commit_invalid',
+    )
+    await expect(draft.locator('[data-wb2-decision="pass"]')).toHaveAttribute('aria-checked', 'false')
+    expect(await page.evaluate(() => (
+      window as unknown as { __reviewDraftWrites: number }
+    ).__reviewDraftWrites)).toBe(0)
+  })
 })
