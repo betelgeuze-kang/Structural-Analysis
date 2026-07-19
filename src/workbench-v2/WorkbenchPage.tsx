@@ -22,7 +22,6 @@ import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
 import {
-  createReviewDraftState,
   loadReviewDraftState,
   updateReviewDraftState,
   type ReviewDraft,
@@ -59,18 +58,9 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
 
   const reviewSourceCommitSha = caseV2?.provenance.sourceCommitSha ?? null
 
-  useEffect(() => {
-    if (!reviewSourceCommitSha) return
-    if (reviewDraftStatesRef.current.has(reviewSourceCommitSha)) return
-    const next = new Map(reviewDraftStatesRef.current)
-    next.set(reviewSourceCommitSha, loadReviewDraftState(reviewSourceCommitSha))
-    reviewDraftStatesRef.current = next
-    setReviewDraftStates(next)
-  }, [reviewSourceCommitSha])
-
   const reviewDraftState = useMemo(() => {
     if (!reviewSourceCommitSha) return null
-    return reviewDraftStates.get(reviewSourceCommitSha) ?? createReviewDraftState(reviewSourceCommitSha)
+    return reviewDraftStates.get(reviewSourceCommitSha) ?? null
   }, [reviewDraftStates, reviewSourceCommitSha])
 
   function updateReviewDraft(patch: Partial<ReviewDraft>): void {
@@ -122,6 +112,13 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
         setSourceLabel(res.sourcePath)
         if (res.status === 'ready' && res.caseV2) {
           const w = res.validation?.warnings ?? []
+          const reviewCommitSha = res.caseV2.provenance.sourceCommitSha
+          if (!reviewDraftStatesRef.current.has(reviewCommitSha)) {
+            const nextReviewStates = new Map(reviewDraftStatesRef.current)
+            nextReviewStates.set(reviewCommitSha, loadReviewDraftState(reviewCommitSha))
+            reviewDraftStatesRef.current = nextReviewStates
+            setReviewDraftStates(nextReviewStates)
+          }
           setCaseV2(res.caseV2)
           setWarnings(w)
           setLoadState('ready')
@@ -247,14 +244,23 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
 
       {/* Decision: Review + Export */}
       <div id="wb2-sec-review" className="wb2-section">
-        <ReviewDecision
-          dataMode={state.dataMode}
-          draftState={reviewDraftState}
-          onDraftChange={updateReviewDraft}
-        />
+        {caseV2 && !reviewDraftState ? (
+          <section className="wb2-panel" aria-labelledby="wb2-verdict-title">
+            <h2 id="wb2-verdict-title" className="wb2-panel__title">Review decision</h2>
+            <p className="wb2-empty" role="status" data-wb2-review-loading>
+              Loading reviewer draft persistence…
+            </p>
+          </section>
+        ) : (
+          <ReviewDecision
+            dataMode={state.dataMode}
+            draftState={reviewDraftState}
+            onDraftChange={updateReviewDraft}
+          />
+        )}
       </div>
       <div id="wb2-sec-export" className="wb2-section">
-        {caseV2 ? (
+        {caseV2 && reviewDraftState ? (
           <ExportPanel
             caseV2={caseV2}
             dataMode={state.dataMode}
@@ -265,8 +271,15 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
             comparisonRows={comparisonRows}
             viewerDeepLink={viewerDeepLink}
             baseUrl={baseUrl}
-            reviewDraftState={reviewDraftState ?? createReviewDraftState(caseV2.provenance.sourceCommitSha)}
+            reviewDraftState={reviewDraftState}
           />
+        ) : caseV2 ? (
+          <section className="wb2-panel" aria-labelledby="wb2-export-title">
+            <h2 id="wb2-export-title" className="wb2-panel__title">Export</h2>
+            <p className="wb2-empty" role="status" data-wb2-export-loading>
+              Export remains unavailable until reviewer draft persistence is loaded.
+            </p>
+          </section>
         ) : (
           <section className="wb2-panel"><h2 className="wb2-panel__title">Export</h2><p className="wb2-unavailable" data-wb2-unavailable>Nothing to export until a valid case is loaded.</p></section>
         )}

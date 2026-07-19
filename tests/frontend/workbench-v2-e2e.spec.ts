@@ -183,6 +183,18 @@ test.describe('Workbench v2 — commercial layout, review draft, benchmarks', ()
     await expect(page.locator('[data-wb2-review-reviewer]')).toHaveValue('QA')
     await expect(page.locator('[data-wb2-review-state="review"]')).toBeVisible()
     await expect(page.locator('[data-wb2-persistence-display="Saved locally"]')).toBeVisible()
+
+    const downloadPromise = page.waitForEvent('download')
+    await page.locator('[data-wb2-export]').click()
+    const download = await downloadPromise
+    const downloadPath = await download.path()
+    expect(downloadPath).not.toBeNull()
+    const bundle = JSON.parse(await readFile(downloadPath!, 'utf8')) as {
+      reviewer_draft: { reviewer: string; decision: string }
+      reviewer_draft_persistence: { display_status: string }
+    }
+    expect(bundle.reviewer_draft).toMatchObject({ reviewer: 'QA', decision: 'review' })
+    expect(bundle.reviewer_draft_persistence.display_status).toBe('Saved locally')
   })
 
   test('quota failure retains and exports the exact draft as Session-only', async ({ page }) => {
