@@ -88,6 +88,19 @@ def _status_hash(payload: dict[str, Any]) -> str:
     )
 
 
+def _comparison_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Remove generation-context metadata that is not an evidence claim."""
+    return {
+        **payload,
+        "status_hash": None,
+        "source": {
+            **payload["source"],
+            "repository_commit_sha": None,
+            "worktree_clean": None,
+        },
+    }
+
+
 def _missing_device_row(expected_architecture: str, path: Path) -> dict[str, Any]:
     return {
         "expected_architecture": expected_architecture,
@@ -151,21 +164,15 @@ def _device_row(
         "source_set_hash": source["source_set_hash"],
         "exact_source_commit": claims["exact_source_commit"],
         "wheel_sha256": wheel["sha256"],
-        "wheel_bound_at_execution": claims[
-            "wheel_identity_bound_at_execution"
-        ],
-        "fixture_identity_hash": _fixture_identity_hash(
-            evidence["fixture_identity"]
-        ),
+        "wheel_bound_at_execution": claims["wheel_identity_bound_at_execution"],
+        "fixture_identity_hash": _fixture_identity_hash(evidence["fixture_identity"]),
         "signature_verified": signature["state"] == "verified",
         "signer_id": signature["signer_id"],
         "public_key_sha256": signature["public_key_sha256"],
         "organization_id": context["organization_id"],
         "runner_id": context["runner_id"],
         "execution_location": context["execution_location"],
-        "independent_from_local_gfx1030": context[
-            "independent_from_local_gfx1030"
-        ],
+        "independent_from_local_gfx1030": context["independent_from_local_gfx1030"],
     }
     return row, receipt
 
@@ -235,8 +242,7 @@ def _identity_gates(
         and external["exact_source_commit"]
     )
     same_commit = bool(
-        attached_pair
-        and local["source_commit_sha"] == external["source_commit_sha"]
+        attached_pair and local["source_commit_sha"] == external["source_commit_sha"]
     )
     same_source_set = bool(
         attached_pair and local["source_set_hash"] == external["source_set_hash"]
@@ -254,9 +260,7 @@ def _identity_gates(
         and local["fixture_identity_hash"] == external["fixture_identity_hash"]
     )
     signed_pair = bool(
-        attached_pair
-        and local["signature_verified"]
-        and external["signature_verified"]
+        attached_pair and local["signature_verified"] and external["signature_verified"]
     )
     distinct_signers = bool(
         signed_pair
@@ -264,8 +268,7 @@ def _identity_gates(
         and local["public_key_sha256"] != external["public_key_sha256"]
     )
     independent_org = bool(
-        attached_pair
-        and local["organization_id"] != external["organization_id"]
+        attached_pair and local["organization_id"] != external["organization_id"]
     )
     independent_runner = bool(
         attached_pair and local["runner_id"] != external["runner_id"]
@@ -377,9 +380,7 @@ def build_stage4_status(
         local_legacy_path,
         repo_root=repo_root,
     )
-    local_row, _local = _device_row(
-        "gfx1030", gfx1030_device_path, repo_root=repo_root
-    )
+    local_row, _local = _device_row("gfx1030", gfx1030_device_path, repo_root=repo_root)
     external_row, _external = _device_row(
         "gfx1100", gfx1100_device_path, repo_root=repo_root
     )
@@ -457,7 +458,7 @@ def validate_stage4_status(
         gfx1100_device_path=Path(payload["device_receipts"]["gfx1100"]["path"]),
         generated_at=payload["generated_at"],
     )
-    if payload != expected:
+    if _comparison_payload(payload) != _comparison_payload(expected):
         raise ValueError("engine_v2_hip_stage4_status_stale")
     return payload
 
@@ -466,12 +467,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--local-legacy", type=Path, default=DEFAULT_LOCAL_LEGACY)
-    parser.add_argument(
-        "--gfx1030-device", type=Path, default=DEFAULT_GFX1030_DEVICE
-    )
-    parser.add_argument(
-        "--gfx1100-device", type=Path, default=DEFAULT_GFX1100_DEVICE
-    )
+    parser.add_argument("--gfx1030-device", type=Path, default=DEFAULT_GFX1030_DEVICE)
+    parser.add_argument("--gfx1100-device", type=Path, default=DEFAULT_GFX1100_DEVICE)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
     out = _resolve(ROOT, args.out)

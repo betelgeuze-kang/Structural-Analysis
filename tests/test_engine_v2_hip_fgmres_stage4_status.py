@@ -30,8 +30,7 @@ SPEC.loader.exec_module(module)
 def _legacy_receipt() -> dict:
     return json.loads(
         (
-            ROOT
-            / "implementation/phase1/release_evidence/productization/"
+            ROOT / "implementation/phase1/release_evidence/productization/"
             "engine_v2_cpu_hip_fgmres_recurrence_receipt.json"
         ).read_text(encoding="utf-8")
     )
@@ -64,9 +63,7 @@ def _unsigned_device_receipt(
         binary_sha256=hardware["binary_sha256"],
         operator_context=_operator_context(architecture=architecture),
         wheel={
-            "filename": (
-                "structural_optimization_workbench-1.0.0-py3-none-any.whl"
-            ),
+            "filename": ("structural_optimization_workbench-1.0.0-py3-none-any.whl"),
             "project_name": "structural-optimization-workbench",
             "project_version": "1.0.0",
             "sha256": wheel_hash,
@@ -78,10 +75,8 @@ def _unsigned_device_receipt(
     source = receipt["evidence_payload"]["source"]
     source["worktree_clean"] = True
     source["exact_source_commit_claim"] = True
-    receipt["signature"]["signed_payload_hash"] = (
-        module.device_runner._sha256_bytes(
-            module.device_runner.device_evidence_bytes(receipt)
-        )
+    receipt["signature"]["signed_payload_hash"] = module.device_runner._sha256_bytes(
+        module.device_runner.device_evidence_bytes(receipt)
     )
     receipt["claims"] = module.device_runner._claims(
         exact_source_commit=True,
@@ -115,9 +110,7 @@ def _signed_device_receipt(
     )
     return module.device_runner.attach_ed25519_signature(
         receipt,
-        signature_bytes=key.sign(
-            module.device_runner.device_evidence_bytes(receipt)
-        ),
+        signature_bytes=key.sign(module.device_runner.device_evidence_bytes(receipt)),
         public_key_pem=public_pem,
         signer_id=signer_id,
         repo_root=ROOT,
@@ -144,11 +137,13 @@ def test_stage4_status_keeps_missing_external_evidence_explicit(
     assert status["claims"]["stage4_cross_device_evidence"] is False
     assert status["claims"]["production_recurrence"] is False
     assert status["claims"]["performance"] is False
-    assert "signed_clean_gfx1030_device_receipt_not_attached" in (
-        status["blockers_remaining"]
+    assert (
+        "signed_clean_gfx1030_device_receipt_not_attached"
+        in (status["blockers_remaining"])
     )
-    assert "independent_gfx1100_device_receipt_not_attached" in (
-        status["blockers_remaining"]
+    assert (
+        "independent_gfx1100_device_receipt_not_attached"
+        in (status["blockers_remaining"])
     )
 
 
@@ -186,9 +181,7 @@ def test_stage4_status_requires_complete_signed_independent_pair(
     assert status["claims"]["same_fixture_cross_device"] is True
     assert status["claims"]["signed_cross_device_receipts"] is True
     assert status["claims"]["stage4_cross_device_evidence"] is True
-    assert "model_size_performance_sweep_not_executed" in (
-        status["blockers_remaining"]
-    )
+    assert "model_size_performance_sweep_not_executed" in (status["blockers_remaining"])
 
 
 def test_stage4_status_rejects_same_signer_pair(tmp_path: Path) -> None:
@@ -273,5 +266,20 @@ def test_stage4_status_check_round_trip(tmp_path: Path) -> None:
         gfx1030_device_path=tmp_path / "missing-gfx1030.json",
         gfx1100_device_path=tmp_path / "missing-gfx1100.json",
     )
+
+    assert module.validate_stage4_status(status, repo_root=ROOT) == status
+
+
+def test_stage4_status_check_allows_non_claim_generation_context(
+    tmp_path: Path,
+) -> None:
+    status = module.build_stage4_status(
+        repo_root=ROOT,
+        gfx1030_device_path=tmp_path / "missing-gfx1030.json",
+        gfx1100_device_path=tmp_path / "missing-gfx1100.json",
+    )
+    status["source"]["repository_commit_sha"] = "f" * 40
+    status["source"]["worktree_clean"] = not status["source"]["worktree_clean"]
+    status["status_hash"] = module._status_hash(status)
 
     assert module.validate_stage4_status(status, repo_root=ROOT) == status

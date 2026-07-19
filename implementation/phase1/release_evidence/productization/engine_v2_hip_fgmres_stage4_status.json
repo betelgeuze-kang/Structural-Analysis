@@ -84,7 +84,7 @@
       "wheel_sha256": null
     }
   },
-  "generated_at": "2026-07-19T07:02:49.145153+00:00",
+  "generated_at": "2026-07-19T07:38:24.225359+00:00",
   "identity_gates": {
     "actual_hardware_pair": false,
     "architecture_pair_exact": false,
@@ -124,16 +124,16 @@
     "input_checksums": {
       "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json": "sha256:9fe3adb29995a274f8818ab963cc39a1ca19ecaec219fe8b4213ecacb99ac4e3",
       "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json": "sha256:1b5826eb44b6a7850ba679ae7ffe879306078680ab2b8bbc8dcc1b58a2639f0a",
-      "scripts/build_engine_v2_hip_fgmres_stage4_status.py": "sha256:93ea785c88fae5b7972355c4673af522494c83dbc24fc0b0a7150be2b8d1a141",
+      "scripts/build_engine_v2_hip_fgmres_stage4_status.py": "sha256:442c026f147049107b3f2cb8cd79856c4a887ed5628451f400561f3556d74247",
       "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:f3a5baff648100275ed5a141fad0e621f8a7e9a5a20b4c9e1060ac0701a481ad",
       "src/structural_analysis/schemas/hip_fgmres_device_receipt_v1.schema.json": "sha256:768e8aec34ba7b791c22b925c4405d1f40f1d1fe144a92b290aa195b861aa0f9",
       "src/structural_analysis/schemas/hip_fgmres_stage4_status_v1.schema.json": "sha256:7911e585ece66d6ea66c503ce21439d60d4bfaf29c403312497b4579c4e7e8c3",
       "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:3b9780329c2cbad3a2c5559510c0f56b283f91809ead9da6145e6b09d3c68e6e",
-      "tests/test_engine_v2_hip_fgmres_stage4_status.py": "sha256:ea5a53b5451a01031ce2b27ddb939099a5c4208674df81365a6d6c73f1d57ec4"
+      "tests/test_engine_v2_hip_fgmres_stage4_status.py": "sha256:8849cb458a41b9e50d1b4a3590149cbd23e507892bbc114c3b57dad6ab415977"
     },
-    "repository_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+    "repository_commit_sha": "1ae01fa3d9d11dd3f1ba41c975d59d18ca7598d8",
     "worktree_clean": false
   },
   "status": "partial",
-  "status_hash": "sha256:aab20c8cebd9a7d6028e69d2af63eb992f62e63b75f5019d38045ac9286af229"
+  "status_hash": "sha256:596e28811ae5e84324477dac10f26413961049c1952d040674c14b6b0ac15e36"
 }
