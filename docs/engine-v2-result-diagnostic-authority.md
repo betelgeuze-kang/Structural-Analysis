@@ -81,7 +81,9 @@ write/readback hash 검증에 실패하면 이번 호출이 만든 파일만 제
 
 이 state projection은 engineering-result recovery가 아니다. reaction과 local-axis
 member force는 residual과 동일한 element/material law, operator hash, state epoch를
-사용하는 별도 recovery PR에서 구현하고 CPU/HIP parity를 검증해야 한다.
+사용하는 별도 `LinearStaticRecoveryOperator`와 `EngineeringResultIR`에서만
+승격된다. 상세 계약과 아직 열려 있는 CPU/HIP parity 경계는
+`docs/engine-v2-engineering-result-recovery.md`에 기록한다.
 
 ## 검증
 
