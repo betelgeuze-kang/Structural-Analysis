@@ -21,8 +21,14 @@ def test_canonical_ci_owns_structural_core_lane() -> None:
     assert "scripts/verify_quality_gate.py --mode pr" in workflow
 
 
-def test_pr_quality_gate_pins_reproducible_openblas_execution() -> None:
+def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
     workflow = _read("ci.yml")
+
+    install = workflow.split("- name: Install Python package", 1)[1].split(
+        "- name: Install Node dependencies",
+        1,
+    )[0]
+    assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in install
 
     quality_gate = workflow.split("- name: PR quality gate", 1)[1].split(
         "- name: Upload quality-gate log",
