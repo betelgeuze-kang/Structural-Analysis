@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/linear_static_recovery_operator_v1.schema.json",
+  "title": "Engine v2 linear-static recovery operator v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "authority_profile",
+    "bindings",
+    "element_law",
+    "dimensions",
+    "consistency",
+    "array_bundle_hash",
+    "array_descriptors",
+    "claim_boundary",
+    "recovery_operator_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-linear-static-recovery-operator.v1"
+    },
+    "profile": {
+      "const": "bound_global_csr_and_element_local_linear_law.v1"
+    },
+    "authority_profile": {
+      "const": "non_authoritative_bound_recovery_operator.v1"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "reduced_csr_identity_hash",
+        "equation_scaling_hash",
+        "operator_hash",
+        "load_pattern_id",
+        "ordering_hash",
+        "global_pattern_hash",
+        "operator_numeric_values_hash",
+        "reference_external_load_data_hash"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "reduced_csr_identity_hash": {"$ref": "#/$defs/sha256"},
+        "equation_scaling_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+        "ordering_hash": {"$ref": "#/$defs/sha256"},
+        "global_pattern_hash": {"$ref": "#/$defs/sha256"},
+        "operator_numeric_values_hash": {"$ref": "#/$defs/sha256"},
+        "reference_external_load_data_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "element_law": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recovery_law_receipt_hash",
+        "element_order",
+        "element_result_profiles",
+        "element_profile_hash",
+        "local_components",
+        "kinematic_action",
+        "force_action",
+        "global_action"
+      ],
+      "properties": {
+        "recovery_law_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "element_order": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/stable_id"}
+        },
+        "element_result_profiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "frame_3d_local_end_force_12.v1",
+              "axial_3d_local_end_force_fx_i_fx_j.v1"
+            ]
+          }
+        },
+        "element_profile_hash": {"$ref": "#/$defs/sha256"},
+        "local_components": {
+          "const": [
+            "FX_I", "FY_I", "FZ_I", "MX_I", "MY_I", "MZ_I",
+            "FX_J", "FY_J", "FZ_J", "MX_J", "MY_J", "MZ_J"
+          ]
+        },
+        "kinematic_action": {
+          "const": "u_local=Q_element*u_global_element"
+        },
+        "force_action": {"const": "f_local=K_local*u_local"},
+        "global_action": {
+          "const": "f_global_element=transpose(Q_element)*f_local"
+        }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dof_count",
+        "element_count",
+        "global_nnz",
+        "element_dof_count",
+        "local_component_count"
+      ],
+      "properties": {
+        "dof_count": {"type": "integer", "minimum": 6, "multipleOf": 6},
+        "element_count": {"type": "integer", "minimum": 1},
+        "global_nnz": {"type": "integer", "minimum": 1},
+        "element_dof_count": {"const": 12},
+        "local_component_count": {"const": 12}
+      }
+    },
+    "consistency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assembly_replay_scaled_linf",
+        "local_stiffness_symmetry_scaled_linf",
+        "assembly_replay_scaled_linf_tolerance",
+        "assembly_replay_gate_passed",
+        "local_stiffness_symmetry_gate_passed"
+      ],
+      "properties": {
+        "assembly_replay_scaled_linf": {"type": "number", "minimum": 0},
+        "local_stiffness_symmetry_scaled_linf": {
+          "type": "number",
+          "minimum": 0
+        },
+        "assembly_replay_scaled_linf_tolerance": {"const": 1e-12},
+        "assembly_replay_gate_passed": {"const": true},
+        "local_stiffness_symmetry_gate_passed": {"const": true}
+      }
+    },
+    "array_bundle_hash": {"$ref": "#/$defs/sha256"},
+    "array_descriptors": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_csr_values_si",
+        "reference_external_load_global_si",
+        "element_kinematic_matrices",
+        "element_local_stiffness_matrices_si"
+      ],
+      "properties": {
+        "global_csr_values_si": {"$ref": "#/$defs/array_descriptor"},
+        "reference_external_load_global_si": {
+          "$ref": "#/$defs/array_descriptor"
+        },
+        "element_kinematic_matrices": {"$ref": "#/$defs/array_descriptor"},
+        "element_local_stiffness_matrices_si": {
+          "$ref": "#/$defs/array_descriptor"
+        }
+      }
+    },
+    "claim_boundary": {
+      "const": {
+        "numeric_arrays_embedded": false,
+        "global_csr_values_bound_to_reduced_solve": true,
+        "reference_load_bound_to_equation_scaling": true,
+        "element_law_assembly_replayed": true,
+        "result_authority": false,
+        "receipt_authenticity_established": false,
+        "cpu_hip_parity_established": false
+      }
+    },
+    "recovery_operator_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "minLength": 71,
+      "maxLength": 71
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "array_descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name", "dtype", "shape", "layout", "byte_length",
+        "data_hash", "content_hash"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "layout": {"const": "C"},
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}
