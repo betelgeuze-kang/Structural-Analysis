@@ -262,7 +262,7 @@
     "skipped_invalid_line_connectivity_count": 0,
     "skipped_short_or_degenerate_line_count": 4
   },
-  "generated_at": "2026-07-18T20:57:46.298675+00:00",
+  "generated_at": "2026-07-19T07:15:15.575169+00:00",
   "input_checksums": {
     "implementation/phase1/mgt_state_updated_frame_axial_geometry.py": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
     "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
@@ -271,7 +271,7 @@
     "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py": "sha256:a6598d5613aefccaa9a6eda7c26adaba2cf4406dd3ea0a4acb57f32fe0870603",
     "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
     "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
-    "scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py": "sha256:38319a5c4bf1f31af47a41c2e557bc1e844ba48b0d572b42b6e11c4c2e23fd31",
+    "scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py": "sha256:e47e12752c3d24a6f0f7584630b24619ccfd19b99531cb588e6db5e73d6fd3fd",
     "src/structural_analysis/schemas/g1_mgt_state_updated_frame_axial_geometry_preflight_v1.schema.json": "sha256:26c033fa8306c3543554b3db4469140fdaf45d01cde009d4edc0743af83fb774",
     "tests/test_build_g1_mgt_state_updated_frame_axial_geometry_preflight.py": "sha256:2ec97cbd84c54051f1a064310ad895350f8378cb9074e5fe1e9cd93b950629f6",
     "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
@@ -427,7 +427,7 @@
   },
   "schema_version": "g1-mgt-state-updated-frame-axial-geometry-preflight.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "source_property_coverage_audit": {
     "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
     "exact_source_property_coverage": false,

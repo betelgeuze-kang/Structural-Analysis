@@ -74,7 +74,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -136,8 +136,7 @@ def build_phase2_state_updated_bilinear_link_artifacts(
         element_row["internal_force_kn"] - point_response.force_kn
     )
     element_tangent_error = abs(
-        element_row["tangent_kn_per_m"]
-        - point_response.consistent_tangent_kn_per_m
+        element_row["tangent_kn_per_m"] - point_response.consistent_tangent_kn_per_m
     )
     element_contract_pass = bool(
         element_row["response_kind"] == "force_deformation"
@@ -168,14 +167,8 @@ def build_phase2_state_updated_bilinear_link_artifacts(
         ),
     )
     force_spreads = [
-        max(
-            row["internal_force_kn"]
-            for row in step.trial_assembly.element_responses
-        )
-        - min(
-            row["internal_force_kn"]
-            for row in step.trial_assembly.element_responses
-        )
+        max(row["internal_force_kn"] for row in step.trial_assembly.element_responses)
+        - min(row["internal_force_kn"] for row in step.trial_assembly.element_responses)
         for step in structure_path.steps
     ]
     deformation_spreads = [
@@ -194,8 +187,7 @@ def build_phase2_state_updated_bilinear_link_artifacts(
         for step in structure_path.steps
     ]
     deterministic_replay = bool(
-        structure_replay.final_state.state_hash
-        == structure_path.final_state.state_hash
+        structure_replay.final_state.state_hash == structure_path.final_state.state_hash
         and structure_replay.to_dict() == structure_path.to_dict()
     )
     structure_contract_pass = bool(
@@ -228,15 +220,13 @@ def build_phase2_state_updated_bilinear_link_artifacts(
         == rollback_parent.canonical_bytes()
     )
     line_search_history_present = all(
-        bool(step.trial_solution.line_search_history)
-        for step in structure_path.steps
+        bool(step.trial_solution.line_search_history) for step in structure_path.steps
     )
     fallback_count = sum(
         bool(step.metrics["fallback_used"]) for step in structure_path.steps
     )
     regularization_count = sum(
-        bool(step.metrics["regularization_used"])
-        for step in structure_path.steps
+        bool(step.metrics["regularization_used"]) for step in structure_path.steps
     )
     contract_pass = bool(
         point_contract_pass
@@ -263,12 +253,8 @@ def build_phase2_state_updated_bilinear_link_artifacts(
             "parameters": {
                 "initial_stiffness_kn_per_m": material.initial_stiffness_kn_per_m,
                 "yield_force_kn": material.yield_force_kn,
-                "isotropic_hardening_kn_per_m": (
-                    material.isotropic_hardening_kn_per_m
-                ),
-                "kinematic_hardening_kn_per_m": (
-                    material.kinematic_hardening_kn_per_m
-                ),
+                "isotropic_hardening_kn_per_m": (material.isotropic_hardening_kn_per_m),
+                "kinematic_hardening_kn_per_m": (material.kinematic_hardening_kn_per_m),
             },
             "monotonic_response": point_response.to_dict(),
             "finite_difference_tangent": point_tangent,
@@ -328,9 +314,7 @@ def build_phase2_state_updated_bilinear_link_artifacts(
                 Path("src/structural_analysis/assembly/stateful_axial.py"),
                 Path("src/structural_analysis/solvers/nonlinear/newton.py"),
                 SCHEMA_PATH,
-                Path(
-                    "scripts/build_phase2_state_updated_bilinear_link_artifacts.py"
-                ),
+                Path("scripts/build_phase2_state_updated_bilinear_link_artifacts.py"),
                 Path("tests/test_state_updated_bilinear_link_newton.py"),
                 Path(
                     "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py"

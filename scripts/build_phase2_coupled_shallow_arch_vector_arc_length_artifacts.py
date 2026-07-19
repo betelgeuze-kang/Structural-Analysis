@@ -39,19 +39,20 @@ SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "coupled_shallow_arch_vector_arc_length_v1.schema.json"
 )
-SUMMARY_SCHEMA_VERSION = (
-    "phase2-coupled-shallow-arch-vector-arc-length-artifacts.v1"
-)
+SUMMARY_SCHEMA_VERSION = "phase2-coupled-shallow-arch-vector-arc-length-artifacts.v1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _strip_volatile(payload: Any) -> Any:
@@ -59,7 +60,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -80,9 +81,7 @@ def build_phase2_coupled_shallow_arch_vector_arc_length_artifacts(
     summary_out: Path = DEFAULT_SUMMARY_OUT,
 ) -> dict[str, dict[str, Any]]:
     repo_root = repo_root.resolve()
-    result_payload = (
-        build_coupled_shallow_arch_vector_arc_length_benchmark_seed()
-    )
+    result_payload = build_coupled_shallow_arch_vector_arc_length_benchmark_seed()
     schema = _read_json(repo_root / SCHEMA_PATH)
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(result_payload)
@@ -101,27 +100,19 @@ def build_phase2_coupled_shallow_arch_vector_arc_length_artifacts(
         "claim_boundary_version": CLAIM_BOUNDARY_VERSION,
         "input_checksums": input_checksums(
             [
-                Path(
-                    "src/structural_analysis/solvers/nonlinear/"
-                    "vector_arc_length.py"
-                ),
+                Path("src/structural_analysis/solvers/nonlinear/vector_arc_length.py"),
                 Path(
                     "src/structural_analysis/benchmark/"
                     "coupled_shallow_arch_arc_length.py"
                 ),
-                Path(
-                    "src/structural_analysis/benchmark/geometric_nonlinear.py"
-                ),
+                Path("src/structural_analysis/benchmark/geometric_nonlinear.py"),
                 SCHEMA_PATH,
                 Path(
                     "scripts/"
                     "build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py"
                 ),
                 Path("tests/test_nonlinear_vector_arc_length.py"),
-                Path(
-                    "tests/"
-                    "test_coupled_shallow_arch_vector_arc_length_benchmark.py"
-                ),
+                Path("tests/test_coupled_shallow_arch_vector_arc_length_benchmark.py"),
                 Path(
                     "tests/"
                     "test_build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py"
@@ -175,9 +166,7 @@ def build_phase2_coupled_shallow_arch_vector_arc_length_artifacts(
             "tangent_energy_finite_difference_gate_passed"
         ],
         "checkpoint_restart_exact": verification["checkpoint_restart_exact"],
-        "deterministic_replay_exact": verification[
-            "deterministic_replay_exact"
-        ],
+        "deterministic_replay_exact": verification["deterministic_replay_exact"],
         "path_contract_hash": verification["path_contract_hash"],
         "dense_multi_dof_vector_arc_length_claim": claims[
             "dense_multi_dof_vector_arc_length"
@@ -251,12 +240,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
     if args.check:
-        ok, message = (
-            check_phase2_coupled_shallow_arch_vector_arc_length_artifacts(
-                repo_root=ROOT,
-                result_out=args.result_out,
-                summary_out=args.summary_out,
-            )
+        ok, message = check_phase2_coupled_shallow_arch_vector_arc_length_artifacts(
+            repo_root=ROOT,
+            result_out=args.result_out,
+            summary_out=args.summary_out,
         )
         print(message)
         return 0 if ok else 1

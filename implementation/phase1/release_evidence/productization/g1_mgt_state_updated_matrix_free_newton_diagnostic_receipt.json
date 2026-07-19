@@ -168,7 +168,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-19T02:01:10.970709+00:00",
+  "generated_at": "2026-07-19T07:16:31.549541+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
@@ -179,7 +179,7 @@
     "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
     "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
-    "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py": "sha256:de9f8adb81f4f652e4e0610630b6583e3e31e97379cec1f9d330ed793c5fca3b",
+    "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py": "sha256:7150278daf4e0534a054ec3396bfe6fbc316e95f340ec33312e0f8d4e893effa",
     "src/structural_analysis/engine_v2/contracts/_canonical.py": "sha256:78883ad07598edeb838de0ccce2717b362a323574bfe86822dfcfda665ecf11b",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
@@ -593,7 +593,7 @@
     "reference_preconditioner_values_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1"
   },
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }

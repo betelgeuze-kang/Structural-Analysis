@@ -17,12 +17,14 @@ GITHUB_HOSTED_LABEL_RE = re.compile(
     r"\b(?:ubuntu|windows|macos)-latest-(?:\d+core|\w+)\b",
     flags=re.IGNORECASE,
 )
+MATRIX_RUNNER_EXPRESSION_RE = re.compile(r"^\$\{\{\s*matrix\.([A-Za-z0-9_-]+)\s*\}\}$")
 DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
     {
         ".github/workflows/authoritative-core-evidence-resync.yml",
         ".github/workflows/authoritative-linear-core-ci.yml",
         ".github/workflows/ci.yml",
         ".github/workflows/engine-v2-contract-ci.yml",
+        ".github/workflows/engine-v2-determinism-ci.yml",
         ".github/workflows/frontend-web-ci.yml",
         ".github/workflows/legacy-evidence-ci.yml",
         ".github/workflows/nightly-full-quality.yml",
@@ -144,6 +146,25 @@ def _runs_on_entries(lines: list[str]) -> list[tuple[int, str]]:
     return entries
 
 
+def _resolve_matrix_runner_values(*, lines: list[str], value: str) -> str:
+    """Resolve a simple inline matrix axis used directly by ``runs-on``."""
+
+    match = MATRIX_RUNNER_EXPRESSION_RE.fullmatch(value)
+    if match is None:
+        return value
+    axis = re.escape(match.group(1))
+    inline_axis = re.compile(rf"^\s*{axis}\s*:\s*\[(?P<values>[^\]]+)\]\s*(?:#.*)?$")
+    for line in lines:
+        axis_match = inline_axis.match(line)
+        if axis_match is None:
+            continue
+        values = [_clean_scalar(item) for item in axis_match.group("values").split(",")]
+        resolved = [item for item in values if item]
+        if resolved:
+            return ", ".join(resolved)
+    return value
+
+
 def check_runner_policy(
     *,
     workflow_dir: Path = DEFAULT_WORKFLOW_DIR,
@@ -164,8 +185,12 @@ def check_runner_policy(
         deterministic_hosted = rel_path in allowlist
         lines = workflow.read_text(encoding="utf-8").splitlines()
         for line_number, value in _runs_on_entries(lines):
-            github_hosted = bool(GITHUB_HOSTED_LABEL_RE.search(value))
-            self_hosted = "self-hosted" in value
+            resolved_value = _resolve_matrix_runner_values(
+                lines=lines,
+                value=value,
+            )
+            github_hosted = bool(GITHUB_HOSTED_LABEL_RE.search(resolved_value))
+            self_hosted = "self-hosted" in resolved_value
             if deterministic_hosted:
                 ok = github_hosted and not self_hosted
                 execution_class = "deterministic_github_hosted"
@@ -193,6 +218,7 @@ def check_runner_policy(
                     "workflow": rel_path,
                     "line": line_number,
                     "runs_on": value,
+                    "resolved_runs_on": resolved_value,
                     "execution_class": execution_class,
                     "github_hosted_allowlisted": deterministic_hosted,
                     "github_hosted_label": github_hosted,

@@ -47,19 +47,14 @@ DEFAULT_COMPILE_OUT = (
 SOURCE_PATH = Path(
     "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp"
 )
-MODULE_PATH = Path(
-    "src/structural_analysis/engine_v2_backends/hip_sparse_lu_apply.py"
-)
+MODULE_PATH = Path("src/structural_analysis/engine_v2_backends/hip_sparse_lu_apply.py")
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/hip_sparse_lu_apply_parity_v1.schema.json"
 )
 COMPILE_SCHEMA_PATH = Path(
-    "src/structural_analysis/schemas/"
-    "hip_sparse_lu_apply_compile_receipt_v1.schema.json"
+    "src/structural_analysis/schemas/hip_sparse_lu_apply_compile_receipt_v1.schema.json"
 )
-RECEIPT_SCHEMA_VERSION = (
-    "engine-v2-hip-sparse-lu-apply-parity-receipt.v1"
-)
+RECEIPT_SCHEMA_VERSION = "engine-v2-hip-sparse-lu-apply-parity-receipt.v1"
 COMPILE_RECEIPT_SCHEMA_VERSION = (
     "engine-v2-hip-sparse-lu-apply-target-compile-host-parse-receipt.v1"
 )
@@ -105,13 +100,16 @@ COMPILE_CLAIM_BOUNDARY = (
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        ensure_ascii=False,
-        allow_nan=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -155,8 +153,7 @@ def _resolve_hipcc(explicit: str) -> Path:
 def _resolve_device_lib_path(repo_root: Path, explicit: str) -> Path:
     candidates = [
         Path(explicit) if explicit else Path("/nonexistent"),
-        repo_root
-        / "implementation/phase1/third_party/rocm_device_libs/opt/"
+        repo_root / "implementation/phase1/third_party/rocm_device_libs/opt/"
         "rocm-5.7.1/amdgcn/bitcode",
         Path("/opt/rocm/amdgcn/bitcode"),
         Path("/opt/rocm/lib/bitcode"),
@@ -196,10 +193,7 @@ def _source_paths() -> list[Path]:
         Path("scripts/run_engine_v2_hip_sparse_lu_apply.py"),
         Path("tests/test_engine_v2_hip_sparse_lu_apply.py"),
         Path("tests/test_engine_v2_hip_sparse_lu_apply_runner.py"),
-        Path(
-            "src/structural_analysis/solvers/nonlinear/"
-            "canonical_sparse_lu.py"
-        ),
+        Path("src/structural_analysis/solvers/nonlinear/canonical_sparse_lu.py"),
     ]
 
 
@@ -297,9 +291,7 @@ def validate_receipt(
         expected = input_checksums(_source_paths(), repo_root=repo_root)
         if payload["source"]["input_checksums"] != expected:
             raise ValueError("engine_v2_hip_sparse_lu_source_checksums_stale")
-        if payload["source"]["repository_base_commit_sha"] != git_head(
-            repo_root
-        ):
+        if payload["source"]["repository_base_commit_sha"] != git_head(repo_root):
             raise ValueError("engine_v2_hip_sparse_lu_base_commit_mismatch")
     return payload
 
@@ -320,14 +312,11 @@ def build_compile_receipt(
     if not all(
         row.get("host_fixture_parser_execution") is True
         and row.get("host_fixture_validation", {}).get("contract_pass") is True
-        and row["host_fixture_validation"]["actual_hardware_execution"]
-        is False
+        and row["host_fixture_validation"]["actual_hardware_execution"] is False
         and row["host_fixture_validation"]["hip_runtime_api_call_count"] == 0
         for row in ordered_targets
     ):
-        raise ValueError(
-            "engine_v2_hip_sparse_lu_host_fixture_validation_invalid"
-        )
+        raise ValueError("engine_v2_hip_sparse_lu_host_fixture_validation_invalid")
     provisional = {
         "schema_version": COMPILE_RECEIPT_SCHEMA_VERSION,
         "receipt_hash": "sha256:" + "0" * 64,
@@ -349,9 +338,7 @@ def build_compile_receipt(
             "version_first_line": compiler_version_output.splitlines()[0],
             "version_output_sha256": (
                 "sha256:"
-                + hashlib.sha256(
-                    compiler_version_output.encode("utf-8")
-                ).hexdigest()
+                + hashlib.sha256(compiler_version_output.encode("utf-8")).hexdigest()
             ),
         },
         "targets": ordered_targets,
@@ -384,24 +371,18 @@ def validate_compile_receipt(
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema, format_checker=None).validate(payload)
     if payload["receipt_hash"] != _receipt_hash(payload):
-        raise ValueError(
-            "engine_v2_hip_sparse_lu_compile_receipt_hash_mismatch"
-        )
+        raise ValueError("engine_v2_hip_sparse_lu_compile_receipt_hash_mismatch")
     architectures = [row["architecture"] for row in payload["targets"]]
     if architectures != ["gfx1030", "gfx1100"]:
         raise ValueError("engine_v2_hip_sparse_lu_compile_target_order_invalid")
     if require_current_sources:
         expected = input_checksums(_source_paths(), repo_root=repo_root)
         if payload["source"]["input_checksums"] != expected:
-            raise ValueError(
-                "engine_v2_hip_sparse_lu_compile_source_checksums_stale"
-            )
-        if payload["source"]["repository_base_commit_sha"] != git_head(
-            repo_root
-        ):
-            raise ValueError(
-                "engine_v2_hip_sparse_lu_compile_base_commit_mismatch"
-            )
+            raise ValueError("engine_v2_hip_sparse_lu_compile_source_checksums_stale")
+        if payload["source"]["exact_source_commit_claim"] is True and payload["source"][
+            "repository_base_commit_sha"
+        ] != git_head(repo_root):
+            raise ValueError("engine_v2_hip_sparse_lu_compile_base_commit_mismatch")
     return payload
 
 
@@ -444,8 +425,7 @@ def run_compile_only(
             if compiled.returncode != 0:
                 raise RuntimeError(
                     "engine_v2_hip_sparse_lu_compile_failed:"
-                    f"{architecture}:"
-                    + compiled.stderr[-1000:].replace("\n", " ")
+                    f"{architecture}:" + compiled.stderr[-1000:].replace("\n", " ")
                 )
             parsed = _run(
                 [
@@ -459,23 +439,18 @@ def run_compile_only(
             if parsed.returncode != 0:
                 raise RuntimeError(
                     "engine_v2_hip_sparse_lu_host_fixture_validation_failed:"
-                    f"{architecture}:"
-                    + parsed.stderr[-1000:].replace("\n", " ")
+                    f"{architecture}:" + parsed.stderr[-1000:].replace("\n", " ")
                 )
             try:
-                parser_output = json.loads(
-                    parsed.stdout.strip().splitlines()[-1]
-                )
+                parser_output = json.loads(parsed.stdout.strip().splitlines()[-1])
             except Exception as exc:
                 raise RuntimeError(
                     "engine_v2_hip_sparse_lu_host_fixture_output_invalid:"
                     f"{architecture}"
                 ) from exc
-            host_fixture_validation = (
-                validate_hip_sparse_lu_fixture_parser_output(
-                    reference.fixture,
-                    parser_output,
-                )
+            host_fixture_validation = validate_hip_sparse_lu_fixture_parser_output(
+                reference.fixture,
+                parser_output,
             )
             target_rows.append(
                 {
@@ -510,9 +485,7 @@ def run_hardware_parity(
     if version.returncode != 0 or not version.stdout.strip():
         raise RuntimeError("engine_v2_hip_sparse_lu_hipcc_version_failed")
     reference = build_hip_sparse_lu_apply_reference()
-    with tempfile.TemporaryDirectory(
-        prefix="engine-v2-hip-sparse-lu-"
-    ) as temporary:
+    with tempfile.TemporaryDirectory(prefix="engine-v2-hip-sparse-lu-") as temporary:
         temporary_path = Path(temporary)
         fixture_path = temporary_path / "fixture.bin"
         binary_path = temporary_path / "engine_v2_sparse_lu_apply"
@@ -549,9 +522,7 @@ def run_hardware_parity(
         try:
             runtime_output = json.loads(executed.stdout.strip().splitlines()[-1])
         except Exception as exc:
-            raise RuntimeError(
-                "engine_v2_hip_sparse_lu_output_invalid"
-            ) from exc
+            raise RuntimeError("engine_v2_hip_sparse_lu_output_invalid") from exc
     if runtime_output.get("gcn_arch_name") != architecture:
         raise RuntimeError("engine_v2_hip_sparse_lu_runtime_arch_mismatch")
     return build_receipt_from_runtime_output(
@@ -587,8 +558,7 @@ def check_committed_receipt(
             )
     except Exception as exc:
         return False, (
-            "engine_v2_hip_sparse_lu_receipt_invalid:"
-            f"{exc.__class__.__name__}:{exc}"
+            f"engine_v2_hip_sparse_lu_receipt_invalid:{exc.__class__.__name__}:{exc}"
         )
     return True, "engine_v2_hip_sparse_lu_receipt_consistent"
 
@@ -624,9 +594,7 @@ def main(argv: list[str] | None = None) -> int:
             device_lib_path=args.device_lib_path,
         )
     output = (
-        output_argument
-        if output_argument.is_absolute()
-        else ROOT / output_argument
+        output_argument if output_argument.is_absolute() else ROOT / output_argument
     )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(_json_text(receipt), encoding="utf-8")

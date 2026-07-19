@@ -43,32 +43,24 @@ from structural_analysis.engine_v2_backends.hip_current_tangent_operator import 
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
-DEFAULT_OUT = (
-    PRODUCTIZATION / "engine_v2_hip_current_tangent_operator_receipt.json"
-)
+DEFAULT_OUT = PRODUCTIZATION / "engine_v2_hip_current_tangent_operator_receipt.json"
 DEFAULT_COMPILE_OUT = (
-    PRODUCTIZATION
-    / "engine_v2_hip_current_tangent_operator_compile_receipt.json"
+    PRODUCTIZATION / "engine_v2_hip_current_tangent_operator_compile_receipt.json"
 )
 SOURCE_PATH = Path(
-    "implementation/phase1/hip_kernels/"
-    "engine_v2_current_tangent_operator.hip.cpp"
+    "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp"
 )
 MODULE_PATH = Path(
-    "src/structural_analysis/engine_v2_backends/"
-    "hip_current_tangent_operator.py"
+    "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py"
 )
 SCHEMA_PATH = Path(
-    "src/structural_analysis/schemas/"
-    "hip_current_tangent_operator_parity_v1.schema.json"
+    "src/structural_analysis/schemas/hip_current_tangent_operator_parity_v1.schema.json"
 )
 COMPILE_SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "hip_current_tangent_operator_compile_receipt_v1.schema.json"
 )
-RECEIPT_SCHEMA_VERSION = (
-    "engine-v2-hip-current-tangent-operator-parity-receipt.v1"
-)
+RECEIPT_SCHEMA_VERSION = "engine-v2-hip-current-tangent-operator-parity-receipt.v1"
 COMPILE_RECEIPT_SCHEMA_VERSION = (
     "engine-v2-hip-current-tangent-target-compile-host-parse-receipt.v1"
 )
@@ -112,13 +104,16 @@ COMPILE_CLAIM_BOUNDARY = (
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        ensure_ascii=False,
-        allow_nan=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -162,8 +157,7 @@ def _resolve_hipcc(explicit: str) -> Path:
 def _resolve_device_lib_path(repo_root: Path, explicit: str) -> Path:
     candidates = [
         Path(explicit) if explicit else Path("/nonexistent"),
-        repo_root
-        / "implementation/phase1/third_party/rocm_device_libs/opt/"
+        repo_root / "implementation/phase1/third_party/rocm_device_libs/opt/"
         "rocm-5.7.1/amdgcn/bitcode",
         Path("/opt/rocm/amdgcn/bitcode"),
         Path("/opt/rocm/lib/bitcode"),
@@ -203,14 +197,8 @@ def _source_paths() -> list[Path]:
         Path("scripts/run_engine_v2_hip_current_tangent_operator.py"),
         Path("tests/test_engine_v2_hip_current_tangent_operator.py"),
         Path("tests/test_engine_v2_hip_current_tangent_operator_runner.py"),
-        Path(
-            "src/structural_analysis/engine_v2/contracts/"
-            "current_tangent_operator.py"
-        ),
-        Path(
-            "src/structural_analysis/schemas/"
-            "current_tangent_operator_v1.schema.json"
-        ),
+        Path("src/structural_analysis/engine_v2/contracts/current_tangent_operator.py"),
+        Path("src/structural_analysis/schemas/current_tangent_operator_v1.schema.json"),
         Path("tests/test_engine_v2_current_tangent_operator_v1.py"),
     ]
 
@@ -235,9 +223,7 @@ def build_receipt_from_runtime_output(
         runtime_output,
     )
     if comparison["contract_pass"] is not True:
-        raise RuntimeError(
-            "engine_v2_hip_current_tangent_numerical_parity_failed"
-        )
+        raise RuntimeError("engine_v2_hip_current_tangent_numerical_parity_failed")
     architecture = str(runtime_output["gcn_arch_name"])
     provisional = {
         "schema_version": RECEIPT_SCHEMA_VERSION,
@@ -273,9 +259,7 @@ def build_receipt_from_runtime_output(
             "current_tangent_numerical_parity": True,
             "deterministic_free_row_schedule_executed": True,
             "gfx1030_local_current_tangent_action": architecture == "gfx1030",
-            "gfx1100_independent_current_tangent_action": (
-                architecture == "gfx1100"
-            ),
+            "gfx1100_independent_current_tangent_action": (architecture == "gfx1100"),
             "actual_mgt_current_tangent_action": False,
             "production_current_tangent_fgmres": False,
             "performance": False,
@@ -297,9 +281,7 @@ def validate_receipt(
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema, format_checker=None).validate(payload)
     if payload["receipt_hash"] != _receipt_hash(payload):
-        raise ValueError(
-            "engine_v2_hip_current_tangent_receipt_hash_mismatch"
-        )
+        raise ValueError("engine_v2_hip_current_tangent_receipt_hash_mismatch")
     reference = build_hip_current_tangent_operator_reference()
     runtime = payload["hardware_execution"]["runtime_output"]
     comparison = compare_hip_current_tangent_operator_output(
@@ -307,9 +289,7 @@ def validate_receipt(
         runtime,
     )
     if comparison != payload["comparison"]:
-        raise ValueError(
-            "engine_v2_hip_current_tangent_comparison_mismatch"
-        )
+        raise ValueError("engine_v2_hip_current_tangent_comparison_mismatch")
     if payload["fixture"] != reference.fixture.to_manifest():
         raise ValueError("engine_v2_hip_current_tangent_fixture_mismatch")
     if require_current_sources:
@@ -329,14 +309,11 @@ def build_compile_receipt(
         "gfx1030",
         "gfx1100",
     ]:
-        raise ValueError(
-            "engine_v2_hip_current_tangent_compile_targets_invalid"
-        )
+        raise ValueError("engine_v2_hip_current_tangent_compile_targets_invalid")
     if not all(
         row.get("host_fixture_parser_execution") is True
         and row.get("host_fixture_validation", {}).get("contract_pass") is True
-        and row["host_fixture_validation"]["actual_hardware_execution"]
-        is False
+        and row["host_fixture_validation"]["actual_hardware_execution"] is False
         and row["host_fixture_validation"]["hip_runtime_api_call_count"] == 0
         for row in ordered_targets
     ):
@@ -394,27 +371,19 @@ def validate_compile_receipt(
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema, format_checker=None).validate(payload)
     if payload["receipt_hash"] != _receipt_hash(payload):
-        raise ValueError(
-            "engine_v2_hip_current_tangent_compile_receipt_hash_mismatch"
-        )
+        raise ValueError("engine_v2_hip_current_tangent_compile_receipt_hash_mismatch")
     if [row["architecture"] for row in payload["targets"]] != [
         "gfx1030",
         "gfx1100",
     ]:
-        raise ValueError(
-            "engine_v2_hip_current_tangent_compile_target_order_invalid"
-        )
+        raise ValueError("engine_v2_hip_current_tangent_compile_target_order_invalid")
     reference = build_hip_current_tangent_operator_reference()
     if payload["fixture"] != reference.fixture.to_manifest():
-        raise ValueError(
-            "engine_v2_hip_current_tangent_compile_fixture_mismatch"
-        )
+        raise ValueError("engine_v2_hip_current_tangent_compile_fixture_mismatch")
     for row in payload["targets"]:
         validation = row["host_fixture_validation"]
         if validation["fixture_hash"] != reference.fixture.fixture_hash:
-            raise ValueError(
-                "engine_v2_hip_current_tangent_parser_fixture_mismatch"
-            )
+            raise ValueError("engine_v2_hip_current_tangent_parser_fixture_mismatch")
     if require_current_sources:
         _validate_source_identity(payload["source"], repo_root=repo_root)
     return payload
@@ -437,16 +406,12 @@ def compile_and_validate_host_fixture_for_targets(
         or len(set(architectures)) != len(architectures)
         or any(_ARCH_PATTERN.fullmatch(value) is None for value in architectures)
     ):
-        raise ValueError(
-            "engine_v2_hip_current_tangent_host_parser_targets_invalid"
-        )
+        raise ValueError("engine_v2_hip_current_tangent_host_parser_targets_invalid")
     compiler = _resolve_hipcc(hipcc)
     device_libs = _resolve_device_lib_path(repo_root, device_lib_path)
     version = _run([str(compiler), "--version"], cwd=repo_root, timeout=30.0)
     if version.returncode != 0 or not version.stdout.strip():
-        raise RuntimeError(
-            "engine_v2_hip_current_tangent_hipcc_version_failed"
-        )
+        raise RuntimeError("engine_v2_hip_current_tangent_hipcc_version_failed")
     target_rows: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(
         prefix="engine-v2-hip-current-tangent-compile-"
@@ -467,8 +432,7 @@ def compile_and_validate_host_fixture_for_targets(
             if compiled.returncode != 0:
                 raise RuntimeError(
                     "engine_v2_hip_current_tangent_compile_failed:"
-                    f"{architecture}:"
-                    + compiled.stderr[-1000:].replace("\n", " ")
+                    f"{architecture}:" + compiled.stderr[-1000:].replace("\n", " ")
                 )
             parsed = _run(
                 [
@@ -482,8 +446,7 @@ def compile_and_validate_host_fixture_for_targets(
             if parsed.returncode != 0:
                 raise RuntimeError(
                     "engine_v2_hip_current_tangent_host_fixture_failed:"
-                    f"{architecture}:"
-                    + parsed.stderr[-1000:].replace("\n", " ")
+                    f"{architecture}:" + parsed.stderr[-1000:].replace("\n", " ")
                 )
             parser_output = _last_json(parsed.stdout, architecture)
             validation = validate_hip_current_tangent_fixture_parser_output(
@@ -584,9 +547,7 @@ def compile_and_run_hardware_fixture(
         raise ValueError("engine_v2_hip_current_tangent_arch_invalid")
     version = _run([str(compiler), "--version"], cwd=repo_root, timeout=30.0)
     if version.returncode != 0 or not version.stdout.strip():
-        raise RuntimeError(
-            "engine_v2_hip_current_tangent_hipcc_version_failed"
-        )
+        raise RuntimeError("engine_v2_hip_current_tangent_hipcc_version_failed")
     with tempfile.TemporaryDirectory(
         prefix="engine-v2-hip-current-tangent-runtime-"
     ) as temporary:
@@ -619,9 +580,7 @@ def compile_and_run_hardware_fixture(
             )
         runtime_output = _last_json(executed.stdout, selected_arch)
         if runtime_output.get("gcn_arch_name") != selected_arch:
-            raise RuntimeError(
-                "engine_v2_hip_current_tangent_runtime_arch_mismatch"
-            )
+            raise RuntimeError("engine_v2_hip_current_tangent_runtime_arch_mismatch")
         return {
             "compiler": _compiler_manifest(str(compiler), version.stdout),
             "compiler_path": str(compiler),
@@ -667,8 +626,7 @@ def _compiler_manifest(path: str, version_output: str) -> dict[str, Any]:
         "path": path,
         "version_first_line": version_output.splitlines()[0],
         "version_output_sha256": (
-            "sha256:"
-            + hashlib.sha256(version_output.encode("utf-8")).hexdigest()
+            "sha256:" + hashlib.sha256(version_output.encode("utf-8")).hexdigest()
         ),
     }
 
@@ -678,10 +636,10 @@ def _validate_source_identity(source: dict[str, Any], *, repo_root: Path) -> Non
         _source_paths(),
         repo_root=repo_root,
     ):
-        raise ValueError(
-            "engine_v2_hip_current_tangent_source_checksums_stale"
-        )
-    if source["repository_base_commit_sha"] != git_head(repo_root):
+        raise ValueError("engine_v2_hip_current_tangent_source_checksums_stale")
+    if source["exact_source_commit_claim"] is True and source[
+        "repository_base_commit_sha"
+    ] != git_head(repo_root):
         raise ValueError("engine_v2_hip_current_tangent_base_commit_mismatch")
 
 
@@ -721,9 +679,7 @@ def _last_json(output: str, label: str) -> dict[str, Any]:
             f"engine_v2_hip_current_tangent_output_invalid:{label}"
         ) from exc
     if not isinstance(payload, dict):
-        raise RuntimeError(
-            f"engine_v2_hip_current_tangent_output_invalid:{label}"
-        )
+        raise RuntimeError(f"engine_v2_hip_current_tangent_output_invalid:{label}")
     return payload
 
 

@@ -11,9 +11,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = (
-    ROOT / "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py"
-)
+SCRIPT = ROOT / "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py"
 SPEC = importlib.util.spec_from_file_location(
     "run_g1_mgt_hip_current_tangent_hardware_parity",
     SCRIPT,
@@ -79,9 +77,7 @@ def test_committed_receipt_records_actual_mgt_gfx1030_parity() -> None:
     )
     assert hardware["runtime_metadata"]["kernel_invocation_count"] == 1
     assert hardware["runtime_metadata"]["mid_action_d2h_transfer_count"] == 0
-    assert hardware["runtime_metadata"][
-        "blocking_d2h_synchronization_count"
-    ] == 1
+    assert hardware["runtime_metadata"]["blocking_d2h_synchronization_count"] == 1
     assert hardware["runtime_output_hash"].startswith("sha256:")
     assert hardware["action_artifact"]["byte_length"] == 564_480
     assert hardware["action_artifact"]["data_hash"] == (
@@ -90,9 +86,7 @@ def test_committed_receipt_records_actual_mgt_gfx1030_parity() -> None:
     assert generic["contract_pass"] is True
     assert generic["canonical_cpu_max_abs_error_n_per_m"] == 0.0625
     assert generic["device_order_cpu_max_abs_error_n_per_m"] == 0.0
-    assert generic["action_data_hash"] == generic[
-        "device_order_action_data_hash"
-    ]
+    assert generic["action_data_hash"] == generic["device_order_action_data_hash"]
     assert generic["canonical_action_data_hash"] == (
         "sha256:a4b5fd93cc47de5f86eb129d59d061b444d40e00fa2781a3a35e3b2cfcb2e8e0"
     )
@@ -123,6 +117,22 @@ def test_committed_receipt_and_action_are_source_bound() -> None:
     passed, reason = module.check_source_only(repo_root=ROOT)
     assert passed is True
     assert reason == "g1_mgt_hip_hardware_parity_sources_consistent"
+
+
+def test_non_exact_receipt_is_bound_by_current_source_checksums() -> None:
+    payload = deepcopy(_committed_receipt())
+    assert payload["source_commit_exact_replay_claim"] is False
+    payload["source_commit_sha"] = "0" * 40
+    payload["receipt_hash"] = module._receipt_hash(payload)
+
+    assert (
+        module.validate_receipt(
+            payload,
+            repo_root=ROOT,
+            require_current_sources=True,
+        )
+        == payload
+    )
 
 
 def test_receipt_hash_validation_fails_closed() -> None:

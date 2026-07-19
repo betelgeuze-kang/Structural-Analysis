@@ -48,25 +48,20 @@ from structural_analysis.solvers.nonlinear.matrix_free_fgmres import (  # noqa: 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_MGT = Path(
-    "implementation/phase1/open_data/midas/"
-    "midas_generator_33.optimized.mgt"
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
 )
 DEFAULT_CHECKPOINT = (
-    PRODUCTIZATION
-    / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
+    PRODUCTIZATION / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
     "accepted_load_0p656.npz"
 )
 DEFAULT_RECEIPT_OUT = (
-    PRODUCTIZATION
-    / "g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.json"
+    PRODUCTIZATION / "g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.json"
 )
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "g1_mgt_state_updated_matrix_free_newton_diagnostic_v1.schema.json"
 )
-SCHEMA_VERSION = (
-    "g1-mgt-state-updated-matrix-free-newton-diagnostic-receipt.v1"
-)
+SCHEMA_VERSION = "g1-mgt-state-updated-matrix-free-newton-diagnostic-receipt.v1"
 CASE_ID = "g1_real_mgt_state_updated_matrix_free_newton_diagnostic"
 LOAD_FACTOR = 1.0
 RESIDUAL_GATE_KN = 5.0e-7
@@ -101,13 +96,16 @@ def _config() -> MatrixFreeCPUFGMRESConfig:
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -122,7 +120,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             str(key): _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -149,25 +147,13 @@ def _input_paths(*, mgt_path: Path, checkpoint_npz: Path) -> list[Path]:
         Path("implementation/phase1/mgt_frame_force_based_assembly.py"),
         Path("implementation/phase1/mgt_physical_residual_assembly.py"),
         Path("implementation/phase1/mgt_semantic_load_assembly.py"),
-        Path(
-            "implementation/phase1/"
-            "mgt_state_updated_frame_axial_geometry.py"
-        ),
+        Path("implementation/phase1/mgt_state_updated_frame_axial_geometry.py"),
         Path("implementation/phase1/parse_mgt_section_material_properties.py"),
         Path("implementation/phase1/parse_midas_mgt_to_json_npz.py"),
-        Path(
-            "src/structural_analysis/solvers/nonlinear/"
-            "matrix_free_fgmres.py"
-        ),
+        Path("src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py"),
         Path("src/structural_analysis/engine_v2/contracts/_canonical.py"),
-        Path(
-            "src/structural_analysis/engine_v2/contracts/"
-            "current_tangent_operator.py"
-        ),
-        Path(
-            "src/structural_analysis/schemas/"
-            "current_tangent_operator_v1.schema.json"
-        ),
+        Path("src/structural_analysis/engine_v2/contracts/current_tangent_operator.py"),
+        Path("src/structural_analysis/schemas/current_tangent_operator_v1.schema.json"),
         SCHEMA_PATH,
         Path(
             "scripts/"
@@ -230,8 +216,7 @@ def _attempt(
         )
         rollback_exercised = True
         rollback_byte_exact = bool(
-            memoryview(state_after).cast("B").tobytes()
-            == state_before_bytes
+            memoryview(state_after).cast("B").tobytes() == state_before_bytes
         )
     after_residual = problem.residual_kn(state_after, LOAD_FACTOR)
     accepted_after_inf = float(np.linalg.norm(after_residual, ord=np.inf))
@@ -313,9 +298,7 @@ def build_receipt(
     alias_audit = adapter_metadata["dgn_material_property_alias_audit"]
     preconditioner = adapter_metadata["reference_preconditioner_contract"]
     residual_contract = adapter_metadata["residual_evaluation_contract"]
-    residual_parent_audit = adapter_metadata[
-        "residual_parent_equivalence_audit"
-    ]
+    residual_parent_audit = adapter_metadata["residual_parent_equivalence_audit"]
     first = attempts[0] if attempts else None
     second = attempts[1] if len(attempts) > 1 else None
     tangent_receipts = [row["tangent_solve"] for row in attempts]
@@ -336,19 +319,10 @@ def build_receipt(
         and geometry["finite_chord_correction_evaluation"]
         == "second_order_decomposition_cancellation_stable"
         and residual_contract["mode"]
-        == (
-            "reference_csr_plus_load_frame_delta_plus_"
-            "finite_chord_correction"
-        )
-        and residual_contract[
-            "reference_csr_parent_matches_analytic_tangent"
-        ]
-        and residual_contract[
-            "load_frame_delta_parent_matches_analytic_tangent"
-        ]
-        and residual_contract[
-            "finite_chord_correction_parent_matches_analytic_tangent"
-        ]
+        == ("reference_csr_plus_load_frame_delta_plus_finite_chord_correction")
+        and residual_contract["reference_csr_parent_matches_analytic_tangent"]
+        and residual_contract["load_frame_delta_parent_matches_analytic_tangent"]
+        and residual_contract["finite_chord_correction_parent_matches_analytic_tangent"]
         and residual_contract["residual_formula_hash"]
         == canonical_hash(residual_contract["residual_formula"])
         and residual_parent_audit["contract_pass"]
@@ -371,12 +345,7 @@ def build_receipt(
         and all(row["fallback_count"] == 0 for row in tangent_receipts)
         and all(row["regularization_count"] == 0 for row in tangent_receipts)
         and all(row["operator_binding_ready"] for row in tangent_receipts)
-        and len(
-            {
-                row["operator_binding"]["binding_hash"]
-                for row in tangent_receipts
-            }
-        )
+        and len({row["operator_binding"]["binding_hash"] for row in tangent_receipts})
         == 1
         and all(
             row["operator_binding"]["free_equation_order_data_hash"]
@@ -395,9 +364,7 @@ def build_receipt(
             and row["recurrence"]["accumulation_profile"]
             == MATRIX_FREE_CPU_FGMRES_ACCUMULATION_PROFILE
             and row["recurrence"]["operator_callback_outputs_in_contract"]
-            and not row["recurrence"][
-                "preconditioner_callback_outputs_in_contract"
-            ]
+            and not row["recurrence"]["preconditioner_callback_outputs_in_contract"]
             and not row["cross_platform_deterministic_recurrence_claim"]
             for row in tangent_receipts
         )
@@ -440,9 +407,7 @@ def build_receipt(
             residual_contract["residual_formula_hash"]
             == canonical_hash(residual_contract["residual_formula"])
         ),
-        "first_full_newton_step_residual_descent": bool(
-            first and first["accepted"]
-        ),
+        "first_full_newton_step_residual_descent": bool(first and first["accepted"]),
         "second_full_newton_step_residual_descent": bool(
             second and second["accepted"] and second["residual_descent"]
         ),
@@ -529,9 +494,7 @@ def build_receipt(
             ),
             "operator_binding": dict(solver.operator_binding),
             "recurrence_profile": MATRIX_FREE_CPU_FGMRES_RECURRENCE_PROFILE,
-            "accumulation_profile": (
-                MATRIX_FREE_CPU_FGMRES_ACCUMULATION_PROFILE
-            ),
+            "accumulation_profile": (MATRIX_FREE_CPU_FGMRES_ACCUMULATION_PROFILE),
             "deterministic_host_recurrence_arithmetic": True,
             "operator_callback_formula_parent_arrays_bound": True,
             "cross_platform_end_to_end_deterministic_claim": False,
@@ -541,12 +504,8 @@ def build_receipt(
         "metrics": {
             "maximum_newton_attempts": MAXIMUM_NEWTON_ATTEMPTS,
             "attempt_count": len(attempts),
-            "accepted_attempt_count": sum(
-                1 for row in attempts if row["accepted"]
-            ),
-            "rejected_attempt_count": sum(
-                1 for row in attempts if not row["accepted"]
-            ),
+            "accepted_attempt_count": sum(1 for row in attempts if row["accepted"]),
+            "rejected_attempt_count": sum(1 for row in attempts if not row["accepted"]),
             "initial_residual_inf_kn": initial_inf,
             "initial_residual_l2_kn": initial_l2,
             "final_accepted_residual_inf_kn": final_inf,

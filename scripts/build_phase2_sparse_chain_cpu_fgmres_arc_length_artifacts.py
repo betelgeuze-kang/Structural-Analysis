@@ -36,22 +36,22 @@ DEFAULT_SUMMARY_OUT = (
     PRODUCTIZATION / "phase2_sparse_chain_cpu_fgmres_arc_length_summary.json"
 )
 SCHEMA_PATH = Path(
-    "src/structural_analysis/schemas/"
-    "sparse_chain_cpu_fgmres_arc_length_v1.schema.json"
+    "src/structural_analysis/schemas/sparse_chain_cpu_fgmres_arc_length_v1.schema.json"
 )
-SUMMARY_SCHEMA_VERSION = (
-    "phase2-sparse-chain-cpu-fgmres-arc-length-artifacts.v1"
-)
+SUMMARY_SCHEMA_VERSION = "phase2-sparse-chain-cpu-fgmres-arc-length-artifacts.v1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _strip_volatile(payload: Any) -> Any:
@@ -59,7 +59,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -98,31 +98,16 @@ def build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts(
         "claim_boundary_version": CLAIM_BOUNDARY_VERSION,
         "input_checksums": input_checksums(
             [
-                Path(
-                    "src/structural_analysis/solvers/nonlinear/"
-                    "vector_arc_length.py"
-                ),
-                Path(
-                    "src/structural_analysis/benchmark/"
-                    "sparse_chain_arc_length.py"
-                ),
-                Path(
-                    "src/structural_analysis/engine_v2/"
-                    "cpu_fgmres_tangent.py"
-                ),
+                Path("src/structural_analysis/solvers/nonlinear/vector_arc_length.py"),
+                Path("src/structural_analysis/benchmark/sparse_chain_arc_length.py"),
+                Path("src/structural_analysis/engine_v2/cpu_fgmres_tangent.py"),
                 Path("src/structural_analysis/engine_v2/cpu_fgmres.py"),
-                Path(
-                    "src/structural_analysis/engine_v2/contracts/"
-                    "execution_plan.py"
-                ),
+                Path("src/structural_analysis/engine_v2/contracts/execution_plan.py"),
                 Path(
                     "src/structural_analysis/engine_v2/contracts/"
                     "execution_plan_reduced_csr.py"
                 ),
-                Path(
-                    "src/structural_analysis/engine_v2/contracts/"
-                    "equation_scaling.py"
-                ),
+                Path("src/structural_analysis/engine_v2/contracts/equation_scaling.py"),
                 SCHEMA_PATH,
                 Path(
                     "scripts/"
@@ -145,9 +130,7 @@ def build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts(
         "accepted_step_count": solver_metrics["accepted_step_count"],
         "rejected_step_count": solver_metrics["rejected_step_count"],
         "rollback_exact": solver_metrics["rollback_exact"],
-        "final_primary_displacement_m": solver_metrics[
-            "final_free_displacements_m"
-        ][0],
+        "final_primary_displacement_m": solver_metrics["final_free_displacements_m"][0],
         "final_load_factor": solver_metrics["final_load_factor"],
         "maximum_checkpoint_residual_inf_norm_kn": solver_metrics[
             "maximum_checkpoint_residual_inf_norm_kn"

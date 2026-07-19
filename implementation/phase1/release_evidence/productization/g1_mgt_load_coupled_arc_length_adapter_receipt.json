@@ -2139,7 +2139,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-19T01:50:12.434869+00:00",
+  "generated_at": "2026-07-19T07:15:04.956691+00:00",
   "initial_state_audit": {
     "blockers_remaining": [
       "initial_checkpoint_not_required_to_satisfy_arc_length_residual_gate",
@@ -2203,7 +2203,7 @@
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:3f3b8033f63dccf39848e5f11c34d45b9fc1b35c06014b9376128b86b1c47e9f",
     "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
     "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
-    "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:508bd5999af421d421e828db6a69e8baea851167a97ac89f20ecdcd73e1356c9",
+    "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:aa7948c0ea1478bf33b2a7d460808fb7754c9ea905a501fdaec1f566c6459af9",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
     "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json": "sha256:609f8bcfb286bc5c1a4464cd1738121c82e59585638815133c93d7f056172658",
@@ -2217,7 +2217,7 @@
   },
   "schema_version": "g1-mgt-load-coupled-arc-length-adapter-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "stored_receipt_comparison": {

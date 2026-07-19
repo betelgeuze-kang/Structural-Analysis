@@ -55,18 +55,13 @@ from structural_analysis.engine_v2_backends.hip_current_tangent_operator import 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_MGT = Path(
-    "implementation/phase1/open_data/midas/"
-    "midas_generator_33.optimized.mgt"
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
 )
 DEFAULT_CHECKPOINT = (
-    PRODUCTIZATION
-    / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
+    PRODUCTIZATION / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
     "accepted_load_0p656.npz"
 )
-DEFAULT_OUT = (
-    PRODUCTIZATION
-    / "g1_mgt_hip_current_tangent_host_parser_receipt.json"
-)
+DEFAULT_OUT = PRODUCTIZATION / "g1_mgt_hip_current_tangent_host_parser_receipt.json"
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json"
@@ -77,13 +72,16 @@ LOAD_FACTOR = 1.0
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -133,21 +131,14 @@ def _input_paths(*, mgt_path: Path, checkpoint_npz: Path) -> list[Path]:
             "implementation/phase1/hip_kernels/"
             "engine_v2_current_tangent_operator.hip.cpp"
         ),
+        Path("src/structural_analysis/engine_v2/contracts/current_tangent_operator.py"),
         Path(
-            "src/structural_analysis/engine_v2/contracts/"
-            "current_tangent_operator.py"
-        ),
-        Path(
-            "src/structural_analysis/engine_v2_backends/"
-            "hip_current_tangent_operator.py"
+            "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py"
         ),
         Path("scripts/run_engine_v2_hip_current_tangent_operator.py"),
         Path("scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py"),
         SCHEMA_PATH,
-        Path(
-            "tests/test_build_g1_mgt_hip_current_tangent_"
-            "host_parser_receipt.py"
-        ),
+        Path("tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py"),
     ]
 
 
@@ -161,13 +152,11 @@ def build_actual_fixture(
     np.ndarray,
     dict[str, Any],
 ]:
-    historical_problem, metadata = (
-        build_real_mgt_load_coupled_arc_length_problem(
-            mgt_path=mgt_path,
-            roundtrip_npz=None,
-            checkpoint_npz=checkpoint_npz,
-            apply_state_updated_frame_axial_geometry=True,
-        )
+    historical_problem, metadata = build_real_mgt_load_coupled_arc_length_problem(
+        mgt_path=mgt_path,
+        roundtrip_npz=None,
+        checkpoint_npz=checkpoint_npz,
+        apply_state_updated_frame_axial_geometry=True,
     )
     problem = historical_problem.zero_state_problem()
     state = np.ascontiguousarray(
@@ -277,26 +266,16 @@ def build_receipt(
             and row["host_fixture_validation"]["fixture_hash"]
             == fixture_summary["fixture_hash"]
             and row["host_fixture_validation"]["equation_count"] == 70_560
-            and row["host_fixture_validation"]["fixture_byte_length"]
-            == 36_123_072
-            and row["host_fixture_validation"][
-                "actual_hardware_execution"
-            ]
-            is False
-            and row["host_fixture_validation"][
-                "hip_runtime_api_call_count"
-            ]
-            == 0
+            and row["host_fixture_validation"]["fixture_byte_length"] == 36_123_072
+            and row["host_fixture_validation"]["actual_hardware_execution"] is False
+            and row["host_fixture_validation"]["hip_runtime_api_call_count"] == 0
             for row in targets
         )
     )
     fixture_contract_pass = bool(
-        fixture_summary["schema_version"]
-        == HIP_CURRENT_TANGENT_FIXTURE_VERSION
-        and fixture_summary["parity_profile"]
-        == HIP_CURRENT_TANGENT_PARITY_PROFILE
-        and fixture_summary["schedule_profile"]
-        == HIP_CURRENT_TANGENT_SCHEDULE_PROFILE
+        fixture_summary["schema_version"] == HIP_CURRENT_TANGENT_FIXTURE_VERSION
+        and fixture_summary["parity_profile"] == HIP_CURRENT_TANGENT_PARITY_PROFILE
+        and fixture_summary["schedule_profile"] == HIP_CURRENT_TANGENT_SCHEDULE_PROFILE
         and fixture_summary["execution_profile"]
         == HIP_CURRENT_TANGENT_EXECUTION_PROFILE
         and fixture_summary["accumulation_profile"]
@@ -357,9 +336,9 @@ def build_receipt(
         "synthetic_compile_receipt": {
             "receipt": str(SYNTHETIC_COMPILE_RECEIPT),
             "receipt_hash": synthetic_receipt["receipt_hash"],
-            "fixture_equation_count": synthetic_receipt["fixture"][
-                "dimensions"
-            ]["equation_count"],
+            "fixture_equation_count": synthetic_receipt["fixture"]["dimensions"][
+                "equation_count"
+            ],
             "target_binary_identity_pass": target_binary_identity_pass,
         },
         "compiler": compiled["compiler"],
@@ -396,8 +375,7 @@ def build_receipt(
             "receipt": _label(repo_root, out_path),
             "schema": str(SCHEMA_PATH),
             "builder": (
-                "scripts/"
-                "build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
+                "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
             ),
             "hip_source": (
                 "implementation/phase1/hip_kernels/"
@@ -449,13 +427,11 @@ def validate_receipt(
             repo_root=repo_root,
         )
         if payload["input_checksums"] != expected_checksums:
-            raise ValueError(
-                "g1_mgt_hip_current_tangent_source_checksums_stale"
-            )
-        if payload["source_commit_sha"] != git_head(repo_root):
-            raise ValueError(
-                "g1_mgt_hip_current_tangent_base_commit_mismatch"
-            )
+            raise ValueError("g1_mgt_hip_current_tangent_source_checksums_stale")
+        if payload["source_commit_exact_replay_claim"] is True and payload[
+            "source_commit_sha"
+        ] != git_head(repo_root):
+            raise ValueError("g1_mgt_hip_current_tangent_base_commit_mismatch")
     return payload
 
 

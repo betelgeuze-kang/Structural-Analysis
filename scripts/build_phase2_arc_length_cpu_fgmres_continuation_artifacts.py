@@ -36,22 +36,22 @@ DEFAULT_SUMMARY_OUT = (
     PRODUCTIZATION / "phase2_arc_length_cpu_fgmres_continuation_summary.json"
 )
 SCHEMA_PATH = Path(
-    "src/structural_analysis/schemas/"
-    "arc_length_cpu_fgmres_continuation_v1.schema.json"
+    "src/structural_analysis/schemas/arc_length_cpu_fgmres_continuation_v1.schema.json"
 )
-SUMMARY_SCHEMA_VERSION = (
-    "phase2-arc-length-cpu-fgmres-continuation-artifacts.v1"
-)
+SUMMARY_SCHEMA_VERSION = "phase2-arc-length-cpu-fgmres-continuation-artifacts.v1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _strip_volatile(payload: Any) -> Any:
@@ -59,7 +59,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -97,22 +97,14 @@ def build_phase2_arc_length_cpu_fgmres_continuation_artifacts(
         "claim_boundary_version": CLAIM_BOUNDARY_VERSION,
         "input_checksums": input_checksums(
             [
-                Path(
-                    "src/structural_analysis/solvers/nonlinear/"
-                    "vector_arc_length.py"
-                ),
-                Path(
-                    "src/structural_analysis/engine_v2/cpu_fgmres_tangent.py"
-                ),
+                Path("src/structural_analysis/solvers/nonlinear/vector_arc_length.py"),
+                Path("src/structural_analysis/engine_v2/cpu_fgmres_tangent.py"),
                 Path("src/structural_analysis/engine_v2/cpu_fgmres.py"),
                 Path(
                     "src/structural_analysis/benchmark/"
                     "coupled_shallow_arch_arc_length.py"
                 ),
-                Path(
-                    "src/structural_analysis/benchmark/"
-                    "arc_length_fgmres_bridge.py"
-                ),
+                Path("src/structural_analysis/benchmark/arc_length_fgmres_bridge.py"),
                 Path(
                     "src/structural_analysis/benchmark/"
                     "arc_length_fgmres_continuation.py"
@@ -138,16 +130,12 @@ def build_phase2_arc_length_cpu_fgmres_continuation_artifacts(
         "analysis_type": result_payload["analysis_type"],
         "tangent_solver_profile": result_payload["tangent_solver_profile"],
         "tangent_solver_mode": result_payload["tangent_solver_mode"],
-        "tangent_solver_contract_hash": result_payload[
-            "tangent_solver_contract_hash"
-        ],
+        "tangent_solver_contract_hash": result_payload["tangent_solver_contract_hash"],
         "path_contract_hash": solver_result["path_contract_hash"],
         "accepted_step_count": solver_metrics["accepted_step_count"],
         "rejected_step_count": solver_metrics["rejected_step_count"],
         "rollback_exact": solver_metrics["rollback_exact"],
-        "final_primary_displacement_m": solver_metrics[
-            "final_free_displacements_m"
-        ][0],
+        "final_primary_displacement_m": solver_metrics["final_free_displacements_m"][0],
         "final_load_factor": solver_metrics["final_load_factor"],
         "maximum_checkpoint_residual_inf_norm_kn": solver_metrics[
             "maximum_checkpoint_residual_inf_norm_kn"
@@ -164,22 +152,14 @@ def build_phase2_arc_length_cpu_fgmres_continuation_artifacts(
         ],
         "path_gate_passed": verification["path_gate_passed"],
         "limit_point_crossed": verification["limit_point_crossed"],
-        "negative_load_branch_reached": verification[
-            "negative_load_branch_reached"
-        ],
+        "negative_load_branch_reached": verification["negative_load_branch_reached"],
         "external_tangent_integration_gate_passed": verification[
             "external_tangent_integration_gate_passed"
         ],
-        "all_tangent_solves_ready": verification[
-            "all_tangent_solves_ready"
-        ],
-        "rollback_evidence_passed": verification[
-            "rollback_evidence_passed"
-        ],
+        "all_tangent_solves_ready": verification["all_tangent_solves_ready"],
+        "rollback_evidence_passed": verification["rollback_evidence_passed"],
         "checkpoint_restart_exact": verification["checkpoint_restart_exact"],
-        "deterministic_replay_exact": verification[
-            "deterministic_replay_exact"
-        ],
+        "deterministic_replay_exact": verification["deterministic_replay_exact"],
         "dense_augmented_reference_gate_passed": verification[
             "dense_augmented_reference_gate_passed"
         ],

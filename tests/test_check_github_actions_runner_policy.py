@@ -5,8 +5,14 @@ from pathlib import Path
 import sys
 
 
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "check_github_actions_runner_policy.py"
-SPEC = importlib.util.spec_from_file_location("check_github_actions_runner_policy", SCRIPT_PATH)
+SCRIPT_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "scripts"
+    / "check_github_actions_runner_policy.py"
+)
+SPEC = importlib.util.spec_from_file_location(
+    "check_github_actions_runner_policy", SCRIPT_PATH
+)
 assert SPEC is not None
 check_github_actions_runner_policy = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
@@ -62,6 +68,34 @@ def test_runner_policy_accepts_allowlisted_deterministic_hosted_lane(
     assert payload["blockers"] == []
 
 
+def test_runner_policy_resolves_allowlisted_hosted_matrix_axis(
+    tmp_path: Path,
+) -> None:
+    workflow_dir = _workflow_dir(tmp_path)
+    (workflow_dir / "matrix.yml").write_text(
+        (
+            "name: Matrix\n"
+            "jobs:\n"
+            "  verify:\n"
+            "    runs-on: ${{ matrix.os }}\n"
+            "    strategy:\n"
+            "      matrix:\n"
+            "        os: [ubuntu-latest, windows-latest]\n"
+        ),
+        encoding="utf-8",
+    )
+
+    payload = check_github_actions_runner_policy.check_runner_policy(
+        workflow_dir=workflow_dir,
+        github_hosted_allowlist={".github/workflows/matrix.yml"},
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["blockers"] == []
+    assert payload["rows"][0]["runs_on"] == "${{ matrix.os }}"
+    assert payload["rows"][0]["resolved_runs_on"] == ("ubuntu-latest, windows-latest")
+
+
 def test_runner_policy_blocks_self_hosted_runner_in_allowlisted_deterministic_lane(
     tmp_path: Path,
 ) -> None:
@@ -80,7 +114,9 @@ def test_runner_policy_blocks_self_hosted_runner_in_allowlisted_deterministic_la
     assert payload["status"] == "blocked"
     assert len(payload["blockers"]) == 2
     assert any("github_hosted_runner_required" in item for item in payload["blockers"])
-    assert any("deterministic_lane_uses_self_hosted" in item for item in payload["blockers"])
+    assert any(
+        "deterministic_lane_uses_self_hosted" in item for item in payload["blockers"]
+    )
 
 
 def test_runner_policy_accepts_self_hosted_expression_for_hardware_lane(
@@ -93,7 +129,7 @@ def test_runner_policy_accepts_self_hosted_expression_for_hardware_lane(
             "jobs:\n"
             "  verify:\n"
             "    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || "
-            "'[\"self-hosted\",\"linux\",\"x64\"]') }}\n"
+            '\'["self-hosted","linux","x64"]\') }}\n'
         ),
         encoding="utf-8",
     )
@@ -139,13 +175,7 @@ def test_runner_policy_blocks_multiline_unapproved_github_hosted_labels(
 ) -> None:
     workflow_dir = _workflow_dir(tmp_path)
     (workflow_dir / "custom.yml").write_text(
-        (
-            "name: Custom\n"
-            "jobs:\n"
-            "  verify:\n"
-            "    runs-on:\n"
-            "      - ubuntu-latest\n"
-        ),
+        ("name: Custom\njobs:\n  verify:\n    runs-on:\n      - ubuntu-latest\n"),
         encoding="utf-8",
     )
 

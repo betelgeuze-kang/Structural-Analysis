@@ -228,14 +228,14 @@
     "schedule_profile": "free_row_sorted_element_local_incidence.v1",
     "schema_version": "engine-v2-hip-current-tangent-operator-fixture.v1"
   },
-  "generated_at": "2026-07-19T03:36:39.441882+00:00",
-  "receipt_hash": "sha256:eb4c4fc7a8669b59fdf7d6ab65a619eff3123da1d1298dc4f0e58ece5281d1e0",
+  "generated_at": "2026-07-19T07:00:24.205596+00:00",
+  "receipt_hash": "sha256:a287ffb0b0c87e59b67496b0987f6ca4824a896ffd2796dddc74bdb0c9a716fd",
   "schema_version": "engine-v2-hip-current-tangent-target-compile-host-parse-receipt.v1",
   "source": {
     "exact_source_commit_claim": false,
     "input_checksums": {
       "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
-      "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:c76c79d6b3c47bc6baa5522ff766bb37810e617a5d19682b05c4c20cd4bc04d2",
+      "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:7e182b1fde74743dc7399108d24d55a30d237674ccd5b4883f74e427dd050752",
       "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
       "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py": "sha256:11b2364da86bf40a8e20737f85ec30e21e4f4a141d605f5efbf0eb58d7683f7a",
       "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
@@ -243,9 +243,9 @@
       "src/structural_analysis/schemas/hip_current_tangent_operator_parity_v1.schema.json": "sha256:8a05dc056e0c205a718d9a339706ff221b7ef56ef35987267ba79e9d283da9f4",
       "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
       "tests/test_engine_v2_hip_current_tangent_operator.py": "sha256:dfb8edf183b407c7502ee3c523b95483a1c8fea942d9deae57a45a3133ac287b",
-      "tests/test_engine_v2_hip_current_tangent_operator_runner.py": "sha256:8d580c84cb47ca8026bc4f529a81960dec92b13eb2e158a3604ba135a2914c12"
+      "tests/test_engine_v2_hip_current_tangent_operator_runner.py": "sha256:b1e64afdf19304b6a5aceaef95f27307382257b48acc8047247e1b4843ec9120"
     },
-    "repository_base_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+    "repository_base_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
     "worktree_clean": false
   },
   "status": "partial",

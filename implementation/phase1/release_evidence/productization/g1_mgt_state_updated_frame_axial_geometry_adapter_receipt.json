@@ -526,7 +526,7 @@
     "unresolved_element_head_limit": 32,
     "unresolved_source_property_element_count": 0
   },
-  "generated_at": "2026-07-19T01:51:31.348521+00:00",
+  "generated_at": "2026-07-19T07:15:52.697410+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
@@ -541,7 +541,7 @@
     "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py": "sha256:a6598d5613aefccaa9a6eda7c26adaba2cf4406dd3ea0a4acb57f32fe0870603",
     "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
     "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
-    "scripts/build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py": "sha256:70e687cc216b7bc6d96780bf1069db82300d49ceb094c58b564617d3cb7f2fe0",
+    "scripts/build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py": "sha256:6045b0044512b04e287d8dacebcd97aa83519cde2f2037382c94d060e1a6b617",
     "src/structural_analysis/engine_v2/contracts/_canonical.py": "sha256:78883ad07598edeb838de0ccce2717b362a323574bfe86822dfcfda665ecf11b",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
@@ -647,7 +647,7 @@
   },
   "schema_version": "g1-mgt-state-updated-frame-axial-geometry-adapter-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "state_dependent_tangent_contract": {
     "available": false,

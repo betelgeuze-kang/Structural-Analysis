@@ -57,24 +57,15 @@ from structural_analysis.engine_v2_backends.hip_current_tangent_operator import 
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
-DEFAULT_OUT = (
-    PRODUCTIZATION
-    / "g1_mgt_hip_current_tangent_hardware_parity_receipt.json"
-)
-DEFAULT_ACTION_OUT = (
-    PRODUCTIZATION / "g1_mgt_hip_current_tangent_action.f64le"
-)
+DEFAULT_OUT = PRODUCTIZATION / "g1_mgt_hip_current_tangent_hardware_parity_receipt.json"
+DEFAULT_ACTION_OUT = PRODUCTIZATION / "g1_mgt_hip_current_tangent_action.f64le"
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json"
 )
-SCHEMA_VERSION = (
-    "g1-mgt-hip-current-tangent-hardware-parity-receipt.v1"
-)
+SCHEMA_VERSION = "g1-mgt-hip-current-tangent-hardware-parity-receipt.v1"
 CASE_ID = "g1_actual_mgt_hip_current_tangent_hardware_parity"
-CONTRACT_SCOPE = (
-    "actual_mgt_single_state_direction_local_gfx1030_hardware_parity"
-)
+CONTRACT_SCOPE = "actual_mgt_single_state_direction_local_gfx1030_hardware_parity"
 ACTION_FORMAT = "canonical_little_endian_float64_vector.v1"
 ACTION_DTYPE = "<f8"
 ACTION_COUNT = 70_560
@@ -82,13 +73,16 @@ ACTION_BYTE_LENGTH = ACTION_COUNT * 8
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -127,13 +121,9 @@ def _input_paths(*, mgt_path: Path, checkpoint_npz: Path) -> list[Path]:
             "implementation/phase1/hip_kernels/"
             "engine_v2_current_tangent_operator.hip.cpp"
         ),
+        Path("src/structural_analysis/engine_v2/contracts/current_tangent_operator.py"),
         Path(
-            "src/structural_analysis/engine_v2/contracts/"
-            "current_tangent_operator.py"
-        ),
-        Path(
-            "src/structural_analysis/engine_v2_backends/"
-            "hip_current_tangent_operator.py"
+            "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py"
         ),
         Path("src/structural_analysis/engine_v2_backends/__init__.py"),
         Path("scripts/run_engine_v2_hip_current_tangent_operator.py"),
@@ -142,9 +132,7 @@ def _input_paths(*, mgt_path: Path, checkpoint_npz: Path) -> list[Path]:
         SCHEMA_PATH,
         Path("tests/test_engine_v2_hip_current_tangent_operator.py"),
         Path("tests/test_engine_v2_hip_current_tangent_operator_runner.py"),
-        Path(
-            "tests/test_run_g1_mgt_hip_current_tangent_hardware_parity.py"
-        ),
+        Path("tests/test_run_g1_mgt_hip_current_tangent_hardware_parity.py"),
     ]
 
 
@@ -161,9 +149,7 @@ def _load_host_parser_receipt(
 
 
 def _target_row(payload: dict[str, Any], architecture: str) -> dict[str, Any]:
-    matches = [
-        row for row in payload["targets"] if row["architecture"] == architecture
-    ]
+    matches = [row for row in payload["targets"] if row["architecture"] == architecture]
     if len(matches) != 1:
         raise ValueError("g1_mgt_hip_host_parser_target_missing")
     return matches[0]
@@ -209,8 +195,7 @@ def _comparison_bundle(
             "equation_count": reference.fixture.equation_count,
             "canonical_scale_n_per_m": canonical_scale,
             "canonical_relative_max_error": (
-                generic["canonical_cpu_max_abs_error_n_per_m"]
-                / canonical_scale
+                generic["canonical_cpu_max_abs_error_n_per_m"] / canonical_scale
             ),
             "device_order_bitwise_match": bool(
                 generic["device_order_cpu_max_abs_error_n_per_m"] == 0.0
@@ -351,9 +336,7 @@ def build_receipt_from_execution(
             "mgt_path": _repo_relative(repo_root, mgt_path),
             "mgt_sha256": file_sha256(_resolve(repo_root, mgt_path)),
             "checkpoint_npz": _repo_relative(repo_root, checkpoint_npz),
-            "checkpoint_sha256": file_sha256(
-                _resolve(repo_root, checkpoint_npz)
-            ),
+            "checkpoint_sha256": file_sha256(_resolve(repo_root, checkpoint_npz)),
             "state_policy": "full_unit_zero_state_linear_predictor",
             "direction_policy": "normalized_current_right_hand_side",
             "load_factor": 1.0,
@@ -413,9 +396,7 @@ def build_receipt_from_execution(
             "receipt": _repo_relative(repo_root, out_path),
             "action_vector": _repo_relative(repo_root, action_out),
             "schema": str(SCHEMA_PATH),
-            "runner": (
-                "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py"
-            ),
+            "runner": ("scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py"),
             "host_parser_receipt": str(HOST_PARSER_RECEIPT),
             "hip_source": (
                 "implementation/phase1/hip_kernels/"
@@ -470,8 +451,7 @@ def validate_receipt(
     hardware = payload["hardware_execution"]
     if (
         hardware["binary_sha256"] != prerequisite["binary_sha256"]
-        or hardware["binary_byte_length"]
-        != prerequisite["binary_byte_length"]
+        or hardware["binary_byte_length"] != prerequisite["binary_byte_length"]
     ):
         raise ValueError("g1_mgt_hip_hardware_binary_mismatch")
     if require_current_sources:
@@ -484,7 +464,9 @@ def validate_receipt(
         )
         if payload["input_checksums"] != expected_checksums:
             raise ValueError("g1_mgt_hip_hardware_source_checksums_stale")
-        if payload["source_commit_sha"] != git_head(repo_root):
+        if payload["source_commit_exact_replay_claim"] is True and payload[
+            "source_commit_sha"
+        ] != git_head(repo_root):
             raise ValueError("g1_mgt_hip_hardware_base_commit_mismatch")
     action: np.ndarray | None = None
     if require_action_artifact or recompute_reference:

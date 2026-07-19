@@ -47,7 +47,9 @@ from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_RESULT_OUT = PRODUCTIZATION / "phase2_state_updated_concrete_damage_result.json"
-DEFAULT_SUMMARY_OUT = PRODUCTIZATION / "phase2_state_updated_concrete_damage_summary.json"
+DEFAULT_SUMMARY_OUT = (
+    PRODUCTIZATION / "phase2_state_updated_concrete_damage_summary.json"
+)
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/state_updated_concrete_damage_v1.schema.json"
 )
@@ -86,7 +88,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -153,13 +155,10 @@ def build_phase2_state_updated_concrete_damage_artifacts(
     )
     expected_force_kn = expected_stress_mpa * 0.01 * 1000.0
     element_force_error_kn = abs(
-        element_assembly.element_responses[0]["internal_force_kn"]
-        - expected_force_kn
+        element_assembly.element_responses[0]["internal_force_kn"] - expected_force_kn
     )
     element_contract_pass = bool(
-        element_assembly.element_responses[0]["material_response"][
-            "damage_evolved"
-        ]
+        element_assembly.element_responses[0]["material_response"]["damage_evolved"]
         and element_force_error_kn <= 1.0e-10
         and element_assembly.residual_kn.size == 0
         and abs(sum(element_assembly.reactions_kn)) <= 1.0e-10
@@ -187,14 +186,8 @@ def build_phase2_state_updated_concrete_damage_artifacts(
         relative_tolerance=1.0e-6,
     )
     force_spreads = [
-        max(
-            row["internal_force_kn"]
-            for row in step.trial_assembly.element_responses
-        )
-        - min(
-            row["internal_force_kn"]
-            for row in step.trial_assembly.element_responses
-        )
+        max(row["internal_force_kn"] for row in step.trial_assembly.element_responses)
+        - min(row["internal_force_kn"] for row in step.trial_assembly.element_responses)
         for step in structure_path.steps
     ]
     residual_norms = [
@@ -214,8 +207,7 @@ def build_phase2_state_updated_concrete_damage_artifacts(
         and min(final_damage) == 0.0
     )
     deterministic_replay = bool(
-        structure_replay.final_state.state_hash
-        == structure_path.final_state.state_hash
+        structure_replay.final_state.state_hash == structure_path.final_state.state_hash
         and structure_replay.to_dict() == structure_path.to_dict()
     )
     structure_contract_pass = bool(
@@ -244,17 +236,13 @@ def build_phase2_state_updated_concrete_damage_artifacts(
         == rollback_parent.canonical_bytes()
     )
     line_search_history_present = bool(
-        all(
-            step.trial_solution.line_search_history
-            for step in structure_path.steps
-        )
+        all(step.trial_solution.line_search_history for step in structure_path.steps)
     )
     fallback_count = sum(
         bool(step.metrics["fallback_used"]) for step in structure_path.steps
     )
     regularization_count = sum(
-        bool(step.metrics["regularization_used"])
-        for step in structure_path.steps
+        bool(step.metrics["regularization_used"]) for step in structure_path.steps
     )
     contract_pass = bool(
         point_contract_pass
@@ -322,9 +310,7 @@ def build_phase2_state_updated_concrete_damage_artifacts(
             "structure_contract_pass": structure_contract_pass,
             "tension_tangent_gate_passed": tension_tangent["pass"],
             "compression_tangent_gate_passed": compression_tangent["pass"],
-            "cyclic_energy_damage_gate_passed": cyclic[
-                "energy_damage_gate_passed"
-            ],
+            "cyclic_energy_damage_gate_passed": cyclic["energy_damage_gate_passed"],
             "rollback_exact_gate_passed": rollback_exact,
             "line_search_history_present": line_search_history_present,
             "fallback_count": fallback_count,
@@ -352,14 +338,10 @@ def build_phase2_state_updated_concrete_damage_artifacts(
                 Path("src/structural_analysis/assembly/stateful_axial.py"),
                 Path("src/structural_analysis/solvers/nonlinear/newton.py"),
                 SCHEMA_PATH,
-                Path(
-                    "scripts/"
-                    "build_phase2_state_updated_concrete_damage_artifacts.py"
-                ),
+                Path("scripts/build_phase2_state_updated_concrete_damage_artifacts.py"),
                 Path("tests/test_state_updated_concrete_damage_newton.py"),
                 Path(
-                    "tests/"
-                    "test_build_phase2_state_updated_concrete_damage_artifacts.py"
+                    "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py"
                 ),
             ],
             repo_root=repo_root,

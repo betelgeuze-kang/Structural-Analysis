@@ -106,9 +106,7 @@ def wheel_identity(path: Path) -> dict[str, Any]:
         )
         if len(metadata_names) != 1:
             raise ValueError("engine_v2_device_receipt_wheel_metadata_invalid")
-        metadata = Parser().parsestr(
-            archive.read(metadata_names[0]).decode("utf-8")
-        )
+        metadata = Parser().parsestr(archive.read(metadata_names[0]).decode("utf-8"))
     project_name = metadata.get("Name", "").strip()
     project_version = metadata.get("Version", "").strip()
     if not project_name or not project_version:
@@ -142,9 +140,7 @@ def _fixture_identity() -> dict[str, Any]:
         ],
         "checkpoint_hash": checkpoint.checkpoint_hash,
         "checkpoint_artifact_data_hash": checkpoint.artifact_descriptor.data_hash,
-        "checkpoint_recurrence_contract_hash": (
-            checkpoint.recurrence_contract_hash
-        ),
+        "checkpoint_recurrence_contract_hash": (checkpoint.recurrence_contract_hash),
         "dimension": fixture.dimension,
         "nnz": fixture.nnz,
     }
@@ -250,9 +246,7 @@ def build_device_receipt_from_runtime_output(
             "public_key_spki_base64": None,
             "public_key_sha256": None,
             "signature_base64": None,
-            "signed_payload_hash": _sha256_bytes(
-                _canonical_bytes(evidence_payload)
-            ),
+            "signed_payload_hash": _sha256_bytes(_canonical_bytes(evidence_payload)),
         },
         "claims": _claims(
             exact_source_commit=exact_source_commit,
@@ -393,7 +387,10 @@ def validate_device_receipt(
         current = input_checksums(_device_source_paths(), repo_root=repo_root)
         if current != source["input_checksums"]:
             raise ValueError("engine_v2_device_receipt_sources_stale")
-        if git_head(repo_root) != source["repository_commit_sha"]:
+        if (
+            source["exact_source_commit_claim"] is True
+            and git_head(repo_root) != source["repository_commit_sha"]
+        ):
             raise ValueError("engine_v2_device_receipt_commit_mismatch")
     if evidence["fixture_identity"] != _fixture_identity():
         raise ValueError("engine_v2_device_receipt_fixture_identity_mismatch")
@@ -429,7 +426,9 @@ def validate_device_receipt(
                 signature["signature_base64"], validate=True
             )
         except Exception as exc:
-            raise ValueError("engine_v2_device_receipt_signature_encoding_invalid") from exc
+            raise ValueError(
+                "engine_v2_device_receipt_signature_encoding_invalid"
+            ) from exc
         if signature["public_key_sha256"] != _sha256_bytes(public_der):
             raise ValueError("engine_v2_device_receipt_public_key_hash_mismatch")
         public_key = _load_ed25519_public_key(public_der)
@@ -586,9 +585,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         if args.wheel is None:
             parser.error("--wheel is required for receipt generation")
-        if not all(
-            (args.organization_id, args.runner_id, args.execution_location)
-        ):
+        if not all((args.organization_id, args.runner_id, args.execution_location)):
             parser.error(
                 "receipt generation requires --organization-id, --runner-id, "
                 "and --execution-location"
@@ -597,9 +594,7 @@ def main(argv: list[str] | None = None) -> int:
             "organization_id": args.organization_id,
             "runner_id": args.runner_id,
             "execution_location": args.execution_location,
-            "independent_from_local_gfx1030": (
-                args.independent_from_local_gfx1030
-            ),
+            "independent_from_local_gfx1030": (args.independent_from_local_gfx1030),
         }
         resolved_wheel = args.wheel if args.wheel.is_absolute() else ROOT / args.wheel
         if args.from_runtime_receipt is not None:

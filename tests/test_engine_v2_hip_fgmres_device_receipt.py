@@ -49,17 +49,13 @@ def _checkpoint_resume_output(reference) -> dict:
         "suffix_restart_count": (
             len(run.restart_history) - checkpoint.next_restart_index
         ),
-        "convergence_threshold_scaled_l2": (
-            run.convergence_threshold_scaled_l2
-        ),
+        "convergence_threshold_scaled_l2": (run.convergence_threshold_scaled_l2),
         "solution": [float(value) for value in run.solution_free],
         "scaled_l2_suffix_history": [
-            row.scaled_l2
-            for row in run.observations[checkpoint.iteration_count :]
+            row.scaled_l2 for row in run.observations[checkpoint.iteration_count :]
         ],
         "scaled_linf_suffix_history": [
-            row.scaled_linf
-            for row in run.observations[checkpoint.iteration_count :]
+            row.scaled_linf for row in run.observations[checkpoint.iteration_count :]
         ],
         "restart_suffix_history": [
             {
@@ -94,12 +90,8 @@ def _runtime_output(*, architecture: str = "gfx1030") -> dict:
                     run.convergence_threshold_scaled_l2
                 ),
                 "solution": [float(value) for value in run.solution_free],
-                "scaled_l2_history": [
-                    row.scaled_l2 for row in run.observations
-                ],
-                "scaled_linf_history": [
-                    row.scaled_linf for row in run.observations
-                ],
+                "scaled_l2_history": [row.scaled_l2 for row in run.observations],
+                "scaled_linf_history": [row.scaled_linf for row in run.observations],
                 "restart_history": [
                     {
                         "start_iteration": row.start_iteration,
@@ -131,9 +123,7 @@ def _runtime_output(*, architecture: str = "gfx1030") -> dict:
         ),
         "device_resident_full_recurrence_probe": True,
         "production_recurrence_claim": False,
-        "preconditioner_profile": (
-            "operator_derived_left_scaled_jacobi_right.v1"
-        ),
+        "preconditioner_profile": ("operator_derived_left_scaled_jacobi_right.v1"),
         "reduction_profile": "fixed_block_binary_tree_fp64_probe.v1",
         "krylov_workspace_profile": "device_global_dynamic_dimension_fp64.v1",
         "workspace_dimension": reference.fixture.dimension,
@@ -201,9 +191,9 @@ def test_device_receipt_is_architecture_neutral_and_fail_closed() -> None:
 
     assert receipt["contract_pass"] is True
     assert receipt["status"] == "partial"
-    assert receipt["evidence_payload"]["hardware_execution"][
-        "gcn_arch_name"
-    ] == "gfx1100"
+    assert (
+        receipt["evidence_payload"]["hardware_execution"]["gcn_arch_name"] == "gfx1100"
+    )
     assert receipt["claims"]["actual_hardware_execution"] is True
     assert receipt["claims"]["numerical_parity"] is True
     assert receipt["claims"]["checkpoint_resume_parity"] is True
@@ -211,22 +201,44 @@ def test_device_receipt_is_architecture_neutral_and_fail_closed() -> None:
     assert receipt["claims"]["cross_device_stage4"] is False
     assert receipt["claims"]["production_recurrence"] is False
     assert receipt["claims"]["performance"] is False
-    assert "device_receipt_signature_not_attached" in (
-        receipt["blockers_remaining"]
+    assert "device_receipt_signature_not_attached" in (receipt["blockers_remaining"])
+    assert (
+        "production_preconditioner_apply_not_verified"
+        not in (receipt["blockers_remaining"])
     )
-    assert "production_preconditioner_apply_not_verified" not in (
-        receipt["blockers_remaining"]
+    assert (
+        "production_scale_preconditioner_effectiveness_not_verified"
+        in (receipt["blockers_remaining"])
     )
-    assert "production_scale_preconditioner_effectiveness_not_verified" in (
-        receipt["blockers_remaining"]
+
+
+def test_non_exact_device_receipt_is_bound_by_current_source_checksums(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(module.local_runner, "_worktree_clean", lambda _: False)
+    receipt = _receipt()
+    source = receipt["evidence_payload"]["source"]
+    assert source["exact_source_commit_claim"] is False
+    source["repository_commit_sha"] = "0" * 40
+    receipt["signature"]["signed_payload_hash"] = module._sha256_bytes(
+        module.device_evidence_bytes(receipt)
+    )
+    receipt["receipt_hash"] = fgmres_recurrence_receipt_hash(receipt)
+
+    assert (
+        module.validate_device_receipt(
+            receipt,
+            repo_root=ROOT,
+            require_current_sources=True,
+        )
+        == receipt
     )
 
 
 def test_device_receipt_wraps_validated_runtime_without_relabeling_wheel() -> None:
     upstream = json.loads(
         (
-            ROOT
-            / "implementation/phase1/release_evidence/productization/"
+            ROOT / "implementation/phase1/release_evidence/productization/"
             "engine_v2_cpu_hip_fgmres_recurrence_receipt.json"
         ).read_text(encoding="utf-8")
     )
@@ -267,9 +279,7 @@ def test_ed25519_signature_is_verified_over_evidence_payload() -> None:
     assert signed["signature"]["algorithm"] == "ed25519"
     assert signed["signature"]["signer_id"] == "independent-lab-a"
     assert signed["claims"]["signed_receipt"] is True
-    assert "device_receipt_signature_not_attached" not in (
-        signed["blockers_remaining"]
-    )
+    assert "device_receipt_signature_not_attached" not in (signed["blockers_remaining"])
     module.validate_device_receipt(
         signed,
         repo_root=ROOT,

@@ -30,9 +30,9 @@
   "final_primary_displacement_m": 0.2243460826364069,
   "g1_full_building_closure_claim": false,
   "general_frame_shell_arc_length_claim": false,
-  "generated_at": "2026-07-18T16:18:19.155055+00:00",
+  "generated_at": "2026-07-19T07:13:36.462626+00:00",
   "input_checksums": {
-    "scripts/build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py": "sha256:09123aba0681d8f13ad5b8f70fdaa6c2af998ea4404b637a15de7d70e78ce99e",
+    "scripts/build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py": "sha256:1aca47ba2373df7126da8f62866dcc9cbc4dbb6a7ffde73c51079f78151830eb",
     "src/structural_analysis/benchmark/arc_length_fgmres_bridge.py": "sha256:e4ee2e028fac4a2c879d87cc1ce202ff5429820c57235a53790ef6c0d15fa60c",
     "src/structural_analysis/benchmark/arc_length_fgmres_continuation.py": "sha256:19925f5f6a74bcbd41161597ce1abeb2fb952c4a5c7eaad98358075094e51219",
     "src/structural_analysis/benchmark/coupled_shallow_arch_arc_length.py": "sha256:bd1cfba7bb53d576cb510c4d21b47953a37c56e1e4be2c320a88288071643ab5",
@@ -65,7 +65,7 @@
   "rollback_evidence_passed": true,
   "rollback_exact": true,
   "schema_version": "phase2-arc-length-cpu-fgmres-continuation-artifacts.v1",
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "status": "partial",
   "tangent_solve_count": 57,
   "tangent_solve_hashes": [

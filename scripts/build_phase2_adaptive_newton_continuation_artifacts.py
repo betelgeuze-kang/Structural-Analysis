@@ -43,8 +43,12 @@ from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_RESULT_OUT = PRODUCTIZATION / "phase2_adaptive_newton_continuation_result.json"
-DEFAULT_SUMMARY_OUT = PRODUCTIZATION / "phase2_adaptive_newton_continuation_summary.json"
-SCHEMA_PATH = Path("src/structural_analysis/schemas/adaptive_newton_continuation_v1.schema.json")
+DEFAULT_SUMMARY_OUT = (
+    PRODUCTIZATION / "phase2_adaptive_newton_continuation_summary.json"
+)
+SCHEMA_PATH = Path(
+    "src/structural_analysis/schemas/adaptive_newton_continuation_v1.schema.json"
+)
 SUMMARY_SCHEMA_VERSION = "phase2-adaptive-newton-continuation-artifacts.v1"
 CLAIM_BOUNDARY = (
     "This receipt reaches load factor 1.0 only for a two-element 1D strain-cubic "
@@ -67,7 +71,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -134,14 +138,11 @@ def build_phase2_adaptive_newton_continuation_artifacts(
         row for row in one_shot.attempts if row.get("outcome") == "committed"
     ]
     final_attempt = committed_attempts[-1]
-    quadratic_check = assess_quadratic_convergence(
-        final_attempt["convergence_history"]
-    )
+    quadratic_check = assess_quadratic_convergence(final_attempt["convergence_history"])
     restart_exact = bool(
         first_half.status == "ready"
         and resumed.status == "ready"
-        and resumed.final_checkpoint.state_hash
-        == one_shot.final_checkpoint.state_hash
+        and resumed.final_checkpoint.state_hash == one_shot.final_checkpoint.state_hash
         and resumed.final_checkpoint.free_displacements_m
         == one_shot.final_checkpoint.free_displacements_m
     )
@@ -183,8 +184,7 @@ def build_phase2_adaptive_newton_continuation_artifacts(
         and one_shot.metrics.get("solver_executed") is True
         and one_shot.metrics.get("convergence_claim") is True
         and one_shot.metrics.get("reaction_observation_only") is False
-        and one_shot.metrics.get("terminal_dispositions")
-        == ["solve_free_equations"]
+        and one_shot.metrics.get("terminal_dispositions") == ["solve_free_equations"]
     )
 
     result_payload = one_shot.to_dict()
@@ -235,8 +235,7 @@ def build_phase2_adaptive_newton_continuation_artifacts(
                 Path("scripts/build_phase2_adaptive_newton_continuation_artifacts.py"),
                 Path("tests/test_nonlinear_adaptive_continuation.py"),
                 Path(
-                    "tests/"
-                    "test_build_phase2_adaptive_newton_continuation_artifacts.py"
+                    "tests/test_build_phase2_adaptive_newton_continuation_artifacts.py"
                 ),
             ],
             repo_root=repo_root,
@@ -262,20 +261,14 @@ def build_phase2_adaptive_newton_continuation_artifacts(
         "no_solve_reaction_only_step_count": one_shot.metrics[
             "no_solve_reaction_only_step_count"
         ],
-        "iterative_solver_step_count": one_shot.metrics[
-            "iterative_solver_step_count"
-        ],
-        "solver_executed_step_count": one_shot.metrics[
-            "solver_executed_step_count"
-        ],
+        "iterative_solver_step_count": one_shot.metrics["iterative_solver_step_count"],
+        "solver_executed_step_count": one_shot.metrics["solver_executed_step_count"],
         "newton_convergence_claim_count": one_shot.metrics[
             "newton_convergence_claim_count"
         ],
         "solver_executed": one_shot.metrics["solver_executed"],
         "convergence_claim": one_shot.metrics["convergence_claim"],
-        "reaction_observation_only": one_shot.metrics[
-            "reaction_observation_only"
-        ],
+        "reaction_observation_only": one_shot.metrics["reaction_observation_only"],
         "terminal_dispositions": one_shot.metrics["terminal_dispositions"],
         "analytic_seed_full_load_pass": contract_pass,
         "g1_full_load_claim": False,

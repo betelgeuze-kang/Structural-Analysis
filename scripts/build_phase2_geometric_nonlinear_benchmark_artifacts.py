@@ -28,7 +28,9 @@ from structural_analysis.benchmark.geometric_nonlinear import (  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_RESULT_OUT = PRODUCTIZATION / "phase2_geometric_nonlinear_benchmark_result.json"
-DEFAULT_SUMMARY_OUT = PRODUCTIZATION / "phase2_geometric_nonlinear_benchmark_summary.json"
+DEFAULT_SUMMARY_OUT = (
+    PRODUCTIZATION / "phase2_geometric_nonlinear_benchmark_summary.json"
+)
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/geometric_nonlinear_benchmark_v1.schema.json"
 )
@@ -63,7 +65,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -98,15 +100,13 @@ def build_phase2_geometric_nonlinear_benchmark_artifacts(
         "status": "partial" if implemented_contract_pass else "blocked",
         "contract_pass": implemented_contract_pass,
         "verification": {
-            "euler_column_gate_passed": benchmark_rows["euler_column"][
+            "euler_column_gate_passed": benchmark_rows["euler_column"]["contract_pass"],
+            "modal_pdelta_column_gate_passed": benchmark_rows["modal_pdelta_column"][
                 "contract_pass"
             ],
-            "modal_pdelta_column_gate_passed": benchmark_rows[
-                "modal_pdelta_column"
-            ]["contract_pass"],
-            "two_bar_shallow_arch_gate_passed": benchmark_rows[
-                "two_bar_shallow_arch"
-            ]["contract_pass"],
+            "two_bar_shallow_arch_gate_passed": benchmark_rows["two_bar_shallow_arch"][
+                "contract_pass"
+            ],
             "deterministic_replay_exact": deterministic_replay,
         },
         "implemented_benchmarks_contract_pass": implemented_contract_pass,
@@ -130,9 +130,7 @@ def build_phase2_geometric_nonlinear_benchmark_artifacts(
             [
                 Path("src/structural_analysis/benchmark/geometric_nonlinear.py"),
                 SCHEMA_PATH,
-                Path(
-                    "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py"
-                ),
+                Path("scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py"),
                 Path("tests/test_geometric_nonlinear_benchmarks.py"),
                 Path(
                     "tests/test_build_phase2_geometric_nonlinear_benchmark_artifacts.py"
@@ -146,9 +144,7 @@ def build_phase2_geometric_nonlinear_benchmark_artifacts(
         "analysis_type": result_payload["analysis_type"],
         "euler_column_gate_passed": euler["contract_pass"],
         "euler_finest_relative_error": euler["finest_relative_error"],
-        "euler_minimum_convergence_order": min(
-            euler["observed_convergence_orders"]
-        ),
+        "euler_minimum_convergence_order": min(euler["observed_convergence_orders"]),
         "modal_pdelta_column_gate_passed": pdelta["contract_pass"],
         "modal_pdelta_maximum_relative_error": max(
             row["relative_error"] for row in pdelta["load_rows"]

@@ -44,21 +44,17 @@ from release_evidence_metadata import (  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_MGT = Path(
-    "implementation/phase1/open_data/midas/"
-    "midas_generator_33.optimized.mgt"
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
 )
 DEFAULT_OPERATOR_CHECKPOINT = (
-    PRODUCTIZATION
-    / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
+    PRODUCTIZATION / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
     "accepted_load_0p656.npz"
 )
 DEFAULT_RECEIPT_OUT = (
-    PRODUCTIZATION
-    / "g1_mgt_semantic_live_linear_newton_continuation_receipt.json"
+    PRODUCTIZATION / "g1_mgt_semantic_live_linear_newton_continuation_receipt.json"
 )
 DEFAULT_SUMMARY_OUT = (
-    PRODUCTIZATION
-    / "g1_mgt_semantic_live_linear_newton_continuation_summary.json"
+    PRODUCTIZATION / "g1_mgt_semantic_live_linear_newton_continuation_summary.json"
 )
 DEFAULT_RESTART_VECTOR_OUT = (
     PRODUCTIZATION
@@ -72,15 +68,9 @@ SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "g1_mgt_semantic_live_linear_newton_continuation_v1.schema.json"
 )
-RECEIPT_SCHEMA_VERSION = (
-    "g1-mgt-semantic-live-linear-newton-continuation-receipt.v1"
-)
-SUMMARY_SCHEMA_VERSION = (
-    "g1-mgt-semantic-live-linear-newton-continuation-summary.v1"
-)
-VECTOR_SCHEMA_VERSION = (
-    "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1"
-)
+RECEIPT_SCHEMA_VERSION = "g1-mgt-semantic-live-linear-newton-continuation-receipt.v1"
+SUMMARY_SCHEMA_VERSION = "g1-mgt-semantic-live-linear-newton-continuation-summary.v1"
+VECTOR_SCHEMA_VERSION = "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1"
 CLAIM_BOUNDARY = (
     "This receipt proves deterministic zero-state adaptive load-controlled "
     "Newton control flow for the current actual-MGT semantic LIVE adapter "
@@ -96,13 +86,16 @@ CLAIM_BOUNDARY = (
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -117,7 +110,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             str(key): _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -231,34 +224,20 @@ def _input_paths(
         operator_checkpoint,
         Path("implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py"),
         Path(
-            "implementation/phase1/"
-            "g1_mgt_semantic_live_linear_newton_continuation.py"
+            "implementation/phase1/g1_mgt_semantic_live_linear_newton_continuation.py"
         ),
         Path("implementation/phase1/mgt_frame_force_based_assembly.py"),
         Path("implementation/phase1/mgt_physical_residual_assembly.py"),
         Path("implementation/phase1/mgt_semantic_load_assembly.py"),
-        Path(
-            "implementation/phase1/"
-            "parse_mgt_section_material_properties.py"
-        ),
+        Path("implementation/phase1/parse_mgt_section_material_properties.py"),
         Path("implementation/phase1/parse_midas_mgt_to_json_npz.py"),
-        Path(
-            "src/structural_analysis/engine_v2/contracts/"
-            "current_tangent_operator.py"
-        ),
-        Path(
-            "src/structural_analysis/schemas/"
-            "current_tangent_operator_v1.schema.json"
-        ),
+        Path("src/structural_analysis/engine_v2/contracts/current_tangent_operator.py"),
+        Path("src/structural_analysis/schemas/current_tangent_operator_v1.schema.json"),
         SCHEMA_PATH,
         Path(
-            "scripts/"
-            "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
+            "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
         ),
-        Path(
-            "tests/"
-            "test_g1_mgt_semantic_live_linear_newton_continuation.py"
-        ),
+        Path("tests/test_g1_mgt_semantic_live_linear_newton_continuation.py"),
         Path("tests/test_engine_v2_current_tangent_operator_v1.py"),
         Path(
             "tests/"
@@ -332,17 +311,11 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         config=_rollback_probe_config(),
     )
 
-    direct_final_raw = _vector_bytes(
-        direct.final_checkpoint.free_displacements_m
-    )
-    restarted_final_raw = _vector_bytes(
-        restarted.final_checkpoint.free_displacements_m
-    )
+    direct_final_raw = _vector_bytes(direct.final_checkpoint.free_displacements_m)
+    restarted_final_raw = _vector_bytes(restarted.final_checkpoint.free_displacements_m)
     restart_replay = {
         "status": "ready",
-        "serialized_checkpoint_load_factor": (
-            reloaded_checkpoint.load_factor
-        ),
+        "serialized_checkpoint_load_factor": (reloaded_checkpoint.load_factor),
         "serialized_checkpoint_data_sha256": _bytes_sha256(restart_raw),
         "serialized_checkpoint_state_hash": reloaded_checkpoint.state_hash,
         "checkpoint_state_hash_validated_on_reload": True,
@@ -363,15 +336,10 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         "direct_final_state_hash": direct.final_checkpoint.state_hash,
         "restarted_final_state_hash": restarted.final_checkpoint.state_hash,
         "final_state_hash_identical": bool(
-            direct.final_checkpoint.state_hash
-            == restarted.final_checkpoint.state_hash
+            direct.final_checkpoint.state_hash == restarted.final_checkpoint.state_hash
         ),
-        "direct_final_residual_inf_n": direct.metrics[
-            "final_residual_inf_n"
-        ],
-        "restarted_final_residual_inf_n": restarted.metrics[
-            "final_residual_inf_n"
-        ],
+        "direct_final_residual_inf_n": direct.metrics["final_residual_inf_n"],
+        "restarted_final_residual_inf_n": restarted.metrics["final_residual_inf_n"],
     }
     restart_replay["contract_pass"] = bool(
         restarted.status == "ready"
@@ -380,34 +348,24 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         and restart_replay["final_displacement_bytes_identical"]
         and restart_replay["final_state_hash_identical"]
     )
-    restart_replay["status"] = (
-        "ready" if restart_replay["contract_pass"] else "blocked"
-    )
+    restart_replay["status"] = "ready" if restart_replay["contract_pass"] else "blocked"
 
     rollback_metrics = rollback_probe.metrics
     rollback_contract_pass = bool(
         rollback_probe.status == "partial"
-        and rollback_probe.terminal_reason
-        == "minimum_load_increment_exhausted"
+        and rollback_probe.terminal_reason == "minimum_load_increment_exhausted"
         and rollback_metrics["failed_step_count"] == 1
         and rollback_metrics["failed_step_rollback_exercised"]
         and rollback_metrics["rollback_exact"]
         and rollback_probe.final_checkpoint.load_factor == 0.0
-        and np.count_nonzero(
-            rollback_probe.final_checkpoint.free_displacements_m
-        )
-        == 0
+        and np.count_nonzero(rollback_probe.final_checkpoint.free_displacements_m) == 0
     )
     rollback_audit = {
         **rollback_probe.to_dict(),
-        "actual_linear_failed_step_rollback_contract_pass": (
-            rollback_contract_pass
-        ),
+        "actual_linear_failed_step_rollback_contract_pass": (rollback_contract_pass),
     }
 
-    property_coverage = adapter_metadata[
-        "frame_source_property_coverage_audit"
-    ]
+    property_coverage = adapter_metadata["frame_source_property_coverage_audit"]
     adapter_binding = {
         "case_id": zero_problem.case_id,
         "initial_state_policy": zero_problem.initial_state_policy,
@@ -421,13 +379,9 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         "global_dof_count": adapter_metadata["global_dof_count"],
         "free_equation_count": adapter_metadata["free_equation_count"],
         "free_dof_hash": adapter_metadata["free_dof_hash"],
-        "reference_load_free_hash": adapter_metadata[
-            "reference_load_free_hash"
-        ],
+        "reference_load_free_hash": adapter_metadata["reference_load_free_hash"],
         "reference_load_inf_n": adapter_metadata["reference_load_inf_n"],
-        "semantic_load_assembly": adapter_metadata[
-            "semantic_load_assembly"
-        ],
+        "semantic_load_assembly": adapter_metadata["semantic_load_assembly"],
         "state_invariant_tangent_contract": adapter_metadata[
             "state_invariant_tangent_contract"
         ],
@@ -448,12 +402,8 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
     direct_payload = direct.to_dict()
     direct_claims = direct_payload["claims"]
     tangent_contract = adapter_binding["state_invariant_tangent_contract"]
-    material_binding = adapter_binding[
-        "material_analysis_property_binding"
-    ]
-    dgn_alias_audit = adapter_binding[
-        "dgn_material_property_alias_audit"
-    ]
+    material_binding = adapter_binding["material_analysis_property_binding"]
+    dgn_alias_audit = adapter_binding["dgn_material_property_alias_audit"]
     contract_pass = bool(
         direct.status == "ready"
         and direct.final_checkpoint.load_factor == 1.0
@@ -471,10 +421,7 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         and zero_problem.initial_state_policy == "zero_state"
         and zero_problem.initial_load_factor() == 0.0
         and np.count_nonzero(zero_problem.initial_free_displacements_m()) == 0
-        and adapter_binding[
-            "historical_checkpoint_nonfree_displacement_inf_m"
-        ]
-        == 0.0
+        and adapter_binding["historical_checkpoint_nonfree_displacement_inf_m"] == 0.0
     )
     claims = {
         "actual_mgt_semantic_live_load_consumed": bool(
@@ -497,12 +444,8 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         "persisted_linear_reference_full_load_checkpoint": bool(
             full_load_artifact["residual_gate_passed"]
         ),
-        "restart_replay_byte_identical": bool(
-            restart_replay["contract_pass"]
-        ),
-        "actual_linear_failed_step_rollback_exact": (
-            rollback_contract_pass
-        ),
+        "restart_replay_byte_identical": bool(restart_replay["contract_pass"]),
+        "actual_linear_failed_step_rollback_exact": (rollback_contract_pass),
         "source_property_coverage_complete": bool(
             adapter_binding["all_frame_source_material_properties_resolved"]
         ),
@@ -519,9 +462,7 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
             dgn_alias_audit["engineer_review_required"]
         ),
         "dgn_numeric_elastic_override_consumed": bool(
-            dgn_alias_audit[
-                "dgn_numeric_elastic_override_consumed_count"
-            ]
+            dgn_alias_audit["dgn_numeric_elastic_override_consumed_count"]
         ),
         "nonlinear_current_tangent": False,
         "quadratic_convergence": False,
@@ -609,13 +550,9 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         "source_commit_sha": receipt["source_commit_sha"],
         "engine_version": receipt["engine_version"],
         "case_id": zero_problem.case_id,
-        "operator_classification": direct_payload[
-            "operator_classification"
-        ],
+        "operator_classification": direct_payload["operator_classification"],
         "free_equation_count": zero_problem.equation_count,
-        "checkpoint_load_factors": [
-            row.load_factor for row in direct.checkpoints
-        ],
+        "checkpoint_load_factors": [row.load_factor for row in direct.checkpoints],
         "final_residual_inf_n": direct.metrics["final_residual_inf_n"],
         "maximum_tangent_solve_explicit_residual_inf_n": direct.metrics[
             "maximum_tangent_solve_explicit_residual_inf_n"
@@ -626,9 +563,7 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         "restart_replay_byte_identical": restart_replay[
             "final_displacement_bytes_identical"
         ],
-        "actual_linear_failed_step_rollback_exact": (
-            rollback_contract_pass
-        ),
+        "actual_linear_failed_step_rollback_exact": (rollback_contract_pass),
         "source_property_coverage_complete": claims[
             "source_property_coverage_complete"
         ],
@@ -693,9 +628,7 @@ def check_g1_mgt_semantic_live_linear_newton_continuation_receipt(
                 f"g1_linear_newton_continuation_unreadable:{label}:"
                 f"{exc.__class__.__name__}"
             )
-        if _strip_volatile(existing) != _strip_volatile(
-            expected_payloads[label]
-        ):
+        if _strip_volatile(existing) != _strip_volatile(expected_payloads[label]):
             return False, f"g1_linear_newton_continuation_mismatch:{label}"
     binary_paths = {
         "restart_checkpoint_vector": restart_vector_out,
@@ -720,10 +653,8 @@ def write_g1_mgt_semantic_live_linear_newton_continuation_receipt(
     full_load_vector_out = Path(
         kwargs.get("full_load_vector_out", DEFAULT_FULL_LOAD_VECTOR_OUT)
     )
-    payloads, binaries = (
-        build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
-            **kwargs
-        )
+    payloads, binaries = build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
+        **kwargs
     )
     for label, relative in (("receipt", receipt_out), ("summary", summary_out)):
         path = _resolve(repo_root, relative)
@@ -773,18 +704,12 @@ def main(argv: list[str] | None = None) -> int:
         "full_load_vector_out": args.full_load_vector_out,
     }
     if args.check:
-        ok, message = (
-            check_g1_mgt_semantic_live_linear_newton_continuation_receipt(
-                **kwargs
-            )
+        ok, message = check_g1_mgt_semantic_live_linear_newton_continuation_receipt(
+            **kwargs
         )
         print(message)
         return 0 if ok else 1
-    payloads = (
-        write_g1_mgt_semantic_live_linear_newton_continuation_receipt(
-            **kwargs
-        )
-    )
+    payloads = write_g1_mgt_semantic_live_linear_newton_continuation_receipt(**kwargs)
     summary = payloads["summary"]
     print(
         f"{summary['status']} | equations={summary['free_equation_count']} | "

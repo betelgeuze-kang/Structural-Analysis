@@ -38,13 +38,16 @@ SUMMARY_SCHEMA_VERSION = "phase2-shallow-arch-arc-length-artifacts.v1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _strip_volatile(payload: Any) -> Any:
@@ -52,7 +55,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -91,26 +94,14 @@ def build_phase2_shallow_arch_arc_length_artifacts(
         "claim_boundary_version": CLAIM_BOUNDARY_VERSION,
         "input_checksums": input_checksums(
             [
-                Path(
-                    "src/structural_analysis/solvers/nonlinear/arc_length.py"
-                ),
-                Path(
-                    "src/structural_analysis/benchmark/"
-                    "shallow_arch_arc_length.py"
-                ),
-                Path(
-                    "src/structural_analysis/benchmark/geometric_nonlinear.py"
-                ),
+                Path("src/structural_analysis/solvers/nonlinear/arc_length.py"),
+                Path("src/structural_analysis/benchmark/shallow_arch_arc_length.py"),
+                Path("src/structural_analysis/benchmark/geometric_nonlinear.py"),
                 SCHEMA_PATH,
-                Path(
-                    "scripts/build_phase2_shallow_arch_arc_length_artifacts.py"
-                ),
+                Path("scripts/build_phase2_shallow_arch_arc_length_artifacts.py"),
                 Path("tests/test_nonlinear_arc_length.py"),
                 Path("tests/test_shallow_arch_arc_length_benchmark.py"),
-                Path(
-                    "tests/"
-                    "test_build_phase2_shallow_arch_arc_length_artifacts.py"
-                ),
+                Path("tests/test_build_phase2_shallow_arch_arc_length_artifacts.py"),
             ],
             repo_root=repo_root,
         ),
@@ -136,9 +127,7 @@ def build_phase2_shallow_arch_arc_length_artifacts(
             "tangent_finite_difference_gate_passed"
         ],
         "checkpoint_restart_exact": verification["checkpoint_restart_exact"],
-        "deterministic_replay_exact": verification[
-            "deterministic_replay_exact"
-        ],
+        "deterministic_replay_exact": verification["deterministic_replay_exact"],
         "scalar_arc_length_path_following_claim": result_payload["claims"][
             "scalar_arc_length_path_following"
         ],

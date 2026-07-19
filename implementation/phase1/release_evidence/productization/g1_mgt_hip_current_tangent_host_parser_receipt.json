@@ -66,19 +66,19 @@
     "schedule_profile": "free_row_sorted_element_local_incidence.v1",
     "schema_version": "engine-v2-hip-current-tangent-operator-fixture.v1"
   },
-  "generated_at": "2026-07-19T03:41:56.869413+00:00",
+  "generated_at": "2026-07-19T07:01:08.142816+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
     "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
     "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-    "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json": "sha256:063ee2f7543738c103bd370f5195395b91736e0473811afab08cfd52d9b50d26",
+    "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json": "sha256:1cc3f97c879d72f2f2457509062f810f774fc5ce9f882a4e80044f028068fed5",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
-    "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:59b76bf3ff310021d7fe974c34fbb5f3619e1e3ff5b415543184191fc8611c97",
-    "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:c76c79d6b3c47bc6baa5522ff766bb37810e617a5d19682b05c4c20cd4bc04d2",
+    "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:88b0c6ee0c9bf8640dffde0cef4d0972539a398dd30a5ab354558b9992dc974a",
+    "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:7e182b1fde74743dc7399108d24d55a30d237674ccd5b4883f74e427dd050752",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py": "sha256:11b2364da86bf40a8e20737f85ec30e21e4f4a141d605f5efbf0eb58d7683f7a",
     "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json": "sha256:e1ebf5fa26c8e9891d8669be6a884fd4c4d92c9dd86cc5b35678e12882da5672",
-    "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:66f9bb4409898712b6d615bce16d5a5f1ff8939e448ce1808a410dd1ecdfb340"
+    "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:49a99e9882f6810569bac5d2cbecb5f5809c795edcc9fde69da7641eaac00dec"
   },
   "inputs": {
     "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
@@ -91,16 +91,16 @@
     "state_data_hash": "sha256:7da92568f855e09df91d4a561cf678c65bddd0cd2d161393aa548cafb316a58d",
     "state_policy": "full_unit_zero_state_linear_predictor"
   },
-  "receipt_hash": "sha256:7b7df9d1615293c43739e45b1accaa383a11056535c02b8bd23a136b7cc1d5fa",
+  "receipt_hash": "sha256:66e5458b60db0b189e7188e97bb1effc9a996de83d417e60f8699655bf871248",
   "schema_version": "g1-mgt-hip-current-tangent-host-parser-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "synthetic_compile_receipt": {
     "fixture_equation_count": 5,
     "receipt": "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json",
-    "receipt_hash": "sha256:eb4c4fc7a8669b59fdf7d6ab65a619eff3123da1d1298dc4f0e58ece5281d1e0",
+    "receipt_hash": "sha256:a287ffb0b0c87e59b67496b0987f6ca4824a896ffd2796dddc74bdb0c9a716fd",
     "target_binary_identity_pass": true
   },
   "targets": [

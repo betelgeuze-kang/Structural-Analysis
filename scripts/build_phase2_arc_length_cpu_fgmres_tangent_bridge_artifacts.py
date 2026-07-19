@@ -39,19 +39,20 @@ SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "arc_length_cpu_fgmres_tangent_bridge_v1.schema.json"
 )
-SUMMARY_SCHEMA_VERSION = (
-    "phase2-arc-length-cpu-fgmres-tangent-bridge-artifacts.v1"
-)
+SUMMARY_SCHEMA_VERSION = "phase2-arc-length-cpu-fgmres-tangent-bridge-artifacts.v1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _strip_volatile(payload: Any) -> Any:
@@ -59,7 +60,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -104,22 +105,14 @@ def build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts(
         "claim_boundary_version": CLAIM_BOUNDARY_VERSION,
         "input_checksums": input_checksums(
             [
-                Path(
-                    "src/structural_analysis/engine_v2/cpu_fgmres_tangent.py"
-                ),
+                Path("src/structural_analysis/engine_v2/cpu_fgmres_tangent.py"),
                 Path("src/structural_analysis/engine_v2/cpu_fgmres.py"),
-                Path(
-                    "src/structural_analysis/solvers/nonlinear/"
-                    "vector_arc_length.py"
-                ),
+                Path("src/structural_analysis/solvers/nonlinear/vector_arc_length.py"),
                 Path(
                     "src/structural_analysis/benchmark/"
                     "coupled_shallow_arch_arc_length.py"
                 ),
-                Path(
-                    "src/structural_analysis/benchmark/"
-                    "arc_length_fgmres_bridge.py"
-                ),
+                Path("src/structural_analysis/benchmark/arc_length_fgmres_bridge.py"),
                 SCHEMA_PATH,
                 Path(
                     "scripts/"
@@ -141,18 +134,14 @@ def build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts(
         "linear_solver_profile": result_payload["linear_solver_profile"],
         "state_row_count": len(rows),
         "tangent_solve_count": verification["tangent_solve_count"],
-        "all_tangent_solves_ready": verification[
-            "all_tangent_solves_ready"
-        ],
+        "all_tangent_solves_ready": verification["all_tangent_solves_ready"],
         "positive_negative_positive_determinant_coverage": verification[
             "positive_negative_positive_determinant_coverage"
         ],
         "schur_augmented_correction_equivalence": verification[
             "schur_augmented_correction_equivalence"
         ],
-        "deterministic_replay_exact": verification[
-            "deterministic_replay_exact"
-        ],
+        "deterministic_replay_exact": verification["deterministic_replay_exact"],
         "maximum_correction_absolute_error": verification[
             "maximum_correction_absolute_error"
         ],
@@ -167,18 +156,14 @@ def build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts(
         ),
         "fallback_count": verification["fallback_count"],
         "regularization_count": verification["regularization_count"],
-        "tangent_solve_hashes": [
-            solve["solve_hash"] for solve in solve_manifests
-        ],
+        "tangent_solve_hashes": [solve["solve_hash"] for solve in solve_manifests],
         "engine_v2_cpu_fgmres_tangent_bridge_claim": claims[
             "engine_v2_cpu_fgmres_tangent_bridge"
         ],
         "schur_augmented_increment_equivalence_claim": claims[
             "schur_augmented_increment_equivalence"
         ],
-        "indefinite_tangent_solve_claim": claims[
-            "indefinite_tangent_solve"
-        ],
+        "indefinite_tangent_solve_claim": claims["indefinite_tangent_solve"],
         "complete_arc_length_backend_integration_claim": False,
         "frame_shell_residual_assembly_claim": False,
         "production_sparse_nonlinear_backend_claim": False,

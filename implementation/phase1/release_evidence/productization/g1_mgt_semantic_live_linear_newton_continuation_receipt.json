@@ -1255,7 +1255,7 @@
     "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1",
     "status": "ready"
   },
-  "generated_at": "2026-07-19T01:50:48.398163+00:00",
+  "generated_at": "2026-07-19T07:19:36.852575+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
     "implementation/phase1/g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:ac8d129417de659f5145b69e4b126a223176756f30cf75b5586664e26d050f00",
@@ -1266,7 +1266,7 @@
     "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
     "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
-    "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py": "sha256:4844ff9de2988c47b8082e5de2e9e874207b1c25af97709fa225a2421e7955a5",
+    "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py": "sha256:9185d697e848aeabf86ad59a86e605a69771e9f48b856961967af0f64e63d776",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
     "src/structural_analysis/schemas/g1_mgt_semantic_live_linear_newton_continuation_v1.schema.json": "sha256:1d41bac404099a0b8784bfcff98285622f18790fa9d8c791157fb457de7ddfeb",
@@ -1326,7 +1326,7 @@
   },
   "schema_version": "g1-mgt-semantic-live-linear-newton-continuation-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }

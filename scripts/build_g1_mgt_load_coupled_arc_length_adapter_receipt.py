@@ -41,17 +41,13 @@ from release_evidence_metadata import (  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_MGT = Path(
-    "implementation/phase1/open_data/midas/"
-    "midas_generator_33.optimized.mgt"
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
 )
 DEFAULT_CHECKPOINT = (
-    PRODUCTIZATION
-    / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
+    PRODUCTIZATION / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
     "accepted_load_0p656.npz"
 )
-DEFAULT_STORED_DIRECT_RECEIPT = (
-    PRODUCTIZATION / "mgt_direct_residual_newton_probe.json"
-)
+DEFAULT_STORED_DIRECT_RECEIPT = PRODUCTIZATION / "mgt_direct_residual_newton_probe.json"
 DEFAULT_RECEIPT_OUT = (
     PRODUCTIZATION / "g1_mgt_load_coupled_arc_length_adapter_receipt.json"
 )
@@ -59,29 +55,27 @@ DEFAULT_SUMMARY_OUT = (
     PRODUCTIZATION / "g1_mgt_load_coupled_arc_length_adapter_summary.json"
 )
 DEFAULT_PREDICTOR_VECTOR_OUT = (
-    PRODUCTIZATION
-    / "g1_mgt_live_full_unit_predictor_free_displacement.f64le"
+    PRODUCTIZATION / "g1_mgt_live_full_unit_predictor_free_displacement.f64le"
 )
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "g1_mgt_load_coupled_arc_length_adapter_v1.schema.json"
 )
-RECEIPT_SCHEMA_VERSION = (
-    "g1-mgt-load-coupled-arc-length-adapter-receipt.v1"
-)
-SUMMARY_SCHEMA_VERSION = (
-    "g1-mgt-load-coupled-arc-length-adapter-summary.v1"
-)
+RECEIPT_SCHEMA_VERSION = "g1-mgt-load-coupled-arc-length-adapter-receipt.v1"
+SUMMARY_SCHEMA_VERSION = "g1-mgt-load-coupled-arc-length-adapter-summary.v1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -96,7 +90,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             str(key): _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -143,9 +137,7 @@ def _full_unit_predictor_vector_artifact(
         raise ValueError("exactly one full-unit predictor row is required")
     full_unit_row = full_unit_rows[0]
     residual_tolerance_n = 5.0e-4
-    residual_gate = bool(
-        float(full_unit_row["residual_inf_n"]) <= residual_tolerance_n
-    )
+    residual_gate = bool(float(full_unit_row["residual_inf_n"]) <= residual_tolerance_n)
     if not residual_gate:
         raise ValueError("full-unit predictor residual gate failed")
     if digest != predictor_audit["predictor_direction_hash"]:
@@ -162,9 +154,7 @@ def _full_unit_predictor_vector_artifact(
         "byte_length": int(len(raw)),
         "data_sha256": digest,
         "free_dof_hash": str(adapter_metadata["free_dof_hash"]),
-        "reference_load_hash": str(
-            adapter_metadata["reference_load_free_hash"]
-        ),
+        "reference_load_hash": str(adapter_metadata["reference_load_free_hash"]),
         "semantic_load_target": str(
             adapter_metadata["semantic_load_assembly"]["target_name"]
         ),
@@ -208,12 +198,10 @@ def _stored_receipt_comparison(
     stored_generated_at = str(stored.get("generated_at") or "")
     stored_source_commit = stored.get("source_commit_sha")
     source_commit_present = bool(
-        isinstance(stored_source_commit, str)
-        and len(stored_source_commit) == 40
+        isinstance(stored_source_commit, str) and len(stored_source_commit) == 40
     )
     input_checksums_present = bool(
-        isinstance(stored.get("input_checksums"), dict)
-        and stored["input_checksums"]
+        isinstance(stored.get("input_checksums"), dict) and stored["input_checksums"]
     )
     current_residual_n = float(current_audit["residual_inf_norm_kn"]) * 1000.0
     current_load_factor = float(current_audit["load_factor"])
@@ -236,9 +224,7 @@ def _stored_receipt_comparison(
         "stored_receipt_source_commit_sha_present": source_commit_present,
         "stored_receipt_input_checksums_present": input_checksums_present,
         "stored_receipt_replay_provenance_complete": bool(
-            stored_generated_at
-            and source_commit_present
-            and input_checksums_present
+            stored_generated_at and source_commit_present and input_checksums_present
         ),
         "stored_receipt_load_factor": stored_load_factor,
         "current_adapter_load_factor": current_load_factor,
@@ -273,33 +259,19 @@ def _input_paths(
         Path("implementation/phase1/mgt_physical_residual_assembly.py"),
         Path("implementation/phase1/mgt_semantic_load_assembly.py"),
         Path("implementation/phase1/mgt_shell_load_path.py"),
-        Path(
-            "implementation/phase1/"
-            "mgt_state_updated_frame_axial_geometry.py"
-        ),
+        Path("implementation/phase1/mgt_state_updated_frame_axial_geometry.py"),
         Path("implementation/phase1/parse_mgt_section_material_properties.py"),
         Path("implementation/phase1/parse_midas_mgt_to_json_npz.py"),
         Path(
-            "implementation/phase1/"
-            "run_mgt_coupled_frame_surface_sparse_equilibrium.py"
+            "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py"
         ),
         Path("implementation/phase1/run_mgt_direct_residual_newton_probe.py"),
+        Path("implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py"),
         Path(
-            "implementation/phase1/"
-            "run_mgt_full_frame_6dof_sparse_equilibrium.py"
+            "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py"
         ),
-        Path(
-            "implementation/phase1/"
-            "run_mgt_uncoarsened_boundary_global_equilibrium.py"
-        ),
-        Path(
-            "src/structural_analysis/engine_v2/contracts/"
-            "current_tangent_operator.py"
-        ),
-        Path(
-            "src/structural_analysis/schemas/"
-            "current_tangent_operator_v1.schema.json"
-        ),
+        Path("src/structural_analysis/engine_v2/contracts/current_tangent_operator.py"),
+        Path("src/structural_analysis/schemas/current_tangent_operator_v1.schema.json"),
         SCHEMA_PATH,
         Path("scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py"),
         Path("tests/test_g1_mgt_load_coupled_arc_length_adapter.py"),
@@ -326,12 +298,10 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
     repo_root = repo_root.resolve()
     resolved_mgt = _resolve(repo_root, mgt_path)
     resolved_checkpoint = _resolve(repo_root, checkpoint_npz)
-    problem, adapter_metadata = (
-        build_real_mgt_load_coupled_arc_length_problem(
-            mgt_path=resolved_mgt,
-            roundtrip_npz=None,
-            checkpoint_npz=resolved_checkpoint,
-        )
+    problem, adapter_metadata = build_real_mgt_load_coupled_arc_length_problem(
+        mgt_path=resolved_mgt,
+        roundtrip_npz=None,
+        checkpoint_npz=resolved_checkpoint,
     )
     audit = audit_load_coupled_problem_at_initial_state(problem)
     predictor_vector_artifact, predictor_vector_bytes = (
@@ -342,18 +312,14 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
             adapter_metadata=adapter_metadata,
         )
     )
-    adapter_metadata["full_unit_predictor_vector_artifact"] = (
-        predictor_vector_artifact
-    )
+    adapter_metadata["full_unit_predictor_vector_artifact"] = predictor_vector_artifact
     if _write_predictor_vector:
         predictor_target = _resolve(repo_root, predictor_vector_out)
         predictor_target.parent.mkdir(parents=True, exist_ok=True)
         predictor_target.write_bytes(predictor_vector_bytes)
         if (
-            predictor_target.stat().st_size
-            != predictor_vector_artifact["byte_length"]
-            or file_sha256(predictor_target)
-            != predictor_vector_artifact["data_sha256"]
+            predictor_target.stat().st_size != predictor_vector_artifact["byte_length"]
+            or file_sha256(predictor_target) != predictor_vector_artifact["data_sha256"]
         ):
             raise ValueError("persisted predictor vector verification failed")
     comparison = _stored_receipt_comparison(
@@ -385,29 +351,17 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         )
     )
     component_audit = adapter_metadata["initial_state_component_audit"]
-    frame_connectivity_audit = adapter_metadata[
-        "frame_connectivity_audit"
-    ]
+    frame_connectivity_audit = adapter_metadata["frame_connectivity_audit"]
     frame_property_coverage_audit = adapter_metadata[
         "frame_source_property_coverage_audit"
     ]
     zero_map_audit = adapter_metadata["zero_to_unit_free_map_audit"]
-    zero_predictor_audit = adapter_metadata[
-        "zero_state_sparse_predictor_audit"
-    ]
+    zero_predictor_audit = adapter_metadata["zero_state_sparse_predictor_audit"]
     semantic_load_audit = adapter_metadata["semantic_load_assembly"]
-    material_binding = adapter_metadata[
-        "material_analysis_property_binding"
-    ]
-    dgn_alias_audit = adapter_metadata[
-        "dgn_material_property_alias_audit"
-    ]
-    state_invariant_tangent = adapter_metadata[
-        "state_invariant_tangent_contract"
-    ]
-    reference_preconditioner = adapter_metadata[
-        "reference_preconditioner_contract"
-    ]
+    material_binding = adapter_metadata["material_analysis_property_binding"]
+    dgn_alias_audit = adapter_metadata["dgn_material_property_alias_audit"]
+    state_invariant_tangent = adapter_metadata["state_invariant_tangent_contract"]
+    reference_preconditioner = adapter_metadata["reference_preconditioner_contract"]
     component_audit_pass = bool(
         component_audit["component_sum_matches_internal_exact"]
         and math.isclose(
@@ -426,41 +380,25 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         and adapter_metadata["source_material_properties_consumed"]
         and frame_connectivity_audit["frame_connectivity_source"]
         == "elem_conn_ptr/elem_conn_idx"
-        and not frame_connectivity_audit[
-            "edge_index_used_for_element_binding"
-        ]
-        and frame_connectivity_audit[
-            "skipped_invalid_line_connectivity_count"
-        ]
-        == 0
+        and not frame_connectivity_audit["edge_index_used_for_element_binding"]
+        and frame_connectivity_audit["skipped_invalid_line_connectivity_count"] == 0
         and frame_connectivity_audit["line_element_row_accounting_exact"]
         and adapter_metadata["actual_mgt_semantic_load_case_consumed"]
         and semantic_load_audit["selected_case_row_accounting_exact"]
         and semantic_load_audit["unsupported_selected_row_count"] == 0
-        and material_binding["resolution_policy"]
-        == "MATERIAL_rows_only.v1"
+        and material_binding["resolution_policy"] == "MATERIAL_rows_only.v1"
         and not material_binding["dgn_alias_resolution_enabled"]
         and material_binding["dgn_alias_material_count_applied"] == 0
         and not material_binding["engineer_review_required"]
         and dgn_alias_audit["contract_pass"]
-        and dgn_alias_audit[
-            "dgn_numeric_elastic_override_consumed_count"
-        ]
-        == 0
+        and dgn_alias_audit["dgn_numeric_elastic_override_consumed_count"] == 0
         and dgn_alias_audit["fuzzy_name_match_count"] == 0
         and state_invariant_tangent["available"]
-        and state_invariant_tangent[
-            "exact_for_adapter_residual_model"
-        ]
+        and state_invariant_tangent["exact_for_adapter_residual_model"]
         and reference_preconditioner["available"]
-        and reference_preconditioner["intended_use"]
-        == "fixed_right_preconditioner"
-        and reference_preconditioner[
-            "exact_for_adapter_residual_model"
-        ]
-        and not reference_preconditioner[
-            "approximate_for_state_dependent_adapter"
-        ]
+        and reference_preconditioner["intended_use"] == "fixed_right_preconditioner"
+        and reference_preconditioner["exact_for_adapter_residual_model"]
+        and not reference_preconditioner["approximate_for_state_dependent_adapter"]
         and reference_preconditioner["operator_numeric_values_hash"]
         == state_invariant_tangent["operator_numeric_values_hash"]
     )
@@ -472,23 +410,14 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
             adapter_metadata["source_material_properties_consumed"]
         ),
         "all_frame_source_material_properties_resolved": bool(
-            adapter_metadata[
-                "all_frame_source_material_properties_resolved"
-            ]
+            adapter_metadata["all_frame_source_material_properties_resolved"]
         ),
         "authoritative_element_connectivity_consumed": bool(
             frame_connectivity_audit["frame_connectivity_source"]
             == "elem_conn_ptr/elem_conn_idx"
-            and not frame_connectivity_audit[
-                "edge_index_used_for_element_binding"
-            ]
-            and frame_connectivity_audit[
-                "skipped_invalid_line_connectivity_count"
-            ]
-            == 0
-            and frame_connectivity_audit[
-                "line_element_row_accounting_exact"
-            ]
+            and not frame_connectivity_audit["edge_index_used_for_element_binding"]
+            and frame_connectivity_audit["skipped_invalid_line_connectivity_count"] == 0
+            and frame_connectivity_audit["line_element_row_accounting_exact"]
         ),
         "actual_mgt_semantic_load_case_consumed": bool(
             adapter_metadata["actual_mgt_semantic_load_case_consumed"]
@@ -500,12 +429,8 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         ),
         "state_invariant_linear_reference_tangent_bound": bool(
             state_invariant_tangent["available"]
-            and state_invariant_tangent[
-                "exact_for_adapter_residual_model"
-            ]
-            and not state_invariant_tangent[
-                "nonlinear_current_tangent_claim"
-            ]
+            and state_invariant_tangent["exact_for_adapter_residual_model"]
+            and not state_invariant_tangent["nonlinear_current_tangent_claim"]
         ),
         "load_factor_coupled_residual_and_derivative_audited": bool(
             audit["negative_load_derivative_gate_passed"]
@@ -516,14 +441,8 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         "initial_state_component_breakdown_recorded": component_audit_pass,
         "zero_to_unit_fixed_free_map_compatible": bool(
             zero_map_audit["fixed_free_map_exact"]
-            and zero_map_audit[
-                "zero_tangent_on_unit_map_zero_row_count"
-            ]
-            == 0
-            and zero_map_audit[
-                "zero_tangent_on_unit_map_zero_diagonal_count"
-            ]
-            == 0
+            and zero_map_audit["zero_tangent_on_unit_map_zero_row_count"] == 0
+            and zero_map_audit["zero_tangent_on_unit_map_zero_diagonal_count"] == 0
         ),
         "zero_state_sparse_direct_predictor_contract": bool(
             zero_predictor_audit["contract_pass"]
@@ -553,28 +472,18 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
     if not claims["actual_mgt_semantic_load_case_consumed"]:
         blockers.append("actual_mgt_semantic_load_case_not_connected")
     if not claims["all_frame_source_material_properties_resolved"]:
-        blockers.append(
-            "frame_source_material_property_binding_incomplete"
-        )
+        blockers.append("frame_source_material_property_binding_incomplete")
     if not claims["initial_checkpoint_physical_residual_gate"]:
         blockers.append("initial_checkpoint_physical_residual_gate_failed")
     if not claims["zero_to_unit_fixed_free_map_compatible"]:
-        blockers.append(
-            "zero_to_unit_load_fixed_free_map_or_tangent_incompatible"
-        )
+        blockers.append("zero_to_unit_load_fixed_free_map_or_tangent_incompatible")
     if not claims["zero_state_sparse_direct_predictor_contract"]:
         blockers.append("zero_state_sparse_direct_predictor_contract_failed")
     if not claims["state_invariant_linear_reference_tangent_bound"]:
-        blockers.append(
-            "state_invariant_linear_reference_tangent_not_bound"
-        )
+        blockers.append("state_invariant_linear_reference_tangent_not_bound")
     if not claims["stored_direct_residual_receipt_equivalence"]:
-        blockers.append(
-            "current_source_diverges_from_stored_direct_residual_receipt"
-        )
-    if not claims[
-        "stored_direct_residual_receipt_replay_provenance_complete"
-    ]:
+        blockers.append("current_source_diverges_from_stored_direct_residual_receipt")
+    if not claims["stored_direct_residual_receipt_replay_provenance_complete"]:
         blockers.append(
             "stored_direct_residual_receipt_missing_source_commit_or_checksums"
         )
@@ -635,9 +544,7 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         "node_count": adapter_metadata["node_count"],
         "frame_element_count": adapter_metadata["frame_element_count"],
         "frame_connectivity_audit": frame_connectivity_audit,
-        "frame_source_property_coverage_audit": (
-            frame_property_coverage_audit
-        ),
+        "frame_source_property_coverage_audit": (frame_property_coverage_audit),
         "material_analysis_property_binding": material_binding,
         "dgn_material_property_alias_audit": dgn_alias_audit,
         "reference_preconditioner_contract": reference_preconditioner,
@@ -645,9 +552,7 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         "free_equation_count": adapter_metadata["free_equation_count"],
         "checkpoint_load_factor": adapter_metadata["checkpoint_load_factor"],
         "reference_load_inf_n": adapter_metadata["reference_load_inf_n"],
-        "reference_load_contract": adapter_metadata[
-            "reference_load_contract"
-        ],
+        "reference_load_contract": adapter_metadata["reference_load_contract"],
         "semantic_load_assembly": semantic_load_audit,
         "full_unit_predictor_vector_artifact": predictor_vector_artifact,
         "source_material_properties_consumed": adapter_metadata[
@@ -659,16 +564,12 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         "material_state_commit_rollback_connected": adapter_metadata[
             "material_state_commit_rollback_connected"
         ],
-        "initial_residual_inf_n": (
-            float(audit["residual_inf_norm_kn"]) * 1000.0
-        ),
+        "initial_residual_inf_n": (float(audit["residual_inf_norm_kn"]) * 1000.0),
         "initial_residual_equilibrium_gate_passed": audit[
             "residual_equilibrium_gate_passed"
         ],
         "zero_state_start_gate": {
-            "fixed_free_map_exact": zero_map_audit[
-                "fixed_free_map_exact"
-            ],
+            "fixed_free_map_exact": zero_map_audit["fixed_free_map_exact"],
             "zero_state_free_equation_count": zero_map_audit[
                 "zero_state_free_equation_count"
             ],
@@ -678,9 +579,7 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
             "zero_tangent_structural_rank_deficiency": zero_map_audit[
                 "zero_tangent_structural_rank_deficiency"
             ],
-            "free_graph_component_count": zero_map_audit[
-                "free_graph_component_count"
-            ],
+            "free_graph_component_count": zero_map_audit["free_graph_component_count"],
             "free_graph_unanchored_component_count": zero_map_audit[
                 "free_graph_unanchored_component_count"
             ],
@@ -702,15 +601,9 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
             "sparse_direct_solve_attempted": zero_predictor_audit[
                 "sparse_direct_solve_attempted"
             ],
-            "loaded_component_count": zero_predictor_audit[
-                "loaded_component_count"
-            ],
-            "solved_component_count": zero_predictor_audit[
-                "solved_component_count"
-            ],
-            "sparse_predictor_contract_pass": zero_predictor_audit[
-                "contract_pass"
-            ],
+            "loaded_component_count": zero_predictor_audit["loaded_component_count"],
+            "solved_component_count": zero_predictor_audit["solved_component_count"],
+            "sparse_predictor_contract_pass": zero_predictor_audit["contract_pass"],
             "sparse_predictor_failure": zero_predictor_audit["failure"],
         },
         "dominant_initial_internal_force_component": component_audit[
@@ -725,9 +618,7 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         "initial_residual_argmax_global_dof_index": component_audit[
             "residual_argmax_global_dof_index"
         ],
-        "initial_residual_argmax_node_id": component_audit[
-            "residual_argmax_node_id"
-        ],
+        "initial_residual_argmax_node_id": component_audit["residual_argmax_node_id"],
         "initial_residual_argmax_dof_label": component_audit[
             "residual_argmax_dof_label"
         ],
@@ -738,22 +629,16 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
             component_audit["hotspot_dominant_frame_element_id"]
         ),
         "initial_residual_hotspot_maximum_frame_force_inf_n": (
-            component_audit[
-                "hotspot_maximum_connected_frame_force_inf_n"
-            ]
+            component_audit["hotspot_maximum_connected_frame_force_inf_n"]
         ),
         "initial_residual_hotspot_connected_shell_element_count": (
             component_audit["hotspot_connected_shell_element_count"]
         ),
         "initial_residual_hotspot_maximum_translation_jump_m": (
-            component_audit[
-                "hotspot_maximum_perimeter_translation_jump_m"
-            ]
+            component_audit["hotspot_maximum_perimeter_translation_jump_m"]
         ),
         "initial_residual_hotspot_maximum_edge_strain_abs": (
-            component_audit[
-                "hotspot_maximum_perimeter_edge_engineering_strain_abs"
-            ]
+            component_audit["hotspot_maximum_perimeter_edge_engineering_strain_abs"]
         ),
         "maximum_negative_load_derivative_error_kn": audit[
             "maximum_negative_load_derivative_error_kn"
@@ -776,9 +661,7 @@ def build_g1_mgt_load_coupled_arc_length_adapter_receipt(
         "stored_base_direct_residual_inf_n": comparison[
             "stored_base_direct_residual_inf_n"
         ],
-        "current_to_stored_residual_ratio": comparison[
-            "current_to_stored_ratio"
-        ],
+        "current_to_stored_residual_ratio": comparison["current_to_stored_ratio"],
         "stored_receipt_equivalent_to_current_adapter": comparison[
             "stored_receipt_equivalent_to_current_adapter"
         ],
@@ -847,9 +730,7 @@ def write_g1_mgt_load_coupled_arc_length_adapter_receipt(
     summary_out = Path(kwargs.get("summary_out", DEFAULT_SUMMARY_OUT))
     build_kwargs = dict(kwargs)
     build_kwargs["_write_predictor_vector"] = True
-    payloads = build_g1_mgt_load_coupled_arc_length_adapter_receipt(
-        **build_kwargs
-    )
+    payloads = build_g1_mgt_load_coupled_arc_length_adapter_receipt(**build_kwargs)
     for label, relative in (("receipt", receipt_out), ("summary", summary_out)):
         path = _resolve(repo_root, relative)
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -885,9 +766,7 @@ def main(argv: list[str] | None = None) -> int:
         "predictor_vector_out": args.predictor_vector_out,
     }
     if args.check:
-        ok, message = check_g1_mgt_load_coupled_arc_length_adapter_receipt(
-            **kwargs
-        )
+        ok, message = check_g1_mgt_load_coupled_arc_length_adapter_receipt(**kwargs)
         print(message)
         return 0 if ok else 1
     payloads = write_g1_mgt_load_coupled_arc_length_adapter_receipt(**kwargs)

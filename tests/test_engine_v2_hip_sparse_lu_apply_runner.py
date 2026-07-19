@@ -67,9 +67,7 @@ def _host_fixture_validation() -> dict[str, object]:
         "upper_nnz": int(fixture.factor.upper_numeric_values.size),
         "lower_level_count": fixture.lower_level_count,
         "upper_level_count": fixture.upper_level_count,
-        "expected_kernel_invocation_count": (
-            fixture.expected_kernel_invocation_count
-        ),
+        "expected_kernel_invocation_count": (fixture.expected_kernel_invocation_count),
         "fixture_byte_length": len(fixture.to_bytes()),
     }
     return validate_hip_sparse_lu_fixture_parser_output(fixture, output)
@@ -141,23 +139,18 @@ def test_runner_builds_dual_target_compile_only_receipt() -> None:
         ],
     )
 
-    assert receipt["contract_scope"] == (
-        "target_compile_and_host_fixture_parser_only"
-    )
+    assert receipt["contract_scope"] == ("target_compile_and_host_fixture_parser_only")
     assert [row["architecture"] for row in receipt["targets"]] == [
         "gfx1030",
         "gfx1100",
     ]
     assert receipt["claims"]["gfx1030_target_compile"] is True
     assert receipt["claims"]["gfx1100_target_compile"] is True
-    assert receipt["claims"][
-        "dual_target_host_fixture_parser_execution"
-    ] is True
+    assert receipt["claims"]["dual_target_host_fixture_parser_execution"] is True
     assert all(
         row["host_fixture_parser_execution"] is True
         and row["host_fixture_validation"]["contract_pass"] is True
-        and row["host_fixture_validation"]["actual_hardware_execution"]
-        is False
+        and row["host_fixture_validation"]["actual_hardware_execution"] is False
         for row in receipt["targets"]
     )
     assert receipt["claims"]["actual_hardware_execution"] is False
@@ -167,6 +160,41 @@ def test_runner_builds_dual_target_compile_only_receipt() -> None:
     assert receipt["claims"]["production_current_tangent_fgmres"] is False
     assert receipt["claims"]["performance"] is False
     assert runner.validate_compile_receipt(receipt, repo_root=ROOT) == receipt
+
+
+def test_non_exact_compile_receipt_is_bound_by_current_source_checksums() -> None:
+    runner = _load_runner()
+    receipt = runner.build_compile_receipt(
+        repo_root=ROOT,
+        compiler_path="/opt/rocm/bin/hipcc",
+        compiler_version_output="HIP version: synthetic-test\n",
+        targets=[
+            {
+                "architecture": architecture,
+                "target_compile": True,
+                "binary_sha256": "sha256:" + marker * 64,
+                "binary_byte_length": byte_length,
+                "host_fixture_parser_execution": True,
+                "host_fixture_validation": _host_fixture_validation(),
+            }
+            for architecture, marker, byte_length in (
+                ("gfx1030", "c", 56_824),
+                ("gfx1100", "d", 57_112),
+            )
+        ],
+    )
+    assert receipt["source"]["exact_source_commit_claim"] is False
+    receipt["source"]["repository_base_commit_sha"] = "0" * 40
+    receipt["receipt_hash"] = runner._receipt_hash(receipt)
+
+    assert (
+        runner.validate_compile_receipt(
+            receipt,
+            repo_root=ROOT,
+            require_current_sources=True,
+        )
+        == receipt
+    )
 
 
 def test_runner_compile_receipt_rejects_duplicate_target() -> None:

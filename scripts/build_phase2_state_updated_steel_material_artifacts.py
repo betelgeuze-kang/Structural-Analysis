@@ -46,7 +46,9 @@ from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_RESULT_OUT = PRODUCTIZATION / "phase2_state_updated_steel_material_result.json"
-DEFAULT_SUMMARY_OUT = PRODUCTIZATION / "phase2_state_updated_steel_material_summary.json"
+DEFAULT_SUMMARY_OUT = (
+    PRODUCTIZATION / "phase2_state_updated_steel_material_summary.json"
+)
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/state_updated_steel_material_v1.schema.json"
 )
@@ -73,7 +75,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -188,16 +190,11 @@ def build_phase2_state_updated_steel_material_artifacts(
         config=config,
     )
     hardening_mpa = 8_000.0
-    plastic_tangent_mpa = 200_000.0 * hardening_mpa / (
-        200_000.0 + hardening_mpa
-    )
-    expected_strain = 250.0 / 200_000.0 + (
-        (300.0 - 250.0) / plastic_tangent_mpa
-    )
+    plastic_tangent_mpa = 200_000.0 * hardening_mpa / (200_000.0 + hardening_mpa)
+    expected_strain = 250.0 / 200_000.0 + ((300.0 - 250.0) / plastic_tangent_mpa)
     expected_displacement_m = 2.0 * expected_strain
     element_displacement_error_m = abs(
-        element_step.accepted_state.displacements_m[-1]
-        - expected_displacement_m
+        element_step.accepted_state.displacements_m[-1] - expected_displacement_m
     )
     element_contract_pass = bool(
         element_step.committed
@@ -228,14 +225,8 @@ def build_phase2_state_updated_steel_material_artifacts(
         trial_free_displacements_m=full_step.trial_solution.free_displacements_m,
     )
     series_force_spreads = [
-        max(
-            row["internal_force_kn"]
-            for row in step.trial_assembly.element_responses
-        )
-        - min(
-            row["internal_force_kn"]
-            for row in step.trial_assembly.element_responses
-        )
+        max(row["internal_force_kn"] for row in step.trial_assembly.element_responses)
+        - min(row["internal_force_kn"] for row in step.trial_assembly.element_responses)
         for step in structure_path.steps
     ]
     structure_residuals = [
@@ -243,8 +234,7 @@ def build_phase2_state_updated_steel_material_artifacts(
         for step in structure_path.steps
     ]
     deterministic_replay = bool(
-        structure_replay.final_state.state_hash
-        == structure_path.final_state.state_hash
+        structure_replay.final_state.state_hash == structure_path.final_state.state_hash
         and structure_replay.to_dict() == structure_path.to_dict()
     )
     structure_contract_pass = bool(
@@ -278,8 +268,7 @@ def build_phase2_state_updated_steel_material_artifacts(
     line_search_history_present = bool(
         element_step.trial_solution.line_search_history
         and all(
-            step.trial_solution.line_search_history
-            for step in structure_path.steps
+            step.trial_solution.line_search_history for step in structure_path.steps
         )
     )
     fallback_count = sum(
@@ -290,9 +279,7 @@ def build_phase2_state_updated_steel_material_artifacts(
         bool(step.metrics["regularization_used"])
         for step in (element_step, *structure_path.steps)
     )
-    material_point_contract = all(
-        row["point_contract_pass"] for row in point_rows
-    )
+    material_point_contract = all(row["point_contract_pass"] for row in point_rows)
     contract_pass = bool(
         material_point_contract
         and element_contract_pass
@@ -362,21 +349,14 @@ def build_phase2_state_updated_steel_material_artifacts(
         "claim_boundary_version": CLAIM_BOUNDARY_VERSION,
         "input_checksums": input_checksums(
             [
-                Path(
-                    "src/structural_analysis/materials/"
-                    "uniaxial_plasticity.py"
-                ),
+                Path("src/structural_analysis/materials/uniaxial_plasticity.py"),
                 Path("src/structural_analysis/assembly/stateful_axial.py"),
                 Path("src/structural_analysis/solvers/nonlinear/newton.py"),
                 SCHEMA_PATH,
-                Path(
-                    "scripts/"
-                    "build_phase2_state_updated_steel_material_artifacts.py"
-                ),
+                Path("scripts/build_phase2_state_updated_steel_material_artifacts.py"),
                 Path("tests/test_state_updated_steel_material_newton.py"),
                 Path(
-                    "tests/"
-                    "test_build_phase2_state_updated_steel_material_artifacts.py"
+                    "tests/test_build_phase2_state_updated_steel_material_artifacts.py"
                 ),
             ],
             repo_root=repo_root,
@@ -391,8 +371,7 @@ def build_phase2_state_updated_steel_material_artifacts(
         "material_variant_count": len(point_rows),
         "material_variant_ids": [row["variant_id"] for row in point_rows],
         "cyclic_energy_dissipation_gate_passed": all(
-            row["cyclic_path"]["energy_dissipation_gate_passed"]
-            for row in point_rows
+            row["cyclic_path"]["energy_dissipation_gate_passed"] for row in point_rows
         ),
         "material_tangent_finite_difference_gate_passed": all(
             row["finite_difference_tangent"]["pass"] for row in point_rows

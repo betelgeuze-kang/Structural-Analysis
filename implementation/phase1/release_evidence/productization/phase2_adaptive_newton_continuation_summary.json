@@ -26,9 +26,9 @@
   "finite_difference_jacobian_gate_passed": true,
   "full_mesh_closure_claim": false,
   "g1_full_load_claim": false,
-  "generated_at": "2026-07-19T05:51:07.972070+00:00",
+  "generated_at": "2026-07-19T07:13:08.328932+00:00",
   "input_checksums": {
-    "scripts/build_phase2_adaptive_newton_continuation_artifacts.py": "sha256:c1a9ba859fe491f91061ffb0bf7468459354d5489716beb6870ac5479c7bd9a4",
+    "scripts/build_phase2_adaptive_newton_continuation_artifacts.py": "sha256:ecac39ff811bcde4fc11a1dcee36971068e80b270312de7580ba84b753bfa9da",
     "src/structural_analysis/assembly/nonlinear_static.py": "sha256:c09d0bd753e0ce9475e5a2adaa4b234e013a7c7bf150beb2aeadf778c5702c63",
     "src/structural_analysis/schemas/adaptive_newton_continuation_v1.schema.json": "sha256:cda2488f210513437cf00e814bc6deb0eb62f5e3f66655d25521f20c17248688",
     "src/structural_analysis/solvers/nonlinear/continuation.py": "sha256:acc9b71a0865256c1a75522ec500f050703aaf9d474c0281442bf19886505b52",
@@ -51,7 +51,7 @@
   "schema_version": "phase2-adaptive-newton-continuation-artifacts.v1",
   "solver_executed": true,
   "solver_executed_step_count": 4,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "status": "ready",
   "target_load_factor": 1.0,
   "terminal_dispositions": [

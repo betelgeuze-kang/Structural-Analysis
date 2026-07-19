@@ -52,30 +52,29 @@ from run_mgt_uncoarsened_boundary_global_equilibrium import (  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_MGT = Path(
-    "implementation/phase1/open_data/midas/"
-    "midas_generator_33.optimized.mgt"
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
 )
 DEFAULT_RECEIPT_OUT = (
-    PRODUCTIZATION
-    / "g1_mgt_state_updated_frame_axial_geometry_preflight.json"
+    PRODUCTIZATION / "g1_mgt_state_updated_frame_axial_geometry_preflight.json"
 )
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "g1_mgt_state_updated_frame_axial_geometry_preflight_v1.schema.json"
 )
-SCHEMA_VERSION = (
-    "g1-mgt-state-updated-frame-axial-geometry-preflight.v1"
-)
+SCHEMA_VERSION = "g1-mgt-state-updated-frame-axial-geometry-preflight.v1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -90,7 +89,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             str(key): _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -112,36 +111,19 @@ def _label(repo_root: Path, path: Path) -> str:
 def _input_paths(*, mgt_path: Path) -> list[Path]:
     return [
         mgt_path,
+        Path("implementation/phase1/mgt_state_updated_frame_axial_geometry.py"),
+        Path("implementation/phase1/parse_mgt_section_material_properties.py"),
         Path(
-            "implementation/phase1/"
-            "mgt_state_updated_frame_axial_geometry.py"
+            "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py"
         ),
+        Path("implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py"),
         Path(
-            "implementation/phase1/"
-            "parse_mgt_section_material_properties.py"
-        ),
-        Path(
-            "implementation/phase1/"
-            "run_mgt_coupled_frame_surface_sparse_equilibrium.py"
-        ),
-        Path(
-            "implementation/phase1/"
-            "run_mgt_full_frame_6dof_sparse_equilibrium.py"
-        ),
-        Path(
-            "implementation/phase1/"
-            "run_mgt_uncoarsened_boundary_global_equilibrium.py"
+            "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py"
         ),
         Path("implementation/phase1/parse_midas_mgt_to_json_npz.py"),
         SCHEMA_PATH,
-        Path(
-            "scripts/"
-            "build_g1_mgt_state_updated_frame_axial_geometry_preflight.py"
-        ),
-        Path(
-            "tests/"
-            "test_build_g1_mgt_state_updated_frame_axial_geometry_preflight.py"
-        ),
+        Path("scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py"),
+        Path("tests/test_build_g1_mgt_state_updated_frame_axial_geometry_preflight.py"),
         Path("tests/test_mgt_state_updated_frame_axial_geometry.py"),
         Path("tests/test_parse_mgt_section_material_properties.py"),
     ]
@@ -161,15 +143,11 @@ def build_preflight(
     properties = load_mgt_section_material_properties(resolved_mgt)
     section_props = properties.get("sections") or {}
     source_material_props = properties.get("source_materials") or {}
-    dgn_material_aliases = (
-        properties.get("dgn_material_property_aliases") or {}
-    )
+    dgn_material_aliases = properties.get("dgn_material_property_aliases") or {}
     dgn_alias_audit = properties["dgn_material_property_alias_audit"]
     resolved_material_props = dict(source_material_props)
     resolved_material_props.update(dgn_material_aliases)
-    beam_end_offsets = _beam_end_offset_lookup(
-        properties.get("beam_end_offsets")
-    )
+    beam_end_offsets = _beam_end_offset_lookup(properties.get("beam_end_offsets"))
     with tempfile.TemporaryDirectory(
         prefix="g1-frame-axial-preflight-"
     ) as temporary_directory:
@@ -183,21 +161,11 @@ def build_preflight(
         with np.load(generated_roundtrip, allow_pickle=False) as archive:
             node_xyz = np.asarray(archive["node_xyz"], dtype=np.float64)
             elem_id = np.asarray(archive["elem_id"], dtype=np.int64)
-            elem_type_code = np.asarray(
-                archive["elem_type_code"], dtype=np.int32
-            )
-            elem_section_id = np.asarray(
-                archive["elem_section_id"], dtype=np.int32
-            )
-            elem_material_id = np.asarray(
-                archive["elem_material_id"], dtype=np.int32
-            )
-            conn_ptr = np.asarray(
-                archive["elem_conn_ptr"], dtype=np.int64
-            )
-            conn_idx = np.asarray(
-                archive["elem_conn_idx"], dtype=np.int64
-            )
+            elem_type_code = np.asarray(archive["elem_type_code"], dtype=np.int32)
+            elem_section_id = np.asarray(archive["elem_section_id"], dtype=np.int32)
+            elem_material_id = np.asarray(archive["elem_material_id"], dtype=np.int32)
+            conn_ptr = np.asarray(archive["elem_conn_ptr"], dtype=np.int64)
+            conn_idx = np.asarray(archive["elem_conn_idx"], dtype=np.int64)
             elem_angle_deg = (
                 np.asarray(archive["elem_angle_deg"], dtype=np.float64)
                 if "elem_angle_deg" in archive.files
@@ -220,12 +188,10 @@ def build_preflight(
         section_props=section_props,
         material_props=source_material_props,
     )
-    resolved_property_audit = (
-        audit_state_updated_frame_axial_property_coverage(
-            frame_elements=frame_elements,
-            section_props=section_props,
-            material_props=resolved_material_props,
-        )
+    resolved_property_audit = audit_state_updated_frame_axial_property_coverage(
+        frame_elements=frame_elements,
+        section_props=section_props,
+        material_props=resolved_material_props,
     )
 
     strict_packed = None
@@ -257,18 +223,12 @@ def build_preflight(
         "succeeded": strict_prepack_succeeded,
         "expected_fail_closed": strict_expected_fail_closed,
         "failure_type": (
-            strict_failure.__class__.__name__
-            if strict_failure is not None
-            else None
+            strict_failure.__class__.__name__ if strict_failure is not None else None
         ),
         "failure_reason_code": (
             "INCOMPLETE_FRAME_SOURCE_PROPERTY_BINDING"
             if strict_expected_fail_closed
-            else (
-                "UNEXPECTED_PREPACK_FAILURE"
-                if strict_failure is not None
-                else None
-            )
+            else ("UNEXPECTED_PREPACK_FAILURE" if strict_failure is not None else None)
         ),
         "failure_message": (
             str(strict_failure) if strict_failure is not None else None
@@ -304,9 +264,7 @@ def build_preflight(
             else None
         ),
         "failure_reason_code": (
-            "UNEXPECTED_PREPACK_FAILURE"
-            if resolved_failure is not None
-            else None
+            "UNEXPECTED_PREPACK_FAILURE" if resolved_failure is not None else None
         ),
         "failure_message": (
             str(resolved_failure) if resolved_failure is not None else None
@@ -320,9 +278,7 @@ def build_preflight(
         material_id = int(element.material_id)
         if material_id not in alias_material_ids:
             continue
-        alias_frame_usage[material_id] = (
-            int(alias_frame_usage.get(material_id, 0)) + 1
-        )
+        alias_frame_usage[material_id] = int(alias_frame_usage.get(material_id, 0)) + 1
     alias_frame_element_count = int(sum(alias_frame_usage.values()))
     diagnostic_execution_ready = bool(
         dgn_alias_audit["contract_pass"]
@@ -333,24 +289,18 @@ def build_preflight(
         == strict_property_audit["unresolved_source_property_element_count"]
     )
     engineer_review_required = bool(
-        diagnostic_execution_ready
-        and dgn_alias_audit["engineer_review_required"]
+        diagnostic_execution_ready and dgn_alias_audit["engineer_review_required"]
     )
-    readiness_pass = bool(
-        diagnostic_execution_ready and not engineer_review_required
-    )
+    readiness_pass = bool(diagnostic_execution_ready and not engineer_review_required)
     contract_pass = bool(
         parser_report["contract_pass"]
         and connectivity_audit["frame_connectivity_source"]
         == "elem_conn_ptr/elem_conn_idx"
         and not connectivity_audit["edge_index_used_for_element_binding"]
         and connectivity_audit["line_element_row_accounting_exact"]
-        and int(connectivity_audit["line_elements_solved"])
-        == len(frame_elements)
-        and int(strict_property_audit["frame_element_count"])
-        == len(frame_elements)
-        and int(resolved_property_audit["frame_element_count"])
-        == len(frame_elements)
+        and int(connectivity_audit["line_elements_solved"]) == len(frame_elements)
+        and int(strict_property_audit["frame_element_count"]) == len(frame_elements)
+        and int(resolved_property_audit["frame_element_count"]) == len(frame_elements)
         and not strict_property_audit["exact_source_property_coverage"]
         and strict_expected_fail_closed
         and strict_fallback_count == 0
@@ -361,9 +311,7 @@ def build_preflight(
         "authoritative_element_connectivity_consumed": bool(
             connectivity_audit["frame_connectivity_source"]
             == "elem_conn_ptr/elem_conn_idx"
-            and not connectivity_audit[
-                "edge_index_used_for_element_binding"
-            ]
+            and not connectivity_audit["edge_index_used_for_element_binding"]
         ),
         "exact_raw_material_table_frame_property_coverage": bool(
             strict_property_audit["exact_source_property_coverage"]
@@ -371,9 +319,7 @@ def build_preflight(
         "exact_source_derived_alias_frame_property_coverage": bool(
             resolved_property_audit["exact_source_property_coverage"]
         ),
-        "missing_property_prepack_failed_closed": (
-            strict_expected_fail_closed
-        ),
+        "missing_property_prepack_failed_closed": (strict_expected_fail_closed),
         "dgn_exact_type_name_alias_contract_pass": bool(
             dgn_alias_audit["contract_pass"]
         ),
@@ -436,9 +382,7 @@ def build_preflight(
             ),
             "roundtrip_generated_uncoarsened": True,
             "generated_roundtrip_sha256": generated_roundtrip_sha256,
-            "uncoarsened_parser_contract_pass": bool(
-                parser_report["contract_pass"]
-            ),
+            "uncoarsened_parser_contract_pass": bool(parser_report["contract_pass"]),
             "node_count": int(node_xyz.shape[0]),
             "element_count": int(elem_id.size),
             "analysis_material_table_ids": sorted(
@@ -462,9 +406,7 @@ def build_preflight(
         "frame_connectivity_audit": connectivity_audit,
         "source_property_coverage_audit": strict_property_audit,
         "dgn_material_property_alias_audit": dgn_alias_audit,
-        "resolved_source_property_coverage_audit": (
-            resolved_property_audit
-        ),
+        "resolved_source_property_coverage_audit": (resolved_property_audit),
         "prepack_probe": strict_prepack_probe,
         "resolved_prepack_probe": resolved_prepack_probe,
         "claims": claims,

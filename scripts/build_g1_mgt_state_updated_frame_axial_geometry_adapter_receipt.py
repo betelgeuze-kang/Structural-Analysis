@@ -46,35 +46,33 @@ from release_evidence_metadata import (  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_MGT = Path(
-    "implementation/phase1/open_data/midas/"
-    "midas_generator_33.optimized.mgt"
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
 )
 DEFAULT_CHECKPOINT = (
-    PRODUCTIZATION
-    / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
+    PRODUCTIZATION / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/"
     "accepted_load_0p656.npz"
 )
 DEFAULT_RECEIPT_OUT = (
-    PRODUCTIZATION
-    / "g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.json"
+    PRODUCTIZATION / "g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.json"
 )
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "g1_mgt_state_updated_frame_axial_geometry_adapter_v1.schema.json"
 )
-SCHEMA_VERSION = (
-    "g1-mgt-state-updated-frame-axial-geometry-adapter-receipt.v1"
-)
+SCHEMA_VERSION = "g1-mgt-state-updated-frame-axial-geometry-adapter-receipt.v1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
-    return json.dumps(
-        payload,
-        allow_nan=False,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-    ) + "\n"
+    return (
+        json.dumps(
+            payload,
+            allow_nan=False,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n"
+    )
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -89,7 +87,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             str(key): _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
@@ -117,37 +115,22 @@ def _input_paths(*, mgt_path: Path, checkpoint_npz: Path) -> list[Path]:
         Path("implementation/phase1/mgt_physical_residual_assembly.py"),
         Path("implementation/phase1/mgt_semantic_load_assembly.py"),
         Path("implementation/phase1/mgt_shell_load_path.py"),
-        Path(
-            "implementation/phase1/"
-            "mgt_state_updated_frame_axial_geometry.py"
-        ),
+        Path("implementation/phase1/mgt_state_updated_frame_axial_geometry.py"),
         Path("implementation/phase1/parse_mgt_section_material_properties.py"),
         Path("implementation/phase1/parse_midas_mgt_to_json_npz.py"),
         Path(
-            "implementation/phase1/"
-            "run_mgt_coupled_frame_surface_sparse_equilibrium.py"
+            "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py"
         ),
+        Path("implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py"),
         Path(
-            "implementation/phase1/"
-            "run_mgt_full_frame_6dof_sparse_equilibrium.py"
-        ),
-        Path(
-            "implementation/phase1/"
-            "run_mgt_uncoarsened_boundary_global_equilibrium.py"
+            "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py"
         ),
         Path("src/structural_analysis/engine_v2/contracts/_canonical.py"),
-        Path(
-            "src/structural_analysis/engine_v2/contracts/"
-            "current_tangent_operator.py"
-        ),
-        Path(
-            "src/structural_analysis/schemas/"
-            "current_tangent_operator_v1.schema.json"
-        ),
+        Path("src/structural_analysis/engine_v2/contracts/current_tangent_operator.py"),
+        Path("src/structural_analysis/schemas/current_tangent_operator_v1.schema.json"),
         SCHEMA_PATH,
         Path(
-            "scripts/"
-            "build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py"
+            "scripts/build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py"
         ),
         Path("tests/test_g1_mgt_load_coupled_arc_length_adapter.py"),
         Path("tests/test_mgt_physical_residual_assembly.py"),
@@ -195,12 +178,10 @@ def _callback_replay(
     direction = predictor / direction_scale
 
     zero_residual_inf_n = float(
-        np.linalg.norm(problem.residual_kn(zero, 0.0), ord=np.inf)
-        * 1000.0
+        np.linalg.norm(problem.residual_kn(zero, 0.0), ord=np.inf) * 1000.0
     )
     full_residual_inf_n = float(
-        np.linalg.norm(problem.residual_kn(predictor, 1.0), ord=np.inf)
-        * 1000.0
+        np.linalg.norm(problem.residual_kn(predictor, 1.0), ord=np.inf) * 1000.0
     )
     full_row = _full_unit_predictor_row(predictor_audit)
     recorded_full_residual_inf_n = float(full_row["residual_inf_n"])
@@ -209,8 +190,7 @@ def _callback_replay(
         1.0e-12 * max(abs(recorded_full_residual_inf_n), 1.0),
     )
     replay_matches = bool(
-        abs(full_residual_inf_n - recorded_full_residual_inf_n)
-        <= replay_tolerance_n
+        abs(full_residual_inf_n - recorded_full_residual_inf_n) <= replay_tolerance_n
     )
 
     tangent_at_zero = problem.consistent_state_tangent_action_kn_per_m(
@@ -224,13 +204,11 @@ def _callback_replay(
         direction,
     )
     centered_reference_step_m = 2.0e-7
-    centered_tangent_at_predictor = (
-        problem.tangent_action_at_step_kn_per_m(
-            predictor,
-            1.0,
-            direction,
-            difference_step_m=centered_reference_step_m,
-        )
+    centered_tangent_at_predictor = problem.tangent_action_at_step_kn_per_m(
+        predictor,
+        1.0,
+        direction,
+        difference_step_m=centered_reference_step_m,
     )
     analytic_centered_error_inf_kn_per_m = float(
         np.linalg.norm(
@@ -248,14 +226,12 @@ def _callback_replay(
         1.0e-30,
     )
     analytic_centered_relative_error = (
-        analytic_centered_error_inf_kn_per_m
-        / analytic_centered_reference_inf_kn_per_m
+        analytic_centered_error_inf_kn_per_m / analytic_centered_reference_inf_kn_per_m
     )
     analytic_centered_relative_tolerance = 5.0e-3
     analytic_centered_gate_passed = bool(
         analytic_centered_error_inf_kn_per_m <= 1.0e-5
-        or analytic_centered_relative_error
-        <= analytic_centered_relative_tolerance
+        or analytic_centered_relative_error <= analytic_centered_relative_tolerance
     )
     tangent_difference_inf_kn_per_m = float(
         np.linalg.norm(
@@ -273,8 +249,7 @@ def _callback_replay(
         1.0e-12 * tangent_reference_inf_kn_per_m,
     )
     tangent_state_dependence_detected = bool(
-        tangent_difference_inf_kn_per_m
-        > tangent_state_dependence_tolerance_kn_per_m
+        tangent_difference_inf_kn_per_m > tangent_state_dependence_tolerance_kn_per_m
     )
     finite = bool(
         math.isfinite(zero_residual_inf_n)
@@ -284,40 +259,26 @@ def _callback_replay(
         and np.all(np.isfinite(centered_tangent_at_predictor))
     )
     return {
-        "schema_version": (
-            "g1-mgt-state-updated-frame-axial-callback-replay.v1"
-        ),
+        "schema_version": ("g1-mgt-state-updated-frame-axial-callback-replay.v1"),
         "equation_count": int(problem.equation_count),
         "zero_state_residual_inf_n": zero_residual_inf_n,
         "full_unit_predictor_residual_inf_n": full_residual_inf_n,
-        "recorded_full_unit_predictor_residual_inf_n": (
-            recorded_full_residual_inf_n
-        ),
+        "recorded_full_unit_predictor_residual_inf_n": (recorded_full_residual_inf_n),
         "predictor_residual_replay_tolerance_n": replay_tolerance_n,
         "predictor_residual_replay_matches": replay_matches,
         "tangent_probe_load_factor": 1.0,
         "tangent_probe_direction": (
             "full_unit_zero_state_predictor_normalized_by_infinity_norm"
         ),
-        "tangent_state_difference_inf_kn_per_m": (
-            tangent_difference_inf_kn_per_m
-        ),
+        "tangent_state_difference_inf_kn_per_m": (tangent_difference_inf_kn_per_m),
         "tangent_state_dependence_tolerance_kn_per_m": (
             tangent_state_dependence_tolerance_kn_per_m
         ),
-        "tangent_state_dependence_detected": (
-            tangent_state_dependence_detected
-        ),
+        "tangent_state_dependence_detected": (tangent_state_dependence_detected),
         "analytic_centered_reference_step_m": centered_reference_step_m,
-        "analytic_centered_error_inf_kn_per_m": (
-            analytic_centered_error_inf_kn_per_m
-        ),
-        "analytic_centered_relative_error": (
-            analytic_centered_relative_error
-        ),
-        "analytic_centered_relative_tolerance": (
-            analytic_centered_relative_tolerance
-        ),
+        "analytic_centered_error_inf_kn_per_m": (analytic_centered_error_inf_kn_per_m),
+        "analytic_centered_relative_error": (analytic_centered_relative_error),
+        "analytic_centered_relative_tolerance": (analytic_centered_relative_tolerance),
         "analytic_centered_gate_passed": analytic_centered_gate_passed,
         "finite": finite,
         "contract_pass": bool(
@@ -354,12 +315,8 @@ def build_receipt(
     geometry = metadata["state_updated_frame_axial_geometry"]
     tangent_contract = metadata["state_invariant_tangent_contract"]
     residual_contract = metadata["residual_evaluation_contract"]
-    residual_parent_audit = metadata[
-        "residual_parent_equivalence_audit"
-    ]
-    reference_preconditioner = metadata[
-        "reference_preconditioner_contract"
-    ]
+    residual_parent_audit = metadata["residual_parent_equivalence_audit"]
+    reference_preconditioner = metadata["reference_preconditioner_contract"]
     predictor_audit = metadata["zero_state_sparse_predictor_audit"]
     callback_replay = _callback_replay(
         problem=problem,
@@ -375,14 +332,11 @@ def build_receipt(
             current_tangent_operator.to_manifest()
         )
     )
-    current_tangent_binding = (
-        problem.matrix_free_current_tangent_operator_binding()
-    )
+    current_tangent_binding = problem.matrix_free_current_tangent_operator_binding()
     if current_tangent_binding is None:
         raise ValueError("state-updated adapter lacks an operator binding")
     current_tangent_contract_pass = bool(
-        current_tangent_manifest["profile"]
-        == CURRENT_TANGENT_OPERATOR_PROFILE
+        current_tangent_manifest["profile"] == CURRENT_TANGENT_OPERATOR_PROFILE
         and current_tangent_manifest["contract_hash"]
         == current_tangent_operator.contract_hash
         and current_tangent_manifest["dimensions"]["equation_count"]
@@ -393,22 +347,13 @@ def build_receipt(
         == metadata["frame_element_count"]
         and current_tangent_manifest["dimensions"]["geometry_element_count"]
         == metadata["frame_element_count"]
-        and current_tangent_binding[
-            "current_tangent_operator_contract_hash"
-        ]
+        and current_tangent_binding["current_tangent_operator_contract_hash"]
         == current_tangent_operator.contract_hash
-        and current_tangent_binding[
-            "current_tangent_operator_array_bundle_hash"
-        ]
+        and current_tangent_binding["current_tangent_operator_array_bundle_hash"]
         == current_tangent_operator.array_bundle_hash
-        and current_tangent_binding[
-            "operator_callback_reference_evaluator"
-        ]
+        and current_tangent_binding["operator_callback_reference_evaluator"]
         == CURRENT_TANGENT_OPERATOR_REFERENCE_EVALUATOR
-        and current_tangent_binding[
-            "operator_callback_outputs_in_contract"
-        ]
-        is True
+        and current_tangent_binding["operator_callback_outputs_in_contract"] is True
         and callback_replay["analytic_centered_gate_passed"]
     )
 
@@ -418,8 +363,7 @@ def build_receipt(
         and metadata["node_count"] == 13_047
         and metadata["element_count"] == 12_728
         and metadata["free_equation_count"] == 70_560
-        and connectivity["frame_connectivity_source"]
-        == "elem_conn_ptr/elem_conn_idx"
+        and connectivity["frame_connectivity_source"] == "elem_conn_ptr/elem_conn_idx"
         and not connectivity["edge_index_used_for_element_binding"]
         and connectivity["line_element_row_accounting_exact"]
         and binding["dgn_alias_resolution_enabled"]
@@ -440,9 +384,7 @@ def build_receipt(
         and geometry["consistent_state_tangent_action_mode"]
         == "analytic_reference_plus_exact_finite_chord_axial_correction"
         and not geometry["connected_to_centered_tangent_action"]
-        and geometry[
-            "centered_tangent_action_available_for_independent_audit"
-        ]
+        and geometry["centered_tangent_action_available_for_independent_audit"]
         and geometry["real_property_element_count"] == 5_572
         and geometry["property_fallback_count"] == 0
         and geometry["conservative_energy_gradient"]
@@ -455,24 +397,12 @@ def build_receipt(
         and tangent_contract["current_state_reassembly_required"]
         and not tangent_contract["exact_for_adapter_residual_model"]
         and residual_contract["mode"]
-        == (
-            "reference_csr_plus_load_frame_delta_plus_"
-            "finite_chord_correction"
-        )
-        and residual_contract[
-            "reference_csr_parent_matches_analytic_tangent"
-        ]
-        and residual_contract[
-            "load_frame_delta_parent_matches_analytic_tangent"
-        ]
-        and residual_contract[
-            "finite_chord_correction_parent_matches_analytic_tangent"
-        ]
-        and residual_contract[
-            "component_force_assembly_retained_for_diagnostics"
-        ]
-        and residual_contract["schema_version"]
-        == "mgt-residual-evaluation-contract.v1"
+        == ("reference_csr_plus_load_frame_delta_plus_finite_chord_correction")
+        and residual_contract["reference_csr_parent_matches_analytic_tangent"]
+        and residual_contract["load_frame_delta_parent_matches_analytic_tangent"]
+        and residual_contract["finite_chord_correction_parent_matches_analytic_tangent"]
+        and residual_contract["component_force_assembly_retained_for_diagnostics"]
+        and residual_contract["schema_version"] == "mgt-residual-evaluation-contract.v1"
         and residual_contract["residual_formula_hash"]
         == canonical_hash(residual_contract["residual_formula"])
         and not residual_contract["promotes_g1_closure"]
@@ -481,39 +411,24 @@ def build_receipt(
         and residual_parent_audit["parent_repeat_bytes_exact"]
         and residual_parent_audit["parent_component_gate_passed"]
         and reference_preconditioner["available"]
-        and reference_preconditioner["intended_use"]
-        == "fixed_right_preconditioner"
-        and not reference_preconditioner[
-            "exact_for_adapter_residual_model"
-        ]
-        and reference_preconditioner[
-            "approximate_for_state_dependent_adapter"
-        ]
-        and not reference_preconditioner[
-            "factorization_executed_by_adapter"
-        ]
+        and reference_preconditioner["intended_use"] == "fixed_right_preconditioner"
+        and not reference_preconditioner["exact_for_adapter_residual_model"]
+        and reference_preconditioner["approximate_for_state_dependent_adapter"]
+        and not reference_preconditioner["factorization_executed_by_adapter"]
         and predictor_audit["contract_pass"]
-        and predictor_audit["remainder_classification"]
-        == "measurable_quadratic"
-        and predictor_audit[
-            "measurable_quadratic_remainder_gate_passed"
-        ]
+        and predictor_audit["remainder_classification"] == "measurable_quadratic"
+        and predictor_audit["measurable_quadratic_remainder_gate_passed"]
         and predictor_audit["quadratic_remainder_gate_passed"]
         and not predictor_audit["linear_model_consistency_gate_passed"]
         and predictor_audit["minimum_observed_remainder_order"] is not None
-        and 1.8
-        <= float(predictor_audit["minimum_observed_remainder_order"])
-        <= 2.2
+        and 1.8 <= float(predictor_audit["minimum_observed_remainder_order"]) <= 2.2
         and callback_replay["contract_pass"]
         and current_tangent_contract_pass
     )
     engineer_review_required = bool(
-        binding["engineer_review_required"]
-        and alias_audit["engineer_review_required"]
+        binding["engineer_review_required"] and alias_audit["engineer_review_required"]
     )
-    readiness_pass = bool(
-        diagnostic_execution_ready and not engineer_review_required
-    )
+    readiness_pass = bool(diagnostic_execution_ready and not engineer_review_required)
     blockers = [
         "dgn_exact_type_name_material_inheritance_engineer_review_required",
         "full_corotational_frame_not_implemented",
@@ -563,9 +478,7 @@ def build_receipt(
             "frame_element_count": metadata["frame_element_count"],
             "global_dof_count": metadata["global_dof_count"],
             "free_equation_count": metadata["free_equation_count"],
-            "semantic_load_case": metadata["reference_load_contract"][
-                "load_case"
-            ],
+            "semantic_load_case": metadata["reference_load_contract"]["load_case"],
             "historical_checkpoint_equilibrium_claim": False,
         },
         "frame_connectivity_audit": connectivity,
@@ -612,9 +525,7 @@ def build_receipt(
                 geometry["connected_to_consistent_state_tangent_action"]
             ),
             "measurable_quadratic_predictor_remainder": bool(
-                predictor_audit[
-                    "measurable_quadratic_remainder_gate_passed"
-                ]
+                predictor_audit["measurable_quadratic_remainder_gate_passed"]
             ),
             "state_dependent_tangent_action_detected": bool(
                 callback_replay["tangent_state_dependence_detected"]
@@ -626,9 +537,7 @@ def build_receipt(
                 current_tangent_contract_pass
             ),
             "residual_parent_matches_analytic_tangent": bool(
-                residual_contract[
-                    "reference_csr_parent_matches_analytic_tangent"
-                ]
+                residual_contract["reference_csr_parent_matches_analytic_tangent"]
                 and residual_contract[
                     "finite_chord_correction_parent_matches_analytic_tangent"
                 ]

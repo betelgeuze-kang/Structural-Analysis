@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
@@ -10,10 +11,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = (
-    ROOT
-    / "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
-)
+SCRIPT = ROOT / "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
 SPEC = importlib.util.spec_from_file_location(
     "build_g1_mgt_hip_current_tangent_host_parser_receipt",
     SCRIPT,
@@ -82,28 +80,22 @@ def test_committed_receipt_records_actual_mgt_host_parser_only() -> None:
         row["target_compile"] is True
         and row["host_fixture_parser_execution"] is True
         and row["host_fixture_validation"]["contract_pass"] is True
-        and row["host_fixture_validation"]["fixture_hash"]
-        == fixture["fixture_hash"]
+        and row["host_fixture_validation"]["fixture_hash"] == fixture["fixture_hash"]
         and row["host_fixture_validation"]["equation_count"] == 70_560
-        and row["host_fixture_validation"]["fixture_byte_length"]
-        == 36_123_072
-        and row["host_fixture_validation"]["actual_hardware_execution"]
-        is False
+        and row["host_fixture_validation"]["fixture_byte_length"] == 36_123_072
+        and row["host_fixture_validation"]["actual_hardware_execution"] is False
         and row["host_fixture_validation"]["hip_runtime_api_call_count"] == 0
         for row in payload["targets"]
     )
-    assert payload["targets"][0]["host_fixture_validation"] == payload[
-        "targets"
-    ][1]["host_fixture_validation"]
+    assert (
+        payload["targets"][0]["host_fixture_validation"]
+        == payload["targets"][1]["host_fixture_validation"]
+    )
 
     claims = payload["claims"]
     assert claims["actual_mgt_fixture_constructed"] is True
-    assert claims[
-        "actual_mgt_dual_target_host_fixture_parser_execution"
-    ] is True
-    assert claims[
-        "actual_mgt_host_parser_hip_runtime_api_calls_zero"
-    ] is True
+    assert claims["actual_mgt_dual_target_host_fixture_parser_execution"] is True
+    assert claims["actual_mgt_host_parser_hip_runtime_api_calls_zero"] is True
     assert claims["synthetic_and_actual_parser_binary_identity"] is True
     assert claims["actual_hardware_execution"] is False
     assert claims["current_tangent_action_executed"] is False
@@ -144,8 +136,22 @@ def test_committed_receipt_source_identity_is_offline_checkable() -> None:
     passed, reason = module.check_receipt_source_only(repo_root=ROOT)
 
     assert passed is True, reason
-    assert reason == (
-        "g1_mgt_hip_current_tangent_host_parser_sources_consistent"
+    assert reason == ("g1_mgt_hip_current_tangent_host_parser_sources_consistent")
+
+
+def test_non_exact_receipt_is_bound_by_current_source_checksums() -> None:
+    payload = deepcopy(_committed_receipt())
+    assert payload["source_commit_exact_replay_claim"] is False
+    payload["source_commit_sha"] = "0" * 40
+    payload["receipt_hash"] = module._receipt_hash(payload)
+
+    assert (
+        module.validate_receipt(
+            payload,
+            repo_root=ROOT,
+            require_current_sources=True,
+        )
+        == payload
     )
 
 

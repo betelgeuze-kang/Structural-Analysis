@@ -28,22 +28,22 @@
   },
   "contract_pass": true,
   "contract_scope": "target_compile_and_host_fixture_parser_only",
-  "generated_at": "2026-07-19T01:05:40.950019+00:00",
-  "receipt_hash": "sha256:137b2a511fe1d5421c5d76ce5196c1a6c10491bd789341fa1dd83ed1b8eef955",
+  "generated_at": "2026-07-19T07:01:55.404227+00:00",
+  "receipt_hash": "sha256:9718a4a336a6a870884133bead3d4eb3f4ec10cabc9bb93b0ded7a7d96ba455a",
   "schema_version": "engine-v2-hip-sparse-lu-apply-target-compile-host-parse-receipt.v1",
   "source": {
     "exact_source_commit_claim": false,
     "input_checksums": {
       "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp": "sha256:452d5964ec9ca38c0653a27d7d0879fdbf8e110ebdc38c1d2bc6600d3d7706e2",
-      "scripts/run_engine_v2_hip_sparse_lu_apply.py": "sha256:cb545a75f67852b1ccd2de2268a1faed0bfb459e727c0eb94dacbb8adb3625b5",
+      "scripts/run_engine_v2_hip_sparse_lu_apply.py": "sha256:0b87e59982247a2f4393c65cf6bd7ef1d37d50db2ea8a02086dfc0d4a422a7e5",
       "src/structural_analysis/engine_v2_backends/hip_sparse_lu_apply.py": "sha256:b9da2c5044c215fd3d391fb0ac6e794fa22c1ab718b5cd150ac6b87aa7341a9e",
       "src/structural_analysis/schemas/hip_sparse_lu_apply_compile_receipt_v1.schema.json": "sha256:3b437db4778b9730d3cd8cb0a0253f7d97d703fb9ad9172ffa14f13ccfa65928",
       "src/structural_analysis/schemas/hip_sparse_lu_apply_parity_v1.schema.json": "sha256:1ebe3b5c22eb0aa3407ebd75eb990cd4e76cf657ad9d595ef01fc4cc5c227140",
       "src/structural_analysis/solvers/nonlinear/canonical_sparse_lu.py": "sha256:49f74473bf9fadea781bcdaf270af556ac8c80108d36d04f265e68fabe26abf1",
       "tests/test_engine_v2_hip_sparse_lu_apply.py": "sha256:7165332c163870173744138ee67315aa1ce3aa5f96c929133577de902e377977",
-      "tests/test_engine_v2_hip_sparse_lu_apply_runner.py": "sha256:38c7dbe811fa0920b8f6c79400d204636f87c1a28a2bf76a44adc078a02ffd58"
+      "tests/test_engine_v2_hip_sparse_lu_apply_runner.py": "sha256:8dd841332a3b61b762acc974515c9e9147f2f91368cea3d3b11abeb2f2d1f62a"
     },
-    "repository_base_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+    "repository_base_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
     "worktree_clean": false
   },
   "status": "partial",

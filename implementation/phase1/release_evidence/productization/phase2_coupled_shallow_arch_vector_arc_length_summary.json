@@ -29,9 +29,9 @@
   "first_limit_load_relative_error": 0.007386101856641412,
   "g1_full_building_closure_claim": false,
   "general_frame_shell_arc_length_claim": false,
-  "generated_at": "2026-07-18T16:18:03.015650+00:00",
+  "generated_at": "2026-07-19T07:13:16.688609+00:00",
   "input_checksums": {
-    "scripts/build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py": "sha256:594952ed91634a3280bdecabfc1f012a6857cd1abda1d67fb9276db2a4ec46ba",
+    "scripts/build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py": "sha256:d05b0cbf9ac3c62a63bc1d4b416d2df511ac6b614e6c3476a4167edf0e531d8d",
     "src/structural_analysis/benchmark/coupled_shallow_arch_arc_length.py": "sha256:bd1cfba7bb53d576cb510c4d21b47953a37c56e1e4be2c320a88288071643ab5",
     "src/structural_analysis/benchmark/geometric_nonlinear.py": "sha256:9c6a0c2d6fb7565fb256c35ab0fcf124f92d9cfb9dbc7b29c3724b656c68c7dd",
     "src/structural_analysis/schemas/coupled_shallow_arch_vector_arc_length_v1.schema.json": "sha256:b46e720476f2c5336baba38130a29992e869870301844b21b9a61f720e49bb7b",
@@ -58,7 +58,7 @@
   "rejected_step_count": 1,
   "rollback_exact": true,
   "schema_version": "phase2-coupled-shallow-arch-vector-arc-length-artifacts.v1",
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "status": "partial",
   "tangent_energy_finite_difference_gate_passed": true,
   "truth_basis": "analytic_coupled_two_dof_conservative_potential"

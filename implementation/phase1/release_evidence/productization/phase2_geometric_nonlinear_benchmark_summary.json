@@ -27,11 +27,11 @@
   "euler_minimum_convergence_order": 3.8765674184937398,
   "general_2d_3d_geometric_stiffness_claim": false,
   "general_frame_pdelta_claim": false,
-  "generated_at": "2026-07-18T10:52:46.707306+00:00",
+  "generated_at": "2026-07-19T07:13:14.227018+00:00",
   "geometric_nonlinear_benchmark_breadth_claim": false,
   "implemented_benchmarks_contract_pass": true,
   "input_checksums": {
-    "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py": "sha256:fa4eb78cc91a4a520521c3fc1c13ce31998014f5552c5bde9271ca6bfedfaad4",
+    "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py": "sha256:9c12455223ac013e3f396e4e5bf0fc41f3486baf6bc8e9d8fe2993a2d0dee8d1",
     "src/structural_analysis/benchmark/geometric_nonlinear.py": "sha256:9c6a0c2d6fb7565fb256c35ab0fcf124f92d9cfb9dbc7b29c3724b656c68c7dd",
     "src/structural_analysis/schemas/geometric_nonlinear_benchmark_v1.schema.json": "sha256:b17375145453087efc1958902b5dca6f0580bad8e2a505e301d671c7ebe996ac",
     "tests/test_build_phase2_geometric_nonlinear_benchmark_artifacts.py": "sha256:99180f73e87e9fec4e2b2c2361e51afe7b155c377a652aa10cb5f9dab41b1775",
@@ -42,7 +42,7 @@
   "modal_pdelta_maximum_relative_error": 1.4388490399142027e-12,
   "schema_version": "phase2-geometric-nonlinear-benchmark-artifacts.v1",
   "shallow_arch_first_limit_load_kn": 29.605176007630757,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "status": "partial",
   "truth_class": "analytic_and_semianalytic_geometric_seed_truth",
   "two_bar_shallow_arch_gate_passed": true

@@ -50,12 +50,12 @@
       "organization_id": "local-development",
       "path": "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json",
       "public_key_sha256": null,
-      "receipt_hash": "sha256:b16712d1adfbc763246da773b77eff22a2d0d1592cc71940a4ff5a921e2637cf",
+      "receipt_hash": "sha256:9458b758129d7519a78b954210ac81806168e39087f8fc0445a5008d80f70e88",
       "runner_id": "codex-desktop-gfx1030",
       "signature_verified": false,
       "signer_id": null,
-      "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
-      "source_set_hash": "sha256:8d198503c142a1aefa8082de306959461476849c8c19d4c450a8b7ea59926b68",
+      "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+      "source_set_hash": "sha256:4131bf7c4d8a930fb240cead95b747d66c6a3610c5c4525ed504e36b16cd464a",
       "wheel_bound_at_execution": true,
       "wheel_sha256": "sha256:85f64c517f09c95195b6afa0bac6a73f0b231d6cddfdab46ef577ee8a074e98e"
     },
@@ -84,7 +84,7 @@
       "wheel_sha256": null
     }
   },
-  "generated_at": "2026-07-18T13:38:50.459897+00:00",
+  "generated_at": "2026-07-19T07:02:49.145153+00:00",
   "identity_gates": {
     "actual_hardware_pair": false,
     "architecture_pair_exact": false,
@@ -123,17 +123,17 @@
   "source": {
     "input_checksums": {
       "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json": "sha256:9fe3adb29995a274f8818ab963cc39a1ca19ecaec219fe8b4213ecacb99ac4e3",
-      "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json": "sha256:de5c6d4efe63b3591e84fea3c16498da9c65c8a1bffad3116a62114263e26278",
+      "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json": "sha256:1b5826eb44b6a7850ba679ae7ffe879306078680ab2b8bbc8dcc1b58a2639f0a",
       "scripts/build_engine_v2_hip_fgmres_stage4_status.py": "sha256:93ea785c88fae5b7972355c4673af522494c83dbc24fc0b0a7150be2b8d1a141",
-      "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:c22d501345ba67fc19c9c493faae9b6f1d0dfd432a83a2b6c7fd8b6f43f0649c",
+      "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:f3a5baff648100275ed5a141fad0e621f8a7e9a5a20b4c9e1060ac0701a481ad",
       "src/structural_analysis/schemas/hip_fgmres_device_receipt_v1.schema.json": "sha256:768e8aec34ba7b791c22b925c4405d1f40f1d1fe144a92b290aa195b861aa0f9",
       "src/structural_analysis/schemas/hip_fgmres_stage4_status_v1.schema.json": "sha256:7911e585ece66d6ea66c503ce21439d60d4bfaf29c403312497b4579c4e7e8c3",
-      "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:85ef4b43a000f929f39ad457233480842b2ca8006b34599dc4c694836271c97c",
+      "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:3b9780329c2cbad3a2c5559510c0f56b283f91809ead9da6145e6b09d3c68e6e",
       "tests/test_engine_v2_hip_fgmres_stage4_status.py": "sha256:ea5a53b5451a01031ce2b27ddb939099a5c4208674df81365a6d6c73f1d57ec4"
     },
-    "repository_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+    "repository_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
     "worktree_clean": false
   },
   "status": "partial",
-  "status_hash": "sha256:1a476cacfb983ef4e38719e956f6c71dee30127c987321b2d16277def1bbd20b"
+  "status_hash": "sha256:aab20c8cebd9a7d6028e69d2af63eb992f62e63b75f5019d38045ac9286af229"
 }
