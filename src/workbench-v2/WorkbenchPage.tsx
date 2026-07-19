@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState, type ReactElement } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState, type ReactElement } from 'react'
 import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
 import type { WorkbenchCaseV2 } from './model/caseSchema'
@@ -55,17 +55,17 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
     () => new Map(),
   )
+  const reviewDraftStatesRef = useRef<ReadonlyMap<string, ReviewDraftState>>(reviewDraftStates)
 
   const reviewSourceCommitSha = caseV2?.provenance.sourceCommitSha ?? null
 
   useEffect(() => {
     if (!reviewSourceCommitSha) return
-    setReviewDraftStates((previous) => {
-      if (previous.has(reviewSourceCommitSha)) return previous
-      const next = new Map(previous)
-      next.set(reviewSourceCommitSha, loadReviewDraftState(reviewSourceCommitSha))
-      return next
-    })
+    if (reviewDraftStatesRef.current.has(reviewSourceCommitSha)) return
+    const next = new Map(reviewDraftStatesRef.current)
+    next.set(reviewSourceCommitSha, loadReviewDraftState(reviewSourceCommitSha))
+    reviewDraftStatesRef.current = next
+    setReviewDraftStates(next)
   }, [reviewSourceCommitSha])
 
   const reviewDraftState = useMemo(() => {
@@ -75,12 +75,12 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
 
   function updateReviewDraft(patch: Partial<ReviewDraft>): void {
     if (!reviewSourceCommitSha) return
-    setReviewDraftStates((previous) => {
-      const current = previous.get(reviewSourceCommitSha) ?? loadReviewDraftState(reviewSourceCommitSha)
-      const next = new Map(previous)
-      next.set(reviewSourceCommitSha, updateReviewDraftState(current, patch))
-      return next
-    })
+    const current = reviewDraftStatesRef.current.get(reviewSourceCommitSha)
+      ?? loadReviewDraftState(reviewSourceCommitSha)
+    const next = new Map(reviewDraftStatesRef.current)
+    next.set(reviewSourceCommitSha, updateReviewDraftState(current, patch))
+    reviewDraftStatesRef.current = next
+    setReviewDraftStates(next)
   }
 
   function toggleCompare(id: string): void {
