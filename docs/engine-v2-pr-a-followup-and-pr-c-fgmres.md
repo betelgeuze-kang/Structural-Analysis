@@ -1,5 +1,9 @@
 # Engine v2 PR-A 후속 계약 및 PR-C CPU FGMRES 스택
 
+> 2026-07-19 상태 메모: 이 스택은 PR #104로 `main`에 squash merge됐다.
+> 후속 Result authority 계약은
+> `docs/engine-v2-result-diagnostic-authority.md`에 분리되어 있다.
+
 ## 상태 경계
 
 이 문서는 PR #104 exact head 위의 **별도 후속 스택**을 설명한다. PR #104의
@@ -212,7 +216,8 @@ tamper가 포함된다.
 - PR #104 인간 contract review, Draft 해제, 승인된 squash merge
 - 이 후속 스택의 독립 리뷰와 승인된 integration 경로
 - 실제 GitHub Actions run에서 보존된 4-way coordinate 및 matrix receipt artifact
-- engineering result recovery/ResultIR 및 reaction 계약
+- displacement-only NumericalResultIR/DiagnosticIR 타입은 후속 slice에 구현됨;
+  engineering result recovery, reaction 및 member-force 계약은 계속 미구현
 - CPU/HIP가 동일 reduced identity와 numeric bytes를 소비한다는 hardware receipt
 - benchmark hierarchy, nonlinear consistent residual/Jacobian, full-load continuation
 - 제품 shell/Viewer/persistence 상태와 PR #102 정리

@@ -66,6 +66,19 @@ Do not claim:
 
 until the corresponding G1 terminal evidence passes and the product readiness snapshot clears the numerical blockers.
 
+## Engine v2 result authority boundary
+
+Engine v2는 solver recurrence와 결과 권위를 분리한다. CPU FGMRES receipt 자체는
+계속 `non_authoritative_solver_recurrence`이며 ResultIR를 직접 만들지 않는다.
+후속 `NumericalResultIR` v1은 exact scaled ExecutionPlan, reduced CSR, committed
+StateIR, free-solution bytes, independent full-residual/BC receipts를 결합한
+global-displacement state에만 수치 권위를 부여한다. `DiagnosticIR`는 sanitized
+code/path 관찰만 보존하며 모든 결과 권위가 false다.
+
+Reaction, local-axis member force, engineering design/code compliance, legacy API와
+Viewer projection, release 또는 commercial authority는 아직 이 계약 범위 밖이다.
+자세한 내용은 `docs/engine-v2-result-diagnostic-authority.md`를 참조한다.
+
 ## Modal and buckling boundary
 
 The repository has strict deterministic dense generalized-eigen kernels for

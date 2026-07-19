@@ -2914,7 +2914,7 @@
   "schema_version": "structural-scope-contamination-audit.v1",
   "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
   "status": "quarantined",
-  "tracked_path_count": 6250,
+  "tracked_path_count": 6255,
   "unquarantined_family_counts": {},
   "unquarantined_git_state_counts": {},
   "unquarantined_non_structural_path_count": 0,

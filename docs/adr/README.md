@@ -14,11 +14,12 @@ ADR은 현재 G1-G10 또는 AI-G1-AI-G10 폐쇄 증거가 아니다. 구현과 f
 ## 구현 경계
 
 ADR은 전체 Engine v2의 장기 결정을 기록하지만, 코드 타입과 runtime은 추출 PR
-순서에 맞춰 단계적으로 도입한다. PR A는 canonical array/hash, `ModelIR`,
-`StateIR`, backend-neutral `ExecutionPlan`만 구현한다. ADR에서 언급하는
-equation scaling, CPU/HIP solver, numerical/diagnostic result authority, AI runtime,
-hardware evidence는 각각의 후속 PR gate를 통과하기 전까지 구현 완료로 간주하지
-않는다.
+순서에 맞춰 단계적으로 도입한다. PR #104까지 canonical array/hash, `ModelIR`,
+`StateIR`, backend-neutral `ExecutionPlan`, equation scaling, reduced CSR, CPU
+FGMRES와 제한된 HIP contract가 도입됐다. 후속 Result authority slice는
+displacement-only `NumericalResultIR`와 비권위 `DiagnosticIR` 타입을 추가한다.
+reaction/member-force recovery, output adapter, AI runtime과 미검증 hardware
+evidence는 각각의 후속 PR gate를 통과하기 전까지 구현 완료로 간주하지 않는다.
 
 ## Index
 

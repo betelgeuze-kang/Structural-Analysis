@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/numerical_result_ir_v1.schema.json",
+  "title": "Engine v2 numerical ResultIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "result_id",
+    "result_kind",
+    "authority_profile",
+    "promotion_basis",
+    "bindings",
+    "source_terminal",
+    "numerical_state",
+    "authority",
+    "diagnostic_ir_hashes",
+    "claim_boundary",
+    "extensions",
+    "result_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-numerical-result-ir.v1"
+    },
+    "result_id": {"$ref": "#/$defs/stable_id"},
+    "result_kind": {"const": "linear_static_numerical_state"},
+    "authority_profile": {
+      "const": "authoritative_converged_linear_static_displacement.v1"
+    },
+    "promotion_basis": {
+      "const": "converged_recurrence_plus_independent_full_residual_bc_and_committed_state.v1"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "reduced_csr_identity_hash",
+        "equation_scaling_hash",
+        "operator_hash",
+        "state_hash",
+        "state_epoch",
+        "load_pattern_id"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/sha256"},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "reduced_csr_identity_hash": {"$ref": "#/$defs/sha256"},
+        "equation_scaling_hash": {"$ref": "#/$defs/sha256"},
+        "operator_hash": {"$ref": "#/$defs/sha256"},
+        "state_hash": {"$ref": "#/$defs/sha256"},
+        "state_epoch": {"type": "integer", "minimum": 1},
+        "load_pattern_id": {"$ref": "#/$defs/stable_id"}
+      }
+    },
+    "source_terminal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_schema_version",
+        "run_hash",
+        "source_authority",
+        "terminal_reason",
+        "solution_data_hash",
+        "free_solution_value_count",
+        "convergence_receipt_hash",
+        "full_residual_receipt_hash",
+        "boundary_condition_receipt_hash",
+        "backend_role",
+        "backend_receipt_hash",
+        "residual_sign",
+        "fallback_count",
+        "regularization_count",
+        "convergence_gate_passed",
+        "independent_full_residual_gate_passed",
+        "boundary_condition_gate_passed",
+        "committed_state_gate_passed"
+      ],
+      "properties": {
+        "run_schema_version": {"$ref": "#/$defs/stable_id"},
+        "run_hash": {"$ref": "#/$defs/sha256"},
+        "source_authority": {"const": "non_authoritative_solver_recurrence"},
+        "terminal_reason": {
+          "enum": ["initial_residual_satisfied", "converged_scaled_residual"]
+        },
+        "solution_data_hash": {"$ref": "#/$defs/sha256"},
+        "free_solution_value_count": {"type": "integer", "minimum": 1},
+        "convergence_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "full_residual_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "boundary_condition_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "backend_role": {"enum": ["cpu_reference", "cpu_optimized", "hip"]},
+        "backend_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "residual_sign": {"const": "internal_minus_external"},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0},
+        "convergence_gate_passed": {"const": true},
+        "independent_full_residual_gate_passed": {"const": true},
+        "boundary_condition_gate_passed": {"const": true},
+        "committed_state_gate_passed": {"const": true}
+      }
+    },
+    "numerical_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "epoch",
+        "load_factor",
+        "time_s",
+        "dof_count",
+        "dof_components",
+        "displacement_artifact"
+      ],
+      "properties": {
+        "role": {"const": "committed"},
+        "epoch": {"type": "integer", "minimum": 1},
+        "load_factor": {"type": "number"},
+        "time_s": {"type": "number", "minimum": 0},
+        "dof_count": {"type": "integer", "minimum": 6, "multipleOf": 6},
+        "dof_components": {
+          "const": ["UX", "UY", "UZ", "RX", "RY", "RZ"]
+        },
+        "displacement_artifact": {"$ref": "#/$defs/displacement_artifact"}
+      }
+    },
+    "authority": {
+      "const": {
+        "numerical_state": "authoritative",
+        "convergence": "authoritative",
+        "displacement": "authoritative",
+        "reaction": "not_evaluated",
+        "member_force": "not_evaluated",
+        "engineering_design": "not_authoritative",
+        "code_compliance": "not_authoritative",
+        "release_readiness": "not_authoritative",
+        "commercial_use": "not_authoritative"
+      }
+    },
+    "diagnostic_ir_hashes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/sha256"}
+    },
+    "claim_boundary": {
+      "const": {
+        "description": "Authoritative committed numerical displacement state only; reaction, member-force, engineering-design, output-adapter, readiness, and commercial authority are outside this contract.",
+        "committed_numerical_state": true,
+        "global_displacement_state_projection": true,
+        "engineering_result_recovery": false,
+        "reaction_authority": false,
+        "member_force_authority": false,
+        "legacy_output_adapter": false,
+        "viewer_projection": false,
+        "release_readiness": false,
+        "commercial_claim": false
+      }
+    },
+    "extensions": {"$ref": "#/$defs/extensions"},
+    "result_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"
+      },
+      "additionalProperties": true
+    },
+    "displacement_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_order",
+        "byte_length",
+        "storage_profile",
+        "unit_profile",
+        "data_hash",
+        "content_hash",
+        "artifact_uri"
+      ],
+      "properties": {
+        "name": {"const": "displacement_global_si"},
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 6}
+        },
+        "layout": {"const": "C"},
+        "byte_order": {"const": "little"},
+        "byte_length": {"type": "integer", "minimum": 48},
+        "storage_profile": {
+          "const": "canonical_little_endian_fp64_binary.v1"
+        },
+        "unit_profile": {
+          "const": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+        },
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "artifact_uri": {
+          "type": "string",
+          "pattern": "^artifact://engine-v2/results/[A-Za-z][A-Za-z0-9_.:-]{0,127}/displacement_global\\.f64le$"
+        }
+      }
+    }
+  }
+}
