@@ -123,7 +123,7 @@
         "roundtrip_sha256": {"$ref": "#/$defs/sha256"},
         "roundtrip_json_sha256": {"$ref": "#/$defs/sha256"},
         "roundtrip_json_hash_mode": {
-          "const": "canonical_json_without_generated_at.v1"
+          "const": "canonical_json_without_generated_at_repo_relative_source_path.v2"
         },
         "checkpoint_sha256": {"$ref": "#/$defs/sha256"},
         "checkpoint_schema": {"type": "string", "minLength": 1},

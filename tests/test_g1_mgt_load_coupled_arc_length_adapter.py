@@ -61,12 +61,39 @@ def _synthetic_problem():
         initial_factor=0.656,
         reference_load_free_n=reference_load_n,
         residual_free_n=residual_free_n,
-        negative_load_derivative_free_n=(
-            negative_load_derivative_free_n
-        ),
+        negative_load_derivative_free_n=(negative_load_derivative_free_n),
         tangent_difference_step_m=1.0e-7,
     )
     return problem, matrix, load_coupling, cubic_n_per_m3
+
+
+def test_roundtrip_json_hash_is_independent_of_checkout_path() -> None:
+    mgt_path = PHASE1 / "open_data/midas/midas_generator_33.optimized.mgt"
+    first = {
+        "generated_at": "2026-07-19T00:00:00Z",
+        "source": {
+            "path": "/tmp/first-worktree/model.mgt",
+            "sha256": "a" * 64,
+        },
+        "model": {"node_count": 2},
+    }
+    second = {
+        **first,
+        "generated_at": "2026-07-19T01:00:00Z",
+        "source": {
+            **first["source"],
+            "path": "C:/second-worktree/model.mgt",
+        },
+    }
+
+    assert module._canonical_roundtrip_json_hash(
+        first,
+        mgt_path=mgt_path,
+    ) == module._canonical_roundtrip_json_hash(
+        second,
+        mgt_path=mgt_path,
+    )
+    assert first["source"]["path"] == "/tmp/first-worktree/model.mgt"
 
 
 def test_callback_problem_converts_newtons_to_kilonewtons() -> None:
@@ -74,12 +101,9 @@ def test_callback_problem_converts_newtons_to_kilonewtons() -> None:
     displacement = problem.initial_free_displacements_m()
     load_factor = problem.initial_load_factor()
 
-    expected_residual_kn = (
-        problem.residual_free_n(displacement, load_factor) / 1000.0
-    )
+    expected_residual_kn = problem.residual_free_n(displacement, load_factor) / 1000.0
     expected_load_rhs_kn = (
-        problem.negative_load_derivative_free_n(displacement, load_factor)
-        / 1000.0
+        problem.negative_load_derivative_free_n(displacement, load_factor) / 1000.0
     )
 
     np.testing.assert_array_equal(problem.reference_load_kn(), [1.0, -0.25, 0.5])
@@ -123,10 +147,10 @@ def test_callback_tangent_action_matches_analytic_load_coupled_jacobian() -> Non
     load_factor = problem.initial_load_factor()
     direction = np.asarray([0.5, -0.2, 0.9])
     analytic = (
-        matrix
-        + load_factor * load_coupling
-        + np.diag(3.0 * cubic * displacement**2)
-    ) @ direction / 1000.0
+        (matrix + load_factor * load_coupling + np.diag(3.0 * cubic * displacement**2))
+        @ direction
+        / 1000.0
+    )
 
     action = problem.consistent_state_tangent_action_kn_per_m(
         displacement,
@@ -158,11 +182,14 @@ def test_callback_prefers_bound_analytic_state_tangent_action() -> None:
     displacement = bound.initial_free_displacements_m()
     load_factor = bound.initial_load_factor()
     direction = np.asarray([0.5, -0.2, 0.9])
-    expected = analytic_action_n_per_m(
-        displacement,
-        load_factor,
-        direction,
-    ) / 1000.0
+    expected = (
+        analytic_action_n_per_m(
+            displacement,
+            load_factor,
+            direction,
+        )
+        / 1000.0
+    )
 
     np.testing.assert_array_equal(
         bound.consistent_state_tangent_action_kn_per_m(
@@ -185,9 +212,7 @@ def test_initial_state_audit_passes_without_promoting_g1() -> None:
     assert payload["status"] == "partial"
     assert payload["contract_pass"] is True
     assert payload["promotes_g1_closure"] is False
-    assert payload[
-        "residual_equilibrium_gate_required_by_adapter_audit"
-    ] is False
+    assert payload["residual_equilibrium_gate_required_by_adapter_audit"] is False
     assert payload["residual_equilibrium_gate_passed"] is False
     assert payload["negative_load_derivative_gate_passed"] is True
     assert payload["negative_load_derivative_absolute_tolerance_kn"] == 1.0e-6
@@ -219,10 +244,7 @@ def test_zero_state_problem_reuses_exact_linear_csr_tangent() -> None:
         displacement: np.ndarray,
         load_factor: float,
     ) -> np.ndarray:
-        return (
-            tangent_n_per_m @ displacement
-            - float(load_factor) * reference_load_n
-        )
+        return tangent_n_per_m @ displacement - float(load_factor) * reference_load_n
 
     problem = module.LoadCoupledArcLengthCallbackProblem(
         case_id="linear_state_invariant_contract",
@@ -235,9 +257,7 @@ def test_zero_state_problem_reuses_exact_linear_csr_tangent() -> None:
         ),
         initial_state_policy="historical_checkpoint",
         state_invariant_tangent_csr_n_per_m=tangent_n_per_m,
-        state_invariant_tangent_contract=(
-            module.MGT_STATE_INVARIANT_TANGENT_CONTRACT
-        ),
+        state_invariant_tangent_contract=(module.MGT_STATE_INVARIANT_TANGENT_CONTRACT),
     )
 
     zero_problem = problem.zero_state_problem()
@@ -375,8 +395,7 @@ def test_matrix_free_operator_binding_propagates_to_zero_state() -> None:
         initial_factor=0.0,
         reference_load_free_n=reference_load_n,
         residual_free_n=lambda displacement, load_factor: (
-            tangent_n_per_m @ displacement
-            - load_factor * reference_load_n
+            tangent_n_per_m @ displacement - load_factor * reference_load_n
         ),
         negative_load_derivative_free_n=(
             lambda displacement, load_factor: reference_load_n
@@ -386,9 +405,7 @@ def test_matrix_free_operator_binding_propagates_to_zero_state() -> None:
             module.MGT_REFERENCE_PRECONDITIONER_CONTRACT
         ),
         state_tangent_action_free_n_per_m=(
-            lambda displacement, load_factor, direction: (
-                tangent_n_per_m @ direction
-            )
+            lambda displacement, load_factor, direction: tangent_n_per_m @ direction
         ),
         free_equation_global_dofs=free_dofs,
         residual_formula_hash=residual_formula_hash,
@@ -452,9 +469,7 @@ def test_backend_neutral_operator_drives_callback_and_extended_binding() -> None
         initial_displacements_m=np.zeros(2),
         initial_factor=0.0,
         reference_load_free_n=np.asarray([500.0, -250.0]),
-        residual_free_n=lambda displacement, load_factor: (
-            matrix @ displacement
-        ),
+        residual_free_n=lambda displacement, load_factor: matrix @ displacement,
         negative_load_derivative_free_n=(
             lambda displacement, load_factor: np.asarray([500.0, -250.0])
         ),
@@ -487,9 +502,7 @@ def test_backend_neutral_operator_drives_callback_and_extended_binding() -> None
     assert binding["current_tangent_operator_profile"] == (
         CURRENT_TANGENT_OPERATOR_PROFILE
     )
-    assert binding["current_tangent_operator_contract_hash"] == (
-        operator.contract_hash
-    )
+    assert binding["current_tangent_operator_contract_hash"] == (operator.contract_hash)
     assert binding["current_tangent_operator_array_bundle_hash"] == (
         operator.array_bundle_hash
     )
@@ -560,13 +573,9 @@ def test_roundtrip_json_hash_discards_only_generated_at_fields() -> None:
 
     first_hash = module._canonical_json_hash_without_generated_at(first)
 
-    assert first_hash == module._canonical_json_hash_without_generated_at(
-        second
-    )
+    assert first_hash == module._canonical_json_hash_without_generated_at(second)
     second["model"]["nodes"] = [{"id": 2}]
-    assert first_hash != module._canonical_json_hash_without_generated_at(
-        second
-    )
+    assert first_hash != module._canonical_json_hash_without_generated_at(second)
 
 
 def test_real_builder_fails_closed_when_inputs_are_missing(tmp_path: Path) -> None:

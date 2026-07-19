@@ -951,8 +951,8 @@
     "roundtrip_derivation": "parse_midas_mgt_to_json_npz:no_resolve_rigid_links:no_drop_unreferenced_nodes",
     "roundtrip_generated_uncoarsened": true,
     "roundtrip_json": null,
-    "roundtrip_json_hash_mode": "canonical_json_without_generated_at.v1",
-    "roundtrip_json_sha256": "sha256:cc33b8253fd25c84ea2e9d2a2c8d86758f003f20a729ef6fa7613feb198f97d6",
+    "roundtrip_json_hash_mode": "canonical_json_without_generated_at_repo_relative_source_path.v2",
+    "roundtrip_json_sha256": "sha256:7f3ee6659bf4a11531b7ffd984ae931b4c01af45a155c688042b1ec4189d9dc6",
     "roundtrip_npz": null,
     "roundtrip_sha256": "sha256:d95097f6d0a40d950f38dda4fe287bca2428ea3e476bebeb3424d458eac409de",
     "schema_version": "g1-mgt-load-coupled-arc-length-adapter.v1",
@@ -2139,7 +2139,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-19T07:15:04.956691+00:00",
+  "generated_at": "2026-07-19T11:10:28.678423+00:00",
   "initial_state_audit": {
     "blockers_remaining": [
       "initial_checkpoint_not_required_to_satisfy_arc_length_residual_gate",
@@ -2188,7 +2188,7 @@
     "tangent_step_comparison_relative_error": 3.3783233839930677e-12
   },
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
     "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
@@ -2206,10 +2206,10 @@
     "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:aa7948c0ea1478bf33b2a7d460808fb7754c9ea905a501fdaec1f566c6459af9",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
-    "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json": "sha256:609f8bcfb286bc5c1a4464cd1738121c82e59585638815133c93d7f056172658",
+    "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json": "sha256:a04172f6aabcbd92299fcb93cf091680affece0e4a385bb3d39136e8171be68c",
     "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:42642fa2b9997bac8ba8a1aa76de3211749352aae46ee8e2bb7a545c3032cdda",
     "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
-    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:9857bee3bd4b418e6356f3826b41735a0def626bb3f20748397c02713ffb9eda",
+    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:f92f6d65a24cd59d7c18a29f9624fa04d52e32d400be8f951485519f64e8e210",
     "tests/test_mgt_physical_residual_assembly.py": "sha256:07956e81f561e06af794e1808e3398bb8c13e54c1d0938456fd2f560fea16982",
     "tests/test_mgt_semantic_load_assembly.py": "sha256:8349d6213e690ce12d33375a18f278a145c52eb48e63b386208f13ecadf9f968",
     "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
@@ -2217,7 +2217,7 @@
   },
   "schema_version": "g1-mgt-load-coupled-arc-length-adapter-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+  "source_commit_sha": "de08647587de76bc2a387278eac7b8884e4cb76a",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "stored_receipt_comparison": {

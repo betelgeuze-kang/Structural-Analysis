@@ -33,9 +33,7 @@ StateTangentActionFreeNPerM = Callable[
     np.ndarray,
 ]
 
-MGT_LOAD_COUPLED_ADAPTER_SCHEMA_VERSION = (
-    "g1-mgt-load-coupled-arc-length-adapter.v1"
-)
+MGT_LOAD_COUPLED_ADAPTER_SCHEMA_VERSION = "g1-mgt-load-coupled-arc-length-adapter.v1"
 MGT_LOAD_COUPLED_ADAPTER_CLAIM_BOUNDARY = (
     "This adapter evaluates the real MGT frame/shell/spring physical residual "
     "against the complete authored LIVE nodal and uniform global-Z plate-face "
@@ -45,20 +43,19 @@ MGT_LOAD_COUPLED_ADAPTER_CLAIM_BOUNDARY = (
     "full continuation path, connect material-state commit/rollback, use Engine "
     "v2 production Krylov or ROCm/HIP, create a load-1.0 checkpoint, or close G1."
 )
-MGT_STATE_INVARIANT_TANGENT_CONTRACT = (
-    "linear_reference_geometry_residual_exact_csr.v1"
-)
+MGT_STATE_INVARIANT_TANGENT_CONTRACT = "linear_reference_geometry_residual_exact_csr.v1"
 MGT_REFERENCE_PRECONDITIONER_CONTRACT = (
     "zero_state_linear_reference_geometry_csr_preconditioner.v1"
 )
-MGT_RESIDUAL_PARENT_EQUIVALENCE_AUDIT = (
-    "mgt-residual-parent-component-equivalence.v1"
-)
+MGT_RESIDUAL_PARENT_EQUIVALENCE_AUDIT = "mgt-residual-parent-component-equivalence.v1"
 MGT_MATRIX_FREE_OPERATOR_BINDING_SCHEMA_VERSION = (
     "matrix-free-current-state-tangent-operator-binding.v1"
 )
 MGT_CURRENT_STATE_TANGENT_ACTION_CONTRACT = (
     "analytic_reference_load_frame_delta_finite_chord_axial_action.v1"
+)
+MGT_ROUNDTRIP_JSON_HASH_MODE = (
+    "canonical_json_without_generated_at_repo_relative_source_path.v2"
 )
 MGT_INITIAL_STATE_POLICIES = frozenset(
     {"provided_initial_state", "historical_checkpoint", "zero_state"}
@@ -123,6 +120,26 @@ def _repo_relative_path(path: Path) -> str:
         return path.resolve().relative_to(repo_root).as_posix()
     except ValueError:
         return str(path)
+
+
+def _canonical_roundtrip_json_hash(
+    payload: dict[str, Any],
+    *,
+    mgt_path: Path,
+) -> str:
+    """Hash round-trip semantics without embedding the checkout location."""
+
+    source = payload.get("source")
+    if not isinstance(source, dict):
+        raise ValueError("roundtrip_json.source must contain an object")
+    normalized = {
+        **payload,
+        "source": {
+            **source,
+            "path": _repo_relative_path(mgt_path),
+        },
+    }
+    return _canonical_json_hash_without_generated_at(normalized)
 
 
 def _stable_parser_report_summary(report: dict[str, Any]) -> dict[str, Any]:
@@ -218,9 +235,7 @@ class LoadCoupledArcLengthCallbackProblem:
     state_invariant_tangent_contract: str = "unavailable"
     reference_preconditioner_csr_n_per_m: Any | None = None
     reference_preconditioner_contract: str = "unavailable"
-    state_tangent_action_free_n_per_m: (
-        StateTangentActionFreeNPerM | None
-    ) = None
+    state_tangent_action_free_n_per_m: StateTangentActionFreeNPerM | None = None
     free_equation_global_dofs: np.ndarray | None = None
     residual_formula_hash: str = "unavailable"
     current_tangent_action_contract: str = "unavailable"
@@ -257,9 +272,8 @@ class LoadCoupledArcLengthCallbackProblem:
         )
         object.__setattr__(self, "initial_displacements_m", displacements)
         object.__setattr__(self, "reference_load_free_n", reference)
-        if (
-            self.state_tangent_action_free_n_per_m is not None
-            and not callable(self.state_tangent_action_free_n_per_m)
+        if self.state_tangent_action_free_n_per_m is not None and not callable(
+            self.state_tangent_action_free_n_per_m
         ):
             raise ValueError("state_tangent_action_free_n_per_m must be callable")
         free_order = self.free_equation_global_dofs
@@ -300,9 +314,8 @@ class LoadCoupledArcLengthCallbackProblem:
                 raw_free_order,
                 dtype="<i8",
             )
-            if (
-                np.any(normalized_free_order < 0)
-                or np.any(np.diff(normalized_free_order) <= 0)
+            if np.any(normalized_free_order < 0) or np.any(
+                np.diff(normalized_free_order) <= 0
             ):
                 raise ValueError(
                     "free_equation_global_dofs must be strictly increasing"
@@ -315,9 +328,7 @@ class LoadCoupledArcLengthCallbackProblem:
                     for character in residual_formula_hash[7:]
                 )
             ):
-                raise ValueError(
-                    "residual_formula_hash must be canonical SHA-256"
-                )
+                raise ValueError("residual_formula_hash must be canonical SHA-256")
             if (
                 not current_tangent_action_contract
                 or current_tangent_action_contract == "unavailable"
@@ -348,8 +359,7 @@ class LoadCoupledArcLengthCallbackProblem:
             if current_tangent_operator is not None:
                 if (
                     current_tangent_operator.case_id != str(self.case_id)
-                    or current_tangent_operator.equation_count
-                    != displacements.size
+                    or current_tangent_operator.equation_count != displacements.size
                     or current_tangent_operator.residual_formula_hash
                     != residual_formula_hash
                     or current_tangent_operator.source_action_contract
@@ -379,9 +389,7 @@ class LoadCoupledArcLengthCallbackProblem:
         tangent_contract = str(self.state_invariant_tangent_contract).strip()
         if tangent is None:
             if tangent_contract != "unavailable":
-                raise ValueError(
-                    "state_invariant_tangent_contract requires a tangent"
-                )
+                raise ValueError("state_invariant_tangent_contract requires a tangent")
         else:
             from scipy.sparse import csr_matrix
 
@@ -395,13 +403,9 @@ class LoadCoupledArcLengthCallbackProblem:
                     "state_invariant_tangent_csr_n_per_m dimension mismatch"
                 )
             if not np.all(np.isfinite(tangent_csr.data)):
-                raise ValueError(
-                    "state_invariant_tangent_csr_n_per_m must be finite"
-                )
+                raise ValueError("state_invariant_tangent_csr_n_per_m must be finite")
             if not tangent_contract or tangent_contract == "unavailable":
-                raise ValueError(
-                    "state_invariant_tangent_contract is required"
-                )
+                raise ValueError("state_invariant_tangent_contract is required")
             object.__setattr__(
                 self,
                 "state_invariant_tangent_csr_n_per_m",
@@ -413,9 +417,7 @@ class LoadCoupledArcLengthCallbackProblem:
                 tangent_contract,
             )
         preconditioner = self.reference_preconditioner_csr_n_per_m
-        preconditioner_contract = str(
-            self.reference_preconditioner_contract
-        ).strip()
+        preconditioner_contract = str(self.reference_preconditioner_contract).strip()
         if preconditioner is None:
             if preconditioner_contract != "unavailable":
                 raise ValueError(
@@ -438,16 +440,9 @@ class LoadCoupledArcLengthCallbackProblem:
                     "reference_preconditioner_csr_n_per_m dimension mismatch"
                 )
             if not np.all(np.isfinite(preconditioner_csr.data)):
-                raise ValueError(
-                    "reference_preconditioner_csr_n_per_m must be finite"
-                )
-            if (
-                not preconditioner_contract
-                or preconditioner_contract == "unavailable"
-            ):
-                raise ValueError(
-                    "reference_preconditioner_contract is required"
-                )
+                raise ValueError("reference_preconditioner_csr_n_per_m must be finite")
+            if not preconditioner_contract or preconditioner_contract == "unavailable":
+                raise ValueError("reference_preconditioner_contract is required")
             object.__setattr__(
                 self,
                 "reference_preconditioner_csr_n_per_m",
@@ -490,32 +485,22 @@ class LoadCoupledArcLengthCallbackProblem:
             initial_factor=0.0,
             reference_load_free_n=self.reference_load_free_n,
             residual_free_n=self.residual_free_n,
-            negative_load_derivative_free_n=(
-                self.negative_load_derivative_free_n
-            ),
+            negative_load_derivative_free_n=(self.negative_load_derivative_free_n),
             tangent_difference_step_m=self.tangent_difference_step_m,
             zero_state_predictor_free_m=self.zero_state_predictor_free_m,
             initial_state_policy="zero_state",
             state_invariant_tangent_csr_n_per_m=(
                 self.state_invariant_tangent_csr_n_per_m
             ),
-            state_invariant_tangent_contract=(
-                self.state_invariant_tangent_contract
-            ),
+            state_invariant_tangent_contract=(self.state_invariant_tangent_contract),
             reference_preconditioner_csr_n_per_m=(
                 self.reference_preconditioner_csr_n_per_m
             ),
-            reference_preconditioner_contract=(
-                self.reference_preconditioner_contract
-            ),
-            state_tangent_action_free_n_per_m=(
-                self.state_tangent_action_free_n_per_m
-            ),
+            reference_preconditioner_contract=(self.reference_preconditioner_contract),
+            state_tangent_action_free_n_per_m=(self.state_tangent_action_free_n_per_m),
             free_equation_global_dofs=self.free_equation_global_dofs,
             residual_formula_hash=self.residual_formula_hash,
-            current_tangent_action_contract=(
-                self.current_tangent_action_contract
-            ),
+            current_tangent_action_contract=(self.current_tangent_action_contract),
             current_tangent_operator=self.current_tangent_operator,
         )
 
@@ -552,9 +537,7 @@ class LoadCoupledArcLengthCallbackProblem:
                 dtype="<i8",
             ),
             "residual_formula_hash": self.residual_formula_hash,
-            "current_tangent_action_contract": (
-                self.current_tangent_action_contract
-            ),
+            "current_tangent_action_contract": (self.current_tangent_action_contract),
             "reference_load_free_n_data_hash": _array_hash(
                 self.reference_load_free_n,
                 dtype="<f8",
@@ -654,11 +637,7 @@ class LoadCoupledArcLengthCallbackProblem:
             displacements - step * normalized_direction,
             load_factor,
         )
-        return (
-            direction_inf
-            * (residual_plus - residual_minus)
-            / (2.0 * step)
-        )
+        return direction_inf * (residual_plus - residual_minus) / (2.0 * step)
 
     def consistent_state_tangent_action_kn_per_m(
         self,
@@ -713,9 +692,7 @@ class _LoadBoundFrameForceCache:
     def assemble(self, displacement_u: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
         zero_force, zero_meta = self.zero_load_cache.assemble(displacement_u)
         unit_force, unit_meta = self.unit_load_cache.assemble(displacement_u)
-        force = np.asarray(zero_force, dtype=np.float64) + float(
-            self.load_factor
-        ) * (
+        force = np.asarray(zero_force, dtype=np.float64) + float(self.load_factor) * (
             np.asarray(unit_force, dtype=np.float64)
             - np.asarray(zero_force, dtype=np.float64)
         )
@@ -731,15 +708,9 @@ class _LoadBoundFrameForceCache:
         self,
         displacement_batch: np.ndarray,
     ) -> tuple[np.ndarray, dict[str, Any]]:
-        zero_force, zero_meta = self.zero_load_cache.assemble_batch(
-            displacement_batch
-        )
-        unit_force, unit_meta = self.unit_load_cache.assemble_batch(
-            displacement_batch
-        )
-        force = np.asarray(zero_force, dtype=np.float64) + float(
-            self.load_factor
-        ) * (
+        zero_force, zero_meta = self.zero_load_cache.assemble_batch(displacement_batch)
+        unit_force, unit_meta = self.unit_load_cache.assemble_batch(displacement_batch)
+        force = np.asarray(zero_force, dtype=np.float64) + float(self.load_factor) * (
             np.asarray(unit_force, dtype=np.float64)
             - np.asarray(zero_force, dtype=np.float64)
         )
@@ -837,11 +808,9 @@ def build_real_mgt_load_coupled_arc_length_problem(
         temporary_roundtrip = tempfile.TemporaryDirectory(
             prefix="g1-load-coupled-adapter-"
         )
-        parsed_json, parsed_npz, parser_report, parser_run = (
-            _run_uncoarsened_parser(
-                mgt_path=mgt_path,
-                work_dir=Path(temporary_roundtrip.name),
-            )
+        parsed_json, parsed_npz, parser_report, parser_run = _run_uncoarsened_parser(
+            mgt_path=mgt_path,
+            work_dir=Path(temporary_roundtrip.name),
         )
         roundtrip_json_path = parsed_json
         roundtrip_path = parsed_npz
@@ -851,9 +820,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             raise ValueError("roundtrip_json resolution failed")
         roundtrip_json_path = Path(roundtrip_json)
     model_text = mgt_path.read_text(encoding="utf-8", errors="ignore")
-    roundtrip_payload = json.loads(
-        roundtrip_json_path.read_text(encoding="utf-8")
-    )
+    roundtrip_payload = json.loads(roundtrip_json_path.read_text(encoding="utf-8"))
     if not isinstance(roundtrip_payload, dict):
         raise ValueError("roundtrip_json must contain an object")
     constraints = parse_mgt_support_constraints(model_text)
@@ -896,9 +863,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             checkpoint["displacement_u"],
             dtype=np.float64,
         )
-        checkpoint_load_factor = float(
-            np.asarray(checkpoint["load_scale"]).item()
-        )
+        checkpoint_load_factor = float(np.asarray(checkpoint["load_scale"]).item())
         checkpoint_schema = str(
             np.asarray(
                 checkpoint[
@@ -944,17 +909,15 @@ def build_real_mgt_load_coupled_arc_length_problem(
         dof_count=dof_count,
         stiffness_scale_to_si=stiffness_scale_to_si,
     )
-    reference_external_n, semantic_load_audit = (
-        assemble_mgt_semantic_reference_load(
-            model_payload=roundtrip_payload,
-            load_case=semantic_load_case,
-            node_id=node_id,
-            node_xyz=node_xyz,
-            elem_id=elem_id,
-            elem_type_code=elem_type_code,
-            conn_ptr=conn_ptr,
-            conn_idx=conn_idx,
-        )
+    reference_external_n, semantic_load_audit = assemble_mgt_semantic_reference_load(
+        model_payload=roundtrip_payload,
+        load_case=semantic_load_case,
+        node_id=node_id,
+        node_xyz=node_xyz,
+        elem_id=elem_id,
+        elem_type_code=elem_type_code,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
     )
     base_axial: dict[int, float] = {}
     zero_axial: dict[int, float] = {}
@@ -1085,9 +1048,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "zero_state_free_equation_count": int(zero_state_free.size),
         "unit_load_active_dof_count": int(unit_load_active.size),
         "unit_load_free_equation_count": int(free.size),
-        "fixed_free_map_exact": bool(
-            np.array_equal(zero_state_free, free)
-        ),
+        "fixed_free_map_exact": bool(np.array_equal(zero_state_free, free)),
         "zero_state_free_dof_hash": _array_hash(
             zero_state_free,
             dtype="<i8",
@@ -1095,12 +1056,8 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "unit_load_free_dof_hash": _array_hash(free, dtype="<i8"),
         "zero_only_free_equation_count": int(zero_only_free.size),
         "unit_only_free_equation_count": int(unit_only_free.size),
-        "zero_only_free_global_dof_head": [
-            int(value) for value in zero_only_free[:32]
-        ],
-        "unit_only_free_global_dof_head": [
-            int(value) for value in unit_only_free[:32]
-        ],
+        "zero_only_free_global_dof_head": [int(value) for value in zero_only_free[:32]],
+        "unit_only_free_global_dof_head": [int(value) for value in unit_only_free[:32]],
         "zero_tangent_on_unit_map_zero_row_count": int(
             np.count_nonzero(zero_row_nnz == 0)
         ),
@@ -1130,14 +1087,10 @@ def build_real_mgt_load_coupled_arc_length_problem(
     restrained_array = np.asarray(sorted(restrained), dtype=np.int64)
     free_graph_rows: list[dict[str, Any]] = []
     for component_index in range(int(free_graph_component_count)):
-        component_local = np.flatnonzero(
-            free_graph_labels == component_index
-        )
+        component_local = np.flatnonzero(free_graph_labels == component_index)
         component_global = free[component_local]
         restrained_coupling_nnz = int(
-            zero_state_stiffness[component_global, :][
-                :, restrained_array
-            ].nnz
+            zero_state_stiffness[component_global, :][:, restrained_array].nnz
         )
         component_rhs_inf_n = float(
             np.linalg.norm(
@@ -1146,23 +1099,16 @@ def build_real_mgt_load_coupled_arc_length_problem(
             )
         )
         component_node_ids = sorted(
-            {
-                int(node_id[int(value) // DOF_PER_NODE])
-                for value in component_global
-            }
+            {int(node_id[int(value) // DOF_PER_NODE]) for value in component_global}
         )
         free_graph_rows.append(
             {
                 "component_index": component_index,
                 "free_equation_count": int(component_local.size),
                 "restrained_coupling_nnz": restrained_coupling_nnz,
-                "anchored_to_restrained_dof": bool(
-                    restrained_coupling_nnz > 0
-                ),
+                "anchored_to_restrained_dof": bool(restrained_coupling_nnz > 0),
                 "reference_load_inf_n": component_rhs_inf_n,
-                "global_dof_head": [
-                    int(value) for value in component_global[:16]
-                ],
+                "global_dof_head": [int(value) for value in component_global[:16]],
                 "distinct_node_count": int(len(component_node_ids)),
                 "node_id_head": component_node_ids[:32],
                 "dof_labels": sorted(
@@ -1247,19 +1193,15 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "nonlinear_remainder_relative_noise_tolerance": 2.0e-11,
         "fallback_count": 0,
         "regularization_count": 0,
-        "loaded_component_count": int(
-            len(loaded_free_graph_component_indices)
-        ),
+        "loaded_component_count": int(len(loaded_free_graph_component_indices)),
         "unloaded_component_zero_solution_count": int(
-            free_graph_component_count
-            - len(loaded_free_graph_component_indices)
+            free_graph_component_count - len(loaded_free_graph_component_indices)
         ),
     }
-    if int(
-        zero_to_unit_free_map_audit[
-            "free_graph_unanchored_loaded_component_count"
-        ]
-    ) > 0:
+    if (
+        int(zero_to_unit_free_map_audit["free_graph_unanchored_loaded_component_count"])
+        > 0
+    ):
         zero_state_predictor_linear_audit = {
             **predictor_audit_base,
             "status": "blocked",
@@ -1272,9 +1214,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             "full_unit_predictor_translation_inf_m": None,
             "full_unit_predictor_rotation_inf_rad": None,
             "solved_component_count": 0,
-            "failure": (
-                "preflight_unanchored_loaded_free_graph_components"
-            ),
+            "failure": ("preflight_unanchored_loaded_free_graph_components"),
         }
     else:
         try:
@@ -1290,44 +1230,32 @@ def build_real_mgt_load_coupled_arc_length_problem(
                     component_local = np.flatnonzero(
                         free_graph_labels == component_index
                     )
-                    component_operator = zero_reduced_on_unit_map[
-                        component_local, :
-                    ][:, component_local]
-                    component_rhs = reference_external_n[
-                        free[component_local]
+                    component_operator = zero_reduced_on_unit_map[component_local, :][
+                        :, component_local
                     ]
+                    component_rhs = reference_external_n[free[component_local]]
                     component_direction = np.asarray(
                         spsolve(component_operator, component_rhs),
                         dtype=np.float64,
                     )
-                    if (
-                        component_direction.shape
-                        != (component_local.size,)
-                        or not np.all(np.isfinite(component_direction))
-                    ):
+                    if component_direction.shape != (
+                        component_local.size,
+                    ) or not np.all(np.isfinite(component_direction)):
                         raise ValueError(
-                            "zero-state component predictor direction is "
-                            "non-finite"
+                            "zero-state component predictor direction is non-finite"
                         )
-                    candidate_direction[component_local] = (
-                        component_direction
-                    )
+                    candidate_direction[component_local] = component_direction
                     solved_component_count += 1
-            if (
-                candidate_direction.shape != (free.size,)
-                or not np.all(np.isfinite(candidate_direction))
+            if candidate_direction.shape != (free.size,) or not np.all(
+                np.isfinite(candidate_direction)
             ):
-                raise ValueError(
-                    "zero-state predictor direction is non-finite"
-                )
+                raise ValueError("zero-state predictor direction is non-finite")
             linear_residual_n = np.asarray(
                 zero_reduced_on_unit_map @ candidate_direction
                 - reference_external_n[free],
                 dtype=np.float64,
             )
-            linear_residual_inf_n = float(
-                np.linalg.norm(linear_residual_n, ord=np.inf)
-            )
+            linear_residual_inf_n = float(np.linalg.norm(linear_residual_n, ord=np.inf))
             linear_rhs_inf_n = float(
                 np.linalg.norm(reference_external_n[free], ord=np.inf)
             )
@@ -1335,35 +1263,27 @@ def build_real_mgt_load_coupled_arc_length_problem(
             zero_state_predictor_linear_residual_n = linear_residual_n
             zero_state_predictor_linear_audit = {
                 **predictor_audit_base,
-                "status": "ready"
-                if linear_residual_inf_n <= 5.0e-4
-                else "blocked",
+                "status": "ready" if linear_residual_inf_n <= 5.0e-4 else "blocked",
                 "sparse_direct_solve_attempted": True,
                 "solve_finite": True,
                 "explicit_linear_residual_inf_n": linear_residual_inf_n,
                 "explicit_linear_relative_residual_inf": (
                     linear_residual_inf_n / max(linear_rhs_inf_n, 1.0e-30)
                 ),
-                "linear_residual_gate_passed": bool(
-                    linear_residual_inf_n <= 5.0e-4
-                ),
+                "linear_residual_gate_passed": bool(linear_residual_inf_n <= 5.0e-4),
                 "predictor_direction_hash": _array_hash(
                     candidate_direction,
                     dtype="<f8",
                 ),
                 "full_unit_predictor_translation_inf_m": float(
                     np.linalg.norm(
-                        candidate_direction[
-                            np.isin(free % DOF_PER_NODE, (0, 1, 2))
-                        ],
+                        candidate_direction[np.isin(free % DOF_PER_NODE, (0, 1, 2))],
                         ord=np.inf,
                     )
                 ),
                 "full_unit_predictor_rotation_inf_rad": float(
                     np.linalg.norm(
-                        candidate_direction[
-                            np.isin(free % DOF_PER_NODE, (3, 4, 5))
-                        ],
+                        candidate_direction[np.isin(free % DOF_PER_NODE, (3, 4, 5))],
                         ord=np.inf,
                     )
                 ),
@@ -1435,9 +1355,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             split_shell_components=split_shell_components,
             shell_operator_cache=shell_operator_cache,
             frame_force_cache=frame_cache,
-            state_updated_frame_axial_geometry=(
-                state_updated_frame_axial_geometry
-            ),
+            state_updated_frame_axial_geometry=(state_updated_frame_axial_geometry),
         )
 
     def residual_free_n(
@@ -1462,9 +1380,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                 - np.asarray(zero_frame_force, dtype=np.float64)
             )
             axial_geometry_correction_n, _ = (
-                state_updated_frame_axial_geometry.assemble_correction(
-                    global_u
-                )
+                state_updated_frame_axial_geometry.assemble_correction(global_u)
             )
             internal_free_n = (
                 np.asarray(
@@ -1500,9 +1416,8 @@ def build_real_mgt_load_coupled_arc_length_problem(
         global_u = _global_displacement(free_displacements_m)
         zero_force, _ = zero_frame_cache.assemble(global_u)
         unit_force, _ = unit_frame_cache.assemble(global_u)
-        frame_load_derivative = (
-            np.asarray(unit_force, dtype=np.float64)
-            - np.asarray(zero_force, dtype=np.float64)
+        frame_load_derivative = np.asarray(unit_force, dtype=np.float64) - np.asarray(
+            zero_force, dtype=np.float64
         )
         return np.asarray(
             reference_external_n[free] - frame_load_derivative[free],
@@ -1586,22 +1501,16 @@ def build_real_mgt_load_coupled_arc_length_problem(
                 np.linalg.norm(predictor_residual_n, ord=np.inf)
             )
             scaled_linear_residual_n = (
-                predictor_load_factor
-                * zero_state_predictor_linear_residual_n
+                predictor_load_factor * zero_state_predictor_linear_residual_n
             )
-            nonlinear_remainder_n = (
-                predictor_residual_n - scaled_linear_residual_n
-            )
+            nonlinear_remainder_n = predictor_residual_n - scaled_linear_residual_n
             nonlinear_remainder_inf_n = float(
                 np.linalg.norm(nonlinear_remainder_n, ord=np.inf)
             )
-            scaled_reference_inf_n = (
-                predictor_load_factor
-                * float(
-                    np.linalg.norm(
-                        reference_external_n[free],
-                        ord=np.inf,
-                    )
+            scaled_reference_inf_n = predictor_load_factor * float(
+                np.linalg.norm(
+                    reference_external_n[free],
+                    ord=np.inf,
                 )
             )
             nonlinear_remainder_noise_tolerance_n = max(
@@ -1613,14 +1522,11 @@ def build_real_mgt_load_coupled_arc_length_problem(
                 previous_step is not None
                 and previous_remainder_inf_n is not None
                 and previous_remainder_noise_tolerance_n is not None
-                and nonlinear_remainder_inf_n
-                > nonlinear_remainder_noise_tolerance_n
-                and previous_remainder_inf_n
-                > previous_remainder_noise_tolerance_n
+                and nonlinear_remainder_inf_n > nonlinear_remainder_noise_tolerance_n
+                and previous_remainder_inf_n > previous_remainder_noise_tolerance_n
             ):
                 observed_order = math.log(
-                    nonlinear_remainder_inf_n
-                    / previous_remainder_inf_n
+                    nonlinear_remainder_inf_n / previous_remainder_inf_n
                 ) / math.log(predictor_load_factor / previous_step)
                 observed_orders.append(observed_order)
             predictor_rows.append(
@@ -1628,8 +1534,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                     "load_factor": predictor_load_factor,
                     "residual_inf_n": predictor_residual_inf_n,
                     "residual_relative_to_scaled_reference_load": (
-                        predictor_residual_inf_n
-                        / max(scaled_reference_inf_n, 1.0e-30)
+                        predictor_residual_inf_n / max(scaled_reference_inf_n, 1.0e-30)
                     ),
                     "scaled_linear_solve_residual_floor_inf_n": float(
                         np.linalg.norm(
@@ -1637,9 +1542,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                             ord=np.inf,
                         )
                     ),
-                    "nonlinear_remainder_inf_n": (
-                        nonlinear_remainder_inf_n
-                    ),
+                    "nonlinear_remainder_inf_n": (nonlinear_remainder_inf_n),
                     "nonlinear_remainder_noise_tolerance_n": (
                         nonlinear_remainder_noise_tolerance_n
                     ),
@@ -1648,8 +1551,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                         > nonlinear_remainder_noise_tolerance_n
                     ),
                     "residual_over_load_factor_squared_n": (
-                        predictor_residual_inf_n
-                        / predictor_load_factor**2
+                        predictor_residual_inf_n / predictor_load_factor**2
                     ),
                     "maximum_predictor_translation_m": float(
                         np.linalg.norm(
@@ -1662,24 +1564,17 @@ def build_real_mgt_load_coupled_arc_length_problem(
                             ord=np.inf,
                         )
                     ),
-                    "observed_remainder_order_from_previous": (
-                        observed_order
-                    ),
+                    "observed_remainder_order_from_previous": (observed_order),
                 }
             )
             previous_step = predictor_load_factor
             previous_remainder_inf_n = nonlinear_remainder_inf_n
-            previous_remainder_noise_tolerance_n = (
-                nonlinear_remainder_noise_tolerance_n
-            )
-    minimum_observed_order = (
-        min(observed_orders) if observed_orders else None
-    )
+            previous_remainder_noise_tolerance_n = nonlinear_remainder_noise_tolerance_n
+    minimum_observed_order = min(observed_orders) if observed_orders else None
     linear_model_consistency_gate = bool(
         predictor_rows
         and all(
-            not bool(row["nonlinear_remainder_above_noise"])
-            for row in predictor_rows
+            not bool(row["nonlinear_remainder_above_noise"]) for row in predictor_rows
         )
     )
     measurable_quadratic_remainder_gate = bool(
@@ -1688,13 +1583,11 @@ def build_real_mgt_load_coupled_arc_length_problem(
         and minimum_observed_order >= 1.8
     )
     predictor_remainder_gate = bool(
-        linear_model_consistency_gate
-        or measurable_quadratic_remainder_gate
+        linear_model_consistency_gate or measurable_quadratic_remainder_gate
     )
     zero_state_predictor_contract_pass = bool(
         zero_state_predictor_linear_audit["linear_residual_gate_passed"]
-        and float(np.linalg.norm(zero_state_residual_n, ord=np.inf))
-        <= 1.0e-12
+        and float(np.linalg.norm(zero_state_residual_n, ord=np.inf)) <= 1.0e-12
         and zero_state_load_direction_error_inf_n <= 1.0e-9
         and predictor_remainder_gate
     )
@@ -1713,8 +1606,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
         ),
         "zero_state_equilibrium_tolerance_n": 1.0e-12,
         "zero_state_equilibrium_gate_passed": bool(
-            float(np.linalg.norm(zero_state_residual_n, ord=np.inf))
-            <= 1.0e-12
+            float(np.linalg.norm(zero_state_residual_n, ord=np.inf)) <= 1.0e-12
         ),
         "zero_state_load_direction_error_inf_n": (
             zero_state_load_direction_error_inf_n
@@ -1722,9 +1614,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "zero_state_load_direction_gate_passed": bool(
             zero_state_load_direction_error_inf_n <= 1.0e-9
         ),
-        "predictor_load_factors": [
-            float(row["load_factor"]) for row in predictor_rows
-        ],
+        "predictor_load_factors": [float(row["load_factor"]) for row in predictor_rows],
         "predictor_rows": predictor_rows,
         "minimum_observed_remainder_order": minimum_observed_order,
         "remainder_classification": (
@@ -1734,9 +1624,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             if measurable_quadratic_remainder_gate
             else "remainder_contract_failed"
         ),
-        "linear_model_consistency_gate_passed": (
-            linear_model_consistency_gate
-        ),
+        "linear_model_consistency_gate_passed": (linear_model_consistency_gate),
         "measurable_quadratic_remainder_gate_passed": (
             measurable_quadratic_remainder_gate
         ),
@@ -1744,9 +1632,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
         # Preserve the legacy field without widening its meaning: it is true
         # only when a measurable quadratic remainder was observed. The
         # broader predictor contract is recorded separately above.
-        "quadratic_remainder_gate_passed": (
-            measurable_quadratic_remainder_gate
-        ),
+        "quadratic_remainder_gate_passed": (measurable_quadratic_remainder_gate),
         "full_arc_length_continuation_executed": False,
         "production_solver_claim": False,
         "claim_boundary": (
@@ -1785,8 +1671,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             audit_load_factor,
         )
         component_residual_free_n = np.asarray(
-            component_internal_n[free]
-            - audit_load_factor * reference_external_n[free],
+            component_internal_n[free] - audit_load_factor * reference_external_n[free],
             dtype=np.float64,
         )
         parent_component_difference_n = np.asarray(
@@ -1827,8 +1712,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             "schema_version": MGT_RESIDUAL_PARENT_EQUIVALENCE_AUDIT,
             "status": (
                 "ready"
-                if parent_repeat_bytes_exact
-                and parent_component_gate_passed
+                if parent_repeat_bytes_exact and parent_component_gate_passed
                 else "blocked"
             ),
             "applicable": True,
@@ -1840,14 +1724,10 @@ def build_real_mgt_load_coupled_arc_length_problem(
             "component_sum_residual_inf_n": float(
                 np.linalg.norm(component_residual_free_n, ord=np.inf)
             ),
-            "parent_component_difference_inf_n": (
-                parent_component_difference_inf_n
-            ),
+            "parent_component_difference_inf_n": (parent_component_difference_inf_n),
             "component_internal_force_inf_n": component_internal_inf_n,
             "comparison_scale_n": comparison_scale_n,
-            "comparison_relative_tolerance": (
-                comparison_relative_tolerance
-            ),
+            "comparison_relative_tolerance": (comparison_relative_tolerance),
             "comparison_tolerance_n": comparison_tolerance_n,
             "parent_component_gate_passed": parent_component_gate_passed,
             "parent_repeat_bytes_exact": parent_repeat_bytes_exact,
@@ -1856,8 +1736,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                 dtype="<f8",
             ),
             "contract_pass": bool(
-                parent_repeat_bytes_exact
-                and parent_component_gate_passed
+                parent_repeat_bytes_exact and parent_component_gate_passed
             ),
             "claim_boundary": (
                 "At the full-unit linear predictor, the tangent-parent "
@@ -1889,18 +1768,13 @@ def build_real_mgt_load_coupled_arc_length_problem(
     )
     component_forces = initial_internal_meta.pop("component_forces")
     initial_residual_free_n = np.asarray(
-        initial_internal_n[free]
-        - checkpoint_load_factor * reference_external_n[free],
+        initial_internal_n[free] - checkpoint_load_factor * reference_external_n[free],
         dtype=np.float64,
     )
-    residual_argmax_free_index = int(
-        np.argmax(np.abs(initial_residual_free_n))
-    )
+    residual_argmax_free_index = int(np.argmax(np.abs(initial_residual_free_n)))
     residual_argmax_global_dof = int(free[residual_argmax_free_index])
     component_free_inf_n = {
-        str(name): float(
-            np.linalg.norm(np.asarray(values)[free], ord=np.inf)
-        )
+        str(name): float(np.linalg.norm(np.asarray(values)[free], ord=np.inf))
         for name, values in component_forces.items()
     }
     component_at_argmax_n = {
@@ -2017,9 +1891,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                     if reference_length > 0.0
                     else 0.0
                 ),
-                "element_force_inf_n": float(
-                    np.linalg.norm(element_force, ord=np.inf)
-                ),
+                "element_force_inf_n": float(np.linalg.norm(element_force, ord=np.inf)),
                 "element_force_at_hotspot_dof_n": float(
                     element_force[hotspot_local_dof]
                 ),
@@ -2054,13 +1926,10 @@ def build_real_mgt_load_coupled_arc_length_problem(
             if reference_length <= 0.0:
                 continue
             translation_jump = (
-                checkpoint_translation[node_j]
-                - checkpoint_translation[node_i]
+                checkpoint_translation[node_j] - checkpoint_translation[node_i]
             )
             deformed_edge = reference_edge + translation_jump
-            edge_strain = (
-                float(np.linalg.norm(deformed_edge)) / reference_length - 1.0
-            )
+            edge_strain = float(np.linalg.norm(deformed_edge)) / reference_length - 1.0
             maximum_translation_jump_m = max(
                 maximum_translation_jump_m,
                 float(np.linalg.norm(translation_jump)),
@@ -2073,9 +1942,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             {
                 "element_id": int(elem_id[int(surface_index)]),
                 "node_ids": [int(node_id[int(index)]) for index in nodes],
-                "maximum_perimeter_translation_jump_m": (
-                    maximum_translation_jump_m
-                ),
+                "maximum_perimeter_translation_jump_m": (maximum_translation_jump_m),
                 "maximum_perimeter_edge_engineering_strain_abs": (
                     maximum_edge_engineering_strain_abs
                 ),
@@ -2085,15 +1952,11 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "physical_internal_force_model": initial_internal_meta.get(
             "physical_internal_force_model"
         ),
-        "use_force_based_frame": initial_internal_meta.get(
-            "use_force_based_frame"
-        ),
+        "use_force_based_frame": initial_internal_meta.get("use_force_based_frame"),
         "shell_internal_force_model": initial_internal_meta.get(
             "shell_internal_force_model"
         ),
-        "residual_inf_n": float(
-            np.linalg.norm(initial_residual_free_n, ord=np.inf)
-        ),
+        "residual_inf_n": float(np.linalg.norm(initial_residual_free_n, ord=np.inf)),
         "internal_force_free_inf_n": float(
             np.linalg.norm(initial_internal_n[free], ord=np.inf)
         ),
@@ -2120,8 +1983,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             initial_internal_n[residual_argmax_global_dof]
         ),
         "external_force_at_residual_argmax_n": float(
-            checkpoint_load_factor
-            * reference_external_n[residual_argmax_global_dof]
+            checkpoint_load_factor * reference_external_n[residual_argmax_global_dof]
         ),
         "component_force_at_residual_argmax_n": component_at_argmax_n,
         "dominant_component_at_residual_argmax": (
@@ -2135,13 +1997,9 @@ def build_real_mgt_load_coupled_arc_length_problem(
         ],
         "hotspot_checkpoint_dofs": [
             float(value)
-            for value in checkpoint_u.reshape((-1, DOF_PER_NODE))[
-                hotspot_node_index
-            ]
+            for value in checkpoint_u.reshape((-1, DOF_PER_NODE))[hotspot_node_index]
         ],
-        "hotspot_connected_frame_element_count": int(
-            len(connected_frame_elements)
-        ),
+        "hotspot_connected_frame_element_count": int(len(connected_frame_elements)),
         "hotspot_connected_frame_elements": connected_frame_elements,
         "hotspot_dominant_frame_element_id": (
             int(connected_frame_elements[0]["element_id"])
@@ -2149,15 +2007,10 @@ def build_real_mgt_load_coupled_arc_length_problem(
             else None
         ),
         "hotspot_maximum_connected_frame_force_inf_n": max(
-            (
-                float(row["element_force_inf_n"])
-                for row in connected_frame_elements
-            ),
+            (float(row["element_force_inf_n"]) for row in connected_frame_elements),
             default=0.0,
         ),
-        "hotspot_connected_shell_element_count": int(
-            len(connected_shell_elements)
-        ),
+        "hotspot_connected_shell_element_count": int(len(connected_shell_elements)),
         "hotspot_connected_shell_elements": connected_shell_elements,
         "hotspot_maximum_perimeter_translation_jump_m": max(
             (
@@ -2168,11 +2021,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
         ),
         "hotspot_maximum_perimeter_edge_engineering_strain_abs": max(
             (
-                float(
-                    row[
-                        "maximum_perimeter_edge_engineering_strain_abs"
-                    ]
-                )
+                float(row["maximum_perimeter_edge_engineering_strain_abs"])
                 for row in connected_shell_elements
             ),
             default=0.0,
@@ -2185,8 +2034,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
     )
     state_dependent_operator_classification = (
         "state_dependent_shell_material_and_frame_axial_geometry"
-        if apply_shell_material_tangent
-        and apply_state_updated_frame_axial_geometry
+        if apply_shell_material_tangent and apply_state_updated_frame_axial_geometry
         else (
             "state_dependent_shell_material_tangent"
             if apply_shell_material_tangent
@@ -2195,9 +2043,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
     )
     state_invariant_tangent_contract = {
         "schema_version": MGT_STATE_INVARIANT_TANGENT_CONTRACT,
-        "status": (
-            "ready" if state_invariant_tangent_available else "blocked"
-        ),
+        "status": ("ready" if state_invariant_tangent_available else "blocked"),
         "available": state_invariant_tangent_available,
         "operator_classification": (
             "state_invariant_linear_reference_geometry"
@@ -2224,9 +2070,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "current_state_reassembly_required": bool(
             not state_invariant_tangent_available
         ),
-        "exact_for_adapter_residual_model": (
-            state_invariant_tangent_available
-        ),
+        "exact_for_adapter_residual_model": (state_invariant_tangent_available),
         "nonlinear_current_tangent_claim": False,
         "quadratic_convergence_claim": False,
         "material_state_commit_rollback_claim": False,
@@ -2271,14 +2115,11 @@ def build_real_mgt_load_coupled_arc_length_problem(
             _canonical_json_hash_without_generated_at(residual_formula)
         ),
         "mode": (
-            "reference_csr_plus_load_frame_delta_plus_"
-            "finite_chord_correction"
+            "reference_csr_plus_load_frame_delta_plus_finite_chord_correction"
             if analytic_parent_residual
             else "component_internal_force_sum"
         ),
-        "reference_csr_parent_matches_analytic_tangent": bool(
-            analytic_parent_residual
-        ),
+        "reference_csr_parent_matches_analytic_tangent": bool(analytic_parent_residual),
         "load_frame_delta_parent_matches_analytic_tangent": bool(
             analytic_parent_residual
         ),
@@ -2316,9 +2157,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                 "current-tangent parent arrays have inconsistent global DOFs"
             )
         if not np.array_equal(zero_frame_cache.dofs, unit_frame_cache.dofs):
-            raise ValueError(
-                "zero/unit frame caches use different element DOF orders"
-            )
+            raise ValueError("zero/unit frame caches use different element DOF orders")
         frame_stiffness_delta_n_per_m = np.ascontiguousarray(
             np.asarray(
                 unit_frame_cache.element_stiffness,
@@ -2332,25 +2171,18 @@ def build_real_mgt_load_coupled_arc_length_problem(
         )
         current_tangent_operator = create_current_tangent_operator(
             case_id="g1_real_mgt_load_coupled_arc_length_adapter",
-            residual_formula_hash=residual_evaluation_contract[
-                "residual_formula_hash"
-            ],
+            residual_formula_hash=residual_evaluation_contract["residual_formula_hash"],
             source_action_contract=MGT_CURRENT_STATE_TANGENT_ACTION_CONTRACT,
             reference_row_pointer=zero_reduced_on_unit_map.indptr,
             reference_column_indices=zero_reduced_on_unit_map.indices,
             reference_values_n_per_m=zero_reduced_on_unit_map.data,
             free_global_dofs=free,
-            background_global_displacements_m=(
-                zero_reference_background_u
-            ),
+            background_global_displacements_m=(zero_reference_background_u),
             frame_dofs=zero_frame_cache.dofs,
-            frame_stiffness_delta_n_per_m=(
-                frame_stiffness_delta_n_per_m
-            ),
+            frame_stiffness_delta_n_per_m=(frame_stiffness_delta_n_per_m),
             geometry_dofs=state_updated_frame_axial_geometry.dofs,
             geometry_relative_translation_operators=(
-                state_updated_frame_axial_geometry
-                .relative_translation_operators
+                state_updated_frame_axial_geometry.relative_translation_operators
             ),
             geometry_reference_chords_m=(
                 state_updated_frame_axial_geometry.reference_chords_m
@@ -2359,8 +2191,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                 state_updated_frame_axial_geometry.reference_lengths_m
             ),
             geometry_axial_stiffness_n_per_m=(
-                state_updated_frame_axial_geometry
-                .axial_stiffness_n_per_m
+                state_updated_frame_axial_geometry.axial_stiffness_n_per_m
             ),
         )
         del frame_stiffness_delta_n_per_m
@@ -2385,9 +2216,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
         ),
         initial_state_policy="historical_checkpoint",
         state_invariant_tangent_csr_n_per_m=(
-            zero_reduced_on_unit_map
-            if state_invariant_tangent_available
-            else None
+            zero_reduced_on_unit_map if state_invariant_tangent_available else None
         ),
         state_invariant_tangent_contract=(
             MGT_STATE_INVARIANT_TANGENT_CONTRACT
@@ -2395,9 +2224,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
             else "unavailable"
         ),
         reference_preconditioner_csr_n_per_m=zero_reduced_on_unit_map,
-        reference_preconditioner_contract=(
-            MGT_REFERENCE_PRECONDITIONER_CONTRACT
-        ),
+        reference_preconditioner_contract=(MGT_REFERENCE_PRECONDITIONER_CONTRACT),
         state_tangent_action_free_n_per_m=(
             state_tangent_action_free_n_per_m
             if state_updated_frame_axial_geometry is not None
@@ -2429,14 +2256,10 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "case_id": problem.case_id,
         "mgt_path": _repo_relative_path(mgt_path),
         "roundtrip_npz": (
-            None
-            if generated_roundtrip
-            else _repo_relative_path(roundtrip_path)
+            None if generated_roundtrip else _repo_relative_path(roundtrip_path)
         ),
         "roundtrip_json": (
-            None
-            if generated_roundtrip
-            else _repo_relative_path(roundtrip_json_path)
+            None if generated_roundtrip else _repo_relative_path(roundtrip_json_path)
         ),
         "roundtrip_derivation": (
             "parse_midas_mgt_to_json_npz:no_resolve_rigid_links:"
@@ -2449,11 +2272,12 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "mgt_sha256": _file_hash(mgt_path),
         "roundtrip_sha256": _file_hash(roundtrip_path),
         "roundtrip_json_sha256": (
-            _canonical_json_hash_without_generated_at(roundtrip_payload)
+            _canonical_roundtrip_json_hash(
+                roundtrip_payload,
+                mgt_path=mgt_path,
+            )
         ),
-        "roundtrip_json_hash_mode": (
-            "canonical_json_without_generated_at.v1"
-        ),
+        "roundtrip_json_hash_mode": MGT_ROUNDTRIP_JSON_HASH_MODE,
         "checkpoint_sha256": _file_hash(checkpoint_npz),
         "checkpoint_schema": checkpoint_schema,
         "checkpoint_load_factor": checkpoint_load_factor,
@@ -2464,20 +2288,14 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "element_count": int(elem_id.size),
         "frame_element_count": int(len(frame_elements)),
         "frame_connectivity_audit": frame_connectivity_audit,
-        "frame_source_property_coverage_audit": (
-            frame_source_property_coverage_audit
-        ),
+        "frame_source_property_coverage_audit": (frame_source_property_coverage_audit),
         "section_property_count": int(len(section_props)),
         "material_property_count": int(len(material_props)),
         "material_analysis_property_binding": props[
             "material_analysis_property_binding"
         ],
-        "dgn_material_property_alias_audit": props[
-            "dgn_material_property_alias_audit"
-        ],
-        "plate_thickness_property_count": int(
-            len(plate_thickness_props)
-        ),
+        "dgn_material_property_alias_audit": props["dgn_material_property_alias_audit"],
+        "plate_thickness_property_count": int(len(plate_thickness_props)),
         "source_material_properties_consumed": bool(
             frame_source_property_coverage_audit[
                 "resolved_source_property_element_count"
@@ -2485,14 +2303,10 @@ def build_real_mgt_load_coupled_arc_length_problem(
             > 0
         ),
         "all_frame_source_material_properties_resolved": bool(
-            frame_source_property_coverage_audit[
-                "exact_source_property_coverage"
-            ]
+            frame_source_property_coverage_audit["exact_source_property_coverage"]
         ),
         "actual_mgt_semantic_load_case_consumed": bool(
-            semantic_load_audit[
-                "actual_mgt_semantic_load_target_consumed"
-            ]
+            semantic_load_audit["actual_mgt_semantic_load_target_consumed"]
             and semantic_load_audit["target_kind"] == "static_load_case"
         ),
         "global_dof_count": dof_count,
@@ -2514,35 +2328,23 @@ def build_real_mgt_load_coupled_arc_length_problem(
             "benchmark_bridge_proxy": False,
             "load_case": str(semantic_load_audit["target_name"]),
             "selected_case_row_accounting_exact": bool(
-                semantic_load_audit[
-                    "selected_case_row_accounting_exact"
-                ]
+                semantic_load_audit["selected_case_row_accounting_exact"]
             ),
-            "frame_component": (
-                "authored_live_nodal_force_and_nodal_moment_rows"
-            ),
+            "frame_component": ("authored_live_nodal_force_and_nodal_moment_rows"),
             "shell_component": (
                 "authored_live_uniform_global_z_plate_face_pressure_rows"
             ),
             "source_mgt_nodal_load_rows_consumed": bool(
-                semantic_load_audit[
-                    "source_mgt_nodal_load_rows_consumed"
-                ]
+                semantic_load_audit["source_mgt_nodal_load_rows_consumed"]
             ),
             "source_mgt_selfweight_rows_consumed": bool(
-                semantic_load_audit[
-                    "source_mgt_selfweight_rows_consumed"
-                ]
+                semantic_load_audit["source_mgt_selfweight_rows_consumed"]
             ),
             "source_mgt_pressure_load_rows_consumed": bool(
-                semantic_load_audit[
-                    "source_mgt_pressure_load_rows_consumed"
-                ]
+                semantic_load_audit["source_mgt_pressure_load_rows_consumed"]
             ),
             "source_mgt_load_combination_consumed": bool(
-                semantic_load_audit[
-                    "source_mgt_load_combination_consumed"
-                ]
+                semantic_load_audit["source_mgt_load_combination_consumed"]
             ),
             "production_load_case_claim": False,
             "checkpoint_reference_load_contract_matches": False,
@@ -2550,20 +2352,14 @@ def build_real_mgt_load_coupled_arc_length_problem(
         "semantic_load_assembly": semantic_load_audit,
         "zero_to_unit_free_map_audit": zero_to_unit_free_map_audit,
         "zero_state_sparse_predictor_audit": zero_state_predictor_audit,
-        "state_invariant_tangent_contract": (
-            state_invariant_tangent_contract
-        ),
+        "state_invariant_tangent_contract": (state_invariant_tangent_contract),
         "residual_evaluation_contract": residual_evaluation_contract,
-        "residual_parent_equivalence_audit": (
-            residual_parent_equivalence_audit
-        ),
+        "residual_parent_equivalence_audit": (residual_parent_equivalence_audit),
         "reference_preconditioner_contract": {
             "schema_version": MGT_REFERENCE_PRECONDITIONER_CONTRACT,
             "status": "ready",
             "available": True,
-            "operator_classification": (
-                "zero_state_linear_reference_geometry"
-            ),
+            "operator_classification": ("zero_state_linear_reference_geometry"),
             "equation_count": int(free.size),
             "operator_nnz": int(zero_reduced_on_unit_map.nnz),
             "csr_row_pointer_hash": _array_hash(
@@ -2579,9 +2375,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                 dtype="<f8",
             ),
             "intended_use": "fixed_right_preconditioner",
-            "exact_for_adapter_residual_model": bool(
-                state_invariant_tangent_available
-            ),
+            "exact_for_adapter_residual_model": bool(state_invariant_tangent_available),
             "approximate_for_state_dependent_adapter": bool(
                 not state_invariant_tangent_available
             ),
@@ -2657,9 +2451,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
                 "mgt_semantic_load_assembly:uniform_global_z_plate_face"
             ),
         },
-        "uncoarsened_parser_report": _stable_parser_report_summary(
-            parser_report
-        ),
+        "uncoarsened_parser_report": _stable_parser_report_summary(parser_report),
         "uncoarsened_parser_run": {
             "return_code": parser_run.get("return_code"),
             "profile": (
@@ -2742,8 +2534,7 @@ def audit_load_coupled_problem_at_initial_state(
     load_derivative_relative_tolerance = 1.0e-8
     load_gate = bool(
         load_error_inf <= load_derivative_absolute_tolerance_kn
-        or load_error_inf / load_reference_inf
-        <= load_derivative_relative_tolerance
+        or load_error_inf / load_reference_inf <= load_derivative_relative_tolerance
     )
     tangent_gate = bool(
         tangent_error_inf <= 1.0e-5
@@ -2764,9 +2555,7 @@ def audit_load_coupled_problem_at_initial_state(
         "load_factor": load_factor,
         "residual_inf_norm_kn": float(np.linalg.norm(residual, ord=np.inf)),
         "residual_finite": residual_finite,
-        "residual_equilibrium_tolerance_kn": (
-            residual_equilibrium_tolerance_kn
-        ),
+        "residual_equilibrium_tolerance_kn": (residual_equilibrium_tolerance_kn),
         "residual_equilibrium_gate_required_by_adapter_audit": False,
         "residual_equilibrium_gate_passed": residual_equilibrium_gate,
         "load_difference_step": step,
@@ -2787,9 +2576,7 @@ def audit_load_coupled_problem_at_initial_state(
         "tangent_difference_step_m": problem.tangent_difference_step_m,
         "tangent_reference_step_m": float(tangent_reference_step_m),
         "tangent_direction_nonzero_count": nonzero_count,
-        "tangent_action_inf_norm_kn": float(
-            np.linalg.norm(tangent_action, ord=np.inf)
-        ),
+        "tangent_action_inf_norm_kn": float(np.linalg.norm(tangent_action, ord=np.inf)),
         "maximum_tangent_step_comparison_error_kn": tangent_error_inf,
         "tangent_step_comparison_relative_error": (
             tangent_error_inf / tangent_reference_inf
