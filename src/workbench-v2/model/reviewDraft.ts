@@ -149,6 +149,12 @@ function isDecision(value: unknown): value is ReviewDecisionValue {
   return value === 'unreviewed' || value === 'pass' || value === 'review' || value === 'fail'
 }
 
+function isValidSourceCommitSha(value: unknown): value is string {
+  return typeof value === 'string'
+    && value.trim().length > 0
+    && value.length <= MAX_SOURCE_COMMIT_CHARS
+}
+
 function isTimestamp(value: unknown): value is string | null {
   return value === null || (
     typeof value === 'string'
@@ -161,6 +167,7 @@ function isTimestamp(value: unknown): value is string | null {
 function normalizedDraft(value: unknown, sourceCommitSha: string): ReviewDraft | null {
   if (
     !isRecord(value)
+    || !isValidSourceCommitSha(sourceCommitSha)
     || !isDecision(value.decision)
     || typeof value.comment !== 'string'
     || value.comment.length > MAX_REVIEW_COMMENT_CHARS
@@ -242,7 +249,7 @@ export function loadReviewDraftState(
   options: ReviewDraftPersistenceOptions = {},
 ): ReviewDraftState {
   const base = defaultDraft(sourceCommitSha)
-  if (!sourceCommitSha || sourceCommitSha.length > MAX_SOURCE_COMMIT_CHARS) {
+  if (!isValidSourceCommitSha(sourceCommitSha)) {
     return makeState(base, makeReceipt({
       ok: false,
       operation: 'read',
@@ -372,6 +379,12 @@ export function updateReviewDraftState(
   patch: Partial<ReviewDraft>,
   options: ReviewDraftPersistenceOptions = {},
 ): ReviewDraftState {
+  if (!isValidSourceCommitSha(previous.draft.sourceCommitSha)) {
+    return makeState(previous.draft, previousStateReceipt(previous, {
+      code: 'review_draft_source_commit_invalid',
+      path: '/draft/sourceCommitSha',
+    }))
+  }
   let serialized: string
   let nextDraft: ReviewDraft
   try {
