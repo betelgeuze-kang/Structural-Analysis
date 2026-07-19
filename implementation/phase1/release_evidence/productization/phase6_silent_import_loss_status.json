@@ -1,28 +1,41 @@
 {
   "all_blockers": [
     "dataset_repository_url_missing",
+    "dirty_import_execution_missing",
     "gui_task_runner_not_implemented",
+    "ifc_import_health_execution_count_below_required:0/10",
+    "import_health_execution_missing",
     "per_file_license_review_pending",
-    "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+    "phase3_ifc_import_case_count_below_minimum",
     "phase3_ifc_import_case_quantity_credit_missing",
     "phase3_ifc_source_license_quantity_credit_below_required:0/10",
     "phase3_ifc_source_license_review_blockers_not_cleared:3",
     "product_legal_license_review_pending",
     "query_expected_answers_missing",
-    "query_task_file_checksums_missing"
+    "query_task_file_checksums_missing",
+    "silent_data_loss_negative_gate_not_executed",
+    "silent_import_loss_gate_not_executed",
+    "source_file_not_acquired",
+    "source_sha256_missing"
   ],
   "blocker_grouping_metadata": {
     "claim_boundary": "Query/GUI spillover blockers are carried through for visibility from the Phase 3 source-license receipt, but they are not direct silent-import-loss closure blockers and are excluded from the direct RC gate blocker list. The RC gate remains blocked until the direct source, checksum, license, quantity-credit, import execution, and silent-loss gate groups are clear.",
     "groups": {
       "checksum": {
-        "blocked": false,
-        "blockers": [],
+        "blocked": true,
+        "blockers": [
+          "source_sha256_missing"
+        ],
         "display_name": "checksum",
         "scope": "direct_silent_import_loss"
       },
       "import_execution": {
-        "blocked": false,
-        "blockers": [],
+        "blocked": true,
+        "blockers": [
+          "dirty_import_execution_missing",
+          "ifc_import_health_execution_count_below_required:0/10",
+          "import_health_execution_missing"
+        ],
         "display_name": "import execution",
         "scope": "direct_silent_import_loss"
       },
@@ -39,7 +52,6 @@
       "quantity_credit": {
         "blocked": true,
         "blockers": [
-          "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
           "phase3_ifc_import_case_quantity_credit_missing",
           "phase3_ifc_source_license_quantity_credit_below_required:0/10"
         ],
@@ -58,14 +70,20 @@
         "scope": "spillover_not_direct_silent_import_loss"
       },
       "silent_loss_gate": {
-        "blocked": false,
-        "blockers": [],
+        "blocked": true,
+        "blockers": [
+          "silent_data_loss_negative_gate_not_executed",
+          "silent_import_loss_gate_not_executed"
+        ],
         "display_name": "silent-loss gate",
         "scope": "direct_silent_import_loss"
       },
       "source_acquisition": {
-        "blocked": false,
-        "blockers": [],
+        "blocked": true,
+        "blockers": [
+          "phase3_ifc_import_case_count_below_minimum",
+          "source_file_not_acquired"
+        ],
         "display_name": "source/acquisition",
         "scope": "direct_silent_import_loss"
       }
@@ -74,24 +92,38 @@
     "unassigned_blockers": []
   },
   "blockers": [
+    "dirty_import_execution_missing",
+    "ifc_import_health_execution_count_below_required:0/10",
+    "import_health_execution_missing",
     "per_file_license_review_pending",
-    "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+    "phase3_ifc_import_case_count_below_minimum",
     "phase3_ifc_import_case_quantity_credit_missing",
     "phase3_ifc_source_license_quantity_credit_below_required:0/10",
     "phase3_ifc_source_license_review_blockers_not_cleared:3",
-    "product_legal_license_review_pending"
+    "product_legal_license_review_pending",
+    "silent_data_loss_negative_gate_not_executed",
+    "silent_import_loss_gate_not_executed",
+    "source_file_not_acquired",
+    "source_sha256_missing"
   ],
   "claim_boundary": "This receipt aggregates the current Phase 3 IFC source/license and import-health receipts for the RC silent-import-loss final gate. It does not download or bundle IFC files, approve product redistribution, prove import execution, or prove zero silent import loss until acquired/checksummed sources, license review, import-health execution, and silent-data-loss negative gates all pass. Query/GUI corpus readiness is reported separately as spillover evidence and does not by itself block the direct silent-import-loss final gate. The technical_silent_import_loss_zero field is scoped to acquired/checksummed sources plus executed import-health and negative silent-loss gates; product license review and quantity credit remain separate release/product-credit requirements.",
   "clean_selected_file_count": 2,
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "direct_blockers": [
+    "dirty_import_execution_missing",
+    "ifc_import_health_execution_count_below_required:0/10",
+    "import_health_execution_missing",
     "per_file_license_review_pending",
-    "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
+    "phase3_ifc_import_case_count_below_minimum",
     "phase3_ifc_import_case_quantity_credit_missing",
     "phase3_ifc_source_license_quantity_credit_below_required:0/10",
     "phase3_ifc_source_license_review_blockers_not_cleared:3",
-    "product_legal_license_review_pending"
+    "product_legal_license_review_pending",
+    "silent_data_loss_negative_gate_not_executed",
+    "silent_import_loss_gate_not_executed",
+    "source_file_not_acquired",
+    "source_sha256_missing"
   ],
   "dirty_selected_file_count": 8,
   "engine_version": "structural-optimization-workbench@1.0.0",
@@ -101,12 +133,12 @@
       "current": 10,
       "required": 10
     },
-    "import_health_execution_ready": true,
+    "import_health_execution_ready": false,
     "product_license_review_ready": false,
     "product_release_credit_ready": false,
-    "selected_file_checksums_ready": true,
-    "silent_data_loss_negative_gate_executed": true,
-    "source_files_acquired": true,
+    "selected_file_checksums_ready": false,
+    "silent_data_loss_negative_gate_executed": false,
+    "source_files_acquired": false,
     "source_license_quantity_credit_ready": {
       "contract_pass": false,
       "current": 0,
@@ -118,22 +150,21 @@
       "contract_pass": false,
       "pass_count": 0
     },
-    "technical_silent_import_loss_zero": true
+    "technical_silent_import_loss_zero": false
   },
-  "generated_at": "2026-07-01T21:12:10.159495+00:00",
-  "import_health_contract_pass_count": 10,
-  "import_health_execution_count": 10,
+  "generated_at": "2026-07-19T07:19:51.770029+00:00",
+  "import_health_contract_pass_count": 0,
+  "import_health_execution_count": 0,
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:6ebf9065f5b8394ae3e32a4281ae97a9cc397e8f2a795b9cef071278cb953630",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:190de20d56258bebee061d081bf7103c9f5f22df9198d61b4808ea4a332a8382",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:e247ff80b0f98644404bea047c21aa64f7a8320433f1b5fb6ef36a62526c6146",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:8e2ff5a3c583014ec323c0e7502197549f0226326a0ef2b30c95d262c099d711",
-    "scripts/build_phase6_silent_import_loss_status.py": "sha256:39e5274318dd2e9308a9f4edb1c74fd164a10fa9de38704bec3487a951c6535b"
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:67634b5cd346e9bed7fb1db629d3155e86ac93104dfeb37b00e46761148740bf",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:8e4cfadd13bfe6303e8aedb8f5ffa0df37a187043934a0438411002ab9b10558",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:89be85cca0fdcfa8661458e00033d72865e00dfde6de8f4037dbef52f6841b96",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:30c8542e7c870d8d54cac4ebedbf66ecbad9039bd1acb39f7f3d3889b57f861a",
+    "scripts/build_phase6_silent_import_loss_status.py": "sha256:e1a43c43c9bc81d4e9b83612c909a65cabd46e731347dbd4b7abd8a6a0b2dedc"
   },
-  "owner_action": "complete product/legal and per-file license review for quantity credit; close or explicitly defer the ifc-bench query/GUI spillover blockers; then refresh the RC final gate.",
+  "owner_action": "acquire/checksum all selected clean/dirty IFC source files; regenerate Phase 3 import-health and silent-data-loss receipts; complete product/legal and per-file license review for quantity credit; close or explicitly defer the ifc-bench query/GUI spillover blockers; then refresh the RC final gate.",
   "product_release_credit_blockers": [
     "per_file_license_review_pending",
-    "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
     "phase3_ifc_import_case_quantity_credit_missing",
     "phase3_ifc_source_license_quantity_credit_below_required:0/10",
     "phase3_ifc_source_license_review_blockers_not_cleared:3",
@@ -152,11 +183,11 @@
   "reused_evidence": true,
   "schema_version": "phase6-silent-import-loss-status.v1",
   "selected_import_case_count": 10,
-  "silent_import_loss_gate_pass_count": 10,
-  "silent_import_loss_zero": true,
-  "source_checksum_attached_count": 10,
-  "source_commit_sha": "d5920ed70fa4b9b8d419144f4d38ea96f22b5ee2",
-  "source_file_acquired_count": 10,
+  "silent_import_loss_gate_pass_count": 0,
+  "silent_import_loss_zero": false,
+  "source_checksum_attached_count": 0,
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+  "source_file_acquired_count": 0,
   "source_license_quantity_credit_ready_count": 0,
   "source_license_receipt_contract_pass": false,
   "source_license_review_blocker_count": 3,
@@ -168,8 +199,17 @@
     "query_task_file_checksums_missing"
   ],
   "status": "blocked",
-  "summary_line": "Phase 6 silent import loss: BLOCKED | selected=10/10 | executed=10/10",
-  "technical_direct_blockers": [],
-  "technical_silent_import_loss_zero": true,
-  "visible_entity_accounting_case_count": 10
+  "summary_line": "Phase 6 silent import loss: BLOCKED | selected=10/10 | executed=0/10",
+  "technical_direct_blockers": [
+    "dirty_import_execution_missing",
+    "ifc_import_health_execution_count_below_required:0/10",
+    "import_health_execution_missing",
+    "phase3_ifc_import_case_count_below_minimum",
+    "silent_data_loss_negative_gate_not_executed",
+    "silent_import_loss_gate_not_executed",
+    "source_file_not_acquired",
+    "source_sha256_missing"
+  ],
+  "technical_silent_import_loss_zero": false,
+  "visible_entity_accounting_case_count": 0
 }

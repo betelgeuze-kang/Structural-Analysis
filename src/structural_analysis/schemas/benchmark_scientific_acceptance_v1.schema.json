@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/benchmark_scientific_acceptance_v1.schema.json",
+  "title": "Benchmark scientific acceptance result v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "metric_family",
+    "contract_pass"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "benchmark-scientific-acceptance.v1"
+    },
+    "metric_family": {
+      "enum": [
+        "displacement",
+        "reaction_equilibrium",
+        "member_force_local",
+        "global_energy_norm",
+        "modal_frequency_and_mac",
+        "buckling_eigenvalue_and_mode",
+        "nonlinear_load_response_path",
+        "residual_observation"
+      ]
+    },
+    "contract_pass": {
+      "type": "boolean"
+    }
+  }
+}

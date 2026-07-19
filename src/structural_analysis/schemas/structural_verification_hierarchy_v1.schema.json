@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/structural_verification_hierarchy_v1.schema.json",
+  "title": "Structural verification hierarchy readiness v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "contract_pass",
+    "highest_verified_level",
+    "required_level_count",
+    "evidence_count",
+    "ready_evidence_count",
+    "input_blockers",
+    "policy",
+    "level_rows",
+    "evidence_rows",
+    "blockers",
+    "summary_line",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-verification-hierarchy.v1"},
+    "status": {"enum": ["pass", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "highest_verified_level": {"type": "integer", "minimum": 0, "maximum": 5},
+    "required_level_count": {"const": 5},
+    "evidence_count": {"type": "integer", "minimum": 0},
+    "ready_evidence_count": {"type": "integer", "minimum": 0},
+    "input_blockers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "policy": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/policy_level"}
+    },
+    "level_rows": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/level_row"}
+    },
+    "evidence_rows": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence_row"}
+    },
+    "blockers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "summary_line": {"type": "string", "minLength": 1},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "policy_slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["category", "label", "minimum_evidence_count"],
+      "properties": {
+        "category": {"type": "string"},
+        "label": {"type": "string"},
+        "minimum_evidence_count": {"type": "integer", "minimum": 1}
+      }
+    },
+    "policy_level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "level_id",
+        "label",
+        "truth_basis",
+        "slots",
+        "claim_boundary"
+      ],
+      "properties": {
+        "level": {"type": "integer", "minimum": 1, "maximum": 5},
+        "level_id": {"type": "string"},
+        "label": {"type": "string"},
+        "truth_basis": {"type": "string"},
+        "slots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/policy_slot"}
+        },
+        "claim_boundary": {"type": "string"}
+      }
+    },
+    "slot_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "category",
+        "label",
+        "minimum_evidence_count",
+        "ready_evidence_count",
+        "ready_evidence_ids",
+        "contract_pass",
+        "blockers"
+      ],
+      "properties": {
+        "category": {"type": "string"},
+        "label": {"type": "string"},
+        "minimum_evidence_count": {"type": "integer", "minimum": 1},
+        "ready_evidence_count": {"type": "integer", "minimum": 0},
+        "ready_evidence_ids": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "contract_pass": {"type": "boolean"},
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "level_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "level_id",
+        "label",
+        "truth_basis",
+        "evidence_count",
+        "ready_evidence_count",
+        "intrinsic_contract_pass",
+        "promotion_contract_pass",
+        "status",
+        "slot_rows",
+        "blockers",
+        "claim_boundary"
+      ],
+      "properties": {
+        "level": {"type": "integer", "minimum": 1, "maximum": 5},
+        "level_id": {"type": "string"},
+        "label": {"type": "string"},
+        "truth_basis": {"type": "string"},
+        "evidence_count": {"type": "integer", "minimum": 0},
+        "ready_evidence_count": {"type": "integer", "minimum": 0},
+        "intrinsic_contract_pass": {"type": "boolean"},
+        "promotion_contract_pass": {"type": "boolean"},
+        "status": {
+          "enum": ["ready", "partial", "missing", "blocked_by_prerequisite"]
+        },
+        "slot_rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/slot_row"}
+        },
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "claim_boundary": {"type": "string"}
+      }
+    },
+    "evidence_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "evidence_id",
+        "level",
+        "level_id",
+        "category",
+        "truth_basis",
+        "source_url_or_doi",
+        "source_sha256",
+        "decision",
+        "ready_for_hierarchy_credit",
+        "blockers",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-verification-evidence.v1"},
+        "evidence_id": {"type": "string"},
+        "level": {"type": "integer", "minimum": 0, "maximum": 5},
+        "level_id": {"type": "string"},
+        "category": {"type": "string"},
+        "truth_basis": {"type": "string"},
+        "source_url_or_doi": {"type": "string"},
+        "source_sha256": {"type": "string"},
+        "decision": {"type": "object"},
+        "ready_for_hierarchy_credit": {"type": "boolean"},
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "claim_boundary": {"type": "string"}
+      }
+    }
+  }
+}

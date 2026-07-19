@@ -13892,7 +13892,8 @@ def run_mgt_rocm_sparse_solver_probe(
 
     coupled_frame_elements, coupled_frame_meta = _select_coupled_frame_elements(
         node_xyz=node_xyz,
-        edge_index=edge_index,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
         elem_id=elem_id,
         elem_type_code=elem_type_code,
         elem_section_id=elem_section_id,

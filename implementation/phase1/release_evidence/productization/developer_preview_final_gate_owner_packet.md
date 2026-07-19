@@ -1,26 +1,27 @@
 # Developer Preview Final Gate Owner Packet
 
-- `summary_line`: `Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=3/9 | handoff_rows=3`
+- `summary_line`: `Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=4/9 | handoff_rows=4`
 - `contract_pass`: `True`
 - `evidence_closure_pass`: `False`
-- `blocked_final_gate_count`: `3`
+- `blocked_final_gate_count`: `4`
 
 ## Nearest A/B/F Slice
 
 | Slice | Gate | Status | Owner Review Required | Blockers |
 |---|---|---|---:|---:|
 | `A` | `benchmark_results_clean_checkout_regenerated` | `ready` | `False` | 0 |
-| `B` | `silent_import_loss_zero` | `ready` | `False` | 0 |
+| `B` | `silent_import_loss_zero` | `blocked` | `True` | 8 |
 | `F` | `new_user_core_workflow_observation_passed` | `blocked` | `True` | 17 |
 
-- `nearest_abf_ready_count`: `2/3`
-- `nearest_abf_blocked_slice_ids`: `['F']`
+- `nearest_abf_ready_count`: `1/3`
+- `nearest_abf_blocked_slice_ids`: `['B', 'F']`
 
 ## Owner Packets
 
 | Gate | Owner | Blockers | Closure Decision |
 |---|---|---:|---|
-| `selected_medium_models_pass_or_approved_review` | `benchmark_validation_owner` | 7 | `five_PASS_or_explicit_APPROVED_REVIEW_rows` |
+| `selected_medium_models_pass_or_approved_review` | `benchmark_validation_owner` | 8 | `five_PASS_or_explicit_APPROVED_REVIEW_rows` |
+| `silent_import_loss_zero` | `ifc_import_validation_owner` | 8 | `technical_IFC_import_and_silent_loss_evidence_passes` |
 | `linux_windows_reproducibility_confirmed` | `release_reproducibility_owner` | 1 | `direct_windows_replay_receipt_passes` |
 | `new_user_core_workflow_observation_passed` | `ux_research_owner` | 17 | `accepted_human_new_user_observation` |
 
@@ -30,7 +31,13 @@
 - `python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check`
 - `python3 scripts/build_phase6_benchmark_scale_status.py --check`
 - `python3 scripts/build_developer_preview_rc_status.py --check`
+- `python3 scripts/build_medium_benchmark_corpus_plan.py --check`
 - `python3 scripts/build_product_readiness_snapshot.py --check`
+
+### `silent_import_loss_zero`
+- `python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --check`
+- `python3 scripts/build_phase6_silent_import_loss_status.py --check`
+- `python3 scripts/build_developer_preview_rc_status.py --check`
 
 ### `linux_windows_reproducibility_confirmed`
 - `python3 scripts/build_phase6_linux_windows_parity_status.py --check`
@@ -56,6 +63,13 @@
 - `python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
 - `python3 scripts/build_product_readiness_snapshot.py --out implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
 
+### `silent_import_loss_zero`
+- `python3 scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py --out implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json`
+- `python3 scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py --out implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json`
+- `python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --out implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json`
+- `python3 scripts/build_phase6_silent_import_loss_status.py --out implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json`
+- `python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
+
 ### `linux_windows_reproducibility_confirmed`
 - `python3 scripts/build_phase6_linux_windows_parity_status.py --out implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
 - `python3 scripts/build_developer_preview_rc_status.py --out implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
@@ -72,12 +86,16 @@
 
 ### `selected_medium_models_pass_or_approved_review`
 - `select_additional_medium_model_cases` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+- `complete_scientific_medium_corpus` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `complete_product_legal_license_review` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `attach_medium_reference_outputs` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `record_medium_canonical_normalization` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `run_medium_scorecard_receipts` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `attach_medium_pass_or_approved_review_decisions` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `rerun_medium_model_and_dp_rc_checks` from `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
+
+### `silent_import_loss_zero`
+- none
 
 ### `linux_windows_reproducibility_confirmed`
 - `attach_windows_platform_replay_receipt` from `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
@@ -95,7 +113,13 @@
 ### `selected_medium_models_pass_or_approved_review`
 | Artifact | Status | Pass | Plan Rows | Blockers |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json` | `blocked` | `False` | 7 | 5 |
+| `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json` | `blocked` | `False` | 8 | 6 |
+
+### `silent_import_loss_zero`
+| Artifact | Status | Pass | Plan Rows | Blockers |
+|---|---|---:|---:|---:|
+| `implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json` | `blocked` | `False` | 0 | 3 |
+| `implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json` | `blocked` | `False` | 0 | 13 |
 
 ### `linux_windows_reproducibility_confirmed`
 | Artifact | Status | Pass | Plan Rows | Blockers |
@@ -112,6 +136,12 @@
 ### `selected_medium_models_pass_or_approved_review`
 - `implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json`
 - `implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json`
+
+### `silent_import_loss_zero`
+- `implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json`
+- `implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json`
+- `implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json`
+- `implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json`
 
 ### `linux_windows_reproducibility_confirmed`
 - `implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json`
@@ -138,6 +168,8 @@
 
 - `developer_preview_rc::selected_medium_models_pass_or_approved_review`
 - `product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review`
+- `developer_preview_rc::silent_import_loss_zero`
+- `product_readiness_snapshot::final_gate_blocked:silent_import_loss_zero`
 - `developer_preview_rc::linux_windows_reproducibility_confirmed`
 - `product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed`
 - `developer_preview_rc::new_user_core_workflow_observation_passed`
@@ -175,6 +207,10 @@
 - `developer_preview_rc::selected_medium_models_pass_or_approved_review`
 - `product_readiness_snapshot::final_gate_blocked:selected_medium_models_pass_or_approved_review`
 
+### `silent_import_loss_zero`
+- `developer_preview_rc::silent_import_loss_zero`
+- `product_readiness_snapshot::final_gate_blocked:silent_import_loss_zero`
+
 ### `linux_windows_reproducibility_confirmed`
 - `developer_preview_rc::linux_windows_reproducibility_confirmed`
 - `product_readiness_snapshot::final_gate_blocked:linux_windows_reproducibility_confirmed`
@@ -187,4 +223,4 @@
 
 ## Claim Boundary
 
-This packet is a Developer Preview owner-evidence handoff for blocked RC final gates. It does not create benchmark, Windows, or human UX evidence; does not promote Developer Preview readiness; and does not close Commercial Release, G1, customer shadow, external benchmark, license, SLA, or GitHub CI streak gates.
+This packet is a Developer Preview owner-evidence handoff for blocked RC final gates. It does not acquire IFC sources, run import evidence, or create benchmark, Windows, or human UX evidence; does not promote Developer Preview readiness; and does not close Commercial Release, G1, customer shadow, external benchmark, license, SLA, or GitHub CI streak gates.

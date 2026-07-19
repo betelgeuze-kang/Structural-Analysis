@@ -159,6 +159,8 @@ def _assemble_coupled_frame_shell_system(roundtrip_json: Path) -> dict[str, Any]
     elem_type_code = np.asarray(model["elem_type_code"], dtype=np.int32)
     elem_section_id = np.asarray(model["elem_section_id"], dtype=np.int32)
     elem_material_id = np.asarray(model["elem_material_id"], dtype=np.int32)
+    conn_ptr = np.asarray(model["conn_ptr"], dtype=np.int64)
+    conn_idx = np.asarray(model["conn_idx"], dtype=np.int64)
     material_props = props.get("materials") if isinstance(props.get("materials"), dict) else {}
     section_props = props.get("sections") if isinstance(props.get("sections"), dict) else {}
     plate_thickness_props = (
@@ -172,14 +174,15 @@ def _assemble_coupled_frame_shell_system(roundtrip_json: Path) -> dict[str, Any]
         elem_type_code=elem_type_code,
         elem_section_id=elem_section_id,
         elem_material_id=elem_material_id,
-        conn_ptr=np.asarray(model["conn_ptr"], dtype=np.int64),
-        conn_idx=np.asarray(model["conn_idx"], dtype=np.int64),
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
         material_props=material_props,
         plate_thickness_props=plate_thickness_props,
     )
     frame_elements, frame_meta = _select_coupled_frame_elements(
         node_xyz=node_xyz,
-        edge_index=np.asarray(model["edge_index"], dtype=np.int64),
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
         elem_id=np.asarray(model["elem_id"], dtype=np.int64),
         elem_type_code=elem_type_code,
         elem_section_id=elem_section_id,

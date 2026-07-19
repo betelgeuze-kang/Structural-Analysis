@@ -1,0 +1,220 @@
+name: Engine v2 Contract CI
+
+# Deterministic core plus offline backend-contract lane. This workflow does not exercise
+# HIP/ROCm hardware and cannot create hardware or readiness evidence.
+
+on:
+  pull_request:
+    paths:
+      - "src/structural_analysis/engine_v2/**"
+      - "src/structural_analysis/engine_v2_backends/**"
+      - "src/structural_analysis/model_ir/**"
+      - "src/structural_analysis/schemas/cpu_fgmres_checkpoint_v1.schema.json"
+      - "src/structural_analysis/schemas/cpu_fgmres_run_v1.schema.json"
+      - "src/structural_analysis/schemas/cpu_hip_fgmres_recurrence_parity_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_fgmres_multiblock_compile_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_fgmres_device_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_fgmres_stage4_status_v1.schema.json"
+      - "src/structural_analysis/schemas/cpu_hip_primitive_parity_v1.schema.json"
+      - "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json"
+      - "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_current_tangent_operator_compile_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_current_tangent_operator_parity_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_sparse_lu_apply_compile_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_sparse_lu_apply_parity_v1.schema.json"
+      - "src/structural_analysis/schemas/engine_v2_vector_artifacts_v1.schema.json"
+      - "src/structural_analysis/schemas/equation_scaling_v1.schema.json"
+      - "src/structural_analysis/schemas/execution_plan_v1.schema.json"
+      - "src/structural_analysis/schemas/execution_plan_reduced_csr_v1.schema.json"
+      - "src/structural_analysis/schemas/model_ir_v2.schema.json"
+      - "src/structural_analysis/schemas/scaled_residual_trace_v1.schema.json"
+      - "src/structural_analysis/schemas/state_ir_v1.schema.json"
+      - "src/structural_analysis/schemas/state_ir_binary_manifest_v1.schema.json"
+      - "tests/test_engine_v2*.py"
+      - "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
+      - "tests/test_run_g1_mgt_hip_current_tangent_hardware_parity.py"
+      - "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
+      - "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py"
+      - "scripts/run_engine_v2_hip_fgmres_recurrence.py"
+      - "scripts/run_engine_v2_hip_fgmres_device_receipt.py"
+      - "scripts/build_engine_v2_hip_fgmres_stage4_status.py"
+      - "scripts/run_engine_v2_hip_current_tangent_operator.py"
+      - "scripts/run_engine_v2_hip_primitive_parity.py"
+      - "scripts/run_engine_v2_hip_sparse_lu_apply.py"
+      - "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp"
+      - "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp"
+      - "implementation/phase1/hip_kernels/engine_v2_primitive_parity.hip.cpp"
+      - "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp"
+      - "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_multiblock_compile_receipt.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_stage4_status.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_*_device_receipt.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_primitive_parity_receipt.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json"
+      - "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json"
+      - "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_hardware_parity_receipt.json"
+      - "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_action.f64le"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_sparse_lu_apply_compile_receipt.json"
+      - "tests/test_model_ir_v2_contract.py"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - "requirements*.txt"
+      - ".github/workflows/engine-v2-contract-ci.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "src/structural_analysis/engine_v2/**"
+      - "src/structural_analysis/engine_v2_backends/**"
+      - "src/structural_analysis/model_ir/**"
+      - "src/structural_analysis/schemas/cpu_fgmres_checkpoint_v1.schema.json"
+      - "src/structural_analysis/schemas/cpu_fgmres_run_v1.schema.json"
+      - "src/structural_analysis/schemas/cpu_hip_fgmres_recurrence_parity_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_fgmres_multiblock_compile_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_fgmres_device_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_fgmres_stage4_status_v1.schema.json"
+      - "src/structural_analysis/schemas/cpu_hip_primitive_parity_v1.schema.json"
+      - "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json"
+      - "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_current_tangent_operator_compile_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_current_tangent_operator_parity_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_sparse_lu_apply_compile_receipt_v1.schema.json"
+      - "src/structural_analysis/schemas/hip_sparse_lu_apply_parity_v1.schema.json"
+      - "src/structural_analysis/schemas/engine_v2_vector_artifacts_v1.schema.json"
+      - "src/structural_analysis/schemas/equation_scaling_v1.schema.json"
+      - "src/structural_analysis/schemas/execution_plan_v1.schema.json"
+      - "src/structural_analysis/schemas/execution_plan_reduced_csr_v1.schema.json"
+      - "src/structural_analysis/schemas/model_ir_v2.schema.json"
+      - "src/structural_analysis/schemas/scaled_residual_trace_v1.schema.json"
+      - "src/structural_analysis/schemas/state_ir_v1.schema.json"
+      - "src/structural_analysis/schemas/state_ir_binary_manifest_v1.schema.json"
+      - "tests/test_engine_v2*.py"
+      - "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
+      - "tests/test_run_g1_mgt_hip_current_tangent_hardware_parity.py"
+      - "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
+      - "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py"
+      - "scripts/run_engine_v2_hip_fgmres_recurrence.py"
+      - "scripts/run_engine_v2_hip_fgmres_device_receipt.py"
+      - "scripts/build_engine_v2_hip_fgmres_stage4_status.py"
+      - "scripts/run_engine_v2_hip_current_tangent_operator.py"
+      - "scripts/run_engine_v2_hip_primitive_parity.py"
+      - "scripts/run_engine_v2_hip_sparse_lu_apply.py"
+      - "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp"
+      - "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp"
+      - "implementation/phase1/hip_kernels/engine_v2_primitive_parity.hip.cpp"
+      - "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp"
+      - "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_multiblock_compile_receipt.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_stage4_status.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_*_device_receipt.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_primitive_parity_receipt.json"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json"
+      - "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json"
+      - "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_hardware_parity_receipt.json"
+      - "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_action.f64le"
+      - "implementation/phase1/release_evidence/productization/engine_v2_hip_sparse_lu_apply_compile_receipt.json"
+      - "tests/test_model_ir_v2_contract.py"
+      - "pyproject.toml"
+      - "setup.cfg"
+      - "requirements*.txt"
+      - ".github/workflows/engine-v2-contract-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+concurrency:
+  group: engine-v2-contract-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  engine-v2-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install package and contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Lint Engine v2 contracts
+        run: >-
+          python -m ruff check
+          src/structural_analysis/engine_v2
+          src/structural_analysis/engine_v2_backends
+          src/structural_analysis/model_ir
+          scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py
+          scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py
+          scripts/build_engine_v2_hip_fgmres_stage4_status.py
+          scripts/run_engine_v2_hip_current_tangent_operator.py
+          scripts/run_engine_v2_hip_fgmres_device_receipt.py
+          scripts/run_engine_v2_hip_fgmres_recurrence.py
+          scripts/run_engine_v2_hip_primitive_parity.py
+          scripts/run_engine_v2_hip_sparse_lu_apply.py
+          tests/test_run_g1_mgt_hip_current_tangent_hardware_parity.py
+          tests/test_engine_v2*.py
+          tests/test_model_ir_v2_contract.py
+
+      - name: Compile backend-neutral contract packages
+        run: >-
+          python -m compileall -q
+          src/structural_analysis/engine_v2
+          src/structural_analysis/engine_v2_backends
+          src/structural_analysis/model_ir
+
+      - name: Check committed HIP primitive receipt offline
+        run: python scripts/run_engine_v2_hip_primitive_parity.py --check
+
+      - name: Check committed HIP current-tangent compile receipt offline
+        run: >-
+          python scripts/run_engine_v2_hip_current_tangent_operator.py
+          --compile-only --check
+
+      - name: Check actual-MGT HIP current-tangent parser receipt sources offline
+        run: >-
+          python scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py
+          --check-source-only
+
+      - name: Check actual-MGT HIP current-tangent hardware receipt sources offline
+        run: >-
+          python scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py
+          --check-source-only
+
+      - name: Check committed HIP sparse-LU compile receipt offline
+        run: >-
+          python scripts/run_engine_v2_hip_sparse_lu_apply.py
+          --compile-only --check
+
+      - name: Check committed HIP FGMRES multi-block compile receipt offline
+        run: >-
+          python scripts/run_engine_v2_hip_fgmres_recurrence.py
+          --compile-only --check
+
+      - name: Check committed HIP FGMRES recurrence receipt offline
+        run: python scripts/run_engine_v2_hip_fgmres_recurrence.py --check
+
+      - name: Check committed gfx1030 device receipt offline
+        run: >-
+          python scripts/run_engine_v2_hip_fgmres_device_receipt.py
+          --out implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json
+          --check
+
+      - name: Check HIP FGMRES Stage 4 evidence status offline
+        run: python scripts/build_engine_v2_hip_fgmres_stage4_status.py --check
+
+      - name: Run complete Engine v2 contract suite
+        run: >-
+          python -m pytest -q
+          tests/test_engine_v2*.py
+          tests/test_model_ir_v2_contract.py

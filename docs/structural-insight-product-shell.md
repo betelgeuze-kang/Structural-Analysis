@@ -1,10 +1,14 @@
-# Structural Insight — product shell (v2)
+# Structural Insight — viewer-local shell (v2)
 
-> Status: **closed** for source `index.html` (2026-05-30)
+> Status: **closed** for the viewer-local `index.html` surface (2026-05-30). This does not close the application-level product-shell gate.
+
+## Architecture scope
+
+“Shell” in this document means the viewport-first chrome inside Static Viewer. Workbench v2 is the default application product shell and owns project, run, result, comparison, review, and export orchestration. Static Viewer remains an embeddable 3D/drawing/evidence subsystem that can also be opened directly for specialized review and handoff.
 
 ## Goal
 
-Present the 3D viewer as a **standalone Structural Insight product** (MIDAS/Tekla/RFEM-class dark engineering UI), not an internal “optimization cockpit” page.
+Present the 3D viewer as a focused **Structural Insight review surface** (MIDAS/Tekla/RFEM-class dark engineering UI), not an internal “optimization cockpit” page, while preserving its subsystem boundary under Workbench v2.
 
 ## Delivered
 
@@ -20,6 +24,7 @@ Present the 3D viewer as a **standalone Structural Insight product** (MIDAS/Tekl
 | Viewport graphics | `viewer-visual-scene.js` — PMREM/IBL, infinite grid, ViewCube, quality tiers |
 | Workspace escape hatch | Top bar **Workspace** → `data-si-shell="workspace"` restores cockpit chrome |
 | Persistence | `structure-viewer-si-shell`, panel collapse keys in `sessionStorage` |
+| Runtime ingest storage | Validated session payload with visible persistence receipts; see `docs/viewer-runtime-ingest-payload-storage.md` |
 | Contract | `docs/viewer-contract.md` CSS stack + shell modes |
 
 ## CSS load order

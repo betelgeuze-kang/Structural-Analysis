@@ -12,7 +12,14 @@ for candidate in (REPO_ROOT / "scripts", REPO_ROOT / "src"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-spec = importlib.util.spec_from_file_location("run_phase3_medium_model_scorecard_receipt", SCRIPT_PATH)
+from structural_analysis.benchmark.acceptance import decide_benchmark  # noqa: E402
+from structural_analysis.benchmark.medium_corpus import (  # noqa: E402
+    REQUIRED_CORE_METRIC_FAMILIES,
+)
+
+spec = importlib.util.spec_from_file_location(
+    "run_phase3_medium_model_scorecard_receipt", SCRIPT_PATH
+)
 assert spec is not None
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
@@ -39,38 +46,46 @@ def _write_model(path: Path) -> None:
             }
         ],
         "materials": [{"id": "M1", "type": "elastic", "elastic_modulus": 200000.0}],
-        "sections": [{"id": "S1", "type": "bar", "area": 0.01}],
-        "loads": [],
-        "supports": [],
+        "sections": [{"id": "S1", "type": "axial", "area": 0.01}],
+        "loads": [{"node": "N2", "components": {"FX": 10.0, "FY": 0.0, "FZ": 0.0}}],
+        "supports": [
+            {"node": "N1", "dofs": ["UX", "UY", "UZ"]},
+            {"node": "N2", "dofs": ["UY", "UZ"]},
+        ],
         "unsupported_features": [],
         "warnings": [],
     }
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _write_scientific_pass(path: Path) -> None:
+    payload = decide_benchmark(
+        [
+            {"metric_family": family, "contract_pass": True}
+            for family in REQUIRED_CORE_METRIC_FAMILIES
+        ],
+        decision="PASS",
+        evaluated_at="2026-07-18T00:00:00Z",
+    )
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def test_medium_model_scorecard_receipt_runner_writes_pass_receipt_for_valid_attached_model(
     tmp_path: Path,
 ) -> None:
     model = tmp_path / "attached-medium-model.json"
-    review = tmp_path / "approved-review.json"
+    review = tmp_path / "scientific-decision.json"
     result = tmp_path / "result.json"
     report = tmp_path / "report.json"
     out = tmp_path / "receipt.json"
     _write_model(model)
-    review.write_text(
-        json.dumps(
-            {
-                "decision": "APPROVED_REVIEW",
-                "evidence_ref": "operator-review://medium-runner-smoke",
-                "reviewer": "release_owner",
-            },
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
+    _write_scientific_pass(review)
 
     payload = module.build_medium_model_scorecard_receipt(
         model_path=model,
@@ -81,6 +96,7 @@ def test_medium_model_scorecard_receipt_runner_writes_pass_receipt_for_valid_att
         out_path=out,
         result_out=result,
         report_out=report,
+        analysis_type="linear_static",
         runner_command="python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model attached-medium-model.json",
     )
 
@@ -91,9 +107,14 @@ def test_medium_model_scorecard_receipt_runner_writes_pass_receipt_for_valid_att
     assert payload["phase3_closure_claim"] is False
     assert payload["blockers"] == []
     assert payload["scorecard_or_review_status"]["contract_pass"] is True
-    assert payload["scorecard_or_review_status"]["decision"] == "APPROVED_REVIEW"
+    assert payload["scorecard_or_review_status"]["decision"] == "PASS"
+    assert payload["scorecard_or_review_status"]["metric_families"] == list(
+        REQUIRED_CORE_METRIC_FAMILIES
+    )
     assert payload["source_sha256_match"] is True
     assert payload["validation_contract_pass"] is True
+    assert payload["execution_contract_pass"] is True
+    assert payload["scientific_decision_contract_pass"] is True
     assert payload["crashed"] is False
     assert payload["oom"] is False
     assert result.exists()
@@ -122,6 +143,7 @@ def test_medium_model_scorecard_receipt_blocks_on_sha_mismatch_and_missing_revie
     assert payload["source_sha256_match"] is False
     assert "source_sha256_mismatch" in payload["blockers"]
     assert "scorecard_or_review_missing" in payload["blockers"]
+    assert "benchmark_analysis_type_model_health_only" in payload["blockers"]
 
 
 def test_medium_model_scorecard_receipt_blocks_invalid_review_payload(
@@ -146,8 +168,8 @@ def test_medium_model_scorecard_receipt_blocks_invalid_review_payload(
     assert payload["scorecard_or_review_status"]["contract_pass"] is False
     assert "scorecard_or_review_json_invalid_or_empty" in payload["blockers"]
     assert "scorecard_or_review_decision_not_accepted" in payload["blockers"]
-    assert "scorecard_or_review_evidence_ref_missing" in payload["blockers"]
-    assert "scorecard_or_review_reviewer_missing" in payload["blockers"]
+    assert "scientific_decision_schema_mismatch" in payload["blockers"]
+    assert "scientific_decision_benchmark_credit_missing" in payload["blockers"]
 
 
 def test_medium_model_scorecard_receipt_blocks_self_referenced_review_evidence(
@@ -157,18 +179,29 @@ def test_medium_model_scorecard_receipt_blocks_self_referenced_review_evidence(
     review = tmp_path / "self-ref-review.json"
     out = tmp_path / "receipt.json"
     _write_model(model)
-    review.write_text(
-        json.dumps(
+    review_payload = decide_benchmark(
+        [
             {
-                "decision": "APPROVED_REVIEW",
-                "evidence_ref": str(review),
-                "reviewer": "release_owner",
-            },
-            ensure_ascii=False,
-            indent=2,
-            sort_keys=True,
-        )
-        + "\n",
+                "metric_family": family,
+                "contract_pass": family != "reaction_equilibrium",
+            }
+            for family in REQUIRED_CORE_METRIC_FAMILIES
+        ],
+        decision="REVIEW",
+        review={
+            "engineer_id": "PE-KR-1042",
+            "reason": "Scoped reaction review.",
+            "scope": ["reaction_equilibrium"],
+            "evidence_ref": "operator-review://temporary",
+            "approved_at": "2026-07-17T00:00:00Z",
+            "expires_at": "2026-08-18T00:00:00Z",
+        },
+        evaluated_at="2026-07-18T00:00:00Z",
+    )
+    assert review_payload["review"] is not None
+    review_payload["review"]["evidence_ref"] = str(review)
+    review.write_text(
+        json.dumps(review_payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
 

@@ -7,6 +7,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
@@ -303,6 +305,54 @@ def test_linear_static_sparse_backend_is_selectable_via_analysis_config(tmp_path
     assert all(row["status"] == "pass" for row in report.comparisons)
 
 
+@pytest.mark.parametrize(
+    ("tolerance", "receipt_value"),
+    [
+        pytest.param(True, True, id="boolean"),
+        pytest.param("invalid", "invalid", id="non-numeric"),
+        pytest.param(float("inf"), "positive_infinity", id="positive-infinity"),
+        pytest.param(float("-inf"), "negative_infinity", id="negative-infinity"),
+        pytest.param(float("nan"), "nan", id="nan"),
+        pytest.param(0.0, 0.0, id="zero"),
+        pytest.param(-1.0e-9, -1.0e-9, id="negative"),
+    ],
+)
+def test_linear_static_invalid_tolerance_fails_closed_before_solver(
+    tmp_path: Path,
+    tolerance: object,
+    receipt_value: object,
+) -> None:
+    model_path = tmp_path / "truss.json"
+    _write_linear_static_truss_model(model_path)
+
+    result = analyze(
+        load_model(model_path),
+        AnalysisConfig(analysis_type="linear_static", tolerance=tolerance),
+    )
+    report = validate(result)
+
+    assert result.status == "blocked"
+    assert result.tolerance == 0.0
+    assert result.convergence_history == []
+    assert result.unsupported_features == [
+        {
+            "kind": "linear_static_tolerance_invalid",
+            "tolerance": receipt_value,
+            "detail": (
+                "Authoritative CPU linear static requires a finite positive "
+                "numeric tolerance; boolean gates are not numeric tolerances."
+            ),
+        }
+    ]
+    assert result.metrics["solver_executed"] is False
+    assert result.metrics["convergence_claim"] is False
+    assert result.metrics["regularization_used"] is False
+    assert result.metrics["fallback_used"] is False
+    assert report.contract_pass is False
+    json.dumps(result.to_dict(), allow_nan=False)
+    json.dumps(report.to_dict(), allow_nan=False)
+
+
 def test_nonlinear_material_mesh_uses_canonical_api_path(tmp_path: Path) -> None:
     model_path = tmp_path / "material_mesh.json"
     _write_nonlinear_material_mesh_model(model_path)
@@ -402,6 +452,114 @@ def test_nonlinear_material_mesh_sparse_backend_is_selectable(tmp_path: Path) ->
     assert all(row["status"] == "pass" for row in report.comparisons)
 
 
+@pytest.mark.parametrize(
+    ("tolerance", "receipt_value"),
+    [
+        pytest.param(True, True, id="boolean"),
+        pytest.param("invalid", "invalid", id="non-numeric"),
+        pytest.param(float("inf"), "positive_infinity", id="positive-infinity"),
+        pytest.param(float("-inf"), "negative_infinity", id="negative-infinity"),
+        pytest.param(float("nan"), "nan", id="nan"),
+        pytest.param(0.0, 0.0, id="zero"),
+        pytest.param(-1.0e-9, -1.0e-9, id="negative"),
+    ],
+)
+def test_nonlinear_material_mesh_invalid_tolerance_fails_closed_before_solver(
+    tmp_path: Path,
+    tolerance: object,
+    receipt_value: object,
+) -> None:
+    model_path = tmp_path / "material_mesh.json"
+    _write_nonlinear_material_mesh_model(model_path)
+
+    result = analyze(
+        load_model(model_path),
+        AnalysisConfig(
+            analysis_type="nonlinear_static_material_mesh",
+            tolerance=tolerance,
+            max_iterations=25,
+        ),
+    )
+    report = validate(result)
+
+    assert result.status == "blocked"
+    assert result.tolerance == 0.0
+    assert result.convergence_history == []
+    assert result.unsupported_features[0] == {
+        "kind": "nonlinear_static_material_mesh_tolerance_invalid",
+        "tolerance": receipt_value,
+        "detail": (
+            "Material-mesh Newton requires a finite positive numeric tolerance; "
+            "boolean gates are not numeric tolerances."
+        ),
+    }
+    assert result.metrics["solver_executed"] is False
+    assert result.metrics["convergence_claim"] is False
+    assert result.metrics["regularization_used"] is False
+    assert result.metrics["fallback_used"] is False
+    assert report.contract_pass is False
+    json.dumps(result.to_dict(), allow_nan=False)
+    json.dumps(report.to_dict(), allow_nan=False)
+
+
+@pytest.mark.parametrize(
+    ("max_iterations", "receipt_value"),
+    [
+        pytest.param(-1, -1, id="negative"),
+        pytest.param(True, True, id="boolean"),
+        pytest.param(1.5, 1.5, id="fractional"),
+        pytest.param("25", "25", id="non-integer"),
+    ],
+)
+def test_nonlinear_material_mesh_invalid_iteration_limit_fails_closed(
+    tmp_path: Path,
+    max_iterations: object,
+    receipt_value: object,
+) -> None:
+    model_path = tmp_path / "material_mesh.json"
+    _write_nonlinear_material_mesh_model(model_path)
+
+    result = analyze(
+        load_model(model_path),
+        AnalysisConfig(
+            analysis_type="nonlinear_static_material_mesh",
+            tolerance=1.0e-10,
+            max_iterations=max_iterations,
+        ),
+    )
+
+    assert result.status == "blocked"
+    assert result.tolerance == 1.0e-10
+    assert result.convergence_history == []
+    assert result.unsupported_features[0]["kind"] == (
+        "nonlinear_static_material_mesh_max_iterations_invalid"
+    )
+    assert result.unsupported_features[0]["max_iterations"] == receipt_value
+    assert result.metrics["solver_executed"] is False
+    assert result.metrics["convergence_claim"] is False
+    json.dumps(result.to_dict(), allow_nan=False)
+
+
+def test_nonlinear_material_mesh_zero_iteration_limit_selects_bounded_default(
+    tmp_path: Path,
+) -> None:
+    model_path = tmp_path / "material_mesh.json"
+    _write_nonlinear_material_mesh_model(model_path)
+
+    result = analyze(
+        load_model(model_path),
+        AnalysisConfig(
+            analysis_type="nonlinear_static_material_mesh",
+            tolerance=1.0e-10,
+            max_iterations=0,
+        ),
+    )
+
+    assert result.status == "ready"
+    assert result.unsupported_features == []
+    assert result.metrics["convergence_claim"] is True
+
+
 def test_nonlinear_material_mesh_cli_matches_python_api(tmp_path: Path) -> None:
     model_path = tmp_path / "material_mesh.json"
     result_path = tmp_path / "result.json"
@@ -473,6 +631,72 @@ def test_nonlinear_material_mesh_cli_matches_python_api(tmp_path: Path) -> None:
     assert completed.returncode == 0, completed.stderr
     assert json.loads(result_path.read_text(encoding="utf-8")) == expected_result.to_dict()
     assert json.loads(report_path.read_text(encoding="utf-8")) == expected_report.to_dict()
+
+
+@pytest.mark.parametrize(
+    ("configuration_args", "expected_kind"),
+    [
+        pytest.param(
+            ["--tolerance", "inf"],
+            "nonlinear_static_material_mesh_tolerance_invalid",
+            id="infinite-tolerance",
+        ),
+        pytest.param(
+            ["--max-iterations", "-1"],
+            "nonlinear_static_material_mesh_max_iterations_invalid",
+            id="negative-iteration-limit",
+        ),
+    ],
+)
+def test_nonlinear_material_mesh_cli_writes_blocked_invalid_config_result(
+    tmp_path: Path,
+    configuration_args: list[str],
+    expected_kind: str,
+) -> None:
+    model_path = tmp_path / "material_mesh.json"
+    result_path = tmp_path / "blocked_result.json"
+    report_path = tmp_path / "blocked_report.json"
+    _write_nonlinear_material_mesh_model(model_path)
+    env = os.environ.copy()
+    env["PYTHONPATH"] = (
+        str(SRC_ROOT)
+        if not env.get("PYTHONPATH")
+        else f"{SRC_ROOT}{os.pathsep}{env['PYTHONPATH']}"
+    )
+
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "structural_analysis.api.cli",
+            str(model_path),
+            "--analysis-type",
+            "nonlinear_static_material_mesh",
+            *configuration_args,
+            "--out",
+            str(result_path),
+            "--report-out",
+            str(report_path),
+        ],
+        cwd=REPO_ROOT,
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    assert "Traceback" not in completed.stderr
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert result["status"] == "blocked"
+    assert result["unsupported_features"][0]["kind"] == expected_kind
+    assert result["metrics"]["solver_executed"] is False
+    assert result["metrics"]["convergence_claim"] is False
+    assert report["status"] == "blocked"
+    assert report["contract_pass"] is False
+    json.dumps(result, allow_nan=False)
+    json.dumps(report, allow_nan=False)
 
 
 def test_cli_nonlinear_material_mesh_sparse_backend_uses_configured_backend(tmp_path: Path) -> None:

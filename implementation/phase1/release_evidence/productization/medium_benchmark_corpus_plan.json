@@ -1,0 +1,1616 @@
+{
+  "archetype_policy": [
+    {
+      "archetype_id": "steel_moment_frame_3d",
+      "claim_boundary": "A frame-only building case; braced-only or 2D proxy cases do not fill this slot.",
+      "label": "3D steel moment frame",
+      "required_capabilities": [
+        "frame_3d",
+        "moment_connection",
+        "multi_story"
+      ]
+    },
+    {
+      "archetype_id": "braced_frame_or_truss_tower",
+      "claim_boundary": "Requires a real braced or truss load path, not an axial-bar seed.",
+      "label": "Braced frame / truss tower",
+      "required_capabilities": [
+        "axial_member",
+        "bracing_or_truss",
+        "three_dimensional"
+      ]
+    },
+    {
+      "archetype_id": "irregular_multistory_frame",
+      "claim_boundary": "Requires documented geometric or stiffness irregularity and medium scale.",
+      "label": "Irregular multi-story frame",
+      "required_capabilities": [
+        "frame_3d",
+        "multi_story",
+        "plan_or_vertical_irregularity"
+      ]
+    },
+    {
+      "archetype_id": "frame_shell_diaphragm",
+      "claim_boundary": "Parser-only shell presence does not prove shell force or diaphragm response accuracy.",
+      "label": "Frame + shell diaphragm",
+      "required_capabilities": [
+        "frame_3d",
+        "shell",
+        "diaphragm_load_path"
+      ]
+    },
+    {
+      "archetype_id": "foundation_link_or_mixed_element",
+      "claim_boundary": "Requires an active link, spring, foundation, or mixed-element response in the reference outputs.",
+      "label": "Foundation/link or mixed-element model",
+      "required_capabilities": [
+        "frame_or_shell",
+        "link_spring_or_foundation",
+        "mixed_element"
+      ]
+    }
+  ],
+  "attached_case_count": 3,
+  "blockers": [
+    "derived_source_provenance_pending",
+    "large_model_substitute_not_medium",
+    "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+    "medium_case_artifact_contract_not_passed:decision_receipt",
+    "medium_case_artifact_contract_not_passed:member_force_comparison",
+    "medium_case_artifact_contract_not_passed:reaction_comparison",
+    "medium_case_artifact_contract_not_passed:reference_output",
+    "medium_case_artifact_contract_not_passed:reference_solver_input",
+    "medium_case_artifact_contract_not_passed:residual_comparison",
+    "medium_case_artifact_contract_not_passed:solver_output",
+    "medium_case_artifact_contract_not_passed:tolerance_policy",
+    "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+    "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+    "medium_case_artifact_receipt:decision_receipt_file_missing",
+    "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+    "medium_case_artifact_receipt:member_force_comparison_file_missing",
+    "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+    "medium_case_artifact_receipt:reaction_comparison_file_missing",
+    "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+    "medium_case_artifact_receipt:reference_output_file_missing",
+    "medium_case_artifact_receipt:reference_output_sha256_invalid",
+    "medium_case_artifact_receipt:reference_solver_input_file_missing",
+    "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+    "medium_case_artifact_receipt:residual_comparison_file_missing",
+    "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+    "medium_case_artifact_receipt:solver_output_file_missing",
+    "medium_case_artifact_receipt:solver_output_sha256_invalid",
+    "medium_case_artifact_receipt:tolerance_policy_file_missing",
+    "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+    "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+    "medium_case_artifact_sha256_invalid:decision_receipt",
+    "medium_case_artifact_sha256_invalid:member_force_comparison",
+    "medium_case_artifact_sha256_invalid:reaction_comparison",
+    "medium_case_artifact_sha256_invalid:reference_output",
+    "medium_case_artifact_sha256_invalid:reference_solver_input",
+    "medium_case_artifact_sha256_invalid:residual_comparison",
+    "medium_case_artifact_sha256_invalid:solver_output",
+    "medium_case_artifact_sha256_invalid:tolerance_policy",
+    "medium_case_capability_missing:diaphragm_load_path",
+    "medium_case_commercial_use_not_approved",
+    "medium_case_decision_not_pass_or_review",
+    "medium_case_license_not_approved",
+    "medium_case_license_receipt_path_invalid",
+    "medium_case_license_receipt_sha256_invalid",
+    "medium_case_local_execution_not_approved",
+    "medium_case_pass_or_review_credit_missing",
+    "medium_case_reference_solver_version_unverified",
+    "medium_case_size_class_not_medium",
+    "medium_case_source_commit_sha_invalid",
+    "medium_corpus_archetype_missing:foundation_link_or_mixed_element",
+    "medium_corpus_archetype_missing:steel_moment_frame_3d",
+    "medium_corpus_opensees_reference_missing",
+    "medium_corpus_second_reference_solver_missing",
+    "medium_corpus_source_family_diversity_below_two",
+    "source_url_verification_pending"
+  ],
+  "byte_bound_case_count": 0,
+  "case_rows": [
+    {
+      "archetype_id": "braced_frame_or_truss_tower",
+      "artifact_receipt_bindings": [
+        {
+          "artifact_name": "canonical_normalization_receipt",
+          "blockers": [
+            "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:canonical_normalization_receipt"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+              "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.canonical_normalization_receipt.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reference_solver_input",
+          "blockers": [
+            "medium_case_artifact_receipt:reference_solver_input_file_missing",
+            "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reference_solver_input"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reference_solver_input_file_missing",
+              "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.reference_solver_input.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reference_output",
+          "blockers": [
+            "medium_case_artifact_receipt:reference_output_file_missing",
+            "medium_case_artifact_receipt:reference_output_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reference_output"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reference_output_file_missing",
+              "medium_case_artifact_receipt:reference_output_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.reference_output.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "solver_output",
+          "blockers": [
+            "medium_case_artifact_receipt:solver_output_file_missing",
+            "medium_case_artifact_receipt:solver_output_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:solver_output"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:solver_output_file_missing",
+              "medium_case_artifact_receipt:solver_output_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.solver_output.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "residual_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:residual_comparison_file_missing",
+            "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:residual_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:residual_comparison_file_missing",
+              "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.residual_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reaction_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:reaction_comparison_file_missing",
+            "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reaction_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reaction_comparison_file_missing",
+              "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.reaction_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "member_force_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:member_force_comparison_file_missing",
+            "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:member_force_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:member_force_comparison_file_missing",
+              "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.member_force_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "tolerance_policy",
+          "blockers": [
+            "medium_case_artifact_receipt:tolerance_policy_file_missing",
+            "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:tolerance_policy"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:tolerance_policy_file_missing",
+              "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.tolerance_policy.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "decision_receipt",
+          "blockers": [
+            "medium_case_artifact_receipt:decision_receipt_file_missing",
+            "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:decision_receipt"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:decision_receipt_file_missing",
+              "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.decision_receipt.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        }
+      ],
+      "blockers": [
+        "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+        "medium_case_artifact_contract_not_passed:decision_receipt",
+        "medium_case_artifact_contract_not_passed:member_force_comparison",
+        "medium_case_artifact_contract_not_passed:reaction_comparison",
+        "medium_case_artifact_contract_not_passed:reference_output",
+        "medium_case_artifact_contract_not_passed:reference_solver_input",
+        "medium_case_artifact_contract_not_passed:residual_comparison",
+        "medium_case_artifact_contract_not_passed:solver_output",
+        "medium_case_artifact_contract_not_passed:tolerance_policy",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:decision_receipt_file_missing",
+        "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:member_force_comparison_file_missing",
+        "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reaction_comparison_file_missing",
+        "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reference_output_file_missing",
+        "medium_case_artifact_receipt:reference_output_sha256_invalid",
+        "medium_case_artifact_receipt:reference_solver_input_file_missing",
+        "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+        "medium_case_artifact_receipt:residual_comparison_file_missing",
+        "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:solver_output_file_missing",
+        "medium_case_artifact_receipt:solver_output_sha256_invalid",
+        "medium_case_artifact_receipt:tolerance_policy_file_missing",
+        "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+        "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+        "medium_case_artifact_sha256_invalid:decision_receipt",
+        "medium_case_artifact_sha256_invalid:member_force_comparison",
+        "medium_case_artifact_sha256_invalid:reaction_comparison",
+        "medium_case_artifact_sha256_invalid:reference_output",
+        "medium_case_artifact_sha256_invalid:reference_solver_input",
+        "medium_case_artifact_sha256_invalid:residual_comparison",
+        "medium_case_artifact_sha256_invalid:solver_output",
+        "medium_case_artifact_sha256_invalid:tolerance_policy",
+        "medium_case_commercial_use_not_approved",
+        "medium_case_decision_not_pass_or_review",
+        "medium_case_license_not_approved",
+        "medium_case_license_receipt_path_invalid",
+        "medium_case_license_receipt_sha256_invalid",
+        "medium_case_local_execution_not_approved",
+        "medium_case_pass_or_review_credit_missing",
+        "medium_case_reference_solver_version_unverified",
+        "medium_case_source_commit_sha_invalid"
+      ],
+      "bound_artifact_receipt_count": 0,
+      "capabilities": [
+        "axial_member",
+        "bracing_or_truss",
+        "three_dimensional"
+      ],
+      "case_id": "SCBF16B",
+      "claim_boundary": "This row verifies repository-contained source, license receipt, artifact receipt, and payload bytes plus selected scientific payload semantics. It does not authenticate external solver execution, legal authority, or the human identities declared by those bound receipts.",
+      "decision": "FAIL",
+      "decision_metric_families": [
+        "displacement",
+        "global_energy_norm",
+        "member_force_local",
+        "reaction_equilibrium",
+        "residual_observation"
+      ],
+      "decision_schema_version": "benchmark-scientific-decision.v1",
+      "evidence_binding_contract_pass": false,
+      "evidence_binding_profile": "repository_bytes_and_receipt_payloads.v1",
+      "license_receipt_binding": {
+        "blockers": [
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid"
+        ],
+        "contract_pass": false,
+        "payload_schema_contract_pass": false,
+        "receipt_file": {
+          "blockers": [
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid"
+          ],
+          "byte_length": null,
+          "contract_pass": false,
+          "declared_sha256": "",
+          "observed_sha256": "",
+          "path": ""
+        },
+        "schema_version": "medium-benchmark-source-license-receipt.v1"
+      },
+      "medium_scale_basis": "SCBF16B parser topology; 426-node family receipt; 32 GB runner envelope",
+      "metric_families": [
+        "displacement",
+        "global_energy_norm",
+        "member_force_local",
+        "reaction_equilibrium",
+        "residual_observation"
+      ],
+      "ready_for_medium_benchmark_credit": false,
+      "reference_solver_class": "open_source",
+      "reference_solver_name": "OpenSees",
+      "schema_version": "medium-benchmark-case-evidence.v1",
+      "size_class": "medium",
+      "source_commit_sha": "",
+      "source_family": "sac_scbf16b",
+      "source_file_binding": {
+        "blockers": [],
+        "byte_length": 118066,
+        "contract_pass": true,
+        "declared_sha256": "sha256:309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+        "observed_sha256": "sha256:309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+        "path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl"
+      },
+      "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+      "source_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+      "source_url_or_doi": "https://github.com/amaelkady/OpenSEES_Models_CBF/blob/main/Models%20and%20Tcl%20Files/SCBF16B.tcl"
+    },
+    {
+      "archetype_id": "frame_shell_diaphragm",
+      "artifact_receipt_bindings": [
+        {
+          "artifact_name": "canonical_normalization_receipt",
+          "blockers": [
+            "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:canonical_normalization_receipt"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+              "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.canonical_normalization_receipt.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reference_solver_input",
+          "blockers": [
+            "medium_case_artifact_receipt:reference_solver_input_file_missing",
+            "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reference_solver_input"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reference_solver_input_file_missing",
+              "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.reference_solver_input.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reference_output",
+          "blockers": [
+            "medium_case_artifact_receipt:reference_output_file_missing",
+            "medium_case_artifact_receipt:reference_output_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reference_output"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reference_output_file_missing",
+              "medium_case_artifact_receipt:reference_output_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.reference_output.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "solver_output",
+          "blockers": [
+            "medium_case_artifact_receipt:solver_output_file_missing",
+            "medium_case_artifact_receipt:solver_output_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:solver_output"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:solver_output_file_missing",
+              "medium_case_artifact_receipt:solver_output_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.solver_output.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "residual_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:residual_comparison_file_missing",
+            "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:residual_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:residual_comparison_file_missing",
+              "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.residual_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reaction_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:reaction_comparison_file_missing",
+            "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reaction_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reaction_comparison_file_missing",
+              "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.reaction_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "member_force_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:member_force_comparison_file_missing",
+            "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:member_force_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:member_force_comparison_file_missing",
+              "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.member_force_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "tolerance_policy",
+          "blockers": [
+            "medium_case_artifact_receipt:tolerance_policy_file_missing",
+            "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:tolerance_policy"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:tolerance_policy_file_missing",
+              "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.tolerance_policy.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "decision_receipt",
+          "blockers": [
+            "medium_case_artifact_receipt:decision_receipt_file_missing",
+            "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:decision_receipt"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:decision_receipt_file_missing",
+              "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.decision_receipt.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        }
+      ],
+      "blockers": [
+        "derived_source_provenance_pending",
+        "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+        "medium_case_artifact_contract_not_passed:decision_receipt",
+        "medium_case_artifact_contract_not_passed:member_force_comparison",
+        "medium_case_artifact_contract_not_passed:reaction_comparison",
+        "medium_case_artifact_contract_not_passed:reference_output",
+        "medium_case_artifact_contract_not_passed:reference_solver_input",
+        "medium_case_artifact_contract_not_passed:residual_comparison",
+        "medium_case_artifact_contract_not_passed:solver_output",
+        "medium_case_artifact_contract_not_passed:tolerance_policy",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:decision_receipt_file_missing",
+        "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:member_force_comparison_file_missing",
+        "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reaction_comparison_file_missing",
+        "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reference_output_file_missing",
+        "medium_case_artifact_receipt:reference_output_sha256_invalid",
+        "medium_case_artifact_receipt:reference_solver_input_file_missing",
+        "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+        "medium_case_artifact_receipt:residual_comparison_file_missing",
+        "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:solver_output_file_missing",
+        "medium_case_artifact_receipt:solver_output_sha256_invalid",
+        "medium_case_artifact_receipt:tolerance_policy_file_missing",
+        "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+        "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+        "medium_case_artifact_sha256_invalid:decision_receipt",
+        "medium_case_artifact_sha256_invalid:member_force_comparison",
+        "medium_case_artifact_sha256_invalid:reaction_comparison",
+        "medium_case_artifact_sha256_invalid:reference_output",
+        "medium_case_artifact_sha256_invalid:reference_solver_input",
+        "medium_case_artifact_sha256_invalid:residual_comparison",
+        "medium_case_artifact_sha256_invalid:solver_output",
+        "medium_case_artifact_sha256_invalid:tolerance_policy",
+        "medium_case_capability_missing:diaphragm_load_path",
+        "medium_case_commercial_use_not_approved",
+        "medium_case_decision_not_pass_or_review",
+        "medium_case_license_not_approved",
+        "medium_case_license_receipt_path_invalid",
+        "medium_case_license_receipt_sha256_invalid",
+        "medium_case_local_execution_not_approved",
+        "medium_case_pass_or_review_credit_missing",
+        "medium_case_reference_solver_version_unverified",
+        "medium_case_source_commit_sha_invalid",
+        "source_url_verification_pending"
+      ],
+      "bound_artifact_receipt_count": 0,
+      "capabilities": [
+        "frame_3d",
+        "shell"
+      ],
+      "case_id": "SCBF16B_shell_beam_mix",
+      "claim_boundary": "This row verifies repository-contained source, license receipt, artifact receipt, and payload bytes plus selected scientific payload semantics. It does not authenticate external solver execution, legal authority, or the human identities declared by those bound receipts.",
+      "decision": "FAIL",
+      "decision_metric_families": [
+        "displacement",
+        "global_energy_norm",
+        "member_force_local",
+        "reaction_equilibrium",
+        "residual_observation"
+      ],
+      "decision_schema_version": "benchmark-scientific-decision.v1",
+      "evidence_binding_contract_pass": false,
+      "evidence_binding_profile": "repository_bytes_and_receipt_payloads.v1",
+      "license_receipt_binding": {
+        "blockers": [
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid"
+        ],
+        "contract_pass": false,
+        "payload_schema_contract_pass": false,
+        "receipt_file": {
+          "blockers": [
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid"
+          ],
+          "byte_length": null,
+          "contract_pass": false,
+          "declared_sha256": "",
+          "observed_sha256": "",
+          "path": ""
+        },
+        "schema_version": "medium-benchmark-source-license-receipt.v1"
+      },
+      "medium_scale_basis": "SCBF16B beam/shell parser topology; 426-node family receipt; 32 GB runner envelope",
+      "metric_families": [
+        "displacement",
+        "global_energy_norm",
+        "member_force_local",
+        "reaction_equilibrium",
+        "residual_observation"
+      ],
+      "ready_for_medium_benchmark_credit": false,
+      "reference_solver_class": "open_source",
+      "reference_solver_name": "OpenSees",
+      "schema_version": "medium-benchmark-case-evidence.v1",
+      "size_class": "medium",
+      "source_commit_sha": "",
+      "source_family": "sac_scbf16b_shell_beam_mix",
+      "source_file_binding": {
+        "blockers": [],
+        "byte_length": 118474,
+        "contract_pass": true,
+        "declared_sha256": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+        "observed_sha256": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+        "path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl"
+      },
+      "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+      "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+      "source_url_or_doi": "https://github.com/amaelkady/OpenSEES_Models_CBF"
+    },
+    {
+      "archetype_id": "irregular_multistory_frame",
+      "artifact_receipt_bindings": [
+        {
+          "artifact_name": "canonical_normalization_receipt",
+          "blockers": [
+            "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:canonical_normalization_receipt"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+              "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.canonical_normalization_receipt.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reference_solver_input",
+          "blockers": [
+            "medium_case_artifact_receipt:reference_solver_input_file_missing",
+            "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reference_solver_input"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reference_solver_input_file_missing",
+              "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.reference_solver_input.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reference_output",
+          "blockers": [
+            "medium_case_artifact_receipt:reference_output_file_missing",
+            "medium_case_artifact_receipt:reference_output_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reference_output"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reference_output_file_missing",
+              "medium_case_artifact_receipt:reference_output_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.reference_output.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "solver_output",
+          "blockers": [
+            "medium_case_artifact_receipt:solver_output_file_missing",
+            "medium_case_artifact_receipt:solver_output_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:solver_output"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:solver_output_file_missing",
+              "medium_case_artifact_receipt:solver_output_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.solver_output.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "residual_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:residual_comparison_file_missing",
+            "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:residual_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:residual_comparison_file_missing",
+              "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.residual_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "reaction_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:reaction_comparison_file_missing",
+            "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:reaction_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:reaction_comparison_file_missing",
+              "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.reaction_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "member_force_comparison",
+          "blockers": [
+            "medium_case_artifact_receipt:member_force_comparison_file_missing",
+            "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:member_force_comparison"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:member_force_comparison_file_missing",
+              "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.member_force_comparison.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "tolerance_policy",
+          "blockers": [
+            "medium_case_artifact_receipt:tolerance_policy_file_missing",
+            "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:tolerance_policy"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:tolerance_policy_file_missing",
+              "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.tolerance_policy.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        },
+        {
+          "artifact_name": "decision_receipt",
+          "blockers": [
+            "medium_case_artifact_receipt:decision_receipt_file_missing",
+            "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_file": {
+            "blockers": [
+              "medium_case_artifact_payload_unbound:decision_receipt"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "payload_semantic_contract_pass": null,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_artifact_receipt:decision_receipt_file_missing",
+              "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.decision_receipt.json"
+          },
+          "receipt_schema_contract_pass": false,
+          "schema_version": "medium-benchmark-artifact-receipt.v1",
+          "source_commit_sha": ""
+        }
+      ],
+      "blockers": [
+        "large_model_substitute_not_medium",
+        "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+        "medium_case_artifact_contract_not_passed:decision_receipt",
+        "medium_case_artifact_contract_not_passed:member_force_comparison",
+        "medium_case_artifact_contract_not_passed:reaction_comparison",
+        "medium_case_artifact_contract_not_passed:reference_output",
+        "medium_case_artifact_contract_not_passed:reference_solver_input",
+        "medium_case_artifact_contract_not_passed:residual_comparison",
+        "medium_case_artifact_contract_not_passed:solver_output",
+        "medium_case_artifact_contract_not_passed:tolerance_policy",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:decision_receipt_file_missing",
+        "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:member_force_comparison_file_missing",
+        "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reaction_comparison_file_missing",
+        "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reference_output_file_missing",
+        "medium_case_artifact_receipt:reference_output_sha256_invalid",
+        "medium_case_artifact_receipt:reference_solver_input_file_missing",
+        "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+        "medium_case_artifact_receipt:residual_comparison_file_missing",
+        "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:solver_output_file_missing",
+        "medium_case_artifact_receipt:solver_output_sha256_invalid",
+        "medium_case_artifact_receipt:tolerance_policy_file_missing",
+        "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+        "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+        "medium_case_artifact_sha256_invalid:decision_receipt",
+        "medium_case_artifact_sha256_invalid:member_force_comparison",
+        "medium_case_artifact_sha256_invalid:reaction_comparison",
+        "medium_case_artifact_sha256_invalid:reference_output",
+        "medium_case_artifact_sha256_invalid:reference_solver_input",
+        "medium_case_artifact_sha256_invalid:residual_comparison",
+        "medium_case_artifact_sha256_invalid:solver_output",
+        "medium_case_artifact_sha256_invalid:tolerance_policy",
+        "medium_case_commercial_use_not_approved",
+        "medium_case_decision_not_pass_or_review",
+        "medium_case_license_not_approved",
+        "medium_case_license_receipt_path_invalid",
+        "medium_case_license_receipt_sha256_invalid",
+        "medium_case_local_execution_not_approved",
+        "medium_case_pass_or_review_credit_missing",
+        "medium_case_reference_solver_version_unverified",
+        "medium_case_size_class_not_medium",
+        "medium_case_source_commit_sha_invalid"
+      ],
+      "bound_artifact_receipt_count": 0,
+      "capabilities": [
+        "frame_3d",
+        "multi_story",
+        "plan_or_vertical_irregularity"
+      ],
+      "case_id": "luxinzheng_megatall_model1",
+      "claim_boundary": "This row verifies repository-contained source, license receipt, artifact receipt, and payload bytes plus selected scientific payload semantics. It does not authenticate external solver execution, legal authority, or the human identities declared by those bound receipts.",
+      "decision": "FAIL",
+      "decision_metric_families": [
+        "displacement",
+        "global_energy_norm",
+        "member_force_local",
+        "reaction_equilibrium",
+        "residual_observation"
+      ],
+      "decision_schema_version": "benchmark-scientific-decision.v1",
+      "evidence_binding_contract_pass": false,
+      "evidence_binding_profile": "repository_bytes_and_receipt_payloads.v1",
+      "license_receipt_binding": {
+        "blockers": [
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid"
+        ],
+        "contract_pass": false,
+        "payload_schema_contract_pass": false,
+        "receipt_file": {
+          "blockers": [
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid"
+          ],
+          "byte_length": null,
+          "contract_pass": false,
+          "declared_sha256": "",
+          "observed_sha256": "",
+          "path": ""
+        },
+        "schema_version": "medium-benchmark-source-license-receipt.v1"
+      },
+      "medium_scale_basis": "606 m mega-tall model belongs to the separate large-model lane",
+      "metric_families": [
+        "displacement",
+        "global_energy_norm",
+        "member_force_local",
+        "reaction_equilibrium",
+        "residual_observation"
+      ],
+      "ready_for_medium_benchmark_credit": false,
+      "reference_solver_class": "open_source",
+      "reference_solver_name": "OpenSees",
+      "schema_version": "medium-benchmark-case-evidence.v1",
+      "size_class": "large",
+      "source_commit_sha": "",
+      "source_family": "luxinzheng_megatall",
+      "source_file_binding": {
+        "blockers": [],
+        "byte_length": 2850355,
+        "contract_pass": true,
+        "declared_sha256": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+        "observed_sha256": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+        "path": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl"
+      },
+      "source_path": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl",
+      "source_sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+      "source_url_or_doi": "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm"
+    }
+  ],
+  "claim_boundary": "This readiness object requires five structurally distinct medium cases and repository-bound metric-specific evidence. Missing bytes, hash mismatches, path escapes, missing slots, parser-only artifacts, unapproved licenses, template reviews, and large-model substitutes receive zero credit. A PASS still does not authenticate external execution or grant release or final-design authority.",
+  "contract_pass": false,
+  "evidence_binding_profile": "repository_bytes_and_receipt_payloads.v1",
+  "evidence_binding_required": true,
+  "input_blockers": [],
+  "medium_benchmark_credit_count": 0,
+  "reference_solver_diversity": {
+    "contract_pass": false,
+    "opensees_present": false,
+    "second_independent_solver_present": false,
+    "solver_names": []
+  },
+  "required_case_artifacts": [
+    "canonical_normalization_receipt",
+    "reference_solver_input",
+    "reference_output",
+    "solver_output",
+    "residual_comparison",
+    "reaction_comparison",
+    "member_force_comparison",
+    "tolerance_policy",
+    "decision_receipt"
+  ],
+  "required_case_count": 5,
+  "required_core_metric_families": [
+    "displacement",
+    "reaction_equilibrium",
+    "member_force_local",
+    "global_energy_norm",
+    "residual_observation"
+  ],
+  "schema_version": "medium-benchmark-corpus-readiness.v1",
+  "slot_rows": [
+    {
+      "archetype_id": "steel_moment_frame_3d",
+      "blockers": [
+        "medium_corpus_archetype_missing:steel_moment_frame_3d"
+      ],
+      "claim_boundary": "A frame-only building case; braced-only or 2D proxy cases do not fill this slot.",
+      "label": "3D steel moment frame",
+      "required_capabilities": [
+        "frame_3d",
+        "moment_connection",
+        "multi_story"
+      ],
+      "selected_case_ids": [],
+      "slot_status": "operator_selection_required"
+    },
+    {
+      "archetype_id": "braced_frame_or_truss_tower",
+      "blockers": [
+        "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+        "medium_case_artifact_contract_not_passed:decision_receipt",
+        "medium_case_artifact_contract_not_passed:member_force_comparison",
+        "medium_case_artifact_contract_not_passed:reaction_comparison",
+        "medium_case_artifact_contract_not_passed:reference_output",
+        "medium_case_artifact_contract_not_passed:reference_solver_input",
+        "medium_case_artifact_contract_not_passed:residual_comparison",
+        "medium_case_artifact_contract_not_passed:solver_output",
+        "medium_case_artifact_contract_not_passed:tolerance_policy",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:decision_receipt_file_missing",
+        "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:member_force_comparison_file_missing",
+        "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reaction_comparison_file_missing",
+        "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reference_output_file_missing",
+        "medium_case_artifact_receipt:reference_output_sha256_invalid",
+        "medium_case_artifact_receipt:reference_solver_input_file_missing",
+        "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+        "medium_case_artifact_receipt:residual_comparison_file_missing",
+        "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:solver_output_file_missing",
+        "medium_case_artifact_receipt:solver_output_sha256_invalid",
+        "medium_case_artifact_receipt:tolerance_policy_file_missing",
+        "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+        "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+        "medium_case_artifact_sha256_invalid:decision_receipt",
+        "medium_case_artifact_sha256_invalid:member_force_comparison",
+        "medium_case_artifact_sha256_invalid:reaction_comparison",
+        "medium_case_artifact_sha256_invalid:reference_output",
+        "medium_case_artifact_sha256_invalid:reference_solver_input",
+        "medium_case_artifact_sha256_invalid:residual_comparison",
+        "medium_case_artifact_sha256_invalid:solver_output",
+        "medium_case_artifact_sha256_invalid:tolerance_policy",
+        "medium_case_commercial_use_not_approved",
+        "medium_case_decision_not_pass_or_review",
+        "medium_case_license_not_approved",
+        "medium_case_license_receipt_path_invalid",
+        "medium_case_license_receipt_sha256_invalid",
+        "medium_case_local_execution_not_approved",
+        "medium_case_pass_or_review_credit_missing",
+        "medium_case_reference_solver_version_unverified",
+        "medium_case_source_commit_sha_invalid"
+      ],
+      "claim_boundary": "Requires a real braced or truss load path, not an axial-bar seed.",
+      "label": "Braced frame / truss tower",
+      "required_capabilities": [
+        "axial_member",
+        "bracing_or_truss",
+        "three_dimensional"
+      ],
+      "selected_case_ids": [
+        "SCBF16B"
+      ],
+      "slot_status": "selected_blocked"
+    },
+    {
+      "archetype_id": "irregular_multistory_frame",
+      "blockers": [
+        "large_model_substitute_not_medium",
+        "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+        "medium_case_artifact_contract_not_passed:decision_receipt",
+        "medium_case_artifact_contract_not_passed:member_force_comparison",
+        "medium_case_artifact_contract_not_passed:reaction_comparison",
+        "medium_case_artifact_contract_not_passed:reference_output",
+        "medium_case_artifact_contract_not_passed:reference_solver_input",
+        "medium_case_artifact_contract_not_passed:residual_comparison",
+        "medium_case_artifact_contract_not_passed:solver_output",
+        "medium_case_artifact_contract_not_passed:tolerance_policy",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:decision_receipt_file_missing",
+        "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:member_force_comparison_file_missing",
+        "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reaction_comparison_file_missing",
+        "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reference_output_file_missing",
+        "medium_case_artifact_receipt:reference_output_sha256_invalid",
+        "medium_case_artifact_receipt:reference_solver_input_file_missing",
+        "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+        "medium_case_artifact_receipt:residual_comparison_file_missing",
+        "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:solver_output_file_missing",
+        "medium_case_artifact_receipt:solver_output_sha256_invalid",
+        "medium_case_artifact_receipt:tolerance_policy_file_missing",
+        "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+        "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+        "medium_case_artifact_sha256_invalid:decision_receipt",
+        "medium_case_artifact_sha256_invalid:member_force_comparison",
+        "medium_case_artifact_sha256_invalid:reaction_comparison",
+        "medium_case_artifact_sha256_invalid:reference_output",
+        "medium_case_artifact_sha256_invalid:reference_solver_input",
+        "medium_case_artifact_sha256_invalid:residual_comparison",
+        "medium_case_artifact_sha256_invalid:solver_output",
+        "medium_case_artifact_sha256_invalid:tolerance_policy",
+        "medium_case_commercial_use_not_approved",
+        "medium_case_decision_not_pass_or_review",
+        "medium_case_license_not_approved",
+        "medium_case_license_receipt_path_invalid",
+        "medium_case_license_receipt_sha256_invalid",
+        "medium_case_local_execution_not_approved",
+        "medium_case_pass_or_review_credit_missing",
+        "medium_case_reference_solver_version_unverified",
+        "medium_case_size_class_not_medium",
+        "medium_case_source_commit_sha_invalid"
+      ],
+      "claim_boundary": "Requires documented geometric or stiffness irregularity and medium scale.",
+      "label": "Irregular multi-story frame",
+      "required_capabilities": [
+        "frame_3d",
+        "multi_story",
+        "plan_or_vertical_irregularity"
+      ],
+      "selected_case_ids": [
+        "luxinzheng_megatall_model1"
+      ],
+      "slot_status": "selected_blocked"
+    },
+    {
+      "archetype_id": "frame_shell_diaphragm",
+      "blockers": [
+        "derived_source_provenance_pending",
+        "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+        "medium_case_artifact_contract_not_passed:decision_receipt",
+        "medium_case_artifact_contract_not_passed:member_force_comparison",
+        "medium_case_artifact_contract_not_passed:reaction_comparison",
+        "medium_case_artifact_contract_not_passed:reference_output",
+        "medium_case_artifact_contract_not_passed:reference_solver_input",
+        "medium_case_artifact_contract_not_passed:residual_comparison",
+        "medium_case_artifact_contract_not_passed:solver_output",
+        "medium_case_artifact_contract_not_passed:tolerance_policy",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:decision_receipt_file_missing",
+        "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:member_force_comparison_file_missing",
+        "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reaction_comparison_file_missing",
+        "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reference_output_file_missing",
+        "medium_case_artifact_receipt:reference_output_sha256_invalid",
+        "medium_case_artifact_receipt:reference_solver_input_file_missing",
+        "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+        "medium_case_artifact_receipt:residual_comparison_file_missing",
+        "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:solver_output_file_missing",
+        "medium_case_artifact_receipt:solver_output_sha256_invalid",
+        "medium_case_artifact_receipt:tolerance_policy_file_missing",
+        "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+        "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+        "medium_case_artifact_sha256_invalid:decision_receipt",
+        "medium_case_artifact_sha256_invalid:member_force_comparison",
+        "medium_case_artifact_sha256_invalid:reaction_comparison",
+        "medium_case_artifact_sha256_invalid:reference_output",
+        "medium_case_artifact_sha256_invalid:reference_solver_input",
+        "medium_case_artifact_sha256_invalid:residual_comparison",
+        "medium_case_artifact_sha256_invalid:solver_output",
+        "medium_case_artifact_sha256_invalid:tolerance_policy",
+        "medium_case_capability_missing:diaphragm_load_path",
+        "medium_case_commercial_use_not_approved",
+        "medium_case_decision_not_pass_or_review",
+        "medium_case_license_not_approved",
+        "medium_case_license_receipt_path_invalid",
+        "medium_case_license_receipt_sha256_invalid",
+        "medium_case_local_execution_not_approved",
+        "medium_case_pass_or_review_credit_missing",
+        "medium_case_reference_solver_version_unverified",
+        "medium_case_source_commit_sha_invalid",
+        "source_url_verification_pending"
+      ],
+      "claim_boundary": "Parser-only shell presence does not prove shell force or diaphragm response accuracy.",
+      "label": "Frame + shell diaphragm",
+      "required_capabilities": [
+        "frame_3d",
+        "shell",
+        "diaphragm_load_path"
+      ],
+      "selected_case_ids": [
+        "SCBF16B_shell_beam_mix"
+      ],
+      "slot_status": "selected_blocked"
+    },
+    {
+      "archetype_id": "foundation_link_or_mixed_element",
+      "blockers": [
+        "medium_corpus_archetype_missing:foundation_link_or_mixed_element"
+      ],
+      "claim_boundary": "Requires an active link, spring, foundation, or mixed-element response in the reference outputs.",
+      "label": "Foundation/link or mixed-element model",
+      "required_capabilities": [
+        "frame_or_shell",
+        "link_spring_or_foundation",
+        "mixed_element"
+      ],
+      "selected_case_ids": [],
+      "slot_status": "operator_selection_required"
+    }
+  ],
+  "source_family_count": 0,
+  "status": "blocked",
+  "summary_line": "Medium benchmark corpus: BLOCKED | credit=0/5 | reference_solvers=0"
+}

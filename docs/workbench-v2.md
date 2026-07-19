@@ -1,20 +1,35 @@
 # Workbench v2 — usage guide
 
-Workbench v2 is the browser front end for reading structural analysis cases and
+Workbench v2 is the default product shell for reading structural analysis cases and
 their release evidence. Its design goal is an **honest evidence reader**: it
 shows only what is attached, labels demo vs. live data, and never infers a
 pass/fail or release-readiness verdict.
 
 ## Opening it
 
-The app uses hash routing. The workbench route is:
+The repository root now opens Workbench v2. The explicit route remains available for stable deep links:
 
 ```
+/
 /#/workbench-v2
 ```
 
 On GitHub Pages it lives under the project base path, e.g.
 `https://<user>.github.io/Structural-Analysis/#/workbench-v2`.
+
+The former all-in-one `App` is retained only as a compatibility/evidence desk at `/#/legacy`. It is not the default product shell and must not own new project, run, result, comparison, review, or export workflows. Its module is loaded lazily only after the explicit legacy route is selected; the default Workbench request graph must not download it.
+
+## Product architecture boundary
+
+Workbench v2 owns the project, analysis, run monitor, results, comparison, evidence, review, and export flow. Static Viewer is embedded as the specialized 3D/drawing/evidence subsystem in Model Health and keeps its independent provenance visible. Selection is synchronized through the viewer bridge, but Workbench does not reinterpret Viewer payloads as matching analysis evidence without provenance agreement.
+
+The Viewer runtime and offline-release responsibilities are defined in [Structure Viewer module boundaries](structure-viewer-module-boundaries.md).
+
+### Production delivery boundary
+
+Workbench and Static Viewer are separate HTML entries in the same Vite production build. `npm run build` must emit both `dist/index.html` and `dist/src/structure-viewer/index.html`; the latter is the exact path used by the Workbench iframe and direct Viewer links. The build then runs `workbench_viewer_production_delivery_v1`, which rejects a missing Viewer entry, a Workbench SPA fallback served in its place, missing emitted assets, a Workbench bundle that no longer targets that entry, legacy ownership markers in the eager Workbench graph, or anything other than one route-loaded legacy `App` chunk.
+
+The Workbench browser smoke also enters the iframe and requires the Viewer-only `data-si-shell="product"` marker. Merely observing a `200` response or matching the iframe `src` is not sufficient, because a generic SPA fallback can satisfy both while recursively rendering Workbench instead of Viewer. The same smoke verifies that the initial root load requests no `App-*.js` chunk and that the explicit legacy route requests exactly one.
 
 ## Data mode: Demo vs Live
 
@@ -115,6 +130,8 @@ boundary states the references are for integrity, not a verdict.
 ```bash
 npm ci
 npm run dev                      # local preview
+npm run build                    # type-check + both production entries + delivery contract
+npm run verify:workbench-viewer-delivery
 npm run build:evidence-bundle -- --check   # consistency check (no write)
 npm run verify:evidence-bundle-contract    # offline gate contract test
 ```

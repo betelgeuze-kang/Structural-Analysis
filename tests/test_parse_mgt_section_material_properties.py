@@ -13,6 +13,7 @@ from parse_mgt_section_material_properties import (  # noqa: E402
     parse_mgt_beam_end_offsets,
     parse_mgt_elastic_links,
     parse_mgt_element_local_axis_rows,
+    parse_mgt_dgn_material_property_aliases,
     parse_mgt_material_properties,
     parse_mgt_plate_thickness_properties,
     parse_mgt_section_properties,
@@ -47,6 +48,68 @@ def test_material_moduli_from_mgt() -> None:
     assert materials[3]["type"] == "SRC"
     assert abs(materials[3]["E_kN_per_m2"] - 2.06e8) / 2.06e8 < 0.01
     assert abs(materials[3]["E_secondary_kN_per_m2"] - 3.25e7) / 3.25e7 < 0.01
+
+
+def test_dgn_material_aliases_use_only_exact_unique_source_identity() -> None:
+    text = MGT.read_text(encoding="utf-8", errors="ignore")
+    source_materials = parse_mgt_material_properties(text)
+
+    aliases, audit = parse_mgt_dgn_material_property_aliases(
+        text,
+        source_materials=source_materials,
+    )
+
+    assert len(source_materials) == 6
+    assert len(aliases) == 24
+    assert audit["dgn_material_row_count"] == 29
+    assert audit["existing_source_id_row_count"] == 5
+    assert audit["exact_unique_identity_match_row_count"] == 29
+    assert audit["unresolved_identity_rows"] == []
+    assert audit["ambiguous_identity_rows"] == []
+    assert audit["duplicate_dgn_material_ids"] == []
+    assert audit["dgn_numeric_elastic_override_consumed_count"] == 0
+    assert audit["fuzzy_name_match_count"] == 0
+    assert audit["contract_pass"] is True
+    assert audit["engineer_review_required"] is True
+    assert aliases[26]["inherited_from_material_id"] == 1
+    assert aliases[26]["E_kN_per_m2"] == source_materials[1][
+        "E_kN_per_m2"
+    ]
+    assert aliases[16]["inherited_from_material_id"] == 3
+    assert aliases[16]["E_secondary_kN_per_m2"] == source_materials[3][
+        "E_secondary_kN_per_m2"
+    ]
+    assert all(
+        row["dgn_numeric_elastic_override_consumed"] is False
+        for row in aliases.values()
+    )
+
+
+def test_dgn_material_aliases_fail_closed_on_ambiguous_or_missing_identity() -> None:
+    text = """\
+*DGN-MATL
+9, CONC, C40, 2, 0
+10, CONC, C50, 2, 0
+*ENDDATA
+"""
+    source_materials = {
+        1: {"type": "CONC", "name": "C40", "E_kN_per_m2": 1.0},
+        2: {"type": "CONC", "name": "C40", "E_kN_per_m2": 2.0},
+    }
+
+    aliases, audit = parse_mgt_dgn_material_property_aliases(
+        text,
+        source_materials=source_materials,
+    )
+
+    assert aliases == {}
+    assert [row["dgn_material_id"] for row in audit["ambiguous_identity_rows"]] == [
+        9
+    ]
+    assert [row["dgn_material_id"] for row in audit["unresolved_identity_rows"]] == [
+        10
+    ]
+    assert audit["contract_pass"] is False
 
 
 def test_pipe_section_p50x4_parses() -> None:
@@ -177,6 +240,14 @@ def test_load_mgt_section_material_properties_bundle() -> None:
     assert "sections" in bundle and "materials" in bundle and "plate_thicknesses" in bundle
     assert len(bundle["sections"]) >= 1
     assert len(bundle["materials"]) >= 3
+    assert len(bundle["source_materials"]) == 6
+    assert len(bundle["dgn_material_property_aliases"]) == 24
+    assert bundle["material_analysis_property_binding"][
+        "dgn_alias_resolution_enabled"
+    ] is False
+    assert bundle["material_analysis_property_binding"][
+        "dgn_alias_material_count_applied"
+    ] == 0
     assert len(bundle["plate_thicknesses"]) >= 20
     assert len(bundle["beam_end_offsets"]) >= 300
     assert len(bundle["support_constraints"]) == 8
@@ -185,3 +256,20 @@ def test_load_mgt_section_material_properties_bundle() -> None:
     assert len(bundle["boundary_groups"]) == 1
     assert len(bundle["element_local_axes"]) >= 12000
     assert bundle["opening_source_markers"]["opening_marker_row_count"] == 0
+
+    resolved = load_mgt_section_material_properties(
+        MGT,
+        resolve_dgn_material_property_aliases=True,
+    )
+    assert len(resolved["materials"]) == 30
+    assert resolved["materials"][26]["inherited_from_material_id"] == 1
+    assert resolved["materials"][16]["inherited_from_material_id"] == 3
+    assert resolved["material_analysis_property_binding"][
+        "dgn_alias_resolution_enabled"
+    ] is True
+    assert resolved["material_analysis_property_binding"][
+        "dgn_alias_material_count_applied"
+    ] == 24
+    assert resolved["material_analysis_property_binding"][
+        "engineer_review_required"
+    ] is True

@@ -1,0 +1,1588 @@
+{
+  "analysis_type": "adaptive_consistent_newton_continuation_seed",
+  "analytic_seed_full_load_pass": true,
+  "attempts": [
+    {
+      "accepted_load_factor_after": 0.0,
+      "accepted_load_factor_before": 0.0,
+      "accepted_state_hash_after": "sha256:8888bab453b3fbf14df03e01c65fa47093324a449964611653625e168bd64377",
+      "accepted_state_hash_before": "sha256:8888bab453b3fbf14df03e01c65fa47093324a449964611653625e168bd64377",
+      "accepted_step_index_before": 0,
+      "active_equation_count": 2,
+      "attempt_index": 1,
+      "attempted_step_size": 0.5,
+      "commit_contract_pass": false,
+      "committed": false,
+      "convergence_claim": false,
+      "convergence_history": [
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.0,
+            0.0
+          ],
+          "increment_abs_m": 0.5,
+          "increment_gate_passed": false,
+          "iteration": 0,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            0.25,
+            0.5
+          ],
+          "relative_residual": 1.0,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            -50.0
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.25,
+            0.5
+          ],
+          "increment_abs_m": 0.08064516129032256,
+          "increment_gate_passed": false,
+          "iteration": 1,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -0.04032258064516129,
+            -0.08064516129032258
+          ],
+          "relative_residual": 0.3125,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            15.625
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.20967741935483872,
+            0.41935483870967744
+          ],
+          "increment_abs_m": 0.006953258929248696,
+          "increment_gate_passed": false,
+          "iteration": 2,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -0.003476629464624351,
+            -0.006953258929248703
+          ],
+          "relative_residual": 0.023077439495149576,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            1.1538719747574788
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.20620078989021437,
+            0.41240157978042874
+          ],
+          "increment_abs_m": 4.6166483082643595e-05,
+          "increment_gate_passed": false,
+          "iteration": 3,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -2.308324154131738e-05,
+            -4.616648308263476e-05
+          ],
+          "relative_residual": 0.0001512212225578935,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            0.007561061127894675
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.20617770664867305,
+            0.4123554132973461
+          ],
+          "increment_abs_m": 2.0126620925431382e-09,
+          "increment_gate_passed": false,
+          "iteration": 4,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -1.006331050042201e-09,
+            -2.012662100084402e-09
+          ],
+          "relative_residual": 6.592026693397202e-09,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            3.296013346698601e-07
+          ]
+        }
+      ],
+      "fallback_used": false,
+      "final_increment_abs_m": null,
+      "increment_gate_passed": false,
+      "increment_norm_applicable": true,
+      "iteration_count": 5,
+      "iterative_solver_contract_pass": false,
+      "line_search_history": [
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.25,
+                0.5
+              ],
+              "trial_relative_residual": 0.3125,
+              "trial_residual_kn": [
+                0.0,
+                15.625
+              ]
+            }
+          ],
+          "iteration": 0,
+          "newton_increment_m": [
+            0.25,
+            0.5
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.20967741935483872,
+                0.41935483870967744
+              ],
+              "trial_relative_residual": 0.023077439495149576,
+              "trial_residual_kn": [
+                0.0,
+                1.1538719747574788
+              ]
+            }
+          ],
+          "iteration": 1,
+          "newton_increment_m": [
+            -0.04032258064516129,
+            -0.08064516129032258
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.25,
+            0.5
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.20620078989021437,
+                0.41240157978042874
+              ],
+              "trial_relative_residual": 0.0001512212225578935,
+              "trial_residual_kn": [
+                0.0,
+                0.007561061127894675
+              ]
+            }
+          ],
+          "iteration": 2,
+          "newton_increment_m": [
+            -0.003476629464624351,
+            -0.006953258929248703
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.20967741935483872,
+            0.41935483870967744
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.20617770664867305,
+                0.4123554132973461
+              ],
+              "trial_relative_residual": 6.592026693397202e-09,
+              "trial_residual_kn": [
+                0.0,
+                3.296013346698601e-07
+              ]
+            }
+          ],
+          "iteration": 3,
+          "newton_increment_m": [
+            -2.308324154131738e-05,
+            -4.616648308263476e-05
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.20620078989021437,
+            0.41240157978042874
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.206177705642342,
+                0.412355411284684
+              ],
+              "trial_relative_residual": 0.0,
+              "trial_residual_kn": [
+                0.0,
+                0.0
+              ]
+            }
+          ],
+          "iteration": 4,
+          "newton_increment_m": [
+            -1.006331050042201e-09,
+            -2.012662100084402e-09
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.20617770664867305,
+            0.4123554132973461
+          ]
+        }
+      ],
+      "line_search_step_count": 5,
+      "linear_solve_count": 0,
+      "no_solve_contract_pass": false,
+      "outcome": "rolled_back",
+      "reaction_observation_only": false,
+      "regularization_used": false,
+      "relative_residual": 0.0,
+      "residual_gate_passed": false,
+      "residual_norm_applicable": true,
+      "rollback_exact": true,
+      "solver_contract_pass": false,
+      "solver_detail": "max_iterations_exceeded",
+      "solver_executed": true,
+      "solver_status": "blocked",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "max_iterations_exceeded",
+      "trial_load_factor": 0.5,
+      "trial_state_hash": "sha256:cabfcd80073a4422247fb212f63b06c3ad8dd8ab41cd6dd7853184ce8dfeb5a0"
+    },
+    {
+      "accepted_load_factor_after": 0.25,
+      "accepted_load_factor_before": 0.0,
+      "accepted_state_hash_after": "sha256:e79a8015bb1d4f7971d9d77b3bd1244fb542d3a6f2ff35b78d6be963c8b49554",
+      "accepted_state_hash_before": "sha256:8888bab453b3fbf14df03e01c65fa47093324a449964611653625e168bd64377",
+      "accepted_step_index_before": 0,
+      "active_equation_count": 2,
+      "attempt_index": 2,
+      "attempted_step_size": 0.25,
+      "commit_contract_pass": true,
+      "committed": true,
+      "convergence_claim": true,
+      "convergence_history": [
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.0,
+            0.0
+          ],
+          "increment_abs_m": 0.25,
+          "increment_gate_passed": false,
+          "iteration": 0,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            0.125,
+            0.25
+          ],
+          "relative_residual": 1.0,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            -25.0
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.125,
+            0.25
+          ],
+          "increment_abs_m": 0.015822784810126583,
+          "increment_gate_passed": false,
+          "iteration": 1,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -0.007911392405063292,
+            -0.015822784810126583
+          ],
+          "relative_residual": 0.078125,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            1.953125
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.11708860759493671,
+            0.23417721518987342
+          ],
+          "increment_abs_m": 0.00019057103915312568,
+          "increment_gate_passed": false,
+          "iteration": 2,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -9.528551957655709e-05,
+            -0.00019057103915311418
+          ],
+          "relative_residual": 0.0009190449437062398,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            0.022976123592655995
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.11699332207536015,
+            0.2339866441507203
+          ],
+          "increment_abs_m": 2.6452855683700705e-08,
+          "increment_gate_passed": false,
+          "iteration": 3,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -1.3226427846270483e-08,
+            -2.6452855692540966e-08
+          ],
+          "relative_residual": 1.2753573116697226e-07,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            3.1883932791743064e-06
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.1169933088489323,
+            0.2339866176978646
+          ],
+          "increment_abs_m": 5.01083178924673e-16,
+          "increment_gate_passed": true,
+          "iteration": 4,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 0,
+          "newton_increment_m": [
+            -2.505415894623365e-16,
+            -5.01083178924673e-16
+          ],
+          "relative_residual": 2.415845301584341e-15,
+          "residual_gate_passed": true,
+          "residual_kn": [
+            0.0,
+            6.039613253960852e-14
+          ]
+        }
+      ],
+      "fallback_used": false,
+      "final_increment_abs_m": 5.01083178924673e-16,
+      "increment_gate_passed": true,
+      "increment_norm_applicable": true,
+      "iteration_count": 5,
+      "iterative_solver_contract_pass": true,
+      "line_search_history": [
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.125,
+                0.25
+              ],
+              "trial_relative_residual": 0.078125,
+              "trial_residual_kn": [
+                0.0,
+                1.953125
+              ]
+            }
+          ],
+          "iteration": 0,
+          "newton_increment_m": [
+            0.125,
+            0.25
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.11708860759493671,
+                0.23417721518987342
+              ],
+              "trial_relative_residual": 0.0009190449437062398,
+              "trial_residual_kn": [
+                0.0,
+                0.022976123592655995
+              ]
+            }
+          ],
+          "iteration": 1,
+          "newton_increment_m": [
+            -0.007911392405063292,
+            -0.015822784810126583
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.125,
+            0.25
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.11699332207536015,
+                0.2339866441507203
+              ],
+              "trial_relative_residual": 1.2753573116697226e-07,
+              "trial_residual_kn": [
+                0.0,
+                3.1883932791743064e-06
+              ]
+            }
+          ],
+          "iteration": 2,
+          "newton_increment_m": [
+            -9.528551957655709e-05,
+            -0.00019057103915311418
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.11708860759493671,
+            0.23417721518987342
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.1169933088489323,
+                0.2339866176978646
+              ],
+              "trial_relative_residual": 2.415845301584341e-15,
+              "trial_residual_kn": [
+                0.0,
+                6.039613253960852e-14
+              ]
+            }
+          ],
+          "iteration": 3,
+          "newton_increment_m": [
+            -1.3226427846270483e-08,
+            -2.6452855692540966e-08
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.11699332207536015,
+            0.2339866441507203
+          ]
+        }
+      ],
+      "line_search_step_count": 4,
+      "linear_solve_count": 5,
+      "no_solve_contract_pass": false,
+      "outcome": "committed",
+      "reaction_observation_only": false,
+      "regularization_used": false,
+      "relative_residual": 2.415845301584341e-15,
+      "residual_gate_passed": true,
+      "residual_norm_applicable": true,
+      "rollback_exact": null,
+      "solver_contract_pass": true,
+      "solver_detail": "",
+      "solver_executed": true,
+      "solver_status": "ready",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "residual_and_increment_converged",
+      "trial_load_factor": 0.25,
+      "trial_state_hash": "sha256:e79a8015bb1d4f7971d9d77b3bd1244fb542d3a6f2ff35b78d6be963c8b49554"
+    },
+    {
+      "accepted_load_factor_after": 0.5,
+      "accepted_load_factor_before": 0.25,
+      "accepted_state_hash_after": "sha256:82b58c74ebb3153282e78b3e98e8e3740ffec8af1c681082830e73c61501c947",
+      "accepted_state_hash_before": "sha256:e79a8015bb1d4f7971d9d77b3bd1244fb542d3a6f2ff35b78d6be963c8b49554",
+      "accepted_step_index_before": 1,
+      "active_equation_count": 2,
+      "attempt_index": 3,
+      "attempted_step_size": 0.25,
+      "commit_contract_pass": true,
+      "committed": true,
+      "convergence_claim": true,
+      "convergence_history": [
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.1169933088489323,
+            0.2339866176978646
+          ],
+          "increment_abs_m": 0.2074152589969463,
+          "increment_gate_passed": false,
+          "iteration": 0,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            0.10370762949847313,
+            0.20741525899694627
+          ],
+          "relative_residual": 0.4999999999999988,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            -24.99999999999994
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.22070093834740545,
+            0.4414018766948109
+          ],
+          "increment_abs_m": 0.028257215360919852,
+          "increment_gate_passed": false,
+          "iteration": 1,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -0.014128607680459928,
+            -0.028257215360919855
+          ],
+          "relative_residual": 0.0978057705903943,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            4.890288529519715
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.20657233066694553,
+            0.41314466133389105
+          ],
+          "increment_abs_m": 0.0007886619907925274,
+          "increment_gate_passed": false,
+          "iteration": 2,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -0.00039433099539627346,
+            -0.0007886619907925469
+          ],
+          "relative_residual": 0.002586940539381288,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            0.12934702696906442
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.20617799967154926,
+            0.4123559993430985
+          ],
+          "increment_abs_m": 5.880580880024411e-07,
+          "increment_gate_passed": false,
+          "iteration": 3,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -2.9402904400772925e-07,
+            -5.880580880154585e-07
+          ],
+          "relative_residual": 1.926055498131518e-06,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            9.63027749065759e-05
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.20617770564250526,
+            0.4123554112850105
+          ],
+          "increment_abs_m": 3.2653995335441924e-13,
+          "increment_gate_passed": true,
+          "iteration": 4,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 0,
+          "newton_increment_m": [
+            -1.6326997667720962e-13,
+            -3.2653995335441924e-13
+          ],
+          "relative_residual": 1.0695089258661029e-12,
+          "residual_gate_passed": true,
+          "residual_kn": [
+            0.0,
+            5.347544629330514e-11
+          ]
+        }
+      ],
+      "fallback_used": false,
+      "final_increment_abs_m": 3.2653995335441924e-13,
+      "increment_gate_passed": true,
+      "increment_norm_applicable": true,
+      "iteration_count": 5,
+      "iterative_solver_contract_pass": true,
+      "line_search_history": [
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.22070093834740545,
+                0.4414018766948109
+              ],
+              "trial_relative_residual": 0.0978057705903943,
+              "trial_residual_kn": [
+                0.0,
+                4.890288529519715
+              ]
+            }
+          ],
+          "iteration": 0,
+          "newton_increment_m": [
+            0.10370762949847313,
+            0.20741525899694627
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.1169933088489323,
+            0.2339866176978646
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.20657233066694553,
+                0.41314466133389105
+              ],
+              "trial_relative_residual": 0.002586940539381288,
+              "trial_residual_kn": [
+                0.0,
+                0.12934702696906442
+              ]
+            }
+          ],
+          "iteration": 1,
+          "newton_increment_m": [
+            -0.014128607680459928,
+            -0.028257215360919855
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.22070093834740545,
+            0.4414018766948109
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.20617799967154926,
+                0.4123559993430985
+              ],
+              "trial_relative_residual": 1.926055498131518e-06,
+              "trial_residual_kn": [
+                0.0,
+                9.63027749065759e-05
+              ]
+            }
+          ],
+          "iteration": 2,
+          "newton_increment_m": [
+            -0.00039433099539627346,
+            -0.0007886619907925469
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.20657233066694553,
+            0.41314466133389105
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.20617770564250526,
+                0.4123554112850105
+              ],
+              "trial_relative_residual": 1.0695089258661029e-12,
+              "trial_residual_kn": [
+                0.0,
+                5.347544629330514e-11
+              ]
+            }
+          ],
+          "iteration": 3,
+          "newton_increment_m": [
+            -2.9402904400772925e-07,
+            -5.880580880154585e-07
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.20617799967154926,
+            0.4123559993430985
+          ]
+        }
+      ],
+      "line_search_step_count": 4,
+      "linear_solve_count": 5,
+      "no_solve_contract_pass": false,
+      "outcome": "committed",
+      "reaction_observation_only": false,
+      "regularization_used": false,
+      "relative_residual": 1.0695089258661029e-12,
+      "residual_gate_passed": true,
+      "residual_norm_applicable": true,
+      "rollback_exact": null,
+      "solver_contract_pass": true,
+      "solver_detail": "",
+      "solver_executed": true,
+      "solver_status": "ready",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "residual_and_increment_converged",
+      "trial_load_factor": 0.5,
+      "trial_state_hash": "sha256:82b58c74ebb3153282e78b3e98e8e3740ffec8af1c681082830e73c61501c947"
+    },
+    {
+      "accepted_load_factor_after": 0.75,
+      "accepted_load_factor_before": 0.5,
+      "accepted_state_hash_after": "sha256:d2b2705e677a795cfc5649b699a8dd1642bbb76b24105b7b31dca815d1845baa",
+      "accepted_state_hash_before": "sha256:82b58c74ebb3153282e78b3e98e8e3740ffec8af1c681082830e73c61501c947",
+      "accepted_step_index_before": 2,
+      "active_equation_count": 2,
+      "attempt_index": 4,
+      "attempted_step_size": 0.25,
+      "commit_contract_pass": true,
+      "committed": true,
+      "convergence_claim": true,
+      "convergence_history": [
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.20617770564250526,
+            0.4123554112850105
+          ],
+          "increment_abs_m": 0.15265882567987188,
+          "increment_gate_passed": false,
+          "iteration": 0,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            0.07632941283993593,
+            0.15265882567987185
+          ],
+          "relative_residual": 0.33333333333262033,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            -24.999999999946525
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.2825071184824412,
+            0.5650142369648824
+          ],
+          "increment_abs_m": 0.01842562476450571,
+          "increment_gate_passed": false,
+          "iteration": 1,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -0.009212812382252841,
+            -0.018425624764505683
+          ],
+          "relative_residual": 0.05397858216802357,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            4.048393662601768
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.27329430610018834,
+            0.5465886122003767
+          ],
+          "increment_abs_m": 0.00033556872211648603,
+          "increment_gate_passed": false,
+          "iteration": 2,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -0.00016778436105826248,
+            -0.00033556872211652495
+          ],
+          "relative_residual": 0.000948696028295141,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            0.07115220212213558
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.2731265217391301,
+            0.5462530434782602
+          ],
+          "increment_abs_m": 1.0890324086965109e-07,
+          "increment_gate_passed": false,
+          "iteration": 3,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -5.4451620435929776e-08,
+            -1.0890324087185955e-07
+          ],
+          "relative_residual": 3.0768381141873155e-07,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            2.3076285856404866e-05
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.27312646728750967,
+            0.5462529345750193
+          ],
+          "increment_abs_m": 1.1535160240261319e-14,
+          "increment_gate_passed": true,
+          "iteration": 4,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 0,
+          "newton_increment_m": [
+            -5.7675801201306595e-15,
+            -1.1535160240261319e-14
+          ],
+          "relative_residual": 3.259022681352993e-14,
+          "residual_gate_passed": true,
+          "residual_kn": [
+            0.0,
+            2.4442670110147446e-12
+          ]
+        }
+      ],
+      "fallback_used": false,
+      "final_increment_abs_m": 1.1535160240261319e-14,
+      "increment_gate_passed": true,
+      "increment_norm_applicable": true,
+      "iteration_count": 5,
+      "iterative_solver_contract_pass": true,
+      "line_search_history": [
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.2825071184824412,
+                0.5650142369648824
+              ],
+              "trial_relative_residual": 0.05397858216802357,
+              "trial_residual_kn": [
+                0.0,
+                4.048393662601768
+              ]
+            }
+          ],
+          "iteration": 0,
+          "newton_increment_m": [
+            0.07632941283993593,
+            0.15265882567987185
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.20617770564250526,
+            0.4123554112850105
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.27329430610018834,
+                0.5465886122003767
+              ],
+              "trial_relative_residual": 0.000948696028295141,
+              "trial_residual_kn": [
+                0.0,
+                0.07115220212213558
+              ]
+            }
+          ],
+          "iteration": 1,
+          "newton_increment_m": [
+            -0.009212812382252841,
+            -0.018425624764505683
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.2825071184824412,
+            0.5650142369648824
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.2731265217391301,
+                0.5462530434782602
+              ],
+              "trial_relative_residual": 3.0768381141873155e-07,
+              "trial_residual_kn": [
+                0.0,
+                2.3076285856404866e-05
+              ]
+            }
+          ],
+          "iteration": 2,
+          "newton_increment_m": [
+            -0.00016778436105826248,
+            -0.00033556872211652495
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.27329430610018834,
+            0.5465886122003767
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.27312646728750967,
+                0.5462529345750193
+              ],
+              "trial_relative_residual": 3.259022681352993e-14,
+              "trial_residual_kn": [
+                0.0,
+                2.4442670110147446e-12
+              ]
+            }
+          ],
+          "iteration": 3,
+          "newton_increment_m": [
+            -5.4451620435929776e-08,
+            -1.0890324087185955e-07
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.2731265217391301,
+            0.5462530434782602
+          ]
+        }
+      ],
+      "line_search_step_count": 4,
+      "linear_solve_count": 5,
+      "no_solve_contract_pass": false,
+      "outcome": "committed",
+      "reaction_observation_only": false,
+      "regularization_used": false,
+      "relative_residual": 3.259022681352993e-14,
+      "residual_gate_passed": true,
+      "residual_norm_applicable": true,
+      "rollback_exact": null,
+      "solver_contract_pass": true,
+      "solver_detail": "",
+      "solver_executed": true,
+      "solver_status": "ready",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "residual_and_increment_converged",
+      "trial_load_factor": 0.75,
+      "trial_state_hash": "sha256:d2b2705e677a795cfc5649b699a8dd1642bbb76b24105b7b31dca815d1845baa"
+    },
+    {
+      "accepted_load_factor_after": 1.0,
+      "accepted_load_factor_before": 0.75,
+      "accepted_state_hash_after": "sha256:b3e92af8bbcb1faa3de6c9392dd6bd93a5a3323f2d86e65c114141c39c808c2b",
+      "accepted_state_hash_before": "sha256:d2b2705e677a795cfc5649b699a8dd1642bbb76b24105b7b31dca815d1845baa",
+      "accepted_step_index_before": 3,
+      "active_equation_count": 2,
+      "attempt_index": 5,
+      "attempted_step_size": 0.25,
+      "commit_contract_pass": true,
+      "committed": true,
+      "convergence_claim": true,
+      "convergence_history": [
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.27312646728750967,
+            0.5462529345750193
+          ],
+          "increment_abs_m": 0.117981793603958,
+          "increment_gate_passed": false,
+          "iteration": 0,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            0.05899089680197897,
+            0.11798179360395794
+          ],
+          "relative_residual": 0.24999999999997555,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            -24.999999999997556
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.33211736408948866,
+            0.6642347281789773
+          ],
+          "increment_abs_m": 0.01151489918109716,
+          "increment_gate_passed": false,
+          "iteration": 1,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -0.005757449590548561,
+            -0.011514899181097122
+          ],
+          "relative_residual": 0.030566635569459207,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            3.056663556945921
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.3263599144989401,
+            0.6527198289978802
+          ],
+          "increment_abs_m": 0.0001264077314782064,
+          "increment_gate_passed": false,
+          "iteration": 2,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -6.320386573912817e-05,
+            -0.00012640773147825634
+          ],
+          "relative_residual": 0.00032836454879571876,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            0.032836454879571875
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.326296710633201,
+            0.652593421266402
+          ],
+          "increment_abs_m": 1.505906987997463e-08,
+          "increment_gate_passed": false,
+          "iteration": 3,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 1,
+          "newton_increment_m": [
+            -7.529534950812497e-09,
+            -1.5059069901624993e-08
+          ],
+          "relative_residual": 3.910905434167944e-08,
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            3.910905434167944e-06
+          ]
+        },
+        {
+          "accepted": true,
+          "free_displacements_m": [
+            0.32629670310366604,
+            0.6525934062073321
+          ],
+          "increment_abs_m": 2.1887745862832428e-16,
+          "increment_gate_passed": true,
+          "iteration": 4,
+          "line_search_alpha": 1.0,
+          "line_search_attempt_count": 0,
+          "newton_increment_m": [
+            -1.0943872931416214e-16,
+            -2.1887745862832428e-16
+          ],
+          "relative_residual": 5.684341886080802e-16,
+          "residual_gate_passed": true,
+          "residual_kn": [
+            0.0,
+            5.684341886080802e-14
+          ]
+        }
+      ],
+      "fallback_used": false,
+      "final_increment_abs_m": 2.1887745862832428e-16,
+      "increment_gate_passed": true,
+      "increment_norm_applicable": true,
+      "iteration_count": 5,
+      "iterative_solver_contract_pass": true,
+      "line_search_history": [
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.33211736408948866,
+                0.6642347281789773
+              ],
+              "trial_relative_residual": 0.030566635569459207,
+              "trial_residual_kn": [
+                0.0,
+                3.056663556945921
+              ]
+            }
+          ],
+          "iteration": 0,
+          "newton_increment_m": [
+            0.05899089680197897,
+            0.11798179360395794
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.27312646728750967,
+            0.5462529345750193
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.3263599144989401,
+                0.6527198289978802
+              ],
+              "trial_relative_residual": 0.00032836454879571876,
+              "trial_residual_kn": [
+                0.0,
+                0.032836454879571875
+              ]
+            }
+          ],
+          "iteration": 1,
+          "newton_increment_m": [
+            -0.005757449590548561,
+            -0.011514899181097122
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.33211736408948866,
+            0.6642347281789773
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.326296710633201,
+                0.652593421266402
+              ],
+              "trial_relative_residual": 3.910905434167944e-08,
+              "trial_residual_kn": [
+                0.0,
+                3.910905434167944e-06
+              ]
+            }
+          ],
+          "iteration": 2,
+          "newton_increment_m": [
+            -6.320386573912817e-05,
+            -0.00012640773147825634
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.3263599144989401,
+            0.6527198289978802
+          ]
+        },
+        {
+          "attempt_count": 1,
+          "attempts": [
+            {
+              "accepted": true,
+              "alpha": 1.0,
+              "trial_free_displacements_m": [
+                0.32629670310366604,
+                0.6525934062073321
+              ],
+              "trial_relative_residual": 5.684341886080802e-16,
+              "trial_residual_kn": [
+                0.0,
+                5.684341886080802e-14
+              ]
+            }
+          ],
+          "iteration": 3,
+          "newton_increment_m": [
+            -7.529534950812497e-09,
+            -1.5059069901624993e-08
+          ],
+          "selected_alpha": 1.0,
+          "starting_free_displacements_m": [
+            0.326296710633201,
+            0.652593421266402
+          ]
+        }
+      ],
+      "line_search_step_count": 4,
+      "linear_solve_count": 5,
+      "no_solve_contract_pass": false,
+      "outcome": "committed",
+      "reaction_observation_only": false,
+      "regularization_used": false,
+      "relative_residual": 5.684341886080802e-16,
+      "residual_gate_passed": true,
+      "residual_norm_applicable": true,
+      "rollback_exact": null,
+      "solver_contract_pass": true,
+      "solver_detail": "",
+      "solver_executed": true,
+      "solver_status": "ready",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "residual_and_increment_converged",
+      "trial_load_factor": 1.0,
+      "trial_state_hash": "sha256:b3e92af8bbcb1faa3de6c9392dd6bd93a5a3323f2d86e65c114141c39c808c2b"
+    }
+  ],
+  "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+  "checkpoints": [
+    {
+      "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+      "free_displacements_m": [
+        0.0,
+        0.0
+      ],
+      "load_factor": 0.0,
+      "schema_version": "structural-analysis-continuation-checkpoint.v1",
+      "state_hash": "sha256:8888bab453b3fbf14df03e01c65fa47093324a449964611653625e168bd64377",
+      "step_index": 0
+    },
+    {
+      "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+      "free_displacements_m": [
+        0.1169933088489323,
+        0.2339866176978646
+      ],
+      "load_factor": 0.25,
+      "schema_version": "structural-analysis-continuation-checkpoint.v1",
+      "state_hash": "sha256:e79a8015bb1d4f7971d9d77b3bd1244fb542d3a6f2ff35b78d6be963c8b49554",
+      "step_index": 1
+    },
+    {
+      "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+      "free_displacements_m": [
+        0.20617770564250526,
+        0.4123554112850105
+      ],
+      "load_factor": 0.5,
+      "schema_version": "structural-analysis-continuation-checkpoint.v1",
+      "state_hash": "sha256:82b58c74ebb3153282e78b3e98e8e3740ffec8af1c681082830e73c61501c947",
+      "step_index": 2
+    },
+    {
+      "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+      "free_displacements_m": [
+        0.27312646728750967,
+        0.5462529345750193
+      ],
+      "load_factor": 0.75,
+      "schema_version": "structural-analysis-continuation-checkpoint.v1",
+      "state_hash": "sha256:d2b2705e677a795cfc5649b699a8dd1642bbb76b24105b7b31dca815d1845baa",
+      "step_index": 3
+    },
+    {
+      "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+      "free_displacements_m": [
+        0.32629670310366604,
+        0.6525934062073321
+      ],
+      "load_factor": 1.0,
+      "schema_version": "structural-analysis-continuation-checkpoint.v1",
+      "state_hash": "sha256:b3e92af8bbcb1faa3de6c9392dd6bd93a5a3323f2d86e65c114141c39c808c2b",
+      "step_index": 4
+    }
+  ],
+  "claim_boundary": "This receipt reaches load factor 1.0 only for a two-element 1D strain-cubic analytic axial chain. It verifies accepted/trial state discipline, adaptive step reduction, exact rollback, checkpoint restart, a finite-difference consistent Jacobian check, local quadratic convergence, and zero fallback. Every committed step has active free equations and an iterative convergence claim; fully constrained no-solve state transitions are a separate contract. It does not close G1 full-building/full-mesh nonlinear equilibrium, frame-shell coupling, material-model breadth, arc-length snap-through, or ROCm/HIP parity.",
+  "config": {
+    "failed_step_reduction": 0.5,
+    "fast_iteration_threshold": 4,
+    "fast_step_growth": 1.0,
+    "initial_step_size": 0.5,
+    "maximum_attempt_count": 20,
+    "maximum_step_size": 0.5,
+    "minimum_step_size": 0.125,
+    "target_load_factor": 1.0
+  },
+  "contract_pass": true,
+  "final_checkpoint": {
+    "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+    "free_displacements_m": [
+      0.32629670310366604,
+      0.6525934062073321
+    ],
+    "load_factor": 1.0,
+    "schema_version": "structural-analysis-continuation-checkpoint.v1",
+    "state_hash": "sha256:b3e92af8bbcb1faa3de6c9392dd6bd93a5a3323f2d86e65c114141c39c808c2b",
+    "step_index": 4
+  },
+  "full_mesh_closure_claim": false,
+  "g1_full_load_claim": false,
+  "initial_checkpoint": {
+    "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+    "free_displacements_m": [
+      0.0,
+      0.0
+    ],
+    "load_factor": 0.0,
+    "schema_version": "structural-analysis-continuation-checkpoint.v1",
+    "state_hash": "sha256:8888bab453b3fbf14df03e01c65fa47093324a449964611653625e168bd64377",
+    "step_index": 0
+  },
+  "metrics": {
+    "accepted_step_count": 4,
+    "attempt_count": 5,
+    "checkpoint_restart_used": false,
+    "contract_pass": true,
+    "convergence_claim": true,
+    "fallback_count": 0,
+    "final_load_factor": 1.0,
+    "final_state_hash": "sha256:b3e92af8bbcb1faa3de6c9392dd6bd93a5a3323f2d86e65c114141c39c808c2b",
+    "initial_state_hash": "sha256:8888bab453b3fbf14df03e01c65fa47093324a449964611653625e168bd64377",
+    "iterative_solver_step_count": 4,
+    "newton_convergence_claim_count": 4,
+    "no_solve_reaction_only_step_count": 0,
+    "reaction_observation_only": false,
+    "regularization_count": 0,
+    "rejected_attempt_count": 1,
+    "residual_formula": "F_internal_minus_F_external",
+    "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+    "rollback_exact_all": true,
+    "solver_executed": true,
+    "solver_executed_step_count": 4,
+    "target_load_factor": 1.0,
+    "target_load_factor_reached": true,
+    "terminal_dispositions": [
+      "solve_free_equations"
+    ]
+  },
+  "newton_config": {
+    "increment_tolerance": 1e-12,
+    "line_search_alphas": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625,
+      0.03125
+    ],
+    "matrix_backend": "numpy_linalg_solve_dense",
+    "max_iterations": 4,
+    "residual_tolerance": 1e-10
+  },
+  "production_nonlinear_closure_claim": false,
+  "residual_formula": "F_internal_minus_F_external",
+  "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+  "schema_version": "structural-analysis-adaptive-continuation.v1",
+  "status": "ready",
+  "terminal_reason": "target_load_factor_reached",
+  "truth_class": "analytic_1d_material_mesh_truth",
+  "verification": {
+    "checkpoint_restart": {
+      "exact_final_state_match": true,
+      "first_half_checkpoint": {
+        "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+        "free_displacements_m": [
+          0.20617770564250526,
+          0.4123554112850105
+        ],
+        "load_factor": 0.5,
+        "schema_version": "structural-analysis-continuation-checkpoint.v1",
+        "state_hash": "sha256:82b58c74ebb3153282e78b3e98e8e3740ffec8af1c681082830e73c61501c947",
+        "step_index": 2
+      },
+      "one_shot_final_state_hash": "sha256:b3e92af8bbcb1faa3de6c9392dd6bd93a5a3323f2d86e65c114141c39c808c2b",
+      "resumed_final_state_hash": "sha256:b3e92af8bbcb1faa3de6c9392dd6bd93a5a3323f2d86e65c114141c39c808c2b"
+    },
+    "final_residual_inf_norm_kn": 5.684341886080802e-14,
+    "finite_difference_jacobian": {
+      "analytic_jacobian_kn_per_m": [
+        [
+          1038.8172307379318,
+          -519.4086153689659
+        ],
+        [
+          -519.4086153689659,
+          519.4086153689659
+        ]
+      ],
+      "finite_difference_epsilon": 1e-07,
+      "finite_difference_jacobian_kn_per_m": [
+        [
+          1038.817230778477,
+          -519.4086151050215
+        ],
+        [
+          -519.4086153892385,
+          519.4086151050215
+        ]
+      ],
+      "free_dof_count": 2,
+      "max_abs_error": 2.639444574015215e-07,
+      "pass": true
+    },
+    "full_load_factor_reached": true,
+    "line_search_history_present": true,
+    "quadratic_convergence": {
+      "full_step_sample_count": 5,
+      "method": "consecutive_full_step_relative_residual_order",
+      "minimum_observed_order": 1.993039837835807,
+      "minimum_observed_order_required": 1.8,
+      "minimum_order_sample_count_required": 2,
+      "order_sample_count": 3,
+      "order_samples": [
+        {
+          "ending_iteration": 2,
+          "observed_order": 2.1572343995960157,
+          "quadratic_ratio": 0.3514479262210839
+        },
+        {
+          "ending_iteration": 3,
+          "observed_order": 1.993039837835807,
+          "quadratic_ratio": 0.3627143921422583
+        },
+        {
+          "ending_iteration": 4,
+          "observed_order": 1.997308725694158,
+          "quadratic_ratio": 0.37164266111082606
+        }
+      ],
+      "pass": true,
+      "samples": [
+        {
+          "iteration": 0,
+          "relative_residual": 0.24999999999997555
+        },
+        {
+          "iteration": 1,
+          "relative_residual": 0.030566635569459207
+        },
+        {
+          "iteration": 2,
+          "relative_residual": 0.00032836454879571876
+        },
+        {
+          "iteration": 3,
+          "relative_residual": 3.910905434167944e-08
+        },
+        {
+          "iteration": 4,
+          "relative_residual": 5.684341886080802e-16
+        }
+      ]
+    },
+    "rollback_attempt_count": 1,
+    "rollback_exact_gate_passed": true
+  }
+}

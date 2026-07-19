@@ -24,6 +24,7 @@ from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION 
 from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
     GLOBALIZATION,
     RESIDUAL_FORMULA,
+    SOLVE_FREE_EQUATIONS_DISPOSITION,
     NewtonRaphsonConfig,
     ScalarNonlinearAxialReference,
     expected_scalar_equilibrium_displacement,
@@ -68,6 +69,157 @@ class ZeroResidualSingularVector:
 
     def assemble(self, free_displacements_m: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         return np.array([0.0]), np.array([[0.0]])
+
+
+class ConstantResidualScalar:
+    """Adversarial scalar problem where no line-search trial can descend."""
+
+    case_id = "phase2_constant_residual_scalar_line_search_guard"
+    external_force_kn = 1.0
+    initial_displacement_m = 0.0
+
+    def internal_force(self, displacement_m: float) -> float:
+        return 0.0
+
+    def tangent_stiffness(self, displacement_m: float) -> float:
+        return 1.0
+
+    def residual(self, displacement_m: float) -> float:
+        return -1.0
+
+    def reference_force_scale(self) -> float:
+        return 1.0
+
+
+class ConstantResidualVector:
+    """Adversarial vector problem where no line-search trial can descend."""
+
+    case_id = "phase2_constant_residual_vector_line_search_guard"
+
+    def reference_force_scale(self) -> float:
+        return 1.0
+
+    def initial_free_displacements_m(self) -> np.ndarray:
+        return np.array([0.0])
+
+    def assemble(self, free_displacements_m: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        return np.array([1.0]), np.array([[1.0]])
+
+
+def _non_descent_line_search_guard_payload(solution: Any) -> dict[str, Any]:
+    convergence_row = solution.convergence_history[0]
+    line_search_row = solution.line_search_history[0]
+    guard_passed = bool(
+        solution.status == "blocked"
+        and solution.metrics.get("contract_pass") is False
+        and solution.metrics.get("detail")
+        == "line_search_failed_to_reduce_residual"
+        and solution.metrics.get("terminal_disposition")
+        == SOLVE_FREE_EQUATIONS_DISPOSITION
+        and solution.metrics.get("solver_executed") is True
+        and solution.metrics.get("convergence_claim") is False
+        and convergence_row.get("increment_gate_passed") is True
+        and convergence_row.get("accepted") is False
+        and line_search_row.get("selected_alpha") == 0.0
+        and line_search_row.get("attempt_count") > 0
+        and all(
+            attempt.get("accepted") is False
+            for attempt in line_search_row.get("attempts", [])
+        )
+        and solution.metrics.get("regularization_used") is False
+        and solution.metrics.get("fallback_used") is False
+    )
+    return {
+        "case_id": solution.problem.case_id,
+        "status": solution.status,
+        "guard_passed": guard_passed,
+        "terminal_disposition": solution.metrics.get("terminal_disposition"),
+        "terminal_reason": solution.metrics.get("terminal_reason"),
+        "solver_executed": solution.metrics.get("solver_executed"),
+        "convergence_claim": solution.metrics.get("convergence_claim"),
+        "increment_gate_passed_on_unchanged_state": convergence_row.get(
+            "increment_gate_passed"
+        ),
+        "accepted": convergence_row.get("accepted"),
+        "selected_alpha": line_search_row.get("selected_alpha"),
+        "attempt_count": line_search_row.get("attempt_count"),
+        "all_attempts_rejected": all(
+            attempt.get("accepted") is False
+            for attempt in line_search_row.get("attempts", [])
+        ),
+        "regularization_used": solution.metrics.get("regularization_used"),
+        "fallback_used": solution.metrics.get("fallback_used"),
+        "convergence_history": solution.convergence_history,
+        "line_search_history": solution.line_search_history,
+    }
+
+
+def _newton_configuration_guard_payload() -> dict[str, Any]:
+    cases = (
+        (
+            "infinite_residual_and_increment_tolerances",
+            {
+                "residual_tolerance": float("inf"),
+                "increment_tolerance": float("inf"),
+            },
+            "residual_tolerance",
+        ),
+        (
+            "zero_residual_tolerance",
+            {"residual_tolerance": 0.0},
+            "residual_tolerance",
+        ),
+        (
+            "negative_iteration_limit",
+            {"max_iterations": -1},
+            "max_iterations",
+        ),
+        (
+            "nondecreasing_line_search_alphas",
+            {"line_search_alphas": (0.5, 1.0)},
+            "line_search_alphas",
+        ),
+        (
+            "empty_matrix_backend",
+            {"matrix_backend": ""},
+            "matrix_backend",
+        ),
+    )
+    rows: list[dict[str, Any]] = []
+    for case_id, kwargs, expected_message_fragment in cases:
+        try:
+            NewtonRaphsonConfig(**kwargs)
+        except ValueError as exc:
+            rejected = expected_message_fragment in str(exc)
+            exception_type = exc.__class__.__name__
+            message = str(exc)
+        else:
+            rejected = False
+            exception_type = None
+            message = ""
+        rows.append(
+            {
+                "case_id": case_id,
+                "rejected_before_solver_invocation": rejected,
+                "expected_message_fragment": expected_message_fragment,
+                "exception_type": exception_type,
+                "message": message,
+            }
+        )
+    contract_pass = all(
+        row["rejected_before_solver_invocation"] is True for row in rows
+    )
+    return {
+        "contract_pass": contract_pass,
+        "case_count": len(rows),
+        "rejected_case_count": sum(
+            row["rejected_before_solver_invocation"] is True for row in rows
+        ),
+        "infinite_tolerance_false_pass_prevented": bool(
+            rows[0]["rejected_before_solver_invocation"] is True
+        ),
+        "cases": rows,
+    }
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -150,6 +302,23 @@ def build_newton_globalization_artifacts(
         ZeroResidualSingularVector(),
         config=NewtonRaphsonConfig(),
     )
+    constant_residual_scalar_solution = newton_raphson_scalar(
+        ConstantResidualScalar(),
+        config=NewtonRaphsonConfig(),
+    )
+    constant_residual_vector_solution = newton_raphson_vector(
+        ConstantResidualVector(),
+        config=NewtonRaphsonConfig(),
+    )
+    non_descent_line_search_guard = {
+        "scalar": _non_descent_line_search_guard_payload(
+            constant_residual_scalar_solution
+        ),
+        "vector": _non_descent_line_search_guard_payload(
+            constant_residual_vector_solution
+        ),
+    }
+    configuration_guard = _newton_configuration_guard_payload()
     expected_displacement_m = expected_scalar_equilibrium_displacement(problem)
     displacement_error = abs(solution.displacement_m - expected_displacement_m)
     tangent_check = finite_difference_tangent_check(problem, solution.displacement_m)
@@ -187,6 +356,10 @@ def build_newton_globalization_artifacts(
         and singular_vector_solution.metrics.get("regularization_used") is False
         and singular_vector_solution.metrics.get("fallback_used") is False
     )
+    non_descent_line_search_guard_passed = bool(
+        all(row["guard_passed"] for row in non_descent_line_search_guard.values())
+    )
+    configuration_guard_passed = bool(configuration_guard["contract_pass"])
     contract_pass = (
         solution.status == "ready"
         and bool(metrics.get("contract_pass"))
@@ -200,6 +373,8 @@ def build_newton_globalization_artifacts(
         and displacement_gate_passed
         and unsupported_backend_guard_passed
         and singular_tangent_guard_passed
+        and non_descent_line_search_guard_passed
+        and configuration_guard_passed
         and metrics.get("residual_formula") == RESIDUAL_FORMULA
     )
 
@@ -213,6 +388,10 @@ def build_newton_globalization_artifacts(
         "tangent_finite_difference_check": tangent_check,
         "tangent_gate_passed": tangent_gate_passed,
     }
+    result_payload["non_descent_line_search_guard"] = (
+        non_descent_line_search_guard
+    )
+    result_payload["configuration_guard"] = configuration_guard
 
     summary_payload = {
         "schema_version": SCHEMA_VERSION,
@@ -223,6 +402,10 @@ def build_newton_globalization_artifacts(
             [
                 Path("src/structural_analysis/solvers/nonlinear/newton.py"),
                 Path("src/structural_analysis/solvers/nonlinear/__init__.py"),
+                Path("scripts/build_phase2_newton_globalization_artifacts.py"),
+                Path("tests/test_nonlinear_line_search_acceptance.py"),
+                Path("tests/test_nonlinear_newton_config_contract.py"),
+                Path("tests/test_build_phase2_newton_globalization_artifacts.py"),
             ],
             repo_root=repo_root,
         ),
@@ -249,6 +432,12 @@ def build_newton_globalization_artifacts(
         "fallback_used": metrics.get("fallback_used"),
         "unsupported_backend_guard_passed": unsupported_backend_guard_passed,
         "singular_tangent_guard_passed": singular_tangent_guard_passed,
+        "non_descent_line_search_guard_passed": (
+            non_descent_line_search_guard_passed
+        ),
+        "non_descent_line_search_guard": non_descent_line_search_guard,
+        "configuration_guard_passed": configuration_guard_passed,
+        "configuration_guard": configuration_guard,
         "unsupported_backend_guard": {
             "configured_matrix_backend": "scipy_sparse_spsolve_cpu",
             "status": unsupported_backend_solution.status,
@@ -337,6 +526,12 @@ def build_newton_globalization_artifacts(
             "residual/increment convergence gates without regularization or fallback "
             "false PASS; unsupported scalar matrix backend requests and singular "
             "tangent/Jacobian zero-residual mechanisms remain blocked. "
+            "A non-descending line search now also blocks even though the "
+            "unchanged state's applied increment is zero and numerically passes "
+            "the increment gate; that zero is not accepted as convergence. "
+            "Non-finite/non-positive tolerances, invalid iteration limits, "
+            "non-descending line-search sequences, and empty backend identifiers "
+            "are rejected before solver invocation. "
             "It does not close G1 full-mesh/full-load nonlinear equilibrium, "
             "general frame/shell/material coupling, sparse production matrix backends, "
             "or production GPU/HIP gates."

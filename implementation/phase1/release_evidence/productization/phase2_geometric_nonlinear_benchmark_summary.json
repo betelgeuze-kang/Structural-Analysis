@@ -1,0 +1,49 @@
+{
+  "analysis_type": "geometric_nonlinear_benchmark_seed",
+  "arc_length_path_following_claim": false,
+  "artifacts": {
+    "result": "implementation/phase1/release_evidence/productization/phase2_geometric_nonlinear_benchmark_result.json",
+    "schema": "src/structural_analysis/schemas/geometric_nonlinear_benchmark_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_geometric_nonlinear_benchmark_summary.json"
+  },
+  "blockers_remaining": [
+    "general_2d_3d_pdelta_frame_not_implemented",
+    "lee_frame_snapthrough_not_implemented",
+    "arc_length_path_following_not_implemented",
+    "continuum_cantilever_large_rotation_not_implemented",
+    "general_corotational_frame_shell_elements_not_implemented",
+    "material_geometric_nonlinear_coupling_not_verified",
+    "published_or_experimental_geometric_validation_not_attached",
+    "production_sparse_rocm_hip_geometric_parity_not_verified"
+  ],
+  "claim_boundary": "This receipt verifies a pinned Euler-Bernoulli column against the closed-form critical load and sine mode, first-mode P-Delta amplification using the same finite-element K/Kg eigenpair, and the exact displacement-controlled path of a symmetric two-bar shallow arch through its first limit point. It is not a general frame solver and does not claim a P-Delta frame, Lee frame, arc-length path following, continuum cantilever large rotation, general corotational frame/shell kinematics, material-geometric coupling, or CPU/HIP parity.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "continuum_cantilever_large_rotation_claim": false,
+  "contract_pass": true,
+  "deterministic_replay_exact": true,
+  "engine_version": "1.0.0",
+  "euler_column_gate_passed": true,
+  "euler_finest_relative_error": 2.0602108659497045e-06,
+  "euler_minimum_convergence_order": 3.8765674184937398,
+  "general_2d_3d_geometric_stiffness_claim": false,
+  "general_frame_pdelta_claim": false,
+  "generated_at": "2026-07-19T07:13:14.227018+00:00",
+  "geometric_nonlinear_benchmark_breadth_claim": false,
+  "implemented_benchmarks_contract_pass": true,
+  "input_checksums": {
+    "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py": "sha256:9c12455223ac013e3f396e4e5bf0fc41f3486baf6bc8e9d8fe2993a2d0dee8d1",
+    "src/structural_analysis/benchmark/geometric_nonlinear.py": "sha256:9c6a0c2d6fb7565fb256c35ab0fcf124f92d9cfb9dbc7b29c3724b656c68c7dd",
+    "src/structural_analysis/schemas/geometric_nonlinear_benchmark_v1.schema.json": "sha256:b17375145453087efc1958902b5dca6f0580bad8e2a505e301d671c7ebe996ac",
+    "tests/test_build_phase2_geometric_nonlinear_benchmark_artifacts.py": "sha256:99180f73e87e9fec4e2b2c2361e51afe7b155c377a652aa10cb5f9dab41b1775",
+    "tests/test_geometric_nonlinear_benchmarks.py": "sha256:a7d10825121b29fdf6ec74923d0566cc176e84733a696dda22811fa1a46355fd"
+  },
+  "lee_frame_snapthrough_claim": false,
+  "modal_pdelta_column_gate_passed": true,
+  "modal_pdelta_maximum_relative_error": 1.4388490399142027e-12,
+  "schema_version": "phase2-geometric-nonlinear-benchmark-artifacts.v1",
+  "shallow_arch_first_limit_load_kn": 29.605176007630757,
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+  "status": "partial",
+  "truth_class": "analytic_and_semianalytic_geometric_seed_truth",
+  "two_bar_shallow_arch_gate_passed": true
+}

@@ -1,0 +1,345 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/medium_benchmark_corpus_readiness_v1.schema.json",
+  "title": "Medium benchmark corpus readiness v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "contract_pass",
+    "required_case_count",
+    "attached_case_count",
+    "medium_benchmark_credit_count",
+    "required_core_metric_families",
+    "required_case_artifacts",
+    "evidence_binding_profile",
+    "evidence_binding_required",
+    "byte_bound_case_count",
+    "archetype_policy",
+    "slot_rows",
+    "case_rows",
+    "reference_solver_diversity",
+    "source_family_count",
+    "input_blockers",
+    "blockers",
+    "summary_line",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "medium-benchmark-corpus-readiness.v1"
+    },
+    "status": {
+      "enum": ["pass", "blocked"]
+    },
+    "contract_pass": {"type": "boolean"},
+    "required_case_count": {"const": 5},
+    "attached_case_count": {"type": "integer", "minimum": 0},
+    "medium_benchmark_credit_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5
+    },
+    "required_core_metric_families": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "string"}
+    },
+    "required_case_artifacts": {
+      "type": "array",
+      "minItems": 9,
+      "uniqueItems": true,
+      "items": {"type": "string"}
+    },
+    "evidence_binding_profile": {
+      "const": "repository_bytes_and_receipt_payloads.v1"
+    },
+    "evidence_binding_required": {"const": true},
+    "byte_bound_case_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "archetype_policy": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/archetype"}
+    },
+    "slot_rows": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/slot"}
+    },
+    "case_rows": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/case"}
+    },
+    "reference_solver_diversity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solver_names",
+        "opensees_present",
+        "second_independent_solver_present",
+        "contract_pass"
+      ],
+      "properties": {
+        "solver_names": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "opensees_present": {"type": "boolean"},
+        "second_independent_solver_present": {"type": "boolean"},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "source_family_count": {"type": "integer", "minimum": 0},
+    "input_blockers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "blockers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "summary_line": {"type": "string", "minLength": 1},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "archetype": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["archetype_id", "label", "required_capabilities", "claim_boundary"],
+      "properties": {
+        "archetype_id": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "required_capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archetype_id",
+        "label",
+        "required_capabilities",
+        "selected_case_ids",
+        "slot_status",
+        "blockers",
+        "claim_boundary"
+      ],
+      "properties": {
+        "archetype_id": {"type": "string"},
+        "label": {"type": "string"},
+        "required_capabilities": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "selected_case_ids": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "slot_status": {
+          "enum": [
+            "operator_selection_required",
+            "duplicate_selection_blocked",
+            "selected_blocked",
+            "ready_for_credit"
+          ]
+        },
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "claim_boundary": {"type": "string"}
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "case_id",
+        "archetype_id",
+        "size_class",
+        "medium_scale_basis",
+        "capabilities",
+        "source_family",
+        "source_path",
+        "source_url_or_doi",
+        "source_sha256",
+        "source_commit_sha",
+        "reference_solver_name",
+        "reference_solver_class",
+        "metric_families",
+        "decision_schema_version",
+        "decision",
+        "decision_metric_families",
+        "evidence_binding_profile",
+        "source_file_binding",
+        "license_receipt_binding",
+        "artifact_receipt_bindings",
+        "bound_artifact_receipt_count",
+        "evidence_binding_contract_pass",
+        "blockers",
+        "ready_for_medium_benchmark_credit",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {"const": "medium-benchmark-case-evidence.v1"},
+        "case_id": {"type": "string"},
+        "archetype_id": {"type": "string"},
+        "size_class": {"type": "string"},
+        "medium_scale_basis": {"type": "string"},
+        "capabilities": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "source_family": {"type": "string"},
+        "source_path": {"type": "string"},
+        "source_url_or_doi": {"type": "string"},
+        "source_sha256": {"type": "string"},
+        "source_commit_sha": {"type": "string"},
+        "reference_solver_name": {"type": "string"},
+        "reference_solver_class": {"type": "string"},
+        "metric_families": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "decision_schema_version": {"type": "string"},
+        "decision": {"type": "string"},
+        "decision_metric_families": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "evidence_binding_profile": {
+          "const": "repository_bytes_and_receipt_payloads.v1"
+        },
+        "source_file_binding": {"$ref": "#/$defs/fileBinding"},
+        "license_receipt_binding": {"$ref": "#/$defs/licenseBinding"},
+        "artifact_receipt_bindings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/artifactBinding"},
+          "maxItems": 9
+        },
+        "bound_artifact_receipt_count": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9
+        },
+        "evidence_binding_contract_pass": {"type": "boolean"},
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        },
+        "ready_for_medium_benchmark_credit": {"type": "boolean"},
+        "claim_boundary": {"type": "string"}
+      }
+    },
+    "fileBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "declared_sha256",
+        "observed_sha256",
+        "byte_length",
+        "contract_pass",
+        "blockers"
+      ],
+      "properties": {
+        "path": {"type": "string"},
+        "declared_sha256": {"type": "string"},
+        "observed_sha256": {"type": "string"},
+        "byte_length": {
+          "oneOf": [
+            {"type": "integer", "minimum": 0},
+            {"type": "null"}
+          ]
+        },
+        "contract_pass": {"type": "boolean"},
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "licenseBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "receipt_file",
+        "payload_schema_contract_pass",
+        "contract_pass",
+        "blockers"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "medium-benchmark-source-license-receipt.v1"
+        },
+        "receipt_file": {"$ref": "#/$defs/fileBinding"},
+        "payload_schema_contract_pass": {"type": "boolean"},
+        "contract_pass": {"type": "boolean"},
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    },
+    "artifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_name",
+        "schema_version",
+        "receipt_file",
+        "receipt_schema_contract_pass",
+        "payload_file",
+        "payload_semantic_contract_pass",
+        "source_commit_sha",
+        "contract_pass",
+        "blockers"
+      ],
+      "properties": {
+        "artifact_name": {"type": "string"},
+        "schema_version": {
+          "const": "medium-benchmark-artifact-receipt.v1"
+        },
+        "receipt_file": {"$ref": "#/$defs/fileBinding"},
+        "receipt_schema_contract_pass": {"type": "boolean"},
+        "payload_file": {"$ref": "#/$defs/fileBinding"},
+        "payload_semantic_contract_pass": {
+          "oneOf": [{"type": "boolean"}, {"type": "null"}]
+        },
+        "source_commit_sha": {"type": "string"},
+        "contract_pass": {"type": "boolean"},
+        "blockers": {
+          "type": "array",
+          "items": {"type": "string"},
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

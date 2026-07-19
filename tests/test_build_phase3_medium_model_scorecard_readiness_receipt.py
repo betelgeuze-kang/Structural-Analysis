@@ -7,12 +7,21 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_PATH = REPO_ROOT / "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py"
+SCRIPT_PATH = (
+    REPO_ROOT / "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py"
+)
 for candidate in (REPO_ROOT / "scripts", REPO_ROOT / "src"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-spec = importlib.util.spec_from_file_location("build_phase3_medium_model_scorecard_readiness_receipt", SCRIPT_PATH)
+from structural_analysis.benchmark.acceptance import decide_benchmark  # noqa: E402
+from structural_analysis.benchmark.medium_corpus import (  # noqa: E402
+    REQUIRED_CORE_METRIC_FAMILIES,
+)
+
+spec = importlib.util.spec_from_file_location(
+    "build_phase3_medium_model_scorecard_readiness_receipt", SCRIPT_PATH
+)
 assert spec is not None
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
@@ -22,17 +31,39 @@ spec.loader.exec_module(module)
 
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
-def _write_review(path: Path, *, index: int) -> None:
+def _write_review(
+    path: Path,
+    *,
+    index: int,
+    evidence_ref: str | None = None,
+) -> None:
     _write_json(
         path,
-        {
-            "decision": "APPROVED_REVIEW",
-            "evidence_ref": f"operator-review://medium-{index}",
-            "reviewer": "release_owner",
-        },
+        decide_benchmark(
+            [
+                {
+                    "metric_family": family,
+                    "contract_pass": family != "reaction_equilibrium",
+                }
+                for family in REQUIRED_CORE_METRIC_FAMILIES
+            ],
+            decision="REVIEW",
+            review={
+                "engineer_id": "PE-KR-1042",
+                "reason": "Scoped near-zero reaction review.",
+                "scope": ["reaction_equilibrium"],
+                "evidence_ref": evidence_ref or f"operator-review://medium-{index}",
+                "approved_at": "2026-07-17T00:00:00Z",
+                "expires_at": "2026-08-18T00:00:00Z",
+            },
+            evaluated_at="2026-07-18T00:00:00Z",
+        ),
     )
 
 
@@ -68,9 +99,14 @@ def _write_minimal_medium_readiness_inputs(repo_root: Path) -> None:
 
 
 def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() -> None:
-    payload = module.build_phase3_medium_model_scorecard_readiness_receipt(repo_root=REPO_ROOT)
+    payload = module.build_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=REPO_ROOT
+    )
 
-    assert payload["schema_version"] == "phase3-medium-model-scorecard-readiness-receipt.v1"
+    assert (
+        payload["schema_version"]
+        == "phase3-medium-model-scorecard-readiness-receipt.v1"
+    )
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
     assert payload["phase3_closure_claim"] is False
@@ -83,7 +119,10 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert payload["local_candidate_artifact_count"] == 3
     assert payload["local_topology_contract_pass"] is True
     assert payload["source_url_verified"] is True
-    assert payload["license_review_status"] == "identified_gpl_3_0_product_legal_review_required"
+    assert (
+        payload["license_review_status"]
+        == "identified_gpl_3_0_product_legal_review_required"
+    )
     assert payload["required_evidence_pass_count"] == 4
     assert payload["required_evidence_count"] == len(payload["required_evidence"])
     assert payload["summary"] == {
@@ -93,6 +132,8 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "current_medium_model_scorecard_count": 0,
         "normalization_receipt_count": 0,
         "pass_or_approved_review_count": 0,
+        "scientific_medium_benchmark_credit_count": 0,
+        "scientific_corpus_contract_pass": False,
         "remaining_scorecard_case_count": 5,
         "remaining_pass_or_review_case_count": 5,
         "required_evidence_pass_count": 4,
@@ -114,34 +155,45 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     }
     assert "source_url_verification_pending" not in payload["blockers"]
     assert "license_review_pending" in payload["blockers"]
+    assert "scientific_medium_corpus_contract_blocked" in payload["blockers"]
     assert "reference_outputs_missing" in payload["blockers"]
     assert "normalization_receipts_missing" in payload["blockers"]
     assert "opensees_medium_runner_command_missing" not in payload["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in payload["blockers"]
     assert "medium_model_pass_or_review_missing" in payload["blockers"]
     assert payload["runner_command_ready"] is True
-    assert "run_phase3_medium_model_scorecard_receipt.py" in payload["runner_command_template"]
+    assert (
+        "run_phase3_medium_model_scorecard_receipt.py"
+        in payload["runner_command_template"]
+    )
     assert payload["resource_envelope"]["default_timeout_seconds"] == 3600
     assert payload["local_parser_boundary"]["topology_contract_pass"] is True
     assert "parser input evidence" in payload["local_parser_boundary"]["claim_boundary"]
-    assert payload["scorecard_receipt_template"]["schema_version"] == "phase3-medium-model-scorecard-receipt.v1"
+    assert (
+        payload["scorecard_receipt_template"]["schema_version"]
+        == "phase3-medium-model-scorecard-receipt.v1"
+    )
     assert payload["scorecard_receipt_template"]["crashed"] is False
     assert payload["scorecard_receipt_template"]["oom"] is False
     assert payload["scorecard_receipt_template"]["contract_pass"] is False
     assert [row["id"] for row in payload["missing_evidence_breakdown"]] == [
         "license_approval",
+        "scientific_corpus_contract",
         "reference_outputs",
         "canonical_normalization",
         "scorecard_execution",
         "pass_or_approved_review",
     ]
-    scorecard_gap = {
-        row["id"]: row for row in payload["missing_evidence_breakdown"]
-    }["scorecard_execution"]
+    scorecard_gap = {row["id"]: row for row in payload["missing_evidence_breakdown"]}[
+        "scorecard_execution"
+    ]
     assert scorecard_gap["remaining_case_count"] == 5
-    assert scorecard_gap["receipt_directory"].endswith("medium_model_scorecard_receipts")
+    assert scorecard_gap["receipt_directory"].endswith(
+        "medium_model_scorecard_receipts"
+    )
     assert [row["id"] for row in payload["operator_next_actions"]] == [
         "select_additional_medium_model_cases",
+        "complete_scientific_medium_corpus",
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
@@ -149,7 +201,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "attach_medium_pass_or_approved_review_decisions",
     ]
     assert payload["recommended_next_actions"] == payload["operator_next_actions"]
-    assert payload["gate_unblock_plan_count"] == 7
+    assert payload["gate_unblock_plan_count"] == 8
     gate_plan = {row["slot_id"]: row for row in payload["gate_unblock_plan"]}
     assert "select_additional_medium_model_cases" in gate_plan
     assert "rerun_medium_model_and_dp_rc_checks" in gate_plan
@@ -159,6 +211,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         for item in gate_plan["run_medium_scorecard_receipts"]["minimum_evidence"]
     )
     assert payload["validation_commands"] == [
+        "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
         "python3 scripts/build_developer_preview_rc_status.py --check",
@@ -166,6 +219,7 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     ]
     assert payload["next_actions"] == [
         "select_additional_medium_model_cases",
+        "complete_scientific_medium_corpus",
         "complete_product_legal_license_review",
         "attach_medium_reference_outputs",
         "record_medium_canonical_normalization",
@@ -173,7 +227,9 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "attach_medium_pass_or_approved_review_decisions",
     ]
     case_ledger = payload["case_readiness_ledger"]
-    assert case_ledger["schema_version"] == "phase3-medium-model-case-readiness-ledger.v1"
+    assert (
+        case_ledger["schema_version"] == "phase3-medium-model-case-readiness-ledger.v1"
+    )
     assert case_ledger["required_case_count"] == 5
     assert case_ledger["local_candidate_case_count"] == 3
     assert case_ledger["missing_candidate_case_count"] == 2
@@ -194,8 +250,9 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert case_rows["SCBF16B"]["authoritative_source_pass"] is True
     assert case_rows["SCBF16B_shell_beam_mix"]["authoritative_source_pass"] is False
     assert case_rows["luxinzheng_megatall_model1"]["authoritative_source_pass"] is False
-    assert "source_url_verification_pending" in (
-        case_rows["luxinzheng_megatall_model1"]["blockers"]
+    assert (
+        "source_url_verification_pending"
+        in (case_rows["luxinzheng_megatall_model1"]["blockers"])
     )
     assert "reference_outputs_missing" in case_rows["SCBF16B"]["blockers"]
     queue = payload["medium_model_case_execution_queue"]
@@ -218,15 +275,18 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
         "operator_selection_required",
         "operator_selection_required",
     ]
-    assert "PASS or APPROVED_REVIEW decision with non-generated evidence_ref" in (
-        selected_slots[0]["next_required_inputs"]
+    assert (
+        "scientific PASS or scoped REVIEW decision covering every core metric family"
+        in (selected_slots[0]["next_required_inputs"])
     )
-    assert "verified authoritative source URL/checksum" in (
-        selected_slots[2]["next_required_inputs"]
+    assert (
+        "verified authoritative source URL/checksum"
+        in (selected_slots[2]["next_required_inputs"])
     )
     assert missing_slots[0]["case_id"] == "OPERATOR_ATTACHED_MEDIUM_CASE_4"
-    assert "run_phase3_medium_model_scorecard_receipt.py" in (
-        missing_slots[0]["runner_command_template"]
+    assert (
+        "run_phase3_medium_model_scorecard_receipt.py"
+        in (missing_slots[0]["runner_command_template"])
     )
     assert payload["case_input_requirements"]["remaining_case_count"] == 5
     assert "case_id" in {
@@ -239,7 +299,9 @@ def test_medium_model_scorecard_readiness_blocks_without_scorecard_evidence() ->
     assert "operator scorecard runner command" in payload["claim_boundary"]
 
 
-def test_medium_model_scorecard_readiness_counts_operator_scorecard_receipts(tmp_path: Path) -> None:
+def test_medium_model_scorecard_readiness_counts_operator_scorecard_receipts(
+    tmp_path: Path,
+) -> None:
     _write_minimal_medium_readiness_inputs(tmp_path)
     receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
     for index in range(5):
@@ -283,14 +345,15 @@ def test_medium_model_scorecard_readiness_counts_operator_scorecard_receipts(tmp
     assert payload["developer_preview_release_candidate_claim"] is False
 
 
-def test_medium_model_scorecard_readiness_validates_normalization_receipts(tmp_path: Path) -> None:
+def test_medium_model_scorecard_readiness_validates_normalization_receipts(
+    tmp_path: Path,
+) -> None:
     _write_minimal_medium_readiness_inputs(tmp_path)
     receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
     for index in range(5):
         _write_review(tmp_path / f"approved-review-{index}.json", index=index)
         normalization_receipt = (
-            module.MEDIUM_RECEIPT_DIR
-            / f"medium-{index}.normalization_receipt.json"
+            module.MEDIUM_RECEIPT_DIR / f"medium-{index}.normalization_receipt.json"
         )
         _write_json(
             tmp_path / normalization_receipt,
@@ -326,9 +389,9 @@ def test_medium_model_scorecard_readiness_validates_normalization_receipts(tmp_p
     assert payload["scorecard_receipt_inventory"]["valid_normalization_case_count"] == 5
     assert payload["summary"]["normalization_receipt_count"] == 5
     assert "normalization_receipts_missing" not in payload["blockers"]
-    canonical_normalization = {
-        row["id"]: row for row in payload["required_evidence"]
-    }["canonical_normalization"]
+    canonical_normalization = {row["id"]: row for row in payload["required_evidence"]}[
+        "canonical_normalization"
+    ]
     assert canonical_normalization["contract_pass"] is True
     assert all(
         row["normalization_receipt_contract_pass"] is True
@@ -370,9 +433,10 @@ def test_medium_model_scorecard_readiness_rejects_invalid_review_payloads(
         for row in payload["scorecard_receipt_inventory"]["receipts"]
     )
     first = payload["scorecard_receipt_inventory"]["receipts"][0]
-    assert "scorecard_or_review_decision_not_accepted" in first[
-        "scorecard_or_review_status"
-    ]["blockers"]
+    assert (
+        "scorecard_or_review_decision_not_accepted"
+        in first["scorecard_or_review_status"]["blockers"]
+    )
 
 
 def test_medium_model_scorecard_readiness_rejects_review_generated_evidence_refs(
@@ -381,28 +445,21 @@ def test_medium_model_scorecard_readiness_rejects_review_generated_evidence_refs
     _write_minimal_medium_readiness_inputs(tmp_path)
     receipt_dir = tmp_path / module.MEDIUM_RECEIPT_DIR
     generated_gate_artifact = (
-        tmp_path
-        / "implementation/phase1/release_evidence/productization/"
+        tmp_path / "implementation/phase1/release_evidence/productization/"
         "phase3_medium_model_scorecard_readiness_receipt.json"
     )
     _write_json(generated_gate_artifact, {"status": "blocked"})
     self_ref_review = tmp_path / "self-ref-review.json"
     generated_ref_review = tmp_path / "generated-ref-review.json"
-    _write_json(
+    _write_review(
         self_ref_review,
-        {
-            "decision": "APPROVED_REVIEW",
-            "evidence_ref": str(self_ref_review),
-            "reviewer": "release_owner",
-        },
+        index=0,
+        evidence_ref=str(self_ref_review),
     )
-    _write_json(
+    _write_review(
         generated_ref_review,
-        {
-            "decision": "APPROVED_REVIEW",
-            "evidence_ref": str(generated_gate_artifact),
-            "reviewer": "release_owner",
-        },
+        index=1,
+        evidence_ref=str(generated_gate_artifact),
     )
     for index, review in enumerate([self_ref_review, generated_ref_review]):
         _write_json(
@@ -435,7 +492,9 @@ def test_medium_model_scorecard_readiness_rejects_review_generated_evidence_refs
     assert all(status["contract_pass"] is False for status in statuses)
 
 
-def test_medium_model_scorecard_readiness_check_detects_missing_output(tmp_path: Path) -> None:
+def test_medium_model_scorecard_readiness_check_detects_missing_output(
+    tmp_path: Path,
+) -> None:
     ok, message = module.check_phase3_medium_model_scorecard_readiness_receipt(
         repo_root=REPO_ROOT,
         out_path=tmp_path / "missing.json",
@@ -447,10 +506,15 @@ def test_medium_model_scorecard_readiness_check_detects_missing_output(tmp_path:
 
 def test_medium_model_scorecard_readiness_check_detects_drift(tmp_path: Path) -> None:
     out = tmp_path / "medium-scorecard.json"
-    module.write_phase3_medium_model_scorecard_readiness_receipt(repo_root=REPO_ROOT, out_path=out)
+    module.write_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=REPO_ROOT, out_path=out
+    )
     payload = json.loads(out.read_text(encoding="utf-8"))
     payload["contract_pass"] = True
-    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
     ok, message = module.check_phase3_medium_model_scorecard_readiness_receipt(
         repo_root=REPO_ROOT,
@@ -461,13 +525,20 @@ def test_medium_model_scorecard_readiness_check_detects_drift(tmp_path: Path) ->
     assert message == "phase3_medium_model_scorecard_readiness_mismatch"
 
 
-def test_medium_model_scorecard_readiness_check_ignores_wrapper_metadata(tmp_path: Path) -> None:
+def test_medium_model_scorecard_readiness_check_ignores_wrapper_metadata(
+    tmp_path: Path,
+) -> None:
     out = tmp_path / "medium-scorecard.json"
-    module.write_phase3_medium_model_scorecard_readiness_receipt(repo_root=REPO_ROOT, out_path=out)
+    module.write_phase3_medium_model_scorecard_readiness_receipt(
+        repo_root=REPO_ROOT, out_path=out
+    )
     payload = json.loads(out.read_text(encoding="utf-8"))
     payload["generated_at"] = "2026-06-30T00:00:00+00:00"
     payload["source_commit_sha"] = "receipt-only-refresh"
-    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
     ok, message = module.check_phase3_medium_model_scorecard_readiness_receipt(
         repo_root=REPO_ROOT,

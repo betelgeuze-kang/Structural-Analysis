@@ -13,14 +13,14 @@
     {
       "column_inf_norm_error": 3.1741365091875196e-07,
       "finite_difference_epsilon": 1e-08,
-      "free_dof_index": 3,
+      "free_dof_index": 6,
       "pass": true
     }
   ],
   "finite_difference_tolerance": 1e-06,
   "free_dof_count": 1,
   "free_dof_indices": [
-    3
+    6
   ],
   "g1_closure_claim": false,
   "nonlinear_newton_closure_claim": false,
@@ -30,7 +30,7 @@
   "schema_version": "phase2-linear-tangent-jacobian.v1",
   "sparse_backend_used": false,
   "status": "ready",
-  "stiffness_order": 6,
+  "stiffness_order": 12,
   "stiffness_storage": "dense_numpy",
   "tangent_equals_stiffness_gate_passed": true,
   "tangent_equals_stiffness_inf_norm_error": 0.0,

@@ -824,271 +824,209 @@
 import * as THREE from './vendor/three.module.js';
 import {OrbitControls} from './vendor/OrbitControls.js';
 import {
+  applyCodecheckHydrationToModelData,
   buildArtifactCandidates,
-  getRequestedPreset,
-  normalizePresetToken,
-  loadPresetSidecarIfNeeded,
-  getPresetSidecarPath,
-  resolvePresetModelPayload,
-  resolveRepoArtifactUrl,
-  loadEmbeddedDataScriptIfNeeded,
-  readEmbeddedPayload,
-} from './viewer-data-loader.js';
-import {
+  buildDirectModelMeta,
+  buildElementDcrMapAllCombinations,
+  buildElementDcrMapFromModelMeta,
+  buildEvidenceIngestFileReadFailurePreview,
+  buildEvidenceIngestPreviewFromText,
+  buildMaterialCatalogSummary,
   buildModelFromInteractivePayload,
   buildModelFromInteractivePayloadAsync,
+  buildViewerProjectBundleFileFailurePreview,
+  evidenceIngestFileReadMetadata,
   extractInteractivePayload,
   extractModelPayload,
+  extractRenderableEvidencePayloadFromText,
+  getPresetSidecarPath,
+  getRequestedPreset,
+  hydrateModelElementsWithCodecheckDcr,
   isModelPayload,
-} from './viewer-model-normalizer.js';
-import {
-  buildDirectModelMeta,
-  buildMaterialCatalogSummary,
+  loadEmbeddedDataScriptIfNeeded,
+  loadPresetSidecarIfNeeded,
+  mergeElementDcrMaps,
+  normalizePresetToken,
+  readEmbeddedPayload,
+  readEvidenceIngestFileText,
+  readViewerLocalModelFile,
+  readViewerProjectBundleFile,
+  resolveCodecheckCompanionPaths,
+  resolvePresetModelPayload,
+  resolveRepoArtifactUrl,
   sanitizeModelPayload,
   sanitizeModelPayloadAsync,
-} from './viewer-direct-model-normalizer.js';
-import {
-  createViewerRenderPickingGeometryToolkit,
-} from './viewer-render-picking-geometry.js';
-import {
-  createViewerLargeModelPickingToolkit,
-} from './viewer-large-model-picking.js';
-import {
-  createViewerPickBroadphaseToolkit,
-} from './viewer-pick-broadphase.js';
-import {
-  createViewerRenderMeshBuilderToolkit,
-} from './viewer-render-mesh-builders.js';
-import {
-  createViewerVisualScene,
-} from './viewer-visual-scene.js';
-import {
-  ensureViewportHud,
-  updateViewportHudContext,
-  updateViewportHudReadout,
-  updateViewportHudScale,
-  updateInfoOverlay,
-  enhanceStageResultCalloutElement,
-} from './viewer-viewport-hud.js';
-import {separateCalloutAnchorRows} from './viewer-callout-layout.js';
-import {
-  createViewerContourMaterialToolkit,
-} from './viewer-contour-materials.js';
-import {
-  createViewerDeformedRenderingToolkit,
-} from './viewer-deformed-rendering.js';
-import {
-  REAL_DRAWING_BROWSER_STATE_KEY,
-  REAL_DRAWING_BROWSER_SORT_OPTIONS,
-  REAL_DRAWING_QUALITY_FILTERS,
-  applyRealDrawingBrowserQueryParams as applyRealDrawingBrowserQueryParamsWithState,
-  normalizeRealDrawingBrowserSort,
-  normalizeRealDrawingQualityFilter,
-  persistRealDrawingBrowserState as persistRealDrawingBrowserStateToStorage,
-  readInitialRealDrawingBrowserState as readInitialRealDrawingBrowserStateFromStorage,
-} from './viewer-real-drawing-browser-state.js';
-import {
-  getRealDrawingAssetRegistry,
-} from './viewer-real-drawing-quality.js';
-import {
-  filterRecentRealDrawingAssetRefs as filterRecentRealDrawingAssetRefsWithSelection,
-  getActiveRealDrawingAssetRef as getActiveRealDrawingAssetRefFromSelection,
-  getRealDrawingBrowserVisibleAssets as getRealDrawingBrowserVisibleAssetsFromSelection,
-  rememberRealDrawingAssetRef as rememberRealDrawingAssetRefWithSelection,
-  resolveRealDrawingAssetRefForSelection as resolveRealDrawingAssetRefFromSelection,
-  stepRealDrawingAssetRef,
-} from './viewer-real-drawing-selection.js';
-import {
-  buildRealDrawingQualityPanelModel,
-} from './viewer-real-drawing-panel-model.js';
-import {
-  bindRealDrawingQualityPanelEvents,
-} from './viewer-real-drawing-panel-events.js';
-import {
-  buildRealDrawingTreeModel,
-} from './viewer-real-drawing-tree-model.js';
-import {
-  buildLayerToggleItems,
-  buildLoadCaseListModel,
-} from './viewer-side-panel-model.js';
-import {
-  buildViewerSearchResultsModel,
-  resolveViewerSearchMatches,
-  viewerElementMatchesSearchQuery,
-} from './viewer-search-results-model.js';
-import {
-  buildClearSelectionButtonModel,
-  buildElementSelectionKey,
-  buildSelectionSetSummary,
-} from './viewer-selection-summary-model.js';
-import {
-  buildViewerProvenanceModel,
-} from './viewer-provenance-model.js';
-import {
-  SHARED_SELECTION_KEY,
-  applySharedSelectionQueryParams,
-  buildSharedSelectionPayload,
-  normalizeSelectionValue,
-  normalizeSelectionValues,
-  readSharedSelectionState,
-} from './viewer-shared-selection-state.js';
-import {
-  VIEWER_KPI_CARD_CONFIGS,
-  VIEWER_STATS_PANEL_KEYS,
-  buildViewerStatEntries,
-  buildViewerStatsSummary,
-} from './viewer-stats-summary.js';
-import {
-  ANALYSIS_COCKPIT_KPI_KEYS,
-  buildAnalysisCockpitModel,
-} from './viewer-analysis-cockpit-model.js';
-import {
-  PANEL_ZONE_EVIDENCE_SCHEMA,
-  buildPanelZoneEvidenceModel,
-} from './viewer-panel-zone-evidence.js';
-import {
-  buildRealDrawingQualityPanelHtml,
-} from './viewer-real-drawing-panel-renderer.js';
-import {
-  buildMidas33CameraPoseFromBounds,
-  buildMidas33ViewButtonStates,
-  getMidas33ViewPresetConfig,
-  isMidas33PresetToken,
-  normalizeMidas33ViewPreset,
-} from './viewer-midas33-view-presets.js';
-import {
-  buildViewerRenderModeButtonStates,
-  getViewerLegendDisplayForRenderMode,
-  normalizeViewerRenderMode,
-} from './viewer-viewport-command-state.js';
-import {
-  DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST,
-  buildProjectBrowserModel,
-  buildRuntimeProjectManifest,
-  buildWorkspaceUrl,
-  normalizeProjectManifest,
-  resolveWorkspaceStateFromSearch,
-} from './viewer-project-workspace.js';
-import {
-  buildMemberComparisonPanelHtml,
-  buildProjectDrawingListHtml,
-  buildProjectEvidencePanelHtml,
-  buildProjectRecentListHtml,
-} from './viewer-project-workspace-renderer.js';
-import {
-  buildViewerExplainabilityModel,
-} from './viewer-explainability-model.js';
-import {
-  buildSelectionInspectorHtml,
-} from './viewer-selection-inspector-renderer.js';
-import {
-  buildOptimizationComparisonModel,
-} from './viewer-optimization-comparison-model.js';
-import {
-  buildMemberComparisonModel,
-} from './viewer-member-comparison-model.js';
-import {
-  buildDrawingComparisonDeliveryRows,
-  buildDrawingComparisonRemovedSummary,
-  buildDrawingComparisonState,
-  resolveBaselineArtifactPath,
-  resolveOptimizationChangesPath,
-} from './viewer-drawing-comparison-engine.js';
+  viewerLocalModelFileFailure,
+  viewerProjectBundleFileMetadata,
+} from './viewer-ingest.js';
 import {
   buildContourContextDescriptor,
+  createViewerContourMaterialToolkit,
+  createViewerDeformedRenderingToolkit,
+  createViewerLargeModelPickingToolkit,
+  createViewerPickBroadphaseToolkit,
+  createViewerRenderMeshBuilderToolkit,
+  createViewerRenderPickingGeometryToolkit,
+  createViewerVisualScene,
+  enhanceStageResultCalloutElement,
+  ensureViewportHud,
   hasUsableContourRange as hasUsableDrawingCompareContourRange,
   isNodeContourField as isDrawingCompareNodeContourField,
   mergeContourRanges,
+  separateCalloutAnchorRows,
   summarizeContourContexts,
-} from './viewer-drawing-comparison-contour.js';
+  updateInfoOverlay,
+  updateViewportHudContext,
+  updateViewportHudReadout,
+  updateViewportHudScale,
+} from './viewer-renderer.js';
 import {
-  applyCodecheckHydrationToModelData,
-  buildElementDcrMapAllCombinations,
-  buildElementDcrMapFromModelMeta,
-  hydrateModelElementsWithCodecheckDcr,
-  mergeElementDcrMaps,
-  resolveCodecheckCompanionPaths,
-} from './viewer-codecheck-dcr-hydrator.js';
-import {
+  DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST,
+  REAL_DRAWING_BROWSER_SORT_OPTIONS,
+  REAL_DRAWING_BROWSER_STATE_KEY,
+  REAL_DRAWING_QUALITY_FILTERS,
+  SHARED_SELECTION_KEY,
+  applyRealDrawingBrowserQueryParams as applyRealDrawingBrowserQueryParamsWithState,
+  applySharedSelectionQueryParams,
+  buildDrawingComparisonDeliveryRows,
+  buildDrawingComparisonRemovedSummary,
+  buildDrawingComparisonState,
+  buildGroupMemberIndexModel,
+  buildMemberComparisonModel,
+  buildMidas33CameraPoseFromBounds,
+  buildMidas33ViewButtonStates,
+  buildOptimizationComparisonModel,
   buildOptimizationTimelineDeliveryRows,
   buildOptimizationTimelineModel,
+  buildProjectBrowserModel,
+  buildRuntimeProjectManifest,
+  buildSharedSelectionPayload,
+  buildTimelineHighlightsWithGroupIndex,
   buildTimelineStepHighlights,
+  buildViewerRenderModeButtonStates,
+  buildWorkspaceUrl,
+  filterRecentRealDrawingAssetRefs as filterRecentRealDrawingAssetRefsWithSelection,
+  getActiveRealDrawingAssetRef as getActiveRealDrawingAssetRefFromSelection,
+  getMidas33ViewPresetConfig,
+  getRealDrawingAssetRegistry,
+  getRealDrawingBrowserVisibleAssets as getRealDrawingBrowserVisibleAssetsFromSelection,
+  getViewerLegendDisplayForRenderMode,
+  isMidas33PresetToken,
+  normalizeMidas33ViewPreset,
+  normalizeRealDrawingBrowserSort,
+  normalizeRealDrawingQualityFilter,
+  normalizeSelectionValue,
+  normalizeSelectionValues,
+  normalizeProjectManifest,
+  normalizeViewerRenderMode,
+  persistRealDrawingBrowserState as persistRealDrawingBrowserStateToStorage,
+  readInitialRealDrawingBrowserState as readInitialRealDrawingBrowserStateFromStorage,
+  readSharedSelectionState,
+  rememberRealDrawingAssetRef as rememberRealDrawingAssetRefWithSelection,
+  resolveBaselineArtifactPath,
   resolveFirstTimelineStepIndexForStage,
+  resolveGroupMemberIndexPath,
+  resolveOptimizationChangesPath,
   resolveOptimizationTimelineStep,
+  resolveRealDrawingAssetRefForSelection as resolveRealDrawingAssetRefFromSelection,
   resolveTimelineStepIndexForDeltaKey,
   resolveTimelineStepIndexForMember,
-} from './viewer-optimization-timeline-model.js';
-import {
-  buildGroupMemberIndexModel,
-  buildTimelineHighlightsWithGroupIndex,
-  resolveGroupMemberIndexPath,
-} from './viewer-optimization-group-member-index.js';
-import {
-  buildCommercialToolCrosswalkModel,
-  buildCommercialToolCsvMapperModel,
-} from './viewer-commercial-tool-crosswalk-model.js';
-import {
-  buildDrawingReviewModel,
-} from './viewer-drawing-review-model.js';
-import {
-  buildDrawingSheetPackage,
-  buildDrawingSheetPackageReportRows,
-} from './viewer-drawing-sheet-package-model.js';
-import {
-  buildDrawingHandoffPanelHtml,
-} from './viewer-drawing-handoff-panel-renderer.js';
-import {
-  buildStageResultCalloutsHtml,
-  STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_SCHEMA_VERSION,
-} from './viewer-stage-result-callouts-renderer.js';
-import {
-  buildStructureViewerReportExport,
-} from './viewer-report-export.js';
-import {
-  buildReportExportPanelHtml,
-} from './viewer-report-panel-renderer.js';
-import {
-  buildEvidenceIngestPreviewFromText,
-  extractRenderableEvidencePayloadFromText,
-} from './viewer-evidence-ingest-model.js';
-import {
-  buildEvidenceIngestFileReadFailurePreview,
-  evidenceIngestFileReadMetadata,
-  readEvidenceIngestFileText,
-} from './viewer-evidence-ingest-file-reader.js';
-import {
-  buildReviewTaskModel,
-} from './viewer-review-task-model.js';
-import {
-  buildSolverReceiptModel,
-} from './viewer-solver-receipt-model.js';
+  resolveWorkspaceStateFromSearch,
+  stepRealDrawingAssetRef,
+} from './viewer-state.js';
 import {
   VIEWER_LOCAL_OPS_STATE_KEY,
   appendViewerAuditEvent,
   appendViewerExportHistory,
-  buildViewerProjectBundleImportPreview,
-  buildViewerProjectBundleExport,
   buildViewerAuditJsonlExport,
+  buildViewerProjectBundleExport,
+  buildViewerProjectBundleImportPreview,
+  createBrowserRuntimeIngestPayloadStorage,
   getViewerReviewNote,
-  readViewerLocalOpsState,
-  rememberViewerWorkspaceSelection,
   mergeViewerEvidenceIngestPreview,
   mergeViewerProjectBundleImport,
-  setViewerReviewTask,
+  readViewerLocalOpsState,
+  rememberViewerWorkspaceSelection,
+  runtimeIngestStorageReceiptMetadata,
   setViewerReviewNote,
+  setViewerReviewTask,
   writeViewerLocalOpsState,
-} from './viewer-local-ops-state.js';
+} from './viewer-storage.js';
 import {
-  buildViewerProjectBundleFileFailurePreview,
-  readViewerProjectBundleFile,
-  viewerProjectBundleFileMetadata,
-} from './viewer-project-bundle-file-reader.js';
+  STRUCTURE_VIEWER_STAGE_RESULT_CALLOUTS_SCHEMA_VERSION,
+  buildCommercialToolCrosswalkModel,
+  buildCommercialToolCsvMapperModel,
+  buildDrawingHandoffPanelHtml,
+  buildDrawingReviewModel,
+  buildDrawingSheetPackage,
+  buildDrawingSheetPackageReportRows,
+  buildReportExportPanelHtml,
+  buildReviewTaskModel,
+  buildSelectionInspectorHtml,
+  buildSolverReceiptModel,
+  buildStageResultCalloutsHtml,
+  buildStructureViewerReportExport,
+  buildViewerExplainabilityModel,
+} from './viewer-report.js';
 import {
-  readViewerLocalModelFile,
-  viewerLocalModelFileFailure,
-} from './viewer-local-model-file-reader.js';
+  ANALYSIS_COCKPIT_KPI_KEYS,
+  PANEL_ZONE_EVIDENCE_SCHEMA,
+  VIEWER_KPI_CARD_CONFIGS,
+  VIEWER_STATS_PANEL_KEYS,
+  bindRealDrawingQualityPanelEvents,
+  buildAnalysisCockpitModel,
+  buildClearSelectionButtonModel,
+  buildElementSelectionKey,
+  buildLayerToggleItems,
+  buildLoadCaseListModel,
+  buildMemberComparisonPanelHtml,
+  buildPanelZoneEvidenceModel,
+  buildProjectDrawingListHtml,
+  buildProjectEvidencePanelHtml,
+  buildProjectRecentListHtml,
+  buildRealDrawingQualityPanelHtml,
+  buildRealDrawingQualityPanelModel,
+  buildRealDrawingTreeModel,
+  buildSelectionSetSummary,
+  buildViewerProvenanceModel,
+  buildViewerSearchResultsModel,
+  buildViewerStatEntries,
+  buildViewerStatsSummary,
+  resolveViewerSearchMatches,
+  viewerElementMatchesSearchQuery,
+} from './viewer-shell.js';
 
-const VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY='structure-viewer-runtime-ingest-payload-v1';
+const runtimeIngestPayloadStorage=createBrowserRuntimeIngestPayloadStorage(window);
+const startupRuntimeIngestStorageRead=runtimeIngestPayloadStorage.read();
+let runtimeIngestStorageStatus=runtimeIngestStorageReceiptMetadata(
+  startupRuntimeIngestStorageRead.receipt
+);
+window.__STRUCTURE_VIEWER_RUNTIME_INGEST_STORAGE_STATUS__=runtimeIngestStorageStatus;
+function updateRuntimeIngestStorageStatus(receipt){
+  runtimeIngestStorageStatus=runtimeIngestStorageReceiptMetadata(receipt);
+  window.__STRUCTURE_VIEWER_RUNTIME_INGEST_STORAGE_STATUS__=runtimeIngestStorageStatus;
+  const status=document.getElementById('runtime-ingest-storage-status');
+  if(status instanceof HTMLElement){
+    const detail=runtimeIngestStorageStatus.error_code
+      ?` · ${runtimeIngestStorageStatus.error_code}${runtimeIngestStorageStatus.error_path?` @ ${runtimeIngestStorageStatus.error_path}`:''}`
+      :'';
+    const tone=runtimeIngestStorageStatus.display_status==='Saved locally'
+      ?'success'
+      :runtimeIngestStorageStatus.display_status==='Storage unavailable'
+        ?'danger'
+        :runtimeIngestStorageStatus.display_status==='Previous state retained'
+          ?'warn'
+          :'accent';
+    status.textContent=`${runtimeIngestStorageStatus.display_status}${detail}`;
+    status.classList.remove('prop-value--success','prop-value--danger','prop-value--warn','prop-value--accent');
+    status.classList.add(`prop-value--${tone}`);
+    status.dataset.runtimeIngestStorageStatus=runtimeIngestStorageStatus.status;
+    status.dataset.runtimeIngestStoragePersistence=runtimeIngestStorageStatus.persistence;
+    status.dataset.runtimeIngestStorageErrorCode=runtimeIngestStorageStatus.error_code;
+    status.dataset.runtimeIngestStorageErrorPath=runtimeIngestStorageStatus.error_path;
+  }
+  return runtimeIngestStorageStatus;
+}
 const VIEWER_OPTIMIZATION_WORKER_MODULE_URLS = {
   modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,
   directModelNormalizer: new URL('./viewer-direct-model-normalizer.js', import.meta.url).href,
@@ -1730,21 +1668,19 @@ function getRuntimeIngestRenderablePayload(){
     }
   }
   if(!payload){
-    try{
-      const parsed=JSON.parse(safeSessionStorageGet(VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY)||'null');
-      if(parsed&&typeof parsed==='object')payload=parsed;
-    }catch(_err){
-      payload=null;
-    }
+    const stored=runtimeIngestPayloadStorage.read();
+    updateRuntimeIngestStorageStatus(stored.receipt);
+    if(stored.payload&&typeof stored.payload==='object')payload=stored.payload;
   }
   if(!payload||typeof payload!=='object'||!payload.payload)return null;
   return payload;
 }
 function writeRuntimeIngestRenderablePayload(payload=null){
-  safeSessionStorageSet(
-    VIEWER_RUNTIME_INGEST_PAYLOAD_SESSION_KEY,
-    payload&&typeof payload==='object'?JSON.stringify(payload):null
-  );
+  const receipt=payload&&typeof payload==='object'
+    ?runtimeIngestPayloadStorage.write(payload)
+    :runtimeIngestPayloadStorage.clear();
+  updateRuntimeIngestStorageStatus(receipt);
+  return receipt;
 }
 function rememberWorkspaceState(){
   const next=rememberViewerWorkspaceSelection(readLocalOpsState(),{
@@ -19797,6 +19733,7 @@ function renderReportExportPanel(){
     commercialMapper,
     importPreview:ops.lastImportPreview,
     ingestPreview:ops.lastIngestPreview,
+    runtimeIngestStorage:runtimeIngestStorageStatus,
     drawingSheetPackage,
     lastExport,
     reviewNote:getViewerReviewNote(ops,{

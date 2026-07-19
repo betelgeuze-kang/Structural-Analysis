@@ -1,0 +1,309 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/cpu_hip_fgmres_recurrence_parity_v1.schema.json",
+  "title": "Engine v2 CPU/HIP FGMRES recurrence parity receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "source",
+    "cpu_references",
+    "fixture",
+    "checkpoint",
+    "hardware_execution",
+    "recurrence_comparison",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "engine-v2-cpu-hip-fgmres-recurrence-parity-receipt.v1"
+    },
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "source": {
+      "type": "object",
+      "required": [
+        "repository_base_commit_sha",
+        "worktree_clean",
+        "exact_source_commit_claim",
+        "input_checksums"
+      ],
+      "properties": {
+        "repository_base_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktree_clean": {"type": "boolean"},
+        "exact_source_commit_claim": {"const": false},
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 5,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "cpu_references": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "case_id",
+          "run_hash",
+          "terminal_reason",
+          "converged",
+          "iteration_count",
+          "matvec_count",
+          "restart_count",
+          "preconditioner_profile",
+          "preconditioner_contract_hash",
+          "result_ir_authority"
+        ],
+        "properties": {
+          "case_id": {"type": "string", "minLength": 1},
+          "run_hash": {"$ref": "#/$defs/hash"},
+          "terminal_reason": {"type": "string", "minLength": 1},
+          "converged": {"type": "boolean"},
+          "iteration_count": {"type": "integer", "minimum": 1},
+          "matvec_count": {"type": "integer", "minimum": 1},
+          "restart_count": {"type": "integer", "minimum": 1},
+          "preconditioner_profile": {
+            "const": "operator_derived_left_scaled_jacobi_right.v1"
+          },
+          "preconditioner_contract_hash": {"$ref": "#/$defs/hash"},
+          "result_ir_authority": {"const": false}
+        },
+        "additionalProperties": false
+      }
+    },
+    "fixture": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "fixture_hash",
+        "execution_plan_hash",
+        "scaling_hash",
+        "reduced_csr_identity_hash",
+        "operator_numeric_values_hash",
+        "preconditioner_profile",
+        "preconditioner_derivation_profile",
+        "preconditioner_contract_hash",
+        "binary_profile",
+        "dimension",
+        "nnz",
+        "cases",
+        "arrays"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "engine-v2-hip-fgmres-recurrence-fixture.v1"
+        },
+        "fixture_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "scaling_hash": {"$ref": "#/$defs/hash"},
+        "reduced_csr_identity_hash": {"$ref": "#/$defs/hash"},
+        "operator_numeric_values_hash": {"$ref": "#/$defs/hash"},
+        "preconditioner_profile": {
+          "const": "operator_derived_left_scaled_jacobi_right.v1"
+        },
+        "preconditioner_derivation_profile": {
+          "const": "exact_positive_diagonal_inverse_of_left_scaled_reduced_operator.v1"
+        },
+        "preconditioner_contract_hash": {"$ref": "#/$defs/hash"},
+        "binary_profile": {"const": "canonical_little_endian_mixed_numeric.v1"},
+        "dimension": {"type": "integer", "minimum": 1, "maximum": 4092},
+        "nnz": {"type": "integer", "minimum": 1},
+        "cases": {"type": "array", "minItems": 2, "maxItems": 2},
+        "arrays": {"type": "object", "minProperties": 7}
+      },
+      "additionalProperties": true
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "checkpoint_hash",
+        "recurrence_contract_hash",
+        "boundary",
+        "artifact",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-cpu-fgmres-checkpoint.v1"
+        },
+        "checkpoint_hash": {"$ref": "#/$defs/hash"},
+        "recurrence_contract_hash": {"$ref": "#/$defs/hash"},
+        "boundary": {
+          "type": "object",
+          "required": ["iteration_count", "matvec_count", "next_restart_index"]
+        },
+        "artifact": {
+          "type": "object",
+          "required": ["storage_profile", "data_hash", "content_hash"]
+        },
+        "claim_boundary": {
+          "type": "object",
+          "required": [
+            "resumable_without_completed_iteration_replay",
+            "result_ir_authority",
+            "hip_or_hardware_claim"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "hardware_execution": {
+      "type": "object",
+      "required": [
+        "actual_hardware",
+        "backend",
+        "device_name",
+        "gcn_arch_name",
+        "compiler",
+        "binary_sha256",
+        "runtime_output"
+      ],
+      "properties": {
+        "actual_hardware": {"const": true},
+        "backend": {"const": "amd_rocm_hip"},
+        "device_name": {"type": "string", "minLength": 1},
+        "gcn_arch_name": {"type": "string", "pattern": "^gfx[0-9a-f]+$"},
+        "compiler": {
+          "type": "object",
+          "required": ["path", "version_first_line", "version_output_sha256"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1},
+            "version_first_line": {"type": "string", "minLength": 1},
+            "version_output_sha256": {"$ref": "#/$defs/hash"}
+          },
+          "additionalProperties": false
+        },
+        "binary_sha256": {"$ref": "#/$defs/hash"},
+        "runtime_output": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "recurrence_comparison": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "fixture_hash",
+        "case_rows",
+        "checkpoint_resume",
+        "terminal_semantics_exact",
+        "restart_checkpoint_semantics_exact",
+        "persisted_checkpoint_resume_semantics_exact",
+        "contract_pass",
+        "device_resident_full_recurrence_probe_claim",
+        "parallel_reduction_recurrence_probe_claim",
+        "device_global_krylov_workspace_probe_claim",
+        "cooperative_launch_supported",
+        "multi_block_recurrence_probe_claim",
+        "operator_derived_scaled_jacobi_recurrence_probe_claim",
+        "multi_block_kernel_invocation_count",
+        "production_recurrence_claim",
+        "performance_claim"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "engine-v2-cpu-hip-fgmres-recurrence-parity.v1"
+        },
+        "fixture_hash": {"$ref": "#/$defs/hash"},
+        "case_rows": {"type": "array", "minItems": 2, "maxItems": 2},
+        "checkpoint_resume": {
+          "type": "object",
+          "required": [
+            "checkpoint_hash",
+            "checkpoint_artifact_data_hash",
+            "completed_iteration_replay_count",
+            "hash_binding_exact",
+            "contract_pass",
+            "production_checkpoint_claim"
+          ],
+          "properties": {
+            "checkpoint_hash": {"$ref": "#/$defs/hash"},
+            "checkpoint_artifact_data_hash": {"$ref": "#/$defs/hash"},
+            "completed_iteration_replay_count": {"const": 0},
+            "hash_binding_exact": {"const": true},
+            "contract_pass": {"const": true},
+            "production_checkpoint_claim": {"const": false}
+          },
+          "additionalProperties": true
+        },
+        "terminal_semantics_exact": {"const": true},
+        "restart_checkpoint_semantics_exact": {"const": true},
+        "persisted_checkpoint_resume_semantics_exact": {"const": true},
+        "contract_pass": {"const": true},
+        "device_resident_full_recurrence_probe_claim": {"const": true},
+        "parallel_reduction_recurrence_probe_claim": {"const": true},
+        "device_global_krylov_workspace_probe_claim": {"const": true},
+        "cooperative_launch_supported": {"type": "boolean"},
+        "multi_block_recurrence_probe_claim": {"const": true},
+        "operator_derived_scaled_jacobi_recurrence_probe_claim": {
+          "const": true
+        },
+        "multi_block_kernel_invocation_count": {"type": "integer", "minimum": 1},
+        "production_recurrence_claim": {"const": false},
+        "performance_claim": {"const": false}
+      },
+      "additionalProperties": true
+    },
+    "claims": {
+      "type": "object",
+      "required": [
+        "gfx1030_local_device_resident_recurrence_parity",
+        "gfx1030_local_parallel_reduction_recurrence_parity",
+        "gfx1030_local_global_krylov_workspace_parity",
+        "gfx1030_local_multi_block_recurrence_parity",
+        "gfx1030_local_operator_derived_scaled_jacobi_recurrence_parity",
+        "restart_terminal_history_parity",
+        "checkpoint_restart_artifact_parity",
+        "production_scalable_parallel_recurrence",
+        "production_preconditioner_parity",
+        "independent_gfx1100_parity",
+        "same_source_commit_cross_device",
+        "signed_receipt",
+        "performance"
+      ],
+      "properties": {
+        "gfx1030_local_device_resident_recurrence_parity": {"const": true},
+        "gfx1030_local_parallel_reduction_recurrence_parity": {"const": true},
+        "gfx1030_local_global_krylov_workspace_parity": {"const": true},
+        "gfx1030_local_multi_block_recurrence_parity": {"const": true},
+        "gfx1030_local_operator_derived_scaled_jacobi_recurrence_parity": {
+          "const": true
+        },
+        "restart_terminal_history_parity": {"const": true},
+        "checkpoint_restart_artifact_parity": {"const": true},
+        "production_scalable_parallel_recurrence": {"const": false},
+        "production_preconditioner_parity": {"const": false},
+        "independent_gfx1100_parity": {"const": false},
+        "same_source_commit_cross_device": {"const": false},
+        "signed_receipt": {"const": false},
+        "performance": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 6,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

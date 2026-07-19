@@ -1,0 +1,61 @@
+{
+  "accepted_step_count": 4,
+  "analysis_type": "adaptive_consistent_newton_continuation_seed",
+  "analytic_seed_full_load_pass": true,
+  "artifacts": {
+    "result": "implementation/phase1/release_evidence/productization/phase2_adaptive_newton_continuation_result.json",
+    "schema": "src/structural_analysis/schemas/adaptive_newton_continuation_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_adaptive_newton_continuation_summary.json"
+  },
+  "attempt_count": 5,
+  "blockers_remaining": [
+    "g1_full_building_load_factor_1_not_closed",
+    "general_frame_shell_consistent_jacobian_not_closed",
+    "state_updated_material_newton_breadth_not_closed",
+    "arc_length_snap_through_not_closed",
+    "production_sparse_rocm_hip_parity_not_closed"
+  ],
+  "checkpoint_restart_exact_gate_passed": true,
+  "claim_boundary": "This receipt reaches load factor 1.0 only for a two-element 1D strain-cubic analytic axial chain. It verifies accepted/trial state discipline, adaptive step reduction, exact rollback, checkpoint restart, a finite-difference consistent Jacobian check, local quadratic convergence, and zero fallback. Every committed step has active free equations and an iterative convergence claim; fully constrained no-solve state transitions are a separate contract. It does not close G1 full-building/full-mesh nonlinear equilibrium, frame-shell coupling, material-model breadth, arc-length snap-through, or ROCm/HIP parity.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "convergence_claim": true,
+  "engine_version": "1.0.0",
+  "fallback_count": 0,
+  "final_load_factor": 1.0,
+  "finite_difference_jacobian_gate_passed": true,
+  "full_mesh_closure_claim": false,
+  "g1_full_load_claim": false,
+  "generated_at": "2026-07-19T07:13:08.328932+00:00",
+  "input_checksums": {
+    "scripts/build_phase2_adaptive_newton_continuation_artifacts.py": "sha256:ecac39ff811bcde4fc11a1dcee36971068e80b270312de7580ba84b753bfa9da",
+    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:c09d0bd753e0ce9475e5a2adaa4b234e013a7c7bf150beb2aeadf778c5702c63",
+    "src/structural_analysis/schemas/adaptive_newton_continuation_v1.schema.json": "sha256:cda2488f210513437cf00e814bc6deb0eb62f5e3f66655d25521f20c17248688",
+    "src/structural_analysis/solvers/nonlinear/continuation.py": "sha256:acc9b71a0865256c1a75522ec500f050703aaf9d474c0281442bf19886505b52",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:2531dbc71d29277e550f792e3dd79f36012ad23d9f99aa6311f7cd50b989a8e6",
+    "tests/test_build_phase2_adaptive_newton_continuation_artifacts.py": "sha256:4de8ee192648dbcbaf2fa78fd8fddadd6dea4deebd4d61e2fdc835672f053abb",
+    "tests/test_nonlinear_adaptive_continuation.py": "sha256:1e1ac97f43eee8164e58c5501b190a5579ad0f43f09227b52e157392b77b71fc"
+  },
+  "iterative_solver_step_count": 4,
+  "line_search_history_present": true,
+  "newton_convergence_claim_count": 4,
+  "no_solve_reaction_only_step_count": 0,
+  "production_nonlinear_closure_claim": false,
+  "quadratic_convergence_gate_passed": true,
+  "reaction_observation_only": false,
+  "regularization_count": 0,
+  "rejected_attempt_count": 1,
+  "residual_formula": "F_internal_minus_F_external",
+  "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+  "rollback_exact_gate_passed": true,
+  "schema_version": "phase2-adaptive-newton-continuation-artifacts.v1",
+  "solver_executed": true,
+  "solver_executed_step_count": 4,
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+  "status": "ready",
+  "target_load_factor": 1.0,
+  "terminal_dispositions": [
+    "solve_free_equations"
+  ],
+  "truth_class": "analytic_1d_material_mesh_truth"
+}

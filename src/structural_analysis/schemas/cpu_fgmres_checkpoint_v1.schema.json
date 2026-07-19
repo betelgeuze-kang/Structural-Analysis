@@ -1,0 +1,381 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/cpu_fgmres_checkpoint_v1.schema.json",
+  "title": "Engine v2 deterministic CPU FGMRES restart checkpoint v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "checkpoint_hash",
+    "recurrence_contract_hash",
+    "authority",
+    "source",
+    "solver",
+    "inputs",
+    "parameters",
+    "boundary",
+    "observations",
+    "restart_history",
+    "artifact",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-cpu-fgmres-checkpoint.v1"
+    },
+    "checkpoint_hash": {"$ref": "#/$defs/sha256"},
+    "recurrence_contract_hash": {"$ref": "#/$defs/sha256"},
+    "authority": {
+      "const": "non_authoritative_solver_restart_checkpoint"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_plan_hash",
+        "scaling_hash",
+        "reduced_csr_identity_hash",
+        "operator_numeric_values_hash",
+        "dof_count",
+        "free_count",
+        "global_csr_nnz"
+      ],
+      "properties": {
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "scaling_hash": {"$ref": "#/$defs/sha256"},
+        "reduced_csr_identity_hash": {"$ref": "#/$defs/sha256"},
+        "operator_numeric_values_hash": {"$ref": "#/$defs/sha256"},
+        "dof_count": {
+          "type": "integer",
+          "minimum": 6,
+          "maximum": 2147483647,
+          "multipleOf": 6
+        },
+        "free_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "global_csr_nnz": {"type": "integer", "minimum": 1}
+      }
+    },
+    "solver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preconditioner_profile"],
+      "properties": {
+        "preconditioner_profile": {
+          "enum": [
+            "identity_right_preconditioner.v1",
+            "fixed_positive_inverse_diagonal_right.v1",
+            "operator_derived_left_scaled_jacobi_right.v1"
+          ]
+        }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "global_csr_values_si",
+        "right_hand_side_si",
+        "free_equation_scale_divisors_si",
+        "initial_solution_free",
+        "right_preconditioner_inverse_diagonal"
+      ],
+      "properties": {
+        "global_csr_values_si": {"$ref": "#/$defs/inputVectorDescriptor"},
+        "right_hand_side_si": {"$ref": "#/$defs/inputVectorDescriptor"},
+        "free_equation_scale_divisors_si": {"$ref": "#/$defs/inputVectorDescriptor"},
+        "initial_solution_free": {"$ref": "#/$defs/inputVectorDescriptor"},
+        "right_preconditioner_inverse_diagonal": {"$ref": "#/$defs/inputVectorDescriptor"}
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_iterations",
+        "restart_length",
+        "relative_tolerance_scaled_l2",
+        "absolute_tolerance_scaled_l2",
+        "arnoldi_breakdown_tolerance"
+      ],
+      "properties": {
+        "max_iterations": {"type": "integer", "minimum": 2},
+        "restart_length": {"type": "integer", "minimum": 1},
+        "relative_tolerance_scaled_l2": {"type": "number", "minimum": 0},
+        "absolute_tolerance_scaled_l2": {"type": "number", "minimum": 0},
+        "arnoldi_breakdown_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iteration_count",
+        "matvec_count",
+        "next_restart_index",
+        "convergence_threshold_scaled_l2",
+        "last_observation_hash"
+      ],
+      "properties": {
+        "iteration_count": {"type": "integer", "minimum": 1},
+        "matvec_count": {"type": "integer", "minimum": 3},
+        "next_restart_index": {"type": "integer", "minimum": 1},
+        "convergence_threshold_scaled_l2": {
+          "type": "number",
+          "minimum": 0
+        },
+        "last_observation_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 2,
+      "items": {"$ref": "#/$defs/observation"}
+    },
+    "restart_history": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/restartRecord"}
+    },
+    "artifact": {"$ref": "#/$defs/checkpointArtifact"},
+    "claim_boundary": {
+      "const": {
+        "restart_boundary_only": true,
+        "resumable_without_completed_iteration_replay": true,
+        "result_ir_authority": false,
+        "engineering_result_recovery": false,
+        "hip_or_hardware_claim": false,
+        "inline_vector_values": false
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "dof": {"enum": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+    "vectorShape": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {"type": "integer", "minimum": 0}
+    },
+    "inputVectorDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_order",
+        "equation_scope",
+        "byte_length",
+        "data_hash",
+        "content_hash"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "global_csr_values_si",
+            "right_hand_side_si",
+            "free_equation_scale_divisors_si",
+            "initial_solution_free",
+            "right_preconditioner_inverse_diagonal"
+          ]
+        },
+        "dtype": {"const": "<f8"},
+        "shape": {"$ref": "#/$defs/vectorShape"},
+        "layout": {"const": "C"},
+        "byte_order": {"const": "little"},
+        "equation_scope": {
+          "enum": [
+            "global_csr_pattern_order",
+            "global_equations",
+            "free_equations"
+          ]
+        },
+        "byte_length": {"type": "integer", "minimum": 0},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "iteration",
+        "restart_index",
+        "inner_iteration",
+        "vector_hashes",
+        "solution_free_data_hash",
+        "norms",
+        "governing",
+        "observation_hash"
+      ],
+      "properties": {
+        "iteration": {"type": "integer", "minimum": 0},
+        "restart_index": {"type": "integer", "minimum": 0},
+        "inner_iteration": {"type": "integer", "minimum": 0},
+        "vector_hashes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["raw_residual", "scaled_residual"],
+          "properties": {
+            "raw_residual": {"$ref": "#/$defs/sha256"},
+            "scaled_residual": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "solution_free_data_hash": {"$ref": "#/$defs/sha256"},
+        "norms": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "raw_translation_l2_n",
+            "raw_translation_linf_n",
+            "raw_rotation_l2_nm",
+            "raw_rotation_linf_nm",
+            "scaled_l2",
+            "scaled_linf"
+          ],
+          "properties": {
+            "raw_translation_l2_n": {"type": "number", "minimum": 0},
+            "raw_translation_linf_n": {"type": "number", "minimum": 0},
+            "raw_rotation_l2_nm": {"type": "number", "minimum": 0},
+            "raw_rotation_linf_nm": {"type": "number", "minimum": 0},
+            "scaled_l2": {"type": "number", "minimum": 0},
+            "scaled_linf": {"type": "number", "minimum": 0}
+          }
+        },
+        "governing": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["equation", "node_id", "dof"],
+          "properties": {
+            "equation": {"type": "integer", "minimum": 0},
+            "node_id": {"$ref": "#/$defs/stableId"},
+            "dof": {"$ref": "#/$defs/dof"}
+          }
+        },
+        "observation_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "restartRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "restart_index",
+        "start_iteration",
+        "end_iteration",
+        "iteration_count",
+        "start_observation_hash",
+        "end_observation_hash",
+        "disposition",
+        "restart_hash"
+      ],
+      "properties": {
+        "restart_index": {"type": "integer", "minimum": 0},
+        "start_iteration": {"type": "integer", "minimum": 0},
+        "end_iteration": {"type": "integer", "minimum": 1},
+        "iteration_count": {"type": "integer", "minimum": 1},
+        "start_observation_hash": {"$ref": "#/$defs/sha256"},
+        "end_observation_hash": {"$ref": "#/$defs/sha256"},
+        "disposition": {"const": "restarted"},
+        "restart_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "checkpointArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storage_profile",
+        "artifact_uri",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "header",
+        "vectors"
+      ],
+      "properties": {
+        "storage_profile": {
+          "const": "canonical_little_endian_fgmres_restart_checkpoint.v1"
+        },
+        "artifact_uri": {
+          "type": "string",
+          "pattern": "/fgmres_restart_checkpoint\\.bin$"
+        },
+        "byte_length": {"type": "integer", "minimum": 64},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "header": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "magic",
+            "byte_length",
+            "free_count",
+            "iteration_count",
+            "matvec_count",
+            "next_restart_index",
+            "convergence_threshold_scaled_l2"
+          ],
+          "properties": {
+            "magic": {"const": "EV2FGCP1"},
+            "byte_length": {"const": 48},
+            "free_count": {"type": "integer", "minimum": 1},
+            "iteration_count": {"type": "integer", "minimum": 1},
+            "matvec_count": {"type": "integer", "minimum": 3},
+            "next_restart_index": {"type": "integer", "minimum": 1},
+            "convergence_threshold_scaled_l2": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "vectors": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/checkpointVector"}
+        }
+      }
+    },
+    "checkpointVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "byte_order",
+        "offset",
+        "byte_length",
+        "data_hash"
+      ],
+      "properties": {
+        "name": {
+          "enum": ["solution_free", "scaled_recurrence_residual_free"]
+        },
+        "dtype": {"const": "<f8"},
+        "shape": {"$ref": "#/$defs/vectorShape"},
+        "byte_order": {"const": "little"},
+        "offset": {"type": "integer", "minimum": 48},
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

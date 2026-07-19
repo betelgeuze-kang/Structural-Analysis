@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/structural_verification_evidence_manifest_v1.schema.json",
+  "title": "Structural verification evidence manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "evidence", "claim_boundary"],
+  "properties": {
+    "schema_version": {
+      "const": "structural-verification-evidence-manifest.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "evidence": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  }
+}

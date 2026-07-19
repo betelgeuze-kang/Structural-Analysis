@@ -1,0 +1,288 @@
+{
+  "blockers_remaining": [
+    "actual_hardware_execution_not_performed",
+    "numerical_parity_not_evaluated",
+    "actual_mgt_70560_operator_not_executed",
+    "current_tangent_fgmres_and_preconditioner_not_integrated_on_device",
+    "independent_cross_device_receipts_not_attached",
+    "model_size_performance_sweep_not_executed"
+  ],
+  "claim_boundary": "This dual-target receipt proves only that the current-tangent HIP source compiles with warnings treated as errors for declared gfx1030 and gfx1100 targets and that each binary runs the same host-only, zero-HIP-runtime-call fixture parser. It does not launch a kernel, access hardware, verify numerical parity, execute the actual 70,560-equation MGT operator, integrate device-resident FGMRES/preconditioning, measure performance, or close G1.",
+  "claims": {
+    "actual_hardware_execution": false,
+    "actual_mgt_current_tangent_action": false,
+    "declared_target_compile": true,
+    "dual_target_host_fixture_parser_execution": true,
+    "gfx1030_target_compile": true,
+    "gfx1100_target_compile": true,
+    "numerical_parity": false,
+    "performance": false,
+    "production_current_tangent_fgmres": false
+  },
+  "compiler": {
+    "path": "/opt/rocm-6.0.2/bin/hipcc",
+    "version_first_line": "HIP version: 6.0.32831-204d35d16",
+    "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
+  },
+  "contract_pass": true,
+  "contract_scope": "target_compile_and_host_fixture_parser_only",
+  "fixture": {
+    "accumulation_profile": "reference_then_sorted_frame_then_sorted_geometry_sequential_fp64.v1",
+    "arrays": {
+      "background_global_displacements_m": {
+        "byte_length": 96,
+        "data_hash": "sha256:5fb9f855f902a371a71969fb5ff805d07d71d760e2d7ca5d96261f3b7e06c8a0",
+        "dtype": "<f8",
+        "shape": [
+          12
+        ]
+      },
+      "frame_dofs": {
+        "byte_length": 96,
+        "data_hash": "sha256:700a4498438a801b5781533040bce85a20ae4bfe08866f7552ff33e172923b0a",
+        "dtype": "<i8",
+        "shape": [
+          1,
+          12
+        ]
+      },
+      "frame_incidence_element": {
+        "byte_length": 40,
+        "data_hash": "sha256:2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb",
+        "dtype": "<i8",
+        "shape": [
+          5
+        ]
+      },
+      "frame_incidence_local_dof": {
+        "byte_length": 40,
+        "data_hash": "sha256:5526cc94eda5989c310057852e292c49511a8f4064954ea3ad9ceaedbe98ca30",
+        "dtype": "<i8",
+        "shape": [
+          5
+        ]
+      },
+      "frame_incidence_pointer": {
+        "byte_length": 48,
+        "data_hash": "sha256:f190072c5052f4f440d4a607c25f5bced487c420806c9aab4ca5b0653e72da61",
+        "dtype": "<i8",
+        "shape": [
+          6
+        ]
+      },
+      "frame_stiffness_delta_n_per_m": {
+        "byte_length": 1152,
+        "data_hash": "sha256:e0c4816b6ca8ad98774849757587e87c3a3c1bab9007351d66398390805aad40",
+        "dtype": "<f8",
+        "shape": [
+          1,
+          12,
+          12
+        ]
+      },
+      "free_direction_m": {
+        "byte_length": 40,
+        "data_hash": "sha256:fd2754b4281a3e07a22fff27bda057ba469ad67a2886f68ec97794f37580242d",
+        "dtype": "<f8",
+        "shape": [
+          5
+        ]
+      },
+      "free_displacements_m": {
+        "byte_length": 40,
+        "data_hash": "sha256:3b283348f32f66ee6e4714b45776672872604c5f7846f1d7bdfab15402e32dda",
+        "dtype": "<f8",
+        "shape": [
+          5
+        ]
+      },
+      "free_global_dofs": {
+        "byte_length": 40,
+        "data_hash": "sha256:5526cc94eda5989c310057852e292c49511a8f4064954ea3ad9ceaedbe98ca30",
+        "dtype": "<i8",
+        "shape": [
+          5
+        ]
+      },
+      "geometry_axial_stiffness_n_per_m": {
+        "byte_length": 8,
+        "data_hash": "sha256:8954731458f48c180b5333fee655033a0c5997ce6b92dc802113033d52edd431",
+        "dtype": "<f8",
+        "shape": [
+          1
+        ]
+      },
+      "geometry_dofs": {
+        "byte_length": 96,
+        "data_hash": "sha256:700a4498438a801b5781533040bce85a20ae4bfe08866f7552ff33e172923b0a",
+        "dtype": "<i8",
+        "shape": [
+          1,
+          12
+        ]
+      },
+      "geometry_incidence_element": {
+        "byte_length": 40,
+        "data_hash": "sha256:2c34ce1df23b838c5abf2a7f6437cca3d3067ed509ff25f11df6b11b582b51eb",
+        "dtype": "<i8",
+        "shape": [
+          5
+        ]
+      },
+      "geometry_incidence_local_dof": {
+        "byte_length": 40,
+        "data_hash": "sha256:5526cc94eda5989c310057852e292c49511a8f4064954ea3ad9ceaedbe98ca30",
+        "dtype": "<i8",
+        "shape": [
+          5
+        ]
+      },
+      "geometry_incidence_pointer": {
+        "byte_length": 48,
+        "data_hash": "sha256:f190072c5052f4f440d4a607c25f5bced487c420806c9aab4ca5b0653e72da61",
+        "dtype": "<i8",
+        "shape": [
+          6
+        ]
+      },
+      "geometry_reference_chords_m": {
+        "byte_length": 24,
+        "data_hash": "sha256:f97bcbc2b8412a84b469604dbcd3bcf5c71478ca283f6756f64266150b20c55d",
+        "dtype": "<f8",
+        "shape": [
+          1,
+          3
+        ]
+      },
+      "geometry_reference_lengths_m": {
+        "byte_length": 8,
+        "data_hash": "sha256:90eae230c3221bbae3b929e20dec8a84cbce25f9c3b2eb19ee527536228d611e",
+        "dtype": "<f8",
+        "shape": [
+          1
+        ]
+      },
+      "geometry_relative_translation_operators": {
+        "byte_length": 288,
+        "data_hash": "sha256:92e862b6a153a581b47a0195fa766caea057814161af3ab4900b103826ca7cee",
+        "dtype": "<f8",
+        "shape": [
+          1,
+          3,
+          12
+        ]
+      },
+      "global_to_free": {
+        "byte_length": 96,
+        "data_hash": "sha256:a506294dc1059d4076ed2731e3c68d06dc932c75ad6808448a1dbcf57b1a6cae",
+        "dtype": "<i8",
+        "shape": [
+          12
+        ]
+      },
+      "reference_column_indices": {
+        "byte_length": 120,
+        "data_hash": "sha256:a8a3021a905d809a95ae1386911e6eb243e11a68ed836ad4d4ee4ca3469ebac9",
+        "dtype": "<i8",
+        "shape": [
+          15
+        ]
+      },
+      "reference_row_pointer": {
+        "byte_length": 48,
+        "data_hash": "sha256:a936f3d054e4b832a52a9c533b66abf84adf21c80fe04544e3f240c344346639",
+        "dtype": "<i8",
+        "shape": [
+          6
+        ]
+      },
+      "reference_values_n_per_m": {
+        "byte_length": 120,
+        "data_hash": "sha256:f417cafcd227c014879e67aa9da99f046910c1c75330e5e02990b8e54c1af7ae",
+        "dtype": "<f8",
+        "shape": [
+          15
+        ]
+      }
+    },
+    "binary_profile": "canonical_little_endian_mixed_numeric.v1",
+    "claim_boundary": "This fixture binds one backend-neutral current-tangent operator, deterministic derived row-incidence schedules, and one state/direction pair. Actual HIP execution, CPU/HIP numerical parity, actual-MGT scale, performance, and G1 closure require separate device evidence.",
+    "dimensions": {
+      "equation_count": 5,
+      "frame_element_count": 1,
+      "frame_incidence_count": 5,
+      "geometry_element_count": 1,
+      "geometry_incidence_count": 5,
+      "global_dof_count": 12,
+      "reference_nnz": 15
+    },
+    "execution_contract_hash": "sha256:9bfe8906e29d477b46c1eb99973c3fba3c1c03ae3c110b64f9062f823bee7132",
+    "execution_profile": "one_thread_per_free_row_reference_frame_geometry.v1",
+    "expected_kernel_invocation_count": 1,
+    "fixture_byte_length": 2600,
+    "fixture_hash": "sha256:d9532976ea771b0aad8c04f2fb2812b1c5b645deed192116737943c767326747",
+    "load_factor": 0.73,
+    "operator_contract_hash": "sha256:7cb2c798bce2cd97b1c4ab782ad4a1312dc1f10131999d1fe7c2da7df1fff451",
+    "parity_profile": "engine-v2-cpu-hip-current-tangent-operator-parity.v1",
+    "schedule_contract_hash": "sha256:5ccf240152540ba800ed2d6d6680676a92ca7037a626b2447fc43c22632a5084",
+    "schedule_profile": "free_row_sorted_element_local_incidence.v1",
+    "schema_version": "engine-v2-hip-current-tangent-operator-fixture.v1"
+  },
+  "generated_at": "2026-07-19T07:00:24.205596+00:00",
+  "receipt_hash": "sha256:a287ffb0b0c87e59b67496b0987f6ca4824a896ffd2796dddc74bdb0c9a716fd",
+  "schema_version": "engine-v2-hip-current-tangent-target-compile-host-parse-receipt.v1",
+  "source": {
+    "exact_source_commit_claim": false,
+    "input_checksums": {
+      "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
+      "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:7e182b1fde74743dc7399108d24d55a30d237674ccd5b4883f74e427dd050752",
+      "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
+      "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py": "sha256:11b2364da86bf40a8e20737f85ec30e21e4f4a141d605f5efbf0eb58d7683f7a",
+      "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
+      "src/structural_analysis/schemas/hip_current_tangent_operator_compile_receipt_v1.schema.json": "sha256:9f61bc703756fbd2bb81c7edc80955c996f20fa24a9bd25846cb1f857a33186c",
+      "src/structural_analysis/schemas/hip_current_tangent_operator_parity_v1.schema.json": "sha256:8a05dc056e0c205a718d9a339706ff221b7ef56ef35987267ba79e9d283da9f4",
+      "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
+      "tests/test_engine_v2_hip_current_tangent_operator.py": "sha256:dfb8edf183b407c7502ee3c523b95483a1c8fea942d9deae57a45a3133ac287b",
+      "tests/test_engine_v2_hip_current_tangent_operator_runner.py": "sha256:b1e64afdf19304b6a5aceaef95f27307382257b48acc8047247e1b4843ec9120"
+    },
+    "repository_base_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+    "worktree_clean": false
+  },
+  "status": "partial",
+  "targets": [
+    {
+      "architecture": "gfx1030",
+      "binary_byte_length": 56912,
+      "binary_sha256": "sha256:2b579ec5b651a5c7503318a9fe59efcf688d1690726f8bb3e51662de942e39d4",
+      "host_fixture_parser_execution": true,
+      "host_fixture_validation": {
+        "actual_hardware_execution": false,
+        "contract_pass": true,
+        "equation_count": 5,
+        "fixture_byte_length": 2600,
+        "fixture_hash": "sha256:d9532976ea771b0aad8c04f2fb2812b1c5b645deed192116737943c767326747",
+        "hip_runtime_api_call_count": 0,
+        "profile": "engine-v2-hip-current-tangent-host-fixture-parser.v1",
+        "runtime_output_hash": "sha256:2ba6fa6b02ca916b383de632e0870e01e06e40d69fd1c795611c7769ca70e7d6"
+      },
+      "target_compile": true
+    },
+    {
+      "architecture": "gfx1100",
+      "binary_byte_length": 57680,
+      "binary_sha256": "sha256:2c99d9a6e65118185b783e5151af5480e17a86cb38dac907195d67a3e421b654",
+      "host_fixture_parser_execution": true,
+      "host_fixture_validation": {
+        "actual_hardware_execution": false,
+        "contract_pass": true,
+        "equation_count": 5,
+        "fixture_byte_length": 2600,
+        "fixture_hash": "sha256:d9532976ea771b0aad8c04f2fb2812b1c5b645deed192116737943c767326747",
+        "hip_runtime_api_call_count": 0,
+        "profile": "engine-v2-hip-current-tangent-host-fixture-parser.v1",
+        "runtime_output_hash": "sha256:2ba6fa6b02ca916b383de632e0870e01e06e40d69fd1c795611c7769ca70e7d6"
+      },
+      "target_compile": true
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/state_updated_bilinear_link_v1.schema.json",
+  "title": "State-updated bilinear link Newton receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "contract_pass",
+    "truth_class",
+    "analysis_type",
+    "residual_formula",
+    "residual_formula_hash",
+    "return_mapping_algorithm",
+    "material_point",
+    "element_benchmark",
+    "structure_benchmark",
+    "rollback_probe",
+    "verification",
+    "state_updated_bilinear_link_seed_contract_pass",
+    "link_spring_material_breadth_closure_claim",
+    "material_newton_breadth_closure_claim",
+    "g1_material_newton_breadth_claim",
+    "production_nonlinear_closure_claim",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase2-state-updated-bilinear-link-result.v1"
+    },
+    "status": {"enum": ["ready", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "truth_class": {"const": "analytic_1d_force_deformation_link_truth"},
+    "analysis_type": {"const": "state_updated_bilinear_link_newton_seed"},
+    "residual_formula": {"const": "F_internal_minus_F_external"},
+    "residual_formula_hash": {"$ref": "#/$defs/hash"},
+    "return_mapping_algorithm": {
+      "const": "backward_euler_1d_link_return_mapping"
+    },
+    "material_point": {"type": "object"},
+    "element_benchmark": {"type": "object"},
+    "structure_benchmark": {"type": "object"},
+    "rollback_probe": {"type": "object"},
+    "verification": {"type": "object"},
+    "state_updated_bilinear_link_seed_contract_pass": {"type": "boolean"},
+    "link_spring_material_breadth_closure_claim": {"const": false},
+    "material_newton_breadth_closure_claim": {"const": false},
+    "g1_material_newton_breadth_claim": {"const": false},
+    "production_nonlinear_closure_claim": {"const": false},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": true
+}

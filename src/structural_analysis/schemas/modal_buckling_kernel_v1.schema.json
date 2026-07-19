@@ -1,0 +1,359 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/modal_buckling_kernel_v1.schema.json",
+  "title": "Deterministic modal and linear-buckling matrix-kernel receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "numeric_serialization_profile",
+    "semantic_hash_profile",
+    "status",
+    "truth_class",
+    "analysis_scope",
+    "source",
+    "tolerance_policy",
+    "verification",
+    "summary",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary",
+    "contract_pass"
+  ],
+  "properties": {
+    "schema_version": {"const": "phase2-modal-buckling-kernel-result.v1"},
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "numeric_serialization_profile": {
+      "const": "binary64-json-round-trip-plus-semantic-12e"
+    },
+    "semantic_hash_profile": {"const": "canonical-json-scientific-12e"},
+    "status": {"enum": ["partial", "blocked"]},
+    "truth_class": {"const": "analytic_and_semianalytic_matrix_kernel_truth"},
+    "analysis_scope": {"const": "dense_symmetric_generalized_eigen_matrix_kernels"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_checksums", "source_set_hash"],
+      "properties": {
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 10,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        },
+        "source_set_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "tolerance_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modal_eigenvalue_relative_tolerance",
+        "diagonal_buckling_relative_tolerance",
+        "euler_column_relative_tolerance",
+        "residual_relative_tolerance",
+        "orthogonality_tolerance",
+        "cluster_relative_tolerance"
+      ],
+      "properties": {
+        "modal_eigenvalue_relative_tolerance": {"const": 1e-12},
+        "diagonal_buckling_relative_tolerance": {"const": 1e-12},
+        "euler_column_relative_tolerance": {"const": 3e-6},
+        "residual_relative_tolerance": {"const": 1e-9},
+        "orthogonality_tolerance": {"const": 1e-8},
+        "cluster_relative_tolerance": {"const": 1e-10}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modal_two_dof",
+        "buckling_singular_geometric",
+        "euler_column",
+        "repeated_eigenspace"
+      ],
+      "properties": {
+        "modal_two_dof": {"$ref": "#/$defs/modalCase"},
+        "buckling_singular_geometric": {"$ref": "#/$defs/bucklingCase"},
+        "euler_column": {"$ref": "#/$defs/eulerCase"},
+        "repeated_eigenspace": {"$ref": "#/$defs/repeatedCase"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_count",
+        "passing_case_count",
+        "modal_kernel_contract_pass",
+        "buckling_kernel_contract_pass",
+        "euler_column_bridge_contract_pass",
+        "repeated_eigenspace_contract_pass",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_count": {"const": 4},
+        "passing_case_count": {"type": "integer", "minimum": 0, "maximum": 4},
+        "modal_kernel_contract_pass": {"type": "boolean"},
+        "buckling_kernel_contract_pass": {"type": "boolean"},
+        "euler_column_bridge_contract_pass": {"type": "boolean"},
+        "repeated_eigenspace_contract_pass": {"type": "boolean"},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "modal_matrix_kernel_evidence",
+        "buckling_matrix_kernel_evidence",
+        "repeated_eigenspace_determinism_evidence",
+        "euler_column_analytic_bridge_evidence",
+        "whole_model_modal_workflow",
+        "whole_model_buckling_workflow",
+        "independent_code_to_code_evidence",
+        "published_or_experimental_evidence",
+        "sparse_rocm_hip_parity",
+        "verification_level_2",
+        "release_readiness"
+      ],
+      "properties": {
+        "modal_matrix_kernel_evidence": {"type": "boolean"},
+        "buckling_matrix_kernel_evidence": {"type": "boolean"},
+        "repeated_eigenspace_determinism_evidence": {"type": "boolean"},
+        "euler_column_analytic_bridge_evidence": {"type": "boolean"},
+        "whole_model_modal_workflow": {"const": false},
+        "whole_model_buckling_workflow": {"const": false},
+        "independent_code_to_code_evidence": {"const": false},
+        "published_or_experimental_evidence": {"const": false},
+        "sparse_rocm_hip_parity": {"const": false},
+        "verification_level_2": {"const": false},
+        "release_readiness": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 400},
+    "contract_pass": {"type": "boolean"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"contract_pass": {"const": true}},
+        "required": ["contract_pass"]
+      },
+      "then": {"properties": {"status": {"const": "partial"}}},
+      "else": {"properties": {"status": {"const": "blocked"}}}
+    }
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nonnegative": {"type": "number", "minimum": 0},
+    "positive": {"type": "number", "exclusiveMinimum": 0},
+    "numberVector": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "number"}
+    },
+    "modeMatrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/numberVector"}
+    },
+    "modalCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "expected_eigenvalues",
+        "actual_eigenvalues",
+        "mass_normalized_modes",
+        "maximum_eigenvalue_relative_error",
+        "maximum_residual_relative_inf",
+        "mass_orthogonality_error_inf",
+        "stiffness_diagonalization_error_inf",
+        "stiffness_matrix_hash",
+        "mass_matrix_hash",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "regularization_applied",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "analytic_two_dof_shear_modal"},
+        "truth_basis": {"const": "analytic_closed_form"},
+        "expected_eigenvalues": {"$ref": "#/$defs/numberVector"},
+        "actual_eigenvalues": {"$ref": "#/$defs/numberVector"},
+        "mass_normalized_modes": {"$ref": "#/$defs/modeMatrix"},
+        "maximum_eigenvalue_relative_error": {"$ref": "#/$defs/nonnegative"},
+        "maximum_residual_relative_inf": {"$ref": "#/$defs/nonnegative"},
+        "mass_orthogonality_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_diagonalization_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "mass_matrix_hash": {"$ref": "#/$defs/hash"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "regularization_applied": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "bucklingCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "expected_load_factors",
+        "actual_load_factors",
+        "stiffness_normalized_modes",
+        "finite_positive_eigenvalue_count",
+        "geometric_stiffness_positive_rank",
+        "maximum_load_factor_relative_error",
+        "maximum_residual_relative_inf",
+        "stiffness_orthogonality_error_inf",
+        "geometric_diagonalization_error_inf",
+        "stiffness_matrix_hash",
+        "geometric_stiffness_matrix_hash",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "regularization_applied",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "analytic_diagonal_buckling_singular_kg"},
+        "truth_basis": {"const": "analytic_closed_form"},
+        "expected_load_factors": {"$ref": "#/$defs/numberVector"},
+        "actual_load_factors": {"$ref": "#/$defs/numberVector"},
+        "stiffness_normalized_modes": {"$ref": "#/$defs/modeMatrix"},
+        "finite_positive_eigenvalue_count": {"const": 2},
+        "geometric_stiffness_positive_rank": {"const": 2},
+        "maximum_load_factor_relative_error": {"$ref": "#/$defs/nonnegative"},
+        "maximum_residual_relative_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_orthogonality_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "geometric_diagonalization_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "geometric_stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "regularization_applied": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "eulerCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "element_count",
+        "length_m",
+        "flexural_rigidity_kn_m2",
+        "expected_critical_load_kn",
+        "actual_critical_load_kn",
+        "critical_mode_stiffness_normalized",
+        "critical_load_relative_error",
+        "residual_relative_inf",
+        "stiffness_matrix_hash",
+        "geometric_stiffness_matrix_hash",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "symmetry_projection_applied",
+        "regularization_applied",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "pinned_pinned_euler_column_16_element"},
+        "truth_basis": {"const": "analytic_closed_form_with_fe_convergence_bridge"},
+        "element_count": {"const": 16},
+        "length_m": {"$ref": "#/$defs/positive"},
+        "flexural_rigidity_kn_m2": {"$ref": "#/$defs/positive"},
+        "expected_critical_load_kn": {"$ref": "#/$defs/positive"},
+        "actual_critical_load_kn": {"$ref": "#/$defs/positive"},
+        "critical_mode_stiffness_normalized": {"$ref": "#/$defs/numberVector"},
+        "critical_load_relative_error": {"$ref": "#/$defs/nonnegative"},
+        "residual_relative_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "geometric_stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "symmetry_projection_applied": {"const": false},
+        "regularization_applied": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "repeatedCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "modal_eigenvalues",
+        "modal_normalized_modes",
+        "modal_axis_basis",
+        "modal_raw_result_hash",
+        "modal_semantic_result_hash",
+        "modal_replay_raw_exact",
+        "modal_replay_semantic_exact",
+        "modal_incomplete_cluster_rejected",
+        "buckling_load_factors",
+        "buckling_normalized_modes",
+        "buckling_axis_basis",
+        "buckling_raw_result_hash",
+        "buckling_semantic_result_hash",
+        "buckling_replay_raw_exact",
+        "buckling_replay_semantic_exact",
+        "buckling_incomplete_cluster_rejected",
+        "regularization_applied",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "complete_repeated_eigenvalue_cluster"},
+        "truth_basis": {"const": "coordinate_axis_projector_invariant"},
+        "modal_eigenvalues": {"$ref": "#/$defs/numberVector"},
+        "modal_normalized_modes": {"$ref": "#/$defs/modeMatrix"},
+        "modal_axis_basis": {"$ref": "#/$defs/modeMatrix"},
+        "modal_raw_result_hash": {"$ref": "#/$defs/hash"},
+        "modal_semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "modal_replay_raw_exact": {"type": "boolean"},
+        "modal_replay_semantic_exact": {"type": "boolean"},
+        "modal_incomplete_cluster_rejected": {"type": "boolean"},
+        "buckling_load_factors": {"$ref": "#/$defs/numberVector"},
+        "buckling_normalized_modes": {"$ref": "#/$defs/modeMatrix"},
+        "buckling_axis_basis": {"$ref": "#/$defs/modeMatrix"},
+        "buckling_raw_result_hash": {"$ref": "#/$defs/hash"},
+        "buckling_semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "buckling_replay_raw_exact": {"type": "boolean"},
+        "buckling_replay_semantic_exact": {"type": "boolean"},
+        "buckling_incomplete_cluster_rejected": {"type": "boolean"},
+        "regularization_applied": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    }
+  }
+}

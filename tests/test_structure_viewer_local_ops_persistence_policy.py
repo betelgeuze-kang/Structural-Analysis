@@ -116,8 +116,7 @@ const smallState = {
 const smallPrepared = prepareViewerLocalOpsStateForStorage(smallState);
 const smallSerialized = JSON.stringify(smallPrepared.state);
 const markerCount = smallSerialized.split('RAW_RENDERABLE_MARKER').length - 1;
-const bundle = buildViewerProjectBundleExport({
-  state: smallPrepared.state,
+const bundle = buildViewerProjectBundleExport(smallPrepared.state, {
   projectId: 'project',
   drawingId: 'drawing',
 });

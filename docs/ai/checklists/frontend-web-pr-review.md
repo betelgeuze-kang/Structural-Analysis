@@ -18,7 +18,7 @@ Run from the repository root with Node `20.19.0`:
 
 ```bash
 npm ci
-npm run build                                   # tsc --noEmit && vite build
+npm run build                                   # type-check + Vite multi-entry build + Workbench/Viewer delivery check
 npm run verify:frontend-contract                # frontend build contract
 npx playwright install chromium
 npm run verify:frontend-browser-smoke -- --mode minimal
@@ -31,7 +31,7 @@ Attach to the PR:
 
 ## Reviewer checklist
 
-- [ ] `npm run build` passes (TypeScript type-check + Vite build).
+- [ ] `npm run build` passes (TypeScript type-check + Vite multi-entry build + Workbench/Viewer delivery contract).
 - [ ] `verify:frontend-contract` passes.
 - [ ] `verify:frontend-browser-smoke -- --mode minimal` passes (or the failure
       is understood and unrelated to this change).

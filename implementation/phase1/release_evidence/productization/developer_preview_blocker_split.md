@@ -16,7 +16,7 @@ The historical `42` release blocker count is no longer the stored canonical coun
 
 | Candidate item | DP RC blocker? | Current evidence boundary |
 |---|---:|---|
-| Selected medium models | Yes | Needs selected medium OpenSees/reference model PASS or approved REVIEW evidence. Parser/topology evidence alone does not count; medium normalization now has a receipt schema, but per-case normalization receipts are still missing. |
+| Selected medium models | Yes | Scientific benchmark credit remains `0/5`. The older `3/5` value is parser-ready candidate breadth only. `medium_benchmark_corpus_plan.json` now preserves five diverse archetype slots, complete artifact-chain requirements, OpenSees plus a second independent solver, and scoped engineer REVIEW rules; no current case satisfies them. |
 | Large crash/OOM-free execution | No | Current RC evidence is pass for this final gate; it still does not close full benchmark parity or commercial claim scope. |
 | Silent import loss zero | No | Current RC evidence is pass for this final gate; it still does not close all import/benchmark/license commercial gates. |
 | Linux/Windows reproducibility | Yes | Needs direct Windows replay receipt. Clean-clone spillover stays in the clean-checkout gate. |

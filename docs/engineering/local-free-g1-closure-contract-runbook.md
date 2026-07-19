@@ -18,6 +18,39 @@ Known current state:
 - Row-only correction loop: stopped
 - Support/link row gap: disfavored
 
+A separate CPU diagnostic now reaches `lambda=1.0` from zero for the current
+state-invariant linear reference-geometry adapter and replays a serialized
+`lambda=0.75` checkpoint byte-for-byte. It is deliberately not counted in the
+terminal requirements: it is not a `mgt-direct-residual-newton-state.v1` state,
+the raw `*MATERIAL` table leaves 79 frame bindings unresolved, and the available
+exact type/name `*DGN-MATL` aliases remain engineer-review-required. A separate
+actual-adapter diagnostic now connects the finite-chord axial correction to the
+physical residual and an analytic current-state tangent action; centered
+difference and component-force summation are retained only as independent
+audits, while the solve residual and tangent share the same reference/load-delta/
+finite-chord parents. That residual definition is bound to canonical hash
+`sha256:2da9d3377eaf3cd9b196e82535c3a3593502079652306bc5705e13d910cca62f`,
+which each dependent receipt builder recomputes independently. A bounded local CPU
+matrix-free diagnostic uses cancellation-stable finite-chord formulas, accepts
+two descending full Newton corrections, and leaves an in-memory residual of
+`1.1767242540372536e-6 N`. A separate load-controlled path accepts semantic `LIVE`
+factors `0.25/0.5/0.75/1.0`, ends at `0.0004447424730642524 N`, restarts exactly
+from `0.5`, and exercises exact rollback with a one-correction-limited probe. An
+adaptive one-correction controller additionally rejects two actual large steps,
+restores the accepted checkpoint, halves the step, reaches `1.0` through
+`0.5/0.75/1.0`, and restarts exactly from `0.5`. A three-scale perturbation audit
+around the direct full-load state measures local directional Newton order
+`1.99998507` to `1.99998515`. All 20 tangent solves across the fixed, restart,
+direct, rollback, adaptive, and local-quadratic probes bind the same free-DOF,
+residual-formula, reference-load, current-tangent, and fixed-preconditioner
+identities. Their host recurrence uses the ordered Python-`fsum` arithmetic
+profile. The tangent formula and 12 immutable parent arrays are contract-bound,
+while NumPy evaluation order and SuperLU output remain outside the cross-platform
+determinism claim. The
+local `0.0005 N` gate now passes for this narrow axial diagnostic, but it still
+does not establish a complete frame/shell/material tangent, material state,
+arc-length branch, an authoritative G1 checkpoint, or a production HIP path.
+
 Authoritative artifacts:
 
 - `implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json`
@@ -25,6 +58,10 @@ Authoritative artifacts:
 - `implementation/phase1/release_evidence/productization/g1_consistent_newton_full_load_checkpoint_candidate_runner.json`
 - `implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json`
 - `implementation/phase1/release_evidence/productization/g1_load_dependent_near_null_geometric_stiffness_comparison.json`
+- `implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_geometry_preflight.json`
+- `implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.json`
+- `implementation/phase1/release_evidence/productization/g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.json`
+- `implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.json`
 
 ## Governing residual contract
 
@@ -46,6 +83,7 @@ Do not promote:
 - regularized residual as direct residual;
 - row-only correction as full nonlinear equilibrium;
 - sub-full-load checkpoint as full-load readiness;
+- a full-load linear-reference diagnostic as a nonlinear G1 checkpoint;
 - CPU diagnostic fallback as production HIP proof.
 
 ## Required G1 terminal closure gates

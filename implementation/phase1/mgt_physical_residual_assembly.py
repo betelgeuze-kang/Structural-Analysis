@@ -77,6 +77,7 @@ def assemble_physical_internal_force_components(
     split_shell_components: bool = False,
     shell_operator_cache: dict[str, Any] | None = None,
     frame_force_cache: Any | None = None,
+    state_updated_frame_axial_geometry: Any | None = None,
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     """Assemble component-wise F_int(u), separated for residual diagnostics."""
     assembly_xyz = assembly_node_xyz(node_xyz=node_xyz, u=u)
@@ -106,6 +107,16 @@ def assemble_physical_internal_force_components(
             include_geometric=True,
         )
         f_frame = np.asarray(frame_equilibrium_stiffness @ u, dtype=np.float64)
+    state_updated_axial_correction = np.zeros_like(
+        np.asarray(f_frame, dtype=np.float64)
+    )
+    state_updated_axial_meta: dict[str, Any] = {
+        "state_updated_frame_axial_geometry_applied": False,
+    }
+    if state_updated_frame_axial_geometry is not None:
+        state_updated_axial_correction, state_updated_axial_meta = (
+            state_updated_frame_axial_geometry.assemble_correction(u)
+        )
     shell_material_tangent: dict[int, float] | None = None
     shell_material_tangent_meta: dict[str, Any] = {
         "shell_material_tangent_applied": False,
@@ -186,6 +197,10 @@ def assemble_physical_internal_force_components(
         "spring": np.asarray(f_spring, dtype=np.float64),
         "material_stress_correction": np.asarray(f_material_stress_correction, dtype=np.float64),
     }
+    if state_updated_frame_axial_geometry is not None:
+        components["frame_state_updated_axial_geometry_correction"] = (
+            np.asarray(state_updated_axial_correction, dtype=np.float64)
+        )
     components.update({name: np.asarray(values, dtype=np.float64) for name, values in shell_components.items()})
     return components, {
         "physical_internal_force_model": (
@@ -193,6 +208,11 @@ def assemble_physical_internal_force_components(
             + (
                 "_with_stress_based_axial_correction"
                 if apply_material_stress_axial_correction
+                else ""
+            )
+            + (
+                "_with_finite_chord_state_updated_axial_geometry"
+                if state_updated_frame_axial_geometry is not None
                 else ""
             )
             + ("_with_shell_material_tangent" if apply_shell_material_tangent else "")
@@ -207,6 +227,7 @@ def assemble_physical_internal_force_components(
         "shell_internal_force_model": shell_meta.get("shell_internal_force_model"),
         "split_shell_components": bool(split_shell_components),
         "frame_equilibrium_meta": frame_meta,
+        "state_updated_frame_axial_geometry_meta": state_updated_axial_meta,
         "shell_meta": shell_meta,
         "shell_material_tangent_meta": shell_material_tangent_meta,
         "stress_corrected_element_count": int(stress_corrected_element_count),
@@ -235,6 +256,7 @@ def assemble_physical_internal_forces_batch(
     shell_operator_cache: dict[str, Any] | None = None,
     frame_force_cache: Any | None = None,
     apply_shell_material_tangent: bool = False,
+    state_updated_frame_axial_geometry: Any | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Batch assemble F_int(U) for residual-only JVP and alpha replay."""
     states = np.asarray(u_batch, dtype=np.float64)
@@ -275,6 +297,16 @@ def assemble_physical_internal_forces_batch(
             else np.zeros((0, int(node_xyz.shape[0]) * DOF_PER_NODE), dtype=np.float64)
         )
         frame_equilibrium_stiffness_nnz = int(frame_equilibrium_stiffness.nnz) if states.size else 0
+    state_updated_axial_batch = np.zeros_like(
+        np.asarray(f_frame_batch, dtype=np.float64)
+    )
+    state_updated_axial_meta: dict[str, Any] = {
+        "state_updated_frame_axial_geometry_applied": False,
+    }
+    if state_updated_frame_axial_geometry is not None:
+        state_updated_axial_batch, state_updated_axial_meta = (
+            state_updated_frame_axial_geometry.assemble_correction_batch(states)
+        )
     shell_material_batch_meta: dict[str, Any] = {
         "shell_material_tangent_applied": bool(apply_shell_material_tangent),
     }
@@ -388,9 +420,20 @@ def assemble_physical_internal_forces_batch(
             shell_operator_cache=shell_operator_cache,
         )
     f_spring_batch = np.asarray(spring_stiffness @ states.T, dtype=np.float64).T
-    f_int_batch = np.asarray(f_frame_batch + f_shell_batch + f_spring_batch, dtype=np.float64)
+    f_int_batch = np.asarray(
+        f_frame_batch
+        + state_updated_axial_batch
+        + f_shell_batch
+        + f_spring_batch,
+        dtype=np.float64,
+    )
     component_inf = {
         "frame_inf_n": float(np.max(np.abs(f_frame_batch))) if f_frame_batch.size else 0.0,
+        "frame_state_updated_axial_geometry_correction_inf_n": (
+            float(np.max(np.abs(state_updated_axial_batch)))
+            if state_updated_axial_batch.size
+            else 0.0
+        ),
         "shell_inf_n": float(np.max(np.abs(f_shell_batch))) if f_shell_batch.size else 0.0,
         "spring_inf_n": float(np.max(np.abs(f_spring_batch))) if f_spring_batch.size else 0.0,
     }
@@ -403,6 +446,11 @@ def assemble_physical_internal_forces_batch(
         "physical_internal_force_model": (
             frame_model
             + "_plus_force_consistent_shell_plus_springs_batch"
+            + (
+                "_with_finite_chord_state_updated_axial_geometry"
+                if state_updated_frame_axial_geometry is not None
+                else ""
+            )
             + ("_with_shell_material_tangent" if apply_shell_material_tangent else "")
         ),
         "use_force_based_frame": bool(use_force_based_frame),
@@ -415,6 +463,7 @@ def assemble_physical_internal_forces_batch(
         "shell_internal_force_model": shell_meta.get("shell_internal_force_model"),
         "split_shell_components": bool(split_shell_components),
         "frame_equilibrium_meta": frame_meta,
+        "state_updated_frame_axial_geometry_meta": state_updated_axial_meta,
         "shell_meta": shell_meta,
         "shell_material_tangent_meta": shell_material_batch_meta,
         "stress_corrected_element_count": 0,
@@ -445,6 +494,7 @@ def assemble_physical_internal_forces(
     split_shell_components: bool | None = None,
     shell_operator_cache: dict[str, Any] | None = None,
     frame_force_cache: Any | None = None,
+    state_updated_frame_axial_geometry: Any | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Assemble F_int(u) from equilibrium operators, not Newton tangent operators."""
     split_shell = bool(include_component_forces) if split_shell_components is None else bool(split_shell_components)
@@ -470,6 +520,9 @@ def assemble_physical_internal_forces(
         split_shell_components=split_shell,
         shell_operator_cache=shell_operator_cache,
         frame_force_cache=frame_force_cache,
+        state_updated_frame_axial_geometry=(
+            state_updated_frame_axial_geometry
+        ),
     )
     f_int = np.zeros_like(np.asarray(u, dtype=np.float64))
     component_inf = {}

@@ -1,0 +1,816 @@
+{
+  "all_frame_source_material_properties_resolved": false,
+  "artifacts": {
+    "full_unit_predictor_vector": "implementation/phase1/release_evidence/productization/g1_mgt_live_full_unit_predictor_free_displacement.f64le",
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_load_coupled_arc_length_adapter_receipt.json",
+    "schema": "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/g1_mgt_load_coupled_arc_length_adapter_summary.json"
+  },
+  "blockers_remaining": [
+    "source_commit_exact_replay_not_claimed_for_dirty_worktree",
+    "current_direct_probe_replay_not_executed_by_adapter_receipt_builder",
+    "historical_checkpoint_reference_load_contract_not_proven_live",
+    "frame_source_material_property_binding_incomplete",
+    "initial_checkpoint_physical_residual_gate_failed",
+    "current_source_diverges_from_stored_direct_residual_receipt",
+    "stored_direct_residual_receipt_missing_source_commit_or_checksums",
+    "initial_checkpoint_not_required_to_satisfy_arc_length_residual_gate",
+    "full_arc_length_continuation_not_executed",
+    "large_vector_binary_trace_not_connected",
+    "engine_v2_production_matrix_free_krylov_not_connected",
+    "material_state_commit_rollback_not_connected",
+    "production_rocm_hip_nonlinear_parity_not_verified",
+    "g1_full_load_checkpoint_not_created"
+  ],
+  "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+  "checkpoint_load_factor": 0.656,
+  "claim_boundary": "This adapter evaluates the real MGT frame/shell/spring physical residual against the complete authored LIVE nodal and uniform global-Z plate-face load vector at one retained checkpoint, then audits its load derivative, zero-state free map, and sparse-predictor preflight. It does not establish that the retained historical checkpoint was generated under LIVE, run a full continuation path, connect material-state commit/rollback, use Engine v2 production Krylov or ROCm/HIP, create a load-1.0 checkpoint, or close G1.",
+  "claims": {
+    "actual_mgt_frame_shell_spring_residual_adapter_evaluated": true,
+    "actual_mgt_semantic_load_case_consumed": true,
+    "all_frame_source_material_properties_resolved": false,
+    "authoritative_element_connectivity_consumed": true,
+    "engine_v2_production_matrix_free_krylov": false,
+    "full_arc_length_continuation": false,
+    "full_unit_semantic_live_predictor_binary_artifact": true,
+    "g1_full_building_closure": false,
+    "initial_checkpoint_physical_residual_gate": false,
+    "initial_state_component_breakdown_recorded": true,
+    "large_vector_binary_trace": false,
+    "load_1p0_checkpoint": false,
+    "load_factor_coupled_residual_and_derivative_audited": true,
+    "material_state_commit_rollback": false,
+    "production_rocm_hip_nonlinear_parity": false,
+    "source_material_properties_consumed": true,
+    "state_invariant_linear_reference_tangent_bound": true,
+    "stored_direct_residual_receipt_equivalence": false,
+    "stored_direct_residual_receipt_replay_provenance_complete": false,
+    "two_step_centered_tangent_action_audited": true,
+    "zero_state_sparse_direct_predictor_contract": true,
+    "zero_to_unit_fixed_free_map_compatible": true
+  },
+  "contract_pass": true,
+  "current_to_stored_residual_ratio": 29868657.172590453,
+  "dgn_material_property_alias_audit": {
+    "alias_material_count": 24,
+    "alias_rows": [
+      {
+        "dgn_material_id": 8,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 9,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 10,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 11,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 12,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 13,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 14,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 15,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 16,
+        "material_name": "C40+Q235",
+        "material_type": "SRC",
+        "source_material_id": 3,
+        "source_material_name": "C40+Q235",
+        "source_material_type": "SRC"
+      },
+      {
+        "dgn_material_id": 17,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 18,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 19,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 20,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 21,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 22,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 23,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 24,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 25,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 26,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 27,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 28,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 29,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 30,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 31,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      }
+    ],
+    "ambiguous_identity_rows": [],
+    "claim_boundary": "Copies analysis elastic properties only from one exact *MATERIAL type/name identity to a distinct *DGN-MATL id. DGN numeric design fields, fuzzy matching, and inferred database values are not consumed. The identity inheritance remains engineer-review-required.",
+    "contract_pass": true,
+    "dgn_material_row_count": 29,
+    "dgn_numeric_elastic_override_consumed_count": 0,
+    "dgn_unique_material_id_count": 29,
+    "duplicate_dgn_material_ids": [],
+    "engineer_review_required": true,
+    "exact_unique_identity_match_row_count": 29,
+    "existing_source_id_row_count": 5,
+    "fuzzy_name_match_count": 0,
+    "resolution_policy": "exact_normalized_type_and_name_unique_source_material.v1",
+    "schema_version": "mgt-dgn-material-property-alias-audit.v1",
+    "source_material_count": 6,
+    "unresolved_identity_rows": []
+  },
+  "dominant_initial_internal_force_component": "frame",
+  "dominant_initial_residual_argmax_component": "frame",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_closure_pass": false,
+  "frame_connectivity_audit": {
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "edge_index_used_for_element_binding": false,
+    "frame_connectivity_source": "elem_conn_ptr/elem_conn_idx",
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "invalid_line_connectivity_element_id_head": [],
+    "line_element_row_accounting_exact": true,
+    "line_elements_solved": 5572,
+    "line_node_count": 8076,
+    "raw_line_element_count": 5576,
+    "skipped_invalid_line_connectivity_count": 0,
+    "skipped_short_or_degenerate_line_count": 4
+  },
+  "frame_element_count": 5572,
+  "frame_source_property_coverage_audit": {
+    "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
+    "exact_source_property_coverage": false,
+    "fallback_allowed_for_state_updated_geometry": false,
+    "frame_element_count": 5572,
+    "material_property_resolved_element_count": 5493,
+    "missing_material_element_count": 79,
+    "missing_material_id_counts": [
+      {
+        "element_count": 5,
+        "material_id": 16
+      },
+      {
+        "element_count": 9,
+        "material_id": 26
+      },
+      {
+        "element_count": 9,
+        "material_id": 27
+      },
+      {
+        "element_count": 14,
+        "material_id": 28
+      },
+      {
+        "element_count": 17,
+        "material_id": 29
+      },
+      {
+        "element_count": 15,
+        "material_id": 30
+      },
+      {
+        "element_count": 10,
+        "material_id": 31
+      }
+    ],
+    "missing_section_element_count": 0,
+    "missing_section_id_counts": [],
+    "resolved_source_property_element_count": 5493,
+    "schema_version": "mgt-state-updated-frame-axial-property-coverage.v1",
+    "section_property_resolved_element_count": 5572,
+    "source_material_property_count": 6,
+    "source_property_coverage_ratio": 0.9858219669777458,
+    "source_section_property_count": 183,
+    "unresolved_element_head": [
+      {
+        "element_id": 1261,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 1485,
+        "material_id": 31,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 370
+      },
+      {
+        "element_id": 1488,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 1489,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 2996,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 2997,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 2998,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 2999,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 3088,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 3089,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 3097,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 3099,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 3797,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 3829,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 3832,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 3834,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 4363,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 4364,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 21892,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 21893,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 21894,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 21925,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 21926,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 22043,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 22044,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 22057,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22058,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22059,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22060,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22061,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22072,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 22073,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      }
+    ],
+    "unresolved_element_head_limit": 32,
+    "unresolved_source_property_element_count": 79
+  },
+  "free_equation_count": 70560,
+  "full_unit_predictor_vector_artifact": {
+    "artifact_path": "implementation/phase1/release_evidence/productization/g1_mgt_live_full_unit_predictor_free_displacement.f64le",
+    "byte_length": 564480,
+    "byte_order": "little",
+    "claim_boundary": "One deterministic free-DOF displacement vector for the full-unit zero-state LIVE predictor. It is not a continuation trace, an accepted material/geometric nonlinear checkpoint, a production ROCm/HIP result, or G1 closure.",
+    "data_sha256": "sha256:5974fb0760380dc4c212d54ec379dd7d60246737c4af23500a2400632e1562bb",
+    "dtype": "<f8",
+    "equation_count": 70560,
+    "equation_order": "adapter_free_global_dof_order",
+    "free_dof_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+    "g1_full_load_checkpoint_claim": false,
+    "large_vector_binary_trace_claim": false,
+    "layout": "C",
+    "load_factor": 1.0,
+    "maximum_translation_m": 0.003460998957181514,
+    "persisted_nonlinear_continuation_checkpoint": false,
+    "promotes_g1_closure": false,
+    "reference_load_hash": "sha256:010766b31f80c5f2de534b006b6b3143d9d59fffd24d709eb16637392fbdc805",
+    "residual_gate_passed": true,
+    "residual_inf_n": 0.00024772050528554246,
+    "residual_tolerance_n": 0.0005,
+    "schema_version": "g1-mgt-live-full-unit-predictor-vector.v1",
+    "semantic_load_target": "LIVE",
+    "status": "ready"
+  },
+  "generated_at": "2026-07-19T11:10:28.678423+00:00",
+  "global_dof_count": 78282,
+  "initial_component_internal_force_free_inf_n": {
+    "frame": 1276959794140.9329,
+    "material_stress_correction": 0.0,
+    "shell_bending_drilling": 347838.82372304593,
+    "shell_membrane": 34171425819.74918,
+    "spring": 0.9176081954801703
+  },
+  "initial_residual_argmax_dof_label": "Dx",
+  "initial_residual_argmax_global_dof_index": 2010,
+  "initial_residual_argmax_node_id": 336,
+  "initial_residual_equilibrium_gate_passed": false,
+  "initial_residual_hotspot_connected_frame_element_count": 3,
+  "initial_residual_hotspot_connected_shell_element_count": 4,
+  "initial_residual_hotspot_dominant_frame_element_id": 16441,
+  "initial_residual_hotspot_maximum_edge_strain_abs": 0.004664272204824238,
+  "initial_residual_hotspot_maximum_frame_force_inf_n": 1276939552442.1929,
+  "initial_residual_hotspot_maximum_translation_jump_m": 0.006714415448707063,
+  "initial_residual_inf_n": 1277024522787.6619,
+  "input_checksums": {
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
+    "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
+    "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
+    "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
+    "implementation/phase1/mgt_shell_load_path.py": "sha256:3518c70ddbaf5bf3e4fa71a3ebedd84304ebe674315bb599c5d1b3cbeb5d5863",
+    "implementation/phase1/mgt_state_updated_frame_axial_geometry.py": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
+    "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
+    "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_probe.json": "sha256:f3cc02959943f08b62f68056861f9918fe22112ec177fd4ad31dda762777c4b5",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py": "sha256:a6598d5613aefccaa9a6eda7c26adaba2cf4406dd3ea0a4acb57f32fe0870603",
+    "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:3f3b8033f63dccf39848e5f11c34d45b9fc1b35c06014b9376128b86b1c47e9f",
+    "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
+    "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
+    "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:aa7948c0ea1478bf33b2a7d460808fb7754c9ea905a501fdaec1f566c6459af9",
+    "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
+    "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
+    "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json": "sha256:a04172f6aabcbd92299fcb93cf091680affece0e4a385bb3d39136e8171be68c",
+    "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:42642fa2b9997bac8ba8a1aa76de3211749352aae46ee8e2bb7a545c3032cdda",
+    "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
+    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:f92f6d65a24cd59d7c18a29f9624fa04d52e32d400be8f951485519f64e8e210",
+    "tests/test_mgt_physical_residual_assembly.py": "sha256:07956e81f561e06af794e1808e3398bb8c13e54c1d0938456fd2f560fea16982",
+    "tests/test_mgt_semantic_load_assembly.py": "sha256:8349d6213e690ce12d33375a18f278a145c52eb48e63b386208f13ecadf9f968",
+    "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
+    "tests/test_parse_mgt_section_material_properties.py": "sha256:d7859a725762191c56523c0cfed9aabd13ed7ec5b2cdca275ba2a10d7a472cfa"
+  },
+  "material_analysis_property_binding": {
+    "dgn_alias_material_count_applied": 0,
+    "dgn_alias_material_count_available": 24,
+    "dgn_alias_resolution_enabled": false,
+    "engineer_review_required": false,
+    "resolution_policy": "MATERIAL_rows_only.v1",
+    "resolved_material_count": 6,
+    "source_material_count": 6
+  },
+  "material_state_commit_rollback_connected": false,
+  "maximum_negative_load_derivative_error_kn": 1.818401074160647e-08,
+  "maximum_tangent_step_comparison_error_kn": 7.275957614183426e-05,
+  "negative_load_derivative_gate_passed": true,
+  "negative_load_derivative_relative_error": 1.0132728123630522e-10,
+  "node_count": 13047,
+  "reference_load_contract": {
+    "benchmark_bridge_proxy": false,
+    "checkpoint_reference_load_contract_matches": false,
+    "frame_component": "authored_live_nodal_force_and_nodal_moment_rows",
+    "load_case": "LIVE",
+    "production_load_case_claim": false,
+    "selected_case_row_accounting_exact": true,
+    "shell_component": "authored_live_uniform_global_z_plate_face_pressure_rows",
+    "source_mgt_load_combination_consumed": false,
+    "source_mgt_nodal_load_rows_consumed": true,
+    "source_mgt_pressure_load_rows_consumed": true,
+    "source_mgt_selfweight_rows_consumed": false
+  },
+  "reference_load_inf_n": 179458.19249999968,
+  "reference_preconditioner_contract": {
+    "approximate_for_state_dependent_adapter": false,
+    "available": true,
+    "claim_boundary": "The zero-state linear reference-geometry CSR is exposed as a fixed right-preconditioner candidate. For a state-dependent adapter it is approximate, not the current Jacobian. The adapter does not factorize it, run Krylov, establish preconditioner effectiveness, or promote G1 closure.",
+    "csr_column_index_hash": "sha256:35eac43fbeda16f3fa8658e110dbbd0f34985f2ca1bac524927a44974fd90733",
+    "csr_row_pointer_hash": "sha256:3af537a8aade96dcf3b69a55d2e48c421c8900a758060a9c38dee5fcf7079dd3",
+    "equation_count": 70560,
+    "exact_for_adapter_residual_model": true,
+    "factorization_executed_by_adapter": false,
+    "intended_use": "fixed_right_preconditioner",
+    "operator_classification": "zero_state_linear_reference_geometry",
+    "operator_nnz": 1264133,
+    "operator_numeric_values_hash": "sha256:b980afc98b448341aff4268e5514c6ab8069362ded38e1a8180579ed64f14799",
+    "production_preconditioner_claim": false,
+    "promotes_g1_closure": false,
+    "schema_version": "zero_state_linear_reference_geometry_csr_preconditioner.v1",
+    "status": "ready"
+  },
+  "schema_version": "g1-mgt-load-coupled-arc-length-adapter-summary.v1",
+  "semantic_load_assembly": {
+    "actual_mgt_semantic_load_case_consumed": true,
+    "actual_mgt_semantic_load_target_consumed": true,
+    "assembled_applied_moment_resultant_n_m": [
+      1810.0,
+      2960.0,
+      0.0
+    ],
+    "assembled_force_resultant_n": [
+      0.0,
+      0.0,
+      -50628330.359766744
+    ],
+    "authored_nodal_moment_resultant_n_m": [
+      1810.0,
+      2960.0,
+      0.0
+    ],
+    "case_factors": {
+      "LIVE": 1.0
+    },
+    "claim_boundary": "Consumes authored MGT nodal loads and uniform unprojected global-direction PLATE/FACE pressures in an explicit force/length unit system. Selfweight, projected or nonuniform pressure, envelope selection, follower loads, production load recovery, and G1 closure remain outside this contract.",
+    "combination_expansion_mode": null,
+    "connectivity_index_hash": "sha256:cd84900389d1ee294f2d247300af03c228057dfd56c124dd6e9190a77ed235db",
+    "connectivity_pointer_hash": "sha256:dce1233cdeaf432b953eb7e932438f6c81cbc6cdedd3284fd96336b972585826",
+    "contract_pass": true,
+    "element_count": 12728,
+    "element_id_hash": "sha256:c407a3734713d7e0bce240cedf0992f7a6570c484f0934f373acf96e2e600b2c",
+    "global_dof_count": 78282,
+    "nodal_force_resultant_n": [
+      0.0,
+      0.0,
+      -22964.0
+    ],
+    "nodal_load_row_count_consumed": 6,
+    "nodal_load_target_count_consumed": 6,
+    "node_count": 13047,
+    "node_id_hash": "sha256:a80a114fbf3b202ed2abcc71bee2efd54581f22563a8552d2736b82f5fa311fd",
+    "pressure_force_resultant_n": [
+      0.0,
+      0.0,
+      -50605366.359766565
+    ],
+    "pressure_load_element_count_consumed": 3644,
+    "pressure_load_row_count_consumed": 3644,
+    "pressure_loaded_area_m2": 7802.903986433339,
+    "production_load_case_claim": false,
+    "promotes_g1_closure": false,
+    "reference_load_hash": "sha256:e2e447325a332289f25ab5b536bc83b0400553663aa11044a7a287a49d2b2e5e",
+    "reference_load_inf_n": 179458.19249999968,
+    "reference_load_l1_n": 50638576.35976667,
+    "resultant_applied_moment_error_inf_n_m": 0.0,
+    "resultant_force_error_inf_n": 1.7881393432617188e-07,
+    "resultant_gate_passed": true,
+    "resultant_moment_about_origin_n_m": [
+      -9490891919.244497,
+      6615330872.895246,
+      0.0
+    ],
+    "schema_version": "mgt-semantic-load-assembly.v1",
+    "selected_case_row_accounting_exact": true,
+    "selected_target_row_counts": {
+      "nodal_loads": 6,
+      "pressure_loads": 3644,
+      "selfweight": 0
+    },
+    "selected_target_rows_consumed": {
+      "nodal_loads": 6,
+      "pressure_loads": 3644,
+      "selfweight": 0
+    },
+    "selfweight_row_count_consumed": 0,
+    "source_mgt_load_combination_consumed": false,
+    "source_mgt_nodal_load_rows_consumed": true,
+    "source_mgt_pressure_load_rows_consumed": true,
+    "source_mgt_selfweight_rows_consumed": false,
+    "source_row_counts": {
+      "nodal_loads": 12,
+      "pressure_loads": 7278,
+      "selfweight": 1
+    },
+    "status": "ready",
+    "target_kind": "static_load_case",
+    "target_name": "LIVE",
+    "unbound_source_row_counts": {
+      "nodal_loads": 0,
+      "pressure_loads": 0,
+      "selfweight": 0
+    },
+    "unit_contract": {
+      "force_to_newton": 1000.0,
+      "length_to_metre": 1.0,
+      "moment_to_n_m": 1000.0,
+      "pressure_to_n_per_m2": 1000.0,
+      "source_force_unit": "KN",
+      "source_length_unit": "M"
+    },
+    "unsupported_features": [
+      "selfweight",
+      "projected_pressure",
+      "nonuniform_pressure",
+      "envelope_selection",
+      "follower_load"
+    ],
+    "unsupported_selected_row_count": 0
+  },
+  "source_commit_exact_replay_claim": false,
+  "source_commit_sha": "de08647587de76bc2a387278eac7b8884e4cb76a",
+  "source_material_properties_consumed": true,
+  "status": "partial",
+  "stored_base_direct_residual_inf_n": 42754.66805918372,
+  "stored_receipt_equivalent_to_current_adapter": false,
+  "stored_receipt_replay_provenance_complete": false,
+  "tangent_step_comparison_gate_passed": true,
+  "tangent_step_comparison_relative_error": 3.3783233839930677e-12,
+  "zero_state_start_gate": {
+    "fixed_free_map_exact": true,
+    "free_graph_component_count": 2171,
+    "free_graph_loaded_component_count": 1,
+    "free_graph_unanchored_component_count": 2167,
+    "free_graph_unanchored_loaded_component_count": 0,
+    "free_graph_unanchored_loaded_components": [],
+    "loaded_component_count": 1,
+    "solved_component_count": 1,
+    "sparse_direct_solve_attempted": true,
+    "sparse_predictor_contract_pass": true,
+    "sparse_predictor_failure": null,
+    "unit_load_free_equation_count": 70560,
+    "zero_state_equilibrium_gate_passed": true,
+    "zero_state_free_equation_count": 70560,
+    "zero_state_load_direction_gate_passed": true,
+    "zero_tangent_structural_rank_deficiency": 0
+  }
+}

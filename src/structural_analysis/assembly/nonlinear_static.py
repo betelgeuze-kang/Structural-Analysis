@@ -555,6 +555,36 @@ class AxialChainMeshNewtonAdapter:
         return state.residual_kn, state.jacobian_kn_per_m
 
 
+@dataclass(frozen=True)
+class AxialChainLoadContinuationAdapter:
+    """Build absolute-load axial-chain Newton problems from an accepted free state."""
+
+    mesh_problem: AxialChainMeshProblem
+
+    @property
+    def case_id(self) -> str:
+        return self.mesh_problem.case_id
+
+    def initial_free_displacements_m(self) -> np.ndarray:
+        return AxialChainMeshNewtonAdapter(self.mesh_problem).initial_free_displacements_m()
+
+    def problem_at_load_factor(
+        self,
+        load_factor: float,
+        accepted_free_displacements_m: np.ndarray,
+    ) -> AxialChainMeshNewtonAdapter:
+        full_displacements = _full_displacement_vector(
+            self.mesh_problem,
+            accepted_free_displacements_m,
+        )
+        scaled_problem = mesh_problem_with_scaled_external_load(
+            self.mesh_problem,
+            load_factor=load_factor,
+            initial_displacements_m=tuple(float(value) for value in full_displacements),
+        )
+        return AxialChainMeshNewtonAdapter(scaled_problem)
+
+
 def solve_axial_chain_mesh(
     mesh_problem: AxialChainMeshProblem,
     *,

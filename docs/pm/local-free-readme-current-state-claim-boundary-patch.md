@@ -59,7 +59,7 @@ Current non-promoting readiness summary:
 
 | Topic | Use | Avoid until closed |
 | --- | --- | --- |
-| Developer Preview | `Developer Preview candidate`, `deliverables 10/10`, `final gates 6/9` | `Developer Preview ready` |
+| Developer Preview | `Developer Preview candidate`, `deliverables 10/10`, `final gates 5/9` | `Developer Preview ready` |
 | G1 | `direct residual terminal slice ready`, `full-load lane open` | `G1 closed`, `full-load solved` |
 | Commercial | `engineer-in-loop assist`, `workstation delivery preparation` | `independent commercial solver ready` |
 | GPU/HIP | `remediation path identified` | `production HIP solver truth ready` |

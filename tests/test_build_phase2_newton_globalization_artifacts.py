@@ -77,6 +77,8 @@ def test_phase2_newton_globalization_builds_honest_seed_artifacts() -> None:
     assert summary["fallback_used"] is False
     assert summary["unsupported_backend_guard_passed"] is True
     assert summary["singular_tangent_guard_passed"] is True
+    assert summary["non_descent_line_search_guard_passed"] is True
+    assert summary["configuration_guard_passed"] is True
     assert summary["unsupported_backend_guard"] == {
         "configured_matrix_backend": "scipy_sparse_spsolve_cpu",
         "status": "blocked",
@@ -104,6 +106,37 @@ def test_phase2_newton_globalization_builds_honest_seed_artifacts() -> None:
             "unsupported_feature_kinds": ["newton_vector_reference_blocked"],
         },
     }
+    assert result["non_descent_line_search_guard"] == summary[
+        "non_descent_line_search_guard"
+    ]
+    for guard in summary["non_descent_line_search_guard"].values():
+        assert guard["status"] == "blocked"
+        assert guard["guard_passed"] is True
+        assert guard["terminal_disposition"] == "solve_free_equations"
+        assert guard["terminal_reason"] == (
+            "line_search_failed_to_reduce_residual"
+        )
+        assert guard["solver_executed"] is True
+        assert guard["convergence_claim"] is False
+        assert guard["increment_gate_passed_on_unchanged_state"] is True
+        assert guard["accepted"] is False
+        assert guard["selected_alpha"] == 0.0
+        assert guard["attempt_count"] > 0
+        assert guard["all_attempts_rejected"] is True
+        assert guard["regularization_used"] is False
+        assert guard["fallback_used"] is False
+    assert result["configuration_guard"] == summary["configuration_guard"]
+    configuration_guard = summary["configuration_guard"]
+    assert configuration_guard["contract_pass"] is True
+    assert configuration_guard["case_count"] == 5
+    assert configuration_guard["rejected_case_count"] == 5
+    assert configuration_guard["infinite_tolerance_false_pass_prevented"] is True
+    assert all(
+        row["rejected_before_solver_invocation"] is True
+        and row["exception_type"] == "ValueError"
+        and row["expected_message_fragment"] in row["message"]
+        for row in configuration_guard["cases"]
+    )
     assert summary["sparse_backend_used"] is False
     assert summary["matrix_backend"] == "numpy_linalg_solve_scalar"
     assert summary["blockers_remaining"] == [

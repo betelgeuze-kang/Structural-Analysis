@@ -243,7 +243,6 @@ def run_mgt_uncoarsened_boundary_global_equilibrium(
         with np.load(roundtrip_npz, allow_pickle=False) as archive:
             node_id = np.asarray(archive["node_id"], dtype=np.int64)
             node_xyz = np.asarray(archive["node_xyz"], dtype=np.float64)
-            edge_index = np.asarray(archive["edge_index"], dtype=np.int64)
             elem_id = np.asarray(archive["elem_id"], dtype=np.int64)
             elem_type_code = np.asarray(archive["elem_type_code"], dtype=np.int32)
             elem_section_id = np.asarray(archive["elem_section_id"], dtype=np.int32)
@@ -258,7 +257,8 @@ def run_mgt_uncoarsened_boundary_global_equilibrium(
 
         frame_elements, frame_select_meta = _select_frame_elements(
             node_xyz=node_xyz,
-            edge_index=edge_index,
+            conn_ptr=conn_ptr,
+            conn_idx=conn_idx,
             elem_id=elem_id,
             elem_type_code=elem_type_code,
             elem_section_id=elem_section_id,

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/engine_v2_vector_artifacts_v1.schema.json",
+  "title": "Engine v2 descriptor-only vector artifact bundle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "storage_profile",
+    "source_contract",
+    "artifacts",
+    "claim_boundary",
+    "bundle_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-engine-v2-vector-artifacts.v1"
+    },
+    "storage_profile": {
+      "const": "canonical_little_endian_fp64_binary.v1"
+    },
+    "source_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_kind",
+        "owner_schema_version",
+        "owner_hash",
+        "execution_plan_hash",
+        "scaling_hash",
+        "dof_count"
+      ],
+      "properties": {
+        "owner_kind": {
+          "enum": ["equation_scaling", "scaled_residual_trace"]
+        },
+        "owner_schema_version": {
+          "enum": [
+            "structural-analysis-equation-scaling.v1",
+            "structural-analysis-scaled-residual-trace.v1"
+          ]
+        },
+        "owner_hash": {"$ref": "#/$defs/sha256"},
+        "execution_plan_hash": {"$ref": "#/$defs/sha256"},
+        "scaling_hash": {"$ref": "#/$defs/sha256"},
+        "dof_count": {
+          "type": "integer",
+          "minimum": 6,
+          "maximum": 2147483647,
+          "multipleOf": 6
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {"$ref": "#/$defs/vectorArtifact"}
+    },
+    "claim_boundary": {
+      "const": {
+        "inline_vectors": false,
+        "canonical_little_endian_binary": true,
+        "source_contract_authority_unchanged": true,
+        "solver_or_result_authority": false
+      }
+    },
+    "bundle_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "vectorArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_order",
+        "equation_scope",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "source_vector_content_hash",
+        "artifact_uri"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "scale_divisors_si",
+            "raw_residual_si",
+            "scaled_residual"
+          ]
+        },
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 0}
+        },
+        "layout": {"const": "C"},
+        "byte_order": {"const": "little"},
+        "equation_scope": {
+          "enum": [
+            "global_equations",
+            "global_storage_free_equation_observation"
+          ]
+        },
+        "byte_length": {"type": "integer", "minimum": 0},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "source_vector_content_hash": {
+          "oneOf": [
+            {"$ref": "#/$defs/sha256"},
+            {"type": "null"}
+          ]
+        },
+        "artifact_uri": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

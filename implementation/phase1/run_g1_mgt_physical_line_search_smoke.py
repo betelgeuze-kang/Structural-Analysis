@@ -309,7 +309,6 @@ def build_mgt_physical_residual_closure(
     with np.load(roundtrip_npz, allow_pickle=False) as ar:
         node_id = np.asarray(ar["node_id"], dtype=np.int64)
         node_xyz = np.asarray(ar["node_xyz"], dtype=np.float64)
-        edge_index = np.asarray(ar["edge_index"], dtype=np.int64)
         elem_id = np.asarray(ar["elem_id"], dtype=np.int64)
         elem_type_code = np.asarray(ar["elem_type_code"], dtype=np.int32)
         elem_section_id = np.asarray(ar["elem_section_id"], dtype=np.int32)
@@ -323,7 +322,7 @@ def build_mgt_physical_residual_closure(
         conn_idx = np.asarray(ar["elem_conn_idx"], dtype=np.int64)
 
     frame_elements, _ = _select_frame_elements(
-        node_xyz=node_xyz, edge_index=edge_index, elem_id=elem_id,
+        node_xyz=node_xyz, conn_ptr=conn_ptr, conn_idx=conn_idx, elem_id=elem_id,
         elem_type_code=elem_type_code, elem_section_id=elem_section_id,
         elem_material_id=elem_material_id, elem_angle_deg=elem_angle_deg,
         beam_end_offsets=beam_end_offsets,

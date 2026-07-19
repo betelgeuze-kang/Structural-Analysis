@@ -34,9 +34,15 @@ def test_mgt_coupled_frame_surface_sparse_equilibrium_is_ready(tmp_path: Path) -
     assert payload["surface_shell_full_bending_tangent_ready"] is False
     mesh = payload["mesh_fingerprint"]
     assert mesh["line_elements_solved"] > 5000
+    assert mesh["frame_connectivity_source"] == "elem_conn_ptr/elem_conn_idx"
+    assert mesh["edge_index_used_for_element_binding"] is False
+    assert mesh["skipped_invalid_line_connectivity_count"] == 0
+    assert mesh["line_element_row_accounting_exact"] is True
     assert mesh["surface_element_count"] > 7000
     assert mesh["assembled_triangle_count"] >= mesh["surface_element_count"]
-    assert mesh["coupled_stiffness_nnz"] >= mesh["frame_stiffness_nnz"]
+    assert mesh["coupled_stiffness_nnz"] <= (
+        mesh["frame_stiffness_nnz"] + mesh["surface_stiffness_nnz"]
+    )
     assert mesh["coupled_stiffness_nnz"] > 400000
     assert mesh["active_dof_count"] > 30000
     assert mesh["free_dof_count"] > 25000

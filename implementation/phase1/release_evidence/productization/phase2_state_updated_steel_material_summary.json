@@ -1,0 +1,58 @@
+{
+  "analysis_type": "state_updated_steel_material_newton_seed",
+  "artifacts": {
+    "result": "implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_result.json",
+    "schema": "src/structural_analysis/schemas/state_updated_steel_material_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_summary.json"
+  },
+  "blockers_remaining": [
+    "concrete_damage_multiaxial_mesh_objectivity_not_closed",
+    "composite_fiber_partial_interaction_breadth_not_closed",
+    "nonlinear_link_device_family_breadth_not_closed",
+    "frame_shell_integration_point_coupling_not_closed",
+    "published_or_experimental_cyclic_validation_not_attached",
+    "g1_full_building_material_newton_breadth_not_closed",
+    "production_sparse_rocm_hip_material_parity_not_closed"
+  ],
+  "claim_boundary": "This receipt verifies one small-strain uniaxial steel family with isotropic, kinematic, and combined linear hardening at integration-point, single-bar, and two-element axial-chain scope. It records cyclic plastic dissipation, same-parent consistent tangents, state commit, and exact rollback. It does not close general material Newton breadth, concrete damage, composite sections, nonlinear links/springs, frame-shell integration-point coupling, published or experimental cyclic validation, G1 full-building equilibrium, or ROCm/HIP parity.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "cyclic_energy_dissipation_gate_passed": true,
+  "deterministic_replay_exact_gate_passed": true,
+  "element_benchmark_gate_passed": true,
+  "engine_version": "1.0.0",
+  "fallback_count": 0,
+  "g1_material_newton_breadth_claim": false,
+  "generated_at": "2026-07-19T07:13:09.511212+00:00",
+  "input_checksums": {
+    "scripts/build_phase2_state_updated_steel_material_artifacts.py": "sha256:d978a3f1da87ba4d2238f25c36e2cf8c06d65c68ac453616e49fc3cdd93081bd",
+    "src/structural_analysis/assembly/stateful_axial.py": "sha256:4a4598faa4c0a9ebcc9c6e64d5df45be6dff2f97dbad00bfe85d212d4fc57e62",
+    "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:9bbb52ba8db6dc572f2b5e5cdf78762da3b42464f818e88ae21863ad85c77932",
+    "src/structural_analysis/schemas/state_updated_steel_material_v1.schema.json": "sha256:7139861dbf1f66d3a0c7eb542b5dbbfd3945795472ad3ff8b3c365c07862fbb8",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:2531dbc71d29277e550f792e3dd79f36012ad23d9f99aa6311f7cd50b989a8e6",
+    "tests/test_build_phase2_state_updated_steel_material_artifacts.py": "sha256:71f9fb7853b75d5de7c2eed83b1034968abcf36501e78a8e064a462150602faa",
+    "tests/test_state_updated_steel_material_newton.py": "sha256:df9f19349af6c3f559a565a90ba979edbe30c729a3008556585218cf78cd676d"
+  },
+  "line_search_history_present": true,
+  "material_newton_breadth_closure_claim": false,
+  "material_tangent_finite_difference_gate_passed": true,
+  "material_variant_count": 3,
+  "material_variant_ids": [
+    "steel_bilinear_isotropic_hardening_1d",
+    "steel_bilinear_kinematic_hardening_1d",
+    "steel_bilinear_combined_hardening_1d"
+  ],
+  "production_nonlinear_closure_claim": false,
+  "regularization_count": 0,
+  "residual_formula": "F_internal_minus_F_external",
+  "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+  "return_mapping_algorithm": "backward_euler_1d_radial_return",
+  "rollback_exact_gate_passed": true,
+  "schema_version": "phase2-state-updated-steel-material-artifacts.v1",
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+  "state_updated_steel_seed_contract_pass": true,
+  "status": "ready",
+  "structure_benchmark_gate_passed": true,
+  "structure_jacobian_gate_passed": true,
+  "truth_class": "analytic_1d_constitutive_and_axial_chain_truth"
+}

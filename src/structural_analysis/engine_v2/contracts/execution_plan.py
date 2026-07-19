@@ -1,8 +1,8 @@
 """Backend-neutral immutable ExecutionPlan v1 contract.
 
 The contract freezes compiler-produced topology and sparse-pattern arrays.  It
-does not assemble an operator, select a CPU/HIP backend, run a solver, implement
-equation scaling, or create authoritative results.
+does not assemble an operator, select a CPU/HIP backend, run a solver, or create
+authoritative results.  Equation scaling can be bound through a typed extension.
 """
 
 from __future__ import annotations
@@ -31,12 +31,24 @@ from ._canonical import (
 
 EXECUTION_PLAN_SCHEMA_VERSION = "structural-analysis-execution-plan.v1"
 EXECUTION_PLAN_CAPABILITY_PROFILE = "engine_v2_core_linear_static"
+EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE = "engine_v2_core_scaled_linear_static"
 EXECUTION_PLAN_RESIDUAL_SIGN = "internal_minus_external"
 EXECUTION_PLAN_DOF_COMPONENTS = ("UX", "UY", "UZ", "RX", "RY", "RZ")
+EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY = "engine-v2:required-extensions"
+EXECUTION_PLAN_REQUIRED_EXTENSIONS_SCHEMA_VERSION = (
+    "structural-analysis-required-extensions.v1"
+)
 
 _HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 _STABLE_ID_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 _EXTENSION_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$")
+_SUPPORTED_REQUIRED_EXTENSIONS = frozenset({"engine-v2:equation-scaling"})
+_SUPPORTED_CAPABILITY_PROFILES = frozenset(
+    {
+        EXECUTION_PLAN_CAPABILITY_PROFILE,
+        EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE,
+    }
+)
 _INT32_MAX = int(np.iinfo(np.int32).max)
 _STRICT_JSON_TYPE_CHECKER = Draft202012Validator.TYPE_CHECKER.redefine(
     "integer", lambda _checker, value: type(value) is int
@@ -175,6 +187,10 @@ class ExecutionPlan:
     def free_dofs(self) -> tuple[int, ...]:
         return tuple(int(value) for value in self.array("free_dofs"))
 
+    @property
+    def required_extensions(self) -> tuple[str, ...]:
+        return _required_extensions_from_mapping(self.extensions)
+
     def to_dict(self) -> dict[str, Any]:
         validate_execution_plan(self)
         return _plan_payload(self, include_plan_hash=True)
@@ -286,7 +302,7 @@ def validate_execution_plan(plan: ExecutionPlan) -> ExecutionPlan:
         _fail("execution_plan_type_invalid", "/", "Expected an ExecutionPlan.")
     if plan.schema_version != EXECUTION_PLAN_SCHEMA_VERSION:
         _fail("schema_version_invalid", "/schema_version", "Unsupported schema.")
-    if plan.capability_profile != EXECUTION_PLAN_CAPABILITY_PROFILE:
+    if plan.capability_profile not in _SUPPORTED_CAPABILITY_PROFILES:
         _fail(
             "capability_profile_invalid",
             "/capability_profile",
@@ -387,6 +403,10 @@ def validate_execution_plan(plan: ExecutionPlan) -> ExecutionPlan:
             "CSR pattern hash is stale.",
         )
     _validate_extensions(plan.extensions)
+    _validate_required_extensions(plan.extensions)
+    _validate_capability_profile_for_extensions(
+        plan.capability_profile, plan.extensions
+    )
     manifest = _plan_payload(plan, include_plan_hash=True)
     validate_execution_plan_manifest(manifest)
     if plan.plan_hash != canonical_hash(_plan_payload(plan, include_plan_hash=False)):
@@ -395,6 +415,12 @@ def validate_execution_plan(plan: ExecutionPlan) -> ExecutionPlan:
             "/plan_hash",
             "Plan hash does not match the canonical manifest.",
         )
+    if "engine-v2:equation-scaling" in plan.extensions:
+        # Local import preserves the one-way contract dependency while allowing
+        # ExecutionPlan validation to fail closed on the typed PR-B extension.
+        from .equation_scaling import _validate_equation_scaling_binding_semantics
+
+        _validate_equation_scaling_binding_semantics(plan)
     return plan
 
 
@@ -411,10 +437,20 @@ def validate_execution_plan_manifest(payload: Any) -> Mapping[str, Any]:
         _fail("execution_plan_schema_invalid", path or "/", error.message)
     if not isinstance(payload, Mapping):  # pragma: no cover - schema invariant
         _fail("execution_plan_manifest_type_invalid", "/", "Expected an object.")
+    _validate_required_extensions(payload["extensions"])
+    _validate_capability_profile_for_extensions(
+        payload["capability_profile"], payload["extensions"]
+    )
     without_hash = dict(payload)
     claimed_hash = without_hash.pop("plan_hash")
     if claimed_hash != canonical_hash(without_hash):
         _fail("plan_hash_mismatch", "/plan_hash", "Manifest plan hash is stale.")
+    if "engine-v2:equation-scaling" in payload["extensions"]:
+        from .equation_scaling import (
+            _validate_equation_scaling_binding_manifest_semantics,
+        )
+
+        _validate_equation_scaling_binding_manifest_semantics(payload)
     return payload
 
 
@@ -699,6 +735,36 @@ def _freeze_extensions(value: Mapping[str, Any]) -> Mapping[str, Any]:
     return _freeze(normalized)
 
 
+def _required_extension_tuple(value: Any, *, path: str) -> tuple[str, ...]:
+    if isinstance(value, (str, bytes)) or not isinstance(value, Sequence):
+        _fail(
+            "required_extensions_invalid",
+            path,
+            "Expected a sorted sequence of extension keys.",
+        )
+    result = tuple(value)
+    if not result:
+        _fail(
+            "required_extensions_invalid",
+            path,
+            "At least one required extension key is needed.",
+        )
+    for index, key in enumerate(result):
+        if not isinstance(key, str) or _EXTENSION_KEY_PATTERN.fullmatch(key) is None:
+            _fail(
+                "extension_key_invalid",
+                f"{path}/{index}",
+                "Invalid extension key.",
+            )
+    if result != tuple(sorted(set(result))):
+        _fail(
+            "required_extensions_invalid",
+            path,
+            "Required extension keys must be sorted and unique.",
+        )
+    return result
+
+
 def _freeze(value: Any) -> Any:
     if isinstance(value, dict):
         return MappingProxyType({key: _freeze(item) for key, item in value.items()})
@@ -741,6 +807,87 @@ def _validate_extensions(value: Any) -> None:
         canonical_json_bytes(_thaw(value))
     except CanonicalContractError as exc:
         _fail("extensions_invalid", "/extensions", str(exc))
+
+
+def _required_extensions_from_mapping(extensions: Mapping[str, Any]) -> tuple[str, ...]:
+    declaration = extensions.get(EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY)
+    if declaration is None:
+        return ()
+    declaration_path = f"/extensions/{EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY}"
+    if not isinstance(declaration, Mapping):
+        _fail(
+            "required_extensions_declaration_invalid",
+            declaration_path,
+            "Required-extension declaration must be an object.",
+        )
+    if set(declaration) != {"schema_version", "required_extensions"}:
+        _fail(
+            "required_extensions_declaration_invalid",
+            declaration_path,
+            "Required-extension declaration fields are invalid.",
+        )
+    if (
+        declaration["schema_version"]
+        != EXECUTION_PLAN_REQUIRED_EXTENSIONS_SCHEMA_VERSION
+    ):
+        _fail(
+            "required_extensions_declaration_invalid",
+            f"{declaration_path}/schema_version",
+            "Required-extension declaration schema is unsupported.",
+        )
+    return _required_extension_tuple(
+        declaration["required_extensions"],
+        path=f"{declaration_path}/required_extensions",
+    )
+
+
+def _validate_required_extensions(extensions: Mapping[str, Any]) -> None:
+    required_extensions = _required_extensions_from_mapping(extensions)
+    _validate_required_extension_keys(required_extensions, extensions)
+
+
+def _validate_capability_profile_for_extensions(
+    capability_profile: Any, extensions: Mapping[str, Any]
+) -> None:
+    has_scaling = "engine-v2:equation-scaling" in extensions
+    expected = (
+        EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE
+        if has_scaling
+        else EXECUTION_PLAN_CAPABILITY_PROFILE
+    )
+    if capability_profile != expected:
+        _fail(
+            "capability_profile_extension_mismatch",
+            "/capability_profile",
+            "Capability profile does not match the plan's required extensions.",
+        )
+
+
+def _validate_required_extension_keys(
+    required_extensions: tuple[str, ...], extensions: Mapping[str, Any]
+) -> None:
+    for index, key in enumerate(required_extensions):
+        if key not in extensions:
+            _fail(
+                "required_extension_missing",
+                f"/extensions/{EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY}/"
+                f"required_extensions/{index}",
+                f"Required extension {key!r} is absent.",
+            )
+        if key not in _SUPPORTED_REQUIRED_EXTENSIONS:
+            _fail(
+                "required_extension_unsupported",
+                f"/extensions/{EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY}/"
+                f"required_extensions/{index}",
+                f"Required extension {key!r} is not supported by this reader.",
+            )
+    for key in sorted(_SUPPORTED_REQUIRED_EXTENSIONS):
+        if key in extensions and key not in required_extensions:
+            _fail(
+                "required_extension_declaration_missing",
+                f"/extensions/{EXECUTION_PLAN_REQUIRED_EXTENSIONS_EXTENSION_KEY}",
+                f"Typed extension {key!r} must be declared as required.",
+            )
 
 
 def _require_hash(value: Any, path: str) -> str:
@@ -792,6 +939,7 @@ __all__ = [
     "EXECUTION_PLAN_CAPABILITY_PROFILE",
     "EXECUTION_PLAN_DOF_COMPONENTS",
     "EXECUTION_PLAN_RESIDUAL_SIGN",
+    "EXECUTION_PLAN_SCALED_CAPABILITY_PROFILE",
     "EXECUTION_PLAN_SCHEMA_VERSION",
     "ExecutionPlan",
     "ExecutionPlanError",

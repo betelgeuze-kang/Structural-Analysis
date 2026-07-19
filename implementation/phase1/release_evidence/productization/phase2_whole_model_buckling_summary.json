@@ -1,0 +1,49 @@
+{
+  "artifacts": {
+    "result": "implementation/phase1/release_evidence/productization/phase2_whole_model_buckling_result.json",
+    "schema": "src/structural_analysis/schemas/whole_model_buckling_v1.schema.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_whole_model_buckling_summary.json"
+  },
+  "blockers_remaining": [
+    "general_frame_shell_linear_buckling_not_verified",
+    "mixed_tension_compression_reference_not_supported",
+    "distributed_thermal_settlement_follower_loads_not_supported",
+    "nonlinear_buckling_and_imperfection_sensitivity_not_connected",
+    "sparse_buckling_backend_not_connected",
+    "large_mode_binary_vector_artifacts_not_connected",
+    "rocm_hip_buckling_parity_not_verified",
+    "independent_code_to_code_buckling_evidence_not_attached",
+    "verification_level_2_not_achieved",
+    "release_readiness_not_established"
+  ],
+  "case_count": 4,
+  "claim_boundary": "This receipt proves a bounded public-API whole-model linear-buckling slice for explicit 3D frame, beam, and column elements. It runs the authoritative dense linear-static solver at reference load factor 1.0, recovers constant element axial compression, assembles a positive-semidefinite consistent Euler-Bernoulli initial-stress matrix, and solves K phi = lambda Kg phi with the strict symmetric generalized-eigen kernel. It covers two-plane Euler column convergence, physical critical-load invariance under reference-load scaling, deterministic replay, complete repeated-mode cluster selection, and fail-closed tension or zero-compression reference states. It does not prove general frame/shell stability, truss or shell geometric stiffness, mixed tension-compression initial stress, distributed/thermal/settlement/follower load conversion, nonlinear buckling, imperfection sensitivity, sparse or large-mode execution, ROCm/HIP parity, an independent second-solver buckling comparison, Verification Level 2, commercial equivalence, or release readiness.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "claims": {
+    "general_frame_shell_linear_buckling": false,
+    "independent_code_to_code_or_verification_level_2": false,
+    "large_mode_binary_vector_artifacts": false,
+    "mixed_tension_compression_reference": false,
+    "nonlinear_buckling_or_imperfection_sensitivity": false,
+    "reference_axial_sign_fail_closed_evidence": true,
+    "reference_static_initial_stress_assembly_evidence": true,
+    "release_readiness": false,
+    "repeated_cluster_fail_closed_evidence": true,
+    "rocm_hip_buckling_parity": false,
+    "sparse_buckling_backend": false,
+    "whole_model_frame_linear_buckling_evidence": true
+  },
+  "contract_pass": true,
+  "engine_version": "1.0.0",
+  "euler_two_plane_contract_pass": true,
+  "generated_at": "2026-07-19T06:15:18.612272+00:00",
+  "passing_case_count": 4,
+  "reference_load_scale_contract_pass": true,
+  "reference_sign_contract_pass": true,
+  "repeated_cluster_contract_pass": true,
+  "result_artifact_hash": "sha256:8dcf165fe866448b76e67ea47bfa3bea2e0cb9f8755a6029ae0ada997af2bbe8",
+  "schema_version": "phase2-whole-model-buckling-artifacts.v1",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_set_hash": "sha256:6b08e3de7c16202e1f57206d35babc3ddc62bf4c3047950503e4a87606353783",
+  "status": "partial"
+}

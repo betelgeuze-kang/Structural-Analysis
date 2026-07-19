@@ -47,6 +47,73 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
         "scripts/check_product_ci_boundaries.py --fail-blocked"
     ) < output.index("scripts/check_git_remote_safety.py --show-ok")
     assert "scripts/run_product_ci_lane.py --lane core --ruff --compile" in output
+    assert "scripts/run_engine_v2_hip_primitive_parity.py --check" in output
+    assert "scripts/run_engine_v2_hip_fgmres_recurrence.py --check" in output
+    assert (
+        "scripts/run_engine_v2_hip_fgmres_recurrence.py --compile-only --check"
+        in output
+    )
+    assert (
+        "scripts/run_engine_v2_hip_sparse_lu_apply.py --compile-only --check"
+        in output
+    )
+    assert (
+        "scripts/run_engine_v2_hip_current_tangent_operator.py "
+        "--compile-only --check" in output
+    )
+    assert (
+        "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py --check"
+        in output
+    )
+    assert "scripts/build_engine_v2_hip_fgmres_stage4_status.py --check" in output
+    assert (
+        "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/"
+        "build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/"
+        "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/build_g1_mgt_matrix_free_preconditioner_candidate_audit.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/"
+        "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py "
+        "--check" in output
+    )
+    assert "tests/test_g1_mgt_load_coupled_arc_length_adapter.py" in output
+    assert "tests/test_matrix_free_cpu_fgmres_state_tangent.py" in output
+    assert "tests/test_engine_v2_canonical_contract.py" in output
+    assert "tests/test_engine_v2_current_tangent_operator_v1.py" in output
+    assert "tests/test_engine_v2_hip_current_tangent_operator.py" in output
+    assert (
+        "tests/test_engine_v2_hip_current_tangent_operator_runner.py"
+        in output
+    )
+    assert "tests/test_canonical_sparse_lu_factor.py" in output
+    assert "tests/test_engine_v2_hip_sparse_lu_apply.py" in output
+    assert "tests/test_engine_v2_hip_sparse_lu_apply_runner.py" in output
+    assert (
+        "tests/test_build_g1_mgt_matrix_free_preconditioner_candidate_audit.py"
+        in output
+    )
+    assert "-k not test_committed_receipt_is_reproducible" in output
+    assert (
+        "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py"
+        in output
+    )
     assert "tests/test_project_ops_api_service.py" in output
     assert "-m pytest -q\n" not in output
 
@@ -94,6 +161,145 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
         "scripts/build_phase1_core_api_contract_artifacts.py"
     )
     assert "scripts/build_phase2_frame_shell_material_coupling_artifacts.py --check" in output
+    assert "scripts/build_phase2_state_updated_steel_material_artifacts.py --check" in output
+    assert "scripts/build_phase2_state_updated_concrete_damage_artifacts.py --check" in output
+    assert "scripts/build_phase2_state_updated_composite_section_artifacts.py --check" in output
+    assert "scripts/build_phase2_state_updated_bilinear_link_artifacts.py --check" in output
+    assert "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py --check" in output
+    assert "scripts/build_phase2_whole_model_modal_artifacts.py --check" in output
+    assert "scripts/build_phase2_whole_model_buckling_artifacts.py --check" in output
+    assert "scripts/run_external_modal_buckling_technical_receipt.py --check" in output
+    assert "scripts/build_phase2_shallow_arch_arc_length_artifacts.py --check" in output
+    assert (
+        "scripts/build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/"
+        "build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/"
+        "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py "
+        "--check" in output
+    )
+    assert (
+        "scripts/"
+        "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py "
+        "--check" in output
+    )
+    assert output.index(
+        "scripts/build_phase2_adaptive_newton_continuation_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_state_updated_steel_material_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_state_updated_steel_material_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_state_updated_concrete_damage_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_state_updated_concrete_damage_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_state_updated_composite_section_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_state_updated_composite_section_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_state_updated_bilinear_link_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_state_updated_bilinear_link_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py"
+    ) < output.index("scripts/build_phase2_shallow_arch_arc_length_artifacts.py")
+    assert output.index(
+        "scripts/build_phase2_shallow_arch_arc_length_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py"
+    ) < output.index(
+        "scripts/build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py"
+    )
+    assert output.index(
+        "scripts/build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py"
+    ) < output.index(
+        "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py"
+    )
+    assert output.index(
+        "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py"
+    ) < output.index(
+        "scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py"
+    )
+    assert output.index(
+        "scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py"
+    ) < output.index(
+        "scripts/"
+        "build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py"
+    )
+    assert output.index(
+        "scripts/"
+        "build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py"
+    ) < output.index(
+        "scripts/"
+        "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py"
+    )
+    assert output.index(
+        "scripts/"
+        "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py"
+    ) < output.index(
+        "scripts/"
+        "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
+    )
+    assert output.index(
+        "scripts/"
+        "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
+    ) < output.index("scripts/build_phase2_nonlinear_load_step_artifacts.py")
     assert output.index("scripts/build_phase2_material_mesh_newton_artifacts.py") < output.index(
         "scripts/build_phase2_patch_rigidbody_artifacts.py"
     )

@@ -21,6 +21,11 @@ import re
 import shutil
 from pathlib import Path
 
+from implementation.phase1.release_viewer_bundler import (
+    build_inline_viewer_module_import_urls,
+    inline_local_viewer_module_imports,
+    inline_viewer_worker_module_urls,
+)
 from implementation.phase1.singlefile_viewer_support import inline_structure_viewer_stylesheets
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -42,9 +47,6 @@ ARTIFACT_PRESET_INPUTS = {
     / "midas"
     / "midas_generator_33.optimized.roundtrip.json",
 }
-LOCAL_VIEWER_MODULE_IMPORT_RE = re.compile(
-    r"from\s+([\"'])(\./viewer-[^\"']+\.js)\1\s*;?"
-)
 REMOTE_LINK_RE = re.compile(r"\s*<link\b[^>]+href=[\"']https?://[^\"']+[\"'][^>]*>\s*", re.IGNORECASE)
 
 
@@ -173,9 +175,9 @@ def generate_selfcontained_html(model_data: dict) -> str:
             three_import_url=three_import_url,
             orbit_controls_import_url=orbit_controls_import_url,
         )
-        viewer_module_import_urls = _build_inline_viewer_module_import_urls()
-        html_content = _inline_local_viewer_module_imports(html_content, viewer_module_import_urls)
-        html_content = _inline_viewer_worker_module_urls(html_content, viewer_module_import_urls)
+        viewer_module_import_urls = build_inline_viewer_module_import_urls(VIEWER_ROOT)
+        html_content = inline_local_viewer_module_imports(html_content, viewer_module_import_urls)
+        html_content = inline_viewer_worker_module_urls(html_content, viewer_module_import_urls)
         embedded_json = json.dumps(model_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
         # Keep both contracts: the viewer data loader prefers the JSON script tag,
@@ -511,38 +513,6 @@ def _mark_structural_singlefile_html(html_content: str) -> str:
     return html_content.replace("</head>", f"<script>{marker}</script>\n</head>", 1)
 
 
-def _build_inline_viewer_module_import_urls() -> dict[str, str]:
-    """Return data-URL module imports for local viewer helpers used by index.html."""
-    index_html = (VIEWER_ROOT / "index.html").read_text(encoding="utf-8")
-    root_imports = set(match.group(2) for match in LOCAL_VIEWER_MODULE_IMPORT_RE.finditer(index_html))
-    cache: dict[str, str] = {}
-    visiting: set[str] = set()
-
-    def inline_module(module_path: str) -> str:
-        if module_path in cache:
-            return cache[module_path]
-        if module_path in visiting:
-            raise RuntimeError(f"Cyclic viewer module import detected: {module_path}")
-        source_path = VIEWER_ROOT / module_path.removeprefix("./")
-        if not source_path.exists():
-            raise RuntimeError(f"Missing viewer module for single-file export: {module_path}")
-        visiting.add(module_path)
-        module_source = source_path.read_text(encoding="utf-8")
-
-        def replace_import(match: re.Match[str]) -> str:
-            dependency_path = match.group(2)
-            return f"from '{inline_module(dependency_path)}';"
-
-        module_source = LOCAL_VIEWER_MODULE_IMPORT_RE.sub(replace_import, module_source)
-        visiting.remove(module_path)
-        cache[module_path] = _encode_js_module_data_url(module_source)
-        return cache[module_path]
-
-    for module_path in sorted(root_imports):
-        inline_module(module_path)
-    return cache
-
-
 def build_inline_vendor_import_urls() -> tuple[str, str]:
     """Return data-URL module imports for Three.js and OrbitControls."""
 
@@ -578,40 +548,6 @@ def _inline_vendor_module_imports(
     )
     if three_count != 1 or orbit_count != 1:
         raise RuntimeError("Failed to inline viewer vendor module imports from the template HTML")
-    return html_content
-
-
-def _inline_local_viewer_module_imports(html_content: str, module_import_urls: dict[str, str]) -> str:
-    """Inline local helper ESM imports so generated viewer HTML remains single-file."""
-
-    for module_path, module_url in module_import_urls.items():
-        html_content, _replacement_count = re.subn(
-            rf"from\s+['\"]{re.escape(module_path)}['\"];",
-            f"from '{module_url}';",
-            html_content,
-            count=1,
-        )
-    leftover_imports = sorted(set(match.group(2) for match in LOCAL_VIEWER_MODULE_IMPORT_RE.finditer(html_content)))
-    if leftover_imports:
-        raise RuntimeError(f"Failed to inline viewer module imports: {', '.join(leftover_imports)}")
-    return html_content
-
-
-def _inline_viewer_worker_module_urls(html_content: str, module_import_urls: dict[str, str]) -> str:
-    """Inline module URLs consumed by the Blob module worker in single-file output."""
-
-    replacements = {
-        "modelNormalizer: new URL('./viewer-model-normalizer.js', import.meta.url).href,": (
-            f"modelNormalizer: {json.dumps(module_import_urls['./viewer-model-normalizer.js'])},"
-        ),
-        "directModelNormalizer: new URL('./viewer-direct-model-normalizer.js', import.meta.url).href,": (
-            f"directModelNormalizer: {json.dumps(module_import_urls['./viewer-direct-model-normalizer.js'])},"
-        ),
-    }
-    for needle, replacement in replacements.items():
-        if needle not in html_content:
-            raise RuntimeError(f"Failed to inline viewer worker module URL: {needle}")
-        html_content = html_content.replace(needle, replacement, 1)
     return html_content
 
 

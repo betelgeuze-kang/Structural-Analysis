@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/hip_fgmres_device_receipt_v1.schema.json",
+  "title": "Engine v2 architecture-neutral HIP FGMRES device receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "evidence_payload",
+    "signature",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "engine-v2-hip-fgmres-device-receipt.v1"
+    },
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "evidence_payload": {
+      "type": "object",
+      "required": [
+        "source",
+        "operator_context",
+        "wheel",
+        "fixture_identity",
+        "hardware_execution",
+        "recurrence_comparison"
+      ],
+      "properties": {
+        "source": {
+          "type": "object",
+          "required": [
+            "repository_commit_sha",
+            "worktree_clean",
+            "exact_source_commit_claim",
+            "input_checksums",
+            "source_set_hash"
+          ],
+          "properties": {
+            "repository_commit_sha": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$"
+            },
+            "worktree_clean": {"type": "boolean"},
+            "exact_source_commit_claim": {"type": "boolean"},
+            "input_checksums": {
+              "type": "object",
+              "minProperties": 10,
+              "additionalProperties": {"$ref": "#/$defs/hash"}
+            },
+            "source_set_hash": {"$ref": "#/$defs/hash"}
+          },
+          "additionalProperties": false
+        },
+        "operator_context": {
+          "type": "object",
+          "required": [
+            "organization_id",
+            "runner_id",
+            "execution_location",
+            "independent_from_local_gfx1030"
+          ],
+          "properties": {
+            "organization_id": {"type": "string", "minLength": 1},
+            "runner_id": {"type": "string", "minLength": 1},
+            "execution_location": {"type": "string", "minLength": 1},
+            "independent_from_local_gfx1030": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
+        "wheel": {
+          "type": "object",
+          "required": [
+            "filename",
+            "project_name",
+            "project_version",
+            "sha256",
+            "bound_at_execution"
+          ],
+          "properties": {
+            "filename": {"type": "string", "pattern": "^[^/]+\\.whl$"},
+            "project_name": {"type": "string", "minLength": 1},
+            "project_version": {"type": "string", "minLength": 1},
+            "sha256": {"$ref": "#/$defs/hash"},
+            "bound_at_execution": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
+        "fixture_identity": {
+          "type": "object",
+          "required": [
+            "fixture_hash",
+            "execution_plan_hash",
+            "scaling_hash",
+            "reduced_csr_identity_hash",
+            "operator_numeric_values_hash",
+            "preconditioner_profile",
+            "preconditioner_derivation_profile",
+            "preconditioner_contract_hash",
+            "checkpoint_hash",
+            "checkpoint_artifact_data_hash",
+            "checkpoint_recurrence_contract_hash",
+            "dimension",
+            "nnz"
+          ],
+          "properties": {
+            "fixture_hash": {"$ref": "#/$defs/hash"},
+            "execution_plan_hash": {"$ref": "#/$defs/hash"},
+            "scaling_hash": {"$ref": "#/$defs/hash"},
+            "reduced_csr_identity_hash": {"$ref": "#/$defs/hash"},
+            "operator_numeric_values_hash": {"$ref": "#/$defs/hash"},
+            "preconditioner_profile": {
+              "const": "operator_derived_left_scaled_jacobi_right.v1"
+            },
+            "preconditioner_derivation_profile": {
+              "const": "exact_positive_diagonal_inverse_of_left_scaled_reduced_operator.v1"
+            },
+            "preconditioner_contract_hash": {"$ref": "#/$defs/hash"},
+            "checkpoint_hash": {"$ref": "#/$defs/hash"},
+            "checkpoint_artifact_data_hash": {"$ref": "#/$defs/hash"},
+            "checkpoint_recurrence_contract_hash": {"$ref": "#/$defs/hash"},
+            "dimension": {"type": "integer", "minimum": 1},
+            "nnz": {"type": "integer", "minimum": 1}
+          },
+          "additionalProperties": false
+        },
+        "hardware_execution": {
+          "type": "object",
+          "required": [
+            "evidence_origin",
+            "upstream_receipt_hash",
+            "actual_hardware",
+            "backend",
+            "device_name",
+            "gcn_arch_name",
+            "compiler",
+            "binary_sha256",
+            "runtime_output"
+          ],
+          "properties": {
+            "evidence_origin": {
+              "enum": [
+                "direct_device_runner",
+                "validated_upstream_runtime_receipt"
+              ]
+            },
+            "upstream_receipt_hash": {
+              "oneOf": [
+                {"$ref": "#/$defs/hash"},
+                {"type": "null"}
+              ]
+            },
+            "actual_hardware": {"const": true},
+            "backend": {"const": "amd_rocm_hip"},
+            "device_name": {"type": "string", "minLength": 1},
+            "gcn_arch_name": {
+              "type": "string",
+              "pattern": "^gfx[0-9a-f]+$"
+            },
+            "compiler": {
+              "type": "object",
+              "required": [
+                "path",
+                "version_first_line",
+                "version_output_sha256"
+              ],
+              "properties": {
+                "path": {"type": "string", "minLength": 1},
+                "version_first_line": {"type": "string", "minLength": 1},
+                "version_output_sha256": {"$ref": "#/$defs/hash"}
+              },
+              "additionalProperties": false
+            },
+            "binary_sha256": {"$ref": "#/$defs/hash"},
+            "runtime_output": {"type": "object"}
+          },
+          "additionalProperties": false
+        },
+        "recurrence_comparison": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "signature": {
+      "type": "object",
+      "required": [
+        "state",
+        "algorithm",
+        "signer_id",
+        "public_key_spki_base64",
+        "public_key_sha256",
+        "signature_base64",
+        "signed_payload_hash"
+      ],
+      "properties": {
+        "state": {"enum": ["unsigned", "verified"]},
+        "algorithm": {
+          "oneOf": [
+            {"const": "ed25519"},
+            {"type": "null"}
+          ]
+        },
+        "signer_id": {
+          "oneOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "null"}
+          ]
+        },
+        "public_key_spki_base64": {
+          "oneOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "null"}
+          ]
+        },
+        "public_key_sha256": {
+          "oneOf": [
+            {"$ref": "#/$defs/hash"},
+            {"type": "null"}
+          ]
+        },
+        "signature_base64": {
+          "oneOf": [
+            {"type": "string", "minLength": 1},
+            {"type": "null"}
+          ]
+        },
+        "signed_payload_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "claims": {
+      "type": "object",
+      "required": [
+        "actual_hardware_execution",
+        "numerical_parity",
+        "checkpoint_resume_parity",
+        "exact_source_commit",
+        "wheel_identity_bound_at_execution",
+        "signed_receipt",
+        "cross_device_stage4",
+        "production_recurrence",
+        "performance"
+      ],
+      "properties": {
+        "actual_hardware_execution": {"const": true},
+        "numerical_parity": {"const": true},
+        "checkpoint_resume_parity": {"const": true},
+        "exact_source_commit": {"type": "boolean"},
+        "wheel_identity_bound_at_execution": {"type": "boolean"},
+        "signed_receipt": {"type": "boolean"},
+        "cross_device_stage4": {"const": false},
+        "production_recurrence": {"const": false},
+        "performance": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 80}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "signature": {
+            "properties": {"state": {"const": "unsigned"}},
+            "required": ["state"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "signature": {
+            "properties": {
+              "algorithm": {"type": "null"},
+              "signer_id": {"type": "null"},
+              "public_key_spki_base64": {"type": "null"},
+              "public_key_sha256": {"type": "null"},
+              "signature_base64": {"type": "null"}
+            }
+          },
+          "claims": {
+            "properties": {"signed_receipt": {"const": false}}
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "signature": {
+            "properties": {
+              "algorithm": {"const": "ed25519"},
+              "signer_id": {"type": "string", "minLength": 1},
+              "public_key_spki_base64": {"type": "string", "minLength": 1},
+              "public_key_sha256": {"$ref": "#/$defs/hash"},
+              "signature_base64": {"type": "string", "minLength": 1}
+            }
+          },
+          "claims": {
+            "properties": {"signed_receipt": {"const": true}}
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

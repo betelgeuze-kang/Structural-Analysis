@@ -1,0 +1,65 @@
+{
+  "blockers_remaining": [
+    "actual_hardware_execution_not_performed",
+    "multi_block_numerical_parity_not_verified",
+    "checkpoint_resume_runtime_not_verified",
+    "production_scale_multi_block_operator_not_verified",
+    "production_scale_preconditioner_effectiveness_not_verified",
+    "independent_gfx1100_receipt_not_attached",
+    "same_clean_source_commit_cross_device_not_verified",
+    "signed_hardware_receipt_not_attached",
+    "wheel_hash_cross_device_identity_not_verified",
+    "model_size_performance_sweep_not_executed"
+  ],
+  "claim_boundary": "This compile-only receipt proves that the current multi-block HIP FGMRES source compiles for the declared target architecture. It contains no hardware execution, numerical parity, checkpoint resume, production-readiness, or performance evidence.",
+  "claims": {
+    "actual_hardware_execution": false,
+    "checkpoint_resume_parity": false,
+    "declared_target_compile": true,
+    "gfx1030_target_compile": true,
+    "numerical_parity": false,
+    "performance": false,
+    "production_recurrence": false
+  },
+  "contract_pass": true,
+  "contract_scope": "target_compile_only",
+  "generated_at": "2026-07-18T13:31:39.103762+00:00",
+  "receipt_hash": "sha256:1af29ffe07299e7703c11709aa678a57fcb6e94fcfef6fac721a0c2b9a035b1d",
+  "schema_version": "engine-v2-hip-fgmres-multiblock-compile-receipt.v1",
+  "source": {
+    "exact_source_commit_claim": false,
+    "input_checksums": {
+      "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp": "sha256:e50d6da179b691ebe348926400acdfcc9d50f96959bca16cd936528687f9b539",
+      "scripts/run_engine_v2_hip_fgmres_recurrence.py": "sha256:8004e2e7c269e9a7ca693385af962518442b722938f1037ee80a357062002333",
+      "src/structural_analysis/engine_v2/cpu_fgmres.py": "sha256:c6e3edd7d2778469c1f52a21b07bf93c1e82077e600b3f86c618f6c2e97cd848",
+      "src/structural_analysis/engine_v2/cpu_fgmres_checkpoint.py": "sha256:7864d9c7fa92c8034e1ff618d5ee99642b5c9e129a6404c5d89547a49c996508",
+      "src/structural_analysis/engine_v2_backends/hip_fgmres_recurrence.py": "sha256:ff48948675367a43e97bdd6ddb17b6525d976d634f15a0316f28fc4c69bbf1a2",
+      "src/structural_analysis/engine_v2_backends/hip_primitive_parity.py": "sha256:c0a6b1bec36392da8db16ad48c1a64f9c119ff49ae527f21d12abc9c3fc81942",
+      "src/structural_analysis/schemas/cpu_fgmres_checkpoint_v1.schema.json": "sha256:daadbcb312ae5d7ed5861dc7d92e642ea62b2db8b91644e73d414909ed69168c",
+      "src/structural_analysis/schemas/cpu_fgmres_run_v1.schema.json": "sha256:e111ffd7141c5db5e01ecaecc47c10ae65d765836594f9a5723ecbcc0b80332f",
+      "src/structural_analysis/schemas/cpu_hip_fgmres_recurrence_parity_v1.schema.json": "sha256:be7546693f506f26b4de25c78d82fcb02355159723ea33ee7f753cb2d9627a17",
+      "src/structural_analysis/schemas/hip_fgmres_multiblock_compile_receipt_v1.schema.json": "sha256:5e0dc59821983998f422c6c3d6b3a61c20be8a05f8a7c7079efea39d5f3a86d3",
+      "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py": "sha256:9c66db78f22d09fd52437e9a1204ae16d27fde8a4b345a2bd21182d52359fc5a",
+      "tests/test_engine_v2_cpu_fgmres_v1.py": "sha256:7d4cf202c3d89e5154af4e87dd0ce3062ae60606dd38a7481e8fd7988e9f62df",
+      "tests/test_engine_v2_hip_fgmres_recurrence.py": "sha256:dccebab38d3b8985ad98b0320cf369fe97c551b0f462d9e1a2d61e4a4cbbde0a",
+      "tests/test_engine_v2_hip_fgmres_recurrence_runner.py": "sha256:e9a5b2d61ba4d68eb0b51bebac4a140ec253473c00c552fa5305444b6b405f2c"
+    },
+    "repository_base_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+    "worktree_clean": false
+  },
+  "status": "partial",
+  "target_compile": {
+    "architecture": "gfx1030",
+    "backend": "amd_rocm_hip",
+    "binary_sha256": "sha256:de3133fd1877977a65e362fa577835893857ed755c89ac9a1bbab4eba1aa2441",
+    "compile_succeeded": true,
+    "compiler": {
+      "path": "/opt/rocm-6.0.2/bin/hipcc",
+      "version_first_line": "HIP version: 6.0.32831-204d35d16",
+      "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
+    },
+    "operator_blocks_per_case": 4,
+    "recurrence_execution_profile": "same_stream_fixed_kernel_sequence_device_guarded.v1",
+    "source_path": "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp"
+  }
+}

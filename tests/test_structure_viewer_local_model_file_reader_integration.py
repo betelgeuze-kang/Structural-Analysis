@@ -37,10 +37,12 @@ def _drop_handler() -> str:
 
 def test_file_select_and_drop_share_the_bounded_model_reader() -> None:
     text = INDEX.read_text(encoding="utf-8")
+    ingest_facade = (INDEX.parent / "viewer-ingest.js").read_text(encoding="utf-8")
     select_handler = _file_select_handler()
     drop_handler = _drop_handler()
 
-    assert "from './viewer-local-model-file-reader.js';" in text
+    assert "from './viewer-ingest.js';" in text
+    assert "export * from './viewer-local-model-file-reader.js';" in ingest_facade
     assert "readViewerLocalModelFile," in text
     assert "viewerLocalModelFileFailure," in text
 

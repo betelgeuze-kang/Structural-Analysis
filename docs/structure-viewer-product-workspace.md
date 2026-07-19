@@ -1,6 +1,10 @@
 # Structure Viewer Product Workspace
 
-The source viewer now has a project-workspace layer on top of the existing static 3D viewer. The goal is desktop-first engineer-in-loop review: browse registered projects, switch drawing variants, select members, inspect evidence-aware explanations, and export review reports without splitting the viewer into more standalone HTML files.
+The source viewer has a subsystem workspace layer on top of the existing static 3D viewer. Workbench v2 is the default application product shell; this viewer workspace is its embedded 3D/drawing/evidence subsystem and remains directly openable for specialized engineer-in-loop review and handoff. It can browse registered projects, switch drawing variants, select members, inspect evidence-aware explanations, and export viewer-local review reports without splitting the viewer into more standalone HTML files.
+
+Viewer-local report/export features do not transfer ownership of the application-wide project, run, comparison, review, or export workflow from Workbench v2. Evidence may cross the boundary only with matching provenance; the Workbench must not infer that a viewer payload belongs to the active analysis result.
+
+Runtime responsibility boundaries and the offline bundle graph are defined in [Structure Viewer module boundaries](structure-viewer-module-boundaries.md).
 
 ## Current Interface
 

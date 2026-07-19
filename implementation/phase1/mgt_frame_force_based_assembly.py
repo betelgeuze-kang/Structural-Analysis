@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""6-DOF corotational force-based frame internal-force recovery."""
+"""Reference-geometry 6-DOF frame internal-force recovery."""
 
 from __future__ import annotations
 
@@ -91,7 +91,7 @@ def _element_end_points_reference(
     elem: FrameElement,
     node_xyz: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Reference chord for corotational transforms; deformation is carried only by ``u``."""
+    """Reference chord for the small-rotation transform."""
     return _element_end_points(elem, node_xyz)
 
 
@@ -104,7 +104,7 @@ def _element_force_based_end_forces(
     axial_force_n: float,
     include_geometric: bool,
 ) -> np.ndarray:
-    """Recover corotational 12-DOF end forces in the nodal (offset-mapped) frame."""
+    """Recover reference-geometry 12-DOF end forces in the nodal frame."""
     offset_i = np.asarray(elem.offset_i_global_m, dtype=np.float64)
     offset_j = np.asarray(elem.offset_j_global_m, dtype=np.float64)
     rigid_transform = _rigid_end_offset_transform(offset_i, offset_j)
@@ -191,7 +191,11 @@ def prepack_frame_force_based_assembly(
         element_stiffness=element_stiffness,
         n_dof=n_dof,
         meta={
-            "frame_internal_force_model": "corotational_force_based_6dof",
+            "frame_internal_force_model": (
+                "reference_geometry_linear_force_recovery_6dof"
+            ),
+            "state_updated_geometry": False,
+            "full_corotational_frame_claim": False,
             "real_section_material_element_count": int(real_count),
             "geometric_element_count": int(geometric_element_count),
             "min_chord_length_m": float(min_chord_length_m if frame_elements else 0.0),
@@ -254,7 +258,11 @@ def assemble_frame_force_based_f_int(
             f_int[global_dof] += float(force_node[index])
 
     return f_int, {
-        "frame_internal_force_model": "corotational_force_based_6dof",
+        "frame_internal_force_model": (
+            "reference_geometry_linear_force_recovery_6dof"
+        ),
+        "state_updated_geometry": False,
+        "full_corotational_frame_claim": False,
         "real_section_material_element_count": int(real_count),
         "geometric_element_count": int(geometric_element_count),
         "min_chord_length_m": float(min_chord_length_m if frame_elements else 0.0),

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/state_updated_steel_material_v1.schema.json",
+  "title": "State-updated uniaxial steel material Newton receipt",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "contract_pass",
+    "truth_class",
+    "analysis_type",
+    "residual_formula",
+    "residual_formula_hash",
+    "return_mapping_algorithm",
+    "material_point_variants",
+    "element_benchmark",
+    "structure_benchmark",
+    "rollback_probe",
+    "verification",
+    "state_updated_steel_seed_contract_pass",
+    "material_newton_breadth_closure_claim",
+    "g1_material_newton_breadth_claim",
+    "production_nonlinear_closure_claim",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "phase2-state-updated-steel-material-result.v1"
+    },
+    "status": {"enum": ["ready", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "truth_class": {
+      "const": "analytic_1d_constitutive_and_axial_chain_truth"
+    },
+    "analysis_type": {"const": "state_updated_steel_material_newton_seed"},
+    "residual_formula": {"const": "F_internal_minus_F_external"},
+    "residual_formula_hash": {"$ref": "#/$defs/hash"},
+    "return_mapping_algorithm": {
+      "const": "backward_euler_1d_radial_return"
+    },
+    "material_point_variants": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "variant_id",
+          "point_contract_pass",
+          "finite_difference_tangent",
+          "cyclic_path"
+        ],
+        "properties": {
+          "variant_id": {"type": "string", "minLength": 1},
+          "point_contract_pass": {"type": "boolean"},
+          "finite_difference_tangent": {"type": "object"},
+          "cyclic_path": {"type": "object"}
+        },
+        "additionalProperties": true
+      }
+    },
+    "element_benchmark": {"type": "object"},
+    "structure_benchmark": {"type": "object"},
+    "rollback_probe": {"type": "object"},
+    "verification": {"type": "object"},
+    "state_updated_steel_seed_contract_pass": {"type": "boolean"},
+    "material_newton_breadth_closure_claim": {"const": false},
+    "g1_material_newton_breadth_claim": {"const": false},
+    "production_nonlinear_closure_claim": {"const": false},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": true
+}

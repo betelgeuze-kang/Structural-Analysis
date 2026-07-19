@@ -1,0 +1,608 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/g1-mgt-semantic-live-linear-newton-continuation-v1.schema.json",
+  "title": "G1 actual-MGT semantic LIVE linear-reference Newton continuation receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "evidence_closure_pass",
+    "source_commit_sha",
+    "engine_version",
+    "source_commit_exact_replay_claim",
+    "source_tree_state",
+    "input_checksums",
+    "case_id",
+    "adapter_binding",
+    "direct_continuation",
+    "restart_checkpoint_artifact",
+    "full_load_checkpoint_artifact",
+    "restart_replay_audit",
+    "failed_step_rollback_audit",
+    "claims",
+    "blockers_remaining",
+    "artifacts",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "g1-mgt-semantic-live-linear-newton-continuation-receipt.v1"
+    },
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["partial", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "evidence_closure_pass": {"const": false},
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "engine_version": {"type": "string", "minLength": 1},
+    "source_commit_exact_replay_claim": {"const": false},
+    "source_tree_state": {
+      "const": "working_tree_with_uncommitted_goal_changes"
+    },
+    "input_checksums": {
+      "type": "object",
+      "minProperties": 10,
+      "additionalProperties": {"$ref": "#/$defs/sha256"}
+    },
+    "case_id": {
+      "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+    },
+    "adapter_binding": {"$ref": "#/$defs/adapter_binding"},
+    "direct_continuation": {"$ref": "#/$defs/continuation"},
+    "restart_checkpoint_artifact": {
+      "allOf": [
+        {"$ref": "#/$defs/vector_artifact"},
+        {"properties": {"role": {"const": "restart_checkpoint"}}}
+      ]
+    },
+    "full_load_checkpoint_artifact": {
+      "allOf": [
+        {"$ref": "#/$defs/vector_artifact"},
+        {"properties": {"role": {"const": "full_load_checkpoint"}}}
+      ]
+    },
+    "restart_replay_audit": {"$ref": "#/$defs/restart_replay"},
+    "failed_step_rollback_audit": {"$ref": "#/$defs/rollback_audit"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "artifacts": {"$ref": "#/$defs/artifacts"},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "adapter_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "initial_state_policy",
+        "initial_load_factor",
+        "historical_checkpoint_free_vector_used_as_initial_state",
+        "historical_checkpoint_used_for_operator_binding",
+        "historical_checkpoint_nonfree_displacement_inf_m",
+        "node_count",
+        "global_dof_count",
+        "free_equation_count",
+        "free_dof_hash",
+        "reference_load_free_hash",
+        "reference_load_inf_n",
+        "semantic_load_assembly",
+        "state_invariant_tangent_contract",
+        "frame_source_property_coverage_audit",
+        "material_analysis_property_binding",
+        "dgn_material_property_alias_audit",
+        "all_frame_source_material_properties_resolved",
+        "state_updated_frame_axial_geometry_applied"
+      ],
+      "properties": {
+        "case_id": {
+          "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+        },
+        "initial_state_policy": {"const": "zero_state"},
+        "initial_load_factor": {"const": 0.0},
+        "historical_checkpoint_free_vector_used_as_initial_state": {
+          "const": false
+        },
+        "historical_checkpoint_used_for_operator_binding": {"const": true},
+        "historical_checkpoint_nonfree_displacement_inf_m": {
+          "const": 0.0
+        },
+        "node_count": {"const": 13047},
+        "global_dof_count": {"const": 78282},
+        "free_equation_count": {"const": 70560},
+        "free_dof_hash": {"$ref": "#/$defs/sha256"},
+        "reference_load_free_hash": {"$ref": "#/$defs/sha256"},
+        "reference_load_inf_n": {"type": "number", "exclusiveMinimum": 0},
+        "semantic_load_assembly": {
+          "type": "object",
+          "required": [
+            "status",
+            "contract_pass",
+            "target_kind",
+            "target_name",
+            "selected_case_row_accounting_exact",
+            "unsupported_selected_row_count",
+            "actual_mgt_semantic_load_target_consumed",
+            "promotes_g1_closure"
+          ],
+          "properties": {
+            "status": {"const": "ready"},
+            "contract_pass": {"const": true},
+            "target_kind": {"const": "static_load_case"},
+            "target_name": {"const": "LIVE"},
+            "selected_case_row_accounting_exact": {"const": true},
+            "unsupported_selected_row_count": {"const": 0},
+            "actual_mgt_semantic_load_target_consumed": {"const": true},
+            "promotes_g1_closure": {"const": false}
+          }
+        },
+        "state_invariant_tangent_contract": {
+          "type": "object",
+          "required": [
+            "status",
+            "available",
+            "operator_classification",
+            "equation_count",
+            "operator_nnz",
+            "exact_for_adapter_residual_model",
+            "nonlinear_current_tangent_claim",
+            "quadratic_convergence_claim",
+            "material_state_commit_rollback_claim",
+            "promotes_g1_closure"
+          ],
+          "properties": {
+            "status": {"const": "ready"},
+            "available": {"const": true},
+            "operator_classification": {
+              "const": "state_invariant_linear_reference_geometry"
+            },
+            "equation_count": {"const": 70560},
+            "operator_nnz": {"const": 1264133},
+            "exact_for_adapter_residual_model": {"const": true},
+            "nonlinear_current_tangent_claim": {"const": false},
+            "quadratic_convergence_claim": {"const": false},
+            "material_state_commit_rollback_claim": {"const": false},
+            "promotes_g1_closure": {"const": false}
+          }
+        },
+        "frame_source_property_coverage_audit": {
+          "type": "object",
+          "required": [
+            "frame_element_count",
+            "resolved_source_property_element_count",
+            "unresolved_source_property_element_count",
+            "source_property_coverage_ratio",
+            "exact_source_property_coverage",
+            "fallback_allowed_for_state_updated_geometry"
+          ],
+          "properties": {
+            "frame_element_count": {"type": "integer", "minimum": 1},
+            "resolved_source_property_element_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unresolved_source_property_element_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "source_property_coverage_ratio": {
+              "type": "number",
+              "minimum": 0.0,
+              "maximum": 1.0
+            },
+            "exact_source_property_coverage": {"type": "boolean"},
+            "fallback_allowed_for_state_updated_geometry": {"const": false}
+          }
+        },
+        "material_analysis_property_binding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "resolution_policy",
+            "source_material_count",
+            "resolved_material_count",
+            "dgn_alias_resolution_enabled",
+            "dgn_alias_material_count_available",
+            "dgn_alias_material_count_applied",
+            "engineer_review_required"
+          ],
+          "properties": {
+            "resolution_policy": {"const": "MATERIAL_rows_only.v1"},
+            "source_material_count": {"const": 6},
+            "resolved_material_count": {"const": 6},
+            "dgn_alias_resolution_enabled": {"const": false},
+            "dgn_alias_material_count_available": {"const": 24},
+            "dgn_alias_material_count_applied": {"const": 0},
+            "engineer_review_required": {"const": false}
+          }
+        },
+        "dgn_material_property_alias_audit": {
+          "$ref": "#/$defs/dgn_material_property_alias_audit"
+        },
+        "all_frame_source_material_properties_resolved": {
+          "type": "boolean"
+        },
+        "state_updated_frame_axial_geometry_applied": {"const": false}
+      }
+    },
+    "dgn_material_property_alias_audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "resolution_policy",
+        "source_material_count",
+        "dgn_material_row_count",
+        "dgn_unique_material_id_count",
+        "existing_source_id_row_count",
+        "exact_unique_identity_match_row_count",
+        "alias_material_count",
+        "alias_rows",
+        "unresolved_identity_rows",
+        "ambiguous_identity_rows",
+        "duplicate_dgn_material_ids",
+        "dgn_numeric_elastic_override_consumed_count",
+        "fuzzy_name_match_count",
+        "contract_pass",
+        "engineer_review_required",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "mgt-dgn-material-property-alias-audit.v1"
+        },
+        "resolution_policy": {
+          "const": "exact_normalized_type_and_name_unique_source_material.v1"
+        },
+        "source_material_count": {"const": 6},
+        "dgn_material_row_count": {"const": 29},
+        "dgn_unique_material_id_count": {"const": 29},
+        "existing_source_id_row_count": {"const": 5},
+        "exact_unique_identity_match_row_count": {"const": 29},
+        "alias_material_count": {"const": 24},
+        "alias_rows": {
+          "type": "array",
+          "minItems": 24,
+          "maxItems": 24,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "dgn_material_id",
+              "material_type",
+              "material_name",
+              "source_material_id",
+              "source_material_type",
+              "source_material_name"
+            ],
+            "properties": {
+              "dgn_material_id": {"type": "integer"},
+              "material_type": {"type": "string", "minLength": 1},
+              "material_name": {"type": "string", "minLength": 1},
+              "source_material_id": {"type": "integer"},
+              "source_material_type": {"type": "string", "minLength": 1},
+              "source_material_name": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "unresolved_identity_rows": {"type": "array", "maxItems": 0},
+        "ambiguous_identity_rows": {"type": "array", "maxItems": 0},
+        "duplicate_dgn_material_ids": {"type": "array", "maxItems": 0},
+        "dgn_numeric_elastic_override_consumed_count": {"const": 0},
+        "fuzzy_name_match_count": {"const": 0},
+        "contract_pass": {"const": true},
+        "engineer_review_required": {"const": true},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "case_id",
+        "path_contract_hash",
+        "step_index",
+        "load_factor",
+        "equation_count",
+        "displacement_inf_m",
+        "displacement_data_hash",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-semantic-live-linear-newton-checkpoint.v1"
+        },
+        "case_id": {
+          "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+        },
+        "path_contract_hash": {"$ref": "#/$defs/sha256"},
+        "step_index": {"type": "integer", "minimum": 0},
+        "load_factor": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "equation_count": {"const": 70560},
+        "displacement_inf_m": {"type": "number", "minimum": 0.0},
+        "displacement_data_hash": {"$ref": "#/$defs/sha256"},
+        "state_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "continuation": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "status",
+        "terminal_reason",
+        "case_id",
+        "path_contract_hash",
+        "solver_profile",
+        "operator_classification",
+        "config",
+        "initial_checkpoint",
+        "final_checkpoint",
+        "checkpoints",
+        "attempts",
+        "tangent_consistency_audit",
+        "metrics",
+        "claims",
+        "blockers_remaining",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-semantic-live-linear-newton-continuation.v1"
+        },
+        "status": {"enum": ["ready", "partial"]},
+        "terminal_reason": {"type": "string", "minLength": 1},
+        "case_id": {
+          "const": "g1_real_mgt_load_coupled_arc_length_adapter"
+        },
+        "path_contract_hash": {"$ref": "#/$defs/sha256"},
+        "solver_profile": {
+          "const": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1"
+        },
+        "operator_classification": {
+          "const": "state_invariant_linear_reference_geometry"
+        },
+        "config": {"type": "object"},
+        "initial_checkpoint": {"$ref": "#/$defs/checkpoint"},
+        "final_checkpoint": {"$ref": "#/$defs/checkpoint"},
+        "checkpoints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/checkpoint"}
+        },
+        "attempts": {"type": "array"},
+        "tangent_consistency_audit": {
+          "type": "object",
+          "required": ["all_gates_passed", "maximum_error_inf_kn"],
+          "properties": {
+            "all_gates_passed": {"type": "boolean"},
+            "maximum_error_inf_kn": {"type": "number", "minimum": 0.0}
+          }
+        },
+        "metrics": {
+          "type": "object",
+          "required": [
+            "target_load_factor",
+            "final_load_factor",
+            "target_load_factor_reached",
+            "failed_step_count",
+            "rollback_exact",
+            "fallback_count",
+            "regularization_count",
+            "final_residual_inf_n"
+          ],
+          "properties": {
+            "target_load_factor": {"type": "number"},
+            "final_load_factor": {"type": "number"},
+            "target_load_factor_reached": {"type": "boolean"},
+            "failed_step_count": {"type": "integer", "minimum": 0},
+            "rollback_exact": {"type": "boolean"},
+            "fallback_count": {"const": 0},
+            "regularization_count": {"const": 0},
+            "final_residual_inf_n": {"type": "number", "minimum": 0.0}
+          }
+        },
+        "claims": {"type": "object"},
+        "blockers_remaining": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "vector_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "status",
+        "role",
+        "artifact_path",
+        "dtype",
+        "layout",
+        "byte_order",
+        "equation_order",
+        "equation_count",
+        "byte_length",
+        "data_sha256",
+        "checkpoint",
+        "residual_inf_n",
+        "residual_tolerance_n",
+        "residual_gate_passed",
+        "linear_reference_geometry_checkpoint",
+        "persisted_nonlinear_continuation_checkpoint",
+        "g1_full_load_checkpoint_claim",
+        "promotes_g1_closure",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1"
+        },
+        "status": {"enum": ["ready", "blocked"]},
+        "role": {"enum": ["restart_checkpoint", "full_load_checkpoint"]},
+        "artifact_path": {"type": "string", "minLength": 1},
+        "dtype": {"const": "<f8"},
+        "layout": {"const": "C"},
+        "byte_order": {"const": "little"},
+        "equation_order": {"const": "adapter_free_global_dof_order"},
+        "equation_count": {"const": 70560},
+        "byte_length": {"const": 564480},
+        "data_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint": {"$ref": "#/$defs/checkpoint"},
+        "residual_inf_n": {"type": "number", "minimum": 0.0},
+        "residual_tolerance_n": {"type": "number", "exclusiveMinimum": 0.0},
+        "residual_gate_passed": {"type": "boolean"},
+        "linear_reference_geometry_checkpoint": {"const": true},
+        "persisted_nonlinear_continuation_checkpoint": {"const": false},
+        "g1_full_load_checkpoint_claim": {"const": false},
+        "promotes_g1_closure": {"const": false},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "restart_replay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "serialized_checkpoint_load_factor",
+        "serialized_checkpoint_data_sha256",
+        "serialized_checkpoint_state_hash",
+        "checkpoint_state_hash_validated_on_reload",
+        "serialization_roundtrip_byte_exact",
+        "restart_checkpoint_consumed",
+        "direct_final_data_sha256",
+        "restarted_final_data_sha256",
+        "final_displacement_bytes_identical",
+        "direct_final_state_hash",
+        "restarted_final_state_hash",
+        "final_state_hash_identical",
+        "direct_final_residual_inf_n",
+        "restarted_final_residual_inf_n",
+        "contract_pass"
+      ],
+      "properties": {
+        "status": {"enum": ["ready", "blocked"]},
+        "serialized_checkpoint_load_factor": {"const": 0.75},
+        "serialized_checkpoint_data_sha256": {"$ref": "#/$defs/sha256"},
+        "serialized_checkpoint_state_hash": {"$ref": "#/$defs/sha256"},
+        "checkpoint_state_hash_validated_on_reload": {"type": "boolean"},
+        "serialization_roundtrip_byte_exact": {"type": "boolean"},
+        "restart_checkpoint_consumed": {"type": "boolean"},
+        "direct_final_data_sha256": {"$ref": "#/$defs/sha256"},
+        "restarted_final_data_sha256": {"$ref": "#/$defs/sha256"},
+        "final_displacement_bytes_identical": {"type": "boolean"},
+        "direct_final_state_hash": {"$ref": "#/$defs/sha256"},
+        "restarted_final_state_hash": {"$ref": "#/$defs/sha256"},
+        "final_state_hash_identical": {"type": "boolean"},
+        "direct_final_residual_inf_n": {"type": "number", "minimum": 0.0},
+        "restarted_final_residual_inf_n": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "rollback_audit": {
+      "allOf": [
+        {"$ref": "#/$defs/continuation"},
+        {
+          "type": "object",
+          "required": ["actual_linear_failed_step_rollback_contract_pass"],
+          "properties": {
+            "actual_linear_failed_step_rollback_contract_pass": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actual_mgt_semantic_live_load_consumed",
+        "zero_state_initial_policy",
+        "adaptive_load_controlled_newton_path",
+        "line_search_history_recorded",
+        "state_invariant_linear_reference_tangent",
+        "full_load_linear_reference_checkpoint",
+        "persisted_linear_reference_restart_checkpoint",
+        "persisted_linear_reference_full_load_checkpoint",
+        "restart_replay_byte_identical",
+        "actual_linear_failed_step_rollback_exact",
+        "source_property_coverage_complete",
+        "raw_material_table_property_coverage_complete",
+        "dgn_exact_type_name_alias_contract_pass",
+        "dgn_alias_applied_to_linear_reference_adapter",
+        "dgn_alias_engineer_review_required",
+        "dgn_numeric_elastic_override_consumed",
+        "nonlinear_current_tangent",
+        "quadratic_convergence",
+        "material_state_commit_rollback",
+        "full_arc_length_continuation",
+        "production_matrix_free_krylov",
+        "production_rocm_hip_nonlinear_parity",
+        "g1_full_load_checkpoint",
+        "g1_full_building_closure"
+      ],
+      "properties": {
+        "actual_mgt_semantic_live_load_consumed": {"type": "boolean"},
+        "zero_state_initial_policy": {"type": "boolean"},
+        "adaptive_load_controlled_newton_path": {"type": "boolean"},
+        "line_search_history_recorded": {"type": "boolean"},
+        "state_invariant_linear_reference_tangent": {"type": "boolean"},
+        "full_load_linear_reference_checkpoint": {"type": "boolean"},
+        "persisted_linear_reference_restart_checkpoint": {"type": "boolean"},
+        "persisted_linear_reference_full_load_checkpoint": {"type": "boolean"},
+        "restart_replay_byte_identical": {"type": "boolean"},
+        "actual_linear_failed_step_rollback_exact": {"type": "boolean"},
+        "source_property_coverage_complete": {"type": "boolean"},
+        "raw_material_table_property_coverage_complete": {"type": "boolean"},
+        "dgn_exact_type_name_alias_contract_pass": {"type": "boolean"},
+        "dgn_alias_applied_to_linear_reference_adapter": {"const": false},
+        "dgn_alias_engineer_review_required": {"type": "boolean"},
+        "dgn_numeric_elastic_override_consumed": {"const": false},
+        "nonlinear_current_tangent": {"const": false},
+        "quadratic_convergence": {"const": false},
+        "material_state_commit_rollback": {"const": false},
+        "full_arc_length_continuation": {"const": false},
+        "production_matrix_free_krylov": {"const": false},
+        "production_rocm_hip_nonlinear_parity": {"const": false},
+        "g1_full_load_checkpoint": {"const": false},
+        "g1_full_building_closure": {"const": false}
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt",
+        "summary",
+        "schema",
+        "restart_checkpoint_vector",
+        "full_load_checkpoint_vector"
+      ],
+      "properties": {
+        "receipt": {"type": "string", "minLength": 1},
+        "summary": {"type": "string", "minLength": 1},
+        "schema": {"type": "string", "minLength": 1},
+        "restart_checkpoint_vector": {"type": "string", "minLength": 1},
+        "full_load_checkpoint_vector": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

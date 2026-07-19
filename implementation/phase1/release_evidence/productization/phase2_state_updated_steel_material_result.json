@@ -1,0 +1,3707 @@
+{
+  "analysis_type": "state_updated_steel_material_newton_seed",
+  "claim_boundary": "This receipt verifies one small-strain uniaxial steel family with isotropic, kinematic, and combined linear hardening at integration-point, single-bar, and two-element axial-chain scope. It records cyclic plastic dissipation, same-parent consistent tangents, state commit, and exact rollback. It does not close general material Newton breadth, concrete damage, composite sections, nonlinear links/springs, frame-shell integration-point coupling, published or experimental cyclic validation, G1 full-building equilibrium, or ROCm/HIP parity.",
+  "contract_pass": true,
+  "element_benchmark": {
+    "contract_pass": true,
+    "displacement_abs_error_m": 3.469446951953614e-18,
+    "expected_displacement_m": 0.0155,
+    "load_step": {
+      "accepted_state": {
+        "case_id": "phase2_state_updated_steel_single_bar",
+        "displacements_m": [
+          0.0,
+          0.015500000000000003
+        ],
+        "load_factor": 1.0,
+        "material_states": [
+          {
+            "accumulated_plastic_strain": 0.006250000000000001,
+            "backstress_mpa": 31.250000000000007,
+            "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+            "plastic_strain": 0.006250000000000001,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:a3253794e3eb62fce87d58cb09d899c1b3fd1e5ab74284a466c497960cc3a233",
+        "step_index": 1
+      },
+      "committed": true,
+      "metrics": {
+        "accepted_state_hash_after": "sha256:a3253794e3eb62fce87d58cb09d899c1b3fd1e5ab74284a466c497960cc3a233",
+        "active_equation_count": 1,
+        "committed": true,
+        "convergence_claim": true,
+        "fallback_used": false,
+        "increment_gate_applicable": true,
+        "increment_gate_passed": true,
+        "iterative_solver_contract_pass": true,
+        "material_state_changed": true,
+        "no_solve_contract_pass": false,
+        "no_solve_reaction_only": false,
+        "parent_state_hash": "sha256:302d66ee21c83c7cd32e6e1972bdbca0721e557696842f8a31ada99b2b320b9d",
+        "regularization_used": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "residual_gate_applicable": true,
+        "residual_gate_passed": true,
+        "rollback_exact": null,
+        "solver_contract_pass": true,
+        "solver_executed": true,
+        "state_updated_element_count": 1,
+        "target_load_factor": 1.0,
+        "terminal_contract_pass": true,
+        "terminal_disposition": "solve_free_equations",
+        "terminal_reason": "residual_and_increment_converged",
+        "trial_parent_state_hash": "sha256:302d66ee21c83c7cd32e6e1972bdbca0721e557696842f8a31ada99b2b320b9d",
+        "yielded_element_count": 1
+      },
+      "parent_state": {
+        "case_id": "phase2_state_updated_steel_single_bar",
+        "displacements_m": [
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "accumulated_plastic_strain": 0.0,
+            "backstress_mpa": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "plastic_strain": 0.0,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:302d66ee21c83c7cd32e6e1972bdbca0721e557696842f8a31ada99b2b320b9d",
+        "step_index": 0
+      },
+      "status": "ready",
+      "trial_assembly": {
+        "displacements_m": [
+          0.0,
+          0.015500000000000003
+        ],
+        "element_responses": [
+          {
+            "area_m2": 0.01,
+            "element_id": "bar-1",
+            "elongation_m": 0.015500000000000003,
+            "generalized_deformation": 0.007750000000000002,
+            "internal_force_kn": 3000.0,
+            "length_m": 2.0,
+            "material_response": {
+              "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+              "consistent_tangent_mpa": 7692.307692307692,
+              "elastic_strain": 0.0015000000000000005,
+              "final_yield_function_mpa": 0.0,
+              "plastic_multiplier_increment": 0.006250000000000001,
+              "stress_mpa": 300.0,
+              "total_strain": 0.007750000000000002,
+              "trial_state": {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              },
+              "trial_yield_function_mpa": 1300.0000000000002,
+              "yielded": true
+            },
+            "node_i": 0,
+            "node_j": 1,
+            "response_kind": "stress_strain",
+            "tangent_kn_per_m": 38461.53846153846,
+            "total_strain": 0.007750000000000002
+          }
+        ],
+        "external_forces_kn": [
+          0.0,
+          3000.0
+        ],
+        "free_node_indices": [
+          1
+        ],
+        "internal_forces_kn": [
+          -3000.0,
+          3000.0
+        ],
+        "jacobian_kn_per_m": [
+          [
+            38461.53846153846
+          ]
+        ],
+        "parent_state_hash": "sha256:302d66ee21c83c7cd32e6e1972bdbca0721e557696842f8a31ada99b2b320b9d",
+        "reactions_kn": [
+          -3000.0,
+          0.0
+        ],
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_kn": [
+          0.0
+        ],
+        "target_load_factor": 1.0,
+        "trial_material_states": [
+          {
+            "accumulated_plastic_strain": 0.006250000000000001,
+            "backstress_mpa": 31.250000000000007,
+            "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+            "plastic_strain": 0.006250000000000001,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+          }
+        ]
+      },
+      "trial_solution": {
+        "convergence_history": [
+          {
+            "accepted": true,
+            "free_displacements_m": [
+              0.0
+            ],
+            "increment_abs_m": 0.003,
+            "increment_gate_passed": false,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": [
+              0.003
+            ],
+            "relative_residual": 1.0,
+            "residual_gate_passed": false,
+            "residual_kn": [
+              -3000.0
+            ]
+          },
+          {
+            "accepted": true,
+            "free_displacements_m": [
+              0.003
+            ],
+            "increment_abs_m": 0.012500000000000004,
+            "increment_gate_passed": false,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": [
+              0.012500000000000004
+            ],
+            "relative_residual": 0.16025641025641033,
+            "residual_gate_passed": false,
+            "residual_kn": [
+              -480.76923076923094
+            ]
+          },
+          {
+            "accepted": true,
+            "free_displacements_m": [
+              0.015500000000000003
+            ],
+            "increment_abs_m": 0.0,
+            "increment_gate_passed": true,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 0,
+            "newton_increment_m": [
+              -0.0
+            ],
+            "relative_residual": 0.0,
+            "residual_gate_passed": true,
+            "residual_kn": [
+              0.0
+            ]
+          }
+        ],
+        "line_search_history": [
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_free_displacements_m": [
+                  0.003
+                ],
+                "trial_relative_residual": 0.16025641025641033,
+                "trial_residual_kn": [
+                  -480.76923076923094
+                ]
+              }
+            ],
+            "iteration": 0,
+            "newton_increment_m": [
+              0.003
+            ],
+            "selected_alpha": 1.0,
+            "starting_free_displacements_m": [
+              0.0
+            ]
+          },
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_free_displacements_m": [
+                  0.015500000000000003
+                ],
+                "trial_relative_residual": 0.0,
+                "trial_residual_kn": [
+                  0.0
+                ]
+              }
+            ],
+            "iteration": 1,
+            "newton_increment_m": [
+              0.012500000000000004
+            ],
+            "selected_alpha": 1.0,
+            "starting_free_displacements_m": [
+              0.003
+            ]
+          }
+        ],
+        "metrics": {
+          "active_equation_count": 1,
+          "case_id": "phase2_state_updated_steel_single_bar@load=1",
+          "contract_pass": true,
+          "convergence_claim": true,
+          "fallback_used": false,
+          "final_increment_abs_m": 0.0,
+          "free_displacements_m": [
+            0.015500000000000003
+          ],
+          "globalization": "backtracking_line_search",
+          "increment_gate_passed": true,
+          "increment_norm_applicable": true,
+          "increment_tolerance": 1e-12,
+          "iteration_count": 3,
+          "line_search_step_count": 2,
+          "line_search_used": false,
+          "linear_solve_count": 3,
+          "matrix_backend": "numpy_linalg_solve_dense",
+          "newton_iteration_count": 3,
+          "reaction_observation_only": false,
+          "regularization_used": false,
+          "relative_residual": 0.0,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+          "residual_gate_passed": true,
+          "residual_kn": [
+            0.0
+          ],
+          "residual_norm_applicable": true,
+          "residual_tolerance": 1e-10,
+          "solver_executed": true,
+          "sparse_backend_used": false,
+          "stiffness_storage": "numpy_dense_ndarray",
+          "tangent_definition": "dF_internal_du_consistent",
+          "terminal_disposition": "solve_free_equations",
+          "terminal_reason": "residual_and_increment_converged"
+        },
+        "status": "ready",
+        "unsupported_features": []
+      }
+    }
+  },
+  "g1_material_newton_breadth_claim": false,
+  "material_newton_breadth_closure_claim": false,
+  "material_point_variants": [
+    {
+      "cyclic_path": {
+        "cumulative_dissipated_energy_density_mj_per_m3": 8.359027607576767,
+        "dissipation_nonnegative_monotonic": true,
+        "energy_dissipation_gate_passed": true,
+        "final_state": {
+          "accumulated_plastic_strain": 0.03343611043030707,
+          "backstress_mpa": 0.0,
+          "dissipated_energy_density_mj_per_m3": 8.359027607576767,
+          "plastic_strain": 0.002587444417212282,
+          "schema_version": "uniaxial-combined-hardening-state.v1",
+          "state_hash": "sha256:d6866b0e39e670ff20e5c22344eda3e4f58e7b999621902a962797104181c5cc"
+        },
+        "history": [
+          {
+            "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "consistent_tangent_mpa": 200000.0,
+            "elastic_strain": 0.0,
+            "final_yield_function_mpa": -250.0,
+            "parent_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "plastic_flow_direction": 0,
+            "plastic_multiplier_increment": 0.0,
+            "step_index": 1,
+            "stress_mpa": 0.0,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.0,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 0.0,
+              "plastic_strain": 0.0,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+            },
+            "trial_yield_function_mpa": -250.0,
+            "yielded": false
+          },
+          {
+            "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0013173076923076923,
+            "final_yield_function_mpa": 0.0,
+            "parent_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.0016826923076923078,
+            "step_index": 2,
+            "stress_mpa": 263.46153846153845,
+            "total_strain": 0.003,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.0016826923076923078,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 0.4206730769230769,
+              "plastic_strain": 0.0016826923076923078,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:6c8fe7aab04aae43d111691b8650aebea72ac35cc96756484d8e3445e7493c7f"
+            },
+            "trial_yield_function_mpa": 350.0,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:6c8fe7aab04aae43d111691b8650aebea72ac35cc96756484d8e3445e7493c7f",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0015096153846153844,
+            "final_yield_function_mpa": 1.1368683772161603e-13,
+            "parent_state_hash": "sha256:6c8fe7aab04aae43d111691b8650aebea72ac35cc96756484d8e3445e7493c7f",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.004807692307692308,
+            "step_index": 3,
+            "stress_mpa": 301.923076923077,
+            "total_strain": 0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.006490384615384616,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 1.622596153846154,
+              "plastic_strain": 0.006490384615384616,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:efb715e6f926b578e65382fe0afb442e2caa0ba0da71af466cee5c0283f9e84c"
+            },
+            "trial_yield_function_mpa": 1000.0000000000001,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:efb715e6f926b578e65382fe0afb442e2caa0ba0da71af466cee5c0283f9e84c",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.001701183431952663,
+            "final_yield_function_mpa": 0.0,
+            "parent_state_hash": "sha256:efb715e6f926b578e65382fe0afb442e2caa0ba0da71af466cee5c0283f9e84c",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.004789201183431953,
+            "step_index": 4,
+            "stress_mpa": -340.23668639053255,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.011279585798816568,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 2.8198964497041423,
+              "plastic_strain": 0.001701183431952663,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:3d436da1e212fe0268598d382bbcb21e8fa5d8408812904305524b8bb7bb1799"
+            },
+            "trial_yield_function_mpa": 996.1538461538462,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:3d436da1e212fe0268598d382bbcb21e8fa5d8408812904305524b8bb7bb1799",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.0020088757396449705,
+            "final_yield_function_mpa": 0.0,
+            "parent_state_hash": "sha256:3d436da1e212fe0268598d382bbcb21e8fa5d8408812904305524b8bb7bb1799",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.007692307692307693,
+            "step_index": 5,
+            "stress_mpa": -401.7751479289941,
+            "total_strain": -0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.018971893491124263,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 4.742973372781066,
+              "plastic_strain": -0.00599112426035503,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:88c06e5fabcbb72777eccda26435a8d5d040f1e37a5875e7cea6e95093dcfbb6"
+            },
+            "trial_yield_function_mpa": 1600.0,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:88c06e5fabcbb72777eccda26435a8d5d040f1e37a5875e7cea6e95093dcfbb6",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0021620391442876653,
+            "final_yield_function_mpa": 0.0,
+            "parent_state_hash": "sha256:88c06e5fabcbb72777eccda26435a8d5d040f1e37a5875e7cea6e95093dcfbb6",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.0038290851160673644,
+            "step_index": 6,
+            "stress_mpa": 432.407828857533,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.022800978607191626,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 5.700244651797907,
+              "plastic_strain": -0.0021620391442876653,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:1b18901ae4acdc45a7951b238d22e080de32eda6eb931f53ef7f0b026e24a6da"
+            },
+            "trial_yield_function_mpa": 796.4497041420118,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:1b18901ae4acdc45a7951b238d22e080de32eda6eb931f53ef7f0b026e24a6da",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.002469731451979971,
+            "final_yield_function_mpa": -5.684341886080802e-14,
+            "parent_state_hash": "sha256:1b18901ae4acdc45a7951b238d22e080de32eda6eb931f53ef7f0b026e24a6da",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.0076923076923076945,
+            "step_index": 7,
+            "stress_mpa": 493.94629039599454,
+            "total_strain": 0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.030493286299499323,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 7.62332157487483,
+              "plastic_strain": 0.005530268548020029,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:8abbae5b9b51727382c9f994757d30f640c6c141500182b7385e9b60703c81ed"
+            },
+            "trial_yield_function_mpa": 1600.0000000000005,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:8abbae5b9b51727382c9f994757d30f640c6c141500182b7385e9b60703c81ed",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.002587444417212282,
+            "final_yield_function_mpa": -1.1368683772161603e-13,
+            "parent_state_hash": "sha256:8abbae5b9b51727382c9f994757d30f640c6c141500182b7385e9b60703c81ed",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.002942824130807747,
+            "step_index": 8,
+            "stress_mpa": -517.4888834424565,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.03343611043030707,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 8.359027607576767,
+              "plastic_strain": 0.002587444417212282,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:d6866b0e39e670ff20e5c22344eda3e4f58e7b999621902a962797104181c5cc"
+            },
+            "trial_yield_function_mpa": 612.1074192080114,
+            "yielded": true
+          }
+        ],
+        "material_id": "steel_bilinear_isotropic_hardening_1d",
+        "plastic_flow_reversal_count": 3,
+        "return_mapping_algorithm": "backward_euler_1d_radial_return",
+        "step_count": 8,
+        "strain_path": [
+          0.0,
+          0.003,
+          0.008,
+          0.0,
+          -0.008,
+          0.0,
+          0.008,
+          0.0
+        ],
+        "stress_strain_work_density_mj_per_m3": 8.852073194215889,
+        "yielded_step_count": 7
+      },
+      "finite_difference_tangent": {
+        "absolute_error_mpa": 1.930927282955963e-06,
+        "analytic_consistent_tangent_mpa": 7692.307692307692,
+        "finite_difference_epsilon": 1e-08,
+        "finite_difference_tangent_mpa": 7692.307690376765,
+        "pass": true,
+        "relative_error": 2.510205467842752e-10,
+        "relative_tolerance": 1e-07,
+        "return_mapping_algorithm": "backward_euler_1d_radial_return",
+        "same_committed_parent_state": true,
+        "tangent_definition": "algorithmic_consistent_d_stress_d_total_strain",
+        "total_strain": 0.01
+      },
+      "material_parameters": {
+        "elastic_modulus_mpa": 200000.0,
+        "isotropic_hardening_modulus_mpa": 8000.0,
+        "kinematic_hardening_modulus_mpa": 0.0,
+        "plastic_consistent_tangent_mpa": 7692.307692307692,
+        "yield_stress_mpa": 250.0
+      },
+      "monotonic_trial": {
+        "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+        "consistent_tangent_mpa": 7692.307692307692,
+        "elastic_strain": 0.0015865384615384621,
+        "final_yield_function_mpa": 5.684341886080802e-14,
+        "plastic_multiplier_increment": 0.008413461538461538,
+        "stress_mpa": 317.3076923076924,
+        "total_strain": 0.01,
+        "trial_state": {
+          "accumulated_plastic_strain": 0.008413461538461538,
+          "backstress_mpa": 0.0,
+          "dissipated_energy_density_mj_per_m3": 2.1033653846153846,
+          "plastic_strain": 0.008413461538461538,
+          "schema_version": "uniaxial-combined-hardening-state.v1",
+          "state_hash": "sha256:66776fcda3b4487e2c2c6b5cf4e9d0c7854494259787bc93cdae0a2722dc518e"
+        },
+        "trial_yield_function_mpa": 1750.0,
+        "yielded": true
+      },
+      "point_contract_pass": true,
+      "variant_id": "steel_bilinear_isotropic_hardening_1d"
+    },
+    {
+      "cyclic_path": {
+        "cumulative_dissipated_energy_density_mj_per_m3": 9.435096153846153,
+        "dissipation_nonnegative_monotonic": true,
+        "energy_dissipation_gate_passed": true,
+        "final_state": {
+          "accumulated_plastic_strain": 0.037740384615384606,
+          "backstress_mpa": 9.61538461538462,
+          "dissipated_energy_density_mj_per_m3": 9.435096153846153,
+          "plastic_strain": 0.001201923076923077,
+          "schema_version": "uniaxial-combined-hardening-state.v1",
+          "state_hash": "sha256:1c44ef7c81301954e11e21a09b9ce75374bb492f4951b008397f8c3c8714c993"
+        },
+        "history": [
+          {
+            "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "consistent_tangent_mpa": 200000.0,
+            "elastic_strain": 0.0,
+            "final_yield_function_mpa": -250.0,
+            "parent_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "plastic_flow_direction": 0,
+            "plastic_multiplier_increment": 0.0,
+            "step_index": 1,
+            "stress_mpa": 0.0,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.0,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 0.0,
+              "plastic_strain": 0.0,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+            },
+            "trial_yield_function_mpa": -250.0,
+            "yielded": false
+          },
+          {
+            "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0013173076923076923,
+            "final_yield_function_mpa": 0.0,
+            "parent_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.0016826923076923078,
+            "step_index": 2,
+            "stress_mpa": 263.46153846153845,
+            "total_strain": 0.003,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.0016826923076923078,
+              "backstress_mpa": 13.461538461538462,
+              "dissipated_energy_density_mj_per_m3": 0.4206730769230769,
+              "plastic_strain": 0.0016826923076923078,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:63325eb511be3da49a9a14468025030e96b34043577538ffc650fbc75385fe11"
+            },
+            "trial_yield_function_mpa": 350.0,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:63325eb511be3da49a9a14468025030e96b34043577538ffc650fbc75385fe11",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0015096153846153844,
+            "final_yield_function_mpa": 8.526512829121202e-14,
+            "parent_state_hash": "sha256:63325eb511be3da49a9a14468025030e96b34043577538ffc650fbc75385fe11",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.004807692307692308,
+            "step_index": 3,
+            "stress_mpa": 301.923076923077,
+            "total_strain": 0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.006490384615384616,
+              "backstress_mpa": 51.92307692307693,
+              "dissipated_energy_density_mj_per_m3": 1.622596153846154,
+              "plastic_strain": 0.006490384615384616,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:639faaf4d121a3e31f13a540561eec4f078fb25e821e556335036f3da4bcad25"
+            },
+            "trial_yield_function_mpa": 1000.0,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:639faaf4d121a3e31f13a540561eec4f078fb25e821e556335036f3da4bcad25",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.001201923076923077,
+            "final_yield_function_mpa": -1.4210854715202004e-13,
+            "parent_state_hash": "sha256:639faaf4d121a3e31f13a540561eec4f078fb25e821e556335036f3da4bcad25",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.005288461538461539,
+            "step_index": 4,
+            "stress_mpa": -240.38461538461524,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.011778846153846154,
+              "backstress_mpa": 9.61538461538462,
+              "dissipated_energy_density_mj_per_m3": 2.9447115384615383,
+              "plastic_strain": 0.001201923076923077,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:2a674c34afded686b3c6e956029906e003a7ec1f78a83629dafe1fa3a1b4696f"
+            },
+            "trial_yield_function_mpa": 1100.0,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:2a674c34afded686b3c6e956029906e003a7ec1f78a83629dafe1fa3a1b4696f",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.0015096153846153862,
+            "final_yield_function_mpa": 2.2737367544323206e-13,
+            "parent_state_hash": "sha256:2a674c34afded686b3c6e956029906e003a7ec1f78a83629dafe1fa3a1b4696f",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.007692307692307691,
+            "step_index": 5,
+            "stress_mpa": -301.92307692307713,
+            "total_strain": -0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.019471153846153846,
+              "backstress_mpa": -51.923076923076906,
+              "dissipated_energy_density_mj_per_m3": 4.867788461538461,
+              "plastic_strain": -0.006490384615384614,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:9b3c0f12d20886b2063b1dceab96fa23f9cc3dc38601f0e06e579b1e627bf48c"
+            },
+            "trial_yield_function_mpa": 1599.9999999999998,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:9b3c0f12d20886b2063b1dceab96fa23f9cc3dc38601f0e06e579b1e627bf48c",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.001201923076923077,
+            "final_yield_function_mpa": 8.526512829121202e-14,
+            "parent_state_hash": "sha256:9b3c0f12d20886b2063b1dceab96fa23f9cc3dc38601f0e06e579b1e627bf48c",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.005288461538461537,
+            "step_index": 6,
+            "stress_mpa": 240.38461538461547,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.024759615384615383,
+              "backstress_mpa": -9.615384615384606,
+              "dissipated_energy_density_mj_per_m3": 6.189903846153845,
+              "plastic_strain": -0.001201923076923077,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:5952ed3cc881806fd1915cb2bdc9fe1ae58e37515862f87ca4153f6ddd7add93"
+            },
+            "trial_yield_function_mpa": 1099.9999999999998,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:5952ed3cc881806fd1915cb2bdc9fe1ae58e37515862f87ca4153f6ddd7add93",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0015096153846153862,
+            "final_yield_function_mpa": 2.2737367544323206e-13,
+            "parent_state_hash": "sha256:5952ed3cc881806fd1915cb2bdc9fe1ae58e37515862f87ca4153f6ddd7add93",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.007692307692307691,
+            "step_index": 7,
+            "stress_mpa": 301.92307692307713,
+            "total_strain": 0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.03245192307692307,
+              "backstress_mpa": 51.92307692307692,
+              "dissipated_energy_density_mj_per_m3": 8.112980769230768,
+              "plastic_strain": 0.006490384615384614,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:5de2588c465ccc082bbe1aea0da7675ee2ba85a6f1f245be56e72a8efca13b1a"
+            },
+            "trial_yield_function_mpa": 1599.9999999999998,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:5de2588c465ccc082bbe1aea0da7675ee2ba85a6f1f245be56e72a8efca13b1a",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.001201923076923077,
+            "final_yield_function_mpa": 8.526512829121202e-14,
+            "parent_state_hash": "sha256:5de2588c465ccc082bbe1aea0da7675ee2ba85a6f1f245be56e72a8efca13b1a",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.005288461538461537,
+            "step_index": 8,
+            "stress_mpa": -240.38461538461547,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.037740384615384606,
+              "backstress_mpa": 9.61538461538462,
+              "dissipated_energy_density_mj_per_m3": 9.435096153846153,
+              "plastic_strain": 0.001201923076923077,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:1c44ef7c81301954e11e21a09b9ce75374bb492f4951b008397f8c3c8714c993"
+            },
+            "trial_yield_function_mpa": 1099.9999999999998,
+            "yielded": true
+          }
+        ],
+        "material_id": "steel_bilinear_kinematic_hardening_1d",
+        "plastic_flow_reversal_count": 3,
+        "return_mapping_algorithm": "backward_euler_1d_radial_return",
+        "step_count": 8,
+        "strain_path": [
+          0.0,
+          0.003,
+          0.008,
+          0.0,
+          -0.008,
+          0.0,
+          0.008,
+          0.0
+        ],
+        "stress_strain_work_density_mj_per_m3": 5.408653846153845,
+        "yielded_step_count": 7
+      },
+      "finite_difference_tangent": {
+        "absolute_error_mpa": 1.930927282955963e-06,
+        "analytic_consistent_tangent_mpa": 7692.307692307692,
+        "finite_difference_epsilon": 1e-08,
+        "finite_difference_tangent_mpa": 7692.307690376765,
+        "pass": true,
+        "relative_error": 2.510205467842752e-10,
+        "relative_tolerance": 1e-07,
+        "return_mapping_algorithm": "backward_euler_1d_radial_return",
+        "same_committed_parent_state": true,
+        "tangent_definition": "algorithmic_consistent_d_stress_d_total_strain",
+        "total_strain": 0.01
+      },
+      "material_parameters": {
+        "elastic_modulus_mpa": 200000.0,
+        "isotropic_hardening_modulus_mpa": 0.0,
+        "kinematic_hardening_modulus_mpa": 8000.0,
+        "plastic_consistent_tangent_mpa": 7692.307692307692,
+        "yield_stress_mpa": 250.0
+      },
+      "monotonic_trial": {
+        "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+        "consistent_tangent_mpa": 7692.307692307692,
+        "elastic_strain": 0.0015865384615384621,
+        "final_yield_function_mpa": 5.684341886080802e-14,
+        "plastic_multiplier_increment": 0.008413461538461538,
+        "stress_mpa": 317.3076923076924,
+        "total_strain": 0.01,
+        "trial_state": {
+          "accumulated_plastic_strain": 0.008413461538461538,
+          "backstress_mpa": 67.3076923076923,
+          "dissipated_energy_density_mj_per_m3": 2.1033653846153846,
+          "plastic_strain": 0.008413461538461538,
+          "schema_version": "uniaxial-combined-hardening-state.v1",
+          "state_hash": "sha256:bcc40adf98a2f7d7a7e09d72bb89972f7d6175ae459cd64848ee6fef96649340"
+        },
+        "trial_yield_function_mpa": 1750.0,
+        "yielded": true
+      },
+      "point_contract_pass": true,
+      "variant_id": "steel_bilinear_kinematic_hardening_1d"
+    },
+    {
+      "cyclic_path": {
+        "cumulative_dissipated_energy_density_mj_per_m3": 9.020557098372645,
+        "dissipation_nonnegative_monotonic": true,
+        "energy_dissipation_gate_passed": true,
+        "final_state": {
+          "accumulated_plastic_strain": 0.03608222839349058,
+          "backstress_mpa": 8.737724028791998,
+          "dissipated_energy_density_mj_per_m3": 9.020557098372645,
+          "plastic_strain": 0.0017475448057583994,
+          "schema_version": "uniaxial-combined-hardening-state.v1",
+          "state_hash": "sha256:82b949ee4caaad174b05a1368d66456760c00caa9d9294528c2a61593cd59a77"
+        },
+        "history": [
+          {
+            "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "consistent_tangent_mpa": 200000.0,
+            "elastic_strain": 0.0,
+            "final_yield_function_mpa": -250.0,
+            "parent_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "plastic_flow_direction": 0,
+            "plastic_multiplier_increment": 0.0,
+            "step_index": 1,
+            "stress_mpa": 0.0,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.0,
+              "backstress_mpa": 0.0,
+              "dissipated_energy_density_mj_per_m3": 0.0,
+              "plastic_strain": 0.0,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+            },
+            "trial_yield_function_mpa": -250.0,
+            "yielded": false
+          },
+          {
+            "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0013173076923076923,
+            "final_yield_function_mpa": -2.842170943040401e-14,
+            "parent_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.0016826923076923078,
+            "step_index": 2,
+            "stress_mpa": 263.46153846153845,
+            "total_strain": 0.003,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.0016826923076923078,
+              "backstress_mpa": 8.413461538461538,
+              "dissipated_energy_density_mj_per_m3": 0.4206730769230769,
+              "plastic_strain": 0.0016826923076923078,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:691b300e31f4fef06d5202907635abef6d2282dab6b657aaf7edbaa9fe5ee300"
+            },
+            "trial_yield_function_mpa": 350.0,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:691b300e31f4fef06d5202907635abef6d2282dab6b657aaf7edbaa9fe5ee300",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0015096153846153836,
+            "final_yield_function_mpa": -1.7053025658242404e-13,
+            "parent_state_hash": "sha256:691b300e31f4fef06d5202907635abef6d2282dab6b657aaf7edbaa9fe5ee300",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.004807692307692309,
+            "step_index": 3,
+            "stress_mpa": 301.9230769230768,
+            "total_strain": 0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.006490384615384617,
+              "backstress_mpa": 32.45192307692308,
+              "dissipated_energy_density_mj_per_m3": 1.6225961538461542,
+              "plastic_strain": 0.006490384615384617,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:32610fd63c241816d95af8c3e2aa61338f0e894b8df4a62ca25964f75d062daa"
+            },
+            "trial_yield_function_mpa": 1000.0000000000002,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:32610fd63c241816d95af8c3e2aa61338f0e894b8df4a62ca25964f75d062daa",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.0013891457100591717,
+            "final_yield_function_mpa": -5.684341886080802e-14,
+            "parent_state_hash": "sha256:32610fd63c241816d95af8c3e2aa61338f0e894b8df4a62ca25964f75d062daa",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.005101238905325445,
+            "step_index": 4,
+            "stress_mpa": -277.8291420118343,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.01159162352071006,
+              "backstress_mpa": 6.945728550295854,
+              "dissipated_energy_density_mj_per_m3": 2.8979058801775155,
+              "plastic_strain": 0.0013891457100591717,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:f5bd508e9320a8158cad24800b32fb19b6918d999c3f1057433b6aa0ab12f0f2"
+            },
+            "trial_yield_function_mpa": 1061.0576923076926,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:f5bd508e9320a8158cad24800b32fb19b6918d999c3f1057433b6aa0ab12f0f2",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.0016968380177514782,
+            "final_yield_function_mpa": -5.684341886080802e-14,
+            "parent_state_hash": "sha256:f5bd508e9320a8158cad24800b32fb19b6918d999c3f1057433b6aa0ab12f0f2",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.007692307692307694,
+            "step_index": 5,
+            "stress_mpa": -339.3676035502958,
+            "total_strain": -0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.019283931213017753,
+              "backstress_mpa": -31.515809911242613,
+              "dissipated_energy_density_mj_per_m3": 4.820982803254439,
+              "plastic_strain": -0.006303161982248522,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:0f8e64a3af0ceafa0a973c546e0425f8b8f9306d613dda165b7fa5e12b941a1c"
+            },
+            "trial_yield_function_mpa": 1600.0000000000002,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:0f8e64a3af0ceafa0a973c546e0425f8b8f9306d613dda165b7fa5e12b941a1c",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.001570967690316341,
+            "final_yield_function_mpa": 1.1368683772161603e-13,
+            "parent_state_hash": "sha256:0f8e64a3af0ceafa0a973c546e0425f8b8f9306d613dda165b7fa5e12b941a1c",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.004732194291932181,
+            "step_index": 6,
+            "stress_mpa": 314.1935380632682,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.024016125504949935,
+              "backstress_mpa": -7.854838451581706,
+              "dissipated_energy_density_mj_per_m3": 6.004031376237484,
+              "plastic_strain": -0.001570967690316341,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:0ddf5720df9300b29223e7014aeaa63649c28ee9bae493182be558420de8b330"
+            },
+            "trial_yield_function_mpa": 984.2964127218936,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:0ddf5720df9300b29223e7014aeaa63649c28ee9bae493182be558420de8b330",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": 0.0018786599980086484,
+            "final_yield_function_mpa": 1.1368683772161603e-13,
+            "parent_state_hash": "sha256:0ddf5720df9300b29223e7014aeaa63649c28ee9bae493182be558420de8b330",
+            "plastic_flow_direction": 1,
+            "plastic_multiplier_increment": 0.007692307692307693,
+            "step_index": 7,
+            "stress_mpa": 375.73199960172974,
+            "total_strain": 0.008,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.03170843319725763,
+              "backstress_mpa": 30.60670000995676,
+              "dissipated_energy_density_mj_per_m3": 7.9271082993144075,
+              "plastic_strain": 0.006121340001991352,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:7cc97b51c555d91a347508c29b544da5dca83cc302fc1ef0755cdaf86eccd50f"
+            },
+            "trial_yield_function_mpa": 1600.0,
+            "yielded": true
+          },
+          {
+            "committed_state_hash": "sha256:7cc97b51c555d91a347508c29b544da5dca83cc302fc1ef0755cdaf86eccd50f",
+            "consistent_tangent_mpa": 7692.307692307692,
+            "elastic_strain": -0.0017475448057583994,
+            "final_yield_function_mpa": 0.0,
+            "parent_state_hash": "sha256:7cc97b51c555d91a347508c29b544da5dca83cc302fc1ef0755cdaf86eccd50f",
+            "plastic_flow_direction": -1,
+            "plastic_multiplier_increment": 0.004373795196232952,
+            "step_index": 8,
+            "stress_mpa": -349.5089611516797,
+            "total_strain": 0.0,
+            "trial_state": {
+              "accumulated_plastic_strain": 0.03608222839349058,
+              "backstress_mpa": 8.737724028791998,
+              "dissipated_energy_density_mj_per_m3": 9.020557098372645,
+              "plastic_strain": 0.0017475448057583994,
+              "schema_version": "uniaxial-combined-hardening-state.v1",
+              "state_hash": "sha256:82b949ee4caaad174b05a1368d66456760c00caa9d9294528c2a61593cd59a77"
+            },
+            "trial_yield_function_mpa": 909.7494008164541,
+            "yielded": true
+          }
+        ],
+        "material_id": "steel_bilinear_combined_hardening_1d",
+        "plastic_flow_reversal_count": 3,
+        "return_mapping_algorithm": "backward_euler_1d_radial_return",
+        "step_count": 8,
+        "strain_path": [
+          0.0,
+          0.003,
+          0.008,
+          0.0,
+          -0.008,
+          0.0,
+          0.008,
+          0.0
+        ],
+        "stress_strain_work_density_mj_per_m3": 6.735178823669078,
+        "yielded_step_count": 7
+      },
+      "finite_difference_tangent": {
+        "absolute_error_mpa": 1.930927282955963e-06,
+        "analytic_consistent_tangent_mpa": 7692.307692307692,
+        "finite_difference_epsilon": 1e-08,
+        "finite_difference_tangent_mpa": 7692.307690376765,
+        "pass": true,
+        "relative_error": 2.510205467842752e-10,
+        "relative_tolerance": 1e-07,
+        "return_mapping_algorithm": "backward_euler_1d_radial_return",
+        "same_committed_parent_state": true,
+        "tangent_definition": "algorithmic_consistent_d_stress_d_total_strain",
+        "total_strain": 0.01
+      },
+      "material_parameters": {
+        "elastic_modulus_mpa": 200000.0,
+        "isotropic_hardening_modulus_mpa": 3000.0,
+        "kinematic_hardening_modulus_mpa": 5000.0,
+        "plastic_consistent_tangent_mpa": 7692.307692307692,
+        "yield_stress_mpa": 250.0
+      },
+      "monotonic_trial": {
+        "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+        "consistent_tangent_mpa": 7692.307692307692,
+        "elastic_strain": 0.0015865384615384621,
+        "final_yield_function_mpa": 5.684341886080802e-14,
+        "plastic_multiplier_increment": 0.008413461538461538,
+        "stress_mpa": 317.3076923076924,
+        "total_strain": 0.01,
+        "trial_state": {
+          "accumulated_plastic_strain": 0.008413461538461538,
+          "backstress_mpa": 42.06730769230769,
+          "dissipated_energy_density_mj_per_m3": 2.1033653846153846,
+          "plastic_strain": 0.008413461538461538,
+          "schema_version": "uniaxial-combined-hardening-state.v1",
+          "state_hash": "sha256:3d60e5ce21c15fcc6d8f34a273361a661a4eaeaf19be87b7ca940ac25671161a"
+        },
+        "trial_yield_function_mpa": 1750.0,
+        "yielded": true
+      },
+      "point_contract_pass": true,
+      "variant_id": "steel_bilinear_combined_hardening_1d"
+    }
+  ],
+  "production_nonlinear_closure_claim": false,
+  "residual_formula": "F_internal_minus_F_external",
+  "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+  "return_mapping_algorithm": "backward_euler_1d_radial_return",
+  "rollback_probe": {
+    "accepted_state_hash_after": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+    "exact": true,
+    "load_step": {
+      "accepted_state": {
+        "case_id": "phase2_state_updated_steel_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "accumulated_plastic_strain": 0.0,
+            "backstress_mpa": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "plastic_strain": 0.0,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+          },
+          {
+            "accumulated_plastic_strain": 0.0,
+            "backstress_mpa": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "plastic_strain": 0.0,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "step_index": 0
+      },
+      "committed": false,
+      "metrics": {
+        "accepted_state_hash_after": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "active_equation_count": 2,
+        "committed": false,
+        "convergence_claim": false,
+        "fallback_used": false,
+        "increment_gate_applicable": true,
+        "increment_gate_passed": false,
+        "iterative_solver_contract_pass": false,
+        "material_state_changed": false,
+        "no_solve_contract_pass": false,
+        "no_solve_reaction_only": false,
+        "parent_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "regularization_used": false,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "residual_gate_applicable": true,
+        "residual_gate_passed": false,
+        "rollback_exact": true,
+        "solver_contract_pass": false,
+        "solver_executed": true,
+        "state_updated_element_count": 2,
+        "target_load_factor": 1.0,
+        "terminal_contract_pass": false,
+        "terminal_disposition": "solve_free_equations",
+        "terminal_reason": "max_iterations_exceeded",
+        "trial_parent_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "yielded_element_count": 2
+      },
+      "parent_state": {
+        "case_id": "phase2_state_updated_steel_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "accumulated_plastic_strain": 0.0,
+            "backstress_mpa": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "plastic_strain": 0.0,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+          },
+          {
+            "accumulated_plastic_strain": 0.0,
+            "backstress_mpa": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "plastic_strain": 0.0,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "step_index": 0
+      },
+      "status": "blocked",
+      "trial_assembly": {
+        "displacements_m": [
+          0.0,
+          0.0015,
+          0.003
+        ],
+        "element_responses": [
+          {
+            "area_m2": 0.01,
+            "element_id": "bar-1",
+            "elongation_m": 0.0015,
+            "generalized_deformation": 0.0015,
+            "internal_force_kn": 2519.230769230769,
+            "length_m": 1.0,
+            "material_response": {
+              "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+              "consistent_tangent_mpa": 7692.307692307692,
+              "elastic_strain": 0.0012596153846153846,
+              "final_yield_function_mpa": 0.0,
+              "plastic_multiplier_increment": 0.0002403846153846154,
+              "stress_mpa": 251.9230769230769,
+              "total_strain": 0.0015,
+              "trial_state": {
+                "accumulated_plastic_strain": 0.0002403846153846154,
+                "backstress_mpa": 1.201923076923077,
+                "dissipated_energy_density_mj_per_m3": 0.06009615384615385,
+                "plastic_strain": 0.0002403846153846154,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:56ac50e2657681ef702ad37d32cf4e2bd47e690a1ca4370768738b20a8bd13b9"
+              },
+              "trial_yield_function_mpa": 50.0,
+              "yielded": true
+            },
+            "node_i": 0,
+            "node_j": 1,
+            "response_kind": "stress_strain",
+            "tangent_kn_per_m": 76923.07692307692,
+            "total_strain": 0.0015
+          },
+          {
+            "area_m2": 0.01,
+            "element_id": "bar-2",
+            "elongation_m": 0.0015,
+            "generalized_deformation": 0.0015,
+            "internal_force_kn": 2519.230769230769,
+            "length_m": 1.0,
+            "material_response": {
+              "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+              "consistent_tangent_mpa": 7692.307692307692,
+              "elastic_strain": 0.0012596153846153846,
+              "final_yield_function_mpa": 0.0,
+              "plastic_multiplier_increment": 0.0002403846153846154,
+              "stress_mpa": 251.9230769230769,
+              "total_strain": 0.0015,
+              "trial_state": {
+                "accumulated_plastic_strain": 0.0002403846153846154,
+                "backstress_mpa": 1.201923076923077,
+                "dissipated_energy_density_mj_per_m3": 0.06009615384615385,
+                "plastic_strain": 0.0002403846153846154,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:56ac50e2657681ef702ad37d32cf4e2bd47e690a1ca4370768738b20a8bd13b9"
+              },
+              "trial_yield_function_mpa": 50.0,
+              "yielded": true
+            },
+            "node_i": 1,
+            "node_j": 2,
+            "response_kind": "stress_strain",
+            "tangent_kn_per_m": 76923.07692307692,
+            "total_strain": 0.0015
+          }
+        ],
+        "external_forces_kn": [
+          0.0,
+          0.0,
+          3000.0
+        ],
+        "free_node_indices": [
+          1,
+          2
+        ],
+        "internal_forces_kn": [
+          -2519.230769230769,
+          0.0,
+          2519.230769230769
+        ],
+        "jacobian_kn_per_m": [
+          [
+            153846.15384615384,
+            -76923.07692307692
+          ],
+          [
+            -76923.07692307692,
+            76923.07692307692
+          ]
+        ],
+        "parent_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "reactions_kn": [
+          -2519.230769230769,
+          0.0,
+          0.0
+        ],
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_kn": [
+          0.0,
+          -480.76923076923094
+        ],
+        "target_load_factor": 1.0,
+        "trial_material_states": [
+          {
+            "accumulated_plastic_strain": 0.0002403846153846154,
+            "backstress_mpa": 1.201923076923077,
+            "dissipated_energy_density_mj_per_m3": 0.06009615384615385,
+            "plastic_strain": 0.0002403846153846154,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:56ac50e2657681ef702ad37d32cf4e2bd47e690a1ca4370768738b20a8bd13b9"
+          },
+          {
+            "accumulated_plastic_strain": 0.0002403846153846154,
+            "backstress_mpa": 1.201923076923077,
+            "dissipated_energy_density_mj_per_m3": 0.06009615384615385,
+            "plastic_strain": 0.0002403846153846154,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:56ac50e2657681ef702ad37d32cf4e2bd47e690a1ca4370768738b20a8bd13b9"
+          }
+        ]
+      },
+      "trial_solution": {
+        "convergence_history": [
+          {
+            "accepted": true,
+            "free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "increment_abs_m": 0.003,
+            "increment_gate_passed": false,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": [
+              0.0015,
+              0.003
+            ],
+            "relative_residual": 1.0,
+            "residual_gate_passed": false,
+            "residual_kn": [
+              0.0,
+              -3000.0
+            ]
+          }
+        ],
+        "line_search_history": [
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_free_displacements_m": [
+                  0.0015,
+                  0.003
+                ],
+                "trial_relative_residual": 0.16025641025641033,
+                "trial_residual_kn": [
+                  0.0,
+                  -480.76923076923094
+                ]
+              }
+            ],
+            "iteration": 0,
+            "newton_increment_m": [
+              0.0015,
+              0.003
+            ],
+            "selected_alpha": 1.0,
+            "starting_free_displacements_m": [
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "metrics": {
+          "active_equation_count": 2,
+          "case_id": "phase2_state_updated_steel_two_element_chain@load=1",
+          "contract_pass": false,
+          "convergence_claim": false,
+          "detail": "max_iterations_exceeded",
+          "fallback_used": false,
+          "free_displacements_m": [
+            0.0015,
+            0.003
+          ],
+          "globalization": "backtracking_line_search",
+          "increment_gate_passed": false,
+          "increment_norm_applicable": true,
+          "matrix_backend": "numpy_linalg_solve_dense",
+          "reaction_observation_only": false,
+          "regularization_used": false,
+          "relative_residual": 0.16025641025641033,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+          "residual_gate_passed": false,
+          "residual_kn": [
+            0.0,
+            -480.76923076923094
+          ],
+          "residual_norm_applicable": true,
+          "solver_executed": true,
+          "sparse_backend_used": false,
+          "stiffness_storage": "numpy_dense_ndarray",
+          "terminal_disposition": "solve_free_equations",
+          "terminal_reason": "max_iterations_exceeded"
+        },
+        "status": "blocked",
+        "unsupported_features": [
+          {
+            "detail": "max_iterations_exceeded",
+            "fallback_used": false,
+            "guard_outcome": "blocked",
+            "kind": "newton_vector_reference_blocked",
+            "regularization_used": false
+          }
+        ]
+      }
+    },
+    "parent_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7"
+  },
+  "schema_version": "phase2-state-updated-steel-material-result.v1",
+  "state_updated_steel_seed_contract_pass": true,
+  "status": "ready",
+  "structure_benchmark": {
+    "consistent_jacobian_finite_difference": {
+      "analytic_jacobian_kn_per_m": [
+        [
+          153846.15384615384,
+          -76923.07692307692
+        ],
+        [
+          -76923.07692307692,
+          76923.07692307692
+        ]
+      ],
+      "finite_difference_epsilon": 1e-08,
+      "finite_difference_jacobian_kn_per_m": [
+        [
+          153846.15385301004,
+          -76923.07692650502
+        ],
+        [
+          -76923.07692650502,
+          76923.07692650502
+        ]
+      ],
+      "max_abs_error_kn_per_m": 6.856193067505956e-06,
+      "parent_state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+      "pass": true,
+      "relative_error": 4.4565254936802653e-11,
+      "relative_tolerance": 1e-07,
+      "same_committed_parent_state": true
+    },
+    "contract_pass": true,
+    "deterministic_replay_exact": true,
+    "load_factors": [
+      0.5,
+      1.0,
+      0.0,
+      -1.0,
+      0.0,
+      1.0
+    ],
+    "maximum_residual_inf_norm_kn": 4.3368086899420177e-13,
+    "maximum_series_force_spread_kn": 0.0,
+    "path": {
+      "contract_pass": true,
+      "final_state": {
+        "case_id": "phase2_state_updated_steel_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0018906250000000064,
+          0.003781250000000013
+        ],
+        "load_factor": 1.0,
+        "material_states": [
+          {
+            "accumulated_plastic_strain": 0.016015625,
+            "backstress_mpa": 1.9531250000000302,
+            "dissipated_energy_density_mj_per_m3": 4.00390625,
+            "plastic_strain": 0.0003906250000000064,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:70dfe9d554bb70d2b02c75b6e3a25384045bc02bfc296cd2570a9bedbd32b0be"
+          },
+          {
+            "accumulated_plastic_strain": 0.016015625,
+            "backstress_mpa": 1.9531250000000302,
+            "dissipated_energy_density_mj_per_m3": 4.00390625,
+            "plastic_strain": 0.0003906250000000064,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:70dfe9d554bb70d2b02c75b6e3a25384045bc02bfc296cd2570a9bedbd32b0be"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:758ade71abf996d4aaa0ef2137f678be4072a60c92c91ed4001cc9ae69706ae4",
+        "step_index": 6
+      },
+      "initial_state": {
+        "case_id": "phase2_state_updated_steel_two_element_chain",
+        "displacements_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "material_states": [
+          {
+            "accumulated_plastic_strain": 0.0,
+            "backstress_mpa": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "plastic_strain": 0.0,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+          },
+          {
+            "accumulated_plastic_strain": 0.0,
+            "backstress_mpa": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "plastic_strain": 0.0,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+          }
+        ],
+        "schema_version": "stateful-axial-accepted-state.v1",
+        "state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "step_index": 0
+      },
+      "status": "ready",
+      "steps": [
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.00075,
+              0.0015
+            ],
+            "load_factor": 0.5,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.0,
+                "backstress_mpa": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "plastic_strain": 0.0,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+              },
+              {
+                "accumulated_plastic_strain": 0.0,
+                "backstress_mpa": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "plastic_strain": 0.0,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+            "step_index": 1
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+            "active_equation_count": 2,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": false,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.5,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "load_factor": 0.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.0,
+                "backstress_mpa": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "plastic_strain": 0.0,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+              },
+              {
+                "accumulated_plastic_strain": 0.0,
+                "backstress_mpa": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "plastic_strain": 0.0,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+            "step_index": 0
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.00075,
+              0.0015
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": 0.00075,
+                "generalized_deformation": 0.00075,
+                "internal_force_kn": 1500.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+                  "consistent_tangent_mpa": 200000.0,
+                  "elastic_strain": 0.00075,
+                  "final_yield_function_mpa": -100.0,
+                  "plastic_multiplier_increment": 0.0,
+                  "stress_mpa": 150.0,
+                  "total_strain": 0.00075,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.0,
+                    "backstress_mpa": 0.0,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "plastic_strain": 0.0,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+                  },
+                  "trial_yield_function_mpa": -100.0,
+                  "yielded": false
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 2000000.0,
+                "total_strain": 0.00075
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": 0.00075,
+                "generalized_deformation": 0.00075,
+                "internal_force_kn": 1500.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+                  "consistent_tangent_mpa": 200000.0,
+                  "elastic_strain": 0.00075,
+                  "final_yield_function_mpa": -100.0,
+                  "plastic_multiplier_increment": 0.0,
+                  "stress_mpa": 150.0,
+                  "total_strain": 0.00075,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.0,
+                    "backstress_mpa": 0.0,
+                    "dissipated_energy_density_mj_per_m3": 0.0,
+                    "plastic_strain": 0.0,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+                  },
+                  "trial_yield_function_mpa": -100.0,
+                  "yielded": false
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 2000000.0,
+                "total_strain": 0.00075
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              1500.0
+            ],
+            "free_node_indices": [
+              1,
+              2
+            ],
+            "internal_forces_kn": [
+              -1500.0,
+              0.0,
+              1500.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                4000000.0,
+                -2000000.0
+              ],
+              [
+                -2000000.0,
+                2000000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+            "reactions_kn": [
+              -1500.0,
+              0.0,
+              0.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0,
+              0.0
+            ],
+            "target_load_factor": 0.5,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_strain": 0.0,
+                "backstress_mpa": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "plastic_strain": 0.0,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+              },
+              {
+                "accumulated_plastic_strain": 0.0,
+                "backstress_mpa": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "plastic_strain": 0.0,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.0,
+                  0.0
+                ],
+                "increment_abs_m": 0.0015,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00075,
+                  0.0015
+                ],
+                "relative_residual": 0.5,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  -1500.0
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.00075,
+                  0.0015
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0,
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.00075,
+                      0.0015
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0,
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00075,
+                  0.0015
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 2,
+              "case_id": "phase2_state_updated_steel_two_element_chain@load=0.5",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.00075,
+                0.0015
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0,
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.007750000000000002,
+              0.015500000000000003
+            ],
+            "load_factor": 1.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              },
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+            "step_index": 2
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+            "active_equation_count": 2,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 1.0,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.00075,
+              0.0015
+            ],
+            "load_factor": 0.5,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.0,
+                "backstress_mpa": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "plastic_strain": 0.0,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+              },
+              {
+                "accumulated_plastic_strain": 0.0,
+                "backstress_mpa": 0.0,
+                "dissipated_energy_density_mj_per_m3": 0.0,
+                "plastic_strain": 0.0,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+            "step_index": 1
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.007750000000000002,
+              0.015500000000000003
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": 0.007750000000000002,
+                "generalized_deformation": 0.007750000000000002,
+                "internal_force_kn": 3000.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+                  "consistent_tangent_mpa": 7692.307692307692,
+                  "elastic_strain": 0.0015000000000000005,
+                  "final_yield_function_mpa": 0.0,
+                  "plastic_multiplier_increment": 0.006250000000000001,
+                  "stress_mpa": 300.0,
+                  "total_strain": 0.007750000000000002,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.006250000000000001,
+                    "backstress_mpa": 31.250000000000007,
+                    "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                    "plastic_strain": 0.006250000000000001,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+                  },
+                  "trial_yield_function_mpa": 1300.0000000000002,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 76923.07692307692,
+                "total_strain": 0.007750000000000002
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": 0.007750000000000002,
+                "generalized_deformation": 0.007750000000000002,
+                "internal_force_kn": 3000.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+                  "consistent_tangent_mpa": 7692.307692307692,
+                  "elastic_strain": 0.0015000000000000005,
+                  "final_yield_function_mpa": 0.0,
+                  "plastic_multiplier_increment": 0.006250000000000001,
+                  "stress_mpa": 300.0,
+                  "total_strain": 0.007750000000000002,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.006250000000000001,
+                    "backstress_mpa": 31.250000000000007,
+                    "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                    "plastic_strain": 0.006250000000000001,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+                  },
+                  "trial_yield_function_mpa": 1300.0000000000002,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 76923.07692307692,
+                "total_strain": 0.007750000000000002
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              3000.0
+            ],
+            "free_node_indices": [
+              1,
+              2
+            ],
+            "internal_forces_kn": [
+              -3000.0,
+              0.0,
+              3000.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                153846.15384615384,
+                -76923.07692307692
+              ],
+              [
+                -76923.07692307692,
+                76923.07692307692
+              ]
+            ],
+            "parent_state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+            "reactions_kn": [
+              -3000.0,
+              0.0,
+              0.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0,
+              0.0
+            ],
+            "target_load_factor": 1.0,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              },
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.00075,
+                  0.0015
+                ],
+                "increment_abs_m": 0.0015,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.00075,
+                  0.0015
+                ],
+                "relative_residual": 0.5,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  -1500.0
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.0015,
+                  0.003
+                ],
+                "increment_abs_m": 0.012500000000000004,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.006250000000000002,
+                  0.012500000000000004
+                ],
+                "relative_residual": 0.16025641025641033,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  -480.76923076923094
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.007750000000000002,
+                  0.015500000000000003
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0,
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.0015,
+                      0.003
+                    ],
+                    "trial_relative_residual": 0.16025641025641033,
+                    "trial_residual_kn": [
+                      0.0,
+                      -480.76923076923094
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.00075,
+                  0.0015
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.00075,
+                  0.0015
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.007750000000000002,
+                      0.015500000000000003
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0,
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.006250000000000002,
+                  0.012500000000000004
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.0015,
+                  0.003
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 2,
+              "case_id": "phase2_state_updated_steel_two_element_chain@load=1",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.007750000000000002,
+                0.015500000000000003
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0,
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.006250000000000001,
+              0.012500000000000002
+            ],
+            "load_factor": 0.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              },
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:81199925dcdaac5d8d78ca512aadc24b09344f3c372e264ae4686f875e40477a",
+            "step_index": 3
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:81199925dcdaac5d8d78ca512aadc24b09344f3c372e264ae4686f875e40477a",
+            "active_equation_count": 2,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": false,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.0,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.007750000000000002,
+              0.015500000000000003
+            ],
+            "load_factor": 1.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              },
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+            "step_index": 2
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.006250000000000001,
+              0.012500000000000002
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": 0.006250000000000001,
+                "generalized_deformation": 0.006250000000000001,
+                "internal_force_kn": 0.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36",
+                  "consistent_tangent_mpa": 200000.0,
+                  "elastic_strain": 0.0,
+                  "final_yield_function_mpa": -237.5,
+                  "plastic_multiplier_increment": 0.0,
+                  "stress_mpa": 0.0,
+                  "total_strain": 0.006250000000000001,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.006250000000000001,
+                    "backstress_mpa": 31.250000000000007,
+                    "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                    "plastic_strain": 0.006250000000000001,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+                  },
+                  "trial_yield_function_mpa": -237.5,
+                  "yielded": false
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 2000000.0,
+                "total_strain": 0.006250000000000001
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": 0.006250000000000001,
+                "generalized_deformation": 0.006250000000000001,
+                "internal_force_kn": 0.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36",
+                  "consistent_tangent_mpa": 200000.0,
+                  "elastic_strain": 0.0,
+                  "final_yield_function_mpa": -237.5,
+                  "plastic_multiplier_increment": 0.0,
+                  "stress_mpa": 0.0,
+                  "total_strain": 0.006250000000000001,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.006250000000000001,
+                    "backstress_mpa": 31.250000000000007,
+                    "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                    "plastic_strain": 0.006250000000000001,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+                  },
+                  "trial_yield_function_mpa": -237.5,
+                  "yielded": false
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 2000000.0,
+                "total_strain": 0.006250000000000001
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1,
+              2
+            ],
+            "internal_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                4000000.0,
+                -2000000.0
+              ],
+              [
+                -2000000.0,
+                2000000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+            "reactions_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0,
+              0.0
+            ],
+            "target_load_factor": 0.0,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              },
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.007750000000000002,
+                  0.015500000000000003
+                ],
+                "increment_abs_m": 0.003000000000000001,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.0015000000000000007,
+                  -0.0030000000000000014
+                ],
+                "relative_residual": 1.0000000000000004,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  3000.0000000000014
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.006250000000000001,
+                  0.012500000000000002
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0,
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.006250000000000001,
+                      0.012500000000000002
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0,
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  -0.0015000000000000007,
+                  -0.0030000000000000014
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.007750000000000002,
+                  0.015500000000000003
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 2,
+              "case_id": "phase2_state_updated_steel_two_element_chain@load=0",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.006250000000000001,
+                0.012500000000000002
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0,
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.003062499999999995,
+              -0.00612499999999999
+            ],
+            "load_factor": -1.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              },
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:0a3ffe4f908f30ccf03c935111dc079b1729101b5f4f9f4b44098be542393359",
+            "step_index": 4
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:0a3ffe4f908f30ccf03c935111dc079b1729101b5f4f9f4b44098be542393359",
+            "active_equation_count": 2,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:81199925dcdaac5d8d78ca512aadc24b09344f3c372e264ae4686f875e40477a",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": -1.0,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:81199925dcdaac5d8d78ca512aadc24b09344f3c372e264ae4686f875e40477a",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.006250000000000001,
+              0.012500000000000002
+            ],
+            "load_factor": 0.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              },
+              {
+                "accumulated_plastic_strain": 0.006250000000000001,
+                "backstress_mpa": 31.250000000000007,
+                "dissipated_energy_density_mj_per_m3": 1.5625000000000002,
+                "plastic_strain": 0.006250000000000001,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:81199925dcdaac5d8d78ca512aadc24b09344f3c372e264ae4686f875e40477a",
+            "step_index": 3
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.003062499999999995,
+              -0.00612499999999999
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.003062499999999995,
+                "generalized_deformation": -0.003062499999999995,
+                "internal_force_kn": -3000.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36",
+                  "consistent_tangent_mpa": 7692.307692307692,
+                  "elastic_strain": -0.0014999999999999996,
+                  "final_yield_function_mpa": 0.0,
+                  "plastic_multiplier_increment": 0.0078124999999999965,
+                  "stress_mpa": -300.0,
+                  "total_strain": -0.003062499999999995,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.014062499999999999,
+                    "backstress_mpa": -7.812499999999979,
+                    "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                    "plastic_strain": -0.0015624999999999953,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+                  },
+                  "trial_yield_function_mpa": 1624.9999999999993,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 76923.07692307692,
+                "total_strain": -0.003062499999999995
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.003062499999999995,
+                "generalized_deformation": -0.003062499999999995,
+                "internal_force_kn": -3000.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36",
+                  "consistent_tangent_mpa": 7692.307692307692,
+                  "elastic_strain": -0.0014999999999999996,
+                  "final_yield_function_mpa": 0.0,
+                  "plastic_multiplier_increment": 0.0078124999999999965,
+                  "stress_mpa": -300.0,
+                  "total_strain": -0.003062499999999995,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.014062499999999999,
+                    "backstress_mpa": -7.812499999999979,
+                    "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                    "plastic_strain": -0.0015624999999999953,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+                  },
+                  "trial_yield_function_mpa": 1624.9999999999993,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 76923.07692307692,
+                "total_strain": -0.003062499999999995
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              -3000.0
+            ],
+            "free_node_indices": [
+              1,
+              2
+            ],
+            "internal_forces_kn": [
+              3000.0,
+              0.0,
+              -3000.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                153846.15384615384,
+                -76923.07692307692
+              ],
+              [
+                -76923.07692307692,
+                76923.07692307692
+              ]
+            ],
+            "parent_state_hash": "sha256:81199925dcdaac5d8d78ca512aadc24b09344f3c372e264ae4686f875e40477a",
+            "reactions_kn": [
+              3000.0,
+              0.0,
+              0.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0,
+              0.0
+            ],
+            "target_load_factor": -1.0,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              },
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.006250000000000001,
+                  0.012500000000000002
+                ],
+                "increment_abs_m": 0.003000000000000001,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.0015,
+                  -0.003
+                ],
+                "relative_residual": 1.0,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  3000.0
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.004750000000000001,
+                  0.009500000000000001
+                ],
+                "increment_abs_m": 0.015624999999999991,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  -0.007812499999999996,
+                  -0.015624999999999991
+                ],
+                "relative_residual": 0.2003205128205127,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  600.9615384615381
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.003062499999999995,
+                  -0.00612499999999999
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0,
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.004750000000000001,
+                      0.009500000000000001
+                    ],
+                    "trial_relative_residual": 0.2003205128205127,
+                    "trial_residual_kn": [
+                      0.0,
+                      600.9615384615381
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  -0.0015,
+                  -0.003
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.006250000000000001,
+                  0.012500000000000002
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.003062499999999995,
+                      -0.00612499999999999
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0,
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  -0.007812499999999996,
+                  -0.015624999999999991
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  0.004750000000000001,
+                  0.009500000000000001
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 2,
+              "case_id": "phase2_state_updated_steel_two_element_chain@load=-1",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                -0.003062499999999995,
+                -0.00612499999999999
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0,
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.001562499999999995,
+              -0.00312499999999999
+            ],
+            "load_factor": 0.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              },
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:8b42319470d1a6782d0de77c005a43f21d315c6daa53ea211e4829a9a5a3e500",
+            "step_index": 5
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:8b42319470d1a6782d0de77c005a43f21d315c6daa53ea211e4829a9a5a3e500",
+            "active_equation_count": 2,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": false,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:0a3ffe4f908f30ccf03c935111dc079b1729101b5f4f9f4b44098be542393359",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 0,
+            "target_load_factor": 0.0,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:0a3ffe4f908f30ccf03c935111dc079b1729101b5f4f9f4b44098be542393359",
+            "yielded_element_count": 0
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.003062499999999995,
+              -0.00612499999999999
+            ],
+            "load_factor": -1.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              },
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:0a3ffe4f908f30ccf03c935111dc079b1729101b5f4f9f4b44098be542393359",
+            "step_index": 4
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              -0.001562499999999995,
+              -0.00312499999999999
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": -0.001562499999999995,
+                "generalized_deformation": -0.001562499999999995,
+                "internal_force_kn": 4.3368086899420177e-13,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765",
+                  "consistent_tangent_mpa": 200000.0,
+                  "elastic_strain": 2.168404344971009e-19,
+                  "final_yield_function_mpa": -284.375,
+                  "plastic_multiplier_increment": 0.0,
+                  "stress_mpa": 4.336808689942018e-14,
+                  "total_strain": -0.001562499999999995,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.014062499999999999,
+                    "backstress_mpa": -7.812499999999979,
+                    "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                    "plastic_strain": -0.0015624999999999953,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+                  },
+                  "trial_yield_function_mpa": -284.375,
+                  "yielded": false
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 2000000.0,
+                "total_strain": -0.001562499999999995
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": -0.001562499999999995,
+                "generalized_deformation": -0.001562499999999995,
+                "internal_force_kn": 4.3368086899420177e-13,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765",
+                  "consistent_tangent_mpa": 200000.0,
+                  "elastic_strain": 2.168404344971009e-19,
+                  "final_yield_function_mpa": -284.375,
+                  "plastic_multiplier_increment": 0.0,
+                  "stress_mpa": 4.336808689942018e-14,
+                  "total_strain": -0.001562499999999995,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.014062499999999999,
+                    "backstress_mpa": -7.812499999999979,
+                    "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                    "plastic_strain": -0.0015624999999999953,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+                  },
+                  "trial_yield_function_mpa": -284.375,
+                  "yielded": false
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 2000000.0,
+                "total_strain": -0.001562499999999995
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "free_node_indices": [
+              1,
+              2
+            ],
+            "internal_forces_kn": [
+              -4.3368086899420177e-13,
+              0.0,
+              4.3368086899420177e-13
+            ],
+            "jacobian_kn_per_m": [
+              [
+                4000000.0,
+                -2000000.0
+              ],
+              [
+                -2000000.0,
+                2000000.0
+              ]
+            ],
+            "parent_state_hash": "sha256:0a3ffe4f908f30ccf03c935111dc079b1729101b5f4f9f4b44098be542393359",
+            "reactions_kn": [
+              -4.3368086899420177e-13,
+              0.0,
+              0.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0,
+              4.3368086899420177e-13
+            ],
+            "target_load_factor": 0.0,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              },
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.003062499999999995,
+                  -0.00612499999999999
+                ],
+                "increment_abs_m": 0.0029999999999999996,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0014999999999999998,
+                  0.0029999999999999996
+                ],
+                "relative_residual": 0.9999999999999999,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  -2999.9999999999995
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.001562499999999995,
+                  -0.00312499999999999
+                ],
+                "increment_abs_m": 4.336808689942018e-19,
+                "increment_gate_passed": true,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -2.168404344971009e-19,
+                  -4.336808689942018e-19
+                ],
+                "relative_residual": 1.4456028966473392e-16,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0,
+                  4.3368086899420177e-13
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -0.001562499999999995,
+                      -0.00312499999999999
+                    ],
+                    "trial_relative_residual": 1.4456028966473392e-16,
+                    "trial_residual_kn": [
+                      0.0,
+                      4.3368086899420177e-13
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.0014999999999999998,
+                  0.0029999999999999996
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.003062499999999995,
+                  -0.00612499999999999
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 2,
+              "case_id": "phase2_state_updated_steel_two_element_chain@load=0",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 4.336808689942018e-19,
+              "free_displacements_m": [
+                -0.001562499999999995,
+                -0.00312499999999999
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 2,
+              "line_search_step_count": 1,
+              "line_search_used": false,
+              "linear_solve_count": 2,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 2,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 1.4456028966473392e-16,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0,
+                4.3368086899420177e-13
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        },
+        {
+          "accepted_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              0.0018906250000000064,
+              0.003781250000000013
+            ],
+            "load_factor": 1.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.016015625,
+                "backstress_mpa": 1.9531250000000302,
+                "dissipated_energy_density_mj_per_m3": 4.00390625,
+                "plastic_strain": 0.0003906250000000064,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:70dfe9d554bb70d2b02c75b6e3a25384045bc02bfc296cd2570a9bedbd32b0be"
+              },
+              {
+                "accumulated_plastic_strain": 0.016015625,
+                "backstress_mpa": 1.9531250000000302,
+                "dissipated_energy_density_mj_per_m3": 4.00390625,
+                "plastic_strain": 0.0003906250000000064,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:70dfe9d554bb70d2b02c75b6e3a25384045bc02bfc296cd2570a9bedbd32b0be"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:758ade71abf996d4aaa0ef2137f678be4072a60c92c91ed4001cc9ae69706ae4",
+            "step_index": 6
+          },
+          "committed": true,
+          "metrics": {
+            "accepted_state_hash_after": "sha256:758ade71abf996d4aaa0ef2137f678be4072a60c92c91ed4001cc9ae69706ae4",
+            "active_equation_count": 2,
+            "committed": true,
+            "convergence_claim": true,
+            "fallback_used": false,
+            "increment_gate_applicable": true,
+            "increment_gate_passed": true,
+            "iterative_solver_contract_pass": true,
+            "material_state_changed": true,
+            "no_solve_contract_pass": false,
+            "no_solve_reaction_only": false,
+            "parent_state_hash": "sha256:8b42319470d1a6782d0de77c005a43f21d315c6daa53ea211e4829a9a5a3e500",
+            "regularization_used": false,
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+            "residual_gate_applicable": true,
+            "residual_gate_passed": true,
+            "rollback_exact": null,
+            "solver_contract_pass": true,
+            "solver_executed": true,
+            "state_updated_element_count": 2,
+            "target_load_factor": 1.0,
+            "terminal_contract_pass": true,
+            "terminal_disposition": "solve_free_equations",
+            "terminal_reason": "residual_and_increment_converged",
+            "trial_parent_state_hash": "sha256:8b42319470d1a6782d0de77c005a43f21d315c6daa53ea211e4829a9a5a3e500",
+            "yielded_element_count": 2
+          },
+          "parent_state": {
+            "case_id": "phase2_state_updated_steel_two_element_chain",
+            "displacements_m": [
+              0.0,
+              -0.001562499999999995,
+              -0.00312499999999999
+            ],
+            "load_factor": 0.0,
+            "material_states": [
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              },
+              {
+                "accumulated_plastic_strain": 0.014062499999999999,
+                "backstress_mpa": -7.812499999999979,
+                "dissipated_energy_density_mj_per_m3": 3.515624999999999,
+                "plastic_strain": -0.0015624999999999953,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765"
+              }
+            ],
+            "schema_version": "stateful-axial-accepted-state.v1",
+            "state_hash": "sha256:8b42319470d1a6782d0de77c005a43f21d315c6daa53ea211e4829a9a5a3e500",
+            "step_index": 5
+          },
+          "status": "ready",
+          "trial_assembly": {
+            "displacements_m": [
+              0.0,
+              0.0018906250000000064,
+              0.003781250000000013
+            ],
+            "element_responses": [
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-1",
+                "elongation_m": 0.0018906250000000064,
+                "generalized_deformation": 0.0018906250000000064,
+                "internal_force_kn": 3000.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765",
+                  "consistent_tangent_mpa": 7692.307692307692,
+                  "elastic_strain": 0.0015,
+                  "final_yield_function_mpa": -5.684341886080802e-14,
+                  "plastic_multiplier_increment": 0.0019531250000000017,
+                  "stress_mpa": 300.0,
+                  "total_strain": 0.0018906250000000064,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.016015625,
+                    "backstress_mpa": 1.9531250000000302,
+                    "dissipated_energy_density_mj_per_m3": 4.00390625,
+                    "plastic_strain": 0.0003906250000000064,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:70dfe9d554bb70d2b02c75b6e3a25384045bc02bfc296cd2570a9bedbd32b0be"
+                  },
+                  "trial_yield_function_mpa": 406.25000000000034,
+                  "yielded": true
+                },
+                "node_i": 0,
+                "node_j": 1,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 76923.07692307692,
+                "total_strain": 0.0018906250000000064
+              },
+              {
+                "area_m2": 0.01,
+                "element_id": "bar-2",
+                "elongation_m": 0.0018906250000000064,
+                "generalized_deformation": 0.0018906250000000064,
+                "internal_force_kn": 3000.0,
+                "length_m": 1.0,
+                "material_response": {
+                  "committed_state_hash": "sha256:84fd8a0e110e17078b46e128d16721f5972e8a06aca4a6eceb7f036988456765",
+                  "consistent_tangent_mpa": 7692.307692307692,
+                  "elastic_strain": 0.0015,
+                  "final_yield_function_mpa": -5.684341886080802e-14,
+                  "plastic_multiplier_increment": 0.0019531250000000017,
+                  "stress_mpa": 300.0,
+                  "total_strain": 0.0018906250000000064,
+                  "trial_state": {
+                    "accumulated_plastic_strain": 0.016015625,
+                    "backstress_mpa": 1.9531250000000302,
+                    "dissipated_energy_density_mj_per_m3": 4.00390625,
+                    "plastic_strain": 0.0003906250000000064,
+                    "schema_version": "uniaxial-combined-hardening-state.v1",
+                    "state_hash": "sha256:70dfe9d554bb70d2b02c75b6e3a25384045bc02bfc296cd2570a9bedbd32b0be"
+                  },
+                  "trial_yield_function_mpa": 406.25000000000034,
+                  "yielded": true
+                },
+                "node_i": 1,
+                "node_j": 2,
+                "response_kind": "stress_strain",
+                "tangent_kn_per_m": 76923.07692307692,
+                "total_strain": 0.0018906250000000064
+              }
+            ],
+            "external_forces_kn": [
+              0.0,
+              0.0,
+              3000.0
+            ],
+            "free_node_indices": [
+              1,
+              2
+            ],
+            "internal_forces_kn": [
+              -3000.0,
+              0.0,
+              3000.0
+            ],
+            "jacobian_kn_per_m": [
+              [
+                153846.15384615384,
+                -76923.07692307692
+              ],
+              [
+                -76923.07692307692,
+                76923.07692307692
+              ]
+            ],
+            "parent_state_hash": "sha256:8b42319470d1a6782d0de77c005a43f21d315c6daa53ea211e4829a9a5a3e500",
+            "reactions_kn": [
+              -3000.0,
+              0.0,
+              0.0
+            ],
+            "residual_formula": "F_internal_minus_F_external",
+            "residual_kn": [
+              0.0,
+              0.0
+            ],
+            "target_load_factor": 1.0,
+            "trial_material_states": [
+              {
+                "accumulated_plastic_strain": 0.016015625,
+                "backstress_mpa": 1.9531250000000302,
+                "dissipated_energy_density_mj_per_m3": 4.00390625,
+                "plastic_strain": 0.0003906250000000064,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:70dfe9d554bb70d2b02c75b6e3a25384045bc02bfc296cd2570a9bedbd32b0be"
+              },
+              {
+                "accumulated_plastic_strain": 0.016015625,
+                "backstress_mpa": 1.9531250000000302,
+                "dissipated_energy_density_mj_per_m3": 4.00390625,
+                "plastic_strain": 0.0003906250000000064,
+                "schema_version": "uniaxial-combined-hardening-state.v1",
+                "state_hash": "sha256:70dfe9d554bb70d2b02c75b6e3a25384045bc02bfc296cd2570a9bedbd32b0be"
+              }
+            ]
+          },
+          "trial_solution": {
+            "convergence_history": [
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -0.001562499999999995,
+                  -0.00312499999999999
+                ],
+                "increment_abs_m": 0.0029999999999999996,
+                "increment_gate_passed": false,
+                "iteration": 0,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0014999999999999998,
+                  0.0029999999999999996
+                ],
+                "relative_residual": 0.9999999999999999,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  -2999.9999999999995
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  -6.249999999999529e-05,
+                  -0.00012499999999999057
+                ],
+                "increment_abs_m": 0.0039062500000000035,
+                "increment_gate_passed": false,
+                "iteration": 1,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 1,
+                "newton_increment_m": [
+                  0.0019531250000000017,
+                  0.0039062500000000035
+                ],
+                "relative_residual": 0.05008012820512825,
+                "residual_gate_passed": false,
+                "residual_kn": [
+                  0.0,
+                  -150.24038461538476
+                ]
+              },
+              {
+                "accepted": true,
+                "free_displacements_m": [
+                  0.0018906250000000064,
+                  0.003781250000000013
+                ],
+                "increment_abs_m": 0.0,
+                "increment_gate_passed": true,
+                "iteration": 2,
+                "line_search_alpha": 1.0,
+                "line_search_attempt_count": 0,
+                "newton_increment_m": [
+                  -0.0,
+                  -0.0
+                ],
+                "relative_residual": 0.0,
+                "residual_gate_passed": true,
+                "residual_kn": [
+                  0.0,
+                  0.0
+                ]
+              }
+            ],
+            "line_search_history": [
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      -6.249999999999529e-05,
+                      -0.00012499999999999057
+                    ],
+                    "trial_relative_residual": 0.05008012820512825,
+                    "trial_residual_kn": [
+                      0.0,
+                      -150.24038461538476
+                    ]
+                  }
+                ],
+                "iteration": 0,
+                "newton_increment_m": [
+                  0.0014999999999999998,
+                  0.0029999999999999996
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -0.001562499999999995,
+                  -0.00312499999999999
+                ]
+              },
+              {
+                "attempt_count": 1,
+                "attempts": [
+                  {
+                    "accepted": true,
+                    "alpha": 1.0,
+                    "trial_free_displacements_m": [
+                      0.0018906250000000064,
+                      0.003781250000000013
+                    ],
+                    "trial_relative_residual": 0.0,
+                    "trial_residual_kn": [
+                      0.0,
+                      0.0
+                    ]
+                  }
+                ],
+                "iteration": 1,
+                "newton_increment_m": [
+                  0.0019531250000000017,
+                  0.0039062500000000035
+                ],
+                "selected_alpha": 1.0,
+                "starting_free_displacements_m": [
+                  -6.249999999999529e-05,
+                  -0.00012499999999999057
+                ]
+              }
+            ],
+            "metrics": {
+              "active_equation_count": 2,
+              "case_id": "phase2_state_updated_steel_two_element_chain@load=1",
+              "contract_pass": true,
+              "convergence_claim": true,
+              "fallback_used": false,
+              "final_increment_abs_m": 0.0,
+              "free_displacements_m": [
+                0.0018906250000000064,
+                0.003781250000000013
+              ],
+              "globalization": "backtracking_line_search",
+              "increment_gate_passed": true,
+              "increment_norm_applicable": true,
+              "increment_tolerance": 1e-12,
+              "iteration_count": 3,
+              "line_search_step_count": 2,
+              "line_search_used": false,
+              "linear_solve_count": 3,
+              "matrix_backend": "numpy_linalg_solve_dense",
+              "newton_iteration_count": 3,
+              "reaction_observation_only": false,
+              "regularization_used": false,
+              "relative_residual": 0.0,
+              "residual_formula": "F_internal_minus_F_external",
+              "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+              "residual_gate_passed": true,
+              "residual_kn": [
+                0.0,
+                0.0
+              ],
+              "residual_norm_applicable": true,
+              "residual_tolerance": 1e-10,
+              "solver_executed": true,
+              "sparse_backend_used": false,
+              "stiffness_storage": "numpy_dense_ndarray",
+              "tangent_definition": "dF_internal_du_consistent",
+              "terminal_disposition": "solve_free_equations",
+              "terminal_reason": "residual_and_increment_converged"
+            },
+            "status": "ready",
+            "unsupported_features": []
+          }
+        }
+      ]
+    }
+  },
+  "tangent_definition": "algorithmic_consistent_d_stress_d_total_strain",
+  "truth_class": "analytic_1d_constitutive_and_axial_chain_truth",
+  "verification": {
+    "element_contract_pass": true,
+    "fallback_count": 0,
+    "line_search_history_present": true,
+    "material_point_contract_pass": true,
+    "material_variant_count": 3,
+    "regularization_count": 0,
+    "rollback_exact_gate_passed": true,
+    "structure_contract_pass": true
+  }
+}

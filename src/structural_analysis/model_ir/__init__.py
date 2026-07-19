@@ -9,8 +9,13 @@ from structural_analysis.model_ir.validation import (
     ModelIRValidationIssue,
     ModelIRValidationReport,
     canonicalize_model_ir_v2,
+    derive_model_ir_v2_blocking_feature_ids,
     load_json_object_strict,
     model_ir_v2_content_hash,
+    model_ir_v2_provenance_hash,
+    model_ir_v2_provenance_projection,
+    model_ir_v2_semantic_hash,
+    model_ir_v2_semantic_projection,
     validate_model_ir_v2,
 )
 
@@ -22,9 +27,14 @@ __all__ = [
     "ModelIRValidationIssue",
     "ModelIRValidationReport",
     "canonicalize_model_ir_v2",
+    "derive_model_ir_v2_blocking_feature_ids",
     "load_json_object_strict",
     "load_model_ir_v2",
     "parse_model_ir_v2",
     "model_ir_v2_content_hash",
+    "model_ir_v2_provenance_hash",
+    "model_ir_v2_provenance_projection",
+    "model_ir_v2_semantic_hash",
+    "model_ir_v2_semantic_projection",
     "validate_model_ir_v2",
 ]

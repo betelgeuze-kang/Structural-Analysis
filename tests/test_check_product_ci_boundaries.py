@@ -63,22 +63,251 @@ def _write_manifest(root: Path, paths: list[str]) -> Path:
 def test_classification_assigns_exact_product_ownership() -> None:
     quarantined = {"scripts/materialize_gpcr_rows.py"}
 
-    assert module.classify_path(
-        "src/structural_analysis/api/core.py",
-        quarantined_paths=quarantined,
-    ) == "core"
-    assert module.classify_path(
-        "scripts/build_phase2_linear_reference_artifacts.py",
-        quarantined_paths=quarantined,
-    ) == "legacy_evidence"
-    assert module.classify_path(
-        "scripts/materialize_gpcr_rows.py",
-        quarantined_paths=quarantined,
-    ) == "molecular_quarantine"
-    assert module.classify_path(
-        "tests/test_pocketmd_contract.py",
-        quarantined_paths=set(),
-    ) == "molecular_quarantine"
+    assert (
+        module.classify_path(
+            "src/structural_analysis/api/core.py",
+            quarantined_paths=quarantined,
+        )
+        == "core"
+    )
+    assert (
+        module.classify_path(
+            "scripts/build_phase2_linear_reference_artifacts.py",
+            quarantined_paths=quarantined,
+        )
+        == "legacy_evidence"
+    )
+    assert (
+        module.classify_path(
+            "scripts/materialize_gpcr_rows.py",
+            quarantined_paths=quarantined,
+        )
+        == "molecular_quarantine"
+    )
+    assert (
+        module.classify_path(
+            "tests/test_pocketmd_contract.py",
+            quarantined_paths=set(),
+        )
+        == "molecular_quarantine"
+    )
+
+    for structural_benchmark_path in (
+        "scripts/build_analytic_frame_verification_artifact.py",
+        "scripts/build_medium_benchmark_corpus_plan.py",
+        "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
+        "scripts/build_phase6_benchmark_scale_status.py",
+        "scripts/build_phase6_silent_import_loss_status.py",
+        "scripts/build_developer_preview_rc_status.py",
+        "scripts/build_developer_preview_final_gate_owner_packet.py",
+        "scripts/build_structural_product_development_roadmap.py",
+        "scripts/build_verification_hierarchy_status.py",
+        "scripts/run_phase3_medium_model_scorecard_receipt.py",
+        "tests/test_benchmark_scientific_acceptance.py",
+        "tests/test_analytic_frame_verification.py",
+        "tests/test_build_medium_benchmark_corpus_plan.py",
+        "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
+        "tests/test_build_phase6_benchmark_scale_status.py",
+        "tests/test_build_phase6_silent_import_loss_status.py",
+        "tests/test_build_developer_preview_rc_status.py",
+        "tests/test_build_developer_preview_final_gate_owner_packet.py",
+        "tests/test_build_structural_product_development_roadmap.py",
+        "tests/test_build_verification_hierarchy_status.py",
+        "tests/test_medium_benchmark_corpus_contract.py",
+        "tests/test_run_phase3_medium_model_scorecard_receipt.py",
+        "tests/test_verification_hierarchy_contract.py",
+    ):
+        assert (
+            module.classify_path(
+                structural_benchmark_path,
+                quarantined_paths=set(),
+            )
+            == "core"
+        )
+
+
+def test_release_viewer_bundler_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "implementation/phase1/release_viewer_bundler.py",
+        "tests/test_release_viewer_bundler.py",
+        "tests/test_structure_viewer_module_boundaries.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_adaptive_newton_continuation_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_adaptive_newton_continuation_artifacts.py",
+        "tests/test_build_phase2_adaptive_newton_continuation_artifacts.py",
+        "tests/test_nonlinear_adaptive_continuation.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_state_updated_steel_material_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_state_updated_steel_material_artifacts.py",
+        "tests/test_build_phase2_state_updated_steel_material_artifacts.py",
+        "tests/test_state_updated_steel_material_newton.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_state_updated_concrete_damage_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+        "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py",
+        "tests/test_state_updated_concrete_damage_newton.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_state_updated_composite_section_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_state_updated_composite_section_artifacts.py",
+        "tests/test_build_phase2_state_updated_composite_section_artifacts.py",
+        "tests/test_state_updated_composite_section_newton.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_state_updated_bilinear_link_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_state_updated_bilinear_link_artifacts.py",
+        "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py",
+        "tests/test_state_updated_bilinear_link_newton.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_geometric_nonlinear_benchmarks_are_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py",
+        "tests/test_build_phase2_geometric_nonlinear_benchmark_artifacts.py",
+        "tests/test_geometric_nonlinear_benchmarks.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_modal_buckling_kernels_are_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_modal_buckling_kernel_artifacts.py",
+        "tests/test_build_phase2_modal_buckling_kernel_artifacts.py",
+        "tests/test_modal_generalized_eigen_v1.py",
+        "tests/test_buckling_generalized_eigen_v1.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_whole_model_modal_path_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_whole_model_modal_artifacts.py",
+        "tests/test_build_phase2_whole_model_modal_artifacts.py",
+        "tests/test_whole_model_modal_analysis.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_whole_model_buckling_path_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_whole_model_buckling_artifacts.py",
+        "tests/test_build_phase2_whole_model_buckling_artifacts.py",
+        "tests/test_whole_model_buckling_analysis.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_external_code_to_code_receipt_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/run_external_code_to_code_technical_receipt.py",
+        "tests/test_external_code_to_code_technical_receipt.py",
+        "scripts/run_external_modal_buckling_technical_receipt.py",
+        "tests/test_external_modal_buckling_technical_receipt.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_shallow_arch_arc_length_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_shallow_arch_arc_length_artifacts.py",
+        "tests/test_build_phase2_shallow_arch_arc_length_artifacts.py",
+        "tests/test_nonlinear_arc_length.py",
+        "tests/test_shallow_arch_arc_length_benchmark.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_coupled_vector_arc_length_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py",
+        "tests/test_build_phase2_coupled_shallow_arch_vector_arc_length_artifacts.py",
+        "tests/test_coupled_shallow_arch_vector_arc_length_benchmark.py",
+        "tests/test_nonlinear_vector_arc_length.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_arc_length_cpu_fgmres_bridge_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts.py",
+        "tests/test_build_phase2_arc_length_cpu_fgmres_tangent_bridge_artifacts.py",
+        "tests/test_arc_length_cpu_fgmres_tangent_bridge.py",
+        "tests/test_engine_v2_cpu_fgmres_tangent.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_arc_length_cpu_fgmres_continuation_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py",
+        "tests/test_build_phase2_arc_length_cpu_fgmres_continuation_artifacts.py",
+        "tests/test_arc_length_cpu_fgmres_continuation.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_sparse_chain_cpu_fgmres_arc_length_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py",
+        "tests/test_build_phase2_sparse_chain_cpu_fgmres_arc_length_artifacts.py",
+        "tests/test_sparse_chain_cpu_fgmres_arc_length.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_load_coupled_sparse_chain_arc_length_is_owned_by_core_lane() -> None:
+    for path in (
+        "scripts/build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py",
+        (
+            "tests/"
+            "test_build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py"
+        ),
+        "tests/test_load_coupled_sparse_chain_arc_length.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_actual_mgt_load_coupled_adapter_is_owned_by_core_lane() -> None:
+    for path in (
+        "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py",
+        "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py",
+        "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py",
+        "tests/test_g1_mgt_load_coupled_arc_length_adapter.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_engine_v2_hip_backend_contracts_are_owned_by_the_core_lane() -> None:
+    for path in (
+        "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py",
+        "scripts/run_engine_v2_hip_primitive_parity.py",
+        "tests/test_engine_v2_hip_primitive_parity.py",
+        "tests/test_engine_v2_hip_primitive_parity_runner.py",
+        "scripts/run_engine_v2_hip_fgmres_recurrence.py",
+        "tests/test_engine_v2_hip_fgmres_recurrence.py",
+        "tests/test_engine_v2_hip_fgmres_recurrence_runner.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
 
 
 def test_boundary_report_accepts_complete_three_lane_partition(

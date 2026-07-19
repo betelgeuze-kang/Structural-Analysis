@@ -40,7 +40,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-07-01T15:42:23.904144+00:00",
+  "generated_at": "2026-07-18T14:04:27.261915+00:00",
   "ifc_import_case_requirement": {
     "blocker": "phase3_ifc_import_case_quantity_credit_missing",
     "claim_boundary": "The Phase 3 roadmap requires at least 10 clean/dirty IFC import cases. Current acquisition evidence contains two clean buildingSMART expected import-health contracts and eight dirty/negative expected block contracts, but zero quantity-credit-ready IFC cases.",
@@ -63,15 +63,15 @@
     "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:54555de9e2e83f8ab8bda0757338207e44a86935684fec668d7ba4f72df68684",
     "scripts/build_phase3_ifc_query_gui_readiness_receipt.py": "sha256:b6c47721aa4d13ad865c2d6232f64d8e5907f749623492f6a6925927ccf75d99",
     "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
-    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:8a9e393a1c0d9c40ca51648a74ae2de0ea514cf4e12d696d1671fcd3680d469c",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:3010d611350dc38e8385ed5474253a48acec7b71e84da33ac59b09bc2cc40620",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:9bb1c71f77d906fec775f65ad6648eadecb7c0852d47a6a6ce1dd60e4b9a981c",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:2f6db6035be27e94bd622e64d9ffb3e92f88fcef3b3e524f4ad91792f04b575b",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
     "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py": "sha256:500bbc5fe5a32797e47d6887e42b08f18213907f6ae07e2cadbf77cdb8f910db",
     "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
     "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
-    "scripts/run_phase3_large_model_execution_receipt.py": "sha256:9dd82f9169697294c91b7a2cf98faace9992d15ab37237267a3369cfc3555e89",
-    "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:a059da647948a9f33aef2aaf73582ac2104b860309b25919363e6d3a820071c3",
+    "scripts/run_phase3_large_model_execution_receipt.py": "sha256:d615b169fda3f3f8c9a231a957b7b0354f503c769269724f23c8dc477c9250eb",
+    "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:c8229fdf99cc50c93a4c170f09080358d5f851b132c2b6d3be24e6347fbf3852",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82"
   },
   "lanes": [
@@ -486,7 +486,7 @@
     "writes_default_artifact_command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py"
   },
   "schema_version": "phase3-benchmark-acquisition-plan.v1",
-  "source_commit_sha": "b737f323f6c1614b64b8bccc732d8b90ef42c5a9",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
   "source_license_receipt_source_count": 4,
   "status": "blocked",
   "topology_receipt_source_count": 6

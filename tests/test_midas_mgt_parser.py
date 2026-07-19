@@ -118,6 +118,9 @@ def test_parse_midas_mgt_to_json_npz(tmp_path: Path) -> None:
     assert int((report["artifacts"]["edge_list_summary"] or {}).get("node_count", 0)) == 6
 
     model = json.loads(json_out.read_text(encoding="utf-8"))
+    assert model["model"]["units"]["force"] == "N"
+    assert model["model"]["units"]["length"] == "M"
+    assert model["parser"]["unit_system"] == model["model"]["units"]
     assert len(model["model"]["nodes"]) == 6
     assert len(model["model"]["elements"]) == 3
     assert len(model["model"]["loads"]["static_load_cases"]) == 1
@@ -336,6 +339,11 @@ ST, DEAD, 1.2, ST, LIVE, 1.6
     assert loads["nodal_loads"][0]["load_case_source"] == "use_stld"
     assert loads["selfweight"][0]["load_case"] == "DEAD"
     assert loads["pressure_loads"][0]["load_case"] == "LIVE"
+    assert loads["pressure_loads"][0]["direction"] == "GZ"
+    assert loads["pressure_loads"][0]["direction_vector"] == [0.0, 0.0, 0.0]
+    assert loads["pressure_loads"][0]["projected"] == "NO"
+    assert loads["pressure_loads"][0]["uniform_pressure"] == -5.0
+    assert loads["pressure_loads"][0]["corner_pressures"] == [0.0, 0.0, 0.0, 0.0]
     semantic = loads["semantic_load_summary"]
     case_rows = {row["load_case"]: row for row in semantic["case_force_summaries"]}
     assert set(case_rows) == {"DEAD", "LIVE"}

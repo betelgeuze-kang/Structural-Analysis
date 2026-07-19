@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from structural_analysis import AnalysisConfig, analyze, load_model
+from structural_analysis.analyses import run_authoritative_linear_static
 
 
 E = 200.0e6
@@ -226,3 +227,35 @@ def test_non_positive_tolerance_is_blocked(tmp_path: Path) -> None:
     assert {row["kind"] for row in result.unsupported_features} == {
         "linear_static_tolerance_invalid"
     }
+
+
+@pytest.mark.parametrize(
+    ("tolerance", "receipt_value"),
+    [
+        pytest.param(True, True, id="boolean"),
+        pytest.param("invalid", "invalid", id="non-numeric"),
+        pytest.param(float("inf"), "positive_infinity", id="infinite"),
+        pytest.param(float("nan"), "nan", id="nan"),
+    ],
+)
+def test_direct_linear_driver_rejects_non_numeric_or_nonfinite_tolerance(
+    tmp_path: Path,
+    tolerance: object,
+    receipt_value: object,
+) -> None:
+    path = tmp_path / "invalid-direct-tolerance.json"
+    _write_frame_case(path)
+
+    result = run_authoritative_linear_static(
+        load_model(path),
+        tolerance=tolerance,
+        matrix_backend="numpy_linalg_solve_dense",
+    )
+
+    assert result.status == "blocked"
+    assert result.unsupported_features[0]["kind"] == (
+        "linear_static_tolerance_invalid"
+    )
+    assert result.unsupported_features[0]["tolerance"] == receipt_value
+    assert result.metrics["fallback_used"] is False
+    json.dumps(result.unsupported_features, allow_nan=False)

@@ -1,0 +1,898 @@
+{
+  "analysis_type": "geometric_nonlinear_benchmark_seed",
+  "arc_length_path_following_claim": false,
+  "benchmarks": {
+    "euler_column": {
+      "case_id": "pinned_pinned_euler_column_fe_convergence",
+      "contract_pass": true,
+      "exact_critical_load_kn": 10966.227112321509,
+      "finest_relative_error": 2.0602108659497045e-06,
+      "formulation": "euler_bernoulli_beam_column_consistent_geometric",
+      "mesh_rows": [
+        {
+          "computed_critical_load_kn": 11048.718662755216,
+          "contract_pass": true,
+          "element_count": 2,
+          "element_length_m": 1.5,
+          "exact_critical_load_kn": 10966.227112321509,
+          "generalized_eigen_residual_relative_inf": 9.293835577396169e-15,
+          "matrix_symmetry_abs_max": 0.0,
+          "mode_mac": 1.0,
+          "normalized_nodal_translations": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "relative_error": 0.007522327377391384
+        },
+        {
+          "computed_critical_load_kn": 10971.843361823507,
+          "contract_pass": true,
+          "element_count": 4,
+          "element_length_m": 0.75,
+          "exact_critical_load_kn": 10966.227112321509,
+          "generalized_eigen_residual_relative_inf": 3.961972803380216e-14,
+          "matrix_symmetry_abs_max": 0.0,
+          "mode_mac": 1.0,
+          "normalized_nodal_translations": [
+            0.0,
+            0.7071067811865498,
+            1.0,
+            0.7071067811865459,
+            0.0
+          ],
+          "relative_error": 0.0005121405424558171
+        },
+        {
+          "computed_critical_load_kn": 10966.586432658874,
+          "contract_pass": true,
+          "element_count": 8,
+          "element_length_m": 0.375,
+          "exact_critical_load_kn": 10966.227112321509,
+          "generalized_eigen_residual_relative_inf": 2.469056029409762e-13,
+          "matrix_symmetry_abs_max": 0.0,
+          "mode_mac": 1.0,
+          "normalized_nodal_translations": [
+            0.0,
+            0.38268343236509217,
+            0.7071067811865501,
+            0.9238795325112878,
+            1.0,
+            0.9238795325112868,
+            0.707106781186548,
+            0.38268343236509045,
+            0.0
+          ],
+          "relative_error": 3.276608569979264e-05
+        },
+        {
+          "computed_critical_load_kn": 10966.249705061764,
+          "contract_pass": true,
+          "element_count": 16,
+          "element_length_m": 0.1875,
+          "exact_critical_load_kn": 10966.227112321509,
+          "generalized_eigen_residual_relative_inf": 3.4024558343987525e-12,
+          "matrix_symmetry_abs_max": 0.0,
+          "mode_mac": 1.0,
+          "normalized_nodal_translations": [
+            0.0,
+            0.1950903220161219,
+            0.3826834323650781,
+            0.555570233019588,
+            0.7071067811865336,
+            0.8314696123025337,
+            0.9238795325112792,
+            0.9807852804032272,
+            1.0,
+            0.9807852804032325,
+            0.9238795325112903,
+            0.8314696123025487,
+            0.70710678118655,
+            0.5555702330196031,
+            0.38268343236508967,
+            0.19509032201612816,
+            0.0
+          ],
+          "relative_error": 2.0602108659497045e-06
+        }
+      ],
+      "monotonic_upper_bound_convergence": true,
+      "observed_convergence_orders": [
+        3.8765674184937398,
+        3.9662645301836528,
+        3.991339423749977
+      ],
+      "parameters": {
+        "flexural_rigidity_kn_m2": 10000.0,
+        "length_m": 3.0
+      },
+      "truth_basis": "closed_form_euler_critical_load_and_sine_mode"
+    },
+    "modal_pdelta_column": {
+      "amplification_monotonic": true,
+      "case_id": "pinned_column_first_mode_pdelta_amplification",
+      "contract_pass": true,
+      "element_count": 16,
+      "fe_critical_load_kn": 10966.249705061764,
+      "formulation": "modal_second_order_K_minus_PKg",
+      "general_frame_pdelta_claim": false,
+      "load_rows": [
+        {
+          "compression_load_kn": 0.0,
+          "compression_to_critical_ratio": 0.0,
+          "computed_modal_amplification": 1.0,
+          "contract_pass": true,
+          "equilibrium_residual_relative_inf": 2.0513456013460135e-12,
+          "exact_modal_amplification": 1.0,
+          "relative_error": 0.0
+        },
+        {
+          "compression_load_kn": 2741.562426265441,
+          "compression_to_critical_ratio": 0.25,
+          "computed_modal_amplification": 1.3333333333337,
+          "contract_pass": true,
+          "equilibrium_residual_relative_inf": 3.0633427646767134e-12,
+          "exact_modal_amplification": 1.3333333333333333,
+          "relative_error": 2.751132655021138e-13
+        },
+        {
+          "compression_load_kn": 5483.124852530882,
+          "compression_to_critical_ratio": 0.5,
+          "computed_modal_amplification": 1.999999999999953,
+          "contract_pass": true,
+          "equilibrium_residual_relative_inf": 4.376203949538162e-12,
+          "exact_modal_amplification": 2.0,
+          "relative_error": 2.353672812205332e-14
+        },
+        {
+          "compression_load_kn": 8224.687278796322,
+          "compression_to_critical_ratio": 0.75,
+          "computed_modal_amplification": 3.9999999999960876,
+          "contract_pass": true,
+          "equilibrium_residual_relative_inf": 8.889164272499392e-12,
+          "exact_modal_amplification": 4.0,
+          "relative_error": 9.78106484694763e-13
+        },
+        {
+          "compression_load_kn": 9869.624734555588,
+          "compression_to_critical_ratio": 0.9,
+          "computed_modal_amplification": 9.999999999985613,
+          "contract_pass": true,
+          "equilibrium_residual_relative_inf": 3.495492904693607e-11,
+          "exact_modal_amplification": 10.000000000000002,
+          "relative_error": 1.4388490399142027e-12
+        }
+      ],
+      "truth_basis": "generalized_eigenmode_amplification_identity"
+    },
+    "two_bar_shallow_arch": {
+      "arc_length_solver_claim": false,
+      "case_id": "two_bar_shallow_arch_exact_snapthrough_path",
+      "contract_pass": true,
+      "curve_rows": [
+        {
+          "consistent_tangent_kn_per_m": 754.2928274545557,
+          "downward_displacement_m": 0.0,
+          "equilibrium_load_kn": 0.0,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.0
+        },
+        {
+          "consistent_tangent_kn_per_m": 700.4488671138939,
+          "downward_displacement_m": 0.005,
+          "equilibrium_load_kn": 3.6363928725232553,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.00920315771435048
+        },
+        {
+          "consistent_tangent_kn_per_m": 647.7209995548724,
+          "downward_displacement_m": 0.01,
+          "equilibrium_load_kn": 7.006348839907157,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.035919862326338675
+        },
+        {
+          "consistent_tangent_kn_per_m": 596.126700179388,
+          "downward_displacement_m": 0.015,
+          "equilibrium_load_kn": 10.11549216321952,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.07883195355541327
+        },
+        {
+          "consistent_tangent_kn_per_m": 545.6831772493315,
+          "downward_displacement_m": 0.02,
+          "equilibrium_load_kn": 12.969533817990541,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.1366496097690484
+        },
+        {
+          "consistent_tangent_kn_per_m": 496.40735918982045,
+          "downward_displacement_m": 0.025,
+          "equilibrium_load_kn": 15.574270126744334,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.20811177816285475
+        },
+        {
+          "consistent_tangent_kn_per_m": 448.31588198211637,
+          "downward_displacement_m": 0.03,
+          "equilibrium_load_kn": 17.935581328250834,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.29198659794496556
+        },
+        {
+          "consistent_tangent_kn_per_m": 401.42507666213953,
+          "downward_displacement_m": 0.035,
+          "equilibrium_load_kn": 20.0594300840084,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.38707181620942305
+        },
+        {
+          "consistent_tangent_kn_per_m": 355.7509569403753,
+          "downward_displacement_m": 0.04,
+          "equilibrium_load_kn": 21.9518599225125,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.49219519618644864
+        },
+        {
+          "consistent_tangent_kn_per_m": 311.30920695961896,
+          "downward_displacement_m": 0.045,
+          "equilibrium_load_kn": 23.618993621963057,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.6062149175595497
+        },
+        {
+          "consistent_tangent_kn_per_m": 268.1151692062214,
+          "downward_displacement_m": 0.05,
+          "equilibrium_load_kn": 25.0670315321323,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.7280199685439283
+        },
+        {
+          "consistent_tangent_kn_per_m": 226.18383259112767,
+          "downward_displacement_m": 0.055,
+          "equilibrium_load_kn": 26.30224983621825,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.856530529423883
+        },
+        {
+          "consistent_tangent_kn_per_m": 185.52982071659522,
+          "downward_displacement_m": 0.06,
+          "equilibrium_load_kn": 27.33099875354824,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.9906983472510908
+        },
+        {
+          "consistent_tangent_kn_per_m": 146.16738034462674,
+          "downward_displacement_m": 0.065,
+          "equilibrium_load_kn": 28.15970068412089,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.12950710141063
+        },
+        {
+          "consistent_tangent_kn_per_m": 108.11037008277812,
+          "downward_displacement_m": 0.07,
+          "equilibrium_load_kn": 28.79484829602621,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.271972759766411
+        },
+        {
+          "consistent_tangent_kn_per_m": 71.37224930309738,
+          "downward_displacement_m": 0.075,
+          "equilibrium_load_kn": 29.243002556869115,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.417143925103431
+        },
+        {
+          "consistent_tangent_kn_per_m": 35.96606730968586,
+          "downward_displacement_m": 0.08,
+          "equilibrium_load_kn": 29.510790710404592,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.564102171589289
+        },
+        {
+          "consistent_tangent_kn_per_m": 1.9044527700708471,
+          "downward_displacement_m": 0.085,
+          "equilibrium_load_kn": 29.604904199663917,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.7119623709849623
+        },
+        {
+          "consistent_tangent_kn_per_m": -30.8003965744954,
+          "downward_displacement_m": 0.09,
+          "equilibrium_load_kn": 29.53209653792818,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.8598730083400024
+        },
+        {
+          "consistent_tangent_kn_per_m": -62.13672390508274,
+          "downward_displacement_m": 0.095,
+          "equilibrium_load_kn": 29.299181128978255,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.00701648691515
+        },
+        {
+          "consistent_tangent_kn_per_m": -92.09322301307341,
+          "downward_displacement_m": 0.1,
+          "equilibrium_load_kn": 28.9130290381381,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.152609422082773
+        },
+        {
+          "consistent_tangent_kn_per_m": -120.65904766591885,
+          "downward_displacement_m": 0.105,
+          "equilibrium_load_kn": 28.380566715665108,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.295902923962325
+        },
+        {
+          "consistent_tangent_kn_per_m": -147.82382063707658,
+          "downward_displacement_m": 0.11,
+          "equilibrium_load_kn": 27.708773674155314,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.436182868557616
+        },
+        {
+          "consistent_tangent_kn_per_m": -173.5776423866059,
+          "downward_displacement_m": 0.115,
+          "equilibrium_load_kn": 26.904680121666058,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.5727701571693746
+        },
+        {
+          "consistent_tangent_kn_per_m": -197.9110993796264,
+          "downward_displacement_m": 0.12,
+          "equilibrium_load_kn": 25.97536455232765,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.7050209638661715
+        },
+        {
+          "consistent_tangent_kn_per_m": -220.8152720303283,
+          "downward_displacement_m": 0.125,
+          "equilibrium_load_kn": 24.92795129630438,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.8323269708064553
+        },
+        {
+          "consistent_tangent_kn_per_m": -242.2817422593466,
+          "downward_displacement_m": 0.13,
+          "equilibrium_load_kn": 23.76960803098917,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.9541155912122936
+        },
+        {
+          "consistent_tangent_kn_per_m": -262.3026006533766,
+          "downward_displacement_m": 0.135,
+          "equilibrium_load_kn": 22.5075432554064,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.069850179806719
+        },
+        {
+          "consistent_tangent_kn_per_m": -280.8704532158484,
+          "downward_displacement_m": 0.14,
+          "equilibrium_load_kn": 21.14900372983035,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.1790302305346376
+        },
+        {
+          "consistent_tangent_kn_per_m": -297.9784276986749,
+          "downward_displacement_m": 0.145,
+          "equilibrium_load_kn": 19.701271882697316,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.2811915613997265
+        },
+        {
+          "consistent_tangent_kn_per_m": -313.62017950518026,
+          "downward_displacement_m": 0.15,
+          "equilibrium_load_kn": 18.17166318692446,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.3759064862585406
+        },
+        {
+          "consistent_tangent_kn_per_m": -327.78989715513234,
+          "downward_displacement_m": 0.155,
+          "equilibrium_load_kn": 16.567523507806033,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.462783973423619
+        },
+        {
+          "consistent_tangent_kn_per_m": -340.482307303585,
+          "downward_displacement_m": 0.16,
+          "equilibrium_load_kn": 14.896226424695465,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.5414697909402353
+        },
+        {
+          "consistent_tangent_kn_per_m": -351.6926793056561,
+          "downward_displacement_m": 0.165,
+          "equilibrium_load_kn": 13.165170528728305,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.611646638410753
+        },
+        {
+          "consistent_tangent_kn_per_m": -361.41682932011304,
+          "downward_displacement_m": 0.17,
+          "equilibrium_load_kn": 11.381776698868007,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.6730342652518484
+        },
+        {
+          "consistent_tangent_kn_per_m": -369.6511239454555,
+          "downward_displacement_m": 0.17500000000000002,
+          "equilibrium_load_kn": 9.553485358601403,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.72538957528294
+        },
+        {
+          "consistent_tangent_kn_per_m": -376.39248338286126,
+          "downward_displacement_m": 0.18,
+          "equilibrium_load_kn": 7.687753715634846,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.768506717554995
+        },
+        {
+          "consistent_tangent_kn_per_m": -381.63838412087756,
+          "downward_displacement_m": 0.185,
+          "equilibrium_load_kn": 5.792052986968767,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.802217163339531
+        },
+        {
+          "consistent_tangent_kn_per_m": -385.3868611378609,
+          "downward_displacement_m": 0.19,
+          "equilibrium_load_kn": 3.8738656117534918,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.8263897692123185
+        },
+        {
+          "consistent_tangent_kn_per_m": -387.6365096184113,
+          "downward_displacement_m": 0.195,
+          "equilibrium_load_kn": 1.9406824543450052,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.840930826174464
+        },
+        {
+          "consistent_tangent_kn_per_m": -388.3864861815981,
+          "downward_displacement_m": 0.2,
+          "equilibrium_load_kn": 0.0,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.845784094771282
+        },
+        {
+          "consistent_tangent_kn_per_m": -387.6365096184113,
+          "downward_displacement_m": 0.20500000000000002,
+          "equilibrium_load_kn": -1.9406824543450052,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.840930826174464
+        },
+        {
+          "consistent_tangent_kn_per_m": -385.3868611378609,
+          "downward_displacement_m": 0.21,
+          "equilibrium_load_kn": -3.873865611753481,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.8263897692123185
+        },
+        {
+          "consistent_tangent_kn_per_m": -381.63838412087756,
+          "downward_displacement_m": 0.215,
+          "equilibrium_load_kn": -5.7920529869687565,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.802217163339531
+        },
+        {
+          "consistent_tangent_kn_per_m": -376.39248338286126,
+          "downward_displacement_m": 0.22,
+          "equilibrium_load_kn": -7.687753715634836,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.768506717554995
+        },
+        {
+          "consistent_tangent_kn_per_m": -369.6511239454555,
+          "downward_displacement_m": 0.225,
+          "equilibrium_load_kn": -9.553485358601403,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.72538957528294
+        },
+        {
+          "consistent_tangent_kn_per_m": -361.41682932011304,
+          "downward_displacement_m": 0.23,
+          "equilibrium_load_kn": -11.381776698868007,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.6730342652518484
+        },
+        {
+          "consistent_tangent_kn_per_m": -351.6926793056561,
+          "downward_displacement_m": 0.23500000000000001,
+          "equilibrium_load_kn": -13.165170528728305,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.611646638410753
+        },
+        {
+          "consistent_tangent_kn_per_m": -340.482307303585,
+          "downward_displacement_m": 0.24,
+          "equilibrium_load_kn": -14.896226424695454,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.5414697909402353
+        },
+        {
+          "consistent_tangent_kn_per_m": -327.78989715513234,
+          "downward_displacement_m": 0.245,
+          "equilibrium_load_kn": -16.567523507806023,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.462783973423619
+        },
+        {
+          "consistent_tangent_kn_per_m": -313.62017950518026,
+          "downward_displacement_m": 0.25,
+          "equilibrium_load_kn": -18.171663186924448,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.3759064862585406
+        },
+        {
+          "consistent_tangent_kn_per_m": -297.9784276986749,
+          "downward_displacement_m": 0.255,
+          "equilibrium_load_kn": -19.701271882697306,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.2811915613997265
+        },
+        {
+          "consistent_tangent_kn_per_m": -280.8704532158484,
+          "downward_displacement_m": 0.26,
+          "equilibrium_load_kn": -21.14900372983035,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.1790302305346376
+        },
+        {
+          "consistent_tangent_kn_per_m": -262.3026006533766,
+          "downward_displacement_m": 0.265,
+          "equilibrium_load_kn": -22.5075432554064,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 3.069850179806719
+        },
+        {
+          "consistent_tangent_kn_per_m": -242.2817422593466,
+          "downward_displacement_m": 0.27,
+          "equilibrium_load_kn": -23.76960803098917,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.9541155912122936
+        },
+        {
+          "consistent_tangent_kn_per_m": -220.8152720303283,
+          "downward_displacement_m": 0.275,
+          "equilibrium_load_kn": -24.92795129630438,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.8323269708064553
+        },
+        {
+          "consistent_tangent_kn_per_m": -197.9110993796264,
+          "downward_displacement_m": 0.28,
+          "equilibrium_load_kn": -25.97536455232765,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.7050209638661715
+        },
+        {
+          "consistent_tangent_kn_per_m": -173.5776423866059,
+          "downward_displacement_m": 0.28500000000000003,
+          "equilibrium_load_kn": -26.90468012166606,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.5727701571693746
+        },
+        {
+          "consistent_tangent_kn_per_m": -147.82382063707658,
+          "downward_displacement_m": 0.29,
+          "equilibrium_load_kn": -27.7087736741553,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.436182868557616
+        },
+        {
+          "consistent_tangent_kn_per_m": -120.65904766591885,
+          "downward_displacement_m": 0.295,
+          "equilibrium_load_kn": -28.380566715665093,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.295902923962325
+        },
+        {
+          "consistent_tangent_kn_per_m": -92.09322301307341,
+          "downward_displacement_m": 0.3,
+          "equilibrium_load_kn": -28.91302903813809,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.152609422082773
+        },
+        {
+          "consistent_tangent_kn_per_m": -62.13672390508274,
+          "downward_displacement_m": 0.305,
+          "equilibrium_load_kn": -29.299181128978248,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 2.00701648691515
+        },
+        {
+          "consistent_tangent_kn_per_m": -30.8003965744954,
+          "downward_displacement_m": 0.31,
+          "equilibrium_load_kn": -29.53209653792817,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.8598730083400024
+        },
+        {
+          "consistent_tangent_kn_per_m": 1.9044527700708471,
+          "downward_displacement_m": 0.315,
+          "equilibrium_load_kn": -29.604904199663913,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.7119623709849623
+        },
+        {
+          "consistent_tangent_kn_per_m": 35.96606730968586,
+          "downward_displacement_m": 0.32,
+          "equilibrium_load_kn": -29.51079071040459,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.564102171589289
+        },
+        {
+          "consistent_tangent_kn_per_m": 71.37224930309738,
+          "downward_displacement_m": 0.325,
+          "equilibrium_load_kn": -29.243002556869115,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.417143925103431
+        },
+        {
+          "consistent_tangent_kn_per_m": 108.11037008277812,
+          "downward_displacement_m": 0.33,
+          "equilibrium_load_kn": -28.79484829602621,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.271972759766411
+        },
+        {
+          "consistent_tangent_kn_per_m": 146.16738034462674,
+          "downward_displacement_m": 0.335,
+          "equilibrium_load_kn": -28.15970068412089,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.12950710141063
+        },
+        {
+          "consistent_tangent_kn_per_m": 185.52982071659522,
+          "downward_displacement_m": 0.34,
+          "equilibrium_load_kn": -27.33099875354824,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.9906983472510908
+        },
+        {
+          "consistent_tangent_kn_per_m": 226.18383259112767,
+          "downward_displacement_m": 0.34500000000000003,
+          "equilibrium_load_kn": -26.30224983621825,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.856530529423883
+        },
+        {
+          "consistent_tangent_kn_per_m": 268.1151692062214,
+          "downward_displacement_m": 0.35000000000000003,
+          "equilibrium_load_kn": -25.0670315321323,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.7280199685439283
+        },
+        {
+          "consistent_tangent_kn_per_m": 311.30920695961896,
+          "downward_displacement_m": 0.355,
+          "equilibrium_load_kn": -23.61899362196305,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.6062149175595497
+        },
+        {
+          "consistent_tangent_kn_per_m": 355.7509569403753,
+          "downward_displacement_m": 0.36,
+          "equilibrium_load_kn": -21.951859922512497,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.49219519618644864
+        },
+        {
+          "consistent_tangent_kn_per_m": 401.42507666213953,
+          "downward_displacement_m": 0.365,
+          "equilibrium_load_kn": -20.059430084008397,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.38707181620942305
+        },
+        {
+          "consistent_tangent_kn_per_m": 448.31588198211637,
+          "downward_displacement_m": 0.37,
+          "equilibrium_load_kn": -17.93558132825083,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.29198659794496556
+        },
+        {
+          "consistent_tangent_kn_per_m": 496.40735918982045,
+          "downward_displacement_m": 0.375,
+          "equilibrium_load_kn": -15.57427012674433,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.20811177816285475
+        },
+        {
+          "consistent_tangent_kn_per_m": 545.6831772493315,
+          "downward_displacement_m": 0.38,
+          "equilibrium_load_kn": -12.96953381799054,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.1366496097690484
+        },
+        {
+          "consistent_tangent_kn_per_m": 596.126700179388,
+          "downward_displacement_m": 0.385,
+          "equilibrium_load_kn": -10.11549216321952,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.07883195355541327
+        },
+        {
+          "consistent_tangent_kn_per_m": 647.7209995548724,
+          "downward_displacement_m": 0.39,
+          "equilibrium_load_kn": -7.006348839907157,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.035919862326338675
+        },
+        {
+          "consistent_tangent_kn_per_m": 700.4488671138939,
+          "downward_displacement_m": 0.395,
+          "equilibrium_load_kn": -3.6363928725232553,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.00920315771435048
+        },
+        {
+          "consistent_tangent_kn_per_m": 754.2928274545557,
+          "downward_displacement_m": 0.4,
+          "equilibrium_load_kn": -0.0,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.0
+        },
+        {
+          "consistent_tangent_kn_per_m": 809.2351508054169,
+          "downward_displacement_m": 0.405,
+          "equilibrium_load_kn": 3.9083660204583524,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.0096564512534457
+        },
+        {
+          "consistent_tangent_kn_per_m": 865.2578658542155,
+          "downward_displacement_m": 0.41000000000000003,
+          "equilibrium_load_kn": 8.094152173588348,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.03954603211689124
+        },
+        {
+          "consistent_tangent_kn_per_m": 922.3427726189841,
+          "downward_displacement_m": 0.41500000000000004,
+          "equilibrium_load_kn": 12.562715010514784,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.09106927254856127
+        },
+        {
+          "consistent_tangent_kn_per_m": 980.4714553466418,
+          "downward_displacement_m": 0.42,
+          "equilibrium_load_kn": 17.319319537653186,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.1656532568501163
+        },
+        {
+          "consistent_tangent_kn_per_m": 1039.6252954234228,
+          "downward_displacement_m": 0.425,
+          "equilibrium_load_kn": 22.369138170115793,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.2647511632995714
+        },
+        {
+          "consistent_tangent_kn_per_m": 1099.7854842828453,
+          "downward_displacement_m": 0.43,
+          "equilibrium_load_kn": 27.717249749694844,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.3898417987130561
+        },
+        {
+          "consistent_tangent_kn_per_m": 1160.9330362959547,
+          "downward_displacement_m": 0.435,
+          "equilibrium_load_kn": 33.36863862732259,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.5424291282572565
+        },
+        {
+          "consistent_tangent_kn_per_m": 1223.0488016301001,
+          "downward_displacement_m": 0.44,
+          "equilibrium_load_kn": 39.32819380993287,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.7240418008357242
+        },
+        {
+          "consistent_tangent_kn_per_m": 1286.113479061727,
+          "downward_displacement_m": 0.445,
+          "equilibrium_load_kn": 45.60070817148774,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 0.9362326703695673
+        },
+        {
+          "consistent_tangent_kn_per_m": 1350.1076287298029,
+          "downward_displacement_m": 0.45,
+          "equilibrium_load_kn": 52.19087772794113,
+          "equilibrium_residual_kn": 0.0,
+          "strain_energy_kn_m": 1.1805783132935947
+        }
+      ],
+      "finite_difference_checks": [
+        {
+          "contract_pass": true,
+          "downward_displacement_m": 0.021321388827889698,
+          "energy_derivative_relative_error": 4.733246107948098e-10,
+          "exact_internal_force_kn": 13.681905122390253,
+          "exact_tangent_kn_per_m": 532.5464659148344,
+          "finite_difference_energy_derivative_kn": 13.68190511591427,
+          "finite_difference_step_m": 2.0000000000000003e-06,
+          "finite_difference_tangent_kn_per_m": 532.5464659655664,
+          "tangent_relative_error": 9.526317881970129e-11
+        },
+        {
+          "contract_pass": true,
+          "downward_displacement_m": 0.0639641664836691,
+          "energy_derivative_relative_error": 2.6576948519807076e-10,
+          "exact_internal_force_kn": 28.00413233678271,
+          "exact_tangent_kn_per_m": 154.21521190450602,
+          "finite_difference_energy_derivative_kn": 28.004132329340067,
+          "finite_difference_step_m": 2.0000000000000003e-06,
+          "finite_difference_tangent_kn_per_m": 154.2152119338169,
+          "tangent_relative_error": 1.9006479482766097e-10
+        },
+        {
+          "contract_pass": true,
+          "downward_displacement_m": 0.1139641664836691,
+          "energy_derivative_relative_error": 3.5529918011765026e-11,
+          "exact_internal_force_kn": 27.081779916689676,
+          "exact_tangent_kn_per_m": -168.35865072888328,
+          "finite_difference_energy_derivative_kn": 27.081779915727463,
+          "finite_difference_step_m": 2.0000000000000003e-06,
+          "finite_difference_tangent_kn_per_m": -168.35865070508046,
+          "tangent_relative_error": 1.4138158070696156e-10
+        }
+      ],
+      "first_limit_point": {
+        "consistent_tangent_kn_per_m": 4.3546529746182125e-12,
+        "contract_pass": true,
+        "downward_displacement_m": 0.08528555531155879,
+        "equilibrium_load_kn": 29.605176007630757,
+        "tangent_after_kn_per_m": -0.01332297962688624,
+        "tangent_before_kn_per_m": 0.013323196821735328
+      },
+      "formulation": "exact_two_bar_corotational_truss_displacement_control",
+      "lee_frame_claim": false,
+      "parameters": {
+        "axial_rigidity_kn": 10000.0,
+        "half_span_m": 1.0,
+        "initial_bar_length_m": 1.019803902718557,
+        "rise_m": 0.2
+      },
+      "path_shape": {
+        "contract_pass": true,
+        "negative_force_after_apex_inversion_kn": -28.913029038138106,
+        "positive_force_after_rehardening_kn": 52.19087772794113,
+        "zero_force_checkpoints_abs_max_kn": 0.0
+      },
+      "truth_basis": "closed_form_finite_rotation_two_bar_equilibrium"
+    }
+  },
+  "blockers_remaining": [
+    "general_2d_3d_pdelta_frame_not_implemented",
+    "lee_frame_snapthrough_not_implemented",
+    "arc_length_path_following_not_implemented",
+    "continuum_cantilever_large_rotation_not_implemented",
+    "general_corotational_frame_shell_elements_not_implemented",
+    "material_geometric_nonlinear_coupling_not_verified",
+    "published_or_experimental_geometric_validation_not_attached",
+    "production_sparse_rocm_hip_geometric_parity_not_verified"
+  ],
+  "claim_boundary": "This receipt verifies a pinned Euler-Bernoulli column against the closed-form critical load and sine mode, first-mode P-Delta amplification using the same finite-element K/Kg eigenpair, and the exact displacement-controlled path of a symmetric two-bar shallow arch through its first limit point. It is not a general frame solver and does not claim a P-Delta frame, Lee frame, arc-length path following, continuum cantilever large rotation, general corotational frame/shell kinematics, material-geometric coupling, or CPU/HIP parity.",
+  "continuum_cantilever_large_rotation_claim": false,
+  "contract_pass": true,
+  "general_2d_3d_geometric_stiffness_claim": false,
+  "general_frame_pdelta_claim": false,
+  "geometric_nonlinear_benchmark_breadth_claim": false,
+  "implemented_benchmarks_contract_pass": true,
+  "lee_frame_snapthrough_claim": false,
+  "schema_version": "phase2-geometric-nonlinear-benchmark-result.v1",
+  "status": "partial",
+  "truth_class": "analytic_and_semianalytic_geometric_seed_truth",
+  "verification": {
+    "deterministic_replay_exact": true,
+    "euler_column_gate_passed": true,
+    "modal_pdelta_column_gate_passed": true,
+    "two_bar_shallow_arch_gate_passed": true
+  }
+}

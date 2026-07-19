@@ -17,6 +17,7 @@ export function buildReportExportPanelHtml({
   commercialMapper = null,
   importPreview = null,
   ingestPreview = null,
+  runtimeIngestStorage = null,
   drawingSheetPackage = null,
   lastExport = null,
   reviewNote = '',
@@ -40,6 +41,21 @@ export function buildReportExportPanelHtml({
   const ingestRenderableLabel = ingestPreview?.renderable_payload_available
     ? ` · renderable ${ingestPreview.renderable_payload_kind || 'model'} · elements ${ingestPreview.renderable_element_count || 0} · segments ${ingestPreview.renderable_segment_count || 0}${ingestValidationLabel}`
     : ingestValidationLabel;
+  const runtimeStorageLabel = String(runtimeIngestStorage?.display_status || 'Session-only').trim();
+  const runtimeStorageStatus = String(runtimeIngestStorage?.status || 'session_only').trim();
+  const runtimeStoragePersistence = String(runtimeIngestStorage?.persistence || 'memory_only').trim();
+  const runtimeStorageErrorCode = String(runtimeIngestStorage?.error_code || '').trim();
+  const runtimeStorageErrorPath = String(runtimeIngestStorage?.error_path || '').trim();
+  const runtimeStorageTone = runtimeStorageLabel === 'Saved locally'
+    ? 'success'
+    : runtimeStorageLabel === 'Storage unavailable'
+      ? 'danger'
+      : runtimeStorageLabel === 'Previous state retained'
+        ? 'warn'
+        : 'accent';
+  const runtimeStorageDetail = runtimeStorageErrorCode
+    ? ` · ${runtimeStorageErrorCode}${runtimeStorageErrorPath ? ` @ ${runtimeStorageErrorPath}` : ''}`
+    : '';
   return `
     <div class="prop-row"><span class="prop-label">Project</span><span class="prop-value">${escapeHtml(workspace.projectTitle || workspace.projectId || '--')}</span></div>
     <div class="prop-row"><span class="prop-label">Drawing</span><span class="prop-value">${escapeHtml(workspace.drawingTitle || workspace.drawingId || '--')}</span></div>
@@ -58,6 +74,7 @@ export function buildReportExportPanelHtml({
     <div class="prop-row"><span class="prop-label">CSV Mapper</span><span class="prop-value prop-value--accent">${escapeHtml(commercialMapper?.summary || 'commercial CSV mapper pending')}</span></div>
     <div class="prop-row"><span class="prop-label">Import Preview</span><span class="prop-value prop-value--${escapeHtml(importPreview?.blocked ? 'danger' : importPreview ? 'success' : 'neutral')}">${escapeHtml(importPreview ? `${importPreview.blocked ? 'blocked' : 'mergeable'} · ${importPreview.incoming_counts?.reviewTasks || 0} tasks · ${importPreview.incoming_counts?.receiptIndex || 0} receipts` : '--')}</span></div>
     <div class="prop-row"><span class="prop-label">Evidence Ingest</span><span class="prop-value prop-value--${escapeHtml(ingestBlockedCount ? 'warn' : ingestPreview ? 'success' : 'neutral')}">${escapeHtml(ingestPreview ? `${ingestPreview.source_type || '--'} · ${ingestPreview.drawing_count || 0} drawings · ${ingestBlockedCount} blocked${ingestRenderableLabel}` : '--')}</span></div>
+    <div class="prop-row" data-runtime-ingest-storage-row><span class="prop-label">Ingest Storage</span><span id="runtime-ingest-storage-status" class="prop-value prop-value--${escapeHtml(runtimeStorageTone)}" data-runtime-ingest-storage-status="${escapeHtml(runtimeStorageStatus)}" data-runtime-ingest-storage-persistence="${escapeHtml(runtimeStoragePersistence)}" data-runtime-ingest-storage-error-code="${escapeHtml(runtimeStorageErrorCode)}" data-runtime-ingest-storage-error-path="${escapeHtml(runtimeStorageErrorPath)}">${escapeHtml(`${runtimeStorageLabel}${runtimeStorageDetail}`)}</span></div>
     ${rows.map(row => `<div class="prop-row"><span class="prop-label">${escapeHtml(row.label)}</span><span class="prop-value prop-value--${escapeHtml(row.tone)}">${escapeHtml(row.delta || row.value)}</span></div>`).join('')}
     <div class="panel-field report-note-field">
       <label for="review-task-status-select">Review Task</label>

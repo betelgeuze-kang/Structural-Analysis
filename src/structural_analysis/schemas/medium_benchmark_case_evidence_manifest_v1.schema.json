@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/medium_benchmark_case_evidence_manifest_v1.schema.json",
+  "title": "Medium benchmark case evidence manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "binding_profile",
+    "cases",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "medium-benchmark-case-evidence-manifest.v1"
+    },
+    "binding_profile": {
+      "const": "repository_bytes_and_receipt_payloads.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

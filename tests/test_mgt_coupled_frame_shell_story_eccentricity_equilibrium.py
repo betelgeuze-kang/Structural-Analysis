@@ -23,6 +23,11 @@ def test_coupled_frame_shell_story_eccentricity_equilibrium_ready() -> None:
     assert payload["equilibrium_summary"]["ready_case_count"] == 4
     assert payload["equilibrium_summary"]["max_residual_inf_n"] <= 5.0e-2
     assert payload["equilibrium_summary"]["max_relative_residual_inf"] <= 1.0e-6
+    mesh = payload["mesh_fingerprint"]
+    assert mesh["frame_connectivity_source"] == "elem_conn_ptr/elem_conn_idx"
+    assert mesh["edge_index_used_for_element_binding"] is False
+    assert mesh["skipped_invalid_line_connectivity_count"] == 0
+    assert mesh["line_element_row_accounting_exact"] is True
     assert payload["support"]["story_eccentricity_load_generation_ready"] is True
     assert payload["support"]["global_solver_consumes_story_eccentricity_loads"] is True
     assert payload["support"]["coupled_frame_shell_story_eccentricity_solve_ready"] is True

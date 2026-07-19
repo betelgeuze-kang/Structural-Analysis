@@ -19,9 +19,15 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase6_silent_import_loss_status.json"
-PHASE3_IFC_IMPORT_HEALTH = PRODUCTIZATION / "phase3_ifc_import_health_execution_receipt.json"
-PHASE3_IFC_CLEAN_ACQUISITION = PRODUCTIZATION / "phase3_buildingsmart_ifc_acquisition_receipt.json"
-PHASE3_IFC_DIRTY_ACQUISITION = PRODUCTIZATION / "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
+PHASE3_IFC_IMPORT_HEALTH = (
+    PRODUCTIZATION / "phase3_ifc_import_health_execution_receipt.json"
+)
+PHASE3_IFC_CLEAN_ACQUISITION = (
+    PRODUCTIZATION / "phase3_buildingsmart_ifc_acquisition_receipt.json"
+)
+PHASE3_IFC_DIRTY_ACQUISITION = (
+    PRODUCTIZATION / "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
+)
 PHASE3_IFC_SOURCE_LICENSE = PRODUCTIZATION / "phase3_ifc_source_license_receipt.json"
 SCHEMA_VERSION = "phase6-silent-import-loss-status.v1"
 REQUIRED_IFC_IMPORT_CASE_COUNT = 10
@@ -51,9 +57,7 @@ BLOCKER_GROUPS = {
             "product_legal_license_review_pending",
             "per_file_license_review_pending",
         },
-        "prefixes": (
-            "phase3_ifc_source_license_review_blockers_not_cleared:",
-        ),
+        "prefixes": ("phase3_ifc_source_license_review_blockers_not_cleared:",),
     },
     "quantity_credit": {
         "display_name": "quantity credit",
@@ -63,9 +67,7 @@ BLOCKER_GROUPS = {
             "phase3_ifc_import_case_quantity_credit_blocked_pending_license_review",
             "phase3_ifc_import_case_quantity_credit_missing",
         },
-        "prefixes": (
-            "phase3_ifc_source_license_quantity_credit_below_required:",
-        ),
+        "prefixes": ("phase3_ifc_source_license_quantity_credit_below_required:",),
     },
     "import_execution": {
         "display_name": "import execution",
@@ -74,9 +76,7 @@ BLOCKER_GROUPS = {
             "dirty_import_execution_missing",
             "import_health_execution_missing",
         },
-        "prefixes": (
-            "ifc_import_health_execution_count_below_required:",
-        ),
+        "prefixes": ("ifc_import_health_execution_count_below_required:",),
     },
     "silent_loss_gate": {
         "display_name": "silent-loss gate",
@@ -109,7 +109,7 @@ def _strip_volatile(payload: Any) -> Any:
         return {
             key: _strip_volatile(value)
             for key, value in payload.items()
-            if key not in {"generated_at"}
+            if key not in {"generated_at", "source_commit_sha"}
         }
     if isinstance(payload, list):
         return [_strip_volatile(item) for item in payload]
@@ -130,7 +130,9 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
 def _blockers(*payloads: dict[str, Any]) -> list[str]:
     blockers: list[str] = []
     for payload in payloads:
-        blockers.extend(str(blocker) for blocker in payload.get("blockers", []) if str(blocker))
+        blockers.extend(
+            str(blocker) for blocker in payload.get("blockers", []) if str(blocker)
+        )
     return sorted(dict.fromkeys(blockers))
 
 
@@ -185,7 +187,10 @@ def _direct_and_spillover_blockers(blockers: list[str]) -> tuple[list[str], list
 def _group_blockers(blockers: list[str], group_ids: set[str]) -> list[str]:
     selected: list[str] = []
     for blocker in blockers:
-        if any(_blocker_matches_group(blocker, BLOCKER_GROUPS[group_id]) for group_id in group_ids):
+        if any(
+            _blocker_matches_group(blocker, BLOCKER_GROUPS[group_id])
+            for group_id in group_ids
+        ):
             selected.append(blocker)
     return sorted(dict.fromkeys(selected))
 
@@ -317,7 +322,9 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
     if not import_health_ready:
         blockers.extend(import_health_blockers)
     if not silent_negative_gate_executed:
-        blockers.extend(import_health.get("silent_import_loss_gate", {}).get("blockers", []))
+        blockers.extend(
+            import_health.get("silent_import_loss_gate", {}).get("blockers", [])
+        )
     if not case_count_ready:
         blockers.append(
             f"ifc_import_case_count_below_required:{selected_import_case_count}/{REQUIRED_IFC_IMPORT_CASE_COUNT}"
@@ -333,7 +340,9 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         {"license_legal", "quantity_credit"},
     )
     technical_direct_blockers = [
-        blocker for blocker in direct_blockers if blocker not in set(product_credit_blockers)
+        blocker
+        for blocker in direct_blockers
+        if blocker not in set(product_credit_blockers)
     ]
     technical_silent_import_loss_zero = bool(
         not technical_direct_blockers
@@ -361,11 +370,20 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
     )
     owner_actions = []
     if not source_acquired or not checksums_ready:
-        owner_actions.append("acquire/checksum all selected clean/dirty IFC source files")
+        owner_actions.append(
+            "acquire/checksum all selected clean/dirty IFC source files"
+        )
     if not import_health_ready or not silent_negative_gate_executed:
-        owner_actions.append("regenerate Phase 3 import-health and silent-data-loss receipts")
-    if not license_ready or quantity_credit_ready_count < REQUIRED_IFC_IMPORT_CASE_COUNT:
-        owner_actions.append("complete product/legal and per-file license review for quantity credit")
+        owner_actions.append(
+            "regenerate Phase 3 import-health and silent-data-loss receipts"
+        )
+    if (
+        not license_ready
+        or quantity_credit_ready_count < REQUIRED_IFC_IMPORT_CASE_COUNT
+    ):
+        owner_actions.append(
+            "complete product/legal and per-file license review for quantity credit"
+        )
     if any(
         blocker
         in {
@@ -376,10 +394,14 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
         }
         for blocker in all_blockers
     ):
-        owner_actions.append("close or explicitly defer the ifc-bench query/GUI spillover blockers")
+        owner_actions.append(
+            "close or explicitly defer the ifc-bench query/GUI spillover blockers"
+        )
     owner_action = "; ".join(owner_actions) + "; then refresh the RC final gate."
     if contract_pass:
-        owner_action = "Silent-import-loss evidence is ready; refresh the RC final gate."
+        owner_action = (
+            "Silent-import-loss evidence is ready; refresh the RC final gate."
+        )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -480,7 +502,10 @@ def check_phase6_silent_import_loss_status(
     try:
         existing = json.loads(resolved.read_text(encoding="utf-8"))
     except Exception as exc:
-        return False, f"phase6_silent_import_loss_status_unreadable:{exc.__class__.__name__}"
+        return (
+            False,
+            f"phase6_silent_import_loss_status_unreadable:{exc.__class__.__name__}",
+        )
     if _strip_volatile(existing) != _strip_volatile(expected):
         return False, "phase6_silent_import_loss_status_mismatch"
     return True, "phase6_silent_import_loss_status_consistent"

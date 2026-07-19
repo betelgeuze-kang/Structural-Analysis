@@ -370,6 +370,9 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
         "review_goal": "",
     }
     assert stages["pm_release_gate"]["blockers"] == ["ux::human_observation_missing"]
+    assert "acquire_checksum_and_execute_ifc_import_evidence" in stages[
+        "developer_preview_rc"
+    ]["next_actions"]
     assert stages["g1_solver_closure"]["blockers"] == [
         "full_load_hip_newton_not_closed"
     ]

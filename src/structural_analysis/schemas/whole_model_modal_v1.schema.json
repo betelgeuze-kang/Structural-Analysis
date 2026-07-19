@@ -1,0 +1,428 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/whole_model_modal_v1.schema.json",
+  "title": "Bounded whole-model frame/truss modal analysis receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "numeric_serialization_profile",
+    "status",
+    "truth_class",
+    "analysis_scope",
+    "solver_contract",
+    "source",
+    "tolerance_policy",
+    "verification",
+    "summary",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary",
+    "contract_pass"
+  ],
+  "properties": {
+    "schema_version": {"const": "phase2-whole-model-modal-result.v1"},
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "numeric_serialization_profile": {
+      "const": "binary64-json-round-trip-plus-semantic-12e"
+    },
+    "status": {"enum": ["partial", "blocked"]},
+    "truth_class": {"const": "analytic_and_invariant_whole_model_modal_truth"},
+    "analysis_scope": {
+      "const": "public_api_dense_consistent_mass_frame_truss_modal"
+    },
+    "solver_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solver_id",
+        "eigen_backend",
+        "maximum_dense_free_dof_count",
+        "mass_formulation",
+        "material_density_unit",
+        "mass_matrix_unit",
+        "mode_shape_storage_profile",
+        "claim_boundary"
+      ],
+      "properties": {
+        "solver_id": {"const": "authoritative_cpu_modal_fea_3d_v1"},
+        "eigen_backend": {"const": "scipy_linalg_eigh_dense"},
+        "maximum_dense_free_dof_count": {"const": 512},
+        "mass_formulation": {"const": "element_consistent_mass_frame_truss_v1"},
+        "material_density_unit": {"const": "kg_per_m3"},
+        "mass_matrix_unit": {"const": "kN_s2_per_m"},
+        "mode_shape_storage_profile": {
+          "const": "inline_max_component_normalized_small_dense_v1"
+        },
+        "claim_boundary": {
+          "const": "dense_consistent_mass_frame_truss_modal_preview_v1"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_checksums", "source_set_hash"],
+      "properties": {
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 17,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        },
+        "source_set_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "tolerance_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eigenvalue_relative_tolerance",
+        "residual_relative_tolerance",
+        "orthogonality_tolerance",
+        "effective_mass_ratio_absolute_tolerance",
+        "repeated_eigenvalue_relative_tolerance"
+      ],
+      "properties": {
+        "eigenvalue_relative_tolerance": {"const": 2e-12},
+        "residual_relative_tolerance": {"const": 1e-9},
+        "orthogonality_tolerance": {"const": 1e-8},
+        "effective_mass_ratio_absolute_tolerance": {"const": 1e-12},
+        "repeated_eigenvalue_relative_tolerance": {"const": 1e-12}
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cantilever_bending",
+        "axial_bar",
+        "free_free_rigid_modes",
+        "repeated_cluster"
+      ],
+      "properties": {
+        "cantilever_bending": {"$ref": "#/$defs/cantileverCase"},
+        "axial_bar": {"$ref": "#/$defs/axialCase"},
+        "free_free_rigid_modes": {"$ref": "#/$defs/freeFreeCase"},
+        "repeated_cluster": {"$ref": "#/$defs/repeatedCase"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_count",
+        "passing_case_count",
+        "cantilever_bending_contract_pass",
+        "axial_bar_contract_pass",
+        "free_free_rigid_mode_contract_pass",
+        "repeated_cluster_contract_pass",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_count": {"const": 4},
+        "passing_case_count": {"type": "integer", "minimum": 0, "maximum": 4},
+        "cantilever_bending_contract_pass": {"type": "boolean"},
+        "axial_bar_contract_pass": {"type": "boolean"},
+        "free_free_rigid_mode_contract_pass": {"type": "boolean"},
+        "repeated_cluster_contract_pass": {"type": "boolean"},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "whole_model_frame_truss_modal_evidence",
+        "consistent_mass_assembly_evidence",
+        "rigid_body_mode_exclusion_evidence",
+        "repeated_cluster_fail_closed_evidence",
+        "general_frame_shell_modal_workflow",
+        "nodal_lumped_mass_support",
+        "sparse_modal_backend",
+        "large_mode_binary_vector_artifacts",
+        "rocm_hip_modal_parity",
+        "independent_code_to_code_or_verification_level_2",
+        "release_readiness"
+      ],
+      "properties": {
+        "whole_model_frame_truss_modal_evidence": {"type": "boolean"},
+        "consistent_mass_assembly_evidence": {"type": "boolean"},
+        "rigid_body_mode_exclusion_evidence": {"type": "boolean"},
+        "repeated_cluster_fail_closed_evidence": {"type": "boolean"},
+        "general_frame_shell_modal_workflow": {"const": false},
+        "nodal_lumped_mass_support": {"const": false},
+        "sparse_modal_backend": {"const": false},
+        "large_mode_binary_vector_artifacts": {"const": false},
+        "rocm_hip_modal_parity": {"const": false},
+        "independent_code_to_code_or_verification_level_2": {"const": false},
+        "release_readiness": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 600},
+    "contract_pass": {"type": "boolean"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"contract_pass": {"const": true}},
+        "required": ["contract_pass"]
+      },
+      "then": {"properties": {"status": {"const": "partial"}}},
+      "else": {"properties": {"status": {"const": "blocked"}}}
+    }
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nonnegative": {"type": "number", "minimum": 0},
+    "positive": {"type": "number", "exclusiveMinimum": 0},
+    "numberVector": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "number"}
+    },
+    "cantileverCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "public_status",
+        "solver_id",
+        "free_dof_count",
+        "mode_count",
+        "rigid_mode_count",
+        "expected_eigenvalues_rad2_per_s2",
+        "actual_eigenvalues_rad2_per_s2",
+        "maximum_eigenvalue_relative_error",
+        "maximum_residual_relative_inf",
+        "mass_orthogonality_error_inf",
+        "stiffness_diagonalization_error_inf",
+        "total_physical_mass_kg",
+        "uy_cumulative_effective_modal_mass_ratio",
+        "stiffness_matrix_hash",
+        "mass_matrix_hash",
+        "free_dof_map_hash",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "public_frame_cantilever_consistent_mass"},
+        "truth_basis": {
+          "const": "one_element_euler_bernoulli_consistent_mass_closed_form"
+        },
+        "public_status": {"const": "ready"},
+        "solver_id": {"const": "authoritative_cpu_modal_fea_3d_v1"},
+        "free_dof_count": {"const": 2},
+        "mode_count": {"const": 2},
+        "rigid_mode_count": {"const": 0},
+        "expected_eigenvalues_rad2_per_s2": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/positive"}
+        },
+        "actual_eigenvalues_rad2_per_s2": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/positive"}
+        },
+        "maximum_eigenvalue_relative_error": {"$ref": "#/$defs/nonnegative"},
+        "maximum_residual_relative_inf": {"$ref": "#/$defs/nonnegative"},
+        "mass_orthogonality_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_diagonalization_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "total_physical_mass_kg": {"$ref": "#/$defs/positive"},
+        "uy_cumulative_effective_modal_mass_ratio": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "mass_matrix_hash": {"$ref": "#/$defs/hash"},
+        "free_dof_map_hash": {"$ref": "#/$defs/hash"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "axialCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "public_status",
+        "solver_id",
+        "free_dof_count",
+        "mode_count",
+        "rigid_mode_count",
+        "expected_eigenvalue_rad2_per_s2",
+        "actual_eigenvalue_rad2_per_s2",
+        "eigenvalue_relative_error",
+        "residual_relative_inf",
+        "total_physical_mass_kg",
+        "stiffness_matrix_hash",
+        "mass_matrix_hash",
+        "free_dof_map_hash",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "public_truss_axial_consistent_mass"},
+        "truth_basis": {"const": "one_element_axial_consistent_mass_closed_form"},
+        "public_status": {"const": "ready"},
+        "solver_id": {"const": "authoritative_cpu_modal_fea_3d_v1"},
+        "free_dof_count": {"const": 1},
+        "mode_count": {"const": 1},
+        "rigid_mode_count": {"const": 0},
+        "expected_eigenvalue_rad2_per_s2": {"$ref": "#/$defs/positive"},
+        "actual_eigenvalue_rad2_per_s2": {"$ref": "#/$defs/positive"},
+        "eigenvalue_relative_error": {"$ref": "#/$defs/nonnegative"},
+        "residual_relative_inf": {"$ref": "#/$defs/nonnegative"},
+        "total_physical_mass_kg": {"$ref": "#/$defs/positive"},
+        "stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "mass_matrix_hash": {"$ref": "#/$defs/hash"},
+        "free_dof_map_hash": {"$ref": "#/$defs/hash"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "freeFreeCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "public_status",
+        "solver_id",
+        "free_dof_count",
+        "expected_rigid_mode_count",
+        "actual_rigid_mode_count",
+        "positive_mode_count",
+        "positive_frequencies_hz",
+        "minimum_positive_frequency_hz",
+        "maximum_residual_relative_inf",
+        "mass_orthogonality_error_inf",
+        "stiffness_diagonalization_error_inf",
+        "stiffness_matrix_hash",
+        "mass_matrix_hash",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "public_free_free_frame_rigid_mode_exclusion"},
+        "truth_basis": {"const": "three_dimensional_rigid_body_mode_invariant"},
+        "public_status": {"const": "ready"},
+        "solver_id": {"const": "authoritative_cpu_modal_fea_3d_v1"},
+        "free_dof_count": {"const": 12},
+        "expected_rigid_mode_count": {"const": 6},
+        "actual_rigid_mode_count": {"const": 6},
+        "positive_mode_count": {"const": 6},
+        "positive_frequencies_hz": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {"$ref": "#/$defs/positive"}
+        },
+        "minimum_positive_frequency_hz": {"$ref": "#/$defs/positive"},
+        "maximum_residual_relative_inf": {"$ref": "#/$defs/nonnegative"},
+        "mass_orthogonality_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_diagonalization_error_inf": {"$ref": "#/$defs/nonnegative"},
+        "stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "mass_matrix_hash": {"$ref": "#/$defs/hash"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    },
+    "repeatedCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "truth_basis",
+        "incomplete_selection_status",
+        "incomplete_selection_blocker_kind",
+        "incomplete_selection_detail",
+        "complete_selection_status",
+        "solver_id",
+        "complete_mode_count",
+        "complete_eigenvalues_rad2_per_s2",
+        "complete_frequencies_hz",
+        "repeated_eigenvalue_relative_gap",
+        "raw_result_hash",
+        "semantic_result_hash",
+        "deterministic_replay_raw_exact",
+        "deterministic_replay_semantic_exact",
+        "regularization_used",
+        "fallback_used",
+        "contract_pass"
+      ],
+      "properties": {
+        "case_id": {"const": "public_symmetric_bending_repeated_cluster"},
+        "truth_basis": {
+          "const": "complete_repeated_eigenspace_selection_invariant"
+        },
+        "incomplete_selection_status": {"const": "blocked"},
+        "incomplete_selection_blocker_kind": {
+          "const": "modal_generalized_eigen_contract_failed"
+        },
+        "incomplete_selection_detail": {"type": "string", "minLength": 20},
+        "complete_selection_status": {"const": "ready"},
+        "solver_id": {"const": "authoritative_cpu_modal_fea_3d_v1"},
+        "complete_mode_count": {"const": 2},
+        "complete_eigenvalues_rad2_per_s2": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/positive"}
+        },
+        "complete_frequencies_hz": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/positive"}
+        },
+        "repeated_eigenvalue_relative_gap": {"$ref": "#/$defs/nonnegative"},
+        "raw_result_hash": {"$ref": "#/$defs/hash"},
+        "semantic_result_hash": {"$ref": "#/$defs/hash"},
+        "deterministic_replay_raw_exact": {"type": "boolean"},
+        "deterministic_replay_semantic_exact": {"type": "boolean"},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false},
+        "contract_pass": {"type": "boolean"}
+      }
+    }
+  }
+}

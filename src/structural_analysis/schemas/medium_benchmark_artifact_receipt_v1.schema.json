@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/medium_benchmark_artifact_receipt_v1.schema.json",
+  "title": "Medium benchmark bound artifact receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "case_id",
+    "artifact_kind",
+    "source_commit_sha",
+    "payload",
+    "contract_pass",
+    "blockers",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "medium-benchmark-artifact-receipt.v1"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "case_id": {"type": "string", "minLength": 1},
+    "artifact_kind": {
+      "enum": [
+        "canonical_normalization_receipt",
+        "reference_solver_input",
+        "reference_output",
+        "solver_output",
+        "residual_comparison",
+        "reaction_comparison",
+        "member_force_comparison",
+        "tolerance_policy",
+        "decision_receipt"
+      ]
+    },
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "byte_length", "media_type"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {
+          "type": "string",
+          "pattern": "^(?:sha256:)?[0-9a-f]{64}$"
+        },
+        "byte_length": {"type": "integer", "minimum": 0},
+        "media_type": {
+          "enum": ["application/json", "text/plain", "application/octet-stream"]
+        }
+      }
+    },
+    "contract_pass": {"type": "boolean"},
+    "blockers": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  }
+}

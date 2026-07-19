@@ -1,0 +1,707 @@
+{
+  "artifacts": {
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_geometry_preflight.json",
+    "schema": "src/structural_analysis/schemas/g1_mgt_state_updated_frame_axial_geometry_preflight_v1.schema.json"
+  },
+  "blockers_remaining": [
+    "raw_material_table_binding_incomplete_source_derived_alias_available",
+    "dgn_exact_type_name_material_inheritance_engineer_review_required",
+    "actual_mgt_state_updated_axial_geometry_not_connected_to_residual",
+    "full_nonlinear_continuation_not_executed",
+    "full_corotational_frame_not_implemented"
+  ],
+  "case_id": "g1_real_mgt_state_updated_frame_axial_geometry_preflight",
+  "claim_boundary": "This preflight preserves the raw *MATERIAL-only failure while allowing a source-derived, exact unique DGN-MATL type/name alias for diagnostic execution. The alias consumes no DGN numeric elastic override or synthetic fallback and remains engineer-review-required. It does not establish a full corotational beam, nonlinear continuation, HIP parity, or G1 full-building closure.",
+  "claims": {
+    "actual_mgt_source_and_roundtrip_consumed": true,
+    "actual_mgt_state_updated_axial_geometry_connected_to_residual": false,
+    "actual_mgt_state_updated_axial_geometry_prepacked": true,
+    "authoritative_element_connectivity_consumed": true,
+    "design_material_rows_promoted_to_analysis_properties": false,
+    "dgn_alias_engineer_review_required": true,
+    "dgn_exact_type_name_alias_contract_pass": true,
+    "dgn_numeric_elastic_override_consumed": false,
+    "exact_raw_material_table_frame_property_coverage": false,
+    "exact_source_derived_alias_frame_property_coverage": true,
+    "full_corotational_frame": false,
+    "full_nonlinear_continuation": false,
+    "g1_full_building_closure": false,
+    "missing_property_prepack_failed_closed": true,
+    "synthetic_property_fallback_used": false
+  },
+  "contract_pass": true,
+  "dgn_material_property_alias_audit": {
+    "alias_material_count": 24,
+    "alias_rows": [
+      {
+        "dgn_material_id": 8,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 9,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 10,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 11,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 12,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 13,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 14,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 15,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 16,
+        "material_name": "C40+Q235",
+        "material_type": "SRC",
+        "source_material_id": 3,
+        "source_material_name": "C40+Q235",
+        "source_material_type": "SRC"
+      },
+      {
+        "dgn_material_id": 17,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 18,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 19,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 20,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 21,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 22,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 23,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 24,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 25,
+        "material_name": "C40WBR",
+        "material_type": "CONC",
+        "source_material_id": 4,
+        "source_material_name": "C40WBR",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 26,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 27,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 28,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 29,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 30,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      },
+      {
+        "dgn_material_id": 31,
+        "material_name": "C40",
+        "material_type": "CONC",
+        "source_material_id": 1,
+        "source_material_name": "C40",
+        "source_material_type": "CONC"
+      }
+    ],
+    "ambiguous_identity_rows": [],
+    "claim_boundary": "Copies analysis elastic properties only from one exact *MATERIAL type/name identity to a distinct *DGN-MATL id. DGN numeric design fields, fuzzy matching, and inferred database values are not consumed. The identity inheritance remains engineer-review-required.",
+    "contract_pass": true,
+    "dgn_material_row_count": 29,
+    "dgn_numeric_elastic_override_consumed_count": 0,
+    "dgn_unique_material_id_count": 29,
+    "duplicate_dgn_material_ids": [],
+    "engineer_review_required": true,
+    "exact_unique_identity_match_row_count": 29,
+    "existing_source_id_row_count": 5,
+    "fuzzy_name_match_count": 0,
+    "resolution_policy": "exact_normalized_type_and_name_unique_source_material.v1",
+    "schema_version": "mgt-dgn-material-property-alias-audit.v1",
+    "source_material_count": 6,
+    "unresolved_identity_rows": []
+  },
+  "diagnostic_execution_ready": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engineer_review_required": true,
+  "evidence_closure_pass": false,
+  "frame_connectivity_audit": {
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "edge_index_used_for_element_binding": false,
+    "frame_connectivity_source": "elem_conn_ptr/elem_conn_idx",
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_max_abs_angle_deg": 270.0,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "invalid_line_connectivity_element_id_head": [],
+    "line_element_row_accounting_exact": true,
+    "line_elements_solved": 5572,
+    "line_node_count": 8076,
+    "raw_line_element_count": 5576,
+    "skipped_invalid_line_connectivity_count": 0,
+    "skipped_short_or_degenerate_line_count": 4
+  },
+  "generated_at": "2026-07-19T07:15:15.575169+00:00",
+  "input_checksums": {
+    "implementation/phase1/mgt_state_updated_frame_axial_geometry.py": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
+    "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
+    "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py": "sha256:a6598d5613aefccaa9a6eda7c26adaba2cf4406dd3ea0a4acb57f32fe0870603",
+    "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
+    "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
+    "scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py": "sha256:e47e12752c3d24a6f0f7584630b24619ccfd19b99531cb588e6db5e73d6fd3fd",
+    "src/structural_analysis/schemas/g1_mgt_state_updated_frame_axial_geometry_preflight_v1.schema.json": "sha256:26c033fa8306c3543554b3db4469140fdaf45d01cde009d4edc0743af83fb774",
+    "tests/test_build_g1_mgt_state_updated_frame_axial_geometry_preflight.py": "sha256:2ec97cbd84c54051f1a064310ad895350f8378cb9074e5fe1e9cd93b950629f6",
+    "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
+    "tests/test_parse_mgt_section_material_properties.py": "sha256:d7859a725762191c56523c0cfed9aabd13ed7ec5b2cdca275ba2a10d7a472cfa"
+  },
+  "inputs": {
+    "analysis_material_table_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7
+    ],
+    "dgn_alias_frame_element_count": 79,
+    "dgn_alias_frame_material_id_counts": [
+      {
+        "element_count": 5,
+        "material_id": 16
+      },
+      {
+        "element_count": 9,
+        "material_id": 26
+      },
+      {
+        "element_count": 9,
+        "material_id": 27
+      },
+      {
+        "element_count": 14,
+        "material_id": 28
+      },
+      {
+        "element_count": 17,
+        "material_id": 29
+      },
+      {
+        "element_count": 15,
+        "material_id": 30
+      },
+      {
+        "element_count": 10,
+        "material_id": 31
+      }
+    ],
+    "dgn_alias_material_ids": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "element_count": 12728,
+    "generated_roundtrip_sha256": "sha256:d95097f6d0a40d950f38dda4fe287bca2428ea3e476bebeb3424d458eac409de",
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "node_count": 13047,
+    "resolved_analysis_material_ids": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "roundtrip_derivation": "parse_midas_mgt_to_json_npz:no_resolve_rigid_links:no_drop_unreferenced_nodes",
+    "roundtrip_generated_uncoarsened": true,
+    "uncoarsened_parser_contract_pass": true
+  },
+  "prepack_probe": {
+    "attempted": true,
+    "expected_fail_closed": true,
+    "failure_message": "state-updated frame axial geometry requires complete source property coverage: unresolved_element_count=79, missing_material_ids=[16, 26, 27, 28, 29, 30, 31], missing_section_ids=[], first_unresolved_element=1261",
+    "failure_reason_code": "INCOMPLETE_FRAME_SOURCE_PROPERTY_BINDING",
+    "failure_type": "ValueError",
+    "property_fallback_attempted": false,
+    "property_fallback_count": 0,
+    "succeeded": false
+  },
+  "readiness_pass": false,
+  "resolved_prepack_probe": {
+    "attempted": true,
+    "expected_fail_closed": false,
+    "failure_message": null,
+    "failure_reason_code": null,
+    "failure_type": null,
+    "property_fallback_attempted": false,
+    "property_fallback_count": 0,
+    "succeeded": true
+  },
+  "resolved_source_property_coverage_audit": {
+    "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
+    "exact_source_property_coverage": true,
+    "fallback_allowed_for_state_updated_geometry": false,
+    "frame_element_count": 5572,
+    "material_property_resolved_element_count": 5572,
+    "missing_material_element_count": 0,
+    "missing_material_id_counts": [],
+    "missing_section_element_count": 0,
+    "missing_section_id_counts": [],
+    "resolved_source_property_element_count": 5572,
+    "schema_version": "mgt-state-updated-frame-axial-property-coverage.v1",
+    "section_property_resolved_element_count": 5572,
+    "source_material_property_count": 30,
+    "source_property_coverage_ratio": 1.0,
+    "source_section_property_count": 183,
+    "unresolved_element_head": [],
+    "unresolved_element_head_limit": 32,
+    "unresolved_source_property_element_count": 0
+  },
+  "schema_version": "g1-mgt-state-updated-frame-axial-geometry-preflight.v1",
+  "source_commit_exact_replay_claim": false,
+  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+  "source_property_coverage_audit": {
+    "claim_boundary": "This audit checks exact section/material table binding for every selected frame element. A missing binding blocks the state-updated geometry path; design-material rows and synthetic fallback values are not promoted to analysis elastic properties.",
+    "exact_source_property_coverage": false,
+    "fallback_allowed_for_state_updated_geometry": false,
+    "frame_element_count": 5572,
+    "material_property_resolved_element_count": 5493,
+    "missing_material_element_count": 79,
+    "missing_material_id_counts": [
+      {
+        "element_count": 5,
+        "material_id": 16
+      },
+      {
+        "element_count": 9,
+        "material_id": 26
+      },
+      {
+        "element_count": 9,
+        "material_id": 27
+      },
+      {
+        "element_count": 14,
+        "material_id": 28
+      },
+      {
+        "element_count": 17,
+        "material_id": 29
+      },
+      {
+        "element_count": 15,
+        "material_id": 30
+      },
+      {
+        "element_count": 10,
+        "material_id": 31
+      }
+    ],
+    "missing_section_element_count": 0,
+    "missing_section_id_counts": [],
+    "resolved_source_property_element_count": 5493,
+    "schema_version": "mgt-state-updated-frame-axial-property-coverage.v1",
+    "section_property_resolved_element_count": 5572,
+    "source_material_property_count": 6,
+    "source_property_coverage_ratio": 0.9858219669777458,
+    "source_section_property_count": 183,
+    "unresolved_element_head": [
+      {
+        "element_id": 1261,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 1485,
+        "material_id": 31,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 370
+      },
+      {
+        "element_id": 1488,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 1489,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 2996,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 2997,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 2998,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 2999,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 3088,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 3089,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 3097,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 3099,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 3797,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 3829,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 3832,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 3834,
+        "material_id": 27,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 307
+      },
+      {
+        "element_id": 4363,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 4364,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 21892,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 21893,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 21894,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 21925,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 21926,
+        "material_id": 30,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 642
+      },
+      {
+        "element_id": 22043,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 22044,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 22057,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22058,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22059,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22060,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22061,
+        "material_id": 29,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 48
+      },
+      {
+        "element_id": 22072,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      },
+      {
+        "element_id": 22073,
+        "material_id": 28,
+        "missing_material_property": true,
+        "missing_section_property": false,
+        "section_id": 241
+      }
+    ],
+    "unresolved_element_head_limit": 32,
+    "unresolved_source_property_element_count": 79
+  },
+  "source_tree_state": "working_tree_with_uncommitted_goal_changes",
+  "status": "partial"
+}

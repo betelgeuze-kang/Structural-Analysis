@@ -4,14 +4,16 @@
     "medium_model_pass_or_review_missing",
     "normalization_receipts_missing",
     "opensees_medium_scorecard_execution_missing",
-    "reference_outputs_missing"
+    "reference_outputs_missing",
+    "scientific_medium_corpus_contract_blocked"
   ],
   "blockers": [
     "license_review_pending",
     "medium_model_pass_or_review_missing",
     "normalization_receipts_missing",
     "opensees_medium_scorecard_execution_missing",
-    "reference_outputs_missing"
+    "reference_outputs_missing",
+    "scientific_medium_corpus_contract_blocked"
   ],
   "case_input_requirements": {
     "case_fields": [
@@ -37,7 +39,7 @@
       },
       {
         "field": "scorecard_or_review_path",
-        "required_artifact": "PASS scorecard or pre-approved REVIEW record",
+        "required_artifact": "benchmark-scientific-decision.v1 PASS or scoped engineer REVIEW",
         "runner_argument": "--scorecard-or-review"
       },
       {
@@ -172,7 +174,7 @@
     "missing_candidate_case_count": 2,
     "required_candidate_case_count": 5
   },
-  "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove product license approval, reference outputs, attached normalization receipts, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
+  "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only, reads the source license receipt for upstream source identity, and implements the operator scorecard runner command plus normalization receipt validation, but it does not prove the five-archetype scientific corpus, product license approval, reference outputs, attached normalization receipts, numerical scorecard execution, scientific PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
   "current_medium_model_scorecard_count": 0,
@@ -200,6 +202,31 @@
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
         "python3 scripts/build_developer_preview_rc_status.py --check"
+      ]
+    },
+    {
+      "action": "Populate the five-archetype scientific medium corpus with complete artifact chains and valid per-case PASS or scoped REVIEW decisions.",
+      "clears_blockers": [
+        "scientific_medium_corpus_contract_blocked"
+      ],
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/medium_benchmark_case_evidence.json",
+        "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json"
+      ],
+      "minimum_evidence": [
+        "all five required structural archetype slots are uniquely populated",
+        "each case has a complete checksum-bound comparison artifact chain",
+        "OpenSees and a second independent reference solver are represented",
+        "scientific PASS or scoped, unexpired engineer REVIEW grants case credit",
+        "medium_benchmark_corpus_plan.json contract_pass=true and credit_count=5"
+      ],
+      "owner": "benchmark_operator_and_reviewer",
+      "remaining_case_count": 5,
+      "slot_id": "complete_scientific_medium_corpus",
+      "validation_commands": [
+        "python3 scripts/build_medium_benchmark_corpus_plan.py",
+        "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
       ]
     },
     {
@@ -285,13 +312,13 @@
       ]
     },
     {
-      "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+      "action": "Attach per-case scientific PASS decisions or scoped, unexpired engineer REVIEW records referenced by each scorecard receipt.",
       "clears_blockers": [
         "medium_model_pass_or_review_missing"
       ],
       "evidence_artifacts": [],
       "minimum_evidence": [
-        "each selected case has PASS or APPROVED_REVIEW decision",
+        "each selected case has PASS or scoped engineer REVIEW decision",
         "decision is referenced by the corresponding scorecard receipt",
         "medium_model_pass_or_review_missing is absent from the readiness receipt blockers"
       ],
@@ -314,6 +341,7 @@
       "owner": "release_engineering",
       "slot_id": "rerun_medium_model_and_dp_rc_checks",
       "validation_commands": [
+        "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
         "python3 scripts/build_developer_preview_rc_status.py --check",
@@ -321,17 +349,21 @@
       ]
     }
   ],
-  "gate_unblock_plan_count": 7,
-  "generated_at": "2026-07-02T18:52:42.865200+00:00",
+  "gate_unblock_plan_count": 8,
+  "generated_at": "2026-07-19T04:43:32.568724+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
+    "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json": "sha256:463261af348846be1fb19b23e14b0f66f80c30614e14ea417a43b9fd174ddf62",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
-    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:d5def43be6655852bafe22677ce5838ca865958b52d36f6d01ade554b86ba4fd",
-    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:2a02672801597bdc6676992f35faeabf2894f5ee2e4499256932b55346e3d0d8",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:d161fea306b028f3619b980cfcdc9b469247c3010c68112635e75ea17f12baff",
+    "scripts/build_medium_benchmark_corpus_plan.py": "sha256:81be76525aee9e25ea3170da565bd0eaeb2a55fe436a756f7057a3d94f60fa54",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:2f6db6035be27e94bd622e64d9ffb3e92f88fcef3b3e524f4ad91792f04b575b",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
-    "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:d11eb9c3537e1921390b634a51c62a77feef5b42a6827b2bd40146ea6b55323d",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82"
+    "scripts/run_phase3_medium_model_scorecard_receipt.py": "sha256:c8229fdf99cc50c93a4c170f09080358d5f851b132c2b6d3be24e6347fbf3852",
+    "src/structural_analysis/benchmark/acceptance.py": "sha256:239e0791a5f1d7b8d334fadddad0f003e1c9e81772aa59576c85c1d9b3c60bcc",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82",
+    "src/structural_analysis/benchmark/medium_corpus.py": "sha256:1e8152ad0ca0a11f2470e8ba36d9bccaac7acc11a40a2c7e17fb4b2f63488c9e"
   },
   "lanes": [
     "opensees-medium"
@@ -374,9 +406,9 @@
         "reference output checksum or approved REVIEW baseline",
         "passing phase3-medium-normalization-receipt.v1 normalization receipt",
         "medium scorecard receipt, result artifact, and validation report",
-        "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+        "scientific PASS or scoped REVIEW decision covering every core metric family"
       ],
-      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
       "scorecard_receipt_path": null,
       "slot": 1,
       "slot_status": "selected_blocked",
@@ -399,9 +431,9 @@
           "reference output checksum or approved REVIEW baseline",
           "passing phase3-medium-normalization-receipt.v1 normalization receipt",
           "medium scorecard receipt, result artifact, and validation report",
-          "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+          "scientific PASS or scoped REVIEW decision covering every core metric family"
         ],
-        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
         "scorecard_receipt_path": null,
         "slot": 1,
         "slot_status": "selected_blocked",
@@ -425,9 +457,9 @@
           "reference output checksum or approved REVIEW baseline",
           "passing phase3-medium-normalization-receipt.v1 normalization receipt",
           "medium scorecard receipt, result artifact, and validation report",
-          "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+          "scientific PASS or scoped REVIEW decision covering every core metric family"
         ],
-        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
         "scorecard_receipt_path": null,
         "slot": 2,
         "slot_status": "selected_blocked",
@@ -451,9 +483,9 @@
           "reference output checksum or approved REVIEW baseline",
           "passing phase3-medium-normalization-receipt.v1 normalization receipt",
           "medium scorecard receipt, result artifact, and validation report",
-          "PASS or APPROVED_REVIEW decision with non-generated evidence_ref"
+          "scientific PASS or scoped REVIEW decision covering every core metric family"
         ],
-        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
         "scorecard_receipt_path": null,
         "slot": 3,
         "slot_status": "selected_blocked",
@@ -474,7 +506,7 @@
           "normalization receipt",
           "scorecard/review decision"
         ],
-        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
         "scorecard_receipt_path": "",
         "slot": 4,
         "slot_status": "operator_selection_required",
@@ -495,7 +527,7 @@
           "normalization receipt",
           "scorecard/review decision"
         ],
-        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+        "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
         "scorecard_receipt_path": "",
         "slot": 5,
         "slot_status": "operator_selection_required",
@@ -517,6 +549,23 @@
       "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
       "spdx": "GPL-3.0",
       "status": "identified_review_required"
+    },
+    {
+      "blocker": "scientific_medium_corpus_contract_blocked",
+      "current_case_count": 0,
+      "evidence_type": "scientific_benchmark_corpus",
+      "id": "scientific_corpus_contract",
+      "remaining_case_count": 5,
+      "required": "Five diverse medium archetypes with complete artifact chains, OpenSees plus a second independent solver, and scientific PASS/REVIEW credit.",
+      "required_artifacts": [
+        "five diverse medium archetype case rows",
+        "complete per-case normalization/reference/output/comparison chain",
+        "OpenSees and a second independent reference solver",
+        "benchmark-scientific-decision.v1 PASS or scoped REVIEW"
+      ],
+      "required_case_count": 5,
+      "scientific_corpus_plan_path": "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json",
+      "status": "blocked"
     },
     {
       "blocker": "reference_outputs_missing",
@@ -559,26 +608,27 @@
       "remaining_case_count": 5,
       "required": "OpenSees medium scorecard execution retaining residual, increment, and convergence history.",
       "required_case_count": 5,
-      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
       "status": "missing"
     },
     {
       "accepted_decisions": [
         "PASS",
-        "APPROVED_REVIEW"
+        "REVIEW"
       ],
       "blocker": "medium_model_pass_or_review_missing",
       "current_case_count": 0,
       "evidence_type": "operator_attached",
       "id": "pass_or_approved_review",
       "remaining_case_count": 5,
-      "required": "Per-case PASS or explicit pre-approved REVIEW decision for selected medium models.",
+      "required": "Per-case scientific PASS or scoped, unexpired engineer REVIEW decision covering every required core metric family.",
       "required_case_count": 5,
       "status": "missing"
     }
   ],
   "next_actions": [
     "select_additional_medium_model_cases",
+    "complete_scientific_medium_corpus",
     "complete_product_legal_license_review",
     "attach_medium_reference_outputs",
     "record_medium_canonical_normalization",
@@ -622,6 +672,24 @@
       ]
     },
     {
+      "action": "Populate the five-archetype scientific medium corpus with complete artifact chains and valid per-case PASS or scoped REVIEW decisions.",
+      "clears_blockers": [
+        "scientific_medium_corpus_contract_blocked"
+      ],
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/medium_benchmark_case_evidence.json",
+        "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json"
+      ],
+      "id": "complete_scientific_medium_corpus",
+      "owner": "benchmark_operator_and_reviewer",
+      "remaining_case_count": 5,
+      "validation_commands": [
+        "python3 scripts/build_medium_benchmark_corpus_plan.py",
+        "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+      ]
+    },
+    {
       "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
       "clears_blockers": [
         "license_review_pending"
@@ -678,7 +746,7 @@
       "owner": "benchmark_operator",
       "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
       "remaining_case_count": 5,
-      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
       "validation_commands": [
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
@@ -688,9 +756,9 @@
     {
       "accepted_decisions": [
         "PASS",
-        "APPROVED_REVIEW"
+        "REVIEW"
       ],
-      "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+      "action": "Attach per-case scientific PASS decisions or scoped, unexpired engineer REVIEW records referenced by each scorecard receipt.",
       "clears_blockers": [
         "medium_model_pass_or_review_missing"
       ],
@@ -703,7 +771,7 @@
       ]
     }
   ],
-  "owner_action": "Attach product legal license approval, ingest reference outputs, normalize five selected medium models, run the medium scorecard, and record PASS or pre-approved REVIEW rows before promoting this RC gate.",
+  "owner_action": "Complete the five-archetype scientific corpus, attach product/legal license approval, ingest reference outputs, normalize five selected medium models, run numerical scorecards, and record scientific PASS or scoped engineer REVIEW rows before promoting this RC gate.",
   "pass_or_approved_review_count": 0,
   "phase3_closure_claim": false,
   "recommended_next_actions": [
@@ -728,6 +796,24 @@
       ]
     },
     {
+      "action": "Populate the five-archetype scientific medium corpus with complete artifact chains and valid per-case PASS or scoped REVIEW decisions.",
+      "clears_blockers": [
+        "scientific_medium_corpus_contract_blocked"
+      ],
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/medium_benchmark_case_evidence.json",
+        "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json"
+      ],
+      "id": "complete_scientific_medium_corpus",
+      "owner": "benchmark_operator_and_reviewer",
+      "remaining_case_count": 5,
+      "validation_commands": [
+        "python3 scripts/build_medium_benchmark_corpus_plan.py",
+        "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
+        "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check"
+      ]
+    },
+    {
       "action": "Update the OpenSees medium source license receipt with approved redistribution and commercial-use boundaries.",
       "clears_blockers": [
         "license_review_pending"
@@ -784,7 +870,7 @@
       "owner": "benchmark_operator",
       "receipt_directory": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts",
       "remaining_case_count": 5,
-      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
       "validation_commands": [
         "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
         "python3 scripts/build_phase6_benchmark_scale_status.py --check",
@@ -794,9 +880,9 @@
     {
       "accepted_decisions": [
         "PASS",
-        "APPROVED_REVIEW"
+        "REVIEW"
       ],
-      "action": "Attach per-case PASS decisions or explicit pre-approved REVIEW records referenced by each scorecard receipt.",
+      "action": "Attach per-case scientific PASS decisions or scoped, unexpired engineer REVIEW records referenced by each scorecard receipt.",
       "clears_blockers": [
         "medium_model_pass_or_review_missing"
       ],
@@ -843,6 +929,301 @@
       "status": "parser_only_ready"
     },
     {
+      "blocker": "scientific_medium_corpus_contract_blocked",
+      "claim_boundary": "Parser-ready candidates and legacy scorecard counts do not satisfy this row. Credit requires the five-archetype scientific corpus contract and complete per-case evidence chains.",
+      "contract_pass": false,
+      "current_medium_benchmark_credit_count": 0,
+      "id": "scientific_corpus_contract",
+      "reference_solver_diversity": {
+        "contract_pass": false,
+        "opensees_present": false,
+        "second_independent_solver_present": false,
+        "solver_names": []
+      },
+      "required": "Five diverse medium archetypes with complete artifact chains, OpenSees plus a second independent solver, and scientific PASS/REVIEW credit.",
+      "required_medium_benchmark_credit_count": 5,
+      "scientific_corpus_blockers": [
+        "derived_source_provenance_pending",
+        "large_model_substitute_not_medium",
+        "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+        "medium_case_artifact_contract_not_passed:decision_receipt",
+        "medium_case_artifact_contract_not_passed:member_force_comparison",
+        "medium_case_artifact_contract_not_passed:reaction_comparison",
+        "medium_case_artifact_contract_not_passed:reference_output",
+        "medium_case_artifact_contract_not_passed:reference_solver_input",
+        "medium_case_artifact_contract_not_passed:residual_comparison",
+        "medium_case_artifact_contract_not_passed:solver_output",
+        "medium_case_artifact_contract_not_passed:tolerance_policy",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+        "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:decision_receipt_file_missing",
+        "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+        "medium_case_artifact_receipt:member_force_comparison_file_missing",
+        "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reaction_comparison_file_missing",
+        "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:reference_output_file_missing",
+        "medium_case_artifact_receipt:reference_output_sha256_invalid",
+        "medium_case_artifact_receipt:reference_solver_input_file_missing",
+        "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+        "medium_case_artifact_receipt:residual_comparison_file_missing",
+        "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+        "medium_case_artifact_receipt:solver_output_file_missing",
+        "medium_case_artifact_receipt:solver_output_sha256_invalid",
+        "medium_case_artifact_receipt:tolerance_policy_file_missing",
+        "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+        "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+        "medium_case_artifact_sha256_invalid:decision_receipt",
+        "medium_case_artifact_sha256_invalid:member_force_comparison",
+        "medium_case_artifact_sha256_invalid:reaction_comparison",
+        "medium_case_artifact_sha256_invalid:reference_output",
+        "medium_case_artifact_sha256_invalid:reference_solver_input",
+        "medium_case_artifact_sha256_invalid:residual_comparison",
+        "medium_case_artifact_sha256_invalid:solver_output",
+        "medium_case_artifact_sha256_invalid:tolerance_policy",
+        "medium_case_capability_missing:diaphragm_load_path",
+        "medium_case_commercial_use_not_approved",
+        "medium_case_decision_not_pass_or_review",
+        "medium_case_license_not_approved",
+        "medium_case_license_receipt_path_invalid",
+        "medium_case_license_receipt_sha256_invalid",
+        "medium_case_local_execution_not_approved",
+        "medium_case_pass_or_review_credit_missing",
+        "medium_case_reference_solver_version_unverified",
+        "medium_case_size_class_not_medium",
+        "medium_case_source_commit_sha_invalid",
+        "medium_corpus_archetype_missing:foundation_link_or_mixed_element",
+        "medium_corpus_archetype_missing:steel_moment_frame_3d",
+        "medium_corpus_opensees_reference_missing",
+        "medium_corpus_second_reference_solver_missing",
+        "medium_corpus_source_family_diversity_below_two",
+        "source_url_verification_pending"
+      ],
+      "scientific_corpus_plan_path": "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json",
+      "scientific_corpus_schema_version": "medium-benchmark-corpus-readiness.v1",
+      "slot_rows": [
+        {
+          "archetype_id": "steel_moment_frame_3d",
+          "blockers": [
+            "medium_corpus_archetype_missing:steel_moment_frame_3d"
+          ],
+          "claim_boundary": "A frame-only building case; braced-only or 2D proxy cases do not fill this slot.",
+          "label": "3D steel moment frame",
+          "required_capabilities": [
+            "frame_3d",
+            "moment_connection",
+            "multi_story"
+          ],
+          "selected_case_ids": [],
+          "slot_status": "operator_selection_required"
+        },
+        {
+          "archetype_id": "braced_frame_or_truss_tower",
+          "blockers": [
+            "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+            "medium_case_artifact_contract_not_passed:decision_receipt",
+            "medium_case_artifact_contract_not_passed:member_force_comparison",
+            "medium_case_artifact_contract_not_passed:reaction_comparison",
+            "medium_case_artifact_contract_not_passed:reference_output",
+            "medium_case_artifact_contract_not_passed:reference_solver_input",
+            "medium_case_artifact_contract_not_passed:residual_comparison",
+            "medium_case_artifact_contract_not_passed:solver_output",
+            "medium_case_artifact_contract_not_passed:tolerance_policy",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+            "medium_case_artifact_receipt:decision_receipt_file_missing",
+            "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+            "medium_case_artifact_receipt:member_force_comparison_file_missing",
+            "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:reaction_comparison_file_missing",
+            "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:reference_output_file_missing",
+            "medium_case_artifact_receipt:reference_output_sha256_invalid",
+            "medium_case_artifact_receipt:reference_solver_input_file_missing",
+            "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+            "medium_case_artifact_receipt:residual_comparison_file_missing",
+            "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:solver_output_file_missing",
+            "medium_case_artifact_receipt:solver_output_sha256_invalid",
+            "medium_case_artifact_receipt:tolerance_policy_file_missing",
+            "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+            "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+            "medium_case_artifact_sha256_invalid:decision_receipt",
+            "medium_case_artifact_sha256_invalid:member_force_comparison",
+            "medium_case_artifact_sha256_invalid:reaction_comparison",
+            "medium_case_artifact_sha256_invalid:reference_output",
+            "medium_case_artifact_sha256_invalid:reference_solver_input",
+            "medium_case_artifact_sha256_invalid:residual_comparison",
+            "medium_case_artifact_sha256_invalid:solver_output",
+            "medium_case_artifact_sha256_invalid:tolerance_policy",
+            "medium_case_commercial_use_not_approved",
+            "medium_case_decision_not_pass_or_review",
+            "medium_case_license_not_approved",
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid",
+            "medium_case_local_execution_not_approved",
+            "medium_case_pass_or_review_credit_missing",
+            "medium_case_reference_solver_version_unverified",
+            "medium_case_source_commit_sha_invalid"
+          ],
+          "claim_boundary": "Requires a real braced or truss load path, not an axial-bar seed.",
+          "label": "Braced frame / truss tower",
+          "required_capabilities": [
+            "axial_member",
+            "bracing_or_truss",
+            "three_dimensional"
+          ],
+          "selected_case_ids": [
+            "SCBF16B"
+          ],
+          "slot_status": "selected_blocked"
+        },
+        {
+          "archetype_id": "irregular_multistory_frame",
+          "blockers": [
+            "large_model_substitute_not_medium",
+            "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+            "medium_case_artifact_contract_not_passed:decision_receipt",
+            "medium_case_artifact_contract_not_passed:member_force_comparison",
+            "medium_case_artifact_contract_not_passed:reaction_comparison",
+            "medium_case_artifact_contract_not_passed:reference_output",
+            "medium_case_artifact_contract_not_passed:reference_solver_input",
+            "medium_case_artifact_contract_not_passed:residual_comparison",
+            "medium_case_artifact_contract_not_passed:solver_output",
+            "medium_case_artifact_contract_not_passed:tolerance_policy",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+            "medium_case_artifact_receipt:decision_receipt_file_missing",
+            "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+            "medium_case_artifact_receipt:member_force_comparison_file_missing",
+            "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:reaction_comparison_file_missing",
+            "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:reference_output_file_missing",
+            "medium_case_artifact_receipt:reference_output_sha256_invalid",
+            "medium_case_artifact_receipt:reference_solver_input_file_missing",
+            "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+            "medium_case_artifact_receipt:residual_comparison_file_missing",
+            "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:solver_output_file_missing",
+            "medium_case_artifact_receipt:solver_output_sha256_invalid",
+            "medium_case_artifact_receipt:tolerance_policy_file_missing",
+            "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+            "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+            "medium_case_artifact_sha256_invalid:decision_receipt",
+            "medium_case_artifact_sha256_invalid:member_force_comparison",
+            "medium_case_artifact_sha256_invalid:reaction_comparison",
+            "medium_case_artifact_sha256_invalid:reference_output",
+            "medium_case_artifact_sha256_invalid:reference_solver_input",
+            "medium_case_artifact_sha256_invalid:residual_comparison",
+            "medium_case_artifact_sha256_invalid:solver_output",
+            "medium_case_artifact_sha256_invalid:tolerance_policy",
+            "medium_case_commercial_use_not_approved",
+            "medium_case_decision_not_pass_or_review",
+            "medium_case_license_not_approved",
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid",
+            "medium_case_local_execution_not_approved",
+            "medium_case_pass_or_review_credit_missing",
+            "medium_case_reference_solver_version_unverified",
+            "medium_case_size_class_not_medium",
+            "medium_case_source_commit_sha_invalid"
+          ],
+          "claim_boundary": "Requires documented geometric or stiffness irregularity and medium scale.",
+          "label": "Irregular multi-story frame",
+          "required_capabilities": [
+            "frame_3d",
+            "multi_story",
+            "plan_or_vertical_irregularity"
+          ],
+          "selected_case_ids": [
+            "luxinzheng_megatall_model1"
+          ],
+          "slot_status": "selected_blocked"
+        },
+        {
+          "archetype_id": "frame_shell_diaphragm",
+          "blockers": [
+            "derived_source_provenance_pending",
+            "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+            "medium_case_artifact_contract_not_passed:decision_receipt",
+            "medium_case_artifact_contract_not_passed:member_force_comparison",
+            "medium_case_artifact_contract_not_passed:reaction_comparison",
+            "medium_case_artifact_contract_not_passed:reference_output",
+            "medium_case_artifact_contract_not_passed:reference_solver_input",
+            "medium_case_artifact_contract_not_passed:residual_comparison",
+            "medium_case_artifact_contract_not_passed:solver_output",
+            "medium_case_artifact_contract_not_passed:tolerance_policy",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+            "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+            "medium_case_artifact_receipt:decision_receipt_file_missing",
+            "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+            "medium_case_artifact_receipt:member_force_comparison_file_missing",
+            "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:reaction_comparison_file_missing",
+            "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:reference_output_file_missing",
+            "medium_case_artifact_receipt:reference_output_sha256_invalid",
+            "medium_case_artifact_receipt:reference_solver_input_file_missing",
+            "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+            "medium_case_artifact_receipt:residual_comparison_file_missing",
+            "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+            "medium_case_artifact_receipt:solver_output_file_missing",
+            "medium_case_artifact_receipt:solver_output_sha256_invalid",
+            "medium_case_artifact_receipt:tolerance_policy_file_missing",
+            "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+            "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+            "medium_case_artifact_sha256_invalid:decision_receipt",
+            "medium_case_artifact_sha256_invalid:member_force_comparison",
+            "medium_case_artifact_sha256_invalid:reaction_comparison",
+            "medium_case_artifact_sha256_invalid:reference_output",
+            "medium_case_artifact_sha256_invalid:reference_solver_input",
+            "medium_case_artifact_sha256_invalid:residual_comparison",
+            "medium_case_artifact_sha256_invalid:solver_output",
+            "medium_case_artifact_sha256_invalid:tolerance_policy",
+            "medium_case_capability_missing:diaphragm_load_path",
+            "medium_case_commercial_use_not_approved",
+            "medium_case_decision_not_pass_or_review",
+            "medium_case_license_not_approved",
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid",
+            "medium_case_local_execution_not_approved",
+            "medium_case_pass_or_review_credit_missing",
+            "medium_case_reference_solver_version_unverified",
+            "medium_case_source_commit_sha_invalid",
+            "source_url_verification_pending"
+          ],
+          "claim_boundary": "Parser-only shell presence does not prove shell force or diaphragm response accuracy.",
+          "label": "Frame + shell diaphragm",
+          "required_capabilities": [
+            "frame_3d",
+            "shell",
+            "diaphragm_load_path"
+          ],
+          "selected_case_ids": [
+            "SCBF16B_shell_beam_mix"
+          ],
+          "slot_status": "selected_blocked"
+        },
+        {
+          "archetype_id": "foundation_link_or_mixed_element",
+          "blockers": [
+            "medium_corpus_archetype_missing:foundation_link_or_mixed_element"
+          ],
+          "claim_boundary": "Requires an active link, spring, foundation, or mixed-element response in the reference outputs.",
+          "label": "Foundation/link or mixed-element model",
+          "required_capabilities": [
+            "frame_or_shell",
+            "link_spring_or_foundation",
+            "mixed_element"
+          ],
+          "selected_case_ids": [],
+          "slot_status": "operator_selection_required"
+        }
+      ],
+      "status": "blocked"
+    },
+    {
       "blocker": "reference_outputs_missing",
       "contract_pass": false,
       "id": "reference_outputs",
@@ -876,7 +1257,7 @@
       "contract_pass": false,
       "current_pass_or_approved_review_count": 0,
       "id": "pass_or_approved_review",
-      "required": "Per-case PASS or explicit pre-approved REVIEW decision for selected medium models.",
+      "required": "Per-case scientific PASS or scoped, unexpired engineer REVIEW decision covering every required core metric family.",
       "required_pass_or_approved_review_count": 5,
       "status": "missing"
     },
@@ -885,7 +1266,7 @@
       "contract_pass": true,
       "id": "runner_command",
       "required": "Repeatable medium-model scorecard runner command with selected model inputs and output paths.",
-      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+      "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
       "runner_script": "scripts/run_phase3_medium_model_scorecard_receipt.py",
       "status": "ready"
     },
@@ -903,7 +1284,7 @@
       "status": "ready"
     }
   ],
-  "required_evidence_count": 9,
+  "required_evidence_count": 10,
   "required_evidence_pass_count": 4,
   "required_medium_model_count": 5,
   "resource_envelope": {
@@ -913,8 +1294,1625 @@
     "execution_scope": "operator_workstation_or_scheduled_self_hosted_runner"
   },
   "runner_command_ready": true,
-  "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+  "runner_command_template": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
   "schema_version": "phase3-medium-model-scorecard-readiness-receipt.v1",
+  "scientific_corpus_plan": {
+    "archetype_policy": [
+      {
+        "archetype_id": "steel_moment_frame_3d",
+        "claim_boundary": "A frame-only building case; braced-only or 2D proxy cases do not fill this slot.",
+        "label": "3D steel moment frame",
+        "required_capabilities": [
+          "frame_3d",
+          "moment_connection",
+          "multi_story"
+        ]
+      },
+      {
+        "archetype_id": "braced_frame_or_truss_tower",
+        "claim_boundary": "Requires a real braced or truss load path, not an axial-bar seed.",
+        "label": "Braced frame / truss tower",
+        "required_capabilities": [
+          "axial_member",
+          "bracing_or_truss",
+          "three_dimensional"
+        ]
+      },
+      {
+        "archetype_id": "irregular_multistory_frame",
+        "claim_boundary": "Requires documented geometric or stiffness irregularity and medium scale.",
+        "label": "Irregular multi-story frame",
+        "required_capabilities": [
+          "frame_3d",
+          "multi_story",
+          "plan_or_vertical_irregularity"
+        ]
+      },
+      {
+        "archetype_id": "frame_shell_diaphragm",
+        "claim_boundary": "Parser-only shell presence does not prove shell force or diaphragm response accuracy.",
+        "label": "Frame + shell diaphragm",
+        "required_capabilities": [
+          "frame_3d",
+          "shell",
+          "diaphragm_load_path"
+        ]
+      },
+      {
+        "archetype_id": "foundation_link_or_mixed_element",
+        "claim_boundary": "Requires an active link, spring, foundation, or mixed-element response in the reference outputs.",
+        "label": "Foundation/link or mixed-element model",
+        "required_capabilities": [
+          "frame_or_shell",
+          "link_spring_or_foundation",
+          "mixed_element"
+        ]
+      }
+    ],
+    "attached_case_count": 3,
+    "blockers": [
+      "derived_source_provenance_pending",
+      "large_model_substitute_not_medium",
+      "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+      "medium_case_artifact_contract_not_passed:decision_receipt",
+      "medium_case_artifact_contract_not_passed:member_force_comparison",
+      "medium_case_artifact_contract_not_passed:reaction_comparison",
+      "medium_case_artifact_contract_not_passed:reference_output",
+      "medium_case_artifact_contract_not_passed:reference_solver_input",
+      "medium_case_artifact_contract_not_passed:residual_comparison",
+      "medium_case_artifact_contract_not_passed:solver_output",
+      "medium_case_artifact_contract_not_passed:tolerance_policy",
+      "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+      "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+      "medium_case_artifact_receipt:decision_receipt_file_missing",
+      "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+      "medium_case_artifact_receipt:member_force_comparison_file_missing",
+      "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+      "medium_case_artifact_receipt:reaction_comparison_file_missing",
+      "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+      "medium_case_artifact_receipt:reference_output_file_missing",
+      "medium_case_artifact_receipt:reference_output_sha256_invalid",
+      "medium_case_artifact_receipt:reference_solver_input_file_missing",
+      "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+      "medium_case_artifact_receipt:residual_comparison_file_missing",
+      "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+      "medium_case_artifact_receipt:solver_output_file_missing",
+      "medium_case_artifact_receipt:solver_output_sha256_invalid",
+      "medium_case_artifact_receipt:tolerance_policy_file_missing",
+      "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+      "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+      "medium_case_artifact_sha256_invalid:decision_receipt",
+      "medium_case_artifact_sha256_invalid:member_force_comparison",
+      "medium_case_artifact_sha256_invalid:reaction_comparison",
+      "medium_case_artifact_sha256_invalid:reference_output",
+      "medium_case_artifact_sha256_invalid:reference_solver_input",
+      "medium_case_artifact_sha256_invalid:residual_comparison",
+      "medium_case_artifact_sha256_invalid:solver_output",
+      "medium_case_artifact_sha256_invalid:tolerance_policy",
+      "medium_case_capability_missing:diaphragm_load_path",
+      "medium_case_commercial_use_not_approved",
+      "medium_case_decision_not_pass_or_review",
+      "medium_case_license_not_approved",
+      "medium_case_license_receipt_path_invalid",
+      "medium_case_license_receipt_sha256_invalid",
+      "medium_case_local_execution_not_approved",
+      "medium_case_pass_or_review_credit_missing",
+      "medium_case_reference_solver_version_unverified",
+      "medium_case_size_class_not_medium",
+      "medium_case_source_commit_sha_invalid",
+      "medium_corpus_archetype_missing:foundation_link_or_mixed_element",
+      "medium_corpus_archetype_missing:steel_moment_frame_3d",
+      "medium_corpus_opensees_reference_missing",
+      "medium_corpus_second_reference_solver_missing",
+      "medium_corpus_source_family_diversity_below_two",
+      "source_url_verification_pending"
+    ],
+    "byte_bound_case_count": 0,
+    "case_rows": [
+      {
+        "archetype_id": "braced_frame_or_truss_tower",
+        "artifact_receipt_bindings": [
+          {
+            "artifact_name": "canonical_normalization_receipt",
+            "blockers": [
+              "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+              "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:canonical_normalization_receipt"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+                "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.canonical_normalization_receipt.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reference_solver_input",
+            "blockers": [
+              "medium_case_artifact_receipt:reference_solver_input_file_missing",
+              "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reference_solver_input"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reference_solver_input_file_missing",
+                "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.reference_solver_input.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reference_output",
+            "blockers": [
+              "medium_case_artifact_receipt:reference_output_file_missing",
+              "medium_case_artifact_receipt:reference_output_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reference_output"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reference_output_file_missing",
+                "medium_case_artifact_receipt:reference_output_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.reference_output.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "solver_output",
+            "blockers": [
+              "medium_case_artifact_receipt:solver_output_file_missing",
+              "medium_case_artifact_receipt:solver_output_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:solver_output"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:solver_output_file_missing",
+                "medium_case_artifact_receipt:solver_output_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.solver_output.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "residual_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:residual_comparison_file_missing",
+              "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:residual_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:residual_comparison_file_missing",
+                "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.residual_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reaction_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:reaction_comparison_file_missing",
+              "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reaction_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reaction_comparison_file_missing",
+                "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.reaction_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "member_force_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:member_force_comparison_file_missing",
+              "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:member_force_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:member_force_comparison_file_missing",
+                "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.member_force_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "tolerance_policy",
+            "blockers": [
+              "medium_case_artifact_receipt:tolerance_policy_file_missing",
+              "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:tolerance_policy"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:tolerance_policy_file_missing",
+                "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.tolerance_policy.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "decision_receipt",
+            "blockers": [
+              "medium_case_artifact_receipt:decision_receipt_file_missing",
+              "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:decision_receipt"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:decision_receipt_file_missing",
+                "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B.decision_receipt.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          }
+        ],
+        "blockers": [
+          "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+          "medium_case_artifact_contract_not_passed:decision_receipt",
+          "medium_case_artifact_contract_not_passed:member_force_comparison",
+          "medium_case_artifact_contract_not_passed:reaction_comparison",
+          "medium_case_artifact_contract_not_passed:reference_output",
+          "medium_case_artifact_contract_not_passed:reference_solver_input",
+          "medium_case_artifact_contract_not_passed:residual_comparison",
+          "medium_case_artifact_contract_not_passed:solver_output",
+          "medium_case_artifact_contract_not_passed:tolerance_policy",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:decision_receipt_file_missing",
+          "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:member_force_comparison_file_missing",
+          "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reaction_comparison_file_missing",
+          "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reference_output_file_missing",
+          "medium_case_artifact_receipt:reference_output_sha256_invalid",
+          "medium_case_artifact_receipt:reference_solver_input_file_missing",
+          "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+          "medium_case_artifact_receipt:residual_comparison_file_missing",
+          "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:solver_output_file_missing",
+          "medium_case_artifact_receipt:solver_output_sha256_invalid",
+          "medium_case_artifact_receipt:tolerance_policy_file_missing",
+          "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+          "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+          "medium_case_artifact_sha256_invalid:decision_receipt",
+          "medium_case_artifact_sha256_invalid:member_force_comparison",
+          "medium_case_artifact_sha256_invalid:reaction_comparison",
+          "medium_case_artifact_sha256_invalid:reference_output",
+          "medium_case_artifact_sha256_invalid:reference_solver_input",
+          "medium_case_artifact_sha256_invalid:residual_comparison",
+          "medium_case_artifact_sha256_invalid:solver_output",
+          "medium_case_artifact_sha256_invalid:tolerance_policy",
+          "medium_case_commercial_use_not_approved",
+          "medium_case_decision_not_pass_or_review",
+          "medium_case_license_not_approved",
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid",
+          "medium_case_local_execution_not_approved",
+          "medium_case_pass_or_review_credit_missing",
+          "medium_case_reference_solver_version_unverified",
+          "medium_case_source_commit_sha_invalid"
+        ],
+        "bound_artifact_receipt_count": 0,
+        "capabilities": [
+          "axial_member",
+          "bracing_or_truss",
+          "three_dimensional"
+        ],
+        "case_id": "SCBF16B",
+        "claim_boundary": "This row verifies repository-contained source, license receipt, artifact receipt, and payload bytes plus selected scientific payload semantics. It does not authenticate external solver execution, legal authority, or the human identities declared by those bound receipts.",
+        "decision": "FAIL",
+        "decision_metric_families": [
+          "displacement",
+          "global_energy_norm",
+          "member_force_local",
+          "reaction_equilibrium",
+          "residual_observation"
+        ],
+        "decision_schema_version": "benchmark-scientific-decision.v1",
+        "evidence_binding_contract_pass": false,
+        "evidence_binding_profile": "repository_bytes_and_receipt_payloads.v1",
+        "license_receipt_binding": {
+          "blockers": [
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_schema_contract_pass": false,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_license_receipt_path_invalid",
+              "medium_case_license_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "schema_version": "medium-benchmark-source-license-receipt.v1"
+        },
+        "medium_scale_basis": "SCBF16B parser topology; 426-node family receipt; 32 GB runner envelope",
+        "metric_families": [
+          "displacement",
+          "global_energy_norm",
+          "member_force_local",
+          "reaction_equilibrium",
+          "residual_observation"
+        ],
+        "ready_for_medium_benchmark_credit": false,
+        "reference_solver_class": "open_source",
+        "reference_solver_name": "OpenSees",
+        "schema_version": "medium-benchmark-case-evidence.v1",
+        "size_class": "medium",
+        "source_commit_sha": "",
+        "source_family": "sac_scbf16b",
+        "source_file_binding": {
+          "blockers": [],
+          "byte_length": 118066,
+          "contract_pass": true,
+          "declared_sha256": "sha256:309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+          "observed_sha256": "sha256:309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+          "path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl"
+        },
+        "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+        "source_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+        "source_url_or_doi": "https://github.com/amaelkady/OpenSEES_Models_CBF/blob/main/Models%20and%20Tcl%20Files/SCBF16B.tcl"
+      },
+      {
+        "archetype_id": "frame_shell_diaphragm",
+        "artifact_receipt_bindings": [
+          {
+            "artifact_name": "canonical_normalization_receipt",
+            "blockers": [
+              "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+              "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:canonical_normalization_receipt"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+                "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.canonical_normalization_receipt.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reference_solver_input",
+            "blockers": [
+              "medium_case_artifact_receipt:reference_solver_input_file_missing",
+              "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reference_solver_input"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reference_solver_input_file_missing",
+                "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.reference_solver_input.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reference_output",
+            "blockers": [
+              "medium_case_artifact_receipt:reference_output_file_missing",
+              "medium_case_artifact_receipt:reference_output_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reference_output"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reference_output_file_missing",
+                "medium_case_artifact_receipt:reference_output_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.reference_output.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "solver_output",
+            "blockers": [
+              "medium_case_artifact_receipt:solver_output_file_missing",
+              "medium_case_artifact_receipt:solver_output_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:solver_output"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:solver_output_file_missing",
+                "medium_case_artifact_receipt:solver_output_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.solver_output.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "residual_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:residual_comparison_file_missing",
+              "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:residual_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:residual_comparison_file_missing",
+                "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.residual_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reaction_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:reaction_comparison_file_missing",
+              "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reaction_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reaction_comparison_file_missing",
+                "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.reaction_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "member_force_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:member_force_comparison_file_missing",
+              "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:member_force_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:member_force_comparison_file_missing",
+                "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.member_force_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "tolerance_policy",
+            "blockers": [
+              "medium_case_artifact_receipt:tolerance_policy_file_missing",
+              "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:tolerance_policy"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:tolerance_policy_file_missing",
+                "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.tolerance_policy.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "decision_receipt",
+            "blockers": [
+              "medium_case_artifact_receipt:decision_receipt_file_missing",
+              "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:decision_receipt"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:decision_receipt_file_missing",
+                "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/SCBF16B_shell_beam_mix.decision_receipt.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          }
+        ],
+        "blockers": [
+          "derived_source_provenance_pending",
+          "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+          "medium_case_artifact_contract_not_passed:decision_receipt",
+          "medium_case_artifact_contract_not_passed:member_force_comparison",
+          "medium_case_artifact_contract_not_passed:reaction_comparison",
+          "medium_case_artifact_contract_not_passed:reference_output",
+          "medium_case_artifact_contract_not_passed:reference_solver_input",
+          "medium_case_artifact_contract_not_passed:residual_comparison",
+          "medium_case_artifact_contract_not_passed:solver_output",
+          "medium_case_artifact_contract_not_passed:tolerance_policy",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:decision_receipt_file_missing",
+          "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:member_force_comparison_file_missing",
+          "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reaction_comparison_file_missing",
+          "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reference_output_file_missing",
+          "medium_case_artifact_receipt:reference_output_sha256_invalid",
+          "medium_case_artifact_receipt:reference_solver_input_file_missing",
+          "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+          "medium_case_artifact_receipt:residual_comparison_file_missing",
+          "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:solver_output_file_missing",
+          "medium_case_artifact_receipt:solver_output_sha256_invalid",
+          "medium_case_artifact_receipt:tolerance_policy_file_missing",
+          "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+          "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+          "medium_case_artifact_sha256_invalid:decision_receipt",
+          "medium_case_artifact_sha256_invalid:member_force_comparison",
+          "medium_case_artifact_sha256_invalid:reaction_comparison",
+          "medium_case_artifact_sha256_invalid:reference_output",
+          "medium_case_artifact_sha256_invalid:reference_solver_input",
+          "medium_case_artifact_sha256_invalid:residual_comparison",
+          "medium_case_artifact_sha256_invalid:solver_output",
+          "medium_case_artifact_sha256_invalid:tolerance_policy",
+          "medium_case_capability_missing:diaphragm_load_path",
+          "medium_case_commercial_use_not_approved",
+          "medium_case_decision_not_pass_or_review",
+          "medium_case_license_not_approved",
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid",
+          "medium_case_local_execution_not_approved",
+          "medium_case_pass_or_review_credit_missing",
+          "medium_case_reference_solver_version_unverified",
+          "medium_case_source_commit_sha_invalid",
+          "source_url_verification_pending"
+        ],
+        "bound_artifact_receipt_count": 0,
+        "capabilities": [
+          "frame_3d",
+          "shell"
+        ],
+        "case_id": "SCBF16B_shell_beam_mix",
+        "claim_boundary": "This row verifies repository-contained source, license receipt, artifact receipt, and payload bytes plus selected scientific payload semantics. It does not authenticate external solver execution, legal authority, or the human identities declared by those bound receipts.",
+        "decision": "FAIL",
+        "decision_metric_families": [
+          "displacement",
+          "global_energy_norm",
+          "member_force_local",
+          "reaction_equilibrium",
+          "residual_observation"
+        ],
+        "decision_schema_version": "benchmark-scientific-decision.v1",
+        "evidence_binding_contract_pass": false,
+        "evidence_binding_profile": "repository_bytes_and_receipt_payloads.v1",
+        "license_receipt_binding": {
+          "blockers": [
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_schema_contract_pass": false,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_license_receipt_path_invalid",
+              "medium_case_license_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "schema_version": "medium-benchmark-source-license-receipt.v1"
+        },
+        "medium_scale_basis": "SCBF16B beam/shell parser topology; 426-node family receipt; 32 GB runner envelope",
+        "metric_families": [
+          "displacement",
+          "global_energy_norm",
+          "member_force_local",
+          "reaction_equilibrium",
+          "residual_observation"
+        ],
+        "ready_for_medium_benchmark_credit": false,
+        "reference_solver_class": "open_source",
+        "reference_solver_name": "OpenSees",
+        "schema_version": "medium-benchmark-case-evidence.v1",
+        "size_class": "medium",
+        "source_commit_sha": "",
+        "source_family": "sac_scbf16b_shell_beam_mix",
+        "source_file_binding": {
+          "blockers": [],
+          "byte_length": 118474,
+          "contract_pass": true,
+          "declared_sha256": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+          "observed_sha256": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+          "path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl"
+        },
+        "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+        "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+        "source_url_or_doi": "https://github.com/amaelkady/OpenSEES_Models_CBF"
+      },
+      {
+        "archetype_id": "irregular_multistory_frame",
+        "artifact_receipt_bindings": [
+          {
+            "artifact_name": "canonical_normalization_receipt",
+            "blockers": [
+              "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+              "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:canonical_normalization_receipt"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+                "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.canonical_normalization_receipt.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reference_solver_input",
+            "blockers": [
+              "medium_case_artifact_receipt:reference_solver_input_file_missing",
+              "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reference_solver_input"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reference_solver_input_file_missing",
+                "medium_case_artifact_receipt:reference_solver_input_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.reference_solver_input.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reference_output",
+            "blockers": [
+              "medium_case_artifact_receipt:reference_output_file_missing",
+              "medium_case_artifact_receipt:reference_output_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reference_output"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reference_output_file_missing",
+                "medium_case_artifact_receipt:reference_output_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.reference_output.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "solver_output",
+            "blockers": [
+              "medium_case_artifact_receipt:solver_output_file_missing",
+              "medium_case_artifact_receipt:solver_output_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:solver_output"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:solver_output_file_missing",
+                "medium_case_artifact_receipt:solver_output_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.solver_output.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "residual_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:residual_comparison_file_missing",
+              "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:residual_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:residual_comparison_file_missing",
+                "medium_case_artifact_receipt:residual_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.residual_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "reaction_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:reaction_comparison_file_missing",
+              "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:reaction_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:reaction_comparison_file_missing",
+                "medium_case_artifact_receipt:reaction_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.reaction_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "member_force_comparison",
+            "blockers": [
+              "medium_case_artifact_receipt:member_force_comparison_file_missing",
+              "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:member_force_comparison"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:member_force_comparison_file_missing",
+                "medium_case_artifact_receipt:member_force_comparison_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.member_force_comparison.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "tolerance_policy",
+            "blockers": [
+              "medium_case_artifact_receipt:tolerance_policy_file_missing",
+              "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:tolerance_policy"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:tolerance_policy_file_missing",
+                "medium_case_artifact_receipt:tolerance_policy_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.tolerance_policy.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          },
+          {
+            "artifact_name": "decision_receipt",
+            "blockers": [
+              "medium_case_artifact_receipt:decision_receipt_file_missing",
+              "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+            ],
+            "contract_pass": false,
+            "payload_file": {
+              "blockers": [
+                "medium_case_artifact_payload_unbound:decision_receipt"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": ""
+            },
+            "payload_semantic_contract_pass": null,
+            "receipt_file": {
+              "blockers": [
+                "medium_case_artifact_receipt:decision_receipt_file_missing",
+                "medium_case_artifact_receipt:decision_receipt_sha256_invalid"
+              ],
+              "byte_length": null,
+              "contract_pass": false,
+              "declared_sha256": "",
+              "observed_sha256": "",
+              "path": "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/luxinzheng_megatall_model1.decision_receipt.json"
+            },
+            "receipt_schema_contract_pass": false,
+            "schema_version": "medium-benchmark-artifact-receipt.v1",
+            "source_commit_sha": ""
+          }
+        ],
+        "blockers": [
+          "large_model_substitute_not_medium",
+          "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+          "medium_case_artifact_contract_not_passed:decision_receipt",
+          "medium_case_artifact_contract_not_passed:member_force_comparison",
+          "medium_case_artifact_contract_not_passed:reaction_comparison",
+          "medium_case_artifact_contract_not_passed:reference_output",
+          "medium_case_artifact_contract_not_passed:reference_solver_input",
+          "medium_case_artifact_contract_not_passed:residual_comparison",
+          "medium_case_artifact_contract_not_passed:solver_output",
+          "medium_case_artifact_contract_not_passed:tolerance_policy",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:decision_receipt_file_missing",
+          "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:member_force_comparison_file_missing",
+          "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reaction_comparison_file_missing",
+          "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reference_output_file_missing",
+          "medium_case_artifact_receipt:reference_output_sha256_invalid",
+          "medium_case_artifact_receipt:reference_solver_input_file_missing",
+          "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+          "medium_case_artifact_receipt:residual_comparison_file_missing",
+          "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:solver_output_file_missing",
+          "medium_case_artifact_receipt:solver_output_sha256_invalid",
+          "medium_case_artifact_receipt:tolerance_policy_file_missing",
+          "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+          "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+          "medium_case_artifact_sha256_invalid:decision_receipt",
+          "medium_case_artifact_sha256_invalid:member_force_comparison",
+          "medium_case_artifact_sha256_invalid:reaction_comparison",
+          "medium_case_artifact_sha256_invalid:reference_output",
+          "medium_case_artifact_sha256_invalid:reference_solver_input",
+          "medium_case_artifact_sha256_invalid:residual_comparison",
+          "medium_case_artifact_sha256_invalid:solver_output",
+          "medium_case_artifact_sha256_invalid:tolerance_policy",
+          "medium_case_commercial_use_not_approved",
+          "medium_case_decision_not_pass_or_review",
+          "medium_case_license_not_approved",
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid",
+          "medium_case_local_execution_not_approved",
+          "medium_case_pass_or_review_credit_missing",
+          "medium_case_reference_solver_version_unverified",
+          "medium_case_size_class_not_medium",
+          "medium_case_source_commit_sha_invalid"
+        ],
+        "bound_artifact_receipt_count": 0,
+        "capabilities": [
+          "frame_3d",
+          "multi_story",
+          "plan_or_vertical_irregularity"
+        ],
+        "case_id": "luxinzheng_megatall_model1",
+        "claim_boundary": "This row verifies repository-contained source, license receipt, artifact receipt, and payload bytes plus selected scientific payload semantics. It does not authenticate external solver execution, legal authority, or the human identities declared by those bound receipts.",
+        "decision": "FAIL",
+        "decision_metric_families": [
+          "displacement",
+          "global_energy_norm",
+          "member_force_local",
+          "reaction_equilibrium",
+          "residual_observation"
+        ],
+        "decision_schema_version": "benchmark-scientific-decision.v1",
+        "evidence_binding_contract_pass": false,
+        "evidence_binding_profile": "repository_bytes_and_receipt_payloads.v1",
+        "license_receipt_binding": {
+          "blockers": [
+            "medium_case_license_receipt_path_invalid",
+            "medium_case_license_receipt_sha256_invalid"
+          ],
+          "contract_pass": false,
+          "payload_schema_contract_pass": false,
+          "receipt_file": {
+            "blockers": [
+              "medium_case_license_receipt_path_invalid",
+              "medium_case_license_receipt_sha256_invalid"
+            ],
+            "byte_length": null,
+            "contract_pass": false,
+            "declared_sha256": "",
+            "observed_sha256": "",
+            "path": ""
+          },
+          "schema_version": "medium-benchmark-source-license-receipt.v1"
+        },
+        "medium_scale_basis": "606 m mega-tall model belongs to the separate large-model lane",
+        "metric_families": [
+          "displacement",
+          "global_energy_norm",
+          "member_force_local",
+          "reaction_equilibrium",
+          "residual_observation"
+        ],
+        "ready_for_medium_benchmark_credit": false,
+        "reference_solver_class": "open_source",
+        "reference_solver_name": "OpenSees",
+        "schema_version": "medium-benchmark-case-evidence.v1",
+        "size_class": "large",
+        "source_commit_sha": "",
+        "source_family": "luxinzheng_megatall",
+        "source_file_binding": {
+          "blockers": [],
+          "byte_length": 2850355,
+          "contract_pass": true,
+          "declared_sha256": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+          "observed_sha256": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+          "path": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl"
+        },
+        "source_path": "implementation/phase1/open_data/irregular/collected/artifacts/luxinzheng_megatall_tcl_model1_local/opensees.tcl",
+        "source_sha256": "862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+        "source_url_or_doi": "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm"
+      }
+    ],
+    "claim_boundary": "This readiness object requires five structurally distinct medium cases and repository-bound metric-specific evidence. Missing bytes, hash mismatches, path escapes, missing slots, parser-only artifacts, unapproved licenses, template reviews, and large-model substitutes receive zero credit. A PASS still does not authenticate external execution or grant release or final-design authority.",
+    "contract_pass": false,
+    "evidence_binding_profile": "repository_bytes_and_receipt_payloads.v1",
+    "evidence_binding_required": true,
+    "input_blockers": [],
+    "medium_benchmark_credit_count": 0,
+    "reference_solver_diversity": {
+      "contract_pass": false,
+      "opensees_present": false,
+      "second_independent_solver_present": false,
+      "solver_names": []
+    },
+    "required_case_artifacts": [
+      "canonical_normalization_receipt",
+      "reference_solver_input",
+      "reference_output",
+      "solver_output",
+      "residual_comparison",
+      "reaction_comparison",
+      "member_force_comparison",
+      "tolerance_policy",
+      "decision_receipt"
+    ],
+    "required_case_count": 5,
+    "required_core_metric_families": [
+      "displacement",
+      "reaction_equilibrium",
+      "member_force_local",
+      "global_energy_norm",
+      "residual_observation"
+    ],
+    "schema_version": "medium-benchmark-corpus-readiness.v1",
+    "slot_rows": [
+      {
+        "archetype_id": "steel_moment_frame_3d",
+        "blockers": [
+          "medium_corpus_archetype_missing:steel_moment_frame_3d"
+        ],
+        "claim_boundary": "A frame-only building case; braced-only or 2D proxy cases do not fill this slot.",
+        "label": "3D steel moment frame",
+        "required_capabilities": [
+          "frame_3d",
+          "moment_connection",
+          "multi_story"
+        ],
+        "selected_case_ids": [],
+        "slot_status": "operator_selection_required"
+      },
+      {
+        "archetype_id": "braced_frame_or_truss_tower",
+        "blockers": [
+          "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+          "medium_case_artifact_contract_not_passed:decision_receipt",
+          "medium_case_artifact_contract_not_passed:member_force_comparison",
+          "medium_case_artifact_contract_not_passed:reaction_comparison",
+          "medium_case_artifact_contract_not_passed:reference_output",
+          "medium_case_artifact_contract_not_passed:reference_solver_input",
+          "medium_case_artifact_contract_not_passed:residual_comparison",
+          "medium_case_artifact_contract_not_passed:solver_output",
+          "medium_case_artifact_contract_not_passed:tolerance_policy",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:decision_receipt_file_missing",
+          "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:member_force_comparison_file_missing",
+          "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reaction_comparison_file_missing",
+          "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reference_output_file_missing",
+          "medium_case_artifact_receipt:reference_output_sha256_invalid",
+          "medium_case_artifact_receipt:reference_solver_input_file_missing",
+          "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+          "medium_case_artifact_receipt:residual_comparison_file_missing",
+          "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:solver_output_file_missing",
+          "medium_case_artifact_receipt:solver_output_sha256_invalid",
+          "medium_case_artifact_receipt:tolerance_policy_file_missing",
+          "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+          "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+          "medium_case_artifact_sha256_invalid:decision_receipt",
+          "medium_case_artifact_sha256_invalid:member_force_comparison",
+          "medium_case_artifact_sha256_invalid:reaction_comparison",
+          "medium_case_artifact_sha256_invalid:reference_output",
+          "medium_case_artifact_sha256_invalid:reference_solver_input",
+          "medium_case_artifact_sha256_invalid:residual_comparison",
+          "medium_case_artifact_sha256_invalid:solver_output",
+          "medium_case_artifact_sha256_invalid:tolerance_policy",
+          "medium_case_commercial_use_not_approved",
+          "medium_case_decision_not_pass_or_review",
+          "medium_case_license_not_approved",
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid",
+          "medium_case_local_execution_not_approved",
+          "medium_case_pass_or_review_credit_missing",
+          "medium_case_reference_solver_version_unverified",
+          "medium_case_source_commit_sha_invalid"
+        ],
+        "claim_boundary": "Requires a real braced or truss load path, not an axial-bar seed.",
+        "label": "Braced frame / truss tower",
+        "required_capabilities": [
+          "axial_member",
+          "bracing_or_truss",
+          "three_dimensional"
+        ],
+        "selected_case_ids": [
+          "SCBF16B"
+        ],
+        "slot_status": "selected_blocked"
+      },
+      {
+        "archetype_id": "irregular_multistory_frame",
+        "blockers": [
+          "large_model_substitute_not_medium",
+          "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+          "medium_case_artifact_contract_not_passed:decision_receipt",
+          "medium_case_artifact_contract_not_passed:member_force_comparison",
+          "medium_case_artifact_contract_not_passed:reaction_comparison",
+          "medium_case_artifact_contract_not_passed:reference_output",
+          "medium_case_artifact_contract_not_passed:reference_solver_input",
+          "medium_case_artifact_contract_not_passed:residual_comparison",
+          "medium_case_artifact_contract_not_passed:solver_output",
+          "medium_case_artifact_contract_not_passed:tolerance_policy",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:decision_receipt_file_missing",
+          "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:member_force_comparison_file_missing",
+          "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reaction_comparison_file_missing",
+          "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reference_output_file_missing",
+          "medium_case_artifact_receipt:reference_output_sha256_invalid",
+          "medium_case_artifact_receipt:reference_solver_input_file_missing",
+          "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+          "medium_case_artifact_receipt:residual_comparison_file_missing",
+          "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:solver_output_file_missing",
+          "medium_case_artifact_receipt:solver_output_sha256_invalid",
+          "medium_case_artifact_receipt:tolerance_policy_file_missing",
+          "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+          "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+          "medium_case_artifact_sha256_invalid:decision_receipt",
+          "medium_case_artifact_sha256_invalid:member_force_comparison",
+          "medium_case_artifact_sha256_invalid:reaction_comparison",
+          "medium_case_artifact_sha256_invalid:reference_output",
+          "medium_case_artifact_sha256_invalid:reference_solver_input",
+          "medium_case_artifact_sha256_invalid:residual_comparison",
+          "medium_case_artifact_sha256_invalid:solver_output",
+          "medium_case_artifact_sha256_invalid:tolerance_policy",
+          "medium_case_commercial_use_not_approved",
+          "medium_case_decision_not_pass_or_review",
+          "medium_case_license_not_approved",
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid",
+          "medium_case_local_execution_not_approved",
+          "medium_case_pass_or_review_credit_missing",
+          "medium_case_reference_solver_version_unverified",
+          "medium_case_size_class_not_medium",
+          "medium_case_source_commit_sha_invalid"
+        ],
+        "claim_boundary": "Requires documented geometric or stiffness irregularity and medium scale.",
+        "label": "Irregular multi-story frame",
+        "required_capabilities": [
+          "frame_3d",
+          "multi_story",
+          "plan_or_vertical_irregularity"
+        ],
+        "selected_case_ids": [
+          "luxinzheng_megatall_model1"
+        ],
+        "slot_status": "selected_blocked"
+      },
+      {
+        "archetype_id": "frame_shell_diaphragm",
+        "blockers": [
+          "derived_source_provenance_pending",
+          "medium_case_artifact_contract_not_passed:canonical_normalization_receipt",
+          "medium_case_artifact_contract_not_passed:decision_receipt",
+          "medium_case_artifact_contract_not_passed:member_force_comparison",
+          "medium_case_artifact_contract_not_passed:reaction_comparison",
+          "medium_case_artifact_contract_not_passed:reference_output",
+          "medium_case_artifact_contract_not_passed:reference_solver_input",
+          "medium_case_artifact_contract_not_passed:residual_comparison",
+          "medium_case_artifact_contract_not_passed:solver_output",
+          "medium_case_artifact_contract_not_passed:tolerance_policy",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_file_missing",
+          "medium_case_artifact_receipt:canonical_normalization_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:decision_receipt_file_missing",
+          "medium_case_artifact_receipt:decision_receipt_sha256_invalid",
+          "medium_case_artifact_receipt:member_force_comparison_file_missing",
+          "medium_case_artifact_receipt:member_force_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reaction_comparison_file_missing",
+          "medium_case_artifact_receipt:reaction_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:reference_output_file_missing",
+          "medium_case_artifact_receipt:reference_output_sha256_invalid",
+          "medium_case_artifact_receipt:reference_solver_input_file_missing",
+          "medium_case_artifact_receipt:reference_solver_input_sha256_invalid",
+          "medium_case_artifact_receipt:residual_comparison_file_missing",
+          "medium_case_artifact_receipt:residual_comparison_sha256_invalid",
+          "medium_case_artifact_receipt:solver_output_file_missing",
+          "medium_case_artifact_receipt:solver_output_sha256_invalid",
+          "medium_case_artifact_receipt:tolerance_policy_file_missing",
+          "medium_case_artifact_receipt:tolerance_policy_sha256_invalid",
+          "medium_case_artifact_sha256_invalid:canonical_normalization_receipt",
+          "medium_case_artifact_sha256_invalid:decision_receipt",
+          "medium_case_artifact_sha256_invalid:member_force_comparison",
+          "medium_case_artifact_sha256_invalid:reaction_comparison",
+          "medium_case_artifact_sha256_invalid:reference_output",
+          "medium_case_artifact_sha256_invalid:reference_solver_input",
+          "medium_case_artifact_sha256_invalid:residual_comparison",
+          "medium_case_artifact_sha256_invalid:solver_output",
+          "medium_case_artifact_sha256_invalid:tolerance_policy",
+          "medium_case_capability_missing:diaphragm_load_path",
+          "medium_case_commercial_use_not_approved",
+          "medium_case_decision_not_pass_or_review",
+          "medium_case_license_not_approved",
+          "medium_case_license_receipt_path_invalid",
+          "medium_case_license_receipt_sha256_invalid",
+          "medium_case_local_execution_not_approved",
+          "medium_case_pass_or_review_credit_missing",
+          "medium_case_reference_solver_version_unverified",
+          "medium_case_source_commit_sha_invalid",
+          "source_url_verification_pending"
+        ],
+        "claim_boundary": "Parser-only shell presence does not prove shell force or diaphragm response accuracy.",
+        "label": "Frame + shell diaphragm",
+        "required_capabilities": [
+          "frame_3d",
+          "shell",
+          "diaphragm_load_path"
+        ],
+        "selected_case_ids": [
+          "SCBF16B_shell_beam_mix"
+        ],
+        "slot_status": "selected_blocked"
+      },
+      {
+        "archetype_id": "foundation_link_or_mixed_element",
+        "blockers": [
+          "medium_corpus_archetype_missing:foundation_link_or_mixed_element"
+        ],
+        "claim_boundary": "Requires an active link, spring, foundation, or mixed-element response in the reference outputs.",
+        "label": "Foundation/link or mixed-element model",
+        "required_capabilities": [
+          "frame_or_shell",
+          "link_spring_or_foundation",
+          "mixed_element"
+        ],
+        "selected_case_ids": [],
+        "slot_status": "operator_selection_required"
+      }
+    ],
+    "source_family_count": 0,
+    "status": "blocked",
+    "summary_line": "Medium benchmark corpus: BLOCKED | credit=0/5 | reference_solvers=0"
+  },
+  "scientific_corpus_plan_path": "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json",
   "scorecard_receipt_inventory": {
     "claim_boundary": "Only operator-attached medium scorecard receipts with the expected schema, contract_pass=true, validation_contract_pass=true, and no crash/OOM are counted. This inventory does not create source, license, reference-output, or normalization evidence.",
     "pass_or_approved_review_count": 0,
@@ -929,7 +2927,7 @@
     "case_id": "OPERATOR_ATTACHED_CASE_ID",
     "contract_pass": false,
     "crashed": false,
-    "decision": "PASS|APPROVED_REVIEW",
+    "decision": "PASS|REVIEW",
     "metrics": {
       "convergence_history_retained": true,
       "node_member_mapping_coverage": "OPERATOR_RECORDED_COVERAGE",
@@ -939,13 +2937,13 @@
     "oom": false,
     "peak_memory_gb": "OPERATOR_RECORDED_PEAK_MEMORY",
     "reference_output_sha256": "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256",
-    "runner_command": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type model_health --fail-blocked",
+    "runner_command": "python3 scripts/run_phase3_medium_model_scorecard_receipt.py --model OPERATOR_ATTACHED_MODEL.json --source-id OPERATOR_ATTACHED_SOURCE_ID --case-id OPERATOR_ATTACHED_CASE_ID --source-sha256 OPERATOR_ATTACHED_SHA256 --scorecard-or-review OPERATOR_ATTACHED_SCORECARD_OR_REVIEW.json --out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.scorecard_receipt.json --result-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.result.json --report-out implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts/OPERATOR_ATTACHED_CASE_ID.validation_report.json --analysis-type OPERATOR_SUPPORTED_NUMERICAL_ANALYSIS --fail-blocked",
     "runtime_seconds": "OPERATOR_RECORDED_RUNTIME",
     "schema_version": "phase3-medium-model-scorecard-receipt.v1",
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "b30bb8ccd06170766dc6ed200550106973443824",
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
   "source_url_verified": true,
@@ -959,14 +2957,17 @@
     "pass_or_approved_review_count": 0,
     "remaining_pass_or_review_case_count": 5,
     "remaining_scorecard_case_count": 5,
-    "required_evidence_count": 9,
+    "required_evidence_count": 10,
     "required_evidence_pass_count": 4,
     "required_medium_model_count": 5,
     "runner_command_ready": true,
+    "scientific_corpus_contract_pass": false,
+    "scientific_medium_benchmark_credit_count": 0,
     "source_url_verified": true
   },
-  "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=4/9",
+  "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=4/10",
   "validation_commands": [
+    "python3 scripts/build_medium_benchmark_corpus_plan.py --check",
     "python3 scripts/build_phase3_medium_model_scorecard_readiness_receipt.py --check",
     "python3 scripts/build_phase6_benchmark_scale_status.py --check",
     "python3 scripts/build_developer_preview_rc_status.py --check",

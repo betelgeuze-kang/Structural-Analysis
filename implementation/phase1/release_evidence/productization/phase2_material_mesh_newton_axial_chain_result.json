@@ -417,8 +417,10 @@
     "material_newton_closure_claim": false,
     "matrix_backend": "numpy_linalg_solve_dense",
     "metrics": {
+      "active_equation_count": 2,
       "case_id": "phase2_material_mesh_newton_axial_chain_cubic_spring",
       "contract_pass": true,
+      "convergence_claim": true,
       "fallback_used": false,
       "final_increment_abs_m": 1.0090187253045163e-16,
       "free_displacements_m": [
@@ -427,23 +429,32 @@
       ],
       "globalization": "backtracking_line_search",
       "increment_gate_passed": true,
+      "increment_norm_applicable": true,
       "increment_tolerance": 1e-12,
       "iteration_count": 7,
       "line_search_step_count": 6,
       "line_search_used": true,
+      "linear_solve_count": 7,
       "matrix_backend": "numpy_linalg_solve_dense",
+      "newton_iteration_count": 7,
+      "reaction_observation_only": false,
       "regularization_used": false,
       "relative_residual": 2.842170943040401e-16,
       "residual_formula": "F_internal_minus_F_external",
+      "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
       "residual_gate_passed": true,
       "residual_kn": [
         0.0,
         -2.842170943040401e-14
       ],
+      "residual_norm_applicable": true,
       "residual_tolerance": 1e-10,
+      "solver_executed": true,
       "sparse_backend_used": false,
       "stiffness_storage": "numpy_dense_ndarray",
-      "tangent_definition": "dF_internal_du_consistent"
+      "tangent_definition": "dF_internal_du_consistent",
+      "terminal_disposition": "solve_free_equations",
+      "terminal_reason": "residual_and_increment_converged"
     },
     "model_kind": "scalar_nonlinear_axial_cubic_spring",
     "problem": {

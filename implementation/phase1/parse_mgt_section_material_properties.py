@@ -296,6 +296,154 @@ def parse_mgt_material_properties(mgt_text: str) -> dict[int, dict[str, Any]]:
     return out
 
 
+def parse_mgt_dgn_material_property_aliases(
+    mgt_text: str,
+    *,
+    source_materials: dict[int, dict[str, Any]] | None = None,
+) -> tuple[dict[int, dict[str, Any]], dict[str, Any]]:
+    """Resolve only exact unique DGN-MATL type/name aliases to *MATERIAL.
+
+    DGN numeric design fields are deliberately ignored.  The alias copies an
+    existing analysis elastic-property row only when normalized material type
+    and name identify exactly one *MATERIAL row.  This source-derived mapping
+    remains engineer-review-required because no fuzzy or database inference is
+    permitted here.
+    """
+
+    base_materials = (
+        parse_mgt_material_properties(mgt_text)
+        if source_materials is None
+        else source_materials
+    )
+    identity_to_source_ids: dict[tuple[str, str], list[int]] = {}
+    for material_id, props in sorted(base_materials.items()):
+        identity = (
+            str(props.get("type") or "").strip().upper(),
+            str(props.get("name") or "").strip().casefold(),
+        )
+        identity_to_source_ids.setdefault(identity, []).append(
+            int(material_id)
+        )
+
+    aliases: dict[int, dict[str, Any]] = {}
+    alias_rows: list[dict[str, Any]] = []
+    unresolved_rows: list[dict[str, Any]] = []
+    ambiguous_rows: list[dict[str, Any]] = []
+    duplicate_material_ids: list[int] = []
+    existing_source_id_row_count = 0
+    exact_unique_match_row_count = 0
+    seen_dgn_ids: set[int] = set()
+    dgn_row_count = 0
+    for line in _block_data_lines(mgt_text, "DGN-MATL"):
+        parts = _split_csv(line)
+        if len(parts) < 3:
+            continue
+        material_id = _parse_int_token(parts[0])
+        if material_id is None:
+            continue
+        dgn_row_count += 1
+        material_id = int(material_id)
+        material_type = str(parts[1]).strip().upper()
+        material_name = str(parts[2]).strip()
+        if material_id in seen_dgn_ids:
+            duplicate_material_ids.append(material_id)
+            continue
+        seen_dgn_ids.add(material_id)
+        identity = (material_type, material_name.casefold())
+        candidates = identity_to_source_ids.get(identity, [])
+        row_base = {
+            "dgn_material_id": material_id,
+            "material_type": material_type,
+            "material_name": material_name,
+        }
+        if len(candidates) == 1:
+            exact_unique_match_row_count += 1
+        elif not candidates:
+            unresolved_rows.append(row_base)
+            continue
+        else:
+            ambiguous_rows.append(
+                {
+                    **row_base,
+                    "candidate_source_material_ids": [
+                        int(value) for value in candidates
+                    ],
+                }
+            )
+            continue
+        source_material_id = int(candidates[0])
+        if material_id in base_materials:
+            existing_source_id_row_count += 1
+            continue
+        inherited = dict(base_materials[source_material_id])
+        inherited.update(
+            {
+                "analysis_property_source": (
+                    "DGN-MATL_exact_type_name_alias_to_MATERIAL"
+                ),
+                "analysis_property_inheritance_requires_engineer_review": (
+                    True
+                ),
+                "dgn_material_id": material_id,
+                "inherited_from_material_id": source_material_id,
+                "dgn_material_type": material_type,
+                "dgn_material_name": material_name,
+                "dgn_numeric_elastic_override_consumed": False,
+            }
+        )
+        aliases[material_id] = inherited
+        alias_rows.append(
+            {
+                **row_base,
+                "source_material_id": source_material_id,
+                "source_material_type": str(
+                    base_materials[source_material_id].get("type") or ""
+                ),
+                "source_material_name": str(
+                    base_materials[source_material_id].get("name") or ""
+                ),
+            }
+        )
+
+    alias_rows.sort(key=lambda row: int(row["dgn_material_id"]))
+    unresolved_rows.sort(key=lambda row: int(row["dgn_material_id"]))
+    ambiguous_rows.sort(key=lambda row: int(row["dgn_material_id"]))
+    duplicate_ids = sorted(set(duplicate_material_ids))
+    contract_pass = bool(
+        not unresolved_rows and not ambiguous_rows and not duplicate_ids
+    )
+    return aliases, {
+        "schema_version": "mgt-dgn-material-property-alias-audit.v1",
+        "resolution_policy": (
+            "exact_normalized_type_and_name_unique_source_material.v1"
+        ),
+        "source_material_count": int(len(base_materials)),
+        "dgn_material_row_count": int(dgn_row_count),
+        "dgn_unique_material_id_count": int(len(seen_dgn_ids)),
+        "existing_source_id_row_count": int(
+            existing_source_id_row_count
+        ),
+        "exact_unique_identity_match_row_count": int(
+            exact_unique_match_row_count
+        ),
+        "alias_material_count": int(len(aliases)),
+        "alias_rows": alias_rows,
+        "unresolved_identity_rows": unresolved_rows,
+        "ambiguous_identity_rows": ambiguous_rows,
+        "duplicate_dgn_material_ids": duplicate_ids,
+        "dgn_numeric_elastic_override_consumed_count": 0,
+        "fuzzy_name_match_count": 0,
+        "contract_pass": contract_pass,
+        "engineer_review_required": bool(aliases),
+        "claim_boundary": (
+            "Copies analysis elastic properties only from one exact *MATERIAL "
+            "type/name identity to a distinct *DGN-MATL id. DGN numeric design "
+            "fields, fuzzy matching, and inferred database values are not "
+            "consumed. The identity inheritance remains engineer-review-required."
+        ),
+    }
+
+
 def _parse_global_offset_row(parts: list[str]) -> dict[str, Any] | None:
     if len(parts) < 8:
         return None
@@ -630,11 +778,49 @@ def scan_mgt_opening_source_markers(mgt_text: str) -> dict[str, Any]:
     }
 
 
-def load_mgt_section_material_properties(mgt_path: Path) -> dict[str, Any]:
+def load_mgt_section_material_properties(
+    mgt_path: Path,
+    *,
+    resolve_dgn_material_property_aliases: bool = False,
+) -> dict[str, Any]:
     text = mgt_path.read_text(encoding="utf-8", errors="ignore")
+    source_materials = parse_mgt_material_properties(text)
+    dgn_aliases, dgn_alias_audit = (
+        parse_mgt_dgn_material_property_aliases(
+            text,
+            source_materials=source_materials,
+        )
+    )
+    materials = dict(source_materials)
+    if resolve_dgn_material_property_aliases:
+        materials.update(dgn_aliases)
     return {
         "sections": parse_mgt_section_properties(text),
-        "materials": parse_mgt_material_properties(text),
+        "materials": materials,
+        "source_materials": source_materials,
+        "dgn_material_property_aliases": dgn_aliases,
+        "dgn_material_property_alias_audit": dgn_alias_audit,
+        "material_analysis_property_binding": {
+            "resolution_policy": (
+                dgn_alias_audit["resolution_policy"]
+                if resolve_dgn_material_property_aliases
+                else "MATERIAL_rows_only.v1"
+            ),
+            "dgn_alias_resolution_enabled": bool(
+                resolve_dgn_material_property_aliases
+            ),
+            "source_material_count": int(len(source_materials)),
+            "dgn_alias_material_count_available": int(len(dgn_aliases)),
+            "dgn_alias_material_count_applied": (
+                int(len(dgn_aliases))
+                if resolve_dgn_material_property_aliases
+                else 0
+            ),
+            "resolved_material_count": int(len(materials)),
+            "engineer_review_required": bool(
+                resolve_dgn_material_property_aliases and dgn_aliases
+            ),
+        },
         "plate_thicknesses": parse_mgt_plate_thickness_properties(text),
         "beam_end_offsets": parse_mgt_beam_end_offsets(text),
         "support_constraints": parse_mgt_support_constraints(text),

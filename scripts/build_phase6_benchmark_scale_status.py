@@ -98,6 +98,17 @@ def _benchmark_scale_blocker_grouping_metadata(blockers: list[str]) -> dict[str,
             },
         ),
         (
+            "medium_scientific_corpus",
+            {
+                "scope": "medium_model_scientific_corpus",
+                "description": (
+                    "Five-archetype medium corpus, independent-reference, and "
+                    "scientific credit prerequisites."
+                ),
+                "matches": ("scientific_medium_corpus_contract_blocked",),
+            },
+        ),
+        (
             "medium_scorecard_execution",
             {
                 "scope": "medium_model_scorecard_execution",
@@ -168,9 +179,10 @@ def _benchmark_scale_blocker_grouping_metadata(blockers: list[str]) -> dict[str,
         "schema_version": "phase6-benchmark-scale-blocker-groups.v1",
         "grouping_policy": (
             "Preserve every blocker while separating source/license prerequisites, "
-            "reference/normalization preparation, medium scorecard execution, large "
-            "runner execution, and quantity shortfalls. This grouping does not acquire "
-            "sources, create benchmark evidence, or promote RC readiness."
+            "reference/normalization preparation, the medium scientific corpus, medium "
+            "scorecard execution, large runner execution, and quantity shortfalls. "
+            "This grouping does not acquire sources, create benchmark evidence, or "
+            "promote RC readiness."
         ),
         "blocker_count": len(blockers),
         "unassigned_blocker_count": len(unassigned_blockers),

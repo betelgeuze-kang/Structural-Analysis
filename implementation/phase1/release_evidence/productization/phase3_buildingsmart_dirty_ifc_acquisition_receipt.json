@@ -2,7 +2,9 @@
   "blockers": [
     "dirty_import_execution_missing",
     "per_file_license_review_pending",
-    "silent_data_loss_negative_gate_not_executed"
+    "silent_data_loss_negative_gate_not_executed",
+    "source_file_not_acquired",
+    "source_sha256_missing"
   ],
   "claim_boundary": "This receipt narrows the buildingSMART dirty IFC lane from source identity to selected-file acquisition and expected negative/import-hardening contracts. It records local private-corpus acquisition/checksums when present, but it does not bundle IFC files, approve redistribution, execute import-health checks, or close Phase 3.",
   "claim_boundary_version": "developer-preview-core-api-v1",
@@ -12,7 +14,7 @@
   "dirty_import_execution_count": 0,
   "engine_version": "1.0.0",
   "expected_negative_import_contract_count": 8,
-  "generated_at": "2026-07-01T10:43:33.862042+00:00",
+  "generated_at": "2026-07-18T14:04:27.260687+00:00",
   "input_checksums": {
     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:fa2599e305d75fc385bded48680b0fe1139ed08755f8ae567e317e262a67e36f",
     "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
@@ -42,6 +44,8 @@
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_architectural/Duplex_A_20110907.ifc"
       ],
       "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
         "per_file_license_review_pending",
         "dirty_import_execution_missing",
         "silent_data_loss_negative_gate_not_executed"
@@ -86,11 +90,11 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
-      "source_checksum_status": "attached_from_local_private_corpus",
-      "source_file_acquired": true,
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
-      "source_sha256": "sha256:b347a2c8aa8fff6db896a4417a9c50c22ac0ccd7c5cfc22b99b8d29336c606ed",
+      "source_sha256": "",
       "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
@@ -116,6 +120,8 @@
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_electrical/Duplex_Electrical_20121207.ifc"
       ],
       "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
         "per_file_license_review_pending",
         "dirty_import_execution_missing",
         "silent_data_loss_negative_gate_not_executed"
@@ -160,11 +166,11 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
-      "source_checksum_status": "attached_from_local_private_corpus",
-      "source_file_acquired": true,
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
-      "source_sha256": "sha256:d47b014ed5b3428496683ee75e4664013f6df8237ea571b8d13f877cea0b7a94",
+      "source_sha256": "",
       "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
@@ -190,6 +196,8 @@
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_mep/Duplex_MEP_20110907.ifc"
       ],
       "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
         "per_file_license_review_pending",
         "dirty_import_execution_missing",
         "silent_data_loss_negative_gate_not_executed"
@@ -234,11 +242,11 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
-      "source_checksum_status": "attached_from_local_private_corpus",
-      "source_file_acquired": true,
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
-      "source_sha256": "sha256:13976a8e223f177a6d7123679e4b02e750cd90c13f7bb20c593be125d9407119",
+      "source_sha256": "",
       "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
@@ -264,6 +272,8 @@
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_architectural/Clinic_Architectural.ifc"
       ],
       "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
         "per_file_license_review_pending",
         "dirty_import_execution_missing",
         "silent_data_loss_negative_gate_not_executed"
@@ -308,11 +318,11 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
-      "source_checksum_status": "attached_from_local_private_corpus",
-      "source_file_acquired": true,
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
-      "source_sha256": "sha256:2ac970ce065ecac4e0c9e5f453a257169e90d0067f419b7e33533a64ef837880",
+      "source_sha256": "",
       "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
@@ -338,6 +348,8 @@
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_electrical/Clinic_Electrical.ifc"
       ],
       "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
         "per_file_license_review_pending",
         "dirty_import_execution_missing",
         "silent_data_loss_negative_gate_not_executed"
@@ -382,11 +394,11 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
-      "source_checksum_status": "attached_from_local_private_corpus",
-      "source_file_acquired": true,
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
-      "source_sha256": "sha256:70c436de1f1e8a860acfba61b68da1c9243d18dcbbddb98b88b550a642d95d32",
+      "source_sha256": "",
       "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
@@ -412,6 +424,8 @@
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_hvac/Clinic_HVAC.ifc"
       ],
       "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
         "per_file_license_review_pending",
         "dirty_import_execution_missing",
         "silent_data_loss_negative_gate_not_executed"
@@ -456,11 +470,11 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
-      "source_checksum_status": "attached_from_local_private_corpus",
-      "source_file_acquired": true,
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
-      "source_sha256": "sha256:39c88a79f48fbe56da86afb0fb3ebd188f8930df3df7dbfbd9ecaa535aaeab9b",
+      "source_sha256": "",
       "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
@@ -486,6 +500,8 @@
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_plumbing/Clinic_Plumbing.ifc"
       ],
       "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
         "per_file_license_review_pending",
         "dirty_import_execution_missing",
         "silent_data_loss_negative_gate_not_executed"
@@ -530,11 +546,11 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
-      "source_checksum_status": "attached_from_local_private_corpus",
-      "source_file_acquired": true,
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
-      "source_sha256": "sha256:e662a8d0273694b745a313fc18ee8d4916db03453caa8f9d00d4d80b62bb6e23",
+      "source_sha256": "",
       "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
@@ -560,6 +576,8 @@
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_structural/Clinic_Structural.ifc"
       ],
       "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
         "per_file_license_review_pending",
         "dirty_import_execution_missing",
         "silent_data_loss_negative_gate_not_executed"
@@ -604,11 +622,11 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
-      "source_checksum_status": "attached_from_local_private_corpus",
-      "source_file_acquired": true,
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
-      "source_sha256": "sha256:325287b375f154dc79504c4bbf67b40c501f458f23a8c4ba13b27171e00533d8",
+      "source_sha256": "",
       "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
@@ -626,8 +644,8 @@
       ]
     }
   ],
-  "source_checksum_attached_count": 8,
-  "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
-  "source_file_acquired_count": 8,
+  "source_checksum_attached_count": 0,
+  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_file_acquired_count": 0,
   "status": "blocked"
 }

@@ -1,0 +1,5216 @@
+{
+  "analysis_type": "dense_vector_spherical_arc_length_continuation",
+  "blockers_remaining": [
+    "frame_shell_element_formulation_not_connected",
+    "lee_frame_snapthrough_not_implemented",
+    "material_geometric_coupling_not_verified",
+    "published_or_experimental_validation_not_attached",
+    "production_sparse_backend_not_implemented",
+    "production_rocm_hip_parity_not_verified",
+    "g1_full_load_full_mesh_not_closed"
+  ],
+  "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+  "claim_boundary": "This receipt verifies the dense vector spherical arc-length kernel on one analytic coupled two-DOF shallow-arch potential. It does not verify a frame or shell element formulation, the Lee frame, material-geometric coupling, published or experimental validation, a sparse backend, ROCm/HIP parity, full-building equilibrium, or G1 closure.",
+  "claims": {
+    "checkpoint_restart": true,
+    "consistent_vector_tangent": true,
+    "coupled_two_dof_limit_point_crossing": true,
+    "dense_multi_dof_vector_arc_length": true,
+    "failed_step_rollback": true,
+    "g1_full_building_closure": false,
+    "general_frame_shell_arc_length": false,
+    "lee_frame_snapthrough": false,
+    "material_geometric_coupling": false,
+    "production_rocm_hip_parity": false,
+    "production_sparse_backend": false,
+    "published_or_experimental_validation": false
+  },
+  "computed_first_limit_bracket": {
+    "above_load_factor": 29.3865091621546,
+    "above_primary_displacement_m": 0.09348012372966642,
+    "above_step_index": 3,
+    "below_load_factor": 29.214303221076523,
+    "below_primary_displacement_m": 0.07460575581109628,
+    "below_step_index": 2,
+    "contract_pass": true,
+    "first_limit_load_relative_error": 0.007386101856641412,
+    "first_local_maximum_load_factor": 29.3865091621546,
+    "first_local_maximum_step_index": 3,
+    "relative_tolerance": 0.01
+  },
+  "contract_pass": true,
+  "exact_first_limit_point": {
+    "coupled_displacement_m": 0.029849944359045574,
+    "load_factor": 29.605176007630757,
+    "primary_displacement_m": 0.08528555531155879
+  },
+  "exact_reduction_errors": {
+    "contract_pass": true,
+    "maximum_coupling_relation_absolute_error_m": 2.7755575615628914e-17,
+    "maximum_reduced_equilibrium_absolute_error_kn": 3.026734418654087e-11
+  },
+  "finite_difference_rows": [
+    {
+      "consistent_tangent_kn_per_m": [
+        [
+          497.31588198211637,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "contract_pass": true,
+      "energy_gradient_allowed_error_kn": 1e-07,
+      "finite_difference_energy_gradient_kn": [
+        17.515581313382043,
+        1.1999999999974993
+      ],
+      "finite_difference_step_m": 3e-06,
+      "finite_difference_tangent_kn_per_m": [
+        [
+          497.3158820516706,
+          -140.000000000029
+        ],
+        [
+          -139.99999999999199,
+          399.99999999995595
+        ]
+      ],
+      "free_displacements_m": [
+        0.03,
+        0.013499999999999998
+      ],
+      "internal_force_kn": [
+        17.515581328250835,
+        1.1999999999999997
+      ],
+      "maximum_energy_gradient_absolute_error_kn": 1.4868792419520105e-08,
+      "maximum_tangent_absolute_error_kn_per_m": 6.955423259569216e-08,
+      "tangent_allowed_error_kn_per_m": 1e-06,
+      "tangent_symmetry_absolute_error_kn_per_m": 0.0
+    },
+    {
+      "consistent_tangent_kn_per_m": [
+        [
+          157.1103700827781,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "contract_pass": true,
+      "energy_gradient_allowed_error_kn": 1e-07,
+      "finite_difference_energy_gradient_kn": [
+        28.374848288030087,
+        1.1999999999974993
+      ],
+      "finite_difference_step_m": 3e-06,
+      "finite_difference_tangent_kn_per_m": [
+        [
+          157.1103702661484,
+          -140.000000000029
+        ],
+        [
+          -140.00000000032506,
+          399.99999999995595
+        ]
+      ],
+      "free_displacements_m": [
+        0.07,
+        0.0275
+      ],
+      "internal_force_kn": [
+        28.37484829602621,
+        1.1999999999999997
+      ],
+      "maximum_energy_gradient_absolute_error_kn": 7.996124651299397e-09,
+      "maximum_tangent_absolute_error_kn_per_m": 1.8337030383008823e-07,
+      "tangent_allowed_error_kn_per_m": 1e-06,
+      "tangent_symmetry_absolute_error_kn_per_m": 0.0
+    },
+    {
+      "consistent_tangent_kn_per_m": [
+        [
+          49.00000000000435,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "contract_pass": true,
+      "energy_gradient_allowed_error_kn": 1e-07,
+      "finite_difference_energy_gradient_kn": [
+        29.185175997296454,
+        1.1999999999974993
+      ],
+      "finite_difference_step_m": 3e-06,
+      "finite_difference_tangent_kn_per_m": [
+        [
+          49.000000074646735,
+          -140.000000000029
+        ],
+        [
+          -140.000000000103,
+          400.0000000004
+        ]
+      ],
+      "free_displacements_m": [
+        0.08528555531155879,
+        0.03284994435904558
+      ],
+      "internal_force_kn": [
+        29.185176007630755,
+        1.200000000000001
+      ],
+      "maximum_energy_gradient_absolute_error_kn": 1.03343005264378e-08,
+      "maximum_tangent_absolute_error_kn_per_m": 7.464238649390609e-08,
+      "tangent_allowed_error_kn_per_m": 1e-06,
+      "tangent_symmetry_absolute_error_kn_per_m": 0.0
+    },
+    {
+      "consistent_tangent_kn_per_m": [
+        [
+          -339.3864861815981,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "contract_pass": true,
+      "energy_gradient_allowed_error_kn": 1e-07,
+      "finite_difference_energy_gradient_kn": [
+        -0.42000000003798255,
+        1.199999999960492
+      ],
+      "finite_difference_step_m": 3e-06,
+      "finite_difference_tangent_kn_per_m": [
+        [
+          -339.3864860921913,
+          -140.00000000014
+        ],
+        [
+          -139.99999999939985,
+          400.0000000004
+        ]
+      ],
+      "free_displacements_m": [
+        0.2,
+        0.073
+      ],
+      "internal_force_kn": [
+        -0.4200000000000004,
+        1.200000000000001
+      ],
+      "maximum_energy_gradient_absolute_error_kn": 3.9509062688125596e-11,
+      "maximum_tangent_absolute_error_kn_per_m": 8.940679663282936e-08,
+      "tangent_allowed_error_kn_per_m": 1e-06,
+      "tangent_symmetry_absolute_error_kn_per_m": 0.0
+    },
+    {
+      "consistent_tangent_kn_per_m": [
+        [
+          84.96606730968585,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "contract_pass": true,
+      "energy_gradient_allowed_error_kn": 1e-07,
+      "finite_difference_energy_gradient_kn": [
+        -29.930790699350673,
+        1.1999999999974993
+      ],
+      "finite_difference_step_m": 3e-06,
+      "finite_difference_tangent_kn_per_m": [
+        [
+          84.96606737118384,
+          -140.000000000029
+        ],
+        [
+          -139.99999999939985,
+          400.0000000004
+        ]
+      ],
+      "free_displacements_m": [
+        0.32,
+        0.11499999999999999
+      ],
+      "internal_force_kn": [
+        -29.93079071040459,
+        1.200000000000001
+      ],
+      "maximum_energy_gradient_absolute_error_kn": 1.1053916892933557e-08,
+      "maximum_tangent_absolute_error_kn_per_m": 6.149798537080642e-08,
+      "tangent_allowed_error_kn_per_m": 1e-06,
+      "tangent_symmetry_absolute_error_kn_per_m": 0.0
+    },
+    {
+      "consistent_tangent_kn_per_m": [
+        [
+          1272.0488016301001,
+          -140.0
+        ],
+        [
+          -140.0,
+          400.0
+        ]
+      ],
+      "contract_pass": true,
+      "energy_gradient_allowed_error_kn": 1e-07,
+      "finite_difference_energy_gradient_kn": [
+        38.90819382990074,
+        1.2000000000160032
+      ],
+      "finite_difference_step_m": 3e-06,
+      "finite_difference_tangent_kn_per_m": [
+        [
+          1272.0488016822646,
+          -139.99999999943688
+        ],
+        [
+          -139.99999999847466,
+          400.0000000004
+        ]
+      ],
+      "free_displacements_m": [
+        0.44,
+        0.157
+      ],
+      "internal_force_kn": [
+        38.90819380993287,
+        1.200000000000001
+      ],
+      "maximum_energy_gradient_absolute_error_kn": 1.9967870912296348e-08,
+      "maximum_tangent_absolute_error_kn_per_m": 5.2164523367537186e-08,
+      "tangent_allowed_error_kn_per_m": 1e-06,
+      "tangent_symmetry_absolute_error_kn_per_m": 0.0
+    }
+  ],
+  "problem_definition": {
+    "coupling_ratio": 0.35,
+    "coupling_stiffness_kn_per_m": 400.0,
+    "equation_count": 2,
+    "exact_reduction": "u1=coupling_ratio*u0; load_factor=shallow_arch_force(u0)",
+    "reference_load_kn": [
+      1.0,
+      0.0
+    ]
+  },
+  "schema_version": "phase2-coupled-shallow-arch-vector-arc-length.v1",
+  "solver_result": {
+    "attempts": [
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.05638157902314576,
+          0.019733552658101013
+        ],
+        "accepted_free_displacements_m_before": [
+          0.0,
+          0.0
+        ],
+        "accepted_load_factor_after": 26.606880906763383,
+        "accepted_load_factor_before": 0.0,
+        "accepted_state_hash_after": "sha256:71065d24f29c5373a57a323bff11c6e535ada3566b0b05842e2d611e84bc5e8d",
+        "accepted_state_hash_before": "sha256:2d9766729f3e6f6f1f5d3ffefb695ca9aaf302de823c4a16596999e78b9ef0ae",
+        "accepted_step_index_after": 1,
+        "accepted_step_index_before": 0,
+        "arc_length_m": 0.08,
+        "attempt_index": 1,
+        "consistent_tangent_condition_number": 2.37847309880826,
+        "constraint_residual_m2": 3.382710778154774e-17,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 940395.5153176545,
+            "constraint_residual_m2": -2.6020852139652106e-18,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.013800426265946792,
+              0.004830149193081373
+            ],
+            "correction_load_factor": -5.134272102189167,
+            "iteration": 1,
+            "residual_inf_norm_kn": 9.625266419690554,
+            "residual_kn": [
+              -9.625266419690554,
+              2.0816681711721685e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.04339674627385947,
+              0.015188861195850818
+            ],
+            "trial_load_factor": 32.73385444923741
+          },
+          {
+            "augmented_condition_number": 579888.6661226383,
+            "constraint_residual_m2": 0.000319225106426531,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.0007921418957498158,
+              -0.00027724966351243545
+            ],
+            "correction_load_factor": -0.9851056010952809,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.8202126443990849,
+            "residual_kn": [
+              -0.8202126443990849,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.05719717253980626,
+              0.02001901038893219
+            ],
+            "trial_load_factor": 27.599582347048248
+          },
+          {
+            "augmented_condition_number": 607224.2594174406,
+            "constraint_residual_m2": 4.58608834015637e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.344948101610244e-05,
+              -8.207318355635854e-06
+            ],
+            "correction_load_factor": -0.007593128425174819,
+            "iteration": 3,
+            "residual_inf_norm_kn": 0.0025601628432170287,
+            "residual_kn": [
+              -0.0025601628432170287,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.05640503064405644,
+              0.019741760725419753
+            ],
+            "trial_load_factor": 26.614476745952967
+          },
+          {
+            "augmented_condition_number": 607922.2787098732,
+            "constraint_residual_m2": 8.478606315295845e-10,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.1398945792834824e-09,
+              -7.489631027492187e-10
+            ],
+            "correction_load_factor": -2.710764408016705e-06,
+            "iteration": 4,
+            "residual_inf_norm_kn": 2.2510676629394766e-06,
+            "residual_kn": [
+              -2.2510676629394766e-06,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.05638158116304034,
+              0.019733553407064116
+            ],
+            "trial_load_factor": 26.606883617527792
+          },
+          {
+            "constraint_residual_m2": 3.382710778154774e-17,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 5,
+            "residual_inf_norm_kn": 3.019806626980426e-13,
+            "residual_kn": [
+              3.019806626980426e-13,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.05638157902314576,
+              0.019733552658101013
+            ],
+            "trial_load_factor": 26.606880906763383
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.04339674627385947,
+          0.015188861195850818
+        ],
+        "predictor_load_factor": 32.73385444923741,
+        "predictor_orientation_dot": null,
+        "predictor_tangent_displacements": [
+          0.5424593284232434,
+          0.18986076494813522
+        ],
+        "predictor_tangent_load_factor": 409.1731806154677,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 3.019806626980426e-13,
+        "residual_kn": [
+          3.019806626980426e-13,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.05638157902314576,
+          0.019733552658101013
+        ],
+        "trial_load_factor": 26.606880906763383
+      },
+      {
+        "accepted": false,
+        "accepted_free_displacements_m_after": [
+          0.05638157902314576,
+          0.019733552658101013
+        ],
+        "accepted_free_displacements_m_before": [
+          0.05638157902314576,
+          0.019733552658101013
+        ],
+        "accepted_load_factor_after": 26.606880906763383,
+        "accepted_load_factor_before": 26.606880906763383,
+        "accepted_state_hash_after": "sha256:71065d24f29c5373a57a323bff11c6e535ada3566b0b05842e2d611e84bc5e8d",
+        "accepted_state_hash_before": "sha256:71065d24f29c5373a57a323bff11c6e535ada3566b0b05842e2d611e84bc5e8d",
+        "accepted_step_index_after": 1,
+        "accepted_step_index_before": 1,
+        "arc_length_m": 0.08,
+        "attempt_index": 2,
+        "consistent_tangent_condition_number": 2.7667601098157366,
+        "constraint_residual_m2": 1.5611604890775066e-11,
+        "converged": false,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 754887.7082867929,
+            "constraint_residual_m2": 1.734723475976807e-18,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.015760730091015064,
+              0.005516255531855267
+            ],
+            "correction_load_factor": -20.588447744910933,
+            "iteration": 1,
+            "residual_inf_norm_kn": 17.014269575707928,
+            "residual_kn": [
+              -17.014269575707928,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.1263555523894388,
+              0.04422444333630358
+            ],
+            "trial_load_factor": 41.63884123402646
+          },
+          {
+            "augmented_condition_number": 602895.4140161711,
+            "constraint_residual_m2": 0.0019743664102742616,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00972654121869942,
+              -0.003404289426544797
+            ],
+            "correction_load_factor": 2.300377184360272,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.5036881595530751,
+            "residual_kn": [
+              -0.5036881595530751,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.14211628248045385,
+              0.04974069886815884
+            ],
+            "trial_load_factor": 21.050393489115525
+          },
+          {
+            "augmented_condition_number": 612887.2047365489,
+            "constraint_residual_m2": 0.00012736173134004353,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.0007439963125387744,
+              -0.00026039870938857106
+            ],
+            "correction_load_factor": 0.015641644061180147,
+            "iteration": 3,
+            "residual_inf_norm_kn": 0.17186885745461566,
+            "residual_kn": [
+              -0.17186885745461566,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.13238974126175443,
+              0.046336409441614046
+            ],
+            "trial_load_factor": 23.350770673475797
+          },
+          {
+            "augmented_condition_number": 611934.4323057183,
+            "constraint_residual_m2": 6.223166450396514e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -3.7121238299679456e-06,
+              -1.2992433404887809e-06
+            ],
+            "correction_load_factor": -0.00018954392815897662,
+            "iteration": 4,
+            "residual_inf_norm_kn": 0.0011139799259929362,
+            "residual_kn": [
+              -0.0011139799259929362,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.13164574494921566,
+              0.046076010732225475
+            ],
+            "trial_load_factor": 23.366412317536977
+          },
+          {
+            "augmented_condition_number": 611927.5712151427,
+            "constraint_residual_m2": 1.5611604890775066e-11,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -9.312580415826298e-11,
+              -3.2594024516498124e-11
+            ],
+            "correction_load_factor": -4.740720130017619e-09,
+            "iteration": 5,
+            "residual_inf_norm_kn": 2.7930582291446626e-08,
+            "residual_kn": [
+              -2.7930582291446626e-08,
+              -2.7755575615628914e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.1316420328253857,
+              0.046074711488884985
+            ],
+            "trial_load_factor": 23.36622277360882
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "next_arc_length_m": 0.02,
+        "predictor_free_displacements_m": [
+          0.06997397336629303,
+          0.024490890678202565
+        ],
+        "predictor_load_factor": 15.031960327263072,
+        "predictor_orientation_dot": 0.941929641038746,
+        "predictor_tangent_displacements": [
+          0.8746746670786629,
+          0.30613613347753205
+        ],
+        "predictor_tangent_load_factor": 187.89950409078838,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 2.7930582291446626e-08,
+        "residual_kn": [
+          -2.7930582291446626e-08,
+          -2.7755575615628914e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "maximum_corrector_iterations_exhausted",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.13164203273225988,
+          0.04607471145629096
+        ],
+        "trial_load_factor": 23.3662227688681
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.07460575581109628,
+          0.026112014533883694
+        ],
+        "accepted_free_displacements_m_before": [
+          0.05638157902314576,
+          0.019733552658101013
+        ],
+        "accepted_load_factor_after": 29.214303221076523,
+        "accepted_load_factor_before": 26.606880906763383,
+        "accepted_state_hash_after": "sha256:79a843776d8d073b0b6efc70ac23cc0a0ec23ac08c883a66919137c3c7ba513c",
+        "accepted_state_hash_before": "sha256:71065d24f29c5373a57a323bff11c6e535ada3566b0b05842e2d611e84bc5e8d",
+        "accepted_step_index_after": 2,
+        "accepted_step_index_before": 1,
+        "arc_length_m": 0.02,
+        "attempt_index": 3,
+        "consistent_tangent_condition_number": 2.7667601098157366,
+        "constraint_residual_m2": 2.168404344971009e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 876656.2367297149,
+            "constraint_residual_m2": 5.421010862427522e-20,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.0008707635258430649,
+              0.0003047672340450727
+            ],
+            "correction_load_factor": -1.1374897765817777,
+            "iteration": 1,
+            "residual_inf_norm_kn": 1.2067347465657647,
+            "residual_kn": [
+              -1.2067347465657647,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.07387507236471902,
+              0.025856275327651654
+            ],
+            "trial_load_factor": 30.36487098857915
+          },
+          {
+            "augmented_condition_number": 784699.8290386876,
+            "constraint_residual_m2": 6.026644152198066e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00013958377885474479,
+              -4.885432259916067e-05
+            ],
+            "correction_load_factor": -0.012970714138174019,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.002752102829013836,
+            "residual_kn": [
+              -0.002752102829013836,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.07474583589056208,
+              0.026161042561696726
+            ],
+            "trial_load_factor": 29.227381211997372
+          },
+          {
+            "augmented_condition_number": 801398.091981771,
+            "constraint_residual_m2": 2.254333385714796e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -4.962934534085994e-07,
+              -1.737027086930098e-07
+            ],
+            "correction_load_factor": -0.0001072753603492245,
+            "iteration": 3,
+            "residual_inf_norm_kn": 7.044184311055801e-05,
+            "residual_kn": [
+              -7.044184311055801e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.07460625211170734,
+              0.026112188239097566
+            ],
+            "trial_load_factor": 29.2144104978592
+          },
+          {
+            "augmented_condition_number": 801458.6108605718,
+            "constraint_residual_m2": 3.225119823979661e-13,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -7.157656399683065e-12,
+              -2.5051797398890728e-12
+            ],
+            "correction_load_factor": -1.4223244518020838e-09,
+            "iteration": 4,
+            "residual_inf_norm_kn": 8.910774340620264e-10,
+            "residual_kn": [
+              -8.910774340620264e-10,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.07460575581825393,
+              0.026112014536388874
+            ],
+            "trial_load_factor": 29.21430322249885
+          },
+          {
+            "constraint_residual_m2": 2.168404344971009e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 5,
+            "residual_inf_norm_kn": 1.0658141036401503e-13,
+            "residual_kn": [
+              -1.0658141036401503e-13,
+              -1.3877787807814457e-15
+            ],
+            "trial_free_displacements_m": [
+              0.07460575581109628,
+              0.026112014533883694
+            ],
+            "trial_load_factor": 29.214303221076523
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.017493493341573258,
+          0.006122722669550641
+        ],
+        "predictor_load_factor": 3.757990081815768,
+        "predictor_orientation_dot": 0.941929641038746,
+        "predictor_tangent_displacements": [
+          0.8746746670786629,
+          0.30613613347753205
+        ],
+        "predictor_tangent_load_factor": 187.89950409078838,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.0658141036401503e-13,
+        "residual_kn": [
+          -1.0658141036401503e-13,
+          -1.3877787807814457e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.07460575581109628,
+          0.026112014533883694
+        ],
+        "trial_load_factor": 29.214303221076523
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.09348012372966642,
+          0.03271804330538325
+        ],
+        "accepted_free_displacements_m_before": [
+          0.07460575581109628,
+          0.026112014533883694
+        ],
+        "accepted_load_factor_after": 29.3865091621546,
+        "accepted_load_factor_before": 29.214303221076523,
+        "accepted_state_hash_after": "sha256:563cf7433113d469b7b39e49763786dc48ecba5b21abcd31bfe5e329f4da6981",
+        "accepted_state_hash_before": "sha256:79a843776d8d073b0b6efc70ac23cc0a0ec23ac08c883a66919137c3c7ba513c",
+        "accepted_step_index_after": 3,
+        "accepted_step_index_before": 2,
+        "arc_length_m": 0.02,
+        "attempt_index": 4,
+        "consistent_tangent_condition_number": 7.079889396140531,
+        "constraint_residual_m2": -5.421010862427522e-20,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 553842.317856157,
+            "constraint_residual_m2": 0.0,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.00032336684724383803,
+              0.0001131783965353433
+            ],
+            "correction_load_factor": -1.222633220066321,
+            "iteration": 1,
+            "residual_inf_norm_kn": 1.2059349900286485,
+            "residual_kn": [
+              -1.2059349900286485,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.09330032551932148,
+              0.032655113931762514
+            ],
+            "trial_load_factor": 30.601829229282025
+          },
+          {
+            "augmented_condition_number": 558578.8924286502,
+            "constraint_residual_m2": 6.096703430577598e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00014302279008797863,
+              -5.005797653079252e-05
+            ],
+            "correction_load_factor": 0.007347850473716739,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.00032506481863592285,
+            "residual_kn": [
+              -0.00032506481863592285,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.09362369236656531,
+              0.03276829232829786
+            ],
+            "trial_load_factor": 29.379196009215704
+          },
+          {
+            "augmented_condition_number": 553629.1169787163,
+            "constraint_residual_m2": 2.317728312544549e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -5.458388209387932e-07,
+              -1.9104358732857762e-07
+            ],
+            "correction_load_factor": -3.4697030864324825e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 6.349554411144709e-05,
+            "residual_kn": [
+              -6.349554411144709e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.09348066957647734,
+              0.032718234351767066
+            ],
+            "trial_load_factor": 29.38654385968942
+          },
+          {
+            "augmented_condition_number": 553609.7044061159,
+            "constraint_residual_m2": 3.3925331077364063e-13,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -7.989981191255523e-12,
+              -2.7964864780455295e-12
+            ],
+            "correction_load_factor": -5.039612929157702e-10,
+            "iteration": 4,
+            "residual_inf_norm_kn": 9.254854660412093e-10,
+            "residual_kn": [
+              -9.254854660412093e-10,
+              -2.7755575615628914e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.0934801237376564,
+              0.032718043308179734
+            ],
+            "trial_load_factor": 29.38650916265856
+          },
+          {
+            "constraint_residual_m2": -5.421010862427522e-20,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 5,
+            "residual_inf_norm_kn": 3.339550858072471e-13,
+            "residual_kn": [
+              -3.339550858072471e-13,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.09348012372966642,
+              0.03271804330538325
+            ],
+            "trial_load_factor": 29.3865091621546
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.018694569708225195,
+          0.006543099397878818
+        ],
+        "predictor_load_factor": 1.3875260082055008,
+        "predictor_orientation_dot": 0.9922487962453168,
+        "predictor_tangent_displacements": [
+          0.9347284854112597,
+          0.3271549698939409
+        ],
+        "predictor_tangent_load_factor": 69.37630041027504,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 3.339550858072471e-13,
+        "residual_kn": [
+          -3.339550858072471e-13,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.09348012372966642,
+          0.03271804330538325
+        ],
+        "trial_load_factor": 29.3865091621546
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.11198309678063213,
+          0.03919408387322125
+        ],
+        "accepted_free_displacements_m_before": [
+          0.09348012372966642,
+          0.03271804330538325
+        ],
+        "accepted_load_factor_after": 27.40529193283867,
+        "accepted_load_factor_before": 29.3865091621546,
+        "accepted_state_hash_after": "sha256:e41e1bdf162e3db3990adecd3bfb950c66cf328e21332294a29a91a00e1d8667",
+        "accepted_state_hash_before": "sha256:563cf7433113d469b7b39e49763786dc48ecba5b21abcd31bfe5e329f4da6981",
+        "accepted_step_index_after": 4,
+        "accepted_step_index_before": 3,
+        "arc_length_m": 0.02,
+        "attempt_index": 5,
+        "consistent_tangent_condition_number": 9.333080025955887,
+        "constraint_residual_m2": 0.0,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 1602168.5989966379,
+            "constraint_residual_m2": -3.2526065174565133e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00018889339379420803,
+              -6.611268782797975e-05
+            ],
+            "correction_load_factor": -1.0047670840465206,
+            "iteration": 1,
+            "residual_inf_norm_kn": 1.0349262618824824,
+            "residual_kn": [
+              -1.0349262618824824,
+              2.7755575615628914e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.11226436855058347,
+              0.03929252899270422
+            ],
+            "trial_load_factor": 28.395514150176425
+          },
+          {
+            "augmented_condition_number": 1562244.3921373894,
+            "constraint_residual_m2": 4.078279174444545e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -9.213497091822922e-05,
+              -3.224723982137329e-05
+            ],
+            "correction_load_factor": 0.014528329746751134,
+            "iteration": 2,
+            "residual_inf_norm_kn": 9.219448721609069e-05,
+            "residual_kn": [
+              -9.219448721609069e-05,
+              -2.7755575615628914e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.11207547515678927,
+              0.039226416304876235
+            ],
+            "trial_load_factor": 27.390747066129904
+          },
+          {
+            "augmented_condition_number": 1565887.9188122132,
+            "constraint_residual_m2": 1.0373026803234698e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.434036490417373e-07,
+              -8.519127716460805e-08
+            ],
+            "correction_load_factor": 1.6536863904402394e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 2.1971762127037664e-05,
+            "residual_kn": [
+              -2.1971762127037664e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.11198334018587104,
+              0.039194169065054865
+            ],
+            "trial_load_factor": 27.405275395876657
+          },
+          {
+            "augmented_condition_number": 1565896.6008195393,
+            "constraint_residual_m2": 6.759669863784512e-14,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.5898655966689734e-12,
+              -5.564529588341407e-13
+            ],
+            "correction_load_factor": 9.810851117374419e-11,
+            "iteration": 4,
+            "residual_inf_norm_kn": 1.5342038750532083e-10,
+            "residual_kn": [
+              -1.5342038750532083e-10,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.111983096782222,
+              0.0391940838737777
+            ],
+            "trial_load_factor": 27.40529193274056
+          },
+          {
+            "constraint_residual_m2": 0.0,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 5,
+            "residual_inf_norm_kn": 1.1368683772161603e-13,
+            "residual_kn": [
+              1.1368683772161603e-13,
+              2.7755575615628914e-15
+            ],
+            "trial_free_displacements_m": [
+              0.11198309678063213,
+              0.03919408387322125
+            ],
+            "trial_load_factor": 27.40529193283867
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.018784244820917055,
+          0.006574485687320969
+        ],
+        "predictor_load_factor": -0.9909950119781749,
+        "predictor_orientation_dot": -0.9932234212904324,
+        "predictor_tangent_displacements": [
+          0.9392122410458528,
+          0.32872428436604845
+        ],
+        "predictor_tangent_load_factor": -49.549750598908744,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.1368683772161603e-13,
+        "residual_kn": [
+          1.1368683772161603e-13,
+          2.7755575615628914e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.11198309678063213,
+          0.03919408387322125
+        ],
+        "trial_load_factor": 27.40529193283867
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.12963286387484288,
+          0.045371502356195005
+        ],
+        "accepted_free_displacements_m_before": [
+          0.11198309678063213,
+          0.03919408387322125
+        ],
+        "accepted_load_factor_after": 23.85827831533012,
+        "accepted_load_factor_before": 27.40529193283867,
+        "accepted_state_hash_after": "sha256:f1995a81aae5d56084ad0ce98fcf29ba66dcd2ce63ffe0def7b01efcae4a51c7",
+        "accepted_state_hash_before": "sha256:e41e1bdf162e3db3990adecd3bfb950c66cf328e21332294a29a91a00e1d8667",
+        "accepted_step_index_after": 5,
+        "accepted_step_index_before": 4,
+        "arc_length_m": 0.02,
+        "attempt_index": 6,
+        "consistent_tangent_condition_number": 3.0032488602186627,
+        "constraint_residual_m2": 4.8345116972214885e-15,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 2266866.102882011,
+            "constraint_residual_m2": 5.421010862427522e-20,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00039241094612362583,
+              -0.0001373438311432761
+            ],
+            "correction_load_factor": -0.6960492888986096,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.7912385819816876,
+            "residual_kn": [
+              -0.7912385819816876,
+              2.7755575615628914e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.13007084437835278,
+              0.04552479553242348
+            ],
+            "trial_load_factor": 24.54367190524976
+          },
+          {
+            "augmented_condition_number": 2231565.3918789583,
+            "constraint_residual_m2": 2.110788128895525e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -4.550712517305675e-05,
+              -1.592749381056986e-05
+            ],
+            "correction_load_factor": 0.010644984345097025,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0003197106811114736,
+            "residual_kn": [
+              -0.0003197106811114736,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.12967843343222915,
+              0.0453874517012802
+            ],
+            "trial_load_factor": 23.84762261635115
+          },
+          {
+            "augmented_condition_number": 2236002.550962994,
+            "constraint_residual_m2": 2.7778462671377777e-09,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -6.243221320475753e-08,
+              -2.1851274628604028e-08
+            ],
+            "correction_load_factor": 1.07146338780728e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 4.316225034273202e-06,
+            "residual_kn": [
+              -4.316225034273202e-06,
+              2.7755575615628914e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.12963292630705608,
+              0.045371524207469635
+            ],
+            "trial_load_factor": 23.858267600696244
+          },
+          {
+            "constraint_residual_m2": 4.8345116972214885e-15,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 8.23163759378076e-12,
+            "residual_kn": [
+              -8.23163759378076e-12,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.12963286387484288,
+              0.045371502356195005
+            ],
+            "trial_load_factor": 23.85827831533012
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.018087747597720652,
+          0.006330711659202228
+        ],
+        "predictor_load_factor": -2.8616200275889083,
+        "predictor_orientation_dot": -0.9958825387280807,
+        "predictor_tangent_displacements": [
+          0.9043873798860326,
+          0.31653558296011136
+        ],
+        "predictor_tangent_load_factor": -143.0810013794454,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 8.23163759378076e-12,
+        "residual_kn": [
+          -8.23163759378076e-12,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.12963286387484288,
+          0.045371502356195005
+        ],
+        "trial_load_factor": 23.85827831533012
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.14641261853989598,
+          0.051244416488963586
+        ],
+        "accepted_free_displacements_m_before": [
+          0.12963286387484288,
+          0.045371502356195005
+        ],
+        "accepted_load_factor_after": 19.277101802414034,
+        "accepted_load_factor_before": 23.85827831533012,
+        "accepted_state_hash_after": "sha256:07d569a83adcf377cafdb158191bff6e89e9717760967514d960ae7564283efa",
+        "accepted_state_hash_before": "sha256:f1995a81aae5d56084ad0ce98fcf29ba66dcd2ce63ffe0def7b01efcae4a51c7",
+        "accepted_step_index_after": 6,
+        "accepted_step_index_before": 5,
+        "arc_length_m": 0.02,
+        "attempt_index": 7,
+        "consistent_tangent_condition_number": 1.9329784820844247,
+        "constraint_residual_m2": 2.203098814490545e-16,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 2677875.6795277055,
+            "constraint_residual_m2": 5.421010862427522e-20,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00038566494102844167,
+              -0.00013498272935995456
+            ],
+            "correction_load_factor": -0.4495333550059989,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.5667126921145567,
+            "residual_kn": [
+              -0.5667126921145567,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.14681845049085568,
+              0.05138645767179949
+            ],
+            "trial_load_factor": 19.72076924540643
+          },
+          {
+            "augmented_condition_number": 2657439.1131608477,
+            "constraint_residual_m2": 9.752787330162245e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.0154351701695772e-05,
+              -7.0540230955935195e-06
+            ],
+            "correction_load_factor": 0.005862730498201056,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.00023619452892376103,
+            "residual_kn": [
+              -0.00023619452892376103,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.14643278554982725,
+              0.051251474942439534
+            ],
+            "trial_load_factor": 19.27123589040043
+          },
+          {
+            "augmented_condition_number": 2660257.685802085,
+            "constraint_residual_m2": 5.934435701637937e-10,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.2658229576819549e-08,
+              -4.4303803518868414e-09
+            ],
+            "correction_load_factor": 3.1815154030428302e-06,
+            "iteration": 3,
+            "residual_inf_norm_kn": 6.481876546615695e-07,
+            "residual_kn": [
+              -6.481876546615695e-07,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.14641263119812556,
+              0.05124442091934394
+            ],
+            "trial_load_factor": 19.27709862089863
+          },
+          {
+            "constraint_residual_m2": 2.203098814490545e-16,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 2.4868995751603507e-14,
+            "residual_kn": [
+              -2.4868995751603507e-14,
+              -2.7755575615628914e-15
+            ],
+            "trial_free_displacements_m": [
+              0.14641261853989598,
+              0.051244416488963586
+            ],
+            "trial_load_factor": 19.277101802414034
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.0171855866160128,
+          0.006014955315604479
+        ],
+        "predictor_load_factor": -4.13750906992369,
+        "predictor_orientation_dot": -0.9979542533630636,
+        "predictor_tangent_displacements": [
+          0.85927933080064,
+          0.30074776578022394
+        ],
+        "predictor_tangent_load_factor": -206.87545349618446,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 2.4868995751603507e-14,
+        "residual_kn": [
+          -2.4868995751603507e-14,
+          -2.7755575615628914e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.14641261853989598,
+          0.051244416488963586
+        ],
+        "trial_load_factor": 19.277101802414034
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.1624938279885883,
+          0.05687283979600591
+        ],
+        "accepted_free_displacements_m_before": [
+          0.14641261853989598,
+          0.051244416488963586
+        ],
+        "accepted_load_factor_after": 14.039842172033877,
+        "accepted_load_factor_before": 19.277101802414034,
+        "accepted_state_hash_after": "sha256:1f395124f9ffb50c21d19777dbe99162e444c7ad0e798c70c4009af55b14f4a9",
+        "accepted_state_hash_before": "sha256:07d569a83adcf377cafdb158191bff6e89e9717760967514d960ae7564283efa",
+        "accepted_step_index_after": 7,
+        "accepted_step_index_before": 6,
+        "arc_length_m": 0.02,
+        "attempt_index": 8,
+        "consistent_tangent_condition_number": 1.5188348178870068,
+        "constraint_residual_m2": 7.101524229780054e-18,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 2930086.038104128,
+            "constraint_residual_m2": -2.168404344971009e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.0003025869305135855,
+              -0.00010590542567975494
+            ],
+            "correction_load_factor": -0.28066253831762356,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.3856461499830903,
+            "residual_kn": [
+              -0.3856461499830903,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.16280475371298508,
+              0.05698166379954477
+            ],
+            "trial_load_factor": 14.317719336713191
+          },
+          {
+            "augmented_condition_number": 2920423.665313476,
+            "constraint_residual_m2": 4.1786065136588217e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -8.336575063170068e-06,
+              -2.9178012721095237e-06
+            ],
+            "correction_load_factor": 0.0027846832644569126,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.00010208827860758163,
+            "residual_kn": [
+              -0.00010208827860758163,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.1625021667824715,
+              0.05687575837386502
+            ],
+            "trial_load_factor": 14.037056798395568
+          },
+          {
+            "augmented_condition_number": 2921840.8533444353,
+            "constraint_residual_m2": 1.0902989183150455e-10,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.2188200313828296e-09,
+              -7.765870040450966e-10
+            ],
+            "correction_load_factor": 6.903738527687608e-07,
+            "iteration": 3,
+            "residual_inf_norm_kn": 7.7912968521332e-08,
+            "residual_kn": [
+              -7.7912968521332e-08,
+              -2.7755575615628914e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.16249383020740835,
+              0.05687284057259291
+            ],
+            "trial_load_factor": 14.039841481660025
+          },
+          {
+            "constraint_residual_m2": 7.101524229780054e-18,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 3.552713678800501e-14,
+            "residual_kn": [
+              3.552713678800501e-14,
+              2.7755575615628914e-15
+            ],
+            "trial_free_displacements_m": [
+              0.1624938279885883,
+              0.05687283979600591
+            ],
+            "trial_load_factor": 14.039842172033877
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.016392135173089108,
+          0.0057372473105811875
+        ],
+        "predictor_load_factor": -4.959382465700843,
+        "predictor_orientation_dot": -0.9990739833401753,
+        "predictor_tangent_displacements": [
+          0.8196067586544554,
+          0.28686236552905936
+        ],
+        "predictor_tangent_load_factor": -247.96912328504214,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 3.552713678800501e-14,
+        "residual_kn": [
+          3.552713678800501e-14,
+          2.7755575615628914e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.1624938279885883,
+          0.05687283979600591
+        ],
+        "trial_load_factor": 14.039842172033877
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.17808864935429614,
+          0.06233102727400364
+        ],
+        "accepted_free_displacements_m_before": [
+          0.1624938279885883,
+          0.05687283979600591
+        ],
+        "accepted_load_factor_after": 8.404912358214292,
+        "accepted_load_factor_before": 14.039842172033877,
+        "accepted_state_hash_after": "sha256:83dfbbe4c94a86ce7b15ff81e7e751c86e7a1028e86cfb949fe74b397289515a",
+        "accepted_state_hash_before": "sha256:1f395124f9ffb50c21d19777dbe99162e444c7ad0e798c70c4009af55b14f4a9",
+        "accepted_step_index_after": 8,
+        "accepted_step_index_before": 7,
+        "arc_length_m": 0.02,
+        "attempt_index": 9,
+        "consistent_tangent_condition_number": 1.3167893079685506,
+        "constraint_residual_m2": 1.6263032587282567e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 3075274.6726729046,
+            "constraint_residual_m2": 5.421010862427522e-20,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00020328073059077854,
+              -7.11482557067725e-05
+            ],
+            "correction_load_factor": -0.16474842495996533,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.24082857944210367,
+            "residual_kn": [
+              -0.24082857944210367,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.1782949405765335,
+              0.062403229201786724
+            ],
+            "trial_load_factor": 8.568561837333707
+          },
+          {
+            "augmented_condition_number": 3071679.4461597647,
+            "constraint_residual_m2": 1.5495330382665155e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -3.0101972692599745e-06,
+              -1.0535690442409911e-06
+            ],
+            "correction_load_factor": 0.001098841694460698,
+            "iteration": 2,
+            "residual_inf_norm_kn": 2.6959620251787442e-05,
+            "residual_kn": [
+              -2.6959620251787442e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.17809165984594272,
+              0.06233208094607995
+            ],
+            "trial_load_factor": 8.403813412373742
+          },
+          {
+            "augmented_condition_number": 3072253.377397675,
+            "constraint_residual_m2": 1.5001107832052912e-11,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.943773281698181e-10,
+              -1.0303206485943635e-10
+            ],
+            "correction_load_factor": 1.0414608876047985e-07,
+            "iteration": 3,
+            "residual_inf_norm_kn": 5.9486495729288436e-09,
+            "residual_kn": [
+              -5.9486495729288436e-09,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.17808864964867346,
+              0.062331027377035705
+            ],
+            "trial_load_factor": 8.404912254068202
+          },
+          {
+            "constraint_residual_m2": 1.6263032587282567e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 8.881784197001252e-15,
+            "residual_kn": [
+              8.881784197001252e-15,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.17808864935429614,
+              0.06233102727400364
+            ],
+            "trial_load_factor": 8.404912358214292
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.015801112587945195,
+          0.005530389405780818
+        ],
+        "predictor_load_factor": -5.471280334700169,
+        "predictor_orientation_dot": -0.9996160904282605,
+        "predictor_tangent_displacements": [
+          0.7900556293972597,
+          0.2765194702890409
+        ],
+        "predictor_tangent_load_factor": -273.56401673500847,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 8.881784197001252e-15,
+        "residual_kn": [
+          8.881784197001252e-15,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.17808864935429614,
+          0.06233102727400364
+        ],
+        "trial_load_factor": 8.404912358214292
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.19340408170975187,
+          0.06769142859841315
+        ],
+        "accepted_free_displacements_m_before": [
+          0.17808864935429614,
+          0.06233102727400364
+        ],
+        "accepted_load_factor_after": 2.5588959922021304,
+        "accepted_load_factor_before": 8.404912358214292,
+        "accepted_state_hash_after": "sha256:67cd18c689a170b3a5db84500a0f2249aa036ee9b8226c36ece31b1daecf5de8",
+        "accepted_state_hash_before": "sha256:83dfbbe4c94a86ce7b15ff81e7e751c86e7a1028e86cfb949fe74b397289515a",
+        "accepted_step_index_after": 9,
+        "accepted_step_index_before": 8,
+        "arc_length_m": 0.02,
+        "attempt_index": 10,
+        "consistent_tangent_condition_number": 1.2136450706859252,
+        "constraint_residual_m2": -1.6263032587282567e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 3139800.5585357687,
+            "constraint_residual_m2": -1.0842021724855044e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00010510657829956657,
+              -3.678730240484831e-05
+            ],
+            "correction_load_factor": -0.07886676961572048,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.11955593416830901,
+            "residual_kn": [
+              -0.11955593416830901,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.19350990049069497,
+              0.06772846517174323
+            ],
+            "trial_load_factor": 2.637489243682074
+          },
+          {
+            "augmented_condition_number": 3139095.718072833,
+            "constraint_residual_m2": 3.7280567818421834e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -7.121860054541524e-07,
+              -2.4926510190895336e-07
+            ],
+            "correction_load_factor": 0.0002735117958236362,
+            "iteration": 2,
+            "residual_inf_norm_kn": 2.1623417119087662e-06,
+            "residual_kn": [
+              -2.1623417119087662e-06,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.1934047939123954,
+              0.06769167786933838
+            ],
+            "trial_load_factor": 2.5586224740663535
+          },
+          {
+            "augmented_condition_number": 3139240.5685704285,
+            "constraint_residual_m2": 8.685771286237598e-13,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.6638075221391625e-11,
+              -5.823326327487068e-12
+            ],
+            "correction_load_factor": 6.339953261410209e-09,
+            "iteration": 3,
+            "residual_inf_norm_kn": 1.0033573971668375e-10,
+            "residual_kn": [
+              -1.0033573971668375e-10,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.19340408172638995,
+              0.06769142860423648
+            ],
+            "trial_load_factor": 2.558895985862177
+          },
+          {
+            "constraint_residual_m2": -1.6263032587282567e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 1.3322676295501878e-15,
+            "residual_kn": [
+              1.3322676295501878e-15,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.19340408170975187,
+              0.06769142859841315
+            ],
+            "trial_load_factor": 2.5588959922021304
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.015421251136398837,
+          0.0053974378977395925
+        ],
+        "predictor_load_factor": -5.7674231145322175,
+        "predictor_orientation_dot": -0.9998699562063267,
+        "predictor_tangent_displacements": [
+          0.7710625568199418,
+          0.2698718948869796
+        ],
+        "predictor_tangent_load_factor": -288.3711557266109,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.3322676295501878e-15,
+        "residual_kn": [
+          1.3322676295501878e-15,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.19340408170975187,
+          0.06769142859841315
+        ],
+        "trial_load_factor": 2.5588959922021304
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.2086363320246596,
+          0.07302271620863085
+        ],
+        "accepted_free_displacements_m_before": [
+          0.19340408170975187,
+          0.06769142859841315
+        ],
+        "accepted_load_factor_after": -3.347793494328918,
+        "accepted_load_factor_before": 2.5588959922021304,
+        "accepted_state_hash_after": "sha256:e98588f9aacc24947fe79d0c2033f394876902e84696aa66b2167cf5c5fbd185",
+        "accepted_state_hash_before": "sha256:67cd18c689a170b3a5db84500a0f2249aa036ee9b8226c36ece31b1daecf5de8",
+        "accepted_step_index_after": 10,
+        "accepted_step_index_before": 9,
+        "arc_length_m": 0.02,
+        "attempt_index": 11,
+        "consistent_tangent_condition_number": 1.1702256461064506,
+        "constraint_residual_m2": 5.2583805365546965e-17,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 3134436.782090026,
+            "constraint_residual_m2": 3.7947076036992655e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -9.504124351970587e-06,
+              -3.326443523189706e-06
+            ],
+            "correction_load_factor": -0.0068902692875578994,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.010560231576369095,
+            "residual_kn": [
+              -0.010560231576369095,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.20864584168242056,
+              0.07302604458884719
+            ],
+            "trial_load_factor": -3.340905385178306
+          },
+          {
+            "augmented_condition_number": 3134464.764046807,
+            "constraint_residual_m2": 2.9129684975997064e-10,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -5.533408995111961e-09,
+              -1.9366931482891862e-09
+            ],
+            "correction_load_factor": 2.1601369458995362e-06,
+            "iteration": 2,
+            "residual_inf_norm_kn": 2.3416014904853455e-08,
+            "residual_kn": [
+              2.3416014904853455e-08,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.2086363375580686,
+              0.073022718145324
+            ],
+            "trial_load_factor": -3.347795654465864
+          },
+          {
+            "constraint_residual_m2": 5.2583805365546965e-17,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 3,
+            "residual_inf_norm_kn": 1.1546319456101628e-14,
+            "residual_kn": [
+              -1.1546319456101628e-14,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.2086363320246596,
+              0.07302271620863085
+            ],
+            "trial_load_factor": -3.347793494328918
+          }
+        ],
+        "corrector_iteration_count": 3,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.015241759972668679,
+          0.005334615990434038
+        ],
+        "predictor_load_factor": -5.899801377380436,
+        "predictor_orientation_dot": -0.9999779202334682,
+        "predictor_tangent_displacements": [
+          0.7620879986334339,
+          0.26673079952170187
+        ],
+        "predictor_tangent_load_factor": -294.9900688690218,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.1546319456101628e-14,
+        "residual_kn": [
+          -1.1546319456101628e-14,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.2086363320246596,
+          0.07302271620863085
+        ],
+        "trial_load_factor": -3.347793494328918
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.2239775882714079,
+          0.07839215589499277
+        ],
+        "accepted_free_displacements_m_before": [
+          0.2086363320246596,
+          0.07302271620863085
+        ],
+        "accepted_load_factor_after": -9.174777581876436,
+        "accepted_load_factor_before": -3.347793494328918,
+        "accepted_state_hash_after": "sha256:0a480bef2eea4aaa68414238dfcbdf5fa3558ca71f7b450c243b93fd864aded2",
+        "accepted_state_hash_before": "sha256:e98588f9aacc24947fe79d0c2033f394876902e84696aa66b2167cf5c5fbd185",
+        "accepted_step_index_after": 11,
+        "accepted_step_index_before": 10,
+        "arc_length_m": 0.02,
+        "attempt_index": 12,
+        "consistent_tangent_condition_number": 1.173218117147174,
+        "constraint_residual_m2": 3.7947076036992655e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 3058094.2912750053,
+            "constraint_residual_m2": 2.168404344971009e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              8.718843751399016e-05,
+              3.0515953129896557e-05
+            ],
+            "correction_load_factor": 0.06336219553450634,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.09573312491846409,
+            "residual_kn": [
+              0.09573312491846409,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.22389087019668186,
+              0.07836180456883865
+            ],
+            "trial_load_factor": -9.238319800190927
+          },
+          {
+            "augmented_condition_number": 3056993.710005868,
+            "constraint_residual_m2": 2.4592118323338037e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -4.7035562644014844e-07,
+              -1.6462446926792974e-07
+            ],
+            "correction_load_factor": 0.00018001996304979915,
+            "iteration": 2,
+            "residual_inf_norm_kn": 5.447258207169625e-06,
+            "residual_kn": [
+              5.447258207169625e-06,
+              5.551115123125783e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.22397805863419584,
+              0.07839232052196855
+            ],
+            "trial_load_factor": -9.174957604656422
+          },
+          {
+            "augmented_condition_number": 3057091.2165772733,
+            "constraint_residual_m2": 3.779642072411493e-13,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -7.1615048357254004e-12,
+              -2.5065266925038897e-12
+            ],
+            "correction_load_factor": 2.8169365940405357e-09,
+            "iteration": 3,
+            "residual_inf_norm_kn": 1.589359754916586e-10,
+            "residual_kn": [
+              1.589359754916586e-10,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.2239775882785694,
+              0.07839215589749929
+            ],
+            "trial_load_factor": -9.174777584693372
+          },
+          {
+            "constraint_residual_m2": 3.7947076036992655e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 7.105427357601002e-15,
+            "residual_kn": [
+              -7.105427357601002e-15,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.2239775882714079,
+              0.07839215589499277
+            ],
+            "trial_load_factor": -9.174777581876436
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.015254538172022268,
+          0.005339088360207793
+        ],
+        "predictor_load_factor": -5.890526305862009,
+        "predictor_orientation_dot": -0.9999979967576751,
+        "predictor_tangent_displacements": [
+          0.7627269086011134,
+          0.26695441801038966
+        ],
+        "predictor_tangent_load_factor": -294.5263152931004,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 7.105427357601002e-15,
+        "residual_kn": [
+          -7.105427357601002e-15,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.2239775882714079,
+          0.07839215589499277
+        ],
+        "trial_load_factor": -9.174777581876436
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.23962523728823534,
+          0.08386883305088236
+        ],
+        "accepted_free_displacements_m_before": [
+          0.2239775882714079,
+          0.07839215589499277
+        ],
+        "accepted_load_factor_after": -14.768459007742958,
+        "accepted_load_factor_before": -9.174777581876436,
+        "accepted_state_hash_after": "sha256:263ffaf4f6ccec70fe1d08454e4e335c3add5af4768f6475a1fd48a9b83b442c",
+        "accepted_state_hash_before": "sha256:0a480bef2eea4aaa68414238dfcbdf5fa3558ca71f7b450c243b93fd864aded2",
+        "accepted_step_index_after": 12,
+        "accepted_step_index_before": 11,
+        "arc_length_m": 0.02,
+        "attempt_index": 13,
+        "consistent_tangent_condition_number": 1.2234837902150033,
+        "constraint_residual_m2": 2.710505431213761e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 2897508.8762542587,
+            "constraint_residual_m2": 1.6263032587282567e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.00018983465680046926,
+              6.644212988016424e-05
+            ],
+            "correction_load_factor": 0.14353277177820556,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.20842145247665478,
+            "residual_kn": [
+              0.20842145247665478,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.23943780209579374,
+              0.0838032307335278
+            ],
+            "trial_load_factor": -14.912853426531207
+          },
+          {
+            "augmented_condition_number": 2893036.3880790323,
+            "constraint_residual_m2": 1.228583798430858e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.399283307160347e-06,
+              -8.397491574922438e-07
+            ],
+            "correction_load_factor": 0.0008615783869143021,
+            "iteration": 2,
+            "residual_inf_norm_kn": 4.253911319729298e-05,
+            "residual_kn": [
+              4.253911319729298e-05,
+              -5.551115123125783e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.23962763675259421,
+              0.08386967286340796
+            ],
+            "trial_load_factor": -14.769320654753
+          },
+          {
+            "augmented_condition_number": 2893512.7544836407,
+            "constraint_residual_m2": 9.431008003626257e-12,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.8105170767261987e-10,
+              -6.336811156320478e-11
+            ],
+            "correction_load_factor": 6.862312870164192e-08,
+            "iteration": 3,
+            "residual_inf_norm_kn": 6.816783582053176e-09,
+            "residual_kn": [
+              6.816783582053176e-09,
+              5.551115123125783e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.23962523746928704,
+              0.08386883311425047
+            ],
+            "trial_load_factor": -14.768459076366087
+          },
+          {
+            "constraint_residual_m2": 2.710505431213761e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 1.3677947663381929e-13,
+            "residual_kn": [
+              -1.3677947663381929e-13,
+              -5.551115123125783e-15
+            ],
+            "trial_free_displacements_m": [
+              0.23962523728823534,
+              0.08386883305088236
+            ],
+            "trial_load_factor": -14.768459007742958
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.01546021382438583,
+          0.005411074838535042
+        ],
+        "predictor_load_factor": -5.738075844654771,
+        "predictor_orientation_dot": -0.9999406211327618,
+        "predictor_tangent_displacements": [
+          0.7730106912192916,
+          0.2705537419267521
+        ],
+        "predictor_tangent_load_factor": -286.90379223273857,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.3677947663381929e-13,
+        "residual_kn": [
+          -1.3677947663381929e-13,
+          -5.551115123125783e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.23962523728823534,
+          0.08386883305088236
+        ],
+        "trial_load_factor": -14.768459007742958
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.25578777062736735,
+          0.08952571971957855
+        ],
+        "accepted_free_displacements_m_before": [
+          0.23962523728823534,
+          0.08386883305088236
+        ],
+        "accepted_load_factor_after": -19.934989499257014,
+        "accepted_load_factor_before": -14.768459007742958,
+        "accepted_state_hash_after": "sha256:7687d82314d7731138d88c71d1a5804b070196ee81aa6e894f3756c02dc2b5f3",
+        "accepted_state_hash_before": "sha256:263ffaf4f6ccec70fe1d08454e4e335c3add5af4768f6475a1fd48a9b83b442c",
+        "accepted_step_index_after": 13,
+        "accepted_step_index_before": 12,
+        "arc_length_m": 0.02,
+        "attempt_index": 14,
+        "consistent_tangent_condition_number": 1.3367407184506632,
+        "constraint_residual_m2": 4.228388472693467e-18,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 2623125.2745990646,
+            "constraint_residual_m2": -5.963111948670274e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.00030179289995572935,
+              0.00010562751498450527
+            ],
+            "correction_load_factor": 0.2480875398819368,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.33752583696973915,
+            "residual_kn": [
+              0.33752583696973915,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.2554930327432319,
+              0.08942256146013115
+            ],
+            "trial_load_factor": -20.185311602993583
+          },
+          {
+            "augmented_condition_number": 2611939.40262098,
+            "constraint_residual_m2": 3.4842583616472847e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -7.05352293690189e-06,
+              -2.4687330279156615e-06
+            ],
+            "correction_load_factor": 0.002234040257139675,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.00015073491253403404,
+            "residual_kn": [
+              0.00015073491253403404,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.2557948256431876,
+              0.08952818897511566
+            ],
+            "trial_load_factor": -19.937224063111646
+          },
+          {
+            "augmented_condition_number": 2613225.862588887,
+            "constraint_residual_m2": 7.581057222955101e-11,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.4928833942211247e-09,
+              -5.225091879773937e-10
+            ],
+            "correction_load_factor": 5.235974917760738e-07,
+            "iteration": 3,
+            "residual_inf_norm_kn": 8.262938422376465e-08,
+            "residual_kn": [
+              8.262938422376465e-08,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.2557877721202507,
+              0.08952572024208774
+            ],
+            "trial_load_factor": -19.934990022854507
+          },
+          {
+            "constraint_residual_m2": 4.228388472693467e-18,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 1.4210854715202004e-14,
+            "residual_kn": [
+              -1.4210854715202004e-14,
+              -5.551115123125783e-15
+            ],
+            "trial_free_displacements_m": [
+              0.25578777062736735,
+              0.08952571971957855
+            ],
+            "trial_load_factor": -19.934989499257014
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.01586779545499655,
+          0.00555372840924879
+        ],
+        "predictor_load_factor": -5.416852595250625,
+        "predictor_orientation_dot": -0.9997756561359619,
+        "predictor_tangent_displacements": [
+          0.7933897727498275,
+          0.2776864204624395
+        ],
+        "predictor_tangent_load_factor": -270.84262976253126,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.4210854715202004e-14,
+        "residual_kn": [
+          -1.4210854715202004e-14,
+          -5.551115123125783e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.25578777062736735,
+          0.08952571971957855
+        ],
+        "trial_load_factor": -19.934989499257014
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.27267599577500307,
+          0.09543659852125108
+        ],
+        "accepted_free_displacements_m_before": [
+          0.25578777062736735,
+          0.08952571971957855
+        ],
+        "accepted_load_factor_after": -24.40291304254919,
+        "accepted_load_factor_before": -19.934989499257014,
+        "accepted_state_hash_after": "sha256:a815cb71f25cc03bba41bf0299582c2cabe81216358d62507027c9ed33168af4",
+        "accepted_state_hash_before": "sha256:7687d82314d7731138d88c71d1a5804b070196ee81aa6e894f3756c02dc2b5f3",
+        "accepted_step_index_after": 14,
+        "accepted_step_index_before": 13,
+        "arc_length_m": 0.02,
+        "attempt_index": 15,
+        "consistent_tangent_condition_number": 1.5578063232680688,
+        "constraint_residual_m2": 1.150880606093363e-16,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 2180730.6528590643,
+            "constraint_residual_m2": -7.589415207398531e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.00041855946296476704,
+              0.00014649581203766835
+            ],
+            "correction_load_factor": 0.39765113154282505,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.4950469313629675,
+            "residual_kn": [
+              0.4950469313629675,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.272275095613413,
+              0.09529628346469454
+            ],
+            "trial_load_factor": -24.80501796087987
+          },
+          {
+            "augmented_condition_number": 2158008.484949335,
+            "constraint_residual_m2": 8.291587366508735e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.7650529646810644e-05,
+              -6.177685376383727e-06
+            ],
+            "correction_load_factor": 0.004451090297080247,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0003756498260969465,
+            "residual_kn": [
+              0.0003756498260969465,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.27269365507637777,
+              0.09544277927673221
+            ],
+            "trial_load_factor": -24.407366829337043
+          },
+          {
+            "augmented_condition_number": 2160809.889774195,
+            "constraint_residual_m2": 4.2895381284534587e-10,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -8.77172788677624e-09,
+              -3.070104746493897e-09
+            ],
+            "correction_load_factor": 2.696490772060267e-06,
+            "iteration": 3,
+            "residual_inf_norm_kn": 6.704656421163691e-07,
+            "residual_kn": [
+              6.704656421163691e-07,
+              -5.551115123125783e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.27267600454673097,
+              0.09543660159135582
+            ],
+            "trial_load_factor": -24.402915739039962
+          },
+          {
+            "constraint_residual_m2": 1.150880606093363e-16,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 1.8474111129762605e-13,
+            "residual_kn": [
+              1.8474111129762605e-13,
+              5.551115123125783e-15
+            ],
+            "trial_free_displacements_m": [
+              0.27267599577500307,
+              0.09543659852125108
+            ],
+            "trial_load_factor": -24.40291304254919
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.016487324986045684,
+          0.005770563745115988
+        ],
+        "predictor_load_factor": -4.870028461622854,
+        "predictor_orientation_dot": -0.9994124176168468,
+        "predictor_tangent_displacements": [
+          0.8243662493022842,
+          0.28852818725579943
+        ],
+        "predictor_tangent_load_factor": -243.50142308114272,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.8474111129762605e-13,
+        "residual_kn": [
+          1.8474111129762605e-13,
+          5.551115123125783e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.27267599577500307,
+          0.09543659852125108
+        ],
+        "trial_load_factor": -24.40291304254919
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.29044789639509166,
+          0.10165676373828209
+        ],
+        "accepted_free_displacements_m_before": [
+          0.27267599577500307,
+          0.09543659852125108
+        ],
+        "accepted_load_factor_after": -27.774451750069378,
+        "accepted_load_factor_before": -24.40291304254919,
+        "accepted_state_hash_after": "sha256:030caebfd26c5168bf2165511568b89e6c5b7a9a7168e4881a78a728a82829b0",
+        "accepted_state_hash_before": "sha256:a815cb71f25cc03bba41bf0299582c2cabe81216358d62507027c9ed33168af4",
+        "accepted_step_index_after": 15,
+        "accepted_step_index_before": 14,
+        "arc_length_m": 0.02,
+        "attempt_index": 16,
+        "consistent_tangent_condition_number": 2.019301134183512,
+        "constraint_residual_m2": 2.6954350210162126e-15,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 1482149.6246784388,
+            "constraint_residual_m2": -1.6263032587282567e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.0005090847825978327,
+              0.0001781796739092137
+            ],
+            "correction_load_factor": 0.6185242412826697,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.6938332340342512,
+            "residual_kn": [
+              0.6938332340342512,
+              1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.28997990439317234,
+              0.10149296653761034
+            ],
+            "trial_load_factor": -28.39963523030717
+          },
+          {
+            "augmented_condition_number": 1444467.403997075,
+            "constraint_residual_m2": 1.821204260283487e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -4.1048343023774726e-05,
+              -1.4366920058321154e-05
+            ],
+            "correction_load_factor": 0.006648294438657448,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0006868741597756411,
+            "residual_kn": [
+              0.0006868741597756411,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.29048898917577015,
+              0.10167114621151954
+            ],
+            "trial_load_factor": -27.781110989024498
+          },
+          {
+            "augmented_condition_number": 1449694.7808242533,
+            "constraint_residual_m2": 2.068174133037018e-09,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -4.443765471536116e-08,
+              -1.5553179136498616e-08
+            ],
+            "correction_load_factor": 1.0944516459404618e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 4.481167330538938e-06,
+            "residual_kn": [
+              4.481167330538938e-06,
+              -5.551115123125783e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.2904479408327464,
+              0.10165677929146122
+            ],
+            "trial_load_factor": -27.77446269458584
+          },
+          {
+            "constraint_residual_m2": 2.6954350210162126e-15,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 5.4996007747831754e-12,
+            "residual_kn": [
+              5.4996007747831754e-12,
+              5.551115123125783e-15
+            ],
+            "trial_free_displacements_m": [
+              0.29044789639509166,
+              0.10165676373828209
+            ],
+            "trial_load_factor": -27.774451750069378
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.01730390861816928,
+          0.0060563680163592485
+        ],
+        "predictor_load_factor": -3.996722187757979,
+        "predictor_orientation_dot": -0.9986473965887763,
+        "predictor_tangent_displacements": [
+          0.865195430908464,
+          0.3028184008179624
+        ],
+        "predictor_tangent_load_factor": -199.83610938789894,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 5.4996007747831754e-12,
+        "residual_kn": [
+          5.4996007747831754e-12,
+          5.551115123125783e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.29044789639509166,
+          0.10165676373828209
+        ],
+        "trial_load_factor": -27.774451750069378
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.3090420169995518,
+          0.10816470594984313
+        ],
+        "accepted_free_displacements_m_before": [
+          0.29044789639509166,
+          0.10165676373828209
+        ],
+        "accepted_load_factor_after": -29.49965949971664,
+        "accepted_load_factor_before": -27.774451750069378,
+        "accepted_state_hash_after": "sha256:bf7a97f50b161f2519f8f1ef8ea2287aa6eb245e8d63c4d00fa3984043373d7f",
+        "accepted_state_hash_before": "sha256:030caebfd26c5168bf2165511568b89e6c5b7a9a7168e4881a78a728a82829b0",
+        "accepted_step_index_after": 16,
+        "accepted_step_index_before": 15,
+        "arc_length_m": 0.02,
+        "attempt_index": 17,
+        "consistent_tangent_condition_number": 3.2788082772383254,
+        "constraint_residual_m2": -8.673617379884035e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 420480.9033021958,
+            "constraint_residual_m2": -1.0842021724855044e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.0004761099420624444,
+              0.00016663847972185554
+            ],
+            "correction_load_factor": 0.9185999501596745,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.9373528536018867,
+            "residual_kn": [
+              0.9373528536018867,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3086513891586447,
+              0.10802798620552564
+            ],
+            "trial_load_factor": -30.422109936097307
+          },
+          {
+            "augmented_condition_number": 381758.07581569644,
+            "constraint_residual_m2": 3.629752533587747e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -8.529499748628552e-05,
+              -2.9853249120213807e-05
+            ],
+            "correction_load_factor": 0.0038204626169294,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0007184981862558004,
+            "residual_kn": [
+              0.0007184981862558004,
+              5.551115123125783e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.30912749910070714,
+              0.1081946246852475
+            ],
+            "trial_load_factor": -29.503509985937633
+          },
+          {
+            "augmented_condition_number": 389095.3205123919,
+            "constraint_residual_m2": 8.22483681812633e-09,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.871026899950656e-07,
+              -6.548594149827296e-08
+            ],
+            "correction_load_factor": 3.002345678334269e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 2.3117593912047596e-05,
+            "residual_kn": [
+              2.3117593912047596e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.30904220410322086,
+              0.1081647714361273
+            ],
+            "trial_load_factor": -29.499689523320704
+          },
+          {
+            "augmented_condition_number": 389111.53951998305,
+            "constraint_residual_m2": 4.29009583934048e-14,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -9.79025736769383e-13,
+              -3.42659007869284e-13
+            ],
+            "correction_load_factor": 1.4727958848767832e-10,
+            "iteration": 4,
+            "residual_inf_norm_kn": 1.1114309472759487e-10,
+            "residual_kn": [
+              1.1114309472759487e-10,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.30904201700053086,
+              0.10816470595018579
+            ],
+            "trial_load_factor": -29.49965949986392
+          },
+          {
+            "constraint_residual_m2": -8.673617379884035e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 5,
+            "residual_inf_norm_kn": 1.4566126083082054e-13,
+            "residual_kn": [
+              -1.4566126083082054e-13,
+              5.551115123125783e-15
+            ],
+            "trial_free_displacements_m": [
+              0.3090420169995518,
+              0.10816470594984313
+            ],
+            "trial_load_factor": -29.49965949971664
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.018203492763553042,
+          0.006371222467243565
+        ],
+        "predictor_load_factor": -2.6476581860279276,
+        "predictor_orientation_dot": -0.9971186223674622,
+        "predictor_tangent_displacements": [
+          0.9101746381776521,
+          0.31856112336217823
+        ],
+        "predictor_tangent_load_factor": -132.38290930139638,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.4566126083082054e-13,
+        "residual_kn": [
+          -1.4566126083082054e-13,
+          5.551115123125783e-15
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.3090420169995518,
+          0.10816470594984313
+        ],
+        "trial_load_factor": -29.49965949971664
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.32789615189569365,
+          0.11476365316349277
+        ],
+        "accepted_free_displacements_m_before": [
+          0.3090420169995518,
+          0.10816470594984313
+        ],
+        "accepted_load_factor_after": -29.00582425655561,
+        "accepted_load_factor_before": -29.49965949971664,
+        "accepted_state_hash_after": "sha256:66685974be9f3db5f98b03be34374f2b5d409b45ba1f0a1eaa694c3b59b0403f",
+        "accepted_state_hash_before": "sha256:bf7a97f50b161f2519f8f1ef8ea2287aa6eb245e8d63c4d00fa3984043373d7f",
+        "accepted_step_index_after": 17,
+        "accepted_step_index_before": 16,
+        "arc_length_m": 0.02,
+        "attempt_index": 18,
+        "consistent_tangent_condition_number": 13.427459176218639,
+        "constraint_residual_m2": -2.710505431213761e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 1019753.2571895372,
+            "constraint_residual_m2": -6.505213034913027e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              0.00015802270083830364,
+              5.5307945293392205e-05
+            ],
+            "correction_load_factor": 1.2014174500417478,
+            "iteration": 1,
+            "residual_inf_norm_kn": 1.1868281781217824,
+            "residual_kn": [
+              1.1868281781217824,
+              5.551115123125783e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.327873527223898,
+              0.11475573452836431
+            ],
+            "trial_load_factor": -30.194743118330415
+          },
+          {
+            "augmented_condition_number": 1003091.4305327362,
+            "constraint_residual_m2": 5.801645699852359e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.000134898682113644,
+              -4.7214538739775385e-05
+            ],
+            "correction_load_factor": -0.012519492827686864,
+            "iteration": 2,
+            "residual_inf_norm_kn": 9.202277848885387e-05,
+            "residual_kn": [
+              9.202277848885387e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3280315499247363,
+              0.1148110424736577
+            ],
+            "trial_load_factor": -28.993325668288666
+          },
+          {
+            "augmented_condition_number": 999423.4606914627,
+            "constraint_residual_m2": 2.1053817907221595e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -4.993402472708959e-07,
+              -1.7476908653093573e-07
+            ],
+            "correction_load_factor": 2.0904259727090643e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 6.709037656094097e-05,
+            "residual_kn": [
+              6.709037656094097e-05,
+              -5.551115123125783e-15
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3278966512426227,
+              0.11476382793491792
+            ],
+            "trial_load_factor": -29.00584516111635
+          },
+          {
+            "augmented_condition_number": 999408.6455295704,
+            "constraint_residual_m2": 2.81633169476464e-13,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -6.6817593422952206e-12,
+              -2.338615769803327e-12
+            ],
+            "correction_load_factor": 3.0101603804657436e-10,
+            "iteration": 4,
+            "residual_inf_norm_kn": 9.190159744321136e-10,
+            "residual_kn": [
+              9.190159744321136e-10,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3278961519023754,
+              0.11476365316583138
+            ],
+            "trial_load_factor": -29.005824256856624
+          },
+          {
+            "constraint_residual_m2": -2.710505431213761e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 5,
+            "residual_inf_norm_kn": 2.8066438062523957e-13,
+            "residual_kn": [
+              2.8066438062523957e-13,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.32789615189569365,
+              0.11476365316349277
+            ],
+            "trial_load_factor": -29.00582425655561
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.01883151022434622,
+          0.0065910285785211785
+        ],
+        "predictor_load_factor": -0.6950836186137767,
+        "predictor_orientation_dot": -0.9946151499033061,
+        "predictor_tangent_displacements": [
+          0.9415755112173111,
+          0.32955142892605893
+        ],
+        "predictor_tangent_load_factor": -34.75418093068883,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 2.8066438062523957e-13,
+        "residual_kn": [
+          2.8066438062523957e-13,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.32789615189569365,
+          0.11476365316349277
+        ],
+        "trial_load_factor": -29.00582425655561
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.3459494374927482,
+          0.12108230312246186
+        ],
+        "accepted_free_displacements_m_before": [
+          0.32789615189569365,
+          0.11476365316349277
+        ],
+        "accepted_load_factor_after": -26.08377267217165,
+        "accepted_load_factor_before": -29.00582425655561,
+        "accepted_state_hash_after": "sha256:9c39b92de066dbe1e3a7ed2c5bdf20284100726ac902a5603dbdcc37fbf851e0",
+        "accepted_state_hash_before": "sha256:66685974be9f3db5f98b03be34374f2b5d409b45ba1f0a1eaa694c3b59b0403f",
+        "accepted_step_index_after": 18,
+        "accepted_step_index_before": 17,
+        "arc_length_m": 0.02,
+        "attempt_index": 19,
+        "consistent_tangent_condition_number": 5.751590952087461,
+        "constraint_residual_m2": 4.336808689942018e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 2620593.598733727,
+            "constraint_residual_m2": -2.168404344971009e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00040649619351599805,
+              -0.0001422736677305992
+            ],
+            "correction_load_factor": 1.2333468839292805,
+            "iteration": 1,
+            "residual_inf_norm_kn": 1.3303219082615492,
+            "residual_kn": [
+              1.3303219082615492,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3464920107142606,
+              0.1212722037499912
+            ],
+            "trial_load_factor": -27.285882101793113
+          },
+          {
+            "augmented_condition_number": 2502273.599091944,
+            "constraint_residual_m2": 6.270059096264075e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00013550566044261267,
+              -4.742698115491444e-05
+            ],
+            "correction_load_factor": -0.031180037943740177,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0006880739363879229,
+            "residual_kn": [
+              0.0006880739363879229,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3460855145207446,
+              0.1211299300822606
+            ],
+            "trial_load_factor": -26.052535217863834
+          },
+          {
+            "augmented_condition_number": 2509595.053277076,
+            "constraint_residual_m2": 2.4499881617705797e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -5.713586119118169e-07,
+              -1.9997551416913588e-07
+            ],
+            "correction_load_factor": -5.741562759091575e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 7.631257602724872e-05,
+            "residual_kn": [
+              7.631257602724872e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.34595000886030197,
+              0.12108250310110569
+            ],
+            "trial_load_factor": -26.083715255807576
+          },
+          {
+            "augmented_condition_number": 2509618.633817167,
+            "constraint_residual_m2": 3.7962661443222134e-13,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -8.941859360692205e-12,
+              -3.1296507762422715e-12
+            ],
+            "correction_load_factor": -7.36485849020495e-10,
+            "iteration": 4,
+            "residual_inf_norm_kn": 1.35634081743774e-09,
+            "residual_kn": [
+              1.35634081743774e-09,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.34594943750169005,
+              0.12108230312559151
+            ],
+            "trial_load_factor": -26.083772671435167
+          },
+          {
+            "constraint_residual_m2": 4.336808689942018e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 5,
+            "residual_inf_norm_kn": 4.334310688136611e-13,
+            "residual_kn": [
+              -4.334310688136611e-13,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.3459494374927482,
+              0.12108230312246186
+            ],
+            "trial_load_factor": -26.08377267217165
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.01859585881856696,
+          0.006508550586498436
+        ],
+        "predictor_load_factor": 1.719942154762496,
+        "predictor_orientation_dot": 0.9923897116035556,
+        "predictor_tangent_displacements": [
+          0.9297929409283481,
+          0.3254275293249218
+        ],
+        "predictor_tangent_load_factor": 85.9971077381248,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 4.334310688136611e-13,
+        "residual_kn": [
+          -4.334310688136611e-13,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.3459494374927482,
+          0.12108230312246186
+        ],
+        "trial_load_factor": -26.08377267217165
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.36231825118225386,
+          0.12681138791378882
+        ],
+        "accepted_free_displacements_m_before": [
+          0.3459494374927482,
+          0.12108230312246186
+        ],
+        "accepted_load_factor_after": -21.102820809022443,
+        "accepted_load_factor_before": -26.08377267217165,
+        "accepted_state_hash_after": "sha256:58790ba41038e212b302a4c9f2d053b8ce47ec78b4d4771ee919fcb355690228",
+        "accepted_state_hash_before": "sha256:9c39b92de066dbe1e3a7ed2c5bdf20284100726ac902a5603dbdcc37fbf851e0",
+        "accepted_step_index_after": 19,
+        "accepted_step_index_before": 18,
+        "arc_length_m": 0.02,
+        "attempt_index": 20,
+        "consistent_tangent_condition_number": 2.598729990693889,
+        "constraint_residual_m2": -1.0842021724855044e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 4195082.278551969,
+            "constraint_residual_m2": 8.131516293641283e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.0008091795238630853,
+              -0.00028321283335207986
+            ],
+            "correction_load_factor": 0.9702101583979228,
+            "iteration": 1,
+            "residual_inf_norm_kn": 1.2817376882636324,
+            "residual_kn": [
+              1.2817376882636324,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3632164079717011,
+              0.1271257427900954
+            ],
+            "trial_load_factor": -22.042468196428622
+          },
+          {
+            "augmented_condition_number": 4015582.2845807653,
+            "constraint_residual_m2": 4.500212016647729e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -8.87070988671904e-05,
+              -3.104748460351663e-05
+            ],
+            "correction_load_factor": -0.03049689612898025,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.002997812406604794,
+            "residual_kn": [
+              0.002997812406604794,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.362407228447838,
+              0.1268425299567433
+            ],
+            "trial_load_factor": -21.0722580380307
+          },
+          {
+            "augmented_condition_number": 4028794.625569089,
+            "constraint_residual_m2": 1.2553138382779844e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.701645426840367e-07,
+              -9.455758993941286e-08
+            ],
+            "correction_load_factor": -6.587437621254788e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 3.5917666473039844e-05,
+            "residual_kn": [
+              3.5917666473039844e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3623185213489708,
+              0.12681148247213977
+            ],
+            "trial_load_factor": -21.10275493415968
+          },
+          {
+            "augmented_condition_number": 4028828.7749962527,
+            "constraint_residual_m2": 9.928760287894467e-14,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.174261686654953e-12,
+              -7.609915903292335e-13
+            ],
+            "correction_load_factor": -4.865501560740695e-10,
+            "iteration": 4,
+            "residual_inf_norm_kn": 3.326583453144849e-10,
+            "residual_kn": [
+              3.326583453144849e-10,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3623182511844281,
+              0.12681138791454982
+            ],
+            "trial_load_factor": -21.102820808535892
+          },
+          {
+            "constraint_residual_m2": -1.0842021724855044e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 5,
+            "residual_inf_norm_kn": 6.288303211476887e-13,
+            "residual_kn": [
+              6.288303211476887e-13,
+              -1.1102230246251565e-14
+            ],
+            "trial_free_displacements_m": [
+              0.36231825118225386,
+              0.12681138791378882
+            ],
+            "trial_load_factor": -21.102820809022443
+          }
+        ],
+        "corrector_iteration_count": 5,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.017266970478952908,
+          0.006043439667633518
+        ],
+        "predictor_load_factor": 4.041304475743027,
+        "predictor_orientation_dot": 0.9928688246141572,
+        "predictor_tangent_displacements": [
+          0.8633485239476454,
+          0.3021719833816759
+        ],
+        "predictor_tangent_load_factor": 202.06522378715138,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 6.288303211476887e-13,
+        "residual_kn": [
+          6.288303211476887e-13,
+          -1.1102230246251565e-14
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.36231825118225386,
+          0.12681138791378882
+        ],
+        "trial_load_factor": -21.102820809022443
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.37677966711434957,
+          0.13187288349002235
+        ],
+        "accepted_free_displacements_m_before": [
+          0.36231825118225386,
+          0.12681138791378882
+        ],
+        "accepted_load_factor_after": -14.675365795934281,
+        "accepted_load_factor_before": -21.102820809022443,
+        "accepted_state_hash_after": "sha256:5e24bf998782b48ec4305031c05820df824d31018409567af47a24adda9ff6af",
+        "accepted_state_hash_before": "sha256:58790ba41038e212b302a4c9f2d053b8ce47ec78b4d4771ee919fcb355690228",
+        "accepted_step_index_after": 20,
+        "accepted_step_index_before": 19,
+        "arc_length_m": 0.02,
+        "attempt_index": 21,
+        "consistent_tangent_condition_number": 2.0326412703778316,
+        "constraint_residual_m2": 1.0391860982839063e-14,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 5784085.100975973,
+            "constraint_residual_m2": -3.7947076036992655e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.0008749972909173719,
+              -0.00030624905182105236
+            ],
+            "correction_load_factor": 0.6517040640579785,
+            "iteration": 1,
+            "residual_inf_norm_kn": 1.1092255485199214,
+            "residual_kn": [
+              1.1092255485199214,
+              -1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3777013234937984,
+              0.1321954632228294
+            ],
+            "trial_load_factor": -15.306856279188558
+          },
+          {
+            "augmented_condition_number": 5601520.326373048,
+            "constraint_residual_m2": 2.5582814892922685e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -4.658074932782708e-05,
+              -1.630326226473948e-05
+            ],
+            "correction_load_factor": -0.020183985811860185,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.003771081297346157,
+            "residual_kn": [
+              0.003771081297346157,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.37682632620288103,
+              0.13188921417100835
+            ],
+            "trial_load_factor": -14.65515221513058
+          },
+          {
+            "augmented_condition_number": 5613602.927630917,
+            "constraint_residual_m2": 4.065135701095037e-09,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -7.83392036083479e-08,
+              -2.7418721262921762e-08
+            ],
+            "correction_load_factor": -2.959499184277307e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 1.065664221755469e-05,
+            "residual_kn": [
+              1.065664221755469e-05,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3767797454535532,
+              0.13187291090874362
+            ],
+            "trial_load_factor": -14.67533620094244
+          },
+          {
+            "constraint_residual_m2": 1.0391860982839063e-14,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 3.026734418654087e-11,
+            "residual_kn": [
+              3.026734418654087e-11,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.37677966711434957,
+              0.13187288349002235
+            ],
+            "trial_load_factor": -14.675365795934281
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.01538307231154457,
+          0.005384075309040599
+        ],
+        "predictor_load_factor": 5.795964529833886,
+        "predictor_orientation_dot": 0.9953153747568524,
+        "predictor_tangent_displacements": [
+          0.7691536155772285,
+          0.26920376545202995
+        ],
+        "predictor_tangent_load_factor": 289.79822649169427,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 3.026734418654087e-11,
+        "residual_kn": [
+          3.026734418654087e-11,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.37677966711434957,
+          0.13187288349002235
+        ],
+        "trial_load_factor": -14.675365795934281
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.3895374795133214,
+          0.1363381178296625
+        ],
+        "accepted_free_displacements_m_before": [
+          0.37677966711434957,
+          0.13187288349002235
+        ],
+        "accepted_load_factor_after": -7.304817901008074,
+        "accepted_load_factor_before": -14.675365795934281,
+        "accepted_state_hash_after": "sha256:1a8d1f023c0e841006b6cb3983a38457e6f462ae827ac3caf4699fb8100d9899",
+        "accepted_state_hash_before": "sha256:5e24bf998782b48ec4305031c05820df824d31018409567af47a24adda9ff6af",
+        "accepted_step_index_after": 21,
+        "accepted_step_index_before": 20,
+        "arc_length_m": 0.02,
+        "attempt_index": 22,
+        "consistent_tangent_condition_number": 2.013885442474569,
+        "constraint_residual_m2": 8.655728044038025e-16,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 7375134.800590718,
+            "constraint_residual_m2": 0.0,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.000769228099907339,
+              -0.00026922983496759637
+            ],
+            "correction_load_factor": 0.4201242844555201,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.921019792941296,
+            "residual_kn": [
+              0.921019792941296,
+              1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.39033001250765537,
+              0.1366155043776794
+            ],
+            "trial_load_factor": -7.7130442212353
+          },
+          {
+            "augmented_condition_number": 7218784.44358285,
+            "constraint_residual_m2": 1.3702142312813103e-06,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.328475426526818e-05,
+              -8.149663992816108e-06
+            ],
+            "correction_load_factor": -0.011887838832068924,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.003087590883531277,
+            "residual_kn": [
+              0.003087590883531277,
+              -1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.38956078440774805,
+              0.13634627454271178
+            ],
+            "trial_load_factor": -7.29291993677978
+          },
+          {
+            "augmented_condition_number": 7227897.216699737,
+            "constraint_residual_m2": 1.1738796526082791e-09,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.0140161375695828e-08,
+              -7.049056481493541e-09
+            ],
+            "correction_load_factor": -1.0125396224627014e-05,
+            "iteration": 3,
+            "residual_inf_norm_kn": 2.8227272244052415e-06,
+            "residual_kn": [
+              2.8227272244052415e-06,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.3895374996534828,
+              0.13633812487871896
+            ],
+            "trial_load_factor": -7.30480777561185
+          },
+          {
+            "constraint_residual_m2": 8.655728044038025e-16,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 1.8056667272503546e-12,
+            "residual_kn": [
+              1.8056667272503546e-12,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.3895374795133214,
+              0.1363381178296625
+            ],
+            "trial_load_factor": -7.304817901008074
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.013550345393305798,
+          0.004742620887657029
+        ],
+        "predictor_load_factor": 6.962321574698981,
+        "predictor_orientation_dot": 0.9974049255772608,
+        "predictor_tangent_displacements": [
+          0.6775172696652899,
+          0.23713104438285146
+        ],
+        "predictor_tangent_load_factor": 348.11607873494904,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 1.8056667272503546e-12,
+        "residual_kn": [
+          1.8056667272503546e-12,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.3895374795133214,
+          0.1363381178296625
+        ],
+        "trial_load_factor": -7.304817901008074
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.40089783434202797,
+          0.1403142420197098
+        ],
+        "accepted_free_displacements_m_before": [
+          0.3895374795133214,
+          0.1363381178296625
+        ],
+        "accepted_load_factor_after": 0.6816202066730265,
+        "accepted_load_factor_before": -7.304817901008074,
+        "accepted_state_hash_after": "sha256:e7b3868bd9353fd8e823f92b535eddc14578faa04c7bf1900f58d2c2c33b2f82",
+        "accepted_state_hash_before": "sha256:1a8d1f023c0e841006b6cb3983a38457e6f462ae827ac3caf4699fb8100d9899",
+        "accepted_step_index_after": 22,
+        "accepted_step_index_before": 21,
+        "arc_length_m": 0.02,
+        "attempt_index": 23,
+        "consistent_tangent_condition_number": 2.176815587413863,
+        "constraint_residual_m2": 7.952622935181175e-17,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 8920297.845442103,
+            "constraint_residual_m2": -1.0842021724855044e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00063195490849933,
+              -0.00022118421797479327
+            ],
+            "correction_load_factor": 0.27584728012597476,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.7631593498900489,
+            "residual_kn": [
+              0.7631593498900489,
+              1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4015417882627981,
+              0.14053962589197935
+            ],
+            "trial_load_factor": 0.41275784286258244
+          },
+          {
+            "augmented_condition_number": 8794315.057078242,
+            "constraint_residual_m2": 7.526563524694134e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.1993541386909451e-05,
+              -4.197739485418308e-06
+            ],
+            "correction_load_factor": -0.006981521450199962,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.00218405411367828,
+            "residual_kn": [
+              0.00218405411367828,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4009098333542988,
+              0.14031844167400456
+            ],
+            "trial_load_factor": 0.6886051229885572
+          },
+          {
+            "augmented_condition_number": 8800802.653313795,
+            "constraint_residual_m2": 3.564326183920323e-10,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -5.470883903801758e-09,
+              -1.91480933857504e-09
+            ],
+            "correction_load_factor": -3.3948653308262337e-06,
+            "iteration": 3,
+            "residual_inf_norm_kn": 7.853184479378328e-07,
+            "residual_kn": [
+              7.853184479378328e-07,
+              -1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4008978398129119,
+              0.14031424393451913
+            ],
+            "trial_load_factor": 0.6816236015383573
+          },
+          {
+            "constraint_residual_m2": 7.952622935181175e-17,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 4.2010839251815923e-13,
+            "residual_kn": [
+              4.2010839251815923e-13,
+              1.1102230246251565e-14
+            ],
+            "trial_free_displacements_m": [
+              0.40089783434202797,
+              0.1403142420197098
+            ],
+            "trial_load_factor": 0.6816202066730265
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.012004308749476729,
+          0.004201508062316855
+        ],
+        "predictor_load_factor": 7.717575743870657,
+        "predictor_orientation_dot": 0.9986012092374252,
+        "predictor_tangent_displacements": [
+          0.6002154374738364,
+          0.21007540311584275
+        ],
+        "predictor_tangent_load_factor": 385.87878719353284,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 4.2010839251815923e-13,
+        "residual_kn": [
+          4.2010839251815923e-13,
+          1.1102230246251565e-14
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.40089783434202797,
+          0.1403142420197098
+        ],
+        "trial_load_factor": 0.6816202066730265
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.4111349400281031,
+          0.14389722900983606
+        ],
+        "accepted_free_displacements_m_before": [
+          0.40089783434202797,
+          0.1403142420197098
+        ],
+        "accepted_load_factor_after": 9.08346332888026,
+        "accepted_load_factor_before": 0.6816202066730265,
+        "accepted_state_hash_after": "sha256:946440e5f3bc8570a89d71448322950fa226d0e6a1b7f58a43ba16d620e3f133",
+        "accepted_state_hash_before": "sha256:e7b3868bd9353fd8e823f92b535eddc14578faa04c7bf1900f58d2c2c33b2f82",
+        "accepted_step_index_after": 23,
+        "accepted_step_index_before": 22,
+        "arc_length_m": 0.02,
+        "attempt_index": 24,
+        "consistent_tangent_condition_number": 2.3977615706895623,
+        "constraint_residual_m2": 9.432558900623889e-18,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 10397227.286941294,
+            "constraint_residual_m2": -2.168404344971009e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.0005119083943366606,
+              -0.000179167938017859
+            ],
+            "correction_load_factor": 0.18800992107808442,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.6405460642019296,
+            "residual_kn": [
+              0.6405460642019296,
+              1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4116533794377948,
+              0.1440786828032282
+            ],
+            "trial_load_factor": 8.899698377393806
+          },
+          {
+            "augmented_condition_number": 10296642.042442812,
+            "constraint_residual_m2": 4.355422759006345e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -6.529354867920161e-06,
+              -2.285274203772056e-06
+            ],
+            "correction_load_factor": -0.004243753624844129,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0014903069762848276,
+            "residual_kn": [
+              0.0014903069762848276,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4111414710434581,
+              0.14389951486521033
+            ],
+            "trial_load_factor": 9.08770829847189
+          },
+          {
+            "augmented_condition_number": 10301234.118820239,
+            "constraint_residual_m2": 1.198927319727948e-10,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.660487099028684e-09,
+              -5.81170512415615e-10
+            ],
+            "correction_load_factor": -1.2159667847450005e-06,
+            "iteration": 3,
+            "residual_inf_norm_kn": 2.4214502936104054e-07,
+            "residual_kn": [
+              2.4214502936104054e-07,
+              1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.41113494168859016,
+              0.14389722959100656
+            ],
+            "trial_load_factor": 9.083464544847045
+          },
+          {
+            "constraint_residual_m2": 9.432558900623889e-18,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 3.588240815588506e-13,
+            "residual_kn": [
+              3.588240815588506e-13,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.4111349400281031,
+              0.14389722900983606
+            ],
+            "trial_load_factor": 9.08346332888026
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.01075554509576683,
+          0.0037644407835183908
+        ],
+        "predictor_load_factor": 8.21807817072078,
+        "predictor_orientation_dot": 0.9992184585590014,
+        "predictor_tangent_displacements": [
+          0.5377772547883415,
+          0.18822203917591954
+        ],
+        "predictor_tangent_load_factor": 410.90390853603895,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 3.588240815588506e-13,
+        "residual_kn": [
+          3.588240815588506e-13,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.4111349400281031,
+          0.14389722900983606
+        ],
+        "trial_load_factor": 9.08346332888026
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.42046511491670996,
+          0.14716279022084847
+        ],
+        "accepted_free_displacements_m_before": [
+          0.4111349400281031,
+          0.14389722900983606
+        ],
+        "accepted_load_factor_after": 17.776620789278958,
+        "accepted_load_factor_before": 9.08346332888026,
+        "accepted_state_hash_after": "sha256:d4fd8791a5d76996b7a4d83ae39762d13e94bdec258acdc5bab6b93d82edfa21",
+        "accepted_state_hash_before": "sha256:946440e5f3bc8570a89d71448322950fa226d0e6a1b7f58a43ba16d620e3f133",
+        "accepted_step_index_after": 24,
+        "accepted_step_index_before": 23,
+        "arc_length_m": 0.02,
+        "attempt_index": 25,
+        "consistent_tangent_condition_number": 2.6347138303050643,
+        "constraint_residual_m2": 1.3552527156068805e-18,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 11801891.855842138,
+            "constraint_residual_m2": 2.168404344971009e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.000417051127996058,
+              -0.0001459678947986203
+            ],
+            "correction_load_factor": 0.13327857591980974,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.5465255935385223,
+            "residual_kn": [
+              0.5465255935385223,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.42088593490351844,
+              0.14731007721623143
+            ],
+            "trial_load_factor": 17.64603546083523
+          },
+          {
+            "augmented_condition_number": 11720751.22198196,
+            "constraint_residual_m2": 2.662909848715747e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -3.7682919182661844e-06,
+              -1.3189021713931644e-06
+            ],
+            "correction_load_factor": -0.0026927719683989488,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0010226713146437305,
+            "residual_kn": [
+              0.0010226713146437305,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4204688837755224,
+              0.1471641093214328
+            ],
+            "trial_load_factor": 17.77931403675504
+          },
+          {
+            "augmented_condition_number": 11724049.89414593,
+            "constraint_residual_m2": 4.494361019414736e-11,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -5.66894142626883e-10,
+              -1.9841294991940906e-10
+            ],
+            "correction_load_factor": -4.755076846408983e-07,
+            "iteration": 3,
+            "residual_inf_norm_kn": 8.341092083696822e-08,
+            "residual_kn": [
+              8.341092083696822e-08,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4204651154836041,
+              0.14716279041926142
+            ],
+            "trial_load_factor": 17.77662126478664
+          },
+          {
+            "constraint_residual_m2": 1.3552527156068805e-18,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 3.552713678800501e-14,
+            "residual_kn": [
+              -3.552713678800501e-14,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.42046511491670996,
+              0.14716279022084847
+            ],
+            "trial_load_factor": 17.776620789278958
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.00975099487541535,
+          0.0034128482063953726
+        ],
+        "predictor_load_factor": 8.56257213195497,
+        "predictor_orientation_dot": 0.9995392672696772,
+        "predictor_tangent_displacements": [
+          0.48754974377076754,
+          0.17064241031976862
+        ],
+        "predictor_tangent_load_factor": 428.1286065977485,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 3.552713678800501e-14,
+        "residual_kn": [
+          -3.552713678800501e-14,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.42046511491670996,
+          0.14716279022084847
+        ],
+        "trial_load_factor": 17.776620789278958
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.4290535003029935,
+          0.1501687251060477
+        ],
+        "accepted_free_displacements_m_before": [
+          0.42046511491670996,
+          0.14716279022084847
+        ],
+        "accepted_load_factor_after": 26.681731567964054,
+        "accepted_load_factor_before": 17.776620789278958,
+        "accepted_state_hash_after": "sha256:7f73a82d0cece677d1325bb0862f7c5f3c3bd467bffcf306cc42bfb29c962c04",
+        "accepted_state_hash_before": "sha256:d4fd8791a5d76996b7a4d83ae39762d13e94bdec258acdc5bab6b93d82edfa21",
+        "accepted_step_index_after": 25,
+        "accepted_step_index_before": 24,
+        "arc_length_m": 0.02,
+        "attempt_index": 26,
+        "consistent_tangent_condition_number": 2.8729477704400033,
+        "constraint_residual_m2": 2.710505431213761e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 13137925.157465095,
+            "constraint_residual_m2": -1.0842021724855044e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00034400002385555416,
+              -0.00012040000834944395
+            ],
+            "correction_load_factor": 0.09791252194299736,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.47373642605212396,
+            "residual_kn": [
+              0.47373642605212396,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4293997952013074,
+              0.15028992832045757
+            ],
+            "trial_load_factor": 26.585600519049017
+          },
+          {
+            "augmented_condition_number": 13071403.51806714,
+            "constraint_residual_m2": 1.7117962623633886e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.294658885427363e-06,
+              -8.031306098718215e-07
+            ],
+            "correction_load_factor": -0.0017812702549766658,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0007161184741342197,
+            "residual_kn": [
+              0.0007161184741342197,
+              -1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.42905579517745185,
+              0.1501695283121081
+            ],
+            "trial_load_factor": 26.683513040992015
+          },
+          {
+            "augmented_condition_number": 13073824.776920715,
+            "constraint_residual_m2": 1.8602173512509423e-11,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -2.1557295697584005e-10,
+              -7.545053494154403e-11
+            ],
+            "correction_load_factor": -2.0277298314059384e-07,
+            "iteration": 3,
+            "residual_inf_norm_kn": 3.1839554992529884e-08,
+            "residual_kn": [
+              3.1839554992529884e-08,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.42905350051856644,
+              0.15016872518149824
+            ],
+            "trial_load_factor": 26.681731770737038
+          },
+          {
+            "constraint_residual_m2": 2.710505431213761e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 2.1316282072803006e-14,
+            "residual_kn": [
+              2.1316282072803006e-14,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.4290535003029935,
+              0.1501687251060477
+            ],
+            "trial_load_factor": 26.681731567964054
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.008934680284597426,
+          0.0031271380996090994
+        ],
+        "predictor_load_factor": 8.80897972977006,
+        "predictor_orientation_dot": 0.999713454835126,
+        "predictor_tangent_displacements": [
+          0.4467340142298713,
+          0.15635690498045496
+        ],
+        "predictor_tangent_load_factor": 440.448986488503,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 2.1316282072803006e-14,
+        "residual_kn": [
+          2.1316282072803006e-14,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.4290535003029935,
+          0.1501687251060477
+        ],
+        "trial_load_factor": 26.681731567964054
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.43702605955638735,
+          0.15295912084473556
+        ],
+        "accepted_free_displacements_m_before": [
+          0.4290535003029935,
+          0.1501687251060477
+        ],
+        "accepted_load_factor_after": 35.74611227726566,
+        "accepted_load_factor_before": 26.681731567964054,
+        "accepted_state_hash_after": "sha256:3ad5905370f1938912274b4d4f6a1a0d5b4b99e17674a68eb48db92486d58bf0",
+        "accepted_state_hash_before": "sha256:7f73a82d0cece677d1325bb0862f7c5f3c3bd467bffcf306cc42bfb29c962c04",
+        "accepted_step_index_after": 26,
+        "accepted_step_index_before": 25,
+        "arc_length_m": 0.02,
+        "attempt_index": 27,
+        "consistent_tangent_condition_number": 3.107054897653132,
+        "constraint_residual_m2": -4.336808689942018e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 14411425.569216566,
+            "constraint_residual_m2": 5.421010862427522e-20,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00028771044521038315,
+              -0.00010069865582360632
+            ],
+            "correction_load_factor": 0.07418652856044085,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.4164400703548594,
+            "residual_kn": [
+              0.4164400703548594,
+              -1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.43731523464075733,
+              0.15306033212426504
+            ],
+            "trial_load_factor": 35.673149067229815
+          },
+          {
+            "augmented_condition_number": 14355965.094828134,
+            "constraint_residual_m2": 1.1493208364746687e-07,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.4645490978392439e-06,
+              -5.125921842437354e-07
+            ],
+            "correction_load_factor": -0.0012232250155668433,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0005137385074789336,
+            "residual_kn": [
+              0.0005137385074789336,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.43702752419554697,
+              0.15295963346844144
+            ],
+            "trial_load_factor": 35.747335595790254
+          },
+          {
+            "augmented_condition_number": 14357783.08100655,
+            "constraint_residual_m2": 8.39277275064762e-12,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -9.006177748091292e-11,
+              -3.1521622118319525e-11
+            ],
+            "correction_load_factor": -9.350902677488336e-08,
+            "iteration": 3,
+            "residual_inf_norm_kn": 1.3303115053986403e-08,
+            "residual_kn": [
+              1.3303115053986403e-08,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.43702605964644914,
+              0.15295912087625718
+            ],
+            "trial_load_factor": 35.74611237077469
+          },
+          {
+            "constraint_residual_m2": -4.336808689942018e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 4.618527782440651e-13,
+            "residual_kn": [
+              4.618527782440651e-13,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.43702605955638735,
+              0.15295912084473556
+            ],
+            "trial_load_factor": 35.74611227726566
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.008261734337763818,
+          0.002891607018217336
+        ],
+        "predictor_load_factor": 8.991417499265765,
+        "predictor_orientation_dot": 0.9998130410390786,
+        "predictor_tangent_displacements": [
+          0.4130867168881909,
+          0.1445803509108668
+        ],
+        "predictor_tangent_load_factor": 449.57087496328825,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 4.618527782440651e-13,
+        "residual_kn": [
+          4.618527782440651e-13,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.43702605955638735,
+          0.15295912084473556
+        ],
+        "trial_load_factor": 35.74611227726566
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.44447990433160156,
+          0.15556796651606053
+        ],
+        "accepted_free_displacements_m_before": [
+          0.43702605955638735,
+          0.15295912084473556
+        ],
+        "accepted_load_factor_after": 44.93352380514201,
+        "accepted_load_factor_before": 35.74611227726566,
+        "accepted_state_hash_after": "sha256:4a7a3db7a1e2ba637c7dedb4998840ff54f5dd1e2ad32c63ec4b6fb01ed19a84",
+        "accepted_state_hash_before": "sha256:3ad5905370f1938912274b4d4f6a1a0d5b4b99e17674a68eb48db92486d58bf0",
+        "accepted_step_index_after": 27,
+        "accepted_step_index_before": 26,
+        "arc_length_m": 0.02,
+        "attempt_index": 28,
+        "consistent_tangent_condition_number": 3.3350912976967493,
+        "constraint_residual_m2": 2.168404344971009e-19,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 15628815.352340432,
+            "constraint_residual_m2": -1.6263032587282567e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00024388952700259768,
+              -8.536133445088146e-05
+            ],
+            "correction_load_factor": 0.05770844877738514,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.3705254568936738,
+            "residual_kn": [
+              0.3705254568936738,
+              -1.1102230246251565e-14
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.44472476727406324,
+              0.1556536685459221
+            ],
+            "trial_load_factor": 44.87668334598622
+          },
+          {
+            "augmented_condition_number": 15581849.259263348,
+            "constraint_residual_m2": 8.008971904167059e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -9.733746689412352e-07,
+              -3.4068113412943234e-07
+            ],
+            "correction_load_factor": -0.0008679434409115472,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.0003775111040340562,
+            "residual_kn": [
+              0.0003775111040340562,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.44448087774706063,
+              0.15556830721147122
+            ],
+            "trial_load_factor": 44.934391794763606
+          },
+          {
+            "augmented_condition_number": 15583243.977493457,
+            "constraint_residual_m2": 4.0768255741771564e-12,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -4.079017190479661e-11,
+              -1.4276560166678814e-11
+            ],
+            "correction_load_factor": -4.6180684832065975e-08,
+            "iteration": 3,
+            "residual_inf_norm_kn": 6.010743902606919e-09,
+            "residual_kn": [
+              6.010743902606919e-09,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4444799043723917,
+              0.15556796653033708
+            ],
+            "trial_load_factor": 44.9335238513227
+          },
+          {
+            "constraint_residual_m2": 2.168404344971009e-19,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 5.755396159656812e-13,
+            "residual_kn": [
+              -5.755396159656812e-13,
+              0.0
+            ],
+            "trial_free_displacements_m": [
+              0.44447990433160156,
+              0.15556796651606053
+            ],
+            "trial_load_factor": 44.93352380514201
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.007698707717675879,
+          0.002694547701186558
+        ],
+        "predictor_load_factor": 9.130571068720567,
+        "predictor_orientation_dot": 0.9998728672942145,
+        "predictor_tangent_displacements": [
+          0.38493538588379395,
+          0.13472738505932788
+        ],
+        "predictor_tangent_load_factor": 456.52855343602835,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 5.755396159656812e-13,
+        "residual_kn": [
+          -5.755396159656812e-13,
+          0.0
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.44447990433160156,
+          0.15556796651606053
+        ],
+        "trial_load_factor": 44.93352380514201
+      },
+      {
+        "accepted": true,
+        "accepted_free_displacements_m_after": [
+          0.4514909951427356,
+          0.15802184829995747
+        ],
+        "accepted_free_displacements_m_before": [
+          0.44447990433160156,
+          0.15556796651606053
+        ],
+        "accepted_load_factor_after": 54.21822991019308,
+        "accepted_load_factor_before": 44.93352380514201,
+        "accepted_state_hash_after": "sha256:ef00d5d62403b66698530bec4ebe9c4c846e896b91c2b9df7e91e9adc37b5db2",
+        "accepted_state_hash_before": "sha256:4a7a3db7a1e2ba637c7dedb4998840ff54f5dd1e2ad32c63ec4b6fb01ed19a84",
+        "accepted_step_index_after": 28,
+        "accepted_step_index_before": 27,
+        "arc_length_m": 0.02,
+        "attempt_index": 29,
+        "consistent_tangent_condition_number": 3.5565023983105806,
+        "constraint_residual_m2": 5.421010862427522e-20,
+        "converged": true,
+        "corrector_history": [
+          {
+            "augmented_condition_number": 16796052.61882742,
+            "constraint_residual_m2": 1.6263032587282567e-19,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -0.00020931131996877888,
+              -7.325896198907261e-05
+            ],
+            "correction_load_factor": 0.04590663130879536,
+            "iteration": 1,
+            "residual_inf_norm_kn": 0.33309987728142687,
+            "residual_kn": [
+              0.33309987728142687,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.45170097630995565,
+              0.15809534170848447
+            ],
+            "trial_load_factor": 54.172956879202204
+          },
+          {
+            "augmented_condition_number": 16755722.462958673,
+            "constraint_residual_m2": 5.7607779371620076e-08,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -6.698274560405642e-07,
+              -2.3443960961419747e-07
+            ],
+            "correction_load_factor": -0.000633576115072581,
+            "iteration": 2,
+            "residual_inf_norm_kn": 0.00028366973109683613,
+            "residual_kn": [
+              0.00028366973109683613,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.4514916649899869,
+              0.1580220827464954
+            ],
+            "trial_load_factor": 54.218863510511
+          },
+          {
+            "augmented_condition_number": 16756813.650947647,
+            "constraint_residual_m2": 2.1093054603307793e-12,
+            "converged": false,
+            "correction_free_displacements_m": [
+              -1.9795230715020397e-11,
+              -6.928330750257139e-12
+            ],
+            "correction_load_factor": -2.4202846391179733e-08,
+            "iteration": 3,
+            "residual_inf_norm_kn": 2.904101847889251e-09,
+            "residual_kn": [
+              2.904101847889251e-09,
+              0.0
+            ],
+            "tangent_solve_metadata": null,
+            "trial_free_displacements_m": [
+              0.45149099516253083,
+              0.1580218483068858
+            ],
+            "trial_load_factor": 54.21822993439593
+          },
+          {
+            "constraint_residual_m2": 5.421010862427522e-20,
+            "converged": true,
+            "correction_free_displacements_m": [
+              0.0,
+              0.0
+            ],
+            "correction_load_factor": 0.0,
+            "iteration": 4,
+            "residual_inf_norm_kn": 6.750155989720952e-13,
+            "residual_kn": [
+              -6.750155989720952e-13,
+              1.1102230246251565e-14
+            ],
+            "trial_free_displacements_m": [
+              0.4514909951427356,
+              0.15802184829995747
+            ],
+            "trial_load_factor": 54.21822991019308
+          }
+        ],
+        "corrector_iteration_count": 4,
+        "equilibrium_linearization_mode": "proportional_reference_load",
+        "fallback_used": false,
+        "load_linearization_rhs_kind": "proportional_reference_load",
+        "predictor_free_displacements_m": [
+          0.007221071978354089,
+          0.0025273751924239315
+        ],
+        "predictor_load_factor": 9.23943307406019,
+        "predictor_orientation_dot": 0.9999104430263004,
+        "predictor_tangent_displacements": [
+          0.36105359891770444,
+          0.12636875962119656
+        ],
+        "predictor_tangent_load_factor": 461.97165370300957,
+        "predictor_tangent_solve": null,
+        "regularization_used": false,
+        "residual_inf_norm_kn": 6.750155989720952e-13,
+        "residual_kn": [
+          -6.750155989720952e-13,
+          1.1102230246251565e-14
+        ],
+        "rollback_exact": true,
+        "stop_reason": "equilibrium_and_arc_constraint_converged",
+        "tangent_linear_solver_mode": "dense_augmented_matrix",
+        "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+        "trial_free_displacements_m": [
+          0.4514909951427356,
+          0.15802184829995747
+        ],
+        "trial_load_factor": 54.21822991019308
+      }
+    ],
+    "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+    "checkpoints": [
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.08,
+        "free_displacements_m": [
+          0.0,
+          0.0
+        ],
+        "load_factor": 0.0,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": null,
+        "previous_tangent_load_factor": null,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:2d9766729f3e6f6f1f5d3ffefb695ca9aaf302de823c4a16596999e78b9ef0ae",
+        "step_index": 0
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.08,
+        "free_displacements_m": [
+          0.05638157902314576,
+          0.019733552658101013
+        ],
+        "load_factor": 26.606880906763383,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.704769737789322,
+          0.24666940822626265
+        ],
+        "previous_tangent_load_factor": 332.58601133454226,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:71065d24f29c5373a57a323bff11c6e535ada3566b0b05842e2d611e84bc5e8d",
+        "step_index": 1
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.07460575581109628,
+          0.026112014533883694
+        ],
+        "load_factor": 29.214303221076523,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.9112088393975263,
+          0.318923093789134
+        ],
+        "previous_tangent_load_factor": 130.37111571565703,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:79a843776d8d073b0b6efc70ac23cc0a0ec23ac08c883a66919137c3c7ba513c",
+        "step_index": 2
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.09348012372966642,
+          0.03271804330538325
+        ],
+        "load_factor": 29.3865091621546,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.9437183959285069,
+          0.33030143857497773
+        ],
+        "previous_tangent_load_factor": 8.610297053903793,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:563cf7433113d469b7b39e49763786dc48ecba5b21abcd31bfe5e329f4da6981",
+        "step_index": 3
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.11198309678063213,
+          0.03919408387322125
+        ],
+        "load_factor": 27.40529193283867,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.9251486525482855,
+          0.32380202839190003
+        ],
+        "previous_tangent_load_factor": -99.06086146579653,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:e41e1bdf162e3db3990adecd3bfb950c66cf328e21332294a29a91a00e1d8667",
+        "step_index": 4
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.12963286387484288,
+          0.045371502356195005
+        ],
+        "load_factor": 23.85827831533012,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.8824883547105373,
+          0.3088709241486878
+        ],
+        "previous_tangent_load_factor": -177.35068087542734,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:f1995a81aae5d56084ad0ce98fcf29ba66dcd2ce63ffe0def7b01efcae4a51c7",
+        "step_index": 5
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.14641261853989598,
+          0.051244416488963586
+        ],
+        "load_factor": 19.277101802414034,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.8389877332526552,
+          0.29364570663842904
+        ],
+        "previous_tangent_load_factor": -229.05882564580438,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:07d569a83adcf377cafdb158191bff6e89e9717760967514d960ae7564283efa",
+        "step_index": 6
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.1624938279885883,
+          0.05687283979600591
+        ],
+        "load_factor": 14.039842172033877,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.8040604724346159,
+          0.28142116535211614
+        ],
+        "previous_tangent_load_factor": -261.86298151900786,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:1f395124f9ffb50c21d19777dbe99162e444c7ad0e798c70c4009af55b14f4a9",
+        "step_index": 7
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.17808864935429614,
+          0.06233102727400364
+        ],
+        "load_factor": 8.404912358214292,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.7797410682853917,
+          0.27290937389988673
+        ],
+        "previous_tangent_load_factor": -281.7464906909793,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:83dfbbe4c94a86ce7b15ff81e7e751c86e7a1028e86cfb949fe74b397289515a",
+        "step_index": 8
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.19340408170975187,
+          0.06769142859841315
+        ],
+        "load_factor": 2.5588959922021304,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.7657716177727869,
+          0.26802006622047536
+        ],
+        "previous_tangent_load_factor": -292.30081830060806,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:67cd18c689a170b3a5db84500a0f2249aa036ee9b8226c36ece31b1daecf5de8",
+        "step_index": 9
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.2086363320246596,
+          0.07302271620863085
+        ],
+        "load_factor": -3.347793494328918,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.7616125157453857,
+          0.266564380510885
+        ],
+        "previous_tangent_load_factor": -295.3344743265524,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:e98588f9aacc24947fe79d0c2033f394876902e84696aa66b2167cf5c5fbd185",
+        "step_index": 10
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.2239775882714079,
+          0.07839215589499277
+        ],
+        "load_factor": -9.174777581876436,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.7670628123374157,
+          0.26847198431809577
+        ],
+        "previous_tangent_load_factor": -291.3492043773758,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:0a480bef2eea4aaa68414238dfcbdf5fa3558ca71f7b450c243b93fd864aded2",
+        "step_index": 11
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.23962523728823534,
+          0.08386883305088236
+        ],
+        "load_factor": -14.768459007742958,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.782382450841372,
+          0.2738338577944796
+        ],
+        "previous_tangent_load_factor": -279.6840712933261,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:263ffaf4f6ccec70fe1d08454e4e335c3add5af4768f6475a1fd48a9b83b442c",
+        "step_index": 12
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.25578777062736735,
+          0.08952571971957855
+        ],
+        "load_factor": -19.934989499257014,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.8081266669566003,
+          0.28284433343480975
+        ],
+        "previous_tangent_load_factor": -258.3265245757028,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:7687d82314d7731138d88c71d1a5804b070196ee81aa6e894f3756c02dc2b5f3",
+        "step_index": 13
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.27267599577500307,
+          0.09543659852125108
+        ],
+        "load_factor": -24.40291304254919,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.8444112573817858,
+          0.2955439400836264
+        ],
+        "previous_tangent_load_factor": -223.39617716460882,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:a815cb71f25cc03bba41bf0299582c2cabe81216358d62507027c9ed33168af4",
+        "step_index": 14
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.29044789639509166,
+          0.10165676373828209
+        ],
+        "load_factor": -27.774451750069378,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.8885950310044299,
+          0.3110082608515502
+        ],
+        "previous_tangent_load_factor": -168.57693537600937,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:030caebfd26c5168bf2165511568b89e6c5b7a9a7168e4881a78a728a82829b0",
+        "step_index": 15
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.3090420169995518,
+          0.10816470594984313
+        ],
+        "load_factor": -29.49965949971664,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.929706030223007,
+          0.32539711057805243
+        ],
+        "previous_tangent_load_factor": -86.26038748236304,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:bf7a97f50b161f2519f8f1ef8ea2287aa6eb245e8d63c4d00fa3984043373d7f",
+        "step_index": 16
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.32789615189569365,
+          0.11476365316349277
+        ],
+        "load_factor": -29.00582425655561,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.9427067448070925,
+          0.32994736068248165
+        ],
+        "previous_tangent_load_factor": 24.69176215805149,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:66685974be9f3db5f98b03be34374f2b5d409b45ba1f0a1eaa694c3b59b0403f",
+        "step_index": 17
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.3459494374927482,
+          0.12108230312246186
+        ],
+        "load_factor": -26.08377267217165,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.9026642798527273,
+          0.3159324979484547
+        ],
+        "previous_tangent_load_factor": 146.10257921919788,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:9c39b92de066dbe1e3a7ed2c5bdf20284100726ac902a5603dbdcc37fbf851e0",
+        "step_index": 18
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.36231825118225386,
+          0.12681138791378882
+        ],
+        "load_factor": -21.102820809022443,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.8184406844752828,
+          0.28645423956634786
+        ],
+        "previous_tangent_load_factor": 249.0475931574604,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:58790ba41038e212b302a4c9f2d053b8ce47ec78b4d4771ee919fcb355690228",
+        "step_index": 19
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.37677966711434957,
+          0.13187288349002235
+        ],
+        "load_factor": -14.675365795934281,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.7230707966047856,
+          0.2530747788116766
+        ],
+        "previous_tangent_load_factor": 321.3727506544081,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:5e24bf998782b48ec4305031c05820df824d31018409567af47a24adda9ff6af",
+        "step_index": 20
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.3895374795133214,
+          0.1363381178296625
+        ],
+        "load_factor": -7.304817901008074,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.6378906199485918,
+          0.2232617169820067
+        ],
+        "previous_tangent_load_factor": 368.52739474631034,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:1a8d1f023c0e841006b6cb3983a38457e6f462ae827ac3caf4699fb8100d9899",
+        "step_index": 21
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.40089783434202797,
+          0.1403142420197098
+        ],
+        "load_factor": 0.6816202066730265,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.5680177414353282,
+          0.19880620950236544
+        ],
+        "previous_tangent_load_factor": 399.32190538405507,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:e7b3868bd9353fd8e823f92b535eddc14578faa04c7bf1900f58d2c2c33b2f82",
+        "step_index": 22
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.4111349400281031,
+          0.14389722900983606
+        ],
+        "load_factor": 9.08346332888026,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.5118552843037555,
+          0.17914934950631345
+        ],
+        "previous_tangent_load_factor": 420.0921561103617,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:946440e5f3bc8570a89d71448322950fa226d0e6a1b7f58a43ba16d620e3f133",
+        "step_index": 23
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.42046511491670996,
+          0.14716279022084847
+        ],
+        "load_factor": 17.776620789278958,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.46650874443034396,
+          0.1632780605506201
+        ],
+        "previous_tangent_load_factor": 434.65787301993487,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:d4fd8791a5d76996b7a4d83ae39762d13e94bdec258acdc5bab6b93d82edfa21",
+        "step_index": 24
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.4290535003029935,
+          0.1501687251060477
+        ],
+        "load_factor": 26.681731567964054,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.42941926931417684,
+          0.15029674425996176
+        ],
+        "previous_tangent_load_factor": 445.2555389342548,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:7f73a82d0cece677d1325bb0862f7c5f3c3bd467bffcf306cc42bfb29c962c04",
+        "step_index": 25
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.43702605955638735,
+          0.15295912084473556
+        ],
+        "load_factor": 35.74611227726566,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.3986279626696926,
+          0.1395197869343931
+        ],
+        "previous_tangent_load_factor": 453.21903546508025,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:3ad5905370f1938912274b4d4f6a1a0d5b4b99e17674a68eb48db92486d58bf0",
+        "step_index": 26
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.44447990433160156,
+          0.15556796651606053
+        ],
+        "load_factor": 44.93352380514201,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.37269223876071067,
+          0.13044228356624832
+        ],
+        "previous_tangent_load_factor": 459.3705763938175,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:4a7a3db7a1e2ba637c7dedb4998840ff54f5dd1e2ad32c63ec4b6fb01ed19a84",
+        "step_index": 27
+      },
+      {
+        "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+        "current_arc_length_m": 0.02,
+        "free_displacements_m": [
+          0.4514909951427356,
+          0.15802184829995747
+        ],
+        "load_factor": 54.21822991019308,
+        "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+        "previous_tangent_displacements": [
+          0.3505545405567023,
+          0.12269408919484692
+        ],
+        "previous_tangent_load_factor": 464.2353052525536,
+        "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+        "state_hash": "sha256:ef00d5d62403b66698530bec4ebe9c4c846e896b91c2b9df7e91e9adc37b5db2",
+        "step_index": 28
+      }
+    ],
+    "config": {
+      "constraint_tolerance_m2": 1e-12,
+      "displacement_metric_weights": [
+        1.0,
+        1.0
+      ],
+      "failed_step_reduction": 0.25,
+      "initial_arc_length_m": 0.08,
+      "load_factor_metric_scale_m": 0.002,
+      "maximum_arc_length_m": 0.08,
+      "maximum_attempt_count": 100,
+      "maximum_corrector_iterations": 5,
+      "minimum_arc_length_m": 0.005,
+      "residual_tolerance_kn": 1e-10,
+      "tangent_solve_residual_tolerance_kn": 1e-10,
+      "target_direction": 1,
+      "target_monitor_displacement_m": 0.45,
+      "target_monitor_dof_index": 0
+    },
+    "constraint_formula": "delta_u^T*W*delta_u+(load_factor_metric_scale*delta_load_factor)^2-arc_length^2",
+    "equilibrium_linearization_mode": "proportional_reference_load",
+    "final_checkpoint": {
+      "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+      "current_arc_length_m": 0.02,
+      "free_displacements_m": [
+        0.4514909951427356,
+        0.15802184829995747
+      ],
+      "load_factor": 54.21822991019308,
+      "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+      "previous_tangent_displacements": [
+        0.3505545405567023,
+        0.12269408919484692
+      ],
+      "previous_tangent_load_factor": 464.2353052525536,
+      "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+      "state_hash": "sha256:ef00d5d62403b66698530bec4ebe9c4c846e896b91c2b9df7e91e9adc37b5db2",
+      "step_index": 28
+    },
+    "initial_checkpoint": {
+      "case_id": "coupled_two_dof_shallow_arch_vector_arc_length",
+      "current_arc_length_m": 0.08,
+      "free_displacements_m": [
+        0.0,
+        0.0
+      ],
+      "load_factor": 0.0,
+      "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+      "previous_tangent_displacements": null,
+      "previous_tangent_load_factor": null,
+      "schema_version": "structural-analysis-vector-arc-length-checkpoint.v1",
+      "state_hash": "sha256:2d9766729f3e6f6f1f5d3ffefb695ca9aaf302de823c4a16596999e78b9ef0ae",
+      "step_index": 0
+    },
+    "load_linearization_formula": "J_u=partial_F_internal/partial_u;load_rhs=reference_load",
+    "metrics": {
+      "accepted_step_count": 28,
+      "claim_boundary": "This contract covers a multi-DOF arc-length kernel with an explicitly bound equilibrium linearization and tangent linear-solver profile; it is not a frame/shell formulation, Lee-frame evidence, production material-geometric coupling, production sparse HIP parity, or G1 closure.",
+      "contract_pass": true,
+      "descending_load_branch_observed": true,
+      "equation_count": 2,
+      "equilibrium_linearization_mode": "proportional_reference_load",
+      "external_tangent_solve_count": 0,
+      "external_tangent_solver_contract_hash": null,
+      "fallback_count": 0,
+      "final_free_displacements_m": [
+        0.4514909951427356,
+        0.15802184829995747
+      ],
+      "final_load_factor": 54.21822991019308,
+      "maximum_accepted_constraint_residual_m2": 1.0391860982839063e-14,
+      "maximum_augmented_condition_number": 16796052.61882742,
+      "maximum_checkpoint_residual_inf_norm_kn": 3.026734418654087e-11,
+      "maximum_external_tangent_explicit_residual_inf_norm_kn": 0.0,
+      "maximum_load_factor": 54.21822991019308,
+      "minimum_load_factor": -29.49965949971664,
+      "monitor_displacement_monotonic_in_target_direction": true,
+      "negative_load_factor_observed": true,
+      "regularization_count": 0,
+      "rehardening_load_branch_observed": true,
+      "rejected_step_count": 1,
+      "rollback_exact": true,
+      "tangent_linear_solver_mode": "dense_augmented_matrix",
+      "tangent_linear_solver_profile": "numpy_dense_augmented_newton_solve.v1",
+      "tangent_solve_residual_tolerance_kn": 1e-10,
+      "target_monitor_displacement_reached": true
+    },
+    "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+    "reference_load_kn": [
+      1.0,
+      0.0
+    ],
+    "residual_formula": "F_internal(free_displacements)-load_factor*reference_load",
+    "schema_version": "structural-analysis-vector-arc-length.v1",
+    "status": "ready",
+    "terminal_reason": "target_monitor_displacement_reached"
+  },
+  "status": "partial",
+  "truth_basis": "analytic_coupled_two_dof_conservative_potential",
+  "verification": {
+    "checkpoint_restart_exact": true,
+    "deterministic_replay_exact": true,
+    "exact_scalar_reduction_gate_passed": true,
+    "final_checkpoint_state_hash": "sha256:ef00d5d62403b66698530bec4ebe9c4c846e896b91c2b9df7e91e9adc37b5db2",
+    "limit_point_gate_passed": true,
+    "path_contract_hash": "sha256:235d5a381965d51288e612ac85cbfa36b0d2bed3fce4fd26d6da353421c0615a",
+    "path_gate_passed": true,
+    "restart_checkpoint_state_hash": "sha256:a815cb71f25cc03bba41bf0299582c2cabe81216358d62507027c9ed33168af4",
+    "restarted_final_checkpoint_state_hash": "sha256:ef00d5d62403b66698530bec4ebe9c4c846e896b91c2b9df7e91e9adc37b5db2",
+    "rollback_evidence_passed": true,
+    "tangent_energy_finite_difference_gate_passed": true
+  }
+}

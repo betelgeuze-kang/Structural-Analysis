@@ -1,11 +1,12 @@
 import { expect, test, type Page } from '@playwright/test'
 
-// End-to-end smoke for the Workbench v2 route. The runner builds the app and
-// serves dist; the viewer iframe src is asserted structurally (the viewer is
-// hosted at deploy time).
+// End-to-end smoke for the Workbench v2 product shell. The runner builds and
+// serves dist; the embedded Viewer must resolve to its emitted production entry,
+// not to the server's Workbench SPA fallback.
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 const routeUrl = `${baseUrl}/#/workbench-v2`
+const defaultUrl = `${baseUrl}/`
 
 test.setTimeout(60000)
 
@@ -13,6 +14,35 @@ async function open(page: Page): Promise<void> {
   await page.goto(routeUrl, { waitUntil: 'load', timeout: 30000 })
   await page.locator('[data-wb2-root]').waitFor({ state: 'visible', timeout: 15000 })
 }
+
+test.describe('Product surface routing', () => {
+  test('renders Workbench v2 at the default root', async ({ page }) => {
+    await page.goto(defaultUrl, { waitUntil: 'load', timeout: 30000 })
+    await expect(page.locator('[data-wb2-root]')).toBeVisible()
+    await expect(page.locator('[data-legacy-surface]')).toHaveCount(0)
+    const eagerLegacyChunks = await page.evaluate(() => performance.getEntriesByType('resource')
+      .map((entry) => entry.name)
+      .filter((name) => /\/assets\/App-[^/]+\.js(?:\?|$)/.test(name)))
+    expect(eagerLegacyChunks).toHaveLength(0)
+  })
+
+  test('switches to the compatibility desk only through the explicit legacy link', async ({ page }) => {
+    await page.goto(defaultUrl, { waitUntil: 'load', timeout: 30000 })
+    await page.locator('[data-wb2-legacy-link]').click()
+    await expect(page.locator('[data-legacy-surface]')).toBeVisible()
+    await expect(page.locator('.legacy-surface-route__notice')).toContainText(/legacy evidence desk/i)
+    await expect(page.locator('[data-wb2-root]')).toHaveCount(0)
+    await expect(page).toHaveURL(/#\/legacy$/)
+    const loadedLegacyChunks = await page.evaluate(() => performance.getEntriesByType('resource')
+      .map((entry) => entry.name)
+      .filter((name) => /\/assets\/App-[^/]+\.js(?:\?|$)/.test(name)))
+    expect(loadedLegacyChunks).toHaveLength(1)
+
+    await page.getByRole('link', { name: /return to workbench v2/i }).click()
+    await expect(page.locator('[data-wb2-root]')).toBeVisible()
+    await expect(page.locator('[data-legacy-surface]')).toHaveCount(0)
+  })
+})
 
 test.describe('Workbench v2 — shell & demo case', () => {
   test('renders the DEMO data-mode badge and claim boundary', async ({ page }) => {
@@ -246,6 +276,10 @@ test.describe('Workbench v2 — viewer, mobile, a11y', () => {
     await open(page)
     const iframe = page.locator('.wb2-viewport-iframe')
     await expect(iframe).toHaveAttribute('src', /structure-viewer\/index\.html/)
+    const viewer = page.frameLocator('.wb2-viewport-iframe')
+    await expect(viewer.locator('body[data-si-shell="product"]')).toBeVisible({ timeout: 30000 })
+    await expect(viewer.locator('body[data-viewer-workflow="model"]')).toBeVisible()
+    await expect(viewer.locator('[data-wb2-root]')).toHaveCount(0)
   })
 
   test('is keyboard operable and has a skip link on mobile', async ({ page }) => {

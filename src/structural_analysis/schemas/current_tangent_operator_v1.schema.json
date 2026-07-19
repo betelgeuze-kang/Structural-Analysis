@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/current_tangent_operator_v1.schema.json",
+  "title": "Backend-neutral current-tangent operator contract v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_hash",
+    "profile",
+    "case_id",
+    "residual_formula_hash",
+    "source_action_contract",
+    "array_bundle_hash",
+    "dimensions",
+    "units",
+    "evaluation_contract",
+    "array_descriptors",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-current-tangent-operator.v1"
+    },
+    "contract_hash": {"$ref": "#/$defs/sha256"},
+    "profile": {
+      "const": "reference_csr_load_frame_delta_finite_chord_axial.v1"
+    },
+    "case_id": {"type": "string", "minLength": 1},
+    "residual_formula_hash": {"$ref": "#/$defs/sha256"},
+    "source_action_contract": {"type": "string", "minLength": 1},
+    "array_bundle_hash": {"$ref": "#/$defs/sha256"},
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "equation_count",
+        "global_dof_count",
+        "reference_nnz",
+        "frame_element_count",
+        "geometry_element_count"
+      ],
+      "properties": {
+        "equation_count": {"type": "integer", "minimum": 1},
+        "global_dof_count": {"type": "integer", "minimum": 1},
+        "reference_nnz": {"type": "integer", "minimum": 1},
+        "frame_element_count": {"type": "integer", "minimum": 0},
+        "geometry_element_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["force", "displacement", "tangent_action", "load_factor"],
+      "properties": {
+        "force": {"const": "N"},
+        "displacement": {"const": "m"},
+        "tangent_action": {"const": "N/m"},
+        "load_factor": {"const": "dimensionless"}
+      }
+    },
+    "evaluation_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_expression",
+        "reference_evaluator",
+        "state_embedding",
+        "direction_embedding",
+        "reference_csr_action",
+        "frame_load_delta_action",
+        "geometry_action",
+        "element_scatter",
+        "output_order"
+      ],
+      "properties": {
+        "action_expression": {
+          "const": "K_reference_ff*v_f + load_factor*K_frame_delta*v_global + K_finite_chord_axial_correction(u_global)*v_global"
+        },
+        "reference_evaluator": {
+          "const": "numpy_fp64_array_formula_reference.v1"
+        },
+        "state_embedding": {
+          "const": "background_global_displacements_plus_free_scatter"
+        },
+        "direction_embedding": {
+          "const": "zero_global_vector_plus_free_scatter"
+        },
+        "reference_csr_action": {
+          "const": "row_major_stored_entry_numpy_add_reduceat_fp64"
+        },
+        "frame_load_delta_action": {
+          "const": "load_factor_times_prepacked_12x12_stiffness_delta"
+        },
+        "geometry_action": {
+          "const": "stable_finite_chord_conservative_axial_correction_tangent"
+        },
+        "element_scatter": {
+          "const": "element_then_local_dof_numpy_add_at"
+        },
+        "output_order": {"const": "free_global_dofs"}
+      }
+    },
+    "array_descriptors": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {"$ref": "#/$defs/array_descriptor"}
+    },
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "immutable_backend_neutral_parent_arrays",
+        "cpu_reference_evaluator",
+        "hip_execution",
+        "cpu_hip_numerical_parity",
+        "cross_platform_bit_identity",
+        "performance",
+        "production_nonlinear_solver",
+        "g1_closure"
+      ],
+      "properties": {
+        "description": {"type": "string", "minLength": 1},
+        "immutable_backend_neutral_parent_arrays": {"const": true},
+        "cpu_reference_evaluator": {"const": true},
+        "hip_execution": {"const": false},
+        "cpu_hip_numerical_parity": {"const": false},
+        "cross_platform_bit_identity": {"const": false},
+        "performance": {"const": false},
+        "production_nonlinear_solver": {"const": false},
+        "g1_closure": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "array_descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_length",
+        "data_hash",
+        "content_hash"
+      ],
+      "properties": {
+        "name": {
+          "enum": [
+            "reference_row_pointer",
+            "reference_column_indices",
+            "reference_values_n_per_m",
+            "free_global_dofs",
+            "background_global_displacements_m",
+            "frame_dofs",
+            "frame_stiffness_delta_n_per_m",
+            "geometry_dofs",
+            "geometry_relative_translation_operators",
+            "geometry_reference_chords_m",
+            "geometry_reference_lengths_m",
+            "geometry_axial_stiffness_n_per_m"
+          ]
+        },
+        "dtype": {"enum": ["<i8", "<f8"]},
+        "shape": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": {"type": "integer", "minimum": 0}
+        },
+        "layout": {"const": "C"},
+        "byte_length": {"type": "integer", "minimum": 0},
+        "data_hash": {"$ref": "#/$defs/sha256"},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

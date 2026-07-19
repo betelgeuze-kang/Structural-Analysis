@@ -15,13 +15,13 @@ Key current values:
 | Area | Current value |
 | --- | --- |
 | Product roadmap | blocked |
-| Evidence progress | 65.4% |
-| Stage average | 55.3% |
-| Ready stages | 1/8 |
-| Product snapshot blockers | 41 |
-| PM milestones | 5/5 |
-| PM release areas | 13/16 |
-| Developer Preview final gates | 6/9 |
+| Evidence progress | 28.8% |
+| Stage average | 26.1% |
+| Ready stages | 0/8 |
+| Product snapshot blockers | 118 |
+| PM milestones | 2/5 |
+| PM release areas | 4/16 |
+| Developer Preview final gates | 5/9 |
 | G1 direct residual terminal gate | ready |
 | G1 full-load/HIP/Newton lane | not ready |
 | Paid pilot ready | false |
@@ -34,7 +34,7 @@ Key current values:
 | ---: | --- | --- | --- | --- |
 | 1 | Structural scope release-surface decision pack | `docs/pm/local-free-structural-scope-release-surface-decision-pack.md` | Prepare release-surface owner decisions for quarantined non-structural artifacts. | Owner approval and cleanup execution |
 | 2 | PM release blocker closure pack | `docs/pm/local-free-pm-release-blocker-closure-pack.md` | Prepare CI/UX/license release-area blocker closure. | CI runner, UX observer, legal/product approval |
-| 3 | Developer Preview final-gate pack | `docs/pm/local-free-developer-preview-final-gate-pack.md` | Prepare DP `6/9 -> 9/9` closure path. | Medium model execution, Windows replay, UX observation |
+| 3 | Developer Preview final-gate pack | `docs/pm/local-free-developer-preview-final-gate-pack.md` | Prepare DP `5/9 -> 9/9` closure path. | Medium model execution, IFC acquisition/checksum/import execution, Windows replay, UX observation |
 | 4 | Evidence intake template pack | `docs/pm/local-free-evidence-intake-template-pack.md` | Define license, UX, customer shadow, and EB evidence intake requirements. | Legal, UX, customer, external benchmark owners |
 | 5 | G1 closure contract/runbook | `docs/engineering/local-free-g1-closure-contract-runbook.md` | Define G1 residual/Jacobian/full-load/HIP/material acceptance contract. | Solver execution and HIP runtime |
 | 6 | Claim-boundary audit pack | `docs/pm/local-free-claim-boundary-audit-pack.md` | Prevent over-promotion in README/current-state/roadmap wording. | Documentation review |
@@ -60,13 +60,14 @@ Target outcome:
 
 1. Use `local-free-developer-preview-final-gate-pack.md`.
 2. Select five medium models and attach PASS/approved REVIEW receipts.
-3. Attach Linux and Windows replay receipts.
-4. Attach human new-user workflow observation.
-5. Regenerate Developer Preview RC status and readiness.
+3. Acquire/checksum the selected IFC files and attach import-health/negative silent-loss execution receipts.
+4. Attach Linux and Windows replay receipts.
+5. Attach human new-user workflow observation.
+6. Regenerate Developer Preview RC status and readiness.
 
 Target outcome:
 
-- Developer Preview final gates: `6/9 -> 9/9`
+- Developer Preview final gates: `5/9 -> 9/9`
 
 ### Phase 3 — PM release-area evidence closure
 
@@ -79,7 +80,7 @@ Target outcome:
 
 Target outcome:
 
-- PM release areas: `13/16 -> 16/16`
+- PM release areas: `4/16 -> 16/16`
 
 ### Phase 4 — G1 solver closure execution
 

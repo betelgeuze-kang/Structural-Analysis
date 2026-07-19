@@ -238,8 +238,9 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
         "completion_ratio": 0.6667,
         "claim_boundary": (
             "A/B/F slice tracking only reports current DP final-gate state. "
-            "It does not create missing human observation, benchmark, or "
-            "platform replay evidence and does not promote Developer Preview."
+            "It does not acquire IFC inputs or create missing import execution, "
+            "human observation, benchmark, or platform replay evidence and does "
+            "not promote Developer Preview."
         ),
     }
     nearest = {
@@ -350,6 +351,62 @@ def test_owner_packet_maps_blocked_developer_preview_gates(tmp_path: Path) -> No
     assert packets["new_user_core_workflow_observation_passed"]["human_observation_evidence_policy"][
         "closure_rule"
     ] == "Close only from a real human 30-minute new-user sample."
+
+
+def test_owner_packet_maps_blocked_silent_import_loss_gate(tmp_path: Path) -> None:
+    rc_status = tmp_path / "developer_preview_rc_status.json"
+    action_register = tmp_path / "docs/developer_preview_final_gate_action_register.md"
+    _write_json(
+        rc_status,
+        {
+            "schema_version": "developer-preview-rc-status.v1",
+            "status": "blocked",
+            "contract_pass": False,
+            "final_gate_count": 1,
+            "final_gate_pass_count": 0,
+            "final_gates": [
+                {
+                    "item": "silent_import_loss_zero",
+                    "status": "blocked",
+                    "contract_pass": False,
+                    "blockers": [
+                        "ifc_import_health_execution_count_below_required:0/10",
+                        "source_file_not_acquired",
+                        "source_sha256_missing",
+                    ],
+                    "evidence": "phase3-ifc.json; phase6-ifc.json",
+                }
+            ],
+        },
+    )
+    _write_text(action_register, "# Developer Preview Final Gate Action Register\n")
+
+    payload = owner_packet.build_owner_packet(
+        repo_root=tmp_path,
+        rc_status_path=rc_status,
+        action_register_path=action_register,
+    )
+
+    assert payload["status"] == "ready_for_owner_review"
+    assert payload["contract_pass"] is True
+    assert payload["blocked_gate_items"] == ["silent_import_loss_zero"]
+    assert payload["blockers"] == []
+    packet = payload["owner_packets"][0]
+    assert packet["owner"] == "ifc_import_validation_owner"
+    assert packet["closure_decision_required"] == (
+        "technical_IFC_import_and_silent_loss_evidence_passes"
+    )
+    assert "per_file_sha256_bindings" in packet["required_owner_evidence"]
+    assert "expected_import_contracts_without_execution_receipts" in packet[
+        "prohibited_substitutes"
+    ]
+    assert "python3 scripts/build_phase6_silent_import_loss_status.py --check" in packet[
+        "verification_commands"
+    ]
+    assert payload["nearest_abf_slice_summary"]["blocked_slice_ids"] == ["A", "B", "F"]
+    slice_b = next(row for row in payload["nearest_abf_slice"] if row["slice_id"] == "B")
+    assert slice_b["ready_for_dp_final_gate"] is False
+    assert slice_b["owner"] == "ifc_import_validation_owner"
 
 
 def test_owner_packet_blocks_missing_action_register(tmp_path: Path) -> None:
