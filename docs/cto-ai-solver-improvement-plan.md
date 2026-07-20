@@ -179,8 +179,9 @@ corotational elastic frame kernel [implemented]
     → basic-deformation protocol [implemented]
     → stateful axial-curvature section [implemented independently]
     → corotational fiber-beam [implemented element boundary]
-    → global assembly [next]
-    → load control and arc length
+    → global assembly [implemented dense kernel boundary]
+    → consistent Newton and load control [next]
+    → adaptive stepping and arc length
 ```
 
 The extracted stateless boundary publishes the three current-chord basic
@@ -201,9 +202,18 @@ nonlinear tangent checks, cyclic RC state evolution, deterministic replay, and
 rollback-safe unchanged-parent trials. See
 `docs/stateful-corotational-fiber-beam2d.md`.
 
-Multi-element global assembly, solver-owned checkpoint ancestry, load control,
-arc length, persisted restart, external member validation, and G1 closure
-remain open.
+The additive corotational frame assembly now gathers/scatters those exact member
+responses across shared `[ux, uy, theta]` DOFs, retains separate material and
+geometric global tangents, applies the existing length-valued rotation scaling,
+and validates hash-addressed frame checkpoints against exact member displacement
+bytes. Its focused boundary covers shared-node accumulation, a same-parent
+nonlinear global Jacobian finite difference, sequential multi-turn rigid motion
+for every member, deterministic replay, and unchanged-parent trial branching.
+See `docs/stateful-corotational-fiber-frame2d-global-assembly.md`.
+
+Solver-owned positive-epoch acceptance, consistent Newton/line search, adaptive
+load control, arc length, checkpoint-chain persistence, external member
+validation, and G1 closure remain open.
 
 Required tests include finite rigid rotation, energy-gradient and tangent checks, P-Delta portal response, cyclic RC members, restart/replay, and snap-through paths.
 

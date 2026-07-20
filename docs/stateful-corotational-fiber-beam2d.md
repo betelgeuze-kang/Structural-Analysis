@@ -13,10 +13,13 @@ element now owns one bounded material-geometric response with
 - committed chord-angle continuity across the principal `atan2` branch;
 - canonical element-state bytes and deterministic state hashes.
 
-This is an element boundary, not a multi-element nonlinear frame solver. It
-does not yet provide global topology/constraint assembly, a global checkpoint
-chain, load control, arc length, persisted restart artifacts, external cyclic
-member validation, mesh-objectivity evidence, or G1 closure.
+This remains an element boundary, not a multi-element nonlinear frame solver.
+The separate
+[`StatefulCorotationalFiberFrame2DProblem`](stateful-corotational-fiber-frame2d-global-assembly.md)
+now supplies bounded dense topology/constraint assembly and a frame checkpoint
+type. Convergence-gated checkpoint acceptance, a global checkpoint chain, load
+control, arc length, persisted restart artifacts, external cyclic member
+validation, mesh-objectivity evidence, and G1 closure remain open.
 
 ## Kinematic and constitutive chain
 
@@ -81,7 +84,7 @@ Focused tests establish
 - response-parent binding, state/kinematic consistency, immutability, and
   fail-closed input handling.
 
-The next E-wave slice is global assembly of these elements with explicit
-constraints and committed checkpoint ancestry. P-Delta portal, cyclic member
-reference, restart artifacts, and snap-through paths remain later acceptance
-gates.
+The next E-wave slice is nonlinear solution control over the new global
+assembly, including solver-owned accepted-checkpoint transitions and exact
+failed-step rollback. P-Delta portal, cyclic member reference, restart
+artifacts, and snap-through paths remain later acceptance gates.
