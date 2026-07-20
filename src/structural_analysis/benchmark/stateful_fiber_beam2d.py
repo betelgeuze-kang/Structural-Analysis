@@ -36,7 +36,9 @@ STATEFUL_FIBER_BEAM2D_CLAIM_BOUNDARY = (
     "transformation, multi-element assembly, shear deformation, torsion, "
     "geometric nonlinearity, general plastic-hinge or distributed-plasticity "
     "formulations, mesh objectivity, external benchmarks, production sparse "
-    "or ROCm/HIP execution, full-building equilibrium, or G1 closure."
+    "or ROCm/HIP execution, full-building equilibrium, or G1 closure. The "
+    "element state has no higher-level parent hash and is not an authoritative "
+    "restart chain; diagnostic history acceptance is not a product commit path."
 )
 
 _FREE_TIP_DOFS = (3, 4, 5)
@@ -691,9 +693,10 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
         target_tip_load=rollback_truth.internal_force_local[list(_FREE_TIP_DOFS)],
         config=FiberBeamCantileverNewtonConfig(maximum_iterations=0),
     )
+    nonlinear_parent = element.initial_state()
     nonlinear = element.integrate(
         element.uniform_generalized_strain_displacements(-3.0e-4, 6.0e-3),
-        element.initial_state(),
+        nonlinear_parent,
     )
     deterministic_replay_exact = first == repeated
     newton_gate = bool(
@@ -729,6 +732,14 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
             state.step_index == 1 for state in nonlinear.state.integration_point_states
         )
     )
+    section_parent_binding_gate = all(
+        response.parent_state_hash == parent.state_hash
+        for response, parent in zip(
+            nonlinear.section_responses,
+            nonlinear_parent.integration_point_states,
+            strict=True,
+        )
+    )
     contract_pass = bool(
         elastic["pass"] is True
         and rigid_body["pass"] is True
@@ -742,6 +753,7 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
         and rollback_gate
         and deterministic_replay_exact
         and gauss_state_gate
+        and section_parent_binding_gate
     )
     return {
         "schema_version": STATEFUL_FIBER_BEAM2D_BENCHMARK_SCHEMA_VERSION,
@@ -802,6 +814,7 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
             ),
             "damped_line_search_solution_error_inf_norm": (damped_solution_error),
             "gauss_point_state_coupling_passed": gauss_state_gate,
+            "section_response_parent_binding_passed": (section_parent_binding_gate),
             "deterministic_replay_exact": deterministic_replay_exact,
             "forced_failure_rollback_exact": rollback_gate,
             "fallback_count": 0,
@@ -827,6 +840,9 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
                 and damped_line_search_gate
                 and rollback_gate
             ),
+            "authoritative_restart_chain": False,
+            "product_commit_path": False,
+            "generalized_axial_curvature_section_protocol": False,
             "coordinate_transformed_general_frame": False,
             "multi_element_global_assembly": False,
             "shear_deformation_or_torsion": False,
@@ -839,6 +855,10 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
             "g1_closure": False,
         },
         "blockers_remaining": [
+            "element_state_parent_hash_and_checkpoint_epoch_not_connected",
+            "diagnostic_history_is_not_an_authoritative_product_commit_path",
+            "generalized_axial_curvature_section_protocol_not_extracted",
+            "element_state_response_and_diagnostics_module_split_pending",
             "local_to_global_coordinate_transformation_not_connected",
             "multi_element_global_assembly_not_connected",
             "shear_deformation_and_torsion_not_implemented",

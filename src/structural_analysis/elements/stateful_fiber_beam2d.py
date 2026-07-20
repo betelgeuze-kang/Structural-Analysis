@@ -403,6 +403,11 @@ class StatefulFiberBeam2D:
             strain_displacement = self.strain_displacement_matrix(xi)
             generalized = strain_displacement @ local
             response = self.section.integrate(generalized, parent)
+            if response.parent_state_hash != parent.state_hash:
+                raise ValueError(
+                    "section response parent_state_hash does not match "
+                    "integration-point parent"
+                )
             factor = weight * jacobian
             internal_force += (strain_displacement.T @ response.resultants) * factor
             tangent += (
@@ -547,6 +552,13 @@ def integrate_stateful_fiber_beam2d_history(
     *,
     initial_state: StatefulFiberBeam2DState | None = None,
 ) -> dict[str, Any]:
+    """Run non-authoritative diagnostic history with implicit state acceptance.
+
+    This helper exists only for the bounded cyclic benchmark. Product commits
+    must instead pass explicit residual, increment, ancestry, and rollback
+    gates in a solver/checkpoint layer.
+    """
+
     path = tuple(
         _local_vector(row, name="local_displacement_path row")
         for row in local_displacement_path

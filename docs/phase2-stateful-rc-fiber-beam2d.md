@@ -58,8 +58,18 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
 
 The finite-difference probe evaluates every perturbation from the identical
 immutable element parent, which in turn holds the immutable parent state for
-each Gauss-point section. Newton trials likewise remain uncommitted until both
-scaled residual and increment gates pass.
+each Gauss-point section. Every section response is rejected unless its
+`parent_state_hash` matches that exact integration-point parent. Newton trials
+likewise remain uncommitted until both scaled residual and increment gates
+pass.
+
+The cyclic history helper is a non-authoritative diagnostic with implicit
+state acceptance. It is not a product commit or restart path. Before adding
+coordinate transformation or multi-element assembly, the tracked extraction
+work is to split state/serialization, response, and diagnostics; introduce an
+axial-curvature section protocol instead of the exact RC-section dependency;
+and bind element plus integration-point state into a checkpoint bundle carrying
+a parent hash and epoch.
 
 ## Claim boundary
 
@@ -68,7 +78,9 @@ local-to-global transformation, multi-element global assembler, shear or
 torsional response, geometric stiffness, corotational update, general plastic-
 hinge-length model, or validated distributed-plasticity formulation. The
 uniform-curvature manufactured path proves Gauss-point state transport; it is
-not evidence for mesh-objective localization.
+not evidence for mesh-objective localization. `StatefulFiberBeam2DState` has no
+higher-level parent hash and must not be used as an authoritative restart
+chain.
 
 No external code-to-code, published, experimental, or customer-shadow receipt
 is supplied, and no production sparse or ROCm/HIP path is connected. Full-

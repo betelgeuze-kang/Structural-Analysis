@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 
 import numpy as np
@@ -16,6 +17,9 @@ from structural_analysis.elements import (
     integrate_stateful_fiber_beam2d_history,
 )
 from structural_analysis.materials import (
+    StatefulFiberSectionResponse,
+    StatefulFiberSectionState,
+    StatefulRCFiberSection,
     make_rectangular_stateful_rc_fiber_section,
 )
 
@@ -136,6 +140,30 @@ def test_nonlinear_element_tangent_matches_same_parent_finite_difference() -> No
     assert parent == element.initial_state()
 
 
+def test_element_rejects_section_response_bound_to_wrong_parent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    element = _element()
+    parent = element.initial_state()
+    parent_bytes = parent.canonical_bytes()
+    integrate = StatefulRCFiberSection.integrate
+
+    def tampered_integrate(
+        section: StatefulRCFiberSection,
+        generalized_strain: object,
+        committed_state: StatefulFiberSectionState,
+    ) -> StatefulFiberSectionResponse:
+        response = integrate(section, generalized_strain, committed_state)
+        return replace(response, parent_state_hash="sha256:" + "0" * 64)
+
+    monkeypatch.setattr(StatefulRCFiberSection, "integrate", tampered_integrate)
+
+    with pytest.raises(ValueError, match="section response parent_state_hash"):
+        element.integrate(np.zeros(6), parent)
+
+    assert parent.canonical_bytes() == parent_bytes
+
+
 def test_cyclic_element_history_updates_gauss_states_and_energy_exactly() -> None:
     element = _element()
     generalized_path = (
@@ -186,11 +214,15 @@ def test_beam_benchmark_replays_newton_and_keeps_claims_bounded() -> None:
     assert verification["damped_line_search_minimum_alpha"] <= 0.125
     assert verification["damped_line_search_solution_error_inf_norm"] <= 1.0e-10
     assert verification["gauss_point_state_coupling_passed"] is True
+    assert verification["section_response_parent_binding_passed"] is True
     assert verification["deterministic_replay_exact"] is True
     assert verification["forced_failure_rollback_exact"] is True
     assert verification["fallback_count"] == 0
     assert verification["regularization_count"] == 0
     assert first["claims"]["bounded_stateful_rc_fiber_beam2d_element"] is True
+    assert first["claims"]["authoritative_restart_chain"] is False
+    assert first["claims"]["product_commit_path"] is False
+    assert first["claims"]["generalized_axial_curvature_section_protocol"] is False
     assert first["claims"]["multi_element_global_assembly"] is False
     assert first["claims"]["geometric_nonlinearity"] is False
     assert first["claims"]["general_plastic_hinge_or_distributed_plasticity"] is False
