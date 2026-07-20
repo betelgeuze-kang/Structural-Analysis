@@ -84,12 +84,14 @@ The chain therefore grants no:
 - design or code authority;
 - release or commercial authority.
 
-## Follow-up
+## J4 composition
 
-PR-J4 must compose this material projection chain with PR-J3's exact nonlinear
-kinematic-state chain. It must require the projection chain's solver-state hash
-sequence to equal the J3 committed-state hashes, and it must bind the terminal
-MaterialStateBundle without granting terminal or ResultIR authority.
+PR-J4 now composes this chain with PR-J3's exact nonlinear kinematic-state
+chain in the
+[`FiberFrameNonlinearExecutionStateBinding`](fiber-frame-nonlinear-execution-state-binding.md).
+Every projection's solver-state hash must equal its matching J3 committed-state
+hash. The outer binding also fixes the J2 physical EquationScaling identity and
+terminal MaterialStateBundle without granting terminal or ResultIR authority.
 
 ## Focused validation
 

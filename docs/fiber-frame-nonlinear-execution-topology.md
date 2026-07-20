@@ -26,7 +26,7 @@ path:
 PR-J1  nonlinear six-DOF topology + solver-coordinate scaling
 PR-J2  physical force/moment EquationScaling + residual trace
 PR-J3  nonlinear kinematic-state chain
-PR-J4  bind the MaterialStateProjectionChain
+PR-J4  bind scaled execution + kinematic + MaterialStateProjectionChain
 ```
 
 Existing ExecutionPlan v1, StateIR v1, golden hashes, and authority remain
@@ -192,13 +192,15 @@ J1 grants no authority over:
 - design or code compliance;
 - release readiness or commercial use.
 
-PR-J3 now introduces the separate
+PR-J3 introduces the separate
 [`FiberFrameNonlinearKinematicStateChain`](fiber-frame-nonlinear-kinematic-state-chain.md).
 It retains exactly one committed canonical displacement state per checkpoint and
 replays every positive-epoch accepted → transient-trial → committed lifecycle.
 It does not emit StateIR v1 or reinterpret its `stateless_linear_elastic`
-profile as the complete nonlinear state. PR-J4 then binds that exact kinematic
-chain to PR #132's material-state projection chain.
+profile as the complete nonlinear state. PR-J4 now binds that exact kinematic
+chain, the J2 scaling identity, and PR #132's material-state projection chain in
+the
+[`FiberFrameNonlinearExecutionStateBinding`](fiber-frame-nonlinear-execution-state-binding.md).
 
 ## Focused validation
 
