@@ -46,7 +46,9 @@ committed bundle           exact original
 Opening a trial requires identical entry identity and order. Each trial entry is
 parented by the corresponding accepted entry data hash. Commit retains the exact
 trial bytes while binding a committed solver-state hash. Rollback returns the
-same accepted object.
+same accepted object. Default trial and committed IDs include the direct parent
+bundle digest rather than recursively embedding parent IDs, so they remain
+within the stable-ID bound across long epoch chains.
 
 ## Fail-closed behavior
 
@@ -56,6 +58,7 @@ The contract rejects:
 - unknown manifest fields;
 - integral floats in integer fields;
 - stale or mismatched entry-parent hashes;
+- non-contiguous or order-mismatched imported entry indices;
 - entity, integration-point, material type, schema, or ordering drift;
 - descriptor/byte length or hash mismatch;
 - non-initial bundles without parents;

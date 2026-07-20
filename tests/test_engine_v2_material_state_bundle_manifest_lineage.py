@@ -77,6 +77,18 @@ def _rehash(manifest: dict) -> dict:
         unsigned = dict(entry)
         unsigned.pop("content_hash", None)
         entry["content_hash"] = canonical_hash(unsigned)
+    payload["integration_point_order_hash"] = canonical_hash(
+        [
+            {
+                "index": entry["index"],
+                "entity_id": entry["entity_id"],
+                "integration_point_id": entry["integration_point_id"],
+                "material_type_id": entry["material_type_id"],
+                "material_schema_version": entry["material_schema_version"],
+            }
+            for entry in payload["entries"]
+        ]
+    )
     unsigned_bundle = dict(payload)
     unsigned_bundle.pop("bundle_hash", None)
     payload["bundle_hash"] = canonical_hash(unsigned_bundle)
@@ -119,9 +131,7 @@ def test_coherently_rehashed_initial_lifecycle_tamper_is_rejected(mutator) -> No
     [
         lambda payload: payload.update({"epoch": 0}),
         lambda payload: payload.update({"parent_bundle_hash": None}),
-        lambda payload: payload["entries"][0].update(
-            {"parent_state_data_hash": None}
-        ),
+        lambda payload: payload["entries"][0].update({"parent_state_data_hash": None}),
     ],
 )
 def test_coherently_rehashed_noninitial_lifecycle_tamper_is_rejected(mutator) -> None:
@@ -140,3 +150,15 @@ def test_valid_initial_and_trial_manifests_still_validate() -> None:
     trial = _trial_manifest()
     assert validate_material_state_bundle_manifest(initial) == initial
     assert validate_material_state_bundle_manifest(trial) == trial
+
+
+def test_coherently_rehashed_manifest_rejects_noncontiguous_entry_index() -> None:
+    manifest = _initial_manifest()
+    manifest["entries"][0]["index"] = 1
+    tampered = _rehash(manifest)
+
+    with pytest.raises(
+        MaterialStateBundleError,
+        match="material_state_entry_index_mismatch",
+    ):
+        validate_material_state_bundle_manifest(tampered)
