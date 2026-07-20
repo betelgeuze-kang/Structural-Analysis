@@ -192,11 +192,13 @@ J1 grants no authority over:
 - design or code compliance;
 - release readiness or commercial use.
 
-PR-J3 must introduce the nonlinear kinematic-state chain. It may reference
-StateIR v1 only as an optional canonical displacement carrier and must never
-reinterpret its `stateless_linear_elastic` profile as the complete nonlinear
-state. PR-J4 then binds that kinematic chain to PR #132's material-state
-projection chain.
+PR-J3 now introduces the separate
+[`FiberFrameNonlinearKinematicStateChain`](fiber-frame-nonlinear-kinematic-state-chain.md).
+It retains exactly one committed canonical displacement state per checkpoint and
+replays every positive-epoch accepted → transient-trial → committed lifecycle.
+It does not emit StateIR v1 or reinterpret its `stateless_linear_elastic`
+profile as the complete nonlinear state. PR-J4 then binds that exact kinematic
+chain to PR #132's material-state projection chain.
 
 ## Focused validation
 

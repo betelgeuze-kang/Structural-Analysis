@@ -78,6 +78,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_stateful_fiber_frame2d.py" in targets
     assert "tests/test_stateful_fiber_frame2d_execution_topology.py" in targets
     assert "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py" in targets
+    assert "tests/test_stateful_fiber_frame2d_kinematic_state_chain.py" in targets
     assert "tests/test_stateful_fiber_frame2d_material_state_bundle.py" in targets
     assert (
         "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py"

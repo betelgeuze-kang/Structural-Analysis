@@ -29,10 +29,11 @@ projected = create_fiber_frame_material_state_projection_chain(
 )
 ```
 
-Exactly one solver `StateIR` hash is required for every retained checkpoint.
-The solver-state sequence is not inferred from checkpoint bytes because the
-bounded frame checkpoint currently uses a three-DOF-per-node solver state while
-Engine v2 StateIR compilation is a separate follow-up contract.
+Exactly one solver-state hash is required for every retained checkpoint. PR-J3's
+typed nonlinear kinematic-state chain now supplies that exact hash sequence.
+The hashes are not Engine v2 StateIR v1 claims: StateIR v1 remains a
+`stateless_linear_elastic` contract and may only be used later as an explicitly
+optional canonical displacement carrier.
 
 ## Bound identities
 
@@ -85,10 +86,10 @@ The chain therefore grants no:
 
 ## Follow-up
 
-The next adapter should compile each checkpoint into an exact Engine v2
-`StateIR` under one versioned `ExecutionPlan`. Its equation-scaling contract must
-bind the frame's `rotation_coordinate_scale_m` so force and moment equations are
-not judged by an unscaled mixed-unit residual norm.
+PR-J4 must compose this material projection chain with PR-J3's exact nonlinear
+kinematic-state chain. It must require the projection chain's solver-state hash
+sequence to equal the J3 committed-state hashes, and it must bind the terminal
+MaterialStateBundle without granting terminal or ResultIR authority.
 
 ## Focused validation
 
