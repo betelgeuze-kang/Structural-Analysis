@@ -21,6 +21,8 @@ The project is not presented as a commercial-code replacement. Capabilities are 
 - Detached canonical neutral-model loading and validation.
 - Public linear-static, modal, linear-buckling, and model-health paths.
 - A bounded public nonlinear two-bar truss Python API and CLI for the verified symmetric material-geometric Newton slice.
+- A bounded public planar serial-cantilever RC fiber-frame API/CLI with exact
+  checkpoint-prefix restart and J1--J5-backed engineering recovery.
 - Safe output-path handling and fail-closed unsupported-feature reporting.
 
 ### 2. Engine v2 contracts
@@ -48,9 +50,13 @@ Current merged foundations include:
 - canonical six-DOF nonlinear fiber-frame topology and solver-coordinate scaling;
 - physical force/moment equation scaling and residual traces;
 - nonlinear kinematic-state history;
-- combined kinematic/material execution-state binding.
+- combined kinematic/material execution-state binding;
+- a J5 terminal receipt, bounded nonlinear numerical-result adapter, and exact
+  recovery authority for reactions, member forces, section resultants, and
+  fiber outputs in the supported source profile.
 
-The combined execution-state contract is transport and replay infrastructure. Fiber-frame convergence and engineering results still require a separate terminal/result/recovery application adapter.
+Those authority contracts do not generalize beyond their exact fixed-chord,
+stateful RC source profile.
 
 ### 4. Reusable element kernels
 
@@ -67,7 +73,10 @@ The repository contains:
 - `SolverEpisodeIR` for trace-bound solver observations and actions;
 - a shadow-only step controller with policy/artifact/action identity binding, OOD checks, and deterministic baseline actions.
 
-Shadow proposals are recorded but not executed. No learned policy, residual correction, Jacobian correction, material-law correction, or design decision is authoritative. The next integration step is an adapter from the real fiber-frame load path into `SolverEpisodeIR` and the shadow controller.
+The real fiber-frame load path now records baseline and shadow
+`SolverEpisodeIR` observations. Shadow proposals are not executed. No learned
+policy, residual correction, Jacobian correction, material-law correction, or
+design decision is authoritative.
 
 ### 6. Verification and evidence
 
@@ -80,7 +89,8 @@ Shadow proposals are recorded but not executed. No learned policy, residual corr
 The current repository does **not** claim:
 
 - general commercial nonlinear frame/shell capability;
-- authoritative fiber-frame reactions, member forces, or fiber outputs;
+- fiber-frame reaction, member-force, section, or fiber authority outside the
+  exact bounded recovery profile;
 - mesh-objective concrete fracture;
 - general contact, cable, shell, diaphragm, release, or rigid-offset support;
 - production sparse/HIP parity for the nonlinear fiber-frame path;
@@ -91,11 +101,9 @@ The current repository does **not** claim:
 ## Immediate product critical path
 
 ```text
-merged fiber-frame topology/scaling/state binding
-    → real fiber-frame SolverEpisode adapter
-    → nonlinear terminal and ResultIR adapter
-    → exact independent engineering recovery operator
-    → bounded public RC fiber-frame API/CLI
+merged topology/scaling/state binding and SolverEpisode adapter
+    → merged nonlinear terminal, ResultIR, and exact recovery
+    → merged bounded public RC fiber-frame API/CLI
     → broader corotational and sparse-backend coverage
     → formal Level 2/3 verification evidence
 ```
@@ -113,6 +121,17 @@ Bounded public nonlinear two-bar example:
 python -m structural_analysis.api.nonlinear_truss_cli model.json \
   --out result.json \
   --report-out report.json
+```
+
+Bounded public RC fiber-frame example:
+
+```bash
+python -m structural_analysis.api.nonlinear_fiber_frame_cli \
+  examples/public_rc_fiber_frame_cantilever.json \
+  --load-steps 4 \
+  --out rc-result.json \
+  --report-out rc-report.json \
+  --checkpoint-out rc-checkpoint-chain.json
 ```
 
 Generated readiness and evidence artifacts are source-derived. Do not hand-edit them or infer a broader claim from a passing bounded benchmark.

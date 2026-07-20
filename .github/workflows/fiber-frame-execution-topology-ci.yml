@@ -3,6 +3,9 @@ name: Fiber-frame Execution Topology CI
 on:
   pull_request:
     paths:
+      - "pyproject.toml"
+      - "setup.cfg"
+      - "README.md"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py"
@@ -10,6 +13,10 @@ on:
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py"
+      - "src/structural_analysis/api/_output_integrity.py"
+      - "src/structural_analysis/api/__init__.py"
+      - "src/structural_analysis/api/nonlinear_fiber_frame.py"
+      - "src/structural_analysis/api/nonlinear_fiber_frame_cli.py"
       - "src/structural_analysis/engine_v2/contracts/nonlinear_result.py"
       - "src/structural_analysis/engine_v2/contracts/nonlinear_recovery.py"
       - "src/structural_analysis/schemas/nonlinear_numerical_result_ir_v1.schema.json"
@@ -23,6 +30,8 @@ on:
       - "tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py"
       - "tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py"
       - "tests/test_stateful_fiber_frame2d_nonlinear_recovery.py"
+      - "tests/test_public_rc_fiber_frame_api.py"
+      - "tests/test_verify_quality_gate_contract.py"
       - "tests/test_engine_v2_nonlinear_result_recovery_v1.py"
       - "tests/test_engine_v2_nonlinear_recovery_source_binding.py"
       - "tests/test_engine_v2_solver_episode_v1.py"
@@ -36,12 +45,15 @@ on:
       - "docs/fiber-frame-nonlinear-terminal-receipt.md"
       - "docs/fiber-frame-nonlinear-result-adapter.md"
       - "docs/fiber-frame-nonlinear-engineering-recovery.md"
+      - "docs/public-rc-fiber-frame.md"
+      - "examples/public_rc_fiber_frame_cantilever.json"
       - "docs/engine-v2-nonlinear-result-recovery.md"
       - "docs/fiber-frame-solver-episode-adapter.md"
       - "docs/ai-shadow-solver-controller.md"
       - "docs/cto-ai-solver-improvement-plan.md"
       - ".github/workflows/fiber-frame-execution-topology-ci.yml"
       - "scripts/check_github_actions_runner_policy.py"
+      - "scripts/verify_quality_gate.py"
 
 permissions:
   contents: read
@@ -67,6 +79,10 @@ jobs:
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py \
+            src/structural_analysis/api/_output_integrity.py \
+            src/structural_analysis/api/__init__.py \
+            src/structural_analysis/api/nonlinear_fiber_frame.py \
+            src/structural_analysis/api/nonlinear_fiber_frame_cli.py \
             src/structural_analysis/engine_v2/contracts/nonlinear_result.py \
             src/structural_analysis/engine_v2/contracts/nonlinear_recovery.py \
             src/structural_analysis/ai/__init__.py \
@@ -79,6 +95,7 @@ jobs:
             tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
             tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
             tests/test_stateful_fiber_frame2d_nonlinear_recovery.py \
+            tests/test_public_rc_fiber_frame_api.py \
             tests/test_engine_v2_solver_episode_v1.py \
             tests/test_shadow_solver_controller.py \
             tests/test_fiber_frame_solver_episode_adapter.py
@@ -90,6 +107,10 @@ jobs:
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py \
+            src/structural_analysis/api/_output_integrity.py \
+            src/structural_analysis/api/__init__.py \
+            src/structural_analysis/api/nonlinear_fiber_frame.py \
+            src/structural_analysis/api/nonlinear_fiber_frame_cli.py \
             src/structural_analysis/engine_v2/contracts/nonlinear_result.py \
             src/structural_analysis/engine_v2/contracts/nonlinear_recovery.py \
             src/structural_analysis/ai/__init__.py \
@@ -101,6 +122,7 @@ jobs:
             tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
             tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
             tests/test_stateful_fiber_frame2d_nonlinear_recovery.py \
+            tests/test_public_rc_fiber_frame_api.py \
             tests/test_fiber_frame_solver_episode_adapter.py
       - name: Compile
         run: |
@@ -112,6 +134,10 @@ jobs:
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py \
+            src/structural_analysis/api/_output_integrity.py \
+            src/structural_analysis/api/__init__.py \
+            src/structural_analysis/api/nonlinear_fiber_frame.py \
+            src/structural_analysis/api/nonlinear_fiber_frame_cli.py \
             src/structural_analysis/engine_v2/contracts/nonlinear_result.py \
             src/structural_analysis/engine_v2/contracts/nonlinear_recovery.py \
             src/structural_analysis/ai/__init__.py \
@@ -124,6 +150,7 @@ jobs:
             tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
             tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
             tests/test_stateful_fiber_frame2d_nonlinear_recovery.py \
+            tests/test_public_rc_fiber_frame_api.py \
             tests/test_engine_v2_solver_episode_v1.py \
             tests/test_shadow_solver_controller.py \
             tests/test_fiber_frame_solver_episode_adapter.py
@@ -137,6 +164,7 @@ jobs:
             tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
             tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
             tests/test_stateful_fiber_frame2d_nonlinear_recovery.py \
+            tests/test_public_rc_fiber_frame_api.py \
             tests/test_engine_v2_nonlinear_result_recovery_v1.py \
             tests/test_engine_v2_nonlinear_recovery_source_binding.py \
             tests/test_engine_v2_core_dependency_boundary.py \
