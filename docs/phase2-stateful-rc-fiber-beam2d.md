@@ -64,12 +64,12 @@ likewise remain uncommitted until both scaled residual and increment gates
 pass.
 
 The cyclic history helper is a non-authoritative diagnostic with implicit
-state acceptance. It is not a product commit or restart path. Before adding
-coordinate transformation or multi-element assembly, the tracked extraction
-work is to split state/serialization, response, and diagnostics; introduce an
-axial-curvature section protocol instead of the exact RC-section dependency;
-and bind element plus integration-point state into a checkpoint bundle carrying
-a parent hash and epoch.
+state acceptance. It is not a product commit or restart path. State,
+serialization, response, and diagnostics now live in separate modules, and the
+element consumes an `AxialCurvatureSection` protocol instead of an exact RC
+section class. The separate bounded frame-assembly receipt binds element and
+integration-point states into a checkpoint bundle carrying a parent hash and
+epoch; this local-element receipt does not inherit that broader claim.
 
 ## Claim boundary
 

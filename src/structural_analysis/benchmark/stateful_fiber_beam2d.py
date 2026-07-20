@@ -15,8 +15,10 @@ from structural_analysis.elements.stateful_fiber_beam2d import (
     StatefulFiberBeam2D,
     StatefulFiberBeam2DResponse,
     StatefulFiberBeam2DState,
+)
+from structural_analysis.benchmark.stateful_fiber_beam2d_diagnostics import (
+    diagnose_stateful_fiber_beam2d_history,
     finite_difference_stateful_fiber_beam2d_tangent_check,
-    integrate_stateful_fiber_beam2d_history,
 )
 from structural_analysis.materials.stateful_fiber_section import (
     make_rectangular_stateful_rc_fiber_section,
@@ -616,7 +618,7 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
         (-2.0e-4, -9.0e-3),
         (-2.0e-4, 0.0),
     )
-    cyclic = integrate_stateful_fiber_beam2d_history(
+    cyclic = diagnose_stateful_fiber_beam2d_history(
         element,
         tuple(
             element.uniform_generalized_strain_displacements(axial, curvature)
@@ -842,7 +844,8 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
             ),
             "authoritative_restart_chain": False,
             "product_commit_path": False,
-            "generalized_axial_curvature_section_protocol": False,
+            "generalized_axial_curvature_section_protocol": True,
+            "state_response_and_diagnostics_module_split": True,
             "coordinate_transformed_general_frame": False,
             "multi_element_global_assembly": False,
             "shear_deformation_or_torsion": False,
@@ -855,12 +858,9 @@ def _build_stateful_fiber_beam2d_benchmark_cached() -> dict[str, Any]:
             "g1_closure": False,
         },
         "blockers_remaining": [
-            "element_state_parent_hash_and_checkpoint_epoch_not_connected",
             "diagnostic_history_is_not_an_authoritative_product_commit_path",
-            "generalized_axial_curvature_section_protocol_not_extracted",
-            "element_state_response_and_diagnostics_module_split_pending",
-            "local_to_global_coordinate_transformation_not_connected",
-            "multi_element_global_assembly_not_connected",
+            "local_element_state_alone_is_not_a_parented_checkpoint",
+            "coordinate_transformation_and_assembly_verified_in_separate_bounded_receipt",
             "shear_deformation_and_torsion_not_implemented",
             "geometric_nonlinearity_not_coupled",
             "general_plastic_hinge_and_distributed_plasticity_not_validated",

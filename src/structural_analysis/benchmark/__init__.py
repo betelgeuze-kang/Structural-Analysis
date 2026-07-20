@@ -90,6 +90,20 @@ from structural_analysis.benchmark.stateful_fiber_beam2d import (
     build_stateful_fiber_beam2d_benchmark,
     solve_stateful_fiber_beam2d_cantilever,
 )
+from structural_analysis.benchmark.stateful_fiber_beam2d_diagnostics import (
+    diagnose_stateful_fiber_beam2d_history,
+    finite_difference_stateful_fiber_beam2d_tangent_check,
+)
+from structural_analysis.benchmark.stateful_fiber_frame2d import (
+    STATEFUL_FIBER_FRAME2D_BENCHMARK_SCHEMA_VERSION,
+    STATEFUL_FIBER_FRAME2D_CLAIM_BOUNDARY,
+    build_stateful_fiber_frame2d_benchmark,
+    make_two_element_stateful_fiber_cantilever,
+    make_two_member_stateful_fiber_l_frame,
+)
+from structural_analysis.benchmark.stateful_fiber_frame2d_diagnostics import (
+    finite_difference_stateful_fiber_frame2d_tangent_check,
+)
 from structural_analysis.benchmark.sparse_chain_arc_length import (
     SPARSE_CHAIN_ARC_LENGTH_CLAIM_BOUNDARY,
     SPARSE_CHAIN_ARC_LENGTH_CONFIG,
@@ -177,6 +191,8 @@ __all__ = [
     "STATEFUL_FIBER_BEAM2D_BENCHMARK_SCHEMA_VERSION",
     "STATEFUL_FIBER_BEAM2D_CLAIM_BOUNDARY",
     "STATEFUL_FIBER_BEAM2D_NEWTON_SCHEMA_VERSION",
+    "STATEFUL_FIBER_FRAME2D_BENCHMARK_SCHEMA_VERSION",
+    "STATEFUL_FIBER_FRAME2D_CLAIM_BOUNDARY",
     "ShallowArchArcLengthProblem",
     "SparseChainCPUFGMRESStateTangentSolver",
     "SparseChainDenseReferenceProblem",
@@ -202,6 +218,7 @@ __all__ = [
     "build_shallow_arch_arc_length_benchmark_seed",
     "build_sparse_chain_cpu_fgmres_arc_length_seed",
     "build_stateful_fiber_beam2d_benchmark",
+    "build_stateful_fiber_frame2d_benchmark",
     "build_verification_hierarchy_readiness",
     "compare_buckling",
     "compare_displacements",
@@ -215,14 +232,19 @@ __all__ = [
     "create_load_coupled_dense_reference_solver",
     "create_sparse_chain_cpu_fgmres_state_tangent_solver",
     "decide_benchmark",
+    "diagnose_stateful_fiber_beam2d_history",
     "inspect_benchmark_decision_receipt",
     "generated_benchmark_factory_cases",
     "euler_column_buckling_benchmark",
     "finite_difference_shallow_arch_checks",
+    "finite_difference_stateful_fiber_beam2d_tangent_check",
+    "finite_difference_stateful_fiber_frame2d_tangent_check",
     "inspect_medium_benchmark_case",
     "inspect_verification_evidence",
     "medium_benchmark_archetype_policy",
     "modal_pdelta_amplification_benchmark",
+    "make_two_element_stateful_fiber_cantilever",
+    "make_two_member_stateful_fiber_l_frame",
     "run_benchmark_cases",
     "shallow_arch_snapthrough_benchmark",
     "solve_stateful_fiber_beam2d_cantilever",
