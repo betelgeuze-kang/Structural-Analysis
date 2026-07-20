@@ -1,0 +1,48 @@
+name: Fiber-frame Execution Topology CI
+
+on:
+  pull_request:
+    paths:
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py"
+      - "tests/test_stateful_fiber_frame2d_execution_topology.py"
+      - "docs/fiber-frame-nonlinear-execution-topology.md"
+      - ".github/workflows/fiber-frame-execution-topology-ci.yml"
+      - "scripts/check_github_actions_runner_policy.py"
+
+permissions:
+  contents: read
+
+jobs:
+  topology-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+      - run: python -m pip install -e .[dev]
+      - name: Ruff
+        run: |
+          python -m ruff check \
+            src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py \
+            tests/test_stateful_fiber_frame2d_execution_topology.py
+          python -m ruff format --check \
+            src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py \
+            tests/test_stateful_fiber_frame2d_execution_topology.py
+      - name: Compile
+        run: |
+          python -m compileall -q \
+            src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py \
+            tests/test_stateful_fiber_frame2d_execution_topology.py
+      - name: Focused topology tests
+        run: |
+          python -m pytest -vv \
+            tests/test_stateful_fiber_frame2d_execution_topology.py
+      - name: Fiber-frame regression neighborhood
+        run: |
+          python -m pytest -q \
+            tests/test_stateful_fiber_frame2d.py \
+            tests/test_stateful_fiber_frame2d_material_state_bundle.py \
+            tests/test_stateful_fiber_frame2d_material_state_projection_chain.py
