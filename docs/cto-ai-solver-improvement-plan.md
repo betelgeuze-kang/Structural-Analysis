@@ -1,0 +1,216 @@
+# CTO plan: authoritative nonlinear solver and AI control plane
+
+## Product objective
+
+Build an independent structural-analysis program whose deterministic physics engine remains the source of numerical truth while AI assists only through observable, bounded, reversible control actions.
+
+```text
+AI proposes
+deterministic guards decide
+physics solver executes
+result/recovery contracts authorize
+evidence determines promotable scope
+```
+
+## Completed foundation
+
+### Contract and state plane
+
+- Engine v2 execution, scaling, state, vector, numerical-result, and engineering-result contracts.
+- Ordered `MaterialStateBundle` lifecycle with imported-manifest hardening.
+- Nonlinear numerical-result terminal gates and a non-authoritative recovery candidate.
+- `SolverEpisodeIR` with trace-bound terminal state, baseline/shadow/guarded rules, and data-use receipts.
+
+### Fiber-frame vertical foundation
+
+- Stateful RC fiber section and beam kernels.
+- Bounded 2D fiber-frame assembly and Newton load stepping.
+- Persisted checkpoints and epoch-zero-rooted checkpoint ancestry.
+- Complete checkpoint-to-material-state projection.
+- Canonical six-DOF nonlinear topology and solver-coordinate scaling.
+- Physical force/moment equation scaling and residual trace.
+- Nonlinear kinematic-state history.
+- Combined kinematic/material execution-state binding.
+
+### Reusable geometric-nonlinear kernels
+
+- Corotational 2D truss.
+- Corotational planar Euler–Bernoulli frame.
+
+### Product and evidence seeds
+
+- Bounded public nonlinear two-bar truss API/CLI.
+- Deterministic concrete-damage localization evidence with explicit branch-selection imperfection.
+- Non-promoting Lee-frame formal V&V candidate generator.
+- Shadow-only deterministic solver-step controller.
+
+## Next implementation wave
+
+### A. Real fiber-frame SolverEpisode adapter
+
+**Goal:** convert the existing accepted fiber-frame load path into replayable baseline and shadow episodes.
+
+Minimum first slice:
+
+- one observation for the initial checkpoint and each accepted load step;
+- combined execution-state hash, checkpoint hash, topology hash, scaling hash, residual metrics, accepted/rollback disposition, and load factor;
+- deterministic baseline next-step action;
+- shadow proposal recorded but never executed;
+- no raw customer model or constituent-state bytes in the episode;
+- training eligibility false unless explicit license/privacy receipts are attached.
+
+Acceptance:
+
+- same solve produces the same episode manifest and hash;
+- terminal state equals the last accepted execution-state observation;
+- rollback cannot mutate the accepted state;
+- policy/artifact/action hashes replay exactly;
+- episode authority remains false.
+
+### B. Fiber-frame nonlinear terminal and ResultIR adapter
+
+**Goal:** grant bounded numerical-state authority only after exact convergence gates.
+
+Required bindings:
+
+- exact combined execution-state hash;
+- load-path/checkpoint-chain hash;
+- final physical and scaled residual traces;
+- increment and acceptance tolerances;
+- fallback and regularization counts;
+- boundary-condition receipt;
+- backend receipt;
+- terminal displacement artifact.
+
+Initial authority scope:
+
+```text
+convergence                 eligible
+committed displacement      eligible
+committed material state    eligible
+reactions/member forces     not yet authoritative
+design/code results         not authoritative
+```
+
+### C. Exact engineering recovery operator
+
+**Goal:** independently replay engineering outputs from exact committed state rather than trusting solver-returned arrays.
+
+Required replay:
+
+- geometry and local/global transformations;
+- section and integration-point order;
+- committed constituent-state bytes;
+- section integration and member end forces;
+- element-to-global scatter;
+- free-equation equilibrium;
+- constrained reaction partition;
+- energy and local/global consistency receipts.
+
+Only this operator may promote bounded reaction, member-force, section, and fiber-output authority.
+
+### D. Bounded public RC fiber-frame slice
+
+Initial supported profile:
+
+- XY plane, `UX/UY/RZ` active in canonical six-DOF node space;
+- small-displacement fixed-chord formulation;
+- explicit rectangular RC fiber sections;
+- supported steel and concrete material profiles;
+- zero prescribed displacement and proportional nodal loading;
+- dense CPU reference Newton;
+- checkpoint restart and exact fail-closed compiler.
+
+Keep releases, offsets, diaphragms, distributed loads, arc length, general topology, and design checks outside the first profile.
+
+### E. Corotational stateful fiber frame
+
+Sequence:
+
+```text
+corotational elastic frame kernel
+    → basic-deformation protocol
+    → stateful axial-curvature section
+    → corotational fiber-beam
+    → global assembly
+    → load control and arc length
+```
+
+Required tests include finite rigid rotation, energy-gradient and tangent checks, P-Delta portal response, cyclic RC members, restart/replay, and snap-through paths.
+
+### F. Production CPU sparse baseline
+
+```text
+deterministic CSR/BSR topology
+    → sparse assembly
+    → CPU sparse direct oracle
+    → CPU FGMRES
+    → reviewed preconditioners
+    → dense/sparse/iterative parity
+```
+
+GPU/HIP acceleration must reuse the same operator and result contracts and must never become the only truth backend.
+
+### G. Formal verification closure
+
+Priority order:
+
+1. Level 2 OpenSees comparison with exact material/path mapping.
+2. A second independent solver or implementation.
+3. Clean-runner, source/version, license, and artifact receipts.
+4. Level 3 published benchmark attachment.
+5. Contiguous hierarchy promotion only after all lower levels pass.
+
+## AI rollout policy
+
+### Phase 1 — baseline episodes
+
+Record deterministic solver behavior without AI proposals.
+
+### Phase 2 — shadow
+
+Allow proposals for next step size only. Execute the deterministic baseline action and evaluate proposal quality offline.
+
+### Phase 3 — guarded
+
+A proposed step may execute only when:
+
+- model family is supported;
+- OOD is false;
+- uncertainty passes threshold;
+- proposal/action identity matches;
+- a deterministic guard receipt is present;
+- residual behavior remains acceptable;
+- exact rollback and deterministic fallback are available.
+
+### Prohibited until separate reviewed contracts
+
+- residual or response correction;
+- Jacobian/tangent correction;
+- constitutive-law correction;
+- result correction;
+- design-code or engineering approval decisions.
+
+## Data governance
+
+- Do not embed raw customer models in episodes.
+- Split train/evaluation data by model family, not by near-duplicate run.
+- Preserve failed and rollback episodes.
+- Default training eligibility to false.
+- Require explicit license and privacy receipts.
+- Bind policy version and artifact hash to every proposal.
+
+## Definition of commercial-readiness progress
+
+Commercial readiness is not a single passing benchmark. A promotable capability needs:
+
+- a stable public input profile;
+- deterministic compile and execution contracts;
+- exact committed-state and result authority;
+- independent recovery for engineering outputs;
+- restart and replay;
+- bounded failure behavior;
+- formal verification evidence with permitted sources;
+- documented support and excluded-feature boundaries.
+
+Until those conditions are satisfied for a capability, keep it labeled Developer Preview, candidate, diagnostic, or non-authoritative as appropriate.
