@@ -33,6 +33,8 @@ evidence determines promotable scope
 - Combined kinematic/material execution-state binding.
 - Bounded J5 nonlinear terminal convergence receipt with exact Newton replay.
 - Real baseline/shadow fiber-frame SolverEpisode adapter with exact rollback.
+- J5-backed fiber-frame `NonlinearNumericalResultIR` adapter with bounded
+  convergence, committed-displacement, and committed-material-state authority.
 
 ### Reusable geometric-nonlinear kernels
 
@@ -74,9 +76,9 @@ path, supports a terminal one-step exact rollback path, binds every source step
 and physical residual trace by canonical hash, and keeps runtime at zero under
 an explicit no-timing-authority profile.
 
-## Next implementation wave
+## Implemented second-wave slice
 
-### B. J5-backed fiber-frame NonlinearNumericalResultIR adapter
+### B. J5-backed fiber-frame NonlinearNumericalResultIR adapter — implemented
 
 **Goal:** consume the existing J5 terminal receipt and grant bounded
 numerical-state authority only after the remaining ResultIR bindings pass.
@@ -101,6 +103,14 @@ committed material state    eligible
 reactions/member forces     not yet authoritative
 design/code results         not authoritative
 ```
+
+The implementation preserves the explicit decision not to emit `StateIR v1`,
+replays the complete J1--J5 source chain, emits strict reduced-system,
+full-residual, boundary-condition, and backend receipts, and binds immutable
+terminal canonical six-DOF displacement bytes. Generic engineering recovery
+fails closed for this source profile until the exact operator below exists.
+
+## Next implementation wave
 
 ### C. Exact engineering recovery operator
 

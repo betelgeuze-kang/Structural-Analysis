@@ -100,16 +100,17 @@ J5 does not establish:
   equilibrium;
 - geometric nonlinearity, shell coupling, mesh-objective distributed
   plasticity, production sparse/HIP execution, or G1 closure;
-- `StateIR v1`, `NonlinearNumericalResultIR`, displacement-result, reaction,
-  member-force, or fiber-recovery authority;
+- `StateIR v1`, reaction, member-force, or fiber-recovery authority; J5 alone
+  does not issue `NonlinearNumericalResultIR` or displacement authority;
 - code/design approval, release readiness, or commercial use.
 
-The fiber-frame SolverEpisode adapter now consumes the exact J5 receipt for
-ready baseline/shadow observation traces, but deliberately retains
-`final_authority_status=none` and no result hash. A later result adapter may
-issue a bounded `NonlinearNumericalResultIR` only after it independently
-satisfies that contract's state, artifact, and authority requirements. Exact
-engineering recovery remains a separate step after numerical-result issuance.
+The fiber-frame SolverEpisode adapter consumes the exact J5 receipt for ready
+baseline/shadow observation traces, but deliberately retains
+`final_authority_status=none` and no result hash. The separate result adapter in
+`docs/fiber-frame-nonlinear-result-adapter.md` now independently satisfies the
+state, artifact, boundary, backend, and authority requirements needed to issue
+a bounded `NonlinearNumericalResultIR`. Exact engineering recovery remains a
+separate step after numerical-result issuance.
 
 ## Focused verification
 

@@ -20,7 +20,7 @@ import json
 import math
 import re
 from types import MappingProxyType
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 from jsonschema import Draft202012Validator, validators
 import numpy as np
@@ -101,6 +101,12 @@ NONLINEAR_RESULT_CLAIM_BOUNDARY = MappingProxyType(
         "viewer_projection": False,
         "release_readiness": False,
         "commercial_claim": False,
+    }
+)
+NONLINEAR_RESULT_ADAPTER_CLAIM_BOUNDARY = MappingProxyType(
+    {
+        **dict(NONLINEAR_RESULT_CLAIM_BOUNDARY),
+        "fiber_frame_kinematic_adapter_authority": True,
     }
 )
 
@@ -202,6 +208,46 @@ class NonlinearResultVectorDescriptor:
 
 
 @dataclass(frozen=True)
+class NonlinearNumericalResultSourceSnapshot:
+    """Validated source-neutral inputs for one nonlinear numerical result.
+
+    Concrete nonlinear solvers may implement a replaying source adapter and
+    return this snapshot without pretending to be ``ExecutionPlan v1`` or
+    ``StateIR v1``.  The adapter remains retained by the result and is replayed
+    on every in-memory validation.  This does not change the descriptor-only
+    v1 result manifest or its canonical hash for existing callers.
+    """
+
+    model_ir_content_hash: str
+    execution_plan_hash: str
+    equation_scaling_hash: str
+    reduced_csr_identity_hash: str
+    operator_hash: str
+    state_hash: str
+    state_epoch: int
+    material_state_bundle_hash: str
+    integration_point_order_hash: str
+    path_history_hash: str
+    nonlinear_terminal_hash: str
+    full_residual_receipt_hash: str
+    boundary_condition_receipt_hash: str
+    backend_role: Literal["cpu_reference", "cpu_optimized", "hip"]
+    backend_receipt_hash: str
+    load_factor: float
+    time_s: float
+    dof_count: int
+    displacement_global_si: np.ndarray = field(repr=False, compare=False)
+
+
+class NonlinearNumericalResultSourceAdapter(Protocol):
+    """Replay protocol for a concrete nonlinear result source chain."""
+
+    def validate_nonlinear_result_source(
+        self,
+    ) -> NonlinearNumericalResultSourceSnapshot: ...
+
+
+@dataclass(frozen=True)
 class NonlinearNumericalResultIR:
     schema_version: str
     result_id: str
@@ -229,12 +275,23 @@ class NonlinearNumericalResultIR:
     displacement_artifact: NonlinearResultVectorDescriptor
     extensions: Mapping[str, Any]
     _displacement_global_si: np.ndarray = field(repr=False, compare=False)
-    _execution_plan: ExecutionPlan = field(repr=False, compare=False)
-    _equation_scaling: EquationScaling = field(repr=False, compare=False)
-    _reduced_csr: ExecutionPlanReducedCSR = field(repr=False, compare=False)
-    _committed_state: StateIR = field(repr=False, compare=False)
-    _material_state_bundle: MaterialStateBundle = field(repr=False, compare=False)
-    _terminal_receipt: NonlinearTerminalReceipt = field(repr=False, compare=False)
+    _execution_plan: ExecutionPlan | None = field(repr=False, compare=False)
+    _equation_scaling: EquationScaling | None = field(repr=False, compare=False)
+    _reduced_csr: ExecutionPlanReducedCSR | None = field(repr=False, compare=False)
+    _committed_state: StateIR | None = field(repr=False, compare=False)
+    _material_state_bundle: MaterialStateBundle | None = field(
+        repr=False,
+        compare=False,
+    )
+    _terminal_receipt: NonlinearTerminalReceipt | None = field(
+        repr=False,
+        compare=False,
+    )
+    _source_adapter: NonlinearNumericalResultSourceAdapter | None = field(
+        default=None,
+        repr=False,
+        compare=False,
+    )
 
     @property
     def displacement_global_si(self) -> np.ndarray:
@@ -580,6 +637,72 @@ def create_nonlinear_numerical_result_ir(
     return validate_nonlinear_numerical_result_ir(result)
 
 
+def create_adapter_bound_nonlinear_numerical_result_ir(
+    *,
+    result_id: str,
+    source_adapter: NonlinearNumericalResultSourceAdapter,
+) -> NonlinearNumericalResultIR:
+    """Create a v1 result from one retained, fully replaying source adapter.
+
+    The concrete adapter owns source-specific replay.  This factory only
+    accepts the resulting normalized snapshot, binds its exact displacement
+    bytes, and retains the adapter so every later in-memory validation replays
+    the source chain again.
+    """
+
+    snapshot = _adapter_source_snapshot(source_adapter)
+    normalized_id = _stable_id(result_id, "/result_id")
+    displacement = snapshot.displacement_global_si
+    descriptor = _displacement_descriptor(
+        normalized_id,
+        displacement,
+        state_hash=snapshot.state_hash,
+        material_bundle_hash=snapshot.material_state_bundle_hash,
+    )
+    provisional = NonlinearNumericalResultIR(
+        schema_version=NONLINEAR_NUMERICAL_RESULT_IR_SCHEMA_VERSION,
+        result_id=normalized_id,
+        result_hash=_HASH_ZERO,
+        result_kind=NONLINEAR_NUMERICAL_RESULT_KIND,
+        authority_profile=NONLINEAR_NUMERICAL_RESULT_AUTHORITY_PROFILE,
+        model_ir_content_hash=snapshot.model_ir_content_hash,
+        execution_plan_hash=snapshot.execution_plan_hash,
+        equation_scaling_hash=snapshot.equation_scaling_hash,
+        reduced_csr_identity_hash=snapshot.reduced_csr_identity_hash,
+        operator_hash=snapshot.operator_hash,
+        state_hash=snapshot.state_hash,
+        state_epoch=snapshot.state_epoch,
+        material_state_bundle_hash=snapshot.material_state_bundle_hash,
+        integration_point_order_hash=snapshot.integration_point_order_hash,
+        path_history_hash=snapshot.path_history_hash,
+        nonlinear_terminal_hash=snapshot.nonlinear_terminal_hash,
+        full_residual_receipt_hash=snapshot.full_residual_receipt_hash,
+        boundary_condition_receipt_hash=snapshot.boundary_condition_receipt_hash,
+        backend_role=snapshot.backend_role,
+        backend_receipt_hash=snapshot.backend_receipt_hash,
+        load_factor=snapshot.load_factor,
+        time_s=snapshot.time_s,
+        dof_count=snapshot.dof_count,
+        displacement_artifact=descriptor,
+        extensions=MappingProxyType({}),
+        _displacement_global_si=displacement,
+        _execution_plan=None,
+        _equation_scaling=None,
+        _reduced_csr=None,
+        _committed_state=None,
+        _material_state_bundle=None,
+        _terminal_receipt=None,
+        _source_adapter=source_adapter,
+    )
+    result = replace(
+        provisional,
+        result_hash=canonical_hash(
+            _result_payload(provisional, include_result_hash=False)
+        ),
+    )
+    return validate_nonlinear_numerical_result_ir(result)
+
+
 def validate_nonlinear_numerical_result_ir(
     result: NonlinearNumericalResultIR,
 ) -> NonlinearNumericalResultIR:
@@ -605,39 +728,27 @@ def validate_nonlinear_numerical_result_ir(
             "Nonlinear result kind or authority profile changed.",
         )
     _stable_id(result.result_id, "/result_id")
-    plan = validate_execution_plan(result._execution_plan)
-    validate_equation_scaling_binding(plan, scaling=result._equation_scaling)
-    reduced = validate_execution_plan_reduced_csr(
-        result._reduced_csr,
-        execution_plan=plan,
-    )
-    state = validate_state_ir(result._committed_state, expected_plan=plan)
-    bundle = validate_material_state_bundle(result._material_state_bundle)
-    terminal = validate_nonlinear_terminal_receipt(result._terminal_receipt)
-    _validate_source_chain(
-        plan,
-        result._equation_scaling,
-        reduced,
-        state,
-        bundle,
-        terminal,
-    )
+    snapshot = _result_source_snapshot(result)
 
     expected = {
-        "model_ir_content_hash": plan.model_ir_content_hash,
-        "execution_plan_hash": plan.plan_hash,
-        "equation_scaling_hash": execution_plan_scaling_hash(plan),
-        "reduced_csr_identity_hash": reduced.identity_hash,
-        "operator_hash": plan.operator_hash,
-        "state_hash": state.state_hash,
-        "state_epoch": state.epoch,
-        "material_state_bundle_hash": bundle.bundle_hash,
-        "integration_point_order_hash": bundle.integration_point_order_hash,
-        "path_history_hash": terminal.path_history_hash,
-        "nonlinear_terminal_hash": terminal.terminal_hash,
-        "load_factor": state.load_factor,
-        "time_s": state.time_s,
-        "dof_count": state.dof_count,
+        "model_ir_content_hash": snapshot.model_ir_content_hash,
+        "execution_plan_hash": snapshot.execution_plan_hash,
+        "equation_scaling_hash": snapshot.equation_scaling_hash,
+        "reduced_csr_identity_hash": snapshot.reduced_csr_identity_hash,
+        "operator_hash": snapshot.operator_hash,
+        "state_hash": snapshot.state_hash,
+        "state_epoch": snapshot.state_epoch,
+        "material_state_bundle_hash": snapshot.material_state_bundle_hash,
+        "integration_point_order_hash": snapshot.integration_point_order_hash,
+        "path_history_hash": snapshot.path_history_hash,
+        "nonlinear_terminal_hash": snapshot.nonlinear_terminal_hash,
+        "full_residual_receipt_hash": snapshot.full_residual_receipt_hash,
+        "boundary_condition_receipt_hash": (snapshot.boundary_condition_receipt_hash),
+        "backend_role": snapshot.backend_role,
+        "backend_receipt_hash": snapshot.backend_receipt_hash,
+        "load_factor": snapshot.load_factor,
+        "time_s": snapshot.time_s,
+        "dof_count": snapshot.dof_count,
     }
     if any(getattr(result, key) != value for key, value in expected.items()):
         _fail(
@@ -672,7 +783,7 @@ def validate_nonlinear_numerical_result_ir(
             "NonlinearNumericalResultIR v1 requires empty immutable extensions.",
         )
 
-    displacement = immutable_array(state.displacement_si, dtype="<f8")
+    displacement = snapshot.displacement_global_si
     if not has_immutable_bytes_backing(result._displacement_global_si):
         _fail(
             "nonlinear_result_displacement_mutable",
@@ -683,13 +794,13 @@ def validate_nonlinear_numerical_result_ir(
         _fail(
             "nonlinear_result_displacement_state_mismatch",
             "/displacement_artifact",
-            "Retained displacement does not equal the committed StateIR.",
+            "Retained displacement does not equal the replayed committed state.",
         )
     expected_descriptor = _displacement_descriptor(
         result.result_id,
         displacement,
-        state_hash=state.state_hash,
-        material_bundle_hash=bundle.bundle_hash,
+        state_hash=snapshot.state_hash,
+        material_bundle_hash=snapshot.material_state_bundle_hash,
     )
     if result.displacement_artifact != expected_descriptor:
         _fail(
@@ -705,6 +816,170 @@ def validate_nonlinear_numerical_result_ir(
             "Result hash does not match canonical content.",
         )
     return result
+
+
+def _result_source_snapshot(
+    result: NonlinearNumericalResultIR,
+) -> NonlinearNumericalResultSourceSnapshot:
+    legacy_sources = (
+        result._execution_plan,
+        result._equation_scaling,
+        result._reduced_csr,
+        result._committed_state,
+        result._material_state_bundle,
+        result._terminal_receipt,
+    )
+    if result._source_adapter is not None:
+        if any(value is not None for value in legacy_sources):
+            _fail(
+                "nonlinear_result_source_mode_invalid",
+                "/",
+                "Adapter-bound results cannot retain legacy source contracts.",
+            )
+        return _adapter_source_snapshot(result._source_adapter)
+    if any(value is None for value in legacy_sources):
+        _fail(
+            "nonlinear_result_source_mode_invalid",
+            "/",
+            "Legacy results require the complete plan/state/terminal source chain.",
+        )
+
+    plan = validate_execution_plan(result._execution_plan)
+    validate_equation_scaling_binding(plan, scaling=result._equation_scaling)
+    reduced = validate_execution_plan_reduced_csr(
+        result._reduced_csr,
+        execution_plan=plan,
+    )
+    state = validate_state_ir(result._committed_state, expected_plan=plan)
+    bundle = validate_material_state_bundle(result._material_state_bundle)
+    terminal = validate_nonlinear_terminal_receipt(result._terminal_receipt)
+    _validate_source_chain(
+        plan,
+        result._equation_scaling,
+        reduced,
+        state,
+        bundle,
+        terminal,
+    )
+    return _validate_source_snapshot(
+        NonlinearNumericalResultSourceSnapshot(
+            model_ir_content_hash=plan.model_ir_content_hash,
+            execution_plan_hash=plan.plan_hash,
+            equation_scaling_hash=execution_plan_scaling_hash(plan),
+            reduced_csr_identity_hash=reduced.identity_hash,
+            operator_hash=plan.operator_hash,
+            state_hash=state.state_hash,
+            state_epoch=state.epoch,
+            material_state_bundle_hash=bundle.bundle_hash,
+            integration_point_order_hash=bundle.integration_point_order_hash,
+            path_history_hash=terminal.path_history_hash,
+            nonlinear_terminal_hash=terminal.terminal_hash,
+            full_residual_receipt_hash=result.full_residual_receipt_hash,
+            boundary_condition_receipt_hash=result.boundary_condition_receipt_hash,
+            backend_role=result.backend_role,
+            backend_receipt_hash=result.backend_receipt_hash,
+            load_factor=state.load_factor,
+            time_s=state.time_s,
+            dof_count=state.dof_count,
+            displacement_global_si=state.displacement_si,
+        )
+    )
+
+
+def _adapter_source_snapshot(
+    source_adapter: NonlinearNumericalResultSourceAdapter,
+) -> NonlinearNumericalResultSourceSnapshot:
+    validator = getattr(source_adapter, "validate_nonlinear_result_source", None)
+    if not callable(validator):
+        _fail(
+            "nonlinear_result_source_adapter_invalid",
+            "/",
+            "Source adapter must expose deterministic replay validation.",
+        )
+    return _validate_source_snapshot(validator())
+
+
+def _validate_source_snapshot(
+    snapshot: NonlinearNumericalResultSourceSnapshot,
+) -> NonlinearNumericalResultSourceSnapshot:
+    if type(snapshot) is not NonlinearNumericalResultSourceSnapshot:
+        _fail(
+            "nonlinear_result_source_snapshot_invalid",
+            "/",
+            "Source adapter must return NonlinearNumericalResultSourceSnapshot.",
+        )
+    for path, value in (
+        ("/bindings/model_ir_content_hash", snapshot.model_ir_content_hash),
+        ("/bindings/execution_plan_hash", snapshot.execution_plan_hash),
+        ("/bindings/equation_scaling_hash", snapshot.equation_scaling_hash),
+        (
+            "/bindings/reduced_csr_identity_hash",
+            snapshot.reduced_csr_identity_hash,
+        ),
+        ("/bindings/operator_hash", snapshot.operator_hash),
+        ("/bindings/state_hash", snapshot.state_hash),
+        (
+            "/bindings/material_state_bundle_hash",
+            snapshot.material_state_bundle_hash,
+        ),
+        (
+            "/bindings/integration_point_order_hash",
+            snapshot.integration_point_order_hash,
+        ),
+        ("/bindings/path_history_hash", snapshot.path_history_hash),
+        ("/bindings/nonlinear_terminal_hash", snapshot.nonlinear_terminal_hash),
+        (
+            "/bindings/full_residual_receipt_hash",
+            snapshot.full_residual_receipt_hash,
+        ),
+        (
+            "/bindings/boundary_condition_receipt_hash",
+            snapshot.boundary_condition_receipt_hash,
+        ),
+        ("/backend/receipt_hash", snapshot.backend_receipt_hash),
+    ):
+        _hash(value, path)
+    if _index(snapshot.state_epoch, "/bindings/state_epoch") < 1:
+        _fail(
+            "nonlinear_result_source_state_epoch_invalid",
+            "/bindings/state_epoch",
+            "Adapter-bound state epoch must be positive.",
+        )
+    count = _index(snapshot.dof_count, "/dof_count")
+    if count < 6 or count % 6 != 0:
+        _fail(
+            "nonlinear_result_source_dof_count_invalid",
+            "/dof_count",
+            "Adapter displacement must use canonical six-DOF node order.",
+        )
+    _choice(snapshot.backend_role, _BACKEND_ROLES, "/backend/role")
+    _finite(snapshot.load_factor, "/load_factor")
+    if _finite(snapshot.time_s, "/time_s") < 0.0:
+        _fail(
+            "nonlinear_result_time_negative",
+            "/time_s",
+            "Result time must be non-negative.",
+        )
+    displacement = snapshot.displacement_global_si
+    if (
+        type(displacement) is not np.ndarray
+        or displacement.dtype != np.dtype("<f8")
+        or displacement.shape != (count,)
+        or not displacement.flags.c_contiguous
+        or not np.all(np.isfinite(displacement))
+    ):
+        _fail(
+            "nonlinear_result_source_displacement_invalid",
+            "/displacement_artifact",
+            "Source displacement must be finite contiguous canonical <f8 bytes.",
+        )
+    if not has_immutable_bytes_backing(displacement):
+        _fail(
+            "nonlinear_result_source_displacement_mutable",
+            "/displacement_artifact",
+            "Source displacement must have immutable bytes backing.",
+        )
+    return snapshot
 
 
 def validate_nonlinear_result_manifest(payload: Mapping[str, Any]) -> dict[str, Any]:
@@ -733,6 +1008,16 @@ def validate_nonlinear_result_manifest(payload: Mapping[str, Any]) -> dict[str, 
             "nonlinear_result_manifest_schema_invalid",
             path or "/",
             first.message,
+        )
+    claim_boundary = normalized["claim_boundary"]
+    if claim_boundary not in (
+        dict(NONLINEAR_RESULT_CLAIM_BOUNDARY),
+        dict(NONLINEAR_RESULT_ADAPTER_CLAIM_BOUNDARY),
+    ):
+        _fail(
+            "nonlinear_result_claim_boundary_invalid",
+            "/claim_boundary",
+            "Result claim boundary is not a recognized exact authority profile.",
         )
     descriptor = normalized["displacement_artifact"]
     dof_count = int(normalized["dof_count"])
@@ -931,7 +1216,11 @@ def _result_payload(
         "time_s": result.time_s,
         "dof_count": result.dof_count,
         "displacement_artifact": result.displacement_artifact.to_dict(),
-        "claim_boundary": dict(NONLINEAR_RESULT_CLAIM_BOUNDARY),
+        "claim_boundary": dict(
+            NONLINEAR_RESULT_ADAPTER_CLAIM_BOUNDARY
+            if result._source_adapter is not None
+            else NONLINEAR_RESULT_CLAIM_BOUNDARY
+        ),
         "extensions": dict(result.extensions),
     }
     if not include_result_hash:
@@ -1016,15 +1305,19 @@ def _fail(code: str, path: str, message: str) -> None:
 __all__ = [
     "NONLINEAR_NUMERICAL_RESULT_AUTHORITY_PROFILE",
     "NONLINEAR_NUMERICAL_RESULT_IR_SCHEMA_VERSION",
+    "NONLINEAR_RESULT_ADAPTER_CLAIM_BOUNDARY",
     "NONLINEAR_RESULT_AUTHORITY_AXES",
     "NONLINEAR_RESULT_CLAIM_BOUNDARY",
     "NONLINEAR_TERMINAL_INCREMENT_NORM_PROFILE",
     "NONLINEAR_TERMINAL_RECEIPT_SCHEMA_VERSION",
     "NONLINEAR_TERMINAL_RESIDUAL_NORM_PROFILE",
     "NonlinearNumericalResultIR",
+    "NonlinearNumericalResultSourceAdapter",
+    "NonlinearNumericalResultSourceSnapshot",
     "NonlinearResultIRError",
     "NonlinearResultVectorDescriptor",
     "NonlinearTerminalReceipt",
+    "create_adapter_bound_nonlinear_numerical_result_ir",
     "create_nonlinear_numerical_result_ir",
     "create_nonlinear_terminal_receipt",
     "validate_nonlinear_displacement_bytes",

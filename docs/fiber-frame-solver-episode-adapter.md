@@ -117,10 +117,12 @@ final_authority_status none
 final_result_hash      null
 ```
 
-This adapter cannot turn the J5 convergence receipt into a numerical result.
-The next reviewed slice must separately satisfy
-`NonlinearNumericalResultIR`, bind a terminal displacement artifact and
-boundary/backend receipts, and preserve the narrower J5 authority limits.
+This episode adapter itself cannot turn the J5 convergence receipt into a
+numerical result. The separate adapter documented in
+`docs/fiber-frame-nonlinear-result-adapter.md` now satisfies
+`NonlinearNumericalResultIR`, binds the terminal displacement artifact and
+boundary/backend receipts, and preserves the narrower J5 authority limits.
+The episode remains non-authoritative and does not inherit that result hash.
 
 ## Focused verification
 

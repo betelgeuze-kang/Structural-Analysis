@@ -219,6 +219,12 @@ def create_nonlinear_recovery_candidate(
     """Create a bound equilibrium/reaction/member-force candidate."""
 
     result = validate_nonlinear_numerical_result_ir(nonlinear_result)
+    if result._source_adapter is not None:
+        _fail(
+            "nonlinear_recovery_source_profile_unsupported",
+            "/bindings/source_nonlinear_result_hash",
+            "Adapter-bound nonlinear results require a source-specific exact recovery operator.",
+        )
     plan = result._execution_plan
     dof_count = result.dof_count
     global_external = _float_array(
