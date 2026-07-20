@@ -93,6 +93,7 @@ def test_engine_v2_core_source_inventory_is_explicit_and_backend_neutral() -> No
         "src/structural_analysis/engine_v2/contracts/equation_scaling.py",
         "src/structural_analysis/engine_v2/contracts/execution_plan.py",
         "src/structural_analysis/engine_v2/contracts/execution_plan_reduced_csr.py",
+        "src/structural_analysis/engine_v2/contracts/material_state_bundle.py",
         "src/structural_analysis/engine_v2/contracts/result_ir.py",
         "src/structural_analysis/engine_v2/contracts/state_ir.py",
         "src/structural_analysis/engine_v2/contracts/state_ir_binary.py",
