@@ -6,13 +6,16 @@ on:
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py"
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_state_binding.py"
       - "tests/test_stateful_fiber_frame2d_execution_topology.py"
       - "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py"
       - "tests/test_stateful_fiber_frame2d_kinematic_state_chain.py"
+      - "tests/test_stateful_fiber_frame2d_nonlinear_state_binding.py"
       - "docs/fiber-frame-nonlinear-execution-topology.md"
       - "docs/fiber-frame-physical-equation-scaling.md"
       - "docs/fiber-frame-nonlinear-kinematic-state-chain.md"
       - "docs/fiber-frame-material-state-projection-chain.md"
+      - "docs/fiber-frame-nonlinear-state-binding.md"
       - ".github/workflows/fiber-frame-execution-topology-ci.yml"
       - "scripts/check_github_actions_runner_policy.py"
 
@@ -22,7 +25,7 @@ permissions:
 jobs:
   topology-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -36,35 +39,43 @@ jobs:
             src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py \
+            src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_state_binding.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
-            tests/test_stateful_fiber_frame2d_kinematic_state_chain.py
+            tests/test_stateful_fiber_frame2d_kinematic_state_chain.py \
+            tests/test_stateful_fiber_frame2d_nonlinear_state_binding.py
           python -m ruff format --check \
             src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py \
+            src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_state_binding.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
-            tests/test_stateful_fiber_frame2d_kinematic_state_chain.py
+            tests/test_stateful_fiber_frame2d_kinematic_state_chain.py \
+            tests/test_stateful_fiber_frame2d_nonlinear_state_binding.py
       - name: Compile
         run: |
           python -m compileall -q \
             src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py \
+            src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_state_binding.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
-            tests/test_stateful_fiber_frame2d_kinematic_state_chain.py
-      - name: Focused topology, scaling, and kinematic-state tests
+            tests/test_stateful_fiber_frame2d_kinematic_state_chain.py \
+            tests/test_stateful_fiber_frame2d_nonlinear_state_binding.py
+      - name: Focused topology, scaling, kinematic, and joined-state tests
         run: |
           python -m pytest -vv \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
             tests/test_stateful_fiber_frame2d_kinematic_state_chain.py \
+            tests/test_stateful_fiber_frame2d_nonlinear_state_binding.py \
             tests/test_engine_v2_equation_scaling_v1.py
       - name: Fiber-frame regression neighborhood
         run: |
           python -m pytest -q \
             tests/test_stateful_fiber_frame2d.py \
             tests/test_stateful_fiber_frame2d_material_state_bundle.py \
-            tests/test_stateful_fiber_frame2d_material_state_projection_chain.py
+            tests/test_stateful_fiber_frame2d_material_state_projection_chain.py \
+            tests/test_stateful_fiber_frame2d_nonlinear_state_binding.py
