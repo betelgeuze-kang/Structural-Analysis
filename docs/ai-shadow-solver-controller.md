@@ -1,100 +1,75 @@
-# Shadow AI solver controller v1
+# Shadow-only solver controller
 
 ## Purpose
 
-This slice adds the first executable AI-control-plane boundary on top of
-`SolverEpisodeIR`: a **shadow-only step-size proposal runner**.
+This module is the first executable AI control-plane boundary built on
+`SolverEpisodeIR`. It records policy proposals beside deterministic baseline
+actions without allowing the proposal to alter the solver.
 
-The controller observes an already executed deterministic solver trajectory,
-asks a policy for a next-step proposal, records that proposal, and records the
-actual deterministic baseline action separately. It never executes the
-proposal and never modifies solver, state, result, design, release, or
-commercial authority.
+```text
+solver observation
+  ├─ deterministic baseline action   executed
+  └─ shadow policy proposal          recorded only
+```
+
+The controller always emits a `shadow` episode and validates that:
+
+- `ai_action_executed` is false;
+- every executed action is the deterministic baseline action;
+- every policy proposal retains stable policy ID, version, artifact hash,
+  uncertainty, OOD disposition, reason code, and action-payload hash;
+- a third-party policy cannot substitute an unrelated artifact hash or action
+  scalar after the proposal is formed;
+- unsupported model families fail closed as OOD;
+- rollback observations deterministically shrink the next baseline step.
 
 ## Reference policy
 
-`DeterministicResidualStepPolicy` is included to verify the plumbing. It is a
-fixed rule policy, not a learned model and not production AI.
+`DeterministicResidualStepPolicy` is a bounded reference rule used to test the
+controller wiring. It is not a trained AI model and does not claim learned
+performance.
 
-Its bounded action is the next load-factor increment:
+The reference proposal may suggest a larger, retained, or reduced next step from
+residual ratio and rollback state. The proposal is still never executed in this
+PR.
 
-- strong residual reduction: propose growth;
-- weak residual reduction: propose shrink;
-- moderate reduction: propose hold;
-- rollback: propose shrink;
-- insufficient history: propose hold;
-- unsupported model family: mark OOD and reject.
+## Identity binding
 
-All proposed steps are clamped to the declared minimum and maximum.
-
-## Shadow execution contract
-
-For every retained observation the runner creates:
-
-1. one policy proposal in `SolverEpisodeIR.proposals`;
-2. one deterministic baseline action in `executed_actions`;
-3. no `source=ai_proposal` action;
-4. a canonical action-payload hash for the proposal and the baseline action.
-
-The resulting episode mode is always `shadow`. `SolverEpisodeIR` independently
-rejects any policy that attempts to mark a shadow proposal `eligible` for
-execution.
-
-## OOD and authority boundary
-
-An unsupported model family is recorded as:
+A selected policy exposes:
 
 ```text
-ood=true
-disposition=rejected
-reason_code=ood_model_family
+policy_id
+policy_version
+policy_artifact_hash
+minimum_step_size
+maximum_step_size
 ```
 
-The baseline action is still recorded. The runner does not silently reinterpret
-or repair the model.
-
-The controller output fixes:
+The controller requires the returned decision to repeat the selected policy
+identity and recomputes:
 
 ```text
-ai_action_executed=false
-result_authority=false
+action_payload_hash = hash(
+  action_kind,
+  proposed_step_size,
+  step_unit,
+  policy_artifact_hash
+)
 ```
 
-A terminal episode may reference an independently authoritative result, but the
-controller and episode do not create that authority.
+Out-of-range step sizes, mismatched artifact hashes, mismatched payload hashes,
+non-finite uncertainty, or inconsistent OOD disposition are rejected before an
+episode is produced.
 
-## Extensibility
+## Authority boundary
 
-Future learned policies may implement `ShadowStepPolicy` with:
+A shadow episode is observation/replay data only. It cannot grant convergence,
+numerical-result, reaction/member-force, design/code, release, or commercial
+authority. The controller does not correct residuals, Jacobians, material laws,
+or final results.
 
-- stable policy ID and version;
-- immutable model/checkpoint artifact hash;
-- deterministic proposal payload hash;
-- explicit uncertainty, OOD, and disposition.
-
-Moving from shadow to guarded execution requires a separate PR and an exact
-physics/rollback guard receipt. This v1 runner cannot be configured into guarded
-mode.
-
-## Current exclusions
-
-- no trained checkpoint or inference runtime;
-- no actual step-size override;
-- no solver-route, preconditioner, warm-start, or checkpoint action runner;
-- no customer data ingestion;
-- no response/residual correction;
-- no design or code-check decision;
-- no production performance claim.
-
-## Focused validation
-
-```bash
-PYTHONPATH=src python3 -m pytest -q \
-  tests/test_engine_v2_solver_episode_v1.py \
-  tests/test_shadow_solver_controller.py
-python3 -m ruff check \
-  src/structural_analysis/engine_v2/contracts/solver_episode.py \
-  src/structural_analysis/ai/shadow_solver_controller.py \
-  tests/test_engine_v2_solver_episode_v1.py \
-  tests/test_shadow_solver_controller.py
-```
+Guarded execution, learned checkpoints, and an adapter from the actual
+fiber-frame solve path remain later reviewed contracts. The merged J1–J4
+fiber-frame topology, physical scaling, kinematic history, and combined
+execution-state contracts are inherited from main but are not minted by this
+controller.
