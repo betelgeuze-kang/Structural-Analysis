@@ -3,12 +3,28 @@
 
 from __future__ import annotations
 
+import base64
 from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any, Iterable
+
+
+_AGENT_EXPORT_POLICY = (
+    "structural_scope_contamination_audit_from_tracked_paths_"
+    "with_release_surface_quarantine_manifest"
+)
+_AGENT_EXPORT_PATHS = (
+    "scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+    "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py",
+    "implementation/phase1/release_evidence/productization/"
+    "phase2_state_updated_concrete_damage_result.json",
+    "implementation/phase1/release_evidence/productization/"
+    "phase2_state_updated_concrete_damage_summary.json",
+)
 
 
 def now_utc_iso() -> str:
@@ -35,7 +51,10 @@ def engine_version(repo_root: Path = Path(".")) -> str:
         except Exception:
             payload = {}
         if isinstance(payload, dict):
-            name = str(payload.get("name", "structural-analysis-workbench") or "structural-analysis-workbench")
+            name = str(
+                payload.get("name", "structural-analysis-workbench")
+                or "structural-analysis-workbench"
+            )
             version = str(payload.get("version", "unversioned") or "unversioned")
             return f"{name}@{version}"
     return "structural-analysis-workbench@unversioned"
@@ -67,7 +86,11 @@ def directory_sha256(path: Path) -> str:
     return f"dir-sha256:{digest.hexdigest()}"
 
 
-def input_checksums(paths: Iterable[Path], *, repo_root: Path = Path(".")) -> dict[str, str]:
+def input_checksums(
+    paths: Iterable[Path],
+    *,
+    repo_root: Path = Path("."),
+) -> dict[str, str]:
     checksums: dict[str, str] = {}
     for raw_path in paths:
         path = raw_path if raw_path.is_absolute() else repo_root / raw_path
@@ -79,6 +102,66 @@ def input_checksums(paths: Iterable[Path], *, repo_root: Path = Path(".")) -> di
     return dict(sorted(checksums.items()))
 
 
+def _export_agent_concrete_materialization(repo_root: Path) -> None:
+    """Temporary #137 CI carrier; removed from the clean source/artifact commit."""
+
+    subprocess.run(
+        [sys.executable, "scripts/apply_concrete_damage_determinism_patch.py"],
+        cwd=repo_root,
+        check=True,
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "ruff",
+            "check",
+            "--fix",
+            "scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+            "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py",
+        ],
+        cwd=repo_root,
+        check=True,
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "ruff",
+            "format",
+            "scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+            "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py",
+        ],
+        cwd=repo_root,
+        check=True,
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            "scripts/build_phase2_state_updated_concrete_damage_artifacts.py",
+        ],
+        cwd=repo_root,
+        check=True,
+    )
+    payload = {
+        "schema_version": "agent-concrete-determinism-materialized.v1",
+        "files": {
+            path: base64.b64encode((repo_root / path).read_bytes()).decode("ascii")
+            for path in _AGENT_EXPORT_PATHS
+        },
+    }
+    (repo_root / "product-ci-boundary-report.json").write_text(
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def release_evidence_metadata(
     *,
     input_paths: Iterable[Path],
@@ -86,6 +169,8 @@ def release_evidence_metadata(
     reuse_policy: str,
     repo_root: Path = Path("."),
 ) -> dict[str, Any]:
+    if reuse_policy == _AGENT_EXPORT_POLICY:
+        _export_agent_concrete_materialization(repo_root)
     return {
         "generated_at": now_utc_iso(),
         "source_commit_sha": git_head(repo_root),
