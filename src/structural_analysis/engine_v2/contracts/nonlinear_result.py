@@ -13,7 +13,7 @@ design/code compliance, release, and commercial authority remain outside it.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from functools import lru_cache
 from importlib import resources
 import json
@@ -28,11 +28,21 @@ import numpy as np
 from structural_analysis.engine_v2.contracts._canonical import (
     array_data_hash,
     canonical_hash,
+    has_immutable_bytes_backing,
     immutable_array,
+)
+from structural_analysis.engine_v2.contracts.equation_scaling import (
+    EquationScaling,
+    execution_plan_scaling_hash,
+    validate_equation_scaling_binding,
 )
 from structural_analysis.engine_v2.contracts.execution_plan import (
     ExecutionPlan,
     validate_execution_plan,
+)
+from structural_analysis.engine_v2.contracts.execution_plan_reduced_csr import (
+    ExecutionPlanReducedCSR,
+    validate_execution_plan_reduced_csr,
 )
 from structural_analysis.engine_v2.contracts.material_state_bundle import (
     MaterialStateBundle,
@@ -48,12 +58,14 @@ NONLINEAR_NUMERICAL_RESULT_IR_SCHEMA_VERSION = (
     "structural-analysis-nonlinear-numerical-result-ir.v1"
 )
 NONLINEAR_NUMERICAL_RESULT_AUTHORITY_PROFILE = (
-    "authoritative_converged_nonlinear_state_and_material_history.v1"
+    "authoritative_converged_nonlinear_numerical_and_terminal_material_state.v1"
 )
 NONLINEAR_NUMERICAL_RESULT_KIND = "nonlinear_static_numerical_state"
 NONLINEAR_RESULT_STORAGE_PROFILE = "canonical_little_endian_fp64_binary.v1"
-NONLINEAR_RESULT_DISPLACEMENT_UNIT_PROFILE = (
-    "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+NONLINEAR_RESULT_DISPLACEMENT_UNIT_PROFILE = "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+NONLINEAR_TERMINAL_RESIDUAL_NORM_PROFILE = "dimensionless_equation_scaled_free_linf.v1"
+NONLINEAR_TERMINAL_INCREMENT_NORM_PROFILE = (
+    "source_solver_dimensionless_coordinate_scaled_free_linf.v1"
 )
 NONLINEAR_RESULT_AUTHORITY_AXES = MappingProxyType(
     {
@@ -74,8 +86,14 @@ NONLINEAR_RESULT_CLAIM_BOUNDARY = MappingProxyType(
     {
         "committed_nonlinear_state": True,
         "ordered_material_state_bundle": True,
+        "equation_scaling_replay_bound": True,
+        "reduced_csr_identity_bound": True,
+        "source_free_solution_bytes_bound": True,
         "residual_and_increment_terminal_gate": True,
         "fallback_or_regularization_promoted": False,
+        "constitutive_law_verified": False,
+        "material_state_history_replayed": False,
+        "fiber_frame_kinematic_adapter_authority": False,
         "reaction_authority": False,
         "member_force_authority": False,
         "integration_point_engineering_output_authority": False,
@@ -116,10 +134,16 @@ class NonlinearTerminalReceipt:
     terminal_hash: str
     source_solver_schema_version: str
     source_solver_receipt_hash: str
+    equation_scaling_hash: str
+    reduced_csr_identity_hash: str
+    source_solution_data_hash: str
+    solver_coordinate_scaling_receipt_hash: str
     state_hash: str
     material_state_bundle_hash: str
     path_history_hash: str
     terminal_reason: str
+    residual_norm_profile: str
+    increment_norm_profile: str
     converged: bool
     final_residual_linf: float
     residual_tolerance_linf: float
@@ -186,6 +210,8 @@ class NonlinearNumericalResultIR:
     authority_profile: str
     model_ir_content_hash: str
     execution_plan_hash: str
+    equation_scaling_hash: str
+    reduced_csr_identity_hash: str
     operator_hash: str
     state_hash: str
     state_epoch: int
@@ -202,11 +228,13 @@ class NonlinearNumericalResultIR:
     dof_count: int
     displacement_artifact: NonlinearResultVectorDescriptor
     extensions: Mapping[str, Any]
-    _displacement_global_si: np.ndarray
-    _execution_plan: ExecutionPlan
-    _committed_state: StateIR
-    _material_state_bundle: MaterialStateBundle
-    _terminal_receipt: NonlinearTerminalReceipt
+    _displacement_global_si: np.ndarray = field(repr=False, compare=False)
+    _execution_plan: ExecutionPlan = field(repr=False, compare=False)
+    _equation_scaling: EquationScaling = field(repr=False, compare=False)
+    _reduced_csr: ExecutionPlanReducedCSR = field(repr=False, compare=False)
+    _committed_state: StateIR = field(repr=False, compare=False)
+    _material_state_bundle: MaterialStateBundle = field(repr=False, compare=False)
+    _terminal_receipt: NonlinearTerminalReceipt = field(repr=False, compare=False)
 
     @property
     def displacement_global_si(self) -> np.ndarray:
@@ -221,6 +249,10 @@ def create_nonlinear_terminal_receipt(
     *,
     source_solver_schema_version: str,
     source_solver_receipt_hash: str,
+    equation_scaling_hash: str,
+    reduced_csr_identity_hash: str,
+    source_solution_data_hash: str,
+    solver_coordinate_scaling_receipt_hash: str,
     state_hash: str,
     material_state_bundle_hash: str,
     path_history_hash: str,
@@ -247,6 +279,22 @@ def create_nonlinear_terminal_receipt(
             source_solver_receipt_hash,
             "/source_solver_receipt_hash",
         ),
+        equation_scaling_hash=_hash(
+            equation_scaling_hash,
+            "/equation_scaling_hash",
+        ),
+        reduced_csr_identity_hash=_hash(
+            reduced_csr_identity_hash,
+            "/reduced_csr_identity_hash",
+        ),
+        source_solution_data_hash=_hash(
+            source_solution_data_hash,
+            "/source_solution_data_hash",
+        ),
+        solver_coordinate_scaling_receipt_hash=_hash(
+            solver_coordinate_scaling_receipt_hash,
+            "/solver_coordinate_scaling_receipt_hash",
+        ),
         state_hash=_hash(state_hash, "/state_hash"),
         material_state_bundle_hash=_hash(
             material_state_bundle_hash,
@@ -258,6 +306,8 @@ def create_nonlinear_terminal_receipt(
             _TERMINAL_REASONS,
             "/terminal_reason",
         ),
+        residual_norm_profile=NONLINEAR_TERMINAL_RESIDUAL_NORM_PROFILE,
+        increment_norm_profile=NONLINEAR_TERMINAL_INCREMENT_NORM_PROFILE,
         converged=_boolean(converged, "/converged"),
         final_residual_linf=_nonnegative(
             final_residual_linf,
@@ -315,12 +365,31 @@ def validate_nonlinear_terminal_receipt(
     for path, value in (
         ("/terminal_hash", receipt.terminal_hash),
         ("/source_solver_receipt_hash", receipt.source_solver_receipt_hash),
+        ("/equation_scaling_hash", receipt.equation_scaling_hash),
+        ("/reduced_csr_identity_hash", receipt.reduced_csr_identity_hash),
+        ("/source_solution_data_hash", receipt.source_solution_data_hash),
+        (
+            "/solver_coordinate_scaling_receipt_hash",
+            receipt.solver_coordinate_scaling_receipt_hash,
+        ),
         ("/state_hash", receipt.state_hash),
         ("/material_state_bundle_hash", receipt.material_state_bundle_hash),
         ("/path_history_hash", receipt.path_history_hash),
     ):
         _hash(value, path)
     _choice(receipt.terminal_reason, _TERMINAL_REASONS, "/terminal_reason")
+    if receipt.residual_norm_profile != NONLINEAR_TERMINAL_RESIDUAL_NORM_PROFILE:
+        _fail(
+            "nonlinear_terminal_residual_norm_profile_invalid",
+            "/residual_norm_profile",
+            "Residual norm must use the bound dimensionless equation scaling.",
+        )
+    if receipt.increment_norm_profile != NONLINEAR_TERMINAL_INCREMENT_NORM_PROFILE:
+        _fail(
+            "nonlinear_terminal_increment_norm_profile_invalid",
+            "/increment_norm_profile",
+            "Increment norm must use a bound source-solver coordinate scaling.",
+        )
     _boolean(receipt.converged, "/converged")
     _nonnegative(receipt.final_residual_linf, "/final_residual_linf")
     _positive(receipt.residual_tolerance_linf, "/residual_tolerance_linf")
@@ -334,6 +403,12 @@ def validate_nonlinear_terminal_receipt(
         ("/regularization_count", receipt.regularization_count),
     ):
         _index(value, path)
+    if receipt.rollback_count > receipt.rejected_attempt_count:
+        _fail(
+            "nonlinear_terminal_history_count_invalid",
+            "/rollback_count",
+            "Rollback count cannot exceed rejected-attempt count.",
+        )
     if not receipt.contract_pass:
         _fail(
             "nonlinear_terminal_gate_failed",
@@ -354,6 +429,8 @@ def validate_nonlinear_terminal_receipt(
 
 def _validate_source_chain(
     plan: ExecutionPlan,
+    scaling: EquationScaling,
+    reduced: ExecutionPlanReducedCSR,
     state: StateIR,
     bundle: MaterialStateBundle,
     terminal: NonlinearTerminalReceipt,
@@ -365,6 +442,12 @@ def _validate_source_chain(
             "nonlinear_result_state_not_committed",
             "/bindings/state_hash",
             "A positive-epoch committed StateIR is required.",
+        )
+    if reduced.terminal_disposition != "solve_free_equations" or reduced.free_count < 1:
+        _fail(
+            "nonlinear_result_free_equation_solution_required",
+            "/bindings/reduced_csr_identity_hash",
+            "Nonlinear numerical authority requires a solved free-equation space.",
         )
     if bundle.role != "committed" or bundle.epoch != state.epoch:
         _fail(
@@ -385,11 +468,29 @@ def _validate_source_chain(
     if (
         terminal.state_hash != state.state_hash
         or terminal.material_state_bundle_hash != bundle.bundle_hash
+        or terminal.equation_scaling_hash != scaling.scaling_hash
+        or terminal.reduced_csr_identity_hash != reduced.identity_hash
     ):
         _fail(
             "nonlinear_result_terminal_binding_mismatch",
             "/bindings/nonlinear_terminal_hash",
-            "Terminal receipt does not bind the exact state and material bundle.",
+            "Terminal receipt does not bind the exact scaled plan, reduced CSR, state, and material bundle.",
+        )
+    if terminal.accepted_step_count != state.epoch:
+        _fail(
+            "nonlinear_result_accepted_step_epoch_mismatch",
+            "/bindings/nonlinear_terminal_hash",
+            "Terminal accepted-step count must match the committed StateIR/material epoch.",
+        )
+    free_solution = immutable_array(
+        state.displacement_si[plan.array("free_dofs")],
+        dtype="<f8",
+    )
+    if terminal.source_solution_data_hash != array_data_hash(free_solution):
+        _fail(
+            "nonlinear_result_source_solution_state_mismatch",
+            "/bindings/nonlinear_terminal_hash",
+            "Terminal source-solution bytes do not match the committed StateIR free DOFs.",
         )
 
 
@@ -397,6 +498,8 @@ def create_nonlinear_numerical_result_ir(
     *,
     result_id: str,
     execution_plan: ExecutionPlan,
+    equation_scaling: EquationScaling,
+    reduced_csr: ExecutionPlanReducedCSR,
     committed_state: StateIR,
     material_state_bundle: MaterialStateBundle,
     terminal_receipt: NonlinearTerminalReceipt,
@@ -406,10 +509,16 @@ def create_nonlinear_numerical_result_ir(
     backend_receipt_hash: str,
 ) -> NonlinearNumericalResultIR:
     plan = validate_execution_plan(execution_plan)
+    scaling = equation_scaling
+    validate_equation_scaling_binding(plan, scaling=scaling)
+    reduced = validate_execution_plan_reduced_csr(
+        reduced_csr,
+        execution_plan=plan,
+    )
     state = validate_state_ir(committed_state, expected_plan=plan)
     bundle = validate_material_state_bundle(material_state_bundle)
     terminal = validate_nonlinear_terminal_receipt(terminal_receipt)
-    _validate_source_chain(plan, state, bundle, terminal)
+    _validate_source_chain(plan, scaling, reduced, state, bundle, terminal)
 
     normalized_id = _stable_id(result_id, "/result_id")
     displacement = immutable_array(state.displacement_si, dtype="<f8")
@@ -427,6 +536,8 @@ def create_nonlinear_numerical_result_ir(
         authority_profile=NONLINEAR_NUMERICAL_RESULT_AUTHORITY_PROFILE,
         model_ir_content_hash=plan.model_ir_content_hash,
         execution_plan_hash=plan.plan_hash,
+        equation_scaling_hash=scaling.scaling_hash,
+        reduced_csr_identity_hash=reduced.identity_hash,
         operator_hash=plan.operator_hash,
         state_hash=state.state_hash,
         state_epoch=state.epoch,
@@ -454,6 +565,8 @@ def create_nonlinear_numerical_result_ir(
         extensions=MappingProxyType({}),
         _displacement_global_si=displacement,
         _execution_plan=plan,
+        _equation_scaling=scaling,
+        _reduced_csr=reduced,
         _committed_state=state,
         _material_state_bundle=bundle,
         _terminal_receipt=terminal,
@@ -493,14 +606,28 @@ def validate_nonlinear_numerical_result_ir(
         )
     _stable_id(result.result_id, "/result_id")
     plan = validate_execution_plan(result._execution_plan)
+    validate_equation_scaling_binding(plan, scaling=result._equation_scaling)
+    reduced = validate_execution_plan_reduced_csr(
+        result._reduced_csr,
+        execution_plan=plan,
+    )
     state = validate_state_ir(result._committed_state, expected_plan=plan)
     bundle = validate_material_state_bundle(result._material_state_bundle)
     terminal = validate_nonlinear_terminal_receipt(result._terminal_receipt)
-    _validate_source_chain(plan, state, bundle, terminal)
+    _validate_source_chain(
+        plan,
+        result._equation_scaling,
+        reduced,
+        state,
+        bundle,
+        terminal,
+    )
 
     expected = {
         "model_ir_content_hash": plan.model_ir_content_hash,
         "execution_plan_hash": plan.plan_hash,
+        "equation_scaling_hash": execution_plan_scaling_hash(plan),
+        "reduced_csr_identity_hash": reduced.identity_hash,
         "operator_hash": plan.operator_hash,
         "state_hash": state.state_hash,
         "state_epoch": state.epoch,
@@ -529,6 +656,15 @@ def validate_nonlinear_numerical_result_ir(
     ):
         _hash(value, path)
     _choice(result.backend_role, _BACKEND_ROLES, "/backend/role")
+    _index(result.state_epoch, "/bindings/state_epoch")
+    _index(result.dof_count, "/dof_count")
+    _finite(result.load_factor, "/load_factor")
+    if _finite(result.time_s, "/time_s") < 0.0:
+        _fail(
+            "nonlinear_result_time_negative",
+            "/time_s",
+            "Result time must be non-negative.",
+        )
     if not isinstance(result.extensions, MappingProxyType) or result.extensions:
         _fail(
             "nonlinear_result_extensions_invalid",
@@ -537,6 +673,12 @@ def validate_nonlinear_numerical_result_ir(
         )
 
     displacement = immutable_array(state.displacement_si, dtype="<f8")
+    if not has_immutable_bytes_backing(result._displacement_global_si):
+        _fail(
+            "nonlinear_result_displacement_mutable",
+            "/displacement_artifact",
+            "Retained displacement must have immutable bytes backing.",
+        )
     if not np.array_equal(result._displacement_global_si, displacement):
         _fail(
             "nonlinear_result_displacement_state_mismatch",
@@ -555,9 +697,7 @@ def validate_nonlinear_numerical_result_ir(
             "/displacement_artifact",
             "Displacement descriptor does not match the committed bytes.",
         )
-    expected_hash = canonical_hash(
-        _result_payload(result, include_result_hash=False)
-    )
+    expected_hash = canonical_hash(_result_payload(result, include_result_hash=False))
     if result.result_hash != expected_hash:
         _fail(
             "nonlinear_result_hash_mismatch",
@@ -595,6 +735,24 @@ def validate_nonlinear_result_manifest(payload: Mapping[str, Any]) -> dict[str, 
             first.message,
         )
     descriptor = normalized["displacement_artifact"]
+    dof_count = int(normalized["dof_count"])
+    if descriptor["shape"] != [dof_count] or descriptor["byte_length"] != 8 * dof_count:
+        _fail(
+            "nonlinear_result_displacement_shape_mismatch",
+            "/displacement_artifact",
+            "Displacement shape and byte length must match the global DOF count.",
+        )
+    expected_uri = _displacement_artifact_uri(
+        str(normalized["result_id"]),
+        state_hash=str(normalized["bindings"]["state_hash"]),
+        material_bundle_hash=str(normalized["bindings"]["material_state_bundle_hash"]),
+    )
+    if descriptor["artifact_uri"] != expected_uri:
+        _fail(
+            "nonlinear_result_displacement_uri_invalid",
+            "/displacement_artifact/artifact_uri",
+            "Displacement artifact URI is not canonical for the bound result state.",
+        )
     expected_content_hash = canonical_hash(
         {key: value for key, value in descriptor.items() if key != "content_hash"}
     )
@@ -635,6 +793,12 @@ def validate_nonlinear_displacement_bytes(
             "Displacement artifact byte length does not match descriptor.",
         )
     array = immutable_array(np.frombuffer(payload, dtype="<f8"), dtype="<f8")
+    if array.shape != descriptor.shape:
+        _fail(
+            "nonlinear_result_artifact_shape_mismatch",
+            "/displacement_artifact/shape",
+            "Displacement artifact bytes do not match the descriptor shape.",
+        )
     if array_data_hash(array) != descriptor.data_hash:
         _fail(
             "nonlinear_result_artifact_hash_mismatch",
@@ -662,10 +826,10 @@ def _displacement_descriptor(
         unit_profile=NONLINEAR_RESULT_DISPLACEMENT_UNIT_PROFILE,
         data_hash=array_data_hash(displacement),
         content_hash=_HASH_ZERO,
-        artifact_uri=(
-            f"artifact://nonlinear-result/{result_id}/"
-            f"{state_hash.split(':')[-1][:16]}/"
-            f"{material_bundle_hash.split(':')[-1][:16]}/displacement_global.f64le"
+        artifact_uri=_displacement_artifact_uri(
+            result_id,
+            state_hash=state_hash,
+            material_bundle_hash=material_bundle_hash,
         ),
     )
     return replace(
@@ -680,6 +844,19 @@ def _displacement_descriptor(
     )
 
 
+def _displacement_artifact_uri(
+    result_id: str,
+    *,
+    state_hash: str,
+    material_bundle_hash: str,
+) -> str:
+    return (
+        f"artifact://nonlinear-result/{result_id}/"
+        f"{state_hash.split(':')[-1][:16]}/"
+        f"{material_bundle_hash.split(':')[-1][:16]}/displacement_global.f64le"
+    )
+
+
 def _terminal_payload(
     receipt: NonlinearTerminalReceipt,
     *,
@@ -690,10 +867,18 @@ def _terminal_payload(
         "terminal_hash": receipt.terminal_hash,
         "source_solver_schema_version": receipt.source_solver_schema_version,
         "source_solver_receipt_hash": receipt.source_solver_receipt_hash,
+        "equation_scaling_hash": receipt.equation_scaling_hash,
+        "reduced_csr_identity_hash": receipt.reduced_csr_identity_hash,
+        "source_solution_data_hash": receipt.source_solution_data_hash,
+        "solver_coordinate_scaling_receipt_hash": (
+            receipt.solver_coordinate_scaling_receipt_hash
+        ),
         "state_hash": receipt.state_hash,
         "material_state_bundle_hash": receipt.material_state_bundle_hash,
         "path_history_hash": receipt.path_history_hash,
         "terminal_reason": receipt.terminal_reason,
+        "residual_norm_profile": receipt.residual_norm_profile,
+        "increment_norm_profile": receipt.increment_norm_profile,
         "converged": receipt.converged,
         "final_residual_linf": receipt.final_residual_linf,
         "residual_tolerance_linf": receipt.residual_tolerance_linf,
@@ -726,6 +911,8 @@ def _result_payload(
         "bindings": {
             "model_ir_content_hash": result.model_ir_content_hash,
             "execution_plan_hash": result.execution_plan_hash,
+            "equation_scaling_hash": result.equation_scaling_hash,
+            "reduced_csr_identity_hash": result.reduced_csr_identity_hash,
             "operator_hash": result.operator_hash,
             "state_hash": result.state_hash,
             "state_epoch": result.state_epoch,
@@ -831,7 +1018,9 @@ __all__ = [
     "NONLINEAR_NUMERICAL_RESULT_IR_SCHEMA_VERSION",
     "NONLINEAR_RESULT_AUTHORITY_AXES",
     "NONLINEAR_RESULT_CLAIM_BOUNDARY",
+    "NONLINEAR_TERMINAL_INCREMENT_NORM_PROFILE",
     "NONLINEAR_TERMINAL_RECEIPT_SCHEMA_VERSION",
+    "NONLINEAR_TERMINAL_RESIDUAL_NORM_PROFILE",
     "NonlinearNumericalResultIR",
     "NonlinearResultIRError",
     "NonlinearResultVectorDescriptor",

@@ -16,6 +16,10 @@ non-authoritative, and the third remains future work.
 `NonlinearTerminalReceipt` binds:
 
 - source solver schema and receipt hash;
+- replay-verified `EquationScaling` hash;
+- exact reduced-CSR identity;
+- exact source free-solution bytes hash;
+- source-solver coordinate-scaling receipt hash;
 - exact committed `StateIR` hash;
 - exact committed `MaterialStateBundle` hash;
 - accepted path-history hash;
@@ -31,15 +35,27 @@ converged = true
 final residual <= residual tolerance
 final increment <= increment tolerance
 accepted step count > 0
+rollback count <= rejected attempt count
 fallback count = 0
 regularization count = 0
 ```
+
+Attaching the receipt to a result additionally requires its accepted-step
+count to equal the committed StateIR and material-bundle epoch.
+
+The residual norm is explicitly the dimensionless equation-scaled free-DOF
+infinity norm. The increment norm is explicitly a dimensionless
+source-solver-coordinate-scaled free-DOF infinity norm. The latter remains an
+opaque receipt binding in this generic contract; a concrete solver adapter must
+replay that scaling before it can create a trusted terminal receipt.
 
 ## NonlinearNumericalResultIR
 
 The result requires:
 
 - exact validated `ExecutionPlan`;
+- replay-verified `EquationScaling` bound to that plan;
+- exact `ExecutionPlanReducedCSR` identity with a solved free-equation space;
 - positive-epoch committed `StateIR`;
 - committed `MaterialStateBundle` at the same epoch;
 - material bundle bound to the same model, plan, and solver state;
@@ -47,6 +63,11 @@ The result requires:
 - independent full-residual and boundary-condition receipt hashes;
 - declared backend role and receipt;
 - canonical global displacement artifact descriptor.
+
+The exact committed StateIR free-displacement bytes must match the source
+solution hash carried by the terminal receipt. Imported manifests additionally
+enforce `dof_count`, displacement shape, byte length, and canonical artifact URI
+coherence after schema validation.
 
 The authority axes are:
 
@@ -61,6 +82,9 @@ integration-point engineering output  not evaluated
 ```
 
 Design, code-compliance, release, and commercial authority remain false.
+"Material state" here means the exact terminal ordered bytes bound to the
+committed numerical state. This contract does not replay constitutive laws or
+the complete material-state history.
 
 The manifest is descriptor-only. External displacement bytes are validated
 against exact byte length and data hash.
@@ -77,14 +101,17 @@ The bounded recovery candidate accepts:
 - a recovery-law receipt hash.
 
 It independently scatters element forces and requires agreement with the
-supplied global internal vector. It then forms
+supplied global internal vector after applying the bound per-equation scaling.
+It then forms
 
 ```text
 R = F_internal - F_external
 ```
 
-and checks free-equation equilibrium against the source nonlinear terminal
-tolerance. Constrained residual is partitioned as a reaction candidate.
+It scales that SI residual with the exact `EquationScaling` retained by the
+source result, then checks the free-equation dimensionless infinity norm
+against the source nonlinear terminal tolerance. Constrained SI residual is
+partitioned as a reaction candidate.
 
 This remains non-authoritative because the candidate does not recompute element
 forces from exact geometry, committed integration-point state, and constitutive
@@ -111,6 +138,7 @@ authoritative.
 - no adapter from the public two-bar API yet;
 - no nonlinear artifact writer or Viewer projection;
 - no shell/fiber/frame engineering recovery;
+- no fiber-frame kinematic/coordinate-scaling adapter authority (issue #133);
 - no receipt signature/authenticity verification;
 - no design/code or commercial authority;
 - no G1 closure.
@@ -119,11 +147,13 @@ authoritative.
 
 ```bash
 PYTHONPATH=src python3 -m pytest -q \
-  tests/test_engine_v2_material_state_bundle_v1.py \
-  tests/test_engine_v2_nonlinear_result_recovery_v1.py
+  tests/test_engine_v2_nonlinear_result_recovery_v1.py \
+  tests/test_engine_v2_nonlinear_recovery_source_binding.py \
+  tests/test_engine_v2_core_dependency_boundary.py \
+  tests/test_verify_quality_gate_contract.py
 python3 -m ruff check \
-  src/structural_analysis/engine_v2/contracts/material_state_bundle.py \
   src/structural_analysis/engine_v2/contracts/nonlinear_result.py \
   src/structural_analysis/engine_v2/contracts/nonlinear_recovery.py \
-  tests/test_engine_v2_nonlinear_result_recovery_v1.py
+  tests/test_engine_v2_nonlinear_result_recovery_v1.py \
+  tests/test_engine_v2_nonlinear_recovery_source_binding.py
 ```

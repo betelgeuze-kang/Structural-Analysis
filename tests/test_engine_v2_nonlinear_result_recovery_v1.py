@@ -6,8 +6,19 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
-from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.engine_v2.contracts._canonical import (
+    array_data_hash,
+    canonical_hash,
+    immutable_array,
+)
+from structural_analysis.engine_v2.contracts.equation_scaling import (
+    bind_equation_scaling_to_execution_plan,
+    create_equation_scaling,
+)
 from structural_analysis.engine_v2.contracts.execution_plan import create_execution_plan
+from structural_analysis.engine_v2.contracts.execution_plan_reduced_csr import (
+    create_execution_plan_reduced_csr,
+)
 from structural_analysis.engine_v2.contracts.material_state_bundle import (
     MaterialStateInput,
     commit_trial_material_state_bundle,
@@ -22,6 +33,8 @@ from structural_analysis.engine_v2.contracts.nonlinear_recovery import (
 )
 from structural_analysis.engine_v2.contracts.nonlinear_result import (
     NONLINEAR_NUMERICAL_RESULT_AUTHORITY_PROFILE,
+    NONLINEAR_TERMINAL_INCREMENT_NORM_PROFILE,
+    NONLINEAR_TERMINAL_RESIDUAL_NORM_PROFILE,
     NonlinearResultIRError,
     create_nonlinear_numerical_result_ir,
     create_nonlinear_terminal_receipt,
@@ -68,7 +81,29 @@ def _plan():
 
 
 def _fixture():
-    plan = _plan()
+    base_plan = _plan()
+    coordinates = np.asarray(
+        [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0]],
+        dtype="<f8",
+    )
+    reference_load = np.zeros(12, dtype="<f8")
+    reference_load[6] = 10.0
+    reference_load[11] = 4.0
+    scaling = create_equation_scaling(
+        execution_plan=base_plan,
+        node_coordinates_m=coordinates,
+        reference_equation_load_si=reference_load,
+    )
+    plan = bind_equation_scaling_to_execution_plan(
+        base_plan,
+        scaling,
+        node_coordinates_m=coordinates,
+        reference_equation_load_si=reference_load,
+    )
+    reduced = create_execution_plan_reduced_csr(
+        plan,
+        operator_numeric_values_hash=_hash("d"),
+    )
     initial_state = create_initial_state(plan)
     displacement = np.zeros(12, dtype="<f8")
     displacement[6:] = np.asarray([0.01, -0.02, 0.0, 0.0, 0.0, 0.003])
@@ -118,9 +153,17 @@ def _fixture():
         trial_bundle,
         solver_state_hash=committed_state.state_hash,
     )
+    source_solution = immutable_array(
+        committed_state.displacement_si[plan.array("free_dofs")],
+        dtype="<f8",
+    )
     terminal = create_nonlinear_terminal_receipt(
         source_solver_schema_version="stateful-nonlinear-path.v1",
         source_solver_receipt_hash=_hash("6"),
+        equation_scaling_hash=scaling.scaling_hash,
+        reduced_csr_identity_hash=reduced.identity_hash,
+        source_solution_data_hash=array_data_hash(source_solution),
+        solver_coordinate_scaling_receipt_hash=_hash("e"),
         state_hash=committed_state.state_hash,
         material_state_bundle_hash=committed_bundle.bundle_hash,
         path_history_hash=_hash("7"),
@@ -130,18 +173,28 @@ def _fixture():
         residual_tolerance_linf=1.0e-9,
         final_increment_linf=1.0e-12,
         increment_tolerance_linf=1.0e-10,
-        accepted_step_count=3,
+        accepted_step_count=1,
         rejected_attempt_count=1,
         rollback_count=1,
     )
-    return plan, initial_state, committed_state, committed_bundle, terminal
+    return (
+        plan,
+        scaling,
+        reduced,
+        initial_state,
+        committed_state,
+        committed_bundle,
+        terminal,
+    )
 
 
 def _result(**overrides):
-    plan, _initial, state, bundle, terminal = _fixture()
+    plan, scaling, reduced, _initial, state, bundle, terminal = _fixture()
     values = {
         "result_id": "result.nonlinear.nl1",
         "execution_plan": plan,
+        "equation_scaling": scaling,
+        "reduced_csr": reduced,
         "committed_state": state,
         "material_state_bundle": bundle,
         "terminal_receipt": terminal,
@@ -154,7 +207,7 @@ def _result(**overrides):
     return create_nonlinear_numerical_result_ir(**values)
 
 
-def test_nonlinear_result_binds_state_material_history_and_terminal_gate() -> None:
+def test_nonlinear_result_binds_terminal_material_state_and_terminal_gate() -> None:
     first = _result()
     second = _result()
     manifest = first.to_manifest()
@@ -163,15 +216,81 @@ def test_nonlinear_result_binds_state_material_history_and_terminal_gate() -> No
     assert manifest["authority"]["material_state"] == "authoritative"
     assert manifest["authority"]["reaction"] == "not_evaluated"
     assert manifest["claim_boundary"]["reaction_authority"] is False
+    assert manifest["claim_boundary"]["equation_scaling_replay_bound"] is True
+    assert manifest["claim_boundary"]["reduced_csr_identity_bound"] is True
+    assert manifest["claim_boundary"]["material_state_history_replayed"] is False
     assert first.displacement_global_si.flags.writeable is False
+    with pytest.raises(ValueError):
+        first.displacement_global_si.setflags(write=True)
     assert validate_nonlinear_result_manifest(manifest) == manifest
 
 
+def test_terminal_receipt_binds_scaled_equations_coordinates_and_solution_bytes() -> (
+    None
+):
+    plan, scaling, reduced, _initial, state, bundle, terminal = _fixture()
+    payload = terminal.to_dict()
+    assert payload["equation_scaling_hash"] == scaling.scaling_hash
+    assert payload["reduced_csr_identity_hash"] == reduced.identity_hash
+    assert payload["residual_norm_profile"] == NONLINEAR_TERMINAL_RESIDUAL_NORM_PROFILE
+    assert (
+        payload["increment_norm_profile"] == NONLINEAR_TERMINAL_INCREMENT_NORM_PROFILE
+    )
+
+    wrong_solution_terminal = create_nonlinear_terminal_receipt(
+        source_solver_schema_version=terminal.source_solver_schema_version,
+        source_solver_receipt_hash=terminal.source_solver_receipt_hash,
+        equation_scaling_hash=scaling.scaling_hash,
+        reduced_csr_identity_hash=reduced.identity_hash,
+        source_solution_data_hash=_hash("f"),
+        solver_coordinate_scaling_receipt_hash=(
+            terminal.solver_coordinate_scaling_receipt_hash
+        ),
+        state_hash=state.state_hash,
+        material_state_bundle_hash=bundle.bundle_hash,
+        path_history_hash=terminal.path_history_hash,
+        terminal_reason=terminal.terminal_reason,
+        converged=True,
+        final_residual_linf=terminal.final_residual_linf,
+        residual_tolerance_linf=terminal.residual_tolerance_linf,
+        final_increment_linf=terminal.final_increment_linf,
+        increment_tolerance_linf=terminal.increment_tolerance_linf,
+        accepted_step_count=terminal.accepted_step_count,
+        rejected_attempt_count=terminal.rejected_attempt_count,
+        rollback_count=terminal.rollback_count,
+    )
+    with pytest.raises(
+        NonlinearResultIRError,
+        match="nonlinear_result_source_solution_state_mismatch",
+    ):
+        create_nonlinear_numerical_result_ir(
+            result_id="result.nonlinear.wrong-solution",
+            execution_plan=plan,
+            equation_scaling=scaling,
+            reduced_csr=reduced,
+            committed_state=state,
+            material_state_bundle=bundle,
+            terminal_receipt=wrong_solution_terminal,
+            full_residual_receipt_hash=_hash("8"),
+            boundary_condition_receipt_hash=_hash("9"),
+            backend_role="cpu_reference",
+            backend_receipt_hash=_hash("a"),
+        )
+
+
 def test_terminal_receipt_fails_closed_on_any_promotion_gate() -> None:
-    _plan_value, _initial, state, bundle, _terminal = _fixture()
+    plan, scaling, reduced, _initial, state, bundle, _terminal = _fixture()
+    source_solution = immutable_array(
+        state.displacement_si[plan.array("free_dofs")],
+        dtype="<f8",
+    )
     base = {
         "source_solver_schema_version": "stateful-nonlinear-path.v1",
         "source_solver_receipt_hash": _hash("6"),
+        "equation_scaling_hash": scaling.scaling_hash,
+        "reduced_csr_identity_hash": reduced.identity_hash,
+        "source_solution_data_hash": array_data_hash(source_solution),
+        "solver_coordinate_scaling_receipt_hash": _hash("e"),
         "state_hash": state.state_hash,
         "material_state_bundle_hash": bundle.bundle_hash,
         "path_history_hash": _hash("7"),
@@ -196,9 +315,21 @@ def test_terminal_receipt_fails_closed_on_any_promotion_gate() -> None:
         ):
             create_nonlinear_terminal_receipt(**{**base, **override})
 
+    with pytest.raises(
+        NonlinearResultIRError,
+        match="nonlinear_terminal_history_count_invalid",
+    ):
+        create_nonlinear_terminal_receipt(
+            **{
+                **base,
+                "rejected_attempt_count": 0,
+                "rollback_count": 1,
+            }
+        )
+
 
 def test_result_rejects_valid_material_bundle_bound_to_different_state() -> None:
-    plan, initial_state, state, _bundle, terminal = _fixture()
+    plan, scaling, reduced, initial_state, state, _bundle, terminal = _fixture()
     wrong_initial = create_initial_material_state_bundle(
         bundle_id="material.wrong.initial",
         model_ir_content_hash=plan.model_ir_content_hash,
@@ -239,6 +370,8 @@ def test_result_rejects_valid_material_bundle_bound_to_different_state() -> None
         create_nonlinear_numerical_result_ir(
             result_id="result.nonlinear.stale",
             execution_plan=plan,
+            equation_scaling=scaling,
+            reduced_csr=reduced,
             committed_state=state,
             material_state_bundle=wrong_committed,
             terminal_receipt=terminal,
@@ -273,6 +406,46 @@ def test_displacement_artifact_and_manifest_authority_are_fail_closed() -> None:
     ):
         validate_nonlinear_result_manifest(manifest)
 
+    incoherent = deepcopy(result.to_manifest())
+    incoherent["dof_count"] = 18
+    unsigned = dict(incoherent)
+    unsigned.pop("result_hash")
+    incoherent["result_hash"] = canonical_hash(unsigned)
+    with pytest.raises(
+        NonlinearResultIRError,
+        match="nonlinear_result_displacement_shape_mismatch",
+    ):
+        validate_nonlinear_result_manifest(incoherent)
+
+    wrong_uri = deepcopy(result.to_manifest())
+    wrong_uri["displacement_artifact"]["artifact_uri"] = (
+        "artifact://nonlinear-result/wrong/displacement_global.f64le"
+    )
+    descriptor = wrong_uri["displacement_artifact"]
+    descriptor["content_hash"] = canonical_hash(
+        {key: value for key, value in descriptor.items() if key != "content_hash"}
+    )
+    unsigned = dict(wrong_uri)
+    unsigned.pop("result_hash")
+    wrong_uri["result_hash"] = canonical_hash(unsigned)
+    with pytest.raises(
+        NonlinearResultIRError,
+        match="nonlinear_result_displacement_uri_invalid",
+    ):
+        validate_nonlinear_result_manifest(wrong_uri)
+
+
+def test_retained_displacement_requires_immutable_bytes_backing() -> None:
+    result = _result()
+    owned = result.displacement_global_si.copy()
+    owned.setflags(write=False)
+    tampered = replace(result, _displacement_global_si=owned)
+    with pytest.raises(
+        NonlinearResultIRError,
+        match="nonlinear_result_displacement_mutable",
+    ):
+        validate_nonlinear_numerical_result_ir(tampered)
+
 
 def test_recovery_candidate_partitions_reaction_but_remains_non_authoritative() -> None:
     result = _result()
@@ -296,7 +469,12 @@ def test_recovery_candidate_partitions_reaction_but_remains_non_authoritative() 
     assert candidate.authority_profile == NONLINEAR_RECOVERY_CANDIDATE_AUTHORITY_PROFILE
     assert manifest["authority"]["reaction"] == "candidate_not_authoritative"
     assert manifest["claim_boundary"]["reaction_authority"] is False
-    assert candidate.free_residual_linf == pytest.approx(0.0)
+    assert (
+        manifest["claim_boundary"]["element_global_assembly_equation_scaling_bound"]
+        is True
+    )
+    assert manifest["claim_boundary"]["free_equation_scaling_bound"] is True
+    assert candidate.free_scaled_residual_linf == pytest.approx(0.0)
     assert candidate.reaction_global_si[0] == pytest.approx(-10.0)
     assert candidate.reaction_global_si[5] == pytest.approx(-4.0)
     validate_nonlinear_recovery_candidate(candidate)
@@ -319,6 +497,26 @@ def test_recovery_rejects_assembly_free_residual_and_authority_promotion() -> No
             global_internal_force_si=zeros,
             element_global_dofs=dofs,
             element_internal_force_si=mismatch,
+            member_axial_force_si=np.asarray([0.0]),
+            recovery_law_receipt_hash=_hash("b"),
+        )
+
+    large_internal = zeros.copy()
+    large_internal[0] = 1.0e12
+    large_internal[5] = 1.0
+    masked_moment_error = large_internal.reshape(1, 12).copy()
+    masked_moment_error[0, 5] = 0.0
+    with pytest.raises(
+        NonlinearRecoveryError,
+        match="element_assembly_failed",
+    ):
+        create_nonlinear_recovery_candidate(
+            recovery_id="recovery.mixed-unit-mismatch",
+            nonlinear_result=result,
+            global_external_force_si=zeros,
+            global_internal_force_si=large_internal,
+            element_global_dofs=dofs,
+            element_internal_force_si=masked_moment_error,
             member_axial_force_si=np.asarray([0.0]),
             recovery_law_receipt_hash=_hash("b"),
         )

@@ -6,6 +6,7 @@ from types import MappingProxyType
 import numpy as np
 import pytest
 
+from structural_analysis.engine_v2.contracts._canonical import immutable_array
 from structural_analysis.engine_v2.contracts.nonlinear_recovery import (
     NonlinearRecoveryError,
     create_nonlinear_recovery_candidate,
@@ -71,6 +72,32 @@ def test_manifest_binds_external_internal_and_element_source_arrays() -> None:
     assert candidate.source_array("element_global_dofs").flags.writeable is False
     assert candidate.source_array("element_internal_force_si").flags.writeable is False
     assert candidate.vector("global_external_force_si").flags.writeable is False
+    with pytest.raises(ValueError):
+        candidate.source_array("element_global_dofs").setflags(write=True)
+    with pytest.raises(ValueError):
+        candidate.vector("global_external_force_si").setflags(write=True)
+
+
+def test_retained_source_arrays_require_immutable_bytes_backing() -> None:
+    candidate = _candidate()
+    owned_dofs = candidate.source_array("element_global_dofs").copy()
+    owned_dofs.setflags(write=False)
+    tampered = replace(
+        candidate,
+        _source_arrays=MappingProxyType(
+            {
+                "element_global_dofs": owned_dofs,
+                "element_internal_force_si": candidate.source_array(
+                    "element_internal_force_si"
+                ),
+            }
+        ),
+    )
+    with pytest.raises(
+        NonlinearRecoveryError,
+        match="nonlinear_recovery_source_array_mutable",
+    ):
+        validate_nonlinear_recovery_candidate(tampered)
 
 
 def test_different_element_distribution_has_different_canonical_recovery_hash() -> None:
@@ -92,7 +119,7 @@ def test_retained_element_dof_or_force_tamper_fails_descriptor_validation() -> N
     candidate = _candidate()
     changed_dofs = candidate.source_array("element_global_dofs").copy()
     changed_dofs[0, 0], changed_dofs[0, 1] = changed_dofs[0, 1], changed_dofs[0, 0]
-    changed_dofs.setflags(write=False)
+    changed_dofs = immutable_array(changed_dofs, dtype="<i8")
     tampered_dofs = replace(
         candidate,
         _source_arrays=MappingProxyType(
@@ -112,14 +139,12 @@ def test_retained_element_dof_or_force_tamper_fails_descriptor_validation() -> N
 
     changed_force = candidate.source_array("element_internal_force_si").copy()
     changed_force[0, 0] += 1.0
-    changed_force.setflags(write=False)
+    changed_force = immutable_array(changed_force, dtype="<f8")
     tampered_force = replace(
         candidate,
         _source_arrays=MappingProxyType(
             {
-                "element_global_dofs": candidate.source_array(
-                    "element_global_dofs"
-                ),
+                "element_global_dofs": candidate.source_array("element_global_dofs"),
                 "element_internal_force_si": changed_force,
             }
         ),
@@ -135,7 +160,7 @@ def test_external_force_tamper_fails_vector_descriptor_validation() -> None:
     candidate = _candidate()
     changed_external = candidate.vector("global_external_force_si").copy()
     changed_external[6] += 1.0
-    changed_external.setflags(write=False)
+    changed_external = immutable_array(changed_external, dtype="<f8")
     tampered = replace(
         candidate,
         _vectors=MappingProxyType(

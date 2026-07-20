@@ -34,7 +34,7 @@
       "const": "nonlinear_static_numerical_state"
     },
     "authority_profile": {
-      "const": "authoritative_converged_nonlinear_state_and_material_history.v1"
+      "const": "authoritative_converged_nonlinear_numerical_and_terminal_material_state.v1"
     },
     "authority": {
       "type": "object",
@@ -72,6 +72,8 @@
       "required": [
         "model_ir_content_hash",
         "execution_plan_hash",
+        "equation_scaling_hash",
+        "reduced_csr_identity_hash",
         "operator_hash",
         "state_hash",
         "state_epoch",
@@ -85,6 +87,8 @@
       "properties": {
         "model_ir_content_hash": {"$ref": "#/$defs/hash"},
         "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "equation_scaling_hash": {"$ref": "#/$defs/hash"},
+        "reduced_csr_identity_hash": {"$ref": "#/$defs/hash"},
         "operator_hash": {"$ref": "#/$defs/hash"},
         "state_hash": {"$ref": "#/$defs/hash"},
         "state_epoch": {
@@ -169,8 +173,14 @@
       "required": [
         "committed_nonlinear_state",
         "ordered_material_state_bundle",
+        "equation_scaling_replay_bound",
+        "reduced_csr_identity_bound",
+        "source_free_solution_bytes_bound",
         "residual_and_increment_terminal_gate",
         "fallback_or_regularization_promoted",
+        "constitutive_law_verified",
+        "material_state_history_replayed",
+        "fiber_frame_kinematic_adapter_authority",
         "reaction_authority",
         "member_force_authority",
         "integration_point_engineering_output_authority",
@@ -182,8 +192,14 @@
       "properties": {
         "committed_nonlinear_state": {"const": true},
         "ordered_material_state_bundle": {"const": true},
+        "equation_scaling_replay_bound": {"const": true},
+        "reduced_csr_identity_bound": {"const": true},
+        "source_free_solution_bytes_bound": {"const": true},
         "residual_and_increment_terminal_gate": {"const": true},
         "fallback_or_regularization_promoted": {"const": false},
+        "constitutive_law_verified": {"const": false},
+        "material_state_history_replayed": {"const": false},
+        "fiber_frame_kinematic_adapter_authority": {"const": false},
         "reaction_authority": {"const": false},
         "member_force_authority": {"const": false},
         "integration_point_engineering_output_authority": {"const": false},

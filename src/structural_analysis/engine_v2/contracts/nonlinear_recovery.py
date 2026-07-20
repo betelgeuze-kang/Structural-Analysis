@@ -15,7 +15,8 @@ recovery laws from the exact nonlinear state.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
+import math
 import re
 from types import MappingProxyType
 from typing import Any, Literal
@@ -25,6 +26,7 @@ import numpy as np
 from structural_analysis.engine_v2.contracts._canonical import (
     array_data_hash,
     canonical_hash,
+    has_immutable_bytes_backing,
     immutable_array,
 )
 from structural_analysis.engine_v2.contracts.nonlinear_result import (
@@ -61,7 +63,9 @@ NONLINEAR_RECOVERY_CANDIDATE_CLAIM_BOUNDARY = MappingProxyType(
         "element_global_dof_bytes_bound": True,
         "element_internal_force_bytes_bound": True,
         "element_global_assembly_checked": True,
+        "element_global_assembly_equation_scaling_bound": True,
         "free_equilibrium_checked": True,
+        "free_equation_scaling_bound": True,
         "constrained_reaction_partitioned": True,
         "element_or_material_law_replayed": False,
         "reaction_authority": False,
@@ -76,7 +80,7 @@ NONLINEAR_RECOVERY_CANDIDATE_CLAIM_BOUNDARY = MappingProxyType(
 _HASH_ZERO = "sha256:" + "0" * 64
 _HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 _STABLE_ID_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
-_ASSEMBLY_RELATIVE_TOLERANCE = 1.0e-10
+_ASSEMBLY_SCALED_LINF_TOLERANCE = 1.0e-10
 _SOURCE_ARRAY_SPECS = (
     ("element_global_dofs", "<i8", "element_order_global_equations"),
     ("element_internal_force_si", "<f8", "element_order_global_force_components"),
@@ -163,14 +167,14 @@ class NonlinearRecoveryCandidateIR:
     dof_count: int
     element_count: int
     element_force_width: int
-    element_assembly_relative_linf: float
-    free_residual_linf: float
+    element_assembly_scaled_linf: float
+    free_scaled_residual_linf: float
     source_descriptors: tuple[NonlinearRecoverySourceArrayDescriptor, ...]
     descriptors: tuple[NonlinearRecoveryVectorDescriptor, ...]
     extensions: Mapping[str, Any]
-    _source_arrays: Mapping[str, np.ndarray]
-    _vectors: Mapping[str, np.ndarray]
-    _source_result: NonlinearNumericalResultIR
+    _source_arrays: Mapping[str, np.ndarray] = field(repr=False, compare=False)
+    _vectors: Mapping[str, np.ndarray] = field(repr=False, compare=False)
+    _source_result: NonlinearNumericalResultIR = field(repr=False, compare=False)
 
     def source_array(self, name: str) -> np.ndarray:
         try:
@@ -246,25 +250,32 @@ def create_nonlinear_recovery_candidate(
         )
 
     assembled = _scatter_element_forces(dofs, element_force, dof_count)
-    assembly_error = _relative_inf_error(assembled, global_internal)
-    if assembly_error > _ASSEMBLY_RELATIVE_TOLERANCE:
+    scale_divisors = result._equation_scaling.scale_divisors_si
+    assembly_error = float(
+        np.linalg.norm(
+            (assembled - global_internal) / scale_divisors,
+            ord=np.inf,
+        )
+    )
+    if assembly_error > _ASSEMBLY_SCALED_LINF_TOLERANCE:
         _fail(
             "nonlinear_recovery_element_assembly_failed",
-            "/metrics/element_assembly_relative_linf",
-            "Element force assembly does not match supplied global internal force.",
+            "/metrics/element_assembly_scaled_linf",
+            "Scaled element force assembly does not match supplied global internal force.",
         )
 
     residual = global_internal - global_external
     free = plan.array("free_dofs").astype(np.int64, copy=False)
     constrained = plan.array("constrained_dofs").astype(np.int64, copy=False)
-    free_residual_norm = (
-        float(np.linalg.norm(residual[free], ord=np.inf)) if free.size else 0.0
+    scaled_residual = residual / result._equation_scaling.scale_divisors_si
+    free_scaled_residual_norm = (
+        float(np.linalg.norm(scaled_residual[free], ord=np.inf)) if free.size else 0.0
     )
-    if free_residual_norm > result._terminal_receipt.residual_tolerance_linf:
+    if free_scaled_residual_norm > result._terminal_receipt.residual_tolerance_linf:
         _fail(
             "nonlinear_recovery_free_equilibrium_failed",
-            "/metrics/free_residual_linf",
-            "Recovered free-equation residual exceeds the terminal tolerance.",
+            "/metrics/free_scaled_residual_linf",
+            "Recovered scaled free-equation residual exceeds the terminal tolerance.",
         )
 
     reaction = np.zeros(dof_count, dtype="<f8")
@@ -294,8 +305,7 @@ def create_nonlinear_recovery_candidate(
         for name, dtype, scope in _SOURCE_ARRAY_SPECS
     )
     descriptors = tuple(
-        _vector_descriptor(name, scope, vectors[name])
-        for name, scope in _VECTOR_SPECS
+        _vector_descriptor(name, scope, vectors[name]) for name, scope in _VECTOR_SPECS
     )
     provisional = NonlinearRecoveryCandidateIR(
         schema_version=NONLINEAR_RECOVERY_CANDIDATE_SCHEMA_VERSION,
@@ -314,8 +324,8 @@ def create_nonlinear_recovery_candidate(
         dof_count=dof_count,
         element_count=int(dofs.shape[0]),
         element_force_width=int(dofs.shape[1]),
-        element_assembly_relative_linf=assembly_error,
-        free_residual_linf=free_residual_norm,
+        element_assembly_scaled_linf=assembly_error,
+        free_scaled_residual_linf=free_scaled_residual_norm,
         source_descriptors=source_descriptors,
         descriptors=descriptors,
         extensions=MappingProxyType({}),
@@ -362,7 +372,9 @@ def validate_nonlinear_recovery_candidate(
         "material_state_bundle_hash": result.material_state_bundle_hash,
         "dof_count": result.dof_count,
     }
-    if any(getattr(candidate, key) != value for key, value in expected_bindings.items()):
+    if any(
+        getattr(candidate, key) != value for key, value in expected_bindings.items()
+    ):
         _fail(
             "nonlinear_recovery_binding_mismatch",
             "/bindings",
@@ -371,6 +383,32 @@ def validate_nonlinear_recovery_candidate(
     _stable_id(candidate.recovery_id, "/recovery_id")
     _sha256(candidate.recovery_hash, "/recovery_hash")
     _sha256(candidate.recovery_law_receipt_hash, "/recovery_law_receipt_hash")
+    for path, value in (
+        ("/element_count", candidate.element_count),
+        ("/element_force_width", candidate.element_force_width),
+    ):
+        if type(value) is not int or value < 1 or value > 2**31 - 1:
+            _fail(
+                "nonlinear_recovery_count_invalid",
+                path,
+                "Recovery counts must be positive 32-bit integers.",
+            )
+    for path, value in (
+        (
+            "/metrics/element_assembly_scaled_linf",
+            candidate.element_assembly_scaled_linf,
+        ),
+        (
+            "/metrics/free_scaled_residual_linf",
+            candidate.free_scaled_residual_linf,
+        ),
+    ):
+        if type(value) is not float or not math.isfinite(value) or value < 0.0:
+            _fail(
+                "nonlinear_recovery_metric_invalid",
+                path,
+                "Recovery metrics must be finite non-negative floats.",
+            )
 
     if not isinstance(candidate._source_arrays, MappingProxyType):
         _fail(
@@ -422,9 +460,9 @@ def validate_nonlinear_recovery_candidate(
 
     dofs = candidate.source_array("element_global_dofs")
     element_force = candidate.source_array("element_internal_force_si")
-    if (
-        dofs.shape != element_force.shape
-        or dofs.shape != (candidate.element_count, candidate.element_force_width)
+    if dofs.shape != element_force.shape or dofs.shape != (
+        candidate.element_count,
+        candidate.element_force_width,
     ):
         _fail(
             "nonlinear_recovery_element_array_shape_invalid",
@@ -440,18 +478,24 @@ def validate_nonlinear_recovery_candidate(
     global_external = candidate.vector("global_external_force_si")
     global_internal = candidate.vector("global_internal_force_si")
     assembled = _scatter_element_forces(dofs, element_force, candidate.dof_count)
-    assembly_error = _relative_inf_error(assembled, global_internal)
-    if assembly_error != candidate.element_assembly_relative_linf:
+    scale_divisors = result._equation_scaling.scale_divisors_si
+    assembly_error = float(
+        np.linalg.norm(
+            (assembled - global_internal) / scale_divisors,
+            ord=np.inf,
+        )
+    )
+    if assembly_error != candidate.element_assembly_scaled_linf:
         _fail(
             "nonlinear_recovery_metric_mismatch",
-            "/metrics/element_assembly_relative_linf",
-            "Stored assembly metric does not match retained arrays.",
+            "/metrics/element_assembly_scaled_linf",
+            "Stored scaled assembly metric does not match retained arrays.",
         )
-    if assembly_error > _ASSEMBLY_RELATIVE_TOLERANCE:
+    if assembly_error > _ASSEMBLY_SCALED_LINF_TOLERANCE:
         _fail(
             "nonlinear_recovery_element_assembly_failed",
-            "/metrics/element_assembly_relative_linf",
-            "Element/global assembly gate failed.",
+            "/metrics/element_assembly_scaled_linf",
+            "Scaled element/global assembly gate failed.",
         )
 
     residual = global_internal - global_external
@@ -460,18 +504,21 @@ def validate_nonlinear_recovery_candidate(
         np.int64,
         copy=False,
     )
-    free_norm = float(np.linalg.norm(residual[free], ord=np.inf)) if free.size else 0.0
-    if free_norm != candidate.free_residual_linf:
+    scaled_residual = residual / result._equation_scaling.scale_divisors_si
+    free_scaled_norm = (
+        float(np.linalg.norm(scaled_residual[free], ord=np.inf)) if free.size else 0.0
+    )
+    if free_scaled_norm != candidate.free_scaled_residual_linf:
         _fail(
             "nonlinear_recovery_metric_mismatch",
-            "/metrics/free_residual_linf",
-            "Stored free residual metric does not match retained vectors.",
+            "/metrics/free_scaled_residual_linf",
+            "Stored scaled free residual metric does not match retained vectors.",
         )
-    if free_norm > result._terminal_receipt.residual_tolerance_linf:
+    if free_scaled_norm > result._terminal_receipt.residual_tolerance_linf:
         _fail(
             "nonlinear_recovery_free_equilibrium_failed",
-            "/metrics/free_residual_linf",
-            "Recovered free-equation residual exceeds the terminal tolerance.",
+            "/metrics/free_scaled_residual_linf",
+            "Recovered scaled free-equation residual exceeds the terminal tolerance.",
         )
     expected_reaction = np.zeros(candidate.dof_count, dtype="<f8")
     expected_free_residual = np.zeros(candidate.dof_count, dtype="<f8")
@@ -519,15 +566,6 @@ def _scatter_element_forces(
     return assembled
 
 
-def _relative_inf_error(actual: np.ndarray, reference: np.ndarray) -> float:
-    scale = max(
-        1.0,
-        float(np.linalg.norm(actual, ord=np.inf)),
-        float(np.linalg.norm(reference, ord=np.inf)),
-    )
-    return float(np.linalg.norm(actual - reference, ord=np.inf) / scale)
-
-
 def _float_array(value: Any, *, shape: tuple[int, ...], path: str) -> np.ndarray:
     try:
         array = immutable_array(value, dtype="<f8")
@@ -559,9 +597,10 @@ def _integer_matrix(value: Any, path: str) -> np.ndarray:
             path,
             "Element DOF array must use an integer dtype.",
         )
-    result = np.ascontiguousarray(array, dtype="<i8")
-    result.setflags(write=False)
-    return result
+    try:
+        return immutable_array(array, dtype="<i8")
+    except Exception as exc:
+        _fail("nonlinear_recovery_dof_array_invalid", path, str(exc))
 
 
 def _source_descriptor(
@@ -570,6 +609,12 @@ def _source_descriptor(
     scope: str,
     array: np.ndarray,
 ) -> NonlinearRecoverySourceArrayDescriptor:
+    if not has_immutable_bytes_backing(array):
+        _fail(
+            "nonlinear_recovery_source_array_mutable",
+            f"/source_arrays/{name}",
+            "Recovery source arrays must have immutable bytes backing.",
+        )
     if array.dtype.str != dtype:
         _fail(
             "nonlinear_recovery_source_array_dtype_invalid",
@@ -603,6 +648,12 @@ def _vector_descriptor(
     scope: str,
     vector: np.ndarray,
 ) -> NonlinearRecoveryVectorDescriptor:
+    if not has_immutable_bytes_backing(vector):
+        _fail(
+            "nonlinear_recovery_vector_mutable",
+            f"/vectors/{name}",
+            "Recovery vectors must have immutable bytes backing.",
+        )
     provisional = NonlinearRecoveryVectorDescriptor(
         name=name,
         dtype="<f8",
@@ -648,14 +699,10 @@ def _payload(
         "element_count": candidate.element_count,
         "element_force_width": candidate.element_force_width,
         "metrics": {
-            "element_assembly_relative_linf": (
-                candidate.element_assembly_relative_linf
-            ),
-            "free_residual_linf": candidate.free_residual_linf,
+            "element_assembly_scaled_linf": candidate.element_assembly_scaled_linf,
+            "free_scaled_residual_linf": candidate.free_scaled_residual_linf,
         },
-        "source_descriptors": [
-            row.to_dict() for row in candidate.source_descriptors
-        ],
+        "source_descriptors": [row.to_dict() for row in candidate.source_descriptors],
         "descriptors": [row.to_dict() for row in candidate.descriptors],
         "claim_boundary": dict(NONLINEAR_RECOVERY_CANDIDATE_CLAIM_BOUNDARY),
         "extensions": dict(candidate.extensions),
