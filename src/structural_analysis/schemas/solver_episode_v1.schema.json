@@ -1,0 +1,392 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/solver_episode_v1.schema.json",
+  "title": "SolverEpisodeIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "episode_id",
+    "episode_hash",
+    "authority_profile",
+    "bindings",
+    "analysis_profile",
+    "backend",
+    "episode_mode",
+    "observations",
+    "proposals",
+    "executed_actions",
+    "terminal",
+    "data_use",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-solver-episode.v1"
+    },
+    "episode_id": {
+      "$ref": "#/$defs/stable_id"
+    },
+    "episode_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "authority_profile": {
+      "const": "non_authoritative_solver_episode.v1"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "initial_state_hash"
+      ],
+      "properties": {
+        "model_ir_content_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "execution_plan_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "initial_state_hash": {
+          "$ref": "#/$defs/hash"
+        }
+      }
+    },
+    "analysis_profile": {
+      "$ref": "#/$defs/stable_id"
+    },
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "receipt_hash"],
+      "properties": {
+        "profile": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "receipt_hash": {
+          "$ref": "#/$defs/hash"
+        }
+      }
+    },
+    "episode_mode": {
+      "enum": ["baseline", "shadow", "guarded"]
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/observation"
+      }
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/proposal"
+      }
+    },
+    "executed_actions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    },
+    "terminal": {
+      "$ref": "#/$defs/terminal"
+    },
+    "data_use": {
+      "$ref": "#/$defs/data_use"
+    },
+    "extensions": {
+      "type": "object",
+      "maxProperties": 0,
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "nonnegative_number": {
+      "type": "number",
+      "minimum": 0
+    },
+    "action_kind": {
+      "enum": [
+        "step_size",
+        "solver_route",
+        "restart_length",
+        "preconditioner",
+        "warm_start",
+        "checkpoint_recovery"
+      ]
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observation_index",
+        "state_hash",
+        "iteration",
+        "restart_index",
+        "load_factor",
+        "residual_linf",
+        "scaled_residual_l2",
+        "increment_linf",
+        "runtime_ms",
+        "accepted",
+        "rollback"
+      ],
+      "properties": {
+        "observation_index": {
+          "$ref": "#/$defs/index"
+        },
+        "state_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "iteration": {
+          "$ref": "#/$defs/index"
+        },
+        "restart_index": {
+          "$ref": "#/$defs/index"
+        },
+        "load_factor": {
+          "type": "number"
+        },
+        "residual_linf": {
+          "$ref": "#/$defs/nonnegative_number"
+        },
+        "scaled_residual_l2": {
+          "$ref": "#/$defs/nonnegative_number"
+        },
+        "increment_linf": {
+          "$ref": "#/$defs/nonnegative_number"
+        },
+        "runtime_ms": {
+          "$ref": "#/$defs/nonnegative_number"
+        },
+        "accepted": {
+          "type": "boolean"
+        },
+        "rollback": {
+          "type": "boolean"
+        }
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposal_index",
+        "observation_index",
+        "policy_id",
+        "policy_version",
+        "policy_artifact_hash",
+        "action_kind",
+        "action_payload_hash",
+        "uncertainty",
+        "ood",
+        "disposition"
+      ],
+      "properties": {
+        "proposal_index": {
+          "$ref": "#/$defs/index"
+        },
+        "observation_index": {
+          "$ref": "#/$defs/index"
+        },
+        "policy_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "policy_version": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "policy_artifact_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "action_kind": {
+          "$ref": "#/$defs/action_kind"
+        },
+        "action_payload_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/nonnegative_number"
+        },
+        "ood": {
+          "type": "boolean"
+        },
+        "disposition": {
+          "enum": ["shadow_only", "eligible", "rejected"]
+        }
+      }
+    },
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_index",
+        "observation_index",
+        "proposal_index",
+        "action_kind",
+        "action_payload_hash",
+        "source",
+        "guard_receipt_hash"
+      ],
+      "properties": {
+        "action_index": {
+          "$ref": "#/$defs/index"
+        },
+        "observation_index": {
+          "$ref": "#/$defs/index"
+        },
+        "proposal_index": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/index"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "action_kind": {
+          "$ref": "#/$defs/action_kind"
+        },
+        "action_payload_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "source": {
+          "enum": ["baseline", "ai_proposal", "human_override"]
+        },
+        "guard_receipt_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "terminal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason",
+        "converged",
+        "final_authority_status",
+        "final_state_hash",
+        "final_result_hash",
+        "fallback_count",
+        "regularization_count",
+        "total_iterations",
+        "total_runtime_ms"
+      ],
+      "properties": {
+        "reason": {
+          "enum": [
+            "converged",
+            "max_iterations",
+            "breakdown",
+            "diverged",
+            "blocked",
+            "rolled_back"
+          ]
+        },
+        "converged": {
+          "type": "boolean"
+        },
+        "final_authority_status": {
+          "enum": ["none", "diagnostic", "numerical", "engineering"]
+        },
+        "final_state_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "final_result_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fallback_count": {
+          "$ref": "#/$defs/index"
+        },
+        "regularization_count": {
+          "$ref": "#/$defs/index"
+        },
+        "total_iterations": {
+          "$ref": "#/$defs/index"
+        },
+        "total_runtime_ms": {
+          "$ref": "#/$defs/nonnegative_number"
+        }
+      }
+    },
+    "data_use": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "training_eligible",
+        "evaluation_only",
+        "source_license_receipt_hash",
+        "privacy_receipt_hash",
+        "raw_customer_payload_included"
+      ],
+      "properties": {
+        "training_eligible": {
+          "type": "boolean"
+        },
+        "evaluation_only": {
+          "type": "boolean"
+        },
+        "source_license_receipt_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "privacy_receipt_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "raw_customer_payload_included": {
+          "const": false
+        }
+      }
+    }
+  }
+}
