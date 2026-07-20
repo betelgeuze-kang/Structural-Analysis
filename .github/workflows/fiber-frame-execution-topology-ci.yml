@@ -8,17 +8,26 @@ on:
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_execution_state_binding.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py"
+      - "src/structural_analysis/ai/__init__.py"
+      - "src/structural_analysis/ai/shadow_solver_controller.py"
+      - "src/structural_analysis/ai/fiber_frame_solver_episode_adapter.py"
       - "tests/test_stateful_fiber_frame2d_execution_topology.py"
       - "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py"
       - "tests/test_stateful_fiber_frame2d_kinematic_state_chain.py"
       - "tests/test_stateful_fiber_frame2d_nonlinear_execution_state_binding.py"
       - "tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py"
+      - "tests/test_engine_v2_solver_episode_v1.py"
+      - "tests/test_shadow_solver_controller.py"
+      - "tests/test_fiber_frame_solver_episode_adapter.py"
       - "docs/fiber-frame-nonlinear-execution-topology.md"
       - "docs/fiber-frame-physical-equation-scaling.md"
       - "docs/fiber-frame-nonlinear-kinematic-state-chain.md"
       - "docs/fiber-frame-material-state-projection-chain.md"
       - "docs/fiber-frame-nonlinear-execution-state-binding.md"
       - "docs/fiber-frame-nonlinear-terminal-receipt.md"
+      - "docs/fiber-frame-solver-episode-adapter.md"
+      - "docs/ai-shadow-solver-controller.md"
+      - "docs/cto-ai-solver-improvement-plan.md"
       - ".github/workflows/fiber-frame-execution-topology-ci.yml"
       - "scripts/check_github_actions_runner_policy.py"
 
@@ -44,22 +53,31 @@ jobs:
             src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_execution_state_binding.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
+            src/structural_analysis/ai/__init__.py \
+            src/structural_analysis/ai/shadow_solver_controller.py \
+            src/structural_analysis/ai/fiber_frame_solver_episode_adapter.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
             tests/test_stateful_fiber_frame2d_kinematic_state_chain.py \
             tests/test_stateful_fiber_frame2d_nonlinear_execution_state_binding.py \
-            tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py
+            tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
+            tests/test_engine_v2_solver_episode_v1.py \
+            tests/test_shadow_solver_controller.py \
+            tests/test_fiber_frame_solver_episode_adapter.py
           python -m ruff format --check \
             src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_execution_state_binding.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
+            src/structural_analysis/ai/__init__.py \
+            src/structural_analysis/ai/fiber_frame_solver_episode_adapter.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
             tests/test_stateful_fiber_frame2d_kinematic_state_chain.py \
             tests/test_stateful_fiber_frame2d_nonlinear_execution_state_binding.py \
-            tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py
+            tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
+            tests/test_fiber_frame_solver_episode_adapter.py
       - name: Compile
         run: |
           python -m compileall -q \
@@ -68,11 +86,17 @@ jobs:
             src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_execution_state_binding.py \
             src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
+            src/structural_analysis/ai/__init__.py \
+            src/structural_analysis/ai/shadow_solver_controller.py \
+            src/structural_analysis/ai/fiber_frame_solver_episode_adapter.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
             tests/test_stateful_fiber_frame2d_kinematic_state_chain.py \
             tests/test_stateful_fiber_frame2d_nonlinear_execution_state_binding.py \
-            tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py
+            tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
+            tests/test_engine_v2_solver_episode_v1.py \
+            tests/test_shadow_solver_controller.py \
+            tests/test_fiber_frame_solver_episode_adapter.py
       - name: Focused topology, scaling, and nonlinear-state binding tests
         run: |
           python -m pytest -vv \
@@ -81,6 +105,9 @@ jobs:
             tests/test_stateful_fiber_frame2d_kinematic_state_chain.py \
             tests/test_stateful_fiber_frame2d_nonlinear_execution_state_binding.py \
             tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
+            tests/test_engine_v2_solver_episode_v1.py \
+            tests/test_shadow_solver_controller.py \
+            tests/test_fiber_frame_solver_episode_adapter.py \
             tests/test_engine_v2_equation_scaling_v1.py
       - name: Fiber-frame regression neighborhood
         run: |

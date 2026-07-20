@@ -31,6 +31,8 @@ evidence determines promotable scope
 - Physical force/moment equation scaling and residual trace.
 - Nonlinear kinematic-state history.
 - Combined kinematic/material execution-state binding.
+- Bounded J5 nonlinear terminal convergence receipt with exact Newton replay.
+- Real baseline/shadow fiber-frame SolverEpisode adapter with exact rollback.
 
 ### Reusable geometric-nonlinear kernels
 
@@ -44,9 +46,9 @@ evidence determines promotable scope
 - Non-promoting Lee-frame formal V&V candidate generator.
 - Shadow-only deterministic solver-step controller.
 
-## Next implementation wave
+## Implemented first-wave slice
 
-### A. Real fiber-frame SolverEpisode adapter
+### A. Real fiber-frame SolverEpisode adapter — implemented
 
 **Goal:** convert the existing accepted fiber-frame load path into replayable baseline and shadow episodes.
 
@@ -67,9 +69,17 @@ Acceptance:
 - policy/artifact/action hashes replay exactly;
 - episode authority remains false.
 
-### B. Fiber-frame nonlinear terminal and ResultIR adapter
+The implementation additionally requires the exact J5 receipt for every ready
+path, supports a terminal one-step exact rollback path, binds every source step
+and physical residual trace by canonical hash, and keeps runtime at zero under
+an explicit no-timing-authority profile.
 
-**Goal:** grant bounded numerical-state authority only after exact convergence gates.
+## Next implementation wave
+
+### B. J5-backed fiber-frame NonlinearNumericalResultIR adapter
+
+**Goal:** consume the existing J5 terminal receipt and grant bounded
+numerical-state authority only after the remaining ResultIR bindings pass.
 
 Required bindings:
 
