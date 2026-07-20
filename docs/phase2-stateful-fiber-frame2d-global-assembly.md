@@ -19,6 +19,12 @@ integration-point state to an explicit parent hash and epoch.
   section-response binding to every committed Gauss-point parent;
 - committed checkpoints carrying `parent_state_hash`, `epoch`, global physical
   displacements, and all member/integration-point states;
+- a 4 MiB-bounded, signed-zero-preserving canonical UTF-8 JSON artifact with a
+  closed JSON Schema for the built-in RC fiber state hierarchy;
+- fail-closed duplicate-key, non-finite-token, noncanonical-byte, unknown-field,
+  nested-state-hash, problem-contract, and existing-target checks;
+- exact persisted checkpoint restoration and continuation to the same final
+  checkpoint as the uninterrupted nonlinear load path;
 - residual-and-increment-gated Newton commit, exact failed-step rollback,
   deterministic replay, and exact in-memory checkpoint restart;
 - a two-element elastic cantilever closed-form check, arbitrary rigid rotation
@@ -39,6 +45,40 @@ assert receipt["contract_pass"] is True
 
 `partial` means only that this bounded Level-1 analytic/manufactured contract
 passed. It is not a general frame solver or product-readiness status.
+
+## Persisted checkpoint artifact
+
+The artifact writer validates one accepted checkpoint against the explicit
+problem and creates a new file without overwriting an existing target. The
+reader checks the byte limit and canonical JSON form, validates every
+closed-schema object, reconstructs the steel/concrete fiber states, verifies all
+nested state hashes, and finally re-runs the frame checkpoint validator against
+the supplied problem. The checkpoint retains its `parent_state_hash`, but this
+slice does not persist or restore a bundle containing the full ancestor chain.
+
+```python
+from structural_analysis.assembly import (
+    read_stateful_fiber_frame2d_checkpoint_artifact,
+    write_stateful_fiber_frame2d_checkpoint_artifact,
+)
+
+write_stateful_fiber_frame2d_checkpoint_artifact(
+    problem,
+    accepted_checkpoint,
+    "accepted-checkpoint.json",
+)
+restored = read_stateful_fiber_frame2d_checkpoint_artifact(
+    problem,
+    "accepted-checkpoint.json",
+)
+assert restored.state_hash == accepted_checkpoint.state_hash
+assert restored.canonical_bytes() == accepted_checkpoint.canonical_bytes()
+```
+
+The serialized artifact uses the
+`canonical-signed-zero-preserving-utf8-json.v1` storage profile. Preserving the
+sign of binary64 zero is required because the immutable checkpoint hash is
+defined over exact little-endian binary state bytes.
 
 ## Verification
 
@@ -62,10 +102,13 @@ identical parent object and canonical bytes.
 The transformation is fixed to the initial chord, so this remains a
 small-displacement material-nonlinear reference. It has no corotational update,
 geometric stiffness, shear deformation, torsion, general model import,
-prescribed-displacement surface, persistent checkpoint parser, or production
-sparse solver. The two-member Gauss-point state path is not evidence for
-plastic-hinge calibration, localization regularization, or mesh-objective
-distributed plasticity.
+prescribed-displacement surface, generalized section-state codec registry, or
+production sparse solver. It also has no persisted ancestor-chain bundle.
+Persistent restoration is limited to the built-in RC section state hierarchy
+represented by combined-hardening steel and asymmetric concrete-damage fiber
+states. The two-member Gauss-point state path is not evidence for plastic-hinge
+calibration, localization regularization, or mesh-objective distributed
+plasticity.
 
 No external code-to-code, published, experimental, or customer-shadow receipt
 is supplied. Production ROCm/HIP execution, full-building equilibrium, and G1
