@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILDER = ROOT / "scripts/build_phase2_state_updated_concrete_damage_artifacts.py"
+TEST = ROOT / "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py"
 
 
 def main() -> int:
@@ -21,13 +22,28 @@ def main() -> int:
         "STRUCTURE_LOAD_FACTORS = "
         "(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)\n"
     )
-    replacement = (
-        constants
-        + 'LOCALIZATION_TIE_BREAK_PROFILE = "first_element_area_imperfection.v1"\n'
-        + "LOCALIZATION_AREA_IMPERFECTION_RATIO = 1.0e-6\n"
-    )
     if "LOCALIZATION_TIE_BREAK_PROFILE" not in text:
-        text = text.replace(constants, replacement, 1)
+        text = text.replace(
+            constants,
+            constants
+            + "LOCALIZATION_TIE_BREAK_PROFILE = "
+            + '"first_element_area_imperfection_selects_second_branch.v1"\n'
+            + "LOCALIZATION_AREA_IMPERFECTION_RATIO = 1.0e-6\n"
+            + "LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE = 1.0e-4\n",
+            1,
+        )
+    else:
+        text = text.replace(
+            'LOCALIZATION_TIE_BREAK_PROFILE = "first_element_area_imperfection.v1"',
+            'LOCALIZATION_TIE_BREAK_PROFILE = "first_element_area_imperfection_selects_second_branch.v1"',
+        )
+        if "LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE" not in text:
+            text = text.replace(
+                "LOCALIZATION_AREA_IMPERFECTION_RATIO = 1.0e-6\n",
+                "LOCALIZATION_AREA_IMPERFECTION_RATIO = 1.0e-6\n"
+                "LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE = 1.0e-4\n",
+                1,
+            )
     text = text.replace(
         '"seed at material-point, one-element, and two-element displacement-controlled "\n'
         '    "axial-chain scope. It records irreversible tension/compression damage, "',
@@ -69,50 +85,22 @@ def _json_differences(
     path: str = "$",
 ) -> list[dict[str, Any]]:
     if type(existing) is not type(expected):
-        return [
-            {
-                "path": path,
-                "existing": existing,
-                "expected": expected,
-                "kind": "type",
-            }
-        ]
+        return [{"path": path, "existing": existing, "expected": expected, "kind": "type"}]
     if isinstance(existing, dict):
         rows: list[dict[str, Any]] = []
         for key in sorted(set(existing) | set(expected)):
             child = f"{path}.{key}"
             if key not in existing:
-                rows.append(
-                    {
-                        "path": child,
-                        "existing": "<missing>",
-                        "expected": expected[key],
-                        "kind": "missing_existing",
-                    }
-                )
+                rows.append({"path": child, "existing": "<missing>", "expected": expected[key], "kind": "missing_existing"})
             elif key not in expected:
-                rows.append(
-                    {
-                        "path": child,
-                        "existing": existing[key],
-                        "expected": "<missing>",
-                        "kind": "missing_expected",
-                    }
-                )
+                rows.append({"path": child, "existing": existing[key], "expected": "<missing>", "kind": "missing_expected"})
             else:
                 rows.extend(_json_differences(existing[key], expected[key], child))
         return rows
     if isinstance(existing, list):
         rows = []
         if len(existing) != len(expected):
-            rows.append(
-                {
-                    "path": f"{path}.length",
-                    "existing": len(existing),
-                    "expected": len(expected),
-                    "kind": "length",
-                }
-            )
+            rows.append({"path": f"{path}.length", "existing": len(existing), "expected": len(expected), "kind": "length"})
         for index, (left, right) in enumerate(zip(existing, expected, strict=False)):
             rows.extend(_json_differences(left, right, f"{path}[{index}]"))
         return rows
@@ -167,7 +155,7 @@ def _difference_diagnostic(existing: Any, expected: Any) -> dict[str, Any]:
     new_problem = '''    symmetric_structure_problem = two_element_concrete_damage_chain_problem(
         material=material
     )
-    weakened_element = replace(
+    perturbed_element = replace(
         symmetric_structure_problem.elements[0],
         area_m2=(
             symmetric_structure_problem.elements[0].area_m2
@@ -180,7 +168,7 @@ def _difference_diagnostic(existing: Any, expected: Any) -> dict[str, Any]:
             "phase2_state_updated_concrete_damage_two_element_chain_"
             "imperfection_v1"
         ),
-        elements=(weakened_element, symmetric_structure_problem.elements[1]),
+        elements=(perturbed_element, symmetric_structure_problem.elements[1]),
     )
 '''
     if old_problem in text:
@@ -198,13 +186,18 @@ def _difference_diagnostic(existing: Any, expected: Any) -> dict[str, Any]:
         selected_localization_index
     ].element_id
     deterministic_branch_selected = bool(
-        selected_localization_element_id == "bar-1"
-        and final_damage[0] > final_damage[1]
+        selected_localization_element_id == "bar-2"
+        and final_damage[1] > final_damage[0]
     )
     localization_observed = bool(
 '''
     if "selected_localization_element_id" not in text:
         text = text.replace(final_damage_block, final_damage_replacement, 1)
+    text = text.replace(
+        "        and min(final_damage) == 0.0\n",
+        "        and min(final_damage) <= LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE\n",
+        1,
+    )
     text = text.replace(
         "        and localization_observed\n    )\n",
         "        and localization_observed\n"
@@ -220,7 +213,10 @@ def _difference_diagnostic(existing: Any, expected: Any) -> dict[str, Any]:
             "localization_tie_break": {
                 "profile": LOCALIZATION_TIE_BREAK_PROFILE,
                 "area_imperfection_ratio": LOCALIZATION_AREA_IMPERFECTION_RATIO,
-                "weakened_element_id": "bar-1",
+                "nondominant_damage_tolerance": (
+                    LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE
+                ),
+                "perturbed_element_id": "bar-1",
                 "selected_localization_element_id": (
                     selected_localization_element_id
                 ),
@@ -238,6 +234,9 @@ def _difference_diagnostic(existing: Any, expected: Any) -> dict[str, Any]:
         "localization_tie_break_profile": LOCALIZATION_TIE_BREAK_PROFILE,
         "localization_area_imperfection_ratio": (
             LOCALIZATION_AREA_IMPERFECTION_RATIO
+        ),
+        "localization_nondominant_damage_tolerance": (
+            LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE
         ),
         "selected_localization_element_id": selected_localization_element_id,
         "mesh_objectivity_claim": False,
@@ -264,6 +263,42 @@ def _difference_diagnostic(existing: Any, expected: Any) -> dict[str, Any]:
         1,
     )
     BUILDER.write_text(text, encoding="utf-8")
+
+    test = TEST.read_text(encoding="utf-8")
+    test = test.replace(
+        'assert tie_break["weakened_element_id"] == "bar-1"',
+        'assert tie_break["perturbed_element_id"] == "bar-1"',
+    )
+    test = test.replace(
+        'assert tie_break["selected_localization_element_id"] == "bar-1"',
+        'assert tie_break["selected_localization_element_id"] == "bar-2"',
+    )
+    test = test.replace(
+        'assert result["structure_benchmark"]["final_element_compressive_damage"][0] > 0.9\n'
+        '    assert result["structure_benchmark"]["final_element_compressive_damage"][1] == 0.0',
+        'assert result["structure_benchmark"]["final_element_compressive_damage"][1] > 0.9\n'
+        '    assert result["structure_benchmark"]["final_element_compressive_damage"][0] <= (\n'
+        '        module.LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE\n'
+        '    )',
+    )
+    if "def test_builder_check_reports_structured_json_path_difference" in test:
+        start = test.index("def test_builder_check_reports_structured_json_path_difference")
+        end = test.index("\n\ndef test_builder_is_deterministic", start)
+        replacement = '''def test_difference_diagnostic_reports_structured_json_path() -> None:
+    diagnostic = module._difference_diagnostic(
+        {"structure_benchmark": {"localization_observed": False}},
+        {"structure_benchmark": {"localization_observed": True}},
+    )
+
+    assert diagnostic["difference_count"] == 1
+    assert diagnostic["first_difference"]["path"] == (
+        "$.structure_benchmark.localization_observed"
+    )
+    assert diagnostic["first_difference"]["existing"] is False
+    assert diagnostic["first_difference"]["expected"] is True
+'''
+        test = test[:start] + replacement + test[end:]
+    TEST.write_text(test, encoding="utf-8")
     return 0
 
 
