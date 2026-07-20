@@ -1,148 +1,118 @@
-# Structural Optimization Workbench
+# Structural Analysis
 
-> Workstation-based, engineer-in-loop structural analysis and optimization workbench with evidence/report packaging, deterministic validation surfaces, and bounded commercial-readiness gates.
+**Independent structural-analysis engine — Developer Preview**
 
-## Current readiness posture
+This repository develops a Python structural-analysis engine around a strict separation of:
 
-This repository is currently best described as a **workstation-based, engineer-in-loop structural analysis/optimization workbench**. The release evidence system, viewer/report workflow, structural-scope quarantine, and PM/CTO handoff surfaces are mature enough to support internal review and bounded delivery preparation.
-
-The repository is **not yet** release-ready, paid-pilot-ready, limited-commercial-ready, or an independent commercial structural solver. The canonical readiness snapshot remains blocked. The main open gates are:
-
-- G1 full-load 1.0, full-mesh nonlinear equilibrium, material Newton breadth, and production ROCm/HIP residency;
-- Developer Preview final gates for selected medium models, acquired/checksummed and
-  executed IFC import-loss evidence, Linux/Windows reproducibility, and human new-user
-  observation;
-- PR/nightly CI 30-run streak evidence;
-- product/legal license approval evidence;
-- customer shadow evidence 3/3;
-- external benchmark receipts 4/4;
-- structural-scope owner decisions and release-surface cleanup.
-
-Allowed current claim: **engineer-in-loop review assist and workstation delivery preparation**.
-Forbidden current claim: **independent commercial solver readiness, structural engineer replacement, permit automation, production HIP solver truth, paid-pilot readiness, limited-commercial readiness, or autonomous AI structural engineer**.
-
-## Canonical readiness source
-
-The canonical product readiness source is:
-
-```bash
-python3 scripts/build_product_readiness_snapshot.py --json --no-write
+```text
+user/model input
+    → canonical model and execution topology
+    → deterministic physics kernels and solver state
+    → explicit result/recovery authority
+    → evidence, replay, and AI observation layers
 ```
 
-Release-facing documentation must stay synchronized with:
+The project is not presented as a commercial-code replacement. Capabilities are promoted only when the exact model, state, solver, result, recovery, and verification contracts required for that claim are present.
 
-- `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`
-- `implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json`
-- `implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
-- `implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json`
+## Current architecture
 
-## Developer Preview boundary
+### 1. Canonical model and public analysis surface
 
-Developer Preview deliverables are packaged, but final gates remain open. Use:
+- Detached canonical neutral-model loading and validation.
+- Public linear-static, modal, linear-buckling, and model-health paths.
+- A bounded public nonlinear two-bar truss Python API and CLI for the verified symmetric material-geometric Newton slice.
+- Safe output-path handling and fail-closed unsupported-feature reporting.
 
-- `Developer Preview candidate`
-- `deliverables 10/10`
-- `final gates 5/9`
+### 2. Engine v2 contracts
 
-Do not claim `Developer Preview ready` until selected medium models, IFC import-health
-and silent-loss execution evidence, Linux/Windows reproducibility, and human new-user
-workflow observation all pass.
+The backend-neutral contract layer includes:
 
-## G1 solver boundary
+- deterministic `ExecutionPlan`, equation scaling, sparse topology, and source commitments;
+- immutable `StateIR` and vector artifacts;
+- authoritative bounded linear numerical and engineering result contracts;
+- `MaterialStateBundle` for ordered committed/trial constitutive-state transport;
+- bounded nonlinear numerical-result and non-authoritative recovery-candidate contracts;
+- `SolverEpisodeIR` for baseline, shadow, and guarded observation/replay episodes.
 
-G1 currently has a ready direct-residual terminal slice and strong cause narrowing, but full G1 closure remains open. Use:
+These contracts do not automatically make every solver path authoritative. Each application must bind its exact topology, state ancestry, terminal gates, and recovery operator.
 
-- `direct residual terminal slice ready`
-- `full-load lane open`
-- `consistent residual/Jacobian Newton + ROCm worker is the recommended next lane`
+### 3. Stateful nonlinear foundations
 
-Do not claim:
+Current merged foundations include:
 
-- `G1 closed`
-- `full-load 1.0 solved`
-- `full-mesh nonlinear equilibrium ready`
-- `production HIP solver truth ready`
-- `material Newton breadth closed`
+- stateful uniaxial steel and concrete-damage material paths;
+- stateful axial chains with exact commit and rollback;
+- RC axial-curvature fiber sections and stateful fiber-beam elements;
+- bounded 2D stateful fiber-frame assembly, load stepping, persisted checkpoints, and complete checkpoint ancestry;
+- checkpoint-to-`MaterialStateBundle` projection and complete material-state history;
+- canonical six-DOF nonlinear fiber-frame topology and solver-coordinate scaling;
+- physical force/moment equation scaling and residual traces;
+- nonlinear kinematic-state history;
+- combined kinematic/material execution-state binding.
 
-until the corresponding G1 terminal evidence passes and the product readiness snapshot clears the numerical blockers.
+The combined execution-state contract is transport and replay infrastructure. Fiber-frame convergence and engineering results still require a separate terminal/result/recovery application adapter.
 
-## Engine v2 result authority boundary
+### 4. Reusable element kernels
 
-Engine v2는 solver recurrence와 결과 권위를 분리한다. CPU FGMRES receipt 자체는
-계속 `non_authoritative_solver_recurrence`이며 ResultIR를 직접 만들지 않는다.
-후속 `NumericalResultIR` v1은 exact scaled ExecutionPlan, reduced CSR, committed
-StateIR, free-solution bytes, independent full-residual/BC receipts를 결합한
-global-displacement state에만 수치 권위를 부여한다. `DiagnosticIR`는 sanitized
-code/path 관찰만 보존하며 모든 결과 권위가 false다.
+- Two-node 2D corotational truss response with material and geometric tangent separation.
+- Two-node planar corotational Euler–Bernoulli frame response with exact energy gradient and consistent Hessian.
+- Stateful fiber-beam and axial-curvature section kernels.
 
-Reaction, local-axis member force, engineering design/code compliance, legacy API와
-Viewer projection, release 또는 commercial authority는 아직 이 계약 범위 밖이다.
-자세한 내용은 `docs/engine-v2-result-diagnostic-authority.md`를 참조한다.
+Global corotational RC fiber-frame ownership, releases, rigid offsets, Timoshenko shear, and general 3D behavior remain future work.
 
-## Modal and buckling boundary
+### 5. AI control plane
 
-The repository has strict deterministic dense generalized-eigen kernels for
-`K phi = omega^2 M phi` and `K phi = lambda Kg phi`. Bounded public paths now
-connect both kernels. Modal analysis assembles 3D frame/truss elastic stiffness
-and consistent mass from explicit density. Linear buckling runs a dense reference
-static state and assembles frame initial stress from positive element compression.
-Both paths reject incomplete repeated-mode clusters without regularization or
-fallback, and each source-bound receipt passes four analytic/invariant gates.
+The repository contains:
 
-This is not a general dynamics/stability closure. Whole-model geometric-stiffness
-assembly is bounded to compression-only frame reference states; general
-frame/shell modal or stability coverage, mixed tension-compression, nodal lumped
-mass, nonlinear buckling/imperfections, sparse/large-mode artifacts, ROCm/HIP
-parity, Verification Level 2, and release readiness remain open. See
-`docs/phase2-whole-model-modal-analysis.md` and
-`docs/phase2-whole-model-linear-buckling.md`.
+- `SolverEpisodeIR` for trace-bound solver observations and actions;
+- a shadow-only step controller with policy/artifact/action identity binding, OOD checks, and deterministic baseline actions.
 
-## External code-to-code technical boundary
+Shadow proposals are recorded but not executed. No learned policy, residual correction, Jacobian correction, material-law correction, or design decision is authoritative. The next integration step is an adapter from the real fiber-frame load path into `SolverEpisodeIR` and the shadow controller.
 
-A source-bound technical receipt records actual local execution of OpenSees
-3.7.1 and CalculiX CrunchiX 2.17 for three narrow modal/static cases and seven
-metrics. A second source-bound receipt exercises the public whole-model frame
-modal and linear-buckling paths: two OpenSees eigenvalues and two per-mode MAC
-checks pass, while two CalculiX B32 buckling factors pass a declared 1% tolerance
-and the repeated two-mode subspace correlation is greater than `0.99999999`.
-Mode vectors are checksum-bound little-endian binary artifacts rather than JSON
-arrays. The five pinned external package assets are checksum-recorded but are
-not bundled in this repository.
+### 6. Verification and evidence
 
-This is not Verification Level 2 evidence credit. Product legal and
-redistribution approval, independent clean-runner reproduction, broad
-frame/shell/modal/buckling/nonlinear coverage, published benchmark decisions,
-and the hierarchy operator manifest remain missing. Commercial equivalence and
-release readiness remain false. See
-`docs/external-code-to-code-technical-execution.md`.
+- Deterministic analytic and bounded benchmark evidence remains separated from product claims.
+- The two-element concrete-damage counter-example uses an explicit versioned imperfection to select a reproducible symmetric localization branch; mesh-objectivity and production claims remain false.
+- The Lee-frame generator produces a non-promoting formal V&V candidate. Generated receipt bytes are not represented as publisher-source bytes, and formal credit remains blocked by source-use approval, independent reproduction, operator approval, and incomplete Level 2 evidence.
 
-## Workstation delivery posture
+## Explicit non-claims
 
-The strongest current product posture is workstation-based delivery preparation:
+The current repository does **not** claim:
 
-- engineer-in-loop review assist;
-- local viewer/report/evidence package;
-- structural-scope quarantine and claim-boundary governance;
-- deterministic validation surfaces and readiness evidence tracking;
-- bounded delivery package preparation.
+- general commercial nonlinear frame/shell capability;
+- authoritative fiber-frame reactions, member forces, or fiber outputs;
+- mesh-objective concrete fracture;
+- general contact, cable, shell, diaphragm, release, or rigid-offset support;
+- production sparse/HIP parity for the nonlinear fiber-frame path;
+- design-code compliance or automatic engineering approval;
+- guarded or autonomous AI solver control;
+- formal commercial verification hierarchy closure.
 
-This posture does not imply independent commercial solver readiness, paid-pilot readiness, or GA/enterprise readiness.
+## Immediate product critical path
 
-## Local-free closure packets
+```text
+merged fiber-frame topology/scaling/state binding
+    → real fiber-frame SolverEpisode adapter
+    → nonlinear terminal and ResultIR adapter
+    → exact independent engineering recovery operator
+    → bounded public RC fiber-frame API/CLI
+    → broader corotational and sparse-backend coverage
+    → formal Level 2/3 verification evidence
+```
 
-Local-free closure support documents live under `docs/pm/` and `docs/engineering/`:
+## Development
 
-- `docs/pm/local-free-closure-index.md`
-- `docs/pm/local-free-structural-scope-release-surface-decision-pack.md`
-- `docs/pm/local-free-release-surface-owner-decisions.draft.json`
-- `docs/pm/local-free-release-surface-owner-decisions.candidate.json`
-- `docs/pm/local-free-pm-release-blocker-closure-pack.md`
-- `docs/pm/local-free-developer-preview-final-gate-pack.md`
-- `docs/pm/local-free-evidence-intake-template-pack.md`
-- `docs/pm/local-free-claim-boundary-audit-pack.md`
-- `docs/pm/local-free-readme-current-state-claim-boundary-patch.md`
-- `docs/pm/local-free-readme-current-state-applied-safe-wording.md`
-- `docs/engineering/local-free-g1-closure-contract-runbook.md`
-- `docs/engineering/local-free-static-risk-pr-split-plan.md`
+```bash
+python -m pip install -e .[dev]
+python -m pytest -q
+```
 
-These packets are non-promoting. They prepare evidence closure but do not close release gates by themselves.
+Bounded public nonlinear two-bar example:
+
+```bash
+python -m structural_analysis.api.nonlinear_truss_cli model.json \
+  --out result.json \
+  --report-out report.json
+```
+
+Generated readiness and evidence artifacts are source-derived. Do not hand-edit them or infer a broader claim from a passing bounded benchmark.
