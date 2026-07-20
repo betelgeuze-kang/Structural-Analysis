@@ -104,10 +104,12 @@ J5 does not establish:
   member-force, or fiber-recovery authority;
 - code/design approval, release readiness, or commercial use.
 
-A later result adapter may consume the exact J5 receipt and issue a bounded
-`NonlinearNumericalResultIR` only after it independently satisfies that
-contract's state, artifact, and authority requirements. Exact engineering
-recovery remains a separate step after numerical-result issuance.
+The fiber-frame SolverEpisode adapter now consumes the exact J5 receipt for
+ready baseline/shadow observation traces, but deliberately retains
+`final_authority_status=none` and no result hash. A later result adapter may
+issue a bounded `NonlinearNumericalResultIR` only after it independently
+satisfies that contract's state, artifact, and authority requirements. Exact
+engineering recovery remains a separate step after numerical-result issuance.
 
 ## Focused verification
 

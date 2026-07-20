@@ -61,12 +61,18 @@ Out-of-range step sizes, mismatched artifact hashes, mismatched payload hashes,
 non-finite uncertainty, or inconsistent OOD disposition are rejected before an
 episode is produced.
 
-## Current integration context
+## Fiber-frame integration
 
-The branch is validated against main containing the merged J1–J4 fiber-frame
-execution-state chain and the deterministic concrete-damage evidence fix. Those
-contracts are inherited context only; this controller does not mint or modify
-their topology, scaling, kinematic, material-state, or evidence identities.
+`fiber_frame_solver_episode_adapter.py` now applies this controller to the
+actual stateful fiber-frame load path. It emits genesis plus accepted-step
+observations, or a final rollback observation for a blocked path, and binds
+each observation to its exact J4 execution-state epoch and J2 physical
+residual trace. A ready path must also replay an exact J5 receipt.
+
+The adapter passes only action-source observations to the controller: one row
+for each attempted transition. It then places the resulting proposals beside
+the complete observation sequence. This preserves one proposal per attempted
+step without inventing an action after the terminal observation.
 
 ## Authority boundary
 
@@ -75,8 +81,7 @@ numerical-result, reaction/member-force, design/code, release, or commercial
 authority. The controller does not correct residuals, Jacobians, material laws,
 or final results.
 
-Guarded execution, learned checkpoints, and an adapter from the actual
-fiber-frame solve path remain later reviewed contracts. The merged J1–J4
-fiber-frame topology, physical scaling, kinematic history, and combined
-execution-state contracts are inherited from main but are not minted by this
-controller.
+Guarded execution and learned checkpoints remain later reviewed contracts. The
+fiber-frame adapter is still non-authoritative: it observes the merged J1–J5
+chain but does not mint or modify topology, scaling, kinematic, material-state,
+convergence, or result authority.
