@@ -87,6 +87,10 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py"
         in targets
     )
+    assert (
+        "tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py"
+        in targets
+    )
     assert "tests/test_fiber_frame_solver_episode_adapter.py" in targets
     assert "tests/test_stateful_fiber_frame2d_material_state_bundle.py" in targets
     assert (

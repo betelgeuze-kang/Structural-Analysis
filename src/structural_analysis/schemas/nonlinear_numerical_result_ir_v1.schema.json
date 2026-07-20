@@ -199,7 +199,7 @@
         "fallback_or_regularization_promoted": {"const": false},
         "constitutive_law_verified": {"const": false},
         "material_state_history_replayed": {"const": false},
-        "fiber_frame_kinematic_adapter_authority": {"const": false},
+        "fiber_frame_kinematic_adapter_authority": {"type": "boolean"},
         "reaction_authority": {"const": false},
         "member_force_authority": {"const": false},
         "integration_point_engineering_output_authority": {"const": false},

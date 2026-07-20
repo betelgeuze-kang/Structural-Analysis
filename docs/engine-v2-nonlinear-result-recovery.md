@@ -8,8 +8,8 @@ This slice separates three different claims that must not share one `PASS`:
 2. a reaction/member-force recovery candidate assembled from element forces;
 3. authoritative nonlinear engineering-result recovery.
 
-Only the first is granted authority in this PR. The second is explicitly
-non-authoritative, and the third remains future work.
+Only the first is granted authority by this contract family. The second is
+explicitly non-authoritative, and the third remains future work.
 
 ## Nonlinear terminal receipt
 
@@ -51,7 +51,7 @@ replay that scaling before it can create a trusted terminal receipt.
 
 ## NonlinearNumericalResultIR
 
-The result requires:
+The legacy result construction path requires:
 
 - exact validated `ExecutionPlan`;
 - replay-verified `EquationScaling` bound to that plan;
@@ -68,6 +68,16 @@ The exact committed StateIR free-displacement bytes must match the source
 solution hash carried by the terminal receipt. Imported manifests additionally
 enforce `dof_count`, displacement shape, byte length, and canonical artifact URI
 coherence after schema validation.
+
+A concrete nonlinear solver whose committed state cannot honestly be encoded
+as the current stateless-linear-elastic `StateIR v1` may instead implement the
+`NonlinearNumericalResultSourceAdapter` replay protocol. The adapter must return
+a fully validated source-neutral snapshot containing the same normalized result
+bindings and immutable canonical displacement bytes. The result retains that
+adapter and replays it on every in-memory validation; mixing adapter and legacy
+source objects is rejected. Existing legacy manifests and hashes are unchanged,
+while the exact claim boundary records whether the fiber-frame kinematic
+adapter path was used.
 
 The authority axes are:
 
@@ -99,6 +109,12 @@ The bounded recovery candidate accepts:
 - element global force vectors;
 - one member axial-force value per element;
 - a recovery-law receipt hash.
+
+The generic candidate currently accepts only the legacy ExecutionPlan/StateIR
+source profile. Adapter-bound results fail closed with
+`nonlinear_recovery_source_profile_unsupported`; they need a source-specific
+exact recovery operator and cannot borrow reaction or member-force authority
+from the generic scatter check.
 
 It independently scatters element forces and requires agreement with the
 supplied global internal vector after applying the bound per-equation scaling.
