@@ -154,8 +154,11 @@ observation only. It grants no convergence, nonlinear numerical-result,
 reaction/member-force/fiber engineering, design/code, release, or commercial
 authority.
 
-PR-J3 must add the typed checkpoint-chain to nonlinear kinematic-state chain.
-PR-J4 must then bind that chain to PR #132's MaterialStateProjectionChain.
+PR-J3 now adds the typed
+[`checkpoint-chain → nonlinear kinematic-state chain`](fiber-frame-nonlinear-kinematic-state-chain.md),
+including exact physical/generalized/canonical displacement mapping and
+accepted → transient-trial → committed ancestry. PR-J4 must bind that exact
+chain to PR #132's MaterialStateProjectionChain.
 Only the later nonlinear terminal and exact recovery contracts may connect this
 path to ResultIR authority.
 
