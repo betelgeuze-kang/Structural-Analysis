@@ -319,6 +319,8 @@ def _pr_commands(
             "tests/test_state_updated_concrete_damage_newton.py",
             "tests/test_build_phase2_state_updated_composite_section_artifacts.py",
             "tests/test_state_updated_composite_section_newton.py",
+            "tests/test_stateful_fiber_section.py",
+            "tests/test_stateful_fiber_beam2d.py",
             "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py",
             "tests/test_state_updated_bilinear_link_newton.py",
             "tests/test_build_phase2_geometric_nonlinear_benchmark_artifacts.py",

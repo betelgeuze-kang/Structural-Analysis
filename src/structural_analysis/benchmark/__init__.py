@@ -81,6 +81,15 @@ from structural_analysis.benchmark.shallow_arch_arc_length import (
     ShallowArchArcLengthProblem,
     build_shallow_arch_arc_length_benchmark_seed,
 )
+from structural_analysis.benchmark.stateful_fiber_beam2d import (
+    STATEFUL_FIBER_BEAM2D_BENCHMARK_SCHEMA_VERSION,
+    STATEFUL_FIBER_BEAM2D_CLAIM_BOUNDARY,
+    STATEFUL_FIBER_BEAM2D_NEWTON_SCHEMA_VERSION,
+    FiberBeamCantileverNewtonConfig,
+    FiberBeamCantileverNewtonResult,
+    build_stateful_fiber_beam2d_benchmark,
+    solve_stateful_fiber_beam2d_cantilever,
+)
 from structural_analysis.benchmark.sparse_chain_arc_length import (
     SPARSE_CHAIN_ARC_LENGTH_CLAIM_BOUNDARY,
     SPARSE_CHAIN_ARC_LENGTH_CONFIG,
@@ -140,6 +149,8 @@ __all__ = [
     "EULER_ELEMENT_FORMULATION",
     "EulerColumnSystem",
     "GEOMETRIC_BENCHMARK_SCHEMA_VERSION",
+    "FiberBeamCantileverNewtonConfig",
+    "FiberBeamCantileverNewtonResult",
     "LOAD_COUPLED_DENSE_REFERENCE_SOLVER_PROFILE",
     "LOAD_COUPLED_SPARSE_CHAIN_CLAIM_BOUNDARY",
     "LOAD_COUPLED_SPARSE_CHAIN_SCHEMA_VERSION",
@@ -163,6 +174,9 @@ __all__ = [
     "SPARSE_CHAIN_ARC_LENGTH_SCHEMA_VERSION",
     "SPARSE_CHAIN_EQUATION_COUNT",
     "SPARSE_CHAIN_STATE_TANGENT_SOLVER_PROFILE",
+    "STATEFUL_FIBER_BEAM2D_BENCHMARK_SCHEMA_VERSION",
+    "STATEFUL_FIBER_BEAM2D_CLAIM_BOUNDARY",
+    "STATEFUL_FIBER_BEAM2D_NEWTON_SCHEMA_VERSION",
     "ShallowArchArcLengthProblem",
     "SparseChainCPUFGMRESStateTangentSolver",
     "SparseChainDenseReferenceProblem",
@@ -187,6 +201,7 @@ __all__ = [
     "build_simply_supported_beam_model",
     "build_shallow_arch_arc_length_benchmark_seed",
     "build_sparse_chain_cpu_fgmres_arc_length_seed",
+    "build_stateful_fiber_beam2d_benchmark",
     "build_verification_hierarchy_readiness",
     "compare_buckling",
     "compare_displacements",
@@ -210,6 +225,7 @@ __all__ = [
     "modal_pdelta_amplification_benchmark",
     "run_benchmark_cases",
     "shallow_arch_snapthrough_benchmark",
+    "solve_stateful_fiber_beam2d_cantilever",
     "verification_hierarchy_policy",
     "validate_analytic_frame_verification_artifact",
 ]
