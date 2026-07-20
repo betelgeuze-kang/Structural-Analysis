@@ -5,6 +5,10 @@ from structural_analysis.elements.axial_curvature_section import (
     AxialCurvatureSectionResponse,
     AxialCurvatureSectionState,
 )
+from structural_analysis.elements.corotational_frame2d import (
+    CorotationalFrame2DResponse,
+    corotational_frame2d_response,
+)
 from structural_analysis.elements.corotational_truss2d import (
     MPA_M2_TO_KN,
     CorotationalTruss2DResponse,
@@ -24,12 +28,14 @@ __all__ = [
     "AxialCurvatureSection",
     "AxialCurvatureSectionResponse",
     "AxialCurvatureSectionState",
+    "CorotationalFrame2DResponse",
     "CorotationalTruss2DResponse",
     "StatefulFiberBeam2D",
     "StatefulFiberBeam2DResponse",
     "StatefulFiberBeam2DState",
     "StatefulUniaxialMaterial",
     "StatefulUniaxialResponse",
+    "corotational_frame2d_response",
     "corotational_truss2d_fixed_base_response",
     "corotational_truss2d_response",
 ]
