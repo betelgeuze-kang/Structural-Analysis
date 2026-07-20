@@ -23,7 +23,7 @@
   "frame_shell_material_coupling_closure_claim": false,
   "full_mesh_closure_claim": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-20T03:21:16.211811+00:00",
+  "generated_at": "2026-07-20T03:38:43.037796+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
     "scripts/build_phase2_frame_shell_material_coupling_artifacts.py": "sha256:2b2a99c6040ea14aa2acdce44e7d1271424baae6e49a6b784dc8b2a87820ced7",
@@ -36,7 +36,7 @@
   "regularization_used": false,
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-frame-shell-material-coupling-artifacts.v1",
-  "source_commit_sha": "ef348f941de09ea8b952689b6cdb075711138245",
+  "source_commit_sha": "010ab72423a96e4870860ed5772c954cd51ad748",
   "sparse_matrix_backend": "scipy_sparse_spsolve_cpu",
   "status": "ready",
   "truth_class": "assembled_coupling_truth"
