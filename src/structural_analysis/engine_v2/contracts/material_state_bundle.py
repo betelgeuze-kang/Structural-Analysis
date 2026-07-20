@@ -29,9 +29,7 @@ from jsonschema import Draft202012Validator, validators
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
 
-MATERIAL_STATE_BUNDLE_SCHEMA_VERSION = (
-    "structural-analysis-material-state-bundle.v1"
-)
+MATERIAL_STATE_BUNDLE_SCHEMA_VERSION = "structural-analysis-material-state-bundle.v1"
 MATERIAL_STATE_BUNDLE_STORAGE_PROFILE = (
     "ordered_opaque_integration_point_state_bytes.v1"
 )
@@ -214,7 +212,11 @@ def open_trial_material_state_bundle(
     return _build_bundle(
         bundle_id=(
             bundle_id
-            or f"material-state.trial.e{next_epoch}.{accepted.bundle_id}"
+            or _default_lineage_bundle_id(
+                role="trial",
+                epoch=next_epoch,
+                parent_bundle_hash=accepted.bundle_hash,
+            )
         ),
         model_ir_content_hash=accepted.model_ir_content_hash,
         execution_plan_hash=accepted.execution_plan_hash,
@@ -251,7 +253,11 @@ def commit_trial_material_state_bundle(
     return _build_bundle(
         bundle_id=(
             bundle_id
-            or f"material-state.committed.e{trial.epoch}.{accepted.bundle_id}"
+            or _default_lineage_bundle_id(
+                role="committed",
+                epoch=trial.epoch,
+                parent_bundle_hash=trial.bundle_hash,
+            )
         ),
         model_ir_content_hash=trial.model_ir_content_hash,
         execution_plan_hash=trial.execution_plan_hash,
@@ -398,9 +404,7 @@ def validate_material_state_bundle(
             parent_state_data_hash=descriptor.parent_state_data_hash,
             artifact_uri=descriptor.artifact_uri,
         )
-        expected_descriptors.append(
-            _descriptor(index=index, value=normalized_input)
-        )
+        expected_descriptors.append(_descriptor(index=index, value=normalized_input))
         if descriptor != expected_descriptors[-1]:
             _fail(
                 "material_state_descriptor_mismatch",
@@ -440,9 +444,7 @@ def validate_material_state_bundle(
             "/extensions",
             "MaterialStateBundle v1 requires an immutable empty extensions object.",
         )
-    expected_hash = canonical_hash(
-        _bundle_payload(bundle, include_bundle_hash=False)
-    )
+    expected_hash = canonical_hash(_bundle_payload(bundle, include_bundle_hash=False))
     if bundle.bundle_hash != expected_hash:
         _fail(
             "material_state_bundle_hash_mismatch",
@@ -512,6 +514,12 @@ def validate_material_state_bundle_manifest(
 
     entries = normalized["entries"]
     for index, entry in enumerate(entries):
+        if entry["index"] != index:
+            _fail(
+                "material_state_entry_index_mismatch",
+                f"/entries/{index}/index",
+                "Entry indices must be contiguous and match manifest order.",
+            )
         expected_content_hash = canonical_hash(
             _entry_payload_from_manifest(entry, include_content_hash=False)
         )
@@ -554,11 +562,7 @@ def validate_material_state_bundle_manifest(
             "Integration-point order hash does not match entries.",
         )
     expected_bundle_hash = canonical_hash(
-        {
-            key: value
-            for key, value in normalized.items()
-            if key != "bundle_hash"
-        }
+        {key: value for key, value in normalized.items() if key != "bundle_hash"}
     )
     if normalized["bundle_hash"] != expected_bundle_hash:
         _fail(
@@ -686,10 +690,13 @@ def _normalize_inputs(
             expected_parent = expected_parent_hashes[index]
             if parent_hash is None:
                 parent_hash = expected_parent
-            elif _require_hash(
-                parent_hash,
-                f"/entries/{index}/parent_state_data_hash",
-            ) != expected_parent:
+            elif (
+                _require_hash(
+                    parent_hash,
+                    f"/entries/{index}/parent_state_data_hash",
+                )
+                != expected_parent
+            ):
                 _fail(
                     "material_state_entry_parent_mismatch",
                     f"/entries/{index}/parent_state_data_hash",
@@ -783,8 +790,7 @@ def _validate_trial_transition(
     if (
         trial.model_ir_content_hash != accepted.model_ir_content_hash
         or trial.execution_plan_hash != accepted.execution_plan_hash
-        or trial.integration_point_order_hash
-        != accepted.integration_point_order_hash
+        or trial.integration_point_order_hash != accepted.integration_point_order_hash
         or trial.entry_count != accepted.entry_count
     ):
         _fail(
@@ -938,6 +944,21 @@ def _bundle_payload(
 
 def _data_hash(state_bytes: bytes) -> str:
     return "sha256:" + hashlib.sha256(state_bytes).hexdigest()
+
+
+def _default_lineage_bundle_id(
+    *,
+    role: Literal["committed", "trial"],
+    epoch: int,
+    parent_bundle_hash: str,
+) -> str:
+    """Build a bounded default ID without recursively embedding parent IDs."""
+
+    parent_digest = _require_hash(
+        parent_bundle_hash,
+        "/parent_bundle_hash",
+    ).removeprefix("sha256:")
+    return f"material-state.{role}.e{epoch}.{parent_digest}"
 
 
 def _require_bytes(value: Any, path: str) -> bytes:

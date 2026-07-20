@@ -115,6 +115,44 @@ def test_initial_trial_commit_and_exact_rollback_lifecycle() -> None:
     validate_material_state_bundle_manifest(committed.to_manifest())
 
 
+def test_default_lifecycle_bundle_ids_remain_bounded_across_epochs() -> None:
+    accepted = create_initial_material_state_bundle(
+        bundle_id="B" + "x" * 127,
+        model_ir_content_hash=MODEL_HASH,
+        execution_plan_hash=PLAN_HASH,
+        solver_state_hash=STATE_E0_HASH,
+        entries=(_initial_inputs()[0],),
+    )
+    observed_ids = {accepted.bundle_id}
+
+    for epoch in range(1, 9):
+        trial = open_trial_material_state_bundle(
+            accepted,
+            solver_state_hash=f"sha256:{epoch:064x}",
+            entries=(
+                MaterialStateInput(
+                    entity_id="element.e1",
+                    integration_point_id="ip.0",
+                    material_type_id="steel.combined-hardening",
+                    material_schema_version=("uniaxial-combined-hardening-state.v1"),
+                    state_bytes=f"steel-state-{epoch}".encode(),
+                ),
+            ),
+        )
+        committed = commit_trial_material_state_bundle(
+            accepted,
+            trial,
+            solver_state_hash=f"sha256:{epoch + 32:064x}",
+        )
+
+        assert len(trial.bundle_id) <= 128
+        assert len(committed.bundle_id) <= 128
+        assert trial.bundle_id not in observed_ids
+        assert committed.bundle_id not in observed_ids
+        observed_ids.update((trial.bundle_id, committed.bundle_id))
+        accepted = committed
+
+
 def test_bundle_manifest_is_descriptor_only_and_replayable() -> None:
     bundle = _initial_bundle()
     manifest = bundle.to_manifest()
