@@ -100,3 +100,5 @@ PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_fiber_frame2d_material_state_bundle.py \
   tests/test_stateful_fiber_frame2d_material_state_projection_chain.py
 ```
+
+<!-- temporary materialization trigger; removed from the clean #137 commit -->
