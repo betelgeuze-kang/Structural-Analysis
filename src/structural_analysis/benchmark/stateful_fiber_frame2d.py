@@ -20,6 +20,13 @@ from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import (
     load_stateful_fiber_frame2d_checkpoint_bytes,
     stateful_fiber_frame2d_checkpoint_artifact_hash,
 )
+from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_chain_io import (
+    STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_STORAGE_PROFILE,
+    dump_stateful_fiber_frame2d_checkpoint_chain_bytes,
+    load_stateful_fiber_frame2d_checkpoint_chain_bytes,
+    make_stateful_fiber_frame2d_checkpoint_chain,
+    stateful_fiber_frame2d_checkpoint_chain_artifact_hash,
+)
 from structural_analysis.assembly.stateful_fiber_frame2d_solver import (
     StatefulFiberFrame2DLoadPathResult,
     run_stateful_fiber_frame2d_load_path,
@@ -41,20 +48,20 @@ from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
 
 
 STATEFUL_FIBER_FRAME2D_BENCHMARK_SCHEMA_VERSION = (
-    "phase2-stateful-fiber-frame2d-global-assembly.v2"
+    "phase2-stateful-fiber-frame2d-global-assembly.v3"
 )
 STATEFUL_FIBER_FRAME2D_CLAIM_BOUNDARY = (
     "This receipt verifies fixed initial-chord coordinate transformation, "
     "dense global assembly of two small-displacement Euler-Bernoulli members, "
     "stateful RC axial-curvature sections, a consistent free-equation tangent, "
     "an in-memory committed checkpoint chain with parent hashes and epochs, and "
-    "an exact schema-validated single-checkpoint persisted round-trip plus "
-    "restart for the built-in RC fiber state family. It does not validate a "
-    "persisted ancestor-chain bundle, geometric nonlinearity, shear deformation, "
+    "exact schema-validated single-checkpoint and complete epoch-zero-rooted "
+    "ancestor-chain persisted round-trips plus restart for the built-in RC fiber "
+    "state family. It does not validate geometric nonlinearity, shear deformation, "
     "torsion, a general frame model importer, a generalized section-state codec "
-    "registry, mesh-objective distributed plasticity, external benchmarks, "
-    "production sparse or ROCm/HIP execution, full-building equilibrium, or G1 "
-    "closure."
+    "registry, constitutive transition replay from chain contents alone, "
+    "mesh-objective distributed plasticity, external benchmarks, production "
+    "sparse or ROCm/HIP execution, full-building equilibrium, or G1 closure."
 )
 
 
@@ -371,6 +378,28 @@ def _build_stateful_fiber_frame2d_benchmark_cached() -> dict[str, Any]:
         initial_checkpoint=persisted_checkpoint,
         config=config,
     )
+    checkpoint_chain = make_stateful_fiber_frame2d_checkpoint_chain(
+        restart_problem,
+        (
+            prefix.initial_checkpoint,
+            *(step.accepted_checkpoint for step in prefix.steps),
+        ),
+    )
+    checkpoint_chain_artifact = dump_stateful_fiber_frame2d_checkpoint_chain_bytes(
+        restart_problem,
+        checkpoint_chain,
+    )
+    persisted_chain_problem = make_two_member_stateful_fiber_l_frame()
+    persisted_checkpoint_chain = load_stateful_fiber_frame2d_checkpoint_chain_bytes(
+        checkpoint_chain_artifact,
+        persisted_chain_problem,
+    )
+    persisted_chain_resumed = run_stateful_fiber_frame2d_load_path(
+        persisted_chain_problem,
+        factors[2:],
+        initial_checkpoint=persisted_checkpoint_chain.terminal_checkpoint,
+        config=config,
+    )
     rollback_problem = make_two_member_stateful_fiber_l_frame()
     rollback_parent = initial_stateful_fiber_frame2d_checkpoint(rollback_problem)
     rollback_parent_bytes = rollback_parent.canonical_bytes()
@@ -430,6 +459,28 @@ def _build_stateful_fiber_frame2d_benchmark_cached() -> dict[str, Any]:
         and persisted_resumed.final_checkpoint.canonical_bytes()
         == first.final_checkpoint.canonical_bytes()
     )
+    persistent_chain_gate = bool(
+        len(persisted_checkpoint_chain.checkpoints) == 3
+        and persisted_checkpoint_chain.root_checkpoint.state_hash
+        == prefix.initial_checkpoint.state_hash
+        and persisted_checkpoint_chain.terminal_checkpoint.state_hash
+        == prefix.final_checkpoint.state_hash
+        and persisted_checkpoint_chain.chain_hash == checkpoint_chain.chain_hash
+        and persisted_checkpoint_chain.canonical_bytes()
+        == checkpoint_chain.canonical_bytes()
+        and dump_stateful_fiber_frame2d_checkpoint_chain_bytes(
+            persisted_chain_problem,
+            persisted_checkpoint_chain,
+        )
+        == checkpoint_chain_artifact
+        and persisted_chain_resumed.contract_pass
+        and persisted_chain_resumed.initial_checkpoint.state_hash
+        == prefix.final_checkpoint.state_hash
+        and persisted_chain_resumed.final_checkpoint.state_hash
+        == first.final_checkpoint.state_hash
+        and persisted_chain_resumed.final_checkpoint.canonical_bytes()
+        == first.final_checkpoint.canonical_bytes()
+    )
     rollback_gate = bool(
         forced_failure.committed is False
         and forced_failure.accepted_checkpoint is rollback_parent
@@ -450,6 +501,7 @@ def _build_stateful_fiber_frame2d_benchmark_cached() -> dict[str, Any]:
         and deterministic_gate
         and restart_gate
         and persistent_roundtrip_gate
+        and persistent_chain_gate
         and rollback_gate
         and section_protocol_gate
         and all(
@@ -483,6 +535,24 @@ def _build_stateful_fiber_frame2d_benchmark_cached() -> dict[str, Any]:
             "restored_checkpoint_hash": persisted_checkpoint.state_hash,
             "exact_roundtrip_and_restart": persistent_roundtrip_gate,
         },
+        "persisted_checkpoint_ancestor_chain_artifact": {
+            "storage_profile": (
+                STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_STORAGE_PROFILE
+            ),
+            "checkpoint_count": len(checkpoint_chain.checkpoints),
+            "byte_length": len(checkpoint_chain_artifact),
+            "artifact_hash": (
+                stateful_fiber_frame2d_checkpoint_chain_artifact_hash(
+                    checkpoint_chain_artifact
+                )
+            ),
+            "chain_hash": checkpoint_chain.chain_hash,
+            "root_checkpoint_hash": checkpoint_chain.root_checkpoint.state_hash,
+            "terminal_checkpoint_hash": (
+                checkpoint_chain.terminal_checkpoint.state_hash
+            ),
+            "exact_roundtrip_and_restart": persistent_chain_gate,
+        },
         "forced_failure": {
             "status": forced_failure.status,
             "terminal_reason": forced_failure.metrics["terminal_reason"],
@@ -501,6 +571,9 @@ def _build_stateful_fiber_frame2d_benchmark_cached() -> dict[str, Any]:
             "in_memory_checkpoint_restart_exact": restart_gate,
             "persistent_checkpoint_roundtrip_and_restart_exact": (
                 persistent_roundtrip_gate
+            ),
+            "persistent_checkpoint_ancestor_chain_roundtrip_and_restart_exact": (
+                persistent_chain_gate
             ),
             "forced_failure_rollback_exact": rollback_gate,
             "fallback_count": sum(
@@ -525,7 +598,7 @@ def _build_stateful_fiber_frame2d_benchmark_cached() -> dict[str, Any]:
             "committed_checkpoint_parent_hash_and_epoch": ancestry_gate,
             "in_memory_checkpoint_restart": restart_gate,
             "persistent_checkpoint_roundtrip": persistent_roundtrip_gate,
-            "persistent_checkpoint_ancestor_chain_bundle": False,
+            "persistent_checkpoint_ancestor_chain_bundle": persistent_chain_gate,
             "generalized_section_state_codec_registry": False,
             "general_frame_model_import": False,
             "geometric_nonlinearity": False,
@@ -537,7 +610,6 @@ def _build_stateful_fiber_frame2d_benchmark_cached() -> dict[str, Any]:
             "g1_closure": False,
         },
         "blockers_remaining": [
-            "persistent_checkpoint_ancestor_chain_bundle_not_connected",
             "generalized_section_state_codec_registry_not_connected",
             "general_frame_model_import_and_boundary_conditions_not_connected",
             "geometric_nonlinearity_not_coupled",

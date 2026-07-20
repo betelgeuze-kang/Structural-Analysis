@@ -25,6 +25,11 @@ integration-point state to an explicit parent hash and epoch.
   nested-state-hash, problem-contract, and existing-target checks;
 - exact persisted checkpoint restoration and continuation to the same final
   checkpoint as the uninterrupted nonlinear load path;
+- a separate 32 MiB/256-checkpoint ancestor-chain envelope rooted at the exact
+  epoch-zero problem state, with contiguous epoch/step indices, exact parent
+  links, terminal identity, and a domain-separated chain hash;
+- exact persisted chain restoration and continuation from its terminal
+  checkpoint to the same final state as the uninterrupted nonlinear path;
 - residual-and-increment-gated Newton commit, exact failed-step rollback,
   deterministic replay, and exact in-memory checkpoint restart;
 - a two-element elastic cantilever closed-form check, arbitrary rigid rotation
@@ -53,8 +58,8 @@ problem and creates a new file without overwriting an existing target. The
 reader checks the byte limit and canonical JSON form, validates every
 closed-schema object, reconstructs the steel/concrete fiber states, verifies all
 nested state hashes, and finally re-runs the frame checkpoint validator against
-the supplied problem. The checkpoint retains its `parent_state_hash`, but this
-slice does not persist or restore a bundle containing the full ancestor chain.
+the supplied problem. The single-checkpoint artifact retains its
+`parent_state_hash` without pretending that the referenced parent is present.
 
 ```python
 from structural_analysis.assembly import (
@@ -73,6 +78,36 @@ restored = read_stateful_fiber_frame2d_checkpoint_artifact(
 )
 assert restored.state_hash == accepted_checkpoint.state_hash
 assert restored.canonical_bytes() == accepted_checkpoint.canonical_bytes()
+```
+
+For a complete history, the chain writer accepts only an exact epoch-zero root
+followed by contiguous checkpoints whose `parent_state_hash` equals the
+preceding checkpoint's `state_hash`. Missing prefixes, removed or reordered
+epochs, mixed problem contracts, wrong terminal metadata, and chain-hash
+tampering fail closed.
+
+```python
+from structural_analysis.assembly import (
+    make_stateful_fiber_frame2d_checkpoint_chain,
+    read_stateful_fiber_frame2d_checkpoint_chain_artifact,
+    write_stateful_fiber_frame2d_checkpoint_chain_artifact,
+)
+
+chain = make_stateful_fiber_frame2d_checkpoint_chain(
+    problem,
+    (initial_checkpoint, *accepted_checkpoints),
+)
+write_stateful_fiber_frame2d_checkpoint_chain_artifact(
+    problem,
+    chain,
+    "accepted-checkpoint-chain.json",
+)
+restored_chain = read_stateful_fiber_frame2d_checkpoint_chain_artifact(
+    problem,
+    "accepted-checkpoint-chain.json",
+)
+assert restored_chain.chain_hash == chain.chain_hash
+assert restored_chain.terminal_checkpoint.state_hash == chain.terminal_checkpoint.state_hash
 ```
 
 The serialized artifact uses the
@@ -103,12 +138,14 @@ The transformation is fixed to the initial chord, so this remains a
 small-displacement material-nonlinear reference. It has no corotational update,
 geometric stiffness, shear deformation, torsion, general model import,
 prescribed-displacement surface, generalized section-state codec registry, or
-production sparse solver. It also has no persisted ancestor-chain bundle.
-Persistent restoration is limited to the built-in RC section state hierarchy
-represented by combined-hardening steel and asymmetric concrete-damage fiber
-states. The two-member Gauss-point state path is not evidence for plastic-hinge
-calibration, localization regularization, or mesh-objective distributed
-plasticity.
+production sparse solver. Persistent single-checkpoint and complete-chain
+restoration are limited to the built-in RC section state hierarchy represented
+by combined-hardening steel and asymmetric concrete-damage fiber states. The
+chain is state/restart transport; reading it does not replay or independently
+prove every constitutive transition. Partial-prefix chain bundles and a
+generalized material/section codec registry remain unsupported. The two-member
+Gauss-point state path is not evidence for plastic-hinge calibration,
+localization regularization, or mesh-objective distributed plasticity.
 
 No external code-to-code, published, experimental, or customer-shadow receipt
 is supplied. Production ROCm/HIP execution, full-building equilibrium, and G1

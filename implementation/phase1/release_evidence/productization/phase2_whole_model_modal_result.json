@@ -1,6 +1,6 @@
 {
   "analysis_scope": "public_api_dense_consistent_mass_frame_truss_modal",
-  "artifact_hash": "sha256:2667f836fddb8ca3094a84123fdeec6613b072037db9e13f6c81838df0d4e060",
+  "artifact_hash": "sha256:c7097b5a8dff795bda12d542df2a5ff1e4ab8babaf544e8628afd77b715e39cb",
   "blockers_remaining": [
     "general_frame_shell_modal_workflow_not_verified",
     "nodal_lumped_mass_not_connected",
@@ -46,7 +46,7 @@
       "src/structural_analysis/analyses/modal.py": "sha256:0b2ac841fd3c0589b7c1b3d299543c59861cc208873c9691c3f5860329acdd3e",
       "src/structural_analysis/api/cli.py": "sha256:f2da57b8355a61078b761715e72bfe0b44241667c4c37c5605c1770ce8f202d2",
       "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
-      "src/structural_analysis/assembly/__init__.py": "sha256:775f9fc5d7cfe88405e02b3da23557e08f0b8b12610fb8914eba1107177de74d",
+      "src/structural_analysis/assembly/__init__.py": "sha256:19cf01e5ad7ced21af093ccc225a142338ade4f36eb32e54dc8912a7270e412a",
       "src/structural_analysis/assembly/modal.py": "sha256:bf0909750f7d471541180c8dec8ac2037730e3b17b7ecbbedce0c5c74df83bd8",
       "src/structural_analysis/elements/axial.py": "sha256:47fb843e2e72ec68f23058b7c31a565212bd63e639a1fff04566b3034d3cf573",
       "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
@@ -58,7 +58,7 @@
       "tests/test_build_phase2_whole_model_modal_artifacts.py": "sha256:db67f3dfa657f9318a1a7c03c39eeef887f2a5b6407e5c52bf594fa5a0279427",
       "tests/test_whole_model_modal_analysis.py": "sha256:57e257f4cf2315536ec30332255b519ba627e1554d32920fc434cc6c9448b340"
     },
-    "source_set_hash": "sha256:5ff64f0e8f4b71558f58c276d4e8e5d2aefb41646cb925561408b81468ac9d45"
+    "source_set_hash": "sha256:c3391ed6432f0eb5457e21985f9f9da156e70ede4cfefa8d6ba115dcf829a55c"
   },
   "status": "partial",
   "summary": {
