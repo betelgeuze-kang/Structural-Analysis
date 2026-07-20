@@ -66,14 +66,16 @@ axes.
 Validation requires the gathered global member displacements to match the
 embedded element displacement bytes exactly, including the sign of zero. An
 assembly evaluates every trial from one immutable accepted checkpoint and
-checks every element response's parent hash. This slice does not decide whether
-a trial is converged or authorized for commit; that belongs to the next
-nonlinear solution-control boundary.
+checks every element response's parent hash. The separate bounded
+[`stateful_corotational_fiber_frame2d_solver`](stateful-corotational-fiber-frame2d-newton-load-control.md)
+module now owns fixed-target Newton convergence and commit authorization; the
+assembly itself remains independent of solution control.
 
 ## Focused verification
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
+  tests/test_stateful_corotational_fiber_frame2d_solver.py \
   tests/test_stateful_corotational_fiber_frame2d.py \
   tests/test_stateful_corotational_fiber_beam2d.py \
   tests/test_corotational_frame2d_basic_kinematics.py
@@ -87,12 +89,14 @@ trial branching, and fail-closed checkpoint/geometry binding.
 
 ## Claim boundary
 
-This is a dense multi-element assembly kernel, not a nonlinear frame solver. It
-does not yet provide convergence-gated checkpoint acceptance, Newton line
-search, adaptive load stepping, arc length, prescribed displacements, follower
-loads, sparse production assembly, persisted corotational checkpoint artifacts,
-or checkpoint-chain replay. The nearest-branch chord unwrapping remains unique
-only when each accepted member rotation increment has magnitude below `pi`.
+This document describes the dense multi-element assembly kernel. Fixed-target
+Newton load control and convergence-gated checkpoint acceptance are implemented
+in the separate solver boundary linked above. The combined path still does not
+provide adaptive load stepping, automatic cutback, arc length, prescribed
+displacements, follower loads, sparse production assembly, persisted
+corotational checkpoint artifacts, or checkpoint-chain replay. The
+nearest-branch chord unwrapping remains unique only when each accepted member
+rotation increment has magnitude below `pi`.
 
 No P-Delta portal, Euler-column, external cyclic-member, restart, snap-through,
 full-building, or customer-shadow acceptance receipt is supplied here. G1 and

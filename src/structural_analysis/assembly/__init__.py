@@ -86,6 +86,13 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
     initial_stateful_corotational_fiber_frame2d_checkpoint,
     validate_stateful_corotational_fiber_frame2d_checkpoint,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
+    StatefulCorotationalFiberFrame2DLoadPathResult,
+    StatefulCorotationalFiberFrame2DLoadStepAdapter,
+    StatefulCorotationalFiberFrame2DLoadStepResult,
+    run_stateful_corotational_fiber_frame2d_load_path,
+    solve_stateful_corotational_fiber_frame2d_load_step,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state import (
     STATEFUL_COROTATIONAL_FIBER_FRAME2D_CHECKPOINT_SCHEMA_VERSION,
     StatefulCorotationalFiberFrame2DCheckpoint,
@@ -189,6 +196,9 @@ __all__ = [
     "STATEFUL_FIBER_FRAME2D_TRANSFORMATION",
     "StatefulCorotationalFiberFrame2DAssembly",
     "StatefulCorotationalFiberFrame2DCheckpoint",
+    "StatefulCorotationalFiberFrame2DLoadPathResult",
+    "StatefulCorotationalFiberFrame2DLoadStepAdapter",
+    "StatefulCorotationalFiberFrame2DLoadStepResult",
     "StatefulCorotationalFiberFrame2DMember",
     "StatefulCorotationalFiberFrame2DMemberAssembly",
     "StatefulCorotationalFiberFrame2DProblem",
@@ -235,6 +245,7 @@ __all__ = [
     "read_stateful_fiber_frame2d_checkpoint_artifact",
     "rigid_body_nullspace_check",
     "run_stateful_axial_load_path",
+    "run_stateful_corotational_fiber_frame2d_load_path",
     "run_stateful_fiber_frame2d_load_path",
     "single_element_bilinear_link_problem",
     "single_element_composite_section_bar_problem",
@@ -244,6 +255,7 @@ __all__ = [
     "solve_frame_shell_material_coupled",
     "solve_axial_chain_mesh",
     "solve_stateful_axial_load_step",
+    "solve_stateful_corotational_fiber_frame2d_load_step",
     "small_displacement_frame2d_transformation",
     "solve_stateful_fiber_frame2d_load_step",
     "stateful_fiber_frame2d_checkpoint_chain_artifact_hash",
