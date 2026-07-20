@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/material_state_bundle_v1.schema.json",
+  "title": "MaterialStateBundle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "bundle_id",
+    "bundle_hash",
+    "storage_profile",
+    "authority_profile",
+    "bindings",
+    "role",
+    "epoch",
+    "parent_bundle_hash",
+    "integration_point_order_hash",
+    "entry_count",
+    "total_byte_length",
+    "entries",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-material-state-bundle.v1"
+    },
+    "bundle_id": {
+      "$ref": "#/$defs/stable_id"
+    },
+    "bundle_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "storage_profile": {
+      "const": "ordered_opaque_integration_point_state_bytes.v1"
+    },
+    "authority_profile": {
+      "const": "non_authoritative_constitutive_state_transport.v1"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "solver_state_hash"
+      ],
+      "properties": {
+        "model_ir_content_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "execution_plan_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "solver_state_hash": {
+          "$ref": "#/$defs/hash"
+        }
+      }
+    },
+    "role": {
+      "enum": ["committed", "trial"]
+    },
+    "epoch": {
+      "$ref": "#/$defs/index"
+    },
+    "parent_bundle_hash": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/hash"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "integration_point_order_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "entry_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "total_byte_length": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "maxProperties": 0,
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "epoch": {
+            "const": 0
+          }
+        },
+        "required": ["epoch"]
+      },
+      "then": {
+        "properties": {
+          "role": {
+            "const": "committed"
+          },
+          "parent_bundle_hash": {
+            "type": "null"
+          },
+          "entries": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/entry"
+                },
+                {
+                  "properties": {
+                    "parent_state_data_hash": {
+                      "type": "null"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "parent_bundle_hash": {
+            "$ref": "#/$defs/hash"
+          },
+          "entries": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/entry"
+                },
+                {
+                  "properties": {
+                    "parent_state_data_hash": {
+                      "$ref": "#/$defs/hash"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "role": {
+            "const": "trial"
+          }
+        },
+        "required": ["role"]
+      },
+      "then": {
+        "properties": {
+          "epoch": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "parent_bundle_hash": {
+            "$ref": "#/$defs/hash"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "uri": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9+.-]*://\\S+$"
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "entity_id",
+        "integration_point_id",
+        "material_type_id",
+        "material_schema_version",
+        "byte_length",
+        "data_hash",
+        "content_hash",
+        "parent_state_data_hash"
+      ],
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/index"
+        },
+        "entity_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "integration_point_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "material_type_id": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "material_schema_version": {
+          "$ref": "#/$defs/stable_id"
+        },
+        "byte_length": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "data_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "content_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "parent_state_data_hash": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "artifact_uri": {
+          "$ref": "#/$defs/uri"
+        }
+      }
+    }
+  }
+}
