@@ -61,6 +61,13 @@ Out-of-range step sizes, mismatched artifact hashes, mismatched payload hashes,
 non-finite uncertainty, or inconsistent OOD disposition are rejected before an
 episode is produced.
 
+## Current integration context
+
+The branch is validated against main containing the merged J1–J4 fiber-frame
+execution-state chain and the deterministic concrete-damage evidence fix. Those
+contracts are inherited context only; this controller does not mint or modify
+their topology, scaling, kinematic, material-state, or evidence identities.
+
 ## Authority boundary
 
 A shadow episode is observation/replay data only. It cannot grant convergence,
