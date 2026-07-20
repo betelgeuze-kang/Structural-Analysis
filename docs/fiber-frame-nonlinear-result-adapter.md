@@ -84,10 +84,13 @@ It does not establish authority for:
 - constitutive-law verification beyond the already bounded source profile;
 - design/code approval, release readiness, or commercial use.
 
-The generic nonlinear recovery function rejects this adapter-bound result with
-`nonlinear_recovery_source_profile_unsupported`. The next roadmap slice must
-provide a fiber-frame-specific exact engineering recovery operator before any
-reaction or member-force authority can be promoted.
+The generic nonlinear recovery function continues to reject this adapter-bound
+result with `nonlinear_recovery_source_profile_unsupported`. The source-specific
+operator documented in `docs/fiber-frame-nonlinear-engineering-recovery.md`
+now performs the exact terminal replay and is the only path that promotes the
+bounded reaction, member-force, section-resultant, and fiber-output authority.
+Those claims belong to its separate engineering result, not to this numerical
+result adapter.
 
 ## Validation levels
 
@@ -107,6 +110,7 @@ and checks the adapter hash.
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
+  tests/test_stateful_fiber_frame2d_nonlinear_recovery.py \
   tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py \
   tests/test_engine_v2_nonlinear_result_recovery_v1.py \
   tests/test_engine_v2_nonlinear_recovery_source_binding.py \
@@ -114,7 +118,9 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
 
 python3 -m ruff check \
   src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py \
+  src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py \
   src/structural_analysis/engine_v2/contracts/nonlinear_result.py \
   src/structural_analysis/engine_v2/contracts/nonlinear_recovery.py \
-  tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py
+  tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
+  tests/test_stateful_fiber_frame2d_nonlinear_recovery.py
 ```

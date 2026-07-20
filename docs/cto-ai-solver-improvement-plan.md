@@ -35,6 +35,8 @@ evidence determines promotable scope
 - Real baseline/shadow fiber-frame SolverEpisode adapter with exact rollback.
 - J5-backed fiber-frame `NonlinearNumericalResultIR` adapter with bounded
   convergence, committed-displacement, and committed-material-state authority.
+- Exact terminal fiber-frame engineering recovery with bounded reaction,
+  member-force, section-resultant, and fiber-output authority.
 
 ### Reusable geometric-nonlinear kernels
 
@@ -108,11 +110,12 @@ The implementation preserves the explicit decision not to emit `StateIR v1`,
 replays the complete J1--J5 source chain, emits strict reduced-system,
 full-residual, boundary-condition, and backend receipts, and binds immutable
 terminal canonical six-DOF displacement bytes. Generic engineering recovery
-fails closed for this source profile until the exact operator below exists.
+remains fail-closed for this source profile; the exact source-specific operator
+below is the separate authority-promotion path.
 
-## Next implementation wave
+## Implemented third-wave slice
 
-### C. Exact engineering recovery operator
+### C. Exact engineering recovery operator — implemented
 
 **Goal:** independently replay engineering outputs from exact committed state rather than trusting solver-returned arrays.
 
@@ -128,6 +131,18 @@ Required replay:
 - energy and local/global consistency receipts.
 
 Only this operator may promote bounded reaction, member-force, section, and fiber-output authority.
+
+The implementation restarts from the terminal parent checkpoint and terminal
+J3 coordinates, reruns the constitutive transition, recomputes section
+resultants from ordered fiber stresses, integrates member end forces, performs
+local/global transformation and global scatter, and partitions reactions only
+on authored fixed equations. It requires exact checkpoint and material-bundle
+constituent bytes plus bounded equilibrium, transformation, work, and energy
+consistency gates. Manifests remain descriptor-only, and the promoted result
+retains explicit exclusions for design, code, release, commercial, general
+topology, and geometric-nonlinear authority.
+
+## Next implementation wave
 
 ### D. Bounded public RC fiber-frame slice
 
