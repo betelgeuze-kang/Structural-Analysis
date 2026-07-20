@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/nonlinear_numerical_result_ir_v1.schema.json",
+  "title": "NonlinearNumericalResultIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "result_id",
+    "result_hash",
+    "result_kind",
+    "authority_profile",
+    "authority",
+    "bindings",
+    "backend",
+    "load_factor",
+    "time_s",
+    "dof_count",
+    "displacement_artifact",
+    "claim_boundary",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-nonlinear-numerical-result-ir.v1"
+    },
+    "result_id": {
+      "$ref": "#/$defs/stable_id"
+    },
+    "result_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "result_kind": {
+      "const": "nonlinear_static_numerical_state"
+    },
+    "authority_profile": {
+      "const": "authoritative_converged_nonlinear_state_and_material_history.v1"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerical_state",
+        "convergence",
+        "displacement",
+        "material_state",
+        "reaction",
+        "member_force",
+        "integration_point_engineering_output",
+        "engineering_design",
+        "code_compliance",
+        "release_readiness",
+        "commercial_use"
+      ],
+      "properties": {
+        "numerical_state": {"const": "authoritative"},
+        "convergence": {"const": "authoritative"},
+        "displacement": {"const": "authoritative"},
+        "material_state": {"const": "authoritative"},
+        "reaction": {"const": "not_evaluated"},
+        "member_force": {"const": "not_evaluated"},
+        "integration_point_engineering_output": {"const": "not_evaluated"},
+        "engineering_design": {"const": "not_authoritative"},
+        "code_compliance": {"const": "not_authoritative"},
+        "release_readiness": {"const": "not_authoritative"},
+        "commercial_use": {"const": "not_authoritative"}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_ir_content_hash",
+        "execution_plan_hash",
+        "operator_hash",
+        "state_hash",
+        "state_epoch",
+        "material_state_bundle_hash",
+        "integration_point_order_hash",
+        "path_history_hash",
+        "nonlinear_terminal_hash",
+        "full_residual_receipt_hash",
+        "boundary_condition_receipt_hash"
+      ],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "operator_hash": {"$ref": "#/$defs/hash"},
+        "state_hash": {"$ref": "#/$defs/hash"},
+        "state_epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "material_state_bundle_hash": {"$ref": "#/$defs/hash"},
+        "integration_point_order_hash": {"$ref": "#/$defs/hash"},
+        "path_history_hash": {"$ref": "#/$defs/hash"},
+        "nonlinear_terminal_hash": {"$ref": "#/$defs/hash"},
+        "full_residual_receipt_hash": {"$ref": "#/$defs/hash"},
+        "boundary_condition_receipt_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["role", "receipt_hash"],
+      "properties": {
+        "role": {
+          "enum": ["cpu_reference", "cpu_optimized", "hip"]
+        },
+        "receipt_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "load_factor": {"type": "number"},
+    "time_s": {"type": "number", "minimum": 0},
+    "dof_count": {
+      "type": "integer",
+      "minimum": 6,
+      "maximum": 2147483647,
+      "multipleOf": 6
+    },
+    "displacement_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "dtype",
+        "shape",
+        "layout",
+        "byte_order",
+        "byte_length",
+        "storage_profile",
+        "unit_profile",
+        "data_hash",
+        "content_hash",
+        "artifact_uri"
+      ],
+      "properties": {
+        "name": {"const": "displacement_global_si"},
+        "dtype": {"const": "<f8"},
+        "shape": {
+          "type": "array",
+          "prefixItems": [
+            {"type": "integer", "minimum": 6, "maximum": 2147483647}
+          ],
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "layout": {"const": "C"},
+        "byte_order": {"const": "little"},
+        "byte_length": {"type": "integer", "minimum": 48},
+        "storage_profile": {
+          "const": "canonical_little_endian_fp64_binary.v1"
+        },
+        "unit_profile": {
+          "const": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+        },
+        "data_hash": {"$ref": "#/$defs/hash"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "artifact_uri": {
+          "type": "string",
+          "pattern": "^artifact://nonlinear-result/[^\\s]+$"
+        }
+      }
+    },
+    "claim_boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "committed_nonlinear_state",
+        "ordered_material_state_bundle",
+        "residual_and_increment_terminal_gate",
+        "fallback_or_regularization_promoted",
+        "reaction_authority",
+        "member_force_authority",
+        "integration_point_engineering_output_authority",
+        "design_or_code_authority",
+        "viewer_projection",
+        "release_readiness",
+        "commercial_claim"
+      ],
+      "properties": {
+        "committed_nonlinear_state": {"const": true},
+        "ordered_material_state_bundle": {"const": true},
+        "residual_and_increment_terminal_gate": {"const": true},
+        "fallback_or_regularization_promoted": {"const": false},
+        "reaction_authority": {"const": false},
+        "member_force_authority": {"const": false},
+        "integration_point_engineering_output_authority": {"const": false},
+        "design_or_code_authority": {"const": false},
+        "viewer_projection": {"const": false},
+        "release_readiness": {"const": false},
+        "commercial_claim": {"const": false}
+      }
+    },
+    "extensions": {
+      "type": "object",
+      "maxProperties": 0,
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    }
+  }
+}
