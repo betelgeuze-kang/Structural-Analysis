@@ -68,19 +68,28 @@ The contract rejects:
 
 ## Current boundary
 
-This PR introduces the contract and direct module API only. It does not yet:
+The contract remains a direct module API. A separate bounded adapter now
+projects the exact built-in RC fiber states from one validated stateful
+fiber-frame checkpoint through the accepted/trial/committed bundle lifecycle.
+That adapter is one-way: the existing checkpoint codec remains the restart
+representation, and the caller supplies the ModelIR, ExecutionPlan, and solver
+StateIR hashes. The adapter binds those values but does not prove semantic
+equivalence between the Engine v2 model and the bounded frame problem.
+
+The current surface still does not:
 
 - extend `StateIR v1` or change existing hashes;
-- adapt `StatefulAxialAcceptedState`, two-bar truss state, RC fiber-section state,
-  or fiber-beam state;
+- adapt standalone `StatefulAxialAcceptedState`, two-bar truss, standalone RC
+  fiber-section, or standalone fiber-beam states;
+- provide a generalized material/section codec registry;
 - prove that opaque bytes came from the declared constitutive law;
 - connect material state to nonlinear `NumericalResultIR` or engineering recovery;
 - define Viewer projection or AI training eligibility;
 - close a public nonlinear product path or G1.
 
-The next PRs should add one-way adapters for the bounded axial/truss/fiber
-states, then bind this bundle to a public nonlinear analysis and nonlinear
-result authority contract.
+Future slices may add separately verified one-way adapters for the remaining
+bounded state families, then bind this bundle to a public nonlinear analysis
+and nonlinear result authority contract.
 
 ## Focused validation
 

@@ -110,6 +110,43 @@ assert restored_chain.chain_hash == chain.chain_hash
 assert restored_chain.terminal_checkpoint.state_hash == chain.terminal_checkpoint.state_hash
 ```
 
+The exact checkpoint codec remains the only restart representation for this
+bounded solver. A separate direct-module adapter can project each checkpoint's
+ordered `member -> Gauss point -> fiber` material bytes into the Engine v2
+`MaterialStateBundle` lifecycle without replacing or mutating the checkpoint:
+
+```python
+from structural_analysis.assembly.stateful_fiber_frame2d_material_state_bundle import (
+    adapt_stateful_fiber_frame2d_checkpoint_to_material_state_bundle,
+    create_initial_stateful_fiber_frame2d_material_state_bundle,
+)
+
+accepted_bundle = create_initial_stateful_fiber_frame2d_material_state_bundle(
+    problem,
+    initial_checkpoint,
+    model_ir_content_hash=model_ir.content_hash,
+    execution_plan_hash=plan.plan_hash,
+    solver_state_hash=initial_state.state_hash,
+)
+transition = adapt_stateful_fiber_frame2d_checkpoint_to_material_state_bundle(
+    problem,
+    initial_checkpoint,
+    accepted_checkpoint,
+    accepted_bundle,
+    trial_solver_state_hash=trial_state.state_hash,
+    committed_solver_state_hash=committed_state.state_hash,
+)
+accepted_bundle = transition.committed_bundle
+```
+
+Generated stable entry identities bind exact member, section, integration-point,
+fiber, material-type, and material-schema order. Each entry retains the existing
+steel or concrete canonical binary state bytes. The bundle ID includes the full
+checkpoint state digest, while the bundle contract binds the caller-supplied
+ModelIR, ExecutionPlan, and solver StateIR hashes. The adapter validates those
+exact hash values but cannot prove that a caller-supplied ModelIR is semantically
+equivalent to the bounded frame problem.
+
 The serialized artifact uses the
 `canonical-signed-zero-preserving-utf8-json.v1` storage profile. Preserving the
 sign of binary64 zero is required because the immutable checkpoint hash is
@@ -143,8 +180,11 @@ restoration are limited to the built-in RC section state hierarchy represented
 by combined-hardening steel and asymmetric concrete-damage fiber states. The
 chain is state/restart transport; reading it does not replay or independently
 prove every constitutive transition. Partial-prefix chain bundles and a
-generalized material/section codec registry remain unsupported. The two-member
-Gauss-point state path is not evidence for plastic-hinge calibration,
+generalized material/section codec registry remain unsupported. The one-way
+MaterialStateBundle projection cannot reconstruct global displacements, restore
+a checkpoint, prove convergence or constitutive evolution, or grant numerical,
+engineering, release, or commercial authority. The two-member Gauss-point state
+path is not evidence for plastic-hinge calibration,
 localization regularization, or mesh-objective distributed plasticity.
 
 No external code-to-code, published, experimental, or customer-shadow receipt
