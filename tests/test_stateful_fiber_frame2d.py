@@ -9,20 +9,29 @@ import numpy as np
 import pytest
 
 from structural_analysis.assembly import (
+    STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_MAX_BYTES,
+    STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_STORAGE_PROFILE,
     STATEFUL_FIBER_FRAME2D_CHECKPOINT_MAX_BYTES,
     STATEFUL_FIBER_FRAME2D_CHECKPOINT_STORAGE_PROFILE,
     StatefulFiberFrame2DCheckpointArtifactError,
+    StatefulFiberFrame2DCheckpointChainArtifactError,
     StatefulFiberFrame2DCheckpoint,
     assemble_stateful_fiber_frame2d,
+    dump_stateful_fiber_frame2d_checkpoint_chain_bytes,
     dump_stateful_fiber_frame2d_checkpoint_bytes,
     initial_stateful_fiber_frame2d_checkpoint,
+    load_stateful_fiber_frame2d_checkpoint_chain_bytes,
     load_stateful_fiber_frame2d_checkpoint_bytes,
+    make_stateful_fiber_frame2d_checkpoint_chain,
+    read_stateful_fiber_frame2d_checkpoint_chain_artifact,
     read_stateful_fiber_frame2d_checkpoint_artifact,
     run_stateful_fiber_frame2d_load_path,
     small_displacement_frame2d_transformation,
     solve_stateful_fiber_frame2d_load_step,
+    stateful_fiber_frame2d_checkpoint_chain_artifact_hash,
     stateful_fiber_frame2d_checkpoint_artifact_hash,
     validate_stateful_fiber_frame2d_checkpoint,
+    write_stateful_fiber_frame2d_checkpoint_chain_artifact,
     write_stateful_fiber_frame2d_checkpoint_artifact,
 )
 from structural_analysis.benchmark import (
@@ -111,6 +120,10 @@ def test_frame_benchmark_replays_restart_and_keeps_claims_bounded() -> None:
     assert verification["deterministic_replay_exact"] is True
     assert verification["in_memory_checkpoint_restart_exact"] is True
     assert verification["persistent_checkpoint_roundtrip_and_restart_exact"] is True
+    assert (
+        verification["persistent_checkpoint_ancestor_chain_roundtrip_and_restart_exact"]
+        is True
+    )
     assert verification["forced_failure_rollback_exact"] is True
     assert verification["fallback_count"] == 0
     assert verification["regularization_count"] == 0
@@ -119,7 +132,7 @@ def test_frame_benchmark_replays_restart_and_keeps_claims_bounded() -> None:
     assert first["nonlinear_l_frame_path"]["final_epoch"] == 4
     assert first["claims"]["two_member_dense_global_assembly"] is True
     assert first["claims"]["persistent_checkpoint_roundtrip"] is True
-    assert first["claims"]["persistent_checkpoint_ancestor_chain_bundle"] is False
+    assert first["claims"]["persistent_checkpoint_ancestor_chain_bundle"] is True
     assert first["claims"]["generalized_section_state_codec_registry"] is False
     assert first["claims"]["geometric_nonlinearity"] is False
     assert first["claims"]["mesh_objective_distributed_plasticity"] is False
@@ -386,3 +399,233 @@ def test_checkpoint_artifact_rejects_noncanonical_and_tampered_payloads() -> Non
         match="does not match",
     ):
         load_stateful_fiber_frame2d_checkpoint_bytes(artifact, wrong_problem)
+
+
+def test_persisted_checkpoint_chain_roundtrip_resumes_exact_nonlinear_path(
+    tmp_path: Path,
+) -> None:
+    factors = (0.25, 0.5, 0.75, 1.0)
+    config = NewtonRaphsonConfig(max_iterations=40)
+    problem = make_two_member_stateful_fiber_l_frame()
+    uninterrupted = run_stateful_fiber_frame2d_load_path(
+        problem,
+        factors,
+        config=config,
+    )
+    prefix = run_stateful_fiber_frame2d_load_path(
+        problem,
+        factors[:2],
+        config=config,
+    )
+    checkpoints = (
+        prefix.initial_checkpoint,
+        *(step.accepted_checkpoint for step in prefix.steps),
+    )
+    chain = make_stateful_fiber_frame2d_checkpoint_chain(problem, checkpoints)
+    artifact = dump_stateful_fiber_frame2d_checkpoint_chain_bytes(problem, chain)
+    artifact_path = tmp_path / "frame-checkpoint-chain.json"
+
+    written = write_stateful_fiber_frame2d_checkpoint_chain_artifact(
+        problem,
+        chain,
+        artifact_path,
+    )
+    restored = read_stateful_fiber_frame2d_checkpoint_chain_artifact(
+        problem,
+        written,
+    )
+    resumed = run_stateful_fiber_frame2d_load_path(
+        problem,
+        factors[2:],
+        initial_checkpoint=restored.terminal_checkpoint,
+        config=config,
+    )
+
+    assert STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_STORAGE_PROFILE.endswith(".v1")
+    assert artifact_path.read_bytes() == artifact
+    assert stateful_fiber_frame2d_checkpoint_chain_artifact_hash(artifact).startswith(
+        "sha256:"
+    )
+    assert restored.chain_hash == chain.chain_hash
+    assert restored.canonical_bytes() == chain.canonical_bytes()
+    assert tuple(row.state_hash for row in restored.checkpoints) == tuple(
+        row.state_hash for row in checkpoints
+    )
+    assert restored.root_checkpoint.epoch == 0
+    assert restored.terminal_checkpoint.epoch == 2
+    assert resumed.contract_pass is True
+    assert resumed.initial_checkpoint.state_hash == chain.terminal_checkpoint.state_hash
+    assert (
+        resumed.final_checkpoint.canonical_bytes()
+        == uninterrupted.final_checkpoint.canonical_bytes()
+    )
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="already exists",
+    ):
+        write_stateful_fiber_frame2d_checkpoint_chain_artifact(
+            problem,
+            chain,
+            artifact_path,
+        )
+
+
+def test_checkpoint_chain_artifact_preserves_signed_zero_exactly() -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    committed = solve_stateful_fiber_frame2d_load_step(
+        problem,
+        initial,
+        target_load_factor=1.0,
+    ).accepted_checkpoint
+    displacements = list(committed.global_displacements)
+    displacements[0] = -0.0
+    signed_zero = replace(
+        committed,
+        global_displacements=tuple(displacements),
+        state_hash="",
+    )
+    chain = make_stateful_fiber_frame2d_checkpoint_chain(
+        problem,
+        (initial, signed_zero),
+    )
+    artifact = dump_stateful_fiber_frame2d_checkpoint_chain_bytes(problem, chain)
+    restored = load_stateful_fiber_frame2d_checkpoint_chain_bytes(artifact, problem)
+
+    assert b"-0.0" in artifact
+    assert restored.terminal_checkpoint.state_hash == signed_zero.state_hash
+    assert (
+        restored.terminal_checkpoint.canonical_bytes() == signed_zero.canonical_bytes()
+    )
+    assert (
+        math.copysign(
+            1.0,
+            restored.terminal_checkpoint.global_displacements[0],
+        )
+        == -1.0
+    )
+
+
+def test_checkpoint_chain_artifact_rejects_broken_lineage_and_tamper() -> None:
+    problem = make_two_member_stateful_fiber_l_frame()
+    path = run_stateful_fiber_frame2d_load_path(
+        problem,
+        (0.25, 0.5),
+        config=NewtonRaphsonConfig(max_iterations=40),
+    )
+    checkpoints = (
+        path.initial_checkpoint,
+        *(step.accepted_checkpoint for step in path.steps),
+    )
+    chain = make_stateful_fiber_frame2d_checkpoint_chain(problem, checkpoints)
+    artifact = dump_stateful_fiber_frame2d_checkpoint_chain_bytes(problem, chain)
+
+    broken_parent = replace(
+        checkpoints[2],
+        parent_state_hash=checkpoints[0].state_hash,
+        state_hash="",
+    )
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="does not match",
+    ):
+        make_stateful_fiber_frame2d_checkpoint_chain(
+            problem,
+            (checkpoints[0], checkpoints[1], broken_parent),
+        )
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="does not match",
+    ):
+        make_stateful_fiber_frame2d_checkpoint_chain(problem, checkpoints[1:])
+    root_displacements = list(checkpoints[0].global_displacements)
+    root_displacements[0] = -0.0
+    noncanonical_root = replace(
+        checkpoints[0],
+        global_displacements=tuple(root_displacements),
+        state_hash="",
+    )
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="does not match",
+    ):
+        make_stateful_fiber_frame2d_checkpoint_chain(problem, (noncanonical_root,))
+
+    duplicate_key = artifact.replace(
+        b'{"case_id":',
+        b'{"case_id":"duplicate","case_id":',
+        1,
+    )
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="duplicate key",
+    ):
+        load_stateful_fiber_frame2d_checkpoint_chain_bytes(duplicate_key, problem)
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="not canonical JSON",
+    ):
+        load_stateful_fiber_frame2d_checkpoint_chain_bytes(artifact + b"\n", problem)
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="byte limit",
+    ):
+        load_stateful_fiber_frame2d_checkpoint_chain_bytes(
+            b" " * (STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_MAX_BYTES + 1),
+            problem,
+        )
+
+    payload = json.loads(artifact)
+    payload["checkpoint_count"] = True
+    invalid_count = json.dumps(
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="schema validation failed",
+    ):
+        load_stateful_fiber_frame2d_checkpoint_chain_bytes(invalid_count, problem)
+
+    payload["checkpoint_count"] = len(checkpoints)
+    payload["checkpoints"][0]["unexpected"] = True
+    nested_unknown = json.dumps(
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="schema validation failed",
+    ):
+        load_stateful_fiber_frame2d_checkpoint_chain_bytes(nested_unknown, problem)
+
+    del payload["checkpoints"][0]["unexpected"]
+    payload["chain_hash"] = "sha256:" + "0" * 64
+    invalid_chain_hash = json.dumps(
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="does not match",
+    ):
+        load_stateful_fiber_frame2d_checkpoint_chain_bytes(
+            invalid_chain_hash,
+            problem,
+        )
+
+    wrong_problem = make_two_element_stateful_fiber_cantilever(angle_rad=0.617)
+    with pytest.raises(
+        StatefulFiberFrame2DCheckpointChainArtifactError,
+        match="invalid|does not match",
+    ):
+        load_stateful_fiber_frame2d_checkpoint_chain_bytes(artifact, wrong_problem)
