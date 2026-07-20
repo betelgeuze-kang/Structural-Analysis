@@ -175,13 +175,27 @@ aliasing model, restart, result, or report paths.
 Sequence:
 
 ```text
-corotational elastic frame kernel
-    → basic-deformation protocol
-    → stateful axial-curvature section
-    → corotational fiber-beam
+corotational elastic frame kernel [implemented]
+    → basic-deformation protocol [implemented]
+    → stateful axial-curvature section [implemented independently]
+    → corotational fiber-beam [next]
     → global assembly
     → load control and arc length
 ```
+
+The extracted stateless boundary publishes the three current-chord basic
+deformations, their exact first and second global derivatives, and generic
+material/geometric tangent recovery from a structural basic force/tangent
+response. The elastic kernel consumes this boundary without changing its
+result contract. It deliberately retains the principal `atan2` chord-angle
+branch; multi-turn unwrapping requires committed state and remains part of the
+future stateful corotational element. See
+`docs/corotational-frame2d-basic-kinematics.md`.
+
+The independently implemented axial-curvature section and small-displacement
+fiber beam are not yet connected through a corotational state/commit/rollback
+chain. Therefore corotational fiber-member, cyclic RC, global nonlinear, and
+G1-closure claims remain open.
 
 Required tests include finite rigid rotation, energy-gradient and tangent checks, P-Delta portal response, cyclic RC members, restart/replay, and snap-through paths.
 
