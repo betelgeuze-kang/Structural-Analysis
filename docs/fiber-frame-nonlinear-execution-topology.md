@@ -109,8 +109,10 @@ are validated independently against the retained descriptors.
 
 This receipt describes a coordinate transform. It is **not** the physical
 EquationScaling contract used to judge mixed force and moment convergence.
-That separate PR-J2 contract must retain raw force norms, raw moment norms,
-scaled norms, governing node/DOF, and its own characteristic-length provenance.
+That separate PR-J2 contract is defined in
+`fiber-frame-physical-equation-scaling.md`; it retains raw force norms, raw
+moment norms, scaled norms, governing node/DOF, and its own
+characteristic-length provenance.
 
 ## Physical mapping
 
