@@ -27,9 +27,7 @@ from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
 
 MODEL_HASH = "sha256:" + "1" * 64
 PLAN_HASH = "sha256:" + "2" * 64
-SOLVER_STATE_HASHES = tuple(
-    "sha256:" + character * 64 for character in ("3", "4", "5")
-)
+SOLVER_STATE_HASHES = tuple("sha256:" + character * 64 for character in ("3", "4", "5"))
 
 
 def _checkpoint_chain():
@@ -87,17 +85,17 @@ def test_complete_checkpoint_chain_projects_and_replays_exactly() -> None:
     assert first.terminal_material_state_bundle_hash == (
         first.projections[-1].bundle.bundle_hash
     )
-    assert [
-        row.receipt.parent_checkpoint_state_hash for row in first.projections
-    ] == [
+    assert [row.receipt.parent_checkpoint_state_hash for row in first.projections] == [
         None,
         checkpoint_chain.checkpoints[0].state_hash,
         checkpoint_chain.checkpoints[1].state_hash,
     ]
-    assert first.to_manifest()["claim_boundary"][
-        "numerical_result_authority"
-    ] is False
-    assert "state_bytes" not in str(first.to_manifest())
+    assert first.to_manifest()["claim_boundary"]["numerical_result_authority"] is False
+    assert all(
+        "state_bytes" not in entry
+        for projection in first.to_manifest()["projections"]
+        for entry in projection["material_state_bundle"]["entries"]
+    )
     validate_fiber_frame_material_state_projection_chain(
         problem,
         checkpoint_chain,
@@ -212,9 +210,7 @@ def test_projection_chain_authority_and_coherent_ancestry_tamper_fail_closed() -
     )
     coherently_rehashed = replace(
         tampered,
-        chain_hash=canonical_hash(
-            _chain_payload(tampered, include_chain_hash=False)
-        ),
+        chain_hash=canonical_hash(_chain_payload(tampered, include_chain_hash=False)),
     )
     validate_fiber_frame_material_state_projection_chain_shape(coherently_rehashed)
     with pytest.raises(

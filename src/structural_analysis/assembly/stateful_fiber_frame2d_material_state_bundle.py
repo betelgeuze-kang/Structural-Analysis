@@ -23,6 +23,7 @@ from typing import Any
 
 from structural_analysis.assembly.stateful_fiber_frame2d import (
     StatefulFiberFrame2DProblem,
+    initial_stateful_fiber_frame2d_checkpoint,
     validate_stateful_fiber_frame2d_checkpoint,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
@@ -60,9 +61,7 @@ FIBER_FRAME_MATERIAL_STATE_PROJECTION_SCHEMA_VERSION = (
 FIBER_FRAME_MATERIAL_STATE_PROJECTION_MANIFEST_SCHEMA_VERSION = (
     "stateful-fiber-frame2d-material-state-projection-manifest.v1"
 )
-FIBER_FRAME_MATERIAL_STATE_ADAPTER_PROFILE = (
-    "member_beam_ip_section_fiber_order.v1"
-)
+FIBER_FRAME_MATERIAL_STATE_ADAPTER_PROFILE = "member_beam_ip_section_fiber_order.v1"
 FIBER_FRAME_MATERIAL_STATE_AUTHORITY_PROFILE = (
     "non_authoritative_checkpoint_material_state_projection.v1"
 )
@@ -179,6 +178,16 @@ def create_initial_fiber_frame_material_state_projection(
             "fiber_frame_projection_initial_epoch_invalid",
             "/checkpoint/epoch",
             "Initial projection requires the epoch-zero checkpoint.",
+        )
+    expected_initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    if (
+        checkpoint.state_hash != expected_initial.state_hash
+        or checkpoint.canonical_bytes() != expected_initial.canonical_bytes()
+    ):
+        _fail(
+            "fiber_frame_projection_initial_checkpoint_mismatch",
+            "/checkpoint",
+            "Initial projection requires the exact problem genesis checkpoint.",
         )
     flattened = _flatten_checkpoint(problem, checkpoint)
     bundle = create_initial_material_state_bundle(
@@ -408,9 +417,7 @@ def validate_fiber_frame_material_state_projection(
             "Expected FiberFrameMaterialStateProjection.",
         )
     validate_stateful_fiber_frame2d_checkpoint(problem, checkpoint)
-    receipt = validate_fiber_frame_material_state_projection_receipt(
-        projection.receipt
-    )
+    receipt = validate_fiber_frame_material_state_projection_receipt(projection.receipt)
     bundle = validate_material_state_bundle(projection.bundle)
     flattened = _flatten_checkpoint(problem, checkpoint)
 
@@ -428,9 +435,7 @@ def validate_fiber_frame_material_state_projection(
         "integration_point_order_hash": bundle.integration_point_order_hash,
         "source_identity_hash": flattened.source_identity_hash,
         "member_count": flattened.member_count,
-        "beam_integration_point_count": (
-            flattened.beam_integration_point_count
-        ),
+        "beam_integration_point_count": (flattened.beam_integration_point_count),
         "fiber_state_count": flattened.fiber_state_count,
         "total_state_byte_length": flattened.total_state_byte_length,
     }
@@ -617,8 +622,7 @@ def _flatten_checkpoint(
                     MaterialStateInput(
                         entity_id=f"member.{member_index:04d}",
                         integration_point_id=(
-                            f"ip.{integration_point_index:04d}."
-                            f"fiber.{fiber_index:04d}"
+                            f"ip.{integration_point_index:04d}.fiber.{fiber_index:04d}"
                         ),
                         material_type_id=material_type_id,
                         material_schema_version=material_schema_version,
@@ -678,9 +682,7 @@ def _build_receipt(
         authority_profile=FIBER_FRAME_MATERIAL_STATE_AUTHORITY_PROFILE,
         adapter_profile=FIBER_FRAME_MATERIAL_STATE_ADAPTER_PROFILE,
         problem_contract_hash=problem.contract_hash,
-        checkpoint_schema_version=(
-            STATEFUL_FIBER_FRAME2D_CHECKPOINT_SCHEMA_VERSION
-        ),
+        checkpoint_schema_version=(STATEFUL_FIBER_FRAME2D_CHECKPOINT_SCHEMA_VERSION),
         checkpoint_state_hash=checkpoint.state_hash,
         parent_checkpoint_state_hash=checkpoint.parent_state_hash,
         checkpoint_epoch=checkpoint.epoch,
@@ -722,17 +724,13 @@ def _receipt_payload(
             "problem_contract_hash": receipt.problem_contract_hash,
             "checkpoint_schema_version": receipt.checkpoint_schema_version,
             "checkpoint_state_hash": receipt.checkpoint_state_hash,
-            "parent_checkpoint_state_hash": (
-                receipt.parent_checkpoint_state_hash
-            ),
+            "parent_checkpoint_state_hash": (receipt.parent_checkpoint_state_hash),
             "model_ir_content_hash": receipt.model_ir_content_hash,
             "execution_plan_hash": receipt.execution_plan_hash,
             "solver_state_hash": receipt.solver_state_hash,
             "material_state_bundle_hash": receipt.material_state_bundle_hash,
             "trial_bundle_hash": receipt.trial_bundle_hash,
-            "integration_point_order_hash": (
-                receipt.integration_point_order_hash
-            ),
+            "integration_point_order_hash": (receipt.integration_point_order_hash),
             "source_identity_hash": receipt.source_identity_hash,
         },
         "checkpoint": {
@@ -742,9 +740,7 @@ def _receipt_payload(
         },
         "counts": {
             "member_count": receipt.member_count,
-            "beam_integration_point_count": (
-                receipt.beam_integration_point_count
-            ),
+            "beam_integration_point_count": (receipt.beam_integration_point_count),
             "fiber_state_count": receipt.fiber_state_count,
             "total_state_byte_length": receipt.total_state_byte_length,
         },
@@ -809,9 +805,7 @@ def _require_exact_bundle(
 ) -> None:
     if actual.to_manifest() != expected.to_manifest() or tuple(
         actual.state_bytes(index) for index in range(actual.entry_count)
-    ) != tuple(
-        expected.state_bytes(index) for index in range(expected.entry_count)
-    ):
+    ) != tuple(expected.state_bytes(index) for index in range(expected.entry_count)):
         _fail(
             "fiber_frame_projection_bundle_replay_mismatch",
             "/material_state_bundle",
@@ -859,10 +853,7 @@ def _bundle_id(
         )
     problem_digest = problem.contract_hash.split(":", 1)[1][:16]
     checkpoint_digest = checkpoint.state_hash.split(":", 1)[1][:16]
-    return (
-        f"ffms.{role}.e{checkpoint.epoch}."
-        f"p{problem_digest}.c{checkpoint_digest}"
-    )
+    return f"ffms.{role}.e{checkpoint.epoch}.p{problem_digest}.c{checkpoint_digest}"
 
 
 def _fiber_path(

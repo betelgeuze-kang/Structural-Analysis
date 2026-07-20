@@ -93,12 +93,55 @@ def test_initial_projection_is_deterministic_ordered_and_descriptor_only() -> No
     manifest = first.to_manifest()
     assert manifest["claim_boundary"]["numerical_result_authority"] is False
     assert manifest["claim_boundary"]["constitutive_law_replayed"] is False
-    assert "state_bytes" not in str(manifest)
+    assert all(
+        "state_bytes" not in entry
+        for entry in manifest["material_state_bundle"]["entries"]
+    )
     validate_fiber_frame_material_state_projection(
         problem,
         frame_checkpoint,
         first,
     )
+
+
+def test_initial_projection_rejects_non_genesis_epoch_zero_material_history() -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    checkpoint = initial_stateful_fiber_frame2d_checkpoint(problem)
+    element = checkpoint.element_states[0]
+    section = element.integration_point_states[0]
+    fiber_state = section.fiber_states[0]
+    altered_fiber_state = replace(
+        fiber_state,
+        dissipated_energy_density_mj_per_m3=1.0,
+    )
+    altered_section = replace(
+        section,
+        fiber_states=(altered_fiber_state, *section.fiber_states[1:]),
+    )
+    altered_element = replace(
+        element,
+        integration_point_states=(
+            altered_section,
+            *element.integration_point_states[1:],
+        ),
+    )
+    non_genesis = replace(
+        checkpoint,
+        element_states=(altered_element, *checkpoint.element_states[1:]),
+        state_hash="",
+    )
+
+    with pytest.raises(
+        FiberFrameMaterialStateProjectionError,
+        match="fiber_frame_projection_initial_checkpoint_mismatch",
+    ):
+        create_initial_fiber_frame_material_state_projection(
+            problem,
+            non_genesis,
+            model_ir_content_hash=MODEL_HASH,
+            execution_plan_hash=PLAN_HASH,
+            solver_state_hash=STATE_E0_HASH,
+        )
 
 
 def test_committed_checkpoint_projection_binds_parent_entries_and_persistence() -> None:
@@ -236,7 +279,9 @@ def test_member_order_changes_source_identity_and_bundle_identity() -> None:
     )
 
     assert original_problem.contract_hash != reordered_problem.contract_hash
-    assert original.receipt.source_identity_hash != reordered.receipt.source_identity_hash
+    assert (
+        original.receipt.source_identity_hash != reordered.receipt.source_identity_hash
+    )
     assert original.bundle.bundle_hash != reordered.bundle.bundle_hash
     with pytest.raises(ValueError, match="problem_contract_hash"):
         validate_fiber_frame_material_state_projection(

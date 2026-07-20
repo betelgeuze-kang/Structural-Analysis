@@ -99,7 +99,9 @@ def create_fiber_frame_material_state_projection_chain(
             "/solver_state_hashes",
             "Solver state hashes must be a non-string sequence.",
         )
-    normalized_solver_hashes = tuple(str(value).strip() for value in solver_state_hashes)
+    normalized_solver_hashes = tuple(
+        str(value).strip() for value in solver_state_hashes
+    )
     if len(normalized_solver_hashes) != len(checkpoint_chain.checkpoints):
         raise FiberFrameMaterialStateProjectionError(
             "fiber_frame_projection_chain_solver_hash_count_mismatch",
@@ -146,9 +148,7 @@ def create_fiber_frame_material_state_projection_chain(
         terminal_checkpoint_state_hash=(
             checkpoint_chain.terminal_checkpoint.state_hash
         ),
-        terminal_material_state_bundle_hash=(
-            projection_tuple[-1].bundle.bundle_hash
-        ),
+        terminal_material_state_bundle_hash=(projection_tuple[-1].bundle.bundle_hash),
         projections=projection_tuple,
         extensions=MappingProxyType({}),
     )
@@ -352,9 +352,7 @@ def _chain_payload(
             "problem_contract_hash": projected_chain.problem_contract_hash,
             "model_ir_content_hash": projected_chain.model_ir_content_hash,
             "execution_plan_hash": projected_chain.execution_plan_hash,
-            "root_checkpoint_state_hash": (
-                projected_chain.root_checkpoint_state_hash
-            ),
+            "root_checkpoint_state_hash": (projected_chain.root_checkpoint_state_hash),
             "terminal_checkpoint_state_hash": (
                 projected_chain.terminal_checkpoint_state_hash
             ),

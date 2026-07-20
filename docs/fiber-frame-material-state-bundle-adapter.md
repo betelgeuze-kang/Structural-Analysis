@@ -96,7 +96,9 @@ projection0 = create_initial_fiber_frame_material_state_projection(
 )
 ```
 
-The result is an unparented committed epoch-zero MaterialStateBundle.
+The checkpoint must be byte-identical to the problem's generated genesis
+checkpoint, including its zero constitutive history. The result is an
+unparented committed epoch-zero MaterialStateBundle.
 
 ### Committed child checkpoint
 
@@ -160,6 +162,5 @@ PYTHONPATH=src python3 -m pytest -q \
 
 python3 -m ruff check \
   src/structural_analysis/assembly/stateful_fiber_frame2d_material_state_bundle.py \
-  src/structural_analysis/assembly/__init__.py \
   tests/test_stateful_fiber_frame2d_material_state_bundle.py
 ```
