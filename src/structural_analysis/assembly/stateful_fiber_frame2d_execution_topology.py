@@ -17,7 +17,7 @@ design, release, or commercial authority.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 import json
 import math
 import re
@@ -111,6 +111,37 @@ _SCALING_ARRAY_SPECS = (
     ("reference_load_generalized_solver_order", "<f8"),
 )
 _SCALING_ARRAY_NAMES = tuple(name for name, _dtype in _SCALING_ARRAY_SPECS)
+_SCALING_MAPPING = MappingProxyType(
+    {
+        "generalized_to_physical": "physical_from_generalized_scale",
+        "physical_to_generalized": "generalized_from_physical_scale",
+        "physical_reference_load": "reference_load_physical_solver_order",
+        "generalized_reference_load": "reference_load_generalized_solver_order",
+        "residual_transform": (
+            "r_generalized=physical_from_generalized_scale*r_physical"
+        ),
+        "jacobian_transform": "K_generalized=S*K_physical*S",
+    }
+)
+_CONSTRAINT_PARTITION_MANIFEST = MappingProxyType(
+    {
+        "inactive_physical_dofs": "inactive_physical_dofs",
+        "authored_fixed_physical_dofs": "authored_fixed_physical_dofs",
+        "constrained_physical_dofs": "constrained_physical_dofs",
+        "free_physical_dofs": "free_physical_dofs",
+        "constrained_solver_dofs": "constrained_solver_dofs",
+        "free_solver_dofs": "free_solver_dofs",
+    }
+)
+_SPARSE_PATTERN_MANIFEST = MappingProxyType(
+    {
+        "format": "csr",
+        "scope": "canonical_physical_equations",
+        "row_ptr": "csr_row_ptr",
+        "column_indices": "csr_column_indices",
+        "inactive_rows": "diagonal_only",
+    }
+)
 
 
 class FiberFrameExecutionTopologyError(ValueError):
@@ -156,7 +187,7 @@ class FiberFrameSolverCoordinateScalingReceipt:
     solver_dof_count: int
     source_commitment_hash: str
     descriptors: tuple[FiberFrameTopologyArrayDescriptor, ...]
-    _arrays: Mapping[str, np.ndarray]
+    _arrays: Mapping[str, np.ndarray] = field(repr=False, compare=False)
     extensions: Mapping[str, Any]
 
     def array(self, name: str) -> np.ndarray:
@@ -194,7 +225,7 @@ class FiberFrameNonlinearExecutionTopologyPlan:
     topology_hash: str
     solver_coordinate_scaling_hash: str
     descriptors: tuple[FiberFrameTopologyArrayDescriptor, ...]
-    _arrays: Mapping[str, np.ndarray]
+    _arrays: Mapping[str, np.ndarray] = field(repr=False, compare=False)
     solver_coordinate_scaling: FiberFrameSolverCoordinateScalingReceipt
     extensions: Mapping[str, Any]
 
@@ -440,6 +471,12 @@ def validate_fiber_frame_execution_topology_plan(
                 path,
                 f"Expected {expected}.",
             )
+    if plan.node_count < 2 or plan.member_count < 1:
+        _fail(
+            "fiber_frame_topology_entity_count_invalid",
+            "/entity_order",
+            "Topology requires at least two nodes and one member.",
+        )
     _validate_array_map(
         plan._arrays,
         plan.descriptors,
@@ -757,6 +794,12 @@ def validate_fiber_frame_solver_coordinate_scaling(
             "/solver_coordinate_scaling/arrays/reference_load_generalized_solver_order",
             "Generalized reference load does not match the coordinate Jacobian.",
         )
+    if not np.any(physical_load != 0.0):
+        _fail(
+            "fiber_frame_scaling_reference_load_zero",
+            "/solver_coordinate_scaling/arrays/reference_load_physical_solver_order",
+            "Scaling receipt requires a nonzero reference load.",
+        )
     if not isinstance(receipt.extensions, MappingProxyType) or receipt.extensions:
         _fail(
             "fiber_frame_scaling_extensions_invalid",
@@ -809,6 +852,48 @@ def physical_3dof_to_solver_generalized(
     return immutable_array(
         plan.solver_coordinate_scaling.array("generalized_from_physical_scale")
         * values,
+        dtype="<f8",
+    )
+
+
+def physical_3dof_residual_to_solver_generalized(
+    plan: FiberFrameNonlinearExecutionTopologyPlan,
+    physical_residual: Any,
+) -> np.ndarray:
+    """Map physical UX/UY/RZ residuals into energy-conjugate solver residuals."""
+
+    validate_fiber_frame_execution_topology_plan(plan)
+    values = _immutable_float_vector(
+        physical_residual,
+        plan.solver_dof_count,
+        "/physical_residual",
+    )
+    scale = plan.solver_coordinate_scaling.array("physical_from_generalized_scale")
+    return immutable_array(scale * values, dtype="<f8")
+
+
+def physical_3dof_jacobian_to_solver_generalized(
+    plan: FiberFrameNonlinearExecutionTopologyPlan,
+    physical_jacobian: Any,
+) -> np.ndarray:
+    """Map a physical UX/UY/RZ Jacobian into generalized solver coordinates."""
+
+    validate_fiber_frame_execution_topology_plan(plan)
+    matrix = _immutable_contract_array(
+        physical_jacobian,
+        "<f8",
+        "/physical_jacobian",
+    )
+    expected_shape = (plan.solver_dof_count, plan.solver_dof_count)
+    if matrix.shape != expected_shape:
+        _fail(
+            "fiber_frame_topology_jacobian_shape_invalid",
+            "/physical_jacobian",
+            f"Expected shape {expected_shape}.",
+        )
+    scale = plan.solver_coordinate_scaling.array("physical_from_generalized_scale")
+    return immutable_array(
+        scale[:, None] * matrix * scale[None, :],
         dtype="<f8",
     )
 
@@ -873,22 +958,35 @@ def validate_fiber_frame_execution_topology_array_bytes(
             f"/arrays/{name}",
             "Array artifact must be immutable bytes.",
         )
-    descriptor = _descriptor_by_name(plan.descriptors, name)
-    if len(payload) != descriptor.byte_length:
+    return _validate_external_array_bytes(
+        plan.descriptors,
+        name=name,
+        payload=payload,
+        path=f"/arrays/{name}",
+    )
+
+
+def validate_fiber_frame_solver_coordinate_scaling_array_bytes(
+    receipt: FiberFrameSolverCoordinateScalingReceipt,
+    *,
+    name: str,
+    payload: bytes,
+) -> np.ndarray:
+    """Validate one external solver-coordinate scaling array artifact."""
+
+    validate_fiber_frame_solver_coordinate_scaling(receipt)
+    if type(payload) is not bytes:
         _fail(
-            "fiber_frame_topology_array_length_mismatch",
-            f"/arrays/{name}",
-            "Array artifact byte length does not match descriptor.",
+            "fiber_frame_topology_array_bytes_invalid",
+            f"/solver_coordinate_scaling/arrays/{name}",
+            "Array artifact must be immutable bytes.",
         )
-    array = np.frombuffer(payload, dtype=descriptor.dtype).reshape(descriptor.shape)
-    immutable = immutable_array(array, dtype=descriptor.dtype)
-    if array_data_hash(immutable) != descriptor.data_hash:
-        _fail(
-            "fiber_frame_topology_array_hash_mismatch",
-            f"/arrays/{name}",
-            "Array artifact bytes do not match descriptor.",
-        )
-    return immutable
+    return _validate_external_array_bytes(
+        receipt.descriptors,
+        name=name,
+        payload=payload,
+        path=f"/solver_coordinate_scaling/arrays/{name}",
+    )
 
 
 def validate_fiber_frame_execution_topology_manifest(
@@ -965,55 +1063,141 @@ def validate_fiber_frame_execution_topology_manifest(
             "Kinematic binding decision changed.",
         )
     _require_stable_id(normalized["plan_id"], "/plan_id")
-    for path, value in (
-        ("/plan_hash", normalized["plan_hash"]),
-        (
-            "/bindings/problem_contract_hash",
-            normalized["bindings"].get("problem_contract_hash"),
-        ),
-        (
-            "/bindings/model_ir_content_hash",
-            normalized["bindings"].get("model_ir_content_hash"),
-        ),
-        (
-            "/bindings/source_identity_hash",
-            normalized["bindings"].get("source_identity_hash"),
-        ),
-        ("/bindings/topology_hash", normalized["bindings"].get("topology_hash")),
-        (
-            "/bindings/solver_coordinate_scaling_hash",
-            normalized["bindings"].get("solver_coordinate_scaling_hash"),
-        ),
-        (
-            "/source_artifact_bindings/numeric_buffer_hash",
-            normalized["source_artifact_bindings"].get("numeric_buffer_hash"),
-        ),
-        (
-            "/source_artifact_bindings/entity_mapping_hash",
-            normalized["source_artifact_bindings"].get("entity_mapping_hash"),
-        ),
-        (
-            "/source_artifact_bindings/operator_hash",
-            normalized["source_artifact_bindings"].get("operator_hash"),
-        ),
+    _require_hash(normalized["plan_hash"], "/plan_hash")
+    bindings = _require_manifest_object(
+        normalized["bindings"],
+        {
+            "problem_contract_hash",
+            "model_ir_content_hash",
+            "source_identity_hash",
+            "topology_hash",
+            "solver_coordinate_scaling_hash",
+        },
+        "/bindings",
+    )
+    source_bindings = _require_manifest_object(
+        normalized["source_artifact_bindings"],
+        {"numeric_buffer_hash", "entity_mapping_hash", "operator_hash"},
+        "/source_artifact_bindings",
+    )
+    for name, value in bindings.items():
+        _require_hash(value, f"/bindings/{name}")
+    for name, value in source_bindings.items():
+        _require_hash(value, f"/source_artifact_bindings/{name}")
+
+    entity_order = _require_manifest_object(
+        normalized["entity_order"],
+        {"case_id", "node_ids", "member_ids"},
+        "/entity_order",
+    )
+    _require_nonempty_string(entity_order["case_id"], "/entity_order/case_id")
+    node_ids = _stable_id_tuple(entity_order["node_ids"], "/entity_order/node_ids")
+    member_ids = _stable_id_tuple(
+        entity_order["member_ids"],
+        "/entity_order/member_ids",
+    )
+    if len(set(node_ids)) != len(node_ids) or len(set(member_ids)) != len(member_ids):
+        _fail(
+            "fiber_frame_topology_entity_order_duplicate",
+            "/entity_order",
+            "Node and member IDs must be unique.",
+        )
+
+    dof_layout = _require_manifest_object(
+        normalized["dof_layout"],
+        set(_dof_layout_manifest(node_count=0, member_count=0)),
+        "/dof_layout",
+    )
+    node_count = _require_index(dof_layout["node_count"], "/dof_layout/node_count")
+    member_count = _require_index(
+        dof_layout["member_count"],
+        "/dof_layout/member_count",
+    )
+    _require_index(
+        dof_layout["physical_dof_count"],
+        "/dof_layout/physical_dof_count",
+    )
+    _require_index(
+        dof_layout["solver_dof_count"],
+        "/dof_layout/solver_dof_count",
+    )
+    if node_count < 2 or member_count < 1:
+        _fail(
+            "fiber_frame_topology_entity_count_invalid",
+            "/dof_layout",
+            "Topology requires at least two nodes and one member.",
+        )
+    if len(node_ids) != node_count or len(member_ids) != member_count:
+        _fail(
+            "fiber_frame_topology_entity_count_mismatch",
+            "/entity_order",
+            "Entity-order lengths do not match the DOF-layout counts.",
+        )
+    if dof_layout != _dof_layout_manifest(
+        node_count=node_count,
+        member_count=member_count,
     ):
-        _require_hash(value, path)
+        _fail(
+            "fiber_frame_topology_dof_layout_invalid",
+            "/dof_layout",
+            "Canonical physical/solver DOF layout changed.",
+        )
+    if normalized["constraint_partition"] != dict(_CONSTRAINT_PARTITION_MANIFEST):
+        _fail(
+            "fiber_frame_topology_constraint_manifest_invalid",
+            "/constraint_partition",
+            "Constraint-partition descriptor mapping changed.",
+        )
+    if normalized["sparse_pattern"] != dict(_SPARSE_PATTERN_MANIFEST):
+        _fail(
+            "fiber_frame_topology_sparse_manifest_invalid",
+            "/sparse_pattern",
+            "Sparse-pattern profile or descriptor mapping changed.",
+        )
+
     descriptors = normalized["array_descriptors"]
-    if not isinstance(descriptors, list) or [
-        row.get("name") for row in descriptors if isinstance(row, Mapping)
-    ] != list(_PLAN_ARRAY_NAMES):
+    if (
+        not isinstance(descriptors, list)
+        or not all(isinstance(row, Mapping) for row in descriptors)
+        or [row["name"] if "name" in row else None for row in descriptors]
+        != list(_PLAN_ARRAY_NAMES)
+    ):
         _fail(
             "fiber_frame_topology_manifest_descriptor_set_invalid",
             "/array_descriptors",
             "Topology descriptor set or order is invalid.",
         )
+    descriptor_shapes: dict[str, tuple[int, ...]] = {}
     for index, ((name, dtype), row) in enumerate(
         zip(_PLAN_ARRAY_SPECS, descriptors, strict=True)
     ):
-        _validate_descriptor_manifest(row, name, dtype, f"/array_descriptors/{index}")
-    _validate_scaling_manifest(normalized["solver_coordinate_scaling"])
-    if normalized["claim_boundary"] != dict(
-        FIBER_FRAME_EXECUTION_TOPOLOGY_CLAIM_BOUNDARY
+        descriptor_shapes[name] = _validate_descriptor_manifest(
+            row,
+            name,
+            dtype,
+            f"/array_descriptors/{index}",
+        )
+    _validate_plan_manifest_descriptor_shapes(
+        descriptor_shapes,
+        node_count=node_count,
+        member_count=member_count,
+    )
+    _validate_scaling_manifest(
+        normalized["solver_coordinate_scaling"],
+        expected_problem_contract_hash=bindings["problem_contract_hash"],
+        expected_solver_dof_count=3 * node_count,
+        expected_scaling_hash=bindings["solver_coordinate_scaling_hash"],
+    )
+    claim_boundary = _require_manifest_object(
+        normalized["claim_boundary"],
+        set(FIBER_FRAME_EXECUTION_TOPOLOGY_CLAIM_BOUNDARY),
+        "/claim_boundary",
+    )
+    expected_claim_boundary = dict(FIBER_FRAME_EXECUTION_TOPOLOGY_CLAIM_BOUNDARY)
+    if any(
+        type(claim_boundary[name]) is not bool
+        or claim_boundary[name] is not expected_value
+        for name, expected_value in expected_claim_boundary.items()
     ):
         _fail(
             "fiber_frame_topology_claim_boundary_invalid",
@@ -1040,21 +1224,49 @@ def validate_fiber_frame_execution_topology_manifest(
 def _create_solver_coordinate_scaling(
     problem: StatefulFiberFrame2DProblem,
 ) -> FiberFrameSolverCoordinateScalingReceipt:
-    physical_from_generalized = immutable_array(
-        problem.physical_coordinate_scale,
-        dtype="<f8",
+    scale_length = problem.rotation_coordinate_scale_m
+    if scale_length < 1.0 / np.finfo(np.float64).max:
+        _fail(
+            "fiber_frame_scaling_rotation_scale_unrepresentable",
+            "/solver_coordinate_scaling/rotation_coordinate_scale_m",
+            "Rotation coordinate scale and its inverse must be finite positive fp64 values.",
+        )
+    inverse_scale_length = 1.0 / scale_length
+    if not math.isfinite(inverse_scale_length) or inverse_scale_length <= 0.0:
+        _fail(
+            "fiber_frame_scaling_rotation_scale_unrepresentable",
+            "/solver_coordinate_scaling/rotation_coordinate_scale_m",
+            "Rotation coordinate scale and its inverse must be finite positive fp64 values.",
+        )
+    physical_from_generalized_values = np.ones(
+        problem.global_dof_count,
+        dtype=np.float64,
     )
-    generalized_from_physical = immutable_array(
-        1.0 / physical_from_generalized,
-        dtype="<f8",
+    physical_from_generalized_values[2::3] = inverse_scale_length
+    generalized_from_physical_values = np.ones(
+        problem.global_dof_count,
+        dtype=np.float64,
     )
-    physical_load = immutable_array(
+    generalized_from_physical_values[2::3] = scale_length
+    physical_from_generalized = _immutable_contract_array(
+        physical_from_generalized_values,
+        "<f8",
+        "/solver_coordinate_scaling/arrays/physical_from_generalized_scale",
+    )
+    generalized_from_physical = _immutable_contract_array(
+        generalized_from_physical_values,
+        "<f8",
+        "/solver_coordinate_scaling/arrays/generalized_from_physical_scale",
+    )
+    physical_load = _immutable_contract_array(
         problem.reference_external_load_vector(),
-        dtype="<f8",
+        "<f8",
+        "/solver_coordinate_scaling/arrays/reference_load_physical_solver_order",
     )
-    generalized_load = immutable_array(
+    generalized_load = _immutable_contract_array(
         physical_from_generalized * physical_load,
-        dtype="<f8",
+        "<f8",
+        "/solver_coordinate_scaling/arrays/reference_load_generalized_solver_order",
     )
     arrays = MappingProxyType(
         {
@@ -1199,6 +1411,64 @@ def _compile_plan_arrays(
 def _validate_plan_array_semantics(
     plan: FiberFrameNonlinearExecutionTopologyPlan,
 ) -> None:
+    exact_shapes = {
+        "node_coordinates_xy_m": (plan.node_count, 2),
+        "node_dof_indices": (plan.node_count, 6),
+        "member_physical_global_dofs": (plan.member_count, 12),
+        "member_active_physical_dofs": (plan.member_count, 6),
+        "member_solver_global_dofs": (plan.member_count, 6),
+        "solver_to_physical_global_dofs": (plan.solver_dof_count,),
+        "physical_to_solver_global_dofs": (plan.physical_dof_count,),
+        "inactive_physical_dofs": (3 * plan.node_count,),
+        "reference_external_load_physical_6dof": (plan.physical_dof_count,),
+        "csr_row_ptr": (plan.physical_dof_count + 1,),
+    }
+    for name, expected_shape in exact_shapes.items():
+        if plan.array(name).shape != expected_shape:
+            _fail(
+                "fiber_frame_topology_array_shape_invalid",
+                f"/arrays/{name}",
+                f"Expected shape {expected_shape}.",
+            )
+    for name in (
+        "authored_fixed_physical_dofs",
+        "constrained_physical_dofs",
+        "free_physical_dofs",
+        "constrained_solver_dofs",
+        "free_solver_dofs",
+        "csr_column_indices",
+    ):
+        if plan.array(name).ndim != 1:
+            _fail(
+                "fiber_frame_topology_array_shape_invalid",
+                f"/arrays/{name}",
+                "Expected a one-dimensional vector.",
+            )
+
+    fixed_solver = plan.array("constrained_solver_dofs")
+    if (
+        fixed_solver.size < 1
+        or np.any(fixed_solver < 0)
+        or np.any(fixed_solver >= plan.solver_dof_count)
+        or np.any(fixed_solver[1:] <= fixed_solver[:-1])
+    ):
+        _fail(
+            "fiber_frame_topology_constrained_solver_partition_invalid",
+            "/arrays/constrained_solver_dofs",
+            "Authored solver constraints must be sorted, unique, and in range.",
+        )
+    fixed_set = set(int(value) for value in fixed_solver)
+    expected_free_solver = np.asarray(
+        [dof for dof in range(plan.solver_dof_count) if dof not in fixed_set],
+        dtype=np.int32,
+    )
+    if not np.array_equal(plan.array("free_solver_dofs"), expected_free_solver):
+        _fail(
+            "fiber_frame_topology_free_solver_partition_invalid",
+            "/arrays/free_solver_dofs",
+            "Free solver equations must exactly complement authored constraints.",
+        )
+
     node_dofs = plan.array("node_dof_indices")
     expected_node_dofs = np.arange(plan.physical_dof_count, dtype=np.int32).reshape(
         plan.node_count,
@@ -1307,6 +1577,53 @@ def _validate_plan_array_semantics(
             "/arrays/member_active_physical_dofs",
             "Member active/solver rows must have six equations.",
         )
+    if np.any(member_solver < 0) or np.any(member_solver >= plan.solver_dof_count):
+        _fail(
+            "fiber_frame_topology_member_solver_dof_invalid",
+            "/arrays/member_solver_global_dofs",
+            "Member solver equations are out of range.",
+        )
+    expected_member_physical_rows: list[np.ndarray] = []
+    for index, row in enumerate(member_solver):
+        node_indices: list[int] = []
+        for offset in (0, 3):
+            node_index = int(row[offset]) // 3
+            expected_solver_triplet = np.arange(
+                3 * node_index,
+                3 * node_index + 3,
+                dtype=np.int32,
+            )
+            if not np.array_equal(row[offset : offset + 3], expected_solver_triplet):
+                _fail(
+                    "fiber_frame_topology_member_solver_row_invalid",
+                    f"/arrays/member_solver_global_dofs/{index}",
+                    "Each member end must retain canonical UX/UY/RZ solver order.",
+                )
+            node_indices.append(node_index)
+        if node_indices[0] == node_indices[1]:
+            _fail(
+                "fiber_frame_topology_member_connectivity_invalid",
+                f"/arrays/member_solver_global_dofs/{index}",
+                "Member end nodes must be distinct.",
+            )
+        expected_member_physical_rows.append(
+            np.concatenate(
+                (
+                    node_dofs[node_indices[0]],
+                    node_dofs[node_indices[1]],
+                )
+            )
+        )
+    expected_member_physical = np.vstack(expected_member_physical_rows).astype(
+        np.int32,
+        copy=False,
+    )
+    if not np.array_equal(member_physical, expected_member_physical):
+        _fail(
+            "fiber_frame_topology_member_physical_mapping_invalid",
+            "/arrays/member_physical_global_dofs",
+            "Twelve-DOF member rows do not match solver member connectivity.",
+        )
     if not np.array_equal(member_active, solver_to_physical[member_solver]):
         _fail(
             "fiber_frame_topology_member_mapping_invalid",
@@ -1366,6 +1683,23 @@ def _csr_pattern(
     )
 
 
+def _dof_layout_manifest(*, node_count: int, member_count: int) -> dict[str, Any]:
+    return {
+        "physical_components": list(FIBER_FRAME_PHYSICAL_DOF_COMPONENTS),
+        "solver_components": list(FIBER_FRAME_SOLVER_DOF_COMPONENTS),
+        "node_count": node_count,
+        "member_count": member_count,
+        "physical_dof_count": 6 * node_count,
+        "solver_dof_count": 3 * node_count,
+        "node_dof_indices": "node_dof_indices",
+        "member_physical_global_dofs": "member_physical_global_dofs",
+        "member_active_physical_dofs": "member_active_physical_dofs",
+        "member_solver_global_dofs": "member_solver_global_dofs",
+        "solver_to_physical_global_dofs": "solver_to_physical_global_dofs",
+        "physical_to_solver_global_dofs": "physical_to_solver_global_dofs",
+    }
+
+
 def _plan_payload(
     plan: FiberFrameNonlinearExecutionTopologyPlan,
     *,
@@ -1394,35 +1728,12 @@ def _plan_payload(
             "node_ids": list(plan.node_ids),
             "member_ids": list(plan.member_ids),
         },
-        "dof_layout": {
-            "physical_components": list(FIBER_FRAME_PHYSICAL_DOF_COMPONENTS),
-            "solver_components": list(FIBER_FRAME_SOLVER_DOF_COMPONENTS),
-            "node_count": plan.node_count,
-            "member_count": plan.member_count,
-            "physical_dof_count": plan.physical_dof_count,
-            "solver_dof_count": plan.solver_dof_count,
-            "node_dof_indices": "node_dof_indices",
-            "member_physical_global_dofs": "member_physical_global_dofs",
-            "member_active_physical_dofs": "member_active_physical_dofs",
-            "member_solver_global_dofs": "member_solver_global_dofs",
-            "solver_to_physical_global_dofs": ("solver_to_physical_global_dofs"),
-            "physical_to_solver_global_dofs": ("physical_to_solver_global_dofs"),
-        },
-        "constraint_partition": {
-            "inactive_physical_dofs": "inactive_physical_dofs",
-            "authored_fixed_physical_dofs": "authored_fixed_physical_dofs",
-            "constrained_physical_dofs": "constrained_physical_dofs",
-            "free_physical_dofs": "free_physical_dofs",
-            "constrained_solver_dofs": "constrained_solver_dofs",
-            "free_solver_dofs": "free_solver_dofs",
-        },
-        "sparse_pattern": {
-            "format": "csr",
-            "scope": "canonical_physical_equations",
-            "row_ptr": "csr_row_ptr",
-            "column_indices": "csr_column_indices",
-            "inactive_rows": "diagonal_only",
-        },
+        "dof_layout": _dof_layout_manifest(
+            node_count=plan.node_count,
+            member_count=plan.member_count,
+        ),
+        "constraint_partition": dict(_CONSTRAINT_PARTITION_MANIFEST),
+        "sparse_pattern": dict(_SPARSE_PATTERN_MANIFEST),
         "array_descriptors": [row.to_dict() for row in plan.descriptors],
         "solver_coordinate_scaling": plan.solver_coordinate_scaling.to_manifest(),
         "claim_boundary": dict(FIBER_FRAME_EXECUTION_TOPOLOGY_CLAIM_BOUNDARY),
@@ -1449,16 +1760,7 @@ def _scaling_payload(
         "rotation_coordinate_scale_m": receipt.rotation_coordinate_scale_m,
         "solver_dof_count": receipt.solver_dof_count,
         "array_descriptors": [row.to_dict() for row in receipt.descriptors],
-        "mapping": {
-            "generalized_to_physical": ("physical_from_generalized_scale"),
-            "physical_to_generalized": ("generalized_from_physical_scale"),
-            "physical_reference_load": ("reference_load_physical_solver_order"),
-            "generalized_reference_load": ("reference_load_generalized_solver_order"),
-            "residual_transform": (
-                "r_generalized=physical_from_generalized_scale*r_physical"
-            ),
-            "jacobian_transform": ("K_generalized=S*K_physical*S"),
-        },
+        "mapping": dict(_SCALING_MAPPING),
         "extensions": dict(receipt.extensions),
     }
     if include_scaling_hash:
@@ -1466,7 +1768,97 @@ def _scaling_payload(
     return payload
 
 
-def _validate_scaling_manifest(payload: Any) -> None:
+def _require_manifest_object(
+    value: Any,
+    expected_keys: set[str],
+    path: str,
+) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping) or set(value) != expected_keys:
+        _fail(
+            "fiber_frame_topology_manifest_object_invalid",
+            path,
+            "Manifest object has missing or unknown fields.",
+        )
+    return value
+
+
+def _validate_plan_manifest_descriptor_shapes(
+    shapes: Mapping[str, tuple[int, ...]],
+    *,
+    node_count: int,
+    member_count: int,
+) -> None:
+    physical_dof_count = 6 * node_count
+    solver_dof_count = 3 * node_count
+    exact_shapes = {
+        "node_coordinates_xy_m": (node_count, 2),
+        "node_dof_indices": (node_count, 6),
+        "member_physical_global_dofs": (member_count, 12),
+        "member_active_physical_dofs": (member_count, 6),
+        "member_solver_global_dofs": (member_count, 6),
+        "solver_to_physical_global_dofs": (solver_dof_count,),
+        "physical_to_solver_global_dofs": (physical_dof_count,),
+        "inactive_physical_dofs": (3 * node_count,),
+        "reference_external_load_physical_6dof": (physical_dof_count,),
+        "csr_row_ptr": (physical_dof_count + 1,),
+    }
+    for name, expected in exact_shapes.items():
+        if shapes[name] != expected:
+            _fail(
+                "fiber_frame_topology_descriptor_shape_invalid",
+                f"/array_descriptors/{name}/shape",
+                f"Expected descriptor shape {expected}.",
+            )
+    variable_vectors = (
+        "authored_fixed_physical_dofs",
+        "constrained_physical_dofs",
+        "free_physical_dofs",
+        "constrained_solver_dofs",
+        "free_solver_dofs",
+        "csr_column_indices",
+    )
+    if any(len(shapes[name]) != 1 for name in variable_vectors):
+        _fail(
+            "fiber_frame_topology_descriptor_shape_invalid",
+            "/array_descriptors",
+            "Constraint and CSR column descriptors must be vectors.",
+        )
+    fixed_count = shapes["constrained_solver_dofs"][0]
+    if fixed_count < 1 or fixed_count > solver_dof_count:
+        _fail(
+            "fiber_frame_topology_descriptor_partition_invalid",
+            "/array_descriptors/constrained_solver_dofs/shape",
+            "Authored constrained solver count is out of range.",
+        )
+    expected_partition_lengths = {
+        "authored_fixed_physical_dofs": fixed_count,
+        "constrained_physical_dofs": 3 * node_count + fixed_count,
+        "free_physical_dofs": solver_dof_count - fixed_count,
+        "free_solver_dofs": solver_dof_count - fixed_count,
+    }
+    for name, expected_length in expected_partition_lengths.items():
+        if shapes[name] != (expected_length,):
+            _fail(
+                "fiber_frame_topology_descriptor_partition_invalid",
+                f"/array_descriptors/{name}/shape",
+                "Descriptor length is inconsistent with the DOF partition.",
+            )
+    column_count = shapes["csr_column_indices"][0]
+    if column_count < physical_dof_count:
+        _fail(
+            "fiber_frame_topology_descriptor_csr_invalid",
+            "/array_descriptors/csr_column_indices/shape",
+            "CSR pattern must retain at least one diagonal entry per physical row.",
+        )
+
+
+def _validate_scaling_manifest(
+    payload: Any,
+    *,
+    expected_problem_contract_hash: str,
+    expected_solver_dof_count: int,
+    expected_scaling_hash: str,
+) -> None:
     if not isinstance(payload, Mapping):
         _fail(
             "fiber_frame_scaling_manifest_type_invalid",
@@ -1513,24 +1905,48 @@ def _validate_scaling_manifest(payload: Any) -> None:
             "/solver_coordinate_scaling/scaling_profile",
             "Unsupported scaling profile.",
         )
-    _require_hash(
+    scaling_hash = _require_hash(
         payload["scaling_hash"],
         "/solver_coordinate_scaling/scaling_hash",
     )
-    for name, value in payload["bindings"].items():
+    bindings = _require_manifest_object(
+        payload["bindings"],
+        {"problem_contract_hash", "source_commitment_hash"},
+        "/solver_coordinate_scaling/bindings",
+    )
+    for name, value in bindings.items():
         _require_hash(value, f"/solver_coordinate_scaling/bindings/{name}")
+    if bindings["problem_contract_hash"] != expected_problem_contract_hash:
+        _fail(
+            "fiber_frame_scaling_problem_binding_mismatch",
+            "/solver_coordinate_scaling/bindings/problem_contract_hash",
+            "Scaling manifest belongs to another problem contract.",
+        )
     _require_positive_float(
         payload["rotation_coordinate_scale_m"],
         "/solver_coordinate_scaling/rotation_coordinate_scale_m",
     )
-    _require_index(
+    solver_dof_count = _require_index(
         payload["solver_dof_count"],
         "/solver_coordinate_scaling/solver_dof_count",
     )
+    if (
+        solver_dof_count < 3
+        or solver_dof_count % 3
+        or solver_dof_count != expected_solver_dof_count
+    ):
+        _fail(
+            "fiber_frame_scaling_solver_dof_count_invalid",
+            "/solver_coordinate_scaling/solver_dof_count",
+            "Scaling solver count must match the topology and be a multiple of three.",
+        )
     descriptors = payload["array_descriptors"]
-    if not isinstance(descriptors, list) or [
-        row.get("name") for row in descriptors if isinstance(row, Mapping)
-    ] != list(_SCALING_ARRAY_NAMES):
+    if (
+        not isinstance(descriptors, list)
+        or not all(isinstance(row, Mapping) for row in descriptors)
+        or [row["name"] if "name" in row else None for row in descriptors]
+        != list(_SCALING_ARRAY_NAMES)
+    ):
         _fail(
             "fiber_frame_scaling_manifest_descriptor_set_invalid",
             "/solver_coordinate_scaling/array_descriptors",
@@ -1539,11 +1955,23 @@ def _validate_scaling_manifest(payload: Any) -> None:
     for index, ((name, dtype), row) in enumerate(
         zip(_SCALING_ARRAY_SPECS, descriptors, strict=True)
     ):
-        _validate_descriptor_manifest(
+        shape = _validate_descriptor_manifest(
             row,
             name,
             dtype,
             f"/solver_coordinate_scaling/array_descriptors/{index}",
+        )
+        if shape != (solver_dof_count,):
+            _fail(
+                "fiber_frame_scaling_descriptor_shape_invalid",
+                f"/solver_coordinate_scaling/array_descriptors/{index}/shape",
+                "Every solver-coordinate scaling array must use full solver order.",
+            )
+    if payload["mapping"] != dict(_SCALING_MAPPING):
+        _fail(
+            "fiber_frame_scaling_mapping_invalid",
+            "/solver_coordinate_scaling/mapping",
+            "Residual/Jacobian coordinate-transform mapping changed.",
         )
     if payload["extensions"] != {}:
         _fail(
@@ -1559,6 +1987,12 @@ def _validate_scaling_manifest(payload: Any) -> None:
             "/solver_coordinate_scaling/scaling_hash",
             "Scaling manifest hash is stale.",
         )
+    if scaling_hash != expected_scaling_hash:
+        _fail(
+            "fiber_frame_topology_scaling_hash_mismatch",
+            "/bindings/solver_coordinate_scaling_hash",
+            "Topology binding does not match the nested scaling manifest.",
+        )
 
 
 def _validate_descriptor_manifest(
@@ -1566,7 +2000,7 @@ def _validate_descriptor_manifest(
     expected_name: str,
     expected_dtype: str,
     path: str,
-) -> None:
+) -> tuple[int, ...]:
     if not isinstance(payload, Mapping) or set(payload) != {
         "name",
         "dtype",
@@ -1599,11 +2033,21 @@ def _validate_descriptor_manifest(
             path,
             "Array descriptor shape must be a non-empty list.",
         )
-    for index, value in enumerate(payload["shape"]):
+    shape = tuple(
         _require_index(value, f"{path}/shape/{index}")
-    _require_index(payload["byte_length"], f"{path}/byte_length")
+        for index, value in enumerate(payload["shape"])
+    )
+    byte_length = _require_index(payload["byte_length"], f"{path}/byte_length")
+    expected_byte_length = math.prod(shape) * np.dtype(expected_dtype).itemsize
+    if byte_length != expected_byte_length:
+        _fail(
+            "fiber_frame_topology_descriptor_byte_length_invalid",
+            f"{path}/byte_length",
+            "Descriptor byte length does not match dtype and shape.",
+        )
     _require_hash(payload["data_hash"], f"{path}/data_hash")
     _require_hash(payload["content_hash"], f"{path}/content_hash")
+    return shape
 
 
 def _validate_array_map(
@@ -1621,6 +2065,9 @@ def _validate_array_map(
         )
     if (
         type(descriptors) is not tuple
+        or not all(
+            type(row) is FiberFrameTopologyArrayDescriptor for row in descriptors
+        )
         or tuple(row.name for row in descriptors) != names
     ):
         _fail(
@@ -1684,6 +2131,38 @@ def _descriptor_by_name(
         f"/array_descriptors/{name}",
         "Required array descriptor is missing.",
     )
+
+
+def _validate_external_array_bytes(
+    descriptors: tuple[FiberFrameTopologyArrayDescriptor, ...],
+    *,
+    name: str,
+    payload: bytes,
+    path: str,
+) -> np.ndarray:
+    descriptor = _descriptor_by_name(descriptors, name)
+    if len(payload) != descriptor.byte_length:
+        _fail(
+            "fiber_frame_topology_array_length_mismatch",
+            path,
+            "Array artifact byte length does not match descriptor.",
+        )
+    try:
+        array = np.frombuffer(payload, dtype=descriptor.dtype).reshape(descriptor.shape)
+    except (TypeError, ValueError) as exc:
+        raise FiberFrameExecutionTopologyError(
+            "fiber_frame_topology_array_shape_mismatch",
+            path,
+            "Array artifact bytes cannot be reshaped to the descriptor shape.",
+        ) from exc
+    immutable = immutable_array(array, dtype=descriptor.dtype)
+    if array_data_hash(immutable) != descriptor.data_hash:
+        _fail(
+            "fiber_frame_topology_array_hash_mismatch",
+            path,
+            "Array artifact bytes do not match descriptor.",
+        )
+    return immutable
 
 
 def _descriptor_payload(
@@ -1755,36 +2234,33 @@ def _stable_id_tuple(value: Sequence[str], path: str) -> tuple[str, ...]:
 
 
 def _require_hash(value: Any, path: str) -> str:
-    normalized = str(value).strip()
-    if not _HASH_PATTERN.fullmatch(normalized):
+    if type(value) is not str or not _HASH_PATTERN.fullmatch(value):
         _fail(
             "fiber_frame_topology_hash_invalid",
             path,
             "Expected a lowercase sha256:<hex> hash.",
         )
-    return normalized
+    return value
 
 
 def _require_stable_id(value: Any, path: str) -> str:
-    normalized = str(value).strip()
-    if not _STABLE_ID_PATTERN.fullmatch(normalized):
+    if type(value) is not str or not _STABLE_ID_PATTERN.fullmatch(value):
         _fail(
             "fiber_frame_topology_id_invalid",
             path,
             "Expected a stable identifier.",
         )
-    return normalized
+    return value
 
 
 def _require_nonempty_string(value: Any, path: str) -> str:
-    normalized = str(value).strip()
-    if not normalized:
+    if type(value) is not str or not value or value != value.strip():
         _fail(
             "fiber_frame_topology_string_invalid",
             path,
-            "Expected a non-empty string.",
+            "Expected a normalized non-empty string.",
         )
-    return normalized
+    return value
 
 
 def _require_index(value: Any, path: str) -> int:
@@ -1798,7 +2274,7 @@ def _require_index(value: Any, path: str) -> int:
 
 
 def _require_positive_float(value: Any, path: str) -> float:
-    if isinstance(value, bool) or type(value) not in (int, float):
+    if type(value) is not float:
         _fail(
             "fiber_frame_topology_number_invalid",
             path,
@@ -1837,6 +2313,8 @@ __all__ = [
     "canonical_6dof_to_physical_3dof",
     "compile_stateful_fiber_frame2d_execution_topology",
     "physical_3dof_to_canonical_6dof",
+    "physical_3dof_jacobian_to_solver_generalized",
+    "physical_3dof_residual_to_solver_generalized",
     "physical_3dof_to_solver_generalized",
     "solver_generalized_to_physical_3dof",
     "validate_fiber_frame_execution_topology_against_problem",
@@ -1844,4 +2322,5 @@ __all__ = [
     "validate_fiber_frame_execution_topology_manifest",
     "validate_fiber_frame_execution_topology_plan",
     "validate_fiber_frame_solver_coordinate_scaling",
+    "validate_fiber_frame_solver_coordinate_scaling_array_bytes",
 ]

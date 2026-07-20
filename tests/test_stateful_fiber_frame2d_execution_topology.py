@@ -11,16 +11,24 @@ from structural_analysis.assembly.stateful_fiber_frame2d_execution_topology impo
     FIBER_FRAME_EXECUTION_TOPOLOGY_AUTHORITY_PROFILE,
     FIBER_FRAME_KINEMATIC_BINDING_DECISION,
     FiberFrameExecutionTopologyError,
+    _array_descriptor,
     _plan_payload,
     canonical_6dof_to_physical_3dof,
     compile_stateful_fiber_frame2d_execution_topology,
     physical_3dof_to_canonical_6dof,
+    physical_3dof_jacobian_to_solver_generalized,
+    physical_3dof_residual_to_solver_generalized,
     physical_3dof_to_solver_generalized,
     solver_generalized_to_physical_3dof,
     validate_fiber_frame_execution_topology_against_problem,
     validate_fiber_frame_execution_topology_array_bytes,
     validate_fiber_frame_execution_topology_manifest,
     validate_fiber_frame_execution_topology_plan,
+    validate_fiber_frame_solver_coordinate_scaling_array_bytes,
+)
+from structural_analysis.assembly.stateful_fiber_frame2d import (
+    assemble_stateful_fiber_frame2d,
+    initial_stateful_fiber_frame2d_checkpoint,
 )
 from structural_analysis.benchmark import (
     make_two_element_stateful_fiber_cantilever,
@@ -57,6 +65,18 @@ def _inactive_dofs(node_count: int) -> np.ndarray:
         [6 * node + component for node in range(node_count) for component in (2, 3, 4)],
         dtype=np.int32,
     )
+
+
+def _rehash_manifest(manifest: dict) -> dict:
+    scaling = manifest["solver_coordinate_scaling"]
+    unsigned_scaling = dict(scaling)
+    unsigned_scaling.pop("scaling_hash")
+    scaling["scaling_hash"] = canonical_hash(unsigned_scaling)
+    manifest["bindings"]["solver_coordinate_scaling_hash"] = scaling["scaling_hash"]
+    unsigned = dict(manifest)
+    unsigned.pop("plan_hash")
+    manifest["plan_hash"] = canonical_hash(unsigned)
+    return manifest
 
 
 def test_compile_maps_three_dof_frame_into_canonical_six_dof_topology() -> None:
@@ -125,6 +145,13 @@ def test_compile_maps_three_dof_frame_into_canonical_six_dof_topology() -> None:
             (descriptor.name, descriptor.dtype) for descriptor in plan.descriptors
         )
     )
+    with pytest.raises(ValueError):
+        plan.array("node_dof_indices").setflags(write=True)
+    with pytest.raises(ValueError):
+        plan.solver_coordinate_scaling.array(
+            "physical_from_generalized_scale"
+        ).setflags(write=True)
+    assert "_arrays=" not in repr(plan)
     validate_fiber_frame_execution_topology_against_problem(problem, plan)
 
 
@@ -181,6 +208,44 @@ def test_physical_generalized_and_canonical_coordinate_roundtrip_is_exact() -> N
         match="fiber_frame_topology_inactive_coordinate_nonzero",
     ):
         canonical_6dof_to_physical_3dof(plan, invalid)
+
+
+def test_residual_and_jacobian_transform_replay_current_solver_assembly() -> None:
+    problem, plan = _plan()
+    checkpoint = initial_stateful_fiber_frame2d_checkpoint(problem)
+    trial_free = np.linspace(-2.0e-5, 3.0e-5, len(problem.free_global_dofs))
+    assembly = assemble_stateful_fiber_frame2d(
+        problem,
+        checkpoint,
+        target_load_factor=0.2,
+        trial_free_coordinates_m=trial_free,
+    )
+    physical_residual = assembly.internal_loads_global - assembly.external_loads_global
+    physical_jacobian = np.zeros(
+        (problem.global_dof_count, problem.global_dof_count),
+        dtype=np.float64,
+    )
+    for member in assembly.member_assemblies:
+        physical_jacobian[np.ix_(member.global_dofs, member.global_dofs)] += (
+            member.consistent_tangent_global
+        )
+
+    generalized_residual = physical_3dof_residual_to_solver_generalized(
+        plan,
+        physical_residual,
+    )
+    generalized_jacobian = physical_3dof_jacobian_to_solver_generalized(
+        plan,
+        physical_jacobian,
+    )
+    free = np.asarray(problem.free_global_dofs, dtype=np.int64)
+    np.testing.assert_array_equal(generalized_residual[free], assembly.residual_kn)
+    np.testing.assert_array_equal(
+        generalized_jacobian[np.ix_(free, free)],
+        assembly.jacobian_kn_per_m,
+    )
+    assert generalized_residual.flags.writeable is False
+    assert generalized_jacobian.flags.writeable is False
 
 
 def test_sparse_pattern_has_diagonal_and_active_member_coupling_only() -> None:
@@ -310,6 +375,31 @@ def test_external_array_bytes_are_hash_and_length_checked() -> None:
             payload=bytes(tampered),
         )
 
+    scaling_name = "physical_from_generalized_scale"
+    scaling_payload = plan.solver_coordinate_scaling.array(scaling_name).tobytes(
+        order="C"
+    )
+    restored_scaling = validate_fiber_frame_solver_coordinate_scaling_array_bytes(
+        plan.solver_coordinate_scaling,
+        name=scaling_name,
+        payload=scaling_payload,
+    )
+    np.testing.assert_array_equal(
+        restored_scaling,
+        plan.solver_coordinate_scaling.array(scaling_name),
+    )
+    changed_scaling = bytearray(scaling_payload)
+    changed_scaling[-1] ^= 1
+    with pytest.raises(
+        FiberFrameExecutionTopologyError,
+        match="fiber_frame_topology_array_hash_mismatch",
+    ):
+        validate_fiber_frame_solver_coordinate_scaling_array_bytes(
+            plan.solver_coordinate_scaling,
+            name=scaling_name,
+            payload=bytes(changed_scaling),
+        )
+
 
 def test_object_and_manifest_authority_tamper_fail_closed() -> None:
     problem, plan = _plan()
@@ -366,6 +456,34 @@ def test_object_and_manifest_authority_tamper_fail_closed() -> None:
         validate_fiber_frame_execution_topology_manifest(manifest)
 
 
+def test_coherently_rehashed_out_of_range_partition_fails_stably() -> None:
+    _, plan = _plan()
+    arrays = dict(plan._arrays)
+    changed_fixed = plan.array("constrained_solver_dofs").copy()
+    changed_fixed[0] = plan.solver_dof_count
+    arrays["constrained_solver_dofs"] = immutable_array(changed_fixed, dtype="<i4")
+    frozen_arrays = MappingProxyType(arrays)
+    descriptors = tuple(
+        _array_descriptor(descriptor.name, frozen_arrays[descriptor.name])
+        for descriptor in plan.descriptors
+    )
+    changed = replace(
+        plan,
+        _arrays=frozen_arrays,
+        descriptors=descriptors,
+        plan_hash="sha256:" + "0" * 64,
+    )
+    changed = replace(
+        changed,
+        plan_hash=canonical_hash(_plan_payload(changed, include_plan_hash=False)),
+    )
+    with pytest.raises(
+        FiberFrameExecutionTopologyError,
+        match="fiber_frame_topology_constrained_solver_partition_invalid",
+    ):
+        validate_fiber_frame_execution_topology_plan(changed)
+
+
 def test_coherently_rehashed_case_and_member_identity_tamper_fail_source_replay() -> (
     None
 ):
@@ -404,6 +522,92 @@ def test_coherently_rehashed_case_and_member_identity_tamper_fail_source_replay(
         )
 
 
+@pytest.mark.parametrize(
+    ("path", "value", "error_code"),
+    (
+        (
+            ("dof_layout", "physical_components"),
+            ["BAD"],
+            "fiber_frame_topology_dof_layout_invalid",
+        ),
+        (
+            ("dof_layout", "physical_dof_count"),
+            18.0,
+            "fiber_frame_topology_index_invalid",
+        ),
+        (
+            ("constraint_partition", "free_solver_dofs"),
+            "wrong",
+            "fiber_frame_topology_constraint_manifest_invalid",
+        ),
+        (
+            ("sparse_pattern", "inactive_rows"),
+            "coupled",
+            "fiber_frame_topology_sparse_manifest_invalid",
+        ),
+        (
+            ("claim_boundary", "problem_contract_bound"),
+            1,
+            "fiber_frame_topology_claim_boundary_invalid",
+        ),
+        (
+            ("entity_order", "node_ids"),
+            ["N1", "N2"],
+            "fiber_frame_topology_entity_count_mismatch",
+        ),
+        (
+            ("array_descriptors", 0, "shape"),
+            [6],
+            "fiber_frame_topology_descriptor_shape_invalid",
+        ),
+        (
+            ("solver_coordinate_scaling", "mapping", "jacobian_transform"),
+            "K_generalized=unbound",
+            "fiber_frame_scaling_mapping_invalid",
+        ),
+        (
+            (
+                "solver_coordinate_scaling",
+                "bindings",
+                "problem_contract_hash",
+            ),
+            "sha256:" + "8" * 64,
+            "fiber_frame_scaling_problem_binding_mismatch",
+        ),
+        (
+            ("solver_coordinate_scaling", "array_descriptors", 0, "shape"),
+            [3, 3],
+            "fiber_frame_scaling_descriptor_shape_invalid",
+        ),
+    ),
+)
+def test_coherently_rehashed_manifest_semantic_tamper_fails_closed(
+    path: tuple[str | int, ...],
+    value,
+    error_code: str,
+) -> None:
+    _, plan = _plan()
+    manifest = deepcopy(plan.to_manifest())
+    cursor = manifest
+    for key in path[:-1]:
+        cursor = cursor[key]
+    cursor[path[-1]] = value
+    _rehash_manifest(manifest)
+    with pytest.raises(FiberFrameExecutionTopologyError, match=error_code):
+        validate_fiber_frame_execution_topology_manifest(manifest)
+
+
+def test_manifest_nested_non_object_fails_with_stable_contract_error() -> None:
+    _, plan = _plan()
+    manifest = deepcopy(plan.to_manifest())
+    manifest["bindings"] = []
+    with pytest.raises(
+        FiberFrameExecutionTopologyError,
+        match="fiber_frame_topology_manifest_object_invalid",
+    ):
+        validate_fiber_frame_execution_topology_manifest(manifest)
+
+
 def test_invalid_node_identity_and_wrong_problem_fail_closed() -> None:
     problem = make_two_member_stateful_fiber_l_frame()
     for invalid in (("N1", "N2"), ("N1", "N1", "N3"), ("N1", "bad id", "N3")):
@@ -413,6 +617,20 @@ def test_invalid_node_identity_and_wrong_problem_fail_closed() -> None:
                 model_ir_content_hash=MODEL_HASH,
                 node_ids=invalid,
             )
+
+    unrepresentable_scale = replace(
+        problem,
+        rotation_coordinate_scale_m=float(np.nextafter(0.0, 1.0)),
+    )
+    with pytest.raises(
+        FiberFrameExecutionTopologyError,
+        match="fiber_frame_scaling_rotation_scale_unrepresentable",
+    ):
+        compile_stateful_fiber_frame2d_execution_topology(
+            unrepresentable_scale,
+            model_ir_content_hash=MODEL_HASH,
+            node_ids=NODE_IDS,
+        )
 
     _, plan = _plan(problem)
     other = make_two_element_stateful_fiber_cantilever()

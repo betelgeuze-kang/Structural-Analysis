@@ -91,6 +91,22 @@ K_generalized = S K_physical S
 - source problem, fixed/free equation, and load commitments;
 - exact array byte descriptors and canonical scaling hash.
 
+The contract exposes the same residual and Jacobian transforms as executable,
+bounded helpers:
+
+```python
+generalized_residual = physical_3dof_residual_to_solver_generalized(
+    plan, physical_residual
+)
+generalized_jacobian = physical_3dof_jacobian_to_solver_generalized(
+    plan, physical_jacobian
+)
+```
+
+Focused regression compares both helpers directly with the current frame
+assembly's free-equation residual and Jacobian. External scaling-vector bytes
+are validated independently against the retained descriptors.
+
 This receipt describes a coordinate transform. It is **not** the physical
 EquationScaling contract used to judge mixed force and moment convergence.
 That separate PR-J2 contract must retain raw force norms, raw moment norms,
@@ -156,6 +172,10 @@ The plan identity changes when any of the following changes:
 
 Raw arrays remain separate immutable artifacts. Their descriptors bind dtype,
 shape, layout, byte length, data hash, and metadata-plus-data content hash.
+Imported descriptor-only manifests additionally fail closed on nested binding,
+entity-count, DOF-layout, constraint-map, CSR-profile, scaling-map, descriptor
+shape, and byte-length incoherence even when the attacker recomputes every
+container hash.
 
 ## Authority boundary
 
@@ -180,7 +200,8 @@ projection chain.
 
 ```bash
 PYTHONPATH=src python3 -m pytest -q \
-  tests/test_stateful_fiber_frame2d_execution_topology.py
+  tests/test_stateful_fiber_frame2d_execution_topology.py \
+  tests/test_verify_quality_gate_contract.py
 
 python3 -m ruff check \
   src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py \
