@@ -21,7 +21,7 @@
   "final_tip_displacement_spread_m": 1.1102230246251565e-16,
   "full_mesh_closure_claim": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-20T21:12:49.217788+00:00",
+  "generated_at": "2026-07-20T21:42:36.315348+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
     "scripts/build_phase2_material_mesh_newton_artifacts.py": "sha256:9f5619c056e7f0b9ecf89d918869e65a7d0bfbaeab7bac62d013330a6488349d",
@@ -49,7 +49,7 @@
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-material-mesh-newton-artifacts.v1",
   "series_force_gate_passed": true,
-  "source_commit_sha": "01e7743fb25a5432e3f53c685c7c34e488e1125a",
+  "source_commit_sha": "ff17a6baf23abe0723c9e411d7678b9c33d86829",
   "sparse_backend_equivalence_matrix_backend": "scipy_sparse_spsolve_cpu",
   "sparse_backend_used": false,
   "status": "ready",
