@@ -72,6 +72,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_state_updated_composite_section_newton.py" in targets
     assert "tests/test_stateful_fiber_section.py" in targets
     assert "tests/test_stateful_fiber_beam2d.py" in targets
+    assert "tests/test_stateful_fiber_frame2d.py" in targets
     assert "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py" in targets
     assert "tests/test_state_updated_bilinear_link_newton.py" in targets
     assert (

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 import json
+from typing import Any
 
 import numpy as np
 import pytest
@@ -9,12 +10,12 @@ import pytest
 from structural_analysis.benchmark import (
     FiberBeamCantileverNewtonConfig,
     build_stateful_fiber_beam2d_benchmark,
+    diagnose_stateful_fiber_beam2d_history,
+    finite_difference_stateful_fiber_beam2d_tangent_check,
     solve_stateful_fiber_beam2d_cantilever,
 )
 from structural_analysis.elements import (
     StatefulFiberBeam2D,
-    finite_difference_stateful_fiber_beam2d_tangent_check,
-    integrate_stateful_fiber_beam2d_history,
 )
 from structural_analysis.materials import (
     StatefulFiberSectionResponse,
@@ -30,6 +31,34 @@ def _element() -> StatefulFiberBeam2D:
         length_m=3.0,
         integration_order=3,
     )
+
+
+class _DelegatingAxialCurvatureSection:
+    def __init__(self, wrapped: StatefulRCFiberSection) -> None:
+        self.wrapped = wrapped
+
+    @property
+    def contract_hash(self) -> str:
+        return self.wrapped.contract_hash
+
+    def initial_state(self) -> StatefulFiberSectionState:
+        return self.wrapped.initial_state()
+
+    def validate_state(self, state: StatefulFiberSectionState) -> None:
+        self.wrapped.validate_state(state)
+
+    def integrate(
+        self,
+        generalized_strain: Any,
+        committed_state: StatefulFiberSectionState,
+    ) -> StatefulFiberSectionResponse:
+        return self.wrapped.integrate(generalized_strain, committed_state)
+
+    def dissipated_energy_mj_per_m(
+        self,
+        state: StatefulFiberSectionState,
+    ) -> float:
+        return self.wrapped.dissipated_energy_mj_per_m(state)
 
 
 def test_uniform_section_strain_maps_to_exact_element_end_forces() -> None:
@@ -80,6 +109,21 @@ def test_uniform_section_strain_maps_to_exact_element_end_forces() -> None:
     assert local.flags.writeable is True
     assert np.array_equal(local, local_before)
     assert initial == element.initial_state()
+
+
+def test_element_accepts_structural_axial_curvature_section_protocol() -> None:
+    proxy = _DelegatingAxialCurvatureSection(
+        make_rectangular_stateful_rc_fiber_section()
+    )
+    element = StatefulFiberBeam2D(section=proxy, length_m=3.0)
+    response = element.integrate(
+        element.uniform_generalized_strain_displacements(-1.0e-5, 1.0e-4),
+        element.initial_state(),
+    )
+
+    assert type(element.section) is _DelegatingAxialCurvatureSection
+    assert response.parent_state_hash == element.initial_state().state_hash
+    assert response.state.step_index == 1
 
 
 def test_elastic_cantilever_matches_closed_form_tip_response_and_reactions() -> None:
@@ -179,10 +223,12 @@ def test_cyclic_element_history_updates_gauss_states_and_energy_exactly() -> Non
         element.uniform_generalized_strain_displacements(axial, curvature)
         for axial, curvature in generalized_path
     )
-    first = integrate_stateful_fiber_beam2d_history(element, path)
-    second = integrate_stateful_fiber_beam2d_history(element, path)
+    first = diagnose_stateful_fiber_beam2d_history(element, path)
+    second = diagnose_stateful_fiber_beam2d_history(element, path)
 
     assert first == second
+    assert first["diagnostic_only"] is True
+    assert first["authoritative_commit_path"] is False
     assert first["step_count"] == len(path)
     assert first["curvature_reversal_count"] >= 2
     assert first["yielded_step_count"] > 0
@@ -222,7 +268,8 @@ def test_beam_benchmark_replays_newton_and_keeps_claims_bounded() -> None:
     assert first["claims"]["bounded_stateful_rc_fiber_beam2d_element"] is True
     assert first["claims"]["authoritative_restart_chain"] is False
     assert first["claims"]["product_commit_path"] is False
-    assert first["claims"]["generalized_axial_curvature_section_protocol"] is False
+    assert first["claims"]["generalized_axial_curvature_section_protocol"] is True
+    assert first["claims"]["state_response_and_diagnostics_module_split"] is True
     assert first["claims"]["multi_element_global_assembly"] is False
     assert first["claims"]["geometric_nonlinearity"] is False
     assert first["claims"]["general_plastic_hinge_or_distributed_plasticity"] is False
