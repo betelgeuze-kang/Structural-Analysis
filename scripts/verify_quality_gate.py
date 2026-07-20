@@ -332,6 +332,7 @@ def _pr_commands(
             "tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py",
             "tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py",
             "tests/test_stateful_fiber_frame2d_nonlinear_recovery.py",
+            "tests/test_public_rc_fiber_frame_api.py",
             "tests/test_fiber_frame_solver_episode_adapter.py",
             "tests/test_stateful_fiber_frame2d_material_state_bundle.py",
             "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py",

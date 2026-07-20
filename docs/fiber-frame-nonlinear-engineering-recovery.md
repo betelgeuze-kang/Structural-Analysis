@@ -71,6 +71,11 @@ design-code checks, viewer output, release readiness, or commercial use. The
 generic nonlinear recovery candidate remains deliberately non-authoritative
 and still rejects adapter-bound fiber-frame numerical results.
 
+The bounded public consumer of this authority is documented in
+[`public-rc-fiber-frame.md`](public-rc-fiber-frame.md). Its compiler narrows
+input topology and features before building this complete recovery chain; it
+does not broaden the operator's claim boundary.
+
 ## Validation levels
 
 `validate_fiber_frame_nonlinear_recovery_operator_shape` checks immutable

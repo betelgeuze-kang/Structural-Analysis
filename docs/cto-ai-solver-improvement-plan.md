@@ -142,9 +142,9 @@ consistency gates. Manifests remain descriptor-only, and the promoted result
 retains explicit exclusions for design, code, release, commercial, general
 topology, and geometric-nonlinear authority.
 
-## Next implementation wave
+## Implemented fourth-wave slice
 
-### D. Bounded public RC fiber-frame slice
+### D. Bounded public RC fiber-frame slice — implemented
 
 Initial supported profile:
 
@@ -157,6 +157,18 @@ Initial supported profile:
 - checkpoint restart and exact fail-closed compiler.
 
 Keep releases, offsets, diaphragms, distributed loads, arc length, general topology, and design checks outside the first profile.
+
+The first public compiler further narrows topology to one connected,
+unbranched serial cantilever chain with a single fully fixed endpoint. It
+requires explicit material and section parameters, bounded model sizes, exact
+row fields, and a proportional nodal-load pattern. Ready results traverse the
+complete J1--J5 source chain and exact recovery operator. Persisted restart
+chains must be exact configured load-path prefixes and are fully replayed
+before continuation. The Python result can export any accepted prefix, while
+the CLI can read and write canonical checkpoint-chain artifacts without
+aliasing model, restart, result, or report paths.
+
+## Next implementation wave
 
 ### E. Corotational stateful fiber frame
 
