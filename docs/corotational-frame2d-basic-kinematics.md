@@ -5,14 +5,16 @@
 The stateless planar corotational boundary in
 `structural_analysis.elements.corotational_frame2d_basic` is implemented and
 covered by analytic-versus-centered-difference tests. It extracts exact
-current-chord kinematics from the existing elastic frame kernel so that a
-future stateful section or element law can supply basic forces without
-duplicating global transformation logic.
+current-chord kinematics from the existing elastic frame kernel so that an
+elastic or stateful element law can supply basic forces without duplicating
+global transformation logic. `StatefulCorotationalFiberBeam2D` is the first
+stateful consumer of this boundary.
 
-This is an implementation boundary, not a stateful corotational fiber-frame
-claim. It does not yet provide section-history commit/rollback, multi-turn
-rotation unwrapping, global assembly, load control, arc length, cyclic RC
-validation, or G1 closure.
+This stateless module alone is not a stateful corotational fiber-frame claim.
+It does not own section-history commit/rollback or multi-turn rotation
+unwrapping. Those responsibilities live in the stateful element; global
+assembly, load control, arc length, external cyclic RC validation, and G1
+closure remain outside both element-level boundaries.
 
 ## Public contract
 
@@ -55,9 +57,9 @@ semantics are unchanged.
 The chord rotation change is the principal `atan2` difference. Derivatives are
 valid on a continuous local solution path away from its branch cut. A rigid
 rotation within that branch produces zero basic deformation. Rotations beyond
-the branch are intentionally not unwrapped: robust multi-turn behavior needs
-an accepted/committed angle history and belongs to the future stateful
-corotational element.
+the branch are intentionally not unwrapped here. The stateful corotational
+fiber-beam consumer uses its accepted chord-angle history to choose a
+continuous trial branch.
 
 ## Verification boundary
 
@@ -71,6 +73,7 @@ The focused tests cover
 - material/geometric tangent decomposition;
 - immutable, finite, shape-checked public results.
 
-P-Delta portal response, cyclic RC member response, state restart/replay, and
-snap-through validation remain acceptance requirements for later E-wave
-slices.
+Element-level multi-turn rigid motion, nonlinear RC tangent, cyclic state, and
+replay checks now live with the stateful consumer. P-Delta portal response,
+external cyclic RC member response, persisted restart, and snap-through
+validation remain acceptance requirements for later E-wave slices.

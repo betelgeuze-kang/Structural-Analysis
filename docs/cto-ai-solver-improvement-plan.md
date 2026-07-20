@@ -178,8 +178,8 @@ Sequence:
 corotational elastic frame kernel [implemented]
     → basic-deformation protocol [implemented]
     → stateful axial-curvature section [implemented independently]
-    → corotational fiber-beam [next]
-    → global assembly
+    → corotational fiber-beam [implemented element boundary]
+    → global assembly [next]
     → load control and arc length
 ```
 
@@ -188,14 +188,22 @@ deformations, their exact first and second global derivatives, and generic
 material/geometric tangent recovery from a structural basic force/tangent
 response. The elastic kernel consumes this boundary without changing its
 result contract. It deliberately retains the principal `atan2` chord-angle
-branch; multi-turn unwrapping requires committed state and remains part of the
-future stateful corotational element. See
+branch; multi-turn unwrapping requires committed state and is supplied only by
+the stateful corotational consumer. See
 `docs/corotational-frame2d-basic-kinematics.md`.
 
-The independently implemented axial-curvature section and small-displacement
-fiber beam are not yet connected through a corotational state/commit/rollback
-chain. Therefore corotational fiber-member, cyclic RC, global nonlinear, and
-G1-closure claims remain open.
+The axial-curvature section and its Gauss-point fiber beam are now connected to
+the corotational basic modes through an immutable element state. The element
+tracks a committed chord-angle branch, maps section forces/tangents back to
+the basic system, and recovers exact global material plus geometric tangents.
+Its focused boundary covers sequential multi-turn rigid motion, same-parent
+nonlinear tangent checks, cyclic RC state evolution, deterministic replay, and
+rollback-safe unchanged-parent trials. See
+`docs/stateful-corotational-fiber-beam2d.md`.
+
+Multi-element global assembly, solver-owned checkpoint ancestry, load control,
+arc length, persisted restart, external member validation, and G1 closure
+remain open.
 
 Required tests include finite rigid rotation, energy-gradient and tangent checks, P-Delta portal response, cyclic RC members, restart/replay, and snap-through paths.
 

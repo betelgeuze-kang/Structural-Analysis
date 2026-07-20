@@ -342,6 +342,7 @@ def _pr_commands(
             "tests/test_geometric_nonlinear_benchmarks.py",
             "tests/test_corotational_frame2d_basic_kinematics.py",
             "tests/test_corotational_frame2d_element.py",
+            "tests/test_stateful_corotational_fiber_beam2d.py",
             "tests/test_lee_frame_snapthrough_benchmark.py",
             "tests/test_build_phase2_modal_buckling_kernel_artifacts.py",
             "tests/test_build_phase2_whole_model_modal_artifacts.py",

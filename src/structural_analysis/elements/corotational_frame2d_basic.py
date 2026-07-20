@@ -7,8 +7,8 @@ six global element equations with the exact material and geometric tangent.
 
 The principal chord-angle branch is intentionally bounded to one continuous
 local solve path.  Multi-turn rotation unwrapping requires committed history
-and belongs to the future stateful corotational element, not this stateless
-kinematic boundary.
+and belongs to a stateful consumer, not this stateless kinematic boundary. The
+``StatefulCorotationalFiberBeam2D`` consumer owns that committed history.
 """
 
 from __future__ import annotations

@@ -33,6 +33,17 @@ from structural_analysis.elements.stateful_fiber_beam2d import (
     StatefulFiberBeam2DResponse,
     StatefulFiberBeam2DState,
 )
+from structural_analysis.elements.stateful_corotational_fiber_beam2d import (
+    STATEFUL_COROTATIONAL_FIBER_BEAM2D_ANGLE_UNWRAP,
+    STATEFUL_COROTATIONAL_FIBER_BEAM2D_BASIC_TO_LOCAL,
+    STATEFUL_COROTATIONAL_FIBER_BEAM2D_INTERNAL_FORCE,
+    STATEFUL_COROTATIONAL_FIBER_BEAM2D_SCHEMA_VERSION,
+    STATEFUL_COROTATIONAL_FIBER_BEAM2D_STATE_SCHEMA_VERSION,
+    STATEFUL_COROTATIONAL_FIBER_BEAM2D_TANGENT,
+    StatefulCorotationalFiberBeam2D,
+    StatefulCorotationalFiberBeam2DResponse,
+    StatefulCorotationalFiberBeam2DState,
+)
 
 __all__ = [
     "MPA_M2_TO_KN",
@@ -48,6 +59,15 @@ __all__ = [
     "CorotationalFrame2DResponse",
     "CorotationalTruss2DResponse",
     "Frame2DBasicConstitutiveResponse",
+    "STATEFUL_COROTATIONAL_FIBER_BEAM2D_ANGLE_UNWRAP",
+    "STATEFUL_COROTATIONAL_FIBER_BEAM2D_BASIC_TO_LOCAL",
+    "STATEFUL_COROTATIONAL_FIBER_BEAM2D_INTERNAL_FORCE",
+    "STATEFUL_COROTATIONAL_FIBER_BEAM2D_SCHEMA_VERSION",
+    "STATEFUL_COROTATIONAL_FIBER_BEAM2D_STATE_SCHEMA_VERSION",
+    "STATEFUL_COROTATIONAL_FIBER_BEAM2D_TANGENT",
+    "StatefulCorotationalFiberBeam2D",
+    "StatefulCorotationalFiberBeam2DResponse",
+    "StatefulCorotationalFiberBeam2DState",
     "StatefulFiberBeam2D",
     "StatefulFiberBeam2DResponse",
     "StatefulFiberBeam2DState",
