@@ -27,6 +27,7 @@ PR-J1  nonlinear six-DOF topology + solver-coordinate scaling
 PR-J2  physical force/moment EquationScaling + residual trace
 PR-J3  nonlinear kinematic-state chain
 PR-J4  bind scaled execution + kinematic + MaterialStateProjectionChain
+PR-J5  bind consistent-Newton convergence to the exact J4 terminal state
 ```
 
 Existing ExecutionPlan v1, StateIR v1, golden hashes, and authority remain
@@ -201,6 +202,12 @@ profile as the complete nonlinear state. PR-J4 now binds that exact kinematic
 chain, the J2 scaling identity, and PR #132's material-state projection chain in
 the
 [`FiberFrameNonlinearExecutionStateBinding`](fiber-frame-nonlinear-execution-state-binding.md).
+
+PR-J5 adds the separate bounded nonlinear terminal receipt documented in
+[fiber-frame-nonlinear-terminal-receipt.md](fiber-frame-nonlinear-terminal-receipt.md).
+It replays an actual full-load Newton path, evaluates every accepted residual
+through J2, and audits every same-parent consistent Jacobian. It grants bounded
+path convergence only; numerical-result and recovery authority remain separate.
 
 ## Focused validation
 

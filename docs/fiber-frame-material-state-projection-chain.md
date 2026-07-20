@@ -93,6 +93,11 @@ Every projection's solver-state hash must equal its matching J3 committed-state
 hash. The outer binding also fixes the J2 physical EquationScaling identity and
 terminal MaterialStateBundle without granting terminal or ResultIR authority.
 
+PR-J5 consumes that unchanged J4 envelope in the bounded
+[`FiberFrameNonlinearTerminalReceipt`](fiber-frame-nonlinear-terminal-receipt.md).
+The J5 receipt binds converged Newton steps to these exact bundle hashes but
+does not grant numerical-result or engineering-recovery authority.
+
 ## Focused validation
 
 ```bash

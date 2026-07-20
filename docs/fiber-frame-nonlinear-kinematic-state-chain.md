@@ -170,8 +170,10 @@ J3 proves deterministic kinematic transport and ancestry only. It grants no:
 PR-J4 now binds this exact kinematic-state chain and its `solver_state_hashes`
 sequence to PR #132's `FiberFrameMaterialStateProjectionChain` through the
 [`FiberFrameNonlinearExecutionStateBinding`](fiber-frame-nonlinear-execution-state-binding.md).
-Nonlinear terminal, ResultIR, and exact recovery authority remain separate later
-contracts.
+PR-J5 now binds that exact J4 terminal state to the bounded
+[`FiberFrameNonlinearTerminalReceipt`](fiber-frame-nonlinear-terminal-receipt.md).
+J3 remains non-authoritative; ResultIR and exact recovery authority remain
+separate later contracts.
 
 ## Focused verification
 

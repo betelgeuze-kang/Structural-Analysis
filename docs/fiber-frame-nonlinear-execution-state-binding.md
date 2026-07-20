@@ -165,6 +165,14 @@ the actual consistent residual/Jacobian path, physical EquationScaling, and
 explicit convergence evidence. ResultIR and exact engineering recovery remain
 later, separate contracts.
 
+PR-J5 now supplies that separate bounded terminal contract in
+[fiber-frame-nonlinear-terminal-receipt.md](fiber-frame-nonlinear-terminal-receipt.md).
+It replays the exact J4 sources and actual full-load Newton path, rebuilds J2
+physical residual traces, and finite-difference audits every same-parent
+Jacobian. J4 itself remains non-authoritative, while J5 grants convergence only
+for the bounded path and still grants no numerical-result or recovery
+authority.
+
 ## Focused verification
 
 ```bash

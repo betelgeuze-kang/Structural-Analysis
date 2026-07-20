@@ -161,8 +161,12 @@ accepted → transient-trial → committed ancestry. PR-J4 now binds this J2
 scaling identity, that exact J3 chain, and PR #132's MaterialStateProjectionChain
 in the
 [`FiberFrameNonlinearExecutionStateBinding`](fiber-frame-nonlinear-execution-state-binding.md).
-Only the later nonlinear terminal and exact recovery contracts may connect this
-path to ResultIR authority.
+PR-J5 now consumes that exact composition and replays every accepted physical
+residual in the bounded
+[`FiberFrameNonlinearTerminalReceipt`](fiber-frame-nonlinear-terminal-receipt.md).
+The terminal receipt grants bounded convergence only; a later result adapter
+and exact recovery contract remain required for ResultIR and engineering
+authority.
 
 ## Verification
 
