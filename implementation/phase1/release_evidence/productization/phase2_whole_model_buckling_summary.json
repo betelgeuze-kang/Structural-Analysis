@@ -36,14 +36,14 @@
   "contract_pass": true,
   "engine_version": "1.0.0",
   "euler_two_plane_contract_pass": true,
-  "generated_at": "2026-07-20T21:12:49.553024+00:00",
+  "generated_at": "2026-07-21T22:48:46.927032+00:00",
   "passing_case_count": 4,
   "reference_load_scale_contract_pass": true,
   "reference_sign_contract_pass": true,
   "repeated_cluster_contract_pass": true,
-  "result_artifact_hash": "sha256:dcb135e67b460501ea1bd7ff074a1e0eccdbeb8f4dba644cfe2ca5c671d4dccf",
+  "result_artifact_hash": "sha256:6aafcfbb89104c85303a90b3a7037a92330da8d7a211b633ab79544275f76733",
   "schema_version": "phase2-whole-model-buckling-artifacts.v1",
-  "source_commit_sha": "01e7743fb25a5432e3f53c685c7c34e488e1125a",
-  "source_set_hash": "sha256:0f2620c4e50583821436d293cdc84fbf4cd3b7f892492a283324118fa173c27d",
+  "source_commit_sha": "9fa8972b50d6d36165f58a4b67aca4d28443df1a",
+  "source_set_hash": "sha256:977c365b8cfd5add310624e0b94384e0581d4a15492b8ece5b5712afbaeff175",
   "status": "partial"
 }
