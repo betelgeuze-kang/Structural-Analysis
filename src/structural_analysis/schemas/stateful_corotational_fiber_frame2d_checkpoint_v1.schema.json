@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/stateful_corotational_fiber_frame2d_checkpoint_v1.schema.json",
+  "title": "Stateful Corotational Fiber Frame 2D Checkpoint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "role",
+    "case_id",
+    "problem_contract_hash",
+    "epoch",
+    "step_index",
+    "load_factor",
+    "parent_state_hash",
+    "global_displacements",
+    "element_states",
+    "state_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "stateful-corotational-fiber-frame2d-checkpoint.v1"
+    },
+    "role": {"const": "committed"},
+    "case_id": {"type": "string", "minLength": 1},
+    "problem_contract_hash": {"$ref": "#/$defs/hash"},
+    "epoch": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "step_index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "load_factor": {"type": "number"},
+    "parent_state_hash": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/hash"}
+      ]
+    },
+    "global_displacements": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"type": "number"}
+    },
+    "element_states": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/corotationalElementState"}
+    },
+    "state_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "steelState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "plastic_strain",
+        "backstress_mpa",
+        "accumulated_plastic_strain",
+        "dissipated_energy_density_mj_per_m3",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "uniaxial-combined-hardening-state.v1"},
+        "plastic_strain": {"type": "number"},
+        "backstress_mpa": {"type": "number"},
+        "accumulated_plastic_strain": {"type": "number", "minimum": 0},
+        "dissipated_energy_density_mj_per_m3": {
+          "type": "number",
+          "minimum": 0
+        },
+        "state_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "concreteState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "tensile_history_strain",
+        "compressive_history_strain",
+        "tensile_damage",
+        "compressive_damage",
+        "dissipated_energy_density_mj_per_m3",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "uniaxial-asymmetric-concrete-damage-state.v1"
+        },
+        "tensile_history_strain": {"type": "number", "minimum": 0},
+        "compressive_history_strain": {"type": "number", "minimum": 0},
+        "tensile_damage": {"type": "number", "minimum": 0, "exclusiveMaximum": 1},
+        "compressive_damage": {"type": "number", "minimum": 0, "exclusiveMaximum": 1},
+        "dissipated_energy_density_mj_per_m3": {
+          "type": "number",
+          "minimum": 0
+        },
+        "state_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "sectionState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "section_id",
+        "section_contract_hash",
+        "step_index",
+        "axial_strain",
+        "curvature_z_per_m",
+        "fiber_states",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "stateful-rc-fiber-section-state.v1"},
+        "section_id": {"type": "string", "minLength": 1},
+        "section_contract_hash": {"$ref": "#/$defs/hash"},
+        "step_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "axial_strain": {"type": "number"},
+        "curvature_z_per_m": {"type": "number"},
+        "fiber_states": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {"$ref": "#/$defs/steelState"},
+              {"$ref": "#/$defs/concreteState"}
+            ]
+          }
+        },
+        "state_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "basicBeamState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "element_id",
+        "element_contract_hash",
+        "step_index",
+        "local_displacements",
+        "integration_point_states",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "stateful-fiber-beam2d-state.v1"},
+        "element_id": {"type": "string", "minLength": 1},
+        "element_contract_hash": {"$ref": "#/$defs/hash"},
+        "step_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "local_displacements": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {"type": "number"}
+        },
+        "integration_point_states": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/sectionState"}
+        },
+        "state_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "corotationalElementState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "element_id",
+        "element_contract_hash",
+        "step_index",
+        "element_displacements",
+        "chord_rotation_change_rad",
+        "basic_beam_state",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "stateful-corotational-fiber-beam2d-state.v1"
+        },
+        "element_id": {"type": "string", "minLength": 1},
+        "element_contract_hash": {"$ref": "#/$defs/hash"},
+        "step_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "element_displacements": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {"type": "number"}
+        },
+        "chord_rotation_change_rad": {"type": "number"},
+        "basic_beam_state": {"$ref": "#/$defs/basicBeamState"},
+        "state_hash": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}

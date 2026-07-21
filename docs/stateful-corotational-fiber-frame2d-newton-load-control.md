@@ -24,6 +24,13 @@ The bounded load-step contract provides:
 of load factors. It stops at the first blocked target and returns the last
 successfully committed checkpoint.
 
+The separate
+[`stateful_corotational_fiber_frame2d_adaptive`](stateful-corotational-fiber-frame2d-adaptive-continuation.md)
+boundary now composes this fixed-target transaction into deterministic cutback,
+retry, growth, persisted accepted-state restart, and cumulative attempt-budget
+control. This module remains the authoritative implementation of one Newton
+attempt and its commit/rollback decision.
+
 ## Trial and commit lifecycle
 
 For an accepted checkpoint `C_n`, every residual and tangent evaluation in one
@@ -82,12 +89,13 @@ paths, and the zero-free-equation reaction-only disposition.
 
 ## Claim boundary
 
-This slice implements dense, fixed-target load control only. It does not add
-adaptive increment selection, automatic cutback or retry, displacement control,
-arc length, follower loads, sparse production assembly, corotational checkpoint
-persistence, checkpoint-chain replay, external benchmark acceptance, or a
-full-building solve path.
+This slice implements dense, fixed-target load control only. Adaptive increment
+selection, automatic cutback/retry, and persisted single-boundary restart are
+implemented by the separate adaptive controller linked above. The combined
+path still does not add displacement control, arc length, follower loads,
+sparse production assembly, checkpoint-chain replay, external benchmark
+acceptance, or a full-building solve path.
 
-No P-Delta portal, Euler-column, cyclic member, snap-through, restart, or
+No P-Delta portal, Euler-column, external cyclic-member, snap-through, or
 customer-shadow acceptance receipt is supplied here. G1 and commercial
 readiness remain open, and no protected evidence claim is promoted.

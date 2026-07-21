@@ -71,11 +71,19 @@ checks every element response's parent hash. The separate bounded
 module now owns fixed-target Newton convergence and commit authorization; the
 assembly itself remains independent of solution control.
 
+The bounded checkpoint codec serializes and restores the complete accepted
+frame state as canonical UTF-8 JSON. The separate
+[`stateful_corotational_fiber_frame2d_adaptive`](stateful-corotational-fiber-frame2d-adaptive-continuation.md)
+controller persists that checkpoint together with its cumulative adaptive
+progress and resumes only after source, problem, hash, canonical-byte, and
+equilibrium checks pass.
+
 ## Focused verification
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_fiber_frame2d_solver.py \
+  tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
   tests/test_stateful_corotational_fiber_frame2d.py \
   tests/test_stateful_corotational_fiber_beam2d.py \
   tests/test_corotational_frame2d_basic_kinematics.py
@@ -91,14 +99,14 @@ trial branching, and fail-closed checkpoint/geometry binding.
 
 This document describes the dense multi-element assembly kernel. Fixed-target
 Newton load control and convergence-gated checkpoint acceptance are implemented
-in the separate solver boundary linked above. The combined path still does not
-provide adaptive load stepping, automatic cutback, arc length, prescribed
-displacements, follower loads, sparse production assembly, persisted
-corotational checkpoint artifacts, or checkpoint-chain replay. The
-nearest-branch chord unwrapping remains unique only when each accepted member
-rotation increment has magnitude below `pi`.
+in the separate solver boundary linked above. Adaptive load stepping, automatic
+cutback/retry, and persisted single accepted-boundary restart are implemented
+by the adaptive controller. The combined path still does not provide arc
+length, prescribed displacements, follower loads, sparse production assembly,
+or checkpoint-chain replay. The nearest-branch chord unwrapping remains unique
+only when each accepted member rotation increment has magnitude below `pi`.
 
-No P-Delta portal, Euler-column, external cyclic-member, restart, snap-through,
-full-building, or customer-shadow acceptance receipt is supplied here. G1 and
-commercial-readiness closure remain open, and protected readiness evidence is
-unchanged.
+No authoritative P-Delta portal, Euler-column, external cyclic-member,
+snap-through, full-building, or customer-shadow acceptance receipt is supplied
+here. G1 and commercial-readiness closure remain open, and protected readiness
+evidence is unchanged.
