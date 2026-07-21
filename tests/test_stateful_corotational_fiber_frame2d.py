@@ -462,8 +462,20 @@ def test_multi_turn_rigid_rotation_tracks_every_member_checkpoint() -> None:
     second_checkpoint = _accept_trial(problem, first_checkpoint, second)
     repeated_checkpoint = _accept_trial(problem, first_checkpoint, repeated)
 
-    np.testing.assert_allclose(first.internal_loads_global, 0.0, atol=1.0e-12)
-    np.testing.assert_allclose(second.internal_loads_global, 0.0, atol=1.0e-12)
+    # Binary64 trigonometric reconstruction at 4.4 rad leaves deformation
+    # noise near machine precision; the section stiffness can amplify it to
+    # roughly 1e-9 in the assembled force vector on different libm builds.
+    rigid_force_atol = 2.0e-9
+    np.testing.assert_allclose(
+        first.internal_loads_global,
+        0.0,
+        atol=rigid_force_atol,
+    )
+    np.testing.assert_allclose(
+        second.internal_loads_global,
+        0.0,
+        atol=rigid_force_atol,
+    )
     assert tuple(
         state.chord_rotation_change_rad for state in first.trial_element_states
     ) == pytest.approx((2.2, 2.2))

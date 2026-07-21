@@ -42,6 +42,11 @@ evidence determines promotable scope
 
 - Corotational 2D truss.
 - Corotational planar Euler–Bernoulli frame.
+- Stateful corotational fiber beam with exact material and geometric tangents.
+- Dense multi-member corotational fiber-frame assembly with hash-addressed
+  checkpoints.
+- Fixed-target Newton load control with convergence-gated commit and exact
+  failed-step rollback.
 
 ### Product and evidence seeds
 
