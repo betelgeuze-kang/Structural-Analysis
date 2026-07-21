@@ -17,9 +17,10 @@ This remains an element boundary, not a multi-element nonlinear frame solver.
 The separate
 [`StatefulCorotationalFiberFrame2DProblem`](stateful-corotational-fiber-frame2d-global-assembly.md)
 now supplies bounded dense topology/constraint assembly and a frame checkpoint
-type. Convergence-gated checkpoint acceptance, a global checkpoint chain, load
-control, arc length, persisted restart artifacts, external cyclic member
-validation, mesh-objectivity evidence, and G1 closure remain open.
+type. Fixed-target Newton acceptance and adaptive load control with persisted
+single-boundary restart now live above the element. A global checkpoint chain,
+arc length, external cyclic-member validation, mesh-objectivity evidence, and
+G1 closure remain open.
 
 ## Kinematic and constitutive chain
 
@@ -84,7 +85,8 @@ Focused tests establish
 - response-parent binding, state/kinematic consistency, immutability, and
   fail-closed input handling.
 
-The next E-wave slice is nonlinear solution control over the new global
-assembly, including solver-owned accepted-checkpoint transitions and exact
-failed-step rollback. P-Delta portal, cyclic member reference, restart
-artifacts, and snap-through paths remain later acceptance gates.
+The global frame layers now own solver-authorized checkpoint transitions,
+exact failed-step rollback, adaptive cutback/retry, and canonical persisted
+restart at one accepted boundary. P-Delta portal, external cyclic-member
+reference, checkpoint-chain replay, and snap-through paths remain later
+acceptance gates.

@@ -144,6 +144,15 @@ def test_adaptive_newton_continuation_is_owned_by_the_core_lane() -> None:
         assert module.classify_path(path, quarantined_paths=set()) == "core"
 
 
+def test_corotational_frame_adaptive_continuation_is_core_owned() -> None:
+    for path in (
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py",
+        "tests/test_stateful_corotational_fiber_frame2d_adaptive.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
 def test_state_updated_steel_material_is_owned_by_the_core_lane() -> None:
     for path in (
         "scripts/build_phase2_state_updated_steel_material_artifacts.py",
