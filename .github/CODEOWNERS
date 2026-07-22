@@ -1,0 +1,26 @@
+# Default repository owner
+* @betelgeuze-kang
+
+# Governance and dependency boundaries
+/AGENTS.md @betelgeuze-kang
+/.github/ @betelgeuze-kang
+/artifacts/manifests/ @betelgeuze-kang
+/docs/adr/ @betelgeuze-kang
+/pyproject.toml @betelgeuze-kang
+/setup.cfg @betelgeuze-kang
+
+# Numerical truth, public contracts, V&V, AI policy, and application authority
+/src/structural_analysis/engine_v2/contracts/ @betelgeuze-kang
+/src/structural_analysis/elements/ @betelgeuze-kang
+/src/structural_analysis/materials/ @betelgeuze-kang
+/src/structural_analysis/assembly/ @betelgeuze-kang
+/src/structural_analysis/solvers/ @betelgeuze-kang
+/src/structural_analysis/analyses/ @betelgeuze-kang
+/src/structural_analysis/ai/ @betelgeuze-kang
+/src/workbench-v2/ @betelgeuze-kang
+
+# Protected readiness and release evidence
+/.betelgeuze/ @betelgeuze-kang
+/implementation/phase1/release_evidence/productization/ @betelgeuze-kang
+/docs/commercial-structural-solver-product-gap-ledger.md @betelgeuze-kang
+/docs/structural-analysis-ai-engine-gap-ledger.md @betelgeuze-kang

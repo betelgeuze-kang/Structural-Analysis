@@ -35,6 +35,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     targets = _pytest_targets(commands)
 
     assert [gate._python(), "scripts/check_product_identity.py"] in commands
+    assert [gate._python(), "scripts/check_repository_governance.py"] in commands
     assert "tests/test_structural_analysis_core_api.py" in targets
     assert "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py" in targets
     assert "tests/test_engine_v2_result_ir_v1.py" in targets
