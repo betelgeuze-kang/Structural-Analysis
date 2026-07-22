@@ -124,7 +124,10 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await open(page)
     const table = page.locator('[data-wb2-capability-table]')
     await expect(table).toBeVisible()
-    await expect(table.locator('tbody tr')).toHaveCount(16)
+    await expect(table.locator('tbody tr')).toHaveCount(17)
+    await expect(
+      table.locator('[data-capability-id="contract.result_quantity_catalog"]'),
+    ).toHaveAttribute('data-capability-status', 'bounded_public')
     await expect(
       table.locator('[data-capability-id="vv.opensees_level2"]'),
     ).toHaveAttribute('data-capability-status', 'blocked')

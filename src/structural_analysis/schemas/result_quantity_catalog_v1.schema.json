@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.dev/schemas/result_quantity_catalog_v1.schema.json",
+  "title": "Structural Analysis Result Quantity Catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "catalog_id",
+    "catalog_hash",
+    "unit_system",
+    "quantities",
+    "authority_rules"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-result-quantity-catalog.v1"
+    },
+    "catalog_id": {
+      "const": "structural_analysis_result_quantities_si_v1"
+    },
+    "catalog_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "unit_system": {"const": "SI"},
+    "quantities": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {"$ref": "#/$defs/quantity"}
+    },
+    "authority_rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_values_are_si",
+        "display_unit_conversion_may_change_authority",
+        "tolerance_may_promote_unsupported_quantity",
+        "fallback_result_may_inherit_authority"
+      ],
+      "properties": {
+        "canonical_values_are_si": {"const": true},
+        "display_unit_conversion_may_change_authority": {"const": false},
+        "tolerance_may_promote_unsupported_quantity": {"const": false},
+        "fallback_result_may_inherit_authority": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "quantity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantity_id",
+        "dimension",
+        "canonical_unit",
+        "authority_axis",
+        "component_labels",
+        "absolute_tolerance_si",
+        "relative_tolerance",
+        "comparison_norm",
+        "comparison_profile"
+      ],
+      "properties": {
+        "quantity_id": {
+          "enum": [
+            "displacement.translation",
+            "displacement.rotation",
+            "reaction.force",
+            "reaction.moment",
+            "member.force",
+            "member.moment",
+            "section.axial_force",
+            "section.moment",
+            "section.strain",
+            "section.curvature",
+            "fiber.strain",
+            "fiber.stress"
+          ]
+        },
+        "dimension": {
+          "enum": ["length", "angle", "force", "moment", "strain", "curvature", "stress"]
+        },
+        "canonical_unit": {
+          "enum": ["m", "rad", "N", "N*m", "1", "1/m", "Pa"]
+        },
+        "authority_axis": {
+          "enum": ["displacement", "reaction", "member_force", "section_resultant", "fiber_result"]
+        },
+        "component_labels": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "absolute_tolerance_si": {"type": "number", "exclusiveMinimum": 0},
+        "relative_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "comparison_norm": {"const": "linf"},
+        "comparison_profile": {"const": "absolute_plus_relative_linf.v1"}
+      }
+    }
+  }
+}

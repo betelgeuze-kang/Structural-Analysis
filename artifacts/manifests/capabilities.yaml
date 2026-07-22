@@ -126,6 +126,23 @@
       ]
     },
     {
+      "id": "contract.result_quantity_catalog",
+      "title": "ResultIR SI quantity and tolerance catalog",
+      "category": "result_contract",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "comparison_contract_only_no_result_promotion",
+      "interfaces": ["python_api", "json_schema"],
+      "profile": "hashed_si_quantity_catalog_and_absolute_plus_relative_linf_v1",
+      "limitations": ["Defines fixed SI units and comparison tolerances only; it cannot create solver authority or make corotational output public."],
+      "evidence": [
+        "docs/engine-v2-result-quantity-contract.md",
+        "src/structural_analysis/engine_v2/contracts/result_quantity.py",
+        "src/structural_analysis/schemas/result_quantity_catalog_v1.schema.json",
+        "tests/test_result_quantity_catalog.py"
+      ]
+    },
+    {
       "id": "analysis.nonlinear_corotational_fiber_frame_2d",
       "title": "Corotational 2D fiber-frame assembly",
       "category": "analysis",

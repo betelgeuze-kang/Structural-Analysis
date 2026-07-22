@@ -85,7 +85,7 @@
   "blocked_capability_register_count": 4,
   "blockers": [],
   "canonical_registry": "artifacts/manifests/capabilities.yaml",
-  "capability_count": 16,
+  "capability_count": 17,
   "capability_rows": [
     {
       "blocker_count": 0,
@@ -286,6 +286,33 @@
         "public": true
       },
       "title": "Fixed-chord RC fiber frame"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "contract.result_quantity_catalog",
+      "capability_kind": "result_contract",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/engine-v2-result-quantity-contract.md",
+        "src/structural_analysis/engine_v2/contracts/result_quantity.py",
+        "src/structural_analysis/schemas/result_quantity_catalog_v1.schema.json",
+        "tests/test_result_quantity_catalog.py"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "comparison_contract_only_no_result_promotion",
+        "interfaces": [
+          "python_api",
+          "json_schema"
+        ],
+        "limitations": [
+          "Defines fixed SI units and comparison tolerances only; it cannot create solver authority or make corotational output public."
+        ],
+        "profile": "hashed_si_quantity_catalog_and_absolute_plus_relative_linf_v1",
+        "public": true
+      },
+      "title": "ResultIR SI quantity and tolerance catalog"
     },
     {
       "blocker_count": 0,
@@ -535,9 +562,9 @@
   "first_blocked_capability_id": "vv.opensees_level2",
   "first_blocked_capability_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-22T19:24:11.259037+00:00",
+  "generated_at": "2026-07-22T22:58:51.822809+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:d67541a64e60523b1caa2ef6097417153493a9f6a14cd1a1b4f2fa8def83475a",
+    "artifacts/manifests/capabilities.yaml": "sha256:be0d8f3c332028442c8dc280148aa537493e8cb1907d135a890eccdaca455492",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -561,14 +588,14 @@
     "mutation_allowed": false,
     "route": "/product/capabilities"
   },
-  "ready_capability_count": 9,
+  "ready_capability_count": 10,
   "reason_code": "PASS",
   "reuse_policy": "canonical_registry_plus_structural_solver_evidence_rollup",
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "5648a0b9a4d936afdacc68625e5e0ea7c2fb41de",
+  "source_commit_sha": "bf928ac12ee30cd669f899fe2ed8305de43bd3fb",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",
@@ -594,7 +621,7 @@
     "title": "Restricted alpha structural solver evidence"
   },
   "status": "ready",
-  "summary_line": "Product capabilities surface: READY | capabilities=16 | ready=9 | experimental=2 | shadow_only=1 | blocked=4",
+  "summary_line": "Product capabilities surface: READY | capabilities=17 | ready=10 | experimental=2 | shadow_only=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
   "surface_kind": "product_capabilities_surface",
   "surface_scope": "product_capability_discovery"
