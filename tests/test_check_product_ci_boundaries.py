@@ -149,11 +149,13 @@ def test_corotational_frame_adaptive_continuation_is_core_owned() -> None:
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py",
         "src/structural_analysis/benchmark/stateful_corotational_fiber_frame2d_diagnostics.py",
+        "src/structural_analysis/benchmark/stateful_corotational_composite_frame_cyclic.py",
         "src/structural_analysis/benchmark/stateful_corotational_concrete_frame_cyclic.py",
         "src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py",
         "tests/test_stateful_corotational_fiber_frame2d_adaptive.py",
         "tests/test_stateful_corotational_fiber_frame2d_arc_length.py",
+        "tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py",
         "tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py",
         "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py",
     ):
