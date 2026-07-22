@@ -80,9 +80,12 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
 
 This is one dense 2D, global-axis, scalar translational link integration. It
 does not support rotational or multi-axis coupling, local-axis link
-transformations, gap/contact, friction, uplift, viscous/rate response,
-degradation, pinching, or shell connections. The columns remain elastic, so
-simultaneous inelastic member-link interaction is not validated. No external
-device comparison, production sparse/ROCm/HIP path, full-building equilibrium,
-G1 closure, or commercial-readiness claim is made. Protected readiness evidence
-and existing closure counts remain unchanged.
+transformations within this case, gap/contact, friction, uplift, viscous/rate
+response, degradation, pinching, or shell connections. The separate
+[fixed-reference local-axis benchmark](stateful-corotational-local-axis-linked-frame-cyclic-benchmark.md)
+covers only the bounded direction-cosine transformation; it does not broaden
+this global-axis case into a general link family. The columns remain elastic,
+so simultaneous inelastic member-link interaction is not validated. No
+external device comparison, production sparse/ROCm/HIP path, full-building
+equilibrium, G1 closure, or commercial-readiness claim is made. Protected
+readiness evidence and existing closure counts remain unchanged.

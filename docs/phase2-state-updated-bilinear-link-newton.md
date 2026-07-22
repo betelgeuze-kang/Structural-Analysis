@@ -39,10 +39,13 @@ rate dependence, degradation/pinching, shell connection integration, and
 published or experimental validation remain open. A separate bounded
 [linked-frame cyclic benchmark](stateful-corotational-linked-frame-cyclic-benchmark.md)
 now scatters this scalar global-axis link into two active corotational frame
-DOFs and commits the frame and link states atomically. That result does not
-establish local-axis, rotational, multi-axis, shell, or general link-family
-breadth. Full-building G1 and production ROCm/HIP material parity also remain
-open.
+DOFs and commits the frame and link states atomically. A second bounded
+[fixed-reference local-axis benchmark](stateful-corotational-local-axis-linked-frame-cyclic-benchmark.md)
+projects one scalar link through a four-DOF direction-cosine row derived from
+the undeformed endpoints. These results do not establish updated/follower
+link axes, rotational or coupled multi-axis response, shell integration, or
+general link-family breadth. Full-building G1 and production ROCm/HIP material
+parity also remain open.
 
 The receipt keeps `link_spring_material_breadth_closure_claim=false`,
 `material_newton_breadth_closure_claim=false`,
