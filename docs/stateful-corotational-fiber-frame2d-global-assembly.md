@@ -91,6 +91,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_fiber_frame2d_solver.py \
   tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
   tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+  tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
@@ -104,6 +105,16 @@ material/geometric tangent decomposition, a same-parent nonlinear global
 Jacobian finite difference after RC damage/yield history, sequential 2.2 and
 4.4 rad rigid rotations across all members, exact replay, unchanged-parent
 trial branching, and fail-closed checkpoint/geometry binding.
+
+The separate
+[`stateful-corotational-linked-frame-cyclic-benchmark.md`](stateful-corotational-linked-frame-cyclic-benchmark.md)
+case nests the unchanged frame checkpoint with scalar link states, scatters one
+free-to-free global-x bilinear link into the full residual and tangent, and
+commits both state families atomically. Its 30-target reversal path verifies
+force transfer, nonnegative dissipation, same-parent frame-material,
+link-material, and geometric tangent terms, deterministic replay, and exact
+mixed-state rollback. Local-axis, rotational, multi-axis, shell, contact,
+friction, damping, degradation, and general link breadth remain open.
 
 The separate
 [`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)
