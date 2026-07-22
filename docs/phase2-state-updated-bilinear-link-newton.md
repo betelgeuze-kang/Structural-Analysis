@@ -42,10 +42,14 @@ now scatters this scalar global-axis link into two active corotational frame
 DOFs and commits the frame and link states atomically. A second bounded
 [fixed-reference local-axis benchmark](stateful-corotational-local-axis-linked-frame-cyclic-benchmark.md)
 projects one scalar link through a four-DOF direction-cosine row derived from
-the undeformed endpoints. These results do not establish updated/follower
-link axes, rotational or coupled multi-axis response, shell integration, or
-general link-family breadth. Full-building G1 and production ROCm/HIP material
-parity also remain open.
+the undeformed endpoints. A third bounded
+[updated-current-axis benchmark](stateful-corotational-updated-axis-linked-frame-cyclic-benchmark.md)
+uses current length minus reference length, rotates the internal force with the
+current chord, and adds the consistent force-times-length-Hessian geometric
+tangent. These results do not establish general nonconservative follower
+external loads, rotational or coupled multi-axis response, shell integration,
+or general link-family breadth. Full-building G1 and production ROCm/HIP
+material parity also remain open.
 
 The receipt keeps `link_spring_material_breadth_closure_claim=false`,
 `material_newton_breadth_closure_claim=false`,

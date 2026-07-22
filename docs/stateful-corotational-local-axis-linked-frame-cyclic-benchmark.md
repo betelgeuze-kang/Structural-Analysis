@@ -66,18 +66,22 @@ residual/vector-balance error of about `1.22e-9 kN`, mixed tangent relative
 error of about `3.91e-8`, and final link dissipated energy of about
 `1.767 kN m`.
 
-Run both local- and global-axis link contracts with:
+Run the global, fixed-reference, and updated-axis link contracts with:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
+  tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py
 ```
 
 ## Claim boundary
 
 This is one dense 2D scalar translational link with a fixed reference local
-axis. Updated/follower axes, rotational links, coupled multi-axis constitutive
+axis. This case itself does not update that axis; the separate
+[updated-current-axis benchmark](stateful-corotational-updated-axis-linked-frame-cyclic-benchmark.md)
+covers one internal axial current-chord formulation. General nonconservative
+follower external loads, rotational links, coupled multi-axis constitutive
 response, gap/contact, friction, uplift, viscous/rate response, degradation,
 pinching, shell connections, and simultaneous inelastic frame-member/link
 interaction remain open. No external device acceptance, production sparse or
