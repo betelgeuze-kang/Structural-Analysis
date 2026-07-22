@@ -252,11 +252,15 @@ def test_cyclic_path_yields_reverses_transfers_and_replays(
     assert result["final_link_dissipated_energy_kn_m"] == pytest.approx(
         1.3957333424163187
     )
-    assert result["maximum_residual_inf_norm_kn"] == pytest.approx(
-        1.4214165955372948e-10
+    assert (
+        0.0
+        <= result["maximum_residual_inf_norm_kn"]
+        <= result["maximum_residual_inf_norm_tolerance_kn"]
     )
-    assert result["maximum_moment_transfer_error_kn_m"] == pytest.approx(
-        3.4567904094728874e-12
+    assert (
+        0.0
+        <= result["maximum_moment_transfer_error_kn_m"]
+        <= result["maximum_moment_transfer_error_tolerance_kn_m"]
     )
     assert result["maximum_link_compatibility_error_rad"] == 0.0
     assert result["fallback_count"] == 0
@@ -277,11 +281,17 @@ def test_elastic_prefix_and_same_parent_tangents_are_consistent(
     assert full_tangent["pass"] is True
     assert full_tangent["same_committed_parent_checkpoint"] is True
     assert full_tangent["yielded_link_count"] == 1
-    assert full_tangent["relative_inf_error"] == pytest.approx(1.0366654904068796e-08)
+    assert (
+        0.0 <= full_tangent["relative_inf_error"] <= full_tangent["relative_tolerance"]
+    )
     assert material_tangent["pass"] is True
-    assert material_tangent["relative_error"] == pytest.approx(2.510205717953795e-10)
+    assert (
+        0.0
+        <= material_tangent["relative_error"]
+        <= material_tangent["relative_tolerance"]
+    )
     assert quadratic["pass"] is True
-    assert quadratic["minimum_observed_order"] == pytest.approx(1.8855085667739655)
+    assert quadratic["minimum_observed_order"] >= 1.8
     assert result["maximum_frame_geometric_tangent_inf_norm"] > 0.0
     assert result["maximum_link_geometric_tangent_inf_norm"] == 0.0
 

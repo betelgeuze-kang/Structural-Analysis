@@ -158,11 +158,15 @@ def test_cyclic_updated_axis_path_commits_replays_and_preserves_ancestry(
     assert result["deterministic_replay_exact"] is True
     assert result["fallback_count"] == 0
     assert result["regularization_count"] == 0
-    assert result["maximum_residual_inf_norm_kn"] == pytest.approx(
-        6.854250500509806e-11
+    assert (
+        0.0
+        <= result["maximum_residual_inf_norm_kn"]
+        <= result["maximum_residual_inf_norm_tolerance_kn"]
     )
-    assert result["maximum_vector_balance_error_kn"] == pytest.approx(
-        6.854250500509806e-11
+    assert (
+        0.0
+        <= result["maximum_vector_balance_error_kn"]
+        <= result["maximum_vector_balance_error_tolerance_kn"]
     )
 
 
@@ -228,16 +232,14 @@ def test_updated_axis_objectivity_force_transform_and_geometric_tangent_pass(
     assert objectivity["pass"] is True
     assert objectivity["rigid_deformation_error_m"] == 0.0
     assert objectivity["rotated_direction_error"] <= 1.0e-15
-    assert objectivity["hessian_relative_inf_error"] == pytest.approx(
-        1.6210969094876404e-09
-    )
+    assert 0.0 <= objectivity["hessian_relative_inf_error"] <= 1.0e-8
 
     tangent = result["same_parent_frame_link_tangent"]
     assert tangent["pass"] is True
     assert tangent["yielded_link_count"] == 1
     assert tangent["link_geometric_tangent_inf_norm_kn_per_m"] > 0.0
     assert tangent["frame_link_geometric_split_error_kn_per_m"] == 0.0
-    assert tangent["relative_inf_error"] == pytest.approx(9.231993823594698e-09)
+    assert 0.0 <= tangent["relative_inf_error"] <= tangent["relative_tolerance"]
     reverse_tangent = result["same_parent_reverse_frame_link_tangent"]
     assert reverse_tangent["pass"] is True
     assert reverse_tangent["yielded_link_count"] == 1

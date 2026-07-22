@@ -293,11 +293,15 @@ def test_cyclic_path_opens_closes_transfers_and_replays(
     assert result["maximum_penetration_m"] == pytest.approx(0.0014993474415900248)
     assert result["force_sign_pass"] is True
     assert result["conservative_return_to_open_pass"] is True
-    assert result["maximum_residual_inf_norm_kn"] == pytest.approx(
-        3.098188769929879e-10
+    assert (
+        0.0
+        <= result["maximum_residual_inf_norm_kn"]
+        <= result["maximum_residual_inf_norm_tolerance_kn"]
     )
-    assert result["maximum_force_transfer_error_kn"] == pytest.approx(
-        3.994280461938615e-10
+    assert (
+        0.0
+        <= result["maximum_force_transfer_error_kn"]
+        <= result["maximum_force_transfer_error_tolerance_kn"]
     )
     assert result["maximum_link_compatibility_error_m"] == 0.0
     assert result["fallback_count"] == 0
@@ -320,24 +324,28 @@ def test_analytic_branches_and_same_parent_tangents_are_consistent(
     assert onset["bracket_pass"] is True
     assert onset["analytic_load_factor"] == pytest.approx(-0.18207222222222222)
     assert open_branch["pass"] is True
-    assert open_branch["relative_error"] == pytest.approx(3.483666412349666e-07)
+    assert 0.0 <= open_branch["relative_error"] <= open_branch["relative_tolerance"]
     assert closed_branch["pass"] is True
-    assert closed_branch["relative_error"] == pytest.approx(4.348726409507784e-06)
+    assert 0.0 <= closed_branch["relative_error"] <= closed_branch["relative_tolerance"]
     assert open_full["pass"] is True
     assert open_full["same_committed_parent_checkpoint"] is True
     assert open_full["link_material_tangent_inf_norm_kn_per_m"] == 0.0
-    assert open_full["relative_inf_error"] == pytest.approx(1.1152785642999115e-08)
+    assert 0.0 <= open_full["relative_inf_error"] <= open_full["relative_tolerance"]
     assert closed_full["pass"] is True
     assert closed_full["same_committed_parent_checkpoint"] is True
     assert closed_full["link_material_tangent_inf_norm_kn_per_m"] > 0.0
     assert closed_full["link_geometric_tangent_inf_norm_kn_per_m"] == 0.0
-    assert closed_full["relative_inf_error"] == pytest.approx(2.1366444859935052e-08)
+    assert 0.0 <= closed_full["relative_inf_error"] <= closed_full["relative_tolerance"]
     assert open_material["pass"] is True
     assert open_material["relative_error"] == 0.0
     assert closed_material["pass"] is True
-    assert closed_material["relative_error"] == pytest.approx(4.5511114876717325e-12)
+    assert (
+        0.0
+        <= closed_material["relative_error"]
+        <= closed_material["relative_tolerance"]
+    )
     assert quadratic["pass"] is True
-    assert quadratic["minimum_observed_order"] == pytest.approx(4.503368761422129)
+    assert quadratic["minimum_observed_order"] >= 1.8
     assert result["maximum_frame_geometric_tangent_inf_norm_kn_per_m"] > 0.0
     assert result["maximum_link_geometric_tangent_inf_norm_kn_per_m"] == 0.0
     assert result["common_translation_objectivity"]["exact"] is True

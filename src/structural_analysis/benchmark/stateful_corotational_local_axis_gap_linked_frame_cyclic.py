@@ -681,9 +681,17 @@ def build_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark() -
         "closed_active_set_newton_quadratic_convergence": quadratic,
         "fixed_reference_rotation_covariance": rotation_covariance,
         "maximum_residual_inf_norm_kn": maximum_residual,
+        "maximum_residual_inf_norm_tolerance_kn": _MAXIMUM_RESIDUAL_INF_NORM_KN,
         "maximum_vector_balance_error_kn": maximum_balance_error,
+        "maximum_vector_balance_error_tolerance_kn": (_MAXIMUM_VECTOR_BALANCE_ERROR_KN),
         "maximum_force_transformation_error_kn": maximum_transformation_error,
+        "maximum_force_transformation_error_tolerance_kn": (
+            _MAXIMUM_TRANSFORMATION_ERROR_KN
+        ),
         "maximum_link_compatibility_error_m": maximum_compatibility_error,
+        "maximum_link_compatibility_error_tolerance_m": (
+            _MAXIMUM_COMPATIBILITY_ERROR_M
+        ),
         "maximum_frame_geometric_tangent_inf_norm_kn_per_m": (
             maximum_frame_geometric_tangent
         ),

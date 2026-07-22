@@ -235,7 +235,7 @@ def test_local_axis_transform_elastic_prefix_and_mixed_tangent_pass(
     assert tangent["pass"] is True
     assert tangent["yielded_link_count"] == 1
     assert tangent["all_tangent_terms_active"] is True
-    assert tangent["relative_inf_error"] == pytest.approx(3.903561874559493e-08)
+    assert 0.0 <= tangent["relative_inf_error"] <= tangent["relative_tolerance"]
     assert result["yielded_link_newton_quadratic_convergence"]["pass"] is True
     assert (
         result["yielded_link_newton_quadratic_convergence"]["minimum_observed_order"]

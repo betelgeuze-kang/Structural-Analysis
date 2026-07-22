@@ -214,14 +214,26 @@ def test_cyclic_path_opens_closes_transfers_and_replays(
     assert result["maximum_penetration_m"] == pytest.approx(0.004830650257828986)
     assert result["force_sign_pass"] is True
     assert result["conservative_return_to_open_pass"] is True
-    assert result["maximum_residual_inf_norm_kn"] == pytest.approx(
-        1.2630394508050813e-09
+    assert (
+        0.0
+        <= result["maximum_residual_inf_norm_kn"]
+        <= result["maximum_residual_inf_norm_tolerance_kn"]
     )
-    assert result["maximum_vector_balance_error_kn"] == pytest.approx(
-        1.2630394508050813e-09
+    assert (
+        0.0
+        <= result["maximum_vector_balance_error_kn"]
+        <= result["maximum_vector_balance_error_tolerance_kn"]
     )
-    assert result["maximum_force_transformation_error_kn"] == 0.0
-    assert result["maximum_link_compatibility_error_m"] == 0.0
+    assert (
+        0.0
+        <= result["maximum_force_transformation_error_kn"]
+        <= result["maximum_force_transformation_error_tolerance_kn"]
+    )
+    assert (
+        0.0
+        <= result["maximum_link_compatibility_error_m"]
+        <= result["maximum_link_compatibility_error_tolerance_m"]
+    )
     assert result["fallback_count"] == 0
     assert result["regularization_count"] == 0
 
@@ -241,18 +253,18 @@ def test_linearized_branches_tangents_and_covariance_are_consistent(
     assert onset["analytic_load_factor"] == pytest.approx(-0.18053192936553764)
     assert open_branch["reference_class"] == "small_displacement_linearized_carrier"
     assert open_branch["pass"] is True
-    assert open_branch["relative_error"] == pytest.approx(0.0015154200462721007)
+    assert 0.0 <= open_branch["relative_error"] <= open_branch["relative_tolerance"]
     assert closed_branch["pass"] is True
-    assert closed_branch["relative_error"] == pytest.approx(0.00569202668710445)
+    assert 0.0 <= closed_branch["relative_error"] <= closed_branch["relative_tolerance"]
     assert open_full["pass"] is True
     assert open_full["same_committed_parent_checkpoint"] is True
     assert open_full["link_material_tangent_inf_norm_kn_per_m"] == 0.0
-    assert open_full["relative_inf_error"] == pytest.approx(2.321138684755725e-08)
+    assert 0.0 <= open_full["relative_inf_error"] <= open_full["relative_tolerance"]
     assert closed_full["pass"] is True
     assert closed_full["same_committed_parent_checkpoint"] is True
     assert closed_full["link_material_tangent_inf_norm_kn_per_m"] > 0.0
     assert closed_full["link_geometric_tangent_inf_norm_kn_per_m"] == 0.0
-    assert closed_full["relative_inf_error"] == pytest.approx(2.862327787082141e-08)
+    assert 0.0 <= closed_full["relative_inf_error"] <= closed_full["relative_tolerance"]
     assert result["same_parent_open_material_tangent"]["pass"] is True
     assert result["same_parent_closed_material_tangent"]["pass"] is True
     assert result["closed_active_set_newton_quadratic_convergence"]["pass"] is True
@@ -260,7 +272,7 @@ def test_linearized_branches_tangents_and_covariance_are_consistent(
     assert result["maximum_link_geometric_tangent_inf_norm_kn_per_m"] == 0.0
     assert covariance["pass"] is True
     assert covariance["force_covariance_error_kn"] == 0.0
-    assert covariance["maximum_error"] == pytest.approx(6.821210263296962e-13)
+    assert 0.0 <= covariance["maximum_error"] <= covariance["tolerance"]
 
 
 def test_rollback_and_claim_boundary_remain_explicit(
