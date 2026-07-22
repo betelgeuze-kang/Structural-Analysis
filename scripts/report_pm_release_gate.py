@@ -45,9 +45,6 @@ DEFAULT_MEASURED_BREADTH = Path(
 DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS = Path(
     "implementation/phase1/release/external_benchmark_submission_readiness.json"
 )
-DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH = Path(
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
-)
 DEFAULT_EVIDENCE_SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 DEFAULT_WORST_CASE_REPORT = Path("implementation/phase1/release_evidence/productization/worst_case_report.json")
 DEFAULT_WORKFLOW_PRODUCTIZATION = Path("implementation/phase1/workflow_productization_gate_report.json")
@@ -506,9 +503,7 @@ def _stale_artifact_count(release_evidence_freshness_payload: dict[str, Any]) ->
 def _public_benchmark_ready(
     measured_benchmark_breadth_payload: dict[str, Any],
     external_benchmark_submission_readiness_payload: dict[str, Any],
-    public_benchmark_source_of_truth_payload: dict[str, Any],
 ) -> bool:
-    _ = public_benchmark_source_of_truth_payload
     external_summary = _summary(external_benchmark_submission_readiness_payload)
     external_ready = bool(
         external_summary.get("ready_to_start_full_submission_now")
@@ -672,174 +667,6 @@ def _science_surface_operator_actions(
     return actions
 
 
-def _public_benchmark_operator_actions(
-    public_benchmark_source_of_truth_payload: dict[str, Any],
-) -> list[dict[str, Any]]:
-    source_summary = _summary(public_benchmark_source_of_truth_payload)
-    source_ready = bool(
-        public_benchmark_source_of_truth_payload.get("public_benchmark_ready")
-        or source_summary.get("public_benchmark_ready")
-    )
-    if source_ready:
-        return []
-
-    status = str(
-        public_benchmark_source_of_truth_payload.get("status")
-        or source_summary.get("status")
-        or "missing"
-    )
-    blockers = [
-        str(row)
-        for row in (
-            _as_list(public_benchmark_source_of_truth_payload.get("blockers"))
-            or _as_list(source_summary.get("blockers"))
-        )
-    ]
-    if not blockers:
-        blockers = ["public_benchmark_source_of_truth_missing_or_not_ready"]
-    next_actions = [
-        str(row)
-        for row in (
-            _as_list(public_benchmark_source_of_truth_payload.get("next_actions"))
-            or _as_list(source_summary.get("next_actions"))
-        )
-    ]
-    first_blocked_target = str(
-        public_benchmark_source_of_truth_payload.get("first_blocked_target")
-        or source_summary.get("first_blocked_target")
-        or _as_dict(
-            public_benchmark_source_of_truth_payload.get("first_operator_evidence_gap")
-        ).get("slot_id")
-        or ""
-    )
-    root_cause_tags = [
-        str(row)
-        for row in _as_list(
-            public_benchmark_source_of_truth_payload.get("root_cause_tags")
-            or source_summary.get("root_cause_tags")
-        )
-    ]
-    tier_beta_gate = _as_dict(
-        public_benchmark_source_of_truth_payload.get("tier_beta_gate")
-        or source_summary.get("tier_beta_gate")
-    )
-    blocked_criteria = _failed_criteria(tier_beta_gate)
-    operator_handoff_summary = _as_dict(
-        public_benchmark_source_of_truth_payload.get("operator_handoff_summary")
-        or source_summary.get("operator_handoff_summary")
-    )
-    operator_intake_packet = _as_dict(
-        public_benchmark_source_of_truth_payload.get("operator_intake_packet")
-        or source_summary.get("operator_intake_packet")
-    )
-    operator_handoff_queue = [
-        row
-        for row in _as_list(
-            public_benchmark_source_of_truth_payload.get("operator_handoff_queue")
-            or source_summary.get("operator_handoff_queue")
-        )
-        if isinstance(row, dict)
-    ]
-    first_operator_handoff = _as_dict(
-        public_benchmark_source_of_truth_payload.get("first_operator_handoff")
-        or source_summary.get("first_operator_handoff")
-        or (operator_handoff_queue[0] if operator_handoff_queue else {})
-    )
-    first_blocker = blockers[0] if blockers else ""
-    reason = f"public benchmark source-of-truth is {status}; first_blocker={first_blocker}"
-    if first_blocked_target:
-        reason += f"; first_blocked_target={first_blocked_target}"
-    if root_cause_tags:
-        reason += f"; root_cause_tags={','.join(root_cause_tags)}"
-    if next_actions:
-        reason += f"; next_action={next_actions[0]}"
-    action = {
-        "action_id": "materialize_public_benchmark_source_of_truth",
-        "status": "public_benchmark_evidence_required",
-        "bottleneck": "public_benchmark_source_of_truth_not_ready",
-        "first_blocker": first_blocker,
-        "first_blocked_target": first_blocked_target,
-        "root_cause_tags": root_cause_tags,
-        "blocked_criteria": blocked_criteria,
-        "blocked_criteria_count": len(blocked_criteria),
-        "blockers": blockers,
-        "next_actions": next_actions,
-        "reason": reason,
-        "artifact": str(DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH),
-    }
-    operator_intake_route = str(
-        first_operator_handoff.get("route")
-        or operator_handoff_summary.get("route")
-        or operator_intake_packet.get("route")
-        or ""
-    )
-    operator_intake_artifact = str(
-        first_operator_handoff.get("operator_intake_artifact")
-        or operator_handoff_summary.get("artifact")
-        or operator_intake_packet.get("artifact")
-        or ""
-    )
-    operator_intake_markdown_artifact = str(
-        first_operator_handoff.get("operator_intake_markdown_artifact")
-        or operator_intake_packet.get("markdown_artifact")
-        or ""
-    )
-    operator_template_artifact = str(
-        first_operator_handoff.get("template_artifact")
-        or operator_handoff_summary.get("template_artifact")
-        or ""
-    )
-    if operator_intake_route:
-        action["operator_intake_route"] = operator_intake_route
-    if operator_intake_artifact:
-        action["operator_intake_artifact"] = operator_intake_artifact
-    if operator_intake_markdown_artifact:
-        action["operator_intake_markdown_artifact"] = operator_intake_markdown_artifact
-    if operator_template_artifact:
-        action["operator_template_artifact"] = operator_template_artifact
-    if first_operator_handoff:
-        action["first_operator_handoff"] = first_operator_handoff
-    operator_handoff_queue_count = (
-        public_benchmark_source_of_truth_payload.get("operator_handoff_queue_count")
-        or source_summary.get("operator_handoff_queue_count")
-    )
-    if operator_handoff_queue or operator_handoff_queue_count is not None:
-        action["operator_handoff_queue_count"] = _as_int(
-            operator_handoff_queue_count
-            if operator_handoff_queue_count is not None
-            else len(operator_handoff_queue)
-        )
-    if operator_handoff_summary.get("blocked_operator_slot_count") is not None:
-        action["blocked_operator_slot_count"] = _as_int(
-            operator_handoff_summary.get("blocked_operator_slot_count")
-        )
-    if operator_handoff_summary.get("required_slot_count") is not None:
-        action["required_slot_count"] = _as_int(
-            operator_handoff_summary.get("required_slot_count")
-        )
-    minimum_evidence = _as_dict(
-        first_operator_handoff.get("minimum_evidence")
-        or operator_handoff_summary.get("minimum_evidence")
-    )
-    if minimum_evidence:
-        action["minimum_evidence"] = minimum_evidence
-    materialization_command = str(
-        first_operator_handoff.get("materialization_command")
-        or operator_handoff_summary.get("materialization_command")
-        or ""
-    )
-    validation_command = str(
-        first_operator_handoff.get("validation_command")
-        or operator_handoff_summary.get("validation_command")
-        or ""
-    )
-    if materialization_command:
-        action["materialization_command"] = materialization_command
-    if validation_command:
-        action["validation_command"] = validation_command
-    return [action]
-
-
 def _release_decision(
     *,
     release_allowed: bool,
@@ -847,7 +674,6 @@ def _release_decision(
     release_area_blockers: list[str],
     measured_benchmark_breadth_payload: dict[str, Any],
     external_benchmark_submission_readiness_payload: dict[str, Any],
-    public_benchmark_source_of_truth_payload: dict[str, Any],
     release_evidence_freshness_payload: dict[str, Any],
     pm_blocker_register: dict[str, Any],
     evidence_surface_dir: Path,
@@ -927,7 +753,6 @@ def _release_decision(
         "public_benchmark_ready": _public_benchmark_ready(
             measured_benchmark_breadth_payload,
             external_benchmark_submission_readiness_payload,
-            public_benchmark_source_of_truth_payload,
         ),
         "evidence_surface_dir": str(evidence_surface_dir),
         "evidence_surfaces": evidence_surfaces,
@@ -3364,7 +3189,6 @@ def build_report(
     zero_copy_strict: Path = DEFAULT_ZERO_COPY_STRICT,
     measured_benchmark_breadth: Path = DEFAULT_MEASURED_BREADTH,
     external_benchmark_submission_readiness: Path = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
-    public_benchmark_source_of_truth: Path = DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH,
     evidence_surface_dir: Path = DEFAULT_EVIDENCE_SURFACE_DIR,
     worst_case_report: Path = DEFAULT_WORST_CASE_REPORT,
     workflow_productization: Path = DEFAULT_WORKFLOW_PRODUCTIZATION,
@@ -3535,7 +3359,6 @@ def build_report(
     full_release_gate_ready = bool(limited_ready and release_area_ready)
     measured_benchmark_breadth_payload = _load_json(measured_benchmark_breadth)
     external_benchmark_submission_readiness_payload = _load_json(external_benchmark_submission_readiness)
-    public_benchmark_source_of_truth_payload = _load_json(public_benchmark_source_of_truth)
     release_evidence_freshness_payload = _load_json(release_evidence_freshness)
     pm_blocker_register_payload = _load_json(pm_release_blocker_action_register)
     release_decision = _release_decision(
@@ -3544,7 +3367,6 @@ def build_report(
         release_area_blockers=release_area_blockers,
         measured_benchmark_breadth_payload=measured_benchmark_breadth_payload,
         external_benchmark_submission_readiness_payload=external_benchmark_submission_readiness_payload,
-        public_benchmark_source_of_truth_payload=public_benchmark_source_of_truth_payload,
         release_evidence_freshness_payload=release_evidence_freshness_payload,
         pm_blocker_register=pm_blocker_register_payload,
         evidence_surface_dir=evidence_surface_dir,
@@ -3852,11 +3674,6 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
     )
-    parser.add_argument(
-        "--public-benchmark-source-of-truth",
-        type=Path,
-        default=DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH,
-    )
     parser.add_argument("--evidence-surface-dir", type=Path, default=DEFAULT_EVIDENCE_SURFACE_DIR)
     parser.add_argument("--worst-case-report", type=Path, default=DEFAULT_WORST_CASE_REPORT)
     parser.add_argument("--workflow-productization", type=Path, default=DEFAULT_WORKFLOW_PRODUCTIZATION)
@@ -3973,7 +3790,6 @@ def main(argv: list[str] | None = None) -> int:
         zero_copy_strict=args.zero_copy_strict,
         measured_benchmark_breadth=args.measured_benchmark_breadth,
         external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
-        public_benchmark_source_of_truth=args.public_benchmark_source_of_truth,
         evidence_surface_dir=args.evidence_surface_dir,
         worst_case_report=args.worst_case_report,
         workflow_productization=args.workflow_productization,

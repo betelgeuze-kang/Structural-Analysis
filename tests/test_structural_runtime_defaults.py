@@ -28,6 +28,7 @@ def test_runtime_default_commands_use_structural_hook() -> None:
         "profile_branch64_microbatch_cache.py",
         "run_scaleout_io_profile.py",
         "run_p0_core_gap_pipeline.py",
+        "run_phase1_topk_pipeline.py",
         "run_megastructure_commercial_readiness.py",
         "run_nightly_release_gate.py",
     ]:

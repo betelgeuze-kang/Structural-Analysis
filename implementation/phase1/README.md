@@ -530,8 +530,8 @@ python3 implementation/phase1/run_phased_multidomain_modules.py \
 python implementation/phase1/run_phase1_steps.py --out-dir implementation/phase1/step_outputs --repeats 3 --strict
 ```
 
-- `step1_fire_loop.json`은 mock decay 루프가 아니라 `md3bead_soa.py`의 3-Bead(CA/SC/CB) 포스필드 완화 계산 결과를 기록합니다.
-- 주요 물리지표: `max_unbalanced_force`, `kinetic_energy`, `system_temperature`, `model=3bead_ca_sc_cb`
+- `step1_fire_loop.json`은 mock decay 루프가 아니라 `structural_three_lane_relaxation.py`의 3-레인 프레임 완화 계산 결과를 기록합니다.
+- 주요 물리지표: `max_unbalanced_force`, `kinetic_energy`, `system_temperature`, `model=three_lane_frame_soa`
 
 실엔진 계측 강제 모드:
 
@@ -812,15 +812,15 @@ python implementation/phase1/run_phase1_topk_pipeline.py \
   --out-manifest implementation/phase1/pipeline_manifest.json
 ```
 
-- 파이프라인 기본 런타임 훅은 `rust_hip_md3bead_hook.py`를 사용하며, `step1_case/step5_profile`가 Rust 3-Bead SoA 경로로 실행됩니다.
-- `rust_md3bead_parity_report.json`이 생성되며, Python 참조모델과 Rust 훅의 1:1 동치 여부를 CI gate에서 함께 판정합니다.
+- 파이프라인 기본 런타임 훅은 `structural_runtime_hook.py`를 사용하며, `step1_case/step5_profile`가 구조해석 전용 경로로 실행됩니다.
+- `step1_fire_loop.json`의 수렴·반복성·모델 식별자를 CI gate에서 함께 판정합니다.
 
-### Rust 3-Bead 훅 단독 동치 검증
+### 구조 완화 및 런타임 훅 검증
 
 ```bash
-python implementation/phase1/validate_md3bead_rust_parity.py \
-  --rust-hook-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
-  --out implementation/phase1/rust_md3bead_parity_report.json
+python -m pytest -q \
+  tests/test_structural_three_lane_relaxation.py \
+  tests/test_structural_runtime_hook.py
 ```
 
 ### 비선형 Lennard-Jones 맵핑 커널 검증
@@ -847,7 +847,7 @@ python implementation/phase1/dynamic_time_history_contract_stub.py \
 
 ```bash
 python implementation/phase1/profile_branch64_microbatch_cache.py \
-  --runtime-hook-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
+  --runtime-hook-cmd "python3 implementation/phase1/structural_runtime_hook.py" \
   --branches 64 \
   --chunk-candidates 64,32,16,8,4 \
   --node-count 100000 \
@@ -861,7 +861,7 @@ python implementation/phase1/profile_branch64_microbatch_cache.py \
 
 ```bash
 python implementation/phase1/profile_p0_engine_path.py \
-  --producer-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
+  --producer-cmd "python3 implementation/phase1/structural_runtime_hook.py" \
   --allow-cpu-required \
   --out implementation/phase1/p0_engine_perf_report.json
 ```
@@ -992,12 +992,12 @@ python implementation/phase1/train_pinn_streaming_active.py \
 - Active Learning 루프가 고오차 케이스를 hard pool로 재주입합니다.
 - `--move-reports` 사용 시 결과 JSON/CSV/Parquet는 `workspace/reports/*`로 이동됩니다.
 
-### 3-Bead 캐시 예산 분석 (128MB Infinity Cache 기준)
+### 3-레인 구조 모델 캐시 예산 분석 (128MB Infinity Cache 기준)
 
 ```bash
-python implementation/phase1/three_bead_cache_budget.py \
+python implementation/phase1/three_lane_cache_budget.py \
   --node-count 100000 --branches-list 10,64 \
-  --out implementation/phase1/three_bead_cache_budget_report.json
+  --out implementation/phase1/three_lane_cache_budget_report.json
 ```
 
 - `10` branches 시나리오가 캐시에 들어오는지, `64` branches 시 micro-batch 권장 크기를 자동 계산합니다.
@@ -1047,8 +1047,8 @@ python implementation/phase1/run_noise_sensitivity_stress.py \
   --out implementation/phase1/noise_sensitivity_stress_report.json
 
 python implementation/phase1/run_scaleout_io_profile.py \
-  --runtime-hook-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
-  --producer-cmd "python3 implementation/phase1/rust_hip_md3bead_hook.py" \
+  --runtime-hook-cmd "python3 implementation/phase1/structural_runtime_hook.py" \
+  --producer-cmd "python3 implementation/phase1/structural_runtime_hook.py" \
   --dof-levels 100000,300000,1000000,3000000 \
   --allow-cpu-required \
   --out implementation/phase1/scaleout_io_profile_report.json

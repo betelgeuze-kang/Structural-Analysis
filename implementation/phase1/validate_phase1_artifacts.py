@@ -39,7 +39,7 @@ ALLOWED_CI_REASON = {
     "ERR_BIFURCATION_CONTRACT_FAIL",
     "ERR_RUST_ONNX_CONTRACT_FAIL",
     "ERR_WINNING_TICKET_FAIL",
-    "ERR_RUST_MD3BEAD_PARITY_FAIL",
+    "ERR_STRUCTURAL_RELAXATION_FAIL",
     "ERR_LJ_MAPPING_FAIL",
     "ERR_DYNAMIC_TIME_HISTORY_FAIL",
     "ERR_CACHE_PROFILE_FAIL",
@@ -143,13 +143,6 @@ ALLOWED_WINNING_TICKET_REASON = {
     "ERR_EMPTY_BASIS",
     "ERR_TOPK_INVALID",
     "ERR_TORCH_UNAVAILABLE",
-}
-
-ALLOWED_RUST_PARITY_REASON = {
-    "PASS",
-    "ERR_HOOK_EXEC",
-    "ERR_PARITY_STEP1",
-    "ERR_PARITY_STEP5",
 }
 
 ALLOWED_LJ_MAPPING_REASON = {
@@ -672,7 +665,7 @@ def validate_ci(report: dict) -> list[str]:
         "bifurcation_contract_pass",
         "rust_onnx_contract_pass",
         "winning_ticket_contract_pass",
-        "rust_md3bead_parity_pass",
+        "structural_relaxation_pass",
         "lj_mapping_contract_pass",
         "dynamic_time_history_pass",
         "cache_profile_pass",
@@ -994,31 +987,31 @@ def validate_winning_ticket(report: dict) -> list[str]:
     return errs
 
 
-def validate_rust_parity(report: dict) -> list[str]:
+def validate_structural_relaxation(report: dict) -> list[str]:
     errs: list[str] = []
-    errs.extend(_validate_common_metadata(report, "rust_parity"))
-    if report.get("reason_code") not in ALLOWED_RUST_PARITY_REASON:
-        errs.append("rust_parity.reason_code invalid")
-    if not isinstance(report.get("contract_pass"), bool):
-        errs.append("rust_parity.contract_pass invalid")
-
-    step1 = report.get("step1_parity")
-    if not isinstance(step1, dict):
-        errs.append("rust_parity.step1_parity missing")
-    else:
-        if not isinstance(step1.get("pass"), bool):
-            errs.append("rust_parity.step1_parity.pass invalid")
-        if not isinstance(step1.get("rows"), list):
-            errs.append("rust_parity.step1_parity.rows invalid")
-
-    step5 = report.get("step5_parity")
-    if not isinstance(step5, dict):
-        errs.append("rust_parity.step5_parity missing")
-    else:
-        if not isinstance(step5.get("pass"), bool):
-            errs.append("rust_parity.step5_parity.pass invalid")
-        if not isinstance(step5.get("rows"), list):
-            errs.append("rust_parity.step5_parity.rows invalid")
+    summary = report.get("summary")
+    runs = report.get("runs")
+    if not isinstance(summary, dict):
+        errs.append("structural_relaxation.summary missing")
+        return errs
+    if not isinstance(runs, list) or not runs:
+        errs.append("structural_relaxation.runs missing")
+        return errs
+    if summary.get("all_converged") is not True:
+        errs.append("structural_relaxation.all_converged invalid")
+    if summary.get("within_5pct_variability") is not True:
+        errs.append("structural_relaxation.within_5pct_variability invalid")
+    models_used = summary.get("models_used")
+    if not isinstance(models_used, list) or set(models_used) != {
+        "three_lane_frame_soa"
+    }:
+        errs.append("structural_relaxation.models_used invalid")
+    if any(
+        not isinstance(row, dict)
+        or row.get("model") != "three_lane_frame_soa"
+        for row in runs
+    ):
+        errs.append("structural_relaxation.run_model invalid")
     return errs
 
 
@@ -3156,7 +3149,10 @@ def main() -> None:
     p.add_argument("--bifurcation", default="implementation/phase1/bifurcation_detector_report.json")
     p.add_argument("--rust-onnx", default="implementation/phase1/rust_onnx_native_contract_report.json")
     p.add_argument("--winning-ticket", default="implementation/phase1/winning_ticket_backprop_report.json")
-    p.add_argument("--rust-parity", default="implementation/phase1/rust_md3bead_parity_report.json")
+    p.add_argument(
+        "--structural-relaxation",
+        default="implementation/phase1/step_outputs/step1_fire_loop.json",
+    )
     p.add_argument("--lj-mapping", default="implementation/phase1/nonlinear_lj_mapping_report.json")
     p.add_argument("--dynamic-time-history", default="implementation/phase1/dynamic_time_history_report.json")
     p.add_argument("--cache-profile", default="implementation/phase1/branch64_microbatch_profile_report.json")
@@ -3231,7 +3227,7 @@ def main() -> None:
     bifurcation = _load(args.bifurcation)
     rust_onnx = _load(args.rust_onnx)
     winning_ticket = _load(args.winning_ticket)
-    rust_parity = _load(args.rust_parity)
+    structural_relaxation = _load(args.structural_relaxation)
     lj_mapping = _load(args.lj_mapping)
     dynamic_time_history = _load(args.dynamic_time_history)
     cache_profile = _load(args.cache_profile)
@@ -3305,7 +3301,9 @@ def main() -> None:
         "bifurcation": validate_bifurcation(bifurcation),
         "rust_onnx": validate_rust_onnx(rust_onnx),
         "winning_ticket": validate_winning_ticket(winning_ticket),
-        "rust_parity": validate_rust_parity(rust_parity),
+        "structural_relaxation": validate_structural_relaxation(
+            structural_relaxation
+        ),
         "lj_mapping": validate_lj_mapping(lj_mapping),
         "dynamic_time_history": validate_dynamic_time_history(dynamic_time_history),
         "cache_profile": validate_cache_profile(cache_profile),
@@ -3388,7 +3386,7 @@ def main() -> None:
             "bifurcation": args.bifurcation,
             "rust_onnx": args.rust_onnx,
             "winning_ticket": args.winning_ticket,
-            "rust_parity": args.rust_parity,
+            "structural_relaxation": args.structural_relaxation,
             "lj_mapping": args.lj_mapping,
             "dynamic_time_history": args.dynamic_time_history,
             "cache_profile": args.cache_profile,

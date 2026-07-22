@@ -55,6 +55,12 @@ NON_STRUCTURAL_PRODUCT_PATH_SUBSTRINGS = (
     "public_benchmark_pose",
     "public_benchmark_subset",
     "public_benchmark_vina_gnina",
+    "public_benchmark_external",
+    "public_benchmark_harness",
+    "public_benchmark_operator",
+    "public_benchmark_phase2",
+    "public_benchmark_rmsd",
+    "public_benchmark_source_of_truth",
 )
 
 
@@ -612,24 +618,8 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "implementation/phase1/structural_runtime_ffi/Cargo.toml",
             "implementation/phase1/structural_runtime_ffi/src/lib.rs",
             "implementation/phase1/zero_copy_real_probe.py",
-            "scripts/materialize_public_benchmark_pose_success_harness.py",
-            "scripts/materialize_science_actual_closure_from_rows.py",
             "scripts/report_release_evidence_freshness.py",
             "src/structural_analysis/benchmark/acquisition.py",
-        },
-        "public_benchmark_source_of_truth": {
-            "scripts/build_public_benchmark_operator_intake_packet.py",
-            "scripts/build_public_benchmark_source_of_truth.py",
-            "scripts/materialize_public_benchmark_enrichment_scorecard.py",
-            "scripts/materialize_public_benchmark_harness_bundle.py",
-            "scripts/materialize_public_benchmark_operator_bundle_from_rows.py",
-            "scripts/materialize_public_benchmark_phase2_from_rows.py",
-            "scripts/materialize_public_benchmark_pose_success_harness.py",
-            "scripts/materialize_public_benchmark_pose_validity_input.py",
-            "scripts/materialize_public_benchmark_posebusters_validity_packet.py",
-            "scripts/materialize_public_benchmark_rmsd_scorecard.py",
-            "scripts/validate_public_benchmark_external_receipts.py",
-            "scripts/validate_public_benchmark_pose_validity.py",
         },
         "ux_new_user_observation_report": {
             "scripts/build_ux_new_user_observation_report.py",

@@ -16,7 +16,6 @@ import math
 from datetime import datetime, timezone
 from pathlib import Path
 
-from md3bead_soa import run_relaxation_case
 from orthogonal_krylov_projection import build_krylov_basis
 from rust_nonlinear_frame_bridge import (
     RustNonlinearFrameConfig,
@@ -25,6 +24,7 @@ from rust_nonlinear_frame_bridge import (
 )
 from runtime_contracts import InputContractError, get_logger, log_event, validate_input_contract
 from solver_truthfulness_runtime import build_runtime_truthfulness, normalize_runtime_policy
+from structural_three_lane_relaxation import run_relaxation_case
 
 EPS = 1e-12
 REASONS = {
@@ -59,7 +59,7 @@ def _runtime_truthfulness(*, runtime_mode: str, production_seed_runtime: dict | 
     return build_runtime_truthfulness(
         path_role="top_level_training_eval_branch_selection",
         reduced_kind="explicit_reduced_order_relaxation_branching",
-        reduced_backend="md3bead_soa_relaxation",
+        reduced_backend="structural_three_lane_relaxation",
         reduced_reason="explicit reduced-order physical relaxation path declared without surrogate runtime markers",
         runtime_policy=runtime_mode,
         production_seed_runtime=production_seed_runtime,
@@ -138,7 +138,7 @@ def _simulate_loss(
     alpha: float,
     frame_seed: dict | None = None,
 ) -> tuple[list[float], float, float, float, dict]:
-    # Branch scoring now uses explicit 3-bead SoA relaxation instead of algebraic surrogate updates.
+    # Branch scoring uses explicit structural frame relaxation instead of algebraic updates.
     seed = frame_seed if isinstance(frame_seed, dict) else {}
     drive = abs(sum((t * r) for t, r in zip(theta, residual))) * float(alpha)
     drive += 180.0 * abs(float(seed.get("top_displacement_m", 0.0) or 0.0))
@@ -146,7 +146,7 @@ def _simulate_loss(
     decay_hint -= min(0.02, 0.0015 * float(seed.get("plastic_story_count", 0) or 0))
     decay_hint = max(0.90, min(0.985, decay_hint))
     node_count = max(18, min(96, 20 + int(abs(residual[3]) + abs(residual[4]) + abs(residual[5]))))
-    md = run_relaxation_case(
+    relaxation = run_relaxation_case(
         node_count=node_count,
         base_force=max(60.0, min(320.0, 80.0 + 5.0 * drive)),
         max_steps=96,
@@ -158,23 +158,25 @@ def _simulate_loss(
     # Keep branch update vector for backprop target alignment.
     gain = -float(alpha) / max(
         1.0,
-        float(md.get("final_force_norm", 1.0)),
+        float(relaxation.get("final_force_norm", 1.0)),
         1.0 + 1_000.0 * float(seed.get("residual_inf", 0.0) or 0.0),
     )
     delta_u = [gain * t * r for t, r in zip(theta, residual)]
     residual_next = [r + du for r, du in zip(residual, delta_u)]
-    eq_norm = max(float(md.get("final_force_norm", 0.0)), _l2(residual_next))
-    energy = float(md.get("potential_energy", 0.0)) + float(md.get("kinetic_energy", 0.0))
+    eq_norm = max(float(relaxation.get("final_force_norm", 0.0)), _l2(residual_next))
+    energy = float(relaxation.get("potential_energy", 0.0)) + float(
+        relaxation.get("kinetic_energy", 0.0)
+    )
     energy += 0.0025 * float(seed.get("base_shear_kn", 0.0) or 0.0)
-    temperature = float(md.get("system_temperature", 0.0))
+    temperature = float(relaxation.get("system_temperature", 0.0))
     loss = eq_norm + 0.03 * math.log1p(max(0.0, energy)) + 0.002 * max(0.0, temperature)
     return delta_u, eq_norm, energy, loss, {
-        "max_unbalanced_force": float(md.get("max_unbalanced_force", 0.0)),
-        "kinetic_energy": float(md.get("kinetic_energy", 0.0)),
-        "potential_energy": float(md.get("potential_energy", 0.0)),
+        "max_unbalanced_force": float(relaxation.get("max_unbalanced_force", 0.0)),
+        "kinetic_energy": float(relaxation.get("kinetic_energy", 0.0)),
+        "potential_energy": float(relaxation.get("potential_energy", 0.0)),
         "system_temperature": float(temperature),
-        "model": str(md.get("model", "3bead_ca_sc_cb")),
-        "steps": int(md.get("steps", 0)),
+        "model": str(relaxation.get("model", "three_lane_frame_soa")),
+        "steps": int(relaxation.get("steps", 0)),
         "production_seed_applied": bool(seed),
         "production_seed_top_displacement_m": float(seed.get("top_displacement_m", 0.0) or 0.0),
     }
@@ -269,17 +271,22 @@ def run(
     scouting = []
     for idx, q in enumerate(basis[:branches]):
         theta_i = [t + epsilon * qi for t, qi in zip(theta_init, q)]
-        delta_u, eq_norm, energy, loss, md = _simulate_loss(theta_i, residual, alpha, frame_seed=frame_seed)
+        delta_u, eq_norm, energy, loss, relaxation = _simulate_loss(
+            theta_i,
+            residual,
+            alpha,
+            frame_seed=frame_seed,
+        )
         scouting.append({
             "branch_id": idx,
             "theta": theta_i,
             "delta_u": delta_u,
             "equilibrium_norm": eq_norm,
             "energy_proxy": energy,
-            "max_unbalanced_force": float(md["max_unbalanced_force"]),
-            "system_temperature": float(md["system_temperature"]),
-            "physical_model": str(md["model"]),
-            "production_seed_applied": bool(md["production_seed_applied"]),
+            "max_unbalanced_force": float(relaxation["max_unbalanced_force"]),
+            "system_temperature": float(relaxation["system_temperature"]),
+            "physical_model": str(relaxation["model"]),
+            "production_seed_applied": bool(relaxation["production_seed_applied"]),
             "loss": loss,
         })
 

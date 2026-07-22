@@ -735,15 +735,6 @@ def _release_decision_inputs(tmp_path: Path) -> dict[str, Path]:
                 "blockers": [],
             },
         ),
-        "public_benchmark_source_of_truth": _write(
-            tmp_path / "public_benchmark_source_of_truth.json",
-            {
-                "contract_pass": True,
-                "public_benchmark_ready": True,
-                "status": "ready",
-                "blockers": [],
-            },
-        ),
         "evidence_surface_dir": evidence_surface_dir,
     }
 
@@ -768,15 +759,6 @@ def test_public_benchmark_ready_uses_structural_benchmark_inputs_only() -> None:
         report_pm_release_gate._public_benchmark_ready(
             measured,
             external,
-            {"contract_pass": True, "public_benchmark_ready": True},
-        )
-        is True
-    )
-    assert (
-        report_pm_release_gate._public_benchmark_ready(
-            measured,
-            external,
-            {"contract_pass": True, "public_benchmark_ready": False},
         )
         is True
     )
@@ -795,10 +777,6 @@ def test_release_decision_prioritizes_release_area_first_blocker(
         external_benchmark_submission_readiness_payload={
             "contract_pass": True,
             "summary": {"ready_to_start_full_submission_now": True},
-        },
-        public_benchmark_source_of_truth_payload={
-            "contract_pass": True,
-            "public_benchmark_ready": True,
         },
         release_evidence_freshness_payload={
             "contract_pass": True,
@@ -839,10 +817,6 @@ def test_release_decision_blocks_non_structural_allowlisted_surface(
             "contract_pass": True,
             "summary": {"ready_to_start_full_submission_now": True},
         },
-        public_benchmark_source_of_truth_payload={
-            "contract_pass": True,
-            "public_benchmark_ready": True,
-        },
         release_evidence_freshness_payload={
             "contract_pass": True,
             "summary": {"blocker_count": 0},
@@ -862,201 +836,6 @@ def test_release_decision_blocks_non_structural_allowlisted_surface(
     ]
 
 
-def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> None:
-    actions = report_pm_release_gate._public_benchmark_operator_actions(
-        {
-            "status": "seed_ready_materialization_blocked",
-            "public_benchmark_ready": False,
-            "blockers": [
-                "casf_pdbbind_source_material_not_attached",
-                "public_benchmark_real_pose_predictions_missing",
-            ],
-            "first_blocked_target": "casf_pdbbind_subset_intake",
-            "root_cause_tags": [
-                "operator_source_material_required",
-                "operator_receipts_required",
-            ],
-            "next_actions": [
-                "attach_checked_casf_pdbbind_subset_source_files",
-                "run_public_benchmark_subset_materializer",
-            ],
-            "tier_beta_gate": {
-                "failed_criteria": [
-                    "casf_pdbbind_subset_materialized",
-                    "symmetry_rmsd_scorecard_real_cases",
-                ]
-            },
-            "operator_intake_packet": {
-                "route": "/product/public-benchmark/operator-intake",
-                "artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_operator_intake_packet.json"
-                ),
-                "markdown_artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_operator_intake_packet.md"
-                ),
-            },
-            "operator_handoff_summary": {
-                "route": "/product/public-benchmark/operator-intake",
-                "artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_operator_intake_packet.json"
-                ),
-                "required_slot_count": 4,
-                "blocked_operator_slot_count": 4,
-                "template_artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_casf_pdbbind_operator_template.json"
-                ),
-                "minimum_evidence": {
-                    "case_count": 12,
-                    "source_family": "CASF/PDBBind",
-                },
-                "materialization_command": (
-                    "python3 scripts/materialize_public_benchmark_subset_manifest.py "
-                    "--intake <operator-casf-pdbbind-intake.json>"
-                ),
-                "validation_command": (
-                    "python3 scripts/validate_public_benchmark_subset_manifest.py "
-                    "--manifest implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_subset_manifest.json --fail-blocked"
-                ),
-            },
-            "operator_handoff_queue_count": 1,
-            "first_operator_handoff": {
-                "handoff_id": "public_benchmark::casf_pdbbind_subset_intake",
-                "route": "/product/public-benchmark/operator-intake",
-                "operator_intake_artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_operator_intake_packet.json"
-                ),
-                "operator_intake_markdown_artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_operator_intake_packet.md"
-                ),
-                "slot_id": "casf_pdbbind_subset_intake",
-                "template_artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_casf_pdbbind_operator_template.json"
-                ),
-                "minimum_evidence": {
-                    "case_count": 12,
-                    "source_family": "CASF/PDBBind",
-                },
-                "materialization_command": (
-                    "python3 scripts/materialize_public_benchmark_subset_manifest.py "
-                    "--intake <operator-casf-pdbbind-intake.json>"
-                ),
-                "validation_command": (
-                    "python3 scripts/validate_public_benchmark_subset_manifest.py "
-                    "--manifest implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_subset_manifest.json --fail-blocked"
-                ),
-            },
-        }
-    )
-
-    assert actions == [
-        {
-            "action_id": "materialize_public_benchmark_source_of_truth",
-            "status": "public_benchmark_evidence_required",
-            "bottleneck": "public_benchmark_source_of_truth_not_ready",
-            "first_blocker": "casf_pdbbind_source_material_not_attached",
-            "first_blocked_target": "casf_pdbbind_subset_intake",
-            "root_cause_tags": [
-                "operator_source_material_required",
-                "operator_receipts_required",
-            ],
-            "blocked_criteria": [
-                "casf_pdbbind_subset_materialized",
-                "symmetry_rmsd_scorecard_real_cases",
-            ],
-            "blocked_criteria_count": 2,
-            "blockers": [
-                "casf_pdbbind_source_material_not_attached",
-                "public_benchmark_real_pose_predictions_missing",
-            ],
-            "next_actions": [
-                "attach_checked_casf_pdbbind_subset_source_files",
-                "run_public_benchmark_subset_materializer",
-            ],
-            "reason": (
-                "public benchmark source-of-truth is seed_ready_materialization_blocked; "
-                "first_blocker=casf_pdbbind_source_material_not_attached; "
-                "first_blocked_target=casf_pdbbind_subset_intake; "
-                "root_cause_tags=operator_source_material_required,operator_receipts_required; "
-                "next_action=attach_checked_casf_pdbbind_subset_source_files"
-            ),
-            "artifact": (
-                "implementation/phase1/release_evidence/productization/"
-                "public_benchmark_source_of_truth.json"
-            ),
-            "operator_intake_route": "/product/public-benchmark/operator-intake",
-            "operator_intake_artifact": (
-                "implementation/phase1/release_evidence/productization/"
-                "public_benchmark_operator_intake_packet.json"
-            ),
-            "operator_intake_markdown_artifact": (
-                "implementation/phase1/release_evidence/productization/"
-                "public_benchmark_operator_intake_packet.md"
-            ),
-            "operator_template_artifact": (
-                "implementation/phase1/release_evidence/productization/"
-                "public_benchmark_casf_pdbbind_operator_template.json"
-            ),
-            "first_operator_handoff": {
-                "handoff_id": "public_benchmark::casf_pdbbind_subset_intake",
-                "route": "/product/public-benchmark/operator-intake",
-                "operator_intake_artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_operator_intake_packet.json"
-                ),
-                "operator_intake_markdown_artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_operator_intake_packet.md"
-                ),
-                "slot_id": "casf_pdbbind_subset_intake",
-                "template_artifact": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_casf_pdbbind_operator_template.json"
-                ),
-                "minimum_evidence": {
-                    "case_count": 12,
-                    "source_family": "CASF/PDBBind",
-                },
-                "materialization_command": (
-                    "python3 scripts/materialize_public_benchmark_subset_manifest.py "
-                    "--intake <operator-casf-pdbbind-intake.json>"
-                ),
-                "validation_command": (
-                    "python3 scripts/validate_public_benchmark_subset_manifest.py "
-                    "--manifest implementation/phase1/release_evidence/productization/"
-                    "public_benchmark_subset_manifest.json --fail-blocked"
-                ),
-            },
-            "operator_handoff_queue_count": 1,
-            "blocked_operator_slot_count": 4,
-            "required_slot_count": 4,
-            "minimum_evidence": {
-                "case_count": 12,
-                "source_family": "CASF/PDBBind",
-            },
-            "materialization_command": (
-                "python3 scripts/materialize_public_benchmark_subset_manifest.py "
-                "--intake <operator-casf-pdbbind-intake.json>"
-            ),
-            "validation_command": (
-                "python3 scripts/validate_public_benchmark_subset_manifest.py "
-                "--manifest implementation/phase1/release_evidence/productization/"
-                "public_benchmark_subset_manifest.json --fail-blocked"
-            ),
-        }
-    ]
-
-    assert report_pm_release_gate._public_benchmark_operator_actions(
-        {"contract_pass": True, "public_benchmark_ready": True}
-    ) == []
 
 
 def test_pm_release_gate_keeps_paid_pilot_scope_when_limited_blockers_remain(tmp_path: Path) -> None:

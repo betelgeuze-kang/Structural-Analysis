@@ -54,3 +54,25 @@ def test_dispatches_structural_step5_profile() -> None:
     assert payload["host_copy_bytes"] == 0
     assert 0.0 < payload["cache_fit_ratio"]
     assert isinstance(payload["cache_fit"], bool)
+    assert payload["model"] == "three_lane_frame_soa"
+    assert payload["point_count"] == 300_000
+    assert payload["spring_count"] == 799_995
+
+
+def test_dispatches_structural_step1_relaxation() -> None:
+    payload = structural_runtime_hook.dispatch(
+        {
+            "action": "step1_case",
+            "node_count": 12,
+            "force0": 120.0,
+            "max_steps": 24,
+            "tol": 1.0e-2,
+            "decay": 0.96,
+        }
+    )
+
+    assert payload["runtime_backend"] == "structural_runtime_ffi"
+    assert payload["model"] == "three_lane_frame_soa"
+    assert payload["point_count"] == 36
+    assert payload["spring_count"] == 91
+    assert payload["host_copy_bytes"] == 0

@@ -10,7 +10,6 @@ import math
 from datetime import datetime, timezone
 from pathlib import Path
 
-from md3bead_soa import run_relaxation_case
 from orthogonal_krylov_projection import build_krylov_basis, dot
 from rust_nonlinear_frame_bridge import (
     RustNonlinearFrameConfig,
@@ -19,6 +18,7 @@ from rust_nonlinear_frame_bridge import (
 )
 from runtime_contracts import InputContractError, get_logger, log_event, validate_input_contract
 from solver_truthfulness_runtime import build_runtime_truthfulness, normalize_runtime_policy
+from structural_three_lane_relaxation import run_relaxation_case
 
 
 SCHEMA_VERSION = "1.0"
@@ -50,7 +50,7 @@ def _runtime_truthfulness(*, runtime_mode: str, production_seed_runtime: dict | 
     return build_runtime_truthfulness(
         path_role="top_level_training_eval_branching",
         reduced_kind="explicit_reduced_order_physical_branching",
-        reduced_backend="md3bead_soa_relaxation",
+        reduced_backend="structural_three_lane_relaxation",
         reduced_reason="explicit reduced-order physical branching path declared without surrogate runtime markers",
         runtime_policy=runtime_mode,
         production_seed_runtime=production_seed_runtime,
@@ -133,11 +133,11 @@ def simulate_forward(
     alpha: float,
     frame_seed: dict | None = None,
 ) -> tuple[list[float], float, float, dict]:
-    """Forward-only residual correction with explicit 3-bead relaxation scoring."""
+    """Forward-only residual correction with structural frame relaxation scoring."""
     seed = frame_seed if isinstance(frame_seed, dict) else {}
     drive = abs(sum((t * r) for t, r in zip(theta, residual))) * float(alpha)
     drive += 150.0 * abs(float(seed.get("top_displacement_m", 0.0) or 0.0))
-    md = run_relaxation_case(
+    relaxation = run_relaxation_case(
         node_count=max(16, min(84, 18 + int(abs(residual[3]) + abs(residual[4]) + abs(residual[5])))),
         base_force=max(70.0, min(300.0, 90.0 + 4.5 * drive)),
         max_steps=88,
@@ -148,18 +148,20 @@ def simulate_forward(
 
     gain = -float(alpha) / max(
         1.0,
-        float(md.get("final_force_norm", 1.0)),
+        float(relaxation.get("final_force_norm", 1.0)),
         1.0 + 1_000.0 * float(seed.get("residual_inf", 0.0) or 0.0),
     )
     delta_u = [gain * t * r for t, r in zip(theta, residual)]
     residual_next = [r + du for r, du in zip(residual, delta_u)]
-    eq_norm = max(l2(residual_next), float(md.get("final_force_norm", 0.0)))
-    energy_proxy = float(md.get("potential_energy", 0.0)) + float(md.get("kinetic_energy", 0.0))
+    eq_norm = max(l2(residual_next), float(relaxation.get("final_force_norm", 0.0)))
+    energy_proxy = float(relaxation.get("potential_energy", 0.0)) + float(
+        relaxation.get("kinetic_energy", 0.0)
+    )
     energy_proxy += 0.002 * float(seed.get("base_shear_kn", 0.0) or 0.0)
     return delta_u, eq_norm, energy_proxy, {
-        "max_unbalanced_force": float(md.get("max_unbalanced_force", 0.0)),
-        "system_temperature": float(md.get("system_temperature", 0.0)),
-        "model": str(md.get("model", "3bead_ca_sc_cb")),
+        "max_unbalanced_force": float(relaxation.get("max_unbalanced_force", 0.0)),
+        "system_temperature": float(relaxation.get("system_temperature", 0.0)),
+        "model": str(relaxation.get("model", "three_lane_frame_soa")),
         "production_seed_applied": bool(seed),
     }
 
@@ -224,7 +226,12 @@ def run(branch_k: int, epsilon: float, alpha: float, mode: str, runtime_mode: st
     candidates = []
     for idx, q in enumerate(basis[:branch_k]):
         theta_i = [t + epsilon * qi for t, qi in zip(theta, q)]
-        delta_u, eq_norm, energy, md = simulate_forward(theta_i, residual, alpha=alpha, frame_seed=frame_seed)
+        delta_u, eq_norm, energy, relaxation = simulate_forward(
+            theta_i,
+            residual,
+            alpha=alpha,
+            frame_seed=frame_seed,
+        )
         candidates.append(
             {
                 "branch_id": idx,
@@ -232,10 +239,10 @@ def run(branch_k: int, epsilon: float, alpha: float, mode: str, runtime_mode: st
                 "delta_u": delta_u,
                 "equilibrium_norm": eq_norm,
                 "energy_proxy": energy,
-                "max_unbalanced_force": float(md["max_unbalanced_force"]),
-                "system_temperature": float(md["system_temperature"]),
-                "physical_model": str(md["model"]),
-                "production_seed_applied": bool(md["production_seed_applied"]),
+                "max_unbalanced_force": float(relaxation["max_unbalanced_force"]),
+                "system_temperature": float(relaxation["system_temperature"]),
+                "physical_model": str(relaxation["model"]),
+                "production_seed_applied": bool(relaxation["production_seed_applied"]),
                 "loss": eq_norm + 0.1 * energy,
             }
         )

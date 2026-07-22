@@ -36,7 +36,7 @@ GENERATED_MARKERS = (
     "winning_ticket_backprop",
     "nonlinear_lj_mapping",
     "pipeline_",
-    "three_bead_cache_budget",
+    "three_lane_cache_budget",
     "commercial_benchmark_cases.from_csv",
     "commercial_benchmark_cases.rwth_zenodo",
     "track_lf_solver_report",

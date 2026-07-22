@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""3-Bead branch cache budget estimator for RDNA2-class GPUs.
+"""Three-lane structural branch cache budget estimator for RDNA2-class GPUs.
 
 Estimates whether branch-parallel working sets fit in Infinity Cache and
 recommends micro-batch branch chunk size.
@@ -32,7 +32,7 @@ def _parse_branches(text: str) -> list[int]:
 def _scenario(
     node_count: int,
     branches: int,
-    beads_per_node: int,
+    points_per_node: int,
     bytes_per_scalar: int,
     coords_components: int,
     state_components: int,
@@ -41,8 +41,8 @@ def _scenario(
     cache_bytes: int,
     cache_headroom: float,
 ) -> dict:
-    coord_bytes_per_branch = node_count * beads_per_node * coords_components * bytes_per_scalar
-    state_bytes_per_branch = node_count * beads_per_node * state_components * bytes_per_scalar
+    coord_bytes_per_branch = node_count * points_per_node * coords_components * bytes_per_scalar
+    state_bytes_per_branch = node_count * points_per_node * state_components * bytes_per_scalar
 
     coords_total = coord_bytes_per_branch * branches
     state_total = state_bytes_per_branch * branches
@@ -82,7 +82,7 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--node-count", type=int, default=100_000)
     p.add_argument("--branches-list", default="10,64")
-    p.add_argument("--beads-per-node", type=int, default=3)
+    p.add_argument("--points-per-node", type=int, default=3)
     p.add_argument("--bytes-per-scalar", type=int, default=4)
     p.add_argument("--coords-components", type=int, default=3)
     p.add_argument("--state-components", type=int, default=5, help="compact branch state (e.g., x,y,z,force,residual)")
@@ -90,7 +90,7 @@ def main() -> None:
     p.add_argument("--activation-overhead-mb", type=float, default=14.0)
     p.add_argument("--cache-mb", type=float, default=128.0)
     p.add_argument("--cache-headroom", type=float, default=0.72)
-    p.add_argument("--out", default="implementation/phase1/three_bead_cache_budget_report.json")
+    p.add_argument("--out", default="implementation/phase1/three_lane_cache_budget_report.json")
     args = p.parse_args()
 
     cache_bytes = int(float(args.cache_mb) * 1024.0 * 1024.0)
@@ -100,7 +100,7 @@ def main() -> None:
         _scenario(
             node_count=max(1, int(args.node_count)),
             branches=b,
-            beads_per_node=max(1, int(args.beads_per_node)),
+            points_per_node=max(1, int(args.points_per_node)),
             bytes_per_scalar=max(1, int(args.bytes_per_scalar)),
             coords_components=max(1, int(args.coords_components)),
             state_components=max(1, int(args.state_components)),
@@ -114,12 +114,12 @@ def main() -> None:
 
     payload = {
         "schema_version": "1.0",
-        "run_id": "phase1-3bead-cache-budget",
+        "run_id": "phase1-three-lane-cache-budget",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "inputs": {
             "node_count": int(args.node_count),
             "branches_list": branches,
-            "beads_per_node": int(args.beads_per_node),
+            "points_per_node": int(args.points_per_node),
             "bytes_per_scalar": int(args.bytes_per_scalar),
             "coords_components": int(args.coords_components),
             "state_components": int(args.state_components),

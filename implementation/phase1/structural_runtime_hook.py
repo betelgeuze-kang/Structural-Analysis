@@ -7,6 +7,7 @@ import json
 import sys
 
 from rust_track_lf_bridge import run_inplace_probe
+from structural_three_lane_relaxation import run_relaxation_case
 
 
 PRODUCER_KIND = "rust_hip"
@@ -49,6 +50,18 @@ def build_dlpack_bridge_probe(payload: dict) -> dict[str, object]:
     return out
 
 
+def build_step1_case(payload: dict) -> dict[str, object]:
+    result = run_relaxation_case(
+        node_count=max(2, _as_int(payload, "node_count", 96)),
+        base_force=_as_float(payload, "force0", 120.0),
+        max_steps=max(1, _as_int(payload, "max_steps", 400)),
+        tol=max(0.0, _as_float(payload, "tol", 1.0e-2)),
+        decay_hint=_as_float(payload, "decay", 0.96),
+    )
+    result.update(_base_payload())
+    return result
+
+
 def build_step5_profile(payload: dict) -> dict[str, object]:
     node_count = max(1, _as_int(payload, "n", _as_int(payload, "node_count", 8192)))
     branch_batch = max(1, _as_int(payload, "branch_batch", 1))
@@ -62,7 +75,7 @@ def build_step5_profile(payload: dict) -> dict[str, object]:
     cache_fit_ratio = working_set_mb / cache_mb
     cache_fit = cache_fit_ratio <= 0.72
     cache_penalty = 1.0 if cache_fit else min(8.0, max(1.0, cache_fit_ratio * cache_penalty_gain))
-    seconds = max(0.0001, node_count * branch_batch * 1.0e-10 * cache_penalty)
+    seconds = max(1.0e-9, node_count * branch_batch * 1.0e-8 * cache_penalty)
     working_set_bytes = int(working_set_mb * 1024.0 * 1024.0)
 
     out = _base_payload()
@@ -76,6 +89,10 @@ def build_step5_profile(payload: dict) -> dict[str, object]:
             "host_copy_seconds": 0.0,
             "serialization_seconds": float(seconds * 0.1),
             "checksum": float((node_count + branch_batch + state_components) % 997),
+            "work_scalar": float((node_count + branch_batch + state_components) % 997),
+            "model": "three_lane_frame_soa",
+            "point_count": node_count * 3,
+            "spring_count": max(0, 8 * node_count - 5),
             "cache_fit": bool(cache_fit),
             "cache_fit_ratio": float(cache_fit_ratio),
             "cache_penalty": float(cache_penalty),
@@ -88,6 +105,8 @@ def dispatch(payload: dict) -> dict[str, object]:
     action = str(payload.get("action", "") or "").strip()
     if action == "dlpack_bridge_probe":
         return build_dlpack_bridge_probe(payload)
+    if action == "step1_case":
+        return build_step1_case(payload)
     if action == "step5_profile":
         return build_step5_profile(payload)
     raise ValueError(f"unsupported structural runtime action: {action}")
