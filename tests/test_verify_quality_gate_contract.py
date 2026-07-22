@@ -50,10 +50,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_engine_v2_canonical_contract.py" in targets
     assert "tests/test_engine_v2_current_tangent_operator_v1.py" in targets
     assert "tests/test_engine_v2_hip_current_tangent_operator.py" in targets
-    assert (
-        "tests/test_engine_v2_hip_current_tangent_operator_runner.py"
-        in targets
-    )
+    assert "tests/test_engine_v2_hip_current_tangent_operator_runner.py" in targets
     assert "tests/test_canonical_sparse_lu_factor.py" in targets
     assert "tests/test_engine_v2_hip_sparse_lu_apply.py" in targets
     assert "tests/test_engine_v2_hip_sparse_lu_apply_runner.py" in targets
@@ -64,14 +61,25 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_runtime_dependency_contract.py" in targets
     assert "tests/test_midas_mgt_nodal_load_contract.py" in targets
     assert "tests/test_structure_viewer_dom_safety_contract.py" in targets
-    assert "tests/test_structure_viewer_workbench_v2_product_shell_contract.py" in targets
-    assert "tests/test_build_phase2_adaptive_newton_continuation_artifacts.py" in targets
+    assert (
+        "tests/test_structure_viewer_workbench_v2_product_shell_contract.py" in targets
+    )
+    assert (
+        "tests/test_build_phase2_adaptive_newton_continuation_artifacts.py" in targets
+    )
     assert "tests/test_nonlinear_adaptive_continuation.py" in targets
-    assert "tests/test_build_phase2_state_updated_steel_material_artifacts.py" in targets
+    assert (
+        "tests/test_build_phase2_state_updated_steel_material_artifacts.py" in targets
+    )
     assert "tests/test_state_updated_steel_material_newton.py" in targets
-    assert "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py" in targets
+    assert (
+        "tests/test_build_phase2_state_updated_concrete_damage_artifacts.py" in targets
+    )
     assert "tests/test_state_updated_concrete_damage_newton.py" in targets
-    assert "tests/test_build_phase2_state_updated_composite_section_artifacts.py" in targets
+    assert (
+        "tests/test_build_phase2_state_updated_composite_section_artifacts.py"
+        in targets
+    )
     assert "tests/test_state_updated_composite_section_newton.py" in targets
     assert "tests/test_stateful_fiber_section.py" in targets
     assert "tests/test_stateful_fiber_beam2d.py" in targets
@@ -83,14 +91,8 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "tests/test_stateful_fiber_frame2d_nonlinear_execution_state_binding.py"
         in targets
     )
-    assert (
-        "tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py"
-        in targets
-    )
-    assert (
-        "tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py"
-        in targets
-    )
+    assert "tests/test_stateful_fiber_frame2d_nonlinear_terminal_receipt.py" in targets
+    assert "tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py" in targets
     assert "tests/test_stateful_fiber_frame2d_nonlinear_recovery.py" in targets
     assert "tests/test_public_rc_fiber_frame_api.py" in targets
     assert "tests/test_fiber_frame_solver_episode_adapter.py" in targets
@@ -102,8 +104,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py" in targets
     assert "tests/test_state_updated_bilinear_link_newton.py" in targets
     assert (
-        "tests/test_build_phase2_geometric_nonlinear_benchmark_artifacts.py"
-        in targets
+        "tests/test_build_phase2_geometric_nonlinear_benchmark_artifacts.py" in targets
     )
     assert "tests/test_geometric_nonlinear_benchmarks.py" in targets
     assert "tests/test_corotational_frame2d_basic_kinematics.py" in targets
@@ -112,6 +113,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_stateful_corotational_fiber_frame2d.py" in targets
     assert "tests/test_stateful_corotational_fiber_frame2d_adaptive.py" in targets
     assert "tests/test_stateful_corotational_fiber_frame2d_arc_length.py" in targets
+    assert "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py" in targets
     assert "tests/test_stateful_corotational_fiber_frame2d_solver.py" in targets
     assert "tests/test_lee_frame_snapthrough_benchmark.py" in targets
     assert "tests/test_build_phase2_modal_buckling_kernel_artifacts.py" in targets
@@ -150,13 +152,11 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_sparse_chain_cpu_fgmres_arc_length.py" in targets
     assert (
         "tests/"
-        "test_build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py"
-        in targets
+        "test_build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py" in targets
     )
     assert "tests/test_load_coupled_sparse_chain_arc_length.py" in targets
     assert (
-        "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py"
-        in targets
+        "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py" in targets
     )
     assert "tests/test_g1_mgt_load_coupled_arc_length_adapter.py" in targets
     assert (
@@ -171,16 +171,12 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert (
         "tests/"
         "test_build_g1_mgt_state_updated_matrix_free_newton_"
-        "diagnostic_receipt.py"
-        in targets
+        "diagnostic_receipt.py" in targets
     )
     assert "tests/test_mgt_state_updated_frame_axial_geometry.py" in targets
     assert "tests/test_mgt_physical_residual_assembly.py" in targets
     assert "tests/test_matrix_free_cpu_fgmres_state_tangent.py" in targets
-    assert (
-        "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py"
-        in targets
-    )
+    assert "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py" in targets
     assert (
         "tests/"
         "test_build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
@@ -314,14 +310,12 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     ] in commands
     assert [
         gate._python(),
-        "scripts/"
-        "build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py",
+        "scripts/build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py",
         "--check",
     ] in commands
     assert [
         gate._python(),
-        "scripts/"
-        "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py",
+        "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py",
         "--check",
     ] in commands
     assert [
@@ -331,8 +325,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     ] in commands
     assert [
         gate._python(),
-        "scripts/"
-        "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py",
+        "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py",
         "--check",
     ] in commands
     assert [

@@ -148,9 +148,12 @@ def test_corotational_frame_adaptive_continuation_is_core_owned() -> None:
     for path in (
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py",
+        "src/structural_analysis/benchmark/stateful_corotational_fiber_frame2d_diagnostics.py",
+        "src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py",
         "tests/test_stateful_corotational_fiber_frame2d_adaptive.py",
         "tests/test_stateful_corotational_fiber_frame2d_arc_length.py",
+        "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py",
     ):
         assert module.classify_path(path, quarantined_paths=set()) == "core"
 
@@ -289,10 +292,7 @@ def test_sparse_chain_cpu_fgmres_arc_length_is_owned_by_the_core_lane() -> None:
 def test_load_coupled_sparse_chain_arc_length_is_owned_by_core_lane() -> None:
     for path in (
         "scripts/build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py",
-        (
-            "tests/"
-            "test_build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py"
-        ),
+        ("tests/test_build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py"),
         "tests/test_load_coupled_sparse_chain_arc_length.py",
     ):
         assert module.classify_path(path, quarantined_paths=set()) == "core"
