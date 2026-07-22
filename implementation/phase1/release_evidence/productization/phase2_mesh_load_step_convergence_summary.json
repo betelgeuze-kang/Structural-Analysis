@@ -28,12 +28,12 @@
   "fallback_used": false,
   "full_mesh_closure_claim": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-22T08:51:26.981170+00:00",
+  "generated_at": "2026-07-22T10:13:16.511267+00:00",
   "globalization": "backtracking_line_search",
   "guarded_solver_usage_present": false,
   "input_checksums": {
     "scripts/build_phase2_mesh_load_step_convergence_artifacts.py": "sha256:f53ed6b50e7ff549a0fcfca1dda800b1fb7e6a3d0e0b00c854cd499cf97fc281",
-    "scripts/verify_quality_gate.py": "sha256:41fc60055506907265a765bc1fdab6c7e9454fe4e631998dd29afbc9185123e4",
+    "scripts/verify_quality_gate.py": "sha256:214a6a7437c54958f35dadedfd385106f2b9cbc3d3804b113f8a396ea12ddde8",
     "src/structural_analysis/assembly/nonlinear_static.py": "sha256:c09d0bd753e0ce9475e5a2adaa4b234e013a7c7bf150beb2aeadf778c5702c63",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:2531dbc71d29277e550f792e3dd79f36012ad23d9f99aa6311f7cd50b989a8e6",
     "tests/test_build_phase2_mesh_load_step_convergence_artifacts.py": "sha256:79b694239f0b6d0a5f60c13a01eedac9af498b25408c951248c6bd417cb798d4"
@@ -53,7 +53,7 @@
   "regularization_used": false,
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-mesh-load-step-convergence-artifacts.v1",
-  "source_commit_sha": "da86c4915e095e12451137e61bd8cc32e6be34fe",
+  "source_commit_sha": "f576a370818f5be1fb7b8d4949c7ef2cb3b5f57a",
   "status": "ready",
   "tip_displacement_spread_m": 8.72635297355373e-14,
   "tip_displacement_tolerance_m": 1e-10,

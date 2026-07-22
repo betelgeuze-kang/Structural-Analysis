@@ -33,10 +33,13 @@ PYTHONPATH=src python scripts/build_phase2_state_updated_bilinear_link_artifacts
 
 ## Claim boundary
 
-This is one bilinear translational link family only. Gap/contact, friction,
-compression-only/uplift, viscous and viscoelastic devices, multi-DOF coupling,
-rate dependence, degradation/pinching, shell connection integration, and
-published or experimental validation remain open. A separate bounded
+This receipt remains one bilinear translational link family only. A separate
+bounded compression-only gap contract described below does not change this
+receipt or promote general link-family closure. Friction, impact, restitution,
+local/follower contact normals, general foundation uplift, viscous and
+viscoelastic devices, multi-DOF coupling, rate dependence,
+degradation/pinching, shell connection integration, and published or
+experimental validation remain open. A separate bounded
 [linked-frame cyclic benchmark](stateful-corotational-linked-frame-cyclic-benchmark.md)
 now scatters this scalar global-axis link into two active corotational frame
 DOFs and commits the frame and link states atomically. A second bounded
@@ -50,10 +53,13 @@ tangent. A fourth bounded
 [scalar rotational-link benchmark](stateful-corotational-rotational-linked-frame-cyclic-benchmark.md)
 uses a separate moment-rotation material and immutable rotational state to
 couple two free `rz` DOFs; it does not reinterpret the translational receipt's
-kN-m force-deformation fields. These results do not establish general
-nonconservative follower external loads, coupled multi-axis response, shell
-integration, or general link-family breadth. Full-building G1 and production
-ROCm/HIP material parity also remain open.
+kN-m force-deformation fields. A fifth bounded
+[compression-only gap benchmark](stateful-corotational-gap-linked-frame-cyclic-benchmark.md)
+uses a separate open/closed active-set state and one global-x frictionless
+elastic gap; it does not establish general contact or uplift capability. These
+results do not establish general nonconservative follower external loads,
+coupled multi-axis response, shell integration, or general link-family breadth.
+Full-building G1 and production ROCm/HIP material parity also remain open.
 
 The receipt keeps `link_spring_material_breadth_closure_claim=false`,
 `material_newton_breadth_closure_claim=false`,

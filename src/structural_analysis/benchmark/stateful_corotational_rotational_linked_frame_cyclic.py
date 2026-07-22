@@ -670,7 +670,7 @@ def build_stateful_corotational_rotational_linked_frame_cyclic_benchmark() -> di
         },
         "blockers_remaining": [
             "coupled_multi_axis_link_response_not_implemented",
-            "gap_contact_friction_uplift_families_not_state_updated",
+            "contact_beyond_global_x_gap_friction_uplift_not_state_updated",
             "viscous_rate_degradation_pinching_not_implemented",
             "inelastic_member_and_link_interaction_not_validated",
             "shell_or_3d_connection_integration_not_implemented",
