@@ -15,9 +15,12 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from release_evidence_metadata import input_checksums  # noqa: E402
+from release_evidence_metadata import (  # noqa: E402
+    CANONICAL_ENGINE_VERSION,
+    input_checksums,
+)
 
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RELEASE_GAP_REPORT = Path("implementation/phase1/release/release_gap_report.json")
 DEFAULT_COMMERCIAL_READINESS_REPORT = Path("implementation/phase1/commercial_readiness_report.json")

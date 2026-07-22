@@ -100,7 +100,7 @@
   "developer_preview_ready": false,
   "developer_preview_release_candidate_claim": false,
   "developer_preview_release_candidate_ready": false,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "final_gate_count": 9,
   "final_gate_pass_count": 5,
   "final_gates": [
@@ -505,7 +505,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-19T07:22:04.901696+00:00",
+  "generated_at": "2026-07-22T17:52:11.486799+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -526,16 +526,16 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:79921b967b6e9770c8b26035bf69388f1b06c63f8fd15284fd7b4e885a2bf73b",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:5bc106b5824d41c84c6e8f16549b48589ea92029e8592bd012128d08a2b8b7ba",
-    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:9706c18950eec428c0bbd31673138615b2ed0f3518a4cb7c7a6a7fd40f93fdc4",
+    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:8e531603006ea22eb1039af96906b26d76b606868879bbaa57b830dab655d320",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:9e61ef1db0ab2e01a3917d1e410a9677e8e5170aa5b9fb7ccc344bc98ee30cdd",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:f7319490106191876ffbfaff7d34d082dfec6c3f297467b7e42adb17f9095530",
-    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:d3645ab966dd4fa84737f5dca2f841767c1eddeef1fdb2b01a8ac3e10ea20653",
+    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:d06fbf7187f7ce3d459ee0f34c09b8dd321148022b5d09704efe9a4e7dbc9f23",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:e5d52668ed5a3f8034e1437260cf4f2e68fecc5b8caa435874e1eb10ffa24dc4",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:142e4777ba69b7f3db0cef0e645e1f44c2d2d90a19f1c3b6c943d2eaad521b4c",
-    "pyproject.toml": "sha256:68fa16d82ccccad31439d8adbf90f3bb3c6cc10f13d66e68fb141952ae82ea64",
+    "pyproject.toml": "sha256:e41b0cec57e9bdc480eb610539ac8251fbce891e03a4c73499520b707a671090",
     "scripts/build_phase6_platform_replay_receipt.py": "sha256:4033a3af3c9149894b6df4091c07f7b6c3262bee3253cc301848bb3dab1a5ce6",
-    "setup.cfg": "sha256:97b465e84623d382bb386b4da73b282dd5d1e879d3ae55495631667122c82a1b"
+    "setup.cfg": "sha256:4c6f4261389d5c71bef9308d5a39f5334a5ffed0b803fbcd50bdf0b6b4da5b1e"
   },
   "known_limitations": {
     "benchmark_quantity_handoff": {
@@ -3446,6 +3446,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
   "status": "blocked"
 }

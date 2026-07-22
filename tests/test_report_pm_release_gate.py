@@ -1016,7 +1016,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["limited_commercial_ready"] is True
     assert payload["contract_pass"] is True
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
     assert payload["reuse_policy"] == "status_rebuilt_from_pm_release_gate_input_receipts"
     assert payload["input_checksums"][str(ndtha)].startswith("sha256:")

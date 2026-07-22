@@ -46,6 +46,12 @@ def test_builder_records_concrete_damage_and_post_peak_localization_honestly() -
     )
     assert result["material_point"]["cyclic_path"]["energy_damage_gate_passed"] is True
     assert result["element_benchmark"]["contract_pass"] is True
+    assert result["element_benchmark"]["expected_force_kn"] == (
+        result["element_benchmark"]["assembly"]["element_responses"][0][
+            "internal_force_kn"
+        ]
+    )
+    assert result["element_benchmark"]["force_abs_error_kn"] == 0.0
     assert result["structure_benchmark"]["contract_pass"] is True
     assert result["structure_benchmark"]["localization_observed"] is True
     assert result["structure_benchmark"]["mesh_objectivity_claim"] is False

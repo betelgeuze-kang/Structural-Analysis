@@ -65,11 +65,11 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
         for runtime in payload["runtimes"].values()
     )
     replay = payload["replay_provenance"]
-    assert replay["external_runtime_executed_in_this_generation"] is False
-    assert replay["external_execution_reused"] is True
+    assert replay["external_runtime_executed_in_this_generation"] is True
+    assert replay["external_execution_reused"] is False
     assert replay["current_product_replay_pass"] is True
-    assert replay["reuse_reason"] == "sandbox_mpi_socket_policy"
-    assert module.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
+    assert replay["reuse_reason"] is None
+    assert module.REUSED_EXECUTION_BLOCKER not in payload["blockers_remaining"]
 
 
 def test_debian_metadata_parser_accepts_labeled_field_output(monkeypatch) -> None:

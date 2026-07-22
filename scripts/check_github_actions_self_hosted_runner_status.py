@@ -14,7 +14,9 @@ from typing import Any
 
 
 SCHEMA_VERSION = "github-actions-self-hosted-runner-status.v1"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 DEFAULT_REPO = "betelgeuze-kang/Structural-Analysis"
 DEFAULT_OUT = Path(
     "implementation/phase1/release_evidence/productization/"

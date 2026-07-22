@@ -15,7 +15,9 @@ from typing import Any
 
 SCHEMA_VERSION = "pm-release-blocker-action-register.v1"
 ROOT = Path(__file__).resolve().parents[1]
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 AGGREGATOR_REUSE_POLICY = "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions"
 DEFAULT_PM_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json")

@@ -58,9 +58,15 @@ from mgt_shell_force_based_assembly import _cached_shell_operator
 from mgt_shell_material_tangent import shell_material_tangent_by_surface_index
 from mgt_shell_load_path import surface_pressure_load_path_filter
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SCRIPTS_DIR = REPO_ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
 
 SCHEMA_VERSION = "mgt-direct-residual-newton-probe.v1"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 DEFAULT_OUT = PRODUCTIZATION / "mgt_direct_residual_newton_probe.json"
 DEFAULT_CHECKPOINT = (
     PRODUCTIZATION / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz"

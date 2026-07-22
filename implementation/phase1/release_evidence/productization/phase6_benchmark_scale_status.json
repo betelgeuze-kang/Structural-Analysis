@@ -85,13 +85,13 @@
   "claim_boundary": "This receipt aggregates Phase 3 medium and large benchmark readiness for RC scale gates. parser-only topology evidence is not medium-model pass evidence, policy-only acquisition rows are not large-model execution evidence, and this receipt does not acquire sources, prove crash/OOM-free large execution, close Phase 3, or promote Developer Preview RC readiness.",
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
-  "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-19T04:43:32.754280+00:00",
+  "engine_version": "structural-analysis@0.3.0",
+  "generated_at": "2026-07-22T17:52:11.443629+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:52c8fb04ed5d4a8832b97e490dcc1ff0cc83fb5e6c28a02f1231dc32f85bfe0c",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:c88817ac70cb62988c939c4901b9104ebe1c4e3d13ea0cca2dbc0e14bbee7a9e",
     "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:1afc5640e7792807e50aadda6b08ff1c0e36843830dd3ae331d8746130eb3b40",
-    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:6257053033c4c5e30b62c8a43e288957bc0e781f754142b7af852e3a0adce162",
+    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:4fd4bf6e0f347c45dc4921bfb97be3aa42210dc867af65d5e54f6ad96c3c4e6c",
     "scripts/build_phase6_benchmark_scale_status.py": "sha256:5db045078341daf12ff4ec169c7b2bea686e1555e2f1e3b765e77e507186c66a"
   },
   "large_gate": {
@@ -741,7 +741,7 @@
   "reused_evidence": true,
   "schema_version": "phase6-benchmark-scale-status.v1",
   "seed_benchmark_status": "ready",
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
   "status": "blocked",
   "summary": {
     "large_crash_oom_free": "2/2",

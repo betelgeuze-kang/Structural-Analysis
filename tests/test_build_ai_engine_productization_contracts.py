@@ -33,7 +33,7 @@ def test_build_ai_engine_productization_contracts_writes_disabled_runtime_receip
     assert payload["contracts_ready"] is True
     assert payload["production_ai_ready"] is False
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
     assert (
         payload["reuse_policy"]

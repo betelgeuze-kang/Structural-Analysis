@@ -1026,7 +1026,7 @@
     },
     "terminal_reason": "target_load_factor_reached"
   },
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "evidence_closure_pass": false,
   "failed_step_rollback_audit": {
     "actual_linear_failed_step_rollback_contract_pass": true,
@@ -1255,7 +1255,7 @@
     "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1",
     "status": "ready"
   },
-  "generated_at": "2026-07-19T11:30:24.430336+00:00",
+  "generated_at": "2026-07-22T17:27:17.069585+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
     "implementation/phase1/g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:ac8d129417de659f5145b69e4b126a223176756f30cf75b5586664e26d050f00",
@@ -1326,7 +1326,7 @@
   },
   "schema_version": "g1-mgt-semantic-live-linear-newton-continuation-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "de08647587de76bc2a387278eac7b8884e4cb76a",
+  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }

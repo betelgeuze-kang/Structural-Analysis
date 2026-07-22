@@ -33,14 +33,14 @@
     "whole_model_frame_truss_modal_evidence": true
   },
   "contract_pass": true,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "free_free_rigid_mode_contract_pass": true,
-  "generated_at": "2026-07-22T11:31:46.442641+00:00",
+  "generated_at": "2026-07-22T17:26:01.060898+00:00",
   "passing_case_count": 4,
   "repeated_cluster_contract_pass": true,
-  "result_artifact_hash": "sha256:8ecb6281cdfac9805189b58bfc13bf03e968fe22842abd8c7af7595f1dcf3da6",
+  "result_artifact_hash": "sha256:a979ca7ab73052e9f0f95c85fa57209859e1646f81b5b8e8df9439aa737b5396",
   "schema_version": "phase2-whole-model-modal-artifacts.v1",
-  "source_commit_sha": "21ae7ab7ce9997c06e73659555c3e536f7eaadac",
-  "source_set_hash": "sha256:341a88497342f3409936bc461bba359deddb066f1b78cff3b0b85184740790ec",
+  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
+  "source_set_hash": "sha256:c51b840fc6e0e2008c30b235e2acda02a6e882edad1ca91ece5ad4d48efc3a99",
   "status": "partial"
 }

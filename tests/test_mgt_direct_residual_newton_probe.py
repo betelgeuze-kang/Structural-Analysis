@@ -987,7 +987,7 @@ def test_direct_residual_hip_required_preflight_stops_before_missing_inputs(
     assert output.exists()
     assert json.loads(output.read_text(encoding="utf-8"))["blockers"] == payload["blockers"]
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is False
     assert payload["status"] == "partial"
     assert payload["direct_residual_newton_ready"] is False

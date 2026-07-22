@@ -20,7 +20,9 @@ import check_github_development_sync_preflight  # noqa: E402
 
 
 SCHEMA_VERSION = "pm-release-gate-report.v1"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")

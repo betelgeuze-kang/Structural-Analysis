@@ -1,6 +1,6 @@
 {
   "analysis_scope": "public_api_dense_reference_state_frame_linear_buckling",
-  "artifact_hash": "sha256:bc67df328d469cf7a1f49aa13ac79bcd43166cd429ccb4684c77d147b26ee19b",
+  "artifact_hash": "sha256:e8e8f723036dd52b7b7d0090ef08b18d4f389f27df7e129ad6a511d4ef885a72",
   "blockers_remaining": [
     "general_frame_shell_linear_buckling_not_verified",
     "mixed_tension_compression_reference_not_supported",
@@ -49,7 +49,7 @@
       "src/structural_analysis/analyses/buckling.py": "sha256:bc498580f2a3e3e287640d787d03e88a461df274c41c41e2d5eb331ad4ba0e92",
       "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
       "src/structural_analysis/api/cli.py": "sha256:f2da57b8355a61078b761715e72bfe0b44241667c4c37c5605c1770ce8f202d2",
-      "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
+      "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
       "src/structural_analysis/assembly/__init__.py": "sha256:1ab2299dd9fe761749a2ae79ef7fe0238518ef7bcd66f5302fe82043077d3266",
       "src/structural_analysis/assembly/buckling.py": "sha256:fba3d394c496253c04421c13cfe50e00cc741129727b7ecf337a1628f54a0232",
       "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
@@ -60,7 +60,7 @@
       "tests/test_build_phase2_whole_model_buckling_artifacts.py": "sha256:52f262ba249aca17868f367937cfd4372571b081d3b68c5c456c230df03e4245",
       "tests/test_whole_model_buckling_analysis.py": "sha256:4747e72942b847ff78c6f999676a91b0ab58b3d6158f1971c932d4e175bc0611"
     },
-    "source_set_hash": "sha256:b2d8e96f5379a4bae7efaaee3455ca994224de205693b59ae69677a77449582e"
+    "source_set_hash": "sha256:33c632b771718119bc31c90a89dbdee031acbb6c26ecd2b567f677725b2f3507"
   },
   "status": "partial",
   "summary": {

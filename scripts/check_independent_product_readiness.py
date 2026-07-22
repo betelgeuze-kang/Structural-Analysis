@@ -34,7 +34,9 @@ from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "independent-commercial-product-readiness.v1"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 DEFAULT_COMMERCIALIZATION_STATUS = Path("implementation/phase1/release/independent_product_readiness.json")
 DEFAULT_INDEPENDENT_PLAN = Path("docs/independent-commercial-productization-plan.md")
 DEFAULT_PRODUCTION_SECURITY_DOC = Path("docs/production-ops-security.md")

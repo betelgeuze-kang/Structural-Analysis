@@ -61,6 +61,7 @@ def _pr_commands(
         "--fail-blocked" if p1_failure_mode == "blocked" else "--fail-core-open"
     )
     return [
+        [_python(), "scripts/check_product_identity.py"],
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],

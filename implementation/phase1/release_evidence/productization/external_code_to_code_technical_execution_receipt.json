@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:aed6262abbc42efbfc6242df7085a9553c0b5226cbb30cf0549d188f5a2fe450",
+  "artifact_hash": "sha256:c2c1ed3ffc0605f3b99aefb16700b9df63651e5ec5bc5c82ff7402a3d179136c",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -8,8 +8,7 @@
     "verification_hierarchy_operator_manifest_not_attached",
     "code_to_code_structural_family_breadth_insufficient",
     "verification_level_2_not_achieved",
-    "release_readiness_not_established",
-    "external_runtime_current_source_rerun_missing"
+    "release_readiness_not_established"
   ],
   "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system and a linear cantilever with OpenSees, and one axial member with CalculiX. It is a technical code-to-code execution receipt only. OpenSeesPy declares commercial redistribution licensing requirements, and no product/legal approval is attached for either runtime. The external packages are not bundled. Therefore this receipt does not enter the verification-hierarchy operator manifest, does not achieve Verification Level 2, and does not prove broad frame/shell modal, buckling, nonlinear, sparse/HIP, commercial-equivalence, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
   "claims": {
@@ -130,7 +129,7 @@
       "reference_solver": "CalculiX CrunchiX 2.17"
     }
   ],
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "execution_environment": {
     "machine": "x86_64",
     "python_executable_sha256": "sha256:7d51cd6b48b521277f5caa4610a82126e315fa2be4df069823a8b1eeb5bd4a86",
@@ -187,27 +186,27 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-19T06:27:05.994193+00:00",
+  "generated_at": "2026-07-22T17:52:00.472633+00:00",
   "internal_source": {
     "input_checksums": {
       "scripts/run_external_code_to_code_technical_receipt.py": "sha256:2d91483a92465a69c7cb1cc957b9a47891a654ad308dcfc9fc73442fc0cf6ac9",
-      "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
+      "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
       "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
       "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json": "sha256:096634d444fa46811302dc775b0919d54c9d6b22565cd9bd76dc15d68967704d",
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
       "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
       "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
-      "tests/test_external_code_to_code_technical_receipt.py": "sha256:b686b936d1a7eab184767834aa03d1e98f8afe9d2545bd20b6c33615f898a019"
+      "tests/test_external_code_to_code_technical_receipt.py": "sha256:933684126fce367d0c96e8591260c8ae81a826a3db22c1365fc4d975df24659f"
     },
-    "source_set_hash": "sha256:5ec318512c792642229e283f7f6555f3ed433b40a3cedf262feb5146c9dd1bf1"
+    "source_set_hash": "sha256:50d55412c10c2ad880f551d1efac389498bdcdc98b897ff9b5bb535688f8b013"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-19T06:27:05.994193+00:00",
+    "current_product_replay_generated_at": "2026-07-22T17:52:00.480724+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-07-19T06:18:41.104165+00:00",
-    "external_execution_reused": true,
-    "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "sandbox_mpi_socket_policy"
+    "external_execution_generated_at": "2026-07-22T17:52:00.480717+00:00",
+    "external_execution_reused": false,
+    "external_runtime_executed_in_this_generation": true,
+    "reuse_reason": null
   },
   "runtimes": {
     "calculix": {
@@ -216,11 +215,11 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:0f2336b9654d2eecaf7c1695d97e38769fbe75ad3ea66d3924216862de26c07d",
-        "frd_sha256": "sha256:60ff0f9e0ba9252b2772236dd739f793cfcaf961ed0005ff5f1ef77d8ca0f3ef",
+        "frd_sha256": "sha256:462026f4b496c3b92e4f3179522cd4bdc40e5463971f89d0fd9685ac54dd9c9a",
         "input_deck_sha256": "sha256:96482e7037bd037ba97f5e7359eea54b70522c4f48ca5b095dfe9eb9149d5600",
         "return_code": 0,
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:fe125307f58130bffd638ff8337e3483a78c4d8235c8d183d9ece48d60fee361",
+        "stdout_sha256": "sha256:5c730a47037dd7aa57db7afbe7e67e3ee6f3f5d83f2cc0e0018466651fdf7e31",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -258,7 +257,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",

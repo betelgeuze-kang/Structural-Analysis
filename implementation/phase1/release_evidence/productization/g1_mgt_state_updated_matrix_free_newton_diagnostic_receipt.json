@@ -166,9 +166,9 @@
     "second_full_newton_step_residual_descent": true
   },
   "contract_pass": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-19T11:24:11.284231+00:00",
+  "generated_at": "2026-07-22T17:27:17.353844+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
@@ -593,7 +593,7 @@
     "reference_preconditioner_values_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1"
   },
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "de08647587de76bc2a387278eac7b8884e4cb76a",
+  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }
