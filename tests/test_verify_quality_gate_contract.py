@@ -48,6 +48,13 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "--scope",
         "current",
     ] in commands
+    assert [
+        gate._python(),
+        "scripts/check_core_quality.py",
+        "--contract-only",
+    ] in commands
+    assert "tests/test_core_quality_contract.py" in targets
+    assert "tests/test_current_head_readiness_ci.py" in targets
     assert "tests/test_check_large_git_blobs.py" in targets
     assert "tests/test_check_pr_issue_metadata.py" in targets
     assert "tests/test_structural_analysis_core_api.py" in targets
