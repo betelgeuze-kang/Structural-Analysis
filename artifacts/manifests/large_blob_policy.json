@@ -1,0 +1,9 @@
+{
+  "schema_version": "structural-analysis-large-blob-policy.v1",
+  "threshold_bytes": 26214400,
+  "p0_required_scope": "all_history",
+  "current_tree_storage": "git_lfs_for_declared_binary_artifacts",
+  "history_rewrite_authorized": false,
+  "approved_blobs": [],
+  "claim_boundary": "An empty approval list means every ordinary Git blob above 25 MiB is blocked. Current-tree LFS pointer files are permitted because the pointer blob is below the threshold. Rewriting published history or force-pushing is never authorized by this manifest."
+}

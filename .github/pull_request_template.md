@@ -1,5 +1,10 @@
 ## Summary
 
+## Issue linkage
+
+Use GitHub closing syntax so the merged PR updates its tracked issue, for example
+`Closes #123`.
+
 ## CI lane
 
 Pick the lane this PR belongs to (they are verified by different workflows):
