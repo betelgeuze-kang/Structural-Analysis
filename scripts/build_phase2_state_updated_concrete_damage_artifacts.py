@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 from datetime import datetime, timezone
 import json
 from pathlib import Path
@@ -67,10 +68,20 @@ CYCLIC_STRAINS = (
     0.0,
 )
 STRUCTURE_LOAD_FACTORS = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
+LOCALIZATION_TIE_BREAK_PROFILE = (
+    "first_element_area_imperfection_selects_second_branch.v1"
+)
+LOCALIZATION_AREA_IMPERFECTION_RATIO = 1.0e-6
+LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE = 1.0e-4
+LOCALIZATION_PERTURBED_ELEMENT_ID = "bar-1"
+LOCALIZATION_SELECTED_ELEMENT_ID = "bar-2"
 CLAIM_BOUNDARY = (
     "This receipt verifies one small-strain uniaxial asymmetric concrete damage "
     "seed at material-point, one-element, and two-element displacement-controlled "
-    "axial-chain scope. It records irreversible tension/compression damage, "
+    "axial-chain scope. The two-element counter-example uses a versioned "
+    "first-element area imperfection solely to select one of two symmetric "
+    "localization branches deterministically. It records irreversible "
+    "tension/compression damage, "
     "nonnegative damage dissipation, same-parent consistent tangents, commit, and "
     "exact rollback. The two-element post-peak path localizes and is explicit "
     "counter-evidence for mesh objectivity. It does not close crack-band/fracture-"
@@ -93,6 +104,114 @@ def _strip_volatile(payload: Any) -> Any:
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
     return payload
+
+
+def _json_differences(
+    existing: Any,
+    expected: Any,
+    path: str = "$",
+) -> list[dict[str, Any]]:
+    existing_is_number = isinstance(
+        existing,
+        (int, float, np.integer, np.floating),
+    ) and not isinstance(existing, (bool, np.bool_))
+    expected_is_number = isinstance(
+        expected,
+        (int, float, np.integer, np.floating),
+    ) and not isinstance(expected, (bool, np.bool_))
+    if existing_is_number and expected_is_number:
+        existing_number = float(existing)
+        expected_number = float(expected)
+        signed_zero = bool(
+            existing_number == expected_number == 0.0
+            and bool(np.signbit(existing_number)) != bool(np.signbit(expected_number))
+        )
+        if existing_number != expected_number or signed_zero:
+            return [
+                {
+                    "path": path,
+                    "existing": existing_number,
+                    "expected": expected_number,
+                    "kind": "signed_zero" if signed_zero else "value",
+                    "absolute_difference": abs(existing_number - expected_number),
+                }
+            ]
+        return []
+    if type(existing) is not type(expected):
+        return [
+            {
+                "path": path,
+                "existing": existing,
+                "expected": expected,
+                "kind": "type",
+            }
+        ]
+    if isinstance(existing, dict):
+        rows: list[dict[str, Any]] = []
+        for key in sorted(set(existing) | set(expected)):
+            child = f"{path}.{key}"
+            if key not in existing:
+                rows.append(
+                    {
+                        "path": child,
+                        "existing": "<missing>",
+                        "expected": expected[key],
+                        "kind": "missing_existing",
+                    }
+                )
+            elif key not in expected:
+                rows.append(
+                    {
+                        "path": child,
+                        "existing": existing[key],
+                        "expected": "<missing>",
+                        "kind": "missing_expected",
+                    }
+                )
+            else:
+                rows.extend(_json_differences(existing[key], expected[key], child))
+        return rows
+    if isinstance(existing, list):
+        rows = []
+        if len(existing) != len(expected):
+            rows.append(
+                {
+                    "path": f"{path}.length",
+                    "existing": len(existing),
+                    "expected": len(expected),
+                    "kind": "length",
+                }
+            )
+        for index, (left, right) in enumerate(zip(existing, expected, strict=False)):
+            rows.extend(_json_differences(left, right, f"{path}[{index}]"))
+        return rows
+    if existing != expected:
+        return [
+            {
+                "path": path,
+                "existing": existing,
+                "expected": expected,
+                "kind": "value",
+            }
+        ]
+    return []
+
+
+def _difference_diagnostic(existing: Any, expected: Any) -> dict[str, Any]:
+    rows = _json_differences(_strip_volatile(existing), _strip_volatile(expected))
+    absolute = [
+        float(row["absolute_difference"])
+        for row in rows
+        if "absolute_difference" in row
+    ]
+    return {
+        "difference_count": len(rows),
+        "first_difference": rows[0] if rows else None,
+        "maximum_float_absolute_difference": max(absolute, default=0.0),
+        "signed_zero_difference_count": sum(
+            row["kind"] == "signed_zero" for row in rows
+        ),
+    }
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -164,7 +283,23 @@ def build_phase2_state_updated_concrete_damage_artifacts(
         and abs(sum(element_assembly.reactions_kn)) <= 1.0e-10
     )
 
-    structure_problem = two_element_concrete_damage_chain_problem(material=material)
+    symmetric_structure_problem = two_element_concrete_damage_chain_problem(
+        material=material
+    )
+    perturbed_element = replace(
+        symmetric_structure_problem.elements[0],
+        area_m2=(
+            symmetric_structure_problem.elements[0].area_m2
+            * (1.0 - LOCALIZATION_AREA_IMPERFECTION_RATIO)
+        ),
+    )
+    structure_problem = replace(
+        symmetric_structure_problem,
+        case_id=(
+            "phase2_state_updated_concrete_damage_two_element_chain_imperfection_v1"
+        ),
+        elements=(perturbed_element, symmetric_structure_problem.elements[1]),
+    )
     structure_path = run_stateful_axial_load_path(
         structure_problem,
         STRUCTURE_LOAD_FACTORS,
@@ -201,10 +336,19 @@ def build_phase2_state_updated_concrete_damage_artifacts(
     final_damage = [
         state.compressive_damage for state in structure_path.final_state.material_states
     ]
+    selected_localization_index = int(np.argmax(np.asarray(final_damage, dtype=float)))
+    selected_localization_element_id = structure_problem.elements[
+        selected_localization_index
+    ].element_id
+    deterministic_branch_selected = bool(
+        perturbed_element.element_id == LOCALIZATION_PERTURBED_ELEMENT_ID
+        and selected_localization_element_id == LOCALIZATION_SELECTED_ELEMENT_ID
+        and final_damage[1] > final_damage[0]
+    )
     localization_observed = bool(
         abs(final_strains[0] - final_strains[1]) > 0.003
         and max(final_damage) > 0.9
-        and min(final_damage) == 0.0
+        and min(final_damage) <= LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE
     )
     deterministic_replay = bool(
         structure_replay.final_state.state_hash == structure_path.final_state.state_hash
@@ -219,6 +363,7 @@ def build_phase2_state_updated_concrete_damage_artifacts(
         and structure_jacobian["pass"] is True
         and deterministic_replay
         and localization_observed
+        and deterministic_branch_selected
     )
 
     rollback_parent = initial_stateful_axial_state(structure_problem)
@@ -293,6 +438,16 @@ def build_phase2_state_updated_concrete_damage_artifacts(
             "consistent_jacobian_finite_difference": structure_jacobian,
             "deterministic_replay_exact": deterministic_replay,
             "localization_observed": localization_observed,
+            "localization_tie_break": {
+                "profile": LOCALIZATION_TIE_BREAK_PROFILE,
+                "area_imperfection_ratio": LOCALIZATION_AREA_IMPERFECTION_RATIO,
+                "nondominant_damage_tolerance": (
+                    LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE
+                ),
+                "perturbed_element_id": perturbed_element.element_id,
+                "selected_localization_element_id": (selected_localization_element_id),
+                "deterministic_branch_selected": deterministic_branch_selected,
+            },
             "final_element_strains": final_strains,
             "final_element_compressive_damage": final_damage,
             "mesh_objectivity_claim": False,
@@ -363,6 +518,13 @@ def build_phase2_state_updated_concrete_damage_artifacts(
         "rollback_exact_gate_passed": rollback_exact,
         "deterministic_replay_exact_gate_passed": deterministic_replay,
         "localization_observed": localization_observed,
+        "localization_tie_break_profile": LOCALIZATION_TIE_BREAK_PROFILE,
+        "localization_area_imperfection_ratio": (LOCALIZATION_AREA_IMPERFECTION_RATIO),
+        "localization_nondominant_damage_tolerance": (
+            LOCALIZATION_NONDOMINANT_DAMAGE_TOLERANCE
+        ),
+        "perturbed_localization_element_id": perturbed_element.element_id,
+        "selected_localization_element_id": selected_localization_element_id,
         "mesh_objectivity_claim": False,
         "line_search_history_present": line_search_history_present,
         "fallback_count": fallback_count,
@@ -415,7 +577,16 @@ def check_phase2_state_updated_concrete_damage_artifacts(
                 f"{exc.__class__.__name__}"
             )
         if _strip_volatile(existing) != _strip_volatile(expected[key]):
-            return False, f"phase2_state_updated_concrete_damage_mismatch:{key}"
+            diagnostic = _difference_diagnostic(existing, expected[key])
+            diagnostic_text = json.dumps(
+                diagnostic,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+            return False, (
+                f"phase2_state_updated_concrete_damage_mismatch:{key}:{diagnostic_text}"
+            )
     return True, "phase2_state_updated_concrete_damage_consistent"
 
 
