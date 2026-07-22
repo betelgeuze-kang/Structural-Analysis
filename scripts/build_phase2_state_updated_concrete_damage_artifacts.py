@@ -7,6 +7,7 @@ import argparse
 from dataclasses import replace
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -268,7 +269,7 @@ def build_phase2_state_updated_concrete_damage_artifacts(
         target_load_factor=1.0,
         trial_free_displacements_m=np.asarray([], dtype=float),
     )
-    expected_stress_mpa = -material.compressive_strength_mpa * np.exp(
+    expected_stress_mpa = -material.compressive_strength_mpa * math.exp(
         -material.compressive_softening_rate
         * (0.002 - material.compressive_threshold_strain)
     )
