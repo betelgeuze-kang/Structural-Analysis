@@ -35,9 +35,14 @@ PYTHONPATH=src python scripts/build_phase2_state_updated_bilinear_link_artifacts
 
 This is one bilinear translational link family only. Gap/contact, friction,
 compression-only/uplift, viscous and viscoelastic devices, multi-DOF coupling,
-rate dependence, degradation/pinching, frame/shell connection integration, and
-published or experimental validation remain open. Full-building G1 and
-production ROCm/HIP material parity also remain open.
+rate dependence, degradation/pinching, shell connection integration, and
+published or experimental validation remain open. A separate bounded
+[linked-frame cyclic benchmark](stateful-corotational-linked-frame-cyclic-benchmark.md)
+now scatters this scalar global-axis link into two active corotational frame
+DOFs and commits the frame and link states atomically. That result does not
+establish local-axis, rotational, multi-axis, shell, or general link-family
+breadth. Full-building G1 and production ROCm/HIP material parity also remain
+open.
 
 The receipt keeps `link_spring_material_breadth_closure_claim=false`,
 `material_newton_breadth_closure_claim=false`,
