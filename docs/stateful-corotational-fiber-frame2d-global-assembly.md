@@ -134,9 +134,10 @@ link force with the current chord, and assembles the force-times-length-Hessian
 link geometric tangent separately from the frame geometric tangent. It checks
 finite rigid-motion objectivity, current-axis force transformation, full mixed
 same-parent tangent, cyclic state, replay, and rollback. General follower
-external loads, coupled multi-axis response, shell integration, and contact
-behavior beyond the separate bounded global-x and fixed-reference local-axis
-gap cases—including friction, impact, damping, and degradation—remain open.
+external loads, coupled multi-axis response, and shell integration remain open.
+The same current-length kinematics are also available to the bounded scalar
+compression-only gap defined below; that support does not establish arbitrary
+follower contact surfaces or general contact breadth.
 
 The paired
 [`stateful-corotational-rotational-linked-frame-cyclic-benchmark.md`](stateful-corotational-rotational-linked-frame-cyclic-benchmark.md)
@@ -159,8 +160,14 @@ The companion
 case uses the same unilateral material on a 45-degree normal fixed by the
 reference endpoints. It verifies four-DOF direction-cosine force/tangent
 scatter, coordinate-rotation covariance, active-set replay, and rollback.
-Updated/follower contact normals, friction, impact, coupled contact, and
-general foundation uplift validation remain open.
+The kernel additionally accepts `updated_axial` for this scalar gap: deformation
+is current endpoint distance minus reference distance, the normal follows the
+current chord, and the tangent includes `force * Hessian(current_length)`.
+Focused same-parent finite differences and coordinate-rotation covariance cover
+that implementation in the updated-axis test module. There is not yet a
+separate cyclic or external updated-contact benchmark receipt. Arbitrary
+follower contact surfaces, friction, impact, coupled contact, and general
+foundation uplift validation remain open.
 
 The separate
 [`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)

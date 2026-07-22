@@ -82,7 +82,8 @@ claim boundaries.
 
 The receipt status is `partial`. It verifies one planar, frictionless, elastic,
 scalar compression-only gap with a fixed-reference local normal. It does not
-verify an updated/follower contact normal, friction, impact, restitution,
+itself verify the separately implemented `updated_axial` scalar gap, an
+arbitrary follower contact surface, friction, impact, restitution,
 coupled contact, general foundation uplift, inelastic contact, member or shell
 contact, three-dimensional contact, external acceptance, production
 sparse/ROCm/HIP execution, full-building equilibrium, G1 closure, or

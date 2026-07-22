@@ -113,9 +113,9 @@ def test_problem_connects_free_top_rotations_with_unit_safe_link() -> None:
         454.54545454545456
     )
     assert len(ROTATIONAL_LINKED_FRAME_CYCLIC_LOAD_FACTORS) == 30
-    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v6")
+    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v7")
     assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION.endswith(
-        ".v6"
+        ".v7"
     )
 
 

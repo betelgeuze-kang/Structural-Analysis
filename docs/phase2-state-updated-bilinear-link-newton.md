@@ -36,7 +36,7 @@ PYTHONPATH=src python scripts/build_phase2_state_updated_bilinear_link_artifacts
 This receipt remains one bilinear translational link family only. A separate
 bounded compression-only gap contract described below does not change this
 receipt or promote general link-family closure. Friction, impact, restitution,
-updated/follower contact normals, general foundation uplift, viscous and
+arbitrary follower contact surfaces, general foundation uplift, viscous and
 viscoelastic devices, multi-DOF coupling, rate dependence,
 degradation/pinching, shell connection integration, and published or
 experimental validation remain open. A separate bounded
@@ -59,9 +59,13 @@ uses a separate open/closed active-set state and one global-x frictionless
 elastic gap. A sixth bounded
 [fixed-reference local-axis gap benchmark](stateful-corotational-local-axis-gap-linked-frame-cyclic-benchmark.md)
 projects that unilateral law through a four-DOF reference-normal row and
-checks coordinate-rotation covariance; neither gap case establishes general
-contact or uplift capability. These results do not establish general
-nonconservative follower external loads,
+checks coordinate-rotation covariance. The kernel also has a focused
+`updated_axial` variant whose scalar normal follows the current endpoint chord
+and whose consistent tangent includes the force-times-length-Hessian term.
+That implementation has same-parent finite-difference and rotation-covariance
+tests, but no separate cyclic or external contact receipt; none of these gap
+paths establishes general contact or uplift capability. These results do not
+establish general nonconservative follower external loads,
 coupled multi-axis response, shell integration, or general link-family breadth.
 Full-building G1 and production ROCm/HIP material parity also remain open.
 

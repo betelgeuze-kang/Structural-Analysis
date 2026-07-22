@@ -142,9 +142,9 @@ def test_problem_connects_free_global_x_dofs_with_bounded_gap() -> None:
     )
     assert link.material.initial_gap_m == GAP_LINKED_FRAME_INITIAL_GAP_M
     assert len(GAP_LINKED_FRAME_CYCLIC_LOAD_FACTORS) == 30
-    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v6")
+    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v7")
     assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION.endswith(
-        ".v6"
+        ".v7"
     )
 
 
