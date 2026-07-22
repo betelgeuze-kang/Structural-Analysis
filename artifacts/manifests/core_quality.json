@@ -9,6 +9,7 @@
       "src/structural_analysis/model",
       "src/structural_analysis/results/schema.py",
       "src/structural_analysis/results/validation.py",
+      "src/structural_analysis/engine_v2/contracts/result_quantity.py",
       "src/structural_analysis/units"
     ]
   },
@@ -35,7 +36,8 @@
       "tests/test_authoritative_linear_frame_reference_cases.py",
       "tests/test_whole_model_modal_analysis.py",
       "tests/test_whole_model_buckling_analysis.py",
-      "tests/test_result_validation_tolerance.py"
+      "tests/test_result_validation_tolerance.py",
+      "tests/test_result_quantity_catalog.py"
     ]
   },
   "compatibility_matrix": {
@@ -52,5 +54,5 @@
     "required_coordinate_count": 9,
     "workflow": ".github/workflows/core-quality-ci.yml"
   },
-  "claim_boundary": "This gate covers only the declared public analysis, model, result-schema, result-validation, and unit paths. It does not erase type debt outside that bounded scope, promote experimental or legacy code, prove release readiness, or replace independent engineering review."
+  "claim_boundary": "This gate typechecks and compatibility-tests the ResultIR SI quantity contract alongside the declared public analysis, model, result-schema, result-validation, and unit paths; the 85 percent branch metric remains scoped to the coverage.sources list. It does not erase type debt outside that bounded scope, promote experimental or legacy code, prove release readiness, or replace independent engineering review."
 }

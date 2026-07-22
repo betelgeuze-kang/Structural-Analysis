@@ -36,8 +36,12 @@ def test_core_quality_manifest_contract() -> None:
         "src/structural_analysis/results/viewer.py",
     ]
     assert payload["compatibility_matrix"]["required_coordinate_count"] == 9
-    assert len(payload["coverage"]["tests"]) == 8
-    assert len(payload["typecheck"]["paths"]) == 5
+    assert len(payload["coverage"]["tests"]) == 9
+    assert len(payload["typecheck"]["paths"]) == 6
+    assert (
+        "src/structural_analysis/engine_v2/contracts/result_quantity.py"
+        in payload["typecheck"]["paths"]
+    )
 
 
 def test_core_quality_commands_are_manifest_driven() -> None:
@@ -102,6 +106,9 @@ def test_workflow_matches_manifest_matrix_and_runs_bounded_gate() -> None:
     for version in payload["compatibility_matrix"]["python_versions"]:
         assert f'"{version}"' in workflow
     assert "python scripts/check_core_quality.py" in workflow
+    assert "tests/test_result_quantity_catalog.py" in workflow
+    assert "src/structural_analysis/engine_v2/contracts/result_quantity.py" in workflow
+    assert "--fail-under=90" in workflow
     assert "fail-fast: false" in workflow
     git_checkout_config = [
         ("core.longpaths", '"true"'),
