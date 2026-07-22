@@ -26,6 +26,13 @@ def _workflow_dir(tmp_path: Path) -> Path:
     return workflow_dir
 
 
+def test_pr_metadata_workflow_is_an_approved_deterministic_hosted_lane() -> None:
+    assert (
+        ".github/workflows/pr-metadata-ci.yml"
+        in check_github_actions_runner_policy.DEFAULT_GITHUB_HOSTED_WORKFLOWS
+    )
+
+
 def test_runner_policy_blocks_unapproved_github_hosted_runner(tmp_path: Path) -> None:
     workflow_dir = _workflow_dir(tmp_path)
     (workflow_dir / "custom.yml").write_text(

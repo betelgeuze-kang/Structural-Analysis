@@ -42,6 +42,14 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "scripts/build_product_capabilities_surface.py",
         "--check",
     ] in commands
+    assert [
+        gate._python(),
+        "scripts/check_large_git_blobs.py",
+        "--scope",
+        "current",
+    ] in commands
+    assert "tests/test_check_large_git_blobs.py" in targets
+    assert "tests/test_check_pr_issue_metadata.py" in targets
     assert "tests/test_structural_analysis_core_api.py" in targets
     assert "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py" in targets
     assert "tests/test_engine_v2_result_ir_v1.py" in targets

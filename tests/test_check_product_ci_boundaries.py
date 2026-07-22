@@ -135,6 +135,16 @@ def test_release_viewer_bundler_is_owned_by_the_core_lane() -> None:
         assert module.classify_path(path, quarantined_paths=set()) == "core"
 
 
+def test_repository_metadata_gates_are_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/check_large_git_blobs.py",
+        "scripts/check_pr_issue_metadata.py",
+        "tests/test_check_large_git_blobs.py",
+        "tests/test_check_pr_issue_metadata.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
 def test_adaptive_newton_continuation_is_owned_by_the_core_lane() -> None:
     for path in (
         "scripts/build_phase2_adaptive_newton_continuation_artifacts.py",

@@ -12,6 +12,7 @@ on:
       - "implementation/**"
       - "artifacts/manifests/product_identity.json"
       - "artifacts/manifests/capabilities.yaml"
+      - "artifacts/manifests/large_blob_policy.json"
       - "LICENSE"
       - "SECURITY.md"
       - "CONTRIBUTING.md"
@@ -31,12 +32,14 @@ on:
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
       - ".github/workflows/ci.yml"
       - ".github/workflows/legacy-evidence-ci.yml"
+      - ".github/workflows/pr-metadata-ci.yml"
       - ".github/workflows/science-quarantine-ci.yml"
   pull_request:
     paths:
       - "implementation/**"
       - "artifacts/manifests/product_identity.json"
       - "artifacts/manifests/capabilities.yaml"
+      - "artifacts/manifests/large_blob_policy.json"
       - "LICENSE"
       - "SECURITY.md"
       - "CONTRIBUTING.md"
@@ -56,6 +59,7 @@ on:
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
       - ".github/workflows/ci.yml"
       - ".github/workflows/legacy-evidence-ci.yml"
+      - ".github/workflows/pr-metadata-ci.yml"
       - ".github/workflows/science-quarantine-ci.yml"
   workflow_dispatch:
 

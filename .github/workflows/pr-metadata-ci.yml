@@ -1,0 +1,41 @@
+name: PR Metadata
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Validate issue auto-close and factual PR metadata
+        run: >-
+          python scripts/check_pr_issue_metadata.py
+          --event-json "$GITHUB_EVENT_PATH"
+          --out pr-issue-metadata-report.json
+
+      - name: Upload metadata report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pr-issue-metadata-report
+          path: pr-issue-metadata-report.json
+          if-no-files-found: warn
+          retention-days: 14
