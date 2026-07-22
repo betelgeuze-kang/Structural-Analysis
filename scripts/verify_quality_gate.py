@@ -345,6 +345,7 @@ def _pr_commands(
             "tests/test_stateful_corotational_fiber_frame2d.py",
             "tests/test_stateful_corotational_fiber_frame2d_adaptive.py",
             "tests/test_stateful_corotational_fiber_frame2d_arc_length.py",
+            "tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py",
             "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py",
             "tests/test_stateful_corotational_fiber_frame2d_solver.py",
             "tests/test_lee_frame_snapthrough_benchmark.py",
