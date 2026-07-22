@@ -1,0 +1,132 @@
+name: Core Quality and Compatibility CI
+
+on:
+  pull_request:
+    paths:
+      - ".coveragerc"
+      - ".github/workflows/core-quality-ci.yml"
+      - "artifacts/manifests/core_quality.json"
+      - "pyproject.toml"
+      - "scripts/check_core_quality.py"
+      - "src/structural_analysis/analyses/**"
+      - "src/structural_analysis/model/**"
+      - "src/structural_analysis/results/schema.py"
+      - "src/structural_analysis/results/validation.py"
+      - "src/structural_analysis/units/**"
+      - "tests/test_authoritative_linear_engineering_semantics.py"
+      - "tests/test_authoritative_linear_frame.py"
+      - "tests/test_authoritative_linear_frame_reference_cases.py"
+      - "tests/test_core_quality_contract.py"
+      - "tests/test_result_validation_tolerance.py"
+      - "tests/test_structural_analysis_core_api.py"
+      - "tests/test_typed_domain_model.py"
+      - "tests/test_whole_model_buckling_analysis.py"
+      - "tests/test_whole_model_modal_analysis.py"
+  push:
+    branches: ["main"]
+    paths:
+      - ".coveragerc"
+      - ".github/workflows/core-quality-ci.yml"
+      - "artifacts/manifests/core_quality.json"
+      - "pyproject.toml"
+      - "scripts/check_core_quality.py"
+      - "src/structural_analysis/analyses/**"
+      - "src/structural_analysis/model/**"
+      - "src/structural_analysis/results/schema.py"
+      - "src/structural_analysis/results/validation.py"
+      - "src/structural_analysis/units/**"
+      - "tests/test_authoritative_linear_engineering_semantics.py"
+      - "tests/test_authoritative_linear_frame.py"
+      - "tests/test_authoritative_linear_frame_reference_cases.py"
+      - "tests/test_core_quality_contract.py"
+      - "tests/test_result_validation_tolerance.py"
+      - "tests/test_structural_analysis_core_api.py"
+      - "tests/test_typed_domain_model.py"
+      - "tests/test_whole_model_buckling_analysis.py"
+      - "tests/test_whole_model_modal_analysis.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  # Historical evidence includes LFS pointers and paths beyond Win32 defaults.
+  # Keep checkout byte-faithful while allowing all declared Windows coordinates.
+  GIT_CONFIG_COUNT: "6"
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: "true"
+  GIT_CONFIG_KEY_1: filter.lfs.required
+  GIT_CONFIG_VALUE_1: "false"
+  GIT_CONFIG_KEY_2: filter.lfs.clean
+  GIT_CONFIG_VALUE_2: cat
+  GIT_CONFIG_KEY_3: filter.lfs.smudge
+  GIT_CONFIG_VALUE_3: cat
+  GIT_CONFIG_KEY_4: filter.lfs.process
+  GIT_CONFIG_VALUE_4: ""
+  GIT_CONFIG_KEY_5: core.autocrlf
+  GIT_CONFIG_VALUE_5: "false"
+
+concurrency:
+  group: core-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  public-core-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install package and quality tools
+        run: python -m pip install -e .[dev]
+
+      - name: Enforce bounded mypy and 85 percent branch coverage
+        run: python scripts/check_core_quality.py
+
+      - name: Verify quality and current-HEAD workflow contracts
+        run: >-
+          python -m pytest -q
+          tests/test_core_quality_contract.py
+          tests/test_current_head_readiness_ci.py
+
+  compatibility:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package
+        run: python -m pip install -e .[dev]
+
+      - name: Run bounded public-core compatibility tests
+        run: >-
+          python -m pytest -q
+          tests/test_structural_analysis_core_api.py
+          tests/test_typed_domain_model.py
+          tests/test_authoritative_linear_engineering_semantics.py
+          tests/test_authoritative_linear_frame.py
+          tests/test_authoritative_linear_frame_reference_cases.py
+          tests/test_whole_model_modal_analysis.py
+          tests/test_whole_model_buckling_analysis.py
+          tests/test_result_validation_tolerance.py

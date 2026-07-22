@@ -1,0 +1,16 @@
+[run]
+branch = True
+source =
+    src/structural_analysis/analyses
+    src/structural_analysis/model
+    src/structural_analysis/results
+    src/structural_analysis/units
+omit =
+    src/structural_analysis/results/__init__.py
+    src/structural_analysis/results/viewer.py
+
+[report]
+fail_under = 85
+precision = 0
+show_missing = True
+skip_empty = True

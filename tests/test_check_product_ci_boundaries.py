@@ -145,6 +145,15 @@ def test_repository_metadata_gates_are_owned_by_the_core_lane() -> None:
         assert module.classify_path(path, quarantined_paths=set()) == "core"
 
 
+def test_core_quality_gates_are_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/check_core_quality.py",
+        "tests/test_core_quality_contract.py",
+        "tests/test_current_head_readiness_ci.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
 def test_adaptive_newton_continuation_is_owned_by_the_core_lane() -> None:
     for path in (
         "scripts/build_phase2_adaptive_newton_continuation_artifacts.py",

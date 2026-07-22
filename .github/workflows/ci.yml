@@ -12,6 +12,7 @@ on:
       - "implementation/**"
       - "artifacts/manifests/product_identity.json"
       - "artifacts/manifests/capabilities.yaml"
+      - "artifacts/manifests/core_quality.json"
       - "artifacts/manifests/large_blob_policy.json"
       - "LICENSE"
       - "SECURITY.md"
@@ -24,6 +25,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "pyproject.toml"
+      - ".coveragerc"
       - "setup.cfg"
       - "pytest.ini"
       - "requirements*.txt"
@@ -31,6 +33,7 @@ on:
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
       - ".github/workflows/ci.yml"
+      - ".github/workflows/core-quality-ci.yml"
       - ".github/workflows/legacy-evidence-ci.yml"
       - ".github/workflows/pr-metadata-ci.yml"
       - ".github/workflows/science-quarantine-ci.yml"
@@ -39,6 +42,7 @@ on:
       - "implementation/**"
       - "artifacts/manifests/product_identity.json"
       - "artifacts/manifests/capabilities.yaml"
+      - "artifacts/manifests/core_quality.json"
       - "artifacts/manifests/large_blob_policy.json"
       - "LICENSE"
       - "SECURITY.md"
@@ -51,6 +55,7 @@ on:
       - "package.json"
       - "package-lock.json"
       - "pyproject.toml"
+      - ".coveragerc"
       - "setup.cfg"
       - "pytest.ini"
       - "requirements*.txt"
@@ -58,6 +63,7 @@ on:
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
       - ".github/workflows/ci.yml"
+      - ".github/workflows/core-quality-ci.yml"
       - ".github/workflows/legacy-evidence-ci.yml"
       - ".github/workflows/pr-metadata-ci.yml"
       - ".github/workflows/science-quarantine-ci.yml"
@@ -100,6 +106,30 @@ jobs:
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+
+      - name: Build current-HEAD readiness snapshot
+        run: |
+          python scripts/build_product_readiness_snapshot.py \
+            --out "$RUNNER_TEMP/current-head-product-readiness-snapshot.json"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          path = Path(os.environ["RUNNER_TEMP"]) / "current-head-product-readiness-snapshot.json"
+          payload = json.loads(path.read_text(encoding="utf-8"))
+          if payload.get("source_commit_sha") != os.environ["GITHUB_SHA"]:
+              raise SystemExit("readiness snapshot is not bound to GITHUB_SHA")
+          print(f"current-HEAD readiness snapshot: {payload.get('status')}")
+          PY
+
+      - name: Upload current-HEAD readiness snapshot
+        uses: actions/upload-artifact@v7
+        with:
+          name: current-head-product-readiness-${{ github.sha }}
+          path: ${{ runner.temp }}/current-head-product-readiness-snapshot.json
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Validate product CI ownership boundaries
         run: >-

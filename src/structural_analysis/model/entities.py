@@ -185,6 +185,7 @@ class Support(CanonicalEntity):
             field_name="support.node",
         )
         raw = payload.get("dofs", payload.get("restrained_dofs", []))
+        dofs: tuple[str, ...]
         all_dofs = raw == "all"
         if all_dofs:
             dofs = FRAME_DOF_LABELS

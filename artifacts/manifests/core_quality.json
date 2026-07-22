@@ -1,0 +1,56 @@
+{
+  "schema_version": "structural-analysis-core-quality.v1",
+  "scope_id": "bounded_public_core_v1",
+  "typecheck": {
+    "tool": "mypy",
+    "config": "pyproject.toml",
+    "paths": [
+      "src/structural_analysis/analyses",
+      "src/structural_analysis/model",
+      "src/structural_analysis/results/schema.py",
+      "src/structural_analysis/results/validation.py",
+      "src/structural_analysis/units"
+    ]
+  },
+  "coverage": {
+    "tool": "coverage.py",
+    "config": ".coveragerc",
+    "branch": true,
+    "minimum_percent": 85,
+    "sources": [
+      "src/structural_analysis/analyses",
+      "src/structural_analysis/model",
+      "src/structural_analysis/results",
+      "src/structural_analysis/units"
+    ],
+    "omits": [
+      "src/structural_analysis/results/__init__.py",
+      "src/structural_analysis/results/viewer.py"
+    ],
+    "tests": [
+      "tests/test_structural_analysis_core_api.py",
+      "tests/test_typed_domain_model.py",
+      "tests/test_authoritative_linear_engineering_semantics.py",
+      "tests/test_authoritative_linear_frame.py",
+      "tests/test_authoritative_linear_frame_reference_cases.py",
+      "tests/test_whole_model_modal_analysis.py",
+      "tests/test_whole_model_buckling_analysis.py",
+      "tests/test_result_validation_tolerance.py"
+    ]
+  },
+  "compatibility_matrix": {
+    "operating_systems": [
+      "ubuntu-latest",
+      "windows-latest",
+      "macos-latest"
+    ],
+    "python_versions": [
+      "3.10",
+      "3.12",
+      "3.13"
+    ],
+    "required_coordinate_count": 9,
+    "workflow": ".github/workflows/core-quality-ci.yml"
+  },
+  "claim_boundary": "This gate covers only the declared public analysis, model, result-schema, result-validation, and unit paths. It does not erase type debt outside that bounded scope, promote experimental or legacy code, prove release readiness, or replace independent engineering review."
+}

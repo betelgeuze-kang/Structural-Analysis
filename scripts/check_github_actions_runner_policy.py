@@ -23,6 +23,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/authoritative-core-evidence-resync.yml",
         ".github/workflows/authoritative-linear-core-ci.yml",
         ".github/workflows/ci.yml",
+        ".github/workflows/core-quality-ci.yml",
         ".github/workflows/engine-v2-contract-ci.yml",
         ".github/workflows/engine-v2-determinism-ci.yml",
         ".github/workflows/fiber-frame-execution-topology-ci.yml",
