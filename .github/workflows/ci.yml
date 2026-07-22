@@ -11,6 +11,10 @@ on:
     paths:
       - "implementation/**"
       - "artifacts/manifests/product_identity.json"
+      - "LICENSE"
+      - "SECURITY.md"
+      - "CONTRIBUTING.md"
+      - ".github/CODEOWNERS"
       - "src/structural_analysis/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
@@ -31,6 +35,10 @@ on:
     paths:
       - "implementation/**"
       - "artifacts/manifests/product_identity.json"
+      - "LICENSE"
+      - "SECURITY.md"
+      - "CONTRIBUTING.md"
+      - ".github/CODEOWNERS"
       - "src/structural_analysis/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
