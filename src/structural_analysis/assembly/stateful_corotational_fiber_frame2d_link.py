@@ -37,6 +37,13 @@ from structural_analysis.materials.bilinear_rotational_link import (
     BilinearRotationalLinkResponse,
     BilinearRotationalLinkState,
 )
+from structural_analysis.materials.compression_only_gap_link import (
+    GAP_LINK_ACTIVE_SET_ALGORITHM,
+    GAP_LINK_CLOSURE_CONVENTION,
+    CompressionOnlyGapLink,
+    CompressionOnlyGapLinkResponse,
+    CompressionOnlyGapLinkState,
+)
 from structural_analysis.solvers.nonlinear.newton import (
     NO_SOLVE_REACTION_ONLY_DISPOSITION,
     RESIDUAL_FORMULA,
@@ -49,10 +56,10 @@ from structural_analysis.solvers.nonlinear.newton import (
 
 
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION = (
-    "stateful-corotational-fiber-frame2d-link-coupling.v4"
+    "stateful-corotational-fiber-frame2d-link-coupling.v5"
 )
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION = (
-    "stateful-corotational-fiber-frame2d-link-checkpoint.v4"
+    "stateful-corotational-fiber-frame2d-link-checkpoint.v5"
 )
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_ASSEMBLY = (
     "deformation_link=global_or_fixed_reference_B_link@u_global|"
@@ -60,22 +67,25 @@ STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_ASSEMBLY = (
     "f_internal=f_frame+sum(scatter_link(B_link.T*generalized_force));"
     "K_material=K_frame_material+sum(scatter_link(B_link.T*k*B_link));"
     "K_geometric=K_frame_geometric+sum(scatter_link(force*hessian_length));"
-    "K_consistent=K_material+K_geometric"
+    "K_consistent=K_material+K_geometric;"
+    "gap_active_set=global_x_compression_only_open_at_exact_closure"
 )
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CLAIM_BOUNDARY = (
     "This coupling supports one or more scalar translational force-deformation "
     "links between planar frame nodes on global axes or a fixed reference "
     "local-axial direction, plus an internal updated-axial link whose force "
     "direction and geometric tangent follow the current chord. It also supports "
-    "a distinct scalar relative-rz moment-rotation link between planar nodes. "
-    "It does not provide general follower external loads, coupled multi-axis "
-    "response, gap/contact, friction, uplift, damping, rate effects, degradation "
-    "or pinching, shells, three-dimensional frames, production sparse execution, "
+    "a distinct scalar relative-rz moment-rotation link between planar nodes and "
+    "one frictionless compression-only elastic gap on the global-x relative DOF. "
+    "It does not provide general follower external loads, local or follower "
+    "contact normals, coupled multi-axis contact, friction, impact, general "
+    "foundation uplift validation, damping, rate effects, degradation or "
+    "pinching, shells, three-dimensional frames, production sparse execution, "
     "ROCm/HIP parity, full-building equilibrium, G1 closure, or commercial-"
     "readiness evidence."
 )
 _CHECKPOINT_HASH_DOMAIN = (
-    b"structural-analysis/stateful-corotational-fiber-frame2d-link-checkpoint/v4\0"
+    b"structural-analysis/stateful-corotational-fiber-frame2d-link-checkpoint/v5\0"
 )
 
 
@@ -382,6 +392,104 @@ class StatefulCorotationalFiberFrame2DLink:
 
 
 @dataclass(frozen=True)
+class StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
+    """One frictionless compression-only gap on two nodal global-x DOFs."""
+
+    link_id: str
+    node_i: int
+    node_j: int
+    material: CompressionOnlyGapLink
+    component: Literal["ux"] = "ux"
+
+    def __post_init__(self) -> None:
+        normalized_id = str(self.link_id).strip()
+        if not normalized_id:
+            raise ValueError("link_id must be non-empty")
+        object.__setattr__(self, "link_id", normalized_id)
+        if (
+            type(self.node_i) is not int
+            or type(self.node_j) is not int
+            or self.node_i < 0
+            or self.node_j < 0
+            or self.node_i == self.node_j
+        ):
+            raise ValueError("gap-link node indices must be distinct and non-negative")
+        if self.component != "ux":
+            raise ValueError("compression-only gap component must be 'ux'")
+        if type(self.material) is not CompressionOnlyGapLink:
+            raise ValueError("gap-link material must be a CompressionOnlyGapLink")
+
+    def global_dofs(self) -> tuple[int, int]:
+        return 3 * self.node_i, 3 * self.node_j
+
+    def kinematic_vector(
+        self,
+        node_coordinates_m: Any | None = None,
+        global_displacements: Any | None = None,
+    ) -> np.ndarray:
+        del node_coordinates_m, global_displacements
+        return _readonly(
+            (-1.0, 1.0),
+            shape=(2,),
+            name="compression-only gap kinematic vector",
+        )
+
+    def deformation_m(
+        self,
+        global_displacements: Any,
+        node_coordinates_m: Any | None = None,
+    ) -> float:
+        del node_coordinates_m
+        dofs = self.global_dofs()
+        try:
+            displacements = np.asarray(global_displacements, dtype=np.float64)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("global displacements must be a finite vector") from exc
+        if (
+            displacements.ndim != 1
+            or max(dofs) >= displacements.shape[0]
+            or not np.all(np.isfinite(displacements))
+        ):
+            raise ValueError("global displacements must be a finite vector")
+        return float(self.kinematic_vector() @ displacements[list(dofs)])
+
+    def deformation_hessian_per_m(
+        self,
+        node_coordinates_m: Any,
+        global_displacements: Any,
+    ) -> np.ndarray:
+        del node_coordinates_m, global_displacements
+        return _readonly(
+            np.zeros((2, 2), dtype=np.float64),
+            shape=(2, 2),
+            name="compression-only gap deformation hessian",
+        )
+
+    def contract_payload(
+        self,
+        node_coordinates_m: Any | None = None,
+    ) -> dict[str, Any]:
+        del node_coordinates_m
+        material = self.material
+        return {
+            "link_id": self.link_id,
+            "node_i": self.node_i,
+            "node_j": self.node_j,
+            "component": self.component,
+            "contact_normal": "global_x_node_i_to_node_j",
+            "kinematic_vector": self.kinematic_vector().tolist(),
+            "deformation_measure": "ux_j-ux_i",
+            "active_set_algorithm": GAP_LINK_ACTIVE_SET_ALGORITHM,
+            "closure_convention": GAP_LINK_CLOSURE_CONVENTION,
+            "material": {
+                "material_id": material.material_id,
+                "contact_stiffness_kn_per_m": (material.contact_stiffness_kn_per_m),
+                "initial_gap_m": material.initial_gap_m,
+            },
+        }
+
+
+@dataclass(frozen=True)
 class StatefulCorotationalFiberFrame2DRotationalLink:
     """One scalar relative-rz link with an explicit moment-rotation material."""
 
@@ -469,17 +577,22 @@ class StatefulCorotationalFiberFrame2DRotationalLink:
 
 StatefulCorotationalFiberFrame2DScalarLink = (
     StatefulCorotationalFiberFrame2DLink
+    | StatefulCorotationalFiberFrame2DCompressionOnlyGapLink
     | StatefulCorotationalFiberFrame2DRotationalLink
 )
-BilinearScalarLinkState = BilinearLinkState | BilinearRotationalLinkState
+ScalarLinkState = (
+    BilinearLinkState | BilinearRotationalLinkState | CompressionOnlyGapLinkState
+)
 
 
 def _link_state_matches_definition(
     link: StatefulCorotationalFiberFrame2DScalarLink,
-    state: BilinearScalarLinkState,
+    state: ScalarLinkState,
 ) -> bool:
     if type(link) is StatefulCorotationalFiberFrame2DRotationalLink:
         return type(state) is BilinearRotationalLinkState
+    if type(link) is StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
+        return type(state) is CompressionOnlyGapLinkState
     return type(state) is BilinearLinkState
 
 
@@ -517,6 +630,7 @@ class StatefulCorotationalFiberFrame2DLinkProblem:
                 type(link)
                 in (
                     StatefulCorotationalFiberFrame2DLink,
+                    StatefulCorotationalFiberFrame2DCompressionOnlyGapLink,
                     StatefulCorotationalFiberFrame2DRotationalLink,
                 )
                 for link in self.links
@@ -611,7 +725,7 @@ class StatefulCorotationalFiberFrame2DLinkCheckpoint:
     load_factor: float
     parent_state_hash: str | None
     frame_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
-    link_states: tuple[BilinearScalarLinkState, ...]
+    link_states: tuple[ScalarLinkState, ...]
     role: Literal["committed"] = "committed"
     state_hash: str = ""
 
@@ -661,7 +775,12 @@ class StatefulCorotationalFiberFrame2DLinkCheckpoint:
             not isinstance(self.link_states, tuple)
             or not self.link_states
             or not all(
-                type(state) in (BilinearLinkState, BilinearRotationalLinkState)
+                type(state)
+                in (
+                    BilinearLinkState,
+                    BilinearRotationalLinkState,
+                    CompressionOnlyGapLinkState,
+                )
                 for state in self.link_states
             )
         ):
@@ -804,7 +923,7 @@ class StatefulCorotationalFiberFrame2DLinkAssemblyRow:
     material_tangent_global_kn_per_m: np.ndarray
     geometric_tangent_global_kn_per_m: np.ndarray
     tangent_global_kn_per_m: np.ndarray
-    response: BilinearLinkResponse
+    response: BilinearLinkResponse | CompressionOnlyGapLinkResponse
 
     def __post_init__(self) -> None:
         normalized_id = str(self.link_id).strip()
@@ -889,7 +1008,10 @@ class StatefulCorotationalFiberFrame2DLinkAssemblyRow:
             "deformation_m",
             _finite(self.deformation_m, name="deformation_m"),
         )
-        if type(self.response) is not BilinearLinkResponse:
+        if type(self.response) not in (
+            BilinearLinkResponse,
+            CompressionOnlyGapLinkResponse,
+        ):
             raise ValueError("response type is invalid")
         if self.deformation_m != self.response.deformation_m:
             raise ValueError("link deformation does not match response")
@@ -1103,7 +1225,7 @@ class StatefulCorotationalFiberFrame2DLinkAssembly:
     consistent_tangent_global: np.ndarray
     frame_assembly: StatefulCorotationalFiberFrame2DAssembly
     link_assemblies: tuple[StatefulCorotationalFiberFrame2DScalarLinkAssemblyRow, ...]
-    trial_link_states: tuple[BilinearScalarLinkState, ...]
+    trial_link_states: tuple[ScalarLinkState, ...]
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -1199,7 +1321,12 @@ class StatefulCorotationalFiberFrame2DLinkAssembly:
             not isinstance(self.trial_link_states, tuple)
             or len(self.trial_link_states) != len(self.link_assemblies)
             or not all(
-                type(state) in (BilinearLinkState, BilinearRotationalLinkState)
+                type(state)
+                in (
+                    BilinearLinkState,
+                    BilinearRotationalLinkState,
+                    CompressionOnlyGapLinkState,
+                )
                 for state in self.trial_link_states
             )
         ):
@@ -1289,7 +1416,7 @@ def assemble_stateful_corotational_fiber_frame2d_links(
     )
     link_geometric = np.zeros_like(frame_geometric)
     link_rows: list[StatefulCorotationalFiberFrame2DScalarLinkAssemblyRow] = []
-    trial_link_states: list[BilinearScalarLinkState] = []
+    trial_link_states: list[ScalarLinkState] = []
     for link, parent in zip(
         problem.links,
         accepted_checkpoint.link_states,
@@ -1323,8 +1450,16 @@ def assemble_stateful_corotational_fiber_frame2d_links(
                 )
             )
         else:
-            if type(parent) is not BilinearLinkState:
-                raise ValueError("translational link parent state type is invalid")
+            if (
+                type(link) is StatefulCorotationalFiberFrame2DCompressionOnlyGapLink
+                and type(parent) is not CompressionOnlyGapLinkState
+            ):
+                raise ValueError("gap-link parent state type is invalid")
+            if (
+                type(link) is StatefulCorotationalFiberFrame2DLink
+                and type(parent) is not BilinearLinkState
+            ):
+                raise ValueError("bilinear-link parent state type is invalid")
             kinematic = link.kinematic_vector(
                 problem.frame_problem.node_coordinates_m,
                 (
@@ -1878,6 +2013,7 @@ __all__ = [
     "STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION",
     "STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CLAIM_BOUNDARY",
     "STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION",
+    "StatefulCorotationalFiberFrame2DCompressionOnlyGapLink",
     "StatefulCorotationalFiberFrame2DLink",
     "StatefulCorotationalFiberFrame2DLinkAssembly",
     "StatefulCorotationalFiberFrame2DLinkAssemblyRow",

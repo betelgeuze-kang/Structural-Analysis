@@ -95,6 +95,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
+  tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
@@ -132,8 +133,9 @@ link force with the current chord, and assembles the force-times-length-Hessian
 link geometric tangent separately from the frame geometric tangent. It checks
 finite rigid-motion objectivity, current-axis force transformation, full mixed
 same-parent tangent, cyclic state, replay, and rollback. General follower
-external loads, coupled multi-axis response, shell, contact,
-friction, damping, degradation, and general link breadth remain open.
+external loads, coupled multi-axis response, shell integration, and contact
+behavior beyond the separate bounded global-x gap case—including friction,
+impact, damping, and degradation—remain open.
 
 The paired
 [`stateful-corotational-rotational-linked-frame-cyclic-benchmark.md`](stateful-corotational-rotational-linked-frame-cyclic-benchmark.md)
@@ -143,6 +145,15 @@ checks the `S^T K S` generalized-coordinate scaling, common-rotation
 objectivity, analytic elastic moment transfer, cyclic dissipation,
 same-parent tangent, replay, and rollback. It is one scalar relative-rotation
 link, not coupled multi-axis response or general connection breadth.
+
+The separate
+[`stateful-corotational-gap-linked-frame-cyclic-benchmark.md`](stateful-corotational-gap-linked-frame-cyclic-benchmark.md)
+case connects the same two free top global `ux` DOFs with one frictionless
+compression-only elastic gap. It verifies open/closed active-set checkpoint
+history, analytic onset and branch response, both one-sided tangents, common
+translation, deterministic replay, and exact rollback. Local/follower contact
+normals, friction, impact, coupled contact, and general foundation uplift
+validation remain open.
 
 The separate
 [`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)

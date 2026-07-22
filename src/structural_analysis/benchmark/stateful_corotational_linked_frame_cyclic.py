@@ -690,7 +690,7 @@ def build_stateful_corotational_linked_frame_cyclic_benchmark() -> dict[str, Any
         "blockers_remaining": [
             "rotational_and_multi_axis_link_coupling_not_implemented",
             "local_axis_link_transformation_not_implemented",
-            "gap_contact_friction_uplift_families_not_state_updated",
+            "contact_beyond_global_x_gap_friction_uplift_not_state_updated",
             "viscous_rate_degradation_pinching_not_implemented",
             "inelastic_member_and_link_interaction_not_validated",
             "shell_connection_integration_not_implemented",

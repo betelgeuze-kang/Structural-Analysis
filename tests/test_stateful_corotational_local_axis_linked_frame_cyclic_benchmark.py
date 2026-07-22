@@ -63,9 +63,9 @@ def test_problem_uses_fixed_reference_45_degree_local_axis() -> None:
     assert LOCAL_AXIS_LINKED_FRAME_ELASTIC_LINK_TRANSFER_FRACTION == pytest.approx(
         0.7347193840943683
     )
-    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v4")
+    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v5")
     assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION.endswith(
-        ".v4"
+        ".v5"
     )
 
 
