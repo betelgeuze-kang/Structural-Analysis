@@ -56,10 +56,10 @@ from structural_analysis.solvers.nonlinear.newton import (
 
 
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION = (
-    "stateful-corotational-fiber-frame2d-link-coupling.v5"
+    "stateful-corotational-fiber-frame2d-link-coupling.v6"
 )
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION = (
-    "stateful-corotational-fiber-frame2d-link-checkpoint.v5"
+    "stateful-corotational-fiber-frame2d-link-checkpoint.v6"
 )
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_ASSEMBLY = (
     "deformation_link=global_or_fixed_reference_B_link@u_global|"
@@ -68,7 +68,8 @@ STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_ASSEMBLY = (
     "K_material=K_frame_material+sum(scatter_link(B_link.T*k*B_link));"
     "K_geometric=K_frame_geometric+sum(scatter_link(force*hessian_length));"
     "K_consistent=K_material+K_geometric;"
-    "gap_active_set=global_x_compression_only_open_at_exact_closure"
+    "gap_active_set=global_x_or_fixed_reference_local_axis_"
+    "compression_only_open_at_exact_closure"
 )
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CLAIM_BOUNDARY = (
     "This coupling supports one or more scalar translational force-deformation "
@@ -76,16 +77,17 @@ STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CLAIM_BOUNDARY = (
     "local-axial direction, plus an internal updated-axial link whose force "
     "direction and geometric tangent follow the current chord. It also supports "
     "a distinct scalar relative-rz moment-rotation link between planar nodes and "
-    "one frictionless compression-only elastic gap on the global-x relative DOF. "
-    "It does not provide general follower external loads, local or follower "
-    "contact normals, coupled multi-axis contact, friction, impact, general "
+    "one frictionless compression-only elastic gap on either the global-x "
+    "relative DOF or a fixed reference local-axis normal. It does not provide "
+    "general follower external loads, updated/follower contact normals, coupled "
+    "multi-axis contact, friction, impact, general "
     "foundation uplift validation, damping, rate effects, degradation or "
     "pinching, shells, three-dimensional frames, production sparse execution, "
     "ROCm/HIP parity, full-building equilibrium, G1 closure, or commercial-"
     "readiness evidence."
 )
 _CHECKPOINT_HASH_DOMAIN = (
-    b"structural-analysis/stateful-corotational-fiber-frame2d-link-checkpoint/v5\0"
+    b"structural-analysis/stateful-corotational-fiber-frame2d-link-checkpoint/v6\0"
 )
 
 
@@ -393,13 +395,13 @@ class StatefulCorotationalFiberFrame2DLink:
 
 @dataclass(frozen=True)
 class StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
-    """One frictionless compression-only gap on two nodal global-x DOFs."""
+    """One frictionless compression-only gap on a fixed scalar normal."""
 
     link_id: str
     node_i: int
     node_j: int
     material: CompressionOnlyGapLink
-    component: Literal["ux"] = "ux"
+    component: Literal["ux", "local_axial"] = "ux"
 
     def __post_init__(self) -> None:
         normalized_id = str(self.link_id).strip()
@@ -414,23 +416,79 @@ class StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
             or self.node_i == self.node_j
         ):
             raise ValueError("gap-link node indices must be distinct and non-negative")
-        if self.component != "ux":
-            raise ValueError("compression-only gap component must be 'ux'")
+        if self.component not in ("ux", "local_axial"):
+            raise ValueError(
+                "compression-only gap component must be 'ux' or 'local_axial'"
+            )
         if type(self.material) is not CompressionOnlyGapLink:
             raise ValueError("gap-link material must be a CompressionOnlyGapLink")
 
-    def global_dofs(self) -> tuple[int, int]:
-        return 3 * self.node_i, 3 * self.node_j
+    def global_dofs(self) -> tuple[int, ...]:
+        if self.component == "ux":
+            return 3 * self.node_i, 3 * self.node_j
+        return (
+            3 * self.node_i,
+            3 * self.node_i + 1,
+            3 * self.node_j,
+            3 * self.node_j + 1,
+        )
+
+    def _node_coordinates(self, node_coordinates_m: Any) -> np.ndarray:
+        try:
+            coordinates = np.asarray(node_coordinates_m, dtype=np.float64)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("node coordinates must be a finite (n, 2) array") from exc
+        if (
+            coordinates.ndim != 2
+            or coordinates.shape[1:] != (2,)
+            or max(self.node_i, self.node_j) >= coordinates.shape[0]
+            or not np.all(np.isfinite(coordinates))
+        ):
+            raise ValueError("node coordinates must be a finite (n, 2) array")
+        return coordinates
+
+    def reference_length_m(self, node_coordinates_m: Any) -> float:
+        """Return the strictly positive undeformed endpoint distance."""
+
+        coordinates = self._node_coordinates(node_coordinates_m)
+        length = float(
+            np.linalg.norm(coordinates[self.node_j] - coordinates[self.node_i])
+        )
+        if not math.isfinite(length) or length <= 0.0:
+            raise ValueError("gap-link reference length must be positive")
+        return length
+
+    def reference_direction_cosines(
+        self,
+        node_coordinates_m: Any,
+    ) -> tuple[float, float]:
+        """Return the fixed reference normal directed from node i to node j."""
+
+        if self.component == "ux":
+            return 1.0, 0.0
+        coordinates = self._node_coordinates(node_coordinates_m)
+        delta = coordinates[self.node_j] - coordinates[self.node_i]
+        length = self.reference_length_m(coordinates)
+        return float(delta[0] / length), float(delta[1] / length)
 
     def kinematic_vector(
         self,
         node_coordinates_m: Any | None = None,
         global_displacements: Any | None = None,
     ) -> np.ndarray:
-        del node_coordinates_m, global_displacements
+        del global_displacements
+        if self.component == "ux":
+            values = (-1.0, 1.0)
+        else:
+            if node_coordinates_m is None:
+                raise ValueError(
+                    "local-axis compression-only gap requires node coordinates"
+                )
+            nx, ny = self.reference_direction_cosines(node_coordinates_m)
+            values = (-nx, -ny, nx, ny)
         return _readonly(
-            (-1.0, 1.0),
-            shape=(2,),
+            values,
+            shape=(len(values),),
             name="compression-only gap kinematic vector",
         )
 
@@ -439,7 +497,6 @@ class StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
         global_displacements: Any,
         node_coordinates_m: Any | None = None,
     ) -> float:
-        del node_coordinates_m
         dofs = self.global_dofs()
         try:
             displacements = np.asarray(global_displacements, dtype=np.float64)
@@ -451,7 +508,9 @@ class StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
             or not np.all(np.isfinite(displacements))
         ):
             raise ValueError("global displacements must be a finite vector")
-        return float(self.kinematic_vector() @ displacements[list(dofs)])
+        return float(
+            self.kinematic_vector(node_coordinates_m) @ displacements[list(dofs)]
+        )
 
     def deformation_hessian_per_m(
         self,
@@ -459,9 +518,10 @@ class StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
         global_displacements: Any,
     ) -> np.ndarray:
         del node_coordinates_m, global_displacements
+        dof_count = len(self.global_dofs())
         return _readonly(
-            np.zeros((2, 2), dtype=np.float64),
-            shape=(2, 2),
+            np.zeros((dof_count, dof_count), dtype=np.float64),
+            shape=(dof_count, dof_count),
             name="compression-only gap deformation hessian",
         )
 
@@ -469,16 +529,26 @@ class StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
         self,
         node_coordinates_m: Any | None = None,
     ) -> dict[str, Any]:
-        del node_coordinates_m
         material = self.material
-        return {
+        if self.component == "local_axial" and node_coordinates_m is None:
+            raise ValueError("local-axis gap contract requires node coordinates")
+        kinematic = self.kinematic_vector(node_coordinates_m)
+        payload: dict[str, Any] = {
             "link_id": self.link_id,
             "node_i": self.node_i,
             "node_j": self.node_j,
             "component": self.component,
-            "contact_normal": "global_x_node_i_to_node_j",
-            "kinematic_vector": self.kinematic_vector().tolist(),
-            "deformation_measure": "ux_j-ux_i",
+            "contact_normal": (
+                "global_x_node_i_to_node_j"
+                if self.component == "ux"
+                else "fixed_reference_local_axis_node_i_to_node_j"
+            ),
+            "kinematic_vector": kinematic.tolist(),
+            "deformation_measure": (
+                "ux_j-ux_i"
+                if self.component == "ux"
+                else "reference_normal_dot_u_j_minus_u_i"
+            ),
             "active_set_algorithm": GAP_LINK_ACTIVE_SET_ALGORITHM,
             "closure_convention": GAP_LINK_CLOSURE_CONVENTION,
             "material": {
@@ -487,6 +557,15 @@ class StatefulCorotationalFiberFrame2DCompressionOnlyGapLink:
                 "initial_gap_m": material.initial_gap_m,
             },
         }
+        if self.component == "local_axial":
+            assert node_coordinates_m is not None
+            payload["reference_direction_cosines"] = list(
+                self.reference_direction_cosines(node_coordinates_m)
+            )
+            payload["reference_length_m"] = self.reference_length_m(node_coordinates_m)
+            payload["axis_update"] = "none_fixed_reference_normal"
+            payload["geometric_tangent"] = "zero_fixed_reference_normal"
+        return payload
 
 
 @dataclass(frozen=True)

@@ -86,8 +86,10 @@ deterministic replay, exact rollback, and JSON-safe claim serialization.
 
 The receipt status is `partial`. It verifies only one planar, frictionless,
 elastic, scalar global-x compression gap with a fixed node-order normal. It is
-not a local or follower contact normal, friction, impact, restitution, coupled
-contact, general foundation uplift validation, inelastic contact, member hinge
-or shell contact integration, an external contact acceptance result,
-production sparse/ROCm/HIP execution, full-building equilibrium, G1 closure,
-or commercial-readiness evidence.
+not itself a local or follower contact-normal case. The separate
+[fixed-reference local-axis gap benchmark](stateful-corotational-local-axis-gap-linked-frame-cyclic-benchmark.md)
+verifies one inclined fixed normal, but updated/follower normals, friction,
+impact, restitution, coupled contact, general foundation uplift validation,
+inelastic contact, member hinge or shell contact integration, an external
+contact acceptance result, production sparse/ROCm/HIP execution, full-building
+equilibrium, G1 closure, and commercial-readiness evidence remain open.

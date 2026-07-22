@@ -21,6 +21,7 @@ on:
       - "src/structural_analysis/benchmark/stateful_corotational_updated_axis_linked_frame_cyclic.py"
       - "src/structural_analysis/benchmark/stateful_corotational_rotational_linked_frame_cyclic.py"
       - "src/structural_analysis/benchmark/stateful_corotational_gap_linked_frame_cyclic.py"
+      - "src/structural_analysis/benchmark/stateful_corotational_local_axis_gap_linked_frame_cyclic.py"
       - "src/structural_analysis/materials/bilinear_rotational_link.py"
       - "src/structural_analysis/materials/compression_only_gap_link.py"
       - "src/structural_analysis/materials/__init__.py"
@@ -68,6 +69,7 @@ on:
       - "tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py"
+      - "tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_fiber_frame2d_solver.py"
       - "tests/test_public_rc_fiber_frame_api.py"
       - "tests/test_verify_quality_gate_contract.py"
@@ -95,6 +97,7 @@ on:
       - "docs/stateful-corotational-linked-frame-cyclic-benchmark.md"
       - "docs/stateful-corotational-local-axis-linked-frame-cyclic-benchmark.md"
       - "docs/stateful-corotational-gap-linked-frame-cyclic-benchmark.md"
+      - "docs/stateful-corotational-local-axis-gap-linked-frame-cyclic-benchmark.md"
       - "docs/public-rc-fiber-frame.md"
       - "examples/public_rc_fiber_frame_cantilever.json"
       - "docs/engine-v2-nonlinear-result-recovery.md"
@@ -137,6 +140,7 @@ jobs:
             src/structural_analysis/benchmark/stateful_corotational_updated_axis_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_rotational_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_gap_linked_frame_cyclic.py \
+            src/structural_analysis/benchmark/stateful_corotational_local_axis_gap_linked_frame_cyclic.py \
             src/structural_analysis/materials/bilinear_rotational_link.py \
             src/structural_analysis/materials/compression_only_gap_link.py \
             src/structural_analysis/materials/__init__.py \
@@ -177,6 +181,7 @@ jobs:
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
             tests/test_engine_v2_solver_episode_v1.py \
@@ -198,6 +203,7 @@ jobs:
             src/structural_analysis/benchmark/stateful_corotational_updated_axis_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_rotational_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_gap_linked_frame_cyclic.py \
+            src/structural_analysis/benchmark/stateful_corotational_local_axis_gap_linked_frame_cyclic.py \
             src/structural_analysis/materials/bilinear_rotational_link.py \
             src/structural_analysis/materials/compression_only_gap_link.py \
             src/structural_analysis/materials/__init__.py \
@@ -237,6 +243,7 @@ jobs:
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
             tests/test_fiber_frame_solver_episode_adapter.py
@@ -258,6 +265,7 @@ jobs:
             src/structural_analysis/benchmark/stateful_corotational_updated_axis_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_rotational_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_gap_linked_frame_cyclic.py \
+            src/structural_analysis/benchmark/stateful_corotational_local_axis_gap_linked_frame_cyclic.py \
             src/structural_analysis/materials/bilinear_rotational_link.py \
             src/structural_analysis/materials/compression_only_gap_link.py \
             src/structural_analysis/materials/__init__.py \
@@ -298,6 +306,7 @@ jobs:
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
             tests/test_engine_v2_solver_episode_v1.py \
@@ -318,6 +327,7 @@ jobs:
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
@@ -349,6 +359,7 @@ jobs:
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_stateful_fiber_frame2d.py \
             tests/test_stateful_fiber_frame2d_material_state_bundle.py \

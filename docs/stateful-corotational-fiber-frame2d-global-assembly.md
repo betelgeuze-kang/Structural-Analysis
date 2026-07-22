@@ -96,6 +96,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py \
+  tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
@@ -134,8 +135,8 @@ link geometric tangent separately from the frame geometric tangent. It checks
 finite rigid-motion objectivity, current-axis force transformation, full mixed
 same-parent tangent, cyclic state, replay, and rollback. General follower
 external loads, coupled multi-axis response, shell integration, and contact
-behavior beyond the separate bounded global-x gap case—including friction,
-impact, damping, and degradation—remain open.
+behavior beyond the separate bounded global-x and fixed-reference local-axis
+gap cases—including friction, impact, damping, and degradation—remain open.
 
 The paired
 [`stateful-corotational-rotational-linked-frame-cyclic-benchmark.md`](stateful-corotational-rotational-linked-frame-cyclic-benchmark.md)
@@ -151,9 +152,15 @@ The separate
 case connects the same two free top global `ux` DOFs with one frictionless
 compression-only elastic gap. It verifies open/closed active-set checkpoint
 history, analytic onset and branch response, both one-sided tangents, common
-translation, deterministic replay, and exact rollback. Local/follower contact
-normals, friction, impact, coupled contact, and general foundation uplift
-validation remain open.
+translation, deterministic replay, and exact rollback.
+
+The companion
+[`stateful-corotational-local-axis-gap-linked-frame-cyclic-benchmark.md`](stateful-corotational-local-axis-gap-linked-frame-cyclic-benchmark.md)
+case uses the same unilateral material on a 45-degree normal fixed by the
+reference endpoints. It verifies four-DOF direction-cosine force/tangent
+scatter, coordinate-rotation covariance, active-set replay, and rollback.
+Updated/follower contact normals, friction, impact, coupled contact, and
+general foundation uplift validation remain open.
 
 The separate
 [`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)

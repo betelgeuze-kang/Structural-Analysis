@@ -140,6 +140,10 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "tests/test_stateful_corotational_gap_linked_frame_cyclic_benchmark.py"
         in targets
     )
+    assert (
+        "tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py"
+        in targets
+    )
     assert "tests/test_stateful_corotational_fiber_frame2d_solver.py" in targets
     assert "tests/test_lee_frame_snapthrough_benchmark.py" in targets
     assert "tests/test_build_phase2_modal_buckling_kernel_artifacts.py" in targets

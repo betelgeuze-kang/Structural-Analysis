@@ -743,7 +743,7 @@ def build_stateful_corotational_gap_linked_frame_cyclic_benchmark() -> dict[str,
             "commercial_readiness": False,
         },
         "blockers_remaining": [
-            "local_and_follower_contact_normals_not_implemented",
+            "updated_and_follower_contact_normals_not_implemented",
             "friction_impact_restitution_and_coupled_contact_not_implemented",
             "general_foundation_uplift_not_validated",
             "inelastic_contact_and_member_interaction_not_validated",
