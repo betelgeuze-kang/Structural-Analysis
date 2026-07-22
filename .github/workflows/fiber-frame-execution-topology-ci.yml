@@ -12,6 +12,7 @@ on:
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py"
       - "src/structural_analysis/benchmark/stateful_corotational_fiber_frame2d_diagnostics.py"
+      - "src/structural_analysis/benchmark/stateful_corotational_concrete_frame_cyclic.py"
       - "src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py"
@@ -49,6 +50,7 @@ on:
       - "tests/test_stateful_corotational_fiber_frame2d.py"
       - "tests/test_stateful_corotational_fiber_frame2d_adaptive.py"
       - "tests/test_stateful_corotational_fiber_frame2d_arc_length.py"
+      - "tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_fiber_frame2d_solver.py"
       - "tests/test_public_rc_fiber_frame_api.py"
@@ -71,6 +73,7 @@ on:
       - "docs/stateful-corotational-fiber-frame2d-newton-load-control.md"
       - "docs/stateful-corotational-fiber-frame2d-adaptive-continuation.md"
       - "docs/stateful-corotational-fiber-frame2d-arc-length.md"
+      - "docs/stateful-corotational-concrete-frame-cyclic-benchmark.md"
       - "docs/stateful-corotational-steel-frame-cyclic-benchmark.md"
       - "docs/public-rc-fiber-frame.md"
       - "examples/public_rc_fiber_frame_cantilever.json"
@@ -105,6 +108,7 @@ jobs:
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py \
             src/structural_analysis/benchmark/stateful_corotational_fiber_frame2d_diagnostics.py \
+            src/structural_analysis/benchmark/stateful_corotational_concrete_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py \
@@ -135,6 +139,7 @@ jobs:
             tests/test_stateful_corotational_fiber_frame2d.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+            tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
@@ -148,6 +153,7 @@ jobs:
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py \
             src/structural_analysis/benchmark/stateful_corotational_fiber_frame2d_diagnostics.py \
+            src/structural_analysis/benchmark/stateful_corotational_concrete_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py \
@@ -177,6 +183,7 @@ jobs:
             tests/test_stateful_corotational_fiber_frame2d.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+            tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
@@ -190,6 +197,7 @@ jobs:
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py \
             src/structural_analysis/benchmark/stateful_corotational_fiber_frame2d_diagnostics.py \
+            src/structural_analysis/benchmark/stateful_corotational_concrete_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py \
@@ -220,6 +228,7 @@ jobs:
             tests/test_stateful_corotational_fiber_frame2d.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+            tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
@@ -233,6 +242,7 @@ jobs:
             tests/test_stateful_corotational_fiber_frame2d.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+            tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
@@ -257,6 +267,7 @@ jobs:
             tests/test_stateful_corotational_fiber_frame2d.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+            tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_stateful_fiber_frame2d.py \

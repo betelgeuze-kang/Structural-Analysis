@@ -91,6 +91,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_fiber_frame2d_solver.py \
   tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
   tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+  tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_fiber_frame2d.py \
   tests/test_stateful_corotational_fiber_beam2d.py \
@@ -102,6 +103,16 @@ material/geometric tangent decomposition, a same-parent nonlinear global
 Jacobian finite difference after RC damage/yield history, sequential 2.2 and
 4.4 rad rigid rotations across all members, exact replay, unchanged-parent
 trial branching, and fail-closed checkpoint/geometry binding.
+
+The separate
+[`stateful-corotational-concrete-frame-cyclic-benchmark.md`](stateful-corotational-concrete-frame-cyclic-benchmark.md)
+case exercises independent tension and compression damage through the same
+30-target reversal path. Concrete supplies more than 75 percent of initial
+flexural rigidity, while deliberately elastic reinforcement stabilizes the
+post-cracking load-controlled branch. The case verifies componentwise damage
+irreversibility, nonnegative dissipation, a two-branch same-parent tangent, and
+exact rollback without claiming pure-concrete, mesh-objective, or external
+cyclic acceptance evidence.
 
 The separate
 [`stateful-corotational-steel-frame-cyclic-benchmark.md`](stateful-corotational-steel-frame-cyclic-benchmark.md)
