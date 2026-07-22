@@ -1,0 +1,266 @@
+{
+  "schema_version": "structural-analysis-capabilities.v1",
+  "authority_rules": {
+    "solver_truth_owner": "structural_analysis_core",
+    "workbench_truth_owner": "none",
+    "ai_truth_owner": "none",
+    "gpu_track": "performance_after_cpu_sparse_reference_and_external_vv",
+    "fallback_promotion_allowed": false
+  },
+  "capabilities": [
+    {
+      "id": "model.neutral_canonical",
+      "title": "Neutral canonical model",
+      "category": "model_io",
+      "status": "supported",
+      "public": true,
+      "authority": "validated_input_contract",
+      "interfaces": ["python_api", "cli"],
+      "profile": "structural-analysis-canonical-model.v1",
+      "limitations": ["Only schema-declared entities and units are accepted."],
+      "evidence": ["tests/test_structural_analysis_core_api.py"]
+    },
+    {
+      "id": "io.midas_mgt",
+      "title": "MIDAS MGT import",
+      "category": "model_io",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "input_translation_with_provenance",
+      "interfaces": ["python_api", "cli"],
+      "profile": "topology_and_supported_property_subset",
+      "limitations": ["Unsupported records remain explicit; exact native round-trip is not closed."],
+      "evidence": [
+        "src/structural_analysis/io/midas/loader.py",
+        "tests/test_structural_analysis_core_api.py"
+      ]
+    },
+    {
+      "id": "io.ifc_model_health",
+      "title": "IFC model-health import",
+      "category": "model_io",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "entity_scan_and_model_health_only",
+      "interfaces": ["python_api", "cli"],
+      "profile": "ifc_step_model_health",
+      "limitations": ["Not a general analysis-ready IFC structural-model compiler."],
+      "evidence": [
+        "src/structural_analysis/io/ifc/loader.py",
+        "tests/test_structural_analysis_core_api.py"
+      ]
+    },
+    {
+      "id": "analysis.linear_static",
+      "title": "Linear static analysis",
+      "category": "analysis",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "numerical_and_engineering_within_supported_elements",
+      "interfaces": ["python_api", "cli", "workbench"],
+      "profile": "cpu_dense_or_scipy_sparse_supported_frame_truss",
+      "limitations": ["No general shell, contact, staged-construction, or design-code authority."],
+      "evidence": [
+        "docs/authoritative-cpu-linear-solver.md",
+        "tests/test_structural_analysis_core_api.py"
+      ]
+    },
+    {
+      "id": "analysis.modal",
+      "title": "Whole-model modal analysis",
+      "category": "analysis",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "numerical_within_explicit_frame_truss_mass_profile",
+      "interfaces": ["python_api", "cli"],
+      "profile": "dense_symmetric_generalized_eigen_v1",
+      "limitations": ["The public default is dense and no independent Level 2 comparison is promoted."],
+      "evidence": [
+        "docs/phase2-whole-model-modal-analysis.md",
+        "tests/test_whole_model_modal_analysis.py"
+      ]
+    },
+    {
+      "id": "analysis.linear_buckling",
+      "title": "Whole-model linear buckling",
+      "category": "analysis",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "numerical_within_explicit_preload_profile",
+      "interfaces": ["python_api", "cli"],
+      "profile": "dense_symmetric_generalized_eigen_v1",
+      "limitations": ["The public default is dense and no independent Level 2 comparison is promoted."],
+      "evidence": [
+        "docs/phase2-whole-model-linear-buckling.md",
+        "tests/test_whole_model_buckling_analysis.py"
+      ]
+    },
+    {
+      "id": "analysis.nonlinear_two_bar_truss",
+      "title": "Nonlinear two-bar truss",
+      "category": "analysis",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "bounded_material_geometric_newton",
+      "interfaces": ["python_api", "cli"],
+      "profile": "symmetric_two_bar_material_geometric_v1",
+      "limitations": ["The profile does not generalize to arbitrary truss or frame topology."],
+      "evidence": [
+        "docs/public-two-bar-nonlinear-truss.md",
+        "src/structural_analysis/api/nonlinear_truss.py"
+      ]
+    },
+    {
+      "id": "analysis.nonlinear_rc_fiber_frame_fixed_chord",
+      "title": "Fixed-chord RC fiber frame",
+      "category": "analysis",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "exact_reaction_member_section_fiber_recovery",
+      "interfaces": ["python_api", "cli"],
+      "profile": "planar_serial_cantilever_explicit_rectangular_rc.v1",
+      "limitations": ["Serial cantilever only; zero prescribed movement; dense CPU load control."],
+      "evidence": [
+        "docs/public-rc-fiber-frame.md",
+        "tests/test_public_rc_fiber_frame_api.py"
+      ]
+    },
+    {
+      "id": "analysis.nonlinear_corotational_fiber_frame_2d",
+      "title": "Corotational 2D fiber-frame assembly",
+      "category": "analysis",
+      "status": "experimental",
+      "public": false,
+      "authority": "bounded_assembly_candidate_no_public_api",
+      "interfaces": ["internal_python"],
+      "profile": "bounded_planar_stateful_corotational_fiber_frame2d.v1",
+      "limitations": ["Assembly-level candidate only; no unified public API, general member-feature contract, independent Level 2 verification, or release promotion."],
+      "evidence": [
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py",
+        "tests/test_stateful_corotational_fiber_frame2d_solver.py"
+      ]
+    },
+    {
+      "id": "vv.opensees_level2",
+      "title": "OpenSees Level 2 verification",
+      "category": "verification",
+      "status": "blocked",
+      "public": false,
+      "authority": "none",
+      "interfaces": ["evidence"],
+      "profile": "independent_operator_promotion_required",
+      "limitations": ["Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent."],
+      "evidence": [
+        "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+        "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+        "scripts/run_external_code_to_code_technical_receipt.py",
+        "scripts/run_external_modal_buckling_technical_receipt.py",
+        "tests/test_external_code_to_code_technical_receipt.py",
+        "tests/test_external_modal_buckling_technical_receipt.py",
+        "docs/external-code-to-code-technical-execution.md"
+      ]
+    },
+    {
+      "id": "vv.second_solver_level2",
+      "title": "Second independent solver Level 2 verification",
+      "category": "verification",
+      "status": "blocked",
+      "public": false,
+      "authority": "none",
+      "interfaces": ["evidence"],
+      "profile": "independent_operator_promotion_required",
+      "limitations": ["Fresh pinned CalculiX comparisons pass narrowly, but independent operator attestation, legal review, broader coverage, and a second-solver Level 2 promotion receipt are absent."],
+      "evidence": [
+        "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+        "scripts/run_external_modal_buckling_technical_receipt.py",
+        "tests/test_external_modal_buckling_technical_receipt.py",
+        "docs/external-code-to-code-technical-execution.md"
+      ]
+    },
+    {
+      "id": "analysis.cyclic_corotational_fiber_frames",
+      "title": "Cyclic corotational fiber-frame benchmarks",
+      "category": "analysis",
+      "status": "experimental",
+      "public": false,
+      "authority": "bounded_repository_benchmark_candidate",
+      "interfaces": ["internal_python", "evidence"],
+      "profile": "two_member_planar_material_state_commit_rollback.v1",
+      "limitations": ["Repository-generated steel, concrete, composite, and link cases only; no published cyclic acceptance, 3D response, or release authority."],
+      "evidence": [
+        "src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py",
+        "src/structural_analysis/benchmark/stateful_corotational_concrete_frame_cyclic.py",
+        "src/structural_analysis/benchmark/stateful_corotational_composite_frame_cyclic.py",
+        "src/structural_analysis/benchmark/stateful_corotational_linked_frame_cyclic.py",
+        "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py",
+        "tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py",
+        "tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py",
+        "tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py"
+      ]
+    },
+    {
+      "id": "app.workbench_result_evidence",
+      "title": "Workbench result and evidence review",
+      "category": "application",
+      "status": "bounded_public",
+      "public": true,
+      "authority": "consumer_only",
+      "interfaces": ["workbench"],
+      "profile": "typed_workbench_case_and_evidence_reader",
+      "limitations": ["Workbench display and review decisions never create solver truth."],
+      "evidence": [
+        "docs/workbench-v2.md",
+        "tests/frontend/workbench-v2-e2e.spec.ts"
+      ]
+    },
+    {
+      "id": "ai.solver_shadow_control",
+      "title": "AI solver shadow control",
+      "category": "ai_control",
+      "status": "shadow_only",
+      "public": false,
+      "authority": "proposal_and_evaluation_only",
+      "interfaces": ["internal_python", "evidence"],
+      "profile": "deterministic_shadow_proposal_controller.v1",
+      "limitations": ["Shadow proposals are not executed and cannot alter solver truth."],
+      "evidence": [
+        "src/structural_analysis/ai/shadow_solver_controller.py",
+        "docs/ai-shadow-solver-controller.md",
+        "tests/test_shadow_solver_controller.py"
+      ]
+    },
+    {
+      "id": "ai.guarded_execution",
+      "title": "Guarded AI execution",
+      "category": "ai_control",
+      "status": "blocked",
+      "public": false,
+      "authority": "none",
+      "interfaces": ["internal_python"],
+      "profile": "independent_shadow_and_guard_receipts_required",
+      "limitations": ["No production action execution or autonomous engineering authority."],
+      "evidence": [
+        "docs/ai-shadow-solver-controller.md",
+        "docs/structural-analysis-ai-engine-gap-ledger.md"
+      ]
+    },
+    {
+      "id": "backend.rocm_hip_production",
+      "title": "ROCm/HIP production backend",
+      "category": "backend",
+      "status": "blocked",
+      "public": false,
+      "authority": "none",
+      "interfaces": ["hardware_runner"],
+      "profile": "performance_track_after_cpu_sparse_and_external_vv",
+      "limitations": ["Residency, full-path parity, fallback, and hardware provenance gates remain open."],
+      "evidence": [
+        "docs/engine-v2-cpu-hip-fgmres-recurrence.md",
+        "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json",
+        "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_stage4_status.json",
+        "tests/test_engine_v2_hip_fgmres_stage4_status.py"
+      ]
+    }
+  ]
+}

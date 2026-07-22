@@ -120,6 +120,19 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(page.locator('[data-run-blocked]').first()).toBeVisible()
   })
 
+  test('generated capability registry preserves non-public and blocked rows', async ({ page }) => {
+    await open(page)
+    const table = page.locator('[data-wb2-capability-table]')
+    await expect(table).toBeVisible()
+    await expect(table.locator('tbody tr')).toHaveCount(16)
+    await expect(
+      table.locator('[data-capability-id="vv.opensees_level2"]'),
+    ).toHaveAttribute('data-capability-status', 'blocked')
+    await expect(
+      table.locator('[data-capability-id="ai.solver_shadow_control"]'),
+    ).toHaveAttribute('data-capability-status', 'shadow_only')
+  })
+
   test('evidence reader is present (bundle may be unavailable)', async ({ page }) => {
     await open(page)
     await expect(page.getByText('Read-only evidence')).toBeVisible()
@@ -156,7 +169,7 @@ test.describe('Workbench v2 — commercial layout, review draft, benchmarks', ()
   test('left navigation lists the commercial sections in order', async ({ page }) => {
     await open(page)
     await expect(page.locator('[data-wb2-nav]')).toBeVisible()
-    for (const id of ['wb2-sec-project', 'wb2-sec-model', 'wb2-sec-analysis', 'wb2-sec-run', 'wb2-sec-results', 'wb2-sec-evidence', 'wb2-sec-benchmarks', 'wb2-sec-review', 'wb2-sec-export']) {
+    for (const id of ['wb2-sec-project', 'wb2-sec-model', 'wb2-sec-analysis', 'wb2-sec-run', 'wb2-sec-results', 'wb2-sec-capabilities', 'wb2-sec-evidence', 'wb2-sec-benchmarks', 'wb2-sec-review', 'wb2-sec-export']) {
       await expect(page.locator(`[data-wb2-nav-link="${id}"]`)).toBeVisible()
     }
   })

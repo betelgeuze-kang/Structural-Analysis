@@ -63,6 +63,8 @@ def _pr_commands(
     return [
         [_python(), "scripts/check_product_identity.py"],
         [_python(), "scripts/check_repository_governance.py"],
+        [_python(), "scripts/generate_capability_surfaces.py"],
+        [_python(), "scripts/build_product_capabilities_surface.py", "--check"],
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],

@@ -1,54 +1,553 @@
 {
-  "blocked_capability_count": 0,
-  "blocked_capability_register": [],
-  "blocked_capability_register_count": 0,
+  "blocked_capability_count": 4,
+  "blocked_capability_register": [
+    {
+      "blocker_count": 1,
+      "capability_id": "vv.opensees_level2",
+      "capability_kind": "verification",
+      "contract_pass": false,
+      "evidence_artifact_count": 7,
+      "first_blocked_target": "",
+      "first_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
+      "gate_unblock_plan_count": 0,
+      "handoff_slot": {},
+      "operator_intake_artifact": "",
+      "operator_intake_markdown_artifact": "",
+      "operator_intake_packet_status": "",
+      "operator_intake_required_slot_count": 0,
+      "operator_intake_route": "",
+      "queue_priority": 1,
+      "root_cause_tags": [],
+      "state": "blocked",
+      "title": "OpenSees Level 2 verification"
+    },
+    {
+      "blocker_count": 1,
+      "capability_id": "vv.second_solver_level2",
+      "capability_kind": "verification",
+      "contract_pass": false,
+      "evidence_artifact_count": 4,
+      "first_blocked_target": "",
+      "first_next_action": "Fresh pinned CalculiX comparisons pass narrowly, but independent operator attestation, legal review, broader coverage, and a second-solver Level 2 promotion receipt are absent.",
+      "gate_unblock_plan_count": 0,
+      "handoff_slot": {},
+      "operator_intake_artifact": "",
+      "operator_intake_markdown_artifact": "",
+      "operator_intake_packet_status": "",
+      "operator_intake_required_slot_count": 0,
+      "operator_intake_route": "",
+      "queue_priority": 2,
+      "root_cause_tags": [],
+      "state": "blocked",
+      "title": "Second independent solver Level 2 verification"
+    },
+    {
+      "blocker_count": 1,
+      "capability_id": "ai.guarded_execution",
+      "capability_kind": "ai_control",
+      "contract_pass": false,
+      "evidence_artifact_count": 2,
+      "first_blocked_target": "",
+      "first_next_action": "No production action execution or autonomous engineering authority.",
+      "gate_unblock_plan_count": 0,
+      "handoff_slot": {},
+      "operator_intake_artifact": "",
+      "operator_intake_markdown_artifact": "",
+      "operator_intake_packet_status": "",
+      "operator_intake_required_slot_count": 0,
+      "operator_intake_route": "",
+      "queue_priority": 3,
+      "root_cause_tags": [],
+      "state": "blocked",
+      "title": "Guarded AI execution"
+    },
+    {
+      "blocker_count": 1,
+      "capability_id": "backend.rocm_hip_production",
+      "capability_kind": "backend",
+      "contract_pass": false,
+      "evidence_artifact_count": 4,
+      "first_blocked_target": "",
+      "first_next_action": "Residency, full-path parity, fallback, and hardware provenance gates remain open.",
+      "gate_unblock_plan_count": 0,
+      "handoff_slot": {},
+      "operator_intake_artifact": "",
+      "operator_intake_markdown_artifact": "",
+      "operator_intake_packet_status": "",
+      "operator_intake_required_slot_count": 0,
+      "operator_intake_route": "",
+      "queue_priority": 4,
+      "root_cause_tags": [],
+      "state": "blocked",
+      "title": "ROCm/HIP production backend"
+    }
+  ],
+  "blocked_capability_register_count": 4,
   "blockers": [],
-  "capability_count": 1,
+  "canonical_registry": "artifacts/manifests/capabilities.yaml",
+  "capability_count": 16,
   "capability_rows": [
     {
       "blocker_count": 0,
-      "capability_id": "structural_solver_restricted_alpha_surface",
-      "capability_kind": "engineering_core",
+      "capability_id": "model.neutral_canonical",
+      "capability_kind": "model_io",
       "contract_pass": true,
       "evidence_artifacts": [
-        "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json",
-        "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
-        "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json",
-        "implementation/phase1/release_evidence/surface/solver_breadth_report.json",
-        "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json",
-        "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
-        "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
-        "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json"
+        "tests/test_structural_analysis_core_api.py"
       ],
       "next_actions": [],
-      "state": "ready",
+      "state": "supported",
       "summary": {
-        "present_surface_count": 8,
-        "ready_surface_count": 8,
-        "surface_count": 8
+        "authority": "validated_input_contract",
+        "interfaces": [
+          "python_api",
+          "cli"
+        ],
+        "limitations": [
+          "Only schema-declared entities and units are accepted."
+        ],
+        "profile": "structural-analysis-canonical-model.v1",
+        "public": true
       },
-      "title": "Restricted alpha structural solver evidence"
+      "title": "Neutral canonical model"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "io.midas_mgt",
+      "capability_kind": "model_io",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/io/midas/loader.py",
+        "tests/test_structural_analysis_core_api.py"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "input_translation_with_provenance",
+        "interfaces": [
+          "python_api",
+          "cli"
+        ],
+        "limitations": [
+          "Unsupported records remain explicit; exact native round-trip is not closed."
+        ],
+        "profile": "topology_and_supported_property_subset",
+        "public": true
+      },
+      "title": "MIDAS MGT import"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "io.ifc_model_health",
+      "capability_kind": "model_io",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/io/ifc/loader.py",
+        "tests/test_structural_analysis_core_api.py"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "entity_scan_and_model_health_only",
+        "interfaces": [
+          "python_api",
+          "cli"
+        ],
+        "limitations": [
+          "Not a general analysis-ready IFC structural-model compiler."
+        ],
+        "profile": "ifc_step_model_health",
+        "public": true
+      },
+      "title": "IFC model-health import"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "analysis.linear_static",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/authoritative-cpu-linear-solver.md",
+        "tests/test_structural_analysis_core_api.py"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "numerical_and_engineering_within_supported_elements",
+        "interfaces": [
+          "python_api",
+          "cli",
+          "workbench"
+        ],
+        "limitations": [
+          "No general shell, contact, staged-construction, or design-code authority."
+        ],
+        "profile": "cpu_dense_or_scipy_sparse_supported_frame_truss",
+        "public": true
+      },
+      "title": "Linear static analysis"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "analysis.modal",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/phase2-whole-model-modal-analysis.md",
+        "tests/test_whole_model_modal_analysis.py"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "numerical_within_explicit_frame_truss_mass_profile",
+        "interfaces": [
+          "python_api",
+          "cli"
+        ],
+        "limitations": [
+          "The public default is dense and no independent Level 2 comparison is promoted."
+        ],
+        "profile": "dense_symmetric_generalized_eigen_v1",
+        "public": true
+      },
+      "title": "Whole-model modal analysis"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "analysis.linear_buckling",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/phase2-whole-model-linear-buckling.md",
+        "tests/test_whole_model_buckling_analysis.py"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "numerical_within_explicit_preload_profile",
+        "interfaces": [
+          "python_api",
+          "cli"
+        ],
+        "limitations": [
+          "The public default is dense and no independent Level 2 comparison is promoted."
+        ],
+        "profile": "dense_symmetric_generalized_eigen_v1",
+        "public": true
+      },
+      "title": "Whole-model linear buckling"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "analysis.nonlinear_two_bar_truss",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/public-two-bar-nonlinear-truss.md",
+        "src/structural_analysis/api/nonlinear_truss.py"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "bounded_material_geometric_newton",
+        "interfaces": [
+          "python_api",
+          "cli"
+        ],
+        "limitations": [
+          "The profile does not generalize to arbitrary truss or frame topology."
+        ],
+        "profile": "symmetric_two_bar_material_geometric_v1",
+        "public": true
+      },
+      "title": "Nonlinear two-bar truss"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "analysis.nonlinear_rc_fiber_frame_fixed_chord",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/public-rc-fiber-frame.md",
+        "tests/test_public_rc_fiber_frame_api.py"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "exact_reaction_member_section_fiber_recovery",
+        "interfaces": [
+          "python_api",
+          "cli"
+        ],
+        "limitations": [
+          "Serial cantilever only; zero prescribed movement; dense CPU load control."
+        ],
+        "profile": "planar_serial_cantilever_explicit_rectangular_rc.v1",
+        "public": true
+      },
+      "title": "Fixed-chord RC fiber frame"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "analysis.nonlinear_corotational_fiber_frame_2d",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py",
+        "tests/test_stateful_corotational_fiber_frame2d_solver.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_assembly_candidate_no_public_api",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "Assembly-level candidate only; no unified public API, general member-feature contract, independent Level 2 verification, or release promotion."
+        ],
+        "profile": "bounded_planar_stateful_corotational_fiber_frame2d.v1",
+        "public": false
+      },
+      "title": "Corotational 2D fiber-frame assembly"
+    },
+    {
+      "blocker_count": 1,
+      "capability_id": "vv.opensees_level2",
+      "capability_kind": "verification",
+      "contract_pass": false,
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+        "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+        "scripts/run_external_code_to_code_technical_receipt.py",
+        "scripts/run_external_modal_buckling_technical_receipt.py",
+        "tests/test_external_code_to_code_technical_receipt.py",
+        "tests/test_external_modal_buckling_technical_receipt.py",
+        "docs/external-code-to-code-technical-execution.md"
+      ],
+      "next_actions": [
+        "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent."
+      ],
+      "state": "blocked",
+      "summary": {
+        "authority": "none",
+        "interfaces": [
+          "evidence"
+        ],
+        "limitations": [
+          "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent."
+        ],
+        "profile": "independent_operator_promotion_required",
+        "public": false
+      },
+      "title": "OpenSees Level 2 verification"
+    },
+    {
+      "blocker_count": 1,
+      "capability_id": "vv.second_solver_level2",
+      "capability_kind": "verification",
+      "contract_pass": false,
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+        "scripts/run_external_modal_buckling_technical_receipt.py",
+        "tests/test_external_modal_buckling_technical_receipt.py",
+        "docs/external-code-to-code-technical-execution.md"
+      ],
+      "next_actions": [
+        "Fresh pinned CalculiX comparisons pass narrowly, but independent operator attestation, legal review, broader coverage, and a second-solver Level 2 promotion receipt are absent."
+      ],
+      "state": "blocked",
+      "summary": {
+        "authority": "none",
+        "interfaces": [
+          "evidence"
+        ],
+        "limitations": [
+          "Fresh pinned CalculiX comparisons pass narrowly, but independent operator attestation, legal review, broader coverage, and a second-solver Level 2 promotion receipt are absent."
+        ],
+        "profile": "independent_operator_promotion_required",
+        "public": false
+      },
+      "title": "Second independent solver Level 2 verification"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "analysis.cyclic_corotational_fiber_frames",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py",
+        "src/structural_analysis/benchmark/stateful_corotational_concrete_frame_cyclic.py",
+        "src/structural_analysis/benchmark/stateful_corotational_composite_frame_cyclic.py",
+        "src/structural_analysis/benchmark/stateful_corotational_linked_frame_cyclic.py",
+        "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py",
+        "tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py",
+        "tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py",
+        "tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_repository_benchmark_candidate",
+        "interfaces": [
+          "internal_python",
+          "evidence"
+        ],
+        "limitations": [
+          "Repository-generated steel, concrete, composite, and link cases only; no published cyclic acceptance, 3D response, or release authority."
+        ],
+        "profile": "two_member_planar_material_state_commit_rollback.v1",
+        "public": false
+      },
+      "title": "Cyclic corotational fiber-frame benchmarks"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "app.workbench_result_evidence",
+      "capability_kind": "application",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/workbench-v2.md",
+        "tests/frontend/workbench-v2-e2e.spec.ts"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "consumer_only",
+        "interfaces": [
+          "workbench"
+        ],
+        "limitations": [
+          "Workbench display and review decisions never create solver truth."
+        ],
+        "profile": "typed_workbench_case_and_evidence_reader",
+        "public": true
+      },
+      "title": "Workbench result and evidence review"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "ai.solver_shadow_control",
+      "capability_kind": "ai_control",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/ai/shadow_solver_controller.py",
+        "docs/ai-shadow-solver-controller.md",
+        "tests/test_shadow_solver_controller.py"
+      ],
+      "next_actions": [],
+      "state": "shadow_only",
+      "summary": {
+        "authority": "proposal_and_evaluation_only",
+        "interfaces": [
+          "internal_python",
+          "evidence"
+        ],
+        "limitations": [
+          "Shadow proposals are not executed and cannot alter solver truth."
+        ],
+        "profile": "deterministic_shadow_proposal_controller.v1",
+        "public": false
+      },
+      "title": "AI solver shadow control"
+    },
+    {
+      "blocker_count": 1,
+      "capability_id": "ai.guarded_execution",
+      "capability_kind": "ai_control",
+      "contract_pass": false,
+      "evidence_artifacts": [
+        "docs/ai-shadow-solver-controller.md",
+        "docs/structural-analysis-ai-engine-gap-ledger.md"
+      ],
+      "next_actions": [
+        "No production action execution or autonomous engineering authority."
+      ],
+      "state": "blocked",
+      "summary": {
+        "authority": "none",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "No production action execution or autonomous engineering authority."
+        ],
+        "profile": "independent_shadow_and_guard_receipts_required",
+        "public": false
+      },
+      "title": "Guarded AI execution"
+    },
+    {
+      "blocker_count": 1,
+      "capability_id": "backend.rocm_hip_production",
+      "capability_kind": "backend",
+      "contract_pass": false,
+      "evidence_artifacts": [
+        "docs/engine-v2-cpu-hip-fgmres-recurrence.md",
+        "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json",
+        "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_stage4_status.json",
+        "tests/test_engine_v2_hip_fgmres_stage4_status.py"
+      ],
+      "next_actions": [
+        "Residency, full-path parity, fallback, and hardware provenance gates remain open."
+      ],
+      "state": "blocked",
+      "summary": {
+        "authority": "none",
+        "interfaces": [
+          "hardware_runner"
+        ],
+        "limitations": [
+          "Residency, full-path parity, fallback, and hardware provenance gates remain open."
+        ],
+        "profile": "performance_track_after_cpu_sparse_and_external_vv",
+        "public": false
+      },
+      "title": "ROCm/HIP production backend"
     }
   ],
-  "claim_boundary": "This surface is a read-only capability discovery map for the structural analysis solver product. Non-structural product domains are outside this repository's product scope.",
+  "claim_boundary": "This surface is generated from the canonical capability registry and retains supported, bounded-public, experimental, shadow-only, and blocked states without promotion. The structural evidence rollup is diagnostic and cannot override registry authority. Non-structural product domains are outside this repository's product scope.",
   "claim_locked": false,
   "contract_pass": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
-  "first_blocked_capability": {},
-  "first_blocked_capability_id": "",
-  "first_blocked_capability_next_action": "",
+  "engine_version": "structural-analysis@0.3.0",
+  "experimental_capability_count": 2,
+  "first_blocked_capability": {
+    "blocker_count": 1,
+    "capability_id": "vv.opensees_level2",
+    "capability_kind": "verification",
+    "contract_pass": false,
+    "evidence_artifact_count": 7,
+    "first_blocked_target": "",
+    "first_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
+    "gate_unblock_plan_count": 0,
+    "handoff_slot": {},
+    "operator_intake_artifact": "",
+    "operator_intake_markdown_artifact": "",
+    "operator_intake_packet_status": "",
+    "operator_intake_required_slot_count": 0,
+    "operator_intake_route": "",
+    "queue_priority": 1,
+    "root_cause_tags": [],
+    "state": "blocked",
+    "title": "OpenSees Level 2 verification"
+  },
+  "first_blocked_capability_id": "vv.opensees_level2",
+  "first_blocked_capability_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-02T03:36:35.810997+00:00",
+  "generated_at": "2026-07-22T19:24:11.259037+00:00",
   "input_checksums": {
+    "artifacts/manifests/capabilities.yaml": "sha256:d67541a64e60523b1caa2ef6097417153493a9f6a14cd1a1b4f2fa8def83475a",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
-    "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
+    "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:56d86b7b57ffd17def5bf314f9287599ed40a42868726f705150a9d80d8fa740",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
-    "scripts/build_product_capabilities_surface.py": "sha256:f8b5f37ab943fe58dd2b697a639b354f07a36fce2d7868ee599a22ece9afc060"
+    "scripts/build_product_capabilities_surface.py": "sha256:79e3e6fc54e21901f3936e863625cee47ce786fbd6db8b6d27f24b622590907a",
+    "scripts/generate_capability_surfaces.py": "sha256:8630147c23e370148e70886d429fc0cff03745b34ffd72b2788823ec3960a5bc"
   },
   "locked": false,
   "next_actions": [
@@ -62,15 +561,40 @@
     "mutation_allowed": false,
     "route": "/product/capabilities"
   },
-  "ready_capability_count": 1,
+  "ready_capability_count": 9,
   "reason_code": "PASS",
-  "reuse_policy": "product_capabilities_surface_aggregates_structural_solver_evidence",
+  "reuse_policy": "canonical_registry_plus_structural_solver_evidence_rollup",
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "e149ae7bf61d3e03e697fb5c1dac1f3377994e86",
+  "shadow_only_capability_count": 1,
+  "source_commit_sha": "5648a0b9a4d936afdacc68625e5e0ea7c2fb41de",
+  "source_evidence_rollup": {
+    "blocker_count": 0,
+    "capability_id": "structural_solver_restricted_alpha_surface",
+    "capability_kind": "engineering_core",
+    "contract_pass": true,
+    "evidence_artifacts": [
+      "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json",
+      "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
+      "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json",
+      "implementation/phase1/release_evidence/surface/solver_breadth_report.json",
+      "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json",
+      "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
+      "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
+      "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json"
+    ],
+    "next_actions": [],
+    "state": "ready",
+    "summary": {
+      "present_surface_count": 8,
+      "ready_surface_count": 8,
+      "surface_count": 8
+    },
+    "title": "Restricted alpha structural solver evidence"
+  },
   "status": "ready",
-  "summary_line": "Product capabilities surface: READY | capabilities=1 | ready=1 | blocked=0",
+  "summary_line": "Product capabilities surface: READY | capabilities=16 | ready=9 | experimental=2 | shadow_only=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
   "surface_kind": "product_capabilities_surface",
   "surface_scope": "product_capability_discovery"

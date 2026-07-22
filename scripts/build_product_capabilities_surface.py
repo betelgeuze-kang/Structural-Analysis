@@ -15,6 +15,10 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from generate_capability_surfaces import (  # noqa: E402
+    REGISTRY_PATH,
+    load_registry,
+)
 
 
 SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
@@ -37,6 +41,18 @@ SCHEMA_VERSION = "product-capabilities-surface.v1"
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _strip_volatile(payload: Any) -> Any:
+    if isinstance(payload, dict):
+        return {
+            key: _strip_volatile(value)
+            for key, value in payload.items()
+            if key not in {"generated_at", "source_commit_sha"}
+        }
+    if isinstance(payload, list):
+        return [_strip_volatile(value) for value in payload]
+    return payload
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -194,7 +210,7 @@ def _blocked_capability_register(
     blocked_rows = [
         row
         for row in capability_rows
-        if str(row.get("state") or "") != "ready"
+        if str(row.get("state") or "") == "blocked"
     ]
     register: list[dict[str, Any]] = []
     for index, row in enumerate(blocked_rows, start=1):
@@ -292,16 +308,48 @@ def _structural_solver_capability(repo_root: Path) -> dict[str, Any]:
 def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_product_capabilities_surface.py"),
+        Path("scripts/generate_capability_surfaces.py"),
+        REGISTRY_PATH,
         *STRUCTURAL_SURFACE_PATHS,
     ]
 
 
 def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, Any]:
+    registry = load_registry(repo_root)
     capability_rows = [
-        _structural_solver_capability(repo_root),
+        _capability_row(
+            capability_id=str(row["id"]),
+            title=str(row["title"]),
+            capability_kind=str(row["category"]),
+            state=str(row["status"]),
+            evidence_artifacts=[Path(str(path)) for path in row["evidence"]],
+            contract_pass=str(row["status"]) != "blocked",
+            blocker_count=1 if str(row["status"]) == "blocked" else 0,
+            next_actions=(
+                [str(value) for value in row["limitations"]]
+                if str(row["status"]) == "blocked"
+                else []
+            ),
+            summary={
+                "public": bool(row["public"]),
+                "authority": str(row["authority"]),
+                "interfaces": [str(value) for value in row["interfaces"]],
+                "profile": str(row["profile"]),
+                "limitations": [str(value) for value in row["limitations"]],
+            },
+        )
+        for row in registry["capabilities"]
     ]
-    ready_count = sum(1 for row in capability_rows if row["state"] == "ready")
-    blocked_rows = [row for row in capability_rows if row["state"] != "ready"]
+    ready_count = sum(
+        1 for row in capability_rows if row["state"] in {"supported", "bounded_public"}
+    )
+    blocked_rows = [row for row in capability_rows if row["state"] == "blocked"]
+    experimental_count = sum(
+        1 for row in capability_rows if row["state"] == "experimental"
+    )
+    shadow_only_count = sum(
+        1 for row in capability_rows if row["state"] == "shadow_only"
+    )
     blocked_capability_register = _blocked_capability_register(capability_rows)
     first_blocked_capability = (
         blocked_capability_register[0] if blocked_capability_register else {}
@@ -311,7 +359,7 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
         **release_evidence_metadata(
             input_paths=_input_paths(),
             reused_evidence=False,
-            reuse_policy="product_capabilities_surface_aggregates_structural_solver_evidence",
+            reuse_policy="canonical_registry_plus_structural_solver_evidence_rollup",
             repo_root=repo_root,
         ),
         "surface_id": "product_capabilities_surface",
@@ -322,11 +370,15 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
         "contract_pass": True,
         "locked": False,
         "claim_locked": False,
-        "product_capabilities_ready": False,
+        "product_capabilities_ready": not blocked_rows,
+        "canonical_registry": REGISTRY_PATH.as_posix(),
         "capability_count": len(capability_rows),
         "ready_capability_count": ready_count,
         "blocked_capability_count": len(blocked_rows),
+        "experimental_capability_count": experimental_count,
+        "shadow_only_capability_count": shadow_only_count,
         "capability_rows": capability_rows,
+        "source_evidence_rollup": _structural_solver_capability(repo_root),
         "blocked_capability_register_count": len(blocked_capability_register),
         "first_blocked_capability_id": str(
             first_blocked_capability.get("capability_id") or ""
@@ -352,12 +404,15 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
         "summary_line": (
             "Product capabilities surface: READY | "
             f"capabilities={len(capability_rows)} | ready={ready_count} | "
+            f"experimental={experimental_count} | shadow_only={shadow_only_count} | "
             f"blocked={len(blocked_rows)}"
         ),
         "claim_boundary": (
-            "This surface is a read-only capability discovery map for the structural "
-            "analysis solver product. Non-structural product domains are outside this "
-            "repository's product scope."
+            "This surface is generated from the canonical capability registry and "
+            "retains supported, bounded-public, experimental, shadow-only, and blocked "
+            "states without promotion. The structural evidence rollup is diagnostic "
+            "and cannot override registry authority. Non-structural product domains "
+            "are outside this repository's product scope."
         ),
     }
 
@@ -374,16 +429,48 @@ def write_product_capabilities_surface(
     return payload
 
 
+def check_product_capabilities_surface(
+    *,
+    repo_root: Path = ROOT,
+    out: Path = DEFAULT_OUT,
+) -> tuple[bool, str]:
+    expected = build_product_capabilities_surface(repo_root=repo_root)
+    resolved = out if out.is_absolute() else repo_root / out
+    if not resolved.exists():
+        return False, f"product_capabilities_surface_missing:{out.as_posix()}"
+    try:
+        existing = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return (
+            False,
+            "product_capabilities_surface_unreadable:"
+            f"{out.as_posix()}:{exc.__class__.__name__}",
+        )
+    if not isinstance(existing, dict):
+        return False, "product_capabilities_surface_not_object"
+    if _strip_volatile(existing) != _strip_volatile(expected):
+        return False, "product_capabilities_surface_mismatch"
+    return True, "product_capabilities_surface_consistent"
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
+    parser.add_argument("--check", action="store_true")
     parser.add_argument("--json", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.check:
+        ok, message = check_product_capabilities_surface(
+            repo_root=args.repo_root,
+            out=args.out,
+        )
+        print(f"Product capabilities surface check: {message}")
+        return 0 if ok else 1
     payload = write_product_capabilities_surface(repo_root=args.repo_root, out=args.out)
     print(_json_text(payload), end="") if args.json else print(payload["summary_line"])
     return 0

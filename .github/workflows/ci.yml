@@ -11,6 +11,7 @@ on:
     paths:
       - "implementation/**"
       - "artifacts/manifests/product_identity.json"
+      - "artifacts/manifests/capabilities.yaml"
       - "LICENSE"
       - "SECURITY.md"
       - "CONTRIBUTING.md"
@@ -35,6 +36,7 @@ on:
     paths:
       - "implementation/**"
       - "artifacts/manifests/product_identity.json"
+      - "artifacts/manifests/capabilities.yaml"
       - "LICENSE"
       - "SECURITY.md"
       - "CONTRIBUTING.md"

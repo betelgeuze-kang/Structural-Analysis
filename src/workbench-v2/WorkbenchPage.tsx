@@ -18,6 +18,7 @@ import { ExportPanel } from './components/ExportPanel'
 import { EvidenceReaderPanel } from './components/EvidenceReaderPanel'
 import { BenchmarkBrowser } from './components/BenchmarkBrowser'
 import { ComparePanel } from './components/ComparePanel'
+import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
@@ -234,7 +235,10 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
         <ComparePanel caseV2={caseV2} rows={comparisonRows} onClear={() => setCompareIds([])} />
       </div>
 
-      {/* Verification layer: Evidence + Benchmarks */}
+      {/* Verification layer: capabilities + evidence + benchmarks */}
+      <div id="wb2-sec-capabilities" className="wb2-section">
+        <CapabilitySupportPanel />
+      </div>
       <div id="wb2-sec-evidence" className="wb2-section">
         <EvidenceReaderPanel />
       </div>
