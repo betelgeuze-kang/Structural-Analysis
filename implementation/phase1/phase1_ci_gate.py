@@ -37,7 +37,7 @@ REASON_CODES = {
     "ERR_BIFURCATION_CONTRACT_FAIL": "bifurcation detector contract missing trigger readiness",
     "ERR_RUST_ONNX_CONTRACT_FAIL": "rust/hip/onnx native contract failed",
     "ERR_WINNING_TICKET_FAIL": "winning-ticket backprop contract failed",
-    "ERR_RUST_MD3BEAD_PARITY_FAIL": "rust 3-bead hook is not parity-equivalent to python reference",
+    "ERR_STRUCTURAL_RELAXATION_FAIL": "structural three-lane relaxation contract failed",
     "ERR_LJ_MAPPING_FAIL": "nonlinear Lennard-Jones mapping contract failed",
     "ERR_DYNAMIC_TIME_HISTORY_FAIL": "dynamic time-history contract failed",
     "ERR_CACHE_PROFILE_FAIL": "branch64 microbatch cache profile contract failed",
@@ -1152,7 +1152,7 @@ def _validate_extended_contracts(
     bifurcation_path: str,
     rust_onnx_path: str,
     winning_ticket_path: str,
-    rust_md3bead_parity_path: str,
+    structural_relaxation_path: str,
     lj_mapping_path: str,
     dynamic_time_history_path: str,
     cache_profile_path: str,
@@ -1189,7 +1189,7 @@ def _validate_extended_contracts(
     bifurcation = _load_json(bifurcation_path)
     rust_onnx = _load_json(rust_onnx_path)
     winning_ticket = _load_json(winning_ticket_path)
-    rust_parity = _load_json(rust_md3bead_parity_path)
+    structural_relaxation = _load_json(structural_relaxation_path)
     lj_mapping = _load_json(lj_mapping_path)
     dynamic_time_history = _load_json(dynamic_time_history_path)
     cache_profile = _load_json(cache_profile_path)
@@ -1236,7 +1236,21 @@ def _validate_extended_contracts(
         and bool(tb.get("weighted_aggregation", False))
         and int(tb.get("graph_count", 0)) == top_k
     )
-    rust_md3bead_parity_ok = bool(rust_parity.get("contract_pass", False))
+    relaxation_summary = structural_relaxation.get("summary", {})
+    relaxation_runs = structural_relaxation.get("runs", [])
+    structural_relaxation_ok = bool(
+        relaxation_runs
+        and relaxation_summary.get("all_converged", False)
+        and relaxation_summary.get("within_5pct_variability", False)
+        and isinstance(relaxation_summary.get("models_used"), list)
+        and set(relaxation_summary.get("models_used", []))
+        == {"three_lane_frame_soa"}
+        and all(
+            isinstance(row, dict)
+            and str(row.get("model", "")) == "three_lane_frame_soa"
+            for row in relaxation_runs
+        )
+    )
     lj_mapping_ok = bool(lj_mapping.get("contract_pass", False))
     dynamic_time_history_ok = bool(dynamic_time_history.get("contract_pass", False)) and bool(dynamic_time_history.get("checks", {}).get("newmark_stability_pass", False))
     cache_profile_ok = bool(cache_profile.get("contract_pass", False)) and bool(cache_profile.get("checks", {}).get("microbatch_available", False))
@@ -1321,7 +1335,7 @@ def _validate_extended_contracts(
     fsum_ok = bool(phasef_summary.get("contract_pass", False))
     phasef_resilience_ok = bool(f1_ok and f2_ok and f3_ok and fsum_ok)
 
-    return energy_ok, meta_ood_ok, buckling_ok, benchmark_ok, branching_ok, bifurcation_ok, rust_onnx_ok, winning_ticket_ok, rust_md3bead_parity_ok, lj_mapping_ok, dynamic_time_history_ok, cache_profile_ok, p0_engine_perf_ok, p0_core_gap_ok, noise_stress_ok, scaleout_io_ok, phasea_contract_ok, phaseb_track_ok, phased_multidomain_ok, phasee_integrated_ok, phasef_resilience_ok
+    return energy_ok, meta_ood_ok, buckling_ok, benchmark_ok, branching_ok, bifurcation_ok, rust_onnx_ok, winning_ticket_ok, structural_relaxation_ok, lj_mapping_ok, dynamic_time_history_ok, cache_profile_ok, p0_engine_perf_ok, p0_core_gap_ok, noise_stress_ok, scaleout_io_ok, phasea_contract_ok, phaseb_track_ok, phased_multidomain_ok, phasee_integrated_ok, phasef_resilience_ok
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1340,7 +1354,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--bifurcation", default="implementation/phase1/bifurcation_detector_report.json")
     p.add_argument("--rust-onnx", default="implementation/phase1/rust_onnx_native_contract_report.json")
     p.add_argument("--winning-ticket", default="implementation/phase1/winning_ticket_backprop_report.json")
-    p.add_argument("--rust-md3bead-parity", default="implementation/phase1/rust_md3bead_parity_report.json")
+    p.add_argument(
+        "--structural-relaxation",
+        default="implementation/phase1/step_outputs/step1_fire_loop.json",
+    )
     p.add_argument("--lj-mapping", default="implementation/phase1/nonlinear_lj_mapping_report.json")
     p.add_argument("--dynamic-time-history", default="implementation/phase1/dynamic_time_history_report.json")
     p.add_argument("--cache-profile", default="implementation/phase1/branch64_microbatch_profile_report.json")
@@ -1492,7 +1509,7 @@ def main(argv: list[str] | None = None) -> int:
             "implementation/phase1/bifurcation_detector_report.json",
             "implementation/phase1/rust_onnx_native_contract_report.json",
             "implementation/phase1/winning_ticket_backprop_report.json",
-            "implementation/phase1/rust_md3bead_parity_report.json",
+            "implementation/phase1/step_outputs/step1_fire_loop.json",
             "implementation/phase1/nonlinear_lj_mapping_report.json",
             "implementation/phase1/dynamic_time_history_report.json",
             "implementation/phase1/branch64_microbatch_profile_report.json",
@@ -1686,9 +1703,9 @@ def main(argv: list[str] | None = None) -> int:
     inputs_ok, input_reason = _validate_inputs(strict, rca)
     contracts_ok, missing_contracts = _validate_contract_artifacts(args.required_contracts)
     priority_ok, priority_reason, priority_data = _validate_priority3(args.priority3)
-    energy_ok, meta_ood_ok, buckling_ok, benchmark_ok, branching_ok, bifurcation_ok, rust_onnx_ok, winning_ticket_ok, rust_md3bead_parity_ok, lj_mapping_ok, dynamic_time_history_ok, cache_profile_ok, p0_engine_perf_ok, p0_core_gap_ok, noise_stress_ok, scaleout_io_ok, phasea_contract_ok, phaseb_track_ok, phased_multidomain_ok, phasee_integrated_ok, phasef_resilience_ok = _validate_extended_contracts(
+    energy_ok, meta_ood_ok, buckling_ok, benchmark_ok, branching_ok, bifurcation_ok, rust_onnx_ok, winning_ticket_ok, structural_relaxation_ok, lj_mapping_ok, dynamic_time_history_ok, cache_profile_ok, p0_engine_perf_ok, p0_core_gap_ok, noise_stress_ok, scaleout_io_ok, phasea_contract_ok, phaseb_track_ok, phased_multidomain_ok, phasee_integrated_ok, phasef_resilience_ok = _validate_extended_contracts(
         args.physics_residual, args.meta_learning, args.buckling, args.benchmark,
-        args.branching, args.bifurcation, args.rust_onnx, args.winning_ticket, args.rust_md3bead_parity, args.lj_mapping, args.dynamic_time_history, args.cache_profile, args.p0_engine_perf, args.p0_core_gap, args.noise_stress, args.scaleout_io, args.phasea_contract, args.phaseb_track_lf, args.phaseb_moving_load, args.phaseb_vti, args.phaseb_irregularity, args.phaseb_summary, args.phased_track_dataset, args.phased_tunnel_dataset, args.phased_attention, args.phased_tgnn, args.phased_summary, args.phasee_substructuring, args.phasee_attenuation, args.phasee_compliance, args.phasee_whitebox, args.phasee_summary, args.phasef_l3, args.phasef_phase_correction, args.phasef_soil_ood, args.phasef_summary
+        args.branching, args.bifurcation, args.rust_onnx, args.winning_ticket, args.structural_relaxation, args.lj_mapping, args.dynamic_time_history, args.cache_profile, args.p0_engine_perf, args.p0_core_gap, args.noise_stress, args.scaleout_io, args.phasea_contract, args.phaseb_track_lf, args.phaseb_moving_load, args.phaseb_vti, args.phaseb_irregularity, args.phaseb_summary, args.phased_track_dataset, args.phased_tunnel_dataset, args.phased_attention, args.phased_tgnn, args.phased_summary, args.phasee_substructuring, args.phasee_attenuation, args.phasee_compliance, args.phasee_whitebox, args.phasee_summary, args.phasef_l3, args.phasef_phase_correction, args.phasef_soil_ood, args.phasef_summary
     )
     phase3_pipeline = _load_json(args.phase3_pipeline)
     topology_gate = _load_json(args.topology_gate)
@@ -2610,8 +2627,8 @@ def main(argv: list[str] | None = None) -> int:
         reason_code = "ERR_RUST_ONNX_CONTRACT_FAIL"
     elif not winning_ticket_ok:
         reason_code = "ERR_WINNING_TICKET_FAIL"
-    elif not rust_md3bead_parity_ok:
-        reason_code = "ERR_RUST_MD3BEAD_PARITY_FAIL"
+    elif not structural_relaxation_ok:
+        reason_code = "ERR_STRUCTURAL_RELAXATION_FAIL"
     elif not lj_mapping_ok:
         reason_code = "ERR_LJ_MAPPING_FAIL"
     elif not dynamic_time_history_ok:
@@ -2764,7 +2781,7 @@ def main(argv: list[str] | None = None) -> int:
         "bifurcation_contract_pass": bifurcation_ok,
         "rust_onnx_contract_pass": rust_onnx_ok,
         "winning_ticket_contract_pass": winning_ticket_ok,
-        "rust_md3bead_parity_pass": rust_md3bead_parity_ok,
+        "structural_relaxation_pass": structural_relaxation_ok,
         "lj_mapping_contract_pass": lj_mapping_ok,
         "dynamic_time_history_pass": dynamic_time_history_ok,
         "cache_profile_pass": cache_profile_ok,
@@ -3098,7 +3115,7 @@ def main(argv: list[str] | None = None) -> int:
             "irregular_structure_collection_gate": args.irregular_structure_collection_gate_report,
             "irregular_top5_execution_manifest": args.irregular_top5_execution_manifest,
         },
-        "all_pass": strict_ok and host_copy_ok and contracts_ok and energy_ok and meta_ood_ok and buckling_ok and benchmark_ok and branching_ok and bifurcation_ok and rust_onnx_ok and winning_ticket_ok and rust_md3bead_parity_ok and lj_mapping_ok and dynamic_time_history_ok and cache_profile_ok and p0_engine_perf_ok and p0_core_gap_ok and hip_kernel_smoke_ok and noise_stress_ok and scaleout_io_ok and phase3_real_source_ok and topology_gate_ok and partitioned_scaleout_ok and sync_stress_ok and nightly_10m_ok and nightly_10m_repro_ok and ndtha_long_profile_ok and noise_convergence_ok and commercial_csv_gate_ok and midas_mgt_conversion_ok and midas_section_library_ok and midas_kds_geometry_bridge_ok and midas_loadcomb_roundtrip_ok and solver_breadth_ok and element_material_breadth_ok and material_constitutive_ok and midas_kds_row_provenance_export_ok and contact_readiness_ok and (structural_contact_ok if bool(args.require_structural_contact) else True) and general_fe_contact_matrix_ok and surface_interaction_benchmark_ok and midas_interoperability_ok and korean_source_ingest_gate_ok and midas_native_roundtrip_ok and irregular_structure_collection_gate_ok and nonlinear_generalization_ok and workflow_productization_ok and commercial_readiness_ok and real_source_multi_ok and nonlinear_engine_ok and pushover_stress_ok and ndtha_stress_ok and ndtha_residual_ok and pbd_review_ok and global_authority_ok and wind_benchmark_ok and ssi_boundary_ok and damper_validation_ok and kds_frontend_ok and construction_sequence_ok and flexible_diaphragm_ok and repro_version_lock_ok and release_registry_ok and performance_profiling_ok and solver_truthfulness_ok and hardest_external_10case_kickoff_ok and rc_benchmark_lock_ok and (solver_hip_e2e_ok if bool(args.require_solver_hip_e2e) else True) and gpu_strict_ok and phasea_contract_ok and phaseb_track_ok and phased_multidomain_ok and phasee_integrated_ok and phasef_resilience_ok and priority_ok,
+        "all_pass": strict_ok and host_copy_ok and contracts_ok and energy_ok and meta_ood_ok and buckling_ok and benchmark_ok and branching_ok and bifurcation_ok and rust_onnx_ok and winning_ticket_ok and structural_relaxation_ok and lj_mapping_ok and dynamic_time_history_ok and cache_profile_ok and p0_engine_perf_ok and p0_core_gap_ok and hip_kernel_smoke_ok and noise_stress_ok and scaleout_io_ok and phase3_real_source_ok and topology_gate_ok and partitioned_scaleout_ok and sync_stress_ok and nightly_10m_ok and nightly_10m_repro_ok and ndtha_long_profile_ok and noise_convergence_ok and commercial_csv_gate_ok and midas_mgt_conversion_ok and midas_section_library_ok and midas_kds_geometry_bridge_ok and midas_loadcomb_roundtrip_ok and solver_breadth_ok and element_material_breadth_ok and material_constitutive_ok and midas_kds_row_provenance_export_ok and contact_readiness_ok and (structural_contact_ok if bool(args.require_structural_contact) else True) and general_fe_contact_matrix_ok and surface_interaction_benchmark_ok and midas_interoperability_ok and korean_source_ingest_gate_ok and midas_native_roundtrip_ok and irregular_structure_collection_gate_ok and nonlinear_generalization_ok and workflow_productization_ok and commercial_readiness_ok and real_source_multi_ok and nonlinear_engine_ok and pushover_stress_ok and ndtha_stress_ok and ndtha_residual_ok and pbd_review_ok and global_authority_ok and wind_benchmark_ok and ssi_boundary_ok and damper_validation_ok and kds_frontend_ok and construction_sequence_ok and flexible_diaphragm_ok and repro_version_lock_ok and release_registry_ok and performance_profiling_ok and solver_truthfulness_ok and hardest_external_10case_kickoff_ok and rc_benchmark_lock_ok and (solver_hip_e2e_ok if bool(args.require_solver_hip_e2e) else True) and gpu_strict_ok and phasea_contract_ok and phaseb_track_ok and phased_multidomain_ok and phasee_integrated_ok and phasef_resilience_ok and priority_ok,
         "reason_code": reason_code,
         "reason": REASON_CODES[reason_code],
     }

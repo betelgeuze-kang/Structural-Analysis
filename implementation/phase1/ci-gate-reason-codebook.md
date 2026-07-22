@@ -22,7 +22,7 @@
 | `ERR_BIFURCATION_CONTRACT_FAIL` | Bifurcation detector contract invalid/unready. | Regenerate bifurcation detector report and verify trigger structure. |
 | `ERR_RUST_ONNX_CONTRACT_FAIL` | Rust/HIP/ONNX native contract failed. | Recheck native integration contract checks and regenerate report. |
 | `ERR_WINNING_TICKET_FAIL` | Winning-ticket targeted backprop contract failed. | Regenerate winning-ticket report and ensure `selection.strategy=topk_weighted_backprop`, `top_k>=2`, and `graph_count==top_k`. |
-| `ERR_RUST_MD3BEAD_PARITY_FAIL` | Rust 3-Bead hook and Python reference are not parity-equivalent. | Re-run parity validation and align Rust/Python forcefield math. |
+| `ERR_STRUCTURAL_RELAXATION_FAIL` | Three-lane structural relaxation did not converge reproducibly or reported a non-structural model. | Re-run the structural relaxation and runtime-hook tests, then refresh the step-1 artifact. |
 | `ERR_LJ_MAPPING_FAIL` | Nonlinear Lennard-Jones mapping contract failed. | Re-run LJ mapping validator and recalibrate yield/softening/dissipation parameters. |
 | `ERR_DYNAMIC_TIME_HISTORY_FAIL` | Dynamic time-history contract failed. | Re-run Newmark/Rayleigh validation with valid ground-motion CSV and inspect stability/energy checks. |
 | `ERR_CACHE_PROFILE_FAIL` | Branch64 microbatch cache profile contract failed. | Re-run cache profile with proper hook command and verify at least one cache-safe chunk exists. |
@@ -63,7 +63,7 @@
 - `bifurcation_contract_pass`
 - `rust_onnx_contract_pass`
 - `winning_ticket_contract_pass`
-- `rust_md3bead_parity_pass`
+- `structural_relaxation_pass`
 - `lj_mapping_contract_pass`
 - `dynamic_time_history_pass`
 - `cache_profile_pass`

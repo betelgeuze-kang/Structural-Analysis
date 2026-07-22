@@ -5,99 +5,99 @@
       "case": "dead_only",
       "converged": true,
       "steps": 42,
-      "final_force_norm": 0.00966478892859904,
-      "max_unbalanced_force": 75.15339660729623,
-      "kinetic_energy": 591.1668870372739,
-      "system_temperature": 1.382846519385436,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.009664788658257938,
+      "max_unbalanced_force": 75.15339660661373,
+      "kinetic_energy": 591.166922986691,
+      "system_temperature": 1.3828466034776399,
+      "model": "three_lane_frame_soa"
     },
     {
       "rep": 1,
       "case": "dead_wind",
       "converged": true,
       "steps": 38,
-      "final_force_norm": 0.009831633504804215,
-      "max_unbalanced_force": 114.67617034967874,
-      "kinetic_energy": 1013.1168265271267,
-      "system_temperature": 2.369863921700881,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.009831633260401117,
+      "max_unbalanced_force": 114.67617034931861,
+      "kinetic_energy": 1013.1167812868821,
+      "system_temperature": 2.3698638158757475,
+      "model": "three_lane_frame_soa"
     },
     {
       "rep": 1,
       "case": "dead_wind_seismic",
       "converged": true,
       "steps": 35,
-      "final_force_norm": 0.009861142135739204,
-      "max_unbalanced_force": 166.14051818886148,
-      "kinetic_energy": 1675.7395597115526,
-      "system_temperature": 3.91985861920831,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.00986114277347532,
+      "max_unbalanced_force": 166.14053344751218,
+      "kinetic_energy": 1675.7394631757602,
+      "system_temperature": 3.919858393393591,
+      "model": "three_lane_frame_soa"
     },
     {
       "rep": 2,
       "case": "dead_only",
       "converged": true,
       "steps": 42,
-      "final_force_norm": 0.00966478892859904,
-      "max_unbalanced_force": 75.15339660729623,
-      "kinetic_energy": 591.1668870372739,
-      "system_temperature": 1.382846519385436,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.009664788658257938,
+      "max_unbalanced_force": 75.15339660661373,
+      "kinetic_energy": 591.166922986691,
+      "system_temperature": 1.3828466034776399,
+      "model": "three_lane_frame_soa"
     },
     {
       "rep": 2,
       "case": "dead_wind",
       "converged": true,
       "steps": 38,
-      "final_force_norm": 0.009831633504804215,
-      "max_unbalanced_force": 114.67617034967874,
-      "kinetic_energy": 1013.1168265271267,
-      "system_temperature": 2.369863921700881,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.009831633260401117,
+      "max_unbalanced_force": 114.67617034931861,
+      "kinetic_energy": 1013.1167812868821,
+      "system_temperature": 2.3698638158757475,
+      "model": "three_lane_frame_soa"
     },
     {
       "rep": 2,
       "case": "dead_wind_seismic",
       "converged": true,
       "steps": 35,
-      "final_force_norm": 0.009861142135739204,
-      "max_unbalanced_force": 166.14051818886148,
-      "kinetic_energy": 1675.7395597115526,
-      "system_temperature": 3.91985861920831,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.00986114277347532,
+      "max_unbalanced_force": 166.14053344751218,
+      "kinetic_energy": 1675.7394631757602,
+      "system_temperature": 3.919858393393591,
+      "model": "three_lane_frame_soa"
     },
     {
       "rep": 3,
       "case": "dead_only",
       "converged": true,
       "steps": 42,
-      "final_force_norm": 0.00966478892859904,
-      "max_unbalanced_force": 75.15339660729623,
-      "kinetic_energy": 591.1668870372739,
-      "system_temperature": 1.382846519385436,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.009664788658257938,
+      "max_unbalanced_force": 75.15339660661373,
+      "kinetic_energy": 591.166922986691,
+      "system_temperature": 1.3828466034776399,
+      "model": "three_lane_frame_soa"
     },
     {
       "rep": 3,
       "case": "dead_wind",
       "converged": true,
       "steps": 38,
-      "final_force_norm": 0.009831633504804215,
-      "max_unbalanced_force": 114.67617034967874,
-      "kinetic_energy": 1013.1168265271267,
-      "system_temperature": 2.369863921700881,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.009831633260401117,
+      "max_unbalanced_force": 114.67617034931861,
+      "kinetic_energy": 1013.1167812868821,
+      "system_temperature": 2.3698638158757475,
+      "model": "three_lane_frame_soa"
     },
     {
       "rep": 3,
       "case": "dead_wind_seismic",
       "converged": true,
       "steps": 35,
-      "final_force_norm": 0.009861142135739204,
-      "max_unbalanced_force": 166.14051818886148,
-      "kinetic_energy": 1675.7395597115526,
-      "system_temperature": 3.91985861920831,
-      "model": "3bead_ca_sc_cb"
+      "final_force_norm": 0.00986114277347532,
+      "max_unbalanced_force": 166.14053344751218,
+      "kinetic_energy": 1675.7394631757602,
+      "system_temperature": 3.919858393393591,
+      "model": "three_lane_frame_soa"
     }
   ],
   "summary": {
@@ -112,7 +112,7 @@
     "within_5pct_variability": true,
     "engine_hook_used": true,
     "models_used": [
-      "3bead_ca_sc_cb"
+      "three_lane_frame_soa"
     ]
   }
 }

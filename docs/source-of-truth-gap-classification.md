@@ -19,7 +19,7 @@ No `no-op` candidates were found in the classification pass: every row maps eith
 Aggregator freshness policy:
 
 - Leaf evidence such as direct validation reports can be listed in `report_release_evidence_freshness.py`.
-- Release-decision source-of-truth artifacts such as `public_benchmark_source_of_truth.json` can also be listed when stale state would directly affect `/goal` release cockpit KPIs.
+- 구조 해석 release-decision source-of-truth artifact는 stale 상태가 `/goal` release cockpit KPI에 직접 영향을 줄 때 freshness 대상으로 둘 수 있다.
 - Aggregators should not become direct leaf freshness rows unless they are the only source of a release decision. They must instead carry source tracking for their direct upstream artifacts and keep upstream blocked/proxy/fallback state visible.
 - Aggregator outputs must not make a release gate greener than their upstream inputs. A stale or missing upstream checksum is a refresh-required condition, not a closure signal.
 - Regression guard: `tests/test_report_release_evidence_freshness.py` asserts that the two fixed candidates are freshness leaf rows and the three aggregator-review candidates are excluded from `DEFAULT_ARTIFACTS`; `tests/test_build_source_of_truth_gap_classification.py` asserts that the standalone artifact live-checks the accuracy scorecard science fields and the aggregator source-tracking policy.

@@ -43,7 +43,6 @@ DEFAULT_CONFIG = {
     "comparison_out": "implementation/phase1/topk_comparison_experiment_report.json",
     "suite_out": "implementation/phase1/topk_precision_suite_report.json",
     "strict_probe_out": "implementation/phase1/zero_copy_real_probe_report_strict.json",
-    "rust_parity_out": "implementation/phase1/rust_md3bead_parity_report.json",
     "lj_mapping_out": "implementation/phase1/nonlinear_lj_mapping_report.json",
     "dynamic_time_history_out": "implementation/phase1/dynamic_time_history_report.json",
     "microbatch_profile_out": "implementation/phase1/branch64_microbatch_profile_report.json",
@@ -68,10 +67,10 @@ DEFAULT_CONFIG = {
     "artifact_root": "implementation/phase1/experiments",
     "artifact_label": None,
     "step_outputs_dir": "implementation/phase1/step_outputs",
-    "producer_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "producer_cmd": "python3 implementation/phase1/structural_runtime_hook.py",
     "allow_cpu_required_probe": True,
-    "engine_hook_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
-    "runtime_hook_cmd": "python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "engine_hook_cmd": "python3 implementation/phase1/structural_runtime_hook.py",
+    "runtime_hook_cmd": "python3 implementation/phase1/structural_runtime_hook.py",
     "microbatch_branches": 64,
     "microbatch_chunk_candidates": "64,32,16,8,4",
     "microbatch_repeats": 2,
@@ -482,18 +481,6 @@ def main() -> None:
         steps,
     )
     _run_step(
-        "rust_md3bead_parity",
-        [
-            sys.executable,
-            "implementation/phase1/validate_md3bead_rust_parity.py",
-            "--rust-hook-cmd",
-            str(cfg["engine_hook_cmd"]),
-            "--out",
-            str(cfg["rust_parity_out"]),
-        ],
-        steps,
-    )
-    _run_step(
         "phase1_ci_gate",
         [
             sys.executable,
@@ -506,8 +493,8 @@ def main() -> None:
             "implementation/phase1/priority3_summary.json",
             "--benchmark",
             str(cfg["benchmark_out"]),
-            "--rust-md3bead-parity",
-            str(cfg["rust_parity_out"]),
+            "--structural-relaxation",
+            str(Path(cfg["step_outputs_dir"]) / "step1_fire_loop.json"),
             "--lj-mapping",
             str(cfg["lj_mapping_out"]),
             "--dynamic-time-history",
@@ -561,8 +548,8 @@ def main() -> None:
             str(Path(cfg["step_outputs_dir"]) / "step5_rca_summary.json"),
             "--benchmark",
             str(cfg["benchmark_out"]),
-            "--rust-parity",
-            str(cfg["rust_parity_out"]),
+            "--structural-relaxation",
+            str(Path(cfg["step_outputs_dir"]) / "step1_fire_loop.json"),
             "--lj-mapping",
             str(cfg["lj_mapping_out"]),
             "--dynamic-time-history",
@@ -649,7 +636,9 @@ def main() -> None:
             "ci": cfg["ci_out"],
             "ci_manifest": cfg["ci_manifest"],
             "validation": cfg["validation_out"],
-            "rust_parity": cfg["rust_parity_out"],
+            "structural_relaxation": str(
+                Path(cfg["step_outputs_dir"]) / "step1_fire_loop.json"
+            ),
             "lj_mapping": cfg["lj_mapping_out"],
             "dynamic_time_history": cfg["dynamic_time_history_out"],
             "microbatch_profile": cfg["microbatch_profile_out"],

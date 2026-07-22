@@ -19,7 +19,7 @@
   "bifurcation_contract_pass": true,
   "rust_onnx_contract_pass": true,
   "winning_ticket_contract_pass": true,
-  "rust_md3bead_parity_pass": true,
+  "structural_relaxation_pass": true,
   "lj_mapping_contract_pass": true,
   "dynamic_time_history_pass": true,
   "cache_profile_pass": true,
@@ -40823,7 +40823,7 @@
       {
         "label": "winning_ticket_backprop",
         "run_id": "topk-weighted-backprop",
-        "runtime_backend": "md3bead_soa_relaxation+rocm_torch_hip_mainloop",
+        "runtime_backend": "structural_three_lane_relaxation+rocm_torch_hip_mainloop",
         "execution_backend": "cpu",
         "solver_path_kind": "production_seeded_explicit_reduced_order_relaxation_branching",
         "production_kernel_path": false,
@@ -40842,7 +40842,7 @@
       {
         "label": "physics_guided_branching",
         "run_id": "pgob-branching",
-        "runtime_backend": "md3bead_soa_relaxation+rocm_torch_hip_mainloop",
+        "runtime_backend": "structural_three_lane_relaxation+rocm_torch_hip_mainloop",
         "execution_backend": "cpu",
         "solver_path_kind": "production_seeded_explicit_reduced_order_physical_branching",
         "production_kernel_path": false,

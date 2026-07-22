@@ -2317,7 +2317,7 @@ def test_snapshot_scopes_public_benchmark_materializer_changes(
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
-        == "non_artifact_source_paths_changed"
+        == "receipt_only_commit"
     )
     assert not [
         blocker
@@ -2669,7 +2669,7 @@ def test_snapshot_public_benchmark_builder_change_does_not_stale_snapshot_leaf_r
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["license_status_closure_report"]["source_state_kind"]
-        == "non_artifact_source_paths_changed"
+        == "receipt_only_commit"
     )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert not [
@@ -2705,7 +2705,7 @@ def test_snapshot_public_benchmark_receipt_validator_change_does_not_stale_snaps
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["license_status_closure_report"]["source_state_kind"]
-        == "non_artifact_source_paths_changed"
+        == "receipt_only_commit"
     )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert not [
@@ -2741,7 +2741,7 @@ def test_snapshot_public_benchmark_phase2_runner_change_does_not_stale_snapshot_
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["license_status_closure_report"]["source_state_kind"]
-        == "non_artifact_source_paths_changed"
+        == "receipt_only_commit"
     )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert not [

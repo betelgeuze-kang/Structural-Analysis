@@ -7,7 +7,7 @@
     "track_out": "implementation/phase1/track_lf_solver_report.json",
     "perf_out": "implementation/phase1/p0_engine_perf_report.json",
     "accuracy_out": "implementation/phase1/real_accuracy_validation_report.json",
-    "producer_cmd": "/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py",
+    "producer_cmd": "/usr/bin/python3 implementation/phase1/structural_runtime_hook.py",
     "require_rust_hip": false,
     "allow_cpu_required": true,
     "profile_require_rust_faster": false,
@@ -33,7 +33,7 @@
   "steps": [
     {
       "step": "p0_1_zero_copy_probe",
-      "command": "/usr/bin/python3 implementation/phase1/zero_copy_real_probe.py --producer-cmd '/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py' --out implementation/phase1/zero_copy_real_probe_report_strict.json --allow-cpu-required",
+      "command": "/usr/bin/python3 implementation/phase1/zero_copy_real_probe.py --producer-cmd '/usr/bin/python3 implementation/phase1/structural_runtime_hook.py' --out implementation/phase1/zero_copy_real_probe_report_strict.json --allow-cpu-required",
       "seconds": 0.10526680946350098,
       "ok": true,
       "stdout_tail": "Wrote zero-copy real probe report: implementation/phase1/zero_copy_real_probe_report_strict.json\n",
@@ -49,11 +49,11 @@
     },
     {
       "step": "p0_1_engine_perf_profile",
-      "command": "/usr/bin/python3 implementation/phase1/profile_p0_engine_path.py --producer-cmd '/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py' --probe-out implementation/phase1/zero_copy_real_probe_report_strict.json --track-rust-out implementation/phase1/track_lf_solver_report.json --out implementation/phase1/p0_engine_perf_report.json --allow-cpu-required",
+      "command": "/usr/bin/python3 implementation/phase1/profile_p0_engine_path.py --producer-cmd '/usr/bin/python3 implementation/phase1/structural_runtime_hook.py' --probe-out implementation/phase1/zero_copy_real_probe_report_strict.json --track-rust-out implementation/phase1/track_lf_solver_report.json --out implementation/phase1/p0_engine_perf_report.json --allow-cpu-required",
       "seconds": 4.229142904281616,
       "ok": true,
       "stdout_tail": "Wrote P0 engine perf report: implementation/phase1/p0_engine_perf_report.json\n",
-      "stderr_tail": "{\"event\": \"p0_profile.start\", \"inputs\": {\"allow_cpu_required\": true, \"bending_stiffness\": 6500000.0, \"length_m\": 25.0, \"max_relative_error\": 0.05, \"node_count\": 201, \"out\": \"implementation/phase1/p0_engine_perf_report.json\", \"point_force_n\": 100000.0, \"producer_cmd\": \"/usr/bin/python3 implementation/phase1/rust_hip_md3bead_hook.py\", \"require_rust_faster\": false, \"require_rust_hip\": false, \"shear_stiffness\": 245000000.0}}\n{\"contract_pass\": true, \"event\": \"p0_profile.completed\", \"reason_code\": \"PASS\"}\n"
+      "stderr_tail": "{\"event\": \"p0_profile.start\", \"inputs\": {\"allow_cpu_required\": true, \"bending_stiffness\": 6500000.0, \"length_m\": 25.0, \"max_relative_error\": 0.05, \"node_count\": 201, \"out\": \"implementation/phase1/p0_engine_perf_report.json\", \"point_force_n\": 100000.0, \"producer_cmd\": \"/usr/bin/python3 implementation/phase1/structural_runtime_hook.py\", \"require_rust_faster\": false, \"require_rust_hip\": false, \"shear_stiffness\": 245000000.0}}\n{\"contract_pass\": true, \"event\": \"p0_profile.completed\", \"reason_code\": \"PASS\"}\n"
     },
     {
       "step": "p0_2_real_accuracy_public_hf",

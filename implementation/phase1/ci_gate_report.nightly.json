@@ -19,7 +19,7 @@
   "bifurcation_contract_pass": true,
   "rust_onnx_contract_pass": true,
   "winning_ticket_contract_pass": true,
-  "rust_md3bead_parity_pass": true,
+  "structural_relaxation_pass": true,
   "lj_mapping_contract_pass": true,
   "dynamic_time_history_pass": true,
   "cache_profile_pass": true,

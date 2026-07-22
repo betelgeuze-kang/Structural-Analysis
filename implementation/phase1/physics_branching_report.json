@@ -1,14 +1,14 @@
 {
   "schema_version": "1.0",
   "run_id": "pgob-branching",
-  "generated_at": "2026-03-30T13:50:44.600667+00:00",
+  "generated_at": "2026-07-22T14:48:42.286236+00:00",
   "mode": "train",
   "algorithm": "physics_guided_orthogonal_branching_derivative_free",
   "runtime_truthfulness": {
     "path_role": "top_level_training_eval_branching",
     "solver_path_kind": "production_seeded_explicit_reduced_order_physical_branching",
     "physical_runtime_class": "production_seeded_explicit_physical",
-    "runtime_backend": "md3bead_soa_relaxation+rocm_torch_hip_mainloop",
+    "runtime_backend": "structural_three_lane_relaxation+rocm_torch_hip_mainloop",
     "execution_backend": "cpu",
     "cpu_backend": true,
     "cpu_required": true,
@@ -26,17 +26,17 @@
     "production_seeded_runtime_used": true,
     "production_seed_label": "rust_nonlinear_frame_gpu_seed",
     "production_seed_backend": "rocm_torch_hip_mainloop",
-    "production_seed_solver_path_kind": "production_hip_kernel",
+    "production_seed_solver_path_kind": "production_hip_newton",
     "production_seed_device_residency_ratio": 1.0,
-    "production_seed_hip_kernel_invocation_count": 6,
+    "production_seed_hip_kernel_invocation_count": 11,
     "contract_pass": true,
     "reason": "explicit reduced-order physical branching path declared without surrogate runtime markers; production seed applied via rust_nonlinear_frame_gpu_seed",
     "production_seed_runtime": {
       "runtime_backend": "rocm_torch_hip_mainloop",
-      "solver_path_kind": "production_hip_kernel",
+      "solver_path_kind": "production_hip_newton",
       "production_kernel_path": true,
       "device_residency_ratio": 1.0,
-      "hip_kernel_invocation_count": 6
+      "hip_kernel_invocation_count": 11
     }
   },
   "uses_backprop": false,
@@ -45,7 +45,7 @@
   "alpha": 0.2,
   "basis_dim": 4,
   "best_branch_id": 0,
-  "bifurcation_margin": 0.08860586021137351,
+  "bifurcation_margin": 0.0886786271797746,
   "theta_before": [
     1.0,
     0.8,
@@ -63,19 +63,19 @@
     0.6086386842558136
   ],
   "production_seed": {
-    "top_displacement_m": 6.397078003702757,
-    "max_abs_displacement_m": 6.397078003702757,
+    "top_displacement_m": 69.46370034060556,
+    "max_abs_displacement_m": 69.46370034060556,
     "base_shear_kn": 72.0,
-    "plastic_story_count": 6,
-    "residual_inf": 8.342133280179162e-07
+    "plastic_story_count": 0,
+    "residual_inf": 4.729372449219227e-11
   },
   "u_final": [
     0.0,
     0.0,
     0.0,
-    -2.741040465950019,
-    0.5310815649007333,
-    -0.24295254918372206
+    -2.7433279496963956,
+    0.5315251589988578,
+    -0.2431554621884099
   ],
   "candidates": [
     {
@@ -92,17 +92,17 @@
         -0.0,
         -0.0,
         -0.0,
-        -2.742240465950019,
-        0.5317815649007334,
-        -0.24325254918372205
+        -2.7445279496963955,
+        0.5322251589988578,
+        -0.24345546218840988
       ],
-      "equilibrium_norm": 8.79595681955674,
-      "energy_proxy": 2680.3571513870074,
-      "max_unbalanced_force": 228.20763039968597,
-      "system_temperature": 15.314638382223055,
-      "physical_model": "3bead_ca_sc_cb",
+      "equilibrium_norm": 8.793644304413156,
+      "energy_proxy": 2861.7296726004756,
+      "max_unbalanced_force": 236.88620265418032,
+      "system_temperature": 16.5242190318419,
+      "physical_model": "three_lane_frame_soa",
       "production_seed_applied": true,
-      "loss": 276.8316719582575
+      "loss": 294.9666115644607
     },
     {
       "branch_id": 1,
@@ -118,17 +118,17 @@
         -0.0,
         -0.0,
         -0.0,
-        -2.61471898693077,
-        0.5187332540240505,
-        -0.24206383498218118
+        -2.6169000965957365,
+        0.5191659636649514,
+        -0.2422657564019045
       ],
-      "equilibrium_norm": 8.919639112268106,
-      "energy_proxy": 2680.3571513870074,
-      "max_unbalanced_force": 228.20763039968597,
-      "system_temperature": 15.314638382223055,
-      "physical_model": "3bead_ca_sc_cb",
+      "equilibrium_norm": 8.91742850699754,
+      "energy_proxy": 2861.7296726004756,
+      "max_unbalanced_force": 236.88620265418032,
+      "system_temperature": 16.5242190318419,
+      "physical_model": "three_lane_frame_soa",
       "production_seed_applied": true,
-      "loss": 276.95535425096887
+      "loss": 295.09039576704515
     },
     {
       "branch_id": 2,
@@ -144,17 +144,17 @@
         -0.0,
         -0.0,
         -0.0,
-        -2.63207003250009,
-        0.5453851423102676,
-        -0.25136467769907817
+        -2.6342656158172457,
+        0.5458400840500752,
+        -0.2515743575655193
       ],
-      "equilibrium_norm": 8.894105437365395,
-      "energy_proxy": 2680.3571513870074,
-      "max_unbalanced_force": 228.20763039968597,
-      "system_temperature": 15.314638382223055,
-      "physical_model": "3bead_ca_sc_cb",
+      "equilibrium_norm": 8.891872969564702,
+      "energy_proxy": 2861.7296726004756,
+      "max_unbalanced_force": 236.88620265418032,
+      "system_temperature": 16.5242190318419,
+      "physical_model": "three_lane_frame_soa",
       "production_seed_applied": true,
-      "loss": 276.92982057606616
+      "loss": 295.0648402296123
     },
     {
       "branch_id": 3,
@@ -170,17 +170,17 @@
         -0.0,
         -0.0,
         -0.0,
-        -2.646660572401376,
-        0.5426515241487686,
-        -0.23404051963629344
+        -2.6488683266507635,
+        0.5431041855972629,
+        -0.23423574827918933
       ],
-      "equilibrium_norm": 8.884562679768122,
-      "energy_proxy": 2680.3571513870074,
-      "max_unbalanced_force": 228.20763039968597,
-      "system_temperature": 15.314638382223055,
-      "physical_model": "3bead_ca_sc_cb",
+      "equilibrium_norm": 8.882322931592933,
+      "energy_proxy": 2861.7296726004756,
+      "max_unbalanced_force": 236.88620265418032,
+      "system_temperature": 16.5242190318419,
+      "physical_model": "three_lane_frame_soa",
       "production_seed_applied": true,
-      "loss": 276.9202778184689
+      "loss": 295.0552901916405
     }
   ],
   "contract_pass": true,

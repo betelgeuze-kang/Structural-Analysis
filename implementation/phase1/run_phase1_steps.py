@@ -16,8 +16,8 @@ from pathlib import Path
 from statistics import mean
 
 from generate_lf_sample import make_sample_payload
-from md3bead_soa import run_relaxation_case, run_workload_pass
 from nonlinear_lj_hinge_kernel import LJMappingConfig, simulate_lj_plastic_hinge
+from structural_three_lane_relaxation import run_relaxation_case, run_workload_pass
 from validate_lf_output import validate_payload
 
 
@@ -90,7 +90,7 @@ def step1_fire_loop(max_steps: int, tol: float, repeats: int = 3, engine_hook_cm
                 max_unbalanced_force = float(res["max_unbalanced_force"])
                 kinetic_energy = float(res["kinetic_energy"])
                 system_temperature = float(res["system_temperature"])
-                model_id = str(res.get("model", "3bead_ca_sc_cb"))
+                model_id = str(res.get("model", "three_lane_frame_soa"))
             model_ids.add(model_id)
 
             all_runs.append(
@@ -280,12 +280,12 @@ def step5_runtime_hook_profile(runtime_hook_cmd: str | None = None, require_runt
             serialization_seconds = float(res.get("serialization_seconds", 0.0))
             work_model = str(res.get("model", "external_hook"))
             work_scalar = float(res["work_scalar"]) if "work_scalar" in res else None
-            bond_count = int(res["bond_count"]) if "bond_count" in res else None
-            bead_count = int(res["bead_count"]) if "bead_count" in res else None
+            spring_count = int(res["spring_count"]) if "spring_count" in res else None
+            point_count = int(res["point_count"]) if "point_count" in res else None
         else:
             tracemalloc.start()
             t0 = time.perf_counter()
-            md_work = _engine_hook_work(n)
+            frame_work = _engine_hook_work(n)
             sec = time.perf_counter() - t0
             current_vram, peak_vram = tracemalloc.get_traced_memory()
             tracemalloc.stop()
@@ -293,10 +293,10 @@ def step5_runtime_hook_profile(runtime_hook_cmd: str | None = None, require_runt
             compute_seconds = sec * 0.94
             host_copy_seconds = sec * 0.03
             serialization_seconds = sec * 0.03
-            work_model = "3bead_ca_sc_cb"
-            work_scalar = float(md_work.get("work_scalar", 0.0))
-            bond_count = int(md_work.get("bond_count", 0))
-            bead_count = int(md_work.get("bead_count", 0))
+            work_model = "three_lane_frame_soa"
+            work_scalar = float(frame_work.get("work_scalar", 0.0))
+            spring_count = int(frame_work.get("spring_count", 0))
+            point_count = int(frame_work.get("point_count", 0))
         rows.append(
             {
                 "n": n,
@@ -309,8 +309,8 @@ def step5_runtime_hook_profile(runtime_hook_cmd: str | None = None, require_runt
                 "host_copy_bytes": host_copy_bytes,
                 "work_model": work_model,
                 "work_scalar": work_scalar,
-                "bond_count": bond_count,
-                "bead_count": bead_count,
+                "spring_count": spring_count,
+                "point_count": point_count,
             }
         )
 
