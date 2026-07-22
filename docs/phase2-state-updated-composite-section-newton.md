@@ -42,3 +42,10 @@ The receipt therefore keeps `composite_section_breadth_closure_claim=false`,
 `material_newton_breadth_closure_claim=false`,
 `g1_material_newton_breadth_claim=false`, and
 `production_nonlinear_closure_claim=false`.
+
+The separate
+[`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)
+extends a reduced-fiber perfect-bond steel-girder/concrete-slab section to a
+two-member cyclic frame. It does not alter this 1D receipt or promote the
+partial-interaction, shear-transfer, external-validation, G1, or production
+closure claims above.

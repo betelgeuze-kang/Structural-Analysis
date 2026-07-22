@@ -91,6 +91,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_fiber_frame2d_solver.py \
   tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
   tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+  tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_fiber_frame2d.py \
@@ -103,6 +104,15 @@ material/geometric tangent decomposition, a same-parent nonlinear global
 Jacobian finite difference after RC damage/yield history, sequential 2.2 and
 4.4 rad rigid rotations across all members, exact replay, unchanged-parent
 trial branching, and fail-closed checkpoint/geometry binding.
+
+The separate
+[`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)
+case places reduced steel-girder and concrete-slab fibers in the same
+perfect-bond section. Its 60-target path activates steel plasticity and both
+concrete damage branches, tracks constituent dissipation separately, and checks
+same-parent mixed-state tangents plus exact rollback. Partial interaction,
+connector slip, shear transfer, external composite-member validation, and
+general composite breadth remain open.
 
 The separate
 [`stateful-corotational-concrete-frame-cyclic-benchmark.md`](stateful-corotational-concrete-frame-cyclic-benchmark.md)
