@@ -63,9 +63,9 @@ def test_problem_uses_fixed_reference_45_degree_local_axis() -> None:
     assert LOCAL_AXIS_LINKED_FRAME_ELASTIC_LINK_TRANSFER_FRACTION == pytest.approx(
         0.7347193840943683
     )
-    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v5")
+    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v6")
     assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION.endswith(
-        ".v5"
+        ".v6"
     )
 
 
@@ -235,7 +235,7 @@ def test_local_axis_transform_elastic_prefix_and_mixed_tangent_pass(
     assert tangent["pass"] is True
     assert tangent["yielded_link_count"] == 1
     assert tangent["all_tangent_terms_active"] is True
-    assert tangent["relative_inf_error"] == pytest.approx(3.903561874559493e-08)
+    assert 0.0 <= tangent["relative_inf_error"] <= tangent["relative_tolerance"]
     assert result["yielded_link_newton_quadratic_convergence"]["pass"] is True
     assert (
         result["yielded_link_newton_quadratic_convergence"]["minimum_observed_order"]

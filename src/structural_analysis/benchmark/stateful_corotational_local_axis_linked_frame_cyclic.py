@@ -767,7 +767,7 @@ def build_stateful_corotational_local_axis_linked_frame_cyclic_benchmark() -> di
         "blockers_remaining": [
             "updated_and_follower_link_axis_not_implemented",
             "rotational_and_coupled_multi_axis_link_response_not_implemented",
-            "contact_beyond_global_x_gap_friction_uplift_not_state_updated",
+            "updated_follower_contact_friction_uplift_not_state_updated",
             "viscous_rate_degradation_pinching_not_implemented",
             "inelastic_member_and_link_interaction_not_validated",
             "shell_connection_integration_not_implemented",
