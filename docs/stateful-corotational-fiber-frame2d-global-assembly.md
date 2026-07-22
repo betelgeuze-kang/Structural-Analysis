@@ -113,8 +113,16 @@ free-to-free global-x bilinear link into the full residual and tangent, and
 commits both state families atomically. Its 30-target reversal path verifies
 force transfer, nonnegative dissipation, same-parent frame-material,
 link-material, and geometric tangent terms, deterministic replay, and exact
-mixed-state rollback. Local-axis, rotational, multi-axis, shell, contact,
-friction, damping, degradation, and general link breadth remain open.
+mixed-state rollback.
+
+The separate
+[`stateful-corotational-local-axis-linked-frame-cyclic-benchmark.md`](stateful-corotational-local-axis-linked-frame-cyclic-benchmark.md)
+case derives a fixed 45-degree reference direction from an anchor and frame
+node, then scatters the scalar response through four global translational DOFs.
+It verifies off-axis force and tangent transformation, vector equilibrium,
+cyclic link history, replay, and rollback. Updated/follower axes, rotational or
+coupled multi-axis response, shell, contact, friction, damping, degradation,
+and general link breadth remain open.
 
 The separate
 [`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)

@@ -172,6 +172,7 @@ CORE_EXACT_PATHS = {
     "tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py",
     "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py",
     "tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py",
+    "tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py",
     "tests/test_structure_viewer_dom_safety_contract.py",
     "tests/test_structural_analysis_core_api.py",
     "tests/test_typed_domain_model.py",
