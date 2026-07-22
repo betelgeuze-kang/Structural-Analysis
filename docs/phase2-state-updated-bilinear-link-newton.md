@@ -46,10 +46,14 @@ the undeformed endpoints. A third bounded
 [updated-current-axis benchmark](stateful-corotational-updated-axis-linked-frame-cyclic-benchmark.md)
 uses current length minus reference length, rotates the internal force with the
 current chord, and adds the consistent force-times-length-Hessian geometric
-tangent. These results do not establish general nonconservative follower
-external loads, rotational or coupled multi-axis response, shell integration,
-or general link-family breadth. Full-building G1 and production ROCm/HIP
-material parity also remain open.
+tangent. A fourth bounded
+[scalar rotational-link benchmark](stateful-corotational-rotational-linked-frame-cyclic-benchmark.md)
+uses a separate moment-rotation material and immutable rotational state to
+couple two free `rz` DOFs; it does not reinterpret the translational receipt's
+kN-m force-deformation fields. These results do not establish general
+nonconservative follower external loads, coupled multi-axis response, shell
+integration, or general link-family breadth. Full-building G1 and production
+ROCm/HIP material parity also remain open.
 
 The receipt keeps `link_spring_material_breadth_closure_claim=false`,
 `material_newton_breadth_closure_claim=false`,

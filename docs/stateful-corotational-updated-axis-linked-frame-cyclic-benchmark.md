@@ -86,16 +86,20 @@ Run the global, fixed-reference, and updated-axis link contracts with:
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
-  tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py
+  tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
+  tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py
 ```
 
 ## Claim boundary
 
 This is one dense 2D internal scalar axial link whose force follows its current
 chord. It is not a general nonconservative follower external-load formulation.
-Rotational links, coupled multi-axis constitutive response, gap/contact,
-friction, uplift, viscous/rate response, degradation, pinching, shell
-connections, and simultaneous inelastic frame-member/link interaction remain
-open. No external device acceptance, production sparse or ROCm/HIP path,
+Coupled multi-axis constitutive response, gap/contact, friction, uplift,
+viscous/rate response, degradation, pinching, shell connections, and
+simultaneous inelastic frame-member/link interaction remain open. A separate
+[scalar rotational-link benchmark](stateful-corotational-rotational-linked-frame-cyclic-benchmark.md)
+covers one relative-`rz` moment-rotation link only and is not multi-axis
+connection breadth. No external device acceptance, production sparse or
+ROCm/HIP path,
 full-building equilibrium, G1 closure, or commercial-readiness claim is made.
 Protected readiness closure counts remain unchanged.
