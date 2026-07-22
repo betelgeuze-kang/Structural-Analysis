@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Sequence
 
@@ -12,12 +13,31 @@ from structural_analysis.api._output_integrity import (
     write_json_pair,
 )
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model
+from structural_analysis.generated_capabilities import (
+    CAPABILITY_AUTHORITY_RULES,
+    CAPABILITY_SCHEMA_VERSION,
+    capabilities,
+)
 from structural_analysis.results.validation import validate
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="structural-analysis")
-    parser.add_argument("model_path", help="IFC, MGT, or neutral canonical JSON input.")
+    parser.add_argument(
+        "model_path",
+        nargs="?",
+        help="IFC, MGT, or neutral canonical JSON input.",
+    )
+    parser.add_argument(
+        "--capabilities",
+        action="store_true",
+        help="Print the generated capability support registry and exit.",
+    )
+    parser.add_argument(
+        "--public-only",
+        action="store_true",
+        help="With --capabilities, include only public supported rows.",
+    )
     parser.add_argument("--analysis-type", default="model_health")
     parser.add_argument("--solver", default="developer_preview_model_health")
     parser.add_argument("--tolerance", type=float, default=1.0e-8)
@@ -35,9 +55,32 @@ def main(argv: Sequence[str] | None = None) -> int:
         default="scipy_linalg_eigh_dense",
         choices=["scipy_linalg_eigh_dense"],
     )
-    parser.add_argument("--out", required=True, help="Path for the analysis result JSON.")
-    parser.add_argument("--report-out", required=True, help="Path for validation report JSON.")
+    parser.add_argument("--out", help="Path for the analysis result JSON.")
+    parser.add_argument("--report-out", help="Path for validation report JSON.")
     args = parser.parse_args(argv)
+
+    if args.capabilities:
+        print(
+            json.dumps(
+                {
+                    "schema_version": CAPABILITY_SCHEMA_VERSION,
+                    "authority_rules": CAPABILITY_AUTHORITY_RULES,
+                    "capabilities": capabilities(public_only=args.public_only),
+                },
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return 0
+    if args.public_only:
+        parser.error("--public-only requires --capabilities")
+    if args.model_path is None:
+        parser.error("model_path is required unless --capabilities is used")
+    if args.out is None:
+        parser.error("--out is required unless --capabilities is used")
+    if args.report_out is None:
+        parser.error("--report-out is required unless --capabilities is used")
 
     protected_paths = {"model input": Path(args.model_path)}
     if args.reference is not None:

@@ -30,11 +30,18 @@ from structural_analysis.api.nonlinear_truss import (
     analyze_public_two_bar_truss,
     validate_public_two_bar_truss_result,
 )
+from structural_analysis.generated_capabilities import (
+    CAPABILITY_AUTHORITY_RULES,
+    CAPABILITY_SCHEMA_VERSION,
+    capabilities,
+)
 from structural_analysis.results.validation import validate
 
 __all__ = [
     "ANALYSIS_ENGINE_VERSION",
     "CLAIM_BOUNDARY_VERSION",
+    "CAPABILITY_AUTHORITY_RULES",
+    "CAPABILITY_SCHEMA_VERSION",
     "PUBLIC_RC_FIBER_FRAME_CLAIM_BOUNDARY",
     "PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE",
     "PUBLIC_RC_FIBER_FRAME_SCHEMA_VERSION",
@@ -54,6 +61,7 @@ __all__ = [
     "analyze",
     "analyze_public_rc_fiber_frame",
     "analyze_public_two_bar_truss",
+    "capabilities",
     "load_model",
     "validate",
     "validate_public_rc_fiber_frame_result",

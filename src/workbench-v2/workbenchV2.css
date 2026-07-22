@@ -327,3 +327,33 @@
 @media (forced-colors: active) {
   .wb2-nav-link.is-active { border-color: Highlight; }
 }
+
+.wb2-capabilities__schema {
+  color: var(--wb2-dim);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.72rem;
+}
+
+.wb2-capabilities .wb2-table-wrap {
+  margin-top: 0.75rem;
+  overflow-x: auto;
+}
+
+.wb2-capabilities .wb2-table {
+  border-collapse: collapse;
+  min-width: 58rem;
+  width: 100%;
+}
+
+.wb2-capabilities .wb2-table th,
+.wb2-capabilities .wb2-table td {
+  border-bottom: 1px solid var(--wb2-border);
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.wb2-capabilities .wb2-table th {
+  color: var(--wb2-text);
+  font-weight: 650;
+}
