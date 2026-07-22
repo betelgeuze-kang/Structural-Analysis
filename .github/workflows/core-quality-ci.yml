@@ -51,6 +51,21 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  # Historical evidence includes LFS pointers and paths beyond Win32 defaults.
+  # Keep checkout byte-faithful while allowing all declared Windows coordinates.
+  GIT_CONFIG_COUNT: "6"
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: "true"
+  GIT_CONFIG_KEY_1: filter.lfs.required
+  GIT_CONFIG_VALUE_1: "false"
+  GIT_CONFIG_KEY_2: filter.lfs.clean
+  GIT_CONFIG_VALUE_2: cat
+  GIT_CONFIG_KEY_3: filter.lfs.smudge
+  GIT_CONFIG_VALUE_3: cat
+  GIT_CONFIG_KEY_4: filter.lfs.process
+  GIT_CONFIG_VALUE_4: ""
+  GIT_CONFIG_KEY_5: core.autocrlf
+  GIT_CONFIG_VALUE_5: "false"
 
 concurrency:
   group: core-quality-${{ github.workflow }}-${{ github.ref }}

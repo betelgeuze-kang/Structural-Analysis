@@ -61,7 +61,7 @@ def _mapping(value: Any, *, field: str) -> dict[str, Any]:
     return value
 
 
-def _coverage_config(path: Path) -> tuple[bool, int, list[str]]:
+def _coverage_config(path: Path) -> tuple[bool, int, list[str], list[str]]:
     parser = configparser.ConfigParser()
     if not parser.read(path, encoding="utf-8"):
         raise ValueError(f"coverage config is unreadable: {path}")
@@ -73,9 +73,12 @@ def _coverage_config(path: Path) -> tuple[bool, int, list[str]]:
             for row in parser.get("run", "source").splitlines()
             if row.strip()
         ]
+        omits = [
+            row.strip() for row in parser.get("run", "omit").splitlines() if row.strip()
+        ]
     except (configparser.Error, ValueError) as exc:
         raise ValueError(f"coverage config is invalid: {exc}") from exc
-    return branch, fail_under, sources
+    return branch, fail_under, sources, omits
 
 
 def check_contract(payload: dict[str, Any], *, root: Path = ROOT) -> None:
@@ -97,10 +100,16 @@ def check_contract(payload: dict[str, Any], *, root: Path = ROOT) -> None:
         coverage.get("sources"),
         field="coverage.sources",
     )
+    coverage_omits = _string_list(
+        coverage.get("omits"),
+        field="coverage.omits",
+    )
     referenced_paths = [
         str(typecheck.get("config", "")),
         str(coverage.get("config", "")),
         *typecheck_paths,
+        *coverage_sources,
+        *coverage_omits,
         *coverage_tests,
     ]
     missing = [
@@ -120,7 +129,7 @@ def check_contract(payload: dict[str, Any], *, root: Path = ROOT) -> None:
             f"{MINIMUM_BRANCH_COVERAGE}%"
         )
 
-    config_branch, config_fail_under, config_sources = _coverage_config(
+    config_branch, config_fail_under, config_sources, config_omits = _coverage_config(
         _resolve(root, str(coverage["config"]))
     )
     if config_branch is not True:
@@ -129,6 +138,8 @@ def check_contract(payload: dict[str, Any], *, root: Path = ROOT) -> None:
         raise ValueError("coverage config and manifest thresholds differ")
     if config_sources != coverage_sources:
         raise ValueError("coverage config and manifest sources differ")
+    if config_omits != coverage_omits:
+        raise ValueError("coverage config and manifest omits differ")
 
     operating_systems = _string_list(
         matrix.get("operating_systems"),

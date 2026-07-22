@@ -27,6 +27,14 @@ def test_core_quality_manifest_contract() -> None:
 
     assert payload["coverage"]["branch"] is True
     assert payload["coverage"]["minimum_percent"] == 85
+    assert all(
+        source.startswith("src/structural_analysis/")
+        for source in payload["coverage"]["sources"]
+    )
+    assert payload["coverage"]["omits"] == [
+        "src/structural_analysis/results/__init__.py",
+        "src/structural_analysis/results/viewer.py",
+    ]
     assert payload["compatibility_matrix"]["required_coordinate_count"] == 9
     assert len(payload["coverage"]["tests"]) == 8
     assert len(payload["typecheck"]["paths"]) == 5
@@ -95,3 +103,15 @@ def test_workflow_matches_manifest_matrix_and_runs_bounded_gate() -> None:
         assert f'"{version}"' in workflow
     assert "python scripts/check_core_quality.py" in workflow
     assert "fail-fast: false" in workflow
+    git_checkout_config = [
+        ("core.longpaths", '"true"'),
+        ("filter.lfs.required", '"false"'),
+        ("filter.lfs.clean", "cat"),
+        ("filter.lfs.smudge", "cat"),
+        ("filter.lfs.process", '""'),
+        ("core.autocrlf", '"false"'),
+    ]
+    assert f'GIT_CONFIG_COUNT: "{len(git_checkout_config)}"' in workflow
+    for index, (key, value) in enumerate(git_checkout_config):
+        assert f"GIT_CONFIG_KEY_{index}: {key}" in workflow
+        assert f"GIT_CONFIG_VALUE_{index}: {value}" in workflow
