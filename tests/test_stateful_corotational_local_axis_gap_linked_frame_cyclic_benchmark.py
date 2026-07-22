@@ -67,9 +67,9 @@ def test_problem_uses_fixed_reference_45_degree_contact_normal() -> None:
     )
     assert link.material.initial_gap_m == LOCAL_AXIS_GAP_LINKED_FRAME_INITIAL_GAP_M
     assert len(LOCAL_AXIS_GAP_LINKED_FRAME_CYCLIC_LOAD_FACTORS) == 30
-    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v6")
+    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v7")
     assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION.endswith(
-        ".v6"
+        ".v7"
     )
 
 
@@ -141,10 +141,10 @@ def test_local_axis_gap_definition_fails_closed() -> None:
         local.reference_direction_cosines(((0.0, 0.0), (1.0, 0.0), (0.0, 0.0)))
     with pytest.raises(ValueError, match="component"):
         StatefulCorotationalFiberFrame2DCompressionOnlyGapLink(
-            link_id="bad-updated-gap",
+            link_id="bad-gap-component",
             node_i=0,
             node_j=2,
-            component="updated_axial",  # type: ignore[arg-type]
+            component="uy",  # type: ignore[arg-type]
             material=material,
         )
 

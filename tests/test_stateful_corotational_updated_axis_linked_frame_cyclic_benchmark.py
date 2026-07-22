@@ -11,9 +11,14 @@ import structural_analysis.benchmark as benchmark_api
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_link import (
     STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION,
     STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION,
+    StatefulCorotationalFiberFrame2DCompressionOnlyGapLink,
     StatefulCorotationalFiberFrame2DLinkProblem,
     assemble_stateful_corotational_fiber_frame2d_links,
+    finite_difference_stateful_corotational_fiber_frame2d_link_tangent_check,
     initial_stateful_corotational_fiber_frame2d_link_checkpoint,
+)
+from structural_analysis.benchmark.stateful_corotational_local_axis_gap_linked_frame_cyclic import (
+    make_stateful_corotational_local_axis_gap_linked_frame_cyclic_problem,
 )
 from structural_analysis.benchmark.stateful_corotational_local_axis_linked_frame_cyclic import (
     make_stateful_corotational_local_axis_linked_frame_cyclic_problem,
@@ -26,6 +31,9 @@ from structural_analysis.benchmark.stateful_corotational_updated_axis_linked_fra
     UPDATED_AXIS_LINKED_FRAME_REFERENCE_DIRECTION,
     build_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark,
     make_stateful_corotational_updated_axis_linked_frame_cyclic_problem,
+)
+from structural_analysis.materials.compression_only_gap_link import (
+    CompressionOnlyGapLinkResponse,
 )
 
 
@@ -64,10 +72,162 @@ def test_problem_uses_current_chord_updated_axial_kinematics() -> None:
         UPDATED_AXIS_LINKED_FRAME_REFERENCE_DIRECTION
     )
     assert len(UPDATED_AXIS_LINKED_FRAME_CYCLIC_LOAD_FACTORS) == 30
-    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v6")
+    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v7")
     assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION.endswith(
-        ".v6"
+        ".v7"
     )
+
+
+def _make_updated_axis_gap_problem() -> StatefulCorotationalFiberFrame2DLinkProblem:
+    fixed_problem = (
+        make_stateful_corotational_local_axis_gap_linked_frame_cyclic_problem()
+    )
+    updated_gap = replace(
+        fixed_problem.links[0],
+        link_id="updated-current-axis-compression-only-gap",
+        component="updated_axial",
+    )
+    return StatefulCorotationalFiberFrame2DLinkProblem(
+        case_id="stateful-corotational-updated-axis-gap-link",
+        frame_problem=fixed_problem.frame_problem,
+        links=(updated_gap,),
+    )
+
+
+def test_updated_axis_gap_tracks_current_chord_and_is_rotation_covariant() -> None:
+    problem = _make_updated_axis_gap_problem()
+    link = problem.links[0]
+    coordinates = np.asarray(problem.frame_problem.node_coordinates_m)
+    displacements = np.zeros(problem.global_dof_count, dtype=np.float64)
+    reference_direction = np.asarray(
+        link.reference_direction_cosines(coordinates),
+        dtype=np.float64,
+    )
+    link_dofs = link.global_dofs()
+    transverse_direction = np.array(
+        (-reference_direction[1], reference_direction[0]),
+        dtype=np.float64,
+    )
+    displacements[list(link_dofs[2:])] = (
+        -0.008 * reference_direction + 0.002 * transverse_direction
+    )
+
+    current_length, nx, ny = link.current_length_and_direction(
+        coordinates,
+        displacements,
+    )
+    current_direction = np.array((nx, ny), dtype=np.float64)
+    kinematic = link.kinematic_vector(coordinates, displacements)
+    hessian = link.deformation_hessian_per_m(coordinates, displacements)
+    payload = link.contract_payload(coordinates)
+
+    assert type(link) is StatefulCorotationalFiberFrame2DCompressionOnlyGapLink
+    assert link.component == "updated_axial"
+    assert link.deformation_m(displacements, coordinates) == pytest.approx(
+        current_length - link.reference_length_m(coordinates)
+    )
+    assert kinematic == pytest.approx(
+        np.concatenate((-current_direction, current_direction))
+    )
+    assert payload["contact_normal"] == "updated_current_chord_node_i_to_node_j"
+    assert payload["deformation_measure"] == "current_length-reference_length"
+    assert payload["axis_update"] == "current_endpoint_chord"
+    assert payload["geometric_tangent"] == "force*current_length_hessian"
+    assert np.linalg.norm(current_direction - reference_direction) > 1.0e-4
+
+    angle = 0.371
+    rotation = np.array(
+        ((math.cos(angle), -math.sin(angle)), (math.sin(angle), math.cos(angle))),
+        dtype=np.float64,
+    )
+    rotated_coordinates = coordinates @ rotation.T
+    rotated_displacements = np.array(displacements, copy=True)
+    for node in range(len(coordinates)):
+        dofs = slice(3 * node, 3 * node + 2)
+        rotated_displacements[dofs] = rotation @ displacements[dofs]
+    rotated_length, rotated_nx, rotated_ny = link.current_length_and_direction(
+        rotated_coordinates,
+        rotated_displacements,
+    )
+    transform = np.block(
+        [
+            [rotation, np.zeros((2, 2))],
+            [np.zeros((2, 2)), rotation],
+        ]
+    )
+    assert rotated_length == pytest.approx(current_length, abs=1.0e-14)
+    assert np.array((rotated_nx, rotated_ny)) == pytest.approx(
+        rotation @ current_direction,
+        abs=1.0e-14,
+    )
+    assert link.kinematic_vector(
+        rotated_coordinates,
+        rotated_displacements,
+    ) == pytest.approx(transform @ kinematic, abs=1.0e-14)
+    assert link.deformation_hessian_per_m(
+        rotated_coordinates,
+        rotated_displacements,
+    ) == pytest.approx(transform @ hessian @ transform.T, abs=1.0e-14)
+
+
+def test_updated_axis_gap_full_tangent_matches_same_parent_finite_difference() -> None:
+    problem = _make_updated_axis_gap_problem()
+    checkpoint = initial_stateful_corotational_fiber_frame2d_link_checkpoint(problem)
+    link = problem.links[0]
+    direction = np.asarray(
+        link.reference_direction_cosines(problem.frame_problem.node_coordinates_m),
+        dtype=np.float64,
+    )
+    transverse = np.array((-direction[1], direction[0]), dtype=np.float64)
+    trial = np.zeros(len(problem.free_global_dofs), dtype=np.float64)
+    trial[:2] = -0.008 * direction + 0.002 * transverse
+    assembly = assemble_stateful_corotational_fiber_frame2d_links(
+        problem,
+        checkpoint,
+        target_load_factor=0.0,
+        trial_free_coordinates_m=trial,
+    )
+    row = assembly.link_assemblies[0]
+    tangent = finite_difference_stateful_corotational_fiber_frame2d_link_tangent_check(
+        problem,
+        checkpoint,
+        target_load_factor=0.0,
+        trial_free_coordinates_m=trial,
+        epsilon_m=1.0e-7,
+        relative_tolerance=1.0e-7,
+    )
+
+    assert type(row.response) is CompressionOnlyGapLinkResponse
+    assert row.response.contact_active is True
+    assert row.component == "updated_axial"
+    assert np.linalg.norm(row.material_tangent_global_kn_per_m, ord=np.inf) > 0.0
+    assert np.linalg.norm(row.geometric_tangent_global_kn_per_m, ord=np.inf) > 0.0
+    assert tangent["same_committed_parent_checkpoint"] is True
+    assert tangent["link_material_tangent_inf_norm_kn_per_m"] > 0.0
+    assert tangent["link_geometric_tangent_inf_norm_kn_per_m"] > 0.0
+    assert tangent["frame_link_geometric_split_error_kn_per_m"] <= 1.0e-12
+    assert 0.0 <= tangent["relative_inf_error"] <= tangent["relative_tolerance"]
+    assert tangent["pass"] is True
+
+
+def test_updated_axis_gap_fails_closed_on_missing_or_collapsed_geometry() -> None:
+    problem = _make_updated_axis_gap_problem()
+    link = problem.links[0]
+    coordinates = np.asarray(problem.frame_problem.node_coordinates_m)
+
+    with pytest.raises(ValueError, match="requires node coordinates"):
+        link.contract_payload()
+    with pytest.raises(ValueError, match="requires node coordinates"):
+        link.deformation_m(np.zeros(problem.global_dof_count))
+    with pytest.raises(ValueError, match="requires node coordinates and global"):
+        link.kinematic_vector(coordinates)
+
+    collapsed = np.zeros(problem.global_dof_count, dtype=np.float64)
+    collapsed[list(link.global_dofs()[2:])] = (
+        coordinates[link.node_i] - coordinates[link.node_j]
+    )
+    with pytest.raises(ValueError, match="current length"):
+        link.current_length_and_direction(coordinates, collapsed)
 
 
 def test_updated_axis_benchmark_is_exposed_from_public_namespace() -> None:
