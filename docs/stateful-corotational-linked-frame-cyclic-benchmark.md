@@ -83,9 +83,11 @@ does not support rotational or multi-axis coupling, local-axis link
 transformations within this case, gap/contact, friction, uplift, viscous/rate
 response, degradation, pinching, or shell connections. The separate
 [fixed-reference local-axis benchmark](stateful-corotational-local-axis-linked-frame-cyclic-benchmark.md)
-covers only the bounded direction-cosine transformation; it does not broaden
-this global-axis case into a general link family. The columns remain elastic,
-so simultaneous inelastic member-link interaction is not validated. No
-external device comparison, production sparse/ROCm/HIP path, full-building
-equilibrium, G1 closure, or commercial-readiness claim is made. Protected
-readiness evidence and existing closure counts remain unchanged.
+covers the bounded direction-cosine transformation, while the separate
+[updated-current-axis benchmark](stateful-corotational-updated-axis-linked-frame-cyclic-benchmark.md)
+covers one internal current-chord force and consistent link geometric tangent.
+Neither broadens this global-axis case into a general link family. The columns
+remain elastic, so simultaneous inelastic member-link interaction is not
+validated. No external device comparison, production sparse/ROCm/HIP path,
+full-building equilibrium, G1 closure, or commercial-readiness claim is made.
+Protected readiness evidence and existing closure counts remain unchanged.

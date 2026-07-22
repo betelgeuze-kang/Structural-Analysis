@@ -92,6 +92,8 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
   tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
   tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
+  tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
+  tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
@@ -120,9 +122,17 @@ The separate
 case derives a fixed 45-degree reference direction from an anchor and frame
 node, then scatters the scalar response through four global translational DOFs.
 It verifies off-axis force and tangent transformation, vector equilibrium,
-cyclic link history, replay, and rollback. Updated/follower axes, rotational or
-coupled multi-axis response, shell, contact, friction, damping, degradation,
-and general link breadth remain open.
+cyclic link history, replay, and rollback.
+
+The paired
+[`stateful-corotational-updated-axis-linked-frame-cyclic-benchmark.md`](stateful-corotational-updated-axis-linked-frame-cyclic-benchmark.md)
+case instead uses current length minus reference length, rotates the internal
+link force with the current chord, and assembles the force-times-length-Hessian
+link geometric tangent separately from the frame geometric tangent. It checks
+finite rigid-motion objectivity, current-axis force transformation, full mixed
+same-parent tangent, cyclic state, replay, and rollback. General follower
+external loads, rotational or coupled multi-axis response, shell, contact,
+friction, damping, degradation, and general link breadth remain open.
 
 The separate
 [`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)

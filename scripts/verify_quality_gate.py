@@ -350,6 +350,7 @@ def _pr_commands(
             "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py",
             "tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py",
             "tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py",
+            "tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py",
             "tests/test_stateful_corotational_fiber_frame2d_solver.py",
             "tests/test_lee_frame_snapthrough_benchmark.py",
             "tests/test_build_phase2_modal_buckling_kernel_artifacts.py",
