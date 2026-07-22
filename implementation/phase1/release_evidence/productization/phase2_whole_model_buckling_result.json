@@ -1,6 +1,6 @@
 {
   "analysis_scope": "public_api_dense_reference_state_frame_linear_buckling",
-  "artifact_hash": "sha256:e8e8f723036dd52b7b7d0090ef08b18d4f389f27df7e129ad6a511d4ef885a72",
+  "artifact_hash": "sha256:704c581bc0a93709898819390881ce14147f9057a8cde2fb568c3bba3725d8c2",
   "blockers_remaining": [
     "general_frame_shell_linear_buckling_not_verified",
     "mixed_tension_compression_reference_not_supported",
@@ -44,11 +44,11 @@
   "source": {
     "input_checksums": {
       "scripts/build_phase2_whole_model_buckling_artifacts.py": "sha256:ea2dec4cf343c0739a05a1d668172c35864b90a7413cd3f4db6ed396d3de806a",
-      "src/structural_analysis/__init__.py": "sha256:72402a389d301cb2e05fbc574c28ce89ced833040b95dd5860101926d849ee6d",
+      "src/structural_analysis/__init__.py": "sha256:c19a8b5cb64b6f9a6c5d00712f6cd606be5511188d8caa690e9adf0d95542e04",
       "src/structural_analysis/analyses/__init__.py": "sha256:a10e34597dc201e15c41b13dad6e7a52e65982aaf37d9c5513f2319b46fb1ed7",
       "src/structural_analysis/analyses/buckling.py": "sha256:bc498580f2a3e3e287640d787d03e88a461df274c41c41e2d5eb331ad4ba0e92",
       "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
-      "src/structural_analysis/api/cli.py": "sha256:f2da57b8355a61078b761715e72bfe0b44241667c4c37c5605c1770ce8f202d2",
+      "src/structural_analysis/api/cli.py": "sha256:6e93b6a51e8e7521bec9490c992bd2a5b793762da4238ac1e1d732f5e234860a",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
       "src/structural_analysis/assembly/__init__.py": "sha256:1ab2299dd9fe761749a2ae79ef7fe0238518ef7bcd66f5302fe82043077d3266",
       "src/structural_analysis/assembly/buckling.py": "sha256:fba3d394c496253c04421c13cfe50e00cc741129727b7ecf337a1628f54a0232",
@@ -60,7 +60,7 @@
       "tests/test_build_phase2_whole_model_buckling_artifacts.py": "sha256:52f262ba249aca17868f367937cfd4372571b081d3b68c5c456c230df03e4245",
       "tests/test_whole_model_buckling_analysis.py": "sha256:4747e72942b847ff78c6f999676a91b0ab58b3d6158f1971c932d4e175bc0611"
     },
-    "source_set_hash": "sha256:33c632b771718119bc31c90a89dbdee031acbb6c26ecd2b567f677725b2f3507"
+    "source_set_hash": "sha256:cc34e0610c4584598cd79cccdc67624a3063a9962bac833d79f6c3967e562b20"
   },
   "status": "partial",
   "summary": {
