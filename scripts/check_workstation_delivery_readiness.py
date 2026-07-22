@@ -19,7 +19,9 @@ from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "workstation-delivery-readiness.v1"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_OUT = Path("implementation/phase1/workstation_delivery_readiness.json")
 DEFAULT_HARDWARE_PROFILE = Path("implementation/phase1/workstation_hardware_profile.json")

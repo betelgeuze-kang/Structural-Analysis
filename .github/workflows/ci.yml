@@ -10,10 +10,13 @@ on:
     branches: ["main", "codex/**", "web/**", "feat/**", "solver/**", "ci/**"]
     paths:
       - "implementation/**"
+      - "artifacts/manifests/product_identity.json"
       - "src/structural_analysis/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
       - "*.py"
+      - "package.json"
+      - "package-lock.json"
       - "pyproject.toml"
       - "setup.cfg"
       - "pytest.ini"
@@ -27,10 +30,13 @@ on:
   pull_request:
     paths:
       - "implementation/**"
+      - "artifacts/manifests/product_identity.json"
       - "src/structural_analysis/**"
       - "scripts/**/*.py"
       - "tests/**/*.py"
       - "*.py"
+      - "package.json"
+      - "package-lock.json"
       - "pyproject.toml"
       - "setup.cfg"
       - "pytest.ini"

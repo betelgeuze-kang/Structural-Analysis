@@ -1,0 +1,12 @@
+{
+  "schema_version": "structural-analysis-product-identity.v1",
+  "distribution_name": "structural-analysis",
+  "import_package": "structural_analysis",
+  "display_name": "Structural Analysis",
+  "version": "0.3.0",
+  "release_stage": "developer_preview",
+  "legacy_distribution_names": [
+    "structural-optimization-workbench"
+  ],
+  "claim_boundary": "Version 0.3.0 is a pre-1.0 developer-preview identity. It does not imply commercial solver readiness or promote fallback, proxy, benchmark-bridge, or externally blocked evidence."
+}

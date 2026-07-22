@@ -198,7 +198,9 @@ DEFAULT_CONSISTENT_RESIDUAL_JACOBIAN_RECEIPTS = (
     "mgt_residual_jacobian_physical_audit_followup85_86_summary.json",
     "mgt_cached_residual_jvp_top96_multi_ridge_followup354_361_after_total_scaled_component_fd_hip_latest_only_controller_summary.json",
 )
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 
 
 def _now_utc_iso() -> str:

@@ -265,7 +265,7 @@
   },
   "dominant_initial_internal_force_component": "frame",
   "dominant_initial_residual_argmax_component": "frame",
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "evidence_closure_pass": false,
   "frame_connectivity_audit": {
     "beam_end_offset_applied_element_count": 708,
@@ -584,7 +584,7 @@
     "semantic_load_target": "LIVE",
     "status": "ready"
   },
-  "generated_at": "2026-07-19T11:10:28.678423+00:00",
+  "generated_at": "2026-07-22T17:27:14.315850+00:00",
   "global_dof_count": 78282,
   "initial_component_internal_force_free_inf_n": {
     "frame": 1276959794140.9329,
@@ -617,7 +617,7 @@
     "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_probe.json": "sha256:f3cc02959943f08b62f68056861f9918fe22112ec177fd4ad31dda762777c4b5",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
     "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py": "sha256:a6598d5613aefccaa9a6eda7c26adaba2cf4406dd3ea0a4acb57f32fe0870603",
-    "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:3f3b8033f63dccf39848e5f11c34d45b9fc1b35c06014b9376128b86b1c47e9f",
+    "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:ce19f76c158c6b119c05c034fae25cad3fc0e7e3f77624738cefe39bd98839aa",
     "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
     "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
     "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:aa7948c0ea1478bf33b2a7d460808fb7754c9ea905a501fdaec1f566c6459af9",
@@ -787,7 +787,7 @@
     "unsupported_selected_row_count": 0
   },
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "de08647587de76bc2a387278eac7b8884e4cb76a",
+  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
   "source_material_properties_consumed": true,
   "status": "partial",
   "stored_base_direct_residual_inf_n": 42754.66805918372,

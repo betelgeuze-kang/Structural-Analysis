@@ -87,7 +87,7 @@ def test_build_sidecars_from_complete_intake_passes_preflight(tmp_path: Path) ->
 
     assert external_payload["updates"]["hardest_external_10case"]["receipt_status"] == "attached"
     assert "source_commit_sha" in external_payload
-    assert external_payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert external_payload["engine_version"] == "structural-analysis@0.3.0"
     assert external_payload["reused_evidence"] is False
     assert external_payload["updates"]["hardest_external_10case"]["submission_lifecycle_status"] == (
         "submitted_receipt_attached"

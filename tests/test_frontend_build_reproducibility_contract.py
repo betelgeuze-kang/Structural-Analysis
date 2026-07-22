@@ -15,7 +15,7 @@ def _read_json(relative_path: str) -> dict[str, object]:
 def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     package_json = _read_json("package.json")
 
-    assert package_json["name"] == "structural-optimization-workbench"
+    assert package_json["name"] == "structural-analysis"
     assert package_json["packageManager"] == "npm@10.8.2"
     assert package_json["scripts"]["verify:frontend-contract"] == "node ./scripts/verify-frontend-build-contract.mjs"
     assert package_json["scripts"]["verify:frontend-smoke"] == "node ./scripts/verify-frontend-smoke.mjs"

@@ -4,7 +4,7 @@
     "sourcePath": "sample/demo-highrise.workbench-case.json",
     "sourceSha256": "sha256:samplelivecase00000000000000000000000000000000000000000000000000",
     "sourceCommitSha": "sample-not-a-release",
-    "engineVersion": "structural-optimization-workbench@1.0.0-sample",
+    "engineVersion": "structural-analysis@0.3.0-sample",
     "generatedAt": "2026-06-21T00:00:00+00:00"
   },
   "model": {

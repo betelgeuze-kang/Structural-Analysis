@@ -89,7 +89,7 @@ def test_terminal_gate_report_cross_checks_direct_residual_and_increment_receipt
     assert payload["status"] == "ready"
     assert payload["contract_pass"] is True
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
     assert payload["reuse_policy"] == "status_rebuilt_from_existing_g1_terminal_gate_receipts"
     assert payload["input_checksums"][str(fixtures["direct"])].startswith("sha256:")

@@ -4,7 +4,7 @@
     "sourcePath": "demo/midrise-import-only.case.json",
     "sourceSha256": "sha256:demounavail0000000000000000000000000000000000000000000000000000000",
     "sourceCommitSha": "demo-local",
-    "engineVersion": "structural-optimization-workbench@1.0.0",
+    "engineVersion": "structural-analysis@0.3.0",
     "generatedAt": "2026-06-21T00:00:00+00:00"
   },
   "model": {

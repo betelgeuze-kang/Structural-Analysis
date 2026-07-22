@@ -94,7 +94,7 @@ def test_build_board_groups_open_blockers_by_closure_state(tmp_path: Path) -> No
 
     assert payload["contract_pass"] is False
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
     assert (
         payload["reuse_policy"]

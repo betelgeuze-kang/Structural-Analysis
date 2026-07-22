@@ -13,7 +13,9 @@ import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = REPO_ROOT / "implementation/phase1/release_evidence/productization"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 

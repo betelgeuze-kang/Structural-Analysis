@@ -32,7 +32,7 @@ def test_real_accuracy_source_tracking_metadata_contract(tmp_path: Path) -> None
         real_accuracy._git_head = original_git_head
 
     assert metadata["source_commit_sha"] == "abcdef1234567890"
-    assert metadata["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert metadata["engine_version"] == "structural-analysis@0.3.0"
     assert metadata["reused_evidence"] is False
     assert metadata["reuse_policy"] == "fresh_real_accuracy_validation_run"
     assert metadata["input_checksums"][source.as_posix()].startswith("sha256:")

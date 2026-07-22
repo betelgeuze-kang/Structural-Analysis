@@ -80,7 +80,7 @@ def test_build_evidence_filters_pr_and_nightly_events_for_streaks() -> None:
 
     assert payload["contract_pass"] is False
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is False
     assert payload["lanes"]["pr"]["consecutive_pass_count"] == 3
     assert payload["lanes"]["pr"]["threshold_pass"] is True
@@ -612,7 +612,7 @@ def test_local_metadata_only_refresh_preserves_run_history_timestamp(tmp_path: P
 
     assert payload["generated_at"] == generated_at
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
     assert payload["lanes"]["pr"]["local_required_trigger_present"] is True
     assert payload["lanes"]["pr"]["local_workflow_trigger_events"] == ["pull_request"]

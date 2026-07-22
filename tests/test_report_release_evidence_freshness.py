@@ -53,7 +53,7 @@ def test_release_evidence_freshness_passes_complete_metadata(tmp_path: Path) -> 
 
     assert payload["contract_pass"] is True
     assert payload["source_commit_sha"] == "abcdef1234567890"
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
     assert payload["reuse_policy"] == "status_rebuilt_from_release_evidence_artifact_metadata"
     assert payload["input_checksums"]["evidence.json"].startswith("sha256:")
@@ -335,7 +335,7 @@ def test_release_evidence_freshness_audits_residual_level3_status(tmp_path: Path
         {
             "generated_at": datetime.now(timezone.utc).isoformat(),
             "source_commit_sha": "abcdef123456",
-            "engine_version": "structural-optimization-workbench@1.0.0",
+            "engine_version": "structural-analysis@0.3.0",
             "input_checksums": {
                 "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": (
                     "sha256:abc"
@@ -424,7 +424,7 @@ def test_release_evidence_freshness_audits_g1_residual_receipts(tmp_path: Path) 
             {
                 "generated_at": now_iso,
                 "source_commit_sha": "abcdef123456",
-                "engine_version": "structural-optimization-workbench@1.0.0",
+                "engine_version": "structural-analysis@0.3.0",
                 "input_checksums": {source_relpath: "sha256:abc"},
                 "reused_evidence": True,
                 "reuse_policy": "status_rebuilt_from_existing_g1_receipts",

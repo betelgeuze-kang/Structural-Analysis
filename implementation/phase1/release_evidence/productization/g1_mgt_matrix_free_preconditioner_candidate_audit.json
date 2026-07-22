@@ -312,7 +312,7 @@
     "reference_preconditioner_pattern_hash": "sha256:0e87f2fd7d981ea5b16b472f843775fa8a7204bcbfab999f40c98c27353f0423"
   },
   "diagnostic_execution_ready": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "evidence_closure_pass": false,
   "fixed_reference_splu_baseline": {
     "config": {
@@ -337,7 +337,7 @@
     "residual_gate_passed": true,
     "solution_data_hash": "sha256:f34beea3dcaeefbb3ad7eb97eeb6c0448124198d69654d09d9189c616dea2b35"
   },
-  "generated_at": "2026-07-19T11:28:59.148858+00:00",
+  "generated_at": "2026-07-22T17:28:56.485571+00:00",
   "hip_current_tangent_execution_preparation": {
     "actual_hardware_execution": true,
     "actual_mgt_fixture": {
@@ -1175,7 +1175,7 @@
   "readiness_pass": false,
   "schema_version": "g1-mgt-matrix-free-preconditioner-candidate-audit.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "de08647587de76bc2a387278eac7b8884e4cb76a",
+  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }

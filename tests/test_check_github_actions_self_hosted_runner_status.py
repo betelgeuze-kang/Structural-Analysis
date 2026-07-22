@@ -41,7 +41,7 @@ def test_self_hosted_runner_status_passes_online_idle_matching_runner() -> None:
     assert payload["schema_version"] == "github-actions-self-hosted-runner-status.v1"
     assert payload["generated_at"]
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is False
 
 
