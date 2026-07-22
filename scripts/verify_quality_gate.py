@@ -232,8 +232,7 @@ def _pr_commands(
         ],
         [
             _python(),
-            "scripts/"
-            "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py",
+            "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py",
             "--check",
         ],
         [
@@ -346,6 +345,7 @@ def _pr_commands(
             "tests/test_stateful_corotational_fiber_frame2d.py",
             "tests/test_stateful_corotational_fiber_frame2d_adaptive.py",
             "tests/test_stateful_corotational_fiber_frame2d_arc_length.py",
+            "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py",
             "tests/test_stateful_corotational_fiber_frame2d_solver.py",
             "tests/test_lee_frame_snapthrough_benchmark.py",
             "tests/test_build_phase2_modal_buckling_kernel_artifacts.py",

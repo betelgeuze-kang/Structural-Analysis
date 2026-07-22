@@ -91,6 +91,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_fiber_frame2d_solver.py \
   tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
   tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
+  tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_fiber_frame2d.py \
   tests/test_stateful_corotational_fiber_beam2d.py \
   tests/test_corotational_frame2d_basic_kinematics.py
@@ -101,6 +102,13 @@ material/geometric tangent decomposition, a same-parent nonlinear global
 Jacobian finite difference after RC damage/yield history, sequential 2.2 and
 4.4 rad rigid rotations across all members, exact replay, unchanged-parent
 trial branching, and fail-closed checkpoint/geometry binding.
+
+The separate
+[`stateful-corotational-steel-frame-cyclic-benchmark.md`](stateful-corotational-steel-frame-cyclic-benchmark.md)
+case exercises isotropic, kinematic, and combined hardening through an internal
+30-target reversal path. It keeps concrete carrier fibers elastic, verifies
+same-parent yielded tangents and nonnegative steel dissipation, and retains the
+external cyclic-member acceptance blocker.
 
 ## Claim boundary
 
