@@ -78,15 +78,18 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
 
 ## Claim boundary
 
-This is one dense 2D, global-axis, scalar translational link integration. It
-does not support rotational or multi-axis coupling, local-axis link
+This is one dense 2D, global-axis, scalar translational link integration. This
+case does not exercise rotational or multi-axis coupling, local-axis link
 transformations within this case, gap/contact, friction, uplift, viscous/rate
 response, degradation, pinching, or shell connections. The separate
 [fixed-reference local-axis benchmark](stateful-corotational-local-axis-linked-frame-cyclic-benchmark.md)
 covers the bounded direction-cosine transformation, while the separate
 [updated-current-axis benchmark](stateful-corotational-updated-axis-linked-frame-cyclic-benchmark.md)
 covers one internal current-chord force and consistent link geometric tangent.
-Neither broadens this global-axis case into a general link family. The columns
+The separate
+[scalar rotational-link benchmark](stateful-corotational-rotational-linked-frame-cyclic-benchmark.md)
+uses a distinct moment-rotation state on two free `rz` DOFs. None broadens this
+global-axis case into a coupled multi-axis or general link family. The columns
 remain elastic, so simultaneous inelastic member-link interaction is not
 validated. No external device comparison, production sparse/ROCm/HIP path,
 full-building equilibrium, G1 closure, or commercial-readiness claim is made.

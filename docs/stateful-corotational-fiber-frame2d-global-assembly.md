@@ -94,6 +94,7 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
+  tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py \
   tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py \
@@ -131,8 +132,17 @@ link force with the current chord, and assembles the force-times-length-Hessian
 link geometric tangent separately from the frame geometric tangent. It checks
 finite rigid-motion objectivity, current-axis force transformation, full mixed
 same-parent tangent, cyclic state, replay, and rollback. General follower
-external loads, rotational or coupled multi-axis response, shell, contact,
+external loads, coupled multi-axis response, shell, contact,
 friction, damping, degradation, and general link breadth remain open.
+
+The paired
+[`stateful-corotational-rotational-linked-frame-cyclic-benchmark.md`](stateful-corotational-rotational-linked-frame-cyclic-benchmark.md)
+case reuses the two-cantilever carrier and 30-target path but connects the two
+free top `rz` DOFs. It uses a distinct kN-m/rad material and rotational state,
+checks the `S^T K S` generalized-coordinate scaling, common-rotation
+objectivity, analytic elastic moment transfer, cyclic dissipation,
+same-parent tangent, replay, and rollback. It is one scalar relative-rotation
+link, not coupled multi-axis response or general connection breadth.
 
 The separate
 [`stateful-corotational-composite-frame-cyclic-benchmark.md`](stateful-corotational-composite-frame-cyclic-benchmark.md)

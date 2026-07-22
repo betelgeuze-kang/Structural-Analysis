@@ -1,8 +1,9 @@
-"""Stateful translational links coupled to a corotational 2D fiber frame.
+"""Stateful scalar links coupled to a corotational 2D fiber frame.
 
 The existing frame checkpoint remains unchanged.  This bounded coupling layer
 nests that checkpoint with one immutable state per scalar force-deformation
-link and commits both state families atomically.
+link and commits both state families atomically. Translational and rotational
+links keep distinct force-deformation and moment-rotation unit contracts.
 """
 
 from __future__ import annotations
@@ -31,6 +32,11 @@ from structural_analysis.materials.bilinear_link import (
     BilinearLinkResponse,
     BilinearLinkState,
 )
+from structural_analysis.materials.bilinear_rotational_link import (
+    BilinearCombinedHardeningRotationalLink,
+    BilinearRotationalLinkResponse,
+    BilinearRotationalLinkState,
+)
 from structural_analysis.solvers.nonlinear.newton import (
     NO_SOLVE_REACTION_ONLY_DISPOSITION,
     RESIDUAL_FORMULA,
@@ -43,15 +49,15 @@ from structural_analysis.solvers.nonlinear.newton import (
 
 
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION = (
-    "stateful-corotational-fiber-frame2d-link-coupling.v3"
+    "stateful-corotational-fiber-frame2d-link-coupling.v4"
 )
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION = (
-    "stateful-corotational-fiber-frame2d-link-checkpoint.v3"
+    "stateful-corotational-fiber-frame2d-link-checkpoint.v4"
 )
 STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_ASSEMBLY = (
     "deformation_link=global_or_fixed_reference_B_link@u_global|"
-    "current_length-reference_length;"
-    "f_internal=f_frame+sum(scatter_link(B_link.T*force));"
+    "current_length-reference_length|relative_nodal_rotation;"
+    "f_internal=f_frame+sum(scatter_link(B_link.T*generalized_force));"
     "K_material=K_frame_material+sum(scatter_link(B_link.T*k*B_link));"
     "K_geometric=K_frame_geometric+sum(scatter_link(force*hessian_length));"
     "K_consistent=K_material+K_geometric"
@@ -60,15 +66,16 @@ STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CLAIM_BOUNDARY = (
     "This coupling supports one or more scalar translational force-deformation "
     "links between planar frame nodes on global axes or a fixed reference "
     "local-axial direction, plus an internal updated-axial link whose force "
-    "direction and geometric tangent follow the current chord. It does not "
-    "provide general follower external loads, rotational or coupled multi-axis "
+    "direction and geometric tangent follow the current chord. It also supports "
+    "a distinct scalar relative-rz moment-rotation link between planar nodes. "
+    "It does not provide general follower external loads, coupled multi-axis "
     "response, gap/contact, friction, uplift, damping, rate effects, degradation "
     "or pinching, shells, three-dimensional frames, production sparse execution, "
     "ROCm/HIP parity, full-building equilibrium, G1 closure, or commercial-"
     "readiness evidence."
 )
 _CHECKPOINT_HASH_DOMAIN = (
-    b"structural-analysis/stateful-corotational-fiber-frame2d-link-checkpoint/v3\0"
+    b"structural-analysis/stateful-corotational-fiber-frame2d-link-checkpoint/v4\0"
 )
 
 
@@ -375,12 +382,124 @@ class StatefulCorotationalFiberFrame2DLink:
 
 
 @dataclass(frozen=True)
+class StatefulCorotationalFiberFrame2DRotationalLink:
+    """One scalar relative-rz link with an explicit moment-rotation material."""
+
+    link_id: str
+    node_i: int
+    node_j: int
+    material: BilinearCombinedHardeningRotationalLink
+    component: Literal["rz"] = "rz"
+
+    def __post_init__(self) -> None:
+        normalized_id = str(self.link_id).strip()
+        if not normalized_id:
+            raise ValueError("link_id must be non-empty")
+        object.__setattr__(self, "link_id", normalized_id)
+        if (
+            type(self.node_i) is not int
+            or type(self.node_j) is not int
+            or self.node_i < 0
+            or self.node_j < 0
+            or self.node_i == self.node_j
+        ):
+            raise ValueError("link node indices must be distinct and non-negative")
+        if self.component != "rz":
+            raise ValueError("rotational link component must be 'rz'")
+        if type(self.material) is not BilinearCombinedHardeningRotationalLink:
+            raise ValueError(
+                "rotational link material must be a "
+                "BilinearCombinedHardeningRotationalLink"
+            )
+
+    def global_dofs(self) -> tuple[int, int]:
+        return 3 * self.node_i + 2, 3 * self.node_j + 2
+
+    def kinematic_vector(self) -> np.ndarray:
+        return _readonly(
+            (-1.0, 1.0),
+            shape=(2,),
+            name="rotational link kinematic vector",
+        )
+
+    def rotation_rad(self, global_displacements: Any) -> float:
+        dofs = self.global_dofs()
+        try:
+            displacements = np.asarray(global_displacements, dtype=np.float64)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("global displacements must be a finite vector") from exc
+        if (
+            displacements.ndim != 1
+            or max(dofs) >= displacements.shape[0]
+            or not np.all(np.isfinite(displacements))
+        ):
+            raise ValueError("global displacements must be a finite vector")
+        return float(self.kinematic_vector() @ displacements[list(dofs)])
+
+    def contract_payload(
+        self,
+        node_coordinates_m: Any | None = None,
+    ) -> dict[str, Any]:
+        del node_coordinates_m
+        material = self.material
+        return {
+            "link_id": self.link_id,
+            "node_i": self.node_i,
+            "node_j": self.node_j,
+            "component": self.component,
+            "kinematic_vector": self.kinematic_vector().tolist(),
+            "deformation_measure": "theta_j-theta_i",
+            "generalized_force": "equal_and_opposite_nodal_moment",
+            "material": {
+                "material_id": material.material_id,
+                "initial_stiffness_kn_m_per_rad": (
+                    material.initial_stiffness_kn_m_per_rad
+                ),
+                "yield_moment_kn_m": material.yield_moment_kn_m,
+                "isotropic_hardening_kn_m_per_rad": (
+                    material.isotropic_hardening_kn_m_per_rad
+                ),
+                "kinematic_hardening_kn_m_per_rad": (
+                    material.kinematic_hardening_kn_m_per_rad
+                ),
+                "yield_tolerance_kn_m": material.yield_tolerance_kn_m,
+            },
+        }
+
+
+StatefulCorotationalFiberFrame2DScalarLink = (
+    StatefulCorotationalFiberFrame2DLink
+    | StatefulCorotationalFiberFrame2DRotationalLink
+)
+BilinearScalarLinkState = BilinearLinkState | BilinearRotationalLinkState
+
+
+def _link_state_matches_definition(
+    link: StatefulCorotationalFiberFrame2DScalarLink,
+    state: BilinearScalarLinkState,
+) -> bool:
+    if type(link) is StatefulCorotationalFiberFrame2DRotationalLink:
+        return type(state) is BilinearRotationalLinkState
+    return type(state) is BilinearLinkState
+
+
+def _link_generalized_deformation(
+    link: StatefulCorotationalFiberFrame2DScalarLink,
+    global_displacements: Any,
+    node_coordinates_m: Any,
+) -> float:
+    if type(link) is StatefulCorotationalFiberFrame2DRotationalLink:
+        return link.rotation_rad(global_displacements)
+    return link.deformation_m(global_displacements, node_coordinates_m)
+
+
+@dataclass(frozen=True)
 class StatefulCorotationalFiberFrame2DLinkProblem:
-    """A pre-existing corotational frame plus scalar translational links."""
+    """A pre-existing corotational frame plus scalar link definitions."""
 
     case_id: str
     frame_problem: StatefulCorotationalFiberFrame2DProblem
-    links: tuple[StatefulCorotationalFiberFrame2DLink, ...]
+    links: tuple[StatefulCorotationalFiberFrame2DScalarLink, ...]
 
     def __post_init__(self) -> None:
         normalized_id = str(self.case_id).strip()
@@ -395,7 +514,11 @@ class StatefulCorotationalFiberFrame2DLinkProblem:
             not isinstance(self.links, tuple)
             or not self.links
             or not all(
-                type(link) is StatefulCorotationalFiberFrame2DLink
+                type(link)
+                in (
+                    StatefulCorotationalFiberFrame2DLink,
+                    StatefulCorotationalFiberFrame2DRotationalLink,
+                )
                 for link in self.links
             )
         ):
@@ -412,10 +535,13 @@ class StatefulCorotationalFiberFrame2DLinkProblem:
             if link.node_i >= node_count or link.node_j >= node_count:
                 raise ValueError("link node index is out of range")
             dofs = link.global_dofs()
-            kinematic = link.kinematic_vector(
-                self.frame_problem.node_coordinates_m,
-                zero_displacements if link.component == "updated_axial" else None,
-            )
+            if type(link) is StatefulCorotationalFiberFrame2DRotationalLink:
+                kinematic = link.kinematic_vector()
+            else:
+                kinematic = link.kinematic_vector(
+                    self.frame_problem.node_coordinates_m,
+                    zero_displacements if link.component == "updated_axial" else None,
+                )
             global_kinematic = np.zeros(self.global_dof_count, dtype=np.float64)
             global_kinematic[list(dofs)] = kinematic
             if any(
@@ -485,7 +611,7 @@ class StatefulCorotationalFiberFrame2DLinkCheckpoint:
     load_factor: float
     parent_state_hash: str | None
     frame_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
-    link_states: tuple[BilinearLinkState, ...]
+    link_states: tuple[BilinearScalarLinkState, ...]
     role: Literal["committed"] = "committed"
     state_hash: str = ""
 
@@ -534,7 +660,10 @@ class StatefulCorotationalFiberFrame2DLinkCheckpoint:
         if (
             not isinstance(self.link_states, tuple)
             or not self.link_states
-            or not all(type(state) is BilinearLinkState for state in self.link_states)
+            or not all(
+                type(state) in (BilinearLinkState, BilinearRotationalLinkState)
+                for state in self.link_states
+            )
         ):
             raise ValueError("link_states must be a non-empty tuple of link states")
         if (
@@ -621,7 +750,10 @@ def validate_stateful_corotational_fiber_frame2d_link_checkpoint(
         checkpoint.frame_checkpoint,
     )
     for link, state in zip(problem.links, checkpoint.link_states, strict=True):
-        deformation = link.deformation_m(
+        if not _link_state_matches_definition(link, state):
+            raise ValueError("checkpoint link state type does not match definition")
+        deformation = _link_generalized_deformation(
+            link,
             checkpoint.global_displacements,
             problem.frame_problem.node_coordinates_m,
         )
@@ -845,6 +977,112 @@ class StatefulCorotationalFiberFrame2DLinkAssemblyRow:
 
 
 @dataclass(frozen=True)
+class StatefulCorotationalFiberFrame2DRotationalLinkAssemblyRow:
+    """One assembled moment-rotation row on two physical nodal rz DOFs."""
+
+    link_id: str
+    component: Literal["rz"]
+    global_dofs: tuple[int, int]
+    kinematic_vector: np.ndarray
+    rotation_rad: float
+    internal_moments_global_kn_m: np.ndarray
+    material_tangent_global_kn_m_per_rad: np.ndarray
+    tangent_global_kn_m_per_rad: np.ndarray
+    response: BilinearRotationalLinkResponse
+
+    def __post_init__(self) -> None:
+        normalized_id = str(self.link_id).strip()
+        if not normalized_id:
+            raise ValueError("link_id must be non-empty")
+        object.__setattr__(self, "link_id", normalized_id)
+        if self.component != "rz":
+            raise ValueError("rotational link component must be 'rz'")
+        if (
+            not isinstance(self.global_dofs, tuple)
+            or len(self.global_dofs) != 2
+            or len(set(self.global_dofs)) != 2
+            or any(type(dof) is not int or dof < 0 for dof in self.global_dofs)
+            or any(dof % 3 != 2 for dof in self.global_dofs)
+        ):
+            raise ValueError(
+                "rotational link global_dofs must be two distinct nodal rz DOFs"
+            )
+        object.__setattr__(
+            self,
+            "kinematic_vector",
+            _readonly(
+                self.kinematic_vector,
+                shape=(2,),
+                name="kinematic_vector",
+            ),
+        )
+        if not _exact_float64_equal(self.kinematic_vector, (-1.0, 1.0)):
+            raise ValueError("rotational link kinematic vector is invalid")
+        object.__setattr__(
+            self,
+            "rotation_rad",
+            _finite(self.rotation_rad, name="rotation_rad"),
+        )
+        if type(self.response) is not BilinearRotationalLinkResponse:
+            raise ValueError("rotational link response type is invalid")
+        if self.rotation_rad != self.response.rotation_rad:
+            raise ValueError("rotational link rotation does not match response")
+        for name in (
+            "internal_moments_global_kn_m",
+            "material_tangent_global_kn_m_per_rad",
+            "tangent_global_kn_m_per_rad",
+        ):
+            shape = (2,) if name == "internal_moments_global_kn_m" else (2, 2)
+            object.__setattr__(
+                self,
+                name,
+                _readonly(getattr(self, name), shape=shape, name=name),
+            )
+        expected_moments = self.response.moment_kn_m * self.kinematic_vector
+        expected_tangent = self.response.consistent_tangent_kn_m_per_rad * np.outer(
+            self.kinematic_vector, self.kinematic_vector
+        )
+        if not _exact_float64_equal(
+            self.internal_moments_global_kn_m,
+            expected_moments,
+        ):
+            raise ValueError("rotational link moments do not match response")
+        if not _exact_float64_equal(
+            self.material_tangent_global_kn_m_per_rad,
+            expected_tangent,
+        ):
+            raise ValueError("rotational link material tangent does not match response")
+        if not _exact_float64_equal(
+            self.tangent_global_kn_m_per_rad,
+            expected_tangent,
+        ):
+            raise ValueError("rotational link tangent does not match response")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "link_id": self.link_id,
+            "component": self.component,
+            "global_dofs": list(self.global_dofs),
+            "kinematic_vector": self.kinematic_vector.tolist(),
+            "rotation_rad": self.rotation_rad,
+            "internal_moments_global_kn_m": (
+                self.internal_moments_global_kn_m.tolist()
+            ),
+            "material_tangent_global_kn_m_per_rad": (
+                self.material_tangent_global_kn_m_per_rad.tolist()
+            ),
+            "tangent_global_kn_m_per_rad": (self.tangent_global_kn_m_per_rad.tolist()),
+            "response": self.response.to_dict(),
+        }
+
+
+StatefulCorotationalFiberFrame2DScalarLinkAssemblyRow = (
+    StatefulCorotationalFiberFrame2DLinkAssemblyRow
+    | StatefulCorotationalFiberFrame2DRotationalLinkAssemblyRow
+)
+
+
+@dataclass(frozen=True)
 class StatefulCorotationalFiberFrame2DLinkAssembly:
     parent_checkpoint_hash: str
     target_load_factor: float
@@ -864,8 +1102,8 @@ class StatefulCorotationalFiberFrame2DLinkAssembly:
     geometric_tangent_global: np.ndarray
     consistent_tangent_global: np.ndarray
     frame_assembly: StatefulCorotationalFiberFrame2DAssembly
-    link_assemblies: tuple[StatefulCorotationalFiberFrame2DLinkAssemblyRow, ...]
-    trial_link_states: tuple[BilinearLinkState, ...]
+    link_assemblies: tuple[StatefulCorotationalFiberFrame2DScalarLinkAssemblyRow, ...]
+    trial_link_states: tuple[BilinearScalarLinkState, ...]
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -948,7 +1186,11 @@ class StatefulCorotationalFiberFrame2DLinkAssembly:
             not isinstance(self.link_assemblies, tuple)
             or not self.link_assemblies
             or not all(
-                type(row) is StatefulCorotationalFiberFrame2DLinkAssemblyRow
+                type(row)
+                in (
+                    StatefulCorotationalFiberFrame2DLinkAssemblyRow,
+                    StatefulCorotationalFiberFrame2DRotationalLinkAssemblyRow,
+                )
                 for row in self.link_assemblies
             )
         ):
@@ -957,7 +1199,8 @@ class StatefulCorotationalFiberFrame2DLinkAssembly:
             not isinstance(self.trial_link_states, tuple)
             or len(self.trial_link_states) != len(self.link_assemblies)
             or not all(
-                type(state) is BilinearLinkState for state in self.trial_link_states
+                type(state) in (BilinearLinkState, BilinearRotationalLinkState)
+                for state in self.trial_link_states
             )
         ):
             raise ValueError("trial_link_states does not match link assemblies")
@@ -1045,52 +1288,84 @@ def assemble_stateful_corotational_fiber_frame2d_links(
         copy=True,
     )
     link_geometric = np.zeros_like(frame_geometric)
-    link_rows: list[StatefulCorotationalFiberFrame2DLinkAssemblyRow] = []
-    trial_link_states: list[BilinearLinkState] = []
+    link_rows: list[StatefulCorotationalFiberFrame2DScalarLinkAssemblyRow] = []
+    trial_link_states: list[BilinearScalarLinkState] = []
     for link, parent in zip(
         problem.links,
         accepted_checkpoint.link_states,
         strict=True,
     ):
         dofs = link.global_dofs()
-        kinematic = link.kinematic_vector(
-            problem.frame_problem.node_coordinates_m,
-            frame.global_displacements if link.component == "updated_axial" else None,
-        )
-        deformation = link.deformation_m(
-            frame.global_displacements,
-            problem.frame_problem.node_coordinates_m,
-        )
-        deformation_hessian = link.deformation_hessian_per_m(
-            problem.frame_problem.node_coordinates_m,
-            frame.global_displacements,
-        )
-        response = link.material.integrate(deformation, parent)
-        local_force = response.force_kn * kinematic
-        local_material_tangent = response.consistent_tangent_kn_per_m * np.outer(
-            kinematic,
-            kinematic,
-        )
-        local_geometric_tangent = response.force_kn * deformation_hessian
-        local_tangent = local_material_tangent + local_geometric_tangent
-        internal[list(dofs)] += local_force
+        if type(link) is StatefulCorotationalFiberFrame2DRotationalLink:
+            if type(parent) is not BilinearRotationalLinkState:
+                raise ValueError("rotational link parent state type is invalid")
+            kinematic = link.kinematic_vector()
+            rotation = link.rotation_rad(frame.global_displacements)
+            response = link.material.integrate(rotation, parent)
+            local_internal = response.moment_kn_m * kinematic
+            local_material_tangent = (
+                response.consistent_tangent_kn_m_per_rad
+                * np.outer(kinematic, kinematic)
+            )
+            local_geometric_tangent = np.zeros((2, 2), dtype=np.float64)
+            local_tangent = local_material_tangent
+            link_rows.append(
+                StatefulCorotationalFiberFrame2DRotationalLinkAssemblyRow(
+                    link_id=link.link_id,
+                    component=link.component,
+                    global_dofs=dofs,
+                    kinematic_vector=kinematic,
+                    rotation_rad=rotation,
+                    internal_moments_global_kn_m=local_internal,
+                    material_tangent_global_kn_m_per_rad=(local_material_tangent),
+                    tangent_global_kn_m_per_rad=local_tangent,
+                    response=response,
+                )
+            )
+        else:
+            if type(parent) is not BilinearLinkState:
+                raise ValueError("translational link parent state type is invalid")
+            kinematic = link.kinematic_vector(
+                problem.frame_problem.node_coordinates_m,
+                (
+                    frame.global_displacements
+                    if link.component == "updated_axial"
+                    else None
+                ),
+            )
+            deformation = link.deformation_m(
+                frame.global_displacements,
+                problem.frame_problem.node_coordinates_m,
+            )
+            deformation_hessian = link.deformation_hessian_per_m(
+                problem.frame_problem.node_coordinates_m,
+                frame.global_displacements,
+            )
+            response = link.material.integrate(deformation, parent)
+            local_internal = response.force_kn * kinematic
+            local_material_tangent = response.consistent_tangent_kn_per_m * np.outer(
+                kinematic, kinematic
+            )
+            local_geometric_tangent = response.force_kn * deformation_hessian
+            local_tangent = local_material_tangent + local_geometric_tangent
+            link_rows.append(
+                StatefulCorotationalFiberFrame2DLinkAssemblyRow(
+                    link_id=link.link_id,
+                    component=link.component,
+                    global_dofs=dofs,
+                    kinematic_vector=kinematic,
+                    deformation_hessian_per_m=deformation_hessian,
+                    deformation_m=deformation,
+                    internal_load_global_kn=local_internal,
+                    material_tangent_global_kn_per_m=local_material_tangent,
+                    geometric_tangent_global_kn_per_m=local_geometric_tangent,
+                    tangent_global_kn_per_m=local_tangent,
+                    response=response,
+                )
+            )
+        internal[list(dofs)] += local_internal
         link_material[np.ix_(dofs, dofs)] += local_material_tangent
         link_geometric[np.ix_(dofs, dofs)] += local_geometric_tangent
-        link_rows.append(
-            StatefulCorotationalFiberFrame2DLinkAssemblyRow(
-                link_id=link.link_id,
-                component=link.component,
-                global_dofs=dofs,
-                kinematic_vector=kinematic,
-                deformation_hessian_per_m=deformation_hessian,
-                deformation_m=deformation,
-                internal_load_global_kn=local_force,
-                material_tangent_global_kn_per_m=local_material_tangent,
-                geometric_tangent_global_kn_per_m=local_geometric_tangent,
-                tangent_global_kn_per_m=local_tangent,
-                response=response,
-            )
-        )
         trial_link_states.append(response.state)
 
     material = frame_material + link_material
@@ -1611,6 +1886,8 @@ __all__ = [
     "StatefulCorotationalFiberFrame2DLinkLoadStepAdapter",
     "StatefulCorotationalFiberFrame2DLinkLoadStepResult",
     "StatefulCorotationalFiberFrame2DLinkProblem",
+    "StatefulCorotationalFiberFrame2DRotationalLink",
+    "StatefulCorotationalFiberFrame2DRotationalLinkAssemblyRow",
     "assemble_stateful_corotational_fiber_frame2d_links",
     "finite_difference_stateful_corotational_fiber_frame2d_link_tangent_check",
     "initial_stateful_corotational_fiber_frame2d_link_checkpoint",

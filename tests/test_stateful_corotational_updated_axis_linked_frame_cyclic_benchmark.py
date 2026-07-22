@@ -64,9 +64,9 @@ def test_problem_uses_current_chord_updated_axial_kinematics() -> None:
         UPDATED_AXIS_LINKED_FRAME_REFERENCE_DIRECTION
     )
     assert len(UPDATED_AXIS_LINKED_FRAME_CYCLIC_LOAD_FACTORS) == 30
-    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v3")
+    assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_SCHEMA_VERSION.endswith(".v4")
     assert STATEFUL_COROTATIONAL_FIBER_FRAME2D_LINK_CHECKPOINT_SCHEMA_VERSION.endswith(
-        ".v3"
+        ".v4"
     )
 
 

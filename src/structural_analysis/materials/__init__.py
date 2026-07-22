@@ -7,6 +7,16 @@ from structural_analysis.materials.bilinear_link import (
     finite_difference_link_tangent_check,
     integrate_link_deformation_history,
 )
+from structural_analysis.materials.bilinear_rotational_link import (
+    ROTATIONAL_LINK_RETURN_MAPPING_ALGORITHM,
+    ROTATIONAL_LINK_STATE_SCHEMA_VERSION,
+    ROTATIONAL_LINK_TANGENT_DEFINITION,
+    BilinearCombinedHardeningRotationalLink,
+    BilinearRotationalLinkResponse,
+    BilinearRotationalLinkState,
+    finite_difference_rotational_link_tangent_check,
+    integrate_rotational_link_history,
+)
 from structural_analysis.materials.concrete_damage import (
     DAMAGE_ALGORITHM,
     AsymmetricConcreteDamageMaterial,
@@ -51,8 +61,11 @@ from structural_analysis.materials.uniaxial_plasticity import (
 __all__ = [
     "BilinearCombinedHardeningSteel",
     "BilinearCombinedHardeningLink",
+    "BilinearCombinedHardeningRotationalLink",
     "BilinearLinkResponse",
     "BilinearLinkState",
+    "BilinearRotationalLinkResponse",
+    "BilinearRotationalLinkState",
     "AsymmetricConcreteDamageMaterial",
     "ConcreteDamageResponse",
     "ConcreteDamageState",
@@ -65,6 +78,9 @@ __all__ = [
     "ParallelCompositeSectionState",
     "ParallelSteelConcreteSectionMaterial",
     "RETURN_MAPPING_ALGORITHM",
+    "ROTATIONAL_LINK_RETURN_MAPPING_ALGORITHM",
+    "ROTATIONAL_LINK_STATE_SCHEMA_VERSION",
+    "ROTATIONAL_LINK_TANGENT_DEFINITION",
     "StatefulFiberSectionResponse",
     "StatefulFiberSectionState",
     "StatefulRCFiberSection",
@@ -77,7 +93,9 @@ __all__ = [
     "finite_difference_concrete_damage_tangent_check",
     "finite_difference_composite_section_tangent_check",
     "finite_difference_link_tangent_check",
+    "finite_difference_rotational_link_tangent_check",
     "finite_difference_stateful_fiber_section_tangent_check",
+    "integrate_rotational_link_history",
     "build_stateful_rc_fiber_section_benchmark",
     "integrate_composite_section_history",
     "integrate_link_deformation_history",

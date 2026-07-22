@@ -19,6 +19,9 @@ on:
       - "src/structural_analysis/benchmark/stateful_corotational_linked_frame_cyclic.py"
       - "src/structural_analysis/benchmark/stateful_corotational_local_axis_linked_frame_cyclic.py"
       - "src/structural_analysis/benchmark/stateful_corotational_updated_axis_linked_frame_cyclic.py"
+      - "src/structural_analysis/benchmark/stateful_corotational_rotational_linked_frame_cyclic.py"
+      - "src/structural_analysis/materials/bilinear_rotational_link.py"
+      - "src/structural_analysis/materials/__init__.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_state.py"
@@ -61,6 +64,7 @@ on:
       - "tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py"
+      - "tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_fiber_frame2d_solver.py"
       - "tests/test_public_rc_fiber_frame_api.py"
       - "tests/test_verify_quality_gate_contract.py"
@@ -127,6 +131,9 @@ jobs:
             src/structural_analysis/benchmark/stateful_corotational_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_local_axis_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_updated_axis_linked_frame_cyclic.py \
+            src/structural_analysis/benchmark/stateful_corotational_rotational_linked_frame_cyclic.py \
+            src/structural_analysis/materials/bilinear_rotational_link.py \
+            src/structural_analysis/materials/__init__.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_state.py \
@@ -162,6 +169,7 @@ jobs:
             tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
             tests/test_engine_v2_solver_episode_v1.py \
@@ -181,6 +189,9 @@ jobs:
             src/structural_analysis/benchmark/stateful_corotational_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_local_axis_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_updated_axis_linked_frame_cyclic.py \
+            src/structural_analysis/benchmark/stateful_corotational_rotational_linked_frame_cyclic.py \
+            src/structural_analysis/materials/bilinear_rotational_link.py \
+            src/structural_analysis/materials/__init__.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_state.py \
@@ -215,6 +226,7 @@ jobs:
             tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
             tests/test_fiber_frame_solver_episode_adapter.py
@@ -234,6 +246,9 @@ jobs:
             src/structural_analysis/benchmark/stateful_corotational_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_local_axis_linked_frame_cyclic.py \
             src/structural_analysis/benchmark/stateful_corotational_updated_axis_linked_frame_cyclic.py \
+            src/structural_analysis/benchmark/stateful_corotational_rotational_linked_frame_cyclic.py \
+            src/structural_analysis/materials/bilinear_rotational_link.py \
+            src/structural_analysis/materials/__init__.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_state.py \
@@ -269,6 +284,7 @@ jobs:
             tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_public_rc_fiber_frame_api.py \
             tests/test_engine_v2_solver_episode_v1.py \
@@ -287,6 +303,7 @@ jobs:
             tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_stateful_fiber_frame2d_execution_topology.py \
             tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
@@ -316,6 +333,7 @@ jobs:
             tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_local_axis_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_updated_axis_linked_frame_cyclic_benchmark.py \
+            tests/test_stateful_corotational_rotational_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_stateful_fiber_frame2d.py \
             tests/test_stateful_fiber_frame2d_material_state_bundle.py \
