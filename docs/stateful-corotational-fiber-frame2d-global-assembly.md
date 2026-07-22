@@ -78,12 +78,19 @@ controller persists that checkpoint together with its cumulative adaptive
 progress and resumes only after source, problem, hash, canonical-byte, and
 equilibrium checks pass.
 
+The separate
+[`stateful_corotational_fiber_frame2d_arc_length`](stateful-corotational-fiber-frame2d-arc-length.md)
+bridge follows limit-point paths with the same assembly and full-state
+transaction. It persists the accepted displacement/load tangent so restart
+retains the selected equilibrium branch.
+
 ## Focused verification
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_fiber_frame2d_solver.py \
   tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
+  tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
   tests/test_stateful_corotational_fiber_frame2d.py \
   tests/test_stateful_corotational_fiber_beam2d.py \
   tests/test_corotational_frame2d_basic_kinematics.py
@@ -99,10 +106,10 @@ trial branching, and fail-closed checkpoint/geometry binding.
 
 This document describes the dense multi-element assembly kernel. Fixed-target
 Newton load control and convergence-gated checkpoint acceptance are implemented
-in the separate solver boundary linked above. Adaptive load stepping, automatic
-cutback/retry, and persisted single accepted-boundary restart are implemented
-by the adaptive controller. The combined path still does not provide arc
-length, prescribed displacements, follower loads, sparse production assembly,
+in the separate solver boundary linked above. Adaptive load stepping and the
+optional spherical arc-length branch both provide cutback, exact rollback, and
+persisted single accepted-boundary restart. The combined path still does not
+provide prescribed displacements, follower loads, sparse production assembly,
 or checkpoint-chain replay. The nearest-branch chord unwrapping remains unique
 only when each accepted member rotation increment has magnitude below `pi`.
 
