@@ -136,9 +136,7 @@ def make_stateful_corotational_local_axis_gap_linked_frame_cyclic_problem() -> (
 ):
     """Reuse the verified inclined elastic carrier with one unilateral gap."""
 
-    base_frame = (
-        make_stateful_corotational_local_axis_linked_frame_cyclic_problem().frame_problem
-    )
+    base_frame = make_stateful_corotational_local_axis_linked_frame_cyclic_problem().frame_problem
     nx, ny = LOCAL_AXIS_GAP_LINKED_FRAME_REFERENCE_DIRECTION
     frame_problem = StatefulCorotationalFiberFrame2DProblem(
         case_id="stateful-corotational-local-axis-gap-linked-frame-carrier",
@@ -311,7 +309,9 @@ def _fixed_reference_rotation_covariance(
         rotated_global_displacements,
         rotated_coordinates,
     )
-    response = link.material.integrate(reference_deformation, link.material.initial_state())
+    response = link.material.integrate(
+        reference_deformation, link.material.initial_state()
+    )
     reference_force = response.force_kn * reference_kinematic
     rotated_force = response.force_kn * rotated_kinematic
     reference_tangent = response.consistent_tangent_kn_per_m * np.outer(
@@ -333,8 +333,7 @@ def _fixed_reference_rotation_covariance(
     )
     tangent_error = float(
         np.linalg.norm(
-            rotated_tangent
-            - block_rotation @ reference_tangent @ block_rotation.T,
+            rotated_tangent - block_rotation @ reference_tangent @ block_rotation.T,
             ord=np.inf,
         )
     )
@@ -359,9 +358,9 @@ def _fixed_reference_rotation_covariance(
     }
 
 
-def build_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark() -> (
-    dict[str, Any]
-):
+def build_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark() -> dict[
+    str, Any
+]:
     """Build a deterministic inclined-normal open-close-open receipt."""
 
     problem = make_stateful_corotational_local_axis_gap_linked_frame_cyclic_problem()
@@ -456,9 +455,7 @@ def build_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark() -
         * LOCAL_AXIS_GAP_LINKED_FRAME_REFERENCE_LOAD_KN
     )
     analytic_open_deformation = compliance * open_load
-    observed_open_deformation = float(
-        steps[open_step_index - 1]["link_deformation_m"]
-    )
+    observed_open_deformation = float(steps[open_step_index - 1]["link_deformation_m"])
     open_relative_error = abs(
         observed_open_deformation - analytic_open_deformation
     ) / abs(analytic_open_deformation)
@@ -468,19 +465,13 @@ def build_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark() -
     )
     analytic_contact_force = (
         LOCAL_AXIS_GAP_LINKED_FRAME_CONTACT_STIFFNESS_KN_PER_M
-        * (
-            closed_load
-            + frame_stiffness * LOCAL_AXIS_GAP_LINKED_FRAME_INITIAL_GAP_M
-        )
-        / (
-            frame_stiffness
-            + LOCAL_AXIS_GAP_LINKED_FRAME_CONTACT_STIFFNESS_KN_PER_M
-        )
+        * (closed_load + frame_stiffness * LOCAL_AXIS_GAP_LINKED_FRAME_INITIAL_GAP_M)
+        / (frame_stiffness + LOCAL_AXIS_GAP_LINKED_FRAME_CONTACT_STIFFNESS_KN_PER_M)
     )
     observed_contact_force = float(steps[closed_step_index - 1]["link_force_kn"])
-    contact_relative_error = abs(
-        observed_contact_force - analytic_contact_force
-    ) / abs(analytic_contact_force)
+    contact_relative_error = abs(observed_contact_force - analytic_contact_force) / abs(
+        analytic_contact_force
+    )
 
     maximum_residual = max(float(row["residual_inf_norm_kn"]) for row in steps)
     maximum_balance_error = max(
@@ -681,9 +672,7 @@ def build_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark() -
             "observed_contact_force_kn": observed_contact_force,
             "relative_error": contact_relative_error,
             "relative_tolerance": _LINEARIZED_CONTACT_RELATIVE_TOLERANCE,
-            "pass": (
-                contact_relative_error <= _LINEARIZED_CONTACT_RELATIVE_TOLERANCE
-            ),
+            "pass": (contact_relative_error <= _LINEARIZED_CONTACT_RELATIVE_TOLERANCE),
         },
         "same_parent_open_frame_gap_tangent": open_tangent,
         "same_parent_closed_frame_gap_tangent": closed_tangent,

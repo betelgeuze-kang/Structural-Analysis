@@ -56,9 +56,7 @@ def test_problem_uses_fixed_reference_45_degree_contact_normal() -> None:
         (-root_half, -root_half, root_half, root_half)
     )
     payload = link.contract_payload(frame.node_coordinates_m)
-    assert payload["contact_normal"] == (
-        "fixed_reference_local_axis_node_i_to_node_j"
-    )
+    assert payload["contact_normal"] == ("fixed_reference_local_axis_node_i_to_node_j")
     assert payload["reference_direction_cosines"] == pytest.approx(
         LOCAL_AXIS_GAP_LINKED_FRAME_REFERENCE_DIRECTION
     )
