@@ -124,7 +124,7 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await open(page)
     const table = page.locator('[data-wb2-capability-table]')
     await expect(table).toBeVisible()
-    await expect(table.locator('tbody tr')).toHaveCount(18)
+    await expect(table.locator('tbody tr')).toHaveCount(19)
     await expect(
       table.locator('[data-capability-id="contract.result_quantity_catalog"]'),
     ).toHaveAttribute('data-capability-status', 'bounded_public')
@@ -136,6 +136,9 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     ).toHaveAttribute('data-capability-status', 'shadow_only')
     await expect(
       table.locator('[data-capability-id="backend.nonlinear_sparse"]'),
+    ).toHaveAttribute('data-capability-status', 'experimental')
+    await expect(
+      table.locator('[data-capability-id="material.fracture_energy_concrete"]'),
     ).toHaveAttribute('data-capability-status', 'experimental')
   })
 
