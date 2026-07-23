@@ -320,28 +320,28 @@
       "capability_kind": "analysis",
       "contract_pass": true,
       "evidence_artifacts": [
-        "docs/corotational-fiber-frame-j1-j5-adapter.md",
-        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py",
-        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py",
-        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py",
-        "src/structural_analysis/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json",
-        "tests/test_stateful_corotational_fiber_frame2d_solver.py",
-        "tests/test_corotational_fiber_frame_j1_j5.py"
+        "docs/unified-nonlinear-frame-api.md",
+        "src/structural_analysis/api/nonlinear_frame.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
+        "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json",
+        "tests/test_unified_nonlinear_frame_api.py"
       ],
       "next_actions": [],
       "state": "experimental",
       "summary": {
-        "authority": "replay_bound_portal_convergence_candidate_no_result_authority",
+        "authority": "bounded_j1_j5_and_exact_engineering_recovery_candidate",
         "interfaces": [
-          "internal_python"
+          "python_api",
+          "cli"
         ],
         "limitations": [
-          "One-bay, one-story load-control CPU dense portal candidate only; no public API, exact recovery, general topology, member features, independent Level 2 verification, or release promotion."
+          "One-bay, one-story load-control CPU dense portal candidate only; general topology, native sparse assembly, member features, direct displacement control, both independent Level 2 comparisons, and release promotion remain open."
         ],
-        "profile": "planar_one_bay_one_story_portal_explicit_fiber_section_j1_j5.v1",
+        "profile": "corotational_one_bay_portal.v1",
         "public": false
       },
-      "title": "Corotational 2D fiber-frame portal compiler"
+      "title": "Corotational 2D fiber frame"
     },
     {
       "blocker_count": 1,
@@ -566,9 +566,9 @@
   "first_blocked_capability_id": "vv.opensees_level2",
   "first_blocked_capability_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-22T23:52:06.459721+00:00",
+  "generated_at": "2026-07-23T03:15:44.751208+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:b85acda7b316c2dda1e0a6c2055c8a8833ec6735c12f0f40e3b89db57dd7b3cd",
+    "artifacts/manifests/capabilities.yaml": "sha256:aa331b4d81d3928b39ecb1b3cbdb7b951ecc46fec33f130d06d470c8ba3aa929",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -599,7 +599,7 @@
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "16a6f87b51e42c8c648bf9be3e54988e27eb6e3d",
+  "source_commit_sha": "f0cbda2cdb2e034b5cb9efa20b7e9173e5166cc0",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",
