@@ -321,10 +321,13 @@
       "contract_pass": true,
       "evidence_artifacts": [
         "docs/unified-nonlinear-frame-api.md",
+        "docs/corotational-fiber-frame-native-sparse.md",
         "src/structural_analysis/api/nonlinear_frame.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
         "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json",
+        "tests/test_corotational_fiber_frame_sparse.py",
         "tests/test_unified_nonlinear_frame_api.py"
       ],
       "next_actions": [],
@@ -336,7 +339,7 @@
           "cli"
         ],
         "limitations": [
-          "One-bay, one-story load-control CPU dense portal candidate only; general topology, native sparse assembly, member features, direct displacement control, both independent Level 2 comparisons, and release promotion remain open."
+          "One-bay, one-story load-control CPU dense or native COO/CSR portal candidate only; general topology, sparse factorization and conditioning diagnostics, member features, direct displacement control, both independent Level 2 comparisons, and release promotion remain open."
         ],
         "profile": "corotational_one_bay_portal.v1",
         "public": false
@@ -566,9 +569,9 @@
   "first_blocked_capability_id": "vv.opensees_level2",
   "first_blocked_capability_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-23T03:15:44.751208+00:00",
+  "generated_at": "2026-07-23T04:37:50.888413+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:aa331b4d81d3928b39ecb1b3cbdb7b951ecc46fec33f130d06d470c8ba3aa929",
+    "artifacts/manifests/capabilities.yaml": "sha256:440793a336ce84e080512f0f4c53f43bc5b2b1d4e114da63770c650cc243b20d",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -599,7 +602,7 @@
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "f0cbda2cdb2e034b5cb9efa20b7e9173e5166cc0",
+  "source_commit_sha": "0c2a5abd8a5154901f0a01ecbc68b58b6e9fbc02",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",
