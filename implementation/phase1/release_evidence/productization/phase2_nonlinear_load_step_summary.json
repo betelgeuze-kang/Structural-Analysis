@@ -17,15 +17,15 @@
   "claim_boundary": "Deterministic scalar cubic-spring load-step partition convergence only. Each partition applies proportional load factors to the same reference case, continues from the previous accepted step displacement, and uses newton_raphson_scalar with F_internal_minus_F_external, consistent tangent, residual/increment gates, and backtracking line search. This does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, or production mesh load-step suites.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": true,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "expected_full_load_displacement_m": 0.39300273897110216,
   "full_load_gate_passed": true,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-22T05:00:43.883216+00:00",
+  "generated_at": "2026-07-23T04:44:11.927019+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
     "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:c2a90344f5fba8d2210d4927ff9fc13d6be8943f264b545e1ab20bc2fa78d74d",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:2531dbc71d29277e550f792e3dd79f36012ad23d9f99aa6311f7cd50b989a8e6"
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:12e871b8004dc58a61ac7ff8e96f09689c6815785460d4bf4ac6b9a54bd62195"
   },
   "max_partition_final_displacement_spread_m": 2.220446049250313e-16,
   "nonlinear_newton_closure_claim": false,
@@ -77,7 +77,7 @@
   "residual_contract": "F_internal_minus_F_external",
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-nonlinear-load-step-artifacts.v1",
-  "source_commit_sha": "c3e0e0431520d0f3b9985ea2dd68eb93f75c4ed9",
+  "source_commit_sha": "c59bff9e9ab7cabffea3633c86be0bae7dc03dcf",
   "status": "ready",
   "target_load_factor": 1.0,
   "truth_class": "analytic_truth"

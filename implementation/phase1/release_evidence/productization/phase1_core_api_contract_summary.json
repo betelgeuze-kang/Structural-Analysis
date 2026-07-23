@@ -45,11 +45,11 @@
     "production_fail_closed": true,
     "python_api_cli_equal": true,
     "regularization_used": false,
-    "result_checksum": "sha256:2c2b94e56f7e65b386b9856c617372e819de470b0c234e728017b7a69074561b",
+    "result_checksum": "sha256:5834385d757d18a4a39ba8cc02ee237cdff4ccbdbf6b3bdf6355bf6be11b6a6c",
     "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
     "status": "ready",
     "stiffness_symmetry_error": 0.0,
-    "validation_report_checksum": "sha256:2fe06a9c5f33744a91c145e39f0617053b66da23b08490d34e0b0ed4da46b21f",
+    "validation_report_checksum": "sha256:cd2b28f0a1ca3e92f0778f9fa33a1aa87051af145c6d58a229cafeac86115d1d",
     "viewer_payload_checksum": "sha256:e8bdbb6a109f5e5e79887bd52f8d4d525ce917dc58e0651a41e3309eabd777cc",
     "viewer_solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
     "viewer_source": "authoritative_solver_result"
@@ -57,10 +57,10 @@
   "claim_boundary": "These artifacts prove the GUI can consume the stable Phase 1 model-health result and validation report schema, and that the CLI emits the same JSON envelopes as the Python API. Reference mismatches remain blocking. They also prove the deterministic fail-closed 6-DOF CPU Euler-Bernoulli frame/truss reference path used by the Python API, CLI, and viewer payload. The public configuration guard also proves that non-finite tolerance and negative iteration-limit requests are blocked before solver execution and remain strict-JSON serializable. This does not close shell coupling, Timoshenko shear, geometric/material nonlinearity, dynamics, construction stages, design-code closure, external benchmarks, or commercial solver readiness.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "cli_contract": {
-    "api_result_checksum": "sha256:3391541bfa2f318923085aa697479e4d099c6a73a472ce6944d4f323f52c3bb4",
-    "api_validation_report_checksum": "sha256:c1fd55f51bd4c212567ea38b52a39dc7d586c83e734d26e3abcf7ea0eeea66cc",
-    "cli_result_checksum": "sha256:3391541bfa2f318923085aa697479e4d099c6a73a472ce6944d4f323f52c3bb4",
-    "cli_validation_report_checksum": "sha256:c1fd55f51bd4c212567ea38b52a39dc7d586c83e734d26e3abcf7ea0eeea66cc",
+    "api_result_checksum": "sha256:ebfd0e4a50bc1cafa141096d5fbb64f8e9f9da162946fd4701376a5b7529388d",
+    "api_validation_report_checksum": "sha256:a5888ec299f3cad962e9dae0ff4b736f1f13b4b4cd43e7c6edb067712f5408fb",
+    "cli_result_checksum": "sha256:ebfd0e4a50bc1cafa141096d5fbb64f8e9f9da162946fd4701376a5b7529388d",
+    "cli_validation_report_checksum": "sha256:a5888ec299f3cad962e9dae0ff4b736f1f13b4b4cd43e7c6edb067712f5408fb",
     "contract_pass": true,
     "entry_point": "structural-analysis = structural_analysis.api.cli:main",
     "module_command": "python -m structural_analysis.api.cli",
@@ -75,15 +75,15 @@
   "contract_pass": true,
   "convergence_history_count": 1,
   "developer_preview_blocked_field_count": 0,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "expected_frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
   "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
   "frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
-  "generated_at": "2026-07-19T06:13:33.133852+00:00",
+  "generated_at": "2026-07-23T04:44:06.549703+00:00",
   "input_checksums": {
     "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
-    "src/structural_analysis/api/cli.py": "sha256:f2da57b8355a61078b761715e72bfe0b44241667c4c37c5605c1770ce8f202d2",
-    "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
+    "src/structural_analysis/api/cli.py": "sha256:6e93b6a51e8e7521bec9490c992bd2a5b793762da4238ac1e1d732f5e234860a",
+    "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
     "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
     "src/structural_analysis/assembly/nonlinear_static.py": "sha256:c09d0bd753e0ce9475e5a2adaa4b234e013a7c7bf150beb2aeadf778c5702c63",
     "src/structural_analysis/elements/axial.py": "sha256:47fb843e2e72ec68f23058b7c31a565212bd63e639a1fff04566b3034d3cf573",
@@ -95,7 +95,7 @@
     "src/structural_analysis/schemas/result.schema.json": "sha256:4697b4b32b92dd8963fdfafa083678ea1ae43501a287ab78b950b5dc32c787be",
     "src/structural_analysis/schemas/validation_report.schema.json": "sha256:534d4125281a9a28b69f58d96dd882628db1d3a820aad2e56cea8ec5473ee2bd",
     "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:2531dbc71d29277e550f792e3dd79f36012ad23d9f99aa6311f7cd50b989a8e6"
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:12e871b8004dc58a61ac7ff8e96f09689c6815785460d4bf4ac6b9a54bd62195"
   },
   "invocation_surfaces": [
     "python_api",
@@ -224,12 +224,12 @@
     "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
   },
   "schema_version": "phase1-core-api-contract-artifacts.v3",
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "c59bff9e9ab7cabffea3633c86be0bae7dc03dcf",
   "source_state_policy": {
     "allowed_post_source_scope": "generated_phase1_and_readiness_evidence_only",
     "exact_head_verification_required": true,
     "mode": "source_commit_then_evidence_only_commit",
-    "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc"
+    "source_commit_sha": "c59bff9e9ab7cabffea3633c86be0bae7dc03dcf"
   },
   "status": "ready",
   "supported_preview_analysis_types": [

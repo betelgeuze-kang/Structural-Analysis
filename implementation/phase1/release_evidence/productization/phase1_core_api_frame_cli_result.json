@@ -16,7 +16,7 @@
     }
   ],
   "developer_preview": true,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
   "metrics": {
     "active_dof_count": 12,

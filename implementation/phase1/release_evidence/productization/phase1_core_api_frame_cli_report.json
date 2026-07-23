@@ -103,7 +103,7 @@
   ],
   "developer_preview": true,
   "developer_preview_blocked_fields": [],
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
   "passed_fields": [
     "engine_version",
