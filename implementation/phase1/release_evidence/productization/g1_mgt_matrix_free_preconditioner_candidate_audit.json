@@ -337,7 +337,7 @@
     "residual_gate_passed": true,
     "solution_data_hash": "sha256:f34beea3dcaeefbb3ad7eb97eeb6c0448124198d69654d09d9189c616dea2b35"
   },
-  "generated_at": "2026-07-23T06:18:22.438935+00:00",
+  "generated_at": "2026-07-23T08:54:03.926336+00:00",
   "hip_current_tangent_execution_preparation": {
     "actual_hardware_execution": true,
     "actual_mgt_fixture": {
@@ -866,7 +866,7 @@
       "reference_matrix_nnz": 1262462,
       "reference_preconditioner_contract_hash": "sha256:ef34a0e2f9031e8beec7e76725199a443b8144fbd5630776252526615d9d0d86",
       "row_permutation_data_hash": "sha256:b98f253062002e421ee77d77ee0b46dedeb7fbd31a4f85bfd573d1251f5d802b",
-      "scipy_version": "1.12.0",
+      "scipy_version": "1.15.3",
       "serialized_backend_neutral_factor_artifact_claim": true,
       "upper_factor": {
         "nnz": 6579694,
@@ -1175,7 +1175,7 @@
   "readiness_pass": false,
   "schema_version": "g1-mgt-matrix-free-preconditioner-candidate-audit.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "1f7fb48d142cf1ce912c26188ae025fb098a70c1",
+  "source_commit_sha": "4aeed191886398318972e10cd5f6d7d04dff90f8",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }
