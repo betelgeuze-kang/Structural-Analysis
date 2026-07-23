@@ -61,10 +61,10 @@ def test_product_capabilities_surface_is_generated_from_canonical_registry() -> 
         "mutation_allowed": False,
     }
     assert surface["canonical_registry"] == "artifacts/manifests/capabilities.yaml"
-    assert surface["capability_count"] == 18
+    assert surface["capability_count"] == 19
     assert surface["ready_capability_count"] == 10
     assert surface["blocked_capability_count"] == 4
-    assert surface["experimental_capability_count"] == 3
+    assert surface["experimental_capability_count"] == 4
     assert surface["shadow_only_capability_count"] == 1
     assert surface["product_capabilities_ready"] is False
     assert surface["blocked_capability_register_count"] == 4
@@ -82,6 +82,10 @@ def test_product_capabilities_surface_is_generated_from_canonical_registry() -> 
     assert corotational["state"] == "experimental"
     assert corotational["summary"]["public"] is False
     assert corotational["contract_pass"] is True
+    fracture_energy = rows["material.fracture_energy_concrete"]
+    assert fracture_energy["state"] == "experimental"
+    assert fracture_energy["summary"]["public"] is False
+    assert fracture_energy["contract_pass"] is True
     assert rows["vv.opensees_level2"]["state"] == "blocked"
     assert rows["vv.opensees_level2"]["contract_pass"] is False
 

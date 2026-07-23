@@ -24,6 +24,18 @@ from structural_analysis.benchmark.analytic_frame import (
     build_simply_supported_beam_model,
     validate_analytic_frame_verification_artifact,
 )
+from structural_analysis.benchmark.fracture_energy_concrete import (
+    FRACTURE_ENERGY_CONCRETE_BENCHMARK_CLAIM_BOUNDARY,
+    FRACTURE_ENERGY_CONCRETE_BENCHMARK_PROFILE,
+    FRACTURE_ENERGY_CONCRETE_BENCHMARK_SCHEMA_PATH,
+    FRACTURE_ENERGY_CONCRETE_BENCHMARK_SCHEMA_VERSION,
+    FRACTURE_ENERGY_CONCRETE_BLOCKERS_REMAINING,
+    FRACTURE_ENERGY_CONCRETE_NUMERIC_SERIALIZATION,
+    FRACTURE_ENERGY_CONCRETE_TRUTH_CLASS,
+    FractureEnergyConcreteBenchmarkError,
+    build_fracture_energy_concrete_mesh_objectivity_benchmark,
+    validate_fracture_energy_concrete_mesh_objectivity_benchmark,
+)
 from structural_analysis.benchmark.acceptance import (
     BENCHMARK_ACCEPTANCE_SCHEMA_VERSION,
     BENCHMARK_DECISION_SCHEMA_VERSION,
@@ -285,6 +297,14 @@ from structural_analysis.benchmark.verification_hierarchy import (
 )
 
 __all__ = [
+    "FRACTURE_ENERGY_CONCRETE_BENCHMARK_CLAIM_BOUNDARY",
+    "FRACTURE_ENERGY_CONCRETE_BENCHMARK_PROFILE",
+    "FRACTURE_ENERGY_CONCRETE_BENCHMARK_SCHEMA_PATH",
+    "FRACTURE_ENERGY_CONCRETE_BENCHMARK_SCHEMA_VERSION",
+    "FRACTURE_ENERGY_CONCRETE_BLOCKERS_REMAINING",
+    "FRACTURE_ENERGY_CONCRETE_NUMERIC_SERIALIZATION",
+    "FRACTURE_ENERGY_CONCRETE_TRUTH_CLASS",
+    "FractureEnergyConcreteBenchmarkError",
     "ANALYTIC_FRAME_CATEGORIES",
     "ANALYTIC_FRAME_SCHEMA_VERSION",
     "ARC_LENGTH_FGMRES_BRIDGE_CLAIM_BOUNDARY",
@@ -454,6 +474,7 @@ __all__ = [
     "build_arc_length_cpu_fgmres_tangent_bridge_seed",
     "build_arc_length_cpu_fgmres_continuation_seed",
     "build_analytic_frame_verification_artifact",
+    "build_fracture_energy_concrete_mesh_objectivity_benchmark",
     "build_cantilever_beam_model",
     "build_coupled_shallow_arch_vector_arc_length_benchmark_seed",
     "assemble_euler_column_system",
@@ -516,4 +537,5 @@ __all__ = [
     "solve_stateful_fiber_beam2d_cantilever",
     "verification_hierarchy_policy",
     "validate_analytic_frame_verification_artifact",
+    "validate_fracture_energy_concrete_mesh_objectivity_benchmark",
 ]
