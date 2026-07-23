@@ -14,6 +14,9 @@ The OpenSees receipt includes the public one-bay corotational portal's four-step
 elastic-state load path and compares terminal free-node displacements and support reactions.
 It deliberately stays below the declared material yield and damage thresholds; it is not a
 material-nonlinear or cyclic validation.
+The CalculiX receipt also compares a six-member tetrahedral `T3D2` spatial truss under a
+combined three-axis apex load, covering three apex displacements and nine base reactions.
+That bounded linear-truss case is not frame/shell or nonlinear-family validation.
 
 The Docker base is pinned to
 `python:3.11-slim-bookworm@sha256:b18992999dbe963a45a8a4da40ac2b1975be1a776d939d098c647482bcad5cba`.

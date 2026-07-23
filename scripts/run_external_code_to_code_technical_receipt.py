@@ -85,6 +85,16 @@ PUBLIC_COROTATIONAL_PORTAL_REACTION_SPECS = (
     ("support_N2_UY_N", "N2", "UY"),
     ("support_N2_RZ_N_m", "N2", "RZ"),
 )
+CALCULIX_SPATIAL_TRUSS_DISPLACEMENT_SPECS = (
+    ("apex_N4_UX_m", "UX", 0),
+    ("apex_N4_UY_m", "UY", 1),
+    ("apex_N4_UZ_m", "UZ", 2),
+)
+CALCULIX_SPATIAL_TRUSS_REACTION_SPECS = tuple(
+    (f"support_{node_id}_{dof}_kN", node_id, dof, index)
+    for node_id in ("N1", "N2", "N3")
+    for index, dof in enumerate(("UX", "UY", "UZ"))
+)
 EXTERNAL_ASSET_POLICY = {
     "openseespy-3.7.1.2-py3-none-any.whl": {
         "sha256": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
@@ -129,7 +139,8 @@ CLAIM_BOUNDARY = (
     "from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 "
     "from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system, a "
     "linear cantilever, and the public one-bay corotational portal's four-step "
-    "elastic-state load path with OpenSees, plus one axial member with CalculiX. "
+    "elastic-state load path with OpenSees, plus one axial member and one "
+    "six-member tetrahedral spatial truss with CalculiX. "
     "The portal comparison covers terminal free-node displacements and support "
     "reactions from the public J1-J5 and exact-recovery path, but deliberately stays "
     "below material yield and damage thresholds. It is a technical code-to-code "
@@ -138,7 +149,8 @@ CLAIM_BOUNDARY = (
     "attached for either runtime. The external packages are not bundled. Therefore "
     "this receipt does not enter the verification-hierarchy operator manifest, does "
     "not achieve Verification Level 2, and does not prove material-nonlinear or "
-    "cyclic family breadth, broad frame/shell modal, buckling, sparse/HIP, "
+    "cyclic family breadth, broad frame/shell static or modal coverage, "
+    "nonlinear CalculiX comparison, buckling breadth, sparse/HIP, "
     "commercial-equivalence, or release readiness. "
     "The replay_provenance block distinguishes a fresh external-runtime execution "
     "from a current-product-only replay against checksum-bound stored external "
@@ -293,6 +305,43 @@ Two-node axial truss comparison in kN and m units
 *NODE PRINT, NSET=NALL
 U, RF
 *NODE FILE, NSET=NALL
+U, RF
+*END STEP
+"""
+
+
+CALCULIX_SPATIAL_TRUSS_DECK = """*HEADING
+Six-member tetrahedral spatial truss comparison in kN and m units
+*NODE, NSET=NALL
+1, 0.0, 0.0, 0.0
+2, 2.0, 0.0, 0.0
+3, 0.0, 2.0, 0.0
+4, 0.5, 0.5, 2.0
+*ELEMENT, TYPE=T3D2, ELSET=EALL
+1, 1, 2
+2, 2, 3
+3, 3, 1
+4, 1, 4
+5, 2, 4
+6, 3, 4
+*SOLID SECTION, ELSET=EALL, MATERIAL=MAT
+0.01
+*MATERIAL, NAME=MAT
+*ELASTIC
+2.0E8, 0.3
+*BOUNDARY
+1, 1, 3
+2, 1, 3
+3, 1, 3
+*STEP
+*STATIC
+*CLOAD
+4, 1, 1.2
+4, 2, -0.8
+4, 3, -1.5
+*NODE PRINT, NSET=NALL
+U, RF
+*NODE FILE, OUTPUT=2D, NSET=NALL
 U, RF
 *END STEP
 """
@@ -492,43 +541,85 @@ def _run_calculix(
         or version_match.group(1) != CALCULIX_RUNTIME_VERSION
     ):
         raise ExternalCodeToCodeReceiptError("calculix_runtime_version_invalid")
-    with TemporaryDirectory(prefix="calculix-code-to-code-") as temporary:
-        root = Path(temporary)
-        deck = root / "axial.inp"
-        deck.write_text(CALCULIX_AXIAL_DECK, encoding="utf-8")
+
+    def execute_job(
+        *,
+        root: Path,
+        job_name: str,
+        deck_text: str,
+        output_prefix: str,
+    ) -> tuple[str, str, dict[str, Any]]:
+        deck = root / f"{job_name}.inp"
+        deck.write_text(deck_text, encoding="utf-8")
         completed = subprocess.run(
-            [str(binary.resolve()), "axial"],
+            [str(binary.resolve()), job_name],
             cwd=root,
             check=False,
             capture_output=True,
             text=True,
             env=environment,
         )
-        dat_path = root / "axial.dat"
-        frd_path = root / "axial.frd"
-        if completed.returncode != 0 or not dat_path.is_file() or not frd_path.is_file():
-            raise ExternalCodeToCodeReceiptError("calculix_execution_failed")
+        dat_path = root / f"{job_name}.dat"
+        frd_path = root / f"{job_name}.frd"
+        if (
+            completed.returncode != 0
+            or not dat_path.is_file()
+            or not frd_path.is_file()
+        ):
+            raise ExternalCodeToCodeReceiptError(
+                f"calculix_{job_name}_execution_failed"
+            )
         dat_text = dat_path.read_text(encoding="utf-8")
-        displacement_section, separator, force_section = dat_text.partition(" forces ")
+        displacement_section, separator, force_section = dat_text.partition(
+            " forces "
+        )
         if not separator or "Job finished" not in completed.stdout:
-            raise ExternalCodeToCodeReceiptError("calculix_output_invalid")
-        node2_displacement = _parse_calculix_vector(displacement_section, 2)
-        node1_force = _parse_calculix_vector(force_section, 1)
+            raise ExternalCodeToCodeReceiptError(
+                f"calculix_{job_name}_output_invalid"
+            )
+        return displacement_section, force_section, {
+            f"{output_prefix}return_code": completed.returncode,
+            f"{output_prefix}stdout_sha256": _text_hash(completed.stdout),
+            f"{output_prefix}stderr_sha256": _text_hash(completed.stderr),
+            f"{output_prefix}input_deck_sha256": _file_hash(deck),
+            f"{output_prefix}dat_sha256": _file_hash(dat_path),
+            f"{output_prefix}frd_sha256": _file_hash(frd_path),
+        }
+
+    with TemporaryDirectory(prefix="calculix-code-to-code-") as temporary:
+        root = Path(temporary)
+        axial_displacements, axial_forces, axial_outputs = execute_job(
+            root=root,
+            job_name="axial",
+            deck_text=CALCULIX_AXIAL_DECK,
+            output_prefix="",
+        )
+        spatial_displacements, spatial_forces, spatial_outputs = execute_job(
+            root=root,
+            job_name="spatial_truss",
+            deck_text=CALCULIX_SPATIAL_TRUSS_DECK,
+            output_prefix="spatial_truss_",
+        )
+        node2_displacement = _parse_calculix_vector(axial_displacements, 2)
+        node1_force = _parse_calculix_vector(axial_forces, 1)
+        apex_displacement = _parse_calculix_vector(spatial_displacements, 4)
+        support_reactions = {
+            f"N{node}": _parse_calculix_vector(spatial_forces, node)
+            for node in (1, 2, 3)
+        }
         output_hashes = {
-            "return_code": completed.returncode,
             "version_return_code": version.returncode,
             "version_stdout_sha256": _text_hash(version.stdout),
             "version_stderr_sha256": _text_hash(version.stderr),
-            "stdout_sha256": _text_hash(completed.stdout),
-            "stderr_sha256": _text_hash(completed.stderr),
-            "input_deck_sha256": _file_hash(deck),
-            "dat_sha256": _file_hash(dat_path),
-            "frd_sha256": _file_hash(frd_path),
+            **axial_outputs,
+            **spatial_outputs,
         }
     return {
         "runtime_version": version_match.group(1),
         "axial_tip_displacement_x_m": node2_displacement[0],
         "axial_base_reaction_x_kn": node1_force[0],
+        "spatial_truss_apex_displacement_m": apex_displacement,
+        "spatial_truss_support_reactions_kn": support_reactions,
     }, output_hashes
 
 
@@ -588,6 +679,70 @@ def _axial_product_model() -> dict[str, Any]:
         "warnings": [],
         "metadata": {
             "case_id": "external_code_to_code_axial_member",
+            "truth_class": "code_to_code_candidate",
+        },
+    }
+
+
+def _spatial_truss_product_model() -> dict[str, Any]:
+    return {
+        "schema_version": "structural-analysis-canonical-model.v1",
+        "units": {"length": "m", "force": "kN"},
+        "coordinate_system": {"axis_order": ["X", "Y", "Z"], "up_axis": "Z"},
+        "nodes": [
+            {"id": "N1", "coordinates": [0.0, 0.0, 0.0]},
+            {"id": "N2", "coordinates": [2.0, 0.0, 0.0]},
+            {"id": "N3", "coordinates": [0.0, 2.0, 0.0]},
+            {"id": "N4", "coordinates": [0.5, 0.5, 2.0]},
+        ],
+        "materials": [
+            {
+                "id": "M1",
+                "type": "elastic",
+                "elastic_modulus": 200.0e6,
+                "poisson_ratio": 0.3,
+            }
+        ],
+        "sections": [{"id": "S1", "type": "axial", "area": 0.01}],
+        "elements": [
+            {
+                "id": f"E{index}",
+                "type": "truss",
+                "nodes": [node_i, node_j],
+                "section": "S1",
+                "material": "M1",
+            }
+            for index, (node_i, node_j) in enumerate(
+                (
+                    ("N1", "N2"),
+                    ("N2", "N3"),
+                    ("N3", "N1"),
+                    ("N1", "N4"),
+                    ("N2", "N4"),
+                    ("N3", "N4"),
+                ),
+                start=1,
+            )
+        ],
+        "loads": [
+            {
+                "id": "P1",
+                "node": "N4",
+                "components": {"FX": 1.2, "FY": -0.8, "FZ": -1.5},
+            }
+        ],
+        "supports": [
+            {
+                "id": f"SUP{index}",
+                "node": f"N{index}",
+                "dofs": ["UX", "UY", "UZ"],
+            }
+            for index in (1, 2, 3)
+        ],
+        "unsupported_features": [],
+        "warnings": [],
+        "metadata": {
+            "case_id": "external_code_to_code_spatial_truss",
             "truth_class": "code_to_code_candidate",
         },
     }
@@ -721,6 +876,30 @@ def _public_corotational_portal_metrics(
     return metrics
 
 
+def _spatial_truss_metrics(
+    product: dict[str, Any],
+    reference: dict[str, Any],
+) -> list[dict[str, Any]]:
+    product_metrics = product["metrics"]
+    displacement_metrics = [
+        _comparison(
+            quantity,
+            product_metrics["displacements"]["N4"][dof],
+            reference["spatial_truss_apex_displacement_m"][index],
+        )
+        for quantity, dof, index in CALCULIX_SPATIAL_TRUSS_DISPLACEMENT_SPECS
+    ]
+    reaction_metrics = [
+        _comparison(
+            quantity,
+            product_metrics["reactions"][node_id][dof],
+            reference["spatial_truss_support_reactions_kn"][node_id][index],
+        )
+        for quantity, node_id, dof, index in CALCULIX_SPATIAL_TRUSS_REACTION_SPECS
+    ]
+    return displacement_metrics + reaction_metrics
+
+
 def _comparison(quantity: str, product_value: float, reference_value: float) -> dict[str, Any]:
     product = float(product_value)
     reference = float(reference_value)
@@ -784,6 +963,7 @@ def _current_product_comparison_cases(
         "cantilever_tip_load",
         "public_corotational_portal_load_path",
         "axial_member_tip_load",
+        "tetrahedral_spatial_truss_combined_load",
     }
     if set(stored) != expected_ids:
         raise ExternalCodeToCodeReceiptError("receipt_case_set_invalid")
@@ -808,8 +988,25 @@ def _current_product_comparison_cases(
     cantilever = _analyze_product_model(build_cantilever_beam_model())
     portal = _public_corotational_portal_product_result(repo_root)
     axial = _analyze_product_model(_axial_product_model())
+    spatial_truss = _analyze_product_model(_spatial_truss_product_model())
     cantilever_metrics = cantilever["metrics"]
     axial_metrics = axial["metrics"]
+    spatial_reference = {
+        "spatial_truss_apex_displacement_m": tuple(
+            reference("tetrahedral_spatial_truss_combined_load", quantity)
+            for quantity, _, _ in CALCULIX_SPATIAL_TRUSS_DISPLACEMENT_SPECS
+        ),
+        "spatial_truss_support_reactions_kn": {
+            node_id: tuple(
+                reference("tetrahedral_spatial_truss_combined_load", quantity)
+                for quantity, candidate_node_id, _, _ in (
+                    CALCULIX_SPATIAL_TRUSS_REACTION_SPECS
+                )
+                if candidate_node_id == node_id
+            )
+            for node_id in ("N1", "N2", "N3")
+        },
+    }
     return [
         _case(
             case_id="two_dof_shear_modal",
@@ -929,6 +1126,24 @@ def _current_product_comparison_cases(
             ),
             product_fallback_used=bool(axial_metrics["fallback_used"]),
         ),
+        _case(
+            case_id="tetrahedral_spatial_truss_combined_load",
+            analysis_type="linear_static_spatial_truss",
+            reference_solver="CalculiX CrunchiX 2.17",
+            product_solver_id=str(spatial_truss["solver"]),
+            metrics=_spatial_truss_metrics(spatial_truss, spatial_reference),
+            external_return_code=int(
+                stored["tetrahedral_spatial_truss_combined_load"][
+                    "external_return_code"
+                ]
+            ),
+            product_regularization_applied=bool(
+                spatial_truss["metrics"]["regularization_used"]
+            ),
+            product_fallback_used=bool(
+                spatial_truss["metrics"]["fallback_used"]
+            ),
+        ),
     ]
 
 
@@ -949,6 +1164,10 @@ def _expected_claims(
         ),
         "second_solver_technical_comparison": bool(
             comparisons[3]["contract_pass"]
+            and comparisons[4]["contract_pass"]
+        ),
+        "calculix_spatial_truss_technical_comparison": bool(
+            comparisons[4]["contract_pass"]
         ),
         "product_legal_license_approval": False,
         "external_runtime_redistribution_approval": False,
@@ -994,6 +1213,7 @@ def build_external_code_to_code_technical_receipt(
     cantilever = _analyze_product_model(build_cantilever_beam_model())
     portal = _public_corotational_portal_product_result(repo_root)
     axial = _analyze_product_model(_axial_product_model())
+    spatial_truss = _analyze_product_model(_spatial_truss_product_model())
     cantilever_metrics = cantilever["metrics"]
     axial_metrics = axial["metrics"]
     cases = [
@@ -1082,6 +1302,22 @@ def build_external_code_to_code_technical_receipt(
             external_return_code=calculix_outputs["return_code"],
             product_regularization_applied=bool(axial_metrics["regularization_used"]),
             product_fallback_used=bool(axial_metrics["fallback_used"]),
+        ),
+        _case(
+            case_id="tetrahedral_spatial_truss_combined_load",
+            analysis_type="linear_static_spatial_truss",
+            reference_solver="CalculiX CrunchiX 2.17",
+            product_solver_id=str(spatial_truss["solver"]),
+            metrics=_spatial_truss_metrics(spatial_truss, calculix),
+            external_return_code=calculix_outputs[
+                "spatial_truss_return_code"
+            ],
+            product_regularization_applied=bool(
+                spatial_truss["metrics"]["regularization_used"]
+            ),
+            product_fallback_used=bool(
+                spatial_truss["metrics"]["fallback_used"]
+            ),
         ),
     ]
     checksums = _source_checksums(repo_root)

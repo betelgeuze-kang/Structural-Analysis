@@ -83,7 +83,8 @@ BLOCKERS_REMAINING = (
 CLAIM_BOUNDARY = (
     "This receipt proves a same-operator, container-isolated reproduction of the "
     "narrow non-promoting OpenSees/CalculiX technical comparisons, including the "
-    "public one-bay corotational portal's four-step elastic-state load path. The "
+    "public one-bay corotational portal's four-step elastic-state load path and "
+    "the six-member CalculiX spatial-truss comparison. The "
     "source mount was read-only, runtime networking had no default route, and every "
     "external asset matched its pinned SHA-256 before execution. The source bytes "
     "are checksum-bound over the recorded base commit; this is not an independent "

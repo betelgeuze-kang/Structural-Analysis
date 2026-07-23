@@ -194,7 +194,7 @@ def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sou
         host_modal_reference=_json(ROOT / runner.HOST_MODAL_REFERENCE_RELATIVE_PATH),
     )
     assert parity["numerical_contract_pass"] is True
-    assert parity["scalar_comparison_count"] == 49
+    assert parity["scalar_comparison_count"] == 73
     assert parity["semantic_hash_matches"]["modal_model_hash"] is True
     assert parity["semantic_hash_matches"]["buckling_model_hash"] is True
     assert parity["semantic_hash_matches"]["buckling_semantic_result_hash"] is False

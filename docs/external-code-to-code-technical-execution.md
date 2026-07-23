@@ -6,7 +6,7 @@
 
 ## 실행 범위
 
-`external_code_to_code_technical_execution_receipt.json`은 정확히 네 case를
+`external_code_to_code_technical_execution_receipt.json`은 정확히 다섯 case를
 기록한다.
 
 | Case | 외부 기준 | 제품 경로 | 비교 항목 | 결과 |
@@ -15,10 +15,13 @@
 | cantilever tip load | OpenSees 3.7.1 | authoritative linear-static frame 경로 | tip 변위, base 전단반력, base 모멘트 | PASS |
 | public corotational portal load path | OpenSees 3.7.1 `Corotational` elastic beam-column | 공개 J1-J5 stateful corotational fiber-frame 경로, 4개 load step | N3/N4 변위·회전 6개, N1/N2 지점반력 6개 | PASS |
 | axial member tip load | CalculiX CrunchiX 2.17 | authoritative linear-static frame 경로 | tip 변위, base 축반력 | PASS |
+| tetrahedral spatial truss combined load | CalculiX CrunchiX 2.17 `T3D2` | authoritative linear-static 3D truss 경로, 6개 부재 | apex 3축 변위, base 3개 절점의 3축 반력 9개 | PASS |
 
-총 19개 수치 비교가 통과했다. Modal 고유값과 axial 결과의 절대오차는 `0`이고,
-전체 최대 절대오차는 portal 반력의 `2.438173396512866e-08`, 최대 상대오차는
-`1.4954601238549907e-11`이다. 비교 허용오차는
+총 31개 수치 비교가 통과했다. Modal 고유값과 axial 결과의 절대오차는 `0`이고,
+spatial-truss case의 최대 절대오차는 `4.694679409237196e-13`이다. 전체 최대
+절대오차는 portal 반력의 `2.438173396512866e-08`, 전체 최대 상대오차는
+CalculiX 출력 정밀도의 영향을 받는 spatial-truss 변위의
+`3.6168200235569254e-07`이다. 비교 허용오차는
 `1e-10 + 1e-10 * max(abs(product), abs(reference), 1)`이며 제품 경로의
 fallback과 regularization은 모두 `false`다.
 
@@ -27,6 +30,11 @@ Portal case는 공개 RC fiber section의 초기 탄성 강성 `EA=7,819,200 kN`
 stress가 선언된 concrete/steel 강도 경계 안에 있음을 실행 시 검사한다. 따라서
 이 case는 corotational geometry와 공개 J1-J5/exact recovery 연결을 확인하지만,
 재료 비선형, 항복·손상, cyclic breadth를 검증하지 않는다.
+
+Spatial-truss case는 세 고정 base 절점과 하나의 apex 절점, 여섯 `T3D2`
+부재에 `FX=1.2`, `FY=-0.8`, `FZ=-1.5 kN`의 결합하중을 적용한다. 이는
+CalculiX를 두 번째 외부 솔버로 사용한 3D 다부재 선형 정적 비교 범위를 넓히지만,
+frame/shell 또는 재료·기하 비선형 비교와 독립 운영자 검토를 대신하지 않는다.
 
 ## 런타임과 결속
 
@@ -39,11 +47,11 @@ stress가 선언된 concrete/steel 강도 경계 안에 있음을 실행 시 검
 - 외부 package와 runtime은 저장소에 번들하지 않음
 
 현재 receipt artifact hash는
-`sha256:7a47f3671b4fb665630a835c0ff49723f7ae67b70bbb5c0ea8cae87606685ca1`,
+`sha256:1b490fae40f6dafc559561367a33a2c2323f69efbbb2119ac35ab2ed4fc1f31d`,
 internal source-set hash는
-`sha256:b91db7c6a86c6f4b45f1fe8b55a95e72cf84a23b6da6e7e6a274641676eaf902`이다.
+`sha256:734547310524ea4bbe6d5f196f879b1cb4b9bad6279bf97e0542cfc9bcfade5e`이다.
 Receipt의 `source_commit_sha`는 후보 생성 시 base인
-`91e00a57db8fae1b2975c291f4439acdb75879ae`이며, 후보의 실제 source byte는 별도
+`d81cf64e731288b13bab06edcbe8459546819bfd`이며, 후보의 실제 source byte는 별도
 input checksum과 source-set hash로 결속한다.
 
 ## 전체 모델 modal·buckling 추가 영수증
@@ -69,9 +77,9 @@ Euler-Bernoulli frame과 CalculiX expanded B32 formulation을 동일하다고
 네 mode matrix는 JSON에 넣지 않는다. `<f8`, C-order, little-endian raw binary
 artifact로 저장하고 shape, byte length, data hash, content hash, repository path를
 receipt에 기록한다. 현재 artifact hash는
-`sha256:f8e39b1d04913522a18414909dc674f4691b2c56fc98c067663fee9459af2572`,
+`sha256:77dce301c45f9f25c88445aff95d196ca1aa7b771f46fa79a94f9fea69d3e712`,
 source-set hash는
-`sha256:5ac041c0c750ee3f45d4be2497c5413d4b871f935c1029d77d7aa21249f5df16`다.
+`sha256:e70b17f36e473b94e0455dd28157c951436047f5cd23185a72173fbec575bda7`다.
 이 추가 영수증도 제품 법무/재배포 승인, 독립 clean runner, broad corpus,
 published benchmark decision 또는 hierarchy operator manifest를 만들지 않으며
 `verification_level_2=false`, `commercial_equivalence=false`,
@@ -84,9 +92,9 @@ Python 3.11 base image에서 다시 생성한다. 실행 시 repository mount는
 runtime network는 `none`, 지정 output mount만 writable이며 다섯 외부 package의
 SHA-256을 추출 전에 검사한다. 생성 bundle은
 `artifacts/vv/opensees_calculix_clean_runner/`에 있고 summary artifact hash는
-`sha256:39f33bbf5a03872fb2c1a9b86daa95bf8fdc343e01f7485fc0a1346699884c0f`다.
+`sha256:99c7fc02f3f76c6a6b84c3f5da6b0a9218a73fb4b49fc579c546c2774983a85e`다.
 
-호스트와 container의 49개 scalar가 `1e-12 + 1e-12 * scale` 계약을 통과했다.
+호스트와 container의 73개 scalar가 `1e-12 + 1e-12 * scale` 계약을 통과했다.
 최대 절대 delta는 `2.219557870830613e-12`, 최대 상대 delta는
 `1.6209256159527285e-12`다. Model hash는 일치하지만 buckling semantic result
 hash는 실행 환경의 허용오차 내 부동소수점 차이로 동일하지 않다. 따라서 summary는
@@ -104,7 +112,7 @@ hash는 실행 환경의 허용오차 내 부동소수점 차이로 동일하지
 
 - 두 독립 외부 솔버의 실제 로컬 실행
 - 고정된 외부 runtime 버전 확인
-- 네 좁은 code-to-code case의 19개 수치 계약 통과
+- 다섯 좁은 code-to-code case의 31개 수치 계약 통과
 - 동일 운영자 container-isolated 재현과 호스트/컨테이너 수치 계약 통과
 
 다음은 명시적으로 `false`다.
