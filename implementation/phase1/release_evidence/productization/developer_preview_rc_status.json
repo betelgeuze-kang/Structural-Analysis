@@ -505,7 +505,7 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-07-22T21:23:14.772249+00:00",
+  "generated_at": "2026-07-23T03:25:15.785181+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
@@ -533,9 +533,9 @@
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:e5d52668ed5a3f8034e1437260cf4f2e68fecc5b8caa435874e1eb10ffa24dc4",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:142e4777ba69b7f3db0cef0e645e1f44c2d2d90a19f1c3b6c943d2eaad521b4c",
-    "pyproject.toml": "sha256:faac5191da0481b453b91e4905d055ce1d39efeba1863b178db867c86f24bcfe",
+    "pyproject.toml": "sha256:44a66bee37a7feac341a11caf8c0118a92f8f9a99418f60554cdd9f929cb16dc",
     "scripts/build_phase6_platform_replay_receipt.py": "sha256:4033a3af3c9149894b6df4091c07f7b6c3262bee3253cc301848bb3dab1a5ce6",
-    "setup.cfg": "sha256:4c6f4261389d5c71bef9308d5a39f5334a5ffed0b803fbcd50bdf0b6b4da5b1e"
+    "setup.cfg": "sha256:9cc1374957d640479c86cc3e3d71ff7ea69ad864ccdd77c4ce113e6ec028f646"
   },
   "known_limitations": {
     "benchmark_quantity_handoff": {
@@ -3446,6 +3446,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "effba08be4ee6ce2f37d9264aee69eb1ed126bd9",
+  "source_commit_sha": "470ba2a44c1e14658046d6b399a2d152871a0d8c",
   "status": "blocked"
 }
