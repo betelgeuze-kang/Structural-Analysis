@@ -321,14 +321,19 @@
       "contract_pass": true,
       "evidence_artifacts": [
         "docs/unified-nonlinear-frame-api.md",
+        "docs/corotational-connected-frame2d.md",
         "docs/corotational-fiber-frame-native-sparse.md",
         "src/structural_analysis/api/nonlinear_frame.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
         "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json",
+        "src/structural_analysis/schemas/corotational_fiber_frame_general_j1_j5_v1.schema.json",
+        "tests/test_corotational_fiber_frame_general.py",
         "tests/test_corotational_fiber_frame_sparse.py",
-        "tests/test_unified_nonlinear_frame_api.py"
+        "tests/test_unified_nonlinear_frame_api.py",
+        "examples/public_corotational_branching_frame.json"
       ],
       "next_actions": [],
       "state": "experimental",
@@ -339,9 +344,9 @@
           "cli"
         ],
         "limitations": [
-          "One-bay, one-story load-control CPU dense or native COO/CSR portal candidate only; general topology, member features, direct displacement control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."
+          "Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense or native COO/CSR candidate with branching, support UX/UY/RZ subsets, proportional nodal loads, and proportional prescribed displacement; disconnected graphs, parallel members, releases, rigid offsets, distributed loads, direct displacement control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."
         ],
-        "profile": "corotational_one_bay_portal.v1",
+        "profile": "corotational_connected_frame2d.v1",
         "public": false
       },
       "title": "Corotational 2D fiber frame"
@@ -602,9 +607,9 @@
   "first_blocked_capability_id": "vv.opensees_level2",
   "first_blocked_capability_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-23T05:53:26.779003+00:00",
+  "generated_at": "2026-07-23T08:33:48.165461+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:23c74330cc23e4811f61492f3fd8a17145e56d0520a4d759365680451bf9bd89",
+    "artifacts/manifests/capabilities.yaml": "sha256:39d9f558d23cc1a7db32e1805277942310676f479f85beccc8ba98c85d93e66d",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -635,7 +640,7 @@
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "d2e3d5a91180401b94277db6fe89986389921ff9",
+  "source_commit_sha": "2c856d9fc6ef02ee802faa60cca4ca65c47a8a96",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",
