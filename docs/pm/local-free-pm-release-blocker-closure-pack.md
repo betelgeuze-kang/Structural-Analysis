@@ -93,7 +93,7 @@ External dependency:
 
 ## Recommended execution order
 
-1. Close structural scope release-surface first batch, or explicitly document why release can proceed while it remains pending.
+1. Keep the now-closed structural-scope audit green (`86/86` owner delete decisions, current matching paths `0`).
 2. Attach license approval evidence.
 3. Attach human UX observation evidence.
 4. Bring self-hosted runner online and record PR/nightly streaks.

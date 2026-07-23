@@ -27,7 +27,7 @@ Do not promote release-surface PASS artifacts into product-level readiness. Mate
 | G1 numerical closure | Full-load 1.0, full-mesh nonlinear equilibrium, material Newton breadth, production ROCm/HIP residency |
 | Developer Preview | selected medium models, Linux/Windows reproducibility, human new-user observation |
 | PM release | PR/nightly CI 30-run evidence, UX observation, license status |
-| Structural scope | owner decisions `0/86`, release-surface cleanup decisions `0/3` |
+| Structural scope | closed for repository scope: owner delete decisions `86/86`, current matching paths `0/86`, cleanup pending `0` |
 | Customer shadow | completed customer shadow cases `0/3` |
 | External benchmark | terminal receipts `0/4` |
 | License/legal | active scoped product/legal approval evidence missing |

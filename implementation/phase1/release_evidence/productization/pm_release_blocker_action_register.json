@@ -64,19 +64,18 @@
     "release_area_total_count": 16
   },
   "contract_pass": false,
-  "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-16T06:12:21.021193+00:00",
+  "engine_version": "structural-analysis@0.3.0",
+  "generated_at": "2026-07-23T00:59:40.064791+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:500b7803686ab0e8a38937948dc8831ce19bf9ef6461e601121ef434e39ba81a",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:9ddb5502fc9eb5911082834fb184629f72eb488fd8b53425594c32a52ef06a2f",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:70b4d52619607d53de23e57abcd17e70cbfe7958f7b2afc82760c29ac35df24d",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:61356ccd385e3429cc523626704fc718b4e13efbb3b19d83977e308b9187c924",
-    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:18bc58bb2a7bb2ae2d64a9e7b2476f32697392860e8eab9d28e5ad6949dababe",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:c48765006b56797d52b829b70922696dd0441eee68aeb85f3978aeec589d6288",
+    "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:9127122f34c9bc64e1d39d8b9db90e12c7f288ea39db5cddeb545f9f14b484a2",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
-    "scripts/build_pm_release_blocker_action_register.py": "sha256:7ad36778461baa79f656ed870b84fdf37b95fdbf264f3a94bc717228ab82b8e9"
+    "scripts/build_pm_release_blocker_action_register.py": "sha256:e58950d11e0b0f11758c03ac56f424fe9d00fad5981900f16de8b74182eee440"
   },
   "next_actions": [
-    "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
     "Resolve `element_material_breadth_gate_not_green` in Core Engine Depth Closure evidence, regenerate PM release reports, and attach the updated evidence.",
     "Resolve `contact_material_coupled_case_count_lt_10_or_missing` in Core Engine Depth Closure evidence, regenerate PM release reports, and attach the updated evidence.",
     "Resolve `rc_steel_composite_material_family_missing` in Core Engine Depth Closure evidence, regenerate PM release reports, and attach the updated evidence.",
@@ -155,273 +154,6 @@
   "reuse_policy": "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions",
   "reused_evidence": true,
   "rows": [
-    {
-      "acceptance_criteria": [
-        "`structural_scope_owner_decision_application_plan.json.release_surface_first_batch_application_ready == true` before applying the first release-surface cleanup batch",
-        "`structural_scope_owner_decision_application_plan.json.owner_decision_pending_count == 0`",
-        "`structural_scope_owner_decision_application_plan.json.release_surface_owner_decision_required_count == 0`",
-        "`structural_scope_owner_decision_application_plan.json.retain_quarantined_exception_count == 0`",
-        "`structural_scope_owner_decision_application_plan.json.evidence_closure_pass == true` after manual delete/extract cleanup",
-        "`check_structural_scope_contamination.py --check --fail-blocked` exits 0 after cleanup and release evidence regeneration"
-      ],
-      "blocker_code": "owner_review_decisions_pending",
-      "blocker_id": "structural_scope_cleanup::owner_review_decisions_pending",
-      "blocker_ids": [
-        "structural_scope_cleanup::owner_review_decisions_pending"
-      ],
-      "claim_boundary": "This application plan is non-mutating. It never deletes or extracts files. It only classifies owner decisions into manual follow-up actions and keeps quarantined non-structural artifacts outside the building structural-analysis release surface until owner evidence and post-decision scope audit closure are present.",
-      "evidence_artifacts": {
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "structural_scope_cleanup_impact_report": "implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json",
-        "structural_scope_contamination_audit": "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json",
-        "structural_scope_origin_report": "implementation/phase1/release_evidence/productization/structural_scope_origin_report.json",
-        "structural_scope_owner_decision_application_plan": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-        "structural_scope_owner_decisions": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
-        "structural_scope_owner_review_packet": "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json",
-        "structural_scope_quarantine_manifest": "implementation/phase1/release_evidence/productization/structural_scope_quarantine_manifest.json"
-      },
-      "evidence_snapshot": {
-        "application_ready": false,
-        "evidence_closure_pass": false,
-        "next_owner_review_batch": {
-          "batch_id": "release_surface_first",
-          "family_counts": {
-            "molecular_docking": 1,
-            "molecular_dynamics": 1,
-            "molecular_science_evidence": 1
-          },
-          "path_area": "release_surface",
-          "path_count": 3,
-          "paths": [
-            "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
-            "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
-            "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
-          ],
-          "priority": 1,
-          "recommended_owner_decision_primary_counts": {
-            "delete_from_structural_repository": 3
-          },
-          "review_goal": "record owner delete/extract decisions only; retain exceptions are not allowed for release-surface paths"
-        },
-        "owner_decision_pending_count": 86,
-        "owner_decision_recorded_count": 0,
-        "owner_decision_template_paths": {
-          "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",
-          "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.json",
-          "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.md"
-        },
-        "owner_decision_total_count": 86,
-        "owner_decision_validation_blockers": [
-          "owner_decisions_missing",
-          "owner_decision_pending_count=86"
-        ],
-        "owner_decision_validation_pass": false,
-        "pending_owner_decision_family_counts": {
-          "molecular_docking": 48,
-          "molecular_dynamics": 25,
-          "molecular_science_evidence": 13
-        },
-        "pending_owner_decision_path_area_counts": {
-          "implementation_phase1": 9,
-          "productization_evidence": 36,
-          "release_surface": 3,
-          "script": 19,
-          "test": 19
-        },
-        "post_decision_cleanup_pending_count": 0,
-        "release_surface_first_batch_application_blockers": [
-          "pending_release_surface_owner_decision_count=3",
-          "release_surface_cleanup_decision_count_below_expected=0/3"
-        ],
-        "release_surface_first_batch_application_ready": false,
-        "release_surface_first_batch_blockers": [
-          "pending_release_surface_owner_decision_count=3",
-          "release_surface_cleanup_decision_count_below_expected=0/3"
-        ],
-        "release_surface_first_batch_cleanup_application_preflight": {
-          "blockers": [],
-          "claim_boundary": "This preflight is non-mutating. It only checks owner-approved cleanup rows before a human manually applies git rm or external extract-then-remove actions.",
-          "cleanup_path_count": 0,
-          "delete_path_count": 0,
-          "destructive_commands_enabled": false,
-          "extract_path_count": 0,
-          "git_rm_command_preview_only": true,
-          "manual_application_required": false,
-          "path_safety_rows": [],
-          "ready": false,
-          "release_surface_policy_violation_count": 0,
-          "release_surface_policy_violation_rows": [],
-          "requires_human_confirmation": false,
-          "retain_exception_cleanup_row_count": 0,
-          "safe_to_auto_apply": false,
-          "schema_version": "structural-scope-cleanup-application-preflight.v1",
-          "status": "no_cleanup_required",
-          "unsafe_cleanup_path_count": 0,
-          "unsafe_cleanup_path_rows": []
-        },
-        "release_surface_first_batch_ready": false,
-        "release_surface_first_batch_template_paths": {
-          "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
-          "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
-          "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
-        },
-        "release_surface_owner_decision_required_count": 3,
-        "release_surface_owner_decision_required_paths": [
-          "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
-          "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
-          "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
-        ],
-        "retain_quarantined_exception_count": 0,
-        "status": "pending_owner_decisions",
-        "summary_line": "Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=86 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0"
-      },
-      "evidence_status": {
-        "next_owner_review_batch": {
-          "batch_id": "release_surface_first",
-          "family_counts": {
-            "molecular_docking": 1,
-            "molecular_dynamics": 1,
-            "molecular_science_evidence": 1
-          },
-          "path_area": "release_surface",
-          "path_count": 3,
-          "paths": [
-            "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
-            "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
-            "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
-          ],
-          "priority": 1,
-          "recommended_owner_decision_primary_counts": {
-            "delete_from_structural_repository": 3
-          },
-          "review_goal": "record owner delete/extract decisions only; retain exceptions are not allowed for release-surface paths"
-        },
-        "owner_decision_pending_count": 86,
-        "owner_decision_recorded_count": 0,
-        "owner_decision_total_count": 86,
-        "owner_decision_validation_blockers": [
-          "owner_decisions_missing",
-          "owner_decision_pending_count=86"
-        ],
-        "owner_decision_validation_pass": false,
-        "pending_owner_decision_family_counts": {
-          "molecular_docking": 48,
-          "molecular_dynamics": 25,
-          "molecular_science_evidence": 13
-        },
-        "pending_owner_decision_path_area_counts": {
-          "implementation_phase1": 9,
-          "productization_evidence": 36,
-          "release_surface": 3,
-          "script": 19,
-          "test": 19
-        },
-        "post_decision_cleanup_pending_count": 0,
-        "release_surface_first_batch_application_blockers": [
-          "pending_release_surface_owner_decision_count=3",
-          "release_surface_cleanup_decision_count_below_expected=0/3"
-        ],
-        "release_surface_first_batch_application_ready": false,
-        "release_surface_first_batch_blockers": [
-          "pending_release_surface_owner_decision_count=3",
-          "release_surface_cleanup_decision_count_below_expected=0/3"
-        ],
-        "release_surface_first_batch_cleanup_application_preflight": {
-          "blockers": [],
-          "claim_boundary": "This preflight is non-mutating. It only checks owner-approved cleanup rows before a human manually applies git rm or external extract-then-remove actions.",
-          "cleanup_path_count": 0,
-          "delete_path_count": 0,
-          "destructive_commands_enabled": false,
-          "extract_path_count": 0,
-          "git_rm_command_preview_only": true,
-          "manual_application_required": false,
-          "path_safety_rows": [],
-          "ready": false,
-          "release_surface_policy_violation_count": 0,
-          "release_surface_policy_violation_rows": [],
-          "requires_human_confirmation": false,
-          "retain_exception_cleanup_row_count": 0,
-          "safe_to_auto_apply": false,
-          "schema_version": "structural-scope-cleanup-application-preflight.v1",
-          "status": "no_cleanup_required",
-          "unsafe_cleanup_path_count": 0,
-          "unsafe_cleanup_path_rows": []
-        },
-        "release_surface_first_batch_ready": false,
-        "release_surface_first_batch_template_paths": {
-          "csv": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv",
-          "json": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json",
-          "markdown": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md"
-        },
-        "release_surface_owner_decision_required_count": 3,
-        "release_surface_owner_decision_required_paths": [
-          "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
-          "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
-          "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
-        ],
-        "retain_quarantined_exception_count": 0,
-        "source_policy": "owner_delete_or_extract_decisions_required_before_release_surface_cleanup",
-        "state": "release_surface_owner_decisions_pending",
-        "status": "pending_owner_decisions"
-      },
-      "external_input_required": true,
-      "handoff": {
-        "checks": {
-          "acceptance_criteria_present": true,
-          "evidence_artifacts_present": true,
-          "expected_intake_artifact_present": true,
-          "owner_action_present": true,
-          "owner_assigned": true,
-          "reproduction_commands_present": true,
-          "verification_commands_present": true
-        },
-        "expected_intake_artifact": "structural_scope_owner_decision_application_plan",
-        "handoff_ready": true,
-        "handoff_state": "external_owner_input_ready"
-      },
-      "handoff_ready": true,
-      "handoff_state": "external_owner_input_ready",
-      "namespace": "structural_scope_cleanup",
-      "next_action": "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
-      "owner": "release_scope_owner",
-      "owner_action": "Complete structural scope cleanup before feature expansion: record owner `delete_from_structural_repository` or `extract_to_molecular_or_science_repository` decisions for the 3 release-surface-first path(s) and the 86/86 pending quarantined PocketMD/GPCR/MD3Bead-family path(s), then rerun the structural scope application plan and contamination audit. First release-surface paths: implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json, implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json, implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json.",
-      "owner_input_required": true,
-      "reproduction_commands": [
-        "python3 scripts/check_structural_scope_contamination.py --out implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json --out-md implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.md",
-        "python3 scripts/build_structural_scope_owner_review_packet.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.md --write-decision-template",
-        "python3 scripts/build_structural_scope_origin_report.py --out implementation/phase1/release_evidence/productization/structural_scope_origin_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_origin_report.md",
-        "python3 scripts/build_structural_scope_cleanup_impact_report.py --out implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.json --out-md implementation/phase1/release_evidence/productization/structural_scope_cleanup_impact_report.md",
-        "python3 scripts/build_structural_scope_owner_decision_application_plan.py --out implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.md",
-        "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md",
-        "python3 scripts/build_product_readiness_snapshot.py",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "resolution_type": "owner_review_scope_cleanup_required",
-      "scope": "release_surface_scope",
-      "source_intake_artifact": "structural_scope_owner_decision_application_plan",
-      "source_intake_blocker_id_count": 0,
-      "source_intake_blocker_ids": [],
-      "source_intake_contract_pass": true,
-      "source_intake_evidence_intake_artifact_count": 0,
-      "source_intake_evidence_intake_artifacts": [],
-      "source_intake_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json",
-      "source_intake_release_area_blocker_ids": [],
-      "source_intake_status": "pending_owner_decisions",
-      "status": "open",
-      "title": "Structural Scope Cleanup",
-      "verification_commands": [
-        "python3 scripts/build_structural_scope_origin_report.py --fail-blocked",
-        "python3 scripts/build_structural_scope_cleanup_impact_report.py --fail-blocked",
-        "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-release-surface-first-blocked",
-        "python3 scripts/merge_structural_scope_owner_decision_batch.py --batch-owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.filled.csv --out implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --out-md implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.md --fail-release-surface-first-blocked",
-        "python3 scripts/build_structural_scope_owner_decision_application_plan.py --owner-decisions implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.candidate.json --fail-release-surface-first-blocked",
-        "python3 scripts/build_structural_scope_owner_decision_application_plan.py --fail-invalid-owner-decisions",
-        "python3 scripts/check_structural_scope_contamination.py --check --fail-blocked",
-        "python3 scripts/build_product_readiness_snapshot.py --check",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
     {
       "acceptance_criteria": [
         "`M2::element_material_breadth_gate_not_green` absent from `full_release_blockers`",
@@ -6248,28 +5980,28 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
+  "source_commit_sha": "47d45f9268f2672ac4b756a9ece5502d489c1a36",
   "summary": {
     "all_open_blockers_have_handoff": true,
-    "external_input_required_count": 11,
-    "external_owner_input_ready_count": 11,
+    "external_input_required_count": 10,
+    "external_owner_input_ready_count": 10,
     "full_release_gate_ready": false,
     "ga_enterprise_blocker_count": 48,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 64,
+    "handoff_ready_count": 63,
     "limited_commercial_milestone_ready": false,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "local_remediation_ready_count": 53,
     "milestone_blocker_count": 15,
-    "open_blocker_count": 64,
-    "owner_input_required_count": 11,
+    "open_blocker_count": 63,
+    "owner_input_required_count": 10,
     "paid_pilot_candidate": false,
     "release_area_blocker_count": 42,
     "release_area_gate_ready": false,
     "release_area_green_count": 4,
     "release_area_total_count": 16,
     "release_decision_operator_action_count": 1,
-    "structural_scope_cleanup_blocker_count": 1
+    "structural_scope_cleanup_blocker_count": 0
   }
 }

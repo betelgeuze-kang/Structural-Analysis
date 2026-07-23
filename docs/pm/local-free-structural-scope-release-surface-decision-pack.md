@@ -1,29 +1,31 @@
 # Local-free structural scope release-surface decision pack
 
-Purpose: close as much of the structural-scope cleanup preparation as possible without local workstation, protected-evidence refresh, destructive file deletion, or owner-signoff mutation.
+Purpose: preserve the release-surface-first preparation record that preceded the completed structural-scope cleanup.
 
-This packet is **non-promoting**. It does not close `structural_scope::owner_decision_pending_count=86`, does not delete files, and does not convert quarantine into release readiness. It prepares owner decisions so the owner can execute the next local/CI-backed closure step.
+This packet is **superseded** by `structural_scope_owner_decisions.json` and GitHub issue #181. It remains non-promoting: the completed repository-scope cleanup does not provide legal approval, independent engineering review, or product-release authorization.
 
 ## Current state
 
-- Non-structural tracked paths are quarantined: `86/86`.
-- Unquarantined non-structural tracked paths: `0`.
-- Owner decisions recorded: `0/86`.
-- Release-surface cleanup decisions: `0/3`.
-- Release-surface retain exceptions are not allowed for the first release-surface batch.
+- Historical quarantine-manifest paths: `86`.
+- Current matching paths in the Git index and worktree: `0/86`.
+- Owner delete decisions recorded: `86/86`.
+- Post-decision cleanup applied: `86/86`.
+- Historical release-surface-first paths deleted: `3/3`; current release-surface paths: `0`.
+- Structural-scope evidence closure: `true` with no pending owner or cleanup rows.
 
 Authoritative artifacts:
 
 - `implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json`
 - `implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json`
 - `implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json`
+- `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json`
 - `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.json`
 - `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv`
 - `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.md`
 
-## Release-surface-first paths
+## Historical release-surface-first paths
 
-The release-surface-first batch should be handled before feature expansion:
+The three paths below were the original first batch and are now absent from the repository:
 
 1. `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json`
 2. `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json`
@@ -65,37 +67,31 @@ Recommended `owner_role` values:
 - `technical_owner`
 - `delegated_release_owner`
 
-## Suggested execution sequence
+## Completed execution sequence
 
-1. Fill the release-surface-first template.
-2. Validate the owner decision batch.
-3. Merge the filled batch into the candidate owner-decision artifact.
-4. Apply owner-approved delete/extract cleanup manually.
-5. Rerun structural scope contamination audit.
-6. Rerun structural scope owner review packet.
-7. Rerun structural scope owner decision application plan.
-8. Rerun product readiness snapshot in check mode.
-9. Rerun roadmap generation.
+1. PR #168 removed all 86 manifest paths.
+2. The repository owner selected `delete_from_structural_repository` for all 86 rows in issue #181.
+3. The canonical decision artifact recorded and validated those rows.
+4. The owner-review and application-plan builders verified all 86 paths remain absent.
+5. The product snapshot and roadmap were regenerated without a structural-scope blocker.
 
 ## Acceptance criteria
 
-This track is closed only when:
+This track is closed because:
 
-- release-surface owner decisions are `3/3`;
-- all 86 quarantined non-structural paths have owner decisions;
-- owner-approved delete/extract cleanup is manually applied;
-- structural scope audit passes after cleanup;
-- product readiness snapshot no longer reports structural-scope blockers.
+- all 86 historical paths have delete decisions and are absent;
+- the structural scope audit passes after cleanup;
+- owner-review evidence reports decision pending `0`, cleanup pending `0`, and applied `86`;
+- the product readiness snapshot no longer reports structural-scope blockers.
 
 ## Claim boundary
 
-Until the acceptance criteria pass, the correct claim is:
+The correct current claim is:
 
-> Non-structural artifacts are quarantined from the structural release surface, but owner decisions and delete/extract cleanup are not complete.
+> The 86 historical non-structural paths were removed and their repository-owner delete decisions are recorded; broader product readiness remains blocked by independent external gates.
 
 Do not claim:
 
-- structural scope cleanup closed;
-- repository contamination fully removed;
-- release-surface owner decisions complete;
-- product readiness promoted by quarantine alone.
+- product readiness or commercial release solely from this cleanup;
+- legal approval, independent V&V, engineering signoff, or customer validation;
+- that the historical quarantine manifest describes paths still present in the current tree.

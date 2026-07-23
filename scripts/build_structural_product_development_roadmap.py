@@ -479,12 +479,16 @@ def build_structural_product_development_roadmap(
             numerator=sum(1 for item in structural_scope_checks if item),
             denominator=len(structural_scope_checks),
             blockers=structural_scope_stage_blockers,
-            next_actions=[
-                "record_release_surface_first_owner_delete_or_extract_decisions",
-                "merge_filled_owner_decision_batch_to_candidate",
-                "manually_apply_owner_approved_delete_or_extract_cleanup",
-                "rerun_structural_scope_audit_and_product_snapshot_checks",
-            ],
+            next_actions=(
+                ["keep_structural_scope_contamination_audit_green"]
+                if all(structural_scope_checks) and not structural_scope_stage_blockers
+                else [
+                    "record_release_surface_first_owner_delete_or_extract_decisions",
+                    "merge_filled_owner_decision_batch_to_candidate",
+                    "manually_apply_owner_approved_delete_or_extract_cleanup",
+                    "rerun_structural_scope_audit_and_product_snapshot_checks",
+                ]
+            ),
             evidence_artifacts=[
                 STRUCTURAL_SCOPE_AUDIT,
                 STRUCTURAL_SCOPE_OWNER_REVIEW,
@@ -931,6 +935,15 @@ def build_structural_product_development_roadmap(
             ],
         },
     ]
+    blocked_stage_ids = {str(row["stage_id"]) for row in blocked_stages}
+    recommended_next_slice_details = [
+        row
+        for row in recommended_next_slice_details
+        if any(
+            str(stage_id) in blocked_stage_ids
+            for stage_id in _as_list(row.get("stage_ids"))
+        )
+    ]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -974,15 +987,12 @@ def build_structural_product_development_roadmap(
             "g1_full_load_hip_newton_lane_ready": g1_full_ready,
         },
         "recommended_next_slice": [
-            "close_structural_scope_owner_review_and_release_surface_cleanup",
-            "land_ci_license_ux_release_area_evidence",
-            "close_developer_preview_medium_large_and_parity_gates",
-            "continue_g1_full_load_hip_newton_from_consistent_residual_jacobian_path",
-            "collect_customer_shadow_and_external_benchmark_terminal_receipts",
+            str(row["id"]) for row in recommended_next_slice_details
         ],
         "recommended_next_slice_details": recommended_next_slice_details,
         "summary_line": (
-            "Structural product roadmap: BLOCKED | "
+            "Structural product roadmap: "
+            f"{'BLOCKED' if blocked_stages else 'READY'} | "
             f"evidence_progress={_pct(total_passed, total_required)}% | "
             f"stage_average={stage_average}% | "
             f"ready_stages={len(stages) - len(blocked_stages)}/{len(stages)} | "

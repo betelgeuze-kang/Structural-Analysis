@@ -1,96 +1,40 @@
 # Structural Scope Owner Decision Application Plan
 
-- `summary_line`: `Structural scope owner decision application plan: PENDING_OWNER_DECISIONS | recorded=0 | pending=86 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0`
-- `status`: `pending_owner_decisions`
+- `summary_line`: `Structural scope owner decision application plan: COMPLETE | recorded=86 | pending=0 | cleanup_pending=0 | delete=0 | extract=0 | retain=0 | unquarantined=0`
+- `status`: `complete`
 - `contract_pass`: `True`
 - `application_ready`: `False`
-- `evidence_closure_pass`: `False`
-- `owner_decision_validation_pass`: `False`
-- `owner_decision_pending_count`: `86`
+- `evidence_closure_pass`: `True`
+- `owner_decision_validation_pass`: `True`
+- `owner_decision_pending_count`: `0`
 - `post_decision_cleanup_pending_count`: `0`
-- `post_decision_cleanup_applied_count`: `0`
+- `post_decision_cleanup_applied_count`: `86`
 - `cleanup_required_count`: `0`
 - `release_surface_cleanup_required_count`: `0`
 - `delete_decision_count`: `0`
 - `extract_decision_count`: `0`
 - `retain_quarantined_exception_count`: `0`
-- `release_surface_owner_decision_required_count`: `3`
+- `release_surface_owner_decision_required_count`: `0`
 
 ## Pending Owner Decision Buckets
 
-- `pending_owner_decision_path_area_counts`: `{'implementation_phase1': 9, 'productization_evidence': 36, 'release_surface': 3, 'script': 19, 'test': 19}`
-- `pending_owner_decision_family_counts`: `{'molecular_docking': 48, 'molecular_dynamics': 25, 'molecular_science_evidence': 13}`
-- `pending_owner_decision_recommended_owner_decision_counts`: `{'delete_from_structural_repository_or_extract_only_if_owner_requires_history': 39, 'extract_to_molecular_or_science_repository_or_delete_if_obsolete': 47}`
-- `pending_owner_decision_primary_counts`: `{'delete_from_structural_repository': 39, 'extract_to_molecular_or_science_repository': 47}`
-- `next_owner_review_batch`: `release_surface_first` paths=`3` area=`release_surface`
-- `owner_review_priority_batches`: `5`
+- `pending_owner_decision_path_area_counts`: `{}`
+- `pending_owner_decision_family_counts`: `{}`
+- `pending_owner_decision_recommended_owner_decision_counts`: `{}`
+- `pending_owner_decision_primary_counts`: `{}`
 
 ## Release Surface First Batch Intake
 
-- `status`: `pending_owner_decisions`
+- `status`: `no_release_surface_paths`
 - `ready_for_manual_cleanup_application`: `False`
-- `expected_path_count`: `3`
+- `expected_path_count`: `0`
 - `valid_cleanup_decision_count`: `0`
-- `pending_decision_count`: `3`
-- `pending_release_surface_owner_decision_count=3`
-- `release_surface_cleanup_decision_count_below_expected=0/3`
-- `release_surface_first_batch_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv`
-
-## Release Surface First Owner Action Packet
-
-- `status`: `ready_for_owner_decision_request`
-- `ready_to_request_owner_decision`: `True`
-- `release_surface_owner_decision_required_count`: `3`
-- `allowed_owner_decisions`: `['delete_from_structural_repository', 'extract_to_molecular_or_science_repository']`
-- `disallowed_owner_decisions`: `['retain_quarantined_with_signed_owner_exception']`
-- `owner_decision_template.csv`: `implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.release_surface_first.template.csv`
-- `origin_context_source_report`: `implementation/phase1/release_evidence/productization/structural_scope_origin_report.json`
-- `origin_context_complete`: `True`
-
-| Row | Path | Origin Wave | First Added | Primary Decision |
-|---|---|---|---|---|
-| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `science_release_surface_seed` | `805535fc 2026-06-30` | `delete_from_structural_repository` |
-| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `science_release_surface_seed` | `805535fc 2026-06-30` | `delete_from_structural_repository` |
-| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `pocketmd_release_surface_materialization` | `01e6fe1b 2026-06-30` | `delete_from_structural_repository` |
-
-## Release Surface First Operator Sequence
-
-- `status`: `waiting_for_owner_decision`
-- `current_step_id`: `fill_release_surface_first_owner_decisions`
-- `ready_for_manual_cleanup_application`: `False`
-- `pending_release_surface_owner_decision_count=3`
-- `release_surface_cleanup_decision_count_below_expected=0/3`
-
-| Step | Status | Runnable |
-|---|---|---:|
-| `fill_release_surface_first_owner_decisions` | `waiting_for_owner_input` | `True` |
-| `validate_filled_owner_decisions` | `waiting_on_owner_input` | `False` |
-| `merge_filled_batch_to_candidate` | `waiting_on_owner_input` | `False` |
-| `manual_cleanup_preflight` | `waiting_on_prior_steps` | `False` |
-| `manual_cleanup_application` | `waiting_on_prior_steps` | `False` |
-| `refresh_scope_receipts` | `waiting_on_manual_cleanup` | `False` |
-| `refresh_readiness_snapshot` | `waiting_on_refreshed_scope_receipts` | `False` |
-
-## Next Batch Decision Template
-
-- `batch_id`: `release_surface_first`
-- `decision_pending_count`: `3`
-- `primary_delete_path_count`: `3`
-
-| Row | Path | Primary Decision |
-|---|---|---|
-| `release_surface_first-001` | `implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json` | `delete_from_structural_repository` |
-| `release_surface_first-002` | `implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json` | `delete_from_structural_repository` |
-| `release_surface_first-003` | `implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json` | `delete_from_structural_repository` |
-
-## Owner Decision Validation Blockers
-
-- `owner_decisions_missing`
-- `owner_decision_pending_count=86`
+- `pending_decision_count`: `0`
+- blockers: none
 
 ## Plan Blockers
 
-- `owner_decision_pending_count=86`
+- none
 
 ## Cleanup Rows
 

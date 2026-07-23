@@ -494,6 +494,71 @@ def test_structural_product_development_roadmap_summarizes_blocked_stages(
     ]
 
 
+def test_structural_product_development_roadmap_omits_closed_scope_cleanup_slice(
+    tmp_path: Path,
+) -> None:
+    _write_minimal_inputs(tmp_path)
+    productization = tmp_path / "implementation/phase1/release_evidence/productization"
+    _write_json(
+        productization / "structural_scope_contamination_audit.json",
+        {
+            "schema_version": "structural-scope-contamination-audit.v1",
+            "status": "clean",
+            "contract_pass": True,
+            "blockers": [],
+            "non_structural_path_count": 0,
+            "quarantined_non_structural_path_count": 0,
+            "unquarantined_non_structural_path_count": 0,
+            "release_surface_text_leak_path_count": 0,
+        },
+    )
+    _write_json(
+        productization / "structural_scope_owner_review_packet.json",
+        {
+            "schema_version": "structural-scope-owner-review-packet.v1",
+            "status": "complete",
+            "contract_pass": True,
+            "evidence_closure_pass": True,
+            "owner_review_required": False,
+            "owner_decision_recorded_count": 86,
+            "owner_decision_pending_count": 0,
+        },
+    )
+    _write_json(
+        productization / "structural_scope_owner_decision_application_plan.json",
+        {
+            "schema_version": "structural-scope-owner-decision-application-plan.v1",
+            "status": "complete",
+            "contract_pass": True,
+            "application_ready": False,
+            "evidence_closure_pass": True,
+            "owner_decision_recorded_count": 86,
+            "owner_decision_pending_count": 0,
+            "post_decision_cleanup_pending_count": 0,
+            "release_surface_owner_decision_required_count": 0,
+            "release_surface_first_batch_decision_intake": {
+                "status": "no_release_surface_paths",
+                "expected_path_count": 0,
+                "valid_cleanup_decision_count": 0,
+                "pending_decision_count": 0,
+            },
+            "next_owner_review_batch": {},
+        },
+    )
+
+    payload = module.build_structural_product_development_roadmap(repo_root=tmp_path)
+
+    stages = {row["stage_id"]: row for row in payload["roadmap_stages"]}
+    assert stages["structural_scope_cleanup"]["status"] == "ready"
+    assert stages["structural_scope_cleanup"]["next_actions"] == [
+        "keep_structural_scope_contamination_audit_green"
+    ]
+    assert (
+        "close_structural_scope_owner_review_and_release_surface_cleanup"
+        not in payload["recommended_next_slice"]
+    )
+
+
 def test_write_structural_product_development_roadmap_writes_json_and_markdown(
     tmp_path: Path,
 ) -> None:

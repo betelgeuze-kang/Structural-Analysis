@@ -42,19 +42,18 @@ Key current values:
 
 ## Recommended execution order
 
-### Phase 1 — Owner-decision closure preparation
+### Phase 1 — Owner-decision closure (completed)
 
-1. Use `local-free-structural-scope-release-surface-decision-pack.md`.
-2. Review `local-free-release-surface-owner-decisions.draft.json`.
-3. Owner fills identity, role, timestamp, and evidence reference.
-4. Validate and merge decisions into the actual release-surface-first decision artifact.
-5. Apply owner-approved delete/extract cleanup.
-6. Rerun structural scope audit and product snapshot.
+1. PR #168 removed the 86 historical non-structural paths.
+2. Issue #181 recorded the repository-owner delete disposition.
+3. `structural_scope_owner_decisions.json` records `86/86` decisions.
+4. Owner-review evidence verifies applied `86`, owner pending `0`, and cleanup pending `0`.
+5. Structural scope audit and product snapshot no longer carry a structural-scope blocker.
 
 Target outcome:
 
-- Release-surface owner decisions: `0/3 -> 3/3`
-- Structural scope cleanup stage moves materially forward
+- Historical release-surface paths: `3/3` deleted; current paths `0`
+- Structural scope cleanup stage: `ready` (`4/4`)
 
 ### Phase 2 — Developer Preview closure preparation
 

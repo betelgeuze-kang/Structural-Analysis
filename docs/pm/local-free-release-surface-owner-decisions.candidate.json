@@ -1,13 +1,17 @@
 {
   "schema_version": "local-free-release-surface-owner-decision-candidate.v1",
-  "status": "owner_input_required",
-  "claim_boundary": "This candidate is prepared for owner fill-in. It is not an authoritative owner-decision artifact until OWNER_INPUT_REQUIRED fields are replaced by an authorized owner, validated, merged into the canonical owner-decision artifact, and followed by owner-approved cleanup plus evidence regeneration.",
+  "status": "superseded_by_canonical_owner_decisions",
+  "claim_boundary": "This historical candidate is not authoritative and must not be filled or merged. The canonical owner-decision artifact records 86 repository-owner delete decisions and the current tree contains none of the 86 paths; broader product-release gates remain unchanged.",
+  "superseded_by": {
+    "canonical_owner_decisions": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+    "decision_evidence": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/181"
+  },
   "source_context": {
-    "current_release_surface_cleanup_decisions": "0/3",
-    "current_owner_decisions": "0/86",
+    "current_release_surface_cleanup_decisions": "3/3_historical_paths_deleted",
+    "current_owner_decisions": "86/86",
     "unquarantined_non_structural_paths": 0,
     "release_surface_text_leak_count": 0,
-    "next_owner_review_batch": "release_surface_first"
+    "next_owner_review_batch": "none"
   },
   "batch": {
     "batch_id": "release_surface_first",
