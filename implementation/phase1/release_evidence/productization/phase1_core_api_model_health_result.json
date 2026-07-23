@@ -12,7 +12,7 @@
     }
   ],
   "developer_preview": true,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
   "metrics": {
     "analysis_input_snapshot": "detached_canonical_model_v1",

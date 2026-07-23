@@ -18,10 +18,10 @@
   "fallback_used": false,
   "full_mesh_closure_claim": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-23T03:15:46.020372+00:00",
+  "generated_at": "2026-07-23T04:37:56.637156+00:00",
   "input_checksums": {
     "scripts/build_phase2_patch_rigidbody_artifacts.py": "sha256:fc006c41f3224876bb908b3c064af8bbfc7366c048575da213c836af30d9ab9b",
-    "src/structural_analysis/assembly/__init__.py": "sha256:cd828364f71d37574e152437ceeda29a0a710808ace450c2b5404efdc70a30b0",
+    "src/structural_analysis/assembly/__init__.py": "sha256:99864d3fc0ed733fc394efec7bc0716140de65d5a0c5cf0bbb0d87bb8cb54991",
     "src/structural_analysis/assembly/patch_static.py": "sha256:55b56f88b2d75aa7e979a2e6eac87ab2e4a14b447ec74ba6ec16b853ea62fe35",
     "tests/test_build_phase2_patch_rigidbody_artifacts.py": "sha256:a7ee6293514f9c5ba45fc675e669b1811b005029a279757d2ac242827463e53b"
   },
@@ -34,7 +34,7 @@
   "rigid_body_sparse_nullspace_norm_kn": 0.0,
   "rigid_body_test_passed": true,
   "schema_version": "phase2-patch-rigidbody-artifacts.v1",
-  "source_commit_sha": "f0cbda2cdb2e034b5cb9efa20b7e9173e5166cc0",
+  "source_commit_sha": "0c2a5abd8a5154901f0a01ecbc68b58b6e9fbc02",
   "status": "ready",
   "truth_class": "analytic_component_patch_truth"
 }

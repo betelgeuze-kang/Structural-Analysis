@@ -6,7 +6,7 @@
   "commercial_reference_case_count": 0,
   "contract_pass": true,
   "developer_preview_release_candidate_claim": false,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "expected_output_comparison_count": 88,
   "expected_output_comparison_pass_count": 88,
   "fallback_scope": {
@@ -18,14 +18,14 @@
     "supports_gui_story_member_mode_traceability": false,
     "supports_two_reference_solver_comparison": false
   },
-  "generated_at": "2026-07-19T06:15:18.499631+00:00",
+  "generated_at": "2026-07-23T04:44:14.858310+00:00",
   "input_checksums": {
     "scripts/build_phase4_analytic_physical_fallback_scorecard.py": "sha256:fa8d16def88ffb4da71236dfc3c8c86c1f30813b9328c4e76ceafea7b498f7fe",
-    "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
+    "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
     "src/structural_analysis/benchmark/cli.py": "sha256:c1e8e9eb0129547376d63a631afa4bb3ed1301ac2273415957d28c84fa09883a",
     "src/structural_analysis/benchmark/factory.py": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
     "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:2531dbc71d29277e550f792e3dd79f36012ad23d9f99aa6311f7cd50b989a8e6",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:12e871b8004dc58a61ac7ff8e96f09689c6815785460d4bf4ac6b9a54bd62195",
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
     "src/structure-viewer/viewer-report-export.js": "sha256:06ccfafbd47ed9116183c25f55ced03be05bb64c69e8067c04c55e3c29611373"
   },
@@ -681,7 +681,7 @@
     "element-patch",
     "nonlinear-material-mesh"
   ],
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "c59bff9e9ab7cabffea3633c86be0bae7dc03dcf",
   "status": "ready",
   "truth_class": "analytic_physical_fallback",
   "two_reference_solver_comparison_available": false

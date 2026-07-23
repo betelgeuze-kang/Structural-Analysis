@@ -68,7 +68,7 @@
   "configuration_guard_passed": true,
   "contract_pass": true,
   "displacement_gate_passed": true,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "errors": {
     "displacement_abs_m": 2.942091015256665e-15
   },
@@ -79,13 +79,13 @@
   },
   "fallback_used": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-19T05:51:09.232288+00:00",
+  "generated_at": "2026-07-23T04:44:10.561065+00:00",
   "globalization": "backtracking_line_search",
   "increment_gate_passed": true,
   "input_checksums": {
     "scripts/build_phase2_newton_globalization_artifacts.py": "sha256:1e5f10da13344b8a140bc7cdebda98ff251ccd1fa33aa31aa56f4f0a1d90afb4",
     "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:c2a90344f5fba8d2210d4927ff9fc13d6be8943f264b545e1ab20bc2fa78d74d",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:2531dbc71d29277e550f792e3dd79f36012ad23d9f99aa6311f7cd50b989a8e6",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:12e871b8004dc58a61ac7ff8e96f09689c6815785460d4bf4ac6b9a54bd62195",
     "tests/test_build_phase2_newton_globalization_artifacts.py": "sha256:3760d3704f8cee9980d2bb0f4d72c6b0d19e36867dd4ab34acb2e38b0bd998a0",
     "tests/test_nonlinear_line_search_acceptance.py": "sha256:69ca85a6ba9a6071e220f2adf986acd3e5fdda183be916e35d40fd92b8f9e00e",
     "tests/test_nonlinear_newton_config_contract.py": "sha256:56267bc46d226f52c7262ff49a7119f4d134fdd763ff54280c0776741e457c57"
@@ -331,7 +331,7 @@
     }
   },
   "singular_tangent_guard_passed": true,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "c59bff9e9ab7cabffea3633c86be0bae7dc03dcf",
   "sparse_backend_used": false,
   "status": "ready",
   "tangent_gate_passed": true,

@@ -25,6 +25,7 @@ from structural_analysis.api.nonlinear_frame import (
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_checkpoint_chain_io import (
     STATEFUL_COROTATIONAL_FIBER_FRAME2D_CHECKPOINT_CHAIN_MAX_BYTES,
 )
+from structural_analysis.solvers.nonlinear.newton import VECTOR_MATRIX_BACKENDS
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -42,6 +43,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--max-iterations", type=int, default=40)
     parser.add_argument("--residual-tolerance", type=float, default=1.0e-10)
     parser.add_argument("--increment-tolerance", type=float, default=1.0e-12)
+    parser.add_argument(
+        "--matrix-backend",
+        choices=VECTOR_MATRIX_BACKENDS,
+        default=VECTOR_MATRIX_BACKENDS[0],
+        help="Linear algebra backend (native sparse is corotational-only).",
+    )
     parser.add_argument(
         "--restart-from",
         help="Exact checkpoint-chain artifact for the selected model/profile.",
@@ -68,6 +75,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             residual_tolerance=args.residual_tolerance,
             increment_tolerance_m=args.increment_tolerance,
             maximum_iterations=args.max_iterations,
+            matrix_backend=args.matrix_backend,
         )
         if args.checkpoint_out is None:
             result_path, report_path = resolve_distinct_output_paths(

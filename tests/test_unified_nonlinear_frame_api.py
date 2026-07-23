@@ -4,6 +4,7 @@ from dataclasses import replace
 import json
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from structural_analysis.api import nonlinear_frame as nonlinear_frame_api
@@ -22,6 +23,10 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_checkpoint
     make_stateful_corotational_fiber_frame2d_checkpoint_chain,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.solvers.nonlinear.newton import (
+    VECTOR_MATRIX_BACKEND,
+    VECTOR_SPARSE_MATRIX_BACKEND,
+)
 
 
 def _materials_and_sections() -> tuple[list[dict], list[dict]]:
@@ -171,6 +176,28 @@ def _model(tmp_path: Path, payload: dict, name: str = "model.json"):
     return load_neutral_json(path)
 
 
+def _assert_normalized_rows_close(left, right) -> None:
+    if isinstance(left, dict) and isinstance(right, dict):
+        assert left.keys() == right.keys()
+        for key in left:
+            _assert_normalized_rows_close(left[key], right[key])
+        return
+    if isinstance(left, (tuple, list)) and isinstance(right, (tuple, list)):
+        assert len(left) == len(right)
+        for left_value, right_value in zip(left, right, strict=True):
+            _assert_normalized_rows_close(left_value, right_value)
+        return
+    if (
+        isinstance(left, (int, float))
+        and not isinstance(left, bool)
+        and isinstance(right, (int, float))
+        and not isinstance(right, bool)
+    ):
+        np.testing.assert_allclose(left, right, rtol=1.0e-9, atol=1.0e-9)
+        return
+    assert left == right
+
+
 def test_unified_api_preserves_fixed_chord_profile_and_normalizes_stress_to_pa(
     tmp_path: Path,
 ) -> None:
@@ -229,6 +256,56 @@ def test_corotational_profile_exposes_exact_normalized_engineering_results(
     assert result.checkpoint["complete_ancestry_included"] is True
     assert result.checkpoint["prefix_replay_required"] is True
     assert validate_nonlinear_frame_manifest(result.to_dict()) == result.to_dict()
+
+
+def test_corotational_public_api_exposes_native_sparse_full_si_parity(
+    portal_result,
+) -> None:
+    model, dense = portal_result
+    sparse_config = NonlinearFrameConfig(
+        profile=COROTATIONAL_PORTAL_PROFILE,
+        load_steps=4,
+        matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+    )
+    sparse = analyze_nonlinear_frame(model, sparse_config)
+
+    assert dense.configuration["matrix_backend"] == VECTOR_MATRIX_BACKEND
+    assert sparse.status == "ready"
+    assert validate_nonlinear_frame_result(sparse).contract_pass is True
+    assert sparse.configuration["matrix_backend"] == VECTOR_SPARSE_MATRIX_BACKEND
+    assert sparse.configuration["stiffness_storage"] == "scipy_sparse_csr"
+    assert sparse.metrics["sparse_backend_used"] is True
+    assert sparse.metrics["native_sparse_assembly_used"] is True
+    assert sparse.metrics["fallback_count"] == 0
+    assert sparse.metrics["regularization_count"] == 0
+    _assert_normalized_rows_close(sparse.node_displacements, dense.node_displacements)
+    _assert_normalized_rows_close(sparse.support_reactions, dense.support_reactions)
+    _assert_normalized_rows_close(sparse.member_end_forces, dense.member_end_forces)
+    _assert_normalized_rows_close(sparse.section_results, dense.section_results)
+    _assert_normalized_rows_close(sparse.fiber_results, dense.fiber_results)
+
+    replayed = analyze_nonlinear_frame(
+        model,
+        sparse_config,
+        restart_checkpoint_chain=sparse.checkpoint_artifact(),
+    )
+    assert validate_nonlinear_frame_result(replayed).contract_pass is True
+    assert replayed.metrics["replayed_prefix_step_count"] == 4
+    assert replayed.metrics["native_sparse_assembly_used"] is True
+    assert replayed.node_displacements == sparse.node_displacements
+    assert replayed.support_reactions == sparse.support_reactions
+    assert replayed.member_end_forces == sparse.member_end_forces
+    assert replayed.section_results == sparse.section_results
+    assert replayed.fiber_results == sparse.fiber_results
+    assert replayed.checkpoint_artifact() == sparse.checkpoint_artifact()
+
+
+def test_fixed_chord_profile_rejects_sparse_backend() -> None:
+    with pytest.raises(ValueError, match="fixed-chord"):
+        NonlinearFrameConfig(
+            profile=FIXED_CHORD_SERIAL_PROFILE,
+            matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+        )
 
 
 def test_terminal_checkpoint_chain_replays_to_identical_corotational_result(
@@ -316,20 +393,24 @@ def test_unified_cli_writes_result_report_and_checkpoint_atomically(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     model, result = portal_result
+    captured: list[NonlinearFrameConfig] = []
     result_path = tmp_path / "result.json"
     report_path = tmp_path / "report.json"
     checkpoint_path = tmp_path / "checkpoint.json"
-    monkeypatch.setattr(
-        nonlinear_frame_cli,
-        "analyze_nonlinear_frame",
-        lambda *_args, **_kwargs: result,
-    )
+
+    def _capture_config(_model, config, **_kwargs):
+        captured.append(config)
+        return result
+
+    monkeypatch.setattr(nonlinear_frame_cli, "analyze_nonlinear_frame", _capture_config)
 
     exit_code = nonlinear_frame_cli.main(
         [
             model.source_path,
             "--profile",
             COROTATIONAL_PORTAL_PROFILE,
+            "--matrix-backend",
+            VECTOR_SPARSE_MATRIX_BACKEND,
             "--out",
             str(result_path),
             "--report-out",
@@ -340,6 +421,7 @@ def test_unified_cli_writes_result_report_and_checkpoint_atomically(
     )
 
     assert exit_code == 0
+    assert captured[0].matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
     assert json.loads(result_path.read_text(encoding="utf-8"))["contract_pass"] is True
     assert (
         json.loads(report_path.read_text(encoding="utf-8"))[
