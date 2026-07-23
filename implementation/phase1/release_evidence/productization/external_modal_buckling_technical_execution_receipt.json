@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:77dce301c45f9f25c88445aff95d196ca1aa7b771f46fa79a94f9fea69d3e712",
+  "artifact_hash": "sha256:1e04a0a3e60b262df3ad4ba257f9cd2b6268457ed6071da04da940c1ae9c4fbc",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -180,7 +180,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-23T15:06:48.711041+00:00",
+  "generated_at": "2026-07-23T16:41:48.695416+00:00",
   "internal_source": {
     "input_checksums": {
       "scripts/run_external_code_to_code_technical_receipt.py": "sha256:0efa47f503dea0efdfc32b5ae39d4c54f8060437b50c7adafc8aedeab24fcc75",
@@ -263,9 +263,9 @@
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-23T15:06:48.719759+00:00",
+    "current_product_replay_generated_at": "2026-07-23T16:41:48.704143+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-07-23T15:06:48.719753+00:00",
+    "external_execution_generated_at": "2026-07-23T16:41:48.704137+00:00",
     "external_execution_reused": false,
     "external_runtime_executed_in_this_generation": true,
     "reuse_reason": null
@@ -277,11 +277,11 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:b8ec3933f48d1de716ab86e75f4f638f687163ed74e565a97405e66c26edd8a1",
-        "frd_sha256": "sha256:60fded02cb83327d17b2cbdb5f3f20ed67685d09247b25c9c365b06e0d32183c",
+        "frd_sha256": "sha256:b7b34f84b4a2ef1cab5643921f15d0eddc463833db3853035436534507001893",
         "input_deck_sha256": "sha256:2a929ab93c0191b2b45c99ef1b46b956f0fe27f22d7cba99905cee934481825d",
         "return_code": 0,
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:40f4c88de63acaad072444810ef60d8b436162636b78627870184c5be9b63e06",
+        "stdout_sha256": "sha256:e6bd70eb7131e441f21b796d68f6591ac5cfc187796988fcbb52f956b086d696",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -319,7 +319,7 @@
     }
   },
   "schema_version": "external-modal-buckling-technical-execution.v1",
-  "source_commit_sha": "d81cf64e731288b13bab06edcbe8459546819bfd",
+  "source_commit_sha": "ffb25100b9440e6d3883cf6b3217fc2c72f93a23",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_modal_buckling_technical_execution",

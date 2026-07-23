@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:1b490fae40f6dafc559561367a33a2c2323f69efbbb2119ac35ab2ed4fc1f31d",
+  "artifact_hash": "sha256:a59020220a50593417ac79b415c95ce0badfd21696a82813c086a2027da0d558",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -453,7 +453,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-23T15:06:07.583843+00:00",
+  "generated_at": "2026-07-23T16:41:46.075411+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
@@ -475,9 +475,9 @@
     "source_set_hash": "sha256:734547310524ea4bbe6d5f196f879b1cb4b9bad6279bf97e0542cfc9bcfade5e"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-23T15:06:07.592311+00:00",
+    "current_product_replay_generated_at": "2026-07-23T16:41:46.084074+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-07-23T15:06:07.592305+00:00",
+    "external_execution_generated_at": "2026-07-23T16:41:46.084068+00:00",
     "external_execution_reused": false,
     "external_runtime_executed_in_this_generation": true,
     "reuse_reason": null
@@ -489,17 +489,17 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:0f2336b9654d2eecaf7c1695d97e38769fbe75ad3ea66d3924216862de26c07d",
-        "frd_sha256": "sha256:84a4e8bf5280ff088d6c194d859d9e8dacfe013a9e64f79854f33ea7436b984a",
+        "frd_sha256": "sha256:82782eb35ebda04231b9304470a7cc6e22e4231ece1b7284d0cc2727d9c0d963",
         "input_deck_sha256": "sha256:96482e7037bd037ba97f5e7359eea54b70522c4f48ca5b095dfe9eb9149d5600",
         "return_code": 0,
         "spatial_truss_dat_sha256": "sha256:d754b6dc5fd1e316b516629ed970a5bf1f6e274849c436222b8ea5eb63545cd6",
-        "spatial_truss_frd_sha256": "sha256:9f473a8573d76a857052112e4dc5e073570d0871d56ee1b47c9fc0cf015018b1",
+        "spatial_truss_frd_sha256": "sha256:ff3bd7944e075bd4e9447d5cdcb71f32d6e841ea2fe4a715ca0252919e952193",
         "spatial_truss_input_deck_sha256": "sha256:6675595b476187c36132d260a624bb85d0a9d155c31ff6aba38006f6ab3645b1",
         "spatial_truss_return_code": 0,
         "spatial_truss_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "spatial_truss_stdout_sha256": "sha256:daf7472619e04bdfcd363981593e3eb3f6d69272bb2b8d779568df51629a8908",
+        "spatial_truss_stdout_sha256": "sha256:9a53ce9874a5e46b202b23d371bae84b8ab464da1f9bc13222716d0b2db9b635",
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:639673147c2376daf4121c1758100c0dda2b6f957422d18b95e3d43f6b76db77",
+        "stdout_sha256": "sha256:3ee57d4ce5a62161fe2be5326522fa3b9df81c07f9663f4eda655cedfcbafa88",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -537,7 +537,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "d81cf64e731288b13bab06edcbe8459546819bfd",
+  "source_commit_sha": "ffb25100b9440e6d3883cf6b3217fc2c72f93a23",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
