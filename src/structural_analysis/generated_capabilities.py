@@ -114,16 +114,20 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
  {'authority': 'bounded_j1_j5_and_exact_engineering_recovery_candidate',
   'category': 'analysis',
   'evidence': ['docs/unified-nonlinear-frame-api.md',
+               'docs/corotational-fiber-frame-native-sparse.md',
                'src/structural_analysis/api/nonlinear_frame.py',
+               'src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py',
                'src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py',
                'src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py',
                'src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json',
+               'tests/test_corotational_fiber_frame_sparse.py',
                'tests/test_unified_nonlinear_frame_api.py'],
   'id': 'analysis.nonlinear_corotational_fiber_frame_2d',
   'interfaces': ['python_api', 'cli'],
-  'limitations': ['One-bay, one-story load-control CPU dense portal candidate only; general '
-                  'topology, native sparse assembly, member features, direct displacement control, '
-                  'both independent Level 2 comparisons, and release promotion remain open.'],
+  'limitations': ['One-bay, one-story load-control CPU dense or native COO/CSR portal candidate '
+                  'only; general topology, sparse factorization and conditioning diagnostics, '
+                  'member features, direct displacement control, both independent Level 2 '
+                  'comparisons, and release promotion remain open.'],
   'profile': 'corotational_one_bay_portal.v1',
   'public': False,
   'status': 'experimental',

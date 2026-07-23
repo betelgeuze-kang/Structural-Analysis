@@ -21,7 +21,14 @@ For a ready corotational result, the API binds:
 2. J1-J5 topology, scaling, state ancestry, solver-state, and convergence receipts;
 3. exact terminal-parent engineering replay and immutable SI artifacts;
 4. a complete epoch-zero-rooted checkpoint-chain hash and canonical artifact bytes;
-5. normalized displacement, reaction, member, section, and fiber rows.
+5. normalized displacement, reaction, member, section, and fiber rows;
+6. an explicit dense or native COO/CSR backend choice with no fallback.
+
+The corotational profile accepts `numpy_linalg_solve_dense` or
+`scipy_sparse_spsolve_cpu`. The sparse choice scatters member tangents directly
+to COO and canonical sorted CSR; see
+[Corotational Fiber-Frame Native Sparse Assembly](corotational-fiber-frame-native-sparse.md).
+The fixed-chord profile remains dense-only.
 
 When a restart artifact is supplied, every prefix step is solved again from
 genesis and its checkpoint bytes must match before any remaining step runs. A
@@ -35,6 +42,7 @@ The command line writes result, report, and optional checkpoint files atomically
 structural-analysis-nonlinear-frame \
   examples/public_corotational_rc_portal.json \
   --profile corotational_one_bay_portal.v1 \
+  --matrix-backend scipy_sparse_spsolve_cpu \
   --out result.json \
   --report-out report.json \
   --checkpoint-out checkpoint-chain.json
@@ -42,7 +50,7 @@ structural-analysis-nonlinear-frame \
 
 The same envelope preserves the existing fixed-chord authority while converting
 fiber stress output from MPa to Pa. The corotational endpoint remains a bounded
-Developer Preview candidate. General topology, native sparse assembly,
-factorization diagnostics, member features, direct displacement control, both
+Developer Preview candidate. General topology, sparse factorization and conditioning
+diagnostics, member features, direct displacement control, both
 independent Level 2 comparisons, design-code authority, and release promotion
 remain separate gates.

@@ -71,6 +71,8 @@ from structural_analysis.model.schema import (
 )
 from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_MATRIX_BACKEND,
+    VECTOR_MATRIX_BACKENDS,
+    VECTOR_SPARSE_MATRIX_BACKEND,
     NewtonRaphsonConfig,
 )
 
@@ -157,6 +159,7 @@ class NonlinearFrameConfig:
     residual_tolerance: float = 1.0e-10
     increment_tolerance_m: float = 1.0e-12
     maximum_iterations: int = 40
+    matrix_backend: str = VECTOR_MATRIX_BACKEND
 
     def __post_init__(self) -> None:
         if self.profile not in (
@@ -164,6 +167,15 @@ class NonlinearFrameConfig:
             COROTATIONAL_PORTAL_PROFILE,
         ):
             raise ValueError("profile is not a supported nonlinear frame profile")
+        if self.matrix_backend not in VECTOR_MATRIX_BACKENDS:
+            raise ValueError("matrix_backend is not a supported vector backend")
+        if (
+            self.profile == FIXED_CHORD_SERIAL_PROFILE
+            and self.matrix_backend != VECTOR_MATRIX_BACKEND
+        ):
+            raise ValueError(
+                "the fixed-chord profile currently supports only the dense backend"
+            )
         if type(self.load_steps) is not int or not 2 <= self.load_steps <= 64:
             raise ValueError("load_steps must be an integer in [2, 64]")
         if (
@@ -313,6 +325,16 @@ def validate_nonlinear_frame_result(
     exact_replay = bool(result.metrics.get("exact_checkpoint_chain_replay"))
     fallback_count = int(result.metrics.get("fallback_count", 0))
     regularization_count = int(result.metrics.get("regularization_count", 0))
+    sparse_selected = (
+        result.configuration.get("matrix_backend") == VECTOR_SPARSE_MATRIX_BACKEND
+    )
+    sparse_execution_contract = bool(
+        not sparse_selected
+        or (
+            result.metrics.get("sparse_backend_used") is True
+            and result.metrics.get("native_sparse_assembly_used") is True
+        )
+    )
     ready = bool(
         result.status == "ready"
         and result.contract_pass
@@ -321,6 +343,7 @@ def validate_nonlinear_frame_result(
         and exact_replay
         and fallback_count == 0
         and regularization_count == 0
+        and sparse_execution_contract
         and result.checkpoint.get("available") is True
         and result.authority.get("reaction")
         in {"authoritative", "exact_bounded_candidate"}
@@ -465,8 +488,12 @@ def _analyze_corotational_portal(
         "scaled_residual_tolerance": config.residual_tolerance,
         "solver_coordinate_increment_tolerance_m": config.increment_tolerance_m,
         "maximum_iterations": config.maximum_iterations,
-        "matrix_backend": VECTOR_MATRIX_BACKEND,
-        "stiffness_storage": "numpy_dense_ndarray",
+        "matrix_backend": config.matrix_backend,
+        "stiffness_storage": (
+            "scipy_sparse_csr"
+            if config.matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+            else "numpy_dense_ndarray"
+        ),
         "restart_supplied": restart is not None,
         "restart_checkpoint_artifact_hash": (
             _artifact_hash(restart) if restart is not None else None
@@ -553,6 +580,8 @@ def _analyze_corotational_portal(
                 "exact_checkpoint_chain_replay": False,
                 "fallback_count": 0,
                 "regularization_count": 0,
+                "sparse_backend_used": False,
+                "native_sparse_assembly_used": False,
                 "external_level2_attached": False,
             },
             unsupported_features=tuple(unsupported),
@@ -604,6 +633,14 @@ def _analyze_corotational_portal(
         ),
         "regularization_count": sum(
             int(bool(step.metrics.get("regularization_used")))
+            for step in execution.path.steps
+        ),
+        "sparse_backend_used": all(
+            bool(step.metrics.get("sparse_backend_used"))
+            for step in execution.path.steps
+        ),
+        "native_sparse_assembly_used": all(
+            bool(step.metrics.get("native_sparse_assembly_used"))
             for step in execution.path.steps
         ),
         "external_level2_attached": False,
@@ -1067,7 +1104,7 @@ def _run_corotational_path(
         residual_tolerance=config.residual_tolerance,
         increment_tolerance=config.increment_tolerance_m,
         max_iterations=config.maximum_iterations,
-        matrix_backend=VECTOR_MATRIX_BACKEND,
+        matrix_backend=config.matrix_backend,
     )
 
     def run_segment(

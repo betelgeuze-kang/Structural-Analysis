@@ -9,7 +9,7 @@ from typing import Any, Protocol
 import warnings
 
 import numpy as np
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, issparse
 from scipy.sparse.linalg import MatrixRankWarning, spsolve
 
 RESIDUAL_FORMULA = "F_internal_minus_F_external"
@@ -31,7 +31,8 @@ SCALAR_CONFIG_BACKENDS = (MATRIX_BACKEND, VECTOR_MATRIX_BACKEND)
 class VectorEquilibriumProblem(Protocol):
     """Vector equilibrium problem with assembled residual and consistent tangent."""
 
-    case_id: str
+    @property
+    def case_id(self) -> str: ...
 
     def reference_force_scale(self) -> float: ...
 
@@ -40,7 +41,7 @@ class VectorEquilibriumProblem(Protocol):
     def assemble(
         self,
         free_displacements_m: np.ndarray,
-    ) -> tuple[np.ndarray, np.ndarray]: ...
+    ) -> tuple[np.ndarray, Any]: ...
 
 
 class ScalarAxialEquilibriumProblem(Protocol):
@@ -72,13 +73,14 @@ class ScalarNonlinearAxialReference:
     def internal_force(self, displacement_m: float) -> float:
         u = float(displacement_m)
         return (
-            self.linear_stiffness_kn_per_m * u
-            + self.cubic_stiffness_kn_per_m3 * u**3
+            self.linear_stiffness_kn_per_m * u + self.cubic_stiffness_kn_per_m3 * u**3
         )
 
     def tangent_stiffness(self, displacement_m: float) -> float:
         u = float(displacement_m)
-        return self.linear_stiffness_kn_per_m + 3.0 * self.cubic_stiffness_kn_per_m3 * u**2
+        return (
+            self.linear_stiffness_kn_per_m + 3.0 * self.cubic_stiffness_kn_per_m3 * u**2
+        )
 
     def residual(self, displacement_m: float) -> float:
         return self.internal_force(displacement_m) - self.external_force_kn
@@ -181,9 +183,7 @@ class NewtonRaphsonConfig:
                     "line_search_alphas must be finite in the interval (0, 1]"
                 )
             if alpha >= previous_alpha:
-                raise ValueError(
-                    "line_search_alphas must be strictly decreasing"
-                )
+                raise ValueError("line_search_alphas must be strictly decreasing")
             normalized_alphas.append(alpha)
             previous_alpha = alpha
         object.__setattr__(self, "line_search_alphas", tuple(normalized_alphas))
@@ -192,35 +192,57 @@ class NewtonRaphsonConfig:
             raise ValueError("matrix_backend must be a non-empty string")
 
 
-def _vector_backend_metadata(matrix_backend: str) -> dict[str, Any]:
+def _vector_backend_metadata(
+    matrix_backend: str,
+    *,
+    native_sparse_assembly_used: bool = False,
+) -> dict[str, Any]:
     sparse_backend = matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
     return {
         "matrix_backend": matrix_backend,
         "sparse_backend_used": sparse_backend,
+        "native_sparse_assembly_used": native_sparse_assembly_used,
         "stiffness_storage": (
-            VECTOR_SPARSE_STIFFNESS_STORAGE
-            if sparse_backend
-            else "numpy_dense_ndarray"
+            VECTOR_SPARSE_STIFFNESS_STORAGE if sparse_backend else "numpy_dense_ndarray"
         ),
     }
 
 
 def _solve_vector_increment(
-    jacobian_kn_per_m: np.ndarray,
+    jacobian_kn_per_m: Any,
     residual_kn: np.ndarray,
     *,
     matrix_backend: str,
 ) -> np.ndarray:
     if matrix_backend == VECTOR_MATRIX_BACKEND:
-        return np.linalg.solve(jacobian_kn_per_m, -residual_kn)
+        dense_jacobian = (
+            jacobian_kn_per_m.toarray()
+            if issparse(jacobian_kn_per_m)
+            else np.asarray(jacobian_kn_per_m, dtype=float)
+        )
+        return np.linalg.solve(dense_jacobian, -residual_kn)
     if matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND:
-        sparse_jacobian = csr_matrix(jacobian_kn_per_m)
+        sparse_jacobian = (
+            jacobian_kn_per_m.tocsr(copy=True)
+            if issparse(jacobian_kn_per_m)
+            else csr_matrix(jacobian_kn_per_m)
+        )
+        sparse_jacobian.sum_duplicates()
+        sparse_jacobian.eliminate_zeros()
+        sparse_jacobian.sort_indices()
+        if sparse_jacobian.shape != (
+            residual_kn.size,
+            residual_kn.size,
+        ) or not np.all(np.isfinite(sparse_jacobian.data)):
+            raise np.linalg.LinAlgError("sparse vector tangent is invalid")
         with warnings.catch_warnings():
             warnings.simplefilter("error", MatrixRankWarning)
             increment = spsolve(sparse_jacobian, -residual_kn)
         increment = np.asarray(increment, dtype=float)
         if increment.shape != residual_kn.shape or not np.all(np.isfinite(increment)):
-            raise np.linalg.LinAlgError("sparse vector solve returned invalid increment")
+            raise np.linalg.LinAlgError(
+                "sparse vector solve returned invalid increment"
+            )
         return increment
     raise ValueError(f"unsupported vector matrix backend: {matrix_backend}")
 
@@ -260,13 +282,15 @@ def _no_solve_reaction_only_vector_solution(
     """Route F=0 to a reaction-only terminal state without Newton recurrence."""
     detail = "free_equation_space_empty"
     residual_kn = np.asarray([], dtype=float)
-    jacobian_kn_per_m = np.empty((0, 0), dtype=float)
+    jacobian_kn_per_m: Any = np.empty((0, 0), dtype=float)
     try:
-        assembled_residual, assembled_jacobian = problem.assemble(
-            free_displacements_m
-        )
+        assembled_residual, assembled_jacobian = problem.assemble(free_displacements_m)
         residual_kn = np.asarray(assembled_residual, dtype=float)
-        jacobian_kn_per_m = np.asarray(assembled_jacobian, dtype=float)
+        jacobian_kn_per_m = (
+            np.asarray(assembled_jacobian.toarray(), dtype=float)
+            if issparse(assembled_jacobian)
+            else np.asarray(assembled_jacobian, dtype=float)
+        )
         assembly_contract_valid = bool(
             residual_kn.shape == (0,)
             and jacobian_kn_per_m.shape == (0, 0)
@@ -291,6 +315,7 @@ def _no_solve_reaction_only_vector_solution(
         "globalization": "not_applicable_no_free_equations",
         "matrix_backend": None,
         "sparse_backend_used": False,
+        "native_sparse_assembly_used": False,
         "stiffness_storage": "none",
         "terminal_disposition": NO_SOLVE_REACTION_ONLY_DISPOSITION,
         "terminal_reason": detail,
@@ -333,11 +358,15 @@ def _no_solve_reaction_only_vector_solution(
     )
 
 
-def _relative_residual(problem: ScalarAxialEquilibriumProblem, residual: float) -> float:
+def _relative_residual(
+    problem: ScalarAxialEquilibriumProblem, residual: float
+) -> float:
     return abs(residual) / problem.reference_force_scale()
 
 
-def _relative_residual_vector(problem: VectorEquilibriumProblem, residual: np.ndarray) -> float:
+def _relative_residual_vector(
+    problem: VectorEquilibriumProblem, residual: np.ndarray
+) -> float:
     return float(np.linalg.norm(residual, ord=np.inf)) / problem.reference_force_scale()
 
 
@@ -400,7 +429,9 @@ def _vector_line_search(
                 "alpha": alpha,
                 "trial_free_displacements_m": trial_displacement.tolist(),
                 "trial_residual_kn": trial_residual.tolist(),
-                "trial_relative_residual": _relative_residual_vector(problem, trial_residual),
+                "trial_relative_residual": _relative_residual_vector(
+                    problem, trial_residual
+                ),
                 "accepted": accepted,
             }
         )
@@ -426,9 +457,7 @@ def newton_raphson_vector(
         problem.initial_free_displacements_m(),
         dtype=float,
     ).copy()
-    if free_displacements_m.ndim != 1 or not np.all(
-        np.isfinite(free_displacements_m)
-    ):
+    if free_displacements_m.ndim != 1 or not np.all(np.isfinite(free_displacements_m)):
         raise ValueError(
             "initial_free_displacements_m must be a finite one-dimensional vector"
         )
@@ -447,14 +476,18 @@ def newton_raphson_vector(
             line_search_history=[],
             detail="unsupported_matrix_backend",
         )
-    backend_metadata = _vector_backend_metadata(cfg.matrix_backend)
     history: list[dict[str, Any]] = []
     line_search_history: list[dict[str, Any]] = []
     regularization_used = False
     fallback_used = False
+    native_sparse_assembly_used = False
 
     for iteration in range(cfg.max_iterations + 1):
         residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
+        residual_kn = np.asarray(residual_kn, dtype=float)
+        native_sparse_assembly_used = bool(
+            native_sparse_assembly_used or issparse(jacobian_kn_per_m)
+        )
         relative_residual = _relative_residual_vector(problem, residual_kn)
         residual_gate_passed = relative_residual <= cfg.residual_tolerance
 
@@ -477,7 +510,9 @@ def newton_raphson_vector(
                     else "singular_tangent_stiffness"
                 ),
             )
-        residual_based_increment_abs = float(np.linalg.norm(newton_increment_m, ord=np.inf))
+        residual_based_increment_abs = float(
+            np.linalg.norm(newton_increment_m, ord=np.inf)
+        )
         increment_gate_passed = residual_based_increment_abs <= cfg.increment_tolerance
 
         if residual_gate_passed and increment_gate_passed:
@@ -505,7 +540,9 @@ def newton_raphson_vector(
             residual_before=residual_kn,
             alphas=cfg.line_search_alphas,
         )
-        increment_abs = float(np.linalg.norm(next_displacement_m - free_displacements_m, ord=np.inf))
+        increment_abs = float(
+            np.linalg.norm(next_displacement_m - free_displacements_m, ord=np.inf)
+        )
         increment_gate_passed = increment_abs <= cfg.increment_tolerance
         accepted = line_search_alpha > 0.0
         line_search_history.append(
@@ -564,7 +601,11 @@ def newton_raphson_vector(
             detail="iteration_loop_exhausted",
         )
 
-    final_residual, _ = problem.assemble(free_displacements_m)
+    final_residual, final_jacobian = problem.assemble(free_displacements_m)
+    final_residual = np.asarray(final_residual, dtype=float)
+    native_sparse_assembly_used = bool(
+        native_sparse_assembly_used or issparse(final_jacobian)
+    )
     final_relative_residual = _relative_residual_vector(problem, final_residual)
     final_increment_abs = float(history[-1]["increment_abs_m"]) if history else 0.0
     residual_gate_passed = final_relative_residual <= cfg.residual_tolerance
@@ -591,7 +632,10 @@ def newton_raphson_vector(
         "increment_norm_applicable": True,
         "convergence_claim": contract_pass,
         "reaction_observation_only": False,
-        **backend_metadata,
+        **_vector_backend_metadata(
+            cfg.matrix_backend,
+            native_sparse_assembly_used=native_sparse_assembly_used,
+        ),
         "residual_tolerance": cfg.residual_tolerance,
         "increment_tolerance": cfg.increment_tolerance,
         "residual_gate_passed": residual_gate_passed,
@@ -600,7 +644,9 @@ def newton_raphson_vector(
         "iteration_count": len(history),
         "line_search_step_count": len(line_search_history),
         "line_search_used": any(
-            row["line_search_alpha"] < 1.0 for row in history if row["iteration"] < len(history) - 1
+            row["line_search_alpha"] < 1.0
+            for row in history
+            if row["iteration"] < len(history) - 1
         ),
         "regularization_used": regularization_used,
         "fallback_used": fallback_used,
@@ -626,8 +672,12 @@ def _blocked_vector_solution(
     line_search_history: list[dict[str, Any]],
     detail: str,
 ) -> NewtonRaphsonVectorSolution:
-    residual_kn, _ = problem.assemble(free_displacements_m)
-    backend_metadata = _vector_backend_metadata(cfg.matrix_backend)
+    residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
+    residual_kn = np.asarray(residual_kn, dtype=float)
+    backend_metadata = _vector_backend_metadata(
+        cfg.matrix_backend,
+        native_sparse_assembly_used=issparse(jacobian_kn_per_m),
+    )
     return NewtonRaphsonVectorSolution(
         status="blocked",
         problem=problem,
@@ -853,7 +903,9 @@ def newton_raphson_scalar(
         "iteration_count": len(history),
         "line_search_step_count": len(line_search_history),
         "line_search_used": any(
-            row["line_search_alpha"] < 1.0 for row in history if row["iteration"] < len(history) - 1
+            row["line_search_alpha"] < 1.0
+            for row in history
+            if row["iteration"] < len(history) - 1
         ),
         "regularization_used": regularization_used,
         "fallback_used": fallback_used,
@@ -945,11 +997,15 @@ def expected_scalar_equilibrium_displacement(
                 if problem.residual(low) * problem.residual(high) <= 0.0:
                     break
             else:
-                raise ValueError("expected_scalar_equilibrium_displacement: root not bracketed.")
+                raise ValueError(
+                    "expected_scalar_equilibrium_displacement: root not bracketed."
+                )
     else:
         low, high = bracket_positive
         if problem.residual(low) * problem.residual(high) > 0.0:
-            raise ValueError("expected_scalar_equilibrium_displacement: root not bracketed.")
+            raise ValueError(
+                "expected_scalar_equilibrium_displacement: root not bracketed."
+            )
     if problem.residual(low) == 0.0:
         return low
     if problem.residual(high) == 0.0:
