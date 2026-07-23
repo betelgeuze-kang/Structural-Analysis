@@ -614,16 +614,18 @@ def assemble_stateful_corotational_fiber_frame2d(
         raise ValueError("trial_free_coordinates_m has invalid shape or values")
     scale = problem.physical_coordinate_scale
     generalized = np.zeros(problem.global_dof_count, dtype=np.float64)
-    prescribed = problem.prescribed_displacement_vector(load_factor)
-    generalized[list(problem.fixed_global_dofs)] = (
-        prescribed[list(problem.fixed_global_dofs)]
-        / scale[list(problem.fixed_global_dofs)]
-    )
+    prescribed: np.ndarray | None = None
+    prescribed_dofs: list[int] = []
+    if problem.prescribed_displacements:
+        prescribed = problem.prescribed_displacement_vector(load_factor)
+        prescribed_dofs = [dof for dof, _value in problem.prescribed_displacements]
+        generalized[prescribed_dofs] = (
+            prescribed[prescribed_dofs] / scale[prescribed_dofs]
+        )
     generalized[list(free_dofs)] = free
     global_displacements = scale * generalized
-    global_displacements[list(problem.fixed_global_dofs)] = prescribed[
-        list(problem.fixed_global_dofs)
-    ]
+    if prescribed is not None:
+        global_displacements[prescribed_dofs] = prescribed[prescribed_dofs]
     internal = np.zeros(problem.global_dof_count, dtype=np.float64)
     material_tangent = np.zeros(
         (problem.global_dof_count, problem.global_dof_count),
