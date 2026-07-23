@@ -1,10 +1,14 @@
 {
   "schema_version": "local-free-release-surface-owner-decision-draft.v1",
-  "status": "draft_non_promoting",
-  "claim_boundary": "This draft prepares release-surface-first owner decisions. It does not record an authoritative owner decision, delete files, extract files, close structural scope cleanup, or promote release readiness.",
+  "status": "superseded_by_canonical_owner_decisions",
+  "claim_boundary": "This historical draft is retained only for provenance and must not be used as current owner input. The canonical artifact records all 86 delete decisions; this cleanup does not promote broader product readiness.",
+  "superseded_by": {
+    "canonical_owner_decisions": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.json",
+    "decision_evidence": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/181"
+  },
   "source_context": {
-    "current_release_surface_cleanup_decisions": "0/3",
-    "current_owner_decisions": "0/86",
+    "current_release_surface_cleanup_decisions": "3/3_historical_paths_deleted",
+    "current_owner_decisions": "86/86",
     "unquarantined_non_structural_paths": 0,
     "release_surface_text_leak_count": 0
   },
