@@ -31,9 +31,19 @@
     "schema_version": {"const": "corotational-fiber-frame2d-engineering-result-ir.v1"},
     "engineering_result_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
     "engineering_result_hash": {"$ref": "#/$defs/hash"},
-    "result_kind": {"const": "corotational_portal_reaction_member_section_fiber"},
+    "result_kind": {
+      "enum": [
+        "corotational_portal_reaction_member_section_fiber",
+        "corotational_connected_frame2d_reaction_member_section_fiber"
+      ]
+    },
     "recovery_profile": {"const": "exact_terminal_parent_corotational_section_global_replay.v1"},
-    "authority_profile": {"const": "exact_bounded_portal_engineering_candidate.v1"},
+    "authority_profile": {
+      "enum": [
+        "exact_bounded_portal_engineering_candidate.v1",
+        "exact_connected_frame2d_engineering_candidate.v1"
+      ]
+    },
     "compiler_hash": {"$ref": "#/$defs/hash"},
     "source_adapter_hash": {"$ref": "#/$defs/hash"},
     "model_content_hash": {"$ref": "#/$defs/hash"},
@@ -47,13 +57,13 @@
       "additionalProperties": false,
       "required": ["node", "member", "section", "fiber"],
       "properties": {
-        "node": {"const": 4},
-        "member": {"const": 3},
+        "node": {"type": "integer", "minimum": 2, "maximum": 128},
+        "member": {"type": "integer", "minimum": 1, "maximum": 256},
         "section": {"type": "integer", "minimum": 1},
         "fiber": {"type": "integer", "minimum": 1}
       }
     },
-    "member_ids": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "member_ids": {"type": "array", "minItems": 1, "maxItems": 256, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
     "metrics": {
       "type": "object",
       "additionalProperties": false,
@@ -101,17 +111,39 @@
       }
     },
     "limitations": {
-      "const": [
-        "one_bay_one_story_portal_only",
-        "zero_prescribed_displacement_only",
-        "load_control_cpu_dense_newton_only",
-        "member_end_releases_not_supported",
-        "rigid_offsets_not_supported",
-        "distributed_member_loads_not_supported",
-        "external_level2_not_attached",
-        "public_capability_not_promoted",
-        "detached_manifest_requires_retained_artifact_bytes",
-        "detached_manifest_source_authenticity_not_established"
+      "oneOf": [
+        {
+          "const": [
+            "one_bay_one_story_portal_only",
+            "zero_prescribed_displacement_only",
+            "load_control_cpu_dense_newton_only",
+            "member_end_releases_not_supported",
+            "rigid_offsets_not_supported",
+            "distributed_member_loads_not_supported",
+            "external_level2_not_attached",
+            "public_capability_not_promoted",
+            "detached_manifest_requires_retained_artifact_bytes",
+            "detached_manifest_source_authenticity_not_established"
+          ]
+        },
+        {
+          "const": [
+            "connected_planar_frame_graph_only",
+            "proportional_nodal_load_only",
+            "prescribed_displacement_scaled_by_load_factor",
+            "load_control_cpu_dense_or_native_sparse_newton_only",
+            "parallel_members_not_supported",
+            "disconnected_graphs_not_supported",
+            "member_end_releases_not_supported",
+            "rigid_offsets_not_supported",
+            "distributed_member_loads_not_supported",
+            "direct_displacement_control_not_supported",
+            "external_level2_not_attached",
+            "public_capability_not_promoted",
+            "detached_manifest_requires_retained_artifact_bytes",
+            "detached_manifest_source_authenticity_not_established"
+          ]
+        }
       ]
     },
     "array_bundle_hash": {"$ref": "#/$defs/hash"},
@@ -122,6 +154,34 @@
       "items": {"$ref": "#/$defs/descriptor"}
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "result_kind": {
+            "const": "corotational_portal_reaction_member_section_fiber"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority_profile": {
+            "const": "exact_bounded_portal_engineering_candidate.v1"
+          },
+          "counts": {
+            "properties": {"node": {"const": 4}, "member": {"const": 3}}
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "authority_profile": {
+            "const": "exact_connected_frame2d_engineering_candidate.v1"
+          }
+        }
+      }
+    }
+  ],
   "$defs": {
     "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "descriptor": {

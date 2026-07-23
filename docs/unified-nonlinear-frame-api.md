@@ -8,16 +8,19 @@ SI field names.
 | --- | --- |
 | `fixed_chord_serial_cantilever.v1` | Existing bounded serial-cantilever Developer Preview |
 | `corotational_one_bay_portal.v1` | Four-node, three-member rectangular portal candidate |
+| `corotational_connected_frame2d.v1` | Connected 2–128-node, 1–256-member planar graph candidate |
 
-The corotational compiler requires exactly two fully fixed bases, proportional
-nodal loads, explicit rectangular RC fiber sections, and the supported
-steel/concrete laws. Unsupported keys, topology, support, load, material,
-section, unit, coordinate, release, offset, distributed-load, or prescribed
-displacement semantics fail before solve.
+The portal compiler requires exactly two fully fixed bases. The connected-frame
+compiler accepts branching topology, multiple support nodes with arbitrary
+`UX`/`UY`/`RZ` subsets, proportional nodal loads, and load-factor-proportional
+prescribed values on constrained components. Both require explicit rectangular
+RC fiber sections and the supported steel/concrete laws. Unsupported keys,
+topology, support, load, material, section, unit, or coordinate semantics fail
+before solve.
 
 For a ready corotational result, the API binds:
 
-1. the canonical model checksum and portal compiler hash;
+1. the canonical model checksum and selected compiler hash;
 2. J1-J5 topology, scaling, state ancestry, solver-state, and convergence receipts;
 3. exact terminal-parent engineering replay and immutable SI artifacts;
 4. a complete epoch-zero-rooted checkpoint-chain hash and canonical artifact bytes;
@@ -31,6 +34,11 @@ schema-validated exact conditioning receipt for every factorization; see
 [Corotational Fiber-Frame Native Sparse Assembly](corotational-fiber-frame-native-sparse.md).
 The fixed-chord profile remains dense-only.
 
+A fully constrained connected-frame model with only prescribed values follows a
+reaction-only no-solve contract. It commits the proportional checkpoint path and
+exact recovery without Newton iterations or a convergence claim; sparse
+factorization diagnostics are correctly inapplicable on that path.
+
 When a restart artifact is supplied, every prefix step is solved again from
 genesis and its checkpoint bytes must match before any remaining step runs. A
 valid terminal chain therefore replays to identical engineering output. Altered
@@ -41,8 +49,8 @@ The command line writes result, report, and optional checkpoint files atomically
 
 ```bash
 structural-analysis-nonlinear-frame \
-  examples/public_corotational_rc_portal.json \
-  --profile corotational_one_bay_portal.v1 \
+  examples/public_corotational_branching_frame.json \
+  --profile corotational_connected_frame2d.v1 \
   --matrix-backend scipy_sparse_spsolve_cpu \
   --out result.json \
   --report-out report.json \
@@ -50,8 +58,8 @@ structural-analysis-nonlinear-frame \
 ```
 
 The same envelope preserves the existing fixed-chord authority while converting
-fiber stress output from MPa to Pa. The corotational endpoint remains a bounded
-Developer Preview candidate. General topology, production-scale conditioning,
-member features, direct displacement control, both
+fiber stress output from MPa to Pa. The corotational endpoints remain bounded
+Developer Preview candidates. Parallel members, disconnected graphs,
+production-scale conditioning, member features, direct displacement control, both
 independent Level 2 comparisons, design-code authority, and release promotion
 remain separate gates.

@@ -29,6 +29,10 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_j1_j5 impo
     CorotationalFiberFrameJ1J5Adapter,
     validate_corotational_fiber_frame_j1_j5_adapter,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
+    CorotationalFiberFrameGeneralJ1J5Adapter,
+    validate_corotational_fiber_frame_general_j1_j5_adapter,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
     StatefulCorotationalFiberFrame2DLoadPathResult,
 )
@@ -59,6 +63,12 @@ COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE = (
 )
 COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND = (
     "corotational_portal_reaction_member_section_fiber"
+)
+COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE = (
+    "exact_connected_frame2d_engineering_candidate.v1"
+)
+COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND = (
+    "corotational_connected_frame2d_reaction_member_section_fiber"
 )
 COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE = 1.0e-12
 COROTATIONAL_FIBER_FRAME_ENGINEERING_FIBER_STRAIN_TOLERANCE = 1.0e-14
@@ -94,6 +104,22 @@ _LIMITATIONS = (
     "detached_manifest_requires_retained_artifact_bytes",
     "detached_manifest_source_authenticity_not_established",
 )
+_GENERAL_LIMITATIONS = (
+    "connected_planar_frame_graph_only",
+    "proportional_nodal_load_only",
+    "prescribed_displacement_scaled_by_load_factor",
+    "load_control_cpu_dense_or_native_sparse_newton_only",
+    "parallel_members_not_supported",
+    "disconnected_graphs_not_supported",
+    "member_end_releases_not_supported",
+    "rigid_offsets_not_supported",
+    "distributed_member_loads_not_supported",
+    "direct_displacement_control_not_supported",
+    "external_level2_not_attached",
+    "public_capability_not_promoted",
+    "detached_manifest_requires_retained_artifact_bytes",
+    "detached_manifest_source_authenticity_not_established",
+)
 
 _STRICT_JSON_TYPE_CHECKER = Draft202012Validator.TYPE_CHECKER.redefine(
     "integer", lambda _checker, value: type(value) is int
@@ -103,7 +129,9 @@ _StrictDraft202012Validator = validators.extend(
     type_checker=_STRICT_JSON_TYPE_CHECKER,
 )
 
-CorotationalEngineeringSourceAdapter = CorotationalFiberFrameJ1J5Adapter
+CorotationalEngineeringSourceAdapter = (
+    CorotationalFiberFrameJ1J5Adapter | CorotationalFiberFrameGeneralJ1J5Adapter
+)
 
 _ARRAY_SPECS: Mapping[
     str,
@@ -303,6 +331,7 @@ def create_corotational_fiber_frame_engineering_result_ir(
     """Replay and freeze exact SI engineering results for a bounded profile."""
 
     adapter = _validate_source_adapter(source_adapter)
+    result_kind, authority_profile, limitations = _source_profile(adapter)
     result_id = _stable_id(engineering_result_id, "/engineering_result_id")
     replay = _recover(adapter)
     descriptors = _descriptors(replay.arrays, replay.order_hashes)
@@ -313,9 +342,9 @@ def create_corotational_fiber_frame_engineering_result_ir(
         schema_version=COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION,
         engineering_result_id=result_id,
         engineering_result_hash=_HASH_ZERO,
-        result_kind=COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND,
+        result_kind=result_kind,
         recovery_profile=COROTATIONAL_FIBER_FRAME_ENGINEERING_RECOVERY_PROFILE,
-        authority_profile=COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE,
+        authority_profile=authority_profile,
         compiler_hash=adapter.compiler_hash,
         source_adapter_hash=adapter.adapter_hash,
         model_content_hash=adapter.model_content_hash,
@@ -331,7 +360,7 @@ def create_corotational_fiber_frame_engineering_result_ir(
         member_ids=replay.member_ids,
         metrics=replay.metrics,
         authority_axes=_AUTHORITY_AXES,
-        limitations=_LIMITATIONS,
+        limitations=limitations,
         array_bundle_hash=array_bundle_hash,
         descriptors=descriptors,
         _arrays=replay.arrays,
@@ -363,6 +392,7 @@ def validate_corotational_fiber_frame_engineering_result_ir(
             "Expected exact CorotationalFiberFrameEngineeringResultIR.",
         )
     adapter = _validate_source_adapter(result._adapter)
+    result_kind, authority_profile, limitations = _source_profile(adapter)
     replay = _recover(adapter)
     expected_descriptors = _descriptors(replay.arrays, replay.order_hashes)
     expected_bundle_hash = canonical_hash(
@@ -374,11 +404,10 @@ def validate_corotational_fiber_frame_engineering_result_ir(
         == COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION
         and _stable_id(result.engineering_result_id, "/engineering_result_id")
         == result.engineering_result_id
-        and result.result_kind == COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND
+        and result.result_kind == result_kind
         and result.recovery_profile
         == COROTATIONAL_FIBER_FRAME_ENGINEERING_RECOVERY_PROFILE
-        and result.authority_profile
-        == COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE
+        and result.authority_profile == authority_profile
         and result.compiler_hash == adapter.compiler_hash
         and result.source_adapter_hash == adapter.adapter_hash
         and result.model_content_hash == adapter.model_content_hash
@@ -394,7 +423,7 @@ def validate_corotational_fiber_frame_engineering_result_ir(
         and result.member_ids == replay.member_ids
         and dict(result.metrics) == dict(replay.metrics)
         and dict(result.authority_axes) == dict(_AUTHORITY_AXES)
-        and result.limitations == _LIMITATIONS
+        and result.limitations == limitations
         and result.descriptors == expected_descriptors
         and result.array_bundle_hash == expected_bundle_hash
     )
@@ -475,11 +504,37 @@ def validate_corotational_fiber_frame_engineering_result_manifest(
 def _validate_detached_manifest_semantics(payload: Mapping[str, Any]) -> None:
     counts = payload["counts"]
     descriptors = payload["array_descriptors"]
+    expected_limitations: tuple[str, ...]
+    if payload["result_kind"] == COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND:
+        expected_authority_profile = (
+            COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE
+        )
+        expected_limitations = _LIMITATIONS
+        count_profile_passed = counts["node"] == 4 and counts["member"] == 3
+    elif (
+        payload["result_kind"]
+        == COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND
+    ):
+        expected_authority_profile = (
+            COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE
+        )
+        expected_limitations = _GENERAL_LIMITATIONS
+        count_profile_passed = (
+            2 <= counts["node"] <= 128 and 1 <= counts["member"] <= 256
+        )
+    else:
+        _fail(
+            "corotational_engineering_result_kind_invalid",
+            "/result_kind",
+            "Detached result kind is not supported by v1.",
+        )
     if (
         payload["quantity_catalog_hash"]
         != default_result_quantity_catalog().catalog_hash
+        or payload["authority_profile"] != expected_authority_profile
         or payload["authority_axes"] != dict(_AUTHORITY_AXES)
-        or payload["limitations"] != list(_LIMITATIONS)
+        or payload["limitations"] != list(expected_limitations)
+        or not count_profile_passed
         or len(payload["member_ids"]) != counts["member"]
     ):
         _fail(
@@ -558,13 +613,37 @@ def _detached_array_shapes(counts: Mapping[str, int]) -> Mapping[str, tuple[int,
 def _validate_source_adapter(
     adapter: CorotationalEngineeringSourceAdapter,
 ) -> CorotationalEngineeringSourceAdapter:
-    if type(adapter) is not CorotationalFiberFrameJ1J5Adapter:
-        _fail(
-            "corotational_engineering_source_adapter_type_invalid",
-            "/source_adapter",
-            "Expected the exact bounded portal CorotationalFiberFrameJ1J5Adapter.",
+    if type(adapter) is CorotationalFiberFrameJ1J5Adapter:
+        return validate_corotational_fiber_frame_j1_j5_adapter(adapter)
+    if type(adapter) is CorotationalFiberFrameGeneralJ1J5Adapter:
+        return validate_corotational_fiber_frame_general_j1_j5_adapter(adapter)
+    _fail(
+        "corotational_engineering_source_adapter_type_invalid",
+        "/source_adapter",
+        "Expected an exact portal or connected-frame J1-J5 adapter.",
+    )
+
+
+def _source_profile(
+    adapter: CorotationalEngineeringSourceAdapter,
+) -> tuple[str, str, tuple[str, ...]]:
+    if type(adapter) is CorotationalFiberFrameJ1J5Adapter:
+        return (
+            COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND,
+            COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE,
+            _LIMITATIONS,
         )
-    return validate_corotational_fiber_frame_j1_j5_adapter(adapter)
+    if type(adapter) is CorotationalFiberFrameGeneralJ1J5Adapter:
+        return (
+            COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND,
+            COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE,
+            _GENERAL_LIMITATIONS,
+        )
+    _fail(
+        "corotational_engineering_source_adapter_type_invalid",
+        "/source_adapter",
+        "Expected an exact portal or connected-frame J1-J5 adapter.",
+    )
 
 
 def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
@@ -823,8 +902,20 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         external_scatter, replay.external_loads_global
     )
     free_residual_relative = _linf(replay.residual_kn) / problem.reference_force_scale()
-    terminal_relative_residual = float(
-        terminal_step.trial_solution.metrics.get("relative_residual", math.inf)
+    no_solve_terminal = bool(
+        terminal_step.metrics.get("no_solve_contract_pass") is True
+        and terminal_step.trial_solution.metrics.get("solver_executed") is False
+        and terminal_step.trial_solution.metrics.get("convergence_claim") is False
+        and terminal_step.trial_solution.metrics.get("relative_residual") is None
+        and terminal_step.trial_solution.metrics.get("residual_gate_passed") is None
+        and terminal_step.trial_solution.metrics.get("increment_gate_passed") is None
+    )
+    terminal_relative_residual = (
+        free_residual_relative
+        if no_solve_terminal
+        else _finite_metric(
+            terminal_step.trial_solution.metrics.get("relative_residual")
+        )
     )
     if (
         not state_bytes_exact
@@ -1043,6 +1134,16 @@ def _linf(values: Any) -> float:
     return float(np.max(np.abs(array))) if array.size else 0.0
 
 
+def _finite_metric(value: Any) -> float:
+    if isinstance(value, bool):
+        return math.inf
+    try:
+        normalized = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return math.inf
+    return normalized if math.isfinite(normalized) else math.inf
+
+
 def _scaled_linf(left: Any, right: Any) -> float:
     left_array = np.asarray(left, dtype=np.float64)
     right_array = np.asarray(right, dtype=np.float64)
@@ -1073,6 +1174,8 @@ __all__ = [
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RECOVERY_PROFILE",
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND",
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION",
+    "COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE",
+    "COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND",
     "CorotationalEngineeringArrayDescriptor",
     "CorotationalEngineeringSourceAdapter",
     "CorotationalFiberFrameEngineeringRecoveryError",

@@ -16,6 +16,7 @@ from structural_analysis.api._output_integrity import (
 )
 from structural_analysis.api.core import load_model
 from structural_analysis.api.nonlinear_frame import (
+    COROTATIONAL_GENERAL_PROFILE,
     COROTATIONAL_PORTAL_PROFILE,
     FIXED_CHORD_SERIAL_PROFILE,
     NonlinearFrameConfig,
@@ -36,7 +37,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("model_path", help="Neutral canonical JSON input.")
     parser.add_argument(
         "--profile",
-        choices=(FIXED_CHORD_SERIAL_PROFILE, COROTATIONAL_PORTAL_PROFILE),
+        choices=(
+            FIXED_CHORD_SERIAL_PROFILE,
+            COROTATIONAL_PORTAL_PROFILE,
+            COROTATIONAL_GENERAL_PROFILE,
+        ),
         default=FIXED_CHORD_SERIAL_PROFILE,
     )
     parser.add_argument("--load-steps", type=int, default=4)

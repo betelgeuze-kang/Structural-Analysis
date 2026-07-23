@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from dataclasses import replace
+from typing import cast
+
 import numpy as np
 import pytest
-from typing import cast
 
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
     StatefulCorotationalFiberFrame2DMember,
@@ -155,3 +157,31 @@ def test_sparse_load_path_uses_native_assembly_and_matches_dense_solution() -> N
             rtol=1.0e-10,
             atol=1.0e-10,
         )
+
+
+def test_dense_sparse_parity_includes_exact_proportional_prescribed_values() -> None:
+    problem = replace(
+        _portal_problem(),
+        prescribed_displacements=((3, 2.0e-4),),
+    )
+    checkpoint = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    trial = np.asarray(
+        [1.0e-4, -2.0e-5, -4.0e-5, 1.2e-4, -2.1e-5, -4.5e-5],
+        dtype=np.float64,
+    )
+
+    receipt = compare_corotational_fiber_frame_dense_sparse_assembly(
+        problem,
+        checkpoint,
+        target_load_factor=0.5,
+        trial_free_coordinates_m=trial,
+    )
+    sparse = assemble_stateful_corotational_fiber_frame2d_sparse(
+        problem,
+        checkpoint,
+        target_load_factor=0.5,
+        trial_free_coordinates_m=trial,
+    )
+
+    assert all(receipt.checks.values())
+    assert sparse.global_displacements[3] == 1.0e-4

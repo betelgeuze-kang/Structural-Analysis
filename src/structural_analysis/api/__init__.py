@@ -21,6 +21,7 @@ from structural_analysis.api.nonlinear_fiber_frame import (
     validate_public_rc_fiber_frame_result,
 )
 from structural_analysis.api.nonlinear_frame import (
+    COROTATIONAL_GENERAL_PROFILE,
     COROTATIONAL_PORTAL_PROFILE,
     FIXED_CHORD_SERIAL_PROFILE,
     UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY,
@@ -64,6 +65,7 @@ __all__ = [
     "PUBLIC_TWO_BAR_TRUSS_SCHEMA_VERSION",
     "PUBLIC_TWO_BAR_TRUSS_SOLVER_ID",
     "COROTATIONAL_PORTAL_PROFILE",
+    "COROTATIONAL_GENERAL_PROFILE",
     "FIXED_CHORD_SERIAL_PROFILE",
     "UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY",
     "UNIFIED_NONLINEAR_FRAME_REPORT_SCHEMA_VERSION",

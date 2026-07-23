@@ -35,7 +35,7 @@
     "status": {"enum": ["ready", "blocked"]},
     "contract_pass": {"type": "boolean"},
     "result_hash": {"$ref": "#/$defs/hash"},
-    "profile": {"enum": ["fixed_chord_serial_cantilever.v1", "corotational_one_bay_portal.v1"]},
+    "profile": {"enum": ["fixed_chord_serial_cantilever.v1", "corotational_one_bay_portal.v1", "corotational_connected_frame2d.v1"]},
     "source_result_hash": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
     "canonical_model_checksum": {"$ref": "#/$defs/hash"},
     "input_checksum": {"$ref": "#/$defs/hash"},
