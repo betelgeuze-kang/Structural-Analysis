@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.dev/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json",
+  "title": "Corotational Fiber Frame J1-J5 Adapter v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "adapter_hash",
+    "compiler_profile",
+    "compiler_hash",
+    "authority_profile",
+    "model_content_hash",
+    "problem_contract_hash",
+    "case_id",
+    "compilation",
+    "terminal_checkpoint_hash",
+    "terminal_load_factor",
+    "stage_receipts",
+    "authority_axes",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "stateful-corotational-fiber-frame2d-j1-j5-adapter.v1"
+    },
+    "adapter_hash": {"$ref": "#/$defs/hash"},
+    "compiler_profile": {
+      "const": "planar_one_bay_one_story_portal_explicit_fiber_section.v1"
+    },
+    "compiler_hash": {"$ref": "#/$defs/hash"},
+    "authority_profile": {
+      "const": "non_promoting_bounded_corotational_convergence_candidate.v1"
+    },
+    "model_content_hash": {"$ref": "#/$defs/hash"},
+    "problem_contract_hash": {"$ref": "#/$defs/hash"},
+    "case_id": {"type": "string", "minLength": 1},
+    "compilation": {"$ref": "#/$defs/compilation"},
+    "terminal_checkpoint_hash": {"$ref": "#/$defs/hash"},
+    "terminal_load_factor": {"const": 1.0},
+    "stage_receipts": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J1"},
+                "contract_profile": {
+                  "const": "corotational_portal_topology_and_operator_binding.v1"
+                },
+                "checks": {
+                  "const": {
+                    "portal_profile_passed": true,
+                    "operator_bound": true,
+                    "unsupported_member_features_absent": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J2"},
+                "contract_profile": {
+                  "const": "corotational_physical_equation_and_coordinate_scaling.v1"
+                },
+                "checks": {
+                  "const": {
+                    "coordinate_scaling_bound": true,
+                    "reference_load_bound": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J3"},
+                "contract_profile": {
+                  "const": "corotational_committed_checkpoint_chain.v1"
+                },
+                "checks": {
+                  "const": {
+                    "checkpoint_chain_complete": true,
+                    "rollback_ancestry_bound": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J4"},
+                "contract_profile": {
+                  "const": "corotational_solver_assembly_state_binding.v1"
+                },
+                "checks": {
+                  "const": {
+                    "solver_assembly_binding_passed": true,
+                    "no_fallback_or_regularization": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J5"},
+                "contract_profile": {
+                  "const": "corotational_full_load_terminal_convergence.v1"
+                },
+                "checks": {
+                  "const": {
+                    "full_load_terminal_passed": true,
+                    "residual_and_increment_gates_passed": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "authority_axes": {
+      "const": {
+        "topology": "candidate_bound",
+        "member_features": "not_supported",
+        "equation_scaling": "candidate_bound",
+        "state_ancestry": "candidate_bound",
+        "solver_state_binding": "candidate_bound",
+        "convergence": "bounded_candidate",
+        "numerical_result": "not_created",
+        "reaction": "not_created",
+        "member_force": "not_created",
+        "section_resultant": "not_created",
+        "fiber_result": "not_created",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "limitations": {
+      "const": [
+        "one_bay_one_story_portal_only",
+        "load_control_cpu_dense_newton_only",
+        "zero_prescribed_displacement_only",
+        "member_end_releases_not_supported",
+        "rigid_offsets_not_supported",
+        "distributed_member_loads_not_supported",
+        "exact_engineering_recovery_not_created",
+        "external_level2_not_attached",
+        "standalone_manifest_source_authenticity_not_established",
+        "public_capability_not_promoted"
+      ]
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "compilation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "compiler_profile",
+        "compiler_hash",
+        "model_content_hash",
+        "problem_contract_hash",
+        "case_id",
+        "node_count",
+        "member_count",
+        "base_node_indices",
+        "top_node_indices"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "stateful-corotational-fiber-frame2d-j1-j5-adapter.v1"
+        },
+        "compiler_profile": {
+          "const": "planar_one_bay_one_story_portal_explicit_fiber_section.v1"
+        },
+        "compiler_hash": {"$ref": "#/$defs/hash"},
+        "model_content_hash": {"$ref": "#/$defs/hash"},
+        "problem_contract_hash": {"$ref": "#/$defs/hash"},
+        "case_id": {"type": "string", "minLength": 1},
+        "node_count": {"const": 4},
+        "member_count": {"const": 3},
+        "base_node_indices": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 0, "maximum": 3}
+        },
+        "top_node_indices": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 0, "maximum": 3}
+        }
+      }
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "stage_hash",
+        "contract_profile",
+        "source_hashes",
+        "checks",
+        "body"
+      ],
+      "properties": {
+        "stage": {"enum": ["J1", "J2", "J3", "J4", "J5"]},
+        "stage_hash": {"$ref": "#/$defs/hash"},
+        "contract_profile": {"type": "string", "minLength": 1},
+        "source_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/hash"}
+        },
+        "checks": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"const": true}
+        },
+        "body": {
+          "type": "object",
+          "minProperties": 1
+        }
+      }
+    }
+  }
+}

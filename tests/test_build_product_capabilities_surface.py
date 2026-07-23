@@ -13,14 +13,18 @@ PM_REPORT_PATH = REPO_ROOT / "scripts" / "report_pm_release_gate.py"
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-spec = importlib.util.spec_from_file_location("build_product_capabilities_surface", SCRIPT_PATH)
+spec = importlib.util.spec_from_file_location(
+    "build_product_capabilities_surface", SCRIPT_PATH
+)
 assert spec is not None
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
-pm_spec = importlib.util.spec_from_file_location("report_pm_release_gate", PM_REPORT_PATH)
+pm_spec = importlib.util.spec_from_file_location(
+    "report_pm_release_gate", PM_REPORT_PATH
+)
 assert pm_spec is not None
 pm_report = importlib.util.module_from_spec(pm_spec)
 assert pm_spec.loader is not None
@@ -57,8 +61,8 @@ def test_product_capabilities_surface_is_generated_from_canonical_registry() -> 
         "mutation_allowed": False,
     }
     assert surface["canonical_registry"] == "artifacts/manifests/capabilities.yaml"
-    assert surface["capability_count"] == 16
-    assert surface["ready_capability_count"] == 9
+    assert surface["capability_count"] == 17
+    assert surface["ready_capability_count"] == 10
     assert surface["blocked_capability_count"] == 4
     assert surface["experimental_capability_count"] == 2
     assert surface["shadow_only_capability_count"] == 1
@@ -99,13 +103,14 @@ def test_product_capabilities_surface_is_generated_from_canonical_registry() -> 
         "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
         "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json",
     ]
-    assert surface["reuse_policy"] == "canonical_registry_plus_structural_solver_evidence_rollup"
+    assert (
+        surface["reuse_policy"]
+        == "canonical_registry_plus_structural_solver_evidence_rollup"
+    )
     assert "canonical capability registry" in surface["claim_boundary"]
     assert "Non-structural product domains" in surface["claim_boundary"]
     surface_text = json.dumps(surface, ensure_ascii=False).lower()
-    assert not any(
-        token in surface_text for token in ("gpcr", "pocketmd", "md3bead")
-    )
+    assert not any(token in surface_text for token in ("gpcr", "pocketmd", "md3bead"))
 
 
 def test_product_capabilities_surface_builder_has_no_non_structural_defaults() -> None:
