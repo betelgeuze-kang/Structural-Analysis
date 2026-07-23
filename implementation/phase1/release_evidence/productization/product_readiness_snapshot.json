@@ -138,7 +138,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 86,
+      "blocker_count": 85,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -221,7 +221,6 @@
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
-        "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
         "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
@@ -235,7 +234,7 @@
       ]
     }
   },
-  "blocker_count": 115,
+  "blocker_count": 114,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -347,7 +346,6 @@
     "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
     "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
     "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
-    "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
     "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
     "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
@@ -3091,7 +3089,7 @@
   "engine_version": "structural-analysis@0.3.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-07-23T06:01:51.179755+00:00",
+  "generated_at": "2026-07-23T06:07:08.066021+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:c7caf65f342d15317e25e0b0f0fabd8962e29d1854ab4ac56932999d06e16801",
@@ -3119,7 +3117,7 @@
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:fdae8159fb1786daff81adb8d7a303207bd63e49bd98945259ed80823a47c3c8",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:70b4d52619607d53de23e57abcd17e70cbfe7958f7b2afc82760c29ac35df24d",
-    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:8d7af4043f511d2c6255fbc86df1af2e5bacb2d8b9c6f5af36384cde4167b895",
+    "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:1a8e51ca3504fa7144f7bb6504f9537e3a834d06d161e0355a334822592d8785",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:9127122f34c9bc64e1d39d8b9db90e12c7f288ea39db5cddeb545f9f14b484a2",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:52d76fc3a0f240c250cb70b8916e087259fc311fa59a552de715e43c87bb6b1f",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:142e4777ba69b7f3db0cef0e645e1f44c2d2d90a19f1c3b6c943d2eaad521b4c",
@@ -3417,7 +3415,7 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 78,
+      "blocker_count": 77,
       "blockers": [
         "independent_product:not_ready",
         "missing_artifact:implementation/phase1/release/external_benchmark_submission_readiness.json",
@@ -3492,7 +3490,6 @@
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
-        "stale_or_inconsistent:source_commit_mismatch:structural_scope_contamination_audit",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_decision_application_plan",
         "stale_or_inconsistent:source_commit_mismatch:structural_scope_owner_review_packet",
         "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
@@ -3509,7 +3506,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1",
+  "source_commit_sha": "4a99235ccde98e0b36dbb6d7913f1fc62f8a4ff7",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -6148,15 +6145,35 @@
       },
       {
         "artifact": "phase1_core_api_contract",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_adaptive_newton_continuation_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_mesh_load_step_convergence_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_newton_globalization_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_nonlinear_load_step_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_bilinear_link_result.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_bilinear_link_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_composite_section_result.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_composite_section_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_concrete_damage_result.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_concrete_damage_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_result.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_summary.json",
+          "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/stateful_nonlinear_no_solve_reaction_only.json",
+          "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        ],
         "generated_at": "2026-07-23T06:01:14.926601+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "developer_preview_readiness",
@@ -6715,15 +6732,35 @@
       },
       {
         "artifact": "developer_preview_rc_status",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
+          "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_adaptive_newton_continuation_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_mesh_load_step_convergence_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_newton_globalization_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_nonlinear_load_step_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_bilinear_link_result.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_bilinear_link_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_composite_section_result.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_composite_section_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_concrete_damage_result.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_concrete_damage_summary.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_result.json",
+          "implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_summary.json",
+          "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+          "implementation/phase1/release_evidence/productization/stateful_nonlinear_no_solve_reaction_only.json",
+          "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        ],
         "generated_at": "2026-07-23T06:01:43.151866+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
@@ -13292,32 +13329,15 @@
       },
       {
         "artifact": "structural_scope_contamination_audit",
-        "changed_paths_since_source_commit": [
-          ".github/workflows/fiber-frame-execution-topology-ci.yml",
-          "artifacts/manifests/capabilities.yaml",
-          "docs/api-capabilities.md",
-          "docs/corotational-fiber-frame-native-sparse.md",
-          "docs/sparse-factorization-conditioning-diagnostics.md",
-          "docs/unified-nonlinear-frame-api.md",
-          "src/structural_analysis/api/nonlinear_frame.py",
-          "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py",
-          "src/structural_analysis/generated_capabilities.py",
-          "src/structural_analysis/schemas/scalable_sparse_factorization_diagnostic_v1.schema.json",
-          "src/structural_analysis/schemas/sparse_factorization_diagnostic_v1.schema.json",
-          "src/structural_analysis/solvers/nonlinear/__init__.py",
-          "src/structural_analysis/solvers/nonlinear/newton.py",
-          "src/structural_analysis/solvers/nonlinear/scalable_sparse_factorization.py",
-          "src/structural_analysis/solvers/nonlinear/sparse_factorization.py",
-          "src/workbench-v2/model/generatedCapabilities.json"
-        ],
-        "generated_at": "2026-07-23T04:37:58.227343+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-07-23T06:06:35.918695+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "0c2a5abd8a5154901f0a01ecbc68b58b6e9fbc02",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_matches_head": true,
+        "source_commit_sha": "4a99235ccde98e0b36dbb6d7913f1fc62f8a4ff7",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "structural_scope_owner_review_packet",
@@ -13741,24 +13761,7 @@
     "worktree": {
       "dirty": false,
       "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_adaptive_newton_continuation_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_mesh_load_step_convergence_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_newton_globalization_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_nonlinear_load_step_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_state_updated_bilinear_link_result.json",
-        "implementation/phase1/release_evidence/productization/phase2_state_updated_bilinear_link_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_state_updated_composite_section_result.json",
-        "implementation/phase1/release_evidence/productization/phase2_state_updated_composite_section_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_state_updated_concrete_damage_result.json",
-        "implementation/phase1/release_evidence/productization/phase2_state_updated_concrete_damage_summary.json",
-        "implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_result.json",
-        "implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_summary.json",
-        "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-        "implementation/phase1/release_evidence/productization/stateful_nonlinear_no_solve_reaction_only.json",
-        "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json"
       ],
       "non_receipt_dirty_paths": [],
       "phase3_release_control_cleanup_plan": {
@@ -13783,24 +13786,7 @@
         "track_or_add_required_path_count": 0
       },
       "status_rows": [
-        " M implementation/phase1/release_evidence/productization/developer_preview_rc_status.json",
-        " M implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_adaptive_newton_continuation_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_mesh_load_step_convergence_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_newton_globalization_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_nonlinear_load_step_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_state_updated_bilinear_link_result.json",
-        " M implementation/phase1/release_evidence/productization/phase2_state_updated_bilinear_link_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_state_updated_composite_section_result.json",
-        " M implementation/phase1/release_evidence/productization/phase2_state_updated_composite_section_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_state_updated_concrete_damage_result.json",
-        " M implementation/phase1/release_evidence/productization/phase2_state_updated_concrete_damage_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_result.json",
-        " M implementation/phase1/release_evidence/productization/phase2_state_updated_steel_material_summary.json",
-        " M implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-        " M implementation/phase1/release_evidence/productization/stateful_nonlinear_no_solve_reaction_only.json",
-        " M implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+        " M implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json"
       ]
     }
   },
