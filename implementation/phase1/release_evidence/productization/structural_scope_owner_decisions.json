@@ -2694,7 +2694,7 @@
     "molecular_science_evidence": 13
   },
   "fill_schema_version": "structural-scope-owner-decision-template-fill.v1",
-  "generated_at": "2026-07-23T00:49:21.014408+00:00",
+  "generated_at": "2026-07-23T00:58:16.679355+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv": "sha256:3518ecb53ac6f1d10350f864ef672f0e30897b926fc4aa93249c84d026e50893",
     "scripts/build_structural_scope_owner_review_packet.py": "sha256:605ea030922af67534c69fd716a89c3ff4a21dd35a23161bd875628551766307",
@@ -4279,7 +4279,7 @@
     }
   ],
   "schema_version": "structural-scope-owner-decisions.v1",
-  "source_commit_sha": "fbb6caf7b8c7e0f3f61dd08395e51da1d036e6f4",
+  "source_commit_sha": "47d45f9268f2672ac4b756a9ece5502d489c1a36",
   "status": "filled",
   "template_column_count": 21,
   "template_path": "implementation/phase1/release_evidence/productization/structural_scope_owner_decisions.template.csv",

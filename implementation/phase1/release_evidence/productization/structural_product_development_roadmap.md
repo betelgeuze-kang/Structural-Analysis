@@ -1,6 +1,6 @@
 # Structural Product Development Roadmap
 
-Structural product roadmap: BLOCKED | evidence_progress=28.8% | stage_average=26.1% | ready_stages=0/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
+Structural product roadmap: BLOCKED | evidence_progress=32.7% | stage_average=32.4% | ready_stages=1/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
 
 ## Current Position
 
@@ -12,10 +12,10 @@ Structural product roadmap: BLOCKED | evidence_progress=28.8% | stage_average=26
 - `pm_milestones`: `2/5`
 - `pm_release_areas`: `4/16`
 - `release_ready`: `False`
-- `snapshot_blocker_count`: `118`
+- `snapshot_blocker_count`: `114`
 - `snapshot_status`: `stale_or_inconsistent`
-- `structural_scope_owner_decisions`: `0/86`
-- `structural_scope_release_surface_cleanup_decisions`: `0/3`
+- `structural_scope_owner_decisions`: `86/86`
+- `structural_scope_release_surface_cleanup_decisions`: `0/0`
 - `workstation_delivery_ready`: `True`
 
 ## Roadmap Stages
@@ -23,9 +23,8 @@ Structural product roadmap: BLOCKED | evidence_progress=28.8% | stage_average=26
 - `evidence_freshness_and_snapshot_integrity`: blocked (0/3, 0.0%)
   - first blocker: `freshness_or_snapshot_integrity_not_closed`
   - next action: `keep_release_evidence_freshness_report_green`
-- `structural_scope_cleanup`: partial (2/4, 50.0%)
-  - first blocker: `release_surface_owner_decision_pending_count=3`
-  - next action: `record_release_surface_first_owner_delete_or_extract_decisions`
+- `structural_scope_cleanup`: ready (4/4, 100.0%)
+  - next action: `keep_structural_scope_contamination_audit_green`
 - `pm_release_gate`: partial (6/21, 28.6%)
   - first blocker: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
   - next action: `collect_30_pr_ci_and_nightly_ci_streak_evidence`
@@ -47,9 +46,6 @@ Structural product roadmap: BLOCKED | evidence_progress=28.8% | stage_average=26
 
 ## Recommended Next Slices
 
-- `close_structural_scope_owner_review_and_release_surface_cleanup`
-  - exit condition: release-surface non-structural paths have owner delete/extract decisions
-  - current `next_owner_review_batch`: `release_surface_first`
 - `land_ci_license_ux_release_area_evidence`
   - exit condition: 30 consecutive PR CI passes recorded
   - current `ci_nightly_consecutive_pass_count`: `0`
