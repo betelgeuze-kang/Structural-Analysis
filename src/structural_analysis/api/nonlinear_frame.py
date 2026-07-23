@@ -37,6 +37,13 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_engineerin
     CorotationalFiberFrameEngineeringResultIR,
     create_corotational_fiber_frame_engineering_result_ir,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
+    COROTATIONAL_FIBER_FRAME_GENERAL_COMPILER_PROFILE,
+    CorotationalFiberFrameGeneralCompilation,
+    CorotationalFiberFrameGeneralError,
+    compile_corotational_fiber_frame_general_profile,
+    create_corotational_fiber_frame_general_j1_j5_adapter,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_j1_j5 import (
     CorotationalFiberFrameJ1J5Error,
     CorotationalFiberFramePortalCompilation,
@@ -87,18 +94,25 @@ FIXED_CHORD_SERIAL_PROFILE: Final[Literal["fixed_chord_serial_cantilever.v1"]] =
 COROTATIONAL_PORTAL_PROFILE: Final[Literal["corotational_one_bay_portal.v1"]] = (
     "corotational_one_bay_portal.v1"
 )
+COROTATIONAL_GENERAL_PROFILE: Final[Literal["corotational_connected_frame2d.v1"]] = (
+    "corotational_connected_frame2d.v1"
+)
 UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY = (
     "The unified API selects one explicit bounded profile. The fixed-chord serial "
     "cantilever retains its existing Developer Preview authority. The corotational "
-    "one-bay portal profile binds J1-J5, exact terminal engineering recovery, and "
-    "epoch-zero checkpoint-chain replay, but remains a candidate until two independent "
-    "Level 2 comparisons pass. No profile grants "
+    "portal and connected-frame profiles bind J1-J5, exact terminal engineering "
+    "recovery, and epoch-zero checkpoint-chain replay. The connected-frame profile "
+    "adds bounded connected graphs, multiple support components, and proportional "
+    "prescribed displacements; member releases, rigid offsets, distributed loads, and "
+    "direct displacement control remain outside this slice. Both profiles remain "
+    "candidates until two independent Level 2 comparisons pass. No profile grants "
     "design-code, final-design, commercial, or release-readiness authority."
 )
 
 NonlinearFrameProfile = Literal[
     "fixed_chord_serial_cantilever.v1",
     "corotational_one_bay_portal.v1",
+    "corotational_connected_frame2d.v1",
 ]
 
 _HASH_ZERO = "sha256:" + "0" * 64
@@ -165,6 +179,7 @@ class NonlinearFrameConfig:
         if self.profile not in (
             FIXED_CHORD_SERIAL_PROFILE,
             COROTATIONAL_PORTAL_PROFILE,
+            COROTATIONAL_GENERAL_PROFILE,
         ):
             raise ValueError("profile is not a supported nonlinear frame profile")
         if self.matrix_backend not in VECTOR_MATRIX_BACKENDS:
@@ -273,7 +288,10 @@ class NonlinearFrameValidationReport:
 @dataclass(frozen=True)
 class _CompiledPortal:
     problem: StatefulCorotationalFiberFrame2DProblem
-    compilation: CorotationalFiberFramePortalCompilation
+    compilation: (
+        CorotationalFiberFramePortalCompilation
+        | CorotationalFiberFrameGeneralCompilation
+    )
     node_ids: tuple[str, ...]
     section_by_member: tuple[StatefulRCFiberSection, ...]
     support_node_ids: tuple[str, ...]
@@ -328,10 +346,14 @@ def validate_nonlinear_frame_result(
     sparse_selected = (
         result.configuration.get("matrix_backend") == VECTOR_SPARSE_MATRIX_BACKEND
     )
+    solver_executed = result.metrics.get("solver_executed") is True
+    no_solve_contract = result.metrics.get("no_solve_contract_pass") is True
     sparse_execution_contract = bool(
         not sparse_selected
+        or (not solver_executed and no_solve_contract)
         or (
-            result.metrics.get("sparse_backend_used") is True
+            solver_executed
+            and result.metrics.get("sparse_backend_used") is True
             and result.metrics.get("native_sparse_assembly_used") is True
             and result.metrics.get("sparse_factorization_diagnostics_passed") is True
             and int(result.metrics.get("sparse_factorization_count", 0)) > 0
@@ -487,6 +509,12 @@ def _analyze_corotational_portal(
     config: NonlinearFrameConfig,
     restart: bytes | bytearray | memoryview | None,
 ) -> NonlinearFrameResult:
+    general_profile = config.profile == COROTATIONAL_GENERAL_PROFILE
+    selected_compiler_profile = (
+        COROTATIONAL_FIBER_FRAME_GENERAL_COMPILER_PROFILE
+        if general_profile
+        else "planar_one_bay_one_story_portal_explicit_fiber_section.v1"
+    )
     configuration = {
         "profile": config.profile,
         "load_steps": config.load_steps,
@@ -515,21 +543,37 @@ def _analyze_corotational_portal(
     engineering: CorotationalFiberFrameEngineeringResultIR | None = None
     if not unsupported:
         try:
-            compiled = _compile_portal(model)
+            compiled = _compile_portal(model, general_profile=general_profile)
             execution = _run_corotational_path(compiled, config, restart)
             if execution.path.status != "ready" or not execution.path.contract_pass:
                 raise NonlinearFrameError(
-                    "corotational_portal_solver_blocked",
+                    (
+                        "corotational_general_solver_blocked"
+                        if general_profile
+                        else "corotational_portal_solver_blocked"
+                    ),
                     "/solver",
                     "The configured load path did not commit exactly.",
                 )
-            adapter = create_corotational_fiber_frame_j1_j5_adapter(
-                compiled.compilation,
-                execution.path,
-            )
+            if isinstance(
+                compiled.compilation, CorotationalFiberFrameGeneralCompilation
+            ):
+                adapter = create_corotational_fiber_frame_general_j1_j5_adapter(
+                    compiled.compilation,
+                    execution.path,
+                )
+            else:
+                adapter = create_corotational_fiber_frame_j1_j5_adapter(
+                    compiled.compilation,
+                    execution.path,
+                )
             digest = model.canonical_model_checksum.removeprefix("sha256:")[:20]
             engineering = create_corotational_fiber_frame_engineering_result_ir(
-                engineering_result_id=f"engineering.corotational_portal.{digest}",
+                engineering_result_id=(
+                    f"engineering.corotational_general.{digest}"
+                    if general_profile
+                    else f"engineering.corotational_portal.{digest}"
+                ),
                 source_adapter=adapter,
             )
         except (
@@ -537,7 +581,17 @@ def _analyze_corotational_portal(
             StatefulCorotationalFiberFrame2DCheckpointChainArtifactError,
             ValueError,
         ) as exc:
-            code = str(getattr(exc, "code", "corotational_portal_execution_failed"))
+            code = str(
+                getattr(
+                    exc,
+                    "code",
+                    (
+                        "corotational_general_execution_failed"
+                        if general_profile
+                        else "corotational_portal_execution_failed"
+                    ),
+                )
+            )
             path = str(
                 getattr(
                     exc,
@@ -563,9 +617,7 @@ def _analyze_corotational_portal(
             source_result_hash=None,
             model=model,
             solver_id="public_cpu_corotational_rc_fiber_frame_newton_v1",
-            compiler_profile=(
-                "planar_one_bay_one_story_portal_explicit_fiber_section.v1"
-            ),
+            compiler_profile=selected_compiler_profile,
             configuration=configuration,
             contract_bindings=(
                 {"problem_contract_hash": compiled.problem.contract_hash}
@@ -686,7 +738,11 @@ def _analyze_corotational_portal(
     )
 
 
-def _compile_portal(model: CanonicalModel) -> _CompiledPortal:
+def _compile_portal(
+    model: CanonicalModel,
+    *,
+    general_profile: bool = False,
+) -> _CompiledPortal:
     if model.schema_version != CANONICAL_MODEL_SCHEMA_VERSION:
         _fail(
             "corotational_portal_schema_invalid",
@@ -717,11 +773,17 @@ def _compile_portal(model: CanonicalModel) -> _CompiledPortal:
         )
     if "case_id" in model.metadata:
         _stable(model.metadata["case_id"], "/metadata/case_id")
-    if len(model.nodes) != 4:
+    if (not general_profile and len(model.nodes) != 4) or (
+        general_profile and not 2 <= len(model.nodes) <= 128
+    ):
         _fail(
             "corotational_portal_node_count_invalid",
             "/nodes",
-            "Exactly four portal nodes are required.",
+            (
+                "The connected-frame profile requires 2-128 nodes."
+                if general_profile
+                else "Exactly four portal nodes are required."
+            ),
         )
     node_ids: list[str] = []
     coordinates: list[tuple[float, float]] = []
@@ -892,11 +954,17 @@ def _compile_portal(model: CanonicalModel) -> _CompiledPortal:
     member_sections: list[StatefulRCFiberSection] = []
     member_ids: set[str] = set()
     used_sections: set[str] = set()
-    if len(model.elements) != 3:
+    if (not general_profile and len(model.elements) != 3) or (
+        general_profile and not 1 <= len(model.elements) <= 256
+    ):
         _fail(
             "corotational_portal_member_count_invalid",
             "/elements",
-            "Exactly three portal members are required.",
+            (
+                "The connected-frame profile requires 1-256 members."
+                if general_profile
+                else "Exactly three portal members are required."
+            ),
         )
     for index, row in enumerate(model.elements):
         path = f"/elements/{index}"
@@ -964,35 +1032,81 @@ def _compile_portal(model: CanonicalModel) -> _CompiledPortal:
         member_ids.add(member_id)
         used_sections.add(section_id)
 
-    if len(model.supports) != 2:
+    if (not general_profile and len(model.supports) != 2) or (
+        general_profile and not 1 <= len(model.supports) <= len(model.nodes)
+    ):
         _fail(
             "corotational_portal_support_count_invalid",
             "/supports",
-            "Both portal bases must be supported.",
+            (
+                "The connected-frame profile requires one or more support nodes."
+                if general_profile
+                else "Both portal bases must be supported."
+            ),
         )
     support_ids: list[str] = []
     fixed: list[int] = []
+    prescribed: list[tuple[int, float]] = []
     for index, row in enumerate(model.supports):
         path = f"/supports/{index}"
-        _keys(row, {"node", "dofs"}, path)
+        _keys(
+            row,
+            (
+                {"node", "dofs", "prescribed_values"}
+                if general_profile and "prescribed_values" in row
+                else {"node", "dofs"}
+            ),
+            path,
+        )
         node_id = _stable(row["node"], f"{path}/node")
         raw_dofs = row["dofs"]
+        valid_general_dofs = bool(
+            type(raw_dofs) is list
+            and raw_dofs
+            and all(type(value) is str for value in raw_dofs)
+            and len(raw_dofs) == len(set(raw_dofs))
+            and set(raw_dofs).issubset(set(_ACTIVE_COMPONENTS))
+        )
         valid_portal_dofs = bool(
             type(raw_dofs) is list
             and all(type(value) is str for value in raw_dofs)
             and set(raw_dofs) == set(_ACTIVE_COMPONENTS)
         )
-        if node_id not in node_index or node_id in support_ids or not valid_portal_dofs:
+        if (
+            node_id not in node_index
+            or node_id in support_ids
+            or (not valid_general_dofs if general_profile else not valid_portal_dofs)
+        ):
             _fail(
                 "corotational_portal_support_invalid",
                 path,
-                "Two unique nodes must restrain exactly UX, UY and RZ.",
+                (
+                    "Support DOFs must be a non-empty unique subset of UX, UY and RZ."
+                    if general_profile
+                    else "Two unique nodes must restrain exactly UX, UY and RZ."
+                ),
             )
         support_ids.append(node_id)
         dof_offsets = {label: offset for offset, label in enumerate(_ACTIVE_COMPONENTS)}
         support_dofs = tuple(str(value) for value in raw_dofs)
         fixed.extend(
             3 * node_index[node_id] + dof_offsets[label] for label in support_dofs
+        )
+        raw_prescribed = row.get("prescribed_values", {})
+        if type(raw_prescribed) is not dict or not set(raw_prescribed).issubset(
+            set(support_dofs)
+        ):
+            _fail(
+                "corotational_general_prescribed_displacement_invalid",
+                f"{path}/prescribed_values",
+                "Prescribed keys must be constrained UX, UY, or RZ components.",
+            )
+        prescribed.extend(
+            (
+                3 * node_index[node_id] + dof_offsets[label],
+                _number(value, f"{path}/prescribed_values/{label}"),
+            )
+            for label, value in raw_prescribed.items()
         )
 
     reference_loads: list[tuple[int, float]] = []
@@ -1035,11 +1149,13 @@ def _compile_portal(model: CanonicalModel) -> _CompiledPortal:
             if values[name] != 0.0
         )
         loaded_nodes.add(node_id)
-    if not reference_loads:
+    if not reference_loads and not (
+        general_profile and any(value != 0.0 for _dof, value in prescribed)
+    ):
         _fail(
             "corotational_portal_loads_missing",
             "/loads",
-            "At least one nonzero nodal load is required.",
+            "At least one nonzero nodal load or prescribed displacement is required.",
         )
 
     if used_sections != set(sections):
@@ -1063,18 +1179,30 @@ def _compile_portal(model: CanonicalModel) -> _CompiledPortal:
     digest = model.canonical_model_checksum.removeprefix("sha256:")[:20]
     try:
         problem = StatefulCorotationalFiberFrame2DProblem(
-            case_id=f"public_corotational_portal_{digest}",
+            case_id=(
+                f"public_corotational_general_{digest}"
+                if general_profile
+                else f"public_corotational_portal_{digest}"
+            ),
             node_coordinates_m=tuple(coordinates),
             members=tuple(members),
             fixed_global_dofs=tuple(sorted(fixed)),
             reference_external_loads=tuple(sorted(reference_loads)),
             rotation_coordinate_scale_m=_binary_coordinate_scale(max(lengths)),
+            prescribed_displacements=tuple(sorted(prescribed)),
         )
-        compilation = compile_corotational_fiber_frame_portal_profile(
-            problem,
-            model_content_hash=model.canonical_model_checksum,
+        compilation = (
+            compile_corotational_fiber_frame_general_profile(
+                problem,
+                model_content_hash=model.canonical_model_checksum,
+            )
+            if general_profile
+            else compile_corotational_fiber_frame_portal_profile(
+                problem,
+                model_content_hash=model.canonical_model_checksum,
+            )
         )
-    except CorotationalFiberFrameJ1J5Error:
+    except (CorotationalFiberFrameGeneralError, CorotationalFiberFrameJ1J5Error):
         raise
     except ValueError as exc:
         _fail("corotational_portal_problem_invalid", "/", str(exc))
@@ -1495,7 +1623,19 @@ def _corotational_linear_solver_metrics(
         for step in steps
         if step.metrics.get("sparse_factorization_policy_hash") is not None
     }
+    solver_executed = bool(
+        steps
+        and any(
+            step.trial_solution.metrics.get("solver_executed") is True for step in steps
+        )
+    )
+    no_solve_contract = bool(
+        steps
+        and all(step.metrics.get("no_solve_contract_pass") is True for step in steps)
+    )
     return {
+        "solver_executed": solver_executed,
+        "no_solve_contract_pass": no_solve_contract,
         "fallback_count": sum(
             int(bool(step.metrics.get("fallback_used"))) for step in steps
         ),
@@ -1659,6 +1799,7 @@ def _fail(code: str, path: str, detail: str) -> NoReturn:
 
 
 __all__ = [
+    "COROTATIONAL_GENERAL_PROFILE",
     "COROTATIONAL_PORTAL_PROFILE",
     "FIXED_CHORD_SERIAL_PROFILE",
     "UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY",

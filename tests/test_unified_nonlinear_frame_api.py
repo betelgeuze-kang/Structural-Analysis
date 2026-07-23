@@ -10,6 +10,7 @@ import pytest
 from structural_analysis.api import nonlinear_frame as nonlinear_frame_api
 from structural_analysis.api import nonlinear_frame_cli
 from structural_analysis.api.nonlinear_frame import (
+    COROTATIONAL_GENERAL_PROFILE,
     COROTATIONAL_PORTAL_PROFILE,
     FIXED_CHORD_SERIAL_PROFILE,
     NonlinearFrameConfig,
@@ -164,6 +165,60 @@ def _portal_payload() -> dict:
             "supports": [
                 {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
                 {"node": "N2", "dofs": ["UX", "UY", "RZ"]},
+            ],
+        }
+    )
+    return payload
+
+
+def _branching_payload() -> dict:
+    payload = _base_payload()
+    payload.update(
+        {
+            "nodes": [
+                {"id": "N1", "coordinates": [0.0, 0.0, 0.0]},
+                {"id": "N2", "coordinates": [4.0, 0.0, 0.0]},
+                {"id": "N3", "coordinates": [0.0, 3.0, 0.0]},
+                {"id": "N4", "coordinates": [4.0, 3.0, 0.0]},
+                {"id": "N5", "coordinates": [2.0, 3.0, 0.0]},
+                {"id": "N6", "coordinates": [2.0, 5.0, 0.0]},
+            ],
+            "elements": [
+                {
+                    "id": member_id,
+                    "type": "stateful_corotational_rc_fiber_frame2d",
+                    "nodes": list(nodes),
+                    "section": "RC1",
+                    "integration_order": 3,
+                }
+                for member_id, nodes in (
+                    ("column-left", ("N1", "N3")),
+                    ("column-right", ("N2", "N4")),
+                    ("beam-left", ("N3", "N5")),
+                    ("beam-right", ("N5", "N4")),
+                    ("branch", ("N5", "N6")),
+                )
+            ],
+            "loads": [
+                {
+                    "node": "N6",
+                    "components": {
+                        "FX": 5.0,
+                        "FY": -10.0,
+                        "FZ": 0.0,
+                        "MX": 0.0,
+                        "MY": 0.0,
+                        "MZ": 0.0,
+                    },
+                }
+            ],
+            "supports": [
+                {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+                {
+                    "node": "N2",
+                    "dofs": ["UX", "UY", "RZ"],
+                    "prescribed_values": {"UX": 2.0e-4},
+                },
             ],
         }
     )
@@ -335,6 +390,186 @@ def test_fixed_chord_profile_rejects_sparse_backend() -> None:
         )
 
 
+def test_connected_frame_profile_supports_branching_prescribed_and_restart(
+    tmp_path: Path,
+) -> None:
+    model = _model(tmp_path, _branching_payload(), "branching.json")
+    config = NonlinearFrameConfig(
+        profile=COROTATIONAL_GENERAL_PROFILE,
+        load_steps=4,
+        residual_tolerance=1.0e-9,
+        matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+    )
+    result = analyze_nonlinear_frame(model, config)
+
+    assert validate_nonlinear_frame_result(result).contract_pass is True
+    assert result.compiler_profile == (
+        "planar_connected_branching_frame_explicit_fiber_section.v1"
+    )
+    assert len(result.node_displacements) == 6
+    assert len(result.member_end_forces) == 5
+    assert len(result.support_reactions) == 6
+    assert result.node_displacements[1]["UX_m"] == 2.0e-4
+    assert result.metrics["solver_executed"] is True
+    assert result.metrics["native_sparse_assembly_used"] is True
+    assert result.metrics["sparse_factorization_diagnostics_passed"] is True
+
+    replayed = analyze_nonlinear_frame(
+        model,
+        config,
+        restart_checkpoint_chain=result.checkpoint_artifact(),
+    )
+    assert validate_nonlinear_frame_result(replayed).contract_pass is True
+    assert replayed.metrics["replayed_prefix_step_count"] == 4
+    assert replayed.node_displacements == result.node_displacements
+    assert replayed.support_reactions == result.support_reactions
+    assert replayed.checkpoint_artifact() == result.checkpoint_artifact()
+
+
+def test_connected_frame_profile_supports_partial_dofs_across_support_nodes(
+    tmp_path: Path,
+) -> None:
+    payload = _branching_payload()
+    payload["supports"] = [
+        {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+        {
+            "node": "N2",
+            "dofs": ["UX", "UY"],
+            "prescribed_values": {"UX": 2.0e-4},
+        },
+        {"node": "N4", "dofs": ["RZ"]},
+    ]
+
+    result = analyze_nonlinear_frame(
+        _model(tmp_path, payload, "partial-supports.json"),
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            load_steps=2,
+            residual_tolerance=1.0e-9,
+            matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+        ),
+    )
+
+    assert validate_nonlinear_frame_result(result).contract_pass is True
+    assert result.node_displacements[1]["UX_m"] == 2.0e-4
+    assert {(row["node_id"], row["dof"]) for row in result.support_reactions} == {
+        ("N1", "UX"),
+        ("N1", "UY"),
+        ("N1", "RZ"),
+        ("N2", "UX"),
+        ("N2", "UY"),
+        ("N4", "RZ"),
+    }
+
+
+def test_connected_frame_prescribed_only_commits_without_newton(
+    tmp_path: Path,
+) -> None:
+    payload = _branching_payload()
+    payload["loads"] = []
+    payload["supports"] = [
+        {
+            "node": row["id"],
+            "dofs": ["UX", "UY", "RZ"],
+            **({"prescribed_values": {"UX": 1.0e-4}} if row["id"] == "N6" else {}),
+        }
+        for row in payload["nodes"]
+    ]
+    result = analyze_nonlinear_frame(
+        _model(tmp_path, payload, "prescribed-only.json"),
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            load_steps=2,
+            matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+        ),
+    )
+
+    assert validate_nonlinear_frame_result(result).contract_pass is True
+    assert result.metrics["solver_executed"] is False
+    assert result.metrics["no_solve_contract_pass"] is True
+    assert result.metrics["sparse_factorization_count"] == 0
+    assert result.metrics["sparse_factorization_diagnostics_passed"] is False
+    assert result.convergence_history == ()
+    assert result.node_displacements[-1]["UX_m"] == 1.0e-4
+    assert result.support_reactions
+
+
+def test_connected_frame_profile_rejects_disconnected_graph(tmp_path: Path) -> None:
+    payload = _branching_payload()
+    payload["elements"] = payload["elements"][:-1]
+    result = analyze_nonlinear_frame(
+        _model(tmp_path, payload, "disconnected.json"),
+        NonlinearFrameConfig(profile=COROTATIONAL_GENERAL_PROFILE),
+    )
+
+    assert result.status == "blocked"
+    assert result.contract_pass is False
+    assert result.unsupported_features[0]["kind"] == (
+        "corotational_general_graph_disconnected"
+    )
+
+
+@pytest.mark.parametrize(
+    ("mutate", "expected_kind"),
+    [
+        (
+            lambda payload: payload["supports"][1].update({"dofs": []}),
+            "corotational_portal_support_invalid",
+        ),
+        (
+            lambda payload: payload["supports"][1].update(
+                {"dofs": ["UY"], "prescribed_values": {"UX": 2.0e-4}}
+            ),
+            "corotational_general_prescribed_displacement_invalid",
+        ),
+    ],
+)
+def test_connected_frame_profile_rejects_invalid_support_or_prescribed_values(
+    tmp_path: Path,
+    mutate,
+    expected_kind: str,
+) -> None:
+    payload = _branching_payload()
+    mutate(payload)
+    result = analyze_nonlinear_frame(
+        _model(tmp_path, payload, f"{expected_kind}.json"),
+        NonlinearFrameConfig(profile=COROTATIONAL_GENERAL_PROFILE),
+    )
+
+    assert result.status == "blocked"
+    assert result.unsupported_features[0]["kind"] == expected_kind
+
+
+def test_connected_frame_profile_enforces_node_and_member_bounds(
+    tmp_path: Path,
+) -> None:
+    too_many_nodes = _branching_payload()
+    too_many_nodes["nodes"].extend(
+        {
+            "id": f"EXTRA{index}",
+            "coordinates": [1000.0 + index, 0.0, 0.0],
+        }
+        for index in range(123)
+    )
+    node_result = analyze_nonlinear_frame(
+        _model(tmp_path, too_many_nodes, "too-many-nodes.json"),
+        NonlinearFrameConfig(profile=COROTATIONAL_GENERAL_PROFILE),
+    )
+    assert node_result.unsupported_features[0]["kind"] == (
+        "corotational_portal_node_count_invalid"
+    )
+
+    too_many_members = _branching_payload()
+    too_many_members["elements"] = too_many_members["elements"] * 52
+    member_result = analyze_nonlinear_frame(
+        _model(tmp_path, too_many_members, "too-many-members.json"),
+        NonlinearFrameConfig(profile=COROTATIONAL_GENERAL_PROFILE),
+    )
+    assert member_result.unsupported_features[0]["kind"] == (
+        "corotational_portal_member_count_invalid"
+    )
+
+
 def test_terminal_checkpoint_chain_replays_to_identical_corotational_result(
     portal_result,
 ) -> None:
@@ -457,6 +692,38 @@ def test_unified_cli_writes_result_report_and_checkpoint_atomically(
         is True
     )
     assert checkpoint_path.read_bytes() == result.checkpoint_artifact()
+
+
+def test_unified_cli_runs_connected_frame_profile(tmp_path: Path) -> None:
+    model = _model(tmp_path, _branching_payload(), "cli-branching.json")
+    result_path = tmp_path / "general-result.json"
+    report_path = tmp_path / "general-report.json"
+    checkpoint_path = tmp_path / "general-checkpoint.json"
+
+    exit_code = nonlinear_frame_cli.main(
+        [
+            model.source_path,
+            "--profile",
+            COROTATIONAL_GENERAL_PROFILE,
+            "--load-steps",
+            "2",
+            "--residual-tolerance",
+            "1e-9",
+            "--out",
+            str(result_path),
+            "--report-out",
+            str(report_path),
+            "--checkpoint-out",
+            str(checkpoint_path),
+        ]
+    )
+
+    assert exit_code == 0
+    assert json.loads(result_path.read_text(encoding="utf-8"))["profile"] == (
+        COROTATIONAL_GENERAL_PROFILE
+    )
+    assert json.loads(report_path.read_text(encoding="utf-8"))["contract_pass"] is True
+    assert checkpoint_path.read_bytes()
 
 
 def test_profile_mismatch_and_result_hash_tampering_fail_closed(tmp_path: Path) -> None:

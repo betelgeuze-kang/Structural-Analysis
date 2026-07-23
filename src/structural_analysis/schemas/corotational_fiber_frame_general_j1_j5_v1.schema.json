@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.dev/schemas/corotational_fiber_frame_general_j1_j5_v1.schema.json",
+  "title": "Connected Corotational Fiber Frame J1-J5 Adapter v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "adapter_hash",
+    "compiler_profile",
+    "compiler_hash",
+    "authority_profile",
+    "model_content_hash",
+    "problem_contract_hash",
+    "case_id",
+    "compilation",
+    "terminal_checkpoint_hash",
+    "terminal_load_factor",
+    "stage_receipts",
+    "authority_axes",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "stateful-corotational-fiber-frame2d-general-j1-j5-adapter.v1"
+    },
+    "adapter_hash": {"$ref": "#/$defs/hash"},
+    "compiler_profile": {
+      "const": "planar_connected_branching_frame_explicit_fiber_section.v1"
+    },
+    "compiler_hash": {"$ref": "#/$defs/hash"},
+    "authority_profile": {
+      "const": "non_promoting_general_corotational_convergence_candidate.v1"
+    },
+    "model_content_hash": {"$ref": "#/$defs/hash"},
+    "problem_contract_hash": {"$ref": "#/$defs/hash"},
+    "case_id": {"type": "string", "minLength": 1},
+    "compilation": {"$ref": "#/$defs/compilation"},
+    "terminal_checkpoint_hash": {"$ref": "#/$defs/hash"},
+    "terminal_load_factor": {"const": 1.0},
+    "stage_receipts": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J1"},
+                "contract_profile": {
+                  "const": "corotational_connected_branching_topology_operator_binding.v1"
+                },
+                "checks": {
+                  "const": {
+                    "connected_graph_passed": true,
+                    "multiple_support_semantics_bound": true,
+                    "operator_bound": true,
+                    "unsupported_member_features_absent": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J2"},
+                "contract_profile": {
+                  "const": "corotational_scaling_and_proportional_prescribed_displacement.v1"
+                },
+                "checks": {
+                  "const": {
+                    "coordinate_scaling_bound": true,
+                    "reference_load_bound": true,
+                    "prescribed_displacement_bound": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J3"},
+                "contract_profile": {
+                  "const": "corotational_committed_checkpoint_chain.v1"
+                },
+                "checks": {
+                  "const": {
+                    "checkpoint_chain_complete": true,
+                    "rollback_ancestry_bound": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J4"},
+                "contract_profile": {
+                  "const": "corotational_solver_assembly_state_binding.v1"
+                },
+                "checks": {
+                  "const": {
+                    "solver_assembly_binding_passed": true,
+                    "iterative_or_no_solve_contract_passed": true,
+                    "no_fallback_or_regularization": true
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/stage"},
+            {
+              "properties": {
+                "stage": {"const": "J5"},
+                "contract_profile": {
+                  "const": "corotational_full_load_terminal_contract.v1"
+                },
+                "checks": {
+                  "const": {
+                    "full_load_terminal_passed": true,
+                    "solver_terminal_contract_passed": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "authority_axes": {
+      "const": {
+        "topology": "connected_graph_candidate_bound",
+        "member_features": "not_supported",
+        "multiple_support": "candidate_bound",
+        "prescribed_displacement": "proportional_candidate_bound",
+        "equation_scaling": "candidate_bound",
+        "state_ancestry": "candidate_bound",
+        "solver_state_binding": "candidate_bound",
+        "convergence": "bounded_candidate",
+        "numerical_result": "not_created",
+        "reaction": "not_created",
+        "member_force": "not_created",
+        "section_resultant": "not_created",
+        "fiber_result": "not_created",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "limitations": {
+      "const": [
+        "connected_planar_frame_graph_only",
+        "proportional_nodal_load_only",
+        "prescribed_displacement_scaled_by_load_factor",
+        "load_control_cpu_dense_or_native_sparse_newton_only",
+        "parallel_members_not_supported",
+        "disconnected_graphs_not_supported",
+        "member_end_releases_not_supported",
+        "rigid_offsets_not_supported",
+        "distributed_member_loads_not_supported",
+        "direct_displacement_control_not_supported",
+        "external_level2_not_attached",
+        "standalone_manifest_source_authenticity_not_established",
+        "public_capability_not_promoted"
+      ]
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "prescribed": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {"type": "integer", "minimum": 0, "maximum": 383},
+        {"type": "number"}
+      ],
+      "items": false
+    },
+    "compilation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "compiler_profile",
+        "compiler_hash",
+        "model_content_hash",
+        "problem_contract_hash",
+        "case_id",
+        "node_count",
+        "member_count",
+        "support_node_indices",
+        "branching_node_indices",
+        "maximum_node_degree",
+        "prescribed_displacements"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "stateful-corotational-fiber-frame2d-general-j1-j5-adapter.v1"
+        },
+        "compiler_profile": {
+          "const": "planar_connected_branching_frame_explicit_fiber_section.v1"
+        },
+        "compiler_hash": {"$ref": "#/$defs/hash"},
+        "model_content_hash": {"$ref": "#/$defs/hash"},
+        "problem_contract_hash": {"$ref": "#/$defs/hash"},
+        "case_id": {"type": "string", "minLength": 1},
+        "node_count": {"type": "integer", "minimum": 2, "maximum": 128},
+        "member_count": {"type": "integer", "minimum": 1, "maximum": 256},
+        "support_node_indices": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 0, "maximum": 127}
+        },
+        "branching_node_indices": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 0, "maximum": 127}
+        },
+        "maximum_node_degree": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 127
+        },
+        "prescribed_displacements": {
+          "type": "array",
+          "maxItems": 384,
+          "items": {"$ref": "#/$defs/prescribed"}
+        }
+      }
+    },
+    "stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stage",
+        "stage_hash",
+        "contract_profile",
+        "source_hashes",
+        "checks",
+        "body"
+      ],
+      "properties": {
+        "stage": {"enum": ["J1", "J2", "J3", "J4", "J5"]},
+        "stage_hash": {"$ref": "#/$defs/hash"},
+        "contract_profile": {"type": "string", "minLength": 1},
+        "source_hashes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/hash"}
+        },
+        "checks": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"const": true}
+        },
+        "body": {"type": "object", "minProperties": 1}
+      }
+    }
+  }
+}

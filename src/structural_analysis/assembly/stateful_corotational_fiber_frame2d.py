@@ -131,6 +131,7 @@ class StatefulCorotationalFiberFrame2DProblem:
     fixed_global_dofs: tuple[int, ...]
     reference_external_loads: tuple[tuple[int, float], ...]
     rotation_coordinate_scale_m: float
+    prescribed_displacements: tuple[tuple[int, float], ...] = ()
 
     def __post_init__(self) -> None:
         normalized_case_id = str(self.case_id).strip()
@@ -202,9 +203,32 @@ class StatefulCorotationalFiberFrame2DProblem:
                 raise ValueError("reference external load DOFs must be unique")
             load_dofs.add(dof)
             loads.append((dof, _finite(row[1], name="reference external load")))
-        if not loads or not any(value != 0.0 for _, value in loads):
-            raise ValueError("reference_external_loads must include a nonzero load")
         object.__setattr__(self, "reference_external_loads", tuple(sorted(loads)))
+        if not isinstance(self.prescribed_displacements, tuple):
+            raise ValueError("prescribed_displacements must be a tuple")
+        prescribed: list[tuple[int, float]] = []
+        prescribed_dofs: set[int] = set()
+        fixed_dofs = set(fixed)
+        for row in self.prescribed_displacements:
+            if not isinstance(row, tuple) or len(row) != 2 or type(row[0]) is not int:
+                raise ValueError("each prescribed displacement must be (dof, value)")
+            dof = row[0]
+            if dof < 0 or dof >= global_dof_count:
+                raise ValueError("prescribed displacement DOF is out of range")
+            if dof not in fixed_dofs:
+                raise ValueError("prescribed displacement DOF must be constrained")
+            if dof in prescribed_dofs:
+                raise ValueError("prescribed displacement DOFs must be unique")
+            prescribed_dofs.add(dof)
+            prescribed.append((dof, _finite(row[1], name="prescribed displacement")))
+        normalized_prescribed = tuple(sorted(prescribed))
+        object.__setattr__(self, "prescribed_displacements", normalized_prescribed)
+        if not any(value != 0.0 for _, value in loads) and not any(
+            value != 0.0 for _, value in normalized_prescribed
+        ):
+            raise ValueError(
+                "problem must include a nonzero reference load or prescribed displacement"
+            )
         object.__setattr__(
             self,
             "rotation_coordinate_scale_m",
@@ -250,6 +274,9 @@ class StatefulCorotationalFiberFrame2DProblem:
                 "reference_external_loads": [
                     [dof, value] for dof, value in self.reference_external_loads
                 ],
+                "prescribed_displacements": [
+                    [dof, value] for dof, value in self.prescribed_displacements
+                ],
                 "rotation_coordinate_scale_m": self.rotation_coordinate_scale_m,
                 "assembly": STATEFUL_COROTATIONAL_FIBER_FRAME2D_ASSEMBLY,
                 "coordinate_scaling": (
@@ -278,6 +305,18 @@ class StatefulCorotationalFiberFrame2DProblem:
             external[dof] = value
         external.setflags(write=False)
         return external
+
+    def prescribed_displacement_vector(self, load_factor: float) -> np.ndarray:
+        factor = _finite(load_factor, name="load_factor")
+        prescribed = np.zeros(self.global_dof_count, dtype=np.float64)
+        for dof, terminal_value in self.prescribed_displacements:
+            prescribed[dof] = (
+                0.0
+                if factor == 0.0 or terminal_value == 0.0
+                else factor * terminal_value
+            )
+        prescribed.setflags(write=False)
+        return prescribed
 
     def reference_force_scale(self) -> float:
         generalized = (
@@ -517,11 +556,14 @@ def validate_stateful_corotational_fiber_frame2d_checkpoint(
         checkpoint.global_displacements,
         dtype=np.float64,
     )
-    if not np.array_equal(
+    expected_prescribed = problem.prescribed_displacement_vector(checkpoint.load_factor)
+    if not _exact_float64_equal(
         global_displacements[list(problem.fixed_global_dofs)],
-        np.zeros(len(problem.fixed_global_dofs), dtype=np.float64),
+        expected_prescribed[list(problem.fixed_global_dofs)],
     ):
-        raise ValueError("checkpoint fixed global DOFs must be exactly zero")
+        raise ValueError(
+            "checkpoint constrained global DOFs do not match prescribed values"
+        )
     if checkpoint.epoch == 0 and (
         checkpoint.load_factor != 0.0
         or not np.array_equal(
@@ -572,8 +614,16 @@ def assemble_stateful_corotational_fiber_frame2d(
         raise ValueError("trial_free_coordinates_m has invalid shape or values")
     scale = problem.physical_coordinate_scale
     generalized = np.zeros(problem.global_dof_count, dtype=np.float64)
+    prescribed = problem.prescribed_displacement_vector(load_factor)
+    generalized[list(problem.fixed_global_dofs)] = (
+        prescribed[list(problem.fixed_global_dofs)]
+        / scale[list(problem.fixed_global_dofs)]
+    )
     generalized[list(free_dofs)] = free
     global_displacements = scale * generalized
+    global_displacements[list(problem.fixed_global_dofs)] = prescribed[
+        list(problem.fixed_global_dofs)
+    ]
     internal = np.zeros(problem.global_dof_count, dtype=np.float64)
     material_tangent = np.zeros(
         (problem.global_dof_count, problem.global_dof_count),

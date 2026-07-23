@@ -114,21 +114,28 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
  {'authority': 'bounded_j1_j5_and_exact_engineering_recovery_candidate',
   'category': 'analysis',
   'evidence': ['docs/unified-nonlinear-frame-api.md',
+               'docs/corotational-connected-frame2d.md',
                'docs/corotational-fiber-frame-native-sparse.md',
                'src/structural_analysis/api/nonlinear_frame.py',
+               'src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py',
                'src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py',
                'src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py',
                'src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py',
                'src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json',
+               'src/structural_analysis/schemas/corotational_fiber_frame_general_j1_j5_v1.schema.json',
+               'tests/test_corotational_fiber_frame_general.py',
                'tests/test_corotational_fiber_frame_sparse.py',
-               'tests/test_unified_nonlinear_frame_api.py'],
+               'tests/test_unified_nonlinear_frame_api.py',
+               'examples/public_corotational_branching_frame.json'],
   'id': 'analysis.nonlinear_corotational_fiber_frame_2d',
   'interfaces': ['python_api', 'cli'],
-  'limitations': ['One-bay, one-story load-control CPU dense or native COO/CSR portal candidate '
-                  'only; general topology, member features, direct displacement control, '
-                  'production-scale conditioning, both independent Level 2 comparisons, and '
-                  'release promotion remain open.'],
-  'profile': 'corotational_one_bay_portal.v1',
+  'limitations': ['Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense '
+                  'or native COO/CSR candidate with branching, support UX/UY/RZ subsets, '
+                  'proportional nodal loads, and proportional prescribed displacement; '
+                  'disconnected graphs, parallel members, releases, rigid offsets, distributed '
+                  'loads, direct displacement control, production-scale conditioning, both '
+                  'independent Level 2 comparisons, and release promotion remain open.'],
+  'profile': 'corotational_connected_frame2d.v1',
   'public': False,
   'status': 'experimental',
   'title': 'Corotational 2D fiber frame'},

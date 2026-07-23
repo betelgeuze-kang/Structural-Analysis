@@ -162,8 +162,16 @@ def assemble_stateful_corotational_fiber_frame2d_sparse(
 
     scale = np.asarray(problem.physical_coordinate_scale, dtype=np.float64)
     generalized = np.zeros(problem.global_dof_count, dtype=np.float64)
+    prescribed = problem.prescribed_displacement_vector(load_factor)
+    generalized[list(problem.fixed_global_dofs)] = (
+        prescribed[list(problem.fixed_global_dofs)]
+        / scale[list(problem.fixed_global_dofs)]
+    )
     generalized[list(free_dofs)] = free
     global_displacements = scale * generalized
+    global_displacements[list(problem.fixed_global_dofs)] = prescribed[
+        list(problem.fixed_global_dofs)
+    ]
     internal = np.zeros(problem.global_dof_count, dtype=np.float64)
     external = load_factor * problem.reference_external_load_vector()
     free_position = {global_dof: index for index, global_dof in enumerate(free_dofs)}
