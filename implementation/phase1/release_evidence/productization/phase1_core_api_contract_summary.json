@@ -79,7 +79,7 @@
   "expected_frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
   "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
   "frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
-  "generated_at": "2026-07-23T04:44:06.549703+00:00",
+  "generated_at": "2026-07-23T06:01:14.926601+00:00",
   "input_checksums": {
     "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
     "src/structural_analysis/api/cli.py": "sha256:6e93b6a51e8e7521bec9490c992bd2a5b793762da4238ac1e1d732f5e234860a",
@@ -95,7 +95,7 @@
     "src/structural_analysis/schemas/result.schema.json": "sha256:4697b4b32b92dd8963fdfafa083678ea1ae43501a287ab78b950b5dc32c787be",
     "src/structural_analysis/schemas/validation_report.schema.json": "sha256:534d4125281a9a28b69f58d96dd882628db1d3a820aad2e56cea8ec5473ee2bd",
     "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:12e871b8004dc58a61ac7ff8e96f09689c6815785460d4bf4ac6b9a54bd62195"
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1"
   },
   "invocation_surfaces": [
     "python_api",
@@ -224,12 +224,12 @@
     "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
   },
   "schema_version": "phase1-core-api-contract-artifacts.v3",
-  "source_commit_sha": "c59bff9e9ab7cabffea3633c86be0bae7dc03dcf",
+  "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1",
   "source_state_policy": {
     "allowed_post_source_scope": "generated_phase1_and_readiness_evidence_only",
     "exact_head_verification_required": true,
     "mode": "source_commit_then_evidence_only_commit",
-    "source_commit_sha": "c59bff9e9ab7cabffea3633c86be0bae7dc03dcf"
+    "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1"
   },
   "status": "ready",
   "supported_preview_analysis_types": [
