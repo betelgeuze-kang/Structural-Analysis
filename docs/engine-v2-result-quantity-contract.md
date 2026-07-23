@@ -41,5 +41,7 @@ Primary implementation:
 - `artifacts/manifests/capabilities.yaml`
 
 This contract alone does not make the corotational 2D frame public or
-authoritative. PR 7 and PR 8 must bind the catalog to an exact compiler,
-terminal receipt and engineering recovery path.
+authoritative. The bounded portal J1-J5 adapter and its separate exact engineering
+recovery now bind the catalog to one exact compiler, terminal receipt, and retained
+replay path. That internal candidate does not promote a public API, general topology,
+external verification, design authority, or release readiness.

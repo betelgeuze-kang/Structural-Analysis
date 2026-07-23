@@ -183,6 +183,19 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_j1_j5 impo
     validate_corotational_fiber_frame_j1_j5_manifest,
     validate_corotational_portal_compilation,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_engineering_recovery import (
+    COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE,
+    COROTATIONAL_FIBER_FRAME_ENGINEERING_RECOVERY_PROFILE,
+    COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND,
+    COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION,
+    CorotationalEngineeringArrayDescriptor,
+    CorotationalEngineeringSourceAdapter,
+    CorotationalFiberFrameEngineeringRecoveryError,
+    CorotationalFiberFrameEngineeringResultIR,
+    create_corotational_fiber_frame_engineering_result_ir,
+    validate_corotational_fiber_frame_engineering_result_ir,
+    validate_corotational_fiber_frame_engineering_result_manifest,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state import (
     STATEFUL_COROTATIONAL_FIBER_FRAME2D_CHECKPOINT_SCHEMA_VERSION,
     StatefulCorotationalFiberFrame2DCheckpoint,
@@ -440,4 +453,15 @@ __all__ = [
     "validate_corotational_fiber_frame_j1_j5_adapter",
     "validate_corotational_fiber_frame_j1_j5_manifest",
     "validate_corotational_portal_compilation",
+    "COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE",
+    "COROTATIONAL_FIBER_FRAME_ENGINEERING_RECOVERY_PROFILE",
+    "COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND",
+    "COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION",
+    "CorotationalEngineeringArrayDescriptor",
+    "CorotationalEngineeringSourceAdapter",
+    "CorotationalFiberFrameEngineeringRecoveryError",
+    "CorotationalFiberFrameEngineeringResultIR",
+    "create_corotational_fiber_frame_engineering_result_ir",
+    "validate_corotational_fiber_frame_engineering_result_ir",
+    "validate_corotational_fiber_frame_engineering_result_manifest",
 ]

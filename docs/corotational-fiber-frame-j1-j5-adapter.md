@@ -32,13 +32,16 @@ The adapter establishes a bounded **convergence candidate** only. A standalone
 manifest proves internal hash consistency, not authenticity of the problem or solver
 sources; source authenticity requires the retained typed objects and replay. The
 adapter does not create numerical ResultIR authority or reaction, member-force,
-section-resultant, or fiber authority. Those axes remain `not_created` until exact
-engineering recovery is bound and independently verified.
+section-resultant, or fiber authority. Those axes remain `not_created` on the adapter;
+the separate bounded recovery result can establish exact candidate values without
+mutating or broadening this source contract. See
+[`corotational-fiber-frame-engineering-recovery.md`](corotational-fiber-frame-engineering-recovery.md).
 
 This profile also excludes displacement control, sparse execution, general topology,
-member-end releases, rigid offsets, distributed member loads, exact recovery, and a
-public API. Independent Level 2 external-solver evidence remains unattached, so the
-capability stays experimental and non-public.
+member-end releases, rigid offsets, distributed member loads, and a public API. Exact
+recovery is a companion contract rather than an adapter stage. Independent Level 2
+external-solver evidence remains unattached, so the capability stays experimental
+and non-public.
 
 The machine-readable schema is
 `src/structural_analysis/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json`;
