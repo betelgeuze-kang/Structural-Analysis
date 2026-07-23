@@ -32,7 +32,13 @@ python -m structural_analysis.api.nonlinear_frame_cli \
   --checkpoint-out connected-checkpoint-chain.json
 ```
 
-Member end releases, rigid offsets, distributed member loads, direct
-displacement control, disconnected graphs, parallel members, production-scale
-conditioning, independent Level 2 comparison evidence, design authority, and
-release promotion remain outside this slice.
+The lower-level assembly package also exposes a bounded dense direct
+displacement-control candidate with augmented consistent Newton, proportional
+support-motion coupling, exact rollback, and accepted-checkpoint restart. That
+internal solver is documented separately and is not wired into this unified
+J1–J5 profile.
+
+Member end releases, rigid offsets, distributed member loads, unified-profile
+direct displacement control, disconnected graphs, parallel members,
+production-scale conditioning, independent Level 2 comparison evidence, design
+authority, and release promotion remain outside this slice.
