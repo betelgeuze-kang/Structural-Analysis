@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 import json
+from pathlib import Path
 from typing import cast
 
 import numpy as np
@@ -263,3 +264,17 @@ def test_checkpoint_rejects_tampered_prescribed_displacement() -> None:
         match="constrained global DOFs do not match prescribed values",
     ):
         validate_stateful_corotational_fiber_frame2d_checkpoint(problem, tampered)
+
+
+def test_topology_ci_pins_canonical_openblas_execution() -> None:
+    workflow = (
+        Path(__file__).resolve().parents[1]
+        / ".github/workflows/fiber-frame-execution-topology-ci.yml"
+    ).read_text(encoding="utf-8")
+    job_header = workflow.split("  topology-contract:\n", 1)[1].split(
+        "    steps:\n", 1
+    )[0]
+
+    assert "OPENBLAS_CORETYPE: Haswell" in job_header
+    assert 'OPENBLAS_NUM_THREADS: "1"' in job_header
+    assert 'OMP_NUM_THREADS: "1"' in job_header

@@ -147,6 +147,11 @@ jobs:
   topology-contract:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    # Exact benchmark receipts use this OpenBLAS kernel family as the canonical path.
+    env:
+      OPENBLAS_CORETYPE: Haswell
+      OPENBLAS_NUM_THREADS: "1"
+      OMP_NUM_THREADS: "1"
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
