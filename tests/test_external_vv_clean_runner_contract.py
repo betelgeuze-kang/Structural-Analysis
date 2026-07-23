@@ -159,18 +159,31 @@ def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sou
         check=False,
         capture_output=True,
     ).returncode == 0
+    shallow_repository = subprocess.check_output(
+        ["git", "rev-parse", "--is-shallow-repository"],
+        cwd=ROOT,
+        text=True,
+    ).strip() == "true"
     if recorded_object_available:
-        subprocess.run(
+        ancestry = subprocess.run(
             ["git", "merge-base", "--is-ancestor", recorded_commit, head],
             cwd=ROOT,
-            check=True,
+            check=False,
+            capture_output=True,
         )
+        if ancestry.returncode != 0:
+            assert shallow_repository
+            raw_head = subprocess.check_output(
+                ["git", "cat-file", "-p", head], cwd=ROOT, text=True
+            )
+            direct_parents = {
+                line.removeprefix("parent ")
+                for line in raw_head.splitlines()
+                if line.startswith("parent ")
+            }
+            assert recorded_commit in direct_parents
     else:
-        assert subprocess.check_output(
-            ["git", "rev-parse", "--is-shallow-repository"],
-            cwd=ROOT,
-            text=True,
-        ).strip() == "true"
+        assert shallow_repository
 
     parity = summary["cross_environment_parity"]
     assert parity == runner._cross_environment_parity(
