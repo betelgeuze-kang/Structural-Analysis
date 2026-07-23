@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - "implementation/phase1/**"
+      - "artifacts/vv/**"
+      - "benchmarks/clean-runners/**"
       - "scripts/**"
+      - "src/structural_analysis/schemas/**"
       - "tests/**"
       - "pyproject.toml"
       - ".github/workflows/legacy-evidence-ci.yml"
@@ -13,7 +16,10 @@ on:
     branches: ["main", "ci/**", "evidence/**", "legacy/**"]
     paths:
       - "implementation/phase1/**"
+      - "artifacts/vv/**"
+      - "benchmarks/clean-runners/**"
       - "scripts/**"
+      - "src/structural_analysis/schemas/**"
       - "tests/**"
       - "pyproject.toml"
       - ".github/workflows/legacy-evidence-ci.yml"
@@ -63,6 +69,9 @@ jobs:
           tests/test_build_ci_streak_intake_packet.py
           tests/test_build_product_readiness_snapshot.py
           tests/test_check_repo_hygiene.py
+          tests/test_external_code_to_code_technical_receipt.py
+          tests/test_external_modal_buckling_technical_receipt.py
+          tests/test_external_vv_clean_runner_contract.py
           tests/test_source_boundary_ci_contract.py
 
       - name: Upload legacy evidence receipt

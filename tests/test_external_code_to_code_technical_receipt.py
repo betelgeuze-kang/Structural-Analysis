@@ -53,7 +53,7 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     assert payload["technical_contract_pass"] is True
     assert len(payload["external_assets"]) == 5
     assert all(not row["bundled_in_repository"] for row in payload["external_assets"])
-    assert len(payload["comparisons"]) == 3
+    assert len(payload["comparisons"]) == 4
     assert all(row["contract_pass"] for row in payload["comparisons"])
     assert all(
         metric["contract_pass"]
@@ -70,6 +70,12 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     assert replay["current_product_replay_pass"] is True
     assert replay["reuse_reason"] is None
     assert module.REUSED_EXECUTION_BLOCKER not in payload["blockers_remaining"]
+    portal = payload["comparisons"][2]
+    assert portal["case_id"] == "public_corotational_portal_load_path"
+    assert len(portal["metrics"]) == 12
+    assert payload["claims"][
+        "public_corotational_portal_technical_comparison"
+    ] is True
 
 
 def test_debian_metadata_parser_accepts_labeled_field_output(monkeypatch) -> None:
@@ -96,6 +102,10 @@ def test_receipt_does_not_promote_legal_hierarchy_or_release_claims() -> None:
     assert payload["claims"]["verification_level_2"] is False
     assert payload["claims"]["commercial_equivalence"] is False
     assert payload["claims"]["release_readiness"] is False
+    assert (
+        "public_corotational_material_nonlinear_family_breadth_missing"
+        in payload["blockers_remaining"]
+    )
     assert len(payload["blockers_remaining"]) >= 8
     assert "does not achieve Verification Level 2" in payload["claim_boundary"]
 

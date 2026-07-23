@@ -103,11 +103,12 @@
       "prefixItems": [
         {"$ref": "#/$defs/modalCase"},
         {"$ref": "#/$defs/cantileverCase"},
+        {"$ref": "#/$defs/publicCorotationalPortalCase"},
         {"$ref": "#/$defs/axialCase"}
       ],
       "items": false,
-      "minItems": 3,
-      "maxItems": 3
+      "minItems": 4,
+      "maxItems": 4
     },
     "technical_contract_pass": {"type": "boolean"},
     "verification_hierarchy_operator_manifest_attached": {"const": false},
@@ -118,6 +119,7 @@
       "required": [
         "actual_external_solver_execution",
         "opensees_technical_comparison",
+        "public_corotational_portal_technical_comparison",
         "second_solver_technical_comparison",
         "product_legal_license_approval",
         "external_runtime_redistribution_approval",
@@ -128,6 +130,7 @@
       "properties": {
         "actual_external_solver_execution": {"type": "boolean"},
         "opensees_technical_comparison": {"type": "boolean"},
+        "public_corotational_portal_technical_comparison": {"type": "boolean"},
         "second_solver_technical_comparison": {"type": "boolean"},
         "product_legal_license_approval": {"const": false},
         "external_runtime_redistribution_approval": {"const": false},
@@ -453,6 +456,19 @@
             "analysis_type": {"const": "linear_static"},
             "reference_solver": {"const": "OpenSees 3.7.1"},
             "metrics": {"minItems": 3, "maxItems": 3}
+          }
+        }
+      ]
+    },
+    "publicCorotationalPortalCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "public_corotational_portal_load_path"},
+            "analysis_type": {"const": "corotational_elastic_stateful_load_path"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 12, "maxItems": 12}
           }
         }
       ]

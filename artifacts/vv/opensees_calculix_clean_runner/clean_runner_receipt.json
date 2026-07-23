@@ -1,0 +1,176 @@
+{
+  "artifact_hash": "sha256:39f33bbf5a03872fb2c1a9b86daa95bf8fdc343e01f7485fc0a1346699884c0f",
+  "blockers_remaining": [
+    "independent_operator_attestation_missing",
+    "product_legal_license_approval_missing",
+    "external_runtime_redistribution_approval_missing",
+    "public_corotational_material_nonlinear_external_family_missing",
+    "verification_hierarchy_operator_manifest_missing",
+    "verification_level_2_not_achieved",
+    "exact_cross_environment_buckling_semantic_hash_mismatch_within_tolerance",
+    "release_readiness_not_established"
+  ],
+  "claim_boundary": "This receipt proves a same-operator, container-isolated reproduction of the narrow non-promoting OpenSees/CalculiX technical comparisons, including the public one-bay corotational portal's four-step elastic-state load path. The source mount was read-only, runtime networking had no default route, and every external asset matched its pinned SHA-256 before execution. The source bytes are checksum-bound over the recorded base commit; this is not an independent operator attestation, material-nonlinear or cyclic family validation, legal approval, Verification Level 2 promotion, broad structural-family validation, commercial equivalence, design authority, or release readiness.",
+  "claims": {
+    "actual_external_solver_execution": true,
+    "commercial_equivalence": false,
+    "cross_environment_numerical_parity": true,
+    "current_candidate_source_bytes_checksum_bound": true,
+    "design_authority": false,
+    "external_runtime_redistribution_approval": false,
+    "independent_operator_attestation": false,
+    "product_legal_license_approval": false,
+    "release_readiness": false,
+    "same_operator_container_isolated_reproduction": true,
+    "verification_level_2": false
+  },
+  "cross_environment_parity": {
+    "absolute_tolerance": 1e-12,
+    "exact_semantic_hash_parity": false,
+    "host_reference_receipts": {
+      "code_to_code": {
+        "artifact_hash": "sha256:7a47f3671b4fb665630a835c0ff49723f7ae67b70bbb5c0ea8cae87606685ca1",
+        "file_sha256": "sha256:ae4538e6f8d4e402e3143aeb503849328058e09079b2a22cfecaf99be578f47d",
+        "path": "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json"
+      },
+      "modal_buckling": {
+        "artifact_hash": "sha256:f8e39b1d04913522a18414909dc674f4691b2c56fc98c067663fee9459af2572",
+        "file_sha256": "sha256:c6fb972a70578605cf0d4049665e48fab6b7409cf0dd2e69026dde80aac5e6e0",
+        "path": "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json"
+      }
+    },
+    "maximum_absolute_delta": 2.219557870830613e-12,
+    "maximum_relative_delta": 1.6209256159527285e-12,
+    "nonzero_delta_count": 3,
+    "numerical_contract_pass": true,
+    "relative_tolerance": 1e-12,
+    "scalar_comparison_count": 49,
+    "semantic_hash_matches": {
+      "buckling_model_hash": true,
+      "buckling_semantic_result_hash": false,
+      "modal_model_hash": true,
+      "modal_semantic_result_hash": true
+    }
+  },
+  "external_assets": [
+    {
+      "bundled_in_repository": false,
+      "filename": "calculix-ccx_2.17-3_amd64.deb",
+      "sha256": "sha256:3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e"
+    },
+    {
+      "bundled_in_repository": false,
+      "filename": "libarpack2_3.8.0-1_amd64.deb",
+      "sha256": "sha256:07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a"
+    },
+    {
+      "bundled_in_repository": false,
+      "filename": "libspooles2.2_2.2-14_amd64.deb",
+      "sha256": "sha256:34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917"
+    },
+    {
+      "bundled_in_repository": false,
+      "filename": "openseespy-3.7.1.2-py3-none-any.whl",
+      "sha256": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65"
+    },
+    {
+      "bundled_in_repository": false,
+      "filename": "openseespylinux-3.7.1.2-py3-none-any.whl",
+      "sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a"
+    }
+  ],
+  "generated_at": "2026-07-23T13:10:43.747150+00:00",
+  "isolation": {
+    "designated_output_mount_writable": true,
+    "isolation_contract_pass": true,
+    "repository_mount_read_only": true,
+    "runtime_default_network_route_present": false
+  },
+  "product_receipts": {
+    "code_to_code": {
+      "artifact_hash": "sha256:c580f9c6c0406cc5588fd715f548f2a693335402e43139e8305baef2f1d71e73",
+      "cases": [
+        {
+          "case_id": "two_dof_shear_modal",
+          "contract_pass": true,
+          "metric_count": 2
+        },
+        {
+          "case_id": "cantilever_tip_load",
+          "contract_pass": true,
+          "metric_count": 3
+        },
+        {
+          "case_id": "public_corotational_portal_load_path",
+          "contract_pass": true,
+          "metric_count": 12
+        },
+        {
+          "case_id": "axial_member_tip_load",
+          "contract_pass": true,
+          "metric_count": 2
+        }
+      ],
+      "file_sha256": "sha256:2bfc366e4b96ed0c0b30ba3f46651d9e0d2478bc6f8eae1ccd747510c5dca6bf",
+      "fresh_external_runtime_execution": true,
+      "path": "artifacts/vv/opensees_calculix_clean_runner/external_code_to_code_receipt.json",
+      "source_set_hash": "sha256:b91db7c6a86c6f4b45f1fe8b55a95e72cf84a23b6da6e7e6a274641676eaf902",
+      "technical_contract_pass": true
+    },
+    "modal_buckling": {
+      "artifact_hash": "sha256:c8ed0a4008d96f0dac5117d3bc6744408afd6ec875ffd03b9abd9f3b13b188c7",
+      "cases": [
+        {
+          "case_id": "whole_model_frame_consistent_mass_modal",
+          "contract_pass": true,
+          "metric_count": 4
+        },
+        {
+          "case_id": "whole_model_frame_repeated_mode_linear_buckling",
+          "contract_pass": true,
+          "metric_count": 3
+        }
+      ],
+      "file_sha256": "sha256:f992bb42ffa39de80d60310c63f06dcb1e7c08848b95cfdeb3c8be85d8fbb1bd",
+      "fresh_external_runtime_execution": true,
+      "path": "artifacts/vv/opensees_calculix_clean_runner/external_modal_buckling_receipt.json",
+      "source_set_hash": "sha256:5ac041c0c750ee3f45d4be2497c5413d4b871f935c1029d77d7aa21249f5df16",
+      "technical_contract_pass": true
+    }
+  },
+  "runner": {
+    "base_image": "docker.io/library/python:3.11-slim-bookworm@sha256:b18992999dbe963a45a8a4da40ac2b1975be1a776d939d098c647482bcad5cba",
+    "debian_packages": {
+      "git": "1:2.39.5-0+deb12u3",
+      "libblas3": "3.11.0-2",
+      "libgfortran5": "12.2.0-14+deb12u1",
+      "liblapack3": "3.11.0-2",
+      "libopenmpi3": "4.1.4-3+b1",
+      "libquadmath0": "12.2.0-14+deb12u1"
+    },
+    "derived_image_id": "sha256:ceba175fcd8f4420efe6c5f63464a7a11e84a1f610f4ce97bb718556b61ab74c",
+    "dockerfile_sha256": "sha256:4fdb72214bee7fbce13415e5c6a3d8602c176a6b5ea5f2b1d037c7b1b959f049",
+    "machine": "x86_64",
+    "python_executable_sha256": "sha256:22e747b1e8a04719d4af2094133a0479b33728d2e4d03ab01539064dc6f45cfb",
+    "python_packages": {
+      "attrs": "25.4.0",
+      "jsonschema": "4.26.0",
+      "jsonschema-specifications": "2025.9.1",
+      "numpy": "1.26.4",
+      "referencing": "0.37.0",
+      "rpds-py": "0.30.0",
+      "scipy": "1.12.0",
+      "typing-extensions": "4.15.0"
+    },
+    "python_version": "3.11.15",
+    "runner_source_sha256": "sha256:b4b35abcbdd86de7b697903d745f6b4e6e114d87bc3730df3e981e821997b1e2",
+    "schema_sha256": "sha256:23a5de5ff2beb732d0dc8e11aef43afa7faa27d333b714d8491750500c060aef",
+    "system": "Linux",
+    "wrapper_sha256": "sha256:a62cf874e0089852dbd8eb9d27e1ee2f90cd11fbb44f3350fb814d02e9dcdb24"
+  },
+  "schema_version": "structural-analysis-external-vv-clean-runner-receipt.v1",
+  "source_commit_sha": "91e00a57db8fae1b2975c291f4439acdb75879ae",
+  "status": "partial",
+  "technical_contract_pass": true,
+  "truth_class": "container_isolated_external_vv_technical_candidate"
+}

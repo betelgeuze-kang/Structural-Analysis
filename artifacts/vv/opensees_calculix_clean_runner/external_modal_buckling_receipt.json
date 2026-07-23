@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:f8e39b1d04913522a18414909dc674f4691b2c56fc98c067663fee9459af2572",
+  "artifact_hash": "sha256:c8ed0a4008d96f0dac5117d3bc6744408afd6ec875ffd03b9abd9f3b13b188c7",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -84,32 +84,32 @@
       "external_return_code": 0,
       "metrics": [
         {
-          "absolute_error": 0.05299886801474951,
+          "absolute_error": 0.052998868013923506,
           "absolute_tolerance": 1e-08,
           "contract_pass": true,
           "metric_kind": "value_error",
-          "product_value": 7.48629313198525,
+          "product_value": 7.486293131986076,
           "quantity": "buckling_load_factor_mode_1",
           "reference_value": 7.539292,
-          "relative_error": 0.007029687670241386,
+          "relative_error": 0.007029687670131825,
           "relative_tolerance": 0.01
         },
         {
-          "absolute_error": 0.052998868011753686,
+          "absolute_error": 0.05299886800953413,
           "absolute_tolerance": 1e-08,
           "contract_pass": true,
           "metric_kind": "value_error",
-          "product_value": 7.486293131988246,
+          "product_value": 7.4862931319904655,
           "quantity": "buckling_load_factor_mode_2",
           "reference_value": 7.539292,
-          "relative_error": 0.007029687669844024,
+          "relative_error": 0.007029687669549625,
           "relative_tolerance": 0.01
         },
         {
           "contract_pass": true,
           "metric_kind": "minimum_threshold",
           "minimum_accepted": 0.999999,
-          "observed_value": 0.9999999970332671,
+          "observed_value": 0.9999999970316462,
           "quantity": "repeated_mode_subspace_minimum_principal_correlation_squared"
         }
       ],
@@ -126,8 +126,8 @@
   "engine_version": "0.3.0",
   "execution_environment": {
     "machine": "x86_64",
-    "python_executable_sha256": "sha256:7d51cd6b48b521277f5caa4610a82126e315fa2be4df069823a8b1eeb5bd4a86",
-    "python_version": "3.10.12",
+    "python_executable_sha256": "sha256:22e747b1e8a04719d4af2094133a0479b33728d2e4d03ab01539064dc6f45cfb",
+    "python_version": "3.11.15",
     "system": "Linux"
   },
   "external_assets": [
@@ -180,7 +180,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-23T13:10:24.297996+00:00",
+  "generated_at": "2026-07-23T13:10:40.564020+00:00",
   "internal_source": {
     "input_checksums": {
       "scripts/run_external_code_to_code_technical_receipt.py": "sha256:9b2db3387e433c2a5911f6f8bb1f5c5be47c077a8ac9ed5618645176e37472f9",
@@ -199,10 +199,10 @@
   },
   "mode_vector_artifacts": [
     {
-      "artifact_path": "implementation/phase1/release_evidence/productization/external_modal_buckling_mode_vectors/product_modal_modes.f64le",
+      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/product_modal_modes.f64le",
       "byte_length": 32,
       "byte_order": "little",
-      "content_hash": "sha256:2909ff87686c54fb5d4ee07a47992bd66e3651e13e1f474811bdc9132bbacd79",
+      "content_hash": "sha256:ee3cfe517583566452cc322163a372df0964ee8deecfb73bdf581226decf9237",
       "data_hash": "sha256:39ecaabc6e8d89987489ede409eb005536ab42c38b5e450dbe4322218bddd893",
       "dtype": "<f8",
       "layout": "C",
@@ -213,10 +213,10 @@
       ]
     },
     {
-      "artifact_path": "implementation/phase1/release_evidence/productization/external_modal_buckling_mode_vectors/opensees_modal_modes.f64le",
+      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/opensees_modal_modes.f64le",
       "byte_length": 32,
       "byte_order": "little",
-      "content_hash": "sha256:f7a1ea968b2ae66b40bbb6a76a8d182a281718bc0b1f04ff3e695ec2e3008e99",
+      "content_hash": "sha256:8a1a0cdfb5886d0dcdf2dcfc38887b12997f5423ec9248467d39c39e330288e6",
       "data_hash": "sha256:777c724fc2f464fc11e57b9a21d5e69e204dbaba02f8fbc0bc86f9b10f23a187",
       "dtype": "<f8",
       "layout": "C",
@@ -227,11 +227,11 @@
       ]
     },
     {
-      "artifact_path": "implementation/phase1/release_evidence/productization/external_modal_buckling_mode_vectors/product_buckling_modes.f64le",
+      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/product_buckling_modes.f64le",
       "byte_length": 544,
       "byte_order": "little",
-      "content_hash": "sha256:8859c8aee15c6edfa37747f1215e876a60d65d8d1967d7429c5eed0f1cc5373c",
-      "data_hash": "sha256:4cbc2cafa48912c4acd26fdbb715d3246cf6986a6cdc8016048b214b2deabb79",
+      "content_hash": "sha256:ebb15a7575610540f09984b78502a775141087fbbc96b44e9def83a3f93e689b",
+      "data_hash": "sha256:7ef45e708c68ad0c57be2c312f36da8d7c83295a12f76f869895ba035a21d9d8",
       "dtype": "<f8",
       "layout": "C",
       "name": "product_buckling_modes",
@@ -241,11 +241,11 @@
       ]
     },
     {
-      "artifact_path": "implementation/phase1/release_evidence/productization/external_modal_buckling_mode_vectors/calculix_buckling_modes.f64le",
+      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/calculix_buckling_modes.f64le",
       "byte_length": 544,
       "byte_order": "little",
-      "content_hash": "sha256:c499b3875bc0823aefd14d54be0b74acbcdc0fada913c49ff1c87bc4cb300415",
-      "data_hash": "sha256:058abb5a45a958b759c366ee1cef2677488f0fef90a5a007cf874b4431b969a1",
+      "content_hash": "sha256:90b2586ae12904b4af6750a4cfce7b3ed1b7ed7ad5b9f020d342eea555fc0128",
+      "data_hash": "sha256:32acd17fc747e805c9bc5c07b8ee4ce39f20ca280951e3848e69702d3e62fac6",
       "dtype": "<f8",
       "layout": "C",
       "name": "calculix_buckling_modes",
@@ -258,14 +258,14 @@
   "mode_vector_storage_profile": "canonical_little_endian_fp64_binary.v1",
   "product_evidence": {
     "buckling_model_hash": "sha256:0e222cde2c47ba863d680edff85a9f31a42c829ad876e4324f8fb763dd745800",
-    "buckling_semantic_result_hash": "sha256:7fb6bedd9a067185b835280b2aeca4e4d7383193f18c1a5682f5c5f6bd61229f",
+    "buckling_semantic_result_hash": "sha256:084ab155872c1d069581c66f2d732fdcea7d574f3760f40ed0c41e3ddbbb138b",
     "modal_model_hash": "sha256:5eb02ed60f6d95cf97d13bfde70ac2ffe94e7cb96ca0159c7d0a9a039a40d17c",
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-23T13:10:24.306916+00:00",
+    "current_product_replay_generated_at": "2026-07-23T13:10:40.575757+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-07-23T13:10:24.306907+00:00",
+    "external_execution_generated_at": "2026-07-23T13:10:40.575750+00:00",
     "external_execution_reused": false,
     "external_runtime_executed_in_this_generation": true,
     "reuse_reason": null
@@ -277,11 +277,11 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:b8ec3933f48d1de716ab86e75f4f638f687163ed74e565a97405e66c26edd8a1",
-        "frd_sha256": "sha256:e8a528f804edd299ea9113425607cf14fcd3fc6dfc39fa42053a62a9fdfef93b",
+        "frd_sha256": "sha256:6d2a398fce3ff6741d0a50c788e4569c28cf81993695fb7bdb4a7f7648a88527",
         "input_deck_sha256": "sha256:2a929ab93c0191b2b45c99ef1b46b956f0fe27f22d7cba99905cee934481825d",
         "return_code": 0,
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:c5beabd05a12e286e632257c03d9993340e2d412d1c58322e9659f52ca848113",
+        "stdout_sha256": "sha256:b0a99df8b27fc5a310788ea6b703b1639890c12ffdee7d5a7bc1d551183efe28",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"

@@ -165,16 +165,21 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
   'category': 'verification',
   'evidence': ['implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json',
                'implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json',
+               'artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json',
+               'benchmarks/clean-runners/opensees-calculix/run_clean_runner.py',
                'scripts/run_external_code_to_code_technical_receipt.py',
                'scripts/run_external_modal_buckling_technical_receipt.py',
+               'scripts/run_external_vv_clean_runner.sh',
                'tests/test_external_code_to_code_technical_receipt.py',
                'tests/test_external_modal_buckling_technical_receipt.py',
+               'tests/test_external_vv_clean_runner_contract.py',
                'docs/external-code-to-code-technical-execution.md'],
   'id': 'vv.opensees_level2',
   'interfaces': ['evidence'],
-  'limitations': ['Fresh pinned technical comparisons pass narrowly, but independent operator '
-                  'attestation, legal review, broader nonlinear coverage, and a Level 2 promotion '
-                  'receipt are absent.'],
+  'limitations': ['Fresh pinned technical comparisons and a same-operator container-isolated '
+                  'replay pass narrowly, including an elastic-state public corotational portal '
+                  'path, but independent operator attestation, legal review, material-nonlinear '
+                  'breadth, and a Level 2 promotion receipt are absent.'],
   'profile': 'independent_operator_promotion_required',
   'public': False,
   'status': 'blocked',

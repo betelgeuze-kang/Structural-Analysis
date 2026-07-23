@@ -6,20 +6,27 @@
 
 ## 실행 범위
 
-`external_code_to_code_technical_execution_receipt.json`은 정확히 세 case를
+`external_code_to_code_technical_execution_receipt.json`은 정확히 네 case를
 기록한다.
 
 | Case | 외부 기준 | 제품 경로 | 비교 항목 | 결과 |
 |---|---|---|---|---|
 | 2자유도 shear modal | OpenSees 3.7.1 | deterministic generalized-eigen modal kernel | 고유값 2개 | PASS |
 | cantilever tip load | OpenSees 3.7.1 | authoritative linear-static frame 경로 | tip 변위, base 전단반력, base 모멘트 | PASS |
+| public corotational portal load path | OpenSees 3.7.1 `Corotational` elastic beam-column | 공개 J1-J5 stateful corotational fiber-frame 경로, 4개 load step | N3/N4 변위·회전 6개, N1/N2 지점반력 6개 | PASS |
 | axial member tip load | CalculiX CrunchiX 2.17 | authoritative linear-static frame 경로 | tip 변위, base 축반력 | PASS |
 
-총 7개 수치 비교가 통과했다. Modal 고유값과 axial 결과의 절대오차는 `0`이고,
-cantilever 반력 두 항목의 최대 절대오차는
-`3.552713678800501e-15`이다. 비교 허용오차는
+총 19개 수치 비교가 통과했다. Modal 고유값과 axial 결과의 절대오차는 `0`이고,
+전체 최대 절대오차는 portal 반력의 `2.438173396512866e-08`, 최대 상대오차는
+`1.4954601238549907e-11`이다. 비교 허용오차는
 `1e-10 + 1e-10 * max(abs(product), abs(reference), 1)`이며 제품 경로의
 fallback과 regularization은 모두 `false`다.
+
+Portal case는 공개 RC fiber section의 초기 탄성 강성 `EA=7,819,200 kN`,
+`EI=200,700 kN·m²`를 OpenSees elastic section에 동일하게 적용한다. 모든 fiber
+stress가 선언된 concrete/steel 강도 경계 안에 있음을 실행 시 검사한다. 따라서
+이 case는 corotational geometry와 공개 J1-J5/exact recovery 연결을 확인하지만,
+재료 비선형, 항복·손상, cyclic breadth를 검증하지 않는다.
 
 ## 런타임과 결속
 
@@ -32,12 +39,12 @@ fallback과 regularization은 모두 `false`다.
 - 외부 package와 runtime은 저장소에 번들하지 않음
 
 현재 receipt artifact hash는
-`sha256:ab4def3d1bc564fab21e7d563a975ad425d08c3b4cea16b1103c0f6c4b6977f1`,
+`sha256:7a47f3671b4fb665630a835c0ff49723f7ae67b70bbb5c0ea8cae87606685ca1`,
 internal source-set hash는
-`sha256:481cd404c4353e144a58071a037f7b39b7631fd7ac9b670b784ffe5846ef03cb`이다.
-Receipt의 `source_commit_sha`는 PR #104 기준
-`b243f083e258327a5556483f6cb61d3124b15acc`이며, 실제 변경 source byte는 별도
-source-set hash로 결속한다.
+`sha256:b91db7c6a86c6f4b45f1fe8b55a95e72cf84a23b6da6e7e6a274641676eaf902`이다.
+Receipt의 `source_commit_sha`는 후보 생성 시 base인
+`91e00a57db8fae1b2975c291f4439acdb75879ae`이며, 후보의 실제 source byte는 별도
+input checksum과 source-set hash로 결속한다.
 
 ## 전체 모델 modal·buckling 추가 영수증
 
@@ -62,13 +69,34 @@ Euler-Bernoulli frame과 CalculiX expanded B32 formulation을 동일하다고
 네 mode matrix는 JSON에 넣지 않는다. `<f8`, C-order, little-endian raw binary
 artifact로 저장하고 shape, byte length, data hash, content hash, repository path를
 receipt에 기록한다. 현재 artifact hash는
-`sha256:1a96b69041ba9b3ab54438ac3da07ceedb8701a072157070698a5355f0c675f0`,
+`sha256:f8e39b1d04913522a18414909dc674f4691b2c56fc98c067663fee9459af2572`,
 source-set hash는
-`sha256:d5e036962c7f0b150f9ee01e9243811c4350a7f2256f74d61dbb5f04b889fec7`다.
+`sha256:5ac041c0c750ee3f45d4be2497c5413d4b871f935c1029d77d7aa21249f5df16`다.
 이 추가 영수증도 제품 법무/재배포 승인, 독립 clean runner, broad corpus,
 published benchmark decision 또는 hierarchy operator manifest를 만들지 않으며
 `verification_level_2=false`, `commercial_equivalence=false`,
 `release_readiness=false`를 유지한다.
+
+## 동일 운영자 격리 clean runner
+
+`benchmarks/clean-runners/opensees-calculix/`는 위 두 영수증을 고정된
+Python 3.11 base image에서 다시 생성한다. 실행 시 repository mount는 read-only,
+runtime network는 `none`, 지정 output mount만 writable이며 다섯 외부 package의
+SHA-256을 추출 전에 검사한다. 생성 bundle은
+`artifacts/vv/opensees_calculix_clean_runner/`에 있고 summary artifact hash는
+`sha256:39f33bbf5a03872fb2c1a9b86daa95bf8fdc343e01f7485fc0a1346699884c0f`다.
+
+호스트와 container의 49개 scalar가 `1e-12 + 1e-12 * scale` 계약을 통과했다.
+최대 절대 delta는 `2.219557870830613e-12`, 최대 상대 delta는
+`1.6209256159527285e-12`다. Model hash는 일치하지만 buckling semantic result
+hash는 실행 환경의 허용오차 내 부동소수점 차이로 동일하지 않다. 따라서 summary는
+`same_operator_container_isolated_reproduction=true`만 기록하고
+`exact_semantic_hash_parity=false`를 보존한다.
+
+이 실행은 동일 운영자가 만든 기술 후보다. 독립 운영자 재현·서명, 법무·재배포
+승인, hierarchy operator manifest가 아니므로 Verification Level 2에 편입하지
+않는다. 함께 실행되는 CalculiX 회귀도 별도 second-solver 로드맵 항목을 폐쇄하지
+않는다.
 
 ## 크레딧 경계
 
@@ -76,7 +104,8 @@ published benchmark decision 또는 hierarchy operator manifest를 만들지 않
 
 - 두 독립 외부 솔버의 실제 로컬 실행
 - 고정된 외부 runtime 버전 확인
-- 세 좁은 code-to-code case의 수치 계약 통과
+- 네 좁은 code-to-code case의 19개 수치 계약 통과
+- 동일 운영자 container-isolated 재현과 호스트/컨테이너 수치 계약 통과
 
 다음은 명시적으로 `false`다.
 
@@ -89,8 +118,8 @@ published benchmark decision 또는 hierarchy operator manifest를 만들지 않
 
 OpenSeesPy license 문구는 내부 사용과 commercial redistribution을 구분하며,
 CalculiX package는 GPL-2 posture를 기록한다. 이 저장소에는 어느 runtime에
-대한 제품 법무 승인도 첨부돼 있지 않다. 또한 독립 clean runner 재현과
-frame/shell/modal/buckling/nonlinear 구조형식 폭이 없다. 따라서 이 receipt를
+대한 제품 법무 승인도 첨부돼 있지 않다. 또한 독립 운영자 clean-runner 재현과
+frame/shell/modal/buckling/material-nonlinear 구조형식 폭이 없다. 따라서 이 receipt를
 `verification_hierarchy_evidence.json`에 넣어 Level 2로 승격하면 안 된다.
 
 ## 오프라인 검사
@@ -100,7 +129,14 @@ PYTHONPATH=src python3 scripts/run_external_code_to_code_technical_receipt.py --
 PYTHONPATH=src python3 scripts/run_external_modal_buckling_technical_receipt.py --check
 PYTHONPATH=src python3 -m pytest -q \
   tests/test_external_code_to_code_technical_receipt.py \
-  tests/test_external_modal_buckling_technical_receipt.py
+  tests/test_external_modal_buckling_technical_receipt.py \
+  tests/test_external_vv_clean_runner_contract.py
+```
+
+외부 asset directory가 준비된 재현 명령은 다음과 같다.
+
+```bash
+scripts/run_external_vv_clean_runner.sh <external-asset-directory>
 ```
 
 `--check`는 저장된 receipt의 schema, artifact hash, 내부 source checksum,
