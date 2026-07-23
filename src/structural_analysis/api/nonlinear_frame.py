@@ -333,6 +333,12 @@ def validate_nonlinear_frame_result(
         or (
             result.metrics.get("sparse_backend_used") is True
             and result.metrics.get("native_sparse_assembly_used") is True
+            and result.metrics.get("sparse_factorization_diagnostics_passed") is True
+            and int(result.metrics.get("sparse_factorization_count", 0)) > 0
+            and len(result.metrics.get("sparse_factorization_diagnostic_hashes", ()))
+            == int(result.metrics.get("sparse_factorization_count", 0))
+            and isinstance(result.metrics.get("sparse_factorization_policy_hash"), str)
+            and result.metrics["sparse_factorization_policy_hash"].startswith("sha256:")
         )
     )
     ready = bool(
@@ -578,10 +584,10 @@ def _analyze_corotational_portal(
                 "solver_executed": execution is not None,
                 "exact_engineering_recovery": False,
                 "exact_checkpoint_chain_replay": False,
-                "fallback_count": 0,
-                "regularization_count": 0,
-                "sparse_backend_used": False,
-                "native_sparse_assembly_used": False,
+                **_corotational_linear_solver_metrics(
+                    execution,
+                    matrix_backend=config.matrix_backend,
+                ),
                 "external_level2_attached": False,
             },
             unsupported_features=tuple(unsupported),
@@ -627,21 +633,9 @@ def _analyze_corotational_portal(
         "newly_solved_step_count": execution.newly_solved_step_count,
         "committed_step_count": len(execution.path.steps),
         "terminal_solved_load_factor": execution.path.final_checkpoint.load_factor,
-        "fallback_count": sum(
-            int(bool(step.metrics.get("fallback_used")))
-            for step in execution.path.steps
-        ),
-        "regularization_count": sum(
-            int(bool(step.metrics.get("regularization_used")))
-            for step in execution.path.steps
-        ),
-        "sparse_backend_used": all(
-            bool(step.metrics.get("sparse_backend_used"))
-            for step in execution.path.steps
-        ),
-        "native_sparse_assembly_used": all(
-            bool(step.metrics.get("native_sparse_assembly_used"))
-            for step in execution.path.steps
+        **_corotational_linear_solver_metrics(
+            execution,
+            matrix_backend=config.matrix_backend,
         ),
         "external_level2_attached": False,
         **dict(engineering.metrics),
@@ -1477,6 +1471,89 @@ def _result_payload(
 
 def _artifact_hash(data: bytes | bytearray | memoryview) -> str:
     return "sha256:" + hashlib.sha256(bytes(data)).hexdigest()
+
+
+def _corotational_linear_solver_metrics(
+    execution: _CorotationalExecution | None,
+    *,
+    matrix_backend: str,
+) -> dict[str, Any]:
+    steps = execution.path.steps if execution is not None else ()
+    sparse_selected = matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+    factorization_count = sum(
+        int(step.metrics.get("sparse_factorization_count", 0)) for step in steps
+    )
+    diagnostic_hashes = [
+        diagnostic_hash
+        for step in steps
+        for diagnostic_hash in step.metrics.get(
+            "sparse_factorization_diagnostic_hashes", ()
+        )
+    ]
+    policy_hashes = {
+        str(step.metrics["sparse_factorization_policy_hash"])
+        for step in steps
+        if step.metrics.get("sparse_factorization_policy_hash") is not None
+    }
+    return {
+        "fallback_count": sum(
+            int(bool(step.metrics.get("fallback_used"))) for step in steps
+        ),
+        "regularization_count": sum(
+            int(bool(step.metrics.get("regularization_used"))) for step in steps
+        ),
+        "sparse_backend_used": bool(
+            sparse_selected
+            and steps
+            and all(bool(step.metrics.get("sparse_backend_used")) for step in steps)
+        ),
+        "native_sparse_assembly_used": bool(
+            sparse_selected
+            and steps
+            and all(
+                bool(step.metrics.get("native_sparse_assembly_used")) for step in steps
+            )
+        ),
+        "sparse_factorization_count": factorization_count,
+        "sparse_factorization_diagnostics_passed": (
+            bool(
+                factorization_count > 0
+                and len(diagnostic_hashes) == factorization_count
+                and all(
+                    step.metrics.get("sparse_factorization_diagnostics_passed") is True
+                    for step in steps
+                )
+            )
+            if sparse_selected and steps
+            else None
+        ),
+        "sparse_factorization_max_condition_number_1": _optional_max(
+            step.metrics.get("sparse_factorization_max_condition_number_1")
+            for step in steps
+        ),
+        "sparse_factorization_min_normalized_absolute_pivot": _optional_min(
+            step.metrics.get("sparse_factorization_min_normalized_absolute_pivot")
+            for step in steps
+        ),
+        "sparse_factorization_max_backward_error": _optional_max(
+            step.metrics.get("sparse_factorization_max_backward_error")
+            for step in steps
+        ),
+        "sparse_factorization_diagnostic_hashes": diagnostic_hashes,
+        "sparse_factorization_policy_hash": (
+            next(iter(policy_hashes)) if len(policy_hashes) == 1 else None
+        ),
+    }
+
+
+def _optional_max(values: Any) -> float | None:
+    normalized = [float(value) for value in values if value is not None]
+    return max(normalized) if normalized else None
+
+
+def _optional_min(values: Any) -> float | None:
+    normalized = [float(value) for value in values if value is not None]
+    return min(normalized) if normalized else None
 
 
 def _binary_coordinate_scale(maximum_member_length_m: float) -> float:

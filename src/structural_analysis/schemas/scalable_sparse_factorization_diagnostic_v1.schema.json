@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/scalable_sparse_factorization_diagnostic_v1.schema.json",
+  "title": "Scalable sparse factorization diagnostic v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "diagnostic_hash",
+    "status",
+    "contract_pass",
+    "failure_code",
+    "backend",
+    "ordering",
+    "condition_estimate_method",
+    "condition_estimate_is_exact",
+    "policy",
+    "equation_count",
+    "input_nnz",
+    "input_pattern_hash",
+    "input_numeric_hash",
+    "rhs_hash",
+    "factor_l_nnz",
+    "factor_u_nnz",
+    "factor_fill_ratio",
+    "absolute_pivot_minimum",
+    "absolute_pivot_maximum",
+    "normalized_absolute_pivot_minimum",
+    "inverse_solve_block_size",
+    "inverse_solve_block_count",
+    "condition_number_1",
+    "backward_error",
+    "solution_hash",
+    "permutation_row_hash",
+    "permutation_column_hash",
+    "checks",
+    "claims",
+    "claim_boundary",
+    "regularization_used",
+    "fallback_used"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "sparse-superlu-blocked-exact-factorization-diagnostic.v1"
+    },
+    "diagnostic_hash": {"$ref": "#/$defs/hash"},
+    "status": {"enum": ["pass", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "failure_code": {"type": ["string", "null"]},
+    "backend": {"const": "scipy_superlu_splu_cpu"},
+    "ordering": {"const": "COLAMD"},
+    "condition_estimate_method": {
+      "const": "blocked_exact_inverse_column_solve_matrix_1_norm.v1"
+    },
+    "condition_estimate_is_exact": {"const": true},
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "maximum_condition_number_1",
+        "minimum_normalized_absolute_pivot",
+        "maximum_backward_error",
+        "maximum_equations",
+        "inverse_solve_block_size",
+        "condition_estimate_is_exact",
+        "regularization_allowed",
+        "fallback_allowed",
+        "policy_hash"
+      ],
+      "properties": {
+        "policy_id": {
+          "const": "experimental_blocked_exact_sparse_factorization_fail_closed.v1"
+        },
+        "maximum_condition_number_1": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minimum_normalized_absolute_pivot": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maximum_backward_error": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maximum_equations": {"type": "integer", "minimum": 1},
+        "inverse_solve_block_size": {"type": "integer", "minimum": 1},
+        "condition_estimate_is_exact": {"const": true},
+        "regularization_allowed": {"const": false},
+        "fallback_allowed": {"const": false},
+        "policy_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "equation_count": {"type": "integer", "minimum": 1},
+    "input_nnz": {"type": "integer", "minimum": 1},
+    "input_pattern_hash": {"$ref": "#/$defs/hash"},
+    "input_numeric_hash": {"$ref": "#/$defs/hash"},
+    "rhs_hash": {"$ref": "#/$defs/hash"},
+    "factor_l_nnz": {"type": "integer", "minimum": 1},
+    "factor_u_nnz": {"type": "integer", "minimum": 1},
+    "factor_fill_ratio": {"type": "number", "minimum": 0},
+    "absolute_pivot_minimum": {"type": "number", "minimum": 0},
+    "absolute_pivot_maximum": {"type": "number", "minimum": 0},
+    "normalized_absolute_pivot_minimum": {"type": "number", "minimum": 0},
+    "inverse_solve_block_size": {"type": "integer", "minimum": 1},
+    "inverse_solve_block_count": {"type": "integer", "minimum": 1},
+    "condition_number_1": {"type": "number", "minimum": 0},
+    "backward_error": {"type": "number", "minimum": 0},
+    "solution_hash": {"$ref": "#/$defs/hash"},
+    "permutation_row_hash": {"$ref": "#/$defs/hash"},
+    "permutation_column_hash": {"$ref": "#/$defs/hash"},
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "factorization_succeeded",
+        "solution_finite",
+        "condition_number_exact",
+        "condition_number_within_policy",
+        "normalized_pivot_within_policy",
+        "backward_error_within_policy",
+        "regularization_not_used",
+        "fallback_not_used"
+      ],
+      "properties": {
+        "factorization_succeeded": {"type": "boolean"},
+        "solution_finite": {"type": "boolean"},
+        "condition_number_exact": {"type": "boolean"},
+        "condition_number_within_policy": {"type": "boolean"},
+        "normalized_pivot_within_policy": {"type": "boolean"},
+        "backward_error_within_policy": {"type": "boolean"},
+        "regularization_not_used": {"type": "boolean"},
+        "fallback_not_used": {"type": "boolean"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bounded_larger_system_exact_diagnostic_only",
+        "production_scale_sparse_policy",
+        "integrated_nonlinear_3d_backend",
+        "external_vv",
+        "release_authority"
+      ],
+      "properties": {
+        "bounded_larger_system_exact_diagnostic_only": {"const": true},
+        "production_scale_sparse_policy": {"const": false},
+        "integrated_nonlinear_3d_backend": {"const": false},
+        "external_vv": {"const": false},
+        "release_authority": {"const": false}
+      }
+    },
+    "claim_boundary": {
+      "const": "Experimental CPU-only exact conditioning for at most 1536 equations. The blockwise inverse-column solve remains quadratic-work diagnostic evidence and is not yet wired into a nonlinear 3D backend; it is not a public or production-scale sparse policy, external V&V, performance evidence, or release authority."
+    },
+    "regularization_used": {"const": false},
+    "fallback_used": {"const": false}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

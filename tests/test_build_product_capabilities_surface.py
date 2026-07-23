@@ -61,10 +61,10 @@ def test_product_capabilities_surface_is_generated_from_canonical_registry() -> 
         "mutation_allowed": False,
     }
     assert surface["canonical_registry"] == "artifacts/manifests/capabilities.yaml"
-    assert surface["capability_count"] == 17
+    assert surface["capability_count"] == 18
     assert surface["ready_capability_count"] == 10
     assert surface["blocked_capability_count"] == 4
-    assert surface["experimental_capability_count"] == 2
+    assert surface["experimental_capability_count"] == 3
     assert surface["shadow_only_capability_count"] == 1
     assert surface["product_capabilities_ready"] is False
     assert surface["blocked_capability_register_count"] == 4

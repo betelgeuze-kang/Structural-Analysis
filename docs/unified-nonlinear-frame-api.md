@@ -25,8 +25,9 @@ For a ready corotational result, the API binds:
 6. an explicit dense or native COO/CSR backend choice with no fallback.
 
 The corotational profile accepts `numpy_linalg_solve_dense` or
-`scipy_sparse_spsolve_cpu`. The sparse choice scatters member tangents directly
-to COO and canonical sorted CSR; see
+`scipy_sparse_spsolve_cpu`. The sparse selector scatters member tangents directly
+to COO and canonical sorted CSR, then applies unregularized SuperLU/COLAMD with a
+schema-validated exact conditioning receipt for every factorization; see
 [Corotational Fiber-Frame Native Sparse Assembly](corotational-fiber-frame-native-sparse.md).
 The fixed-chord profile remains dense-only.
 
@@ -50,7 +51,7 @@ structural-analysis-nonlinear-frame \
 
 The same envelope preserves the existing fixed-chord authority while converting
 fiber stress output from MPa to Pa. The corotational endpoint remains a bounded
-Developer Preview candidate. General topology, sparse factorization and conditioning
-diagnostics, member features, direct displacement control, both
+Developer Preview candidate. General topology, production-scale conditioning,
+member features, direct displacement control, both
 independent Level 2 comparisons, design-code authority, and release promotion
 remain separate gates.

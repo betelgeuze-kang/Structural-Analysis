@@ -276,8 +276,35 @@ def test_corotational_public_api_exposes_native_sparse_full_si_parity(
     assert sparse.configuration["stiffness_storage"] == "scipy_sparse_csr"
     assert sparse.metrics["sparse_backend_used"] is True
     assert sparse.metrics["native_sparse_assembly_used"] is True
+    assert sparse.metrics["sparse_factorization_count"] > 0
+    assert sparse.metrics["sparse_factorization_diagnostics_passed"] is True
+    assert sparse.metrics["sparse_factorization_max_condition_number_1"] < 1.0e12
+    assert sparse.metrics["sparse_factorization_max_backward_error"] <= 1.0e-12
+    assert (
+        len(sparse.metrics["sparse_factorization_diagnostic_hashes"])
+        == sparse.metrics["sparse_factorization_count"]
+    )
+    assert str(sparse.metrics["sparse_factorization_policy_hash"]).startswith("sha256:")
     assert sparse.metrics["fallback_count"] == 0
     assert sparse.metrics["regularization_count"] == 0
+
+    tampered = replace(
+        sparse,
+        metrics={
+            **dict(sparse.metrics),
+            "sparse_factorization_diagnostics_passed": False,
+        },
+        result_hash="sha256:" + "0" * 64,
+    )
+    tampered = replace(
+        tampered,
+        result_hash=nonlinear_frame_api.canonical_hash(
+            nonlinear_frame_api._result_payload(tampered, include_hash=False)
+        ),
+    )
+    with pytest.raises(ValueError, match="contract_pass differs"):
+        validate_nonlinear_frame_result(tampered)
+
     _assert_normalized_rows_close(sparse.node_displacements, dense.node_displacements)
     _assert_normalized_rows_close(sparse.support_reactions, dense.support_reactions)
     _assert_normalized_rows_close(sparse.member_end_forces, dense.member_end_forces)

@@ -151,7 +151,7 @@
       "authority": "bounded_j1_j5_and_exact_engineering_recovery_candidate",
       "interfaces": ["python_api", "cli"],
       "profile": "corotational_one_bay_portal.v1",
-      "limitations": ["One-bay, one-story load-control CPU dense or native COO/CSR portal candidate only; general topology, sparse factorization and conditioning diagnostics, member features, direct displacement control, both independent Level 2 comparisons, and release promotion remain open."],
+      "limitations": ["One-bay, one-story load-control CPU dense or native COO/CSR portal candidate only; general topology, member features, direct displacement control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."],
       "evidence": [
         "docs/unified-nonlinear-frame-api.md",
         "docs/corotational-fiber-frame-native-sparse.md",
@@ -162,6 +162,28 @@
         "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json",
         "tests/test_corotational_fiber_frame_sparse.py",
         "tests/test_unified_nonlinear_frame_api.py"
+      ]
+    },
+    {
+      "id": "backend.nonlinear_sparse",
+      "title": "Native sparse nonlinear backend",
+      "category": "backend",
+      "status": "experimental",
+      "public": false,
+      "authority": "bounded_native_coo_csr_and_fail_closed_exact_conditioning_candidate",
+      "interfaces": ["python_api", "cli", "internal_python"],
+      "profile": "corotational_element_triplet_coalesce_sorted_csr_fp64_plus_blocked_exact_1536.v1",
+      "limitations": ["The public exact-conditioning path remains bounded to 256 equations. A separate standalone CPU-only blocked exact diagnostic is bounded to 1536 equations but is not yet wired into a nonlinear 3D backend. Exact inverse-column conditioning has quadratic work and does not close production-scale policy, performance or memory evidence, external V&V, or release promotion."],
+      "evidence": [
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py",
+        "src/structural_analysis/solvers/nonlinear/sparse_factorization.py",
+        "src/structural_analysis/solvers/nonlinear/scalable_sparse_factorization.py",
+        "src/structural_analysis/schemas/sparse_factorization_diagnostic_v1.schema.json",
+        "src/structural_analysis/schemas/scalable_sparse_factorization_diagnostic_v1.schema.json",
+        "tests/test_corotational_fiber_frame_sparse.py",
+        "tests/test_sparse_factorization_diagnostics.py",
+        "tests/test_scalable_sparse_factorization.py",
+        "docs/sparse-factorization-conditioning-diagnostics.md"
       ]
     },
     {
