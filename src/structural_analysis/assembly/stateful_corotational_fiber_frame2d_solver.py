@@ -181,6 +181,10 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
             solver_config.matrix_backend != VECTOR_SPARSE_MATRIX_BACKEND
             or solution.metrics.get("native_sparse_assembly_used") is True
         )
+        and (
+            solver_config.matrix_backend != VECTOR_SPARSE_MATRIX_BACKEND
+            or solution.metrics.get("sparse_factorization_diagnostics_passed") is True
+        )
     )
     parent_binding = bool(
         trial_assembly.parent_checkpoint_hash == accepted_checkpoint.state_hash
@@ -282,6 +286,39 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
                 solution.metrics.get("native_sparse_assembly_used")
             ),
             "stiffness_storage": solution.metrics.get("stiffness_storage"),
+            "sparse_factorization_backend": solution.metrics.get(
+                "sparse_factorization_backend"
+            ),
+            "sparse_factorization_count": int(
+                solution.metrics.get("sparse_factorization_count", 0)
+            ),
+            "sparse_factorization_diagnostics_passed": solution.metrics.get(
+                "sparse_factorization_diagnostics_passed"
+            ),
+            "sparse_factorization_max_condition_number_1": solution.metrics.get(
+                "sparse_factorization_max_condition_number_1"
+            ),
+            "sparse_factorization_min_normalized_absolute_pivot": (
+                solution.metrics.get(
+                    "sparse_factorization_min_normalized_absolute_pivot"
+                )
+            ),
+            "sparse_factorization_max_backward_error": solution.metrics.get(
+                "sparse_factorization_max_backward_error"
+            ),
+            "sparse_factorization_diagnostic_hashes": [
+                row["diagnostic_hash"]
+                for row in solution.metrics.get("sparse_factorization_diagnostics", ())
+            ],
+            "sparse_factorization_policy_hash": next(
+                (
+                    row["policy"]["policy_hash"]
+                    for row in solution.metrics.get(
+                        "sparse_factorization_diagnostics", ()
+                    )
+                ),
+                None,
+            ),
             "committed": committed,
             "rollback_exact": rollback_exact,
             "yielded_member_count": sum(

@@ -148,9 +148,10 @@ python -m structural_analysis.api.nonlinear_frame_cli \
 ```
 
 The portal path supports dense or native COO/CSR Newton tangent assembly, returns
-exact local contract results and an epoch-zero checkpoint chain, but remains a
-bounded candidate until both independent Level 2 slots and the remaining promotion
-gates pass. Sparse factorization/conditioning diagnostics are a later gate.
+exact local contract results and an epoch-zero checkpoint chain, and binds each sparse
+solve to an unregularized SuperLU/COLAMD factorization and exact conditioning receipt.
+It remains a bounded candidate until both independent Level 2 slots and the remaining
+promotion gates pass; production-scale conditioning remains a later gate.
 
 Generated readiness and evidence artifacts are source-derived. Do not hand-edit them or infer a broader claim from a passing bounded benchmark.
 
@@ -170,7 +171,8 @@ This table is generated from artifacts/manifests/capabilities.yaml. Do not edit 
 | Nonlinear two-bar truss | bounded_public | yes | bounded_material_geometric_newton | python_api, cli | symmetric_two_bar_material_geometric_v1; The profile does not generalize to arbitrary truss or frame topology. |
 | Fixed-chord RC fiber frame | bounded_public | yes | exact_reaction_member_section_fiber_recovery | python_api, cli | planar_serial_cantilever_explicit_rectangular_rc.v1; Serial cantilever only; zero prescribed movement; dense CPU load control. |
 | ResultIR SI quantity and tolerance catalog | bounded_public | yes | comparison_contract_only_no_result_promotion | python_api, json_schema | hashed_si_quantity_catalog_and_absolute_plus_relative_linf_v1; Defines fixed SI units and comparison tolerances only; it cannot create solver authority or make corotational output public. |
-| Corotational 2D fiber frame | experimental | no | bounded_j1_j5_and_exact_engineering_recovery_candidate | python_api, cli | corotational_one_bay_portal.v1; One-bay, one-story load-control CPU dense or native COO/CSR portal candidate only; general topology, sparse factorization and conditioning diagnostics, member features, direct displacement control, both independent Level 2 comparisons, and release promotion remain open. |
+| Corotational 2D fiber frame | experimental | no | bounded_j1_j5_and_exact_engineering_recovery_candidate | python_api, cli | corotational_one_bay_portal.v1; One-bay, one-story load-control CPU dense or native COO/CSR portal candidate only; general topology, member features, direct displacement control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open. |
+| Native sparse nonlinear backend | experimental | no | bounded_native_coo_csr_and_fail_closed_exact_conditioning_candidate | python_api, cli, internal_python | corotational_element_triplet_coalesce_sorted_csr_fp64_plus_blocked_exact_1536.v1; The public exact-conditioning path remains bounded to 256 equations. A separate standalone CPU-only blocked exact diagnostic is bounded to 1536 equations but is not yet wired into a nonlinear 3D backend. Exact inverse-column conditioning has quadratic work and does not close production-scale policy, performance or memory evidence, external V&V, or release promotion. |
 | OpenSees Level 2 verification | blocked | no | none | evidence | independent_operator_promotion_required; Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent. |
 | Second independent solver Level 2 verification | blocked | no | none | evidence | independent_operator_promotion_required; Fresh pinned CalculiX comparisons pass narrowly, but independent operator attestation, legal review, broader coverage, and a second-solver Level 2 promotion receipt are absent. |
 | Cyclic corotational fiber-frame benchmarks | experimental | no | bounded_repository_benchmark_candidate | internal_python, evidence | two_member_planar_material_state_commit_rollback.v1; Repository-generated steel, concrete, composite, and link cases only; no published cyclic acceptance, 3D response, or release authority. |

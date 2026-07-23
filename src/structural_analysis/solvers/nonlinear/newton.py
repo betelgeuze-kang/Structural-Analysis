@@ -6,11 +6,15 @@ from dataclasses import dataclass, field
 import hashlib
 import math
 from typing import Any, Protocol
-import warnings
 
 import numpy as np
 from scipy.sparse import csr_matrix, issparse
-from scipy.sparse.linalg import MatrixRankWarning, spsolve
+
+from structural_analysis.solvers.nonlinear.sparse_factorization import (
+    SPARSE_FACTORIZATION_BACKEND,
+    SparseFactorizationError,
+    factorize_and_solve_sparse,
+)
 
 RESIDUAL_FORMULA = "F_internal_minus_F_external"
 RESIDUAL_FORMULA_HASH = (
@@ -213,14 +217,14 @@ def _solve_vector_increment(
     residual_kn: np.ndarray,
     *,
     matrix_backend: str,
-) -> np.ndarray:
+) -> tuple[np.ndarray, dict[str, Any] | None]:
     if matrix_backend == VECTOR_MATRIX_BACKEND:
         dense_jacobian = (
             jacobian_kn_per_m.toarray()
             if issparse(jacobian_kn_per_m)
             else np.asarray(jacobian_kn_per_m, dtype=float)
         )
-        return np.linalg.solve(dense_jacobian, -residual_kn)
+        return np.linalg.solve(dense_jacobian, -residual_kn), None
     if matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND:
         sparse_jacobian = (
             jacobian_kn_per_m.tocsr(copy=True)
@@ -235,16 +239,46 @@ def _solve_vector_increment(
             residual_kn.size,
         ) or not np.all(np.isfinite(sparse_jacobian.data)):
             raise np.linalg.LinAlgError("sparse vector tangent is invalid")
-        with warnings.catch_warnings():
-            warnings.simplefilter("error", MatrixRankWarning)
-            increment = spsolve(sparse_jacobian, -residual_kn)
-        increment = np.asarray(increment, dtype=float)
+        solved = factorize_and_solve_sparse(sparse_jacobian, -residual_kn)
+        increment = np.asarray(solved.solution, dtype=float)
         if increment.shape != residual_kn.shape or not np.all(np.isfinite(increment)):
             raise np.linalg.LinAlgError(
                 "sparse vector solve returned invalid increment"
             )
-        return increment
+        return increment, solved.diagnostic.to_manifest()
     raise ValueError(f"unsupported vector matrix backend: {matrix_backend}")
+
+
+def _sparse_factorization_metadata(
+    diagnostics: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if not diagnostics:
+        return {
+            "sparse_factorization_backend": None,
+            "sparse_factorization_count": 0,
+            "sparse_factorization_diagnostics_passed": None,
+            "sparse_factorization_max_condition_number_1": None,
+            "sparse_factorization_min_normalized_absolute_pivot": None,
+            "sparse_factorization_max_backward_error": None,
+            "sparse_factorization_diagnostics": [],
+        }
+    return {
+        "sparse_factorization_backend": SPARSE_FACTORIZATION_BACKEND,
+        "sparse_factorization_count": len(diagnostics),
+        "sparse_factorization_diagnostics_passed": all(
+            row.get("contract_pass") is True for row in diagnostics
+        ),
+        "sparse_factorization_max_condition_number_1": max(
+            float(row["condition_number_1"]) for row in diagnostics
+        ),
+        "sparse_factorization_min_normalized_absolute_pivot": min(
+            float(row["normalized_absolute_pivot_minimum"]) for row in diagnostics
+        ),
+        "sparse_factorization_max_backward_error": max(
+            float(row["backward_error"]) for row in diagnostics
+        ),
+        "sparse_factorization_diagnostics": list(diagnostics),
+    }
 
 
 @dataclass(frozen=True)
@@ -317,6 +351,7 @@ def _no_solve_reaction_only_vector_solution(
         "sparse_backend_used": False,
         "native_sparse_assembly_used": False,
         "stiffness_storage": "none",
+        **_sparse_factorization_metadata([]),
         "terminal_disposition": NO_SOLVE_REACTION_ONLY_DISPOSITION,
         "terminal_reason": detail,
         "solver_executed": False,
@@ -481,6 +516,7 @@ def newton_raphson_vector(
     regularization_used = False
     fallback_used = False
     native_sparse_assembly_used = False
+    sparse_factorization_diagnostics: list[dict[str, Any]] = []
 
     for iteration in range(cfg.max_iterations + 1):
         residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
@@ -492,12 +528,19 @@ def newton_raphson_vector(
         residual_gate_passed = relative_residual <= cfg.residual_tolerance
 
         try:
-            newton_increment_m = _solve_vector_increment(
+            newton_increment_m, factorization_diagnostic = _solve_vector_increment(
                 jacobian_kn_per_m,
                 residual_kn,
                 matrix_backend=cfg.matrix_backend,
             )
-        except (np.linalg.LinAlgError, ValueError, MatrixRankWarning):
+            if factorization_diagnostic is not None:
+                sparse_factorization_diagnostics.append(factorization_diagnostic)
+        except (np.linalg.LinAlgError, ValueError) as error:
+            if (
+                isinstance(error, SparseFactorizationError)
+                and error.diagnostic is not None
+            ):
+                sparse_factorization_diagnostics.append(error.diagnostic.to_manifest())
             return _blocked_vector_solution(
                 problem,
                 cfg,
@@ -505,10 +548,15 @@ def newton_raphson_vector(
                 history=history,
                 line_search_history=line_search_history,
                 detail=(
-                    "singular_tangent_stiffness_at_residual_gate"
-                    if residual_gate_passed
-                    else "singular_tangent_stiffness"
+                    error.code
+                    if isinstance(error, SparseFactorizationError)
+                    else (
+                        "singular_tangent_stiffness_at_residual_gate"
+                        if residual_gate_passed
+                        else "singular_tangent_stiffness"
+                    )
                 ),
+                sparse_factorization_diagnostics=sparse_factorization_diagnostics,
             )
         residual_based_increment_abs = float(
             np.linalg.norm(newton_increment_m, ord=np.inf)
@@ -579,6 +627,7 @@ def newton_raphson_vector(
                 history=history,
                 line_search_history=line_search_history,
                 detail="line_search_failed_to_reduce_residual",
+                sparse_factorization_diagnostics=sparse_factorization_diagnostics,
             )
 
         free_displacements_m = next_displacement_m
@@ -590,6 +639,7 @@ def newton_raphson_vector(
                 history=history,
                 line_search_history=line_search_history,
                 detail="max_iterations_exceeded",
+                sparse_factorization_diagnostics=sparse_factorization_diagnostics,
             )
     else:
         return _blocked_vector_solution(
@@ -599,6 +649,7 @@ def newton_raphson_vector(
             history=history,
             line_search_history=line_search_history,
             detail="iteration_loop_exhausted",
+            sparse_factorization_diagnostics=sparse_factorization_diagnostics,
         )
 
     final_residual, final_jacobian = problem.assemble(free_displacements_m)
@@ -612,7 +663,19 @@ def newton_raphson_vector(
     increment_gate_passed = final_increment_abs <= cfg.increment_tolerance or (
         history[-1]["iteration"] == 0 and residual_gate_passed
     )
-    contract_pass = residual_gate_passed and increment_gate_passed
+    sparse_factorization_contract = bool(
+        cfg.matrix_backend != VECTOR_SPARSE_MATRIX_BACKEND
+        or (
+            sparse_factorization_diagnostics
+            and all(
+                row.get("contract_pass") is True
+                for row in sparse_factorization_diagnostics
+            )
+        )
+    )
+    contract_pass = bool(
+        residual_gate_passed and increment_gate_passed and sparse_factorization_contract
+    )
     metrics = {
         "case_id": problem.case_id,
         "free_displacements_m": free_displacements_m.tolist(),
@@ -636,6 +699,7 @@ def newton_raphson_vector(
             cfg.matrix_backend,
             native_sparse_assembly_used=native_sparse_assembly_used,
         ),
+        **_sparse_factorization_metadata(sparse_factorization_diagnostics),
         "residual_tolerance": cfg.residual_tolerance,
         "increment_tolerance": cfg.increment_tolerance,
         "residual_gate_passed": residual_gate_passed,
@@ -671,6 +735,7 @@ def _blocked_vector_solution(
     history: list[dict[str, Any]],
     line_search_history: list[dict[str, Any]],
     detail: str,
+    sparse_factorization_diagnostics: list[dict[str, Any]] | None = None,
 ) -> NewtonRaphsonVectorSolution:
     residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
     residual_kn = np.asarray(residual_kn, dtype=float)
@@ -700,6 +765,7 @@ def _blocked_vector_solution(
             "convergence_claim": False,
             "reaction_observation_only": False,
             **backend_metadata,
+            **_sparse_factorization_metadata(sparse_factorization_diagnostics or []),
             "residual_gate_passed": False,
             "increment_gate_passed": False,
             "regularization_used": False,

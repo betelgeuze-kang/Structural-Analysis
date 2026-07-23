@@ -1,8 +1,9 @@
 # Corotational Fiber-Frame Native Sparse Assembly
 
-The bounded one-bay corotational portal supports a CPU sparse backend identified as
-`scipy_sparse_spsolve_cpu`. Each member integrates its stateful consistent tangent
-once per trial and scatters only free/free entries into COO triplets. Duplicate
+The bounded one-bay corotational portal supports a CPU sparse selector identified as
+`scipy_sparse_spsolve_cpu`. Its Newton solve now uses unregularized SuperLU `splu`
+with `COLAMD` and fail-closed factorization diagnostics. Each member integrates its
+stateful consistent tangent once per trial and scatters only free/free entries into COO triplets. Duplicate
 entries are summed, explicit zeros are removed, and column indices are sorted to
 form canonical CSR. The Newton solve receives that CSR directly; it is not created
 by converting a previously assembled dense global tangent.
@@ -25,9 +26,11 @@ The final accepted-state record is rebuilt through the existing immutable assemb
 record for checkpoint commit and exact engineering recovery. This is not a linear
 solve fallback: every Newton tangent requested under the sparse backend is assembled
 as native COO/CSR, and the contract blocks if that fact is not observed. The result
-records backend, storage, sparse-assembly use, fallback, and regularization state.
+records backend, storage, sparse-assembly use, factorization receipt hashes, fallback,
+and regularization state. See
+[Sparse Factorization and Conditioning Diagnostics](sparse-factorization-conditioning-diagnostics.md).
 
-This slice does not add factorization/conditioning diagnostics, production-scale
-performance or memory evidence, general connected topology, member features, direct
+The exact public diagnostic remains capped at 256 equations. This slice does not add
+production-scale conditioning policy, performance or memory evidence, general connected topology, member features, direct
 displacement control, external Level 2 validation, design authority, or release
 authority. Those remain separate roadmap gates.

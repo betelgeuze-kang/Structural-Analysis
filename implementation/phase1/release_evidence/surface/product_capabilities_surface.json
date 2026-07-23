@@ -85,7 +85,7 @@
   "blocked_capability_register_count": 4,
   "blockers": [],
   "canonical_registry": "artifacts/manifests/capabilities.yaml",
-  "capability_count": 17,
+  "capability_count": 18,
   "capability_rows": [
     {
       "blocker_count": 0,
@@ -339,12 +339,45 @@
           "cli"
         ],
         "limitations": [
-          "One-bay, one-story load-control CPU dense or native COO/CSR portal candidate only; general topology, sparse factorization and conditioning diagnostics, member features, direct displacement control, both independent Level 2 comparisons, and release promotion remain open."
+          "One-bay, one-story load-control CPU dense or native COO/CSR portal candidate only; general topology, member features, direct displacement control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."
         ],
         "profile": "corotational_one_bay_portal.v1",
         "public": false
       },
       "title": "Corotational 2D fiber frame"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "backend.nonlinear_sparse",
+      "capability_kind": "backend",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py",
+        "src/structural_analysis/solvers/nonlinear/sparse_factorization.py",
+        "src/structural_analysis/solvers/nonlinear/scalable_sparse_factorization.py",
+        "src/structural_analysis/schemas/sparse_factorization_diagnostic_v1.schema.json",
+        "src/structural_analysis/schemas/scalable_sparse_factorization_diagnostic_v1.schema.json",
+        "tests/test_corotational_fiber_frame_sparse.py",
+        "tests/test_sparse_factorization_diagnostics.py",
+        "tests/test_scalable_sparse_factorization.py",
+        "docs/sparse-factorization-conditioning-diagnostics.md"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_native_coo_csr_and_fail_closed_exact_conditioning_candidate",
+        "interfaces": [
+          "python_api",
+          "cli",
+          "internal_python"
+        ],
+        "limitations": [
+          "The public exact-conditioning path remains bounded to 256 equations. A separate standalone CPU-only blocked exact diagnostic is bounded to 1536 equations but is not yet wired into a nonlinear 3D backend. Exact inverse-column conditioning has quadratic work and does not close production-scale policy, performance or memory evidence, external V&V, or release promotion."
+        ],
+        "profile": "corotational_element_triplet_coalesce_sorted_csr_fp64_plus_blocked_exact_1536.v1",
+        "public": false
+      },
+      "title": "Native sparse nonlinear backend"
     },
     {
       "blocker_count": 1,
@@ -545,7 +578,7 @@
   "claim_locked": false,
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
-  "experimental_capability_count": 2,
+  "experimental_capability_count": 3,
   "first_blocked_capability": {
     "blocker_count": 1,
     "capability_id": "vv.opensees_level2",
@@ -569,9 +602,9 @@
   "first_blocked_capability_id": "vv.opensees_level2",
   "first_blocked_capability_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-23T04:37:50.888413+00:00",
+  "generated_at": "2026-07-23T05:53:26.779003+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:440793a336ce84e080512f0f4c53f43bc5b2b1d4e114da63770c650cc243b20d",
+    "artifacts/manifests/capabilities.yaml": "sha256:23c74330cc23e4811f61492f3fd8a17145e56d0520a4d759365680451bf9bd89",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -602,7 +635,7 @@
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "0c2a5abd8a5154901f0a01ecbc68b58b6e9fbc02",
+  "source_commit_sha": "d2e3d5a91180401b94277db6fe89986389921ff9",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",
@@ -628,7 +661,7 @@
     "title": "Restricted alpha structural solver evidence"
   },
   "status": "ready",
-  "summary_line": "Product capabilities surface: READY | capabilities=17 | ready=10 | experimental=2 | shadow_only=1 | blocked=4",
+  "summary_line": "Product capabilities surface: READY | capabilities=18 | ready=10 | experimental=3 | shadow_only=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
   "surface_kind": "product_capabilities_surface",
   "surface_scope": "product_capability_discovery"

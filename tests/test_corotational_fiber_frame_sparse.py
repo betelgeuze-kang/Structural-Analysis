@@ -125,6 +125,13 @@ def test_sparse_load_path_uses_native_assembly_and_matches_dense_solution() -> N
         step.metrics["native_sparse_assembly_used"] is True
         and step.metrics["sparse_backend_used"] is True
         and step.metrics["stiffness_storage"] == "scipy_sparse_csr"
+        and step.metrics["sparse_factorization_diagnostics_passed"] is True
+        and step.metrics["sparse_factorization_count"] > 0
+        and step.metrics["sparse_factorization_max_condition_number_1"] < 1.0e12
+        and step.metrics["sparse_factorization_max_backward_error"] <= 1.0e-12
+        and len(step.metrics["sparse_factorization_diagnostic_hashes"])
+        == step.metrics["sparse_factorization_count"]
+        and str(step.metrics["sparse_factorization_policy_hash"]).startswith("sha256:")
         and step.metrics["fallback_used"] is False
         and step.metrics["regularization_used"] is False
         for step in sparse.steps
