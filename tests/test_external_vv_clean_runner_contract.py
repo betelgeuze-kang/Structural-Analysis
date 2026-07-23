@@ -6,6 +6,7 @@ from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -144,16 +145,32 @@ def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sou
     head = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
     ).strip()
-    for recorded_commit in {
+    recorded_commits = {
         summary["source_commit_sha"],
         code["source_commit_sha"],
         modal["source_commit_sha"],
-    }:
+    }
+    assert len(recorded_commits) == 1
+    recorded_commit = recorded_commits.pop()
+    assert re.fullmatch(r"[0-9a-f]{40}", recorded_commit)
+    recorded_object_available = subprocess.run(
+        ["git", "cat-file", "-e", f"{recorded_commit}^{{commit}}"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+    ).returncode == 0
+    if recorded_object_available:
         subprocess.run(
             ["git", "merge-base", "--is-ancestor", recorded_commit, head],
             cwd=ROOT,
             check=True,
         )
+    else:
+        assert subprocess.check_output(
+            ["git", "rev-parse", "--is-shallow-repository"],
+            cwd=ROOT,
+            text=True,
+        ).strip() == "true"
 
     parity = summary["cross_environment_parity"]
     assert parity == runner._cross_environment_parity(
