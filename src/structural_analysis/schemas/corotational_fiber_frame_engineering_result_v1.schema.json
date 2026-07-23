@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.invalid/schemas/corotational-fiber-frame-engineering-result-v1.schema.json",
+  "title": "Corotational Fiber Frame Engineering Result IR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "engineering_result_id",
+    "engineering_result_hash",
+    "result_kind",
+    "recovery_profile",
+    "authority_profile",
+    "compiler_hash",
+    "source_adapter_hash",
+    "model_content_hash",
+    "problem_contract_hash",
+    "terminal_checkpoint_hash",
+    "terminal_assembly_hash",
+    "quantity_catalog_hash",
+    "load_factor",
+    "counts",
+    "member_ids",
+    "metrics",
+    "authority_axes",
+    "limitations",
+    "array_bundle_hash",
+    "array_descriptors"
+  ],
+  "properties": {
+    "schema_version": {"const": "corotational-fiber-frame2d-engineering-result-ir.v1"},
+    "engineering_result_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "engineering_result_hash": {"$ref": "#/$defs/hash"},
+    "result_kind": {"const": "corotational_portal_reaction_member_section_fiber"},
+    "recovery_profile": {"const": "exact_terminal_parent_corotational_section_global_replay.v1"},
+    "authority_profile": {"const": "exact_bounded_portal_engineering_candidate.v1"},
+    "compiler_hash": {"$ref": "#/$defs/hash"},
+    "source_adapter_hash": {"$ref": "#/$defs/hash"},
+    "model_content_hash": {"$ref": "#/$defs/hash"},
+    "problem_contract_hash": {"$ref": "#/$defs/hash"},
+    "terminal_checkpoint_hash": {"$ref": "#/$defs/hash"},
+    "terminal_assembly_hash": {"$ref": "#/$defs/hash"},
+    "quantity_catalog_hash": {"$ref": "#/$defs/hash"},
+    "load_factor": {"const": 1.0},
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "member", "section", "fiber"],
+      "properties": {
+        "node": {"const": 4},
+        "member": {"const": 3},
+        "section": {"type": "integer", "minimum": 1},
+        "fiber": {"type": "integer", "minimum": 1}
+      }
+    },
+    "member_ids": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terminal_assembly_replay_exact",
+        "terminal_state_bytes_exact",
+        "reaction_partition_exact",
+        "no_fallback_or_regularization",
+        "scatter_scaled_linf",
+        "external_scatter_scaled_linf",
+        "local_global_scaled_linf",
+        "section_scaled_linf",
+        "fiber_strain_linf",
+        "free_residual_relative",
+        "solver_terminal_relative_residual"
+      ],
+      "properties": {
+        "terminal_assembly_replay_exact": {"const": true},
+        "terminal_state_bytes_exact": {"const": true},
+        "reaction_partition_exact": {"const": true},
+        "no_fallback_or_regularization": {"const": true},
+        "scatter_scaled_linf": {"type": "number", "minimum": 0},
+        "external_scatter_scaled_linf": {"type": "number", "minimum": 0},
+        "local_global_scaled_linf": {"type": "number", "minimum": 0},
+        "section_scaled_linf": {"type": "number", "minimum": 0},
+        "fiber_strain_linf": {"type": "number", "minimum": 0},
+        "free_residual_relative": {"type": "number", "minimum": 0},
+        "solver_terminal_relative_residual": {"type": "number", "minimum": 0}
+      }
+    },
+    "authority_axes": {
+      "const": {
+        "convergence": "inherited_bounded_candidate",
+        "displacement": "exact_bounded_candidate",
+        "reaction": "exact_bounded_candidate",
+        "member_force": "exact_bounded_candidate",
+        "member_features": "not_supported",
+        "section_resultant": "exact_bounded_candidate",
+        "fiber_result": "exact_bounded_candidate",
+        "fallback": "not_used",
+        "public_api": "not_promoted",
+        "external_vv": "not_attached",
+        "engineering_design": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "limitations": {
+      "const": [
+        "one_bay_one_story_portal_only",
+        "zero_prescribed_displacement_only",
+        "load_control_cpu_dense_newton_only",
+        "member_end_releases_not_supported",
+        "rigid_offsets_not_supported",
+        "distributed_member_loads_not_supported",
+        "external_level2_not_attached",
+        "public_capability_not_promoted",
+        "detached_manifest_requires_retained_artifact_bytes",
+        "detached_manifest_source_authenticity_not_established"
+      ]
+    },
+    "array_bundle_hash": {"$ref": "#/$defs/hash"},
+    "array_descriptors": {
+      "type": "array",
+      "minItems": 18,
+      "maxItems": 18,
+      "items": {"$ref": "#/$defs/descriptor"}
+    }
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "dtype", "shape", "unit", "quantity_ids", "order_scope", "authority_role", "order_hash", "data_hash", "content_hash"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "dtype": {"enum": ["<f8", "<i8"]},
+        "shape": {"type": "array", "minItems": 1, "items": {"type": "integer", "minimum": 0}},
+        "unit": {"type": "string", "minLength": 1},
+        "quantity_ids": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "order_scope": {"enum": ["node", "member", "section", "fiber"]},
+        "authority_role": {"enum": ["output", "mapping"]},
+        "order_hash": {"$ref": "#/$defs/hash"},
+        "data_hash": {"$ref": "#/$defs/hash"},
+        "content_hash": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}
