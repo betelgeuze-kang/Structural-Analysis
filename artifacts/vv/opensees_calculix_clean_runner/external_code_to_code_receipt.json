@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:c580f9c6c0406cc5588fd715f548f2a693335402e43139e8305baef2f1d71e73",
+  "artifact_hash": "sha256:5c8dcc3a01050b872312cfe6d821c17703ca3227bb1b0efa07335dbd569a40dc",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -11,9 +11,10 @@
     "verification_level_2_not_achieved",
     "release_readiness_not_established"
   ],
-  "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system, a linear cantilever, and the public one-bay corotational portal's four-step elastic-state load path with OpenSees, plus one axial member with CalculiX. The portal comparison covers terminal free-node displacements and support reactions from the public J1-J5 and exact-recovery path, but deliberately stays below material yield and damage thresholds. It is a technical code-to-code execution receipt only. OpenSeesPy declares commercial redistribution licensing requirements, and no product/legal approval is attached for either runtime. The external packages are not bundled. Therefore this receipt does not enter the verification-hierarchy operator manifest, does not achieve Verification Level 2, and does not prove material-nonlinear or cyclic family breadth, broad frame/shell modal, buckling, sparse/HIP, commercial-equivalence, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
+  "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system, a linear cantilever, and the public one-bay corotational portal's four-step elastic-state load path with OpenSees, plus one axial member and one six-member tetrahedral spatial truss with CalculiX. The portal comparison covers terminal free-node displacements and support reactions from the public J1-J5 and exact-recovery path, but deliberately stays below material yield and damage thresholds. It is a technical code-to-code execution receipt only. OpenSeesPy declares commercial redistribution licensing requirements, and no product/legal approval is attached for either runtime. The external packages are not bundled. Therefore this receipt does not enter the verification-hierarchy operator manifest, does not achieve Verification Level 2, and does not prove material-nonlinear or cyclic family breadth, broad frame/shell static or modal coverage, nonlinear CalculiX comparison, buckling breadth, sparse/HIP, commercial-equivalence, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
   "claims": {
     "actual_external_solver_execution": true,
+    "calculix_spatial_truss_technical_comparison": true,
     "commercial_equivalence": false,
     "external_runtime_redistribution_approval": false,
     "opensees_technical_comparison": true,
@@ -261,6 +262,138 @@
       "product_regularization_applied": false,
       "product_solver_id": "authoritative_cpu_linear_fea_3d_v1",
       "reference_solver": "CalculiX CrunchiX 2.17"
+    },
+    {
+      "analysis_type": "linear_static_spatial_truss",
+      "case_id": "tetrahedral_spatial_truss_combined_load",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 1.7573792186829484e-13,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 2.8449408242620783e-06,
+          "quantity": "apex_N4_UX_m",
+          "reference_value": 2.844941e-06,
+          "relative_error": 6.177207958558538e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 4.694679409237196e-13,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -1.2980125305320591e-06,
+          "quantity": "apex_N4_UY_m",
+          "reference_value": -1.298013e-06,
+          "relative_error": 3.6168200235569254e-07,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 1.6070809471331517e-14,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -8.043670160708095e-07,
+          "quantity": "apex_N4_UZ_m",
+          "reference_value": -8.04367e-07,
+          "relative_error": 1.9979449021816555e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 4.163336342344337e-17,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 0.08750000000000004,
+          "quantity": "support_N1_UX_kN",
+          "reference_value": 0.0875,
+          "relative_error": 4.758098676964956e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 4.163336342344337e-17,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 0.08750000000000004,
+          "quantity": "support_N1_UY_kN",
+          "reference_value": 0.0875,
+          "relative_error": 4.758098676964956e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 1.6653345369377348e-16,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 0.35000000000000014,
+          "quantity": "support_N1_UZ_kN",
+          "reference_value": 0.35,
+          "relative_error": 4.758098676964956e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -1.18125,
+          "quantity": "support_N2_UX_kN",
+          "reference_value": -1.18125,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 5.551115123125783e-17,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 0.39375000000000004,
+          "quantity": "support_N2_UY_kN",
+          "reference_value": 0.39375,
+          "relative_error": 1.409807015397024e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 2.220446049250313e-16,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 1.5750000000000002,
+          "quantity": "support_N2_UZ_kN",
+          "reference_value": 1.575,
+          "relative_error": 1.409807015397024e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 2.7755575615628914e-17,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -0.10625000000000002,
+          "quantity": "support_N3_UX_kN",
+          "reference_value": -0.10625,
+          "relative_error": 2.612289469706251e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 1.6653345369377348e-16,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 0.31875000000000014,
+          "quantity": "support_N3_UY_kN",
+          "reference_value": 0.31875,
+          "relative_error": 5.224578939412502e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 1.1102230246251565e-16,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -0.4250000000000001,
+          "quantity": "support_N3_UZ_kN",
+          "reference_value": -0.425,
+          "relative_error": 2.612289469706251e-16,
+          "relative_tolerance": 1e-10
+        }
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "authoritative_cpu_linear_fea_3d_v1",
+      "reference_solver": "CalculiX CrunchiX 2.17"
     }
   ],
   "engine_version": "0.3.0",
@@ -320,11 +453,11 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-23T13:10:38.452872+00:00",
+  "generated_at": "2026-07-23T15:07:27.140025+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:9b2db3387e433c2a5911f6f8bb1f5c5be47c077a8ac9ed5618645176e37472f9",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:0efa47f503dea0efdfc32b5ae39d4c54f8060437b50c7adafc8aedeab24fcc75",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
       "src/structural_analysis/api/nonlinear_frame.py": "sha256:0eb39cfe9c15708de3e95de4d475da4aede1a3ed0a9597dbaa11989761dfa854",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py": "sha256:04e2afa328dc18344ed9eccf76ec83a910767d45be88da56055ab7bb534bc771",
@@ -332,19 +465,19 @@
       "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
       "src/structural_analysis/elements/stateful_corotational_fiber_beam2d.py": "sha256:b9e21c87553dca965ba173921e6f65c8680371ecf25a9f4cfb23fd48ca704548",
       "src/structural_analysis/materials/stateful_fiber_section.py": "sha256:f3ec359caaa79ced663e6c97aa5413a82eb4aa6e1894624ce43dfc7ffb189382",
-      "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json": "sha256:38d349ef4f45cf9ff903c2bc5b2072efe97358eab82fe9d517f81656e25abacf",
+      "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json": "sha256:42766b70a4d95273a7de8c2ee9d7b4afbf8fc11b264059e1b62765cc691a4dee",
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
       "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
       "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
-      "tests/test_external_code_to_code_technical_receipt.py": "sha256:35d101d9457e5cd1199ffdabbe341ca8d41a92cb879b16cca698233b425cdb4b",
+      "tests/test_external_code_to_code_technical_receipt.py": "sha256:86c407e1c2fb033733be69297b47d82913d8b68a782cb69f83f706508b2e10f5",
       "tests/test_unified_nonlinear_frame_api.py": "sha256:ce849bee30fed750092d71a8e4f2c2f7737bf8ba504b5a9a7eaf33f74ae62676"
     },
-    "source_set_hash": "sha256:b91db7c6a86c6f4b45f1fe8b55a95e72cf84a23b6da6e7e6a274641676eaf902"
+    "source_set_hash": "sha256:734547310524ea4bbe6d5f196f879b1cb4b9bad6279bf97e0542cfc9bcfade5e"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-23T13:10:38.458962+00:00",
+    "current_product_replay_generated_at": "2026-07-23T15:07:27.145957+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-07-23T13:10:38.458951+00:00",
+    "external_execution_generated_at": "2026-07-23T15:07:27.145950+00:00",
     "external_execution_reused": false,
     "external_runtime_executed_in_this_generation": true,
     "reuse_reason": null
@@ -356,11 +489,17 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:0f2336b9654d2eecaf7c1695d97e38769fbe75ad3ea66d3924216862de26c07d",
-        "frd_sha256": "sha256:259e176c98f39890c9015370ec0a07c1d3b615728fa7bbf3630599d22d592d28",
+        "frd_sha256": "sha256:c0454bb73a58bba533fc40770a553d6d18b53f27816493257c4d56bee6ae516f",
         "input_deck_sha256": "sha256:96482e7037bd037ba97f5e7359eea54b70522c4f48ca5b095dfe9eb9149d5600",
         "return_code": 0,
+        "spatial_truss_dat_sha256": "sha256:d754b6dc5fd1e316b516629ed970a5bf1f6e274849c436222b8ea5eb63545cd6",
+        "spatial_truss_frd_sha256": "sha256:a69a74a7aedf90f6c9d4fcb2ff4241f03388752b77624dfeb3d1dc136627ff25",
+        "spatial_truss_input_deck_sha256": "sha256:6675595b476187c36132d260a624bb85d0a9d155c31ff6aba38006f6ab3645b1",
+        "spatial_truss_return_code": 0,
+        "spatial_truss_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "spatial_truss_stdout_sha256": "sha256:6e2e65d46740d2df9b2fb2e531c45742e9d55653607adc59533578886c033450",
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:5a3eb62e21e187cab85b15a98fc64405b3ae5bc4382e07293a4ecf4b8df0bcec",
+        "stdout_sha256": "sha256:3e5e3c9c2c63f44f2514518398d870c215a8011ff5bb22c2a9970a870aeef8ea",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -398,7 +537,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "91e00a57db8fae1b2975c291f4439acdb75879ae",
+  "source_commit_sha": "d81cf64e731288b13bab06edcbe8459546819bfd",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",

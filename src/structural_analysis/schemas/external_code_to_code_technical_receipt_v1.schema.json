@@ -104,11 +104,12 @@
         {"$ref": "#/$defs/modalCase"},
         {"$ref": "#/$defs/cantileverCase"},
         {"$ref": "#/$defs/publicCorotationalPortalCase"},
-        {"$ref": "#/$defs/axialCase"}
+        {"$ref": "#/$defs/axialCase"},
+        {"$ref": "#/$defs/spatialTrussCase"}
       ],
       "items": false,
-      "minItems": 4,
-      "maxItems": 4
+      "minItems": 5,
+      "maxItems": 5
     },
     "technical_contract_pass": {"type": "boolean"},
     "verification_hierarchy_operator_manifest_attached": {"const": false},
@@ -121,6 +122,7 @@
         "opensees_technical_comparison",
         "public_corotational_portal_technical_comparison",
         "second_solver_technical_comparison",
+        "calculix_spatial_truss_technical_comparison",
         "product_legal_license_approval",
         "external_runtime_redistribution_approval",
         "verification_level_2",
@@ -132,6 +134,7 @@
         "opensees_technical_comparison": {"type": "boolean"},
         "public_corotational_portal_technical_comparison": {"type": "boolean"},
         "second_solver_technical_comparison": {"type": "boolean"},
+        "calculix_spatial_truss_technical_comparison": {"type": "boolean"},
         "product_legal_license_approval": {"const": false},
         "external_runtime_redistribution_approval": {"const": false},
         "verification_level_2": {"const": false},
@@ -302,7 +305,13 @@
         "stderr_sha256",
         "input_deck_sha256",
         "dat_sha256",
-        "frd_sha256"
+        "frd_sha256",
+        "spatial_truss_return_code",
+        "spatial_truss_stdout_sha256",
+        "spatial_truss_stderr_sha256",
+        "spatial_truss_input_deck_sha256",
+        "spatial_truss_dat_sha256",
+        "spatial_truss_frd_sha256"
       ],
       "properties": {
         "return_code": {"const": 0},
@@ -313,7 +322,13 @@
         "stderr_sha256": {"$ref": "#/$defs/hash"},
         "input_deck_sha256": {"$ref": "#/$defs/hash"},
         "dat_sha256": {"$ref": "#/$defs/hash"},
-        "frd_sha256": {"$ref": "#/$defs/hash"}
+        "frd_sha256": {"$ref": "#/$defs/hash"},
+        "spatial_truss_return_code": {"const": 0},
+        "spatial_truss_stdout_sha256": {"$ref": "#/$defs/hash"},
+        "spatial_truss_stderr_sha256": {"$ref": "#/$defs/hash"},
+        "spatial_truss_input_deck_sha256": {"$ref": "#/$defs/hash"},
+        "spatial_truss_dat_sha256": {"$ref": "#/$defs/hash"},
+        "spatial_truss_frd_sha256": {"$ref": "#/$defs/hash"}
       }
     },
     "openseesRuntime": {
@@ -482,6 +497,19 @@
             "analysis_type": {"const": "linear_static"},
             "reference_solver": {"const": "CalculiX CrunchiX 2.17"},
             "metrics": {"minItems": 2, "maxItems": 2}
+          }
+        }
+      ]
+    },
+    "spatialTrussCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "tetrahedral_spatial_truss_combined_load"},
+            "analysis_type": {"const": "linear_static_spatial_truss"},
+            "reference_solver": {"const": "CalculiX CrunchiX 2.17"},
+            "metrics": {"minItems": 12, "maxItems": 12}
           }
         }
       ]

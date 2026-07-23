@@ -50,9 +50,10 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   candidate는 존재하지만 hierarchy evidence credit은 여전히 `0/2`다.
   `external_code_to_code_technical_execution_receipt.json`은 2자유도 modal,
   cantilever static, 공개 corotational portal의 4-step elastic-state load path,
-  axial-member static의 네 case와 19개 metric을 통과하며
+  axial-member static, 6-member tetrahedral spatial-truss static의 다섯 case와
+  31개 metric을 통과하며
   artifact hash
-  `sha256:7a47f3671b4fb665630a835c0ff49723f7ae67b70bbb5c0ea8cae87606685ca1`를
+  `sha256:1b490fae40f6dafc559561367a33a2c2323f69efbbb2119ac35ab2ed4fc1f31d`를
   기록한다. 추가
   `external_modal_buckling_technical_execution_receipt.json`은 공개 전체 모델
   frame modal을 OpenSees에, 반복 2모드 frame 선형좌굴을 CalculiX B32에
@@ -61,10 +62,10 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   principal-correlation-squared는 `0.9999999970332671`로 통과한다. 네 mode
   matrix는 little-endian binary artifact로 분리돼 있다. 추가 receipt의
   artifact hash는
-  `sha256:f8e39b1d04913522a18414909dc674f4691b2c56fc98c067663fee9459af2572`다.
-  동일 운영자 container-isolated clean runner도 두 영수증을 재현했고 49개
+  `sha256:77dce301c45f9f25c88445aff95d196ca1aa7b771f46fa79a94f9fea69d3e712`다.
+  동일 운영자 container-isolated clean runner도 두 영수증을 재현했고 73개
   host/container scalar 계약을 통과했다. 해당 summary artifact hash는
-  `sha256:39f33bbf5a03872fb2c1a9b86daa95bf8fdc343e01f7485fc0a1346699884c0f`다.
+  `sha256:99c7fc02f3f76c6a6b84c3f5da6b0a9218a73fb4b49fc579c546c2774983a85e`다.
   그러나 제품 법무 승인, redistribution 승인, 독립 운영자 재현·서명,
   material-nonlinear 구조형식 breadth, published benchmark decision과 operator manifest가 없으므로
   `verification_hierarchy_credit=false`이고 Level 2로 승격하지 않는다. 중형

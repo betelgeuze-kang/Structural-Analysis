@@ -53,7 +53,7 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     assert payload["technical_contract_pass"] is True
     assert len(payload["external_assets"]) == 5
     assert all(not row["bundled_in_repository"] for row in payload["external_assets"])
-    assert len(payload["comparisons"]) == 4
+    assert len(payload["comparisons"]) == 5
     assert all(row["contract_pass"] for row in payload["comparisons"])
     assert all(
         metric["contract_pass"]
@@ -76,6 +76,15 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     assert payload["claims"][
         "public_corotational_portal_technical_comparison"
     ] is True
+    spatial_truss = payload["comparisons"][4]
+    assert spatial_truss["case_id"] == (
+        "tetrahedral_spatial_truss_combined_load"
+    )
+    assert len(spatial_truss["metrics"]) == 12
+    assert payload["claims"][
+        "calculix_spatial_truss_technical_comparison"
+    ] is True
+    assert payload["claims"]["second_solver_technical_comparison"] is True
 
 
 def test_debian_metadata_parser_accepts_labeled_field_output(monkeypatch) -> None:
