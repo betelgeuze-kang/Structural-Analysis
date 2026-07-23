@@ -37,11 +37,12 @@ the separate bounded recovery result can establish exact candidate values withou
 mutating or broadening this source contract. See
 [`corotational-fiber-frame-engineering-recovery.md`](corotational-fiber-frame-engineering-recovery.md).
 
-This profile also excludes displacement control, sparse execution, general topology,
-member-end releases, rigid offsets, distributed member loads, and a public API. Exact
-recovery is a companion contract rather than an adapter stage. Independent Level 2
-external-solver evidence remains unattached, so the capability stays experimental
-and non-public.
+This adapter profile also excludes displacement control, sparse execution, general
+topology, member-end releases, rigid offsets, distributed member loads, and direct
+public authority. Exact recovery is a companion contract rather than an adapter
+stage. The bounded unified API now composes both contracts for a typed Python/CLI
+candidate, but independent Level 2 external-solver evidence remains unattached, so
+the capability stays experimental and non-public in the canonical registry.
 
 The machine-readable schema is
 `src/structural_analysis/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json`;

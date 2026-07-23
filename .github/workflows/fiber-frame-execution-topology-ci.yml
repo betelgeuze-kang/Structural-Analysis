@@ -28,6 +28,7 @@ on:
       - "src/structural_analysis/materials/compression_only_gap_link.py"
       - "src/structural_analysis/materials/__init__.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py"
+      - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_state.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py"
@@ -45,12 +46,16 @@ on:
       - "src/structural_analysis/api/__init__.py"
       - "src/structural_analysis/api/nonlinear_fiber_frame.py"
       - "src/structural_analysis/api/nonlinear_fiber_frame_cli.py"
+      - "src/structural_analysis/api/nonlinear_frame.py"
+      - "src/structural_analysis/api/nonlinear_frame_cli.py"
       - "src/structural_analysis/engine_v2/contracts/nonlinear_result.py"
       - "src/structural_analysis/engine_v2/contracts/nonlinear_recovery.py"
       - "src/structural_analysis/schemas/nonlinear_numerical_result_ir_v1.schema.json"
       - "src/structural_analysis/schemas/stateful_corotational_fiber_frame2d_checkpoint_v1.schema.json"
       - "src/structural_analysis/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json"
       - "src/structural_analysis/schemas/corotational_fiber_frame_engineering_result_v1.schema.json"
+      - "src/structural_analysis/schemas/stateful_corotational_fiber_frame2d_checkpoint_chain_v1.schema.json"
+      - "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json"
       - "src/structural_analysis/ai/__init__.py"
       - "src/structural_analysis/ai/shadow_solver_controller.py"
       - "src/structural_analysis/ai/fiber_frame_solver_episode_adapter.py"
@@ -65,6 +70,7 @@ on:
       - "tests/test_stateful_corotational_fiber_frame2d.py"
       - "tests/test_corotational_fiber_frame_j1_j5.py"
       - "tests/test_corotational_fiber_frame_engineering_recovery.py"
+      - "tests/test_unified_nonlinear_frame_api.py"
       - "tests/test_stateful_corotational_fiber_frame2d_adaptive.py"
       - "tests/test_stateful_corotational_fiber_frame2d_arc_length.py"
       - "tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py"
@@ -96,6 +102,7 @@ on:
       - "docs/stateful-corotational-fiber-frame2d-global-assembly.md"
       - "docs/corotational-fiber-frame-j1-j5-adapter.md"
       - "docs/corotational-fiber-frame-engineering-recovery.md"
+      - "docs/unified-nonlinear-frame-api.md"
       - "docs/stateful-corotational-fiber-frame2d-newton-load-control.md"
       - "docs/stateful-corotational-fiber-frame2d-adaptive-continuation.md"
       - "docs/stateful-corotational-fiber-frame2d-arc-length.md"
@@ -108,6 +115,7 @@ on:
       - "docs/stateful-corotational-local-axis-gap-linked-frame-cyclic-benchmark.md"
       - "docs/public-rc-fiber-frame.md"
       - "examples/public_rc_fiber_frame_cantilever.json"
+      - "examples/public_corotational_rc_portal.json"
       - "docs/engine-v2-nonlinear-result-recovery.md"
       - "docs/fiber-frame-solver-episode-adapter.md"
       - "docs/ai-shadow-solver-controller.md"
@@ -383,6 +391,28 @@ jobs:
             --include="src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py" \
             -m pytest -q tests/test_corotational_fiber_frame_engineering_recovery.py
           python -m coverage report --rcfile=/dev/null --fail-under=90
+      - name: Unified nonlinear frame API contract
+        run: |
+          python -m ruff check \
+            src/structural_analysis/api/__init__.py \
+            src/structural_analysis/api/nonlinear_frame.py \
+            src/structural_analysis/api/nonlinear_frame_cli.py \
+            src/structural_analysis/assembly/__init__.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py \
+            tests/test_unified_nonlinear_frame_api.py
+          python -m ruff format --check \
+            src/structural_analysis/api/__init__.py \
+            src/structural_analysis/api/nonlinear_frame.py \
+            src/structural_analysis/api/nonlinear_frame_cli.py \
+            src/structural_analysis/assembly/__init__.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py \
+            tests/test_unified_nonlinear_frame_api.py
+          python -m mypy \
+            src/structural_analysis/api/nonlinear_frame.py \
+            src/structural_analysis/api/nonlinear_frame_cli.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py \
+            tests/test_unified_nonlinear_frame_api.py
+          python -m pytest -q tests/test_unified_nonlinear_frame_api.py
       - name: Fiber-frame regression neighborhood
         run: |
           python -m pytest -q \

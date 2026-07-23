@@ -190,28 +190,28 @@
       "title": "ResultIR SI quantity and tolerance catalog"
     },
     {
-      "authority": "replay_bound_portal_convergence_candidate_no_result_authority",
+      "authority": "bounded_j1_j5_and_exact_engineering_recovery_candidate",
       "category": "analysis",
       "evidence": [
-        "docs/corotational-fiber-frame-j1-j5-adapter.md",
-        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py",
-        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py",
-        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py",
-        "src/structural_analysis/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json",
-        "tests/test_stateful_corotational_fiber_frame2d_solver.py",
-        "tests/test_corotational_fiber_frame_j1_j5.py"
+        "docs/unified-nonlinear-frame-api.md",
+        "src/structural_analysis/api/nonlinear_frame.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
+        "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json",
+        "tests/test_unified_nonlinear_frame_api.py"
       ],
       "id": "analysis.nonlinear_corotational_fiber_frame_2d",
       "interfaces": [
-        "internal_python"
+        "python_api",
+        "cli"
       ],
       "limitations": [
-        "One-bay, one-story load-control CPU dense portal candidate only; no public API, exact recovery, general topology, member features, independent Level 2 verification, or release promotion."
+        "One-bay, one-story load-control CPU dense portal candidate only; general topology, native sparse assembly, member features, direct displacement control, both independent Level 2 comparisons, and release promotion remain open."
       ],
-      "profile": "planar_one_bay_one_story_portal_explicit_fiber_section_j1_j5.v1",
+      "profile": "corotational_one_bay_portal.v1",
       "public": false,
       "status": "experimental",
-      "title": "Corotational 2D fiber-frame portal compiler"
+      "title": "Corotational 2D fiber frame"
     },
     {
       "authority": "none",

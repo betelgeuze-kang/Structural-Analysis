@@ -40,10 +40,12 @@ content hash. The manifest and aggregate array bundle are independently hashed.
 ## Authority boundary
 
 This is exact engineering recovery only within the bounded one-bay/one-story portal
-candidate landed by PR 7. It remains load-control, CPU-dense,
-zero-prescribed-displacement, and excludes member end releases, rigid offsets,
-distributed member loads, displacement control, connected/general frame topology,
-and public API promotion. It does not establish an external Level 2 comparison,
+candidate landed by PR 7. The recovery contract itself remains load-control,
+CPU-dense, zero-prescribed-displacement, and excludes member end releases, rigid
+offsets, distributed member loads, displacement control, connected/general frame
+topology, and public API promotion. The bounded unified API now consumes this
+contract as a Developer Preview candidate without changing its underlying
+`public_api=not_promoted` authority. It does not establish an external Level 2 comparison,
 grant design-code authority, or establish release readiness. A detached manifest
 validates strict finite JSON, fixed authority semantics, descriptor shapes/order, and
 aggregate hashes. It does not replace the artifact bytes or authenticate the retained
