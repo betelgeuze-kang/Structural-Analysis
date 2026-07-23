@@ -6,9 +6,9 @@
       "capability_id": "vv.opensees_level2",
       "capability_kind": "verification",
       "contract_pass": false,
-      "evidence_artifact_count": 7,
+      "evidence_artifact_count": 11,
       "first_blocked_target": "",
-      "first_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
+      "first_next_action": "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent.",
       "gate_unblock_plan_count": 0,
       "handoff_slot": {},
       "operator_intake_artifact": "",
@@ -392,14 +392,18 @@
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
         "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+        "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json",
+        "benchmarks/clean-runners/opensees-calculix/run_clean_runner.py",
         "scripts/run_external_code_to_code_technical_receipt.py",
         "scripts/run_external_modal_buckling_technical_receipt.py",
+        "scripts/run_external_vv_clean_runner.sh",
         "tests/test_external_code_to_code_technical_receipt.py",
         "tests/test_external_modal_buckling_technical_receipt.py",
+        "tests/test_external_vv_clean_runner_contract.py",
         "docs/external-code-to-code-technical-execution.md"
       ],
       "next_actions": [
-        "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent."
+        "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent."
       ],
       "state": "blocked",
       "summary": {
@@ -408,7 +412,7 @@
           "evidence"
         ],
         "limitations": [
-          "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent."
+          "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent."
         ],
         "profile": "independent_operator_promotion_required",
         "public": false
@@ -589,9 +593,9 @@
     "capability_id": "vv.opensees_level2",
     "capability_kind": "verification",
     "contract_pass": false,
-    "evidence_artifact_count": 7,
+    "evidence_artifact_count": 11,
     "first_blocked_target": "",
-    "first_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
+    "first_next_action": "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent.",
     "gate_unblock_plan_count": 0,
     "handoff_slot": {},
     "operator_intake_artifact": "",
@@ -605,11 +609,11 @@
     "title": "OpenSees Level 2 verification"
   },
   "first_blocked_capability_id": "vv.opensees_level2",
-  "first_blocked_capability_next_action": "Fresh pinned technical comparisons pass narrowly, but independent operator attestation, legal review, broader nonlinear coverage, and a Level 2 promotion receipt are absent.",
+  "first_blocked_capability_next_action": "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-23T08:33:48.165461+00:00",
+  "generated_at": "2026-07-23T13:13:16.198611+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:39d9f558d23cc1a7db32e1805277942310676f479f85beccc8ba98c85d93e66d",
+    "artifacts/manifests/capabilities.yaml": "sha256:74e30b428a9a7c947b886f0b14a2401fb6b80e9f7172770530a0dea920a67f7a",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -640,7 +644,7 @@
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "2c856d9fc6ef02ee802faa60cca4ca65c47a8a96",
+  "source_commit_sha": "91e00a57db8fae1b2975c291f4439acdb75879ae",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",

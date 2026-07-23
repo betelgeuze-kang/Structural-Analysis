@@ -370,6 +370,7 @@ def _pr_commands(
             "tests/test_whole_model_buckling_analysis.py",
             "tests/test_external_code_to_code_technical_receipt.py",
             "tests/test_external_modal_buckling_technical_receipt.py",
+            "tests/test_external_vv_clean_runner_contract.py",
             "tests/test_modal_generalized_eigen_v1.py",
             "tests/test_buckling_generalized_eigen_v1.py",
             "tests/test_build_phase2_shallow_arch_arc_length_artifacts.py",

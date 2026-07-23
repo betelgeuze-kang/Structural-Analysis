@@ -49,9 +49,10 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
 - Level 2: OpenSees 3.7.1과 CalculiX CrunchiX 2.17을 실제 실행한 좁은 기술
   candidate는 존재하지만 hierarchy evidence credit은 여전히 `0/2`다.
   `external_code_to_code_technical_execution_receipt.json`은 2자유도 modal,
-  cantilever static, axial-member static의 세 case와 7개 metric을 통과하며
+  cantilever static, 공개 corotational portal의 4-step elastic-state load path,
+  axial-member static의 네 case와 19개 metric을 통과하며
   artifact hash
-  `sha256:ab4def3d1bc564fab21e7d563a975ad425d08c3b4cea16b1103c0f6c4b6977f1`를
+  `sha256:7a47f3671b4fb665630a835c0ff49723f7ae67b70bbb5c0ea8cae87606685ca1`를
   기록한다. 추가
   `external_modal_buckling_technical_execution_receipt.json`은 공개 전체 모델
   frame modal을 OpenSees에, 반복 2모드 frame 선형좌굴을 CalculiX B32에
@@ -60,9 +61,12 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   principal-correlation-squared는 `0.9999999970332671`로 통과한다. 네 mode
   matrix는 little-endian binary artifact로 분리돼 있다. 추가 receipt의
   artifact hash는
-  `sha256:1a96b69041ba9b3ab54438ac3da07ceedb8701a072157070698a5355f0c675f0`다.
-  그러나 제품 법무 승인, redistribution 승인, 독립 clean-runner 재현,
-  구조형식 breadth, published benchmark decision과 operator manifest가 없으므로
+  `sha256:f8e39b1d04913522a18414909dc674f4691b2c56fc98c067663fee9459af2572`다.
+  동일 운영자 container-isolated clean runner도 두 영수증을 재현했고 49개
+  host/container scalar 계약을 통과했다. 해당 summary artifact hash는
+  `sha256:39f33bbf5a03872fb2c1a9b86daa95bf8fdc343e01f7485fc0a1346699884c0f`다.
+  그러나 제품 법무 승인, redistribution 승인, 독립 운영자 재현·서명,
+  material-nonlinear 구조형식 breadth, published benchmark decision과 operator manifest가 없으므로
   `verification_hierarchy_credit=false`이고 Level 2로 승격하지 않는다. 중형
   corpus의 과학적 크레딧도 `0/5`다. 중형 corpus는 별도
   `repository_bytes_and_receipt_payloads.v1` 계약으로 source, license receipt,
@@ -73,7 +77,8 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   `phase2_whole_model_buckling_result.json`은 각각 bounded frame/truss 공개
   모달 및 compression-only frame 선형좌굴 경로에서 analytic/invariant gate
   `4/4`를 통과한다. 위 별도 기술 receipt가 각각 한 frame/column의 독립
-  reference 비교를 추가했지만 법무/use approval, clean-runner, breadth,
+  reference 비교를 추가했고 같은 운영자 격리 재현도 통과했지만 법무/use approval,
+  독립 운영자 attestation, breadth,
   published decision과 hierarchy operator manifest가 없으므로 Level 2 슬롯을
   채우지 않는다. 따라서 receipts를 추가해도 최고 검증 단계는 `1`이다.
 - Level 3: published benchmark 실행·비교·판정 evidence 없음

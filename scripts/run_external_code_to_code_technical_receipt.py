@@ -35,8 +35,18 @@ for candidate in (SCRIPT_DIR, SRC_ROOT):
 from release_evidence_metadata import git_head, input_checksums  # noqa: E402
 from structural_analysis import ANALYSIS_ENGINE_VERSION  # noqa: E402
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model  # noqa: E402
+from structural_analysis.api.nonlinear_frame import (  # noqa: E402
+    COROTATIONAL_PORTAL_PROFILE,
+    NonlinearFrameConfig,
+    analyze_nonlinear_frame,
+    validate_nonlinear_frame_result,
+)
 from structural_analysis.benchmark.analytic_frame import (  # noqa: E402
     build_cantilever_beam_model,
+)
+from structural_analysis.io.neutral.loader import load_neutral_json  # noqa: E402
+from structural_analysis.materials import (  # noqa: E402
+    make_rectangular_stateful_rc_fiber_section,
 )
 from structural_analysis.solvers.modal import solve_modal_modes  # noqa: E402
 
@@ -54,6 +64,27 @@ CALCULIX_DISTRIBUTION_VERSION = "2.17-3"
 CALCULIX_RUNTIME_VERSION = "2.17"
 COMPARISON_ABSOLUTE_TOLERANCE = 1.0e-10
 COMPARISON_RELATIVE_TOLERANCE = 1.0e-10
+PUBLIC_COROTATIONAL_PORTAL_MODEL = Path(
+    "examples/public_corotational_rc_portal.json"
+)
+PUBLIC_COROTATIONAL_PORTAL_EFFECTIVE_EA_KN = 7_819_200.0
+PUBLIC_COROTATIONAL_PORTAL_EFFECTIVE_EI_KN_M2 = 200_700.0
+PUBLIC_COROTATIONAL_PORTAL_DISPLACEMENT_SPECS = (
+    ("node_N3_UX_m", "N3", "UX_m"),
+    ("node_N3_UY_m", "N3", "UY_m"),
+    ("node_N3_RZ_rad", "N3", "RZ_rad"),
+    ("node_N4_UX_m", "N4", "UX_m"),
+    ("node_N4_UY_m", "N4", "UY_m"),
+    ("node_N4_RZ_rad", "N4", "RZ_rad"),
+)
+PUBLIC_COROTATIONAL_PORTAL_REACTION_SPECS = (
+    ("support_N1_UX_N", "N1", "UX"),
+    ("support_N1_UY_N", "N1", "UY"),
+    ("support_N1_RZ_N_m", "N1", "RZ"),
+    ("support_N2_UX_N", "N2", "UX"),
+    ("support_N2_UY_N", "N2", "UY"),
+    ("support_N2_RZ_N_m", "N2", "RZ"),
+)
 EXTERNAL_ASSET_POLICY = {
     "openseespy-3.7.1.2-py3-none-any.whl": {
         "sha256": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
@@ -88,6 +119,7 @@ BLOCKERS_REMAINING = [
     "independent_clean_runner_reproduction_missing",
     "verification_hierarchy_operator_manifest_not_attached",
     "code_to_code_structural_family_breadth_insufficient",
+    "public_corotational_material_nonlinear_family_breadth_missing",
     "verification_level_2_not_achieved",
     "release_readiness_not_established",
 ]
@@ -95,14 +127,19 @@ REUSED_EXECUTION_BLOCKER = "external_runtime_current_source_rerun_missing"
 CLAIM_BOUNDARY = (
     "This receipt records actual local internal-use execution of OpenSees 3.7.1 "
     "from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 "
-    "from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system and a "
-    "linear cantilever with OpenSees, and one axial member with CalculiX. It is a "
-    "technical code-to-code execution receipt only. OpenSeesPy declares commercial "
+    "from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system, a "
+    "linear cantilever, and the public one-bay corotational portal's four-step "
+    "elastic-state load path with OpenSees, plus one axial member with CalculiX. "
+    "The portal comparison covers terminal free-node displacements and support "
+    "reactions from the public J1-J5 and exact-recovery path, but deliberately stays "
+    "below material yield and damage thresholds. It is a technical code-to-code "
+    "execution receipt only. OpenSeesPy declares commercial "
     "redistribution licensing requirements, and no product/legal approval is "
     "attached for either runtime. The external packages are not bundled. Therefore "
     "this receipt does not enter the verification-hierarchy operator manifest, does "
-    "not achieve Verification Level 2, and does not prove broad frame/shell modal, "
-    "buckling, nonlinear, sparse/HIP, commercial-equivalence, or release readiness. "
+    "not achieve Verification Level 2, and does not prove material-nonlinear or "
+    "cyclic family breadth, broad frame/shell modal, buckling, sparse/HIP, "
+    "commercial-equivalence, or release readiness. "
     "The replay_provenance block distinguishes a fresh external-runtime execution "
     "from a current-product-only replay against checksum-bound stored external "
     "values. A reused execution carries an explicit current-source rerun blocker "
@@ -113,10 +150,23 @@ SOURCE_PATHS = (
     SCHEMA_PATH,
     Path("tests/test_external_code_to_code_technical_receipt.py"),
     Path("src/structural_analysis/api/core.py"),
+    Path("src/structural_analysis/api/nonlinear_frame.py"),
     Path("src/structural_analysis/benchmark/analytic_frame.py"),
+    Path("src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py"),
+    Path(
+        "src/structural_analysis/assembly/"
+        "stateful_corotational_fiber_frame2d_solver.py"
+    ),
+    Path(
+        "src/structural_analysis/elements/"
+        "stateful_corotational_fiber_beam2d.py"
+    ),
+    Path("src/structural_analysis/materials/stateful_fiber_section.py"),
+    PUBLIC_COROTATIONAL_PORTAL_MODEL,
     Path("src/structural_analysis/solvers/_generalized_eigen.py"),
     Path("src/structural_analysis/solvers/modal/solver.py"),
     Path("src/structural_analysis/solvers/linear/static.py"),
+    Path("tests/test_unified_nonlinear_frame_api.py"),
 )
 
 
@@ -159,6 +209,62 @@ payload["cantilever"] = {
     "tip_displacement_y_m": ops.nodeDisp(2, 2),
     "base_reaction_y_kn": ops.nodeReaction(1, 2),
     "base_reaction_mz_kn_m": ops.nodeReaction(1, 3),
+}
+
+ops.wipe()
+ops.model("basic", "-ndm", 2, "-ndf", 3)
+for tag, x_coordinate, y_coordinate in (
+    (1, 0.0, 0.0),
+    (2, 4.0, 0.0),
+    (3, 0.0, 3.0),
+    (4, 4.0, 3.0),
+):
+    ops.node(tag, x_coordinate, y_coordinate)
+ops.fix(1, 1, 1, 1)
+ops.fix(2, 1, 1, 1)
+ops.geomTransf("Corotational", 2)
+for tag, node_i, node_j in ((1, 1, 3), (2, 2, 4), (3, 3, 4)):
+    ops.element(
+        "elasticBeamColumn",
+        tag,
+        node_i,
+        node_j,
+        7819200.0,
+        1.0,
+        200700.0,
+        2,
+    )
+ops.timeSeries("Linear", 2)
+ops.pattern("Plain", 2, 2)
+ops.load(4, 20.0, -50.0, 0.0)
+ops.system("BandGeneral")
+ops.constraints("Plain")
+ops.numberer("RCM")
+ops.test("NormUnbalance", 1.0e-9, 80)
+ops.algorithm("Newton")
+ops.integrator("LoadControl", 0.25)
+ops.analysis("Static")
+payload["public_corotational_portal_analyze_codes"] = [
+    int(ops.analyze(1)) for _ in range(4)
+]
+ops.reactions()
+payload["public_corotational_portal"] = {
+    "node_displacements": {
+        node_id: {
+            "UX_m": ops.nodeDisp(tag, 1),
+            "UY_m": ops.nodeDisp(tag, 2),
+            "RZ_rad": ops.nodeDisp(tag, 3),
+        }
+        for node_id, tag in (("N3", 3), ("N4", 4))
+    },
+    "support_reactions": {
+        node_id: {
+            "UX": 1000.0 * ops.nodeReaction(tag, 1),
+            "UY": 1000.0 * ops.nodeReaction(tag, 2),
+            "RZ": 1000.0 * ops.nodeReaction(tag, 3),
+        }
+        for node_id, tag in (("N1", 1), ("N2", 2))
+    },
 }
 ops.wipe()
 print("CODE_TO_CODE_JSON=" + json.dumps(payload, allow_nan=False, sort_keys=True))
@@ -487,6 +593,134 @@ def _axial_product_model() -> dict[str, Any]:
     }
 
 
+def _public_corotational_portal_effective_rigidity() -> tuple[float, float]:
+    section = make_rectangular_stateful_rc_fiber_section(
+        width_m=0.4,
+        depth_m=0.6,
+        cover_m=0.05,
+        concrete_layer_count=2,
+        top_bar_count=4,
+        bottom_bar_count=4,
+        bar_area_m2=0.000387,
+    )
+    elastic_moduli_kn_per_m2 = {
+        "concrete": section.concrete.elastic_modulus_mpa * 1000.0,
+        "steel": section.steel.elastic_modulus_mpa * 1000.0,
+    }
+    axial_rigidity_kn = sum(
+        elastic_moduli_kn_per_m2[fiber.material_kind] * fiber.area_m2
+        for fiber in section.fibers
+    )
+    flexural_rigidity_kn_m2 = sum(
+        elastic_moduli_kn_per_m2[fiber.material_kind]
+        * fiber.area_m2
+        * fiber.y_m**2
+        for fiber in section.fibers
+    )
+    return float(axial_rigidity_kn), float(flexural_rigidity_kn_m2)
+
+
+def _public_corotational_portal_product_result(
+    repo_root: Path,
+) -> dict[str, Any]:
+    axial_rigidity, flexural_rigidity = (
+        _public_corotational_portal_effective_rigidity()
+    )
+    if not math.isclose(
+        axial_rigidity,
+        PUBLIC_COROTATIONAL_PORTAL_EFFECTIVE_EA_KN,
+        rel_tol=0.0,
+        abs_tol=1.0e-9,
+    ) or not math.isclose(
+        flexural_rigidity,
+        PUBLIC_COROTATIONAL_PORTAL_EFFECTIVE_EI_KN_M2,
+        rel_tol=0.0,
+        abs_tol=1.0e-9,
+    ):
+        raise ExternalCodeToCodeReceiptError(
+            "public_corotational_portal_effective_rigidity_changed"
+        )
+
+    model = load_neutral_json(repo_root / PUBLIC_COROTATIONAL_PORTAL_MODEL)
+    result = analyze_nonlinear_frame(
+        model,
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_PORTAL_PROFILE,
+            load_steps=4,
+            maximum_iterations=80,
+        ),
+    )
+    report = validate_nonlinear_frame_result(result)
+    if result.status != "ready" or not result.contract_pass or not report.contract_pass:
+        raise ExternalCodeToCodeReceiptError(
+            "public_corotational_portal_product_execution_failed"
+        )
+    if (
+        int(result.metrics["committed_step_count"]) != 4
+        or result.metrics["exact_engineering_recovery"] is not True
+    ):
+        raise ExternalCodeToCodeReceiptError(
+            "public_corotational_portal_execution_scope_invalid"
+        )
+
+    material_limits_pa = {
+        "concrete": (-30.0e6, 3.0e6),
+        "steel": (-250.0e6, 250.0e6),
+    }
+    if any(
+        not material_limits_pa[str(row["material_kind"])][0]
+        < float(row["stress_Pa"])
+        < material_limits_pa[str(row["material_kind"])][1]
+        for row in result.fiber_results
+    ):
+        raise ExternalCodeToCodeReceiptError(
+            "public_corotational_portal_material_state_not_elastic"
+        )
+
+    return {
+        "solver_id": result.solver_id,
+        "node_displacements": {
+            str(row["node_id"]): dict(row) for row in result.node_displacements
+        },
+        "support_reactions": {
+            (str(row["node_id"]), str(row["dof"])): float(row["value_si"])
+            for row in result.support_reactions
+        },
+        "regularization_used": int(result.metrics["regularization_count"]) > 0,
+        "fallback_used": int(result.metrics["fallback_count"]) > 0,
+        "material_state": "elastic_below_declared_strength_thresholds",
+        "committed_step_count": int(result.metrics["committed_step_count"]),
+        "exact_engineering_recovery": bool(
+            result.metrics["exact_engineering_recovery"]
+        ),
+    }
+
+
+def _public_corotational_portal_metrics(
+    product: dict[str, Any],
+    reference: dict[str, Any],
+) -> list[dict[str, Any]]:
+    metrics = [
+        _comparison(
+            quantity,
+            float(product["node_displacements"][node_id][component]),
+            float(reference["node_displacements"][node_id][component]),
+        )
+        for quantity, node_id, component in (
+            PUBLIC_COROTATIONAL_PORTAL_DISPLACEMENT_SPECS
+        )
+    ]
+    metrics.extend(
+        _comparison(
+            quantity,
+            float(product["support_reactions"][(node_id, dof)]),
+            float(reference["support_reactions"][node_id][dof]),
+        )
+        for quantity, node_id, dof in PUBLIC_COROTATIONAL_PORTAL_REACTION_SPECS
+    )
+    return metrics
+
+
 def _comparison(quantity: str, product_value: float, reference_value: float) -> dict[str, Any]:
     product = float(product_value)
     reference = float(reference_value)
@@ -539,6 +773,8 @@ def _case(
 
 def _current_product_comparison_cases(
     receipt: dict[str, Any],
+    *,
+    repo_root: Path = ROOT,
 ) -> list[dict[str, Any]]:
     stored = {
         str(case["case_id"]): case for case in receipt.get("comparisons", [])
@@ -546,6 +782,7 @@ def _current_product_comparison_cases(
     expected_ids = {
         "two_dof_shear_modal",
         "cantilever_tip_load",
+        "public_corotational_portal_load_path",
         "axial_member_tip_load",
     }
     if set(stored) != expected_ids:
@@ -569,6 +806,7 @@ def _current_product_comparison_cases(
         mode_count=2,
     )
     cantilever = _analyze_product_model(build_cantilever_beam_model())
+    portal = _public_corotational_portal_product_result(repo_root)
     axial = _analyze_product_model(_axial_product_model())
     cantilever_metrics = cantilever["metrics"]
     axial_metrics = axial["metrics"]
@@ -626,6 +864,47 @@ def _current_product_comparison_cases(
             product_fallback_used=bool(cantilever_metrics["fallback_used"]),
         ),
         _case(
+            case_id="public_corotational_portal_load_path",
+            analysis_type="corotational_elastic_stateful_load_path",
+            reference_solver="OpenSees 3.7.1",
+            product_solver_id=str(portal["solver_id"]),
+            metrics=[
+                _comparison(
+                    quantity,
+                    float(portal["node_displacements"][node_id][component]),
+                    reference(
+                        "public_corotational_portal_load_path",
+                        quantity,
+                    ),
+                )
+                for quantity, node_id, component in (
+                    PUBLIC_COROTATIONAL_PORTAL_DISPLACEMENT_SPECS
+                )
+            ]
+            + [
+                _comparison(
+                    quantity,
+                    float(portal["support_reactions"][(node_id, dof)]),
+                    reference(
+                        "public_corotational_portal_load_path",
+                        quantity,
+                    ),
+                )
+                for quantity, node_id, dof in (
+                    PUBLIC_COROTATIONAL_PORTAL_REACTION_SPECS
+                )
+            ],
+            external_return_code=int(
+                stored["public_corotational_portal_load_path"][
+                    "external_return_code"
+                ]
+            ),
+            product_regularization_applied=bool(
+                portal["regularization_used"]
+            ),
+            product_fallback_used=bool(portal["fallback_used"]),
+        ),
+        _case(
             case_id="axial_member_tip_load",
             analysis_type="linear_static",
             reference_solver="CalculiX CrunchiX 2.17",
@@ -663,9 +942,13 @@ def _expected_claims(
         "opensees_technical_comparison": bool(
             comparisons[0]["contract_pass"]
             and comparisons[1]["contract_pass"]
+            and comparisons[2]["contract_pass"]
+        ),
+        "public_corotational_portal_technical_comparison": bool(
+            comparisons[2]["contract_pass"]
         ),
         "second_solver_technical_comparison": bool(
-            comparisons[2]["contract_pass"]
+            comparisons[3]["contract_pass"]
         ),
         "product_legal_license_approval": False,
         "external_runtime_redistribution_approval": False,
@@ -709,6 +992,7 @@ def build_external_code_to_code_technical_receipt(
         mode_count=2,
     )
     cantilever = _analyze_product_model(build_cantilever_beam_model())
+    portal = _public_corotational_portal_product_result(repo_root)
     axial = _analyze_product_model(_axial_product_model())
     cantilever_metrics = cantilever["metrics"]
     axial_metrics = axial["metrics"]
@@ -757,6 +1041,26 @@ def build_external_code_to_code_technical_receipt(
                 cantilever_metrics["regularization_used"]
             ),
             product_fallback_used=bool(cantilever_metrics["fallback_used"]),
+        ),
+        _case(
+            case_id="public_corotational_portal_load_path",
+            analysis_type="corotational_elastic_stateful_load_path",
+            reference_solver="OpenSees 3.7.1",
+            product_solver_id=str(portal["solver_id"]),
+            metrics=_public_corotational_portal_metrics(
+                portal,
+                opensees["public_corotational_portal"],
+            ),
+            external_return_code=max(
+                abs(int(code))
+                for code in opensees[
+                    "public_corotational_portal_analyze_codes"
+                ]
+            ),
+            product_regularization_applied=bool(
+                portal["regularization_used"]
+            ),
+            product_fallback_used=bool(portal["fallback_used"]),
         ),
         _case(
             case_id="axial_member_tip_load",
@@ -986,7 +1290,10 @@ def validate_external_code_to_code_technical_receipt(
                 "receipt_claim_boundary_invalid"
             )
     if require_current_sources:
-        current_comparisons = _current_product_comparison_cases(payload)
+        current_comparisons = _current_product_comparison_cases(
+            payload,
+            repo_root=repo_root,
+        )
         if payload["comparisons"] != current_comparisons:
             raise ExternalCodeToCodeReceiptError(
                 "receipt_product_comparisons_stale"
@@ -1019,7 +1326,10 @@ def refresh_external_code_to_code_product_replay(
         "external_execution_generated_at",
         payload["generated_at"],
     )
-    comparisons = _current_product_comparison_cases(payload)
+    comparisons = _current_product_comparison_cases(
+        payload,
+        repo_root=repo_root,
+    )
     technical_pass = bool(
         all(row["contract_pass"] is True for row in comparisons)
         and all(
