@@ -1,0 +1,38 @@
+name: Apply portal prescribed-displacement fix
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.head_ref == 'codex/reject-portal-prescribed-displacement'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+          cache: pip
+      - name: Install package and test tools
+        run: python -m pip install -e '.[dev]'
+      - name: Apply focused profile fix
+        run: python .github/apply_portal_prescribed_patch.py
+      - name: Format, lint, and test
+        run: |
+          python -m ruff format src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py tests/test_corotational_fiber_frame_j1_j5.py
+          python -m ruff check src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py tests/test_corotational_fiber_frame_j1_j5.py
+          pytest -q tests/test_corotational_fiber_frame_j1_j5.py
+      - name: Commit focused fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py tests/test_corotational_fiber_frame_j1_j5.py
+          git commit -m "fix: reject prescribed displacement in portal profile"
+          git push origin HEAD:${{ github.head_ref }}
