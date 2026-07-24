@@ -22,11 +22,8 @@ jobs:
           cache: pip
       - name: Install package and test tools
         run: python -m pip install -e '.[dev]'
-      - name: Extract and execute focused patch
-        run: |
-          sed -n "/python - <<'PY'/,/^          PY$/p" .github/workflows/apply-sparse-factorization-hardening.yml \
-            | sed '1d;$d;s/^          //' > /tmp/apply_sparse_patch.py
-          python /tmp/apply_sparse_patch.py
+      - name: Apply focused contract patch
+        run: python .github/apply_sparse_patch.py
       - name: Format, lint, and test
         run: |
           python -m ruff format src/structural_analysis/solvers/nonlinear/sparse_factorization.py tests/test_sparse_factorization_diagnostics.py
