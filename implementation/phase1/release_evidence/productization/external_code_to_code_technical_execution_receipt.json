@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:255c8f2c2017219e9de564cd5ed7749266e7b0b59c672a6396348c0495eeae2d",
+  "artifact_hash": "sha256:f1b17fbfc885212ed7ee0a84043b88843206efd341e2d9cb6063fe505e294b58",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -454,13 +454,13 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-24T07:28:55.946710+00:00",
+  "generated_at": "2026-07-24T10:38:41.436990+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
       "scripts/run_external_code_to_code_technical_receipt.py": "sha256:b8599d7a4a0f0eca7a80c7bdf82c39b0c581d4dbbed31ee68ce22da4c07e8eae",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
-      "src/structural_analysis/api/nonlinear_frame.py": "sha256:0eb39cfe9c15708de3e95de4d475da4aede1a3ed0a9597dbaa11989761dfa854",
+      "src/structural_analysis/api/nonlinear_frame.py": "sha256:c608a2ce5deb5d875540e802e8ff3ffc000cbb231329af65e8ec6c520625a6c4",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py": "sha256:04e2afa328dc18344ed9eccf76ec83a910767d45be88da56055ab7bb534bc771",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py": "sha256:60421274fc2b9800687bece08fdfb063810732897fc2c8f706c1ff3c796a854c",
       "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
@@ -473,15 +473,15 @@
       "tests/test_external_code_to_code_technical_receipt.py": "sha256:6eae6e0fec0f0ba8c70553b3283bcd9f24d5f96867e066b3bd3f153e4d7ec9f1",
       "tests/test_unified_nonlinear_frame_api.py": "sha256:ce849bee30fed750092d71a8e4f2c2f7737bf8ba504b5a9a7eaf33f74ae62676"
     },
-    "source_set_hash": "sha256:685cdc15f805add8fdbd8f89c54f2294a448c2c60a8039193bb43330d29820e0"
+    "source_set_hash": "sha256:35ce40f2208f1f573f1b05778547ae13b807a690351f3305695d4db374d9bda6"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-24T07:28:55.946710+00:00",
+    "current_product_replay_generated_at": "2026-07-24T10:38:41.436990+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-23T16:41:46.084068+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current source aligns product replay tolerance with the existing code-to-code numerical contract and bounds Ruff below the incompatible 0.16 release; the preserved container-isolated external execution is reused because this sandbox prohibits the Docker daemon."
+    "reuse_reason": "PR 17 adds bounded durable checkpoint orchestration; current product comparisons were replayed against checksum-bound stored external values without rerunning either external runtime."
   },
   "runtimes": {
     "calculix": {
@@ -538,7 +538,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "3e7e4f6fffadd11d3ec06656ca386e705f8db21d",
+  "source_commit_sha": "05fd21266430c1fa2b4c18c835f282ec44909dbf",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
