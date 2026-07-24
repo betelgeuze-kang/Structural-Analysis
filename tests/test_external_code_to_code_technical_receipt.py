@@ -17,8 +17,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/run_external_code_to_code_technical_receipt.py"
 RECEIPT = (
-    ROOT
-    / "implementation/phase1/release_evidence/productization/"
+    ROOT / "implementation/phase1/release_evidence/productization/"
     "external_code_to_code_technical_execution_receipt.json"
 )
 SPEC = importlib.util.spec_from_file_location(
@@ -49,6 +48,9 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
         require_current_sources=True,
     )
 
+    source_checksums = payload["internal_source"]["input_checksums"]
+    assert "src/structural_analysis/assembly/linear_static.py" in source_checksums
+    assert "src/structural_analysis/elements/axial.py" in source_checksums
     assert payload["status"] == "partial"
     assert payload["technical_contract_pass"] is True
     assert len(payload["external_assets"]) == 5
@@ -83,17 +85,11 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     portal = payload["comparisons"][2]
     assert portal["case_id"] == "public_corotational_portal_load_path"
     assert len(portal["metrics"]) == 12
-    assert payload["claims"][
-        "public_corotational_portal_technical_comparison"
-    ] is True
+    assert payload["claims"]["public_corotational_portal_technical_comparison"] is True
     spatial_truss = payload["comparisons"][4]
-    assert spatial_truss["case_id"] == (
-        "tetrahedral_spatial_truss_combined_load"
-    )
+    assert spatial_truss["case_id"] == ("tetrahedral_spatial_truss_combined_load")
     assert len(spatial_truss["metrics"]) == 12
-    assert payload["claims"][
-        "calculix_spatial_truss_technical_comparison"
-    ] is True
+    assert payload["claims"]["calculix_spatial_truss_technical_comparison"] is True
     assert payload["claims"]["second_solver_technical_comparison"] is True
 
 
@@ -181,7 +177,9 @@ def test_product_replay_comparison_allows_only_bounded_runtime_drift() -> None:
     assert not module._product_replay_values_match(stored, current)
 
 
-def test_product_replay_refresh_rebinds_current_sources_without_external_rerun() -> None:
+def test_product_replay_refresh_rebinds_current_sources_without_external_rerun() -> (
+    None
+):
     refreshed = module.refresh_external_code_to_code_product_replay(
         _stored_receipt(),
         repo_root=ROOT,
@@ -190,17 +188,16 @@ def test_product_replay_refresh_rebinds_current_sources_without_external_rerun()
 
     assert refreshed["status"] == "partial"
     assert refreshed["technical_contract_pass"] is True
-    assert refreshed["replay_provenance"][
-        "external_runtime_executed_in_this_generation"
-    ] is False
+    assert (
+        refreshed["replay_provenance"]["external_runtime_executed_in_this_generation"]
+        is False
+    )
     assert refreshed["replay_provenance"]["external_execution_reused"] is True
     assert refreshed["replay_provenance"]["current_product_replay_pass"] is True
     assert refreshed["replay_provenance"]["reuse_reason"] == (
         "test_current_product_replay"
     )
-    assert refreshed["blockers_remaining"][-1] == (
-        module.REUSED_EXECUTION_BLOCKER
-    )
+    assert refreshed["blockers_remaining"][-1] == (module.REUSED_EXECUTION_BLOCKER)
 
 
 def test_cli_offline_check_validates_stored_receipt() -> None:

@@ -66,9 +66,7 @@ COMPARISON_ABSOLUTE_TOLERANCE = 1.0e-10
 COMPARISON_RELATIVE_TOLERANCE = 1.0e-10
 PRODUCT_REPLAY_ABSOLUTE_TOLERANCE = COMPARISON_ABSOLUTE_TOLERANCE
 PRODUCT_REPLAY_RELATIVE_TOLERANCE = COMPARISON_RELATIVE_TOLERANCE
-PUBLIC_COROTATIONAL_PORTAL_MODEL = Path(
-    "examples/public_corotational_rc_portal.json"
-)
+PUBLIC_COROTATIONAL_PORTAL_MODEL = Path("examples/public_corotational_rc_portal.json")
 PUBLIC_COROTATIONAL_PORTAL_EFFECTIVE_EA_KN = 7_819_200.0
 PUBLIC_COROTATIONAL_PORTAL_EFFECTIVE_EI_KN_M2 = 200_700.0
 PUBLIC_COROTATIONAL_PORTAL_DISPLACEMENT_SPECS = (
@@ -165,16 +163,14 @@ SOURCE_PATHS = (
     Path("tests/test_external_code_to_code_technical_receipt.py"),
     Path("src/structural_analysis/api/core.py"),
     Path("src/structural_analysis/api/nonlinear_frame.py"),
+    Path("src/structural_analysis/assembly/linear_static.py"),
     Path("src/structural_analysis/benchmark/analytic_frame.py"),
     Path("src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py"),
+    Path("src/structural_analysis/elements/axial.py"),
     Path(
-        "src/structural_analysis/assembly/"
-        "stateful_corotational_fiber_frame2d_solver.py"
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py"
     ),
-    Path(
-        "src/structural_analysis/elements/"
-        "stateful_corotational_fiber_beam2d.py"
-    ),
+    Path("src/structural_analysis/elements/stateful_corotational_fiber_beam2d.py"),
     Path("src/structural_analysis/materials/stateful_fiber_section.py"),
     PUBLIC_COROTATIONAL_PORTAL_MODEL,
     Path("src/structural_analysis/solvers/_generalized_eigen.py"),
@@ -184,7 +180,7 @@ SOURCE_PATHS = (
 )
 
 
-OPENSEES_DRIVER = r'''
+OPENSEES_DRIVER = r"""
 import json
 import openseespy.opensees as ops
 
@@ -282,7 +278,7 @@ payload["public_corotational_portal"] = {
 }
 ops.wipe()
 print("CODE_TO_CODE_JSON=" + json.dumps(payload, allow_nan=False, sort_keys=True))
-'''
+"""
 
 
 CALCULIX_AXIAL_DECK = """*HEADING
@@ -406,7 +402,9 @@ def _source_checksums(repo_root: Path) -> dict[str, str]:
 
 def _wheel_metadata(path: Path) -> tuple[str, str]:
     with zipfile.ZipFile(path) as archive:
-        names = [name for name in archive.namelist() if name.endswith(".dist-info/METADATA")]
+        names = [
+            name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
+        ]
         if len(names) != 1:
             raise ExternalCodeToCodeReceiptError(
                 f"wheel_metadata_count_invalid:{path.name}"
@@ -490,7 +488,11 @@ def _run_opensees(
         env=environment,
     )
     prefix = "CODE_TO_CODE_JSON="
-    rows = [row[len(prefix) :] for row in completed.stdout.splitlines() if row.startswith(prefix)]
+    rows = [
+        row[len(prefix) :]
+        for row in completed.stdout.splitlines()
+        if row.startswith(prefix)
+    ]
     if completed.returncode != 0 or len(rows) != 1:
         raise ExternalCodeToCodeReceiptError("opensees_execution_failed")
     try:
@@ -526,8 +528,8 @@ def _run_calculix(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     environment = dict(os.environ)
     previous = environment.get("LD_LIBRARY_PATH", "")
-    environment["LD_LIBRARY_PATH"] = (
-        str(library_dir.resolve()) + (os.pathsep + previous if previous else "")
+    environment["LD_LIBRARY_PATH"] = str(library_dir.resolve()) + (
+        os.pathsep + previous if previous else ""
     )
     version = subprocess.run(
         [str(binary.resolve()), "-v"],
@@ -572,21 +574,21 @@ def _run_calculix(
                 f"calculix_{job_name}_execution_failed"
             )
         dat_text = dat_path.read_text(encoding="utf-8")
-        displacement_section, separator, force_section = dat_text.partition(
-            " forces "
-        )
+        displacement_section, separator, force_section = dat_text.partition(" forces ")
         if not separator or "Job finished" not in completed.stdout:
-            raise ExternalCodeToCodeReceiptError(
-                f"calculix_{job_name}_output_invalid"
-            )
-        return displacement_section, force_section, {
-            f"{output_prefix}return_code": completed.returncode,
-            f"{output_prefix}stdout_sha256": _text_hash(completed.stdout),
-            f"{output_prefix}stderr_sha256": _text_hash(completed.stderr),
-            f"{output_prefix}input_deck_sha256": _file_hash(deck),
-            f"{output_prefix}dat_sha256": _file_hash(dat_path),
-            f"{output_prefix}frd_sha256": _file_hash(frd_path),
-        }
+            raise ExternalCodeToCodeReceiptError(f"calculix_{job_name}_output_invalid")
+        return (
+            displacement_section,
+            force_section,
+            {
+                f"{output_prefix}return_code": completed.returncode,
+                f"{output_prefix}stdout_sha256": _text_hash(completed.stdout),
+                f"{output_prefix}stderr_sha256": _text_hash(completed.stderr),
+                f"{output_prefix}input_deck_sha256": _file_hash(deck),
+                f"{output_prefix}dat_sha256": _file_hash(dat_path),
+                f"{output_prefix}frd_sha256": _file_hash(frd_path),
+            },
+        )
 
     with TemporaryDirectory(prefix="calculix-code-to-code-") as temporary:
         root = Path(temporary)
@@ -769,9 +771,7 @@ def _public_corotational_portal_effective_rigidity() -> tuple[float, float]:
         for fiber in section.fibers
     )
     flexural_rigidity_kn_m2 = sum(
-        elastic_moduli_kn_per_m2[fiber.material_kind]
-        * fiber.area_m2
-        * fiber.y_m**2
+        elastic_moduli_kn_per_m2[fiber.material_kind] * fiber.area_m2 * fiber.y_m**2
         for fiber in section.fibers
     )
     return float(axial_rigidity_kn), float(flexural_rigidity_kn_m2)
@@ -780,9 +780,7 @@ def _public_corotational_portal_effective_rigidity() -> tuple[float, float]:
 def _public_corotational_portal_product_result(
     repo_root: Path,
 ) -> dict[str, Any]:
-    axial_rigidity, flexural_rigidity = (
-        _public_corotational_portal_effective_rigidity()
-    )
+    axial_rigidity, flexural_rigidity = _public_corotational_portal_effective_rigidity()
     if not math.isclose(
         axial_rigidity,
         PUBLIC_COROTATIONAL_PORTAL_EFFECTIVE_EA_KN,
@@ -902,7 +900,9 @@ def _spatial_truss_metrics(
     return displacement_metrics + reaction_metrics
 
 
-def _comparison(quantity: str, product_value: float, reference_value: float) -> dict[str, Any]:
+def _comparison(
+    quantity: str, product_value: float, reference_value: float
+) -> dict[str, Any]:
     product = float(product_value)
     reference = float(reference_value)
     absolute_error = abs(product - reference)
@@ -928,8 +928,7 @@ def _product_replay_numbers_close(stored: float, current: float) -> bool:
         return False
     scale = max(abs(stored_value), abs(current_value), 1.0)
     return abs(stored_value - current_value) <= (
-        PRODUCT_REPLAY_ABSOLUTE_TOLERANCE
-        + PRODUCT_REPLAY_RELATIVE_TOLERANCE * scale
+        PRODUCT_REPLAY_ABSOLUTE_TOLERANCE + PRODUCT_REPLAY_RELATIVE_TOLERANCE * scale
     )
 
 
@@ -998,9 +997,7 @@ def _current_product_comparison_cases(
     *,
     repo_root: Path = ROOT,
 ) -> list[dict[str, Any]]:
-    stored = {
-        str(case["case_id"]): case for case in receipt.get("comparisons", [])
-    }
+    stored = {str(case["case_id"]): case for case in receipt.get("comparisons", [])}
     expected_ids = {
         "two_dof_shear_modal",
         "cantilever_tip_load",
@@ -1013,14 +1010,10 @@ def _current_product_comparison_cases(
 
     def reference(case_id: str, quantity: str) -> float:
         matches = [
-            row
-            for row in stored[case_id]["metrics"]
-            if row.get("quantity") == quantity
+            row for row in stored[case_id]["metrics"] if row.get("quantity") == quantity
         ]
         if len(matches) != 1:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_reference_metric_invalid"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_reference_metric_invalid")
         return float(matches[0]["reference_value"])
 
     modal = solve_modal_modes(
@@ -1135,13 +1128,9 @@ def _current_product_comparison_cases(
                 )
             ],
             external_return_code=int(
-                stored["public_corotational_portal_load_path"][
-                    "external_return_code"
-                ]
+                stored["public_corotational_portal_load_path"]["external_return_code"]
             ),
-            product_regularization_applied=bool(
-                portal["regularization_used"]
-            ),
+            product_regularization_applied=bool(portal["regularization_used"]),
             product_fallback_used=bool(portal["fallback_used"]),
         ),
         _case(
@@ -1164,9 +1153,7 @@ def _current_product_comparison_cases(
             external_return_code=int(
                 stored["axial_member_tip_load"]["external_return_code"]
             ),
-            product_regularization_applied=bool(
-                axial_metrics["regularization_used"]
-            ),
+            product_regularization_applied=bool(axial_metrics["regularization_used"]),
             product_fallback_used=bool(axial_metrics["fallback_used"]),
         ),
         _case(
@@ -1183,9 +1170,7 @@ def _current_product_comparison_cases(
             product_regularization_applied=bool(
                 spatial_truss["metrics"]["regularization_used"]
             ),
-            product_fallback_used=bool(
-                spatial_truss["metrics"]["fallback_used"]
-            ),
+            product_fallback_used=bool(spatial_truss["metrics"]["fallback_used"]),
         ),
     ]
 
@@ -1206,8 +1191,7 @@ def _expected_claims(
             comparisons[2]["contract_pass"]
         ),
         "second_solver_technical_comparison": bool(
-            comparisons[3]["contract_pass"]
-            and comparisons[4]["contract_pass"]
+            comparisons[3]["contract_pass"] and comparisons[4]["contract_pass"]
         ),
         "calculix_spatial_truss_technical_comparison": bool(
             comparisons[4]["contract_pass"]
@@ -1316,13 +1300,9 @@ def build_external_code_to_code_technical_receipt(
             ),
             external_return_code=max(
                 abs(int(code))
-                for code in opensees[
-                    "public_corotational_portal_analyze_codes"
-                ]
+                for code in opensees["public_corotational_portal_analyze_codes"]
             ),
-            product_regularization_applied=bool(
-                portal["regularization_used"]
-            ),
+            product_regularization_applied=bool(portal["regularization_used"]),
             product_fallback_used=bool(portal["fallback_used"]),
         ),
         _case(
@@ -1352,15 +1332,11 @@ def build_external_code_to_code_technical_receipt(
             reference_solver="CalculiX CrunchiX 2.17",
             product_solver_id=str(spatial_truss["solver"]),
             metrics=_spatial_truss_metrics(spatial_truss, calculix),
-            external_return_code=calculix_outputs[
-                "spatial_truss_return_code"
-            ],
+            external_return_code=calculix_outputs["spatial_truss_return_code"],
             product_regularization_applied=bool(
                 spatial_truss["metrics"]["regularization_used"]
             ),
-            product_fallback_used=bool(
-                spatial_truss["metrics"]["fallback_used"]
-            ),
+            product_fallback_used=bool(spatial_truss["metrics"]["fallback_used"]),
         ),
     ]
     checksums = _source_checksums(repo_root)
@@ -1428,9 +1404,7 @@ def build_external_code_to_code_technical_receipt(
         "replay_provenance": {
             "external_runtime_executed_in_this_generation": True,
             "external_execution_reused": False,
-            "external_execution_generated_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
+            "external_execution_generated_at": datetime.now(timezone.utc).isoformat(),
             "current_product_replay_generated_at": datetime.now(
                 timezone.utc
             ).isoformat(),
@@ -1476,27 +1450,19 @@ def validate_external_code_to_code_technical_receipt(
     replay = payload.get("replay_provenance")
     if replay is None:
         if require_current_sources:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_provenance_missing"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_replay_provenance_missing")
     else:
         reused = replay["external_execution_reused"]
-        executed_now = replay[
-            "external_runtime_executed_in_this_generation"
-        ]
+        executed_now = replay["external_runtime_executed_in_this_generation"]
         reason = replay["reuse_reason"]
         if reused is executed_now:
             raise ExternalCodeToCodeReceiptError(
                 "receipt_replay_execution_state_invalid"
             )
         if reused and (not isinstance(reason, str) or not reason.strip()):
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_reason_missing"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_replay_reason_missing")
         if not reused and reason is not None:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_reason_unexpected"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_replay_reason_unexpected")
     expected_assets = {
         name: policy["sha256"] for name, policy in EXTERNAL_ASSET_POLICY.items()
     }
@@ -1514,9 +1480,10 @@ def validate_external_code_to_code_technical_receipt(
                 abs(reference), np.finfo(np.float64).tiny
             )
             scale = max(abs(product), abs(reference), 1.0)
-            tolerance = float(metric["absolute_tolerance"]) + float(
-                metric["relative_tolerance"]
-            ) * scale
+            tolerance = (
+                float(metric["absolute_tolerance"])
+                + float(metric["relative_tolerance"]) * scale
+            )
             if not math.isclose(
                 float(metric["absolute_error"]),
                 absolute_error,
@@ -1543,8 +1510,7 @@ def validate_external_code_to_code_technical_receipt(
     expected_technical_pass = bool(
         all(row["contract_pass"] is True for row in payload["comparisons"])
         and all(
-            row["actual_external_execution"] is True
-            and row["version_verified"] is True
+            row["actual_external_execution"] is True and row["version_verified"] is True
             for row in payload["runtimes"].values()
         )
     )
@@ -1565,9 +1531,7 @@ def validate_external_code_to_code_technical_receipt(
         if payload["blockers_remaining"] != expected_blockers:
             raise ExternalCodeToCodeReceiptError("receipt_blockers_invalid")
         if payload["claim_boundary"] != CLAIM_BOUNDARY:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_claim_boundary_invalid"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_claim_boundary_invalid")
     if require_current_sources:
         current_comparisons = _current_product_comparison_cases(
             payload,
@@ -1577,13 +1541,9 @@ def validate_external_code_to_code_technical_receipt(
             payload["comparisons"],
             current_comparisons,
         ):
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_product_comparisons_stale"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_product_comparisons_stale")
         if replay["current_product_replay_pass"] is not expected_technical_pass:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_product_replay_pass_invalid"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_product_replay_pass_invalid")
     return payload
 
 
@@ -1615,8 +1575,7 @@ def refresh_external_code_to_code_product_replay(
     technical_pass = bool(
         all(row["contract_pass"] is True for row in comparisons)
         and all(
-            row["actual_external_execution"] is True
-            and row["version_verified"] is True
+            row["actual_external_execution"] is True and row["version_verified"] is True
             for row in payload["runtimes"].values()
         )
     )
@@ -1634,9 +1593,7 @@ def refresh_external_code_to_code_product_replay(
             "replay_provenance": {
                 "external_runtime_executed_in_this_generation": False,
                 "external_execution_reused": True,
-                "external_execution_generated_at": (
-                    external_execution_generated_at
-                ),
+                "external_execution_generated_at": (external_execution_generated_at),
                 "current_product_replay_generated_at": now,
                 "current_product_replay_pass": technical_pass,
                 "reuse_reason": reuse_reason.strip(),
@@ -1700,8 +1657,7 @@ def main(argv: list[str] | None = None) -> int:
             reuse_reason=args.reuse_reason,
         )
         out.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
-            + "\n",
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
         print("external_code_to_code_product_replay_refreshed")
