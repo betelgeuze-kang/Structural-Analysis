@@ -204,9 +204,24 @@ def test_policy_id_must_match_the_packaged_public_schema() -> None:
         SparseFactorizationPolicy(policy_id="custom-policy.v1")
 
 
-def test_complex_sparse_tangent_is_rejected_before_factorization() -> None:
-    matrix = csr_matrix(np.diag([1.0 + 1.0e-16j, 2.0 + 0.0j]))
+def test_dense_real_tangent_is_canonicalized_and_solved() -> None:
+    matrix = np.asarray([[4.0, -1.0], [-1.0, 3.0]], dtype=np.float64)
+    rhs = np.asarray([1.0, 2.0], dtype=np.float64)
 
+    solved = factorize_and_solve_sparse(matrix, rhs)
+
+    np.testing.assert_allclose(solved.solution, np.linalg.solve(matrix, rhs))
+    assert solved.diagnostic.contract_pass is True
+
+
+@pytest.mark.parametrize(
+    "matrix",
+    (
+        np.diag([1.0 + 1.0e-16j, 2.0 + 0.0j]),
+        csr_matrix(np.diag([1.0 + 1.0e-16j, 2.0 + 0.0j])),
+    ),
+)
+def test_complex_tangent_is_rejected_before_factorization(matrix) -> None:
     with pytest.raises(
         SparseFactorizationError,
         match="sparse_factorization_matrix_complex",
@@ -241,6 +256,18 @@ def test_rehashed_pivot_relationship_tampering_is_rejected() -> None:
 
     with pytest.raises(ValueError, match="pivot ratio mismatch"):
         validate_sparse_factorization_diagnostic_manifest(manifest)
+
+    impossible_extrema = factorize_and_solve_sparse(
+        csr_matrix(np.asarray([[4.0, -1.0], [-1.0, 3.0]])),
+        [1.0, 2.0],
+    ).diagnostic.to_manifest()
+    impossible_extrema["absolute_pivot_minimum"] = 2.0
+    impossible_extrema["absolute_pivot_maximum"] = 1.0
+    impossible_extrema["normalized_absolute_pivot_minimum"] = 2.0
+    _rehash_manifest(impossible_extrema)
+
+    with pytest.raises(ValueError, match="pivot extrema mismatch"):
+        validate_sparse_factorization_diagnostic_manifest(impossible_extrema)
 
 
 def test_singular_matrix_and_diagnostic_scope_fail_closed() -> None:
