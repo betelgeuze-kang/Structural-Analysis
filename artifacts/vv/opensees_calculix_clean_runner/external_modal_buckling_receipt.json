@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:99789d3848993cbfc976fed75a849c050f180b49dd97108c1ee28b72bf1da540",
+  "artifact_hash": "sha256:de53efedd3785a61c794a5a55ccf39877c47e53173d8607e918bfc37446d960c",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -9,7 +9,8 @@
     "code_to_code_structural_family_breadth_insufficient",
     "published_modal_buckling_benchmark_missing",
     "verification_level_2_not_achieved",
-    "release_readiness_not_established"
+    "release_readiness_not_established",
+    "external_runtime_current_source_rerun_missing"
   ],
   "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. OpenSees is compared with the public whole-model frame consistent-mass modal path for one two-degree-of-freedom cantilever, including eigenvalues and per-mode MAC. CalculiX B32 is compared with the public compression-only frame linear-buckling path for one sixteen-element pin-ended square column, including two repeated load factors and a basis-invariant two-mode subspace correlation. The CalculiX comparison uses a declared 1 percent load-factor tolerance and does not assert identical element formulations. Mode vectors are checksum-bound little-endian binary artifacts and are not inlined in JSON. This is narrow technical code-to-code evidence only. No product/legal approval or external-runtime redistribution approval is attached, the packages are not bundled, and no independent clean runner, broad structural-family corpus, published benchmark decision, or operator hierarchy manifest is present. Therefore this receipt does not achieve Verification Level 2, commercial equivalence, design authority, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
   "claims": {
@@ -180,11 +181,11 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-23T15:07:29.398959+00:00",
+  "generated_at": "2026-07-24T07:31:22.464306+00:00",
   "internal_source": {
     "input_checksums": {
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:0efa47f503dea0efdfc32b5ae39d4c54f8060437b50c7adafc8aedeab24fcc75",
-      "scripts/run_external_modal_buckling_technical_receipt.py": "sha256:809bf6499fe37cc1ef5a6fd0de8f841e702d70fd0e210d6662bea5016f190954",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:b8599d7a4a0f0eca7a80c7bdf82c39b0c581d4dbbed31ee68ce22da4c07e8eae",
+      "scripts/run_external_modal_buckling_technical_receipt.py": "sha256:18802b36a84452335e42ec7074dfbf34da3844d65eedebdc9d42bd0415c4150e",
       "src/structural_analysis/analyses/buckling.py": "sha256:bc498580f2a3e3e287640d787d03e88a461df274c41c41e2d5eb331ad4ba0e92",
       "src/structural_analysis/analyses/modal.py": "sha256:0b2ac841fd3c0589b7c1b3d299543c59861cc208873c9691c3f5860329acdd3e",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
@@ -193,9 +194,9 @@
       "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
       "src/structural_analysis/schemas/external_modal_buckling_technical_receipt_v1.schema.json": "sha256:74b579d0b3c39e52c739fbd66d9148679013cd3ee7191bccacb5850f111b169d",
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
-      "tests/test_external_modal_buckling_technical_receipt.py": "sha256:0fa03d8e2ca33f0b8c02cc397c6ac8c4ce6e6541fe01e117873750960088ba8d"
+      "tests/test_external_modal_buckling_technical_receipt.py": "sha256:907eb930bb97e6c06b0dcaee2042812584eab9227d2ab586f22a6fbd2b298b41"
     },
-    "source_set_hash": "sha256:e70b17f36e473b94e0455dd28157c951436047f5cd23185a72173fbec575bda7"
+    "source_set_hash": "sha256:306c56be561fcbb000b10455f05ee21ff2a3d96ee86d969109c544b94da5b1f2"
   },
   "mode_vector_artifacts": [
     {
@@ -258,17 +259,17 @@
   "mode_vector_storage_profile": "canonical_little_endian_fp64_binary.v1",
   "product_evidence": {
     "buckling_model_hash": "sha256:0e222cde2c47ba863d680edff85a9f31a42c829ad876e4324f8fb763dd745800",
-    "buckling_semantic_result_hash": "sha256:084ab155872c1d069581c66f2d732fdcea7d574f3760f40ed0c41e3ddbbb138b",
+    "buckling_semantic_result_hash": "sha256:7fb6bedd9a067185b835280b2aeca4e4d7383193f18c1a5682f5c5f6bd61229f",
     "modal_model_hash": "sha256:5eb02ed60f6d95cf97d13bfde70ac2ffe94e7cb96ca0159c7d0a9a039a40d17c",
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-23T15:07:29.405970+00:00",
+    "current_product_replay_generated_at": "2026-07-24T07:31:22.464306+00:00",
     "current_product_replay_pass": true,
-    "external_execution_generated_at": "2026-07-23T15:07:29.405962+00:00",
-    "external_execution_reused": false,
-    "external_runtime_executed_in_this_generation": true,
-    "reuse_reason": null
+    "external_execution_generated_at": "2026-07-23T16:42:50.382514+00:00",
+    "external_execution_reused": true,
+    "external_runtime_executed_in_this_generation": false,
+    "reuse_reason": "Current source aligns code-to-code replay tolerance with its existing numerical contract, preserves stricter modal and buckling replay tolerances, and bounds Ruff below the incompatible 0.16 release; the preserved container-isolated external execution is reused because this sandbox prohibits the Docker daemon."
   },
   "runtimes": {
     "calculix": {
@@ -277,11 +278,11 @@
       "distribution_version": "2.17-3",
       "execution_outputs": {
         "dat_sha256": "sha256:b8ec3933f48d1de716ab86e75f4f638f687163ed74e565a97405e66c26edd8a1",
-        "frd_sha256": "sha256:05f0b3f2ec0d8032904c4f4bbbb07bc0ed3a4638e27c4f2287baf6c9fd58a639",
+        "frd_sha256": "sha256:9582d517ea28e447843087d2c52b2a848c90a18c880a9e579dbc09f65d23dee9",
         "input_deck_sha256": "sha256:2a929ab93c0191b2b45c99ef1b46b956f0fe27f22d7cba99905cee934481825d",
         "return_code": 0,
         "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "stdout_sha256": "sha256:9831afad52919f0636382fc0b49894b3aea3028b5e8fa92f0c0a13778b346853",
+        "stdout_sha256": "sha256:f570cfdee84618ec6684adaddad2225a069ff5ade589a89d99371436f42c0209",
         "version_return_code": 201,
         "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
@@ -319,7 +320,7 @@
     }
   },
   "schema_version": "external-modal-buckling-technical-execution.v1",
-  "source_commit_sha": "d81cf64e731288b13bab06edcbe8459546819bfd",
+  "source_commit_sha": "3e7e4f6fffadd11d3ec06656ca386e705f8db21d",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_modal_buckling_technical_execution",

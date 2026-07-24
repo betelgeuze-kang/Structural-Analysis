@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:99c7fc02f3f76c6a6b84c3f5da6b0a9218a73fb4b49fc579c546c2774983a85e",
+  "artifact_hash": "sha256:90f807714f74f9e3a41d352ccdeca0594c3a7ace1abc563cdcb07ac29036f86d",
   "blockers_remaining": [
     "independent_operator_attestation_missing",
     "product_legal_license_approval_missing",
@@ -7,10 +7,10 @@
     "public_corotational_material_nonlinear_external_family_missing",
     "verification_hierarchy_operator_manifest_missing",
     "verification_level_2_not_achieved",
-    "exact_cross_environment_buckling_semantic_hash_mismatch_within_tolerance",
-    "release_readiness_not_established"
+    "release_readiness_not_established",
+    "external_runtime_current_source_rerun_missing"
   ],
-  "claim_boundary": "This receipt proves a same-operator, container-isolated reproduction of the narrow non-promoting OpenSees/CalculiX technical comparisons, including the public one-bay corotational portal's four-step elastic-state load path and the six-member CalculiX spatial-truss comparison. The source mount was read-only, runtime networking had no default route, and every external asset matched its pinned SHA-256 before execution. The source bytes are checksum-bound over the recorded base commit; this is not an independent operator attestation, material-nonlinear or cyclic family validation, legal approval, Verification Level 2 promotion, broad structural-family validation, commercial equivalence, design authority, or release readiness.",
+  "claim_boundary": "This receipt preserves an earlier same-operator, container-isolated actual OpenSees/CalculiX execution and binds current candidate source bytes through current-product-only replays against the checksum-bound stored external values. The current generation did not execute either external runtime, so same-operator container reproduction of the current source is not claimed and external_runtime_current_source_rerun_missing remains explicit. The recorded isolation and runtime inventory describe the earlier execution. This remains a narrow non-promoting technical candidate, not an independent operator attestation, material-nonlinear or cyclic family validation, legal approval, Verification Level 2 promotion, broad structural-family validation, commercial equivalence, design authority, or release readiness.",
   "claims": {
     "actual_external_solver_execution": true,
     "commercial_equivalence": false,
@@ -21,21 +21,21 @@
     "independent_operator_attestation": false,
     "product_legal_license_approval": false,
     "release_readiness": false,
-    "same_operator_container_isolated_reproduction": true,
+    "same_operator_container_isolated_reproduction": false,
     "verification_level_2": false
   },
   "cross_environment_parity": {
     "absolute_tolerance": 1e-12,
-    "exact_semantic_hash_parity": false,
+    "exact_semantic_hash_parity": true,
     "host_reference_receipts": {
       "code_to_code": {
-        "artifact_hash": "sha256:1b490fae40f6dafc559561367a33a2c2323f69efbbb2119ac35ab2ed4fc1f31d",
-        "file_sha256": "sha256:240b74ba5056f7fbfc4ffd9097b3ec971fbd5f345275eb1ab02ffea32191a78b",
+        "artifact_hash": "sha256:255c8f2c2017219e9de564cd5ed7749266e7b0b59c672a6396348c0495eeae2d",
+        "file_sha256": "sha256:b20fa2a25a904be810775b15b1cf03f9394f192ec6cd991a3f100854d078277d",
         "path": "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json"
       },
       "modal_buckling": {
-        "artifact_hash": "sha256:77dce301c45f9f25c88445aff95d196ca1aa7b771f46fa79a94f9fea69d3e712",
-        "file_sha256": "sha256:ee4ac7293f5b4fc44d2f31b229a1b1e9ddd7a4d2db1289eb19810d88fdfc86f3",
+        "artifact_hash": "sha256:36e3b475fab345ff99deb7d465a9003a47d26b094ef09febd98aac323004da11",
+        "file_sha256": "sha256:6a5a5b5c715d446c575579aa0f179d111cb60324142308d12884caabb2605003",
         "path": "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json"
       }
     },
@@ -47,7 +47,7 @@
     "scalar_comparison_count": 73,
     "semantic_hash_matches": {
       "buckling_model_hash": true,
-      "buckling_semantic_result_hash": false,
+      "buckling_semantic_result_hash": true,
       "modal_model_hash": true,
       "modal_semantic_result_hash": true
     }
@@ -79,7 +79,7 @@
       "sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a"
     }
   ],
-  "generated_at": "2026-07-23T15:07:32.754867+00:00",
+  "generated_at": "2026-07-24T07:31:23.618076+00:00",
   "isolation": {
     "designated_output_mount_writable": true,
     "isolation_contract_pass": true,
@@ -88,7 +88,7 @@
   },
   "product_receipts": {
     "code_to_code": {
-      "artifact_hash": "sha256:5c8dcc3a01050b872312cfe6d821c17703ca3227bb1b0efa07335dbd569a40dc",
+      "artifact_hash": "sha256:72b46ec5ab73cd93aa54b8e67bf06eb3146f4a9c8f06ff96268b7a313f82d271",
       "cases": [
         {
           "case_id": "two_dof_shear_modal",
@@ -116,14 +116,14 @@
           "metric_count": 12
         }
       ],
-      "file_sha256": "sha256:180b7464a05abbac3bddcc67deed7f7bfc181624a9b5e22a190bd401738e6182",
-      "fresh_external_runtime_execution": true,
+      "file_sha256": "sha256:373ddcdda5538d449ed174ffad5ee4d4e4caf893af4c851c2d0a4d2a06c195dc",
+      "fresh_external_runtime_execution": false,
       "path": "artifacts/vv/opensees_calculix_clean_runner/external_code_to_code_receipt.json",
-      "source_set_hash": "sha256:734547310524ea4bbe6d5f196f879b1cb4b9bad6279bf97e0542cfc9bcfade5e",
+      "source_set_hash": "sha256:685cdc15f805add8fdbd8f89c54f2294a448c2c60a8039193bb43330d29820e0",
       "technical_contract_pass": true
     },
     "modal_buckling": {
-      "artifact_hash": "sha256:99789d3848993cbfc976fed75a849c050f180b49dd97108c1ee28b72bf1da540",
+      "artifact_hash": "sha256:de53efedd3785a61c794a5a55ccf39877c47e53173d8607e918bfc37446d960c",
       "cases": [
         {
           "case_id": "whole_model_frame_consistent_mass_modal",
@@ -136,10 +136,10 @@
           "metric_count": 3
         }
       ],
-      "file_sha256": "sha256:06580097008000d30cdd9a653df9b6c2d5277f16df34ec4ced813a03dd304e90",
-      "fresh_external_runtime_execution": true,
+      "file_sha256": "sha256:a33038a864cd80f7c482ccb244a2f6635f751cca194fc0e328eb001afe07b81a",
+      "fresh_external_runtime_execution": false,
       "path": "artifacts/vv/opensees_calculix_clean_runner/external_modal_buckling_receipt.json",
-      "source_set_hash": "sha256:e70b17f36e473b94e0455dd28157c951436047f5cd23185a72173fbec575bda7",
+      "source_set_hash": "sha256:306c56be561fcbb000b10455f05ee21ff2a3d96ee86d969109c544b94da5b1f2",
       "technical_contract_pass": true
     }
   },
@@ -168,13 +168,13 @@
       "typing-extensions": "4.15.0"
     },
     "python_version": "3.11.15",
-    "runner_source_sha256": "sha256:80a1258c0e803b624b221d73abec010f15941aaf01ccd58daeeb842256f15934",
-    "schema_sha256": "sha256:3ee7bdd5f1c9bd47b7ef3f4e3cf5e67a07807d7b75be11fbda91ea6d2f63d338",
+    "runner_source_sha256": "sha256:9901a18b7a4dcdd19dd6879497e3eccd0dd6284f805efdbefa7e9fd52f40b56c",
+    "schema_sha256": "sha256:3316cf81944b7901a442c863dc174395ac7a236a94bb87645541a40f2109a0bb",
     "system": "Linux",
     "wrapper_sha256": "sha256:a62cf874e0089852dbd8eb9d27e1ee2f90cd11fbb44f3350fb814d02e9dcdb24"
   },
   "schema_version": "structural-analysis-external-vv-clean-runner-receipt.v1",
-  "source_commit_sha": "d81cf64e731288b13bab06edcbe8459546819bfd",
+  "source_commit_sha": "3e7e4f6fffadd11d3ec06656ca386e705f8db21d",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "container_isolated_external_vv_technical_candidate"

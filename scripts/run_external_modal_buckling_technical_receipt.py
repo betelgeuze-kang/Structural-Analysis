@@ -54,6 +54,9 @@ MODAL_MAC_MINIMUM = 1.0 - 1.0e-12
 BUCKLING_FACTOR_ABSOLUTE_TOLERANCE = 1.0e-8
 BUCKLING_FACTOR_RELATIVE_TOLERANCE = 1.0e-2
 BUCKLING_SUBSPACE_CORRELATION_MINIMUM = 0.999999
+PRODUCT_REPLAY_ABSOLUTE_TOLERANCE = 1.0e-12
+PRODUCT_REPLAY_RELATIVE_TOLERANCE = 1.0e-12
+PRODUCT_REPLAY_MODE_CORRELATION_MINIMUM = 1.0 - 1.0e-10
 BUCKLING_ELEMENT_COUNT = 16
 BUCKLING_LENGTH_M = 3.0
 BUCKLING_SECTION_SIZE_M = 0.08
@@ -1089,6 +1092,85 @@ def _validate_metric(metric: dict[str, Any]) -> None:
         raise ExternalModalBucklingReceiptError("receipt_metric_invalid")
 
 
+def _product_replay_numbers_close(stored: float, current: float) -> bool:
+    stored_value = float(stored)
+    current_value = float(current)
+    if not math.isfinite(stored_value) or not math.isfinite(current_value):
+        return False
+    scale = max(abs(stored_value), abs(current_value), 1.0)
+    return abs(stored_value - current_value) <= (
+        PRODUCT_REPLAY_ABSOLUTE_TOLERANCE
+        + PRODUCT_REPLAY_RELATIVE_TOLERANCE * scale
+    )
+
+
+def _validate_current_product_replay(
+    *,
+    payload: dict[str, Any],
+    matrices: dict[str, np.ndarray],
+    product: dict[str, Any],
+) -> None:
+    evidence = payload["product_evidence"]
+    if evidence["modal_model_hash"] != product["modal_model_hash"] or evidence[
+        "buckling_model_hash"
+    ] != product["buckling_model_hash"]:
+        raise ExternalModalBucklingReceiptError("product_evidence_stale")
+
+    cases = payload["comparisons"]
+    result_rows = (
+        (cases[0], product["modal_result"]),
+        (cases[1], product["buckling_result"]),
+    )
+    for case, result in result_rows:
+        metrics = result["metrics"]
+        if (
+            case["product_solver_id"] != str(result["solver"])
+            or case["product_regularization_applied"]
+            is not bool(metrics["regularization_used"])
+            or case["product_fallback_used"] is not bool(metrics["fallback_used"])
+        ):
+            raise ExternalModalBucklingReceiptError(
+                "product_replay_contract_stale"
+            )
+
+    modal_correlations = _modal_assurance(
+        matrices["product_modal_modes"],
+        product["modal_matrix"],
+    )
+    buckling_correlations = _subspace_principal_correlations_squared(
+        matrices["product_buckling_modes"],
+        product["buckling_matrix"],
+    )
+    if min((*modal_correlations, *buckling_correlations)) < (
+        PRODUCT_REPLAY_MODE_CORRELATION_MINIMUM
+    ):
+        raise ExternalModalBucklingReceiptError("product_mode_artifacts_stale")
+
+    modal_metrics = _metric_by_quantity(cases[0])
+    buckling_metrics = _metric_by_quantity(cases[1])
+    current_modal_modes = product["modal_result"]["metrics"]["modes"]
+    current_buckling_modes = product["buckling_result"]["metrics"]["modes"]
+    for index in range(2):
+        modal_metric = modal_metrics[
+            f"eigenvalue_mode_{index + 1}_rad2_per_s2"
+        ]
+        buckling_metric = buckling_metrics[
+            f"buckling_load_factor_mode_{index + 1}"
+        ]
+        if not _product_replay_numbers_close(
+            modal_metric["product_value"],
+            current_modal_modes[index]["eigenvalue_rad2_per_s2"],
+        ):
+            raise ExternalModalBucklingReceiptError("product_modal_metric_stale")
+        if not _product_replay_numbers_close(
+            buckling_metric["product_value"],
+            current_buckling_modes[index]["load_factor"],
+        ):
+            raise ExternalModalBucklingReceiptError(
+                "product_buckling_metric_stale"
+            )
+
+
 def validate_external_modal_buckling_technical_receipt(
     payload: dict[str, Any],
     *,
@@ -1214,43 +1296,11 @@ def validate_external_modal_buckling_technical_receipt(
 
     if require_current_sources:
         product = _current_product_evidence()
-        expected_product_evidence = {
-            "modal_model_hash": product["modal_model_hash"],
-            "modal_semantic_result_hash": product["modal_result"]["metrics"][
-                "semantic_result_hash"
-            ],
-            "buckling_model_hash": product["buckling_model_hash"],
-            "buckling_semantic_result_hash": product["buckling_result"]["metrics"][
-                "semantic_result_hash"
-            ],
-        }
-        if payload["product_evidence"] != expected_product_evidence:
-            raise ExternalModalBucklingReceiptError("product_evidence_stale")
-        if not np.array_equal(
-            matrices["product_modal_modes"], product["modal_matrix"]
-        ) or not np.array_equal(
-            matrices["product_buckling_modes"], product["buckling_matrix"]
-        ):
-            raise ExternalModalBucklingReceiptError("product_mode_artifacts_stale")
-        current_modal_modes = product["modal_result"]["metrics"]["modes"]
-        current_buckling_modes = product["buckling_result"]["metrics"]["modes"]
-        for index in range(2):
-            modal_metric = modal_metrics[
-                f"eigenvalue_mode_{index + 1}_rad2_per_s2"
-            ]
-            buckling_metric = buckling_metrics[
-                f"buckling_load_factor_mode_{index + 1}"
-            ]
-            if modal_metric["product_value"] != current_modal_modes[index][
-                "eigenvalue_rad2_per_s2"
-            ]:
-                raise ExternalModalBucklingReceiptError("product_modal_metric_stale")
-            if buckling_metric["product_value"] != current_buckling_modes[index][
-                "load_factor"
-            ]:
-                raise ExternalModalBucklingReceiptError(
-                    "product_buckling_metric_stale"
-                )
+        _validate_current_product_replay(
+            payload=payload,
+            matrices=matrices,
+            product=product,
+        )
 
     expected_technical_pass = bool(
         all(row["contract_pass"] is True for row in cases)

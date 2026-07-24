@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/fracture_energy_concrete_mesh_objectivity_v1.schema.json",
+  "title": "Source-bound fracture-energy concrete mesh-objectivity benchmark v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "numeric_serialization_profile",
+    "truth_class",
+    "source",
+    "status",
+    "contract_pass",
+    "profile",
+    "material_algorithm",
+    "tangent_definition",
+    "configuration",
+    "traction_opening_cases",
+    "tangent_checks",
+    "mesh_cases",
+    "metrics",
+    "checks",
+    "claims",
+    "limitations",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "fracture-energy-concrete-mesh-objectivity-benchmark.v1"
+    },
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "numeric_serialization_profile": {
+      "const": "canonical_json_binary64_round_trip"
+    },
+    "truth_class": {
+      "const": "repository_generated_bounded_mechanics_candidate"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_checksums", "source_set_hash"],
+      "properties": {
+        "input_checksums": {
+          "type": "object",
+          "minProperties": 13,
+          "maxProperties": 13,
+          "additionalProperties": {"$ref": "#/$defs/hash"}
+        },
+        "source_set_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "status": {"enum": ["candidate_verified", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "profile": {
+      "const": "localized_crack_band_rc_tie_2_4_8_meshes.v1"
+    },
+    "material_algorithm": {
+      "const": "crack_band_exponential_traction_effective_crack_opening"
+    },
+    "tangent_definition": {
+      "const": "implicit_consistent_d_traction_d_total_strain"
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mesh_counts",
+        "length_m",
+        "gross_area_m2",
+        "reinforcement_ratio",
+        "terminal_displacement_m",
+        "load_step_count",
+        "tensile_fracture_energy_n_per_m",
+        "terminal_tensile_strength_mpa",
+        "other_tensile_strength_mpa",
+        "seeded_localization",
+        "reinforcement_idealization"
+      ],
+      "properties": {
+        "mesh_counts": {"const": [2, 4, 8]},
+        "length_m": {"const": 0.04},
+        "gross_area_m2": {"const": 0.01},
+        "reinforcement_ratio": {"const": 0.01},
+        "terminal_displacement_m": {"const": 0.00035},
+        "load_step_count": {"const": 50},
+        "tensile_fracture_energy_n_per_m": {"const": 100.0},
+        "terminal_tensile_strength_mpa": {"const": 3.0},
+        "other_tensile_strength_mpa": {"const": 3.3},
+        "seeded_localization": {
+          "const": "terminal_nominal_ft_others_10_percent_higher"
+        },
+        "reinforcement_idealization": {
+          "const": "single_global_parallel_tie"
+        }
+      }
+    },
+    "traction_opening_cases": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/opening_case"}, {"properties": {"mesh_count": {"const": 2}}}]},
+        {"allOf": [{"$ref": "#/$defs/opening_case"}, {"properties": {"mesh_count": {"const": 4}}}]},
+        {"allOf": [{"$ref": "#/$defs/opening_case"}, {"properties": {"mesh_count": {"const": 8}}}]}
+      ],
+      "items": false
+    },
+    "tangent_checks": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"$ref": "#/$defs/tangent_check"}
+    },
+    "mesh_cases": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/mesh_case"}, {"properties": {"mesh_count": {"const": 2}}}]},
+        {"allOf": [{"$ref": "#/$defs/mesh_case"}, {"properties": {"mesh_count": {"const": 4}}}]},
+        {"allOf": [{"$ref": "#/$defs/mesh_case"}, {"properties": {"mesh_count": {"const": 8}}}]}
+      ],
+      "items": false
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximum_traction_absolute_error_mpa",
+        "maximum_rc_force_history_scaled_linf",
+        "concrete_fracture_energy_spread_relative",
+        "opening_energy_spread_mj_per_m2",
+        "fallback_count",
+        "regularization_count"
+      ],
+      "properties": {
+        "maximum_traction_absolute_error_mpa": {"type": "number", "minimum": 0},
+        "maximum_rc_force_history_scaled_linf": {"type": "number", "minimum": 0},
+        "concrete_fracture_energy_spread_relative": {"type": "number", "minimum": 0},
+        "opening_energy_spread_mj_per_m2": {"type": "number", "minimum": 0},
+        "fallback_count": {"type": "integer", "minimum": 0},
+        "regularization_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "checks": {"$ref": "#/$defs/global_checks"},
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uniaxial_fracture_energy_regularization",
+        "bounded_seeded_rc_tie_mesh_objectivity",
+        "arbitrary_rc_frame_or_shell_mesh_objectivity",
+        "multiaxial_or_confined_concrete",
+        "bond_slip",
+        "published_or_external_validation",
+        "independent_engineering_review",
+        "release_readiness"
+      ],
+      "properties": {
+        "uniaxial_fracture_energy_regularization": {"type": "boolean"},
+        "bounded_seeded_rc_tie_mesh_objectivity": {"type": "boolean"},
+        "arbitrary_rc_frame_or_shell_mesh_objectivity": {"const": false},
+        "multiaxial_or_confined_concrete": {"const": false},
+        "bond_slip": {"const": false},
+        "published_or_external_validation": {"const": false},
+        "independent_engineering_review": {"const": false},
+        "release_readiness": {"const": false}
+      }
+    },
+    "limitations": {
+      "const": [
+        "uniaxial_tension_compression_only",
+        "seeded_single_localization_band",
+        "global_parallel_reinforcement_tie",
+        "no_confinement_bond_slip_or_multiaxial_coupling",
+        "no_arbitrary_frame_or_shell_localization_claim",
+        "no_published_or_external_benchmark_credit"
+      ]
+    },
+    "blockers_remaining": {
+      "const": [
+        "arbitrary_frame_or_shell_localization_not_verified",
+        "multiaxial_and_confined_concrete_not_verified",
+        "bond_slip_not_verified",
+        "published_or_external_validation_not_included",
+        "independent_engineering_review_not_included",
+        "release_readiness_not_established"
+      ]
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "number": {"type": "number"},
+    "history": {
+      "type": "array",
+      "minItems": 50,
+      "maxItems": 50,
+      "items": {"$ref": "#/$defs/number"}
+    },
+    "opening_row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "crack_opening_m",
+        "total_strain",
+        "traction_mpa",
+        "expected_traction_mpa",
+        "dissipated_energy_mj_per_m2"
+      ],
+      "properties": {
+        "crack_opening_m": {"type": "number", "minimum": 0},
+        "total_strain": {"type": "number", "minimum": 0},
+        "traction_mpa": {"type": "number", "minimum": 0},
+        "expected_traction_mpa": {"type": "number", "minimum": 0},
+        "dissipated_energy_mj_per_m2": {"type": "number", "minimum": 0}
+      }
+    },
+    "opening_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mesh_count",
+        "characteristic_length_m",
+        "material_contract_hash",
+        "rows"
+      ],
+      "properties": {
+        "mesh_count": {"enum": [2, 4, 8]},
+        "characteristic_length_m": {"type": "number", "exclusiveMinimum": 0},
+        "material_contract_hash": {"$ref": "#/$defs/hash"},
+        "rows": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/opening_row"}
+        }
+      }
+    },
+    "tangent_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "damage_algorithm",
+        "tangent_definition",
+        "active_branch",
+        "total_strain",
+        "finite_difference_epsilon",
+        "analytic_consistent_tangent_mpa",
+        "finite_difference_tangent_mpa",
+        "absolute_error_mpa",
+        "relative_error",
+        "relative_tolerance",
+        "same_committed_parent_state",
+        "pass"
+      ],
+      "properties": {
+        "damage_algorithm": {
+          "const": "crack_band_exponential_traction_effective_crack_opening"
+        },
+        "tangent_definition": {
+          "const": "implicit_consistent_d_traction_d_total_strain"
+        },
+        "active_branch": {"enum": ["tension", "compression"]},
+        "total_strain": {"type": "number"},
+        "finite_difference_epsilon": {"type": "number", "exclusiveMinimum": 0},
+        "analytic_consistent_tangent_mpa": {"type": "number"},
+        "finite_difference_tangent_mpa": {"type": "number"},
+        "absolute_error_mpa": {"type": "number", "minimum": 0},
+        "relative_error": {"type": "number", "minimum": 0},
+        "relative_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "same_committed_parent_state": {"type": "boolean"},
+        "pass": {"type": "boolean"}
+      }
+    },
+    "mesh_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path_contract_pass",
+        "all_steps_committed",
+        "equilibrium_pass",
+        "single_seeded_localization",
+        "deterministic_state_replay",
+        "zero_fallback",
+        "zero_regularization",
+        "terminal_displacement_exact",
+        "fracture_energy_saturation_pass"
+      ],
+      "properties": {
+        "path_contract_pass": {"type": "boolean"},
+        "all_steps_committed": {"type": "boolean"},
+        "equilibrium_pass": {"type": "boolean"},
+        "single_seeded_localization": {"type": "boolean"},
+        "deterministic_state_replay": {"type": "boolean"},
+        "zero_fallback": {"type": "boolean"},
+        "zero_regularization": {"type": "boolean"},
+        "terminal_displacement_exact": {"type": "boolean"},
+        "fracture_energy_saturation_pass": {"type": "boolean"}
+      }
+    },
+    "mesh_case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mesh_count",
+        "element_length_m",
+        "problem_case_id",
+        "step_count",
+        "terminal_state_hash",
+        "accepted_state_path_hash",
+        "replay_accepted_state_path_hash",
+        "status",
+        "contract_pass",
+        "concrete_force_history_kn",
+        "reinforcement_force_history_kn",
+        "total_rc_force_history_kn",
+        "terminal_displacement_m",
+        "maximum_equilibrium_force_spread_kn",
+        "concrete_dissipated_energy_j",
+        "expected_tensile_fracture_energy_j",
+        "fracture_energy_relative_error",
+        "localized_element_indices",
+        "final_tensile_damage",
+        "fallback_count",
+        "regularization_count",
+        "checks"
+      ],
+      "properties": {
+        "mesh_count": {"enum": [2, 4, 8]},
+        "element_length_m": {"type": "number", "exclusiveMinimum": 0},
+        "problem_case_id": {
+          "type": "string",
+          "pattern": "^fracture_energy_rc_tie_mesh_(2|4|8)$"
+        },
+        "step_count": {"type": "integer", "minimum": 1, "maximum": 50},
+        "terminal_state_hash": {"$ref": "#/$defs/hash"},
+        "accepted_state_path_hash": {"$ref": "#/$defs/hash"},
+        "replay_accepted_state_path_hash": {"$ref": "#/$defs/hash"},
+        "status": {"enum": ["ready", "blocked"]},
+        "contract_pass": {"type": "boolean"},
+        "concrete_force_history_kn": {"$ref": "#/$defs/history"},
+        "reinforcement_force_history_kn": {"$ref": "#/$defs/history"},
+        "total_rc_force_history_kn": {"$ref": "#/$defs/history"},
+        "terminal_displacement_m": {"type": "number", "minimum": 0},
+        "maximum_equilibrium_force_spread_kn": {"type": "number", "minimum": 0},
+        "concrete_dissipated_energy_j": {"type": "number", "minimum": 0},
+        "expected_tensile_fracture_energy_j": {"type": "number", "exclusiveMinimum": 0},
+        "fracture_energy_relative_error": {"type": "number", "minimum": 0},
+        "localized_element_indices": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"type": "integer", "minimum": 0}
+        },
+        "final_tensile_damage": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": {"type": "number", "minimum": 0, "exclusiveMaximum": 1}
+        },
+        "fallback_count": {"type": "integer", "minimum": 0},
+        "regularization_count": {"type": "integer", "minimum": 0},
+        "checks": {"$ref": "#/$defs/mesh_checks"}
+      }
+    },
+    "global_checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "implicit_tangent_finite_difference_pass",
+        "traction_opening_length_invariant",
+        "opening_energy_length_invariant",
+        "all_mesh_cases_pass",
+        "rc_force_history_mesh_objective",
+        "fracture_energy_mesh_objective",
+        "zero_fallback_and_regularization"
+      ],
+      "properties": {
+        "implicit_tangent_finite_difference_pass": {"type": "boolean"},
+        "traction_opening_length_invariant": {"type": "boolean"},
+        "opening_energy_length_invariant": {"type": "boolean"},
+        "all_mesh_cases_pass": {"type": "boolean"},
+        "rc_force_history_mesh_objective": {"type": "boolean"},
+        "fracture_energy_mesh_objective": {"type": "boolean"},
+        "zero_fallback_and_regularization": {"type": "boolean"}
+      }
+    }
+  }
+}

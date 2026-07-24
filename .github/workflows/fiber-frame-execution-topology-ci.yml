@@ -149,7 +149,9 @@ permissions:
 jobs:
   topology-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # The complete branch-coverage and regression sequence exceeds 25 minutes
+    # on GitHub-hosted runners; retain enough headroom to finish the evidence lane.
+    timeout-minutes: 45
     # Exact benchmark receipts use this OpenBLAS kernel family as the canonical path.
     env:
       OPENBLAS_CORETYPE: Haswell

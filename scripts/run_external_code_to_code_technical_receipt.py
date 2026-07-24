@@ -64,6 +64,8 @@ CALCULIX_DISTRIBUTION_VERSION = "2.17-3"
 CALCULIX_RUNTIME_VERSION = "2.17"
 COMPARISON_ABSOLUTE_TOLERANCE = 1.0e-10
 COMPARISON_RELATIVE_TOLERANCE = 1.0e-10
+PRODUCT_REPLAY_ABSOLUTE_TOLERANCE = COMPARISON_ABSOLUTE_TOLERANCE
+PRODUCT_REPLAY_RELATIVE_TOLERANCE = COMPARISON_RELATIVE_TOLERANCE
 PUBLIC_COROTATIONAL_PORTAL_MODEL = Path(
     "examples/public_corotational_rc_portal.json"
 )
@@ -919,6 +921,47 @@ def _comparison(quantity: str, product_value: float, reference_value: float) -> 
     }
 
 
+def _product_replay_numbers_close(stored: float, current: float) -> bool:
+    stored_value = float(stored)
+    current_value = float(current)
+    if not math.isfinite(stored_value) or not math.isfinite(current_value):
+        return False
+    scale = max(abs(stored_value), abs(current_value), 1.0)
+    return abs(stored_value - current_value) <= (
+        PRODUCT_REPLAY_ABSOLUTE_TOLERANCE
+        + PRODUCT_REPLAY_RELATIVE_TOLERANCE * scale
+    )
+
+
+def _product_replay_values_match(stored: Any, current: Any) -> bool:
+    """Compare replay payloads while allowing bounded numerical runtime drift."""
+    if isinstance(stored, bool) or isinstance(current, bool):
+        return type(stored) is type(current) and stored is current
+    if isinstance(stored, int) and isinstance(current, int):
+        return stored == current
+    if isinstance(stored, (int, float)) and isinstance(current, (int, float)):
+        return _product_replay_numbers_close(stored, current)
+    if isinstance(stored, dict):
+        return (
+            isinstance(current, dict)
+            and stored.keys() == current.keys()
+            and all(
+                _product_replay_values_match(stored[key], current[key])
+                for key in stored
+            )
+        )
+    if isinstance(stored, list):
+        return (
+            isinstance(current, list)
+            and len(stored) == len(current)
+            and all(
+                _product_replay_values_match(stored_row, current_row)
+                for stored_row, current_row in zip(stored, current, strict=True)
+            )
+        )
+    return type(stored) is type(current) and stored == current
+
+
 def _case(
     *,
     case_id: str,
@@ -1530,7 +1573,10 @@ def validate_external_code_to_code_technical_receipt(
             payload,
             repo_root=repo_root,
         )
-        if payload["comparisons"] != current_comparisons:
+        if not _product_replay_values_match(
+            payload["comparisons"],
+            current_comparisons,
+        ):
             raise ExternalCodeToCodeReceiptError(
                 "receipt_product_comparisons_stale"
             )

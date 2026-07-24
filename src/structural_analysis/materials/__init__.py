@@ -19,9 +19,12 @@ from structural_analysis.materials.bilinear_rotational_link import (
 )
 from structural_analysis.materials.concrete_damage import (
     DAMAGE_ALGORITHM,
+    FRACTURE_ENERGY_DAMAGE_ALGORITHM,
+    FRACTURE_ENERGY_TANGENT_DEFINITION,
     AsymmetricConcreteDamageMaterial,
     ConcreteDamageResponse,
     ConcreteDamageState,
+    FractureEnergyConcreteDamageMaterial,
     finite_difference_concrete_damage_tangent_check,
     integrate_concrete_damage_history,
 )
@@ -85,7 +88,10 @@ __all__ = [
     "CompressionOnlyGapLinkResponse",
     "CompressionOnlyGapLinkState",
     "DAMAGE_ALGORITHM",
+    "FRACTURE_ENERGY_DAMAGE_ALGORITHM",
+    "FRACTURE_ENERGY_TANGENT_DEFINITION",
     "ElasticIsotropicMaterial",
+    "FractureEnergyConcreteDamageMaterial",
     "FiberSectionNewtonConfig",
     "FiberSectionNewtonResult",
     "GAP_LINK_ACTIVE_SET_ALGORITHM",

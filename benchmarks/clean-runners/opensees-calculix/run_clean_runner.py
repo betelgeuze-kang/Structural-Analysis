@@ -9,6 +9,7 @@ output directory over-mounted read-write. Runtime networking must be disabled.
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 from importlib.metadata import version
@@ -76,9 +77,12 @@ BLOCKERS_REMAINING = (
     "public_corotational_material_nonlinear_external_family_missing",
     "verification_hierarchy_operator_manifest_missing",
     "verification_level_2_not_achieved",
-    "exact_cross_environment_buckling_semantic_hash_mismatch_within_tolerance",
     "release_readiness_not_established",
 )
+SEMANTIC_HASH_MISMATCH_BLOCKER = (
+    "exact_cross_environment_buckling_semantic_hash_mismatch_within_tolerance"
+)
+REUSED_EXECUTION_BLOCKER = "external_runtime_current_source_rerun_missing"
 
 CLAIM_BOUNDARY = (
     "This receipt proves a same-operator, container-isolated reproduction of the "
@@ -88,6 +92,19 @@ CLAIM_BOUNDARY = (
     "source mount was read-only, runtime networking had no default route, and every "
     "external asset matched its pinned SHA-256 before execution. The source bytes "
     "are checksum-bound over the recorded base commit; this is not an independent "
+    "operator attestation, material-nonlinear or cyclic family validation, legal "
+    "approval, Verification Level 2 promotion, broad structural-family validation, "
+    "commercial equivalence, design authority, or release readiness."
+)
+REUSED_CLAIM_BOUNDARY = (
+    "This receipt preserves an earlier same-operator, container-isolated actual "
+    "OpenSees/CalculiX execution and binds current candidate source bytes through "
+    "current-product-only replays against the checksum-bound stored external "
+    "values. The current generation did not execute either external runtime, so "
+    "same-operator container reproduction of the current source is not claimed "
+    "and external_runtime_current_source_rerun_missing remains explicit. The "
+    "recorded isolation and runtime inventory describe the earlier execution. "
+    "This remains a narrow non-promoting technical candidate, not an independent "
     "operator attestation, material-nonlinear or cyclic family validation, legal "
     "approval, Verification Level 2 promotion, broad structural-family validation, "
     "commercial equivalence, design authority, or release readiness."
@@ -357,13 +374,87 @@ def _validate_product_receipt(
     if receipt.get("claims", {}).get("verification_level_2") is not False:
         raise CleanRunnerError("product_receipt_level2_promotion_forbidden")
     replay = receipt.get("replay_provenance", {})
-    if expected_fresh_execution and (
-        replay.get("external_runtime_executed_in_this_generation") is not True
-        or replay.get("external_execution_reused") is not False
-    ):
+    fresh_execution = (
+        replay.get("external_runtime_executed_in_this_generation") is True
+        and replay.get("external_execution_reused") is False
+    )
+    reused_execution = (
+        replay.get("external_runtime_executed_in_this_generation") is False
+        and replay.get("external_execution_reused") is True
+        and isinstance(replay.get("reuse_reason"), str)
+        and bool(replay["reuse_reason"].strip())
+    )
+    if not fresh_execution and not reused_execution:
+        raise CleanRunnerError("product_receipt_replay_state_invalid")
+    if expected_fresh_execution and not fresh_execution:
         raise CleanRunnerError("product_receipt_fresh_execution_required")
     if not all(row.get("contract_pass") is True for row in receipt["comparisons"]):
         raise CleanRunnerError("product_receipt_case_failed")
+
+
+def _receipt_fresh_execution(receipt: dict[str, Any]) -> bool:
+    replay = receipt["replay_provenance"]
+    return bool(
+        replay["external_runtime_executed_in_this_generation"] is True
+        and replay["external_execution_reused"] is False
+    )
+
+
+def _summary_blockers(
+    *,
+    fresh_execution: bool,
+    exact_semantic_hash_parity: bool,
+) -> list[str]:
+    blockers = list(BLOCKERS_REMAINING)
+    if not exact_semantic_hash_parity:
+        blockers.insert(-1, SEMANTIC_HASH_MISMATCH_BLOCKER)
+    if not fresh_execution:
+        blockers.append(REUSED_EXECUTION_BLOCKER)
+    return blockers
+
+
+def _summary_claims(
+    *,
+    technical_pass: bool,
+    fresh_execution: bool,
+    cross_environment_pass: bool,
+) -> dict[str, bool]:
+    return {
+        "same_operator_container_isolated_reproduction": (
+            technical_pass and fresh_execution
+        ),
+        "current_candidate_source_bytes_checksum_bound": technical_pass,
+        "actual_external_solver_execution": technical_pass,
+        "cross_environment_numerical_parity": cross_environment_pass,
+        "independent_operator_attestation": False,
+        "product_legal_license_approval": False,
+        "external_runtime_redistribution_approval": False,
+        "verification_level_2": False,
+        "commercial_equivalence": False,
+        "design_authority": False,
+        "release_readiness": False,
+    }
+
+
+def _summary_claim_boundary(*, fresh_execution: bool) -> str:
+    return CLAIM_BOUNDARY if fresh_execution else REUSED_CLAIM_BOUNDARY
+
+
+def _product_receipt_descriptor(
+    *,
+    repo_root: Path,
+    path: Path,
+    receipt: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "path": path.relative_to(repo_root).as_posix(),
+        "file_sha256": _file_hash(path),
+        "artifact_hash": receipt["artifact_hash"],
+        "source_set_hash": receipt["internal_source"]["source_set_hash"],
+        "technical_contract_pass": receipt["technical_contract_pass"],
+        "fresh_external_runtime_execution": _receipt_fresh_execution(receipt),
+        "cases": _case_summary(receipt),
+    }
 
 
 def _build_summary(
@@ -392,6 +483,10 @@ def _build_summary(
         isolation_pass
         and code_receipt["technical_contract_pass"] is True
         and modal_receipt["technical_contract_pass"] is True
+    )
+    fresh_execution = bool(
+        _receipt_fresh_execution(code_receipt)
+        and _receipt_fresh_execution(modal_receipt)
     )
     cross_environment = _cross_environment_parity(
         repo_root=repo_root,
@@ -438,48 +533,35 @@ def _build_summary(
             for path in assets
         ],
         "product_receipts": {
-            "code_to_code": {
-                "path": code_path.relative_to(repo_root).as_posix(),
-                "file_sha256": _file_hash(code_path),
-                "artifact_hash": code_receipt["artifact_hash"],
-                "source_set_hash": code_receipt["internal_source"]["source_set_hash"],
-                "technical_contract_pass": code_receipt["technical_contract_pass"],
-                "fresh_external_runtime_execution": code_receipt["replay_provenance"][
-                    "external_runtime_executed_in_this_generation"
-                ],
-                "cases": _case_summary(code_receipt),
-            },
-            "modal_buckling": {
-                "path": modal_path.relative_to(repo_root).as_posix(),
-                "file_sha256": _file_hash(modal_path),
-                "artifact_hash": modal_receipt["artifact_hash"],
-                "source_set_hash": modal_receipt["internal_source"]["source_set_hash"],
-                "technical_contract_pass": modal_receipt["technical_contract_pass"],
-                "fresh_external_runtime_execution": modal_receipt["replay_provenance"][
-                    "external_runtime_executed_in_this_generation"
-                ],
-                "cases": _case_summary(modal_receipt),
-            },
+            "code_to_code": _product_receipt_descriptor(
+                repo_root=repo_root,
+                path=code_path,
+                receipt=code_receipt,
+            ),
+            "modal_buckling": _product_receipt_descriptor(
+                repo_root=repo_root,
+                path=modal_path,
+                receipt=modal_receipt,
+            ),
         },
         "cross_environment_parity": cross_environment,
         "technical_contract_pass": technical_pass,
-        "claims": {
-            "same_operator_container_isolated_reproduction": technical_pass,
-            "current_candidate_source_bytes_checksum_bound": technical_pass,
-            "actual_external_solver_execution": technical_pass,
-            "cross_environment_numerical_parity": cross_environment[
+        "claims": _summary_claims(
+            technical_pass=technical_pass,
+            fresh_execution=fresh_execution,
+            cross_environment_pass=cross_environment[
                 "numerical_contract_pass"
             ],
-            "independent_operator_attestation": False,
-            "product_legal_license_approval": False,
-            "external_runtime_redistribution_approval": False,
-            "verification_level_2": False,
-            "commercial_equivalence": False,
-            "design_authority": False,
-            "release_readiness": False,
-        },
-        "blockers_remaining": list(BLOCKERS_REMAINING),
-        "claim_boundary": CLAIM_BOUNDARY,
+        ),
+        "blockers_remaining": _summary_blockers(
+            fresh_execution=fresh_execution,
+            exact_semantic_hash_parity=cross_environment[
+                "exact_semantic_hash_parity"
+            ],
+        ),
+        "claim_boundary": _summary_claim_boundary(
+            fresh_execution=fresh_execution,
+        ),
     }
     payload["artifact_hash"] = _artifact_hash(payload)
     return payload
@@ -491,10 +573,6 @@ def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
     Draft202012Validator(schema).validate(payload)
     if payload["artifact_hash"] != _artifact_hash(payload):
         raise CleanRunnerError("summary_artifact_hash_invalid")
-    if payload["claim_boundary"] != CLAIM_BOUNDARY:
-        raise CleanRunnerError("summary_claim_boundary_invalid")
-    if payload["blockers_remaining"] != list(BLOCKERS_REMAINING):
-        raise CleanRunnerError("summary_blockers_invalid")
     runner = payload["runner"]
     expected_runner_hashes = {
         "runner_source_sha256": _file_hash(Path(__file__)),
@@ -519,7 +597,26 @@ def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
             != receipt["internal_source"]["source_set_hash"]
         ):
             raise CleanRunnerError("summary_child_receipt_descriptor_invalid")
-        _validate_product_receipt(receipt)
+        _validate_product_receipt(receipt, expected_fresh_execution=False)
+        if descriptor["fresh_external_runtime_execution"] is not (
+            _receipt_fresh_execution(receipt)
+        ):
+            raise CleanRunnerError("summary_child_replay_descriptor_invalid")
+    fresh_execution = all(
+        descriptor["fresh_external_runtime_execution"] is True
+        for descriptor in payload["product_receipts"].values()
+    )
+    if payload["claim_boundary"] != _summary_claim_boundary(
+        fresh_execution=fresh_execution
+    ):
+        raise CleanRunnerError("summary_claim_boundary_invalid")
+    if payload["blockers_remaining"] != _summary_blockers(
+        fresh_execution=fresh_execution,
+        exact_semantic_hash_parity=payload["cross_environment_parity"][
+            "exact_semantic_hash_parity"
+        ],
+    ):
+        raise CleanRunnerError("summary_blockers_invalid")
     if {
         str(receipt["source_commit_sha"])
         for receipt in child_receipts.values()
@@ -539,22 +636,109 @@ def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
     )
     if payload["cross_environment_parity"] != expected_parity:
         raise CleanRunnerError("summary_cross_environment_parity_invalid")
-    claims = payload["claims"]
-    forbidden = (
-        "independent_operator_attestation",
-        "product_legal_license_approval",
-        "external_runtime_redistribution_approval",
-        "verification_level_2",
-        "commercial_equivalence",
-        "design_authority",
-        "release_readiness",
+    expected_claims = _summary_claims(
+        technical_pass=payload["technical_contract_pass"],
+        fresh_execution=fresh_execution,
+        cross_environment_pass=expected_parity["numerical_contract_pass"],
     )
-    if any(claims[name] is not False for name in forbidden):
-        raise CleanRunnerError("summary_forbidden_claim_promoted")
+    if payload["claims"] != expected_claims:
+        raise CleanRunnerError("summary_claims_invalid")
     if payload["status"] != (
         "partial" if payload["technical_contract_pass"] else "blocked"
     ):
         raise CleanRunnerError("summary_status_invalid")
+
+
+def refresh_product_replay_summary(
+    *,
+    repo_root: Path,
+    output_dir: Path,
+) -> dict[str, Any]:
+    summary_path = output_dir / SUMMARY_RELATIVE_PATH
+    refreshed = deepcopy(_read_json(summary_path))
+    code_path = output_dir / CODE_RECEIPT_RELATIVE_PATH
+    modal_path = output_dir / MODAL_RECEIPT_RELATIVE_PATH
+    code_receipt = _read_json(code_path)
+    modal_receipt = _read_json(modal_path)
+    _validate_product_receipt(code_receipt, expected_fresh_execution=False)
+    _validate_product_receipt(modal_receipt, expected_fresh_execution=False)
+    source_commits = {
+        str(code_receipt["source_commit_sha"]),
+        str(modal_receipt["source_commit_sha"]),
+    }
+    if len(source_commits) != 1:
+        raise CleanRunnerError("product_receipt_source_commit_mismatch")
+
+    cross_environment = _cross_environment_parity(
+        repo_root=repo_root,
+        code_receipt=code_receipt,
+        modal_receipt=modal_receipt,
+        host_code_reference=_read_json(
+            repo_root / HOST_CODE_REFERENCE_RELATIVE_PATH
+        ),
+        host_modal_reference=_read_json(
+            repo_root / HOST_MODAL_REFERENCE_RELATIVE_PATH
+        ),
+    )
+    fresh_execution = bool(
+        _receipt_fresh_execution(code_receipt)
+        and _receipt_fresh_execution(modal_receipt)
+    )
+    technical_pass = bool(
+        refreshed["isolation"]["isolation_contract_pass"] is True
+        and code_receipt["technical_contract_pass"] is True
+        and modal_receipt["technical_contract_pass"] is True
+    )
+    refreshed.update(
+        {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "source_commit_sha": source_commits.pop(),
+            "status": "partial" if technical_pass else "blocked",
+            "product_receipts": {
+                "code_to_code": _product_receipt_descriptor(
+                    repo_root=repo_root,
+                    path=code_path,
+                    receipt=code_receipt,
+                ),
+                "modal_buckling": _product_receipt_descriptor(
+                    repo_root=repo_root,
+                    path=modal_path,
+                    receipt=modal_receipt,
+                ),
+            },
+            "cross_environment_parity": cross_environment,
+            "technical_contract_pass": technical_pass,
+            "claims": _summary_claims(
+                technical_pass=technical_pass,
+                fresh_execution=fresh_execution,
+                cross_environment_pass=cross_environment[
+                    "numerical_contract_pass"
+                ],
+            ),
+            "blockers_remaining": _summary_blockers(
+                fresh_execution=fresh_execution,
+                exact_semantic_hash_parity=cross_environment[
+                    "exact_semantic_hash_parity"
+                ],
+            ),
+            "claim_boundary": _summary_claim_boundary(
+                fresh_execution=fresh_execution,
+            ),
+        }
+    )
+    refreshed["runner"].update(
+        {
+            "runner_source_sha256": _file_hash(Path(__file__)),
+            "schema_sha256": _file_hash(repo_root / SCHEMA_RELATIVE_PATH),
+            "dockerfile_sha256": _file_hash(
+                repo_root / DOCKERFILE_RELATIVE_PATH
+            ),
+            "wrapper_sha256": _file_hash(repo_root / WRAPPER_RELATIVE_PATH),
+        }
+    )
+    refreshed["artifact_hash"] = _artifact_hash(refreshed)
+    validate_summary(refreshed, repo_root=repo_root)
+    return refreshed
 
 
 def _write_summary(path: Path, payload: dict[str, Any]) -> None:
@@ -572,15 +756,28 @@ def _write_summary(path: Path, payload: dict[str, Any]) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, required=True)
-    parser.add_argument("--asset-dir", type=Path, required=True)
+    parser.add_argument("--asset-dir", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--derived-image-id", required=True)
+    parser.add_argument("--derived-image-id")
+    parser.add_argument("--refresh-product-replay-summary", action="store_true")
     args = parser.parse_args(argv)
 
     repo_root = args.repo_root.resolve()
-    asset_dir = args.asset_dir.resolve()
     output_dir = args.output_dir.resolve()
-    if not repo_root.is_dir() or not asset_dir.is_dir() or not output_dir.is_dir():
+    if not repo_root.is_dir() or not output_dir.is_dir():
+        raise CleanRunnerError("runner_directory_missing")
+    if args.refresh_product_replay_summary:
+        summary = refresh_product_replay_summary(
+            repo_root=repo_root,
+            output_dir=output_dir,
+        )
+        _write_summary(output_dir / SUMMARY_RELATIVE_PATH, summary)
+        print("external_vv_clean_runner_product_replay_summary_refreshed")
+        return 0
+    if args.asset_dir is None or args.derived_image_id is None:
+        parser.error("--asset-dir and --derived-image-id are required")
+    asset_dir = args.asset_dir.resolve()
+    if not asset_dir.is_dir():
         raise CleanRunnerError("runner_directory_missing")
     output_relative = _relative_to_repo(output_dir, repo_root)
     source_read_only = _source_mount_is_read_only(repo_root)

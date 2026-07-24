@@ -57,6 +57,21 @@ The generated product receipts bind the exact source bytes by SHA-256 and record
 commit. This permits a candidate bundle to be generated before its containing commit without
 pretending the base commit alone contains those bytes.
 
+When only a current-product replay is possible, refresh both child receipts with their
+`--refresh-product-replay` modes and then run:
+
+```bash
+python benchmarks/clean-runners/opensees-calculix/run_clean_runner.py \
+  --repo-root . \
+  --output-dir artifacts/vv/opensees_calculix_clean_runner \
+  --refresh-product-replay-summary
+```
+
+This preserves the earlier actual container execution but marks both child descriptors as
+non-fresh, clears the current-source container-reproduction claim, and adds
+`external_runtime_current_source_rerun_missing`. It must not be represented as a substitute
+for rerunning the pinned container.
+
 The summary schema deliberately fixes `independent_operator_attestation`, legal and
 redistribution approval, Verification Level 2, commercial equivalence, design authority, and
 release readiness to `false`. A second operator must reproduce and sign the bundle before it

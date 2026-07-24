@@ -86,7 +86,13 @@ def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None
         }
         for name in sorted(runner.ASSET_POLICY)
     ]
-    assert payload["claims"]["same_operator_container_isolated_reproduction"] is True
+    fresh_execution = all(
+        descriptor["fresh_external_runtime_execution"] is True
+        for descriptor in payload["product_receipts"].values()
+    )
+    assert payload["claims"]["same_operator_container_isolated_reproduction"] is (
+        fresh_execution
+    )
     assert payload["claims"]["actual_external_solver_execution"] is True
     for forbidden in (
         "independent_operator_attestation",
@@ -99,6 +105,9 @@ def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None
     ):
         assert payload["claims"][forbidden] is False
     assert "independent_operator_attestation_missing" in payload["blockers_remaining"]
+    assert (
+        runner.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
+    ) is (not fresh_execution)
 
 
 def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sources() -> (
@@ -134,8 +143,12 @@ def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sou
             == receipt["internal_source"]["source_set_hash"]
         )
         assert descriptor["technical_contract_pass"] is True
-        assert descriptor["fresh_external_runtime_execution"] is True
-        assert receipt["replay_provenance"]["external_execution_reused"] is False
+        replay = receipt["replay_provenance"]
+        fresh_execution = (
+            replay["external_runtime_executed_in_this_generation"] is True
+            and replay["external_execution_reused"] is False
+        )
+        assert descriptor["fresh_external_runtime_execution"] is fresh_execution
         assert receipt["claims"]["verification_level_2"] is False
 
     assert code["claims"][
@@ -197,8 +210,9 @@ def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sou
     assert parity["scalar_comparison_count"] == 73
     assert parity["semantic_hash_matches"]["modal_model_hash"] is True
     assert parity["semantic_hash_matches"]["buckling_model_hash"] is True
-    assert parity["semantic_hash_matches"]["buckling_semantic_result_hash"] is False
-    assert parity["exact_semantic_hash_parity"] is False
+    assert parity["exact_semantic_hash_parity"] is all(
+        parity["semantic_hash_matches"].values()
+    )
     assert summary["claims"]["cross_environment_numerical_parity"] is True
 
 
@@ -209,6 +223,19 @@ def test_rehashed_level2_or_independent_operator_promotion_is_rejected() -> None
     payload["artifact_hash"] = runner._artifact_hash(payload)
 
     with pytest.raises(ValidationError):
+        runner.validate_summary(payload, repo_root=ROOT)
+
+
+def test_rehashed_replay_summary_cannot_misstate_current_container_run() -> None:
+    payload = deepcopy(_json(SUMMARY))
+    claim = "same_operator_container_isolated_reproduction"
+    payload["claims"][claim] = not payload["claims"][claim]
+    payload["artifact_hash"] = runner._artifact_hash(payload)
+
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_claims_invalid",
+    ):
         runner.validate_summary(payload, repo_root=ROOT)
 
 

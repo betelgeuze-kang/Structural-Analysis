@@ -85,7 +85,7 @@
   "blocked_capability_register_count": 4,
   "blockers": [],
   "canonical_registry": "artifacts/manifests/capabilities.yaml",
-  "capability_count": 18,
+  "capability_count": 19,
   "capability_rows": [
     {
       "blocker_count": 0,
@@ -449,6 +449,36 @@
     },
     {
       "blocker_count": 0,
+      "capability_id": "material.fracture_energy_concrete",
+      "capability_kind": "material",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/materials/concrete_damage.py",
+        "src/structural_analysis/benchmark/fracture_energy_concrete.py",
+        "src/structural_analysis/schemas/fracture_energy_concrete_mesh_objectivity_v1.schema.json",
+        "artifacts/benchmarks/fracture_energy_concrete_mesh_objectivity.json",
+        "scripts/build_fracture_energy_concrete_benchmark.py",
+        "tests/test_fracture_energy_concrete.py",
+        "docs/fracture-energy-concrete-mesh-objectivity.md"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_source_bound_uniaxial_crack_band_candidate",
+        "interfaces": [
+          "internal_python",
+          "evidence"
+        ],
+        "limitations": [
+          "Source-bound mesh-objectivity evidence is limited to a seeded single-crack uniaxial RC tie. Arbitrary frame or shell localization, multiaxial concrete, confinement, bond slip, published or external validation, independent engineering review, and release promotion remain open."
+        ],
+        "profile": "localized_crack_band_rc_tie_2_4_8_meshes.v1",
+        "public": false
+      },
+      "title": "Fracture-energy concrete"
+    },
+    {
+      "blocker_count": 0,
       "capability_id": "analysis.cyclic_corotational_fiber_frames",
       "capability_kind": "analysis",
       "contract_pass": true,
@@ -587,7 +617,7 @@
   "claim_locked": false,
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
-  "experimental_capability_count": 3,
+  "experimental_capability_count": 4,
   "first_blocked_capability": {
     "blocker_count": 1,
     "capability_id": "vv.opensees_level2",
@@ -611,9 +641,9 @@
   "first_blocked_capability_id": "vv.opensees_level2",
   "first_blocked_capability_next_action": "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-23T13:13:16.198611+00:00",
+  "generated_at": "2026-07-23T16:03:57.006854+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:74e30b428a9a7c947b886f0b14a2401fb6b80e9f7172770530a0dea920a67f7a",
+    "artifacts/manifests/capabilities.yaml": "sha256:7364449dcbf09640f3a1d31863e65230659fc4f23a2ef5fc15ce64d252971c9a",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -644,7 +674,7 @@
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "91e00a57db8fae1b2975c291f4439acdb75879ae",
+  "source_commit_sha": "259002979b923795cfccd11322d0d1d176606c49",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",
@@ -670,7 +700,7 @@
     "title": "Restricted alpha structural solver evidence"
   },
   "status": "ready",
-  "summary_line": "Product capabilities surface: READY | capabilities=18 | ready=10 | experimental=3 | shadow_only=1 | blocked=4",
+  "summary_line": "Product capabilities surface: READY | capabilities=19 | ready=10 | experimental=4 | shadow_only=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
   "surface_kind": "product_capabilities_surface",
   "surface_scope": "product_capability_discovery"

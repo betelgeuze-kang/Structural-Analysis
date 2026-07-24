@@ -65,11 +65,21 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
         for runtime in payload["runtimes"].values()
     )
     replay = payload["replay_provenance"]
-    assert replay["external_runtime_executed_in_this_generation"] is True
-    assert replay["external_execution_reused"] is False
     assert replay["current_product_replay_pass"] is True
-    assert replay["reuse_reason"] is None
-    assert module.REUSED_EXECUTION_BLOCKER not in payload["blockers_remaining"]
+    fresh_execution = (
+        replay["external_runtime_executed_in_this_generation"] is True
+        and replay["external_execution_reused"] is False
+    )
+    reused_execution = (
+        replay["external_runtime_executed_in_this_generation"] is False
+        and replay["external_execution_reused"] is True
+        and isinstance(replay["reuse_reason"], str)
+        and bool(replay["reuse_reason"].strip())
+    )
+    assert fresh_execution or reused_execution
+    assert (
+        module.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
+    ) is reused_execution
     portal = payload["comparisons"][2]
     assert portal["case_id"] == "public_corotational_portal_load_path"
     assert len(portal["metrics"]) == 12
@@ -146,6 +156,29 @@ def test_validation_rejects_rehashed_claim_promotion() -> None:
             repo_root=ROOT,
             require_current_sources=False,
         )
+
+
+def test_product_replay_comparison_allows_only_bounded_runtime_drift() -> None:
+    stored = _stored_receipt()["comparisons"]
+    current = deepcopy(stored)
+    metric = current[0]["metrics"][0]
+    metric.update(
+        module._comparison(
+            metric["quantity"],
+            metric["product_value"] + 1.0e-13,
+            metric["reference_value"],
+        )
+    )
+    assert module._product_replay_values_match(stored, current)
+
+    metric.update(
+        module._comparison(
+            metric["quantity"],
+            metric["product_value"] + 1.0e-6,
+            metric["reference_value"],
+        )
+    )
+    assert not module._product_replay_values_match(stored, current)
 
 
 def test_product_replay_refresh_rebinds_current_sources_without_external_rerun() -> None:

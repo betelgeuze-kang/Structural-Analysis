@@ -264,7 +264,7 @@
       ],
       "properties": {
         "same_operator_container_isolated_reproduction": {
-          "const": true
+          "type": "boolean"
         },
         "current_candidate_source_bytes_checksum_bound": {
           "const": true
@@ -376,7 +376,7 @@
           "const": true
         },
         "fresh_external_runtime_execution": {
-          "const": true
+          "type": "boolean"
         },
         "cases": {
           "type": "array",
