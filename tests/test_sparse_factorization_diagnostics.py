@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import replace
+import math
 
 import numpy as np
 import pytest
 from scipy.sparse import csr_matrix
 
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+import structural_analysis.solvers.nonlinear.sparse_factorization as sparse_factorization
 from structural_analysis.solvers.nonlinear.sparse_factorization import (
     SPARSE_FACTORIZATION_BACKEND,
     SparseFactorizationError,
@@ -195,6 +197,50 @@ def test_rehashed_policy_scope_fill_status_and_relationship_tampering_is_rejecte
     _rehash_manifest(false_block)
     with pytest.raises(ValueError, match="status mismatch"):
         validate_sparse_factorization_diagnostic_manifest(false_block)
+
+
+def test_policy_id_must_match_the_packaged_public_schema() -> None:
+    with pytest.raises(ValueError, match="policy_id must equal"):
+        SparseFactorizationPolicy(policy_id="custom-policy.v1")
+
+
+def test_complex_sparse_tangent_is_rejected_before_factorization() -> None:
+    matrix = csr_matrix(np.diag([1.0 + 1.0e-16j, 2.0 + 0.0j]))
+
+    with pytest.raises(
+        SparseFactorizationError,
+        match="sparse_factorization_matrix_complex",
+    ):
+        factorize_and_solve_sparse(matrix, [1.0, 1.0])
+
+
+def test_nonfinite_condition_estimate_raises_structured_error(monkeypatch) -> None:
+    monkeypatch.setattr(
+        sparse_factorization,
+        "_exact_inverse_one_norm",
+        lambda _factor, _size: math.inf,
+    )
+
+    with pytest.raises(
+        SparseFactorizationError,
+        match="sparse_condition_number_nonfinite",
+    ) as caught:
+        factorize_and_solve_sparse(csr_matrix(np.eye(2)), [1.0, 1.0])
+
+    assert caught.value.code == "sparse_condition_number_nonfinite"
+    assert caught.value.diagnostic is None
+
+
+def test_rehashed_pivot_relationship_tampering_is_rejected() -> None:
+    manifest = factorize_and_solve_sparse(
+        csr_matrix(np.asarray([[4.0, -1.0], [-1.0, 3.0]])),
+        [1.0, 2.0],
+    ).diagnostic.to_manifest()
+    manifest["absolute_pivot_minimum"] = 0.0
+    _rehash_manifest(manifest)
+
+    with pytest.raises(ValueError, match="pivot ratio mismatch"):
+        validate_sparse_factorization_diagnostic_manifest(manifest)
 
 
 def test_singular_matrix_and_diagnostic_scope_fail_closed() -> None:
