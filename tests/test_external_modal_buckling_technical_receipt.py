@@ -117,6 +117,41 @@ def test_mode_similarity_helpers_are_sign_and_basis_invariant() -> None:
     ) == pytest.approx([1.0, 1.0], abs=1.0e-14)
 
 
+def test_current_product_replay_accepts_semantic_hash_only_platform_drift() -> None:
+    payload = _payload()
+    product = module._current_product_evidence()
+    product["modal_result"]["metrics"]["semantic_result_hash"] = "sha256:" + "1" * 64
+    product["buckling_result"]["metrics"]["semantic_result_hash"] = (
+        "sha256:" + "2" * 64
+    )
+    matrices = {
+        row["name"]: module._load_matrix_artifact(
+            repo_root=ROOT,
+            descriptor=row,
+        )
+        for row in payload["mode_vector_artifacts"]
+    }
+
+    module._validate_current_product_replay(
+        payload=payload,
+        matrices=matrices,
+        product=product,
+    )
+
+    product["modal_result"]["metrics"]["modes"][0][
+        "eigenvalue_rad2_per_s2"
+    ] += 1.0e-6
+    with pytest.raises(
+        module.ExternalModalBucklingReceiptError,
+        match="product_modal_metric_stale",
+    ):
+        module._validate_current_product_replay(
+            payload=payload,
+            matrices=matrices,
+            product=product,
+        )
+
+
 def test_offline_validator_rejects_tampered_mode_vector_bytes(
     tmp_path: Path,
 ) -> None:

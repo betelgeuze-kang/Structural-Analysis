@@ -152,3 +152,16 @@ scripts/run_external_vv_clean_runner.sh <external-asset-directory>
 저장소에 없으므로 이 명령은 외부 솔버를 다시 실행하지 않는다. 새 실제 실행은
 고정된 5개 package bytes와 두 license file, OpenSees Python runtime, CalculiX
 binary/library 경로를 명시적으로 공급해야 한다.
+
+현재 제품 재생은 NumPy/SciPy 및 BLAS 구현 차이로 생기는 반올림 편차를
+절대 `1e-12`와 상대 `1e-12`의 합으로 제한한다. source checksum과 model hash는
+여전히 완전 일치해야 하며, modal mode는 MAC, repeated buckling mode는
+basis-invariant subspace correlation으로 검증한다. semantic result hash가
+플랫폼별로 달라도 이 좁은 수치·모드 계약을 통과해야 하며, 허용오차 밖의 변화는
+stale evidence로 거부된다.
+
+외부 runtime을 현재 source에서 다시 실행할 수 없는 환경에서는 공식
+`--refresh-product-replay` 경로만 사용한다. 이 경로는
+`external_runtime_current_source_rerun_missing`을 추가하고 재사용 이유를
+checksum-bound receipt에 기록하므로 fresh external execution이나 Level 2로
+승격할 수 없다.
