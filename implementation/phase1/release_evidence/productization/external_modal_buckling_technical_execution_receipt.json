@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:8f7998acd528df33b58e045bf541bed2bd45858c12f8e8249d11b1d8eb5fbdcb",
+  "artifact_hash": "sha256:36e3b475fab345ff99deb7d465a9003a47d26b094ef09febd98aac323004da11",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -181,11 +181,11 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-24T07:07:15.232959+00:00",
+  "generated_at": "2026-07-24T07:31:20.866678+00:00",
   "internal_source": {
     "input_checksums": {
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:37e422ce1d398b308a57b3d6fd5ac09cd88c2c302083da3b17e2cb58e87d39c1",
-      "scripts/run_external_modal_buckling_technical_receipt.py": "sha256:6d7fe869a8aec6286b2d86a5bb2040118c176737487292cd4ce3407d72c0178c",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:b8599d7a4a0f0eca7a80c7bdf82c39b0c581d4dbbed31ee68ce22da4c07e8eae",
+      "scripts/run_external_modal_buckling_technical_receipt.py": "sha256:18802b36a84452335e42ec7074dfbf34da3844d65eedebdc9d42bd0415c4150e",
       "src/structural_analysis/analyses/buckling.py": "sha256:bc498580f2a3e3e287640d787d03e88a461df274c41c41e2d5eb331ad4ba0e92",
       "src/structural_analysis/analyses/modal.py": "sha256:0b2ac841fd3c0589b7c1b3d299543c59861cc208873c9691c3f5860329acdd3e",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
@@ -196,7 +196,7 @@
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
       "tests/test_external_modal_buckling_technical_receipt.py": "sha256:907eb930bb97e6c06b0dcaee2042812584eab9227d2ab586f22a6fbd2b298b41"
     },
-    "source_set_hash": "sha256:a6f4281a5341cca08aa394e3cfc18402e785d4bb33f3657dcd1b386aa3a3d931"
+    "source_set_hash": "sha256:306c56be561fcbb000b10455f05ee21ff2a3d96ee86d969109c544b94da5b1f2"
   },
   "mode_vector_artifacts": [
     {
@@ -264,12 +264,12 @@
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-24T07:07:15.232959+00:00",
+    "current_product_replay_generated_at": "2026-07-24T07:31:20.866678+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-23T16:41:48.704137+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current source changes add bounded cross-runtime replay validation only; this sandbox prohibits the OpenSees MPI socket and Docker daemon, so current product modal and buckling evidence is replayed against the checksum-bound prior actual external execution."
+    "reuse_reason": "Current source aligns code-to-code replay tolerance with its existing numerical contract, preserves stricter modal and buckling replay tolerances, and bounds Ruff below the incompatible 0.16 release; the preserved container-isolated external execution is reused because this sandbox prohibits the Docker daemon."
   },
   "runtimes": {
     "calculix": {
@@ -320,7 +320,7 @@
     }
   },
   "schema_version": "external-modal-buckling-technical-execution.v1",
-  "source_commit_sha": "6274a41a7a522fd189dfea58106db67f15216224",
+  "source_commit_sha": "3e7e4f6fffadd11d3ec06656ca386e705f8db21d",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_modal_buckling_technical_execution",

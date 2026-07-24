@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:37bef7323dfe350b5ca3478118a397ef2b3de00017aeb2f81bbaf5e4e2f339ec",
+  "artifact_hash": "sha256:255c8f2c2017219e9de564cd5ed7749266e7b0b59c672a6396348c0495eeae2d",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -454,11 +454,11 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-24T07:07:11.728555+00:00",
+  "generated_at": "2026-07-24T07:28:55.946710+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:37e422ce1d398b308a57b3d6fd5ac09cd88c2c302083da3b17e2cb58e87d39c1",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:b8599d7a4a0f0eca7a80c7bdf82c39b0c581d4dbbed31ee68ce22da4c07e8eae",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
       "src/structural_analysis/api/nonlinear_frame.py": "sha256:0eb39cfe9c15708de3e95de4d475da4aede1a3ed0a9597dbaa11989761dfa854",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py": "sha256:04e2afa328dc18344ed9eccf76ec83a910767d45be88da56055ab7bb534bc771",
@@ -473,15 +473,15 @@
       "tests/test_external_code_to_code_technical_receipt.py": "sha256:6eae6e0fec0f0ba8c70553b3283bcd9f24d5f96867e066b3bd3f153e4d7ec9f1",
       "tests/test_unified_nonlinear_frame_api.py": "sha256:ce849bee30fed750092d71a8e4f2c2f7737bf8ba504b5a9a7eaf33f74ae62676"
     },
-    "source_set_hash": "sha256:7e9d5a13934b726eb6d650d9f7f7083e5a8d0db8f3dbc9ed055439b2b4d5488a"
+    "source_set_hash": "sha256:685cdc15f805add8fdbd8f89c54f2294a448c2c60a8039193bb43330d29820e0"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-24T07:07:11.728555+00:00",
+    "current_product_replay_generated_at": "2026-07-24T07:28:55.946710+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-23T16:41:46.084068+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current source changes add bounded cross-runtime replay validation only; this sandbox prohibits the OpenSees MPI socket and Docker daemon, so current product results are replayed against the checksum-bound prior actual external execution."
+    "reuse_reason": "Current source aligns product replay tolerance with the existing code-to-code numerical contract and bounds Ruff below the incompatible 0.16 release; the preserved container-isolated external execution is reused because this sandbox prohibits the Docker daemon."
   },
   "runtimes": {
     "calculix": {
@@ -538,7 +538,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "6274a41a7a522fd189dfea58106db67f15216224",
+  "source_commit_sha": "3e7e4f6fffadd11d3ec06656ca386e705f8db21d",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",

@@ -54,6 +54,8 @@ MODAL_MAC_MINIMUM = 1.0 - 1.0e-12
 BUCKLING_FACTOR_ABSOLUTE_TOLERANCE = 1.0e-8
 BUCKLING_FACTOR_RELATIVE_TOLERANCE = 1.0e-2
 BUCKLING_SUBSPACE_CORRELATION_MINIMUM = 0.999999
+PRODUCT_REPLAY_ABSOLUTE_TOLERANCE = 1.0e-12
+PRODUCT_REPLAY_RELATIVE_TOLERANCE = 1.0e-12
 PRODUCT_REPLAY_MODE_CORRELATION_MINIMUM = 1.0 - 1.0e-10
 BUCKLING_ELEMENT_COUNT = 16
 BUCKLING_LENGTH_M = 3.0
@@ -1090,6 +1092,18 @@ def _validate_metric(metric: dict[str, Any]) -> None:
         raise ExternalModalBucklingReceiptError("receipt_metric_invalid")
 
 
+def _product_replay_numbers_close(stored: float, current: float) -> bool:
+    stored_value = float(stored)
+    current_value = float(current)
+    if not math.isfinite(stored_value) or not math.isfinite(current_value):
+        return False
+    scale = max(abs(stored_value), abs(current_value), 1.0)
+    return abs(stored_value - current_value) <= (
+        PRODUCT_REPLAY_ABSOLUTE_TOLERANCE
+        + PRODUCT_REPLAY_RELATIVE_TOLERANCE * scale
+    )
+
+
 def _validate_current_product_replay(
     *,
     payload: dict[str, Any],
@@ -1143,12 +1157,12 @@ def _validate_current_product_replay(
         buckling_metric = buckling_metrics[
             f"buckling_load_factor_mode_{index + 1}"
         ]
-        if not external_base._product_replay_numbers_close(
+        if not _product_replay_numbers_close(
             modal_metric["product_value"],
             current_modal_modes[index]["eigenvalue_rad2_per_s2"],
         ):
             raise ExternalModalBucklingReceiptError("product_modal_metric_stale")
-        if not external_base._product_replay_numbers_close(
+        if not _product_replay_numbers_close(
             buckling_metric["product_value"],
             current_buckling_modes[index]["load_factor"],
         ):

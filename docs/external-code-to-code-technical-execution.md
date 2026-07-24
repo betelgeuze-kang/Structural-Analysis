@@ -154,9 +154,10 @@ scripts/run_external_vv_clean_runner.sh <external-asset-directory>
 binary/library 경로를 명시적으로 공급해야 한다.
 
 현재 제품 재생은 NumPy/SciPy 및 BLAS 구현 차이로 생기는 반올림 편차를
-절대 `1e-12`와 상대 `1e-12`의 합으로 제한한다. source checksum과 model hash는
-여전히 완전 일치해야 하며, modal mode는 MAC, repeated buckling mode는
-basis-invariant subspace correlation으로 검증한다. semantic result hash가
+code-to-code scalar에는 절대 `1e-10`와 상대 `1e-10`의 합으로, modal·buckling
+고유값에는 절대 `1e-12`와 상대 `1e-12`의 합으로 제한한다. source checksum과
+model hash는 여전히 완전 일치해야 하며, modal mode는 MAC, repeated buckling
+mode는 basis-invariant subspace correlation으로 검증한다. semantic result hash가
 플랫폼별로 달라도 이 좁은 수치·모드 계약을 통과해야 하며, 허용오차 밖의 변화는
 stale evidence로 거부된다.
 
