@@ -8,6 +8,7 @@ from scripts.build_verification_hierarchy_status import (
     build_verification_hierarchy_status,
 )
 from structural_analysis.benchmark.lee_frame_verification_candidate import (
+    LEE_FRAME_DECISION_EVALUATED_AT,
     LEE_FRAME_DECLARED_BLOCKERS,
     LEE_FRAME_EVIDENCE_ID,
     LEE_FRAME_GENERATED_SOURCE_URI,
@@ -46,7 +47,9 @@ def test_candidate_payloads_are_deterministic_and_scientifically_pass() -> None:
     assert execution["metrics"]["fallback_count"] == 0
     assert execution["metrics"]["regularization_count"] == 0
     assert decision["decision"] == "PASS"
-    assert decision["contract_pass"] is True
+    assert decision["evaluated_at"] == LEE_FRAME_DECISION_EVALUATED_AT
+    assert decision["decision_contract_pass"] is True
+    assert decision["numerical_pass"] is True
     assert decision["benchmark_credit"] is True
 
 
