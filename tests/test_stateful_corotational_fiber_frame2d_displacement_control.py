@@ -19,6 +19,7 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displaceme
     StatefulCorotationalFiberFrame2DDisplacementControlStepProblem,
     finite_difference_stateful_corotational_fiber_frame2d_displacement_control_linearization_check,
     run_stateful_corotational_fiber_frame2d_displacement_control_path,
+    solve_stateful_corotational_fiber_frame2d_displacement_control,
     solve_stateful_corotational_fiber_frame2d_displacement_control_step,
 )
 from structural_analysis.elements import StatefulCorotationalFiberBeam2D
@@ -260,6 +261,76 @@ def test_direct_control_solves_coupled_multi_equation_frame() -> None:
         and len(step.trial_assembly.residual_kn) == 6
         for step in result.steps
     )
+
+
+def test_invalid_full_step_trial_is_rejected_and_backtracking_continues(
+    monkeypatch,
+) -> None:
+    coordinates = ((0.0, 0.0), (1.0, 0.0))
+    problem = StatefulCorotationalFiberFrame2DProblem(
+        case_id="direct-control-invalid-full-alpha",
+        node_coordinates_m=coordinates,
+        members=(_member(coordinates, "bar", 0, 1),),
+        fixed_global_dofs=(0, 1, 2, 4, 5),
+        reference_external_loads=((3, 2.0),),
+        rotation_coordinate_scale_m=1.0,
+    )
+    parent = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+    step_problem = StatefulCorotationalFiberFrame2DDisplacementControlStepProblem(
+        problem=problem,
+        accepted_checkpoint=parent,
+        control_global_dof=3,
+        target_control_displacement_m=1.0e-3,
+        config=StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+            maximum_iterations=30,
+        ),
+    )
+    step_type = StatefulCorotationalFiberFrame2DDisplacementControlStepProblem
+    original_assemble = step_type.assemble
+    call_count = 0
+
+    def assemble_with_invalid_full_trial(self, coordinates_m):
+        nonlocal call_count
+        call_count += 1
+        if call_count == 2:
+            raise ValueError("synthetic collapsed trial chord")
+        return original_assemble(self, coordinates_m)
+
+    monkeypatch.setattr(step_type, "assemble", assemble_with_invalid_full_trial)
+    solution = solve_stateful_corotational_fiber_frame2d_displacement_control(
+        step_problem
+    )
+
+    assert solution.status == "ready"
+    assert solution.metrics["contract_pass"] is True
+    first_attempts = solution.line_search_history[0]["attempts"]
+    assert first_attempts[0]["alpha"] == 1.0
+    assert first_attempts[0]["accepted"] is False
+    assert first_attempts[0]["failure"] == "invalid_trial_assembly"
+    assert len(first_attempts) >= 2
+    assert any(row["accepted"] is True for row in first_attempts[1:])
+
+
+def test_direct_control_rejects_disconnected_member_graph() -> None:
+    coordinates = ((0.0, 0.0), (1.0, 0.0), (3.0, 0.0), (4.0, 0.0))
+    problem = StatefulCorotationalFiberFrame2DProblem(
+        case_id="direct-control-disconnected",
+        node_coordinates_m=coordinates,
+        members=(
+            _member(coordinates, "controlled", 0, 1),
+            _member(coordinates, "isolated-fixed", 2, 3),
+        ),
+        fixed_global_dofs=(0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11),
+        reference_external_loads=((3, 1.0),),
+        rotation_coordinate_scale_m=1.0,
+    )
+
+    with pytest.raises(ValueError, match="member graph must be connected"):
+        run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            (1.0e-4,),
+            control_global_dof=3,
+        )
 
 
 def test_failed_direct_control_step_rolls_back_exact_parent() -> None:
