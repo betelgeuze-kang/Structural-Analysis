@@ -19,8 +19,8 @@ from pathlib import Path
 from typing import Any
 
 from structural_analysis.benchmark.acceptance import (
-    ScalarReferenceMetric,
-    build_scientific_decision,
+    BENCHMARK_ACCEPTANCE_SCHEMA_VERSION,
+    decide_benchmark,
 )
 from structural_analysis.benchmark.lee_frame import (
     LEE_FRAME_PUBLISHED_PATH,
@@ -50,6 +50,7 @@ LEE_FRAME_EXECUTION_RECEIPT_SCHEMA_VERSION = (
 LEE_FRAME_EVIDENCE_ID = "published-lee-frame-snap-through-candidate"
 LEE_FRAME_TRUTH_BASIS = "published_benchmark"
 LEE_FRAME_CATEGORY = "nonlinear_snap_through"
+LEE_FRAME_DECISION_EVALUATED_AT = "1970-01-01T00:00:00+00:00"
 LEE_FRAME_GENERATED_SOURCE_URI = (
     "generated://structural_analysis/verification/lee-frame/source-receipt.v1"
 )
@@ -99,6 +100,38 @@ class LeeFrameVerificationCandidateBundle:
             "evidence": self.evidence.to_dict(),
             "claim_boundary": LEE_FRAME_CLAIM_BOUNDARY,
         }
+
+
+def _scalar_metric_result(
+    *,
+    name: str,
+    actual: float,
+    reference: float,
+    absolute_tolerance: float,
+    relative_tolerance: float = 0.0,
+) -> dict[str, Any]:
+    """Build one deterministic scalar metric-family result for acceptance."""
+
+    absolute_error = abs(float(actual) - float(reference))
+    relative_error = (
+        absolute_error / abs(float(reference)) if float(reference) != 0.0 else None
+    )
+    allowed_error = max(
+        float(absolute_tolerance),
+        float(relative_tolerance) * abs(float(reference)),
+    )
+    return {
+        "schema_version": BENCHMARK_ACCEPTANCE_SCHEMA_VERSION,
+        "metric_family": name,
+        "reference": float(reference),
+        "actual": float(actual),
+        "absolute_error": absolute_error,
+        "relative_error": relative_error,
+        "absolute_tolerance": float(absolute_tolerance),
+        "relative_tolerance": float(relative_tolerance),
+        "allowed_error": allowed_error,
+        "contract_pass": absolute_error <= allowed_error,
+    }
 
 
 def build_lee_frame_verification_candidate_payloads() -> tuple[
@@ -192,73 +225,68 @@ def build_lee_frame_verification_candidate_payloads() -> tuple[
         "claim_boundary": result.claim_boundary,
     }
 
-    metrics = {
-        "first_limit_load_factor": ScalarReferenceMetric(
+    metric_results = [
+        _scalar_metric_result(
             name="first_limit_load_factor",
             actual=result.first_limit_load_factor,
             reference=result.first_limit_reference_factor,
             absolute_tolerance=0.25,
-            relative_tolerance=None,
         ),
-        "maximum_path_distance_m": ScalarReferenceMetric(
+        _scalar_metric_result(
             name="maximum_path_distance_m",
             actual=result.maximum_path_distance_m,
             reference=0.0,
             absolute_tolerance=0.004,
-            relative_tolerance=None,
         ),
-        "maximum_load_factor_error": ScalarReferenceMetric(
+        _scalar_metric_result(
             name="maximum_load_factor_error",
             actual=result.maximum_load_factor_error,
             reference=0.0,
             absolute_tolerance=0.35,
-            relative_tolerance=None,
         ),
-        "rms_load_factor_error": ScalarReferenceMetric(
+        _scalar_metric_result(
             name="rms_load_factor_error",
             actual=result.rms_load_factor_error,
             reference=0.0,
             absolute_tolerance=0.20,
-            relative_tolerance=None,
         ),
-        "maximum_residual_inf_kn": ScalarReferenceMetric(
+        _scalar_metric_result(
             name="maximum_residual_inf_kn",
             actual=result.maximum_residual_inf_kn,
             reference=0.0,
             absolute_tolerance=1.0e-7,
-            relative_tolerance=None,
         ),
-        "maximum_constraint_residual_m2": ScalarReferenceMetric(
+        _scalar_metric_result(
             name="maximum_constraint_residual_m2",
             actual=result.maximum_constraint_residual_m2,
             reference=0.0,
             absolute_tolerance=1.0e-10,
-            relative_tolerance=None,
         ),
-        "energy_gradient_relative_error": ScalarReferenceMetric(
+        _scalar_metric_result(
             name="energy_gradient_relative_error",
             actual=result.energy_gradient_relative_error,
             reference=0.0,
             absolute_tolerance=1.0e-7,
-            relative_tolerance=None,
         ),
-        "tangent_hessian_relative_error": ScalarReferenceMetric(
+        _scalar_metric_result(
             name="tangent_hessian_relative_error",
             actual=result.tangent_hessian_relative_error,
             reference=0.0,
             absolute_tolerance=2.0e-7,
-            relative_tolerance=None,
         ),
-        "tangent_symmetry_relative_error": ScalarReferenceMetric(
+        _scalar_metric_result(
             name="tangent_symmetry_relative_error",
             actual=result.tangent_symmetry_relative_error,
             reference=0.0,
             absolute_tolerance=1.0e-12,
-            relative_tolerance=None,
         ),
-    }
-    decision = build_scientific_decision(metrics=metrics).to_dict()
-    if not decision["contract_pass"] or decision["decision"] != "PASS":
+    ]
+    decision = decide_benchmark(
+        metric_results,
+        decision="PASS",
+        evaluated_at=LEE_FRAME_DECISION_EVALUATED_AT,
+    )
+    if not decision["decision_contract_pass"] or decision["decision"] != "PASS":
         raise ValueError("Lee-frame scientific decision did not pass")
     return source_receipt, execution_receipt, decision
 
@@ -409,6 +437,7 @@ def _inside(root: Path, path: Path) -> None:
 __all__ = [
     "LEE_FRAME_CATEGORY",
     "LEE_FRAME_CLAIM_BOUNDARY",
+    "LEE_FRAME_DECISION_EVALUATED_AT",
     "LEE_FRAME_DECLARED_BLOCKERS",
     "LEE_FRAME_EVIDENCE_ID",
     "LEE_FRAME_EXECUTION_RECEIPT_SCHEMA_VERSION",
