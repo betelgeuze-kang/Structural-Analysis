@@ -1,0 +1,30 @@
+name: Regenerate PostCSS lockfile
+
+on:
+  push:
+    branches:
+      - codex/fix-postcss-audit
+
+permissions:
+  contents: read
+
+jobs:
+  lockfile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20.19.0
+          cache: npm
+      - name: Regenerate package lock
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Verify patched dependency resolution
+        run: |
+          node -e "const lock=require('./package-lock.json'); const packages=lock.packages; if (packages['node_modules/postcss'].version !== '8.5.22') process.exit(1); if (packages['node_modules/nanoid'].version !== '3.3.16') process.exit(1)"
+          npm audit --audit-level high
+      - uses: actions/upload-artifact@v7
+        with:
+          name: patched-package-lock
+          path: package-lock.json
+          if-no-files-found: error
