@@ -14,6 +14,17 @@ export function resolveProductSurface(location: Pick<Location, 'pathname' | 'has
   return legacyRoute ? 'legacy-app' : 'workbench-v2'
 }
 
+export function resolveSameOriginJobUrl(value: string | undefined, origin: string): string | undefined {
+  const candidate = value?.trim()
+  if (!candidate) return undefined
+  try {
+    const resolved = new URL(candidate, origin)
+    return resolved.origin === origin ? resolved.toString() : undefined
+  } catch {
+    return undefined
+  }
+}
+
 function LegacyAppSurface(): ReactElement {
   return (
     <div className="legacy-surface-route" data-legacy-surface>
@@ -47,7 +58,12 @@ function RootRouter(): ReactElement {
     }
   }, [])
 
-  return surface === 'legacy-app' ? <LegacyAppSurface /> : <WorkbenchPage />
+  const jobStatusUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_JOB_STATUS_URL,
+    window.location.origin,
+  )
+
+  return surface === 'legacy-app' ? <LegacyAppSurface /> : <WorkbenchPage jobStatusUrl={jobStatusUrl} />
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

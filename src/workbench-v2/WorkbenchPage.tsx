@@ -19,6 +19,7 @@ import { EvidenceReaderPanel } from './components/EvidenceReaderPanel'
 import { BenchmarkBrowser } from './components/BenchmarkBrowser'
 import { ComparePanel } from './components/ComparePanel'
 import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
+import { JobServicePanel } from './components/JobServicePanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
@@ -28,14 +29,17 @@ import {
   type ReviewDraft,
   type ReviewDraftState,
 } from './model/reviewDraft'
+import { loadWorkbenchJob, type JobLoadResult } from './model/jobProvider'
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
+  /** Same-origin authenticated status endpoint; no bearer credential is stored in the browser. */
+  jobStatusUrl?: string
 }
 
 type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 
-export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPageProps): ReactElement {
+export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
   const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
   const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
@@ -51,6 +55,11 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const [loadState, setLoadState] = useState<LoadState>('loading')
   const [errors, setErrors] = useState<string[]>([])
   const [warnings, setWarnings] = useState<string[]>([])
+  const [jobLoad, setJobLoad] = useState<JobLoadResult>({
+    status: jobStatusUrl ? 'loading' : 'unconfigured',
+    job: null,
+    errors: [],
+  })
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
     () => new Map(),
@@ -149,6 +158,17 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
     }
   }, [provider])
 
+  useEffect(() => {
+    if (!jobStatusUrl) {
+      setJobLoad({ status: 'unconfigured', job: null, errors: [] })
+      return undefined
+    }
+    const controller = new AbortController()
+    setJobLoad({ status: 'loading', job: null, errors: [] })
+    loadWorkbenchJob(jobStatusUrl, controller.signal).then(setJobLoad)
+    return () => controller.abort()
+  }, [jobStatusUrl])
+
   const claimBoundary =
     state.dataMode === 'demo'
       ? 'Demo case. Values are illustrative; the review decision is never inferred.'
@@ -204,6 +224,12 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
       </div>
 
       <div id="wb2-sec-run" className="wb2-section">
+        <JobServicePanel
+          loadStatus={jobLoad.status}
+          job={jobLoad.job}
+          errors={jobLoad.errors}
+          artifactStatus={jobLoad.artifactStatus}
+        />
         {caseV2 ? (
           <RunMonitor
             runStatus={state.runStatus}

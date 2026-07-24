@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/job_completion_evidence_v1.schema.json",
+  "title": "Structural Analysis Job Completion Evidence v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "job_id",
+    "request_hash",
+    "checkpoint_hash",
+    "result_artifact_hash",
+    "validator_id",
+    "contract_pass",
+    "solver_truth_owner",
+    "validation_report",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-job-completion-evidence.v1"},
+    "job_id": {"type": "string", "pattern": "^job_[0-9a-f]{32}$"},
+    "request_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "checkpoint_hash": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      ]
+    },
+    "result_artifact_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "validator_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"},
+    "contract_pass": {"const": true},
+    "solver_truth_owner": {"const": "structural_analysis_core"},
+    "validation_report": {
+      "type": "object",
+      "required": ["contract_pass"],
+      "properties": {"contract_pass": {"const": true}}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  }
+}
