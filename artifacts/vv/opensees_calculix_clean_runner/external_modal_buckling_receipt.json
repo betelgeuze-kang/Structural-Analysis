@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:de53efedd3785a61c794a5a55ccf39877c47e53173d8607e918bfc37446d960c",
+  "artifact_hash": "sha256:f68c21a8c2c4f8eeff0ba723d4d625acc03e8fecfb15d0c3b36ae7a7133183eb",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -181,10 +181,10 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-24T07:31:22.464306+00:00",
+  "generated_at": "2026-07-24T23:28:05.117503+00:00",
   "internal_source": {
     "input_checksums": {
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:b8599d7a4a0f0eca7a80c7bdf82c39b0c581d4dbbed31ee68ce22da4c07e8eae",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:6b7ee83f47a0ec9dbcf9baf07f363c8f60f48f52bef83fdba0d8d30c7cf8b845",
       "scripts/run_external_modal_buckling_technical_receipt.py": "sha256:18802b36a84452335e42ec7074dfbf34da3844d65eedebdc9d42bd0415c4150e",
       "src/structural_analysis/analyses/buckling.py": "sha256:bc498580f2a3e3e287640d787d03e88a461df274c41c41e2d5eb331ad4ba0e92",
       "src/structural_analysis/analyses/modal.py": "sha256:0b2ac841fd3c0589b7c1b3d299543c59861cc208873c9691c3f5860329acdd3e",
@@ -196,7 +196,7 @@
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
       "tests/test_external_modal_buckling_technical_receipt.py": "sha256:907eb930bb97e6c06b0dcaee2042812584eab9227d2ab586f22a6fbd2b298b41"
     },
-    "source_set_hash": "sha256:306c56be561fcbb000b10455f05ee21ff2a3d96ee86d969109c544b94da5b1f2"
+    "source_set_hash": "sha256:a3cd6211d145335908425282b03e4861f59667dff5953f2c847e5fbff97d9586"
   },
   "mode_vector_artifacts": [
     {
@@ -264,12 +264,12 @@
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-24T07:31:22.464306+00:00",
+    "current_product_replay_generated_at": "2026-07-24T23:28:05.117503+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-23T16:42:50.382514+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current source aligns code-to-code replay tolerance with its existing numerical contract, preserves stricter modal and buckling replay tolerances, and bounds Ruff below the incompatible 0.16 release; the preserved container-isolated external execution is reused because this sandbox prohibits the Docker daemon."
+    "reuse_reason": "The spatial-truss source inventory now includes the actual linear assembly and axial element implementations; preserved external outputs are reused because this repair changes provenance binding only."
   },
   "runtimes": {
     "calculix": {
@@ -320,7 +320,7 @@
     }
   },
   "schema_version": "external-modal-buckling-technical-execution.v1",
-  "source_commit_sha": "3e7e4f6fffadd11d3ec06656ca386e705f8db21d",
+  "source_commit_sha": "4ecb36799ea07b5dfbe4e9b819b8d08dbb6026d0",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_modal_buckling_technical_execution",

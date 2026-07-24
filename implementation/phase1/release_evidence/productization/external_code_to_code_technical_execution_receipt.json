@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:255c8f2c2017219e9de564cd5ed7749266e7b0b59c672a6396348c0495eeae2d",
+  "artifact_hash": "sha256:7be2093aa548e22cc08f773c23b21bd81f056d8d46daf57dc3417023903f8553",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -454,34 +454,36 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-24T07:28:55.946710+00:00",
+  "generated_at": "2026-07-24T23:27:56.477420+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:b8599d7a4a0f0eca7a80c7bdf82c39b0c581d4dbbed31ee68ce22da4c07e8eae",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:6b7ee83f47a0ec9dbcf9baf07f363c8f60f48f52bef83fdba0d8d30c7cf8b845",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
       "src/structural_analysis/api/nonlinear_frame.py": "sha256:0eb39cfe9c15708de3e95de4d475da4aede1a3ed0a9597dbaa11989761dfa854",
+      "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py": "sha256:04e2afa328dc18344ed9eccf76ec83a910767d45be88da56055ab7bb534bc771",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py": "sha256:60421274fc2b9800687bece08fdfb063810732897fc2c8f706c1ff3c796a854c",
       "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
+      "src/structural_analysis/elements/axial.py": "sha256:47fb843e2e72ec68f23058b7c31a565212bd63e639a1fff04566b3034d3cf573",
       "src/structural_analysis/elements/stateful_corotational_fiber_beam2d.py": "sha256:b9e21c87553dca965ba173921e6f65c8680371ecf25a9f4cfb23fd48ca704548",
       "src/structural_analysis/materials/stateful_fiber_section.py": "sha256:f3ec359caaa79ced663e6c97aa5413a82eb4aa6e1894624ce43dfc7ffb189382",
       "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json": "sha256:42766b70a4d95273a7de8c2ee9d7b4afbf8fc11b264059e1b62765cc691a4dee",
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
       "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
       "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
-      "tests/test_external_code_to_code_technical_receipt.py": "sha256:6eae6e0fec0f0ba8c70553b3283bcd9f24d5f96867e066b3bd3f153e4d7ec9f1",
+      "tests/test_external_code_to_code_technical_receipt.py": "sha256:d5fabc448ae9781e4a9d1408964db744eb7ffcf8fd28545c786f81b423c58675",
       "tests/test_unified_nonlinear_frame_api.py": "sha256:ce849bee30fed750092d71a8e4f2c2f7737bf8ba504b5a9a7eaf33f74ae62676"
     },
-    "source_set_hash": "sha256:685cdc15f805add8fdbd8f89c54f2294a448c2c60a8039193bb43330d29820e0"
+    "source_set_hash": "sha256:bf08c13f774ade561c2dc973c54a27e697908341b7f261369517dd07cef11a7c"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-24T07:28:55.946710+00:00",
+    "current_product_replay_generated_at": "2026-07-24T23:27:56.477420+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-23T16:41:46.084068+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current source aligns product replay tolerance with the existing code-to-code numerical contract and bounds Ruff below the incompatible 0.16 release; the preserved container-isolated external execution is reused because this sandbox prohibits the Docker daemon."
+    "reuse_reason": "The spatial-truss source inventory now includes the actual linear assembly and axial element implementations; preserved external outputs are reused because this repair changes provenance binding only."
   },
   "runtimes": {
     "calculix": {
@@ -538,7 +540,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "3e7e4f6fffadd11d3ec06656ca386e705f8db21d",
+  "source_commit_sha": "4ecb36799ea07b5dfbe4e9b819b8d08dbb6026d0",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
