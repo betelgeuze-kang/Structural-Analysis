@@ -1,0 +1,48 @@
+name: Apply clean-runner evidence hardening
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.head_ref == 'codex/harden-clean-runner-validation'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+          cache: pip
+      - name: Install package and test tools
+        run: python -m pip install -e '.[dev]'
+      - name: Apply focused clean-runner hardening
+        run: python .github/apply_clean_runner_hardening.py
+      - name: Format and lint
+        run: |
+          python -m ruff format benchmarks/clean-runners/opensees-calculix/run_clean_runner.py tests/test_external_vv_clean_runner_contract.py
+          python -m ruff check benchmarks/clean-runners/opensees-calculix/run_clean_runner.py tests/test_external_vv_clean_runner_contract.py
+      - name: Refresh current-product replay summary
+        run: |
+          python benchmarks/clean-runners/opensees-calculix/run_clean_runner.py \
+            --repo-root . \
+            --output-dir artifacts/vv/opensees_calculix_clean_runner \
+            --refresh-product-replay-summary
+      - name: Validate focused clean-runner contracts
+        run: pytest -q tests/test_external_vv_clean_runner_contract.py
+      - name: Commit focused fix and refreshed summary
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            benchmarks/clean-runners/opensees-calculix/run_clean_runner.py \
+            tests/test_external_vv_clean_runner_contract.py \
+            artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json
+          git commit -m "fix: harden clean-runner evidence validation"
+          git push origin HEAD:${{ github.head_ref }}
