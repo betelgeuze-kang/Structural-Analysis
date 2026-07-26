@@ -411,6 +411,50 @@ def validate_corotational_fiber_frame_general_manifest(
             "/compilation",
             "Embedded bounded graph metadata is invalid.",
         )
+    stage_rows = normalized["stage_receipts"]
+    j1_body = stage_rows[0]["body"]
+    free_global_dofs = j1_body.get("free_global_dofs")
+    global_dof_count = 3 * embedded["node_count"]
+    if (
+        not isinstance(free_global_dofs, list)
+        or len(set(free_global_dofs)) != len(free_global_dofs)
+        or any(
+            type(dof) is not int or not 0 <= dof < global_dof_count
+            for dof in free_global_dofs
+        )
+        or j1_body.get("support_nodes") != embedded["support_node_indices"]
+        or j1_body.get("branching_nodes") != embedded["branching_node_indices"]
+        or j1_body.get("maximum_degree") != embedded["maximum_node_degree"]
+    ):
+        _fail(
+            "corotational_general_stage_body_binding_invalid",
+            "/stage_receipts/0/body",
+            "J1 graph and equation metadata differ from the embedded compilation.",
+        )
+    support_nodes = set(embedded["support_node_indices"])
+    prescribed_displacements = embedded["prescribed_displacements"]
+    if any(
+        type(row[0]) is not int
+        or not 0 <= row[0] < global_dof_count
+        or row[0] in free_global_dofs
+        or row[0] // 3 not in support_nodes
+        for row in prescribed_displacements
+    ):
+        _fail(
+            "corotational_general_prescribed_displacement_semantics_invalid",
+            "/compilation/prescribed_displacements",
+            "Prescribed DOFs must be in range and constrained on declared support nodes.",
+        )
+    if (
+        stage_rows[1]["body"].get("prescribed_displacements")
+        != prescribed_displacements
+    ):
+        _fail(
+            "corotational_general_stage_body_binding_invalid",
+            "/stage_receipts/1/body/prescribed_displacements",
+            "J2 prescribed displacements differ from the embedded compilation.",
+        )
+
     for key in (
         "schema_version",
         "compiler_profile",
@@ -471,6 +515,60 @@ def validate_corotational_fiber_frame_general_manifest(
                 f"/stage_receipts/{index}/stage_hash",
                 "Stage hash differs from canonical receipt content.",
             )
+
+    j1, j2, j3, j4, j5 = stage_rows
+    if j1["source_hashes"] != [
+        normalized["problem_contract_hash"],
+        normalized["compiler_hash"],
+    ] or j2["source_hashes"] != [normalized["problem_contract_hash"]]:
+        _fail(
+            "corotational_general_stage_source_binding_invalid",
+            "/stage_receipts",
+            "J1/J2 sources differ from the advertised problem or compiler hashes.",
+        )
+    checkpoint_hashes = j3["source_hashes"]
+    checkpoint_body = j3["body"]
+    if (
+        len(checkpoint_hashes) < 2
+        or checkpoint_hashes[-1] != normalized["terminal_checkpoint_hash"]
+        or len(checkpoint_body.get("epochs", ())) != len(checkpoint_hashes)
+        or len(checkpoint_body.get("load_factors", ())) != len(checkpoint_hashes)
+        or len(checkpoint_body.get("parents", ())) != len(checkpoint_hashes)
+        or checkpoint_body["load_factors"][-1] != normalized["terminal_load_factor"]
+    ):
+        _fail(
+            "corotational_general_stage_source_binding_invalid",
+            "/stage_receipts/2",
+            "J3 checkpoint sources do not bind the advertised terminal state.",
+        )
+    expected_accepted_hashes = checkpoint_hashes[1:]
+    step_bindings = j4["body"].get("step_bindings")
+    if (
+        j4["source_hashes"] != expected_accepted_hashes
+        or not isinstance(step_bindings, list)
+        or len(step_bindings) != len(expected_accepted_hashes)
+        or any(
+            row.get("parent") != checkpoint_hashes[index]
+            or row.get("assembly_parent") != checkpoint_hashes[index]
+            or row.get("accepted") != expected_accepted_hashes[index]
+            for index, row in enumerate(step_bindings)
+        )
+    ):
+        _fail(
+            "corotational_general_stage_source_binding_invalid",
+            "/stage_receipts/3",
+            "J4 step sources do not match the J3 checkpoint ancestry.",
+        )
+    if (
+        j5["source_hashes"] != [normalized["terminal_checkpoint_hash"]]
+        or j5["body"].get("terminal_load_factor") != normalized["terminal_load_factor"]
+    ):
+        _fail(
+            "corotational_general_stage_source_binding_invalid",
+            "/stage_receipts/4",
+            "J5 source or terminal load differs from the advertised terminal fields.",
+        )
+
     claimed = normalized["adapter_hash"]
     body = dict(normalized)
     body.pop("adapter_hash")

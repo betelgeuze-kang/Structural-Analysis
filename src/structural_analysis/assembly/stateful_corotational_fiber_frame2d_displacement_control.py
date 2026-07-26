@@ -114,6 +114,26 @@ def _controlled_free_index(
     return problem.free_global_dofs.index(control_global_dof)
 
 
+def _require_connected_member_graph(
+    problem: StatefulCorotationalFiberFrame2DProblem,
+) -> None:
+    node_count = len(problem.node_coordinates_m)
+    adjacency: list[set[int]] = [set() for _ in range(node_count)]
+    for member in problem.members:
+        adjacency[member.node_i].add(member.node_j)
+        adjacency[member.node_j].add(member.node_i)
+    visited = {0}
+    frontier = [0]
+    while frontier:
+        node = frontier.pop()
+        for neighbor in adjacency[node]:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                frontier.append(neighbor)
+    if len(visited) != node_count:
+        raise ValueError("problem member graph must be connected")
+
+
 @dataclass(frozen=True)
 class StatefulCorotationalFiberFrame2DDisplacementControlConfig:
     residual_tolerance: float = 1.0e-10
@@ -405,6 +425,7 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         StatefulCorotationalFiberFrame2DDisplacementControlStepProblem
     ):
         raise ValueError("step_problem type is invalid")
+    _require_connected_member_graph(step_problem.problem)
     config = step_problem.config
     coordinates = step_problem.initial_augmented_coordinates_m()
     history: list[dict[str, Any]] = []
@@ -474,7 +495,30 @@ def solve_stateful_corotational_fiber_frame2d_displacement_control(
         best_merit = merit_before
         for alpha in config.line_search_alphas:
             trial_coordinates = coordinates + alpha * correction
-            trial = step_problem.assemble(trial_coordinates)
+            try:
+                trial = step_problem.assemble(trial_coordinates)
+            except (
+                TypeError,
+                ValueError,
+                ArithmeticError,
+                AttributeError,
+                LookupError,
+            ):
+                attempts.append(
+                    {
+                        "alpha": alpha,
+                        "trial_load_factor": (
+                            float(trial_coordinates[-1])
+                            / config.load_factor_coordinate_scale_m
+                        ),
+                        "trial_relative_equilibrium_residual": None,
+                        "trial_control_error_m": None,
+                        "trial_merit": None,
+                        "accepted": False,
+                        "failure": "invalid_trial_assembly",
+                    }
+                )
+                continue
             trial_merit = _merit(step_problem, trial)
             accepted = trial_merit < merit_before
             attempts.append(
@@ -871,6 +915,7 @@ def run_stateful_corotational_fiber_frame2d_displacement_control_path(
 ) -> StatefulCorotationalFiberFrame2DDisplacementControlPathResult:
     """Run a strictly monotone displacement target path until one step fails."""
 
+    _require_connected_member_graph(problem)
     _controlled_free_index(problem, control_global_dof)
     targets = tuple(
         _finite(value, name="control displacement") for value in control_displacements_m

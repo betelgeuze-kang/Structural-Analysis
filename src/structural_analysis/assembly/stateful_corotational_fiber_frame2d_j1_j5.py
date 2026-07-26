@@ -485,6 +485,12 @@ def _validate_portal_profile(
     problem: StatefulCorotationalFiberFrame2DProblem,
 ) -> tuple[tuple[int, int], tuple[int, int]]:
     coordinates = problem.node_coordinates_m
+    if problem.prescribed_displacements:
+        _fail(
+            "corotational_portal_prescribed_displacement_unsupported",
+            "/prescribed_displacements",
+            "The v1 portal profile requires zero prescribed displacement.",
+        )
     if len(coordinates) != 4 or len(problem.members) != 3:
         _fail(
             "corotational_portal_topology_count_invalid",
