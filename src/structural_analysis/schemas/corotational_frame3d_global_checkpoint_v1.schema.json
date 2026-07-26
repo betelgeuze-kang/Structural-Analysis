@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/corotational_frame3d_global_checkpoint_v1.schema.json",
+  "title": "Bounded global corotational frame3d checkpoint v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "model_hash",
+    "solver_contract_hash",
+    "load_factor",
+    "displacement",
+    "converged_iterations",
+    "residual_inf_norm_kn",
+    "parent_checkpoint_hash",
+    "checkpoint_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "corotational-frame3d-global-checkpoint.v1"
+    },
+    "profile": {
+      "const": "dense_elastic_corotational_timoshenko_frame3d_load_control.v1"
+    },
+    "model_hash": {"$ref": "#/$defs/hash"},
+    "solver_contract_hash": {"$ref": "#/$defs/hash"},
+    "load_factor": {"type": "number", "minimum": 0.0},
+    "displacement": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 96,
+      "items": {"type": "number"}
+    },
+    "converged_iterations": {"type": "integer", "minimum": 0},
+    "residual_inf_norm_kn": {"type": "number", "minimum": 0.0},
+    "parent_checkpoint_hash": {
+      "oneOf": [{"type": "null"}, {"$ref": "#/$defs/hash"}]
+    },
+    "checkpoint_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
