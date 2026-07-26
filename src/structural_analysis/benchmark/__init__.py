@@ -52,6 +52,12 @@ from structural_analysis.benchmark.factory import (
     generated_benchmark_factory_cases,
     run_benchmark_cases,
 )
+from structural_analysis.benchmark.fracture_energy_concrete import (
+    FRACTURE_ENERGY_CONCRETE_BENCHMARK_CLAIM_BOUNDARY,
+    FRACTURE_ENERGY_CONCRETE_BENCHMARK_PROFILE,
+    FRACTURE_ENERGY_CONCRETE_BENCHMARK_SCHEMA_VERSION,
+    build_fracture_energy_concrete_mesh_objectivity_benchmark,
+)
 from structural_analysis.benchmark.medium_corpus import (
     MEDIUM_BENCHMARK_ARTIFACT_RECEIPT_SCHEMA_VERSION,
     MEDIUM_BENCHMARK_CASE_SCHEMA_VERSION,
@@ -233,6 +239,9 @@ __all__ = [
     "GEOMETRIC_BENCHMARK_SCHEMA_VERSION",
     "FiberBeamCantileverNewtonConfig",
     "FiberBeamCantileverNewtonResult",
+    "FRACTURE_ENERGY_CONCRETE_BENCHMARK_CLAIM_BOUNDARY",
+    "FRACTURE_ENERGY_CONCRETE_BENCHMARK_PROFILE",
+    "FRACTURE_ENERGY_CONCRETE_BENCHMARK_SCHEMA_VERSION",
     "LOAD_COUPLED_DENSE_REFERENCE_SOLVER_PROFILE",
     "LOAD_COUPLED_SPARSE_CHAIN_CLAIM_BOUNDARY",
     "LOAD_COUPLED_SPARSE_CHAIN_SCHEMA_VERSION",
@@ -328,6 +337,7 @@ __all__ = [
     "build_coupled_shallow_arch_vector_arc_length_benchmark_seed",
     "assemble_euler_column_system",
     "build_geometric_nonlinear_benchmark_seed",
+    "build_fracture_energy_concrete_mesh_objectivity_benchmark",
     "build_load_coupled_sparse_chain_arc_length_seed",
     "build_medium_benchmark_corpus_readiness",
     "build_portal_frame_model",

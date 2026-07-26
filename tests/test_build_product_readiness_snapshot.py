@@ -767,8 +767,8 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "claim_boundary": "No Phase 3 release-control cleanup is required for this fixture.",
     })
     _write_json(tmp_path / "package.json", {
-        "name": "structural-optimization-workbench",
-        "version": "1.0.0",
+        "name": "structural-analysis",
+        "version": "0.3.0",
     })
     _write_json(tmp_path / "github_actions_self_hosted_runner_status.json", {
         "schema_version": "github-actions-self-hosted-runner-status.v1",
@@ -781,7 +781,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
     })
     _write_text(
         tmp_path / "pyproject.toml",
-        '[project]\nname = "structural-optimization-workbench"\nversion = "1.0.0"\n',
+        '[project]\nname = "structural-analysis"\nversion = "0.3.0"\n',
     )
     _write_text(
         tmp_path / ".github/workflows/ci.yml",
@@ -796,12 +796,12 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
 
 def _write_stable_non_receipt_inputs(tmp_path: Path) -> None:
     _write_json(tmp_path / "package.json", {
-        "name": "structural-optimization-workbench",
-        "version": "1.0.0",
+        "name": "structural-analysis",
+        "version": "0.3.0",
     })
     _write_text(
         tmp_path / "pyproject.toml",
-        '[project]\nname = "structural-optimization-workbench"\nversion = "1.0.0"\n',
+        '[project]\nname = "structural-analysis"\nversion = "0.3.0"\n',
     )
     _write_text(
         tmp_path / ".github/workflows/ci.yml",
@@ -2107,8 +2107,8 @@ def test_snapshot_reads_project_identity_from_structured_pyproject_toml(tmp_path
             'name = "not-the-product-name"\n'
             "\n"
             "[project]\n"
-            'name = "structural-optimization-workbench" # canonical package name\n'
-            'version = "1.0.0" # canonical package version\n'
+            'name = "structural-analysis" # canonical package name\n'
+            'version = "0.3.0" # canonical package version\n'
         ),
     )
 
@@ -2120,12 +2120,12 @@ def test_snapshot_reads_project_identity_from_structured_pyproject_toml(tmp_path
 
     assert payload["components"]["product_identity"] == {
         "package_json": {
-            "name": "structural-optimization-workbench",
-            "version": "1.0.0",
+            "name": "structural-analysis",
+            "version": "0.3.0",
         },
         "pyproject": {
-            "name": "structural-optimization-workbench",
-            "version": "1.0.0",
+            "name": "structural-analysis",
+            "version": "0.3.0",
         },
         "name_matches": True,
         "version_matches": True,
@@ -2139,12 +2139,12 @@ def test_snapshot_engine_version_tracks_canonical_product_identity(tmp_path: Pat
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
     _write_json(tmp_path / "package.json", {
-        "name": "structural-optimization-workbench",
+        "name": "structural-analysis",
         "version": "1.2.3",
     })
     _write_text(
         tmp_path / "pyproject.toml",
-        '[project]\nname = "structural-optimization-workbench"\nversion = "1.2.3"\n',
+        '[project]\nname = "structural-analysis"\nversion = "1.2.3"\n',
     )
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -2153,7 +2153,7 @@ def test_snapshot_engine_version_tracks_canonical_product_identity(tmp_path: Pat
         source_commit_sha=commit,
     )
 
-    assert payload["engine_version"] == "structural-optimization-workbench@1.2.3"
+    assert payload["engine_version"] == "structural-analysis@1.2.3"
     assert payload["components"]["product_identity"]["matches"] is True
     assert "product_identity_version_mismatch:package_json_vs_pyproject" not in payload["blockers"]
 
@@ -2162,8 +2162,8 @@ def test_snapshot_blocks_package_pyproject_name_mismatch(tmp_path: Path) -> None
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
     _write_json(tmp_path / "package.json", {
-        "name": "structural-optimization-workbench-ui",
-        "version": "1.0.0",
+        "name": "structural-analysis-ui",
+        "version": "0.3.0",
     })
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -2185,7 +2185,7 @@ def test_snapshot_blocks_package_pyproject_version_mismatch(tmp_path: Path) -> N
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
     _write_text(
         tmp_path / "pyproject.toml",
-        '[project]\nname = "structural-optimization-workbench"\nversion = "0.1.0"\n',
+        '[project]\nname = "structural-analysis"\nversion = "0.1.0"\n',
     )
 
     payload = build_product_readiness_snapshot.build_snapshot(

@@ -20,7 +20,9 @@ from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "license-status-closure-report.v1"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_LICENSE_STATUS = Path("implementation/phase1/release/support_bundle/license_status.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/license_status_closure_report.json")

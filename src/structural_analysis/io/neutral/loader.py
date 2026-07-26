@@ -23,10 +23,39 @@ def checksum_for_path(path: Path) -> str:
 
 
 def load_neutral_json(path: Path) -> CanonicalModel:
-    with path.open(encoding="utf-8") as handle:
-        payload = json.load(handle)
+    raw = path.read_bytes()
+    return load_neutral_json_bytes(raw, source_path=str(path))
+
+
+def load_neutral_json_bytes(
+    raw: bytes | bytearray | memoryview,
+    *,
+    source_path: str = "memory://neutral-model.json",
+) -> CanonicalModel:
+    """Load one immutable in-memory neutral model for a durable worker request."""
+
+    if not isinstance(raw, (bytes, bytearray, memoryview)):
+        raise ValueError("Neutral canonical model input must be bytes-like.")
+    encoded = bytes(raw)
+    if not encoded or len(encoded) > 16 * 1024 * 1024:
+        raise ValueError("Neutral canonical model input exceeds the bounded byte profile.")
+    try:
+        payload = json.loads(encoded.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError("Neutral canonical model must be valid UTF-8 JSON.") from exc
     if not isinstance(payload, dict):
         raise ValueError("Neutral canonical model must be a JSON object.")
+
+    return _load_neutral_payload(
+        payload,
+        source_path=source_path,
+        input_checksum=f"sha256:{hashlib.sha256(encoded).hexdigest()}",
+    )
+
+
+def _load_neutral_payload(
+    payload: dict[str, Any], *, source_path: str, input_checksum: str
+) -> CanonicalModel:
 
     schema_version = str(
         payload.get("schema_version", CANONICAL_MODEL_SCHEMA_VERSION)
@@ -48,9 +77,9 @@ def load_neutral_json(path: Path) -> CanonicalModel:
     warnings = _validate_topology(payload)
     return CanonicalModel(
         schema_version=schema_version,
-        source_path=str(path),
+        source_path=source_path,
         source_format="neutral_json",
-        input_checksum=checksum_for_path(path),
+        input_checksum=input_checksum,
         units=units,
         coordinate_system=coordinate_system,
         nodes=_list(payload, "nodes"),

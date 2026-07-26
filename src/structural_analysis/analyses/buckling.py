@@ -10,6 +10,7 @@ from typing import Any
 import json
 
 import numpy as np
+from scipy.sparse import csr_matrix
 
 from structural_analysis.analyses.linear_static import (
     AUTHORITATIVE_CPU_SOLVER_ID,
@@ -27,17 +28,28 @@ from structural_analysis.solvers.buckling import (
     BucklingAnalysisError,
     solve_linear_buckling,
 )
+from structural_analysis.solvers.sparse_generalized_eigen import (
+    SPARSE_BUCKLING_PROFILE,
+    SPARSE_EIGEN_CLAIM_BOUNDARY,
+    SparseGeneralizedEigenError,
+    solve_sparse_linear_buckling,
+)
 
 
 AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID = (
     "authoritative_cpu_linear_buckling_fea_3d_v1"
 )
 BUCKLING_EIGEN_BACKEND = "scipy_linalg_eigh_dense"
+SPARSE_BUCKLING_EIGEN_BACKEND = SPARSE_BUCKLING_PROFILE
 MAX_DENSE_BUCKLING_FREE_DOF = 512
+MAX_SPARSE_BUCKLING_FREE_DOF = 4096
 BUCKLING_MODE_SHAPE_STORAGE_PROFILE = (
     "inline_max_component_normalized_small_dense_v1"
 )
 BUCKLING_CLAIM_BOUNDARY = "dense_reference_state_frame_linear_buckling_preview_v1"
+SPARSE_BUCKLING_CLAIM_BOUNDARY = (
+    "dense_assembly_sparse_low_mode_frame_linear_buckling_experimental_v1"
+)
 SUPPORTED_REFERENCE_LOAD_KINDS = {
     "nodal",
     "node",
@@ -127,17 +139,32 @@ def run_authoritative_linear_buckling(
             eigen_backend=eigen_backend,
             reference_status=reference.status,
         )
-    if len(assembly.free_dofs) > MAX_DENSE_BUCKLING_FREE_DOF:
+    sparse_selected = eigen_backend == SPARSE_BUCKLING_EIGEN_BACKEND
+    maximum_free_dof_count = (
+        MAX_SPARSE_BUCKLING_FREE_DOF
+        if sparse_selected
+        else MAX_DENSE_BUCKLING_FREE_DOF
+    )
+    if len(assembly.free_dofs) > maximum_free_dof_count:
         return _blocked_solution(
             model,
             unsupported=[
                 {
-                    "kind": "buckling_dense_free_dof_limit_exceeded",
+                    "kind": (
+                        "buckling_sparse_extraction_free_dof_limit_exceeded"
+                        if sparse_selected
+                        else "buckling_dense_free_dof_limit_exceeded"
+                    ),
                     "free_dof_count": len(assembly.free_dofs),
-                    "maximum_free_dof_count": MAX_DENSE_BUCKLING_FREE_DOF,
+                    "maximum_free_dof_count": maximum_free_dof_count,
                     "detail": (
-                        "Sparse eigen extraction and binary buckling-mode vector "
-                        "artifacts are not connected to the public path."
+                        "Sparse extraction still receives matrices from bounded "
+                        "dense whole-model assembly; binary mode artifacts and "
+                        "native sparse assembly remain unconnected."
+                        if sparse_selected
+                        else "Select the explicit experimental sparse extraction "
+                        "backend for larger bounded systems; native sparse assembly "
+                        "and binary mode artifacts remain unconnected."
                     ),
                 }
             ],
@@ -149,18 +176,31 @@ def run_authoritative_linear_buckling(
     free = np.asarray(assembly.free_dofs, dtype=np.int64)
     reduced_stiffness = assembly.stiffness[np.ix_(free, free)]
     reduced_geometric = assembly.geometric_stiffness[np.ix_(free, free)]
+    buckling: Any
     try:
-        buckling = solve_linear_buckling(
-            reduced_stiffness,
-            reduced_geometric,
-            mode_count=mode_count,
-            positive_semidefinite_relative_tolerance=1.0e-10,
-            finite_mode_relative_tolerance=1.0e-12,
-            cluster_relative_tolerance=1.0e-9,
-            residual_relative_tolerance=tolerance,
-            orthogonality_tolerance=tolerance,
-        )
-    except BucklingAnalysisError as exc:
+        if sparse_selected:
+            buckling = solve_sparse_linear_buckling(
+                csr_matrix(reduced_stiffness),
+                csr_matrix(reduced_geometric),
+                mode_count=mode_count,
+                positive_semidefinite_relative_tolerance=1.0e-10,
+                finite_mode_relative_tolerance=1.0e-12,
+                cluster_relative_tolerance=1.0e-9,
+                residual_relative_tolerance=tolerance,
+                orthogonality_tolerance=tolerance,
+            )
+        else:
+            buckling = solve_linear_buckling(
+                reduced_stiffness,
+                reduced_geometric,
+                mode_count=mode_count,
+                positive_semidefinite_relative_tolerance=1.0e-10,
+                finite_mode_relative_tolerance=1.0e-12,
+                cluster_relative_tolerance=1.0e-9,
+                residual_relative_tolerance=tolerance,
+                orthogonality_tolerance=tolerance,
+            )
+    except (BucklingAnalysisError, SparseGeneralizedEigenError) as exc:
         return _blocked_solution(
             model,
             unsupported=[
@@ -206,16 +246,31 @@ def run_authoritative_linear_buckling(
         "load_count": len(model.loads),
         "support_count": len(model.supports),
         "solver_path_id": AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID,
-        "analysis_fidelity": "cpu_reference_dense_whole_model_linear_buckling",
+        "analysis_fidelity": (
+            "cpu_experimental_sparse_extraction_whole_model_linear_buckling"
+            if sparse_selected
+            else "cpu_reference_dense_whole_model_linear_buckling"
+        ),
         "production_fail_closed": True,
         "implicit_property_fallback_used": False,
         "automatic_support_generation_used": False,
         "regularization_used": False,
         "fallback_used": False,
         "matrix_backend": eigen_backend,
-        "sparse_backend_used": False,
-        "stiffness_storage": "dense_numpy_binary64",
-        "geometric_stiffness_storage": "dense_numpy_binary64",
+        "sparse_backend_used": sparse_selected,
+        "stiffness_storage": (
+            "scipy_csr_binary64_reduced_from_dense_assembly"
+            if sparse_selected
+            else "dense_numpy_binary64"
+        ),
+        "geometric_stiffness_storage": (
+            "scipy_csr_binary64_reduced_from_dense_assembly"
+            if sparse_selected
+            else "dense_numpy_binary64"
+        ),
+        "whole_model_assembly_storage": "dense_numpy_binary64",
+        "native_sparse_assembly_used": False,
+        "sparse_eigen_extraction_used": sparse_selected,
         "geometric_stiffness_formulation": (
             assembly.geometric_stiffness_formulation
         ),
@@ -244,9 +299,27 @@ def run_authoritative_linear_buckling(
         "free_dof_map_hash": _hash_json(free_dof_rows),
         "requested_mode_count": buckling.requested_mode_count,
         "mode_count": buckling.mode_count,
-        "finite_positive_eigenvalue_count": (
-            buckling.finite_positive_eigenvalue_count
+        "candidate_eigenpair_count": getattr(
+            buckling,
+            "candidate_eigenpair_count",
+            buckling.mode_count,
         ),
+        "eigen_backend_profile": getattr(
+            buckling,
+            "backend_profile",
+            BUCKLING_EIGEN_BACKEND,
+        ),
+        "finite_positive_eigenvalue_count": getattr(
+            buckling,
+            "finite_positive_eigenvalue_count",
+            None,
+        ),
+        "finite_positive_eigenvalue_count_lower_bound": getattr(
+            buckling,
+            "finite_positive_eigenvalue_count_lower_bound",
+            getattr(buckling, "finite_positive_eigenvalue_count", 0),
+        ),
+        "finite_positive_eigenvalue_count_exact": not sparse_selected,
         "critical_load_factor": buckling.critical_load_factor,
         "modes": modes,
         "stiffness_orthogonality_error_inf": (
@@ -261,9 +334,17 @@ def run_authoritative_linear_buckling(
         "geometric_stiffness_relative_symmetry_error": (
             buckling.geometric_stiffness_relative_symmetry_error
         ),
-        "geometric_stiffness_positive_rank": (
-            buckling.geometric_stiffness_positive_rank
+        "geometric_stiffness_positive_rank": getattr(
+            buckling,
+            "geometric_stiffness_positive_rank",
+            None,
         ),
+        "geometric_stiffness_positive_rank_lower_bound": getattr(
+            buckling,
+            "geometric_stiffness_positive_rank_lower_bound",
+            getattr(buckling, "geometric_stiffness_positive_rank", 0),
+        ),
+        "geometric_stiffness_positive_rank_exact": not sparse_selected,
         "stiffness_matrix_hash": buckling.stiffness_matrix_hash,
         "geometric_stiffness_matrix_hash": (
             buckling.geometric_stiffness_matrix_hash
@@ -281,11 +362,20 @@ def run_authoritative_linear_buckling(
         "mixed_tension_compression_reference_supported": False,
         "nonlinear_buckling_supported": False,
         "imperfection_sensitivity_supported": False,
-        "sparse_buckling_backend_connected": False,
+        "sparse_buckling_backend_connected": sparse_selected,
         "rocm_hip_buckling_parity": False,
         "verification_level_2": False,
         "release_readiness": False,
-        "claim_boundary": BUCKLING_CLAIM_BOUNDARY,
+        "eigen_solver_claim_boundary": (
+            SPARSE_EIGEN_CLAIM_BOUNDARY
+            if sparse_selected
+            else BUCKLING_CLAIM_BOUNDARY
+        ),
+        "claim_boundary": (
+            SPARSE_BUCKLING_CLAIM_BOUNDARY
+            if sparse_selected
+            else BUCKLING_CLAIM_BOUNDARY
+        ),
     }
     return WholeModelBucklingSolution(
         status="ready",
@@ -390,12 +480,16 @@ def _public_preflight(
                 "detail": "mode_count must be a positive integer.",
             }
         )
-    if eigen_backend != BUCKLING_EIGEN_BACKEND:
+    supported_backends = (
+        BUCKLING_EIGEN_BACKEND,
+        SPARSE_BUCKLING_EIGEN_BACKEND,
+    )
+    if eigen_backend not in supported_backends:
         unsupported.append(
             {
                 "kind": "buckling_eigen_backend_not_supported",
                 "eigen_backend": eigen_backend,
-                "supported_backend": BUCKLING_EIGEN_BACKEND,
+                "supported_backends": list(supported_backends),
             }
         )
     for element in model.elements:
@@ -441,6 +535,7 @@ def _blocked_solution(
     reference_status: str = "not_run",
     assembly: BucklingAssembly | None = None,
 ) -> WholeModelBucklingSolution:
+    sparse_selected = eigen_backend == SPARSE_BUCKLING_EIGEN_BACKEND
     return WholeModelBucklingSolution(
         status="blocked",
         metrics={
@@ -449,14 +544,21 @@ def _blocked_solution(
             "load_count": len(model.loads),
             "support_count": len(model.supports),
             "solver_path_id": AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID,
-            "analysis_fidelity": "cpu_reference_dense_whole_model_linear_buckling",
+            "analysis_fidelity": (
+                "cpu_experimental_sparse_extraction_whole_model_linear_buckling"
+                if sparse_selected
+                else "cpu_reference_dense_whole_model_linear_buckling"
+            ),
             "production_fail_closed": True,
             "implicit_property_fallback_used": False,
             "automatic_support_generation_used": False,
             "regularization_used": False,
             "fallback_used": False,
             "matrix_backend": eigen_backend,
-            "sparse_backend_used": False,
+            "sparse_backend_used": sparse_selected,
+            "whole_model_assembly_storage": "dense_numpy_binary64",
+            "native_sparse_assembly_used": False,
+            "sparse_eigen_extraction_used": sparse_selected,
             "reference_static_status": reference_status,
             "reference_load_factor": 1.0,
             "free_dof_count": len(assembly.free_dofs) if assembly else 0,
@@ -466,11 +568,15 @@ def _blocked_solution(
             "mixed_tension_compression_reference_supported": False,
             "nonlinear_buckling_supported": False,
             "imperfection_sensitivity_supported": False,
-            "sparse_buckling_backend_connected": False,
+            "sparse_buckling_backend_connected": sparse_selected,
             "rocm_hip_buckling_parity": False,
             "verification_level_2": False,
             "release_readiness": False,
-            "claim_boundary": BUCKLING_CLAIM_BOUNDARY,
+            "claim_boundary": (
+                SPARSE_BUCKLING_CLAIM_BOUNDARY
+                if sparse_selected
+                else BUCKLING_CLAIM_BOUNDARY
+            ),
         },
         convergence_history=[],
         unsupported_features=unsupported,

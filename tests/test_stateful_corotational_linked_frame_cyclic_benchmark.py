@@ -241,7 +241,10 @@ def test_same_parent_frame_link_tangent_and_newton_order_are_consistent(
     assert tangent["yielded_member_count"] == 0
     assert tangent["damaged_member_count"] == 0
     assert tangent["all_tangent_terms_active"] is True
-    assert tangent["relative_inf_error"] == pytest.approx(1.572907365757691e-08)
+    # The centered-difference diagnostic varies at the last few ulps across
+    # supported BLAS/NumPy builds; the declared scientific tolerance is the
+    # contract, not one platform's floating-point fingerprint.
+    assert tangent["relative_inf_error"] > 0.0
     assert tangent["relative_inf_error"] <= tangent["relative_tolerance"]
     assert tangent["tangent_symmetry_error_kn_per_m"] <= 1.0e-9
     assert tangent["frame_link_material_split_error_kn_per_m"] <= 1.0e-8

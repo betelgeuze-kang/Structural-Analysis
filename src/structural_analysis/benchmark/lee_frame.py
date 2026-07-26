@@ -10,13 +10,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import math
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
 from structural_analysis.solvers.nonlinear.vector_arc_length import (
     VectorArcLengthCheckpoint,
     VectorArcLengthConfig,
+    VectorArcLengthProblem,
     vector_arc_length_continuation,
 )
 
@@ -237,8 +238,16 @@ def corotational_frame_element_response(
         strain_energy_kn_m=energy,
         internal_force_global=internal_force,
         consistent_tangent_global=tangent,
-        basic_deformations=tuple(float(value) for value in basic_deformations),
-        basic_forces=tuple(float(value) for value in basic_forces),
+        basic_deformations=(
+            float(basic_deformations[0]),
+            float(basic_deformations[1]),
+            float(basic_deformations[2]),
+        ),
+        basic_forces=(
+            float(basic_forces[0]),
+            float(basic_forces[1]),
+            float(basic_forces[2]),
+        ),
         initial_length_m=initial_length,
         current_length_m=current_length,
         chord_rotation_change_rad=angle_change,
@@ -651,7 +660,8 @@ def build_lee_frame_snapthrough_benchmark(
 
     problem = LeeFrameArcLengthProblem(elements_per_member=elements_per_member)
     config = lee_frame_arc_length_config(problem)
-    result = vector_arc_length_continuation(problem, config=config)
+    arc_length_problem = cast(VectorArcLengthProblem, problem)
+    result = vector_arc_length_continuation(arc_length_problem, config=config)
     path_rows = [
         _checkpoint_path_row(problem, checkpoint) for checkpoint in result.checkpoints
     ]
@@ -706,7 +716,7 @@ def build_lee_frame_snapthrough_benchmark(
 
     midpoint_checkpoint = result.checkpoints[len(result.checkpoints) // 2]
     restarted = vector_arc_length_continuation(
-        problem,
+        arc_length_problem,
         config=config,
         resume_from=midpoint_checkpoint,
     )

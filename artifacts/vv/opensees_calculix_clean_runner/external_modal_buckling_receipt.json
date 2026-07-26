@@ -1,0 +1,328 @@
+{
+  "artifact_hash": "sha256:95ba61365e5fffb905a260f62c9829ebad8598e13b5c5c337cbf0a95b9a8ea5d",
+  "blockers_remaining": [
+    "opensees_commercial_redistribution_license_approval_missing",
+    "calculix_product_legal_approval_missing",
+    "external_runtime_assets_not_bundled",
+    "independent_clean_runner_reproduction_missing",
+    "verification_hierarchy_operator_manifest_not_attached",
+    "code_to_code_structural_family_breadth_insufficient",
+    "published_modal_buckling_benchmark_missing",
+    "verification_level_2_not_achieved",
+    "release_readiness_not_established"
+  ],
+  "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. OpenSees is compared with the public whole-model frame consistent-mass modal path for one two-degree-of-freedom cantilever, including eigenvalues and per-mode MAC. CalculiX B32 is compared with the public compression-only frame linear-buckling path for one sixteen-element pin-ended square column, including two repeated load factors and a basis-invariant two-mode subspace correlation. The CalculiX comparison uses a declared 1 percent load-factor tolerance and does not assert identical element formulations. Mode vectors are checksum-bound little-endian binary artifacts and are not inlined in JSON. This is narrow technical code-to-code evidence only. No product/legal approval or external-runtime redistribution approval is attached, the packages are not bundled, and no independent clean runner, broad structural-family corpus, published benchmark decision, or operator hierarchy manifest is present. Therefore this receipt does not achieve Verification Level 2, commercial equivalence, design authority, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
+  "claims": {
+    "actual_external_solver_execution": true,
+    "buckling_repeated_mode_subspace_comparison": true,
+    "commercial_equivalence": false,
+    "external_runtime_redistribution_approval": false,
+    "modal_mac_comparison": true,
+    "product_legal_license_approval": false,
+    "release_readiness": false,
+    "verification_level_2": false,
+    "whole_model_frame_buckling_technical_comparison": true,
+    "whole_model_frame_modal_technical_comparison": true
+  },
+  "comparisons": [
+    {
+      "analysis_type": "modal",
+      "case_id": "whole_model_frame_consistent_mass_modal",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-09,
+          "contract_pass": true,
+          "metric_kind": "value_error",
+          "product_value": 79491.6697691323,
+          "quantity": "eigenvalue_mode_1_rad2_per_s2",
+          "reference_value": 79491.6697691323,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "contract_pass": true,
+          "metric_kind": "minimum_threshold",
+          "minimum_accepted": 0.999999999999,
+          "observed_value": 1.0,
+          "quantity": "modal_assurance_criterion_mode_1"
+        },
+        {
+          "absolute_error": 3.725290298461914e-09,
+          "absolute_tolerance": 1e-09,
+          "contract_pass": true,
+          "metric_kind": "value_error",
+          "product_value": 7716686.674179917,
+          "quantity": "eigenvalue_mode_2_rad2_per_s2",
+          "reference_value": 7716686.674179921,
+          "relative_error": 4.827577502824829e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "contract_pass": true,
+          "metric_kind": "minimum_threshold",
+          "minimum_accepted": 0.999999999999,
+          "observed_value": 1.0,
+          "quantity": "modal_assurance_criterion_mode_2"
+        }
+      ],
+      "mode_vector_artifacts": [
+        "product_modal_modes",
+        "opensees_modal_modes"
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "authoritative_cpu_modal_fea_3d_v1",
+      "reference_solver": "OpenSees 3.7.1"
+    },
+    {
+      "analysis_type": "linear_buckling",
+      "case_id": "whole_model_frame_repeated_mode_linear_buckling",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 0.052998868013923506,
+          "absolute_tolerance": 1e-08,
+          "contract_pass": true,
+          "metric_kind": "value_error",
+          "product_value": 7.486293131986076,
+          "quantity": "buckling_load_factor_mode_1",
+          "reference_value": 7.539292,
+          "relative_error": 0.007029687670131825,
+          "relative_tolerance": 0.01
+        },
+        {
+          "absolute_error": 0.05299886800953413,
+          "absolute_tolerance": 1e-08,
+          "contract_pass": true,
+          "metric_kind": "value_error",
+          "product_value": 7.4862931319904655,
+          "quantity": "buckling_load_factor_mode_2",
+          "reference_value": 7.539292,
+          "relative_error": 0.007029687669549625,
+          "relative_tolerance": 0.01
+        },
+        {
+          "contract_pass": true,
+          "metric_kind": "minimum_threshold",
+          "minimum_accepted": 0.999999,
+          "observed_value": 0.9999999970316462,
+          "quantity": "repeated_mode_subspace_minimum_principal_correlation_squared"
+        }
+      ],
+      "mode_vector_artifacts": [
+        "product_buckling_modes",
+        "calculix_buckling_modes"
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "authoritative_cpu_linear_buckling_fea_3d_v1",
+      "reference_solver": "CalculiX CrunchiX 2.17 B32"
+    }
+  ],
+  "engine_version": "0.3.0",
+  "execution_environment": {
+    "machine": "x86_64",
+    "python_executable_sha256": "sha256:22e747b1e8a04719d4af2094133a0479b33728d2e4d03ab01539064dc6f45cfb",
+    "python_version": "3.11.15",
+    "system": "Linux"
+  },
+  "external_assets": [
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/calculix-ccx",
+      "bundled_in_repository": false,
+      "distribution": "calculix-ccx",
+      "filename": "calculix-ccx_2.17-3_amd64.deb",
+      "kind": "calculix_ubuntu_runtime_package",
+      "sha256": "sha256:3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e",
+      "version": "2.17-3"
+    },
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/libarpack2",
+      "bundled_in_repository": false,
+      "distribution": "libarpack2",
+      "filename": "libarpack2_3.8.0-1_amd64.deb",
+      "kind": "calculix_runtime_dependency",
+      "sha256": "sha256:07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a",
+      "version": "3.8.0-1"
+    },
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/libspooles2.2",
+      "bundled_in_repository": false,
+      "distribution": "libspooles2.2",
+      "filename": "libspooles2.2_2.2-14_amd64.deb",
+      "kind": "calculix_runtime_dependency",
+      "sha256": "sha256:34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917",
+      "version": "2.2-14"
+    },
+    {
+      "authority_url": "https://pypi.org/project/openseespy/3.7.1.2/",
+      "bundled_in_repository": false,
+      "distribution": "openseespy",
+      "filename": "openseespy-3.7.1.2-py3-none-any.whl",
+      "kind": "opensees_python_meta_wheel",
+      "sha256": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
+      "version": "3.7.1.2"
+    },
+    {
+      "authority_url": "https://pypi.org/project/openseespylinux/3.7.1.2/",
+      "bundled_in_repository": false,
+      "distribution": "openseespylinux",
+      "filename": "openseespylinux-3.7.1.2-py3-none-any.whl",
+      "kind": "opensees_linux_runtime_wheel",
+      "sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a",
+      "version": "3.7.1.2"
+    }
+  ],
+  "generated_at": "2026-07-22T14:59:38.738298+00:00",
+  "internal_source": {
+    "input_checksums": {
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:bad9076af75bd82676cc7e0cca6c2b0bcc25ac9082d78aa712892b3b60e93946",
+      "scripts/run_external_modal_buckling_technical_receipt.py": "sha256:809bf6499fe37cc1ef5a6fd0de8f841e702d70fd0e210d6662bea5016f190954",
+      "src/structural_analysis/analyses/buckling.py": "sha256:b2e7d9b84f91a4d3a4726752c954cfa24e311b4fe63ffc80ca32644369335791",
+      "src/structural_analysis/analyses/modal.py": "sha256:9b20b49caaef63a9dcf9e5bc3ebf8325521a75dd060360befdf77534f604f986",
+      "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
+      "src/structural_analysis/assembly/buckling.py": "sha256:fba3d394c496253c04421c13cfe50e00cc741129727b7ecf337a1628f54a0232",
+      "src/structural_analysis/assembly/modal.py": "sha256:bf0909750f7d471541180c8dec8ac2037730e3b17b7ecbbedce0c5c74df83bd8",
+      "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
+      "src/structural_analysis/schemas/external_modal_buckling_technical_receipt_v1.schema.json": "sha256:74b579d0b3c39e52c739fbd66d9148679013cd3ee7191bccacb5850f111b169d",
+      "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
+      "tests/test_external_modal_buckling_technical_receipt.py": "sha256:0fa03d8e2ca33f0b8c02cc397c6ac8c4ce6e6541fe01e117873750960088ba8d"
+    },
+    "source_set_hash": "sha256:f60253beb3499e3b07afe9f8c6af545354bfdf7901536c18c9878c5f97d948b5"
+  },
+  "mode_vector_artifacts": [
+    {
+      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/product_modal_modes.f64le",
+      "byte_length": 32,
+      "byte_order": "little",
+      "content_hash": "sha256:ee3cfe517583566452cc322163a372df0964ee8deecfb73bdf581226decf9237",
+      "data_hash": "sha256:39ecaabc6e8d89987489ede409eb005536ab42c38b5e450dbe4322218bddd893",
+      "dtype": "<f8",
+      "layout": "C",
+      "name": "product_modal_modes",
+      "shape": [
+        2,
+        2
+      ]
+    },
+    {
+      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/opensees_modal_modes.f64le",
+      "byte_length": 32,
+      "byte_order": "little",
+      "content_hash": "sha256:8a1a0cdfb5886d0dcdf2dcfc38887b12997f5423ec9248467d39c39e330288e6",
+      "data_hash": "sha256:777c724fc2f464fc11e57b9a21d5e69e204dbaba02f8fbc0bc86f9b10f23a187",
+      "dtype": "<f8",
+      "layout": "C",
+      "name": "opensees_modal_modes",
+      "shape": [
+        2,
+        2
+      ]
+    },
+    {
+      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/product_buckling_modes.f64le",
+      "byte_length": 544,
+      "byte_order": "little",
+      "content_hash": "sha256:ebb15a7575610540f09984b78502a775141087fbbc96b44e9def83a3f93e689b",
+      "data_hash": "sha256:7ef45e708c68ad0c57be2c312f36da8d7c83295a12f76f869895ba035a21d9d8",
+      "dtype": "<f8",
+      "layout": "C",
+      "name": "product_buckling_modes",
+      "shape": [
+        34,
+        2
+      ]
+    },
+    {
+      "artifact_path": "artifacts/vv/opensees_calculix_clean_runner/mode_vectors/calculix_buckling_modes.f64le",
+      "byte_length": 544,
+      "byte_order": "little",
+      "content_hash": "sha256:90b2586ae12904b4af6750a4cfce7b3ed1b7ed7ad5b9f020d342eea555fc0128",
+      "data_hash": "sha256:32acd17fc747e805c9bc5c07b8ee4ce39f20ca280951e3848e69702d3e62fac6",
+      "dtype": "<f8",
+      "layout": "C",
+      "name": "calculix_buckling_modes",
+      "shape": [
+        34,
+        2
+      ]
+    }
+  ],
+  "mode_vector_storage_profile": "canonical_little_endian_fp64_binary.v1",
+  "product_evidence": {
+    "buckling_model_hash": "sha256:0e222cde2c47ba863d680edff85a9f31a42c829ad876e4324f8fb763dd745800",
+    "buckling_semantic_result_hash": "sha256:084ab155872c1d069581c66f2d732fdcea7d574f3760f40ed0c41e3ddbbb138b",
+    "modal_model_hash": "sha256:5eb02ed60f6d95cf97d13bfde70ac2ffe94e7cb96ca0159c7d0a9a039a40d17c",
+    "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
+  },
+  "replay_provenance": {
+    "current_product_replay_generated_at": "2026-07-22T14:59:38.753889+00:00",
+    "current_product_replay_pass": true,
+    "external_execution_generated_at": "2026-07-22T14:59:38.753877+00:00",
+    "external_execution_reused": false,
+    "external_runtime_executed_in_this_generation": true,
+    "reuse_reason": null
+  },
+  "runtimes": {
+    "calculix": {
+      "actual_external_execution": true,
+      "binary_sha256": "sha256:85f6961eb174eaf4daf2b053e1c3fd50874c9c597bd4e1e31b7f5cdfc4dda4c3",
+      "distribution_version": "2.17-3",
+      "execution_outputs": {
+        "dat_sha256": "sha256:b8ec3933f48d1de716ab86e75f4f638f687163ed74e565a97405e66c26edd8a1",
+        "frd_sha256": "sha256:ce79cd7bede1b5181d66e139d2b285efde3d9340352462b3225e26fa09c01bf0",
+        "input_deck_sha256": "sha256:2a929ab93c0191b2b45c99ef1b46b956f0fe27f22d7cba99905cee934481825d",
+        "return_code": 0,
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "sha256:0401fb8645df22677fc1b4c6e8ba6642ab9b9b7714ffbe62ac37d8bec1215a2f",
+        "version_return_code": 201,
+        "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
+      },
+      "independent_from_product": true,
+      "license": {
+        "commercial_redistribution_approved": false,
+        "declared_license_posture": "GPL-2_ubuntu_package",
+        "license_file_sha256": "sha256:258824ecc9a05cb4a07afbe2ca850383e8a7b1779822df7ee717ff8ebc168def",
+        "product_legal_approval": false
+      },
+      "name": "CalculiX CrunchiX",
+      "runtime_version": "2.17",
+      "version_verified": true
+    },
+    "opensees": {
+      "actual_external_execution": true,
+      "distribution_version": "3.7.1.2",
+      "execution_outputs": {
+        "driver_sha256": "sha256:77b9aeb6b4a9d6d13b6efaa8d706f57db9a9e82a1b0d5001e2cc90728e44f3d3",
+        "return_code": 0,
+        "stderr_sha256": "sha256:28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea",
+        "stdout_sha256": "sha256:307a6ca0adad1634013034f62a95eaa6e29836350bb27703bf7c259faee2dec1"
+      },
+      "independent_from_product": true,
+      "license": {
+        "commercial_redistribution_approved": false,
+        "declared_license_posture": "internal_use_allowed_commercial_redistribution_requires_license",
+        "license_file_sha256": "sha256:289503a95d55c43668bdadcd1815c9a93b46cb6ec890b3e9aea6c559d3806382",
+        "product_legal_approval": false
+      },
+      "name": "OpenSees",
+      "runtime_version": "3.7.1",
+      "version_verified": true
+    }
+  },
+  "schema_version": "external-modal-buckling-technical-execution.v1",
+  "source_commit_sha": "ab4b2e6191f87d9de9d117e2743d8f3fa4c9e50c",
+  "status": "partial",
+  "technical_contract_pass": true,
+  "truth_class": "external_code_to_code_modal_buckling_technical_execution",
+  "verification_hierarchy_credit": false,
+  "verification_hierarchy_operator_manifest_attached": false
+}

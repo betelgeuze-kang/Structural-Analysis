@@ -64,7 +64,7 @@ def _unsigned_device_receipt(
         operator_context=_operator_context(architecture=architecture),
         wheel={
             "filename": ("structural_optimization_workbench-1.0.0-py3-none-any.whl"),
-            "project_name": "structural-optimization-workbench",
+            "project_name": "structural-analysis",
             "project_version": "1.0.0",
             "sha256": wheel_hash,
             "bound_at_execution": True,

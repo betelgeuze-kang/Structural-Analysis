@@ -24,8 +24,7 @@ def main() -> int:
         "--candidate-dir",
         type=Path,
         default=(
-            ROOT
-            / "implementation/phase1/release_evidence/productization/"
+            ROOT / "implementation/phase1/release_evidence/productization/"
             "verification_candidates/lee_frame"
         ),
     )
@@ -33,8 +32,7 @@ def main() -> int:
         "--manifest-out",
         type=Path,
         default=(
-            ROOT
-            / "implementation/phase1/release_evidence/productization/"
+            ROOT / "implementation/phase1/release_evidence/productization/"
             "verification_hierarchy_evidence.candidate.json"
         ),
     )
@@ -58,8 +56,8 @@ def main() -> int:
         manifest_path=args.manifest_out,
     )
     status = build_verification_hierarchy_status(
-        ROOT,
-        operator_manifest_path=bundle.manifest_path,
+        repo_root=ROOT,
+        operator_evidence_path=bundle.manifest_path,
     )
     payload = {
         "candidate_bundle": bundle.to_dict(),
@@ -86,7 +84,7 @@ def main() -> int:
         evidence_row = next(
             row
             for row in status["evidence_rows"]
-            if row["evidence_id"] == bundle.evidence.evidence_id
+            if row["evidence_id"] == bundle.evidence["evidence_id"]
         )
         if evidence_row["ready_for_hierarchy_credit"]:
             return 2

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import hashlib
 import math
 import struct
@@ -12,6 +12,10 @@ from typing import Any, Iterable
 STATE_SCHEMA_VERSION = "uniaxial-asymmetric-concrete-damage-state.v1"
 DAMAGE_ALGORITHM = "history_max_exponential_tension_compression_damage"
 TANGENT_DEFINITION = "algorithmic_consistent_d_stress_d_total_strain"
+FRACTURE_ENERGY_DAMAGE_ALGORITHM = (
+    "crack_band_exponential_traction_effective_crack_opening"
+)
+FRACTURE_ENERGY_TANGENT_DEFINITION = "implicit_consistent_d_traction_d_total_strain"
 _STATE_HASH_DOMAIN = b"structural-analysis/concrete-damage-state/v1\0"
 
 
@@ -48,9 +52,7 @@ class ConcreteDamageState:
         if not 0.0 <= self.compressive_damage < 1.0:
             raise ValueError("compressive_damage must be in [0, 1)")
         if self.dissipated_energy_density_mj_per_m3 < 0.0:
-            raise ValueError(
-                "dissipated_energy_density_mj_per_m3 must be non-negative"
-            )
+            raise ValueError("dissipated_energy_density_mj_per_m3 must be non-negative")
 
     def canonical_bytes(self) -> bytes:
         return _STATE_HASH_DOMAIN + struct.pack(
@@ -150,6 +152,14 @@ class AsymmetricConcreteDamageMaterial:
         return self.tensile_strength_mpa / self.elastic_modulus_mpa
 
     @property
+    def damage_algorithm(self) -> str:
+        return DAMAGE_ALGORITHM
+
+    @property
+    def tangent_definition(self) -> str:
+        return TANGENT_DEFINITION
+
+    @property
     def compressive_threshold_strain(self) -> float:
         return self.compressive_strength_mpa / self.elastic_modulus_mpa
 
@@ -168,9 +178,7 @@ class AsymmetricConcreteDamageMaterial:
         survival = (
             threshold_strain
             / history_strain
-            * math.exp(
-                -softening_rate * (history_strain - threshold_strain)
-            )
+            * math.exp(-softening_rate * (history_strain - threshold_strain))
         )
         damage = min(1.0 - survival, math.nextafter(1.0, 0.0))
         derivative = survival * (1.0 / history_strain + softening_rate)
@@ -210,8 +218,11 @@ class AsymmetricConcreteDamageMaterial:
             compressive_damage - committed_state.compressive_damage,
             0.0,
         )
-        dissipated_increment = 0.5 * self.elastic_modulus_mpa * strain**2 * (
-            tensile_increment + compressive_increment
+        dissipated_increment = (
+            0.5
+            * self.elastic_modulus_mpa
+            * strain**2
+            * (tensile_increment + compressive_increment)
         )
         next_state = ConcreteDamageState(
             tensile_history_strain=next_tensile_history,
@@ -231,8 +242,7 @@ class AsymmetricConcreteDamageMaterial:
             active_derivative = tensile_derivative
             history_advanced = bool(
                 tensile_measure
-                > committed_state.tensile_history_strain
-                + self.history_tolerance
+                > committed_state.tensile_history_strain + self.history_tolerance
             )
         else:
             active_branch = "compression"
@@ -241,8 +251,7 @@ class AsymmetricConcreteDamageMaterial:
             active_derivative = compressive_derivative
             history_advanced = bool(
                 compressive_measure
-                > committed_state.compressive_history_strain
-                + self.history_tolerance
+                > committed_state.compressive_history_strain + self.history_tolerance
             )
         stress = (1.0 - active_damage) * self.elastic_modulus_mpa * strain
         if history_advanced and active_derivative > 0.0:
@@ -266,6 +275,235 @@ class AsymmetricConcreteDamageMaterial:
         )
 
 
+@dataclass(frozen=True)
+class FractureEnergyConcreteDamageMaterial(AsymmetricConcreteDamageMaterial):
+    """Uniaxial crack-band damage with energy regularized by band length.
+
+    The post-peak branch is defined in effective crack opening ``w`` by
+    ``sigma = f * exp(-f*w/Gf)`` and ``w = h*(kappa-sigma/E)``.  This makes
+    the traction-opening curve and its asymptotic dissipated energy independent
+    of the supplied characteristic length ``h``.  A monotone mapping condition
+    is enforced so the selected local branch is unique and fail-closed.
+    """
+
+    tensile_softening_rate: float = field(init=False, default=1.0)
+    compressive_softening_rate: float = field(init=False, default=1.0)
+    characteristic_length_m: float = 0.01
+    tensile_fracture_energy_n_per_m: float = 100.0
+    compressive_fracture_energy_n_per_m: float = 20_000.0
+    material_id: str = "concrete_fracture_energy_crack_band_1d"
+
+    def __post_init__(self) -> None:
+        characteristic_length = _require_finite(
+            "characteristic_length_m", self.characteristic_length_m
+        )
+        tensile_energy = _require_finite(
+            "tensile_fracture_energy_n_per_m",
+            self.tensile_fracture_energy_n_per_m,
+        )
+        compressive_energy = _require_finite(
+            "compressive_fracture_energy_n_per_m",
+            self.compressive_fracture_energy_n_per_m,
+        )
+        if characteristic_length <= 0.0:
+            raise ValueError("characteristic_length_m must be positive")
+        if tensile_energy <= 0.0 or compressive_energy <= 0.0:
+            raise ValueError("fracture energies must be positive")
+        tensile_rate = (
+            characteristic_length
+            * float(self.tensile_strength_mpa)
+            * 1.0e6
+            / tensile_energy
+        )
+        compressive_rate = (
+            characteristic_length
+            * float(self.compressive_strength_mpa)
+            * 1.0e6
+            / compressive_energy
+        )
+        object.__setattr__(self, "characteristic_length_m", characteristic_length)
+        object.__setattr__(self, "tensile_fracture_energy_n_per_m", tensile_energy)
+        object.__setattr__(
+            self, "compressive_fracture_energy_n_per_m", compressive_energy
+        )
+        object.__setattr__(self, "tensile_softening_rate", tensile_rate)
+        object.__setattr__(self, "compressive_softening_rate", compressive_rate)
+        super().__post_init__()
+        for branch, strength, rate in (
+            ("tensile", self.tensile_strength_mpa, tensile_rate),
+            ("compressive", self.compressive_strength_mpa, compressive_rate),
+        ):
+            ratio = rate * strength / self.elastic_modulus_mpa
+            if ratio >= 1.0:
+                raise ValueError(
+                    f"{branch} crack-band mapping must satisfy "
+                    "softening_rate*strength/elastic_modulus < 1"
+                )
+
+    @property
+    def damage_algorithm(self) -> str:
+        return FRACTURE_ENERGY_DAMAGE_ALGORITHM
+
+    @property
+    def tangent_definition(self) -> str:
+        return FRACTURE_ENERGY_TANGENT_DEFINITION
+
+    @staticmethod
+    def _traction_and_tangent(
+        history_strain: float,
+        *,
+        elastic_modulus_mpa: float,
+        strength_mpa: float,
+        softening_rate: float,
+    ) -> tuple[float, float, float]:
+        threshold = strength_mpa / elastic_modulus_mpa
+        if history_strain <= threshold:
+            return (
+                elastic_modulus_mpa * history_strain,
+                elastic_modulus_mpa,
+                0.0,
+            )
+
+        lower = 0.0
+        upper = strength_mpa
+        for _ in range(96):
+            trial = 0.5 * (lower + upper)
+            equation = (
+                math.log(trial / strength_mpa)
+                + softening_rate * history_strain
+                - softening_rate * trial / elastic_modulus_mpa
+            )
+            if equation > 0.0:
+                upper = trial
+            else:
+                lower = trial
+        traction = 0.5 * (lower + upper)
+        tangent = -softening_rate / (
+            1.0 / traction - softening_rate / elastic_modulus_mpa
+        )
+        damage = min(
+            1.0 - traction / (elastic_modulus_mpa * history_strain),
+            math.nextafter(1.0, 0.0),
+        )
+        return traction, tangent, max(damage, 0.0)
+
+    def _branch_dissipated_energy_density(
+        self,
+        history_strain: float,
+        *,
+        strength_mpa: float,
+        fracture_energy_n_per_m: float,
+        softening_rate: float,
+    ) -> float:
+        threshold = strength_mpa / self.elastic_modulus_mpa
+        if history_strain <= threshold:
+            return 0.0
+        traction, _tangent, _damage = self._traction_and_tangent(
+            history_strain,
+            elastic_modulus_mpa=self.elastic_modulus_mpa,
+            strength_mpa=strength_mpa,
+            softening_rate=softening_rate,
+        )
+        crack_opening_m = self.characteristic_length_m * (
+            history_strain - traction / self.elastic_modulus_mpa
+        )
+        fracture_energy_mj_per_m2 = fracture_energy_n_per_m / 1.0e6
+        dissipated_mj_per_m2 = (
+            fracture_energy_mj_per_m2 * (1.0 - traction / strength_mpa)
+            - 0.5 * traction * crack_opening_m
+        )
+        return max(dissipated_mj_per_m2 / self.characteristic_length_m, 0.0)
+
+    def integrate(
+        self,
+        total_strain: float,
+        committed_state: ConcreteDamageState,
+    ) -> ConcreteDamageResponse:
+        strain = _require_finite("total_strain", total_strain)
+        if type(committed_state) is not ConcreteDamageState:
+            raise ValueError("committed_state must be a ConcreteDamageState")
+        tensile_measure = max(strain, 0.0)
+        compressive_measure = max(-strain, 0.0)
+        tensile_history = max(committed_state.tensile_history_strain, tensile_measure)
+        compressive_history = max(
+            committed_state.compressive_history_strain, compressive_measure
+        )
+        tensile_traction, tensile_tangent, tensile_damage = self._traction_and_tangent(
+            tensile_history,
+            elastic_modulus_mpa=self.elastic_modulus_mpa,
+            strength_mpa=self.tensile_strength_mpa,
+            softening_rate=self.tensile_softening_rate,
+        )
+        compressive_traction, compressive_tangent, compressive_damage = (
+            self._traction_and_tangent(
+                compressive_history,
+                elastic_modulus_mpa=self.elastic_modulus_mpa,
+                strength_mpa=self.compressive_strength_mpa,
+                softening_rate=self.compressive_softening_rate,
+            )
+        )
+        tensile_increment = max(tensile_damage - committed_state.tensile_damage, 0.0)
+        compressive_increment = max(
+            compressive_damage - committed_state.compressive_damage, 0.0
+        )
+        computed_dissipation = self._branch_dissipated_energy_density(
+            tensile_history,
+            strength_mpa=self.tensile_strength_mpa,
+            fracture_energy_n_per_m=self.tensile_fracture_energy_n_per_m,
+            softening_rate=self.tensile_softening_rate,
+        ) + self._branch_dissipated_energy_density(
+            compressive_history,
+            strength_mpa=self.compressive_strength_mpa,
+            fracture_energy_n_per_m=self.compressive_fracture_energy_n_per_m,
+            softening_rate=self.compressive_softening_rate,
+        )
+        next_state = ConcreteDamageState(
+            tensile_history_strain=tensile_history,
+            compressive_history_strain=compressive_history,
+            tensile_damage=tensile_damage,
+            compressive_damage=compressive_damage,
+            dissipated_energy_density_mj_per_m3=max(
+                committed_state.dissipated_energy_density_mj_per_m3,
+                computed_dissipation,
+            ),
+        )
+
+        if strain >= 0.0:
+            active_branch = "tension"
+            active_damage = tensile_damage
+            loading_tangent = tensile_tangent
+            history_advanced = bool(
+                tensile_measure
+                > committed_state.tensile_history_strain + self.history_tolerance
+            )
+        else:
+            active_branch = "compression"
+            active_damage = compressive_damage
+            loading_tangent = compressive_tangent
+            history_advanced = bool(
+                compressive_measure
+                > committed_state.compressive_history_strain + self.history_tolerance
+            )
+        stress = (1.0 - active_damage) * self.elastic_modulus_mpa * strain
+        tangent = (
+            loading_tangent
+            if history_advanced
+            else self.elastic_modulus_mpa * (1.0 - active_damage)
+        )
+        return ConcreteDamageResponse(
+            total_strain=strain,
+            stress_mpa=stress,
+            consistent_tangent_mpa=tangent,
+            active_branch=active_branch,
+            active_damage=active_damage,
+            damage_evolved=bool(tensile_increment > 0.0 or compressive_increment > 0.0),
+            tensile_damage_increment=tensile_increment,
+            compressive_damage_increment=compressive_increment,
+            committed_state_hash=committed_state.state_hash,
+            state=next_state,
+        )
+
+
 def finite_difference_concrete_damage_tangent_check(
     material: AsymmetricConcreteDamageMaterial,
     committed_state: ConcreteDamageState,
@@ -279,9 +517,7 @@ def finite_difference_concrete_damage_tangent_check(
     center = material.integrate(total_strain, committed_state)
     forward = material.integrate(total_strain + epsilon, committed_state)
     backward = material.integrate(total_strain - epsilon, committed_state)
-    finite_difference = (forward.stress_mpa - backward.stress_mpa) / (
-        2.0 * epsilon
-    )
+    finite_difference = (forward.stress_mpa - backward.stress_mpa) / (2.0 * epsilon)
     absolute_error = abs(finite_difference - center.consistent_tangent_mpa)
     scale = max(abs(finite_difference), abs(center.consistent_tangent_mpa), 1.0)
     relative_error = absolute_error / scale
@@ -291,8 +527,8 @@ def finite_difference_concrete_damage_tangent_check(
         == backward.committed_state_hash
     )
     return {
-        "damage_algorithm": DAMAGE_ALGORITHM,
-        "tangent_definition": TANGENT_DEFINITION,
+        "damage_algorithm": material.damage_algorithm,
+        "tangent_definition": material.tangent_definition,
         "active_branch": center.active_branch,
         "total_strain": float(total_strain),
         "finite_difference_epsilon": epsilon,
@@ -356,23 +592,19 @@ def integrate_concrete_damage_history(
         for previous, current in zip(dissipation_values, dissipation_values[1:])
     )
     damage_irreversible = all(
-        current["trial_state"]["tensile_damage"]
-        + 1.0e-15
+        current["trial_state"]["tensile_damage"] + 1.0e-15
         >= previous["trial_state"]["tensile_damage"]
-        and current["trial_state"]["compressive_damage"]
-        + 1.0e-15
+        and current["trial_state"]["compressive_damage"] + 1.0e-15
         >= previous["trial_state"]["compressive_damage"]
         for previous, current in zip(rows, rows[1:])
     )
     return {
         "material_id": material.material_id,
-        "damage_algorithm": DAMAGE_ALGORITHM,
+        "damage_algorithm": material.damage_algorithm,
         "strain_path": list(strain_path),
         "step_count": len(rows),
         "reversal_count": reversal_count,
-        "damage_evolution_step_count": sum(
-            bool(row["damage_evolved"]) for row in rows
-        ),
+        "damage_evolution_step_count": sum(bool(row["damage_evolved"]) for row in rows),
         "stress_strain_work_density_mj_per_m3": work_density,
         "cumulative_dissipated_energy_density_mj_per_m3": (
             state.dissipated_energy_density_mj_per_m3

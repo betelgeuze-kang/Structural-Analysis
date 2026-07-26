@@ -1,0 +1,434 @@
+{
+  "artifact_hash": "sha256:327a3f1eee192194131800e0dd42fae5caee8d755de172ac404273b093ddf067",
+  "blockers_remaining": [
+    "opensees_commercial_redistribution_license_approval_missing",
+    "calculix_product_legal_approval_missing",
+    "external_runtime_assets_not_bundled",
+    "independent_clean_runner_reproduction_missing",
+    "verification_hierarchy_operator_manifest_not_attached",
+    "code_to_code_structural_family_breadth_insufficient",
+    "verification_level_2_not_achieved",
+    "release_readiness_not_established"
+  ],
+  "claim_boundary": "This receipt records actual local internal-use execution of OpenSees 3.7.1 from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system, a linear cantilever, and a two-element elastic spatial frame with OpenSees, and one axial member with CalculiX. It is a technical code-to-code execution receipt only. OpenSeesPy declares commercial redistribution licensing requirements, and no product/legal approval is attached for either runtime. The external packages are not bundled. Therefore this receipt does not enter the verification-hierarchy operator manifest, does not achieve Verification Level 2, and does not prove broad frame/shell modal, buckling, nonlinear, sparse/HIP, commercial-equivalence, or release readiness. The replay_provenance block distinguishes a fresh external-runtime execution from a current-product-only replay against checksum-bound stored external values. A reused execution carries an explicit current-source rerun blocker and remains non-promoting.",
+  "claims": {
+    "actual_external_solver_execution": true,
+    "commercial_equivalence": false,
+    "external_runtime_redistribution_approval": false,
+    "frame3d_external_technical_comparison": true,
+    "opensees_technical_comparison": true,
+    "product_legal_license_approval": false,
+    "release_readiness": false,
+    "second_solver_technical_comparison": true,
+    "verification_level_2": false
+  },
+  "comparisons": [
+    {
+      "analysis_type": "modal",
+      "case_id": "two_dof_shear_modal",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 0.3819660112501052,
+          "quantity": "eigenvalue_mode_1",
+          "reference_value": 0.3819660112501052,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 2.618033988749895,
+          "quantity": "eigenvalue_mode_2",
+          "reference_value": 2.618033988749895,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        }
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "deterministic-modal-solution.v1",
+      "reference_solver": "OpenSees 3.7.1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "case_id": "cantilever_tip_load",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -0.0026666666666666666,
+          "quantity": "tip_displacement_y_m",
+          "reference_value": -0.0026666666666666666,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.552713678800501e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 10.0,
+          "quantity": "base_reaction_y_kn",
+          "reference_value": 9.999999999999996,
+          "relative_error": 3.552713678800502e-16,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.552713678800501e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 20.0,
+          "quantity": "base_reaction_mz_kn_m",
+          "reference_value": 19.999999999999996,
+          "relative_error": 1.7763568394002508e-16,
+          "relative_tolerance": 1e-10
+        }
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "authoritative_cpu_linear_fea_3d_v1",
+      "reference_solver": "OpenSees 3.7.1"
+    },
+    {
+      "analysis_type": "elastic_corotational_static",
+      "case_id": "spatial_frame3d_combined_tip_load",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 1.5132732234829523e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 1.3333333484660664e-07,
+          "quantity": "tip_displacement_y_m",
+          "reference_value": 1.3333333333333342e-07,
+          "relative_error": 1.1349549176122136e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 1.2677452918397855e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -1.493333346010786e-07,
+          "quantity": "tip_displacement_z_m",
+          "reference_value": -1.4933333333333332e-07,
+          "relative_error": 8.489365793569992e-09,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 7.00000108418364e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 1.5000000700000108e-07,
+          "quantity": "tip_rotation_x_rad",
+          "reference_value": 1.5e-07,
+          "relative_error": 4.6666673894557605e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 4.1677714134736054e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 5.6000004167771405e-08,
+          "quantity": "tip_rotation_y_rad",
+          "reference_value": 5.599999999999999e-08,
+          "relative_error": 7.44244895263144e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.003640624664229e-15,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 4.999999699635941e-08,
+          "quantity": "tip_rotation_z_rad",
+          "reference_value": 5.000000000000004e-08,
+          "relative_error": 6.007281249328454e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 8.964025675168782e-13,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -9.99999991035974e-05,
+          "quantity": "base_reaction_y_kn",
+          "reference_value": -9.999999999999996e-05,
+          "relative_error": 8.964025675168786e-09,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 1.652614256921793e-12,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 6.999999834738574e-05,
+          "quantity": "base_reaction_z_kn",
+          "reference_value": 7e-05,
+          "relative_error": 2.360877509888276e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 5.60000054208626e-12,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -3.0000005600000546e-05,
+          "quantity": "base_reaction_mx_kn_m",
+          "reference_value": -3.0000000000000004e-05,
+          "relative_error": 1.8666668473620864e-07,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.4142873532767848e-12,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -0.0002799999965857126,
+          "quantity": "base_reaction_my_kn_m",
+          "reference_value": -0.00028,
+          "relative_error": 1.2193883404559946e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.097975543632503e-12,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -0.0003999999969020247,
+          "quantity": "base_reaction_mz_kn_m",
+          "reference_value": -0.00040000000000000024,
+          "relative_error": 7.744938859081252e-09,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 8.964025675168782e-13,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -9.99999991035974e-05,
+          "quantity": "member_1_end_i_fy_kn",
+          "reference_value": -9.999999999999996e-05,
+          "relative_error": 8.964025675168786e-09,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 1.652614256921793e-12,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 6.999999834738574e-05,
+          "quantity": "member_1_end_i_fz_kn",
+          "reference_value": 7e-05,
+          "relative_error": 2.360877509888276e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 5.60000054208626e-12,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -3.0000005600000546e-05,
+          "quantity": "member_1_end_i_mx_kn_m",
+          "reference_value": -3.0000000000000004e-05,
+          "relative_error": 1.8666668473620864e-07,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.4142873532767848e-12,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -0.0002799999965857126,
+          "quantity": "member_1_end_i_my_kn_m",
+          "reference_value": -0.00028,
+          "relative_error": 1.2193883404559946e-08,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 3.097975543632503e-12,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -0.0003999999969020247,
+          "quantity": "member_1_end_i_mz_kn_m",
+          "reference_value": -0.00040000000000000024,
+          "relative_error": 7.744938859081252e-09,
+          "relative_tolerance": 1e-10
+        }
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "dense_elastic_corotational_timoshenko_frame3d_load_control.v1",
+      "reference_solver": "OpenSees 3.7.1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "case_id": "axial_member_tip_load",
+      "contract_pass": true,
+      "external_return_code": 0,
+      "metrics": [
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": 5e-06,
+          "quantity": "tip_displacement_x_m",
+          "reference_value": 5e-06,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        },
+        {
+          "absolute_error": 0.0,
+          "absolute_tolerance": 1e-10,
+          "contract_pass": true,
+          "product_value": -10.0,
+          "quantity": "base_reaction_x_kn",
+          "reference_value": -10.0,
+          "relative_error": 0.0,
+          "relative_tolerance": 1e-10
+        }
+      ],
+      "product_fallback_used": false,
+      "product_regularization_applied": false,
+      "product_solver_id": "authoritative_cpu_linear_fea_3d_v1",
+      "reference_solver": "CalculiX CrunchiX 2.17"
+    }
+  ],
+  "engine_version": "0.3.0",
+  "execution_environment": {
+    "machine": "x86_64",
+    "python_executable_sha256": "sha256:22e747b1e8a04719d4af2094133a0479b33728d2e4d03ab01539064dc6f45cfb",
+    "python_version": "3.11.15",
+    "system": "Linux"
+  },
+  "external_assets": [
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/calculix-ccx",
+      "bundled_in_repository": false,
+      "distribution": "calculix-ccx",
+      "filename": "calculix-ccx_2.17-3_amd64.deb",
+      "kind": "calculix_ubuntu_runtime_package",
+      "sha256": "sha256:3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e",
+      "version": "2.17-3"
+    },
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/libarpack2",
+      "bundled_in_repository": false,
+      "distribution": "libarpack2",
+      "filename": "libarpack2_3.8.0-1_amd64.deb",
+      "kind": "calculix_runtime_dependency",
+      "sha256": "sha256:07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a",
+      "version": "3.8.0-1"
+    },
+    {
+      "architecture": "amd64",
+      "authority_url": "https://packages.ubuntu.com/jammy/libspooles2.2",
+      "bundled_in_repository": false,
+      "distribution": "libspooles2.2",
+      "filename": "libspooles2.2_2.2-14_amd64.deb",
+      "kind": "calculix_runtime_dependency",
+      "sha256": "sha256:34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917",
+      "version": "2.2-14"
+    },
+    {
+      "authority_url": "https://pypi.org/project/openseespy/3.7.1.2/",
+      "bundled_in_repository": false,
+      "distribution": "openseespy",
+      "filename": "openseespy-3.7.1.2-py3-none-any.whl",
+      "kind": "opensees_python_meta_wheel",
+      "sha256": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
+      "version": "3.7.1.2"
+    },
+    {
+      "authority_url": "https://pypi.org/project/openseespylinux/3.7.1.2/",
+      "bundled_in_repository": false,
+      "distribution": "openseespylinux",
+      "filename": "openseespylinux-3.7.1.2-py3-none-any.whl",
+      "kind": "opensees_linux_runtime_wheel",
+      "sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a",
+      "version": "3.7.1.2"
+    }
+  ],
+  "generated_at": "2026-07-22T14:59:36.923173+00:00",
+  "internal_source": {
+    "input_checksums": {
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:bad9076af75bd82676cc7e0cca6c2b0bcc25ac9082d78aa712892b3b60e93946",
+      "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
+      "src/structural_analysis/assembly/corotational_frame3d_global.py": "sha256:30c06d6a3c10f540f2855be49f705e1e08646bf18c804988ad519d9199b374af",
+      "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
+      "src/structural_analysis/elements/corotational_frame3d.py": "sha256:0ca6bde1a3cedb1635360c9970bd00e69d58817169cea3f73cee92d01f882245",
+      "src/structural_analysis/elements/timoshenko_frame3d.py": "sha256:640fa67a1320393bf2852ca083b0d9e102776bd7a7847fc13c24d1f7fe30931b",
+      "src/structural_analysis/schemas/corotational_frame3d_global_checkpoint_v1.schema.json": "sha256:bdbbf7cc5642be8328b3ec2b3746df5a50f97f399cecb77a6312f246919a07f8",
+      "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json": "sha256:4a6b32144e837d89b23b8ebdb471dd8392842ca16cb492f2e76ce6144f87b54c",
+      "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
+      "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
+      "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
+      "tests/test_corotational_frame3d_global.py": "sha256:d4f08823ff516e1fd5b005bea274f5a24a9ace28aa880c77ca7249b4f9bb6939",
+      "tests/test_external_code_to_code_technical_receipt.py": "sha256:1bddf296834ffd67472bc5aa0be88040b784330b44ef71389e9d78793467baf0"
+    },
+    "source_set_hash": "sha256:e04cae9db458c587a601bd6843e39b56134b721ea307efb03a260fe8f54c43da"
+  },
+  "replay_provenance": {
+    "current_product_replay_generated_at": "2026-07-22T14:59:36.929175+00:00",
+    "current_product_replay_pass": true,
+    "external_execution_generated_at": "2026-07-22T14:59:36.929165+00:00",
+    "external_execution_reused": false,
+    "external_runtime_executed_in_this_generation": true,
+    "reuse_reason": null
+  },
+  "runtimes": {
+    "calculix": {
+      "actual_external_execution": true,
+      "binary_sha256": "sha256:85f6961eb174eaf4daf2b053e1c3fd50874c9c597bd4e1e31b7f5cdfc4dda4c3",
+      "distribution_version": "2.17-3",
+      "execution_outputs": {
+        "dat_sha256": "sha256:0f2336b9654d2eecaf7c1695d97e38769fbe75ad3ea66d3924216862de26c07d",
+        "frd_sha256": "sha256:55bd3f2196063b1d8b9a987d00f23fc1820aad07724d9e61be9ea809b38c2b20",
+        "input_deck_sha256": "sha256:96482e7037bd037ba97f5e7359eea54b70522c4f48ca5b095dfe9eb9149d5600",
+        "return_code": 0,
+        "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "sha256:9bd1bae7d3c479ba5d8d161077ab93b69a276cbe832b50410108658d52bd19c8",
+        "version_return_code": 201,
+        "version_stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "version_stdout_sha256": "sha256:92de192ec7a7c0d8d56095b2c20ac6e1ad6c252ab9c9ebfc40490ce9b47d9ef0"
+      },
+      "independent_from_product": true,
+      "license": {
+        "commercial_redistribution_approved": false,
+        "declared_license_posture": "GPL-2_ubuntu_package",
+        "license_file_sha256": "sha256:258824ecc9a05cb4a07afbe2ca850383e8a7b1779822df7ee717ff8ebc168def",
+        "product_legal_approval": false
+      },
+      "name": "CalculiX CrunchiX",
+      "runtime_version": "2.17",
+      "version_verified": true
+    },
+    "opensees": {
+      "actual_external_execution": true,
+      "distribution_version": "3.7.1.2",
+      "execution_outputs": {
+        "driver_sha256": "sha256:4b54ad2a31dbc3fe141c87a6dfed9e9546ce08bba193967b00fa736b0feb0636",
+        "return_code": 0,
+        "stderr_sha256": "sha256:28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea",
+        "stdout_sha256": "sha256:e26c78f5a2920038f9727060bbf83138180884c619691aa4ecb5552cae45cb49"
+      },
+      "independent_from_product": true,
+      "license": {
+        "commercial_redistribution_approved": false,
+        "declared_license_posture": "internal_use_allowed_commercial_redistribution_requires_license",
+        "license_file_sha256": "sha256:289503a95d55c43668bdadcd1815c9a93b46cb6ec890b3e9aea6c559d3806382",
+        "product_legal_approval": false
+      },
+      "name": "OpenSees",
+      "runtime_version": "3.7.1",
+      "version_verified": true
+    }
+  },
+  "schema_version": "external-code-to-code-technical-execution.v1",
+  "source_commit_sha": "ab4b2e6191f87d9de9d117e2743d8f3fa4c9e50c",
+  "status": "partial",
+  "technical_contract_pass": true,
+  "truth_class": "external_code_to_code_technical_execution",
+  "verification_hierarchy_credit": false,
+  "verification_hierarchy_operator_manifest_attached": false
+}

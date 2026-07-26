@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/nonlinear_transient_checkpoint_v1.schema.json",
+  "title": "Nonlinear transient checkpoint v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "model_hash",
+    "integration_contract_hash",
+    "step_index",
+    "time_s",
+    "time_step_s",
+    "applied_force_kn",
+    "displacement_m",
+    "velocity_m_per_s",
+    "acceleration_m_per_s2",
+    "material_state",
+    "external_work_kn_m",
+    "damping_dissipation_kn_m",
+    "initial_mechanical_energy_kn_m",
+    "parent_checkpoint_hash",
+    "checkpoint_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "nonlinear-transient-checkpoint.v1"
+    },
+    "profile": {
+      "const": "newmark_average_acceleration_bilinear_sdof.v1"
+    },
+    "model_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "integration_contract_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "step_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "time_s": {
+      "type": "number",
+      "minimum": 0
+    },
+    "time_step_s": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "applied_force_kn": {
+      "type": "number"
+    },
+    "displacement_m": {
+      "type": "number"
+    },
+    "velocity_m_per_s": {
+      "type": "number"
+    },
+    "acceleration_m_per_s2": {
+      "type": "number"
+    },
+    "material_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "plastic_displacement_m",
+        "backstress_kn",
+        "cumulative_plastic_displacement_m",
+        "plastic_dissipation_kn_m"
+      ],
+      "properties": {
+        "plastic_displacement_m": {
+          "type": "number"
+        },
+        "backstress_kn": {
+          "type": "number"
+        },
+        "cumulative_plastic_displacement_m": {
+          "type": "number",
+          "minimum": 0
+        },
+        "plastic_dissipation_kn_m": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "external_work_kn_m": {
+      "type": "number"
+    },
+    "damping_dissipation_kn_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "initial_mechanical_energy_kn_m": {
+      "type": "number",
+      "minimum": 0
+    },
+    "parent_checkpoint_hash": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/hash"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "checkpoint_hash": {
+      "$ref": "#/$defs/hash"
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

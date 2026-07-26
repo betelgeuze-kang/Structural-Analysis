@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/engineering_reviewer_registry_v1.schema.json",
+  "title": "Authorized engineering reviewer registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "reviewers",
+    "private_keys_in_repository",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-engineering-reviewer-registry.v1"
+    },
+    "status": {"enum": ["owner_input_required", "configured"]},
+    "reviewers": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/reviewer"}
+    },
+    "private_keys_in_repository": {"const": false},
+    "claim_boundary": {"type": "string", "minLength": 160}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_id",
+        "display_name",
+        "organization",
+        "role",
+        "license_jurisdiction",
+        "license_identifier",
+        "independent_from_implementation_team",
+        "authorization_status",
+        "authorized_review_scopes",
+        "public_key_sha256",
+        "public_key_spki_base64",
+        "approved_by",
+        "approved_at"
+      ],
+      "properties": {
+        "reviewer_id": {"type": "string", "minLength": 1},
+        "display_name": {"type": "string", "minLength": 1},
+        "organization": {"type": "string", "minLength": 1},
+        "role": {"const": "licensed_structural_engineer"},
+        "license_jurisdiction": {"type": "string", "minLength": 1},
+        "license_identifier": {"type": "string", "minLength": 1},
+        "independent_from_implementation_team": {"const": true},
+        "authorization_status": {"const": "approved"},
+        "authorized_review_scopes": {
+          "type": "array",
+          "contains": {"const": "P2"},
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["P0", "P1", "P2", "P3"]}
+        },
+        "public_key_sha256": {"$ref": "#/$defs/hash"},
+        "public_key_spki_base64": {"type": "string", "minLength": 40},
+        "approved_by": {"type": "string", "minLength": 1},
+        "approved_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "owner_input_required"}}},
+      "then": {"properties": {"reviewers": {"maxItems": 0}}},
+      "else": {"properties": {"reviewers": {"minItems": 1}}}
+    }
+  ]
+}

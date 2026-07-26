@@ -65,7 +65,7 @@ def test_ux_new_user_observation_blocks_when_missing(tmp_path: Path) -> None:
 
     assert payload["contract_pass"] is False
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is False
     assert payload["status"] == "blocked"
     assert payload["reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"
@@ -95,7 +95,7 @@ def test_ux_new_user_observation_passes_with_human_record(tmp_path: Path) -> Non
 
     assert payload["contract_pass"] is True
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is False
     assert payload["status"] == "ready"
     assert payload["reason_code"] == "PASS"

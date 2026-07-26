@@ -35,8 +35,19 @@ for candidate in (SCRIPT_DIR, SRC_ROOT):
 from release_evidence_metadata import git_head, input_checksums  # noqa: E402
 from structural_analysis import ANALYSIS_ENGINE_VERSION  # noqa: E402
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model  # noqa: E402
+from structural_analysis.assembly.corotational_frame3d_global import (  # noqa: E402
+    COROTATIONAL_FRAME3D_GLOBAL_PROFILE,
+    CorotationalFrame3DGlobalConfig,
+    CorotationalFrame3DMember,
+    CorotationalFrame3DModel,
+    solve_corotational_frame3d_global_load_path,
+)
 from structural_analysis.benchmark.analytic_frame import (  # noqa: E402
     build_cantilever_beam_model,
+)
+from structural_analysis.elements.frame3d import FrameProps  # noqa: E402
+from structural_analysis.elements.timoshenko_frame3d import (  # noqa: E402
+    TimoshenkoFrame3DSection,
 )
 from structural_analysis.solvers.modal import solve_modal_modes  # noqa: E402
 
@@ -95,9 +106,10 @@ REUSED_EXECUTION_BLOCKER = "external_runtime_current_source_rerun_missing"
 CLAIM_BOUNDARY = (
     "This receipt records actual local internal-use execution of OpenSees 3.7.1 "
     "from the pinned OpenSeesPy 3.7.1.2 Linux wheels and CalculiX CrunchiX 2.17 "
-    "from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system and a "
-    "linear cantilever with OpenSees, and one axial member with CalculiX. It is a "
-    "technical code-to-code execution receipt only. OpenSeesPy declares commercial "
+    "from pinned Ubuntu 22.04 packages. It compares a two-DOF modal system, a "
+    "linear cantilever, and a two-element elastic spatial frame with OpenSees, "
+    "and one axial member with CalculiX. It is a technical code-to-code execution "
+    "receipt only. OpenSeesPy declares commercial "
     "redistribution licensing requirements, and no product/legal approval is "
     "attached for either runtime. The external packages are not bundled. Therefore "
     "this receipt does not enter the verification-hierarchy operator manifest, does "
@@ -117,10 +129,35 @@ SOURCE_PATHS = (
     Path("src/structural_analysis/solvers/_generalized_eigen.py"),
     Path("src/structural_analysis/solvers/modal/solver.py"),
     Path("src/structural_analysis/solvers/linear/static.py"),
+    Path("src/structural_analysis/assembly/corotational_frame3d_global.py"),
+    Path("src/structural_analysis/elements/corotational_frame3d.py"),
+    Path("src/structural_analysis/elements/timoshenko_frame3d.py"),
+    Path(
+        "src/structural_analysis/schemas/"
+        "corotational_frame3d_global_checkpoint_v1.schema.json"
+    ),
+    Path("tests/test_corotational_frame3d_global.py"),
+)
+SPATIAL_FRAME3D_METRIC_SPECS = (
+    ("tip_displacement_y_m", "tip_displacement", 1),
+    ("tip_displacement_z_m", "tip_displacement", 2),
+    ("tip_rotation_x_rad", "tip_displacement", 3),
+    ("tip_rotation_y_rad", "tip_displacement", 4),
+    ("tip_rotation_z_rad", "tip_displacement", 5),
+    ("base_reaction_y_kn", "base_reaction", 1),
+    ("base_reaction_z_kn", "base_reaction", 2),
+    ("base_reaction_mx_kn_m", "base_reaction", 3),
+    ("base_reaction_my_kn_m", "base_reaction", 4),
+    ("base_reaction_mz_kn_m", "base_reaction", 5),
+    ("member_1_end_i_fy_kn", "member_1_global_end_force", 1),
+    ("member_1_end_i_fz_kn", "member_1_global_end_force", 2),
+    ("member_1_end_i_mx_kn_m", "member_1_global_end_force", 3),
+    ("member_1_end_i_my_kn_m", "member_1_global_end_force", 4),
+    ("member_1_end_i_mz_kn_m", "member_1_global_end_force", 5),
 )
 
 
-OPENSEES_DRIVER = r'''
+OPENSEES_DRIVER = r"""
 import json
 import openseespy.opensees as ops
 
@@ -160,9 +197,46 @@ payload["cantilever"] = {
     "base_reaction_y_kn": ops.nodeReaction(1, 2),
     "base_reaction_mz_kn_m": ops.nodeReaction(1, 3),
 }
+
+ops.wipe()
+ops.model("basic", "-ndm", 3, "-ndf", 6)
+for tag, x_coordinate in ((1, 0.0), (2, 2.0), (3, 4.0)):
+    ops.node(tag, x_coordinate, 0.0, 0.0)
+ops.fix(1, 1, 1, 1, 1, 1, 1)
+ops.geomTransf("Linear", 1, 0.0, 0.0, 1.0)
+for tag, node_i, node_j in ((1, 1, 2), (2, 2, 3)):
+    ops.element(
+        "elasticBeamColumn",
+        tag,
+        node_i,
+        node_j,
+        0.02,
+        200.0e6,
+        80.0e6,
+        1.0e-5,
+        5.0e-5,
+        8.0e-5,
+        1,
+    )
+ops.timeSeries("Linear", 1)
+ops.pattern("Plain", 1, 1)
+ops.load(3, 0.0, 1.0e-4, -7.0e-5, 3.0e-5, 0.0, 0.0)
+ops.system("BandGeneral")
+ops.constraints("Plain")
+ops.numberer("RCM")
+ops.algorithm("Linear")
+ops.integrator("LoadControl", 1.0)
+ops.analysis("Static")
+payload["spatial_frame3d_analyze_code"] = int(ops.analyze(1))
+ops.reactions()
+payload["spatial_frame3d"] = {
+    "tip_displacement": list(ops.nodeDisp(3)),
+    "base_reaction": list(ops.nodeReaction(1)),
+    "member_1_global_end_force": list(ops.eleForce(1)),
+}
 ops.wipe()
 print("CODE_TO_CODE_JSON=" + json.dumps(payload, allow_nan=False, sort_keys=True))
-'''
+"""
 
 
 CALCULIX_AXIAL_DECK = """*HEADING
@@ -249,7 +323,9 @@ def _source_checksums(repo_root: Path) -> dict[str, str]:
 
 def _wheel_metadata(path: Path) -> tuple[str, str]:
     with zipfile.ZipFile(path) as archive:
-        names = [name for name in archive.namelist() if name.endswith(".dist-info/METADATA")]
+        names = [
+            name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
+        ]
         if len(names) != 1:
             raise ExternalCodeToCodeReceiptError(
                 f"wheel_metadata_count_invalid:{path.name}"
@@ -333,7 +409,11 @@ def _run_opensees(
         env=environment,
     )
     prefix = "CODE_TO_CODE_JSON="
-    rows = [row[len(prefix) :] for row in completed.stdout.splitlines() if row.startswith(prefix)]
+    rows = [
+        row[len(prefix) :]
+        for row in completed.stdout.splitlines()
+        if row.startswith(prefix)
+    ]
     if completed.returncode != 0 or len(rows) != 1:
         raise ExternalCodeToCodeReceiptError("opensees_execution_failed")
     try:
@@ -369,8 +449,8 @@ def _run_calculix(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     environment = dict(os.environ)
     previous = environment.get("LD_LIBRARY_PATH", "")
-    environment["LD_LIBRARY_PATH"] = (
-        str(library_dir.resolve()) + (os.pathsep + previous if previous else "")
+    environment["LD_LIBRARY_PATH"] = str(library_dir.resolve()) + (
+        os.pathsep + previous if previous else ""
     )
     version = subprocess.run(
         [str(binary.resolve()), "-v"],
@@ -400,7 +480,11 @@ def _run_calculix(
         )
         dat_path = root / "axial.dat"
         frd_path = root / "axial.frd"
-        if completed.returncode != 0 or not dat_path.is_file() or not frd_path.is_file():
+        if (
+            completed.returncode != 0
+            or not dat_path.is_file()
+            or not frd_path.is_file()
+        ):
             raise ExternalCodeToCodeReceiptError("calculix_execution_failed")
         dat_text = dat_path.read_text(encoding="utf-8")
         displacement_section, separator, force_section = dat_text.partition(" forces ")
@@ -487,7 +571,74 @@ def _axial_product_model() -> dict[str, Any]:
     }
 
 
-def _comparison(quantity: str, product_value: float, reference_value: float) -> dict[str, Any]:
+def _spatial_frame3d_product_result() -> dict[str, Any]:
+    properties = FrameProps(
+        area_m2=0.02,
+        e_n_per_m2=200.0e6,
+        g_n_per_m2=80.0e6,
+        iy_m4=5.0e-5,
+        iz_m4=8.0e-5,
+        j_m4=1.0e-5,
+    )
+    section = TimoshenkoFrame3DSection(
+        properties,
+        effective_shear_area_y_m2=1.0e12,
+        effective_shear_area_z_m2=1.0e12,
+    )
+    reference_load = [0.0] * 18
+    reference_load[13] = 1.0e-4
+    reference_load[14] = -7.0e-5
+    reference_load[15] = 3.0e-5
+    model = CorotationalFrame3DModel(
+        node_coordinates_m=(
+            (0.0, 0.0, 0.0),
+            (2.0, 0.0, 0.0),
+            (4.0, 0.0, 0.0),
+        ),
+        members=(
+            CorotationalFrame3DMember("member-1", 0, 1, section),
+            CorotationalFrame3DMember("member-2", 1, 2, section),
+        ),
+        restrained_dofs=tuple(range(6)),
+        reference_load_kn=tuple(reference_load),
+        model_id="external_opensees_spatial_frame3d",
+    )
+    solution = solve_corotational_frame3d_global_load_path(
+        model,
+        (1.0,),
+        config=CorotationalFrame3DGlobalConfig(
+            residual_relative_tolerance=1.0e-10,
+            residual_absolute_tolerance_kn=1.0e-8,
+        ),
+    )
+    terminal = solution.steps[-1]
+    return {
+        "solver_id": COROTATIONAL_FRAME3D_GLOBAL_PROFILE,
+        "tip_displacement": list(solution.final_checkpoint.displacement[12:18]),
+        "base_reaction": [value for _, value in terminal.reactions],
+        "member_1_global_end_force": list(terminal.members[0].global_end_forces),
+        "regularization_used": solution.regularization_used,
+        "fallback_used": solution.fallback_used,
+    }
+
+
+def _spatial_frame3d_metrics(
+    product: dict[str, Any],
+    reference_values: dict[str, float],
+) -> list[dict[str, Any]]:
+    return [
+        _comparison(
+            quantity,
+            product[field][index],
+            reference_values[quantity],
+        )
+        for quantity, field, index in SPATIAL_FRAME3D_METRIC_SPECS
+    ]
+
+
+def _comparison(
+    quantity: str, product_value: float, reference_value: float
+) -> dict[str, Any]:
     product = float(product_value)
     reference = float(reference_value)
     absolute_error = abs(product - reference)
@@ -540,12 +691,11 @@ def _case(
 def _current_product_comparison_cases(
     receipt: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    stored = {
-        str(case["case_id"]): case for case in receipt.get("comparisons", [])
-    }
+    stored = {str(case["case_id"]): case for case in receipt.get("comparisons", [])}
     expected_ids = {
         "two_dof_shear_modal",
         "cantilever_tip_load",
+        "spatial_frame3d_combined_tip_load",
         "axial_member_tip_load",
     }
     if set(stored) != expected_ids:
@@ -553,14 +703,10 @@ def _current_product_comparison_cases(
 
     def reference(case_id: str, quantity: str) -> float:
         matches = [
-            row
-            for row in stored[case_id]["metrics"]
-            if row.get("quantity") == quantity
+            row for row in stored[case_id]["metrics"] if row.get("quantity") == quantity
         ]
         if len(matches) != 1:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_reference_metric_invalid"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_reference_metric_invalid")
         return float(matches[0]["reference_value"])
 
     modal = solve_modal_modes(
@@ -569,6 +715,7 @@ def _current_product_comparison_cases(
         mode_count=2,
     )
     cantilever = _analyze_product_model(build_cantilever_beam_model())
+    spatial_frame3d = _spatial_frame3d_product_result()
     axial = _analyze_product_model(_axial_product_model())
     cantilever_metrics = cantilever["metrics"]
     axial_metrics = axial["metrics"]
@@ -626,6 +773,27 @@ def _current_product_comparison_cases(
             product_fallback_used=bool(cantilever_metrics["fallback_used"]),
         ),
         _case(
+            case_id="spatial_frame3d_combined_tip_load",
+            analysis_type="elastic_corotational_static",
+            reference_solver="OpenSees 3.7.1",
+            product_solver_id=str(spatial_frame3d["solver_id"]),
+            metrics=_spatial_frame3d_metrics(
+                spatial_frame3d,
+                {
+                    quantity: reference(
+                        "spatial_frame3d_combined_tip_load",
+                        quantity,
+                    )
+                    for quantity, _, _ in SPATIAL_FRAME3D_METRIC_SPECS
+                },
+            ),
+            external_return_code=int(
+                stored["spatial_frame3d_combined_tip_load"]["external_return_code"]
+            ),
+            product_regularization_applied=bool(spatial_frame3d["regularization_used"]),
+            product_fallback_used=bool(spatial_frame3d["fallback_used"]),
+        ),
+        _case(
             case_id="axial_member_tip_load",
             analysis_type="linear_static",
             reference_solver="CalculiX CrunchiX 2.17",
@@ -645,9 +813,7 @@ def _current_product_comparison_cases(
             external_return_code=int(
                 stored["axial_member_tip_load"]["external_return_code"]
             ),
-            product_regularization_applied=bool(
-                axial_metrics["regularization_used"]
-            ),
+            product_regularization_applied=bool(axial_metrics["regularization_used"]),
             product_fallback_used=bool(axial_metrics["fallback_used"]),
         ),
     ]
@@ -663,10 +829,10 @@ def _expected_claims(
         "opensees_technical_comparison": bool(
             comparisons[0]["contract_pass"]
             and comparisons[1]["contract_pass"]
+            and comparisons[2]["contract_pass"]
         ),
-        "second_solver_technical_comparison": bool(
-            comparisons[2]["contract_pass"]
-        ),
+        "frame3d_external_technical_comparison": bool(comparisons[2]["contract_pass"]),
+        "second_solver_technical_comparison": bool(comparisons[3]["contract_pass"]),
         "product_legal_license_approval": False,
         "external_runtime_redistribution_approval": False,
         "verification_level_2": False,
@@ -709,6 +875,7 @@ def build_external_code_to_code_technical_receipt(
         mode_count=2,
     )
     cantilever = _analyze_product_model(build_cantilever_beam_model())
+    spatial_frame3d = _spatial_frame3d_product_result()
     axial = _analyze_product_model(_axial_product_model())
     cantilever_metrics = cantilever["metrics"]
     axial_metrics = axial["metrics"]
@@ -757,6 +924,22 @@ def build_external_code_to_code_technical_receipt(
                 cantilever_metrics["regularization_used"]
             ),
             product_fallback_used=bool(cantilever_metrics["fallback_used"]),
+        ),
+        _case(
+            case_id="spatial_frame3d_combined_tip_load",
+            analysis_type="elastic_corotational_static",
+            reference_solver="OpenSees 3.7.1",
+            product_solver_id=str(spatial_frame3d["solver_id"]),
+            metrics=_spatial_frame3d_metrics(
+                spatial_frame3d,
+                {
+                    quantity: float(opensees["spatial_frame3d"][field][index])
+                    for quantity, field, index in SPATIAL_FRAME3D_METRIC_SPECS
+                },
+            ),
+            external_return_code=int(opensees["spatial_frame3d_analyze_code"]),
+            product_regularization_applied=bool(spatial_frame3d["regularization_used"]),
+            product_fallback_used=bool(spatial_frame3d["fallback_used"]),
         ),
         _case(
             case_id="axial_member_tip_load",
@@ -845,9 +1028,7 @@ def build_external_code_to_code_technical_receipt(
         "replay_provenance": {
             "external_runtime_executed_in_this_generation": True,
             "external_execution_reused": False,
-            "external_execution_generated_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
+            "external_execution_generated_at": datetime.now(timezone.utc).isoformat(),
             "current_product_replay_generated_at": datetime.now(
                 timezone.utc
             ).isoformat(),
@@ -893,27 +1074,19 @@ def validate_external_code_to_code_technical_receipt(
     replay = payload.get("replay_provenance")
     if replay is None:
         if require_current_sources:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_provenance_missing"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_replay_provenance_missing")
     else:
         reused = replay["external_execution_reused"]
-        executed_now = replay[
-            "external_runtime_executed_in_this_generation"
-        ]
+        executed_now = replay["external_runtime_executed_in_this_generation"]
         reason = replay["reuse_reason"]
         if reused is executed_now:
             raise ExternalCodeToCodeReceiptError(
                 "receipt_replay_execution_state_invalid"
             )
         if reused and (not isinstance(reason, str) or not reason.strip()):
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_reason_missing"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_replay_reason_missing")
         if not reused and reason is not None:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_replay_reason_unexpected"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_replay_reason_unexpected")
     expected_assets = {
         name: policy["sha256"] for name, policy in EXTERNAL_ASSET_POLICY.items()
     }
@@ -931,9 +1104,10 @@ def validate_external_code_to_code_technical_receipt(
                 abs(reference), np.finfo(np.float64).tiny
             )
             scale = max(abs(product), abs(reference), 1.0)
-            tolerance = float(metric["absolute_tolerance"]) + float(
-                metric["relative_tolerance"]
-            ) * scale
+            tolerance = (
+                float(metric["absolute_tolerance"])
+                + float(metric["relative_tolerance"]) * scale
+            )
             if not math.isclose(
                 float(metric["absolute_error"]),
                 absolute_error,
@@ -960,8 +1134,7 @@ def validate_external_code_to_code_technical_receipt(
     expected_technical_pass = bool(
         all(row["contract_pass"] is True for row in payload["comparisons"])
         and all(
-            row["actual_external_execution"] is True
-            and row["version_verified"] is True
+            row["actual_external_execution"] is True and row["version_verified"] is True
             for row in payload["runtimes"].values()
         )
     )
@@ -982,19 +1155,13 @@ def validate_external_code_to_code_technical_receipt(
         if payload["blockers_remaining"] != expected_blockers:
             raise ExternalCodeToCodeReceiptError("receipt_blockers_invalid")
         if payload["claim_boundary"] != CLAIM_BOUNDARY:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_claim_boundary_invalid"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_claim_boundary_invalid")
     if require_current_sources:
         current_comparisons = _current_product_comparison_cases(payload)
         if payload["comparisons"] != current_comparisons:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_product_comparisons_stale"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_product_comparisons_stale")
         if replay["current_product_replay_pass"] is not expected_technical_pass:
-            raise ExternalCodeToCodeReceiptError(
-                "receipt_product_replay_pass_invalid"
-            )
+            raise ExternalCodeToCodeReceiptError("receipt_product_replay_pass_invalid")
     return payload
 
 
@@ -1023,8 +1190,7 @@ def refresh_external_code_to_code_product_replay(
     technical_pass = bool(
         all(row["contract_pass"] is True for row in comparisons)
         and all(
-            row["actual_external_execution"] is True
-            and row["version_verified"] is True
+            row["actual_external_execution"] is True and row["version_verified"] is True
             for row in payload["runtimes"].values()
         )
     )
@@ -1042,9 +1208,7 @@ def refresh_external_code_to_code_product_replay(
             "replay_provenance": {
                 "external_runtime_executed_in_this_generation": False,
                 "external_execution_reused": True,
-                "external_execution_generated_at": (
-                    external_execution_generated_at
-                ),
+                "external_execution_generated_at": (external_execution_generated_at),
                 "current_product_replay_generated_at": now,
                 "current_product_replay_pass": technical_pass,
                 "reuse_reason": reuse_reason.strip(),
@@ -1108,8 +1272,7 @@ def main(argv: list[str] | None = None) -> int:
             reuse_reason=args.reuse_reason,
         )
         out.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
-            + "\n",
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
         print("external_code_to_code_product_replay_refreshed")

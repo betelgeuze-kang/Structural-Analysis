@@ -1,7 +1,7 @@
 {
-  "name": "structural-optimization-workbench",
+  "name": "structural-analysis",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "Deterministic Vite/React shell for structural review and release surfaces.",
   "type": "module",
   "packageManager": "npm@10.8.2",

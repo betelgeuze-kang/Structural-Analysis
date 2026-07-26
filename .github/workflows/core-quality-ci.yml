@@ -1,0 +1,334 @@
+name: Core Quality and Compatibility CI
+
+on:
+  pull_request:
+    paths:
+      - "src/structural_analysis/analyses/**"
+      - "src/structural_analysis/model/**"
+      - "src/structural_analysis/results/**"
+      - "src/structural_analysis/units/**"
+      - "src/structural_analysis/materials/concrete_damage.py"
+      - "src/structural_analysis/materials/composite_section.py"
+      - "src/structural_analysis/materials/confined_concrete.py"
+      - "src/structural_analysis/materials/bond_slip.py"
+      - "src/structural_analysis/materials/partial_composite.py"
+      - "src/structural_analysis/materials/stateful_biaxial_fiber_section.py"
+      - "src/structural_analysis/solvers/sparse_generalized_eigen.py"
+      - "src/structural_analysis/solvers/nonlinear/transient.py"
+      - "src/structural_analysis/solvers/nonlinear/scalable_sparse_factorization.py"
+      - "src/structural_analysis/elements/corotational_frame3d.py"
+      - "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py"
+      - "src/structural_analysis/elements/stateful_corotational_partial_composite_frame3d.py"
+      - "src/structural_analysis/elements/timoshenko_frame3d.py"
+      - "src/structural_analysis/elements/torsion_warping.py"
+      - "src/structural_analysis/assembly/initial_imperfection.py"
+      - "src/structural_analysis/assembly/corotational_frame3d_global.py"
+      - "src/structural_analysis/assembly/corotational_frame3d_graph.py"
+      - "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py"
+      - "src/structural_analysis/benchmark/fracture_energy_concrete.py"
+      - "src/structural_analysis/assembly/corotational_frame2d_member_features.py"
+      - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d*.py"
+      - "src/structural_analysis/api/nonlinear_frame.py"
+      - "src/structural_analysis/api/nonlinear_frame_cli.py"
+      - "src/structural_analysis/execution/**"
+      - "src/structural_analysis/io/neutral/loader.py"
+      - "apps/worker/**"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_general_j1_j5_v1.schema.json"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_engineering_result_v1.schema.json"
+      - "src/structural_analysis/schemas/stateful_corotational_fiber_frame2d_checkpoint_chain_v1.schema.json"
+      - "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json"
+      - "src/structural_analysis/schemas/fracture_energy_concrete_mesh_objectivity_v1.schema.json"
+      - "src/structural_analysis/schemas/job_*_v1.schema.json"
+      - "src/structural_analysis/schemas/nonlinear_transient_checkpoint_v1.schema.json"
+      - "src/structural_analysis/schemas/stateful_corotational_frame3d_sparse_checkpoint_v1.schema.json"
+      - "src/structural_analysis/schemas/scalable_sparse_factorization_diagnostic_v1.schema.json"
+      - "src/structural_analysis/schemas/external_vv_clean_runner_receipt_v1.schema.json"
+      - "benchmarks/clean-runners/opensees-calculix/**"
+      - "artifacts/vv/opensees_calculix_clean_runner/**"
+      - "scripts/run_external_vv_clean_runner.sh"
+      - "tests/test_external_vv_clean_runner_contract.py"
+      - "tests/test_structural_analysis_core_api.py"
+      - "tests/test_typed_domain_model.py"
+      - "tests/test_authoritative_linear_*.py"
+      - "tests/test_whole_model_*.py"
+      - "tests/test_result_validation_tolerance.py"
+      - "tests/test_corotational_*.py"
+      - "tests/test_stateful_corotational_fiber_frame2d.py"
+      - "tests/test_fracture_energy_concrete.py"
+      - "tests/test_p2_material_candidates.py"
+      - "tests/test_sparse_generalized_eigen.py"
+      - "tests/test_nonlinear_transient.py"
+      - "tests/test_p2_frame3d_candidates.py"
+      - "tests/test_corotational_frame3d_global.py"
+      - "tests/test_stateful_corotational_frame3d_sparse.py"
+      - "tests/test_stateful_corotational_frame3d_materials.py"
+      - "tests/test_stateful_biaxial_fiber_section.py"
+      - "tests/test_stateful_corotational_fiber_frame3d.py"
+      - "tests/test_stateful_corotational_partial_composite_frame3d.py"
+      - "tests/test_scalable_sparse_factorization.py"
+      - "tests/test_stateful_corotational_*_frame_cyclic_benchmark.py"
+      - "docs/sparse-modal-buckling.md"
+      - "docs/nonlinear-transient-reference.md"
+      - "docs/p2-frame3d-candidates.md"
+      - "docs/sparse-factorization-conditioning-diagnostics.md"
+      - "docs/p2-cyclic-frame-candidates.md"
+      - "docs/p3-entry-gate.md"
+      - "scripts/build_p3_entry_gate.py"
+      - "artifacts/manifests/p3_entry_gate.json"
+      - "tests/test_p3_entry_gate.py"
+      - "artifacts/benchmarks/fracture_energy_concrete_mesh_objectivity.json"
+      - "tests/test_unified_nonlinear_frame_api.py"
+      - "tests/test_durable_job_service.py"
+      - "scripts/check_core_quality.py"
+      - "scripts/build_fracture_energy_concrete_benchmark.py"
+      - "artifacts/manifests/core_quality.json"
+      - ".coveragerc"
+      - "pyproject.toml"
+      - ".github/workflows/core-quality-ci.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "src/structural_analysis/analyses/**"
+      - "src/structural_analysis/model/**"
+      - "src/structural_analysis/results/**"
+      - "src/structural_analysis/units/**"
+      - "src/structural_analysis/materials/concrete_damage.py"
+      - "src/structural_analysis/materials/composite_section.py"
+      - "src/structural_analysis/materials/confined_concrete.py"
+      - "src/structural_analysis/materials/bond_slip.py"
+      - "src/structural_analysis/materials/partial_composite.py"
+      - "src/structural_analysis/materials/stateful_biaxial_fiber_section.py"
+      - "src/structural_analysis/solvers/sparse_generalized_eigen.py"
+      - "src/structural_analysis/solvers/nonlinear/transient.py"
+      - "src/structural_analysis/solvers/nonlinear/scalable_sparse_factorization.py"
+      - "src/structural_analysis/elements/corotational_frame3d.py"
+      - "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py"
+      - "src/structural_analysis/elements/stateful_corotational_partial_composite_frame3d.py"
+      - "src/structural_analysis/elements/timoshenko_frame3d.py"
+      - "src/structural_analysis/elements/torsion_warping.py"
+      - "src/structural_analysis/assembly/initial_imperfection.py"
+      - "src/structural_analysis/assembly/corotational_frame3d_global.py"
+      - "src/structural_analysis/assembly/corotational_frame3d_graph.py"
+      - "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py"
+      - "src/structural_analysis/benchmark/fracture_energy_concrete.py"
+      - "src/structural_analysis/assembly/corotational_frame2d_member_features.py"
+      - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d*.py"
+      - "src/structural_analysis/api/nonlinear_frame.py"
+      - "src/structural_analysis/api/nonlinear_frame_cli.py"
+      - "src/structural_analysis/execution/**"
+      - "src/structural_analysis/io/neutral/loader.py"
+      - "apps/worker/**"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_general_j1_j5_v1.schema.json"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_engineering_result_v1.schema.json"
+      - "src/structural_analysis/schemas/stateful_corotational_fiber_frame2d_checkpoint_chain_v1.schema.json"
+      - "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json"
+      - "src/structural_analysis/schemas/fracture_energy_concrete_mesh_objectivity_v1.schema.json"
+      - "src/structural_analysis/schemas/job_*_v1.schema.json"
+      - "src/structural_analysis/schemas/nonlinear_transient_checkpoint_v1.schema.json"
+      - "src/structural_analysis/schemas/stateful_corotational_frame3d_sparse_checkpoint_v1.schema.json"
+      - "src/structural_analysis/schemas/scalable_sparse_factorization_diagnostic_v1.schema.json"
+      - "src/structural_analysis/schemas/external_vv_clean_runner_receipt_v1.schema.json"
+      - "benchmarks/clean-runners/opensees-calculix/**"
+      - "artifacts/vv/opensees_calculix_clean_runner/**"
+      - "scripts/run_external_vv_clean_runner.sh"
+      - "tests/test_external_vv_clean_runner_contract.py"
+      - "tests/test_structural_analysis_core_api.py"
+      - "tests/test_typed_domain_model.py"
+      - "tests/test_authoritative_linear_*.py"
+      - "tests/test_whole_model_*.py"
+      - "tests/test_result_validation_tolerance.py"
+      - "tests/test_corotational_*.py"
+      - "tests/test_stateful_corotational_fiber_frame2d.py"
+      - "tests/test_fracture_energy_concrete.py"
+      - "tests/test_p2_material_candidates.py"
+      - "tests/test_sparse_generalized_eigen.py"
+      - "tests/test_nonlinear_transient.py"
+      - "tests/test_p2_frame3d_candidates.py"
+      - "tests/test_corotational_frame3d_global.py"
+      - "tests/test_stateful_corotational_frame3d_sparse.py"
+      - "tests/test_stateful_corotational_frame3d_materials.py"
+      - "tests/test_stateful_biaxial_fiber_section.py"
+      - "tests/test_stateful_corotational_fiber_frame3d.py"
+      - "tests/test_stateful_corotational_partial_composite_frame3d.py"
+      - "tests/test_scalable_sparse_factorization.py"
+      - "tests/test_stateful_corotational_*_frame_cyclic_benchmark.py"
+      - "docs/sparse-modal-buckling.md"
+      - "docs/nonlinear-transient-reference.md"
+      - "docs/p2-frame3d-candidates.md"
+      - "docs/sparse-factorization-conditioning-diagnostics.md"
+      - "docs/p2-cyclic-frame-candidates.md"
+      - "docs/p3-entry-gate.md"
+      - "scripts/build_p3_entry_gate.py"
+      - "artifacts/manifests/p3_entry_gate.json"
+      - "tests/test_p3_entry_gate.py"
+      - "artifacts/benchmarks/fracture_energy_concrete_mesh_objectivity.json"
+      - "tests/test_unified_nonlinear_frame_api.py"
+      - "tests/test_durable_job_service.py"
+      - "scripts/check_core_quality.py"
+      - "scripts/build_fracture_energy_concrete_benchmark.py"
+      - "artifacts/manifests/core_quality.json"
+      - ".coveragerc"
+      - "pyproject.toml"
+      - ".github/workflows/core-quality-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  public-core-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+      - run: python -m pip install -e .[dev]
+      - name: Enforce mypy and 85 percent branch coverage
+        run: python scripts/check_core_quality.py
+      - name: Verify corotational candidate contracts
+        run: >-
+          python -m pytest
+          tests/test_corotational_fiber_frame_displacement_control.py
+          tests/test_corotational_fiber_frame_engineering_recovery.py
+          tests/test_corotational_fiber_frame_general.py
+          tests/test_corotational_fiber_frame_j1_j5.py
+          tests/test_corotational_fiber_frame_sparse.py
+          tests/test_corotational_frame2d_member_features.py
+          tests/test_fracture_energy_concrete.py
+          tests/test_durable_job_service.py
+          tests/test_stateful_corotational_fiber_frame2d.py
+          tests/test_unified_nonlinear_frame_api.py
+      - name: Verify experimental P2 material candidates
+        run: |
+          python -m ruff check \
+            src/structural_analysis/materials/confined_concrete.py \
+            src/structural_analysis/materials/bond_slip.py \
+            src/structural_analysis/materials/partial_composite.py \
+            src/structural_analysis/materials/stateful_biaxial_fiber_section.py \
+            tests/test_p2_material_candidates.py \
+            tests/test_stateful_biaxial_fiber_section.py
+          python -m mypy \
+            src/structural_analysis/materials/confined_concrete.py \
+            src/structural_analysis/materials/bond_slip.py \
+            src/structural_analysis/materials/partial_composite.py \
+            src/structural_analysis/materials/stateful_biaxial_fiber_section.py
+          python -m pytest -q \
+            tests/test_p2_material_candidates.py \
+            tests/test_stateful_biaxial_fiber_section.py
+      - name: Verify experimental sparse modal and buckling extraction
+        run: |
+          python -m ruff check \
+            src/structural_analysis/solvers/sparse_generalized_eigen.py \
+            src/structural_analysis/analyses/modal.py \
+            src/structural_analysis/analyses/buckling.py \
+            tests/test_sparse_generalized_eigen.py
+          python -m mypy \
+            src/structural_analysis/solvers/sparse_generalized_eigen.py \
+            src/structural_analysis/analyses/modal.py \
+            src/structural_analysis/analyses/buckling.py
+          python -m pytest -q \
+            tests/test_sparse_generalized_eigen.py \
+            tests/test_whole_model_modal_analysis.py \
+            tests/test_whole_model_buckling_analysis.py
+      - name: Verify experimental nonlinear transient reference
+        run: |
+          python -m ruff check \
+            src/structural_analysis/solvers/nonlinear/transient.py \
+            tests/test_nonlinear_transient.py
+          python -m mypy \
+            src/structural_analysis/solvers/nonlinear/transient.py
+          python -m pytest -q tests/test_nonlinear_transient.py
+      - name: Verify experimental P2 3D frame candidates
+        run: |
+          python -m ruff check \
+            src/structural_analysis/elements/corotational_frame3d.py \
+            src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py \
+            src/structural_analysis/elements/stateful_corotational_partial_composite_frame3d.py \
+            src/structural_analysis/elements/timoshenko_frame3d.py \
+            src/structural_analysis/elements/torsion_warping.py \
+            src/structural_analysis/assembly/initial_imperfection.py \
+            src/structural_analysis/assembly/corotational_frame3d_global.py \
+            src/structural_analysis/assembly/corotational_frame3d_graph.py \
+            src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py \
+            src/structural_analysis/solvers/nonlinear/scalable_sparse_factorization.py \
+            tests/test_p2_frame3d_candidates.py \
+            tests/test_stateful_corotational_frame3d_materials.py \
+            tests/test_stateful_corotational_fiber_frame3d.py \
+            tests/test_stateful_corotational_partial_composite_frame3d.py \
+            tests/test_corotational_frame3d_scalable_graph.py \
+            tests/test_scalable_sparse_factorization.py
+          python -m mypy --follow-imports=skip \
+            src/structural_analysis/elements/corotational_frame3d.py \
+            src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py \
+            src/structural_analysis/elements/stateful_corotational_partial_composite_frame3d.py \
+            src/structural_analysis/elements/timoshenko_frame3d.py \
+            src/structural_analysis/elements/torsion_warping.py \
+            src/structural_analysis/assembly/initial_imperfection.py \
+            src/structural_analysis/assembly/corotational_frame3d_global.py \
+            src/structural_analysis/assembly/corotational_frame3d_graph.py \
+            src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py \
+            src/structural_analysis/solvers/nonlinear/scalable_sparse_factorization.py
+          python -m pytest -q \
+            tests/test_p2_frame3d_candidates.py \
+            tests/test_corotational_frame3d_global.py \
+            tests/test_stateful_corotational_frame3d_sparse.py \
+            tests/test_stateful_corotational_frame3d_materials.py \
+            tests/test_stateful_corotational_fiber_frame3d.py \
+            tests/test_stateful_corotational_partial_composite_frame3d.py \
+            tests/test_corotational_frame3d_scalable_graph.py \
+            tests/test_scalable_sparse_factorization.py
+      - name: Verify bounded cyclic frame benchmarks
+        run: >-
+          python -m pytest -q
+          tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py
+          tests/test_stateful_corotational_concrete_frame_cyclic_benchmark.py
+          tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py
+          tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py
+      - name: Verify fail-closed P3 entry gate
+        run: |
+          python -m ruff check scripts/build_p3_entry_gate.py tests/test_p3_entry_gate.py
+          python scripts/build_p3_entry_gate.py --check
+          python -m pytest -q tests/test_p3_entry_gate.py
+      - name: Verify stored container-isolated external V&V candidate
+        run: |
+          python -m ruff check \
+            benchmarks/clean-runners/opensees-calculix/run_clean_runner.py \
+            tests/test_external_vv_clean_runner_contract.py
+          python -m pytest -q tests/test_external_vv_clean_runner_contract.py
+
+  compatibility:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install -e .[dev]
+      - name: Run bounded public-core compatibility tests
+        run: >-
+          python -m pytest
+          tests/test_structural_analysis_core_api.py
+          tests/test_typed_domain_model.py
+          tests/test_authoritative_linear_engineering_semantics.py
+          tests/test_authoritative_linear_frame.py
+          tests/test_authoritative_linear_frame_reference_cases.py
+          tests/test_whole_model_modal_analysis.py
+          tests/test_whole_model_buckling_analysis.py
+          tests/test_result_validation_tolerance.py
+          tests/test_durable_job_service.py

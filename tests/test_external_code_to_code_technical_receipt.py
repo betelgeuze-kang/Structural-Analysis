@@ -17,8 +17,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/run_external_code_to_code_technical_receipt.py"
 RECEIPT = (
-    ROOT
-    / "implementation/phase1/release_evidence/productization/"
+    ROOT / "implementation/phase1/release_evidence/productization/"
     "external_code_to_code_technical_execution_receipt.json"
 )
 SPEC = importlib.util.spec_from_file_location(
@@ -53,7 +52,7 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     assert payload["technical_contract_pass"] is True
     assert len(payload["external_assets"]) == 5
     assert all(not row["bundled_in_repository"] for row in payload["external_assets"])
-    assert len(payload["comparisons"]) == 3
+    assert len(payload["comparisons"]) == 4
     assert all(row["contract_pass"] for row in payload["comparisons"])
     assert all(
         metric["contract_pass"]
@@ -65,11 +64,16 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
         for runtime in payload["runtimes"].values()
     )
     replay = payload["replay_provenance"]
-    assert replay["external_runtime_executed_in_this_generation"] is False
-    assert replay["external_execution_reused"] is True
+    assert replay["external_runtime_executed_in_this_generation"] is True
+    assert replay["external_execution_reused"] is False
     assert replay["current_product_replay_pass"] is True
-    assert replay["reuse_reason"] == "sandbox_mpi_socket_policy"
-    assert module.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
+    assert replay["reuse_reason"] is None
+    assert module.REUSED_EXECUTION_BLOCKER not in payload["blockers_remaining"]
+    spatial = payload["comparisons"][2]
+    assert spatial["case_id"] == "spatial_frame3d_combined_tip_load"
+    assert spatial["analysis_type"] == "elastic_corotational_static"
+    assert len(spatial["metrics"]) == 15
+    assert payload["claims"]["frame3d_external_technical_comparison"] is True
 
 
 def test_debian_metadata_parser_accepts_labeled_field_output(monkeypatch) -> None:
@@ -129,7 +133,9 @@ def test_validation_rejects_rehashed_claim_promotion() -> None:
         )
 
 
-def test_product_replay_refresh_rebinds_current_sources_without_external_rerun() -> None:
+def test_product_replay_refresh_rebinds_current_sources_without_external_rerun() -> (
+    None
+):
     refreshed = module.refresh_external_code_to_code_product_replay(
         _stored_receipt(),
         repo_root=ROOT,
@@ -138,17 +144,16 @@ def test_product_replay_refresh_rebinds_current_sources_without_external_rerun()
 
     assert refreshed["status"] == "partial"
     assert refreshed["technical_contract_pass"] is True
-    assert refreshed["replay_provenance"][
-        "external_runtime_executed_in_this_generation"
-    ] is False
+    assert (
+        refreshed["replay_provenance"]["external_runtime_executed_in_this_generation"]
+        is False
+    )
     assert refreshed["replay_provenance"]["external_execution_reused"] is True
     assert refreshed["replay_provenance"]["current_product_replay_pass"] is True
     assert refreshed["replay_provenance"]["reuse_reason"] == (
         "test_current_product_replay"
     )
-    assert refreshed["blockers_remaining"][-1] == (
-        module.REUSED_EXECUTION_BLOCKER
-    )
+    assert refreshed["blockers_remaining"][-1] == (module.REUSED_EXECUTION_BLOCKER)
 
 
 def test_cli_offline_check_validates_stored_receipt() -> None:

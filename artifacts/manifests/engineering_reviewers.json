@@ -1,0 +1,7 @@
+{
+  "schema_version": "structural-analysis-engineering-reviewer-registry.v1",
+  "status": "owner_input_required",
+  "reviewers": [],
+  "private_keys_in_repository": false,
+  "claim_boundary": "This registry is intentionally empty until an authorized owner records an independent licensed structural engineer, verifies the review scope and public-key fingerprint, and approves that reviewer through normal repository review. Empty or locally invented identity data grants no review authority. Private signing keys must never be stored in this repository or its generated evidence."
+}

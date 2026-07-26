@@ -132,7 +132,7 @@ def test_build_audit_expands_release_areas_and_milestone_requirements(tmp_path: 
 
     assert payload["contract_pass"] is False
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
     assert (
         payload["reuse_policy"]

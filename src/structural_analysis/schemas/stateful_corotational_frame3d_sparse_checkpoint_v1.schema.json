@@ -1,0 +1,371 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/stateful-corotational-frame3d-sparse-checkpoint-v1.schema.json",
+  "title": "Stateful corotational frame3d sparse checkpoint v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "model_hash",
+    "solver_contract_hash",
+    "step_index",
+    "load_factor",
+    "displacement",
+    "material_states",
+    "converged_iterations",
+    "residual_inf_norm_kn",
+    "parent_checkpoint_hash",
+    "checkpoint_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "stateful-corotational-frame3d-sparse-checkpoint.v1"
+    },
+    "profile": {
+      "const": "stateful_axial_material_corotational_timoshenko_frame3d_native_coo_csr.v1"
+    },
+    "model_hash": { "$ref": "#/$defs/hash" },
+    "solver_contract_hash": { "$ref": "#/$defs/hash" },
+    "step_index": { "type": "integer", "minimum": 0 },
+    "load_factor": { "type": "number" },
+    "displacement": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 768,
+      "items": { "type": "number" }
+    },
+    "material_states": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": { "$ref": "#/$defs/material_state" }
+    },
+    "converged_iterations": { "type": "integer", "minimum": 0 },
+    "residual_inf_norm_kn": { "type": "number", "minimum": 0 },
+    "parent_checkpoint_hash": {
+      "oneOf": [
+        { "$ref": "#/$defs/hash" },
+        { "type": "null" }
+      ]
+    },
+    "checkpoint_hash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "material_state": {
+      "oneOf": [
+        { "$ref": "#/$defs/steel_state" },
+        { "$ref": "#/$defs/concrete_state" },
+        { "$ref": "#/$defs/composite_state" },
+        { "$ref": "#/$defs/confined_concrete_state" },
+        { "$ref": "#/$defs/condensed_partial_composite_state" },
+        { "$ref": "#/$defs/distributed_fiber_frame3d_state" },
+        { "$ref": "#/$defs/distributed_partial_composite_frame3d_state" }
+      ]
+    },
+    "steel_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "plastic_strain",
+        "backstress_mpa",
+        "accumulated_plastic_strain",
+        "dissipated_energy_density_mj_per_m3",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "uniaxial-combined-hardening-state.v1"
+        },
+        "plastic_strain": { "type": "number" },
+        "backstress_mpa": { "type": "number" },
+        "accumulated_plastic_strain": {
+          "type": "number",
+          "minimum": 0
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "type": "number",
+          "minimum": 0
+        },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "concrete_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "tensile_history_strain",
+        "compressive_history_strain",
+        "tensile_damage",
+        "compressive_damage",
+        "dissipated_energy_density_mj_per_m3",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "uniaxial-asymmetric-concrete-damage-state.v1"
+        },
+        "tensile_history_strain": { "type": "number", "minimum": 0 },
+        "compressive_history_strain": { "type": "number", "minimum": 0 },
+        "tensile_damage": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "compressive_damage": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "dissipated_energy_density_mj_per_m3": {
+          "type": "number",
+          "minimum": 0
+        },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "composite_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "steel_state",
+        "concrete_state",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "parallel-steel-concrete-section-state.v1"
+        },
+        "steel_state": { "$ref": "#/$defs/steel_state" },
+        "concrete_state": { "$ref": "#/$defs/concrete_state" },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "confined_concrete_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "strain",
+        "maximum_compressive_strain",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "confined-concrete-envelope-state.v1"
+        },
+        "strain": { "type": "number" },
+        "maximum_compressive_strain": {
+          "type": "number",
+          "minimum": 0
+        },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "bond_slip_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "previous_slip_m",
+        "previous_force_n",
+        "last_increment_sign",
+        "reversal_count",
+        "maximum_absolute_slip_m",
+        "stiffness_degradation",
+        "strength_degradation",
+        "dissipated_energy_j",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-bond-slip-state.v1"
+        },
+        "previous_slip_m": { "type": "number" },
+        "previous_force_n": { "type": "number" },
+        "last_increment_sign": {
+          "type": "integer",
+          "minimum": -1,
+          "maximum": 1
+        },
+        "reversal_count": { "type": "integer", "minimum": 0 },
+        "maximum_absolute_slip_m": { "type": "number", "minimum": 0 },
+        "stiffness_degradation": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "strength_degradation": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "dissipated_energy_j": { "type": "number", "minimum": 0 },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "partial_composite_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "connector_state",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": { "const": "partial-composite-state.v1" },
+        "connector_state": { "$ref": "#/$defs/bond_slip_state" },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "condensed_partial_composite_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "total_strain",
+        "interface_slip_m",
+        "component_state",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "condensed-partial-composite-axial-state.v1"
+        },
+        "total_strain": { "type": "number" },
+        "interface_slip_m": { "type": "number" },
+        "component_state": { "$ref": "#/$defs/partial_composite_state" },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "biaxial_fiber_section_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "section_id",
+        "section_contract_hash",
+        "axial_strain",
+        "curvature_y_per_m",
+        "curvature_z_per_m",
+        "fiber_states",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "stateful-biaxial-fiber-section-state.v1"
+        },
+        "section_id": { "type": "string", "minLength": 1 },
+        "section_contract_hash": { "$ref": "#/$defs/hash" },
+        "axial_strain": { "type": "number" },
+        "curvature_y_per_m": { "type": "number" },
+        "curvature_z_per_m": { "type": "number" },
+        "fiber_states": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4096,
+          "items": {
+            "oneOf": [
+              { "$ref": "#/$defs/steel_state" },
+              { "$ref": "#/$defs/concrete_state" },
+              { "$ref": "#/$defs/confined_concrete_state" }
+            ]
+          }
+        },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "distributed_fiber_frame3d_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "element_id",
+        "element_contract_hash",
+        "element_displacements",
+        "integration_point_states",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "stateful-corotational-fiber-frame3d-state.v1"
+        },
+        "element_id": { "type": "string", "minLength": 1 },
+        "element_contract_hash": { "$ref": "#/$defs/hash" },
+        "element_displacements": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "type": "number" }
+        },
+        "integration_point_states": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/biaxial_fiber_section_state" }
+        },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "distributed_partial_composite_frame3d_state": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "element_id",
+        "element_contract_hash",
+        "element_displacements",
+        "interface_slip_nodes_m",
+        "steel_section_states",
+        "concrete_section_states",
+        "connector_states",
+        "state_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "stateful-corotational-partial-composite-frame3d-state.v1"
+        },
+        "element_id": { "type": "string", "minLength": 1 },
+        "element_contract_hash": { "$ref": "#/$defs/hash" },
+        "element_displacements": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "type": "number" }
+        },
+        "interface_slip_nodes_m": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number" }
+        },
+        "steel_section_states": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/biaxial_fiber_section_state" }
+        },
+        "concrete_section_states": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/biaxial_fiber_section_state" }
+        },
+        "connector_states": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 3,
+          "items": { "$ref": "#/$defs/bond_slip_state" }
+        },
+        "state_hash": { "$ref": "#/$defs/hash" }
+      }
+    }
+  }
+}

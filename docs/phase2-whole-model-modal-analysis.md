@@ -18,7 +18,9 @@ UX/UY/UZ participation and effective modal mass.
   `scipy_linalg_eigh_dense` generalized-eigen backend.
 - No diagonal regularization or fallback solver is permitted.
 - An incomplete repeated-eigenvalue cluster fails closed.
-- Dense execution is capped at 512 free DOFs. Sparse extraction and binary
+- Dense execution is capped at 512 free DOFs. An explicit experimental ARPACK
+  sparse-extraction backend is available, but it still consumes matrices from
+  dense whole-model assembly and is capped at 4,096 free DOFs. Binary
   large-mode vector artifacts are not silently substituted.
 - Nodal, element-added, and nonstructural lumped mass inputs fail closed because
   those formulations are not connected yet.
@@ -69,9 +71,12 @@ PYTHONPATH=src python3 scripts/build_phase2_whole_model_modal_artifacts.py --che
 ## Explicit non-claims
 
 This evidence does not prove a general frame/shell modal workflow, nodal or
-nonstructural lumped mass, response-spectrum or time-history analysis, sparse
-modal extraction, production-scale binary mode-vector artifacts, ROCm/HIP modal
+nonstructural lumped mass, response-spectrum or time-history analysis, native
+sparse modal assembly, production-scale binary mode-vector artifacts, ROCm/HIP modal
 parity, general or mixed-stress whole-model buckling beyond the separate bounded
 compression-frame receipt, a broad independent modal corpus beyond the separate
 one-frame OpenSees technical comparison, Verification Level 2, commercial
 equivalence, or release readiness.
+
+The non-promoting sparse extraction contract and invocation are documented in
+`docs/sparse-modal-buckling.md`.

@@ -7,12 +7,20 @@ solution control nor acceptance of trial checkpoints.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import math
 from typing import Any
 
 import numpy as np
 
+from structural_analysis.assembly.corotational_frame2d_member_features import (
+    CorotationalFrame2DMemberFeatureResponse,
+    CorotationalFrame2DMemberFeatures,
+    consistent_uniform_load_element_global,
+    element_end_coordinates_m,
+    expected_element_displacements,
+    integrate_corotational_frame2d_member_features,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state import (
     StatefulCorotationalFiberFrame2DCheckpoint,
 )
@@ -103,6 +111,9 @@ class StatefulCorotationalFiberFrame2DMember:
     node_i: int
     node_j: int
     element: StatefulCorotationalFiberBeam2D
+    features: CorotationalFrame2DMemberFeatures = field(
+        default_factory=CorotationalFrame2DMemberFeatures
+    )
 
     def __post_init__(self) -> None:
         normalized_id = str(self.member_id).strip()
@@ -121,6 +132,8 @@ class StatefulCorotationalFiberFrame2DMember:
             raise ValueError("member element must be a StatefulCorotationalFiberBeam2D")
         if self.element.element_id != normalized_id:
             raise ValueError("member_id must match element.element_id")
+        if type(self.features) is not CorotationalFrame2DMemberFeatures:
+            raise ValueError("member features type is invalid")
 
 
 @dataclass(frozen=True)
@@ -131,6 +144,7 @@ class StatefulCorotationalFiberFrame2DProblem:
     fixed_global_dofs: tuple[int, ...]
     reference_external_loads: tuple[tuple[int, float], ...]
     rotation_coordinate_scale_m: float
+    prescribed_displacements: tuple[tuple[int, float], ...] = ()
 
     def __post_init__(self) -> None:
         normalized_case_id = str(self.case_id).strip()
@@ -169,9 +183,10 @@ class StatefulCorotationalFiberFrame2DProblem:
             member_ids.add(member.member_id)
             if member.node_i >= node_count or member.node_j >= node_count:
                 raise ValueError("member node index is out of range")
-            expected_coordinates = (
+            expected_coordinates = element_end_coordinates_m(
                 normalized_coordinates[member.node_i],
                 normalized_coordinates[member.node_j],
+                member.features,
             )
             if member.element.node_coordinates_m != expected_coordinates:
                 raise ValueError(
@@ -188,6 +203,22 @@ class StatefulCorotationalFiberFrame2DProblem:
         if fixed[0] < 0 or fixed[-1] >= global_dof_count:
             raise ValueError("fixed global DOF is out of range")
         object.__setattr__(self, "fixed_global_dofs", fixed)
+        if not isinstance(self.prescribed_displacements, tuple):
+            raise ValueError("prescribed_displacements must be a tuple")
+        prescribed: list[tuple[int, float]] = []
+        prescribed_dofs: set[int] = set()
+        fixed_set = set(fixed)
+        for row in self.prescribed_displacements:
+            if not isinstance(row, tuple) or len(row) != 2 or type(row[0]) is not int:
+                raise ValueError("each prescribed displacement must be (dof, value)")
+            dof = row[0]
+            if dof not in fixed_set:
+                raise ValueError("prescribed displacement DOF must be constrained")
+            if dof in prescribed_dofs:
+                raise ValueError("prescribed displacement DOFs must be unique")
+            prescribed_dofs.add(dof)
+            prescribed.append((dof, _finite(row[1], name="prescribed displacement")))
+        object.__setattr__(self, "prescribed_displacements", tuple(sorted(prescribed)))
         if not isinstance(self.reference_external_loads, tuple):
             raise ValueError("reference_external_loads must be a tuple")
         loads: list[tuple[int, float]] = []
@@ -202,8 +233,14 @@ class StatefulCorotationalFiberFrame2DProblem:
                 raise ValueError("reference external load DOFs must be unique")
             load_dofs.add(dof)
             loads.append((dof, _finite(row[1], name="reference external load")))
-        if not loads or not any(value != 0.0 for _, value in loads):
-            raise ValueError("reference_external_loads must include a nonzero load")
+        if (
+            not any(value != 0.0 for _, value in loads)
+            and not any(value != 0.0 for _, value in prescribed)
+            and not any(member.features.has_distributed_load for member in self.members)
+        ):
+            raise ValueError(
+                "the problem must include a nonzero load or prescribed displacement"
+            )
         object.__setattr__(self, "reference_external_loads", tuple(sorted(loads)))
         object.__setattr__(
             self,
@@ -243,12 +280,16 @@ class StatefulCorotationalFiberFrame2DProblem:
                         "node_i": member.node_i,
                         "node_j": member.node_j,
                         "element_contract_hash": member.element.contract_hash,
+                        "feature_contract_hash": member.features.contract_hash,
                     }
                     for member in self.members
                 ],
                 "fixed_global_dofs": list(self.fixed_global_dofs),
                 "reference_external_loads": [
                     [dof, value] for dof, value in self.reference_external_loads
+                ],
+                "prescribed_displacements": [
+                    [dof, value] for dof, value in self.prescribed_displacements
                 ],
                 "rotation_coordinate_scale_m": self.rotation_coordinate_scale_m,
                 "assembly": STATEFUL_COROTATIONAL_FIBER_FRAME2D_ASSEMBLY,
@@ -279,11 +320,38 @@ class StatefulCorotationalFiberFrame2DProblem:
         external.setflags(write=False)
         return external
 
+    def prescribed_displacement_vector(self, load_factor: float) -> np.ndarray:
+        factor = _finite(load_factor, name="load_factor")
+        prescribed = np.zeros(self.global_dof_count, dtype=np.float64)
+        if factor != 0.0:
+            for dof, terminal_value in self.prescribed_displacements:
+                prescribed[dof] = factor * terminal_value
+        prescribed.setflags(write=False)
+        return prescribed
+
     def reference_force_scale(self) -> float:
         generalized = (
             self.physical_coordinate_scale * self.reference_external_load_vector()
         )
-        return max(float(np.linalg.norm(generalized, ord=np.inf)), 1.0)
+        distributed_scale = max(
+            (
+                float(
+                    np.linalg.norm(
+                        consistent_uniform_load_element_global(
+                            member.element, member.features
+                        ),
+                        ord=np.inf,
+                    )
+                )
+                for member in self.members
+            ),
+            default=0.0,
+        )
+        return max(
+            float(np.linalg.norm(generalized, ord=np.inf)),
+            distributed_scale,
+            1.0,
+        )
 
 
 @dataclass(frozen=True)
@@ -291,10 +359,12 @@ class StatefulCorotationalFiberFrame2DMemberAssembly:
     member_id: str
     global_dofs: tuple[int, ...]
     internal_load_global: np.ndarray
+    equivalent_external_load_global: np.ndarray
     material_tangent_global: np.ndarray
     geometric_tangent_global: np.ndarray
     consistent_tangent_global: np.ndarray
     response: StatefulCorotationalFiberBeam2DResponse
+    feature_response: CorotationalFrame2DMemberFeatureResponse
 
     def __post_init__(self) -> None:
         normalized_id = str(self.member_id).strip()
@@ -310,8 +380,13 @@ class StatefulCorotationalFiberFrame2DMemberAssembly:
             raise ValueError("global_dofs must be six distinct non-negative integers")
         if type(self.response) is not StatefulCorotationalFiberBeam2DResponse:
             raise ValueError("response type is invalid")
+        if type(self.feature_response) is not CorotationalFrame2DMemberFeatureResponse:
+            raise ValueError("feature_response type is invalid")
+        if self.feature_response.element_response is not self.response:
+            raise ValueError("feature response does not bind the raw element response")
         array_fields = (
             ("internal_load_global", (6,)),
+            ("equivalent_external_load_global", (6,)),
             ("material_tangent_global", (6, 6)),
             ("geometric_tangent_global", (6, 6)),
             ("consistent_tangent_global", (6, 6)),
@@ -324,13 +399,27 @@ class StatefulCorotationalFiberFrame2DMemberAssembly:
             )
         if not _exact_float64_equal(
             self.internal_load_global,
-            self.response.internal_force_global,
+            self.feature_response.nodal_internal_load_global,
         ):
-            raise ValueError("member internal load does not match element response")
+            raise ValueError("member internal load does not match feature response")
+        if not _exact_float64_equal(
+            self.equivalent_external_load_global,
+            self.feature_response.nodal_equivalent_external_load_global,
+        ):
+            raise ValueError("member external load does not match feature response")
         for name, response_values in (
-            ("material_tangent_global", self.response.material_tangent_global),
-            ("geometric_tangent_global", self.response.geometric_tangent_global),
-            ("consistent_tangent_global", self.response.consistent_tangent_global),
+            (
+                "material_tangent_global",
+                self.feature_response.material_tangent_global,
+            ),
+            (
+                "geometric_tangent_global",
+                self.feature_response.geometric_tangent_global,
+            ),
+            (
+                "consistent_tangent_global",
+                self.feature_response.consistent_tangent_global,
+            ),
         ):
             if not _exact_float64_equal(getattr(self, name), response_values):
                 raise ValueError(f"member {name} does not match element response")
@@ -340,10 +429,14 @@ class StatefulCorotationalFiberFrame2DMemberAssembly:
             "member_id": self.member_id,
             "global_dofs": list(self.global_dofs),
             "internal_load_global": self.internal_load_global.tolist(),
+            "equivalent_external_load_global": (
+                self.equivalent_external_load_global.tolist()
+            ),
             "material_tangent_global": self.material_tangent_global.tolist(),
             "geometric_tangent_global": self.geometric_tangent_global.tolist(),
             "consistent_tangent_global": self.consistent_tangent_global.tolist(),
             "element_response": self.response.to_dict(),
+            "member_feature_response": self.feature_response.to_dict(),
         }
 
 
@@ -356,6 +449,8 @@ class StatefulCorotationalFiberFrame2DAssembly:
     global_displacements: np.ndarray
     residual_kn: np.ndarray
     jacobian_kn_per_m: np.ndarray
+    residual_load_factor_derivative_kn: np.ndarray
+    partial_residual_load_factor_derivative_global: np.ndarray
     internal_loads_global: np.ndarray
     external_loads_global: np.ndarray
     reactions_global: np.ndarray
@@ -402,6 +497,11 @@ class StatefulCorotationalFiberFrame2DAssembly:
             ("global_displacements", (global_count,)),
             ("residual_kn", (free_count,)),
             ("jacobian_kn_per_m", (free_count, free_count)),
+            ("residual_load_factor_derivative_kn", (free_count,)),
+            (
+                "partial_residual_load_factor_derivative_global",
+                (global_count,),
+            ),
             ("internal_loads_global", (global_count,)),
             ("external_loads_global", (global_count,)),
             ("reactions_global", (global_count,)),
@@ -465,6 +565,12 @@ class StatefulCorotationalFiberFrame2DAssembly:
             "global_displacements": self.global_displacements.tolist(),
             "residual_kn": self.residual_kn.tolist(),
             "jacobian_kn_per_m": self.jacobian_kn_per_m.tolist(),
+            "residual_load_factor_derivative_kn": (
+                self.residual_load_factor_derivative_kn.tolist()
+            ),
+            "partial_residual_load_factor_derivative_global": (
+                self.partial_residual_load_factor_derivative_global.tolist()
+            ),
             "internal_loads_global": self.internal_loads_global.tolist(),
             "external_loads_global": self.external_loads_global.tolist(),
             "reactions_global": self.reactions_global.tolist(),
@@ -517,11 +623,16 @@ def validate_stateful_corotational_fiber_frame2d_checkpoint(
         checkpoint.global_displacements,
         dtype=np.float64,
     )
-    if not np.array_equal(
+    expected_constrained = problem.prescribed_displacement_vector(
+        checkpoint.load_factor
+    )[list(problem.fixed_global_dofs)]
+    if not _exact_float64_equal(
         global_displacements[list(problem.fixed_global_dofs)],
-        np.zeros(len(problem.fixed_global_dofs), dtype=np.float64),
+        expected_constrained,
     ):
-        raise ValueError("checkpoint fixed global DOFs must be exactly zero")
+        raise ValueError(
+            "checkpoint constrained global DOFs must match prescribed displacement"
+        )
     if checkpoint.epoch == 0 and (
         checkpoint.load_factor != 0.0
         or not np.array_equal(
@@ -539,9 +650,18 @@ def validate_stateful_corotational_fiber_frame2d_checkpoint(
         if element_state.step_index != checkpoint.step_index:
             raise ValueError("checkpoint and element step indices do not match")
         global_dofs = problem.member_global_dofs(member)
-        expected_element_displacements = global_displacements[list(global_dofs)]
+        nodal_displacements = global_displacements[list(global_dofs)]
+        released_rotations = tuple(
+            element_state.element_displacements[dof]
+            for dof in member.features.released_element_dofs
+        )
+        expected_member_displacements = expected_element_displacements(
+            nodal_displacements,
+            member.features,
+            released_rotations_rad=released_rotations,
+        )
         if not _exact_float64_equal(
-            expected_element_displacements,
+            expected_member_displacements,
             element_state.element_displacements,
         ):
             raise ValueError(
@@ -572,9 +692,19 @@ def assemble_stateful_corotational_fiber_frame2d(
         raise ValueError("trial_free_coordinates_m has invalid shape or values")
     scale = problem.physical_coordinate_scale
     generalized = np.zeros(problem.global_dof_count, dtype=np.float64)
+    prescribed = problem.prescribed_displacement_vector(load_factor)
+    generalized[list(problem.fixed_global_dofs)] = (
+        prescribed[list(problem.fixed_global_dofs)]
+        / scale[list(problem.fixed_global_dofs)]
+    )
     generalized[list(free_dofs)] = free
     global_displacements = scale * generalized
+    global_displacements[list(problem.fixed_global_dofs)] = prescribed[
+        list(problem.fixed_global_dofs)
+    ]
     internal = np.zeros(problem.global_dof_count, dtype=np.float64)
+    external = load_factor * problem.reference_external_load_vector()
+    partial_load_factor_derivative = -problem.reference_external_load_vector().copy()
     material_tangent = np.zeros(
         (problem.global_dof_count, problem.global_dof_count),
         dtype=np.float64,
@@ -590,33 +720,49 @@ def assemble_stateful_corotational_fiber_frame2d(
     ):
         global_dofs = problem.member_global_dofs(member)
         member_displacements = global_displacements[list(global_dofs)]
-        response = member.element.integrate(member_displacements, parent)
+        feature_response = integrate_corotational_frame2d_member_features(
+            member.element,
+            member.features,
+            member_displacements,
+            parent,
+            target_load_factor=load_factor,
+        )
+        response = feature_response.element_response
         if response.parent_state_hash != parent.state_hash:
             raise ValueError(
                 "element response parent_state_hash does not match checkpoint parent"
             )
-        internal[list(global_dofs)] += response.internal_force_global
+        internal[list(global_dofs)] += feature_response.nodal_internal_load_global
+        external[list(global_dofs)] += (
+            feature_response.nodal_equivalent_external_load_global
+        )
+        partial_load_factor_derivative[list(global_dofs)] += (
+            feature_response.load_factor_residual_derivative_global
+        )
         material_tangent[np.ix_(global_dofs, global_dofs)] += (
-            response.material_tangent_global
+            feature_response.material_tangent_global
         )
         geometric_tangent[np.ix_(global_dofs, global_dofs)] += (
-            response.geometric_tangent_global
+            feature_response.geometric_tangent_global
         )
         member_rows.append(
             StatefulCorotationalFiberFrame2DMemberAssembly(
                 member_id=member.member_id,
                 global_dofs=global_dofs,
-                internal_load_global=response.internal_force_global,
-                material_tangent_global=response.material_tangent_global,
-                geometric_tangent_global=response.geometric_tangent_global,
-                consistent_tangent_global=response.consistent_tangent_global,
+                internal_load_global=feature_response.nodal_internal_load_global,
+                equivalent_external_load_global=(
+                    feature_response.nodal_equivalent_external_load_global
+                ),
+                material_tangent_global=feature_response.material_tangent_global,
+                geometric_tangent_global=feature_response.geometric_tangent_global,
+                consistent_tangent_global=feature_response.consistent_tangent_global,
                 response=response,
+                feature_response=feature_response,
             )
         )
         trial_states.append(response.state)
 
     consistent_tangent = material_tangent + geometric_tangent
-    external = load_factor * problem.reference_external_load_vector()
     physical_residual = internal - external
     free_scale = scale[list(free_dofs)]
     residual = free_scale * physical_residual[list(free_dofs)]
@@ -624,6 +770,13 @@ def assemble_stateful_corotational_fiber_frame2d(
         free_scale[:, None]
         * consistent_tangent[np.ix_(free_dofs, free_dofs)]
         * free_scale[None, :]
+    )
+    total_load_factor_derivative = (
+        partial_load_factor_derivative
+        + consistent_tangent @ problem.prescribed_displacement_vector(1.0)
+    )
+    residual_load_factor_derivative = (
+        free_scale * total_load_factor_derivative[list(free_dofs)]
     )
     reactions = np.zeros(problem.global_dof_count, dtype=np.float64)
     reactions[list(problem.fixed_global_dofs)] = physical_residual[
@@ -637,6 +790,8 @@ def assemble_stateful_corotational_fiber_frame2d(
         global_displacements=global_displacements,
         residual_kn=residual,
         jacobian_kn_per_m=jacobian,
+        residual_load_factor_derivative_kn=residual_load_factor_derivative,
+        partial_residual_load_factor_derivative_global=(partial_load_factor_derivative),
         internal_loads_global=internal,
         external_loads_global=external,
         reactions_global=reactions,

@@ -1,0 +1,301 @@
+{
+  "assessment_scope": "working_tree_candidate_over_base_head",
+  "authoritative_release_snapshot": false,
+  "base_head": "ab4b2e6191f87d9de9d117e2743d8f3fa4c9e50c",
+  "blockers": [
+    "p0_closed",
+    "p1_closed",
+    "p2_closed",
+    "authoritative_release_snapshot",
+    "roadmap_closure_pass",
+    "ordered_prs_1_through_18_closed",
+    "product_license_approved",
+    "repository_hygiene_closed",
+    "committed_current_head_ci_receipt",
+    "opensees_level2_promoted",
+    "second_solver_level2_promoted",
+    "published_material_cyclic_level3",
+    "published_snap_through_level3",
+    "frame3d_external_comparison",
+    "checkpoint_resume_job_service_promoted",
+    "signed_engineering_review",
+    "element.shell_plate_not_supported",
+    "interaction.contact_not_supported",
+    "element.cable_not_supported",
+    "analysis.soil_structure_interaction_not_supported",
+    "analysis.staged_construction_not_supported",
+    "analysis.mixed_frame_shell_nonlinear_not_supported",
+    "execution.distributed_not_supported",
+    "backend.rocm_hip_production_not_supported",
+    "evidence.customer_shadow_three_not_supported",
+    "design.code_modules_not_supported",
+    "ai.guarded_execution_not_supported",
+    "validated_customer_shadow_cases_below_three"
+  ],
+  "claim_boundary": "This artifact is a fail-closed change-control gate. Existing phase1, proxy, benchmark, fallback, or working-tree candidate assets do not grant P3 entry or product authority. P3 entry requires closed P0-P2 phases, closed PRs 1-18, a current authoritative snapshot, and every named external receipt; P3 completion additionally requires supported capabilities and at least three validated customer-shadow cases.",
+  "contract_pass": true,
+  "customer_shadow_check": {
+    "configured_minimum": 3,
+    "id": "validated_customer_shadow_cases",
+    "observed": 0,
+    "pass": false,
+    "required_minimum": 3,
+    "source_contract_pass": false
+  },
+  "entry_gate_pass": false,
+  "external_evidence_checks": [
+    {
+      "id": "product_license_approved",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "repository_hygiene_closed",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "committed_current_head_ci_receipt",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "opensees_level2_promoted",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "second_solver_level2_promoted",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "published_material_cyclic_level3",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "published_snap_through_level3",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "frame3d_external_comparison",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "checkpoint_resume_job_service_promoted",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "signed_engineering_review",
+      "observed": false,
+      "pass": false,
+      "required": true
+    }
+  ],
+  "input_checksums": {
+    "artifacts/manifests/capabilities.yaml": "sha256:4b78ab5d13b8dbdf69a321c6e2eb0043ccfbcffb8654faed6c79047f566428fe",
+    "artifacts/manifests/product_roadmap_status.json": "sha256:d0b5d0f179ddd1cbb7323387d99b8a1a893e07b928f609391e70ce174cb3dbe3",
+    "docs/repository-architecture-and-product-roadmap.md": "sha256:01c004f8b059b6979434543fbf5214a71d7cd4392f2b0c22aaf91416df9a808f",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:9b1aad51e021dbc4dfb333618dd87a69d3475cc8c550c4b40de2951d90c41b2c",
+    "scripts/build_p3_entry_gate.py": "sha256:d8a1832057370c0594c1f243c8f52fefaaad8ff3f7803967e50ef0aa8d6694b7"
+  },
+  "p3_completion_pass": false,
+  "p3_feature_checks": [
+    {
+      "authority": "none",
+      "capability_id": "element.shell_plate",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "interaction.contact",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "element.cable",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "analysis.soil_structure_interaction",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "analysis.staged_construction",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "analysis.mixed_frame_shell_nonlinear",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "execution.distributed",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "backend.rocm_hip_production",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "evidence.customer_shadow_three",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "design.code_modules",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    },
+    {
+      "authority": "none",
+      "capability_id": "ai.guarded_execution",
+      "completion_pass": false,
+      "public": false,
+      "status": "blocked"
+    }
+  ],
+  "phase_prerequisite_checks": [
+    {
+      "id": "p0_closed",
+      "observed": "blocked",
+      "pass": false,
+      "required": "closed"
+    },
+    {
+      "id": "p1_closed",
+      "observed": "blocked",
+      "pass": false,
+      "required": "closed"
+    },
+    {
+      "id": "p2_closed",
+      "observed": "blocked",
+      "pass": false,
+      "required": "closed"
+    }
+  ],
+  "proxy_inventory": [
+    {
+      "classification": "two_dof_frame_shell_named_nonlinear_spring_seed",
+      "path": "src/structural_analysis/assembly/coupled_static.py",
+      "product_capability": "analysis.mixed_frame_shell_nonlinear",
+      "promotable": false,
+      "reason": "No shell element, mesh assembly, integration-point state, or general frame-shell solve."
+    },
+    {
+      "classification": "large_model_linear_sparse_technical_probe",
+      "path": "implementation/phase1/run_mgt_coupled_frame_shell_sparse_equilibrium.py",
+      "product_capability": "analysis.mixed_frame_shell_nonlinear",
+      "promotable": false,
+      "reason": "Its receipt explicitly keeps coupled_frame_shell_nonlinear_equilibrium false."
+    },
+    {
+      "classification": "phase1_contact_proxy_evidence",
+      "path": "implementation/phase1/run_general_fe_contact_benchmark_gate.py",
+      "product_capability": "interaction.contact",
+      "promotable": false,
+      "reason": "Phase1 evidence is outside the canonical core product boundary and is not a public contact formulation."
+    },
+    {
+      "classification": "phase1_ssi_research_asset",
+      "path": "implementation/phase1/advanced_ssi.py",
+      "product_capability": "analysis.soil_structure_interaction",
+      "promotable": false,
+      "reason": "No promoted core solver profile, external V&V package, or release authority."
+    },
+    {
+      "classification": "phase1_construction_stage_research_asset",
+      "path": "implementation/phase1/construction_stage_engine.py",
+      "product_capability": "analysis.staged_construction",
+      "promotable": false,
+      "reason": "No promoted core state-transfer/checkpoint contract or external validation package."
+    },
+    {
+      "classification": "bounded_hip_backend_research_asset",
+      "path": "src/structural_analysis/engine_v2_backends/hip_fgmres_recurrence.py",
+      "product_capability": "backend.rocm_hip_production",
+      "promotable": false,
+      "reason": "CPU sparse reference, full-path parity, residency, fallback, provenance, and external V&V gates remain open."
+    }
+  ],
+  "schema_version": "structural-analysis-p3-entry-gate.v1",
+  "snapshot_and_sequence_checks": [
+    {
+      "id": "authoritative_release_snapshot",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "roadmap_closure_pass",
+      "observed": false,
+      "pass": false,
+      "required": true
+    },
+    {
+      "id": "ordered_prs_1_through_18_closed",
+      "missing_or_open_pr_numbers": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18
+      ],
+      "observed": 0,
+      "pass": false,
+      "required": 18
+    }
+  ],
+  "status": "blocked"
+}

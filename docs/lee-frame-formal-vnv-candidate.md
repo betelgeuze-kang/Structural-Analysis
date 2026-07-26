@@ -56,7 +56,7 @@ and recording their own approved source receipt is a separate promotion step.
 
 ## Scientific decision
 
-The generator executes `run_lee_frame_snapthrough_benchmark()` and evaluates:
+The generator executes `build_lee_frame_snapthrough_benchmark()` and evaluates:
 
 - first limit load factor;
 - maximum displacement-path distance;
@@ -109,7 +109,7 @@ commercial verification claim.
 
 `build_verification_hierarchy_status()` always composes the repository's five
 Level 1 analytic rows. The candidate manifest is passed through the existing
-`operator_manifest_path` argument and is added to, not substituted for, those
+`operator_evidence_path` argument and is added to, not substituted for, those
 rows.
 
 Higher-level evidence cannot bypass missing Level 2 code-to-code evidence. Even

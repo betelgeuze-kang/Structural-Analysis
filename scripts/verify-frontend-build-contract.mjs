@@ -69,7 +69,7 @@ if (existsSync(path.join(rootDir, 'src/app.tsx'))) {
   fail('Stale lowercase src/app.tsx must be removed; src/main.tsx imports src/App.tsx.')
 }
 
-if (packageJson.name !== 'structural-optimization-workbench') {
+if (packageJson.name !== 'structural-analysis') {
   fail(`Unexpected package name: ${packageJson.name}`)
 }
 

@@ -33,7 +33,9 @@ from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "p1-evidence-sidecar-intake.v1"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 DEFAULT_EXTERNAL_OUT = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES
 DEFAULT_RESIDUAL_OUT = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES
 EXTERNAL_SUBMISSION_IDS = {

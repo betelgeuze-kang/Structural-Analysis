@@ -37,8 +37,11 @@ The committed receipt executes four public-path gates:
 | Symmetric bending cluster | Complete repeated eigenspace | one-mode request blocked; complete two-mode request ready |
 | Reference axial sign | Positive-compression invariant | tension and zero-compression reference states both blocked without fallback |
 
-All ready cases use dense binary64 matrices, expose separate raw and semantic
-result hashes, and report no regularization or fallback. The public result
+All source-bound receipt cases use the default dense binary64 backend, expose
+separate raw and semantic result hashes, and report no regularization or
+fallback. A separate opt-in experimental sparse reciprocal extraction path is
+documented in `docs/sparse-modal-buckling.md`; it does not alter this receipt's
+authority. The public result
 inlines only max-component-normalized small-dense shapes; stiffness-normalized
 vectors are represented by SHA-256 and are not mislabeled as connected binary
 vector artifacts.
@@ -71,7 +74,7 @@ PYTHONPATH=src python3 scripts/build_phase2_whole_model_buckling_artifacts.py --
 The receipt remains `status=partial`. It does not establish general frame/shell
 stability, mixed tension-compression initial stress, truss/shell geometric
 stiffness, nonlinear buckling, post-buckling path following, imperfections,
-material-geometric coupling, sparse production extraction, large-mode binary
+material-geometric coupling, native sparse assembly or production extraction, large-mode binary
 artifacts beyond the separate small code-to-code vectors, ROCm/HIP parity, a
 broad independent buckling corpus beyond the separate one-column CalculiX B32
 technical comparison, Verification Level 2, commercial equivalence, or release

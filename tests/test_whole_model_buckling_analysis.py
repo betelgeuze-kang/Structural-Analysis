@@ -17,6 +17,8 @@ from structural_analysis.analyses.buckling import (
     AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID,
     BUCKLING_CLAIM_BOUNDARY,
     BUCKLING_EIGEN_BACKEND,
+    SPARSE_BUCKLING_CLAIM_BOUNDARY,
+    SPARSE_BUCKLING_EIGEN_BACKEND,
 )
 from structural_analysis.assembly.buckling import (
     GEOMETRIC_STIFFNESS_FORMULATION,
@@ -109,6 +111,7 @@ def _run(
     *,
     mode_count: int = 2,
     load_case: str | None = None,
+    eigen_backend: str = BUCKLING_EIGEN_BACKEND,
 ) -> object:
     return analyze(
         load_model(path),
@@ -116,7 +119,7 @@ def _run(
             analysis_type="linear_buckling",
             mode_count=mode_count,
             tolerance=1.0e-8,
-            eigen_backend=BUCKLING_EIGEN_BACKEND,
+            eigen_backend=eigen_backend,
             load_case=load_case,
         ),
     )
@@ -197,6 +200,40 @@ def test_public_two_plane_column_converges_to_euler_load_and_replays(
             for node in shapes
             for value in node["components"].values()
         ) == pytest.approx(1.0)
+
+
+def test_explicit_sparse_buckling_backend_matches_dense_lower_modes(
+    tmp_path: Path,
+) -> None:
+    model_path = tmp_path / "sparse-column.json"
+    _write_model(model_path, _column_payload())
+
+    dense = _run(model_path)
+    sparse = _run(
+        model_path,
+        eigen_backend=SPARSE_BUCKLING_EIGEN_BACKEND,
+    )
+
+    assert dense.status == "ready"
+    assert sparse.status == "ready"
+    assert [row["load_factor"] for row in sparse.metrics["modes"]] == pytest.approx(
+        [row["load_factor"] for row in dense.metrics["modes"]],
+        rel=3.0e-6,
+    )
+    assert sparse.metrics["matrix_backend"] == SPARSE_BUCKLING_EIGEN_BACKEND
+    assert sparse.metrics["sparse_eigen_extraction_used"] is True
+    assert sparse.metrics["sparse_buckling_backend_connected"] is True
+    assert sparse.metrics["whole_model_assembly_storage"] == "dense_numpy_binary64"
+    assert sparse.metrics["native_sparse_assembly_used"] is False
+    assert sparse.metrics["finite_positive_eigenvalue_count"] is None
+    assert sparse.metrics["finite_positive_eigenvalue_count_lower_bound"] >= 2
+    assert sparse.metrics["finite_positive_eigenvalue_count_exact"] is False
+    assert sparse.metrics["geometric_stiffness_positive_rank"] is None
+    assert sparse.metrics["geometric_stiffness_positive_rank_lower_bound"] >= 2
+    assert sparse.metrics["geometric_stiffness_positive_rank_exact"] is False
+    assert sparse.metrics["regularization_used"] is False
+    assert sparse.metrics["fallback_used"] is False
+    assert sparse.metrics["claim_boundary"] == SPARSE_BUCKLING_CLAIM_BOUNDARY
 
 
 def test_critical_physical_load_is_invariant_to_reference_load_scale(

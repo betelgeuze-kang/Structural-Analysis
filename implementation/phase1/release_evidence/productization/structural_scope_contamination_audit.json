@@ -2,7 +2,7 @@
   "blockers": [],
   "claim_boundary": "This audit protects the building structural-analysis product scope. It does not delete files; it identifies molecular, ligand, GPCR, PocketMD, and MD paths and requires either deletion/extraction or an exact quarantine manifest that excludes them from the structural release surface. Quarantined paths remain visible and must not be counted as structural solver release evidence.",
   "contract_pass": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "family_counts": {
     "molecular_docking": 48,
     "molecular_dynamics": 25,
@@ -10,7 +10,7 @@
   },
   "first_non_structural_path": "implementation/phase1/md3bead_scientific_validity_report.md",
   "first_unquarantined_non_structural_path": "",
-  "generated_at": "2026-07-22T04:55:39.309173+00:00",
+  "generated_at": "2026-07-22T14:29:36.367279+00:00",
   "git_state_counts": {
     "tracked": 86
   },
@@ -20,7 +20,7 @@
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e8a6b5e0b8d86ef1b629c1a6d4e8caab6132dd4a3a311c64bc520c2e4e13954f",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:d94d2262f1b054ba6efd43f97fc7f79dddd28256fab6c4f2c636fc86f1426486",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:56d86b7b57ffd17def5bf314f9287599ed40a42868726f705150a9d80d8fa740",
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
@@ -2912,7 +2912,7 @@
   "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths_with_release_surface_quarantine_manifest",
   "reused_evidence": false,
   "schema_version": "structural-scope-contamination-audit.v1",
-  "source_commit_sha": "c3e0e0431520d0f3b9985ea2dd68eb93f75c4ed9",
+  "source_commit_sha": "ab4b2e6191f87d9de9d117e2743d8f3fa4c9e50c",
   "status": "quarantined",
   "tracked_path_count": 6422,
   "unquarantined_family_counts": {},

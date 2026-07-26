@@ -58,6 +58,22 @@ def _repo_relative_path(value: Any) -> str | None:
     try:
         return str(path.relative_to(REPO_ROOT))
     except ValueError:
+        if path.is_absolute():
+            repository_anchors = {
+                "apps",
+                "artifacts",
+                "benchmarks",
+                "docs",
+                "implementation",
+                "scripts",
+                "src",
+                "tests",
+            }
+            for index, part in enumerate(path.parts):
+                if part not in repository_anchors:
+                    continue
+                relative = Path(*path.parts[index:])
+                return relative.as_posix()
         return str(path)
 
 

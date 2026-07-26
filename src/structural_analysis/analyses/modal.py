@@ -10,6 +10,7 @@ from numbers import Real
 from typing import Any
 
 import numpy as np
+from scipy.sparse import csr_matrix
 
 from structural_analysis.assembly.modal import (
     DOF_LABELS,
@@ -19,13 +20,24 @@ from structural_analysis.assembly.modal import (
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.modal import ModalAnalysisError, solve_modal_modes
+from structural_analysis.solvers.sparse_generalized_eigen import (
+    SPARSE_EIGEN_CLAIM_BOUNDARY,
+    SPARSE_MODAL_PROFILE,
+    SparseGeneralizedEigenError,
+    solve_sparse_modal_modes,
+)
 
 
 AUTHORITATIVE_CPU_MODAL_SOLVER_ID = "authoritative_cpu_modal_fea_3d_v1"
 EIGEN_BACKEND = "scipy_linalg_eigh_dense"
+SPARSE_MODAL_EIGEN_BACKEND = SPARSE_MODAL_PROFILE
 MAX_DENSE_MODAL_FREE_DOF = 512
+MAX_SPARSE_MODAL_FREE_DOF = 4096
 MODE_SHAPE_STORAGE_PROFILE = "inline_max_component_normalized_small_dense_v1"
 MODAL_CLAIM_BOUNDARY = "dense_consistent_mass_frame_truss_modal_preview_v1"
+SPARSE_MODAL_CLAIM_BOUNDARY = (
+    "dense_assembly_sparse_low_mode_frame_truss_modal_experimental_v1"
+)
 TRANSLATION_DIRECTIONS = {"UX": 0, "UY": 1, "UZ": 2}
 
 
@@ -67,17 +79,30 @@ def run_authoritative_modal(
             unsupported=assembly_unsupported,
             eigen_backend=eigen_backend,
         )
-    if len(assembly.free_dofs) > MAX_DENSE_MODAL_FREE_DOF:
+    sparse_selected = eigen_backend == SPARSE_MODAL_EIGEN_BACKEND
+    maximum_free_dof_count = (
+        MAX_SPARSE_MODAL_FREE_DOF if sparse_selected else MAX_DENSE_MODAL_FREE_DOF
+    )
+    if len(assembly.free_dofs) > maximum_free_dof_count:
         return _blocked_solution(
             model,
             unsupported=[
                 {
-                    "kind": "modal_dense_free_dof_limit_exceeded",
+                    "kind": (
+                        "modal_sparse_extraction_free_dof_limit_exceeded"
+                        if sparse_selected
+                        else "modal_dense_free_dof_limit_exceeded"
+                    ),
                     "free_dof_count": len(assembly.free_dofs),
-                    "maximum_free_dof_count": MAX_DENSE_MODAL_FREE_DOF,
+                    "maximum_free_dof_count": maximum_free_dof_count,
                     "detail": (
-                        "Sparse modal extraction and binary mode-vector artifacts "
-                        "are not connected to the public whole-model path."
+                        "Sparse extraction still receives matrices from bounded "
+                        "dense whole-model assembly; binary mode-vector artifacts "
+                        "and native sparse assembly remain unconnected."
+                        if sparse_selected
+                        else "Select the explicit experimental sparse extraction "
+                        "backend for larger bounded systems; native sparse assembly "
+                        "and binary mode-vector artifacts remain unconnected."
                     ),
                 }
             ],
@@ -88,18 +113,31 @@ def run_authoritative_modal(
     free = np.asarray(assembly.free_dofs, dtype=np.int64)
     reduced_stiffness = assembly.stiffness[np.ix_(free, free)]
     reduced_mass = assembly.mass[np.ix_(free, free)]
+    modal: Any
     try:
-        modal = solve_modal_modes(
-            reduced_stiffness,
-            reduced_mass,
-            mode_count=mode_count,
-            positive_semidefinite_relative_tolerance=1.0e-10,
-            rigid_mode_relative_tolerance=1.0e-10,
-            cluster_relative_tolerance=1.0e-9,
-            residual_relative_tolerance=tolerance,
-            orthogonality_tolerance=tolerance,
-        )
-    except ModalAnalysisError as exc:
+        if sparse_selected:
+            modal = solve_sparse_modal_modes(
+                csr_matrix(reduced_stiffness),
+                csr_matrix(reduced_mass),
+                mode_count=mode_count,
+                positive_semidefinite_relative_tolerance=1.0e-10,
+                rigid_mode_relative_tolerance=1.0e-10,
+                cluster_relative_tolerance=1.0e-9,
+                residual_relative_tolerance=tolerance,
+                orthogonality_tolerance=tolerance,
+            )
+        else:
+            modal = solve_modal_modes(
+                reduced_stiffness,
+                reduced_mass,
+                mode_count=mode_count,
+                positive_semidefinite_relative_tolerance=1.0e-10,
+                rigid_mode_relative_tolerance=1.0e-10,
+                cluster_relative_tolerance=1.0e-9,
+                residual_relative_tolerance=tolerance,
+                orthogonality_tolerance=tolerance,
+            )
+    except (ModalAnalysisError, SparseGeneralizedEigenError) as exc:
         return _blocked_solution(
             model,
             unsupported=[
@@ -135,16 +173,31 @@ def run_authoritative_modal(
         "load_count": len(model.loads),
         "support_count": len(model.supports),
         "solver_path_id": AUTHORITATIVE_CPU_MODAL_SOLVER_ID,
-        "analysis_fidelity": "cpu_reference_dense_whole_model_modal",
+        "analysis_fidelity": (
+            "cpu_experimental_sparse_extraction_whole_model_modal"
+            if sparse_selected
+            else "cpu_reference_dense_whole_model_modal"
+        ),
         "production_fail_closed": True,
         "implicit_property_fallback_used": False,
         "automatic_support_generation_used": False,
         "regularization_used": False,
         "fallback_used": False,
         "matrix_backend": eigen_backend,
-        "sparse_backend_used": False,
-        "stiffness_storage": "dense_numpy_binary64",
-        "mass_storage": "dense_numpy_binary64",
+        "sparse_backend_used": sparse_selected,
+        "stiffness_storage": (
+            "scipy_csr_binary64_reduced_from_dense_assembly"
+            if sparse_selected
+            else "dense_numpy_binary64"
+        ),
+        "mass_storage": (
+            "scipy_csr_binary64_reduced_from_dense_assembly"
+            if sparse_selected
+            else "dense_numpy_binary64"
+        ),
+        "whole_model_assembly_storage": "dense_numpy_binary64",
+        "native_sparse_assembly_used": False,
+        "sparse_eigen_extraction_used": sparse_selected,
         "mass_matrix_unit": assembly.mass_matrix_unit,
         "material_density_unit": assembly.density_unit,
         "mass_formulation": assembly.mass_formulation,
@@ -161,6 +214,12 @@ def run_authoritative_modal(
         "free_dof_map_hash": _hash_json(_free_dof_rows(assembly)),
         "requested_mode_count": modal.requested_mode_count,
         "mode_count": modal.mode_count,
+        "candidate_eigenpair_count": getattr(
+            modal,
+            "candidate_eigenpair_count",
+            modal.mode_count,
+        ),
+        "eigen_backend_profile": getattr(modal, "backend_profile", EIGEN_BACKEND),
         "rigid_mode_count": modal.rigid_mode_count,
         "modes": modes,
         "mass_orthogonality_error_inf": modal.mass_orthogonality_error_inf,
@@ -184,11 +243,16 @@ def run_authoritative_modal(
         "whole_model_frame_truss_modal_workflow": True,
         "general_frame_shell_modal_workflow": False,
         "nodal_lumped_mass_supported": False,
-        "sparse_modal_backend_connected": False,
+        "sparse_modal_backend_connected": sparse_selected,
         "rocm_hip_modal_parity": False,
         "verification_level_2": False,
         "release_readiness": False,
-        "claim_boundary": MODAL_CLAIM_BOUNDARY,
+        "eigen_solver_claim_boundary": (
+            SPARSE_EIGEN_CLAIM_BOUNDARY if sparse_selected else MODAL_CLAIM_BOUNDARY
+        ),
+        "claim_boundary": (
+            SPARSE_MODAL_CLAIM_BOUNDARY if sparse_selected else MODAL_CLAIM_BOUNDARY
+        ),
     }
     return WholeModelModalSolution(
         status="ready",
@@ -331,12 +395,13 @@ def _public_preflight(
                 "detail": "mode_count must be a positive integer.",
             }
         )
-    if eigen_backend != EIGEN_BACKEND:
+    supported_backends = (EIGEN_BACKEND, SPARSE_MODAL_EIGEN_BACKEND)
+    if eigen_backend not in supported_backends:
         unsupported.append(
             {
                 "kind": "modal_eigen_backend_not_supported",
                 "eigen_backend": eigen_backend,
-                "supported_backend": EIGEN_BACKEND,
+                "supported_backends": list(supported_backends),
             }
         )
     axis_order = tuple(
@@ -362,6 +427,7 @@ def _blocked_solution(
     eigen_backend: str,
     assembly: ModalAssembly | None = None,
 ) -> WholeModelModalSolution:
+    sparse_selected = eigen_backend == SPARSE_MODAL_EIGEN_BACKEND
     return WholeModelModalSolution(
         status="blocked",
         metrics={
@@ -370,24 +436,35 @@ def _blocked_solution(
             "load_count": len(model.loads),
             "support_count": len(model.supports),
             "solver_path_id": AUTHORITATIVE_CPU_MODAL_SOLVER_ID,
-            "analysis_fidelity": "cpu_reference_dense_whole_model_modal",
+            "analysis_fidelity": (
+                "cpu_experimental_sparse_extraction_whole_model_modal"
+                if sparse_selected
+                else "cpu_reference_dense_whole_model_modal"
+            ),
             "production_fail_closed": True,
             "implicit_property_fallback_used": False,
             "automatic_support_generation_used": False,
             "regularization_used": False,
             "fallback_used": False,
             "matrix_backend": eigen_backend,
-            "sparse_backend_used": False,
+            "sparse_backend_used": sparse_selected,
+            "whole_model_assembly_storage": "dense_numpy_binary64",
+            "native_sparse_assembly_used": False,
+            "sparse_eigen_extraction_used": sparse_selected,
             "free_dof_count": len(assembly.free_dofs) if assembly else 0,
             "active_dof_count": len(assembly.active_dofs) if assembly else 0,
             "whole_model_frame_truss_modal_workflow": False,
             "general_frame_shell_modal_workflow": False,
             "nodal_lumped_mass_supported": False,
-            "sparse_modal_backend_connected": False,
+            "sparse_modal_backend_connected": sparse_selected,
             "rocm_hip_modal_parity": False,
             "verification_level_2": False,
             "release_readiness": False,
-            "claim_boundary": MODAL_CLAIM_BOUNDARY,
+            "claim_boundary": (
+                SPARSE_MODAL_CLAIM_BOUNDARY
+                if sparse_selected
+                else MODAL_CLAIM_BOUNDARY
+            ),
         },
         convergence_history=[],
         unsupported_features=unsupported,

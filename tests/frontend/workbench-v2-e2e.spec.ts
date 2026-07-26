@@ -125,6 +125,14 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(page.getByText('Read-only evidence')).toBeVisible()
   })
 
+  test('unconfigured durable job service is explicit and infers no solver state', async ({ page }) => {
+    await open(page)
+    const panel = page.locator('[data-job-service="unconfigured"]')
+    await expect(panel).toBeVisible()
+    await expect(panel.locator('[data-state="UNAVAILABLE"]')).toBeVisible()
+    await expect(panel).toContainText(/solver state is not inferred/i)
+  })
+
   test('with no published bundle, evidence reader shows only unavailable — readiness is not inferred', async ({ page }) => {
     await open(page)
     const evidence = page.locator('.wb2-evidence')

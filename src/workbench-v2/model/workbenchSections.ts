@@ -20,6 +20,7 @@ export const workbenchSections: WorkbenchSectionDef[] = [
   { id: 'wb2-sec-run', label: 'Run Monitor', group: 'model' },
   { id: 'wb2-sec-results', label: 'Results', group: 'model' },
   { id: 'wb2-sec-compare', label: 'Compare', group: 'model' },
+  { id: 'wb2-sec-capabilities', label: 'Capabilities', group: 'verification' },
   { id: 'wb2-sec-evidence', label: 'Evidence', group: 'verification' },
   { id: 'wb2-sec-benchmarks', label: 'Benchmarks', group: 'verification' },
   { id: 'wb2-sec-review', label: 'Review', group: 'decision' },

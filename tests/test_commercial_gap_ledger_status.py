@@ -266,23 +266,36 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "production_rocm_hip_residency_not_closed"
     ]
     assert hip_terminal["observed"]["production_hip_residual_jacobian_path"] is False
-    assert hip_terminal["observed"]["raw_production_hip_residual_jacobian_path"] is True
-    assert hip_terminal["observed"]["runtime_blockers"] == []
+    assert hip_terminal["observed"]["raw_production_hip_residual_jacobian_path"] is False
+    assert hip_terminal["observed"]["runtime_blockers"] == [
+        "dev_kfd_missing",
+        "dev_dri_missing",
+    ]
     assert (
-        "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven"
+        "hip_residual_jacobian_consistency_not_executed"
         in hip_terminal["observed"]["receipt_blockers"]
     )
     assert (
         hip_terminal["observed"]["production_rocm_hip_residual_jvp_worker_ready"]
         is False
     )
-    assert hip_terminal["observed"]["production_rocm_hip_residual_jvp_worker_blockers"] == [
+    assert (
         "consistent_residual_jacobian_newton_gate_not_passed"
-    ]
+        in hip_terminal["observed"][
+            "production_rocm_hip_residual_jvp_worker_blockers"
+        ]
+    )
+    assert (
+        "production_hip_residual_jacobian_path_not_proven"
+        in hip_terminal["observed"][
+            "production_rocm_hip_residual_jvp_worker_blockers"
+        ]
+    )
     assert "consistent_residual_jacobian_newton_not_proven" in hip_terminal[
         "non_closing_reasons"
     ]
     assert "hip_receipt_blockers_present" in hip_terminal["non_closing_reasons"]
+    assert "hip_runtime_blockers_present" in hip_terminal["non_closing_reasons"]
     assert "production_rocm_hip_residual_jvp_worker_not_ready" in hip_terminal[
         "non_closing_reasons"
     ]

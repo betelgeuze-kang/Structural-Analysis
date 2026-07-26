@@ -1,0 +1,56 @@
+{
+  "schema_version": "structural-analysis-core-quality.v1",
+  "scope_id": "bounded_public_core_v1",
+  "typecheck": {
+    "tool": "mypy",
+    "config": "pyproject.toml",
+    "paths": [
+      "src/structural_analysis/analyses",
+      "src/structural_analysis/model",
+      "src/structural_analysis/results/schema.py",
+      "src/structural_analysis/results/validation.py",
+      "src/structural_analysis/units",
+      "src/structural_analysis/engine_v2/contracts/result_quantity.py",
+      "src/structural_analysis/materials/concrete_damage.py",
+      "src/structural_analysis/benchmark/fracture_energy_concrete.py",
+      "src/structural_analysis/assembly/corotational_frame2d_member_features.py",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_displacement_control.py",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py",
+      "src/structural_analysis/solvers/nonlinear/newton.py",
+      "src/structural_analysis/solvers/nonlinear/sparse_factorization.py",
+      "src/structural_analysis/api/nonlinear_frame.py",
+      "src/structural_analysis/io/neutral/loader.py",
+      "src/structural_analysis/execution/job_service.py",
+      "src/structural_analysis/execution/job_http_api.py",
+      "src/structural_analysis/execution/nonlinear_frame_worker.py"
+    ]
+  },
+  "coverage": {
+    "tool": "coverage.py",
+    "config": ".coveragerc",
+    "branch": true,
+    "minimum_percent": 85,
+    "tests": [
+      "tests/test_structural_analysis_core_api.py",
+      "tests/test_typed_domain_model.py",
+      "tests/test_authoritative_linear_engineering_semantics.py",
+      "tests/test_authoritative_linear_frame.py",
+      "tests/test_authoritative_linear_frame_reference_cases.py",
+      "tests/test_whole_model_modal_analysis.py",
+      "tests/test_whole_model_buckling_analysis.py",
+      "tests/test_result_validation_tolerance.py"
+    ]
+  },
+  "compatibility_matrix": {
+    "operating_systems": ["ubuntu-latest", "windows-latest", "macos-latest"],
+    "python_versions": ["3.10", "3.12", "3.13"],
+    "required_coordinate_count": 9,
+    "workflow": ".github/workflows/core-quality-ci.yml"
+  },
+  "claim_boundary": "This gate covers the bounded public model/analysis/result/unit surface and the result-quantity contract. It does not erase the separately inventoried type debt in legacy, research, benchmark, AI, or unpromoted nonlinear modules and is not release-readiness evidence by itself."
+}

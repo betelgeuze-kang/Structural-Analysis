@@ -18,22 +18,16 @@ import json
 from pathlib import Path
 from typing import Any
 
-from structural_analysis.benchmark.acceptance import (
-    ScalarReferenceMetric,
-    build_scientific_decision,
-)
+from structural_analysis.benchmark.acceptance import decide_benchmark
 from structural_analysis.benchmark.lee_frame import (
     LEE_FRAME_PUBLISHED_PATH,
     LEE_FRAME_REFERENCE_DOI,
     LEE_FRAME_REFERENCE_TABLE,
     LEE_FRAME_SCHEMA_VERSION,
-    run_lee_frame_snapthrough_benchmark,
+    build_lee_frame_snapthrough_benchmark,
 )
 from structural_analysis.benchmark.verification_hierarchy import (
-    EvidenceArtifactReceipt,
-    ReferenceSolverReceipt,
-    SourceLicenseReceipt,
-    VerificationEvidence,
+    VERIFICATION_EVIDENCE_SCHEMA_VERSION,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
@@ -41,12 +35,8 @@ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 LEE_FRAME_VERIFICATION_CANDIDATE_SCHEMA_VERSION = (
     "lee-frame-verification-candidate-bundle.v1"
 )
-LEE_FRAME_SOURCE_RECEIPT_SCHEMA_VERSION = (
-    "lee-frame-published-source-receipt.v1"
-)
-LEE_FRAME_EXECUTION_RECEIPT_SCHEMA_VERSION = (
-    "lee-frame-published-execution-receipt.v1"
-)
+LEE_FRAME_SOURCE_RECEIPT_SCHEMA_VERSION = "lee-frame-published-source-receipt.v1"
+LEE_FRAME_EXECUTION_RECEIPT_SCHEMA_VERSION = "lee-frame-published-execution-receipt.v1"
 LEE_FRAME_EVIDENCE_ID = "published-lee-frame-snap-through-candidate"
 LEE_FRAME_TRUTH_BASIS = "published_benchmark"
 LEE_FRAME_CATEGORY = "nonlinear_snap_through"
@@ -69,6 +59,7 @@ LEE_FRAME_DECLARED_BLOCKERS = (
     "independent_clean_runner_receipt_missing",
     "formal_operator_approval_missing",
 )
+_FIXED_EVALUATED_AT = "2026-07-18T00:00:00Z"
 
 
 @dataclass(frozen=True)
@@ -78,7 +69,7 @@ class LeeFrameVerificationCandidateBundle:
     source_receipt_path: Path
     execution_receipt_path: Path
     decision_path: Path
-    evidence: VerificationEvidence
+    evidence: dict[str, Any]
     source_receipt: dict[str, Any]
     execution_receipt: dict[str, Any]
     decision: dict[str, Any]
@@ -96,7 +87,7 @@ class LeeFrameVerificationCandidateBundle:
                 self.execution_receipt_path,
             ),
             "decision_path": _relative(self.root, self.decision_path),
-            "evidence": self.evidence.to_dict(),
+            "evidence": self.evidence,
             "claim_boundary": LEE_FRAME_CLAIM_BOUNDARY,
         }
 
@@ -108,9 +99,15 @@ def build_lee_frame_verification_candidate_payloads() -> tuple[
 ]:
     """Execute the benchmark and return strict generated receipt payloads."""
 
-    result = run_lee_frame_snapthrough_benchmark()
-    if not result.contract_pass:
+    result = build_lee_frame_snapthrough_benchmark()
+    if result.get("contract_pass") is not True:
         raise ValueError("Lee-frame source benchmark did not pass its bounded contract")
+    problem = result["problem_definition"]
+    solver = result["solver"]
+    path_shape = result["path_shape"]
+    path_errors = result["published_path_error_summary"]
+    tangent_checks = result["consistent_tangent_checks"]
+    first_limit_point = path_shape["first_limit_point"]
 
     published_path_payload = [list(row) for row in LEE_FRAME_PUBLISHED_PATH]
     source_receipt = {
@@ -146,119 +143,136 @@ def build_lee_frame_verification_candidate_payloads() -> tuple[
         "source_schema_version": LEE_FRAME_SCHEMA_VERSION,
         "source_builder": (
             "structural_analysis.benchmark.lee_frame."
-            "run_lee_frame_snapthrough_benchmark"
+            "build_lee_frame_snapthrough_benchmark"
         ),
         "generated_source_receipt_uri": LEE_FRAME_GENERATED_SOURCE_URI,
         "source_receipt_content_hash": canonical_hash(source_receipt),
         "publisher_source_bytes_attached": False,
         "model": {
-            "element_count": result.element_count,
-            "free_dof_count": result.free_dof_count,
-            "published_path_point_count": result.published_path_point_count,
+            "element_count": 2 * int(problem["elements_per_member"]),
+            "free_dof_count": int(problem["free_equation_count"]),
+            "published_path_point_count": len(LEE_FRAME_PUBLISHED_PATH),
         },
         "path": {
-            "accepted_step_count": result.accepted_step_count,
-            "rejected_step_count": result.rejected_step_count,
-            "restart_exact": result.restart_exact,
-            "descending_branch_observed": result.descending_branch_observed,
-            "negative_load_observed": result.negative_load_observed,
-            "snapback_observed": result.snapback_observed,
-            "rehardening_observed": result.rehardening_observed,
+            "accepted_step_count": solver["accepted_step_count"],
+            "rejected_step_count": solver["rejected_step_count"],
+            "restart_exact": solver["checkpoint_restart_exact"],
+            "descending_branch_observed": path_shape["descending_load_branch_observed"],
+            "negative_load_observed": path_shape["negative_load_factor_observed"],
+            "snapback_observed": path_shape["snapback_observed"],
+            "rehardening_observed": path_shape["rehardening_load_branch_observed"],
         },
         "metrics": {
-            "first_limit_load_factor": result.first_limit_load_factor,
-            "first_limit_reference_factor": result.first_limit_reference_factor,
-            "first_limit_absolute_error": result.first_limit_absolute_error,
-            "maximum_path_distance_m": result.maximum_path_distance_m,
-            "maximum_load_factor_error": result.maximum_load_factor_error,
-            "rms_load_factor_error": result.rms_load_factor_error,
-            "maximum_residual_inf_kn": result.maximum_residual_inf_kn,
-            "maximum_constraint_residual_m2": (
-                result.maximum_constraint_residual_m2
-            ),
-            "energy_gradient_relative_error": (
-                result.energy_gradient_relative_error
-            ),
-            "tangent_hessian_relative_error": (
-                result.tangent_hessian_relative_error
-            ),
-            "tangent_symmetry_relative_error": (
-                result.tangent_symmetry_relative_error
-            ),
-            "regularization_count": result.regularization_count,
-            "fallback_count": result.fallback_count,
+            "first_limit_load_factor": first_limit_point["load_proportionality_factor"],
+            "first_limit_reference_factor": path_shape[
+                "published_first_limit_load_factor"
+            ],
+            "first_limit_absolute_error": path_shape[
+                "first_limit_load_factor_absolute_error"
+            ],
+            "maximum_path_distance_m": path_errors[
+                "maximum_displacement_path_distance_m"
+            ],
+            "maximum_load_factor_error": path_errors[
+                "maximum_load_factor_absolute_error"
+            ],
+            "rms_load_factor_error": path_errors["root_mean_square_load_factor_error"],
+            "maximum_residual_inf_kn": solver[
+                "maximum_checkpoint_residual_inf_norm_kn"
+            ],
+            "maximum_constraint_residual_m2": solver[
+                "maximum_accepted_constraint_residual_m2"
+            ],
+            "energy_gradient_relative_error": tangent_checks[
+                "energy_gradient_relative_error"
+            ],
+            "tangent_hessian_relative_error": tangent_checks[
+                "tangent_hessian_relative_error"
+            ],
+            "tangent_symmetry_relative_error": tangent_checks[
+                "tangent_symmetry_relative_error"
+            ],
+            "regularization_count": solver["regularization_count"],
+            "fallback_count": solver["fallback_count"],
         },
-        "source_result_hash": canonical_hash(result.to_dict()),
-        "claim_boundary": result.claim_boundary,
+        "source_result_hash": canonical_hash(result),
+        "claim_boundary": result["claim_boundary"],
     }
+    metrics = execution_receipt["metrics"]
 
-    metrics = {
-        "first_limit_load_factor": ScalarReferenceMetric(
-            name="first_limit_load_factor",
-            actual=result.first_limit_load_factor,
-            reference=result.first_limit_reference_factor,
-            absolute_tolerance=0.25,
-            relative_tolerance=None,
+    metric_specs = (
+        (
+            "first_limit_load_factor",
+            metrics["first_limit_load_factor"],
+            metrics["first_limit_reference_factor"],
+            0.25,
         ),
-        "maximum_path_distance_m": ScalarReferenceMetric(
-            name="maximum_path_distance_m",
-            actual=result.maximum_path_distance_m,
-            reference=0.0,
-            absolute_tolerance=0.004,
-            relative_tolerance=None,
+        (
+            "maximum_path_distance_m",
+            metrics["maximum_path_distance_m"],
+            0.0,
+            0.004,
         ),
-        "maximum_load_factor_error": ScalarReferenceMetric(
-            name="maximum_load_factor_error",
-            actual=result.maximum_load_factor_error,
-            reference=0.0,
-            absolute_tolerance=0.35,
-            relative_tolerance=None,
+        (
+            "maximum_load_factor_error",
+            metrics["maximum_load_factor_error"],
+            0.0,
+            0.35,
         ),
-        "rms_load_factor_error": ScalarReferenceMetric(
-            name="rms_load_factor_error",
-            actual=result.rms_load_factor_error,
-            reference=0.0,
-            absolute_tolerance=0.20,
-            relative_tolerance=None,
+        (
+            "rms_load_factor_error",
+            metrics["rms_load_factor_error"],
+            0.0,
+            0.20,
         ),
-        "maximum_residual_inf_kn": ScalarReferenceMetric(
-            name="maximum_residual_inf_kn",
-            actual=result.maximum_residual_inf_kn,
-            reference=0.0,
-            absolute_tolerance=1.0e-7,
-            relative_tolerance=None,
+        (
+            "maximum_residual_inf_kn",
+            metrics["maximum_residual_inf_kn"],
+            0.0,
+            1.0e-7,
         ),
-        "maximum_constraint_residual_m2": ScalarReferenceMetric(
-            name="maximum_constraint_residual_m2",
-            actual=result.maximum_constraint_residual_m2,
-            reference=0.0,
-            absolute_tolerance=1.0e-10,
-            relative_tolerance=None,
+        (
+            "maximum_constraint_residual_m2",
+            metrics["maximum_constraint_residual_m2"],
+            0.0,
+            1.0e-10,
         ),
-        "energy_gradient_relative_error": ScalarReferenceMetric(
-            name="energy_gradient_relative_error",
-            actual=result.energy_gradient_relative_error,
-            reference=0.0,
-            absolute_tolerance=1.0e-7,
-            relative_tolerance=None,
+        (
+            "energy_gradient_relative_error",
+            metrics["energy_gradient_relative_error"],
+            0.0,
+            1.0e-7,
         ),
-        "tangent_hessian_relative_error": ScalarReferenceMetric(
-            name="tangent_hessian_relative_error",
-            actual=result.tangent_hessian_relative_error,
-            reference=0.0,
-            absolute_tolerance=2.0e-7,
-            relative_tolerance=None,
+        (
+            "tangent_hessian_relative_error",
+            metrics["tangent_hessian_relative_error"],
+            0.0,
+            2.0e-7,
         ),
-        "tangent_symmetry_relative_error": ScalarReferenceMetric(
-            name="tangent_symmetry_relative_error",
-            actual=result.tangent_symmetry_relative_error,
-            reference=0.0,
-            absolute_tolerance=1.0e-12,
-            relative_tolerance=None,
+        (
+            "tangent_symmetry_relative_error",
+            metrics["tangent_symmetry_relative_error"],
+            0.0,
+            1.0e-12,
         ),
-    }
-    decision = build_scientific_decision(metrics=metrics).to_dict()
-    if not decision["contract_pass"] or decision["decision"] != "PASS":
+    )
+    metric_results = [
+        {
+            "metric_family": name,
+            "actual": actual,
+            "reference": reference,
+            "absolute_error": abs(actual - reference),
+            "absolute_tolerance": tolerance,
+            "contract_pass": abs(actual - reference) <= tolerance,
+        }
+        for name, actual, reference, tolerance in metric_specs
+    ]
+    decision = decide_benchmark(
+        metric_results,
+        decision="PASS",
+        evaluated_at=_FIXED_EVALUATED_AT,
+    )
+    if not decision["decision_contract_pass"] or decision["decision"] != "PASS":
         raise ValueError("Lee-frame scientific decision did not pass")
     return source_receipt, execution_receipt, decision
 
@@ -297,64 +311,52 @@ def write_lee_frame_verification_candidate_bundle(
     execution_bytes = _write_json(execution_path, execution_receipt)
     decision_bytes = _write_json(decision_path, decision)
 
-    evidence = VerificationEvidence(
-        schema_version="structural-verification-evidence.v1",
-        evidence_id=LEE_FRAME_EVIDENCE_ID,
-        level=3,
-        category=LEE_FRAME_CATEGORY,
-        truth_basis=LEE_FRAME_TRUTH_BASIS,
-        source_url_or_doi=LEE_FRAME_GENERATED_SOURCE_URI,
-        source_sha256=_sha256(source_bytes),
-        license=SourceLicenseReceipt(
-            approval_status="pending",
-            local_execution_approved=False,
-            commercial_use_approved=False,
-            redistribution_approved=False,
-            approved_by="",
-            evidence_ref=_relative(repository_root, source_path),
-        ),
-        reference_solver=ReferenceSolverReceipt(
-            name="Structural-Analysis bounded Lee-frame kernel",
-            verified_version=LEE_FRAME_SCHEMA_VERSION,
-            solver_class="product_bounded_reference_kernel",
-            independent_from_product=False,
-        ),
-        benchmark_name=(
-            "Lee frame snap-through and snap-back / NAFEMS NLGB8 / "
-            f"DOI {LEE_FRAME_REFERENCE_DOI}"
-        ),
-        publisher="Structural Engineering and Mechanics / NAFEMS",
-        dataset_id=LEE_FRAME_REFERENCE_TABLE,
-        measurement_types=(
-            "load_displacement_path",
-            "limit_load",
-            "equilibrium_residual",
-            "tangent_consistency",
-        ),
-        artifacts=(
-            EvidenceArtifactReceipt(
-                path=_relative(repository_root, source_path),
-                sha256=_sha256(source_bytes),
-                contract_pass=True,
+    evidence = {
+        "schema_version": VERIFICATION_EVIDENCE_SCHEMA_VERSION,
+        "evidence_id": LEE_FRAME_EVIDENCE_ID,
+        "level": 3,
+        "category": LEE_FRAME_CATEGORY,
+        "truth_basis": LEE_FRAME_TRUTH_BASIS,
+        "declared_blockers": list(LEE_FRAME_DECLARED_BLOCKERS),
+        "source": {
+            "url_or_doi": LEE_FRAME_GENERATED_SOURCE_URI,
+            "sha256": _sha256(source_bytes),
+            "license": {
+                "id": "lee-frame-generated-source-pending.v1",
+                "approval_status": "pending",
+                "local_execution_allowed": False,
+                "commercial_use_allowed": False,
+            },
+        },
+        "artifacts": [
+            {
+                "path": _relative(repository_root, source_path),
+                "sha256": _sha256(source_bytes),
+                "contract_pass": True,
+            },
+            {
+                "path": _relative(repository_root, execution_path),
+                "sha256": _sha256(execution_bytes),
+                "contract_pass": True,
+            },
+            {
+                "path": _relative(repository_root, decision_path),
+                "sha256": _sha256(decision_bytes),
+                "contract_pass": True,
+            },
+        ],
+        "decision": decision,
+        "publication": {
+            "benchmark_name": (
+                "Lee frame snap-through and snap-back / NAFEMS NLGB8 / "
+                f"DOI {LEE_FRAME_REFERENCE_DOI}"
             ),
-            EvidenceArtifactReceipt(
-                path=_relative(repository_root, execution_path),
-                sha256=_sha256(execution_bytes),
-                contract_pass=True,
-            ),
-            EvidenceArtifactReceipt(
-                path=_relative(repository_root, decision_path),
-                sha256=_sha256(decision_bytes),
-                contract_pass=True,
-            ),
-        ),
-        decision=decision,
-        declared_blockers=LEE_FRAME_DECLARED_BLOCKERS,
-        claim_boundary=LEE_FRAME_CLAIM_BOUNDARY,
-    )
+            "publisher": "Structural Engineering and Mechanics / NAFEMS",
+        },
+    }
     manifest = {
         "schema_version": "structural-verification-evidence-manifest.v1",
-        "evidence": [evidence.to_dict()],
+        "evidence": [evidence],
         "claim_boundary": (
             "This candidate manifest exposes one published nonlinear snap-through "
             "row without granting hierarchy credit. The evidence source URI and "

@@ -4070,7 +4070,7 @@ function App() {
       source_label: activeSnapshot.sourceLabel,
       route_focus: resolveSurfaceRouteFocus(surface.id, routeTitle),
       return_to: buildWorkbenchReturnHref(surface.href),
-      return_label: 'Structural Optimization Workbench',
+      return_label: 'Structural Analysis',
       ...selectionParamsBySurface[surface.id],
       ...(surface.id === 'viewer'
         ? {
@@ -4102,7 +4102,7 @@ function App() {
       selection_status: activeSnapshot.statusLabel,
       source_label: activeSnapshot.sourceLabel,
       return_to: buildWorkbenchReturnHref(artifact.href),
-      return_label: 'Structural Optimization Workbench',
+      return_label: 'Structural Analysis',
     })
   }
 
@@ -4266,7 +4266,7 @@ function App() {
         <div className="app-bar__brand">
           <span className="app-bar__mark" aria-hidden="true" />
           <div className="app-bar__brand-copy">
-            <p className="app-bar__product">Structural Optimization Workbench</p>
+            <p className="app-bar__product">Structural Analysis</p>
             <p className="app-bar__env">Local evidence workspace</p>
           </div>
         </div>

@@ -115,6 +115,22 @@ def test_model_exposes_immutable_typed_entities_without_breaking_raw_json(
     assert model.elements[0]["nodes"] == ["N1", "N2"]
 
 
+def test_support_prescribed_values_are_typed_and_round_trip() -> None:
+    support = Support.from_mapping(
+        {
+            "node": "N2",
+            "dofs": ["UX", "UY", "RZ"],
+            "prescribed_values": {"UX": 0.001, "RZ": -0.002},
+        }
+    )
+
+    assert support.prescribed_values == (("RZ", -0.002), ("UX", 0.001))
+    assert support.to_dict()["prescribed_values"] == {
+        "RZ": -0.002,
+        "UX": 0.001,
+    }
+
+
 def test_typed_entities_round_trip_to_fresh_legacy_mappings(tmp_path: Path) -> None:
     model = load_model(_write(tmp_path / "frame.json"))
 
@@ -212,9 +228,7 @@ def test_public_analysis_uses_one_detached_snapshot_and_propagates_both_hashes(
 
     assert result.input_checksum == expected_source_checksum
     assert result.canonical_model_checksum == expected_canonical_checksum
-    assert result.metrics["analysis_input_snapshot"] == (
-        "detached_canonical_model_v1"
-    )
+    assert result.metrics["analysis_input_snapshot"] == ("detached_canonical_model_v1")
     assert report.input_checksum == expected_source_checksum
     assert report.canonical_model_checksum == expected_canonical_checksum
     assert "canonical_model_checksum" in report.passed_fields

@@ -17,6 +17,8 @@ from structural_analysis.analyses.modal import (
     AUTHORITATIVE_CPU_MODAL_SOLVER_ID,
     EIGEN_BACKEND,
     MODAL_CLAIM_BOUNDARY,
+    SPARSE_MODAL_CLAIM_BOUNDARY,
+    SPARSE_MODAL_EIGEN_BACKEND,
 )
 from structural_analysis.assembly.modal import assemble_modal_matrices
 from structural_analysis.elements.axial import (
@@ -227,6 +229,45 @@ def test_public_cantilever_modal_path_matches_one_element_closed_eigenvalues(
             for value in node["components"].values()
         ) == pytest.approx(1.0)
 
+
+def test_explicit_sparse_modal_backend_matches_dense_and_reports_dense_assembly(
+    tmp_path: Path,
+) -> None:
+    model_path = tmp_path / "sparse-cantilever.json"
+    payload = _frame_payload(supports=[{"node": "N1", "dofs": "all"}])
+    _write_model(model_path, payload)
+    model = load_model(model_path)
+
+    dense = analyze(
+        model,
+        AnalysisConfig(analysis_type="modal", mode_count=2, tolerance=1.0e-8),
+    )
+    sparse = analyze(
+        model,
+        AnalysisConfig(
+            analysis_type="modal",
+            mode_count=2,
+            tolerance=1.0e-8,
+            eigen_backend=SPARSE_MODAL_EIGEN_BACKEND,
+        ),
+    )
+
+    assert dense.status == "ready"
+    assert sparse.status == "ready"
+    assert [row["eigenvalue_rad2_per_s2"] for row in sparse.metrics["modes"]] == (
+        pytest.approx(
+            [row["eigenvalue_rad2_per_s2"] for row in dense.metrics["modes"]],
+            rel=1.0e-8,
+        )
+    )
+    assert sparse.metrics["matrix_backend"] == SPARSE_MODAL_EIGEN_BACKEND
+    assert sparse.metrics["sparse_eigen_extraction_used"] is True
+    assert sparse.metrics["sparse_modal_backend_connected"] is True
+    assert sparse.metrics["whole_model_assembly_storage"] == "dense_numpy_binary64"
+    assert sparse.metrics["native_sparse_assembly_used"] is False
+    assert sparse.metrics["fallback_used"] is False
+    assert sparse.metrics["regularization_used"] is False
+    assert sparse.metrics["claim_boundary"] == SPARSE_MODAL_CLAIM_BOUNDARY
 
 def test_public_axial_modal_path_matches_consistent_mass_solution(
     tmp_path: Path,

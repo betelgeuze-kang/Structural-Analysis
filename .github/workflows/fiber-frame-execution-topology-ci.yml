@@ -9,6 +9,11 @@ on:
       - "src/structural_analysis/assembly/__init__.py"
       - "src/structural_analysis/benchmark/__init__.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py"
+      - "src/structural_analysis/assembly/corotational_frame2d_member_features.py"
+      - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py"
+      - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py"
+      - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py"
+      - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_link.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py"
@@ -19,7 +24,10 @@ on:
       - "src/structural_analysis/benchmark/stateful_corotational_linked_frame_cyclic.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_io.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py"
+      - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_state.py"
+      - "src/structural_analysis/solvers/nonlinear/newton.py"
+      - "src/structural_analysis/solvers/nonlinear/sparse_factorization.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py"
@@ -35,13 +43,24 @@ on:
       - "src/structural_analysis/api/__init__.py"
       - "src/structural_analysis/api/nonlinear_fiber_frame.py"
       - "src/structural_analysis/api/nonlinear_fiber_frame_cli.py"
+      - "src/structural_analysis/api/nonlinear_frame.py"
+      - "src/structural_analysis/api/nonlinear_frame_cli.py"
       - "src/structural_analysis/engine_v2/contracts/nonlinear_result.py"
       - "src/structural_analysis/engine_v2/contracts/nonlinear_recovery.py"
       - "src/structural_analysis/schemas/nonlinear_numerical_result_ir_v1.schema.json"
       - "src/structural_analysis/schemas/stateful_corotational_fiber_frame2d_checkpoint_v1.schema.json"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_j1_j5_adapter_v1.schema.json"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_engineering_result_v1.schema.json"
+      - "src/structural_analysis/schemas/corotational_fiber_frame_general_j1_j5_v1.schema.json"
+      - "src/structural_analysis/schemas/stateful_corotational_fiber_frame2d_checkpoint_chain_v1.schema.json"
+      - "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json"
+      - "src/structural_analysis/schemas/sparse_factorization_diagnostic_v1.schema.json"
       - "src/structural_analysis/ai/__init__.py"
       - "src/structural_analysis/ai/shadow_solver_controller.py"
       - "src/structural_analysis/ai/fiber_frame_solver_episode_adapter.py"
+      - "src/structural_analysis/ai/offline_counterfactual.py"
+      - "src/structural_analysis/schemas/offline_counterfactual_dataset_v1.schema.json"
+      - "src/structural_analysis/schemas/shadow_policy_scorecard_v1.schema.json"
       - "tests/test_stateful_fiber_frame2d_execution_topology.py"
       - "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py"
       - "tests/test_stateful_fiber_frame2d_kinematic_state_chain.py"
@@ -51,6 +70,11 @@ on:
       - "tests/test_stateful_fiber_frame2d_nonlinear_recovery.py"
       - "tests/test_stateful_corotational_fiber_beam2d.py"
       - "tests/test_stateful_corotational_fiber_frame2d.py"
+      - "tests/test_corotational_fiber_frame_j1_j5.py"
+      - "tests/test_corotational_fiber_frame_engineering_recovery.py"
+      - "tests/test_corotational_fiber_frame_general.py"
+      - "tests/test_corotational_frame2d_member_features.py"
+      - "tests/test_unified_nonlinear_frame_api.py"
       - "tests/test_stateful_corotational_fiber_frame2d_adaptive.py"
       - "tests/test_stateful_corotational_fiber_frame2d_arc_length.py"
       - "tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py"
@@ -58,6 +82,8 @@ on:
       - "tests/test_stateful_corotational_steel_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_fiber_frame2d_solver.py"
+      - "tests/test_corotational_fiber_frame_sparse.py"
+      - "tests/test_sparse_factorization_diagnostics.py"
       - "tests/test_public_rc_fiber_frame_api.py"
       - "tests/test_verify_quality_gate_contract.py"
       - "tests/test_engine_v2_nonlinear_result_recovery_v1.py"
@@ -65,6 +91,7 @@ on:
       - "tests/test_engine_v2_solver_episode_v1.py"
       - "tests/test_shadow_solver_controller.py"
       - "tests/test_fiber_frame_solver_episode_adapter.py"
+      - "tests/test_ai_offline_counterfactual.py"
       - "docs/fiber-frame-nonlinear-execution-topology.md"
       - "docs/fiber-frame-physical-equation-scaling.md"
       - "docs/fiber-frame-nonlinear-kinematic-state-chain.md"
@@ -75,6 +102,13 @@ on:
       - "docs/fiber-frame-nonlinear-engineering-recovery.md"
       - "docs/stateful-corotational-fiber-beam2d.md"
       - "docs/stateful-corotational-fiber-frame2d-global-assembly.md"
+      - "docs/corotational-fiber-frame-j1-j5-adapter.md"
+      - "docs/corotational-fiber-frame-engineering-recovery.md"
+      - "docs/corotational-connected-frame2d.md"
+      - "docs/corotational-member-features.md"
+      - "docs/unified-nonlinear-frame-api.md"
+      - "docs/corotational-fiber-frame-native-sparse.md"
+      - "docs/sparse-factorization-conditioning-diagnostics.md"
       - "docs/stateful-corotational-fiber-frame2d-newton-load-control.md"
       - "docs/stateful-corotational-fiber-frame2d-adaptive-continuation.md"
       - "docs/stateful-corotational-fiber-frame2d-arc-length.md"
@@ -84,9 +118,16 @@ on:
       - "docs/stateful-corotational-linked-frame-cyclic-benchmark.md"
       - "docs/public-rc-fiber-frame.md"
       - "examples/public_rc_fiber_frame_cantilever.json"
+      - "examples/public_corotational_rc_portal.json"
+      - "examples/public_corotational_branching_frame.json"
+      - "examples/public_corotational_member_features.json"
       - "docs/engine-v2-nonlinear-result-recovery.md"
       - "docs/fiber-frame-solver-episode-adapter.md"
       - "docs/ai-shadow-solver-controller.md"
+      - "docs/offline-counterfactual-shadow-scorecard.md"
+      - "scripts/build_ai_shadow_counterfactual_artifacts.py"
+      - "artifacts/ai/offline_counterfactual_dataset.json"
+      - "artifacts/ai/shadow_policy_scorecard.json"
       - "docs/cto-ai-solver-improvement-plan.md"
       - ".github/workflows/fiber-frame-execution-topology-ci.yml"
       - "scripts/check_github_actions_runner_policy.py"
@@ -112,6 +153,7 @@ jobs:
             src/structural_analysis/assembly/__init__.py \
             src/structural_analysis/benchmark/__init__.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py \
+            src/structural_analysis/assembly/corotational_frame2d_member_features.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_link.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py \
@@ -147,6 +189,7 @@ jobs:
             tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
             tests/test_stateful_fiber_frame2d_nonlinear_recovery.py \
             tests/test_stateful_corotational_fiber_frame2d.py \
+            tests/test_corotational_frame2d_member_features.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
             tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
@@ -162,6 +205,7 @@ jobs:
             src/structural_analysis/assembly/__init__.py \
             src/structural_analysis/benchmark/__init__.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py \
+            src/structural_analysis/assembly/corotational_frame2d_member_features.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_link.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py \
@@ -196,6 +240,7 @@ jobs:
             tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
             tests/test_stateful_fiber_frame2d_nonlinear_recovery.py \
             tests/test_stateful_corotational_fiber_frame2d.py \
+            tests/test_corotational_frame2d_member_features.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
             tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
@@ -211,6 +256,7 @@ jobs:
             src/structural_analysis/assembly/__init__.py \
             src/structural_analysis/benchmark/__init__.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py \
+            src/structural_analysis/assembly/corotational_frame2d_member_features.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_link.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_adaptive.py \
             src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py \
@@ -246,6 +292,7 @@ jobs:
             tests/test_stateful_fiber_frame2d_nonlinear_result_adapter.py \
             tests/test_stateful_fiber_frame2d_nonlinear_recovery.py \
             tests/test_stateful_corotational_fiber_frame2d.py \
+            tests/test_corotational_frame2d_member_features.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
             tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
@@ -262,6 +309,7 @@ jobs:
           python -m pytest -vv \
             tests/test_stateful_corotational_fiber_beam2d.py \
             tests/test_stateful_corotational_fiber_frame2d.py \
+            tests/test_corotational_frame2d_member_features.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
             tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
@@ -284,11 +332,25 @@ jobs:
             tests/test_shadow_solver_controller.py \
             tests/test_fiber_frame_solver_episode_adapter.py \
             tests/test_engine_v2_equation_scaling_v1.py
+      - name: Verify offline counterfactual shadow scorecard
+        run: |
+          python -m ruff check \
+            src/structural_analysis/ai/offline_counterfactual.py \
+            scripts/build_ai_shadow_counterfactual_artifacts.py \
+            tests/test_ai_offline_counterfactual.py
+          python -m ruff format --check \
+            src/structural_analysis/ai/offline_counterfactual.py \
+            scripts/build_ai_shadow_counterfactual_artifacts.py \
+            tests/test_ai_offline_counterfactual.py
+          python -m mypy src/structural_analysis/ai/offline_counterfactual.py
+          python -m pytest -q tests/test_ai_offline_counterfactual.py
+          python scripts/build_ai_shadow_counterfactual_artifacts.py --check
       - name: Fiber-frame regression neighborhood
         run: |
           python -m pytest -q \
             tests/test_stateful_corotational_fiber_beam2d.py \
             tests/test_stateful_corotational_fiber_frame2d.py \
+            tests/test_corotational_frame2d_member_features.py \
             tests/test_stateful_corotational_fiber_frame2d_adaptive.py \
             tests/test_stateful_corotational_fiber_frame2d_arc_length.py \
             tests/test_stateful_corotational_composite_frame_cyclic_benchmark.py \
@@ -299,3 +361,51 @@ jobs:
             tests/test_stateful_fiber_frame2d.py \
             tests/test_stateful_fiber_frame2d_material_state_bundle.py \
             tests/test_stateful_fiber_frame2d_material_state_projection_chain.py
+      - name: Corotational J1-J5, exact recovery, and native sparse contracts
+        run: |
+          python -m ruff check \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py \
+            src/structural_analysis/assembly/corotational_frame2d_member_features.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py \
+            src/structural_analysis/solvers/nonlinear/newton.py \
+            src/structural_analysis/solvers/nonlinear/sparse_factorization.py \
+            src/structural_analysis/api/nonlinear_frame.py \
+            src/structural_analysis/api/nonlinear_frame_cli.py \
+            tests/test_corotational_fiber_frame_j1_j5.py \
+            tests/test_corotational_fiber_frame_engineering_recovery.py \
+            tests/test_corotational_fiber_frame_general.py \
+            tests/test_corotational_frame2d_member_features.py \
+            tests/test_corotational_fiber_frame_sparse.py \
+            tests/test_sparse_factorization_diagnostics.py \
+            tests/test_unified_nonlinear_frame_api.py
+          python -m ruff format --check \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py \
+            src/structural_analysis/assembly/corotational_frame2d_member_features.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py \
+            src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py \
+            src/structural_analysis/solvers/nonlinear/newton.py \
+            src/structural_analysis/solvers/nonlinear/sparse_factorization.py \
+            src/structural_analysis/api/nonlinear_frame.py \
+            src/structural_analysis/api/nonlinear_frame_cli.py \
+            tests/test_corotational_fiber_frame_j1_j5.py \
+            tests/test_corotational_fiber_frame_engineering_recovery.py \
+            tests/test_corotational_fiber_frame_general.py \
+            tests/test_corotational_frame2d_member_features.py \
+            tests/test_corotational_fiber_frame_sparse.py \
+            tests/test_sparse_factorization_diagnostics.py \
+            tests/test_unified_nonlinear_frame_api.py
+          python -m pytest -q \
+            tests/test_corotational_fiber_frame_j1_j5.py \
+            tests/test_corotational_fiber_frame_engineering_recovery.py \
+            tests/test_corotational_fiber_frame_general.py \
+            tests/test_corotational_frame2d_member_features.py \
+            tests/test_corotational_fiber_frame_sparse.py \
+            tests/test_sparse_factorization_diagnostics.py \
+            tests/test_unified_nonlinear_frame_api.py

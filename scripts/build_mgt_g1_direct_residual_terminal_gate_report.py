@@ -20,7 +20,9 @@ DEFAULT_TERMINAL_EQUILIBRIUM = (
 )
 DEFAULT_GATE_SUMMARY = PRODUCTIZATION / "mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json"
 DEFAULT_OUT = PRODUCTIZATION / "mgt_g1_direct_residual_terminal_gate_report.json"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 
 
 def _now_utc_iso() -> str:

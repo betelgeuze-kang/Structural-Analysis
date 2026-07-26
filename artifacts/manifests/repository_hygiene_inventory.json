@@ -1,0 +1,85 @@
+{
+  "schema_version": "structural-analysis-repository-hygiene-inventory.v1",
+  "observed_at": "2026-07-22T14:09:26Z",
+  "repository": "betelgeuze-kang/Structural-Analysis",
+  "default_branch": "main",
+  "observed_default_branch_head": "86885920842ed92fdb638f10afc2d0ab3dc423ab",
+  "observation_source": "github_app_and_git_ls_remote_read_only",
+  "candidate_base_head": "ab4b2e6191f87d9de9d117e2743d8f3fa4c9e50c",
+  "candidate_base_behind_default_branch_by": 6,
+  "candidate_remote_changed_path_overlap_count": 6,
+  "candidate_remote_changed_path_overlaps": [
+    ".github/workflows/fiber-frame-execution-topology-ci.yml",
+    "scripts/verify_quality_gate.py",
+    "src/structural_analysis/assembly/__init__.py",
+    "src/structural_analysis/benchmark/__init__.py",
+    "src/structural_analysis/materials/__init__.py",
+    "tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py"
+  ],
+  "external_mutation_authorized": false,
+  "external_actions_performed": [],
+  "open_pull_requests": [
+    {
+      "number": 137,
+      "title": "Fix concrete-damage artifact determinism and mismatch diagnostics",
+      "state": "open",
+      "mergeable": false,
+      "observed_commit_count": 22,
+      "observed_changed_file_count": 23,
+      "observed_updated_at": "2026-07-20T12:46:31Z",
+      "body_claims_one_commit": true,
+      "body_claims_exactly_four_changed_files": true,
+      "metadata_consistent": false,
+      "recommended_disposition": "supersede_or_rewrite_metadata_then_re_review",
+      "disposition_authorized": false,
+      "blockers": [
+        "commit_count_claim_mismatch",
+        "changed_file_scope_claim_requires_refresh",
+        "human_close_or_supersede_decision_missing"
+      ]
+    }
+  ],
+  "recently_merged_pull_requests": [
+    {
+      "number": 162,
+      "title": "Add local-axis links to corotational fiber frames",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-07-22T07:06:24Z",
+      "merge_commit_sha": "51502203b75a5362bc4b0e25c3d97ea1e55eca79"
+    },
+    {
+      "number": 166,
+      "title": "Add fixed-reference local-axis compression-only gap links",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-07-22T13:17:27Z",
+      "merge_commit_sha": "a9e358aea29abcc14402f6401bc7af4d125784b2"
+    },
+    {
+      "number": 167,
+      "title": "fix(evidence): stabilize concrete damage localization receipts",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-07-22T14:02:38Z",
+      "merge_commit_sha": "86885920842ed92fdb638f10afc2d0ab3dc423ab"
+    }
+  ],
+  "remote_branch_inventory": {
+    "stale_after_days": 90,
+    "observed_remote_branch_count": 151,
+    "observed_stale_remote_branch_count": 0,
+    "staleness_assessment_complete": false,
+    "deletion_authorized": false,
+    "deleted_branches": []
+  },
+  "closure_pass": false,
+  "closure_blockers": [
+    "open_pr_137_metadata_inconsistent",
+    "open_pr_137_human_disposition_missing",
+    "candidate_base_six_commits_behind_default_branch",
+    "remote_branch_age_inventory_not_authoritative",
+    "external_pr_or_branch_mutation_not_authorized"
+  ],
+  "claim_boundary": "This is a read-only inventory. It records no PR close, branch deletion, merge, push, or issue mutation and cannot close repository hygiene until current GitHub state is revalidated and an authorized human supplies the required dispositions."
+}

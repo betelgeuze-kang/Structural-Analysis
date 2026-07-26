@@ -32,7 +32,7 @@ export function WorkbenchShell({
 
       <header className="wb2-header">
         <div>
-          <p className="wb2-eyebrow">Structural Optimization Workbench</p>
+          <p className="wb2-eyebrow">Structural Analysis</p>
           <div className="wb2-title-row">
             <h1>Workbench v2</h1>
             <StateChip state={dataModeChipState(dataMode)} srLabel="Data mode" />

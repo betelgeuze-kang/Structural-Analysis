@@ -37,7 +37,9 @@ DEFAULT_CAUSE_NARROWING_STATUS = (
     PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
 )
 DIRECT_PROBE = Path("implementation/phase1/run_mgt_direct_residual_newton_probe.py")
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 HIP_RESIDUAL_REPLAY_BACKENDS = {
     "hip_full_residual",
     "hip_full_residual_resident",

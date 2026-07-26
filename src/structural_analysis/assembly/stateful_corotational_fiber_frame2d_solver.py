@@ -18,11 +18,16 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state import (
     StatefulCorotationalFiberFrame2DCheckpoint,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_sparse import (
+    assemble_stateful_corotational_fiber_frame2d_sparse,
+)
 from structural_analysis.solvers.nonlinear.newton import (
     NO_SOLVE_REACTION_ONLY_DISPOSITION,
     RESIDUAL_FORMULA,
     RESIDUAL_FORMULA_HASH,
     SOLVE_FREE_EQUATIONS_DISPOSITION,
+    VECTOR_MATRIX_BACKEND,
+    VECTOR_SPARSE_MATRIX_BACKEND,
     NewtonRaphsonConfig,
     NewtonRaphsonVectorSolution,
     newton_raphson_vector,
@@ -56,6 +61,7 @@ class StatefulCorotationalFiberFrame2DLoadStepAdapter:
     problem: StatefulCorotationalFiberFrame2DProblem
     accepted_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
     target_load_factor: float
+    matrix_backend: str = VECTOR_MATRIX_BACKEND
 
     @property
     def case_id(self) -> str:
@@ -76,7 +82,15 @@ class StatefulCorotationalFiberFrame2DLoadStepAdapter:
     def assemble(
         self,
         free_displacements_m: np.ndarray,
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, Any]:
+        if self.matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND:
+            sparse_assembly = assemble_stateful_corotational_fiber_frame2d_sparse(
+                self.problem,
+                self.accepted_checkpoint,
+                target_load_factor=self.target_load_factor,
+                trial_free_coordinates_m=free_displacements_m,
+            )
+            return sparse_assembly.residual_kn, sparse_assembly.jacobian_csr
         assembly = assemble_stateful_corotational_fiber_frame2d(
             self.problem,
             self.accepted_checkpoint,
@@ -129,14 +143,16 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
     )
     parent_bytes = accepted_checkpoint.canonical_bytes()
     load_factor = _finite(target_load_factor, name="target_load_factor")
+    solver_config = config or NewtonRaphsonConfig()
     adapter = StatefulCorotationalFiberFrame2DLoadStepAdapter(
         problem=problem,
         accepted_checkpoint=accepted_checkpoint,
         target_load_factor=load_factor,
+        matrix_backend=solver_config.matrix_backend,
     )
     solution = newton_raphson_vector(
         adapter,
-        config=config or NewtonRaphsonConfig(),
+        config=solver_config,
     )
     trial_assembly = assemble_stateful_corotational_fiber_frame2d(
         problem,
@@ -161,6 +177,14 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
         and solution.metrics.get("increment_gate_passed") is True
         and solution.metrics.get("regularization_used") is False
         and solution.metrics.get("fallback_used") is False
+        and (
+            solver_config.matrix_backend != VECTOR_SPARSE_MATRIX_BACKEND
+            or solution.metrics.get("native_sparse_assembly_used") is True
+        )
+        and (
+            solver_config.matrix_backend != VECTOR_SPARSE_MATRIX_BACKEND
+            or solution.metrics.get("sparse_factorization_diagnostics_passed") is True
+        )
     )
     parent_binding = bool(
         trial_assembly.parent_checkpoint_hash == accepted_checkpoint.state_hash
@@ -233,6 +257,9 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
             "residual_formula": RESIDUAL_FORMULA,
             "residual_formula_hash": RESIDUAL_FORMULA_HASH,
             "tangent_definition": "material_plus_geometric_consistent",
+            "member_feature_tangent_definition": (
+                "finite_rigid_arm_second_derivative_plus_dead_load_potential_plus_release_schur_condensation"
+            ),
             "target_load_factor": load_factor,
             "parent_checkpoint_hash": accepted_checkpoint.state_hash,
             "parent_epoch": accepted_checkpoint.epoch,
@@ -256,6 +283,45 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
             "increment_gate_passed": solution.metrics.get("increment_gate_passed"),
             "regularization_used": bool(solution.metrics.get("regularization_used")),
             "fallback_used": bool(solution.metrics.get("fallback_used")),
+            "matrix_backend": solution.metrics.get("matrix_backend"),
+            "sparse_backend_used": bool(solution.metrics.get("sparse_backend_used")),
+            "native_sparse_assembly_used": bool(
+                solution.metrics.get("native_sparse_assembly_used")
+            ),
+            "stiffness_storage": solution.metrics.get("stiffness_storage"),
+            "sparse_factorization_backend": solution.metrics.get(
+                "sparse_factorization_backend"
+            ),
+            "sparse_factorization_count": int(
+                solution.metrics.get("sparse_factorization_count", 0)
+            ),
+            "sparse_factorization_diagnostics_passed": solution.metrics.get(
+                "sparse_factorization_diagnostics_passed"
+            ),
+            "sparse_factorization_max_condition_number_1": solution.metrics.get(
+                "sparse_factorization_max_condition_number_1"
+            ),
+            "sparse_factorization_min_normalized_absolute_pivot": (
+                solution.metrics.get(
+                    "sparse_factorization_min_normalized_absolute_pivot"
+                )
+            ),
+            "sparse_factorization_max_backward_error": solution.metrics.get(
+                "sparse_factorization_max_backward_error"
+            ),
+            "sparse_factorization_diagnostic_hashes": [
+                row["diagnostic_hash"]
+                for row in solution.metrics.get("sparse_factorization_diagnostics", ())
+            ],
+            "sparse_factorization_policy_hash": next(
+                (
+                    row["policy"]["policy_hash"]
+                    for row in solution.metrics.get(
+                        "sparse_factorization_diagnostics", ()
+                    )
+                ),
+                None,
+            ),
             "committed": committed,
             "rollback_exact": rollback_exact,
             "yielded_member_count": sum(
@@ -266,6 +332,41 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
                 int(row.response.damaged_integration_point_count > 0)
                 for row in trial_assembly.member_assemblies
             ),
+            "member_feature_count": sum(
+                int(
+                    member.features.has_release
+                    or member.features.has_rigid_offset
+                    or member.features.has_distributed_load
+                )
+                for member in problem.members
+            ),
+            "released_end_count": sum(
+                len(member.features.released_element_dofs) for member in problem.members
+            ),
+            "rigid_offset_end_count": sum(
+                int(any(value != 0.0 for value in member.features.offset_i_global_m))
+                + int(any(value != 0.0 for value in member.features.offset_j_global_m))
+                for member in problem.members
+            ),
+            "distributed_load_member_count": sum(
+                int(member.features.has_distributed_load) for member in problem.members
+            ),
+            "release_local_iteration_count": sum(
+                row.feature_response.release_iterations
+                for row in trial_assembly.member_assemblies
+            ),
+            "release_equilibrium_max_abs_kn_m": max(
+                (
+                    float(np.max(np.abs(row.feature_response.release_residual_kn_m)))
+                    for row in trial_assembly.member_assemblies
+                    if row.feature_response.release_residual_kn_m.size
+                ),
+                default=0.0,
+            ),
+            "member_feature_response_hashes": [
+                row.feature_response.response_hash
+                for row in trial_assembly.member_assemblies
+            ],
         },
     )
 

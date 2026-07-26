@@ -1,0 +1,347 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/engineering_review_package_v1.schema.json",
+  "title": "P2 signed engineering-review package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "review_material",
+    "review_material_hash",
+    "reviewer_authority",
+    "reviewer_assertion",
+    "signature",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-engineering-review-package.v1"
+    },
+    "package_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"enum": ["blocked", "approved"]},
+    "contract_pass": {"const": true},
+    "review_material": {"$ref": "#/$defs/reviewMaterial"},
+    "review_material_hash": {"$ref": "#/$defs/hash"},
+    "reviewer_authority": {"$ref": "#/$defs/reviewerAuthority"},
+    "reviewer_assertion": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/reviewerAssertion"}
+      ]
+    },
+    "signature": {"$ref": "#/$defs/signature"},
+    "claims": {"$ref": "#/$defs/claims"},
+    "blockers_remaining": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 400}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nullableHash": {
+      "oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]
+    },
+    "nullableString": {
+      "oneOf": [
+        {"type": "string", "minLength": 1},
+        {"type": "null"}
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_commit_sha",
+        "remote_default_branch_head",
+        "worktree_clean",
+        "authoritative_release_snapshot",
+        "assessment_scope"
+      ],
+      "properties": {
+        "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "remote_default_branch_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "worktree_clean": {"type": "boolean"},
+        "authoritative_release_snapshot": {"type": "boolean"},
+        "assessment_scope": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidenceRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "byte_length"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/hash"},
+        "byte_length": {"type": "integer", "minimum": 1}
+      }
+    },
+    "prerequisiteCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "required", "observed", "pass"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "required": {"const": true},
+        "observed": {},
+        "pass": {"type": "boolean"}
+      }
+    },
+    "reviewMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_id",
+        "source",
+        "evidence_inventory",
+        "evidence_set_hash",
+        "review_scope",
+        "required_decision_ids",
+        "prerequisite_checks",
+        "claim_boundary"
+      ],
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "pattern": "^p2-engineering-review-[0-9a-f]{16}$"
+        },
+        "source": {"$ref": "#/$defs/source"},
+        "evidence_inventory": {
+          "type": "array",
+          "minItems": 20,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/evidenceRow"}
+        },
+        "evidence_set_hash": {"$ref": "#/$defs/hash"},
+        "review_scope": {
+          "type": "array",
+          "minItems": 7,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "required_decision_ids": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "numerical_results_accepted"},
+            {"const": "result_and_evidence_authority_boundary_accepted"},
+            {"const": "level2_external_vv_accepted"},
+            {"const": "level3_published_benchmarks_accepted"},
+            {"const": "frame3d_external_comparison_accepted"},
+            {"const": "checkpoint_resume_job_service_accepted"},
+            {"const": "known_limitations_and_blockers_accepted"}
+          ],
+          "items": false,
+          "minItems": 7,
+          "maxItems": 7
+        },
+        "prerequisite_checks": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/prerequisiteCheck"}
+        },
+        "claim_boundary": {"type": "string", "minLength": 400}
+      }
+    },
+    "reviewerAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry_path",
+        "registry_sha256",
+        "authorized_reviewer_count",
+        "matched_reviewer_id"
+      ],
+      "properties": {
+        "registry_path": {
+          "const": "artifacts/manifests/engineering_reviewers.json"
+        },
+        "registry_sha256": {"$ref": "#/$defs/hash"},
+        "authorized_reviewer_count": {"type": "integer", "minimum": 0},
+        "matched_reviewer_id": {"$ref": "#/$defs/nullableString"}
+      }
+    },
+    "decisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numerical_results_accepted",
+        "result_and_evidence_authority_boundary_accepted",
+        "level2_external_vv_accepted",
+        "level3_published_benchmarks_accepted",
+        "frame3d_external_comparison_accepted",
+        "checkpoint_resume_job_service_accepted",
+        "known_limitations_and_blockers_accepted"
+      ],
+      "properties": {
+        "numerical_results_accepted": {"type": "boolean"},
+        "result_and_evidence_authority_boundary_accepted": {"type": "boolean"},
+        "level2_external_vv_accepted": {"type": "boolean"},
+        "level3_published_benchmarks_accepted": {"type": "boolean"},
+        "frame3d_external_comparison_accepted": {"type": "boolean"},
+        "checkpoint_resume_job_service_accepted": {"type": "boolean"},
+        "known_limitations_and_blockers_accepted": {"type": "boolean"}
+      }
+    },
+    "reviewerAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "review_material_hash",
+        "reviewer_id",
+        "reviewed_at",
+        "disposition",
+        "decisions",
+        "review_notes",
+        "independent_review_attested"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "structural-analysis-engineering-review-assertion.v1"
+        },
+        "review_material_hash": {"$ref": "#/$defs/hash"},
+        "reviewer_id": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "format": "date-time"},
+        "disposition": {
+          "enum": ["approved_for_p2_closure", "changes_required", "rejected"]
+        },
+        "decisions": {"$ref": "#/$defs/decisions"},
+        "review_notes": {"type": "string"},
+        "independent_review_attested": {"type": "boolean"}
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "algorithm",
+        "signer_id",
+        "public_key_spki_base64",
+        "public_key_sha256",
+        "signature_base64",
+        "signed_payload_hash"
+      ],
+      "properties": {
+        "state": {"enum": ["unsigned", "verified"]},
+        "algorithm": {
+          "oneOf": [{"const": "ed25519"}, {"type": "null"}]
+        },
+        "signer_id": {"$ref": "#/$defs/nullableString"},
+        "public_key_spki_base64": {"$ref": "#/$defs/nullableString"},
+        "public_key_sha256": {"$ref": "#/$defs/nullableHash"},
+        "signature_base64": {"$ref": "#/$defs/nullableString"},
+        "signed_payload_hash": {"$ref": "#/$defs/nullableHash"}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "evidence_inventory_current",
+        "exact_current_head",
+        "authoritative_release_snapshot",
+        "prerequisite_evidence_pass",
+        "ready_for_external_review",
+        "trusted_reviewer",
+        "signature_verified",
+        "required_decisions_approved",
+        "signed_engineering_review",
+        "release_authority"
+      ],
+      "properties": {
+        "evidence_inventory_current": {"const": true},
+        "exact_current_head": {"type": "boolean"},
+        "authoritative_release_snapshot": {"type": "boolean"},
+        "prerequisite_evidence_pass": {"type": "boolean"},
+        "ready_for_external_review": {"type": "boolean"},
+        "trusted_reviewer": {"type": "boolean"},
+        "signature_verified": {"type": "boolean"},
+        "required_decisions_approved": {"type": "boolean"},
+        "signed_engineering_review": {"type": "boolean"},
+        "release_authority": {"const": false}
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "signature": {
+            "properties": {"state": {"const": "unsigned"}},
+            "required": ["state"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reviewer_assertion": {"type": "null"},
+          "signature": {
+            "properties": {
+              "algorithm": {"type": "null"},
+              "signer_id": {"type": "null"},
+              "public_key_spki_base64": {"type": "null"},
+              "public_key_sha256": {"type": "null"},
+              "signature_base64": {"type": "null"},
+              "signed_payload_hash": {"type": "null"}
+            }
+          },
+          "claims": {
+            "properties": {
+              "signature_verified": {"const": false},
+              "signed_engineering_review": {"const": false}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "reviewer_assertion": {"$ref": "#/$defs/reviewerAssertion"},
+          "signature": {
+            "properties": {
+              "algorithm": {"const": "ed25519"},
+              "signer_id": {"type": "string", "minLength": 1},
+              "public_key_spki_base64": {"type": "string", "minLength": 1},
+              "public_key_sha256": {"$ref": "#/$defs/hash"},
+              "signature_base64": {"type": "string", "minLength": 1},
+              "signed_payload_hash": {"$ref": "#/$defs/hash"}
+            }
+          },
+          "claims": {
+            "properties": {"signature_verified": {"const": true}}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "claims": {
+            "properties": {"signed_engineering_review": {"const": true}},
+            "required": ["signed_engineering_review"]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {"const": "approved"},
+          "blockers_remaining": {"maxItems": 0}
+        }
+      },
+      "else": {"properties": {"status": {"const": "blocked"}}}
+    }
+  ]
+}

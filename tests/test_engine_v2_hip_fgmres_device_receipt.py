@@ -148,7 +148,7 @@ def _runtime_output(*, architecture: str = "gfx1030") -> dict:
 def _wheel(*, bound: bool = True) -> dict:
     return {
         "filename": "structural_optimization_workbench-1.0.0-py3-none-any.whl",
-        "project_name": "structural-optimization-workbench",
+        "project_name": "structural-analysis",
         "project_version": "1.0.0",
         "sha256": "sha256:" + "a" * 64,
         "bound_at_execution": bound,

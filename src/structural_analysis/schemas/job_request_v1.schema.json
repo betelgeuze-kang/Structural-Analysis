@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/job_request_v1.schema.json",
+  "title": "Structural Analysis Nonlinear Frame Job Request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation",
+    "case_id",
+    "model",
+    "config",
+    "result_contract"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-job-request.v1"},
+    "operation": {"const": "nonlinear_frame"},
+    "case_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"},
+    "result_contract": {"const": "unified-nonlinear-frame-result.v1"},
+    "model": {"type": "object", "minProperties": 1},
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "load_steps",
+        "residual_tolerance",
+        "increment_tolerance_m",
+        "maximum_iterations",
+        "matrix_backend",
+        "control_mode"
+      ],
+      "properties": {
+        "profile": {
+          "enum": [
+            "corotational_one_bay_portal.v1",
+            "corotational_connected_frame2d.v1"
+          ]
+        },
+        "load_steps": {"type": "integer", "minimum": 2, "maximum": 64},
+        "residual_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "increment_tolerance_m": {"type": "number", "exclusiveMinimum": 0},
+        "maximum_iterations": {"type": "integer", "minimum": 1, "maximum": 200},
+        "matrix_backend": {
+          "enum": ["numpy_linalg_solve_dense", "scipy_sparse_spsolve_cpu"]
+        },
+        "control_mode": {"enum": ["load_control", "displacement_control"]},
+        "control_node_id": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "control_dof": {"type": ["string", "null"], "enum": ["UX", "UY", "RZ", null]},
+        "terminal_control_displacement": {"type": ["number", "null"]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"control_mode": {"const": "displacement_control"}}},
+          "then": {"required": ["control_node_id", "control_dof", "terminal_control_displacement"]}
+        }
+      ]
+    }
+  }
+}

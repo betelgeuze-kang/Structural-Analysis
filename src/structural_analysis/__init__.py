@@ -21,10 +21,17 @@ from structural_analysis.model.entities import (
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.results.validation import validate
+from structural_analysis.generated_capabilities import (
+    CAPABILITY_AUTHORITY_RULES,
+    CAPABILITY_SCHEMA_VERSION,
+    capabilities,
+)
 
 __all__ = [
     "ANALYSIS_ENGINE_VERSION",
     "CLAIM_BOUNDARY_VERSION",
+    "CAPABILITY_AUTHORITY_RULES",
+    "CAPABILITY_SCHEMA_VERSION",
     "AnalysisConfig",
     "AnalysisResult",
     "CanonicalModel",
@@ -37,6 +44,7 @@ __all__ = [
     "TypedModelEntities",
     "ValidationReport",
     "analyze",
+    "capabilities",
     "load_model",
     "to_legacy_mapping",
     "validate",

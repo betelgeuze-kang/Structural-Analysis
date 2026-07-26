@@ -10,6 +10,8 @@ from pathlib import Path
 import subprocess
 from typing import Any, Iterable
 
+PRODUCT_IDENTITY_MANIFEST = Path("artifacts/manifests/product_identity.json")
+
 
 def now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -28,6 +30,18 @@ def git_head(repo_root: Path = Path(".")) -> str:
 
 
 def engine_version(repo_root: Path = Path(".")) -> str:
+    identity_manifest = repo_root / PRODUCT_IDENTITY_MANIFEST
+    if identity_manifest.exists():
+        try:
+            identity = json.loads(identity_manifest.read_text(encoding="utf-8"))
+        except Exception:
+            identity = {}
+        if isinstance(identity, dict):
+            name = str(identity.get("distribution_name", "")).strip()
+            version = str(identity.get("version", "")).strip()
+            if name and version:
+                return f"{name}@{version}"
+
     package_json = repo_root / "package.json"
     if package_json.exists():
         try:
@@ -39,6 +53,10 @@ def engine_version(repo_root: Path = Path(".")) -> str:
             version = str(payload.get("version", "unversioned") or "unversioned")
             return f"{name}@{version}"
     return "structural-analysis-workbench@unversioned"
+
+
+CANONICAL_REPO_ROOT = Path(__file__).resolve().parents[1]
+CANONICAL_ENGINE_VERSION = engine_version(CANONICAL_REPO_ROOT)
 
 
 def file_sha256(path: Path) -> str:

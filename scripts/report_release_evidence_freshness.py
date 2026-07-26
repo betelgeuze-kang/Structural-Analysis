@@ -9,7 +9,14 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
 
 
 SCHEMA_VERSION = "release-evidence-freshness-report.v1"
@@ -629,7 +636,7 @@ def build_report(
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
         "source_commit_sha": current_commit,
-        "engine_version": "structural-optimization-workbench@1.0.0",
+        "engine_version": CANONICAL_ENGINE_VERSION,
         "input_checksums": _report_input_checksums(repo_root, rows),
         "reused_evidence": True,
         "reuse_policy": "status_rebuilt_from_release_evidence_artifact_metadata",

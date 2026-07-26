@@ -46,7 +46,7 @@ def test_candidate_payloads_are_deterministic_and_scientifically_pass() -> None:
     assert execution["metrics"]["fallback_count"] == 0
     assert execution["metrics"]["regularization_count"] == 0
     assert decision["decision"] == "PASS"
-    assert decision["contract_pass"] is True
+    assert decision["decision_contract_pass"] is True
     assert decision["benchmark_credit"] is True
 
 
@@ -85,13 +85,13 @@ def test_candidate_bundle_writes_exact_generated_source_artifacts(
     assert row["level"] == 3
     assert row["category"] == "nonlinear_snap_through"
     assert row["truth_basis"] == "published_benchmark"
-    assert row["source_url_or_doi"] == LEE_FRAME_GENERATED_SOURCE_URI
-    assert row["source_url_or_doi"] != LEE_FRAME_PUBLISHER_SOURCE_URI
-    assert row["source_sha256"] == _sha256(first.source_receipt_path.read_bytes())
+    assert row["source"]["url_or_doi"] == LEE_FRAME_GENERATED_SOURCE_URI
+    assert row["source"]["url_or_doi"] != LEE_FRAME_PUBLISHER_SOURCE_URI
+    assert row["source"]["sha256"] == _sha256(first.source_receipt_path.read_bytes())
     assert tuple(row["declared_blockers"]) == LEE_FRAME_DECLARED_BLOCKERS
     assert "publisher_source_bytes_not_attached" in row["declared_blockers"]
-    assert row["license"]["approval_status"] == "pending"
-    assert row["license"]["commercial_use_approved"] is False
+    assert row["source"]["license"]["approval_status"] == "pending"
+    assert row["source"]["license"]["commercial_use_allowed"] is False
     assert all(artifact["contract_pass"] for artifact in row["artifacts"])
 
 
@@ -99,32 +99,35 @@ def test_generated_receipt_hash_is_not_presented_as_publisher_source_hash(
     tmp_path: Path,
 ) -> None:
     bundle = write_lee_frame_verification_candidate_bundle(tmp_path)
-    row = bundle.evidence.to_dict()
+    row = bundle.evidence
     source = json.loads(bundle.source_receipt_path.read_text(encoding="utf-8"))
 
-    assert row["source_url_or_doi"].startswith("generated://")
-    assert row["source_sha256"] == _sha256(bundle.source_receipt_path.read_bytes())
+    assert row["source"]["url_or_doi"].startswith("generated://")
+    assert row["source"]["sha256"] == _sha256(bundle.source_receipt_path.read_bytes())
     assert source["publisher_source_uri"].startswith("https://doi.org/")
     assert source["publisher_source_bytes_attached"] is False
     assert source["publisher_source_sha256"] is None
-    assert row["source_url_or_doi"] != source["publisher_source_uri"]
+    assert row["source"]["url_or_doi"] != source["publisher_source_uri"]
 
 
 def test_candidate_is_visible_but_receives_zero_formal_credit(tmp_path: Path) -> None:
     bundle = write_lee_frame_verification_candidate_bundle(tmp_path)
-    inspection = inspect_verification_evidence(bundle.evidence, root=tmp_path)
+    inspection = inspect_verification_evidence(bundle.evidence)
 
     assert inspection["evidence_id"] == LEE_FRAME_EVIDENCE_ID
     assert inspection["ready_for_hierarchy_credit"] is False
-    assert "license_receipt_not_approved" in inspection["blockers"]
-    assert "reference_solver_not_independent" in inspection["blockers"]
+    assert "verification_evidence_license_not_approved" in inspection["blockers"]
+    assert (
+        "verification_evidence_local_execution_not_approved" in inspection["blockers"]
+    )
     assert set(LEE_FRAME_DECLARED_BLOCKERS).issubset(inspection["blockers"])
     assert inspection["decision"]["decision"] == "PASS"
-    assert inspection["artifact_contract_pass"] is True
+    assert inspection["decision"]["benchmark_credit"] is True
+    assert not any("artifact" in blocker for blocker in inspection["blockers"])
 
     status = build_verification_hierarchy_status(
-        tmp_path,
-        operator_manifest_path=bundle.manifest_path,
+        repo_root=tmp_path,
+        operator_evidence_path=bundle.manifest_path,
     )
     row = next(
         value
@@ -143,8 +146,7 @@ def test_candidate_is_visible_but_receives_zero_formal_credit(tmp_path: Path) ->
 
 def test_candidate_does_not_write_canonical_operator_manifest(tmp_path: Path) -> None:
     canonical = (
-        tmp_path
-        / "implementation/phase1/release_evidence/productization/"
+        tmp_path / "implementation/phase1/release_evidence/productization/"
         "verification_hierarchy_evidence.json"
     )
     bundle = write_lee_frame_verification_candidate_bundle(tmp_path)

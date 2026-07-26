@@ -1,0 +1,15 @@
+[run]
+branch = True
+source =
+    structural_analysis.analyses
+    structural_analysis.model
+    structural_analysis.results.schema
+    structural_analysis.results.validation
+    structural_analysis.units
+
+[report]
+fail_under = 85
+precision = 0
+show_missing = True
+skip_empty = True
+

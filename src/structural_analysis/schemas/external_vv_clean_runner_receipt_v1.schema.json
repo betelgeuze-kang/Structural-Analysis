@@ -1,0 +1,401 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/external_vv_clean_runner_receipt_v1.schema.json",
+  "title": "Container-isolated external V&V technical candidate receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "generated_at",
+    "source_commit_sha",
+    "status",
+    "truth_class",
+    "runner",
+    "isolation",
+    "external_assets",
+    "product_receipts",
+    "cross_environment_parity",
+    "technical_contract_pass",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-external-vv-clean-runner-receipt.v1"
+    },
+    "artifact_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "status": {
+      "enum": ["partial", "blocked"]
+    },
+    "truth_class": {
+      "const": "container_isolated_external_vv_technical_candidate"
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_image",
+        "derived_image_id",
+        "runner_source_sha256",
+        "schema_sha256",
+        "system",
+        "machine",
+        "python_version",
+        "python_executable_sha256",
+        "python_packages",
+        "debian_packages"
+      ],
+      "properties": {
+        "base_image": {
+          "type": "string",
+          "pattern": "^docker\\.io/library/python:3\\.11-slim-bookworm@sha256:[0-9a-f]{64}$"
+        },
+        "derived_image_id": {
+          "$ref": "#/$defs/sha256"
+        },
+        "runner_source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "schema_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "system": {
+          "const": "Linux"
+        },
+        "machine": {
+          "type": "string",
+          "minLength": 1
+        },
+        "python_version": {
+          "type": "string",
+          "pattern": "^3\\.11\\."
+        },
+        "python_executable_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "python_packages": {
+          "$ref": "#/$defs/version_map"
+        },
+        "debian_packages": {
+          "$ref": "#/$defs/version_map"
+        }
+      }
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_mount_read_only",
+        "runtime_default_network_route_present",
+        "designated_output_mount_writable",
+        "isolation_contract_pass"
+      ],
+      "properties": {
+        "repository_mount_read_only": {
+          "const": true
+        },
+        "runtime_default_network_route_present": {
+          "const": false
+        },
+        "designated_output_mount_writable": {
+          "const": true
+        },
+        "isolation_contract_pass": {
+          "const": true
+        }
+      }
+    },
+    "external_assets": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["filename", "sha256", "bundled_in_repository"],
+        "properties": {
+          "filename": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "$ref": "#/$defs/sha256"
+          },
+          "bundled_in_repository": {
+            "const": false
+          }
+        }
+      }
+    },
+    "product_receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code_to_code", "modal_buckling"],
+      "properties": {
+        "code_to_code": {
+          "$ref": "#/$defs/product_receipt"
+        },
+        "modal_buckling": {
+          "$ref": "#/$defs/product_receipt"
+        }
+      }
+    },
+    "cross_environment_parity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host_reference_receipts",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "scalar_comparison_count",
+        "nonzero_delta_count",
+        "maximum_absolute_delta",
+        "maximum_relative_delta",
+        "semantic_hash_matches",
+        "exact_semantic_hash_parity",
+        "numerical_contract_pass"
+      ],
+      "properties": {
+        "host_reference_receipts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code_to_code", "modal_buckling"],
+          "properties": {
+            "code_to_code": {
+              "$ref": "#/$defs/reference_receipt"
+            },
+            "modal_buckling": {
+              "$ref": "#/$defs/reference_receipt"
+            }
+          }
+        },
+        "absolute_tolerance": {
+          "const": 1e-12
+        },
+        "relative_tolerance": {
+          "const": 1e-12
+        },
+        "scalar_comparison_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "nonzero_delta_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximum_absolute_delta": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maximum_relative_delta": {
+          "type": "number",
+          "minimum": 0
+        },
+        "semantic_hash_matches": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "modal_model_hash",
+            "modal_semantic_result_hash",
+            "buckling_model_hash",
+            "buckling_semantic_result_hash"
+          ],
+          "properties": {
+            "modal_model_hash": {
+              "const": true
+            },
+            "modal_semantic_result_hash": {
+              "type": "boolean"
+            },
+            "buckling_model_hash": {
+              "const": true
+            },
+            "buckling_semantic_result_hash": {
+              "type": "boolean"
+            }
+          }
+        },
+        "exact_semantic_hash_parity": {
+          "type": "boolean"
+        },
+        "numerical_contract_pass": {
+          "const": true
+        }
+      }
+    },
+    "technical_contract_pass": {
+      "const": true
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "same_operator_container_isolated_reproduction",
+        "current_candidate_source_bytes_checksum_bound",
+        "actual_external_solver_execution",
+        "cross_environment_numerical_parity",
+        "independent_operator_attestation",
+        "product_legal_license_approval",
+        "external_runtime_redistribution_approval",
+        "verification_level_2",
+        "commercial_equivalence",
+        "design_authority",
+        "release_readiness"
+      ],
+      "properties": {
+        "same_operator_container_isolated_reproduction": {
+          "const": true
+        },
+        "current_candidate_source_bytes_checksum_bound": {
+          "const": true
+        },
+        "actual_external_solver_execution": {
+          "const": true
+        },
+        "cross_environment_numerical_parity": {
+          "const": true
+        },
+        "independent_operator_attestation": {
+          "const": false
+        },
+        "product_legal_license_approval": {
+          "const": false
+        },
+        "external_runtime_redistribution_approval": {
+          "const": false
+        },
+        "verification_level_2": {
+          "const": false
+        },
+        "commercial_equivalence": {
+          "const": false
+        },
+        "design_authority": {
+          "const": false
+        },
+        "release_readiness": {
+          "const": false
+        }
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "contains": {
+        "const": "independent_operator_attestation_missing"
+      }
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 100
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "version_map": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_id", "contract_pass", "metric_count"],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_pass": {
+          "const": true
+        },
+        "metric_count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "product_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "file_sha256",
+        "artifact_hash",
+        "source_set_hash",
+        "technical_contract_pass",
+        "fresh_external_runtime_execution",
+        "cases"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^artifacts/vv/opensees_calculix_clean_runner/"
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifact_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "source_set_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "technical_contract_pass": {
+          "const": true
+        },
+        "fresh_external_runtime_execution": {
+          "const": true
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/case"
+          }
+        }
+      }
+    },
+    "reference_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256", "artifact_hash"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^implementation/phase1/release_evidence/productization/"
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifact_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    }
+  }
+}

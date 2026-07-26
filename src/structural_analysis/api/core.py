@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from importlib import metadata
 from math import isfinite
 from numbers import Integral, Real
 from pathlib import Path
@@ -32,6 +31,7 @@ from structural_analysis.io.ifc.loader import load_ifc_step
 from structural_analysis.io.midas import load_midas_mgt
 from structural_analysis.io.neutral.loader import load_neutral_json
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.product_identity import ANALYSIS_ENGINE_VERSION
 from structural_analysis.results.schema import (
     CLAIM_BOUNDARY_VERSION as CLAIM_BOUNDARY_VERSION,
     AnalysisResult as AnalysisResult,
@@ -58,16 +58,6 @@ LEGACY_SOLVER_HINTS = {
     "developer_preview_linear_static_axial_sparse",
     NONLINEAR_MATERIAL_MESH_SOLVER_ID,
 }
-
-
-def _engine_version() -> str:
-    try:
-        return metadata.version("structural-optimization-workbench")
-    except metadata.PackageNotFoundError:
-        return "1.0.0"
-
-
-ANALYSIS_ENGINE_VERSION = _engine_version()
 
 
 @dataclass(frozen=True)

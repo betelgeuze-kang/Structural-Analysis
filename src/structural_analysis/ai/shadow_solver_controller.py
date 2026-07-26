@@ -234,9 +234,7 @@ class DeterministicResidualStepPolicy:
 
     def propose(self, value: ShadowStepInput) -> ShadowStepDecision:
         if type(value) is not ShadowStepInput:
-            raise ShadowSolverControllerError(
-                "policy input must be a ShadowStepInput"
-            )
+            raise ShadowSolverControllerError("policy input must be a ShadowStepInput")
         current = value.current_step_size
         if current < self.minimum_step_size or current > self.maximum_step_size:
             raise ShadowSolverControllerError(
@@ -325,9 +323,7 @@ class ShadowSolverControllerRun:
             "profile": SHADOW_CONTROLLER_PROFILE,
             "episode": self.episode.to_manifest(),
             "decisions": [row.to_dict() for row in self.decisions],
-            "baseline_action_payload_hashes": list(
-                self.baseline_action_payload_hashes
-            ),
+            "baseline_action_payload_hashes": list(self.baseline_action_payload_hashes),
             "ai_action_executed": False,
             "result_authority": False,
         }
@@ -401,9 +397,7 @@ def _validate_decision(
             )
     uncertainty = _finite(decision.uncertainty, name="decision uncertainty")
     if uncertainty < 0.0:
-        raise ShadowSolverControllerError(
-            "decision uncertainty must be non-negative"
-        )
+        raise ShadowSolverControllerError("decision uncertainty must be non-negative")
     if type(decision.ood) is not bool:
         raise ShadowSolverControllerError("decision ood must be an exact boolean")
     if decision.disposition not in _SHADOW_DISPOSITIONS:
@@ -411,9 +405,7 @@ def _validate_decision(
             "shadow decision disposition must be shadow_only or rejected"
         )
     if decision.ood and decision.disposition != "rejected":
-        raise ShadowSolverControllerError(
-            "OOD shadow decisions must be rejected"
-        )
+        raise ShadowSolverControllerError("OOD shadow decisions must be rejected")
     if not str(decision.reason_code).strip():
         raise ShadowSolverControllerError("decision reason_code must be non-empty")
     if decision.policy_artifact_hash != policy_hash:

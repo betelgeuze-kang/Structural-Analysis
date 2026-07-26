@@ -30,7 +30,7 @@ def test_license_status_closure_blocks_not_configured_status(tmp_path: Path) -> 
 
     assert payload["contract_pass"] is False
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is False
     assert payload["status"] == "blocked"
     assert payload["template_path"] == "docs/templates/license_status.template.json"
@@ -83,7 +83,7 @@ def test_license_status_closure_passes_populated_future_license(tmp_path: Path) 
 
     assert payload["contract_pass"] is True
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is False
     assert payload["status"] == "ready"
     assert payload["blockers"] == []

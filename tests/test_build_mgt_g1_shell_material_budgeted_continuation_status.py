@@ -267,7 +267,7 @@ def test_shell_material_status_counts_latest_completed_frontier_and_launch_only_
     assert payload["status"] == "partial"
     assert payload["contract_pass"] is False
     assert payload["source_commit_sha"]
-    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
     assert (
         payload["reuse_policy"]

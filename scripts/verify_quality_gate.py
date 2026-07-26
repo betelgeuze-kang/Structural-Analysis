@@ -61,6 +61,12 @@ def _pr_commands(
         "--fail-blocked" if p1_failure_mode == "blocked" else "--fail-core-open"
     )
     return [
+        [_python(), "scripts/check_product_identity.py"],
+        [_python(), "scripts/check_repository_governance.py"],
+        [_python(), "scripts/generate_capability_surfaces.py"],
+        [_python(), "scripts/check_large_git_blobs.py", "--scope", "current"],
+        [_python(), "scripts/check_repository_hygiene_inventory.py"],
+        [_python(), "scripts/check_core_quality.py", "--contract-only"],
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
@@ -358,6 +364,7 @@ def _pr_commands(
             "tests/test_whole_model_buckling_analysis.py",
             "tests/test_external_code_to_code_technical_receipt.py",
             "tests/test_external_modal_buckling_technical_receipt.py",
+            "tests/test_external_vv_clean_runner_contract.py",
             "tests/test_modal_generalized_eigen_v1.py",
             "tests/test_buckling_generalized_eigen_v1.py",
             "tests/test_build_phase2_shallow_arch_arc_length_artifacts.py",

@@ -42,6 +42,23 @@ A badge in the header shows the active data mode.
 
 Switch modes with the Provider toggle in the header.
 
+## Durable job status
+
+Workbench can consume the separate `structural-analysis-job-view.v1` endpoint
+through the optional same-origin `VITE_JOB_STATUS_URL` build setting. The job
+panel reports only queue/lease/checkpoint/publication state and artifact hashes.
+It never turns `succeeded` into a convergence verdict; convergence and
+engineering values still require the referenced core result/evidence pair.
+
+The endpoint is fetched with same-origin browser credentials and `no-store`.
+Workbench rejects unknown fields, lease tokens, non-atomic result/evidence
+publication, invalid hashes, impossible progress, and inconsistent resume state.
+After success it fetches the referenced result/evidence endpoints, verifies
+their declared byte lengths and SHA-256 digests when Web Crypto is available,
+and checks the completion envelope's exact job/request/checkpoint/result binding.
+If the endpoint is absent or invalid, the panel is explicitly **UNAVAILABLE**.
+See [Durable job service and exact resume](durable-job-service.md).
+
 ### Demo cases
 
 The demo provider offers three samples so each honest result state is visible:
@@ -148,6 +165,7 @@ npm run build                    # type-check + both production entries + delive
 npm run verify:workbench-viewer-delivery
 npm run build:evidence-bundle -- --check   # consistency check (no write)
 npm run verify:evidence-bundle-contract    # offline gate contract test
+npx playwright test tests/frontend/workbench-v2-job-contract.spec.ts
 ```
 
 End-to-end specs live in `tests/frontend/workbench-v2-e2e.spec.ts` and run in the

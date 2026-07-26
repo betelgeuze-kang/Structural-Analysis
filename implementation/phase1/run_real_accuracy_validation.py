@@ -25,7 +25,13 @@ from runtime_contracts import InputContractError, get_logger, log_event, validat
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+SCRIPTS_DIR = REPO_ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+
+ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 
 REASONS = {
     "PASS": "real accuracy validation passed",

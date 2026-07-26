@@ -176,6 +176,7 @@ class Support(CanonicalEntity):
     node: str
     dofs: tuple[str, ...]
     all_dofs: bool = False
+    prescribed_values: tuple[tuple[str, float], ...] = ()
     extras_json: str = field(default="{}", repr=False)
 
     @classmethod
@@ -185,6 +186,7 @@ class Support(CanonicalEntity):
             field_name="support.node",
         )
         raw = payload.get("dofs", payload.get("restrained_dofs", []))
+        dofs: tuple[str, ...]
         all_dofs = raw == "all"
         if all_dofs:
             dofs = FRAME_DOF_LABELS
@@ -195,22 +197,55 @@ class Support(CanonicalEntity):
         invalid = [dof for dof in dofs if dof not in FRAME_DOF_LABELS]
         if invalid:
             raise ValueError(f"support {node} has unsupported DOFs: {invalid}")
+        if len(dofs) != len(set(dofs)):
+            raise ValueError(f"support {node} DOFs must be unique")
+        prescribed_raw = payload.get("prescribed_values", {})
+        if not isinstance(prescribed_raw, Mapping) or not set(prescribed_raw).issubset(
+            set(dofs)
+        ):
+            raise ValueError(
+                f"support {node} prescribed values must reference restrained DOFs"
+            )
+        if any(isinstance(value, bool) for value in prescribed_raw.values()):
+            raise ValueError(f"support {node} prescribed values must be numeric")
+        prescribed_values = tuple(
+            sorted(
+                (
+                    str(dof),
+                    _finite_float(
+                        value,
+                        field_name=f"support {node} prescribed_values.{dof}",
+                    ),
+                )
+                for dof, value in prescribed_raw.items()
+            )
+        )
         return cls(
             node=node,
             dofs=dofs,
             all_dofs=all_dofs,
+            prescribed_values=prescribed_values,
             extras_json=_extras_json(
                 payload,
-                {"node", "node_id", "dofs", "restrained_dofs"},
+                {
+                    "node",
+                    "node_id",
+                    "dofs",
+                    "restrained_dofs",
+                    "prescribed_values",
+                },
             ),
         )
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "node": self.node,
             "dofs": "all" if self.all_dofs else list(self.dofs),
             **_extras_payload(self.extras_json),
         }
+        if self.prescribed_values:
+            payload["prescribed_values"] = dict(self.prescribed_values)
+        return payload
 
 
 @dataclass(frozen=True)
