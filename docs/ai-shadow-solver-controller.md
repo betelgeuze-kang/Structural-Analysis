@@ -85,3 +85,9 @@ Guarded execution and learned checkpoints remain later reviewed contracts. The
 fiber-frame adapter is still non-authoritative: it observes the merged J1–J5
 chain but does not mint or modify topology, scaling, kinematic, material-state,
 convergence, or result authority.
+
+The next offline-only layer is documented in
+[`offline-counterfactual-shadow-scorecard.md`](offline-counterfactual-shadow-scorecard.md).
+It replays eligible proposals from exact parent checkpoints, preserves missing
+replays as null, enforces split leakage checks, and still recommends
+`retain_shadow_only`.
