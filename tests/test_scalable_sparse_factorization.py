@@ -49,7 +49,9 @@ def test_blocked_exact_factorization_supports_more_than_256_equations() -> None:
         "integrated only into the bounded experimental 3D graph candidate"
         in manifest["claim_boundary"]
     )
-    assert "not a public or production-scale sparse policy" in manifest["claim_boundary"]
+    assert (
+        "not a public or production-scale sparse policy" in manifest["claim_boundary"]
+    )
     assert first.diagnostic.diagnostic_hash == repeated.diagnostic.diagnostic_hash
     assert validate_scalable_sparse_factorization_manifest(manifest) == manifest
 
