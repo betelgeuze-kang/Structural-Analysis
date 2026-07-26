@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/shadow_policy_scorecard_v1.schema.json",
+  "title": "Structural Analysis Shadow Policy Scorecard v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "contract_pass", "policy_gate_pass", "source_kind", "dataset_hash", "lineage_root_hash", "policy", "thresholds", "metrics", "gates", "recommendation", "ai_action_executed", "result_authority", "guarded_execution_eligible", "empirical_performance_claim", "claim_boundary", "scorecard_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-shadow-policy-scorecard.v1"},
+    "status": {"enum": ["contract_fixture_pass", "policy_gate_pass", "blocked"]},
+    "contract_pass": {"const": true},
+    "policy_gate_pass": {"type": "boolean"},
+    "source_kind": {"enum": ["repository_generated_contract_fixture", "independent_replay_receipts"]},
+    "dataset_hash": {"$ref": "#/$defs/hash"},
+    "lineage_root_hash": {"$ref": "#/$defs/hash"},
+    "policy": {"$ref": "#/$defs/policy"},
+    "thresholds": {"$ref": "#/$defs/thresholds"},
+    "metrics": {"$ref": "#/$defs/metrics"},
+    "gates": {"$ref": "#/$defs/gates"},
+    "recommendation": {"const": "retain_shadow_only"},
+    "ai_action_executed": {"const": false},
+    "result_authority": {"const": false},
+    "guarded_execution_eligible": {"const": false},
+    "empirical_performance_claim": {"const": false},
+    "claim_boundary": {"type": "string", "minLength": 80},
+    "scorecard_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "count": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "policy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["policy_id", "policy_version", "policy_artifact_hash", "locked_before_holdout"],
+      "properties": {
+        "policy_id": {"type": "string", "minLength": 1}, "policy_version": {"type": "string", "minLength": 1},
+        "policy_artifact_hash": {"$ref": "#/$defs/hash"}, "locked_before_holdout": {"const": true}
+      }
+    },
+    "thresholds": {
+      "type": "object", "additionalProperties": false,
+      "required": ["minimum_evaluated_rows", "minimum_counterfactual_coverage", "minimum_local_non_regression_rate", "minimum_holdout_non_regression_rate", "maximum_fallback_count", "maximum_regularization_count", "maximum_executed_ai_action_count"],
+      "properties": {
+        "minimum_evaluated_rows": {"type": "integer", "minimum": 1},
+        "minimum_counterfactual_coverage": {"const": 1.0},
+        "minimum_local_non_regression_rate": {"$ref": "#/$defs/rate"},
+        "minimum_holdout_non_regression_rate": {"$ref": "#/$defs/rate"},
+        "maximum_fallback_count": {"const": 0}, "maximum_regularization_count": {"const": 0},
+        "maximum_executed_ai_action_count": {"const": 0}
+      }
+    },
+    "metrics": {
+      "type": "object", "additionalProperties": false,
+      "required": ["eligible_proposal_count", "evaluated_counterfactual_count", "counterfactual_coverage", "counterfactual_safe_count", "counterfactual_safety_rate", "local_non_regression_count", "local_non_regression_rate", "holdout_row_count", "holdout_eligible_row_count", "holdout_non_regression_count", "holdout_non_regression_rate", "median_iteration_density_advantage", "fallback_count", "regularization_count", "executed_ai_action_count", "ood_proposal_count", "rejected_proposal_count", "identical_action_proposal_count"],
+      "properties": {
+        "eligible_proposal_count": {"$ref": "#/$defs/count"}, "evaluated_counterfactual_count": {"$ref": "#/$defs/count"},
+        "counterfactual_coverage": {"$ref": "#/$defs/rate"}, "counterfactual_safe_count": {"$ref": "#/$defs/count"},
+        "counterfactual_safety_rate": {"$ref": "#/$defs/rate"}, "local_non_regression_count": {"$ref": "#/$defs/count"},
+        "local_non_regression_rate": {"$ref": "#/$defs/rate"}, "holdout_row_count": {"$ref": "#/$defs/count"},
+        "holdout_eligible_row_count": {"$ref": "#/$defs/count"}, "holdout_non_regression_count": {"$ref": "#/$defs/count"},
+        "holdout_non_regression_rate": {"$ref": "#/$defs/rate"}, "median_iteration_density_advantage": {"type": "number"},
+        "fallback_count": {"$ref": "#/$defs/count"}, "regularization_count": {"$ref": "#/$defs/count"},
+        "executed_ai_action_count": {"const": 0}, "ood_proposal_count": {"$ref": "#/$defs/count"},
+        "rejected_proposal_count": {"$ref": "#/$defs/count"},
+        "identical_action_proposal_count": {"$ref": "#/$defs/count"}
+      }
+    },
+    "gates": {
+      "type": "object", "additionalProperties": false,
+      "required": ["dataset_integrity_pass", "leakage_checks_pass", "policy_locked_before_holdout", "counterfactual_coverage_pass", "holdout_coverage_pass", "minimum_rows_pass", "local_non_regression_pass", "holdout_non_regression_pass", "fallback_free_pass", "regularization_free_pass", "shadow_execution_isolation_pass", "raw_customer_payload_absent"],
+      "properties": {
+        "dataset_integrity_pass": {"type": "boolean"}, "leakage_checks_pass": {"type": "boolean"},
+        "policy_locked_before_holdout": {"type": "boolean"}, "counterfactual_coverage_pass": {"type": "boolean"},
+        "holdout_coverage_pass": {"type": "boolean"}, "minimum_rows_pass": {"type": "boolean"},
+        "local_non_regression_pass": {"type": "boolean"}, "holdout_non_regression_pass": {"type": "boolean"},
+        "fallback_free_pass": {"type": "boolean"}, "regularization_free_pass": {"type": "boolean"},
+        "shadow_execution_isolation_pass": {"type": "boolean"}, "raw_customer_payload_absent": {"type": "boolean"}
+      }
+    }
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/offline_counterfactual_dataset_v1.schema.json",
+  "title": "Structural Analysis Offline Counterfactual Dataset v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "profile", "source_kind", "authority", "policy",
+    "data_use", "split_profile", "split_counts", "source_count",
+    "eligible_proposal_count", "evaluated_counterfactual_count",
+    "missing_counterfactual_count", "rejected_proposal_count",
+    "ood_proposal_count", "identical_action_proposal_count",
+    "executed_ai_action_count", "feature_columns",
+    "label_columns", "leakage_checks", "lineage_root_hash", "sources",
+    "rows", "ai_action_executed", "result_authority",
+    "guarded_execution_eligible", "empirical_performance_claim",
+    "claim_boundary", "dataset_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-offline-counterfactual-dataset.v1"},
+    "profile": {"const": "replay_bound_single_transition_evaluation_only.v1"},
+    "source_kind": {"enum": ["repository_generated_contract_fixture", "independent_replay_receipts"]},
+    "authority": {"const": "offline_evaluation_only"},
+    "policy": {"$ref": "#/$defs/policy"},
+    "data_use": {"$ref": "#/$defs/dataUse"},
+    "split_profile": {"const": "explicit_model_group_partition.v1"},
+    "split_counts": {"$ref": "#/$defs/splitCounts"},
+    "source_count": {"$ref": "#/$defs/count"},
+    "eligible_proposal_count": {"$ref": "#/$defs/count"},
+    "evaluated_counterfactual_count": {"$ref": "#/$defs/count"},
+    "missing_counterfactual_count": {"$ref": "#/$defs/count"},
+    "rejected_proposal_count": {"$ref": "#/$defs/count"},
+    "ood_proposal_count": {"$ref": "#/$defs/count"},
+    "identical_action_proposal_count": {"$ref": "#/$defs/count"},
+    "executed_ai_action_count": {"const": 0},
+    "feature_columns": {
+      "type": "array", "minItems": 14, "maxItems": 14, "uniqueItems": true,
+      "items": {"enum": ["observation_index", "load_factor", "residual_linf", "scaled_residual_l2", "increment_linf", "accepted", "rollback", "current_step_size", "baseline_next_step_size", "proposed_step_size", "residual_ratio", "uncertainty", "ood", "reason_code"]}
+    },
+    "label_columns": {"const": ["baseline", "counterfactual", "comparison"]},
+    "leakage_checks": {"$ref": "#/$defs/leakageChecks"},
+    "lineage_root_hash": {"$ref": "#/$defs/hash"},
+    "sources": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/source"}},
+    "rows": {"type": "array", "items": {"$ref": "#/$defs/row"}},
+    "ai_action_executed": {"const": false},
+    "result_authority": {"const": false},
+    "guarded_execution_eligible": {"const": false},
+    "empirical_performance_claim": {"const": false},
+    "claim_boundary": {"type": "string", "minLength": 80},
+    "dataset_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "nullableHash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/hash"}]},
+    "count": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "split": {"enum": ["calibration", "validation", "holdout"]},
+    "policy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["policy_id", "policy_version", "policy_artifact_hash", "locked_before_holdout"],
+      "properties": {
+        "policy_id": {"type": "string", "minLength": 1},
+        "policy_version": {"type": "string", "minLength": 1},
+        "policy_artifact_hash": {"$ref": "#/$defs/hash"},
+        "locked_before_holdout": {"const": true}
+      }
+    },
+    "dataUse": {
+      "type": "object", "additionalProperties": false,
+      "required": ["training_eligible", "evaluation_only", "raw_customer_payload_included"],
+      "properties": {
+        "training_eligible": {"const": false},
+        "evaluation_only": {"const": true},
+        "raw_customer_payload_included": {"const": false}
+      }
+    },
+    "splitCounts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["calibration", "validation", "holdout"],
+      "properties": {
+        "calibration": {"$ref": "#/$defs/count"},
+        "validation": {"$ref": "#/$defs/count"},
+        "holdout": {"$ref": "#/$defs/count"}
+      }
+    },
+    "leakageChecks": {
+      "type": "object", "additionalProperties": false,
+      "required": ["model_group_id_split_exclusive", "model_group_split_exclusive", "physical_problem_split_exclusive", "pre_action_state_split_exclusive", "source_episode_unique", "row_id_unique", "policy_locked_across_splits", "feature_schema_exact", "future_outcomes_excluded_from_features", "evaluation_only_sources", "raw_customer_payload_absent", "lineage_complete"],
+      "properties": {
+        "model_group_id_split_exclusive": {"const": true},
+        "model_group_split_exclusive": {"const": true},
+        "physical_problem_split_exclusive": {"const": true},
+        "pre_action_state_split_exclusive": {"const": true},
+        "source_episode_unique": {"const": true},
+        "row_id_unique": {"const": true},
+        "policy_locked_across_splits": {"const": true},
+        "feature_schema_exact": {"const": true},
+        "future_outcomes_excluded_from_features": {"const": true},
+        "evaluation_only_sources": {"const": true},
+        "raw_customer_payload_absent": {"const": true},
+        "lineage_complete": {"const": true}
+      }
+    },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["model_group_id", "split", "adapter_hash", "episode_hash", "model_ir_content_hash", "problem_contract_hash", "eligible_row_count", "evaluated_row_count", "training_eligible", "evaluation_only", "raw_customer_payload_included", "ai_action_executed"],
+      "properties": {
+        "model_group_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+        "split": {"$ref": "#/$defs/split"},
+        "adapter_hash": {"$ref": "#/$defs/hash"},
+        "episode_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "problem_contract_hash": {"$ref": "#/$defs/hash"},
+        "eligible_row_count": {"$ref": "#/$defs/count"},
+        "evaluated_row_count": {"$ref": "#/$defs/count"},
+        "training_eligible": {"const": false},
+        "evaluation_only": {"const": true},
+        "raw_customer_payload_included": {"const": false},
+        "ai_action_executed": {"const": false}
+      }
+    },
+    "row": {
+      "type": "object", "additionalProperties": false,
+      "required": ["row_id", "split", "model_group_id", "lineage", "features", "labels", "row_hash"],
+      "properties": {
+        "row_id": {"type": "string", "pattern": "^cf\\.(calibration|validation|holdout)\\.[A-Za-z][A-Za-z0-9_.:-]{0,127}\\.[0-9]+$"},
+        "split": {"$ref": "#/$defs/split"},
+        "model_group_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+        "lineage": {"$ref": "#/$defs/lineage"},
+        "features": {"$ref": "#/$defs/features"},
+        "labels": {"$ref": "#/$defs/labels"},
+        "row_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "lineage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["adapter_hash", "episode_hash", "model_ir_content_hash", "execution_plan_hash", "problem_contract_hash", "transition_binding_hash", "source_step_replay_hash", "parent_checkpoint_state_hash", "observation_state_hash", "baseline_action_payload_hash", "proposal_action_payload_hash", "policy_artifact_hash", "counterfactual_outcome_hash", "evaluator_receipt_hash"],
+      "properties": {
+        "adapter_hash": {"$ref": "#/$defs/hash"}, "episode_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"}, "execution_plan_hash": {"$ref": "#/$defs/hash"},
+        "problem_contract_hash": {"$ref": "#/$defs/hash"}, "transition_binding_hash": {"$ref": "#/$defs/hash"},
+        "source_step_replay_hash": {"$ref": "#/$defs/hash"}, "parent_checkpoint_state_hash": {"$ref": "#/$defs/hash"},
+        "observation_state_hash": {"$ref": "#/$defs/hash"}, "baseline_action_payload_hash": {"$ref": "#/$defs/hash"},
+        "proposal_action_payload_hash": {"$ref": "#/$defs/hash"}, "policy_artifact_hash": {"$ref": "#/$defs/hash"},
+        "counterfactual_outcome_hash": {"$ref": "#/$defs/nullableHash"}, "evaluator_receipt_hash": {"$ref": "#/$defs/nullableHash"}
+      }
+    },
+    "features": {
+      "type": "object", "additionalProperties": false,
+      "required": ["observation_index", "load_factor", "residual_linf", "scaled_residual_l2", "increment_linf", "accepted", "rollback", "current_step_size", "baseline_next_step_size", "proposed_step_size", "residual_ratio", "uncertainty", "ood", "reason_code"],
+      "properties": {
+        "observation_index": {"$ref": "#/$defs/count"}, "load_factor": {"type": "number"},
+        "residual_linf": {"type": "number", "minimum": 0}, "scaled_residual_l2": {"type": "number", "minimum": 0},
+        "increment_linf": {"type": "number", "minimum": 0}, "accepted": {"type": "boolean"}, "rollback": {"type": "boolean"},
+        "current_step_size": {"type": "number", "exclusiveMinimum": 0}, "baseline_next_step_size": {"type": "number", "exclusiveMinimum": 0},
+        "proposed_step_size": {"type": "number", "exclusiveMinimum": 0}, "residual_ratio": {"type": ["number", "null"], "minimum": 0},
+        "uncertainty": {"type": "number", "minimum": 0}, "ood": {"const": false}, "reason_code": {"type": "string", "minLength": 1}
+      }
+    },
+    "labels": {
+      "type": "object", "additionalProperties": false,
+      "required": ["baseline", "counterfactual", "comparison"],
+      "properties": {
+        "baseline": {"$ref": "#/$defs/baseline"},
+        "counterfactual": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/outcome"}]},
+        "comparison": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/comparison"}]}
+      }
+    },
+    "baseline": {
+      "type": "object", "additionalProperties": false,
+      "required": ["target_load_factor", "step_size", "committed", "rollback_exact", "iteration_count", "final_scaled_residual_linf", "outcome_checkpoint_state_hash"],
+      "properties": {
+        "target_load_factor": {"type": "number"}, "step_size": {"type": "number", "exclusiveMinimum": 0},
+        "committed": {"type": "boolean"}, "rollback_exact": {"type": "boolean"},
+        "iteration_count": {"$ref": "#/$defs/count"}, "final_scaled_residual_linf": {"type": "number", "minimum": 0},
+        "outcome_checkpoint_state_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "outcome": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "transition_index", "transition_binding_hash", "parent_checkpoint_state_hash", "intervention_action_payload_hash", "proposed_step_size", "target_load_factor", "evaluator_profile", "replay_engine_artifact_hash", "evaluator_receipt_hash", "committed", "rollback_exact", "iteration_count", "final_relative_residual", "fallback_count", "regularization_count", "outcome_checkpoint_state_hash", "outcome_hash"],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-counterfactual-transition-outcome.v1"},
+        "transition_index": {"$ref": "#/$defs/count"}, "transition_binding_hash": {"$ref": "#/$defs/hash"},
+        "parent_checkpoint_state_hash": {"$ref": "#/$defs/hash"}, "intervention_action_payload_hash": {"$ref": "#/$defs/hash"},
+        "proposed_step_size": {"type": "number", "exclusiveMinimum": 0}, "target_load_factor": {"type": "number"},
+        "evaluator_profile": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+        "replay_engine_artifact_hash": {"$ref": "#/$defs/hash"}, "evaluator_receipt_hash": {"$ref": "#/$defs/hash"},
+        "committed": {"type": "boolean"}, "rollback_exact": {"type": "boolean"}, "iteration_count": {"$ref": "#/$defs/count"},
+        "final_relative_residual": {"type": "number", "minimum": 0}, "fallback_count": {"$ref": "#/$defs/count"},
+        "regularization_count": {"$ref": "#/$defs/count"}, "outcome_checkpoint_state_hash": {"$ref": "#/$defs/hash"},
+        "outcome_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "comparison": {
+      "type": "object", "additionalProperties": false,
+      "required": ["baseline_iterations_per_load_increment", "counterfactual_iterations_per_load_increment", "iteration_density_advantage", "counterfactual_safe", "local_non_regression"],
+      "properties": {
+        "baseline_iterations_per_load_increment": {"type": "number", "minimum": 0},
+        "counterfactual_iterations_per_load_increment": {"type": "number", "minimum": 0},
+        "iteration_density_advantage": {"type": "number"},
+        "counterfactual_safe": {"type": "boolean"}, "local_non_regression": {"type": "boolean"}
+      }
+    }
+  }
+}
