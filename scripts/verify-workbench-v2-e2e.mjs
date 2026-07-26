@@ -14,6 +14,7 @@ const specs = [
   'tests/frontend/workbench-v2-e2e.spec.ts',
   'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',
   'tests/frontend/workbench-v2-live-provider-guard.spec.ts',
+  'tests/frontend/workbench-v2-job-contract.spec.ts',
 ]
 const passthrough = process.argv.slice(2)
 

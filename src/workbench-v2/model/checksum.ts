@@ -3,10 +3,13 @@
 // unavailable rather than fabricating a value).
 
 export async function sha256Hex(text: string): Promise<string | null> {
+  return sha256Bytes(new TextEncoder().encode(text))
+}
+
+export async function sha256Bytes(bytes: Uint8Array): Promise<string | null> {
   try {
     const subtle = typeof crypto !== 'undefined' ? crypto.subtle : undefined
     if (!subtle) return null
-    const bytes = new TextEncoder().encode(text)
     const digest = await subtle.digest('SHA-256', bytes)
     const hex = Array.from(new Uint8Array(digest))
       .map((b) => b.toString(16).padStart(2, '0'))

@@ -286,6 +286,51 @@ class NonlinearFrameValidationReport:
 
 
 @dataclass(frozen=True)
+class NonlinearFrameCheckpointAdvance:
+    """Opaque partial execution artifact for a durable worker checkpoint."""
+
+    profile: NonlinearFrameProfile
+    completed_steps: int
+    total_steps: int
+    newly_solved_steps: int
+    replayed_prefix_steps: int
+    problem_contract_hash: str
+    resume_contract_hash: str
+    checkpoint_chain_hash: str
+    checkpoint_artifact_hash: str
+    checkpoint_bytes: bytes = field(repr=False, compare=False)
+    exact_prefix_replay: bool = True
+    fallback_count: int = 0
+    regularization_count: int = 0
+    claim_boundary: str = UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY
+
+    @property
+    def remaining_steps(self) -> int:
+        return self.total_steps - self.completed_steps
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": "nonlinear-frame-checkpoint-advance.v1",
+            "profile": self.profile,
+            "completed_steps": self.completed_steps,
+            "total_steps": self.total_steps,
+            "remaining_steps": self.remaining_steps,
+            "newly_solved_steps": self.newly_solved_steps,
+            "replayed_prefix_steps": self.replayed_prefix_steps,
+            "problem_contract_hash": self.problem_contract_hash,
+            "resume_contract_hash": self.resume_contract_hash,
+            "checkpoint_chain_hash": self.checkpoint_chain_hash,
+            "checkpoint_artifact_hash": self.checkpoint_artifact_hash,
+            "checkpoint_byte_length": len(self.checkpoint_bytes),
+            "exact_prefix_replay": self.exact_prefix_replay,
+            "fallback_count": self.fallback_count,
+            "regularization_count": self.regularization_count,
+            "solver_truth_created": False,
+            "claim_boundary": self.claim_boundary,
+        }
+
+
+@dataclass(frozen=True)
 class _CompiledPortal:
     problem: StatefulCorotationalFiberFrame2DProblem
     compilation: (
@@ -328,6 +373,102 @@ def analyze_nonlinear_frame(
     if cfg.profile == FIXED_CHORD_SERIAL_PROFILE:
         return _analyze_fixed_chord(snapshot, cfg, restart_checkpoint_chain)
     return _analyze_corotational_portal(snapshot, cfg, restart_checkpoint_chain)
+
+
+def advance_nonlinear_frame_checkpoint(
+    model: CanonicalModel,
+    config: NonlinearFrameConfig,
+    *,
+    maximum_new_steps: int,
+    restart_checkpoint_chain: bytes | bytearray | memoryview | None = None,
+) -> NonlinearFrameCheckpointAdvance:
+    """Advance a corotational path without publishing an engineering result.
+
+    This entry point exists for durable workers. It emits only an exact,
+    replay-validated checkpoint chain. Final result and engineering authority
+    remain exclusively with :func:`analyze_nonlinear_frame` and its validator.
+    """
+
+    if type(model) is not CanonicalModel:
+        raise ValueError("model must be a CanonicalModel")
+    if type(config) is not NonlinearFrameConfig:
+        raise ValueError("config must be a NonlinearFrameConfig")
+    if config.profile == FIXED_CHORD_SERIAL_PROFILE:
+        raise ValueError("durable checkpoint advance requires a corotational profile")
+    if type(maximum_new_steps) is not int or not 1 <= maximum_new_steps <= 64:
+        raise ValueError("maximum_new_steps must be an integer in [1, 64]")
+    if restart_checkpoint_chain is not None and not isinstance(
+        restart_checkpoint_chain, (bytes, bytearray, memoryview)
+    ):
+        raise ValueError("restart_checkpoint_chain must be bytes-like")
+    snapshot = model.detached_analysis_snapshot()
+    compiled = _compile_portal(
+        snapshot,
+        general_profile=config.profile == COROTATIONAL_GENERAL_PROFILE,
+    )
+    execution = _run_corotational_path(
+        compiled,
+        config,
+        restart_checkpoint_chain,
+        maximum_new_steps=maximum_new_steps,
+    )
+    if execution.path.status != "ready" or not execution.path.contract_pass:
+        raise NonlinearFrameError(
+            "corotational_checkpoint_advance_blocked",
+            "/solver",
+            "The bounded partial path did not commit exactly.",
+        )
+    completed = len(execution.path.steps)
+    if completed <= execution.replayed_prefix_step_count:
+        raise NonlinearFrameError(
+            "corotational_checkpoint_no_progress",
+            "/maximum_new_steps",
+            "Checkpoint advance must commit at least one new path step.",
+        )
+    fallback_count = sum(
+        int(bool(step.metrics.get("fallback_used"))) for step in execution.path.steps
+    )
+    regularization_count = sum(
+        int(bool(step.metrics.get("regularization_used")))
+        for step in execution.path.steps
+    )
+    if fallback_count or regularization_count:
+        raise NonlinearFrameError(
+            "corotational_checkpoint_fallback_rejected",
+            "/solver",
+            "A durable checkpoint may not contain fallback or regularization.",
+        )
+    return NonlinearFrameCheckpointAdvance(
+        profile=config.profile,
+        completed_steps=completed,
+        total_steps=config.load_steps,
+        newly_solved_steps=execution.newly_solved_step_count,
+        replayed_prefix_steps=execution.replayed_prefix_step_count,
+        problem_contract_hash=compiled.problem.contract_hash,
+        resume_contract_hash=_resume_contract_hash(compiled, config),
+        checkpoint_chain_hash=execution.chain.chain_hash,
+        checkpoint_artifact_hash=_artifact_hash(execution.checkpoint_bytes),
+        checkpoint_bytes=execution.checkpoint_bytes,
+        fallback_count=fallback_count,
+        regularization_count=regularization_count,
+    )
+
+
+def nonlinear_frame_resume_contract_hash(
+    model: CanonicalModel, config: NonlinearFrameConfig
+) -> str:
+    """Hash the exact model/compiler/load path required for checkpoint reuse."""
+
+    if type(model) is not CanonicalModel or type(config) is not NonlinearFrameConfig:
+        raise ValueError("model and config must use exact public contract types")
+    if config.profile == FIXED_CHORD_SERIAL_PROFILE:
+        raise ValueError("durable resume binding requires a corotational profile")
+    snapshot = model.detached_analysis_snapshot()
+    compiled = _compile_portal(
+        snapshot,
+        general_profile=config.profile == COROTATIONAL_GENERAL_PROFILE,
+    )
+    return _resume_contract_hash(compiled, config)
 
 
 def validate_nonlinear_frame_result(
@@ -1219,6 +1360,8 @@ def _run_corotational_path(
     compiled: _CompiledPortal,
     config: NonlinearFrameConfig,
     restart: bytes | bytearray | memoryview | None,
+    *,
+    maximum_new_steps: int | None = None,
 ) -> _CorotationalExecution:
     problem = compiled.problem
     targets = config.target_load_factors
@@ -1243,7 +1386,10 @@ def _run_corotational_path(
 
     replayed_prefix = 0
     if restart is None:
-        path = run_segment(targets)
+        segment_targets = (
+            targets if maximum_new_steps is None else targets[:maximum_new_steps]
+        )
+        path = run_segment(segment_targets)
         newly_solved = len(path.steps)
     else:
         loaded = load_stateful_corotational_fiber_frame2d_checkpoint_chain_bytes(
@@ -1301,6 +1447,8 @@ def _run_corotational_path(
             )
         replayed_prefix = prefix_count
         remaining = targets[prefix_count:]
+        if maximum_new_steps is not None:
+            remaining = remaining[:maximum_new_steps]
         if remaining:
             suffix = run_segment(
                 remaining,
@@ -1333,6 +1481,26 @@ def _run_corotational_path(
         restart_supplied=restart is not None,
         replayed_prefix_step_count=replayed_prefix,
         newly_solved_step_count=newly_solved,
+    )
+
+
+def _resume_contract_hash(
+    compiled: _CompiledPortal, config: NonlinearFrameConfig
+) -> str:
+    return canonical_hash(
+        {
+            "schema_version": "nonlinear-frame-resume-contract.v1",
+            "profile": config.profile,
+            "model_content_hash": compiled.compilation.model_content_hash,
+            "compiler_hash": compiled.compilation.compiler_hash,
+            "problem_contract_hash": compiled.problem.contract_hash,
+            "load_steps": config.load_steps,
+            "target_load_factors": list(config.target_load_factors),
+            "residual_tolerance": config.residual_tolerance,
+            "increment_tolerance_m": config.increment_tolerance_m,
+            "maximum_iterations": config.maximum_iterations,
+            "matrix_backend": config.matrix_backend,
+        }
     )
 
 
@@ -1806,11 +1974,14 @@ __all__ = [
     "UNIFIED_NONLINEAR_FRAME_REPORT_SCHEMA_VERSION",
     "UNIFIED_NONLINEAR_FRAME_SCHEMA_VERSION",
     "NonlinearFrameConfig",
+    "NonlinearFrameCheckpointAdvance",
     "NonlinearFrameError",
     "NonlinearFrameProfile",
     "NonlinearFrameResult",
     "NonlinearFrameValidationReport",
     "analyze_nonlinear_frame",
+    "advance_nonlinear_frame_checkpoint",
+    "nonlinear_frame_resume_contract_hash",
     "validate_nonlinear_frame_manifest",
     "validate_nonlinear_frame_result",
 ]
