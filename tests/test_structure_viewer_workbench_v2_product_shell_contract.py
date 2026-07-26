@@ -16,7 +16,13 @@ def test_workbench_v2_is_the_default_product_surface() -> None:
     assert "export function resolveProductSurface" in main
     assert "path.endsWith('/legacy') || hash === '#/legacy'" in main
     assert "return legacyRoute ? 'legacy-app' : 'workbench-v2'" in main
-    assert "surface === 'legacy-app' ? <LegacyAppSurface /> : <WorkbenchPage />" in main
+    assert "export function resolveSameOriginJobUrl" in main
+    assert "resolved.origin === origin ? resolved.toString() : undefined" in main
+    assert "import.meta.env.VITE_JOB_STATUS_URL" in main
+    assert (
+        "surface === 'legacy-app' ? <LegacyAppSurface /> : "
+        "<WorkbenchPage jobStatusUrl={jobStatusUrl} />"
+    ) in main
     assert "window.addEventListener('hashchange', updateSurface)" in main
     assert "window.addEventListener('popstate', updateSurface)" in main
     assert "isWorkbenchV2Route() ? <WorkbenchPage /> : <App />" not in main
