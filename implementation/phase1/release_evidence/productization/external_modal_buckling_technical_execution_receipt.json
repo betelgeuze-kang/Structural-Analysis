@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:a67720dbab1079f9a651cbc5fe829586f6fced26d6b126d4b9fefdc59803d29a",
+  "artifact_hash": "sha256:41818765dd8135fb67204ea4351e4780c144615efb72a7ccd4e10faf4239ad3d",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -181,7 +181,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-26T04:45:55.288639+00:00",
+  "generated_at": "2026-07-26T06:44:17.214617+00:00",
   "internal_source": {
     "input_checksums": {
       "scripts/run_external_code_to_code_technical_receipt.py": "sha256:b8599d7a4a0f0eca7a80c7bdf82c39b0c581d4dbbed31ee68ce22da4c07e8eae",
@@ -264,12 +264,12 @@
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-26T04:45:55.288639+00:00",
+    "current_product_replay_generated_at": "2026-07-26T06:44:17.214617+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-23T16:41:48.704137+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Post-squash main lineage synchronization at 51c999f4; current product replay only, stored external solver execution reused; independent operator and Level 2 promotion remain blocked."
+    "reuse_reason": "Current product replay refreshed for bounded corotational Frame2D member-feature source changes; prior pinned external solver outputs are reused without new external runtime execution."
   },
   "runtimes": {
     "calculix": {
@@ -320,7 +320,7 @@
     }
   },
   "schema_version": "external-modal-buckling-technical-execution.v1",
-  "source_commit_sha": "51c999f4940e2ab8e827f116f4b3bc7f2e2f744e",
+  "source_commit_sha": "8f0bc26ab942134edb92eb9ed0c082e78a5aac86",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_modal_buckling_technical_execution",

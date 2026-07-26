@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:9937e26cc18918e2d964791d2c0a639c9a552718a81e5df76d151a97de3859c9",
+  "artifact_hash": "sha256:cfde1a3948be607c3555cbdbd907ca0c50c2b1db764d7a1338185adc9802d13a",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -107,63 +107,63 @@
       "external_return_code": 0,
       "metrics": [
         {
-          "absolute_error": 2.1312704205633803e-16,
+          "absolute_error": 2.13316777436523e-16,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": 0.00017804321094142588,
+          "product_value": 0.0001780432109414257,
           "quantity": "node_N3_UX_m",
           "reference_value": 0.000178043210941639,
-          "relative_error": 1.1970523387505026e-12,
+          "relative_error": 1.198118009152544e-12,
           "relative_tolerance": 1e-10
         },
         {
-          "absolute_error": 3.420446095954953e-17,
+          "absolute_error": 3.4208272607812173e-17,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": 2.2872198605246593e-06,
+          "product_value": 2.2872198605246555e-06,
           "quantity": "node_N3_UY_m",
           "reference_value": 2.287219860558864e-06,
-          "relative_error": 1.4954601238549907e-11,
+          "relative_error": 1.495626773696065e-11,
           "relative_tolerance": 1e-10
         },
         {
-          "absolute_error": 1.9985234170696864e-16,
+          "absolute_error": 1.9985911797054667e-16,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": -4.4713250199271766e-05,
+          "product_value": -4.471325019927176e-05,
           "quantity": "node_N3_RZ_rad",
           "reference_value": -4.471325019947162e-05,
-          "relative_error": 4.469644698504389e-12,
+          "relative_error": 4.46979624784486e-12,
           "relative_tolerance": 1e-10
         },
         {
-          "absolute_error": 4.78051842903171e-16,
+          "absolute_error": 4.778078974143618e-16,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": 0.00018310714735439006,
+          "product_value": 0.00018310714735438982,
           "quantity": "node_N4_UX_m",
           "reference_value": 0.000183107147353912,
-          "relative_error": 2.610776530635289e-12,
+          "relative_error": 2.609444275219078e-12,
           "relative_tolerance": 1e-10
         },
         {
-          "absolute_error": 1.6988092790132248e-17,
+          "absolute_error": 1.698470465834323e-17,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": -2.148117737524527e-05,
+          "product_value": -2.1481177375245273e-05,
           "quantity": "node_N4_UY_m",
           "reference_value": -2.1481177375262258e-05,
-          "relative_error": 7.908362048020584e-13,
+          "relative_error": 7.90678479192804e-13,
           "relative_tolerance": 1e-10
         },
         {
-          "absolute_error": 1.7532904381806214e-16,
+          "absolute_error": 1.753425963452182e-16,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": -4.6555207750033834e-05,
+          "product_value": -4.655520775003385e-05,
           "quantity": "node_N4_RZ_rad",
           "reference_value": -4.6555207749858505e-05,
-          "relative_error": 3.766045782893e-12,
+          "relative_error": 3.766336889469709e-12,
           "relative_tolerance": 1e-10
         },
         {
@@ -177,13 +177,13 @@
           "relative_tolerance": 1e-10
         },
         {
-          "absolute_error": 2.7284841053187847e-12,
+          "absolute_error": 1.8189894035458565e-12,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": -5974.592565344237,
+          "product_value": -5974.592565344238,
           "quantity": "support_N1_UY_N",
           "reference_value": -5974.59256534424,
-          "relative_error": 4.566812005132231e-16,
+          "relative_error": 3.0445413367548207e-16,
           "relative_tolerance": 1e-10
         },
         {
@@ -197,13 +197,13 @@
           "relative_tolerance": 1e-10
         },
         {
-          "absolute_error": 8.427377906627953e-09,
+          "absolute_error": 8.423739927820861e-09,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": -10100.843556100184,
+          "product_value": -10100.84355610018,
           "quantity": "support_N2_UX_N",
           "reference_value": -10100.843556091757,
-          "relative_error": 8.343241690487774e-13,
+          "relative_error": 8.339640032084801e-13,
           "relative_tolerance": 1e-10
         },
         {
@@ -217,13 +217,13 @@
           "relative_tolerance": 1e-10
         },
         {
-          "absolute_error": 2.438173396512866e-08,
+          "absolute_error": 2.437809598632157e-08,
           "absolute_tolerance": 1e-10,
           "contract_pass": true,
-          "product_value": 18270.824917605943,
+          "product_value": 18270.82491760594,
           "quantity": "support_N2_RZ_N_m",
           "reference_value": 18270.82491758156,
-          "relative_error": 1.334462678894521e-12,
+          "relative_error": 1.3342635647974017e-12,
           "relative_tolerance": 1e-10
         }
       ],
@@ -454,14 +454,14 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-26T04:45:55.317426+00:00",
+  "generated_at": "2026-07-26T06:44:36.498988+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
       "scripts/run_external_code_to_code_technical_receipt.py": "sha256:b8599d7a4a0f0eca7a80c7bdf82c39b0c581d4dbbed31ee68ce22da4c07e8eae",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
-      "src/structural_analysis/api/nonlinear_frame.py": "sha256:c608a2ce5deb5d875540e802e8ff3ffc000cbb231329af65e8ec6c520625a6c4",
-      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py": "sha256:04e2afa328dc18344ed9eccf76ec83a910767d45be88da56055ab7bb534bc771",
+      "src/structural_analysis/api/nonlinear_frame.py": "sha256:60d87cefa92ca510e2f7cdc8890eb86cebd405ae8e24746ce8f2d825e0d28c01",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d.py": "sha256:ba299b6cadc5e8553529b581ed716222d541cc6ae16ee5b66cd8059eff372f82",
       "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py": "sha256:60421274fc2b9800687bece08fdfb063810732897fc2c8f706c1ff3c796a854c",
       "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
       "src/structural_analysis/elements/stateful_corotational_fiber_beam2d.py": "sha256:b9e21c87553dca965ba173921e6f65c8680371ecf25a9f4cfb23fd48ca704548",
@@ -471,17 +471,17 @@
       "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
       "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
       "tests/test_external_code_to_code_technical_receipt.py": "sha256:6eae6e0fec0f0ba8c70553b3283bcd9f24d5f96867e066b3bd3f153e4d7ec9f1",
-      "tests/test_unified_nonlinear_frame_api.py": "sha256:ce849bee30fed750092d71a8e4f2c2f7737bf8ba504b5a9a7eaf33f74ae62676"
+      "tests/test_unified_nonlinear_frame_api.py": "sha256:0b27b3320d61dab755254610932618427610756e0dadedefc4d73cd69db51bf9"
     },
-    "source_set_hash": "sha256:35ce40f2208f1f573f1b05778547ae13b807a690351f3305695d4db374d9bda6"
+    "source_set_hash": "sha256:c252505a7178b7cc82da89442a050e50d5008654dd5376e30678fa0768c90829"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-26T04:45:55.317426+00:00",
+    "current_product_replay_generated_at": "2026-07-26T06:44:36.498988+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-23T16:42:48.264240+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Post-squash main lineage synchronization at 51c999f4; current product replay only, stored external solver execution reused; independent operator and Level 2 promotion remain blocked."
+    "reuse_reason": "Current product replay refreshed for bounded corotational Frame2D member-feature source changes; prior pinned external solver outputs are reused without new external runtime execution."
   },
   "runtimes": {
     "calculix": {
@@ -538,7 +538,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "51c999f4940e2ab8e827f116f4b3bc7f2e2f744e",
+  "source_commit_sha": "8f0bc26ab942134edb92eb9ed0c082e78a5aac86",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
