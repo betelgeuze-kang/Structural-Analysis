@@ -721,6 +721,8 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         terminal.load_factor * problem.reference_external_load_vector()
     ).copy()
     local_global_error = 0.0
+    member_feature_error = 0.0
+    release_equilibrium_scaled = 0.0
     section_error = 0.0
     fiber_error = 0.0
     state_bytes_exact = True
@@ -734,6 +736,7 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         )
     ):
         response = row.response
+        feature_response = row.feature_response
         if (
             response.state.state_hash != terminal_state.state_hash
             or response.state.canonical_bytes() != terminal_state.canonical_bytes()
@@ -752,13 +755,36 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
             ],
             dtype=np.float64,
         )
-        raw_element_force = np.asarray(response.internal_force_global, dtype=np.float64)
-        local_force = rotation @ raw_element_force
+        raw_element_force = np.asarray(
+            feature_response.element_internal_load_global, dtype=np.float64
+        )
+        net_element_force = np.asarray(
+            feature_response.element_net_end_force_global, dtype=np.float64
+        )
+        local_force = rotation @ net_element_force
         local_global_error = max(
             local_global_error,
-            _scaled_linf(rotation.T @ local_force, raw_element_force),
+            _scaled_linf(rotation.T @ local_force, net_element_force),
         )
         scatter[list(row.global_dofs)] += row.internal_load_global
+        external_scatter[list(row.global_dofs)] += row.equivalent_external_load_global
+        member_feature_error = max(
+            member_feature_error,
+            _scaled_linf(
+                feature_response.node_to_element_jacobian.T @ raw_element_force,
+                row.internal_load_global,
+            ),
+            _scaled_linf(
+                feature_response.node_to_element_jacobian.T
+                @ feature_response.element_equivalent_external_load_global,
+                row.equivalent_external_load_global,
+            ),
+        )
+        release_equilibrium_scaled = max(
+            release_equilibrium_scaled,
+            _linf(feature_response.release_residual_kn_m)
+            / max(1.0, _linf(raw_element_force)),
+        )
         member_nodes.append((member.node_i, member.node_j))
         member_force.append(local_force[[0, 1, 3, 4]] * 1000.0)
         member_moment.append(local_force[[2, 5]] * 1000.0)
@@ -769,6 +795,11 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
                 "node_i": member.node_i,
                 "node_j": member.node_j,
                 "element_contract_hash": member.element.contract_hash,
+                "member_feature_contract_hash": member.features.contract_hash,
+                "member_feature_response_hash": feature_response.response_hash,
+                "release_residual_kn_m": (
+                    feature_response.release_residual_kn_m.tolist()
+                ),
             }
         )
 
@@ -924,6 +955,10 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
         or local_global_error
         > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
+        or member_feature_error
+        > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
+        or release_equilibrium_scaled
+        > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
         or section_error > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
         or fiber_error > COROTATIONAL_FIBER_FRAME_ENGINEERING_FIBER_STRAIN_TOLERANCE
         or free_residual_relative
@@ -981,6 +1016,8 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
             "scatter_scaled_linf": scatter_error,
             "external_scatter_scaled_linf": external_scatter_error,
             "local_global_scaled_linf": local_global_error,
+            "member_feature_scaled_linf": member_feature_error,
+            "release_equilibrium_scaled_linf": release_equilibrium_scaled,
             "section_scaled_linf": section_error,
             "fiber_strain_linf": fiber_error,
             "free_residual_relative": free_residual_relative,

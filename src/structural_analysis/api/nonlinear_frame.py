@@ -15,6 +15,10 @@ from typing import Any, Final, Literal, NoReturn, cast
 
 from jsonschema import Draft202012Validator
 
+from structural_analysis.assembly.corotational_frame2d_member_features import (
+    CorotationalFrame2DMemberFeatures,
+    element_end_coordinates_m,
+)
 from structural_analysis.api.nonlinear_fiber_frame import (
     PublicRCFiberFrameConfig,
     analyze_public_rc_fiber_frame,
@@ -1116,7 +1120,24 @@ def _compile_portal(
             "section",
             "integration_order",
         }
-        _keys(row, required_element_keys, path)
+        optional_element_keys = {
+            "end_releases",
+            "rigid_offsets_global_m",
+            "uniform_distributed_load_local",
+        }
+        allowed_optional_element_keys = (
+            optional_element_keys if general_profile else set()
+        )
+        if (
+            type(row) is not dict
+            or not required_element_keys.issubset(row)
+            or set(row) - required_element_keys - allowed_optional_element_keys
+        ):
+            _fail(
+                "corotational_portal_row_keys_invalid",
+                path,
+                "Expected required element keys plus only the documented member-feature keys.",
+            )
         member_id = _stable(row["id"], f"{path}/id")
         connectivity = row["nodes"]
         if (
@@ -1155,7 +1176,10 @@ def _compile_portal(
         )
         node_i = node_index[str(node_i_id)]
         node_j = node_index[str(node_j_id)]
-        element_coordinates = (coordinates[node_i], coordinates[node_j])
+        features = _corotational_member_features(row, path)
+        element_coordinates = element_end_coordinates_m(
+            coordinates[node_i], coordinates[node_j], features
+        )
         members.append(
             StatefulCorotationalFiberFrame2DMember(
                 member_id=member_id,
@@ -1167,6 +1191,7 @@ def _compile_portal(
                     integration_order=integration_order,
                     element_id=member_id,
                 ),
+                features=features,
             )
         )
         member_sections.append(section)
@@ -1290,13 +1315,15 @@ def _compile_portal(
             if values[name] != 0.0
         )
         loaded_nodes.add(node_id)
-    if not reference_loads and not (
-        general_profile and any(value != 0.0 for _dof, value in prescribed)
+    if (
+        not reference_loads
+        and not (general_profile and any(value != 0.0 for _dof, value in prescribed))
+        and not any(member.features.has_distributed_load for member in members)
     ):
         _fail(
             "corotational_portal_loads_missing",
             "/loads",
-            "At least one nonzero nodal load or prescribed displacement is required.",
+            "At least one nonzero nodal load, prescribed displacement, or member distributed load is required.",
         )
 
     if used_sections != set(sections):
@@ -1574,7 +1601,11 @@ def _corotational_member_rows(
                 "MZ_Nm": float(moments[index, 1]),
             },
             "local_axis": "current_chord",
-            "end_force_definition": "element_internal_force",
+            "end_force_definition": (
+                "element_internal_minus_scaled_consistent_member_dead_load"
+            ),
+            "member_feature_contract_hash": member.features.contract_hash,
+            "member_features": member.features.to_dict(),
         }
         for index, member in enumerate(compiled.problem.members)
     )
@@ -1905,6 +1936,100 @@ def _keys(row: Any, expected: set[str], path: str) -> None:
             path,
             f"Expected exact keys {sorted(expected)}.",
         )
+
+
+def _corotational_member_features(
+    row: Mapping[str, Any],
+    path: str,
+) -> CorotationalFrame2DMemberFeatures:
+    raw_offsets = row.get(
+        "rigid_offsets_global_m",
+        {"i": [0.0, 0.0], "j": [0.0, 0.0]},
+    )
+    if type(raw_offsets) is not dict or set(raw_offsets) != {"i", "j"}:
+        _fail(
+            "corotational_member_rigid_offset_invalid",
+            f"{path}/rigid_offsets_global_m",
+            "Rigid offsets require exact i and j global XY vectors.",
+        )
+    offsets: dict[str, tuple[float, float]] = {}
+    for end in ("i", "j"):
+        raw_vector = raw_offsets[end]
+        if type(raw_vector) is not list or len(raw_vector) != 2:
+            _fail(
+                "corotational_member_rigid_offset_invalid",
+                f"{path}/rigid_offsets_global_m/{end}",
+                "Each rigid offset must be a two-value global XY vector in metres.",
+            )
+        offsets[end] = (
+            _number(raw_vector[0], f"{path}/rigid_offsets_global_m/{end}/0"),
+            _number(raw_vector[1], f"{path}/rigid_offsets_global_m/{end}/1"),
+        )
+
+    raw_releases = row.get("end_releases", {"i": [], "j": []})
+    if type(raw_releases) is not dict or set(raw_releases) != {"i", "j"}:
+        _fail(
+            "corotational_member_end_release_invalid",
+            f"{path}/end_releases",
+            "End releases require exact i and j component lists.",
+        )
+    releases: dict[str, bool] = {}
+    for end in ("i", "j"):
+        raw_components = raw_releases[end]
+        if (
+            type(raw_components) is not list
+            or len(raw_components) != len(set(raw_components))
+            or any(type(value) is not str for value in raw_components)
+            or not set(raw_components).issubset({"RZ"})
+        ):
+            _fail(
+                "corotational_member_end_release_invalid",
+                f"{path}/end_releases/{end}",
+                "The v1 planar member supports only an optional RZ end release.",
+            )
+        releases[end] = "RZ" in raw_components
+
+    raw_load = row.get(
+        "uniform_distributed_load_local",
+        {
+            "basis": "initial_member_local",
+            "behavior": "dead",
+            "qx_kN_per_m": 0.0,
+            "qy_kN_per_m": 0.0,
+        },
+    )
+    if (
+        type(raw_load) is not dict
+        or set(raw_load) != {"basis", "behavior", "qx_kN_per_m", "qy_kN_per_m"}
+        or raw_load["basis"] != "initial_member_local"
+        or raw_load["behavior"] != "dead"
+    ):
+        _fail(
+            "corotational_member_distributed_load_invalid",
+            f"{path}/uniform_distributed_load_local",
+            "The v1 load must be uniform, dead, and expressed in initial member local axes.",
+        )
+    try:
+        return CorotationalFrame2DMemberFeatures(
+            offset_i_global_m=offsets["i"],
+            offset_j_global_m=offsets["j"],
+            release_i_rz=releases["i"],
+            release_j_rz=releases["j"],
+            uniform_load_local_kn_per_m=(
+                _number(
+                    raw_load["qx_kN_per_m"],
+                    f"{path}/uniform_distributed_load_local/qx_kN_per_m",
+                ),
+                _number(
+                    raw_load["qy_kN_per_m"],
+                    f"{path}/uniform_distributed_load_local/qy_kN_per_m",
+                ),
+            ),
+        )
+    except NonlinearFrameError:
+        raise
+    except ValueError as exc:
+        _fail("corotational_member_features_invalid", path, str(exc))
 
 
 def _stable(value: Any, path: str) -> str:

@@ -89,6 +89,44 @@ def _base_payload() -> dict:
     }
 
 
+def _member_feature_payload() -> dict:
+    payload = _base_payload()
+    payload.update(
+        {
+            "nodes": [
+                {"id": "N1", "coordinates": [0.0, 0.0, 0.0]},
+                {"id": "N2", "coordinates": [4.0, 0.0, 0.0]},
+            ],
+            "elements": [
+                {
+                    "id": "released-beam",
+                    "type": "stateful_corotational_rc_fiber_frame2d",
+                    "nodes": ["N1", "N2"],
+                    "section": "RC1",
+                    "integration_order": 3,
+                    "rigid_offsets_global_m": {
+                        "i": [0.2, 0.0],
+                        "j": [-0.2, 0.0],
+                    },
+                    "end_releases": {"i": [], "j": ["RZ"]},
+                    "uniform_distributed_load_local": {
+                        "basis": "initial_member_local",
+                        "behavior": "dead",
+                        "qx_kN_per_m": 0.0,
+                        "qy_kN_per_m": -2.0,
+                    },
+                }
+            ],
+            "loads": [],
+            "supports": [
+                {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+                {"node": "N2", "dofs": ["RZ"]},
+            ],
+        }
+    )
+    return payload
+
+
 def _fixed_payload() -> dict:
     payload = _base_payload()
     payload.update(
@@ -424,6 +462,43 @@ def test_connected_frame_profile_supports_branching_prescribed_and_restart(
     assert replayed.node_displacements == result.node_displacements
     assert replayed.support_reactions == result.support_reactions
     assert replayed.checkpoint_artifact() == result.checkpoint_artifact()
+
+
+def test_general_public_profile_executes_release_offset_and_distributed_load(
+    tmp_path: Path,
+) -> None:
+    model = _model(tmp_path, _member_feature_payload(), "member-features.json")
+    config = NonlinearFrameConfig(
+        profile=COROTATIONAL_GENERAL_PROFILE,
+        load_steps=4,
+        residual_tolerance=1.0e-9,
+        maximum_iterations=60,
+    )
+    result = analyze_nonlinear_frame(model, config)
+
+    assert result.status == "ready"
+    assert validate_nonlinear_frame_result(result).contract_pass is True
+    assert result.unsupported_features == ()
+    assert result.member_end_forces[0]["member_features"]["release_j_rz"] is True
+    assert result.member_end_forces[0]["member_features"][
+        "uniform_load_local_kn_per_m"
+    ] == [0.0, -2.0]
+    assert abs(result.member_end_forces[0]["local_end_j"]["MZ_Nm"]) < 1.0e-8
+    reaction_by_dof = {
+        (row["node_id"], row["dof"]): row["value_si"]
+        for row in result.support_reactions
+    }
+    assert abs(reaction_by_dof[("N1", "UY")] - 7200.0) < 2.0e-6
+
+    replayed = analyze_nonlinear_frame(
+        model,
+        config,
+        restart_checkpoint_chain=result.checkpoint_artifact(),
+    )
+    assert validate_nonlinear_frame_result(replayed).contract_pass is True
+    assert replayed.node_displacements == result.node_displacements
+    assert replayed.support_reactions == result.support_reactions
+    assert replayed.member_end_forces == result.member_end_forces
 
 
 def test_connected_frame_profile_supports_partial_dofs_across_support_nodes(
