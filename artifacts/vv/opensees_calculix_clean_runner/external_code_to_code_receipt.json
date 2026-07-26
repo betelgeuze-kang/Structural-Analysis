@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:bce7111732badb3be15210f464755e98c4285841813f02921cd8f7814d76e135",
+  "artifact_hash": "sha256:9937e26cc18918e2d964791d2c0a639c9a552718a81e5df76d151a97de3859c9",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -454,7 +454,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-07-24T10:40:36.400580+00:00",
+  "generated_at": "2026-07-26T04:45:55.317426+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
@@ -476,12 +476,12 @@
     "source_set_hash": "sha256:35ce40f2208f1f573f1b05778547ae13b807a690351f3305695d4db374d9bda6"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-07-24T10:40:36.400580+00:00",
+    "current_product_replay_generated_at": "2026-07-26T04:45:55.317426+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-23T16:42:48.264240+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "PR 17 adds bounded durable checkpoint orchestration; current product comparisons were replayed against checksum-bound stored external values without rerunning either external runtime."
+    "reuse_reason": "Post-squash main lineage synchronization at 51c999f4; current product replay only, stored external solver execution reused; independent operator and Level 2 promotion remain blocked."
   },
   "runtimes": {
     "calculix": {
@@ -538,7 +538,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "05fd21266430c1fa2b4c18c835f282ec44909dbf",
+  "source_commit_sha": "51c999f4940e2ab8e827f116f4b3bc7f2e2f744e",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",

@@ -114,6 +114,20 @@ def _load_json(path: Path) -> dict[str, Any] | list[Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _write_text_atomically(path: Path, content: str) -> None:
+    """Replace a text file without exposing a truncated intermediate state."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = path.with_name(
+        f".{path.name}.{os.getpid()}.{threading.get_ident()}.{time.time_ns()}.tmp"
+    )
+    try:
+        temporary_path.write_text(content, encoding="utf-8")
+        temporary_path.replace(path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
+
+
 def _read_json_object(path: Path | None) -> dict[str, Any]:
     if path is None or not path.exists():
         return {}
@@ -2002,8 +2016,10 @@ class ProjectOpsHTTPServer(ThreadingHTTPServer):
             "export_max_events": max(1, int(self.config.audit_export_max_events)),
             "tamper_evidence": "sha256_batch_digest",
         }
-        digest_path.parent.mkdir(parents=True, exist_ok=True)
-        digest_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        _write_text_atomically(
+            digest_path,
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        )
         return payload
 
     def check_rate_limit(self, context: dict[str, Any]) -> tuple[bool, int]:
