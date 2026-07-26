@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import replace
 import json
 from pathlib import Path
@@ -77,6 +78,53 @@ def _problem() -> StatefulCorotationalFiberFrame2DProblem:
         reference_external_loads=((15, 5.0), (16, -10.0)),
         rotation_coordinate_scale_m=4.0,
         prescribed_displacements=((3, 2.0e-4),),
+    )
+
+
+@pytest.fixture(scope="module")
+def general_adapter_manifest() -> dict:
+    problem = _problem()
+    compilation = compile_corotational_fiber_frame_general_profile(
+        problem,
+        model_content_hash=canonical_hash({"fixture": "general-manifest-hardening"}),
+    )
+    path = run_stateful_corotational_fiber_frame2d_load_path(
+        problem,
+        (0.5, 1.0),
+        config=NewtonRaphsonConfig(
+            residual_tolerance=1.0e-9,
+            matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+        ),
+    )
+    return create_corotational_fiber_frame_general_j1_j5_adapter(
+        compilation,
+        path,
+    ).to_manifest()
+
+
+def _rehash_general_adapter(payload: dict) -> None:
+    body = dict(payload)
+    body.pop("adapter_hash")
+    payload["adapter_hash"] = canonical_hash(body)
+
+
+def _rehash_embedded_compilation(payload: dict) -> None:
+    compilation = payload["compilation"]
+    body = dict(compilation)
+    body.pop("compiler_hash")
+    compilation["compiler_hash"] = canonical_hash(body)
+    payload["compiler_hash"] = compilation["compiler_hash"]
+
+
+def _rehash_stage(row: dict) -> None:
+    row["stage_hash"] = canonical_hash(
+        {
+            "stage": row["stage"],
+            "contract_profile": row["contract_profile"],
+            "source_hashes": row["source_hashes"],
+            "checks": row["checks"],
+            "body": row["body"],
+        }
     )
 
 
@@ -160,6 +208,40 @@ def test_general_j1_j5_binds_branching_supports_and_prescribed_path() -> None:
         validate_stateful_corotational_fiber_frame2d_checkpoint(
             problem, step.accepted_checkpoint
         )
+
+
+@pytest.mark.parametrize("invalid_dof", (15, 18))
+def test_detached_manifest_rejects_free_or_out_of_range_prescribed_dof(
+    general_adapter_manifest: dict,
+    invalid_dof: int,
+) -> None:
+    tampered = deepcopy(general_adapter_manifest)
+    replacement = [[invalid_dof, 2.0e-4]]
+    tampered["compilation"]["prescribed_displacements"] = replacement
+    tampered["stage_receipts"][1]["body"]["prescribed_displacements"] = replacement
+    _rehash_embedded_compilation(tampered)
+    _rehash_stage(tampered["stage_receipts"][1])
+    _rehash_general_adapter(tampered)
+
+    with pytest.raises(
+        CorotationalFiberFrameGeneralError,
+        match="corotational_general_prescribed_displacement_semantics_invalid",
+    ):
+        validate_corotational_fiber_frame_general_manifest(tampered)
+
+
+def test_detached_manifest_rejects_rehashed_terminal_source_mismatch(
+    general_adapter_manifest: dict,
+) -> None:
+    tampered = deepcopy(general_adapter_manifest)
+    tampered["terminal_checkpoint_hash"] = "sha256:" + "0" * 64
+    _rehash_general_adapter(tampered)
+
+    with pytest.raises(
+        CorotationalFiberFrameGeneralError,
+        match="corotational_general_stage_source_binding_invalid",
+    ):
+        validate_corotational_fiber_frame_general_manifest(tampered)
 
 
 def test_prescribed_only_fully_constrained_path_commits_without_newton() -> None:

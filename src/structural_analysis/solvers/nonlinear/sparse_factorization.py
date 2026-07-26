@@ -61,8 +61,8 @@ class SparseFactorizationPolicy:
             raise ValueError(
                 "maximum_exact_condition_equations must be a positive integer"
             )
-        if not isinstance(self.policy_id, str) or not self.policy_id.strip():
-            raise ValueError("policy_id must be a non-empty string")
+        if self.policy_id != SPARSE_FACTORIZATION_POLICY_ID:
+            raise ValueError("policy_id must equal " + SPARSE_FACTORIZATION_POLICY_ID)
 
     @property
     def policy_hash(self) -> str:
@@ -215,6 +215,11 @@ def factorize_and_solve_sparse(
     matrix_norm_1 = _sparse_matrix_one_norm(csr)
     inverse_norm_1 = _exact_inverse_one_norm(factor, size)
     condition_number_1 = matrix_norm_1 * inverse_norm_1
+    if not math.isfinite(condition_number_1):
+        raise SparseFactorizationError(
+            "sparse_condition_number_nonfinite",
+            "exact condition-number calculation returned a non-finite value",
+        )
     residual = np.asarray(csr @ solution - vector, dtype=np.float64)
     matrix_norm_inf = _sparse_matrix_infinity_norm(csr)
     denominator = matrix_norm_inf * _linf(solution) + _linf(vector)
@@ -348,6 +353,21 @@ def validate_sparse_factorization_diagnostic_manifest(
     ):
         raise ValueError("sparse factorization diagnostic fill ratio mismatch")
 
+    pivot_minimum = float(normalized["absolute_pivot_minimum"])
+    pivot_maximum = float(normalized["absolute_pivot_maximum"])
+    if pivot_minimum > pivot_maximum:
+        raise ValueError("sparse factorization diagnostic pivot extrema mismatch")
+    expected_normalized_pivot = (
+        pivot_minimum / pivot_maximum if pivot_maximum > 0.0 else 0.0
+    )
+    if not math.isclose(
+        float(normalized["normalized_absolute_pivot_minimum"]),
+        expected_normalized_pivot,
+        rel_tol=1.0e-15,
+        abs_tol=0.0,
+    ):
+        raise ValueError("sparse factorization diagnostic pivot ratio mismatch")
+
     checks = normalized["checks"]
     expected_quality_checks = {
         "condition_number_within_policy": bool(
@@ -427,11 +447,21 @@ def _diagnostic_schema_validator() -> Draft202012Validator:
 
 
 def _canonical_csr(matrix: Any) -> csr_matrix:
-    csr = (
-        matrix.tocsr(copy=True)
-        if issparse(matrix)
-        else csr_matrix(np.asarray(matrix, dtype=np.float64))
-    )
+    if issparse(matrix):
+        if np.iscomplexobj(matrix.data):
+            raise SparseFactorizationError(
+                "sparse_factorization_matrix_complex",
+                "matrix must be real-valued",
+            )
+        csr = matrix.tocsr(copy=True)
+    else:
+        dense = np.asarray(matrix)
+        if np.iscomplexobj(dense):
+            raise SparseFactorizationError(
+                "sparse_factorization_matrix_complex",
+                "matrix must be real-valued",
+            )
+        csr = csr_matrix(np.asarray(dense, dtype=np.float64))
     csr.sum_duplicates()
     csr.eliminate_zeros()
     csr.sort_indices()

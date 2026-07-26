@@ -180,6 +180,13 @@ def test_stage_receipt_body_is_deeply_immutable(
             "corotational_portal_load_location_invalid",
         ),
         (
+            replace(
+                _portal_problem(),
+                prescribed_displacements=((0, 1.0e-4),),
+            ),
+            "corotational_portal_prescribed_displacement_unsupported",
+        ),
+        (
             _portal_problem(
                 edges=(
                     ("column-left", 0, 2),
