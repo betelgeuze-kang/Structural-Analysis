@@ -147,13 +147,13 @@
       "properties": {
         "bounded_larger_system_exact_diagnostic_only": {"const": true},
         "production_scale_sparse_policy": {"const": false},
-        "integrated_nonlinear_3d_backend": {"const": false},
+        "integrated_nonlinear_3d_backend": {"const": true},
         "external_vv": {"const": false},
         "release_authority": {"const": false}
       }
     },
     "claim_boundary": {
-      "const": "Experimental CPU-only exact conditioning for at most 1536 equations. The blockwise inverse-column solve remains quadratic-work diagnostic evidence and is not yet wired into a nonlinear 3D backend; it is not a public or production-scale sparse policy, external V&V, performance evidence, or release authority."
+      "const": "Experimental CPU-only exact conditioning for at most 1536 equations. The blockwise inverse-column solve remains quadratic-work diagnostic evidence and is integrated only into the bounded experimental 3D graph candidate; it is not a public or production-scale sparse policy, external V&V, performance evidence, or release authority."
     },
     "regularization_used": {"const": false},
     "fallback_used": {"const": false}
