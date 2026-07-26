@@ -50,6 +50,18 @@ from structural_analysis.assembly.patch_static import (
     default_axial_patch_rigidbody_problem,
     rigid_body_nullspace_check,
 )
+from structural_analysis.assembly.corotational_frame2d_member_features import (
+    COROTATIONAL_FRAME2D_DISTRIBUTED_LOAD_OPERATOR,
+    COROTATIONAL_FRAME2D_MEMBER_FEATURE_SCHEMA_VERSION,
+    COROTATIONAL_FRAME2D_RELEASE_OPERATOR,
+    COROTATIONAL_FRAME2D_RIGID_OFFSET_OPERATOR,
+    CorotationalFrame2DMemberFeatureResponse,
+    CorotationalFrame2DMemberFeatures,
+    consistent_uniform_load_element_global,
+    element_end_coordinates_m,
+    expected_element_displacements,
+    integrate_corotational_frame2d_member_features,
+)
 from structural_analysis.assembly.stateful_axial import (
     ACCEPTED_STATE_SCHEMA_VERSION,
     StatefulAxialAcceptedState,
@@ -280,6 +292,10 @@ from structural_analysis.assembly.stateful_fiber_frame2d_state import (
 )
 
 __all__ = [
+    "COROTATIONAL_FRAME2D_DISTRIBUTED_LOAD_OPERATOR",
+    "COROTATIONAL_FRAME2D_MEMBER_FEATURE_SCHEMA_VERSION",
+    "COROTATIONAL_FRAME2D_RELEASE_OPERATOR",
+    "COROTATIONAL_FRAME2D_RIGID_OFFSET_OPERATOR",
     "BucklingAssembly",
     "BucklingElementAssemblyRecord",
     "DENSITY_UNIT",
@@ -307,6 +323,8 @@ __all__ = [
     "COROTATIONAL_FIBER_FRAME_SPARSE_STORAGE_PROFILE",
     "CorotationalFiberFrameDenseSparseParityReceipt",
     "CorotationalFiberFrameSparseAssembly",
+    "CorotationalFrame2DMemberFeatureResponse",
+    "CorotationalFrame2DMemberFeatures",
     "StatefulAxialAcceptedState",
     "StatefulAxialAssemblyState",
     "StatefulAxialChainProblem",
@@ -409,6 +427,7 @@ __all__ = [
     "assemble_stateful_corotational_fiber_frame2d_links",
     "assemble_stateful_fiber_frame2d",
     "compare_corotational_fiber_frame_dense_sparse_assembly",
+    "consistent_uniform_load_element_global",
     "adaptive_stateful_corotational_fiber_frame2d_continuation",
     "axial_chain_mesh_problem_from_canonical_model",
     "axial_element_strains_and_forces",
@@ -420,6 +439,8 @@ __all__ = [
     "dump_stateful_fiber_frame2d_checkpoint_bytes",
     "dump_stateful_corotational_fiber_frame2d_checkpoint_bytes",
     "dump_stateful_corotational_fiber_frame2d_checkpoint_chain_bytes",
+    "element_end_coordinates_m",
+    "expected_element_displacements",
     "finite_difference_assembled_jacobian_check",
     "finite_difference_coupled_jacobian_check",
     "finite_difference_stateful_axial_jacobian_check",
@@ -428,6 +449,7 @@ __all__ = [
     "initial_stateful_corotational_fiber_frame2d_checkpoint",
     "initial_stateful_corotational_fiber_frame2d_link_checkpoint",
     "initial_stateful_fiber_frame2d_checkpoint",
+    "integrate_corotational_frame2d_member_features",
     "create_stateful_corotational_fiber_frame2d_adaptive_checkpoint",
     "create_stateful_corotational_fiber_frame2d_arc_length_checkpoint",
     "finite_difference_stateful_corotational_fiber_frame2d_arc_length_linearization_check",

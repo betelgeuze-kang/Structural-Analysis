@@ -10,6 +10,9 @@ from typing import Any, Mapping
 import numpy as np
 from scipy.sparse import coo_matrix, csr_matrix
 
+from structural_analysis.assembly.corotational_frame2d_member_features import (
+    integrate_corotational_frame2d_member_features,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
     StatefulCorotationalFiberFrame2DProblem,
     assemble_stateful_corotational_fiber_frame2d,
@@ -186,13 +189,23 @@ def assemble_stateful_corotational_fiber_frame2d_sparse(
         problem.members, accepted_checkpoint.element_states, strict=True
     ):
         global_dofs = problem.member_global_dofs(member)
-        response = member.element.integrate(
-            global_displacements[list(global_dofs)], parent
+        feature_response = integrate_corotational_frame2d_member_features(
+            member.element,
+            member.features,
+            global_displacements[list(global_dofs)],
+            parent,
+            target_load_factor=load_factor,
         )
+        response = feature_response.element_response
         if response.parent_state_hash != parent.state_hash:
             raise ValueError("sparse assembly element parent binding failed")
-        internal[list(global_dofs)] += response.internal_force_global
-        tangent = np.asarray(response.consistent_tangent_global, dtype=np.float64)
+        internal[list(global_dofs)] += feature_response.nodal_internal_load_global
+        external[list(global_dofs)] += (
+            feature_response.nodal_equivalent_external_load_global
+        )
+        tangent = np.asarray(
+            feature_response.consistent_tangent_global, dtype=np.float64
+        )
         for local_row, global_row in enumerate(global_dofs):
             row = free_position.get(global_row)
             if row is None:
