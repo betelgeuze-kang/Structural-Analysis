@@ -153,10 +153,11 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
   'id': 'backend.nonlinear_sparse',
   'interfaces': ['python_api', 'cli', 'internal_python'],
   'limitations': ['The public exact-conditioning path remains bounded to 256 equations. A separate '
-                  'standalone CPU-only blocked exact diagnostic is bounded to 1536 equations but '
-                  'is not yet wired into a nonlinear 3D backend. Exact inverse-column conditioning '
-                  'has quadratic work and does not close production-scale policy, performance or '
-                  'memory evidence, external V&V, or release promotion.'],
+                  'CPU-only blocked exact diagnostic is bounded to 1536 equations and is '
+                  'integrated only into the bounded experimental 3D graph candidate. Exact '
+                  'inverse-column conditioning has quadratic work and does not close '
+                  'production-scale policy, performance or memory evidence, external V&V, or '
+                  'release promotion.'],
   'profile': 'corotational_element_triplet_coalesce_sorted_csr_fp64_plus_blocked_exact_1536.v1',
   'public': False,
   'status': 'experimental',

@@ -42,9 +42,9 @@ SCALABLE_SPARSE_FACTORIZATION_CONDITION_METHOD = (
 SCALABLE_SPARSE_FACTORIZATION_CLAIM_BOUNDARY = (
     "Experimental CPU-only exact conditioning for at most 1536 equations. "
     "The blockwise inverse-column solve remains quadratic-work diagnostic "
-    "evidence and is not yet wired into a nonlinear 3D backend; it is not a "
-    "public or production-scale sparse policy, external V&V, performance "
-    "evidence, or release authority."
+    "evidence and is integrated only into the bounded experimental 3D graph "
+    "candidate; it is not a public or production-scale sparse policy, external "
+    "V&V, performance evidence, or release authority."
 )
 _ZERO_HASH = "sha256:" + "0" * 64
 
@@ -320,7 +320,7 @@ def factorize_and_solve_scalable_sparse(
             {
                 "bounded_larger_system_exact_diagnostic_only": True,
                 "production_scale_sparse_policy": False,
-                "integrated_nonlinear_3d_backend": False,
+                "integrated_nonlinear_3d_backend": True,
                 "external_vv": False,
                 "release_authority": False,
             }
