@@ -7,6 +7,7 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from implementation.phase1.project_ops_api_service import (
+    _write_text_atomically,
     build_project_ops_snapshot,
     create_project_ops_test_token,
     create_project_ops_server,
@@ -14,6 +15,29 @@ from implementation.phase1.project_ops_api_service import (
 )
 
 TEST_PROJECT_OPS_HMAC_SECRET = "test-project-ops-hmac-secret"
+
+
+def test_atomic_text_write_never_truncates_the_visible_target(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    target = tmp_path / "audit" / "digest.json"
+    target.parent.mkdir(parents=True)
+    target.write_text('{"state":"old"}\n', encoding="utf-8")
+    original_write_text = Path.write_text
+    observed_targets: list[dict[str, str]] = []
+
+    def observing_write_text(path: Path, content: str, *args, **kwargs) -> int:
+        assert path != target
+        observed_targets.append(json.loads(target.read_text(encoding="utf-8")))
+        return original_write_text(path, content, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "write_text", observing_write_text)
+    _write_text_atomically(target, '{"state":"new"}\n')
+
+    assert observed_targets == [{"state": "old"}]
+    assert json.loads(target.read_text(encoding="utf-8")) == {"state": "new"}
+    assert list(target.parent.glob(f".{target.name}.*.tmp")) == []
 
 
 def _write_json(path: Path, payload: dict) -> None:
