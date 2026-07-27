@@ -82,7 +82,7 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert (
         "scripts/"
         "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py "
-        "--check" in output
+        "--portable-check" in output
     )
     assert (
         "scripts/build_g1_mgt_matrix_free_preconditioner_candidate_audit.py "
@@ -206,7 +206,7 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     assert (
         "scripts/"
         "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py "
-        "--check" in output
+        "--portable-check" in output
     )
     assert (
         "scripts/"

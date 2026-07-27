@@ -229,7 +229,7 @@ def _pr_commands(
             "scripts/"
             "build_g1_mgt_state_updated_matrix_free_newton_"
             "diagnostic_receipt.py",
-            "--check",
+            "--portable-check",
         ],
         [
             _python(),

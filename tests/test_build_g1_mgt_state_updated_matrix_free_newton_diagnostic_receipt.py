@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import importlib.util
 from pathlib import Path
 import sys
@@ -237,3 +238,45 @@ def test_check_reports_missing_receipt_without_running_actual_model(
 
     assert ok is False
     assert message == "g1_mgt_state_updated_matrix_free_newton_missing"
+
+
+def test_portable_comparison_accepts_bounded_platform_numeric_drift() -> None:
+    existing = _committed_receipt()
+    expected = deepcopy(existing)
+    expected["generated_at"] = "2099-01-01T00:00:00+00:00"
+    expected["source_commit_sha"] = "f" * 40
+    expected["inputs"]["initial_state_data_hash"] = "sha256:" + "1" * 64
+    first = expected["newton_attempts"][0]
+    first["trial_residual_inf_kn"] += 1.0e-10
+    first["accepted_after_residual_inf_kn"] += 1.0e-10
+    expected["newton_attempts"][1]["before_residual_inf_kn"] += 1.0e-10
+    first["trial_state_data_hash"] = "sha256:" + "2" * 64
+    first["tangent_solve"]["contract_hash"] = "sha256:" + "3" * 64
+    first["tangent_solve"]["solution_data_hash"] = "sha256:" + "4" * 64
+
+    assert module._portable_receipt_difference(existing, expected) is None
+    assert module._portable_receipt_invariant_error(existing) is None
+    assert module._portable_receipt_invariant_error(expected) is None
+
+
+def test_portable_comparison_rejects_source_or_contract_tampering() -> None:
+    existing = _committed_receipt()
+
+    checksum_tamper = deepcopy(existing)
+    first_path = next(iter(checksum_tamper["input_checksums"]))
+    checksum_tamper["input_checksums"][first_path] = "sha256:" + "0" * 64
+    assert module._portable_receipt_difference(existing, checksum_tamper) == (
+        f"input_checksums.{first_path}"
+    )
+
+    claim_tamper = deepcopy(existing)
+    claim_tamper["claims"]["globalized_newton"] = True
+    assert module._portable_receipt_difference(existing, claim_tamper) == (
+        "claims.globalized_newton"
+    )
+
+    failed_gate = deepcopy(existing)
+    failed_gate["metrics"]["final_accepted_residual_inf_kn"] += 1.0e-4
+    assert module._portable_receipt_invariant_error(failed_gate) == (
+        "metrics.final_accepted_residual_inf_kn"
+    )
