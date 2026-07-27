@@ -32,16 +32,18 @@ python -m structural_analysis.api.nonlinear_frame_cli \
   --checkpoint-out connected-checkpoint-chain.json
 ```
 
-The lower-level assembly package also exposes a bounded dense direct
-displacement-control candidate with augmented consistent Newton, proportional
-support-motion coupling, exact rollback, and accepted-checkpoint restart. That
-internal solver is documented separately and is not wired into this unified
-J1–J5 profile.
+The same `analyze_nonlinear_frame` Python entry point exposes bounded dense direct
+displacement control for one free `UX` or `UY` coordinate. It uses augmented
+consistent Newton, proportional support-motion coupling, exact rollback,
+terminal-parent engineering recovery, a complete epoch-zero checkpoint chain,
+and byte-exact accepted-checkpoint restart. The lower-level solver remains
+available as an internal assembly contract and is documented separately.
 
 Finite rigid offsets, optional RZ end releases, uniform dead loads in explicitly
 declared chord-bound member-local axes, and self-weight from explicit SI
 mass-per-length/global-gravity inputs are executed within the bounded connected
 profile. Density-derived self-weight, arbitrarily rotated local axes,
-unified-profile direct displacement and arc-length control, disconnected graphs,
-parallel members, production-scale conditioning, independent Level 2 comparison
-evidence, design authority, and release promotion remain outside this slice.
+unified-profile arc-length control, direct-control CLI flags and native sparse
+augmented execution, disconnected graphs, parallel members, production-scale
+conditioning, independent Level 2 comparison evidence, design authority, and
+release promotion remain outside this slice.

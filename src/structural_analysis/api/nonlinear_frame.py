@@ -37,9 +37,15 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_checkpoint
     load_stateful_corotational_fiber_frame2d_checkpoint_chain_bytes,
     make_stateful_corotational_fiber_frame2d_checkpoint_chain,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control import (
+    StatefulCorotationalFiberFrame2DDisplacementControlConfig,
+    StatefulCorotationalFiberFrame2DDisplacementControlPathResult,
+    run_stateful_corotational_fiber_frame2d_displacement_control_path,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_engineering_recovery import (
     CorotationalEngineeringSourceAdapter,
     CorotationalFiberFrameEngineeringResultIR,
+    create_corotational_direct_displacement_recovery_adapter,
     create_corotational_fiber_frame_engineering_result_ir,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
@@ -111,8 +117,10 @@ UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY = (
     "prescribed displacements, finite rigid offsets, optional RZ end releases, and "
     "uniform dead loads in explicitly declared chord-bound member-local axes. "
     "Explicit SI mass-per-length and global-gravity inputs generate self-weight in "
-    "the same consistent load operator. Density-derived self-weight, arbitrarily "
-    "rotated local axes, direct displacement control, and arc-length control remain "
+    "the same consistent load operator. The connected-frame profile also exposes "
+    "dense direct displacement control for one free UX or UY coordinate with exact "
+    "checkpoint ancestry and terminal engineering recovery. Density-derived "
+    "self-weight, arbitrarily rotated local axes, and arc-length control remain "
     "outside this unified public slice. Both profiles remain "
     "candidates until two independent Level 2 comparisons pass. No profile grants "
     "design-code, final-design, commercial, or release-readiness authority."
@@ -123,6 +131,7 @@ NonlinearFrameProfile = Literal[
     "corotational_one_bay_portal.v1",
     "corotational_connected_frame2d.v1",
 ]
+NonlinearFrameControlMode = Literal["load_control", "direct_displacement_control"]
 
 _HASH_ZERO = "sha256:" + "0" * 64
 _STABLE_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
@@ -178,11 +187,18 @@ class NonlinearFrameError(ValueError):
 @dataclass(frozen=True)
 class NonlinearFrameConfig:
     profile: NonlinearFrameProfile = FIXED_CHORD_SERIAL_PROFILE
+    control_mode: NonlinearFrameControlMode = "load_control"
     load_steps: int = 4
     residual_tolerance: float = 1.0e-10
     increment_tolerance_m: float = 1.0e-12
     maximum_iterations: int = 40
     matrix_backend: str = VECTOR_MATRIX_BACKEND
+    control_node_id: str | None = None
+    control_dof: Literal["UX", "UY"] | None = None
+    target_control_displacements_m: tuple[float, ...] = ()
+    control_tolerance_m: float = 1.0e-12
+    load_factor_increment_tolerance: float = 1.0e-12
+    load_factor_coordinate_scale_m: float = 1.0e-3
 
     def __post_init__(self) -> None:
         if self.profile not in (
@@ -193,12 +209,48 @@ class NonlinearFrameConfig:
             raise ValueError("profile is not a supported nonlinear frame profile")
         if self.matrix_backend not in VECTOR_MATRIX_BACKENDS:
             raise ValueError("matrix_backend is not a supported vector backend")
+        if self.control_mode not in (
+            "load_control",
+            "direct_displacement_control",
+        ):
+            raise ValueError("control_mode is not supported")
         if (
             self.profile == FIXED_CHORD_SERIAL_PROFILE
             and self.matrix_backend != VECTOR_MATRIX_BACKEND
         ):
             raise ValueError(
                 "the fixed-chord profile currently supports only the dense backend"
+            )
+        if self.control_mode == "direct_displacement_control":
+            if self.profile != COROTATIONAL_GENERAL_PROFILE:
+                raise ValueError(
+                    "direct displacement control requires the connected Frame2D profile"
+                )
+            if self.matrix_backend != VECTOR_MATRIX_BACKEND:
+                raise ValueError(
+                    "direct displacement control currently supports only the dense backend"
+                )
+            if (
+                type(self.control_node_id) is not str
+                or _STABLE_ID.fullmatch(self.control_node_id) is None
+            ):
+                raise ValueError("control_node_id must be a stable node identifier")
+            if self.control_dof not in ("UX", "UY"):
+                raise ValueError("control_dof must be UX or UY")
+            if (
+                type(self.target_control_displacements_m) is not tuple
+                or not 1 <= len(self.target_control_displacements_m) <= 64
+            ):
+                raise ValueError(
+                    "target_control_displacements_m must contain 1-64 targets"
+                )
+        elif (
+            self.control_node_id is not None
+            or self.control_dof is not None
+            or self.target_control_displacements_m
+        ):
+            raise ValueError(
+                "control coordinate fields require direct displacement control"
             )
         if type(self.load_steps) is not int or not 2 <= self.load_steps <= 64:
             raise ValueError("load_steps must be an integer in [2, 64]")
@@ -207,7 +259,13 @@ class NonlinearFrameConfig:
             or not 1 <= self.maximum_iterations <= 200
         ):
             raise ValueError("maximum_iterations must be an integer in [1, 200]")
-        for name in ("residual_tolerance", "increment_tolerance_m"):
+        for name in (
+            "residual_tolerance",
+            "increment_tolerance_m",
+            "control_tolerance_m",
+            "load_factor_increment_tolerance",
+            "load_factor_coordinate_scale_m",
+        ):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, (int, float)):
                 raise ValueError(f"{name} must be a finite positive number")
@@ -215,6 +273,37 @@ class NonlinearFrameConfig:
             if not math.isfinite(normalized) or normalized <= 0.0:
                 raise ValueError(f"{name} must be a finite positive number")
             object.__setattr__(self, name, normalized)
+        normalized_targets: list[float] = []
+        for value in self.target_control_displacements_m:
+            if isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(
+                    "target_control_displacements_m must contain finite numbers"
+                )
+            normalized = float(value)
+            if not math.isfinite(normalized):
+                raise ValueError(
+                    "target_control_displacements_m must contain finite numbers"
+                )
+            normalized_targets.append(normalized)
+        if normalized_targets and (
+            normalized_targets[0] == 0.0
+            or any(
+                math.copysign(1.0, normalized_targets[0]) * (right - left) <= 0.0
+                for left, right in zip(
+                    (0.0, *normalized_targets[:-1]),
+                    normalized_targets,
+                    strict=True,
+                )
+            )
+        ):
+            raise ValueError(
+                "target_control_displacements_m must advance strictly from zero in one direction"
+            )
+        object.__setattr__(
+            self,
+            "target_control_displacements_m",
+            tuple(normalized_targets),
+        )
 
     @property
     def target_load_factors(self) -> tuple[float, ...]:
@@ -361,6 +450,16 @@ class _CorotationalExecution:
     newly_solved_step_count: int
 
 
+@dataclass(frozen=True)
+class _CorotationalDirectControlExecution:
+    path: StatefulCorotationalFiberFrame2DDisplacementControlPathResult
+    chain: StatefulCorotationalFiberFrame2DCheckpointChain
+    checkpoint_bytes: bytes
+    restart_supplied: bool
+    replayed_prefix_step_count: int
+    newly_solved_step_count: int
+
+
 def analyze_nonlinear_frame(
     model: CanonicalModel,
     config: NonlinearFrameConfig | None = None,
@@ -381,6 +480,12 @@ def analyze_nonlinear_frame(
     snapshot = model.detached_analysis_snapshot()
     if cfg.profile == FIXED_CHORD_SERIAL_PROFILE:
         return _analyze_fixed_chord(snapshot, cfg, restart_checkpoint_chain)
+    if cfg.control_mode == "direct_displacement_control":
+        return _analyze_corotational_direct_control(
+            snapshot,
+            cfg,
+            restart_checkpoint_chain,
+        )
     return _analyze_corotational_portal(snapshot, cfg, restart_checkpoint_chain)
 
 
@@ -404,6 +509,8 @@ def advance_nonlinear_frame_checkpoint(
         raise ValueError("config must be a NonlinearFrameConfig")
     if config.profile == FIXED_CHORD_SERIAL_PROFILE:
         raise ValueError("durable checkpoint advance requires a corotational profile")
+    if config.control_mode != "load_control":
+        raise ValueError("durable checkpoint advance currently requires load control")
     if type(maximum_new_steps) is not int or not 1 <= maximum_new_steps <= 64:
         raise ValueError("maximum_new_steps must be an integer in [1, 64]")
     if restart_checkpoint_chain is not None and not isinstance(
@@ -667,6 +774,7 @@ def _analyze_corotational_portal(
     )
     configuration = {
         "profile": config.profile,
+        "control_mode": config.control_mode,
         "load_steps": config.load_steps,
         "target_load_factors": list(config.target_load_factors),
         "scaled_residual_tolerance": config.residual_tolerance,
@@ -875,6 +983,232 @@ def _analyze_corotational_portal(
                 "release_readiness": "not_authoritative",
             }
         ),
+        node_displacements=_corotational_node_rows(compiled, engineering),
+        support_reactions=_corotational_reaction_rows(compiled, engineering),
+        member_end_forces=_corotational_member_rows(compiled, engineering),
+        section_results=_corotational_section_rows(compiled, engineering),
+        fiber_results=_corotational_fiber_rows(compiled, engineering),
+        convergence_history=history,
+        metrics=metrics,
+        unsupported_features=(),
+        warnings=tuple(warnings),
+        checkpoint_bytes=execution.checkpoint_bytes,
+    )
+
+
+def _analyze_corotational_direct_control(
+    model: CanonicalModel,
+    config: NonlinearFrameConfig,
+    restart: bytes | bytearray | memoryview | None,
+) -> NonlinearFrameResult:
+    configuration = {
+        "profile": config.profile,
+        "control_mode": config.control_mode,
+        "control_node_id": config.control_node_id,
+        "control_dof": config.control_dof,
+        "target_control_displacements_m": list(config.target_control_displacements_m),
+        "scaled_residual_tolerance": config.residual_tolerance,
+        "solver_coordinate_increment_tolerance_m": config.increment_tolerance_m,
+        "control_tolerance_m": config.control_tolerance_m,
+        "load_factor_increment_tolerance": (config.load_factor_increment_tolerance),
+        "load_factor_coordinate_scale_m": config.load_factor_coordinate_scale_m,
+        "maximum_iterations": config.maximum_iterations,
+        "matrix_backend": config.matrix_backend,
+        "stiffness_storage": "numpy_dense_augmented_ndarray",
+        "restart_supplied": restart is not None,
+        "restart_checkpoint_artifact_hash": (
+            _artifact_hash(restart) if restart is not None else None
+        ),
+    }
+    unsupported: list[Mapping[str, Any]] = [
+        dict(row) for row in model.unsupported_features
+    ]
+    warnings = list(model.warnings)
+    compiled: _CompiledPortal | None = None
+    execution: _CorotationalDirectControlExecution | None = None
+    adapter: CorotationalEngineeringSourceAdapter | None = None
+    engineering: CorotationalFiberFrameEngineeringResultIR | None = None
+    control_global_dof: int | None = None
+    if not unsupported:
+        try:
+            compiled = _compile_portal(model, general_profile=True)
+            control_global_dof = _direct_control_global_dof(compiled, config)
+            execution = _run_corotational_direct_control_path(
+                compiled,
+                config,
+                control_global_dof=control_global_dof,
+                restart=restart,
+            )
+            if execution.path.status != "ready" or not execution.path.contract_pass:
+                raise NonlinearFrameError(
+                    "corotational_direct_control_solver_blocked",
+                    "/solver",
+                    "The configured direct displacement path did not commit exactly.",
+                )
+            if (
+                type(compiled.compilation)
+                is not CorotationalFiberFrameGeneralCompilation
+            ):
+                raise NonlinearFrameError(
+                    "corotational_direct_control_compiler_invalid",
+                    "/compiler",
+                    "Direct displacement control requires the exact general compiler.",
+                )
+            adapter = create_corotational_direct_displacement_recovery_adapter(
+                compiled.compilation,
+                execution.path,
+            )
+            digest = model.canonical_model_checksum.removeprefix("sha256:")[:20]
+            engineering = create_corotational_fiber_frame_engineering_result_ir(
+                engineering_result_id=f"engineering.direct_control.{digest}",
+                source_adapter=adapter,
+            )
+        except (
+            NonlinearFrameError,
+            StatefulCorotationalFiberFrame2DCheckpointChainArtifactError,
+            ValueError,
+        ) as exc:
+            unsupported.append(
+                {
+                    "kind": str(
+                        getattr(
+                            exc,
+                            "code",
+                            "corotational_direct_control_execution_failed",
+                        )
+                    ),
+                    "path": str(
+                        getattr(
+                            exc,
+                            "path",
+                            (
+                                "/restart_checkpoint_chain"
+                                if restart is not None and execution is None
+                                else "/solver"
+                            ),
+                        )
+                    ),
+                    "detail": str(exc),
+                }
+            )
+
+    ready = bool(
+        compiled is not None
+        and execution is not None
+        and adapter is not None
+        and engineering is not None
+        and control_global_dof is not None
+        and not unsupported
+    )
+    if not ready:
+        return _make_result(
+            status="blocked",
+            profile=config.profile,
+            source_result_hash=None,
+            model=model,
+            solver_id="public_cpu_corotational_rc_fiber_frame_direct_control_v1",
+            compiler_profile=COROTATIONAL_FIBER_FRAME_GENERAL_COMPILER_PROFILE,
+            configuration=configuration,
+            contract_bindings=(
+                {"problem_contract_hash": compiled.problem.contract_hash}
+                if compiled is not None
+                else {}
+            ),
+            checkpoint={"available": False},
+            authority=_blocked_authority(),
+            node_displacements=(),
+            support_reactions=(),
+            member_end_forces=(),
+            section_results=(),
+            fiber_results=(),
+            convergence_history=(),
+            metrics={
+                "solver_executed": execution is not None,
+                "exact_engineering_recovery": False,
+                "exact_checkpoint_chain_replay": False,
+                **_direct_control_solver_metrics(execution),
+                "external_level2_attached": False,
+            },
+            unsupported_features=tuple(unsupported),
+            warnings=tuple(warnings),
+            checkpoint_bytes=None,
+        )
+
+    assert compiled is not None
+    assert execution is not None
+    assert adapter is not None
+    assert engineering is not None
+    assert control_global_dof is not None
+    terminal = execution.chain.terminal_checkpoint
+    checkpoint = {
+        "available": True,
+        "storage_profile": "canonical-signed-zero-preserving-utf8-json.v1",
+        "chain_hash": execution.chain.chain_hash,
+        "artifact_hash": _artifact_hash(execution.checkpoint_bytes),
+        "artifact_byte_length": len(execution.checkpoint_bytes),
+        "root_state_hash": execution.chain.root_checkpoint.state_hash,
+        "terminal_state_hash": terminal.state_hash,
+        "terminal_epoch": terminal.epoch,
+        "terminal_load_factor": terminal.load_factor,
+        "control_global_dof": control_global_dof,
+        "terminal_control_displacement_m": terminal.global_displacements[
+            control_global_dof
+        ],
+        "complete_ancestry_included": True,
+        "prefix_replay_required": True,
+    }
+    history = tuple(
+        {
+            "control_step": index,
+            "target_control_displacement_m": step.metrics[
+                "target_control_displacement_m"
+            ],
+            "solved_load_factor": step.metrics["solved_load_factor"],
+            "committed": step.committed,
+            **dict(row),
+        }
+        for index, step in enumerate(execution.path.steps, start=1)
+        for row in step.trial_solution.convergence_history
+    )
+    metrics = {
+        "solver_executed": True,
+        "exact_engineering_recovery": True,
+        "exact_checkpoint_chain_replay": True,
+        "control_mode": "direct_displacement_control",
+        "control_global_dof": control_global_dof,
+        "terminal_control_target_passed": (
+            terminal.global_displacements[control_global_dof]
+            == config.target_control_displacements_m[-1]
+        ),
+        "restart_supplied": execution.restart_supplied,
+        "replayed_prefix_step_count": execution.replayed_prefix_step_count,
+        "newly_solved_step_count": execution.newly_solved_step_count,
+        "committed_step_count": len(execution.path.steps),
+        "terminal_solved_load_factor": terminal.load_factor,
+        **_direct_control_solver_metrics(execution),
+        "external_level2_attached": False,
+        **dict(engineering.metrics),
+    }
+    return _make_result(
+        status="ready",
+        profile=config.profile,
+        source_result_hash=engineering.engineering_result_hash,
+        model=model,
+        solver_id="public_cpu_corotational_rc_fiber_frame_direct_control_v1",
+        compiler_profile=compiled.compilation.compiler_profile,
+        configuration=configuration,
+        contract_bindings={
+            "problem_contract_hash": compiled.problem.contract_hash,
+            "compiler_hash": compiled.compilation.compiler_hash,
+            "control_recovery_adapter_hash": adapter.adapter_hash,
+            "control_source_contract_hash": adapter.source_contract_hash,
+            "engineering_result_hash": engineering.engineering_result_hash,
+            "engineering_array_bundle_hash": engineering.array_bundle_hash,
+            "quantity_catalog_hash": engineering.quantity_catalog_hash,
+            "checkpoint_chain_hash": execution.chain.chain_hash,
+        },
+        checkpoint=checkpoint,
+        authority=_corotational_candidate_authority(),
         node_displacements=_corotational_node_rows(compiled, engineering),
         support_reactions=_corotational_reaction_rows(compiled, engineering),
         member_end_forces=_corotational_member_rows(compiled, engineering),
@@ -1523,6 +1857,172 @@ def _run_corotational_path(
     )
 
 
+def _direct_control_global_dof(
+    compiled: _CompiledPortal,
+    config: NonlinearFrameConfig,
+) -> int:
+    node_id = config.control_node_id
+    component = config.control_dof
+    if node_id is None or component is None:
+        raise NonlinearFrameError(
+            "corotational_direct_control_coordinate_missing",
+            "/configuration",
+            "A control node and translational DOF are required.",
+        )
+    try:
+        node_index = compiled.node_ids.index(node_id)
+    except ValueError as exc:
+        raise NonlinearFrameError(
+            "corotational_direct_control_node_unknown",
+            "/configuration/control_node_id",
+            "The control node is not present in the compiled model.",
+        ) from exc
+    component_index = {"UX": 0, "UY": 1}[component]
+    global_dof = 3 * node_index + component_index
+    if global_dof in compiled.problem.fixed_global_dofs:
+        raise NonlinearFrameError(
+            "corotational_direct_control_dof_constrained",
+            "/configuration/control_dof",
+            "The control coordinate must be a free translational DOF.",
+        )
+    return global_dof
+
+
+def _run_corotational_direct_control_path(
+    compiled: _CompiledPortal,
+    config: NonlinearFrameConfig,
+    *,
+    control_global_dof: int,
+    restart: bytes | bytearray | memoryview | None,
+) -> _CorotationalDirectControlExecution:
+    problem = compiled.problem
+    targets = config.target_control_displacements_m
+    solver_config = StatefulCorotationalFiberFrame2DDisplacementControlConfig(
+        residual_tolerance=config.residual_tolerance,
+        control_tolerance_m=config.control_tolerance_m,
+        increment_tolerance_m=config.increment_tolerance_m,
+        load_factor_increment_tolerance=(config.load_factor_increment_tolerance),
+        maximum_iterations=config.maximum_iterations,
+        load_factor_coordinate_scale_m=config.load_factor_coordinate_scale_m,
+        matrix_backend=config.matrix_backend,
+    )
+
+    def run_segment(
+        segment_targets: tuple[float, ...],
+        *,
+        initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint | None = None,
+    ) -> StatefulCorotationalFiberFrame2DDisplacementControlPathResult:
+        return run_stateful_corotational_fiber_frame2d_displacement_control_path(
+            problem,
+            segment_targets,
+            control_global_dof=control_global_dof,
+            initial_checkpoint=initial_checkpoint,
+            config=solver_config,
+        )
+
+    replayed_prefix = 0
+    if restart is None:
+        path = run_segment(targets)
+        newly_solved = len(path.steps)
+    else:
+        loaded = load_stateful_corotational_fiber_frame2d_checkpoint_chain_bytes(
+            restart,
+            problem,
+        )
+        prefix_count = len(loaded.checkpoints) - 1
+        if prefix_count > len(targets):
+            raise NonlinearFrameError(
+                "corotational_direct_control_restart_path_too_long",
+                "/restart_checkpoint_chain",
+                "Restart chain exceeds the configured control path.",
+            )
+        expected_prefix = targets[:prefix_count]
+        actual_prefix = tuple(
+            checkpoint.global_displacements[control_global_dof]
+            for checkpoint in loaded.checkpoints[1:]
+        )
+        if actual_prefix != expected_prefix:
+            raise NonlinearFrameError(
+                "corotational_direct_control_restart_prefix_mismatch",
+                "/restart_checkpoint_chain",
+                "Restart coordinates are not the exact configured control prefix.",
+            )
+        if prefix_count:
+            prefix_path = run_segment(expected_prefix)
+            replayed = (
+                prefix_path.initial_checkpoint,
+                *(step.accepted_checkpoint for step in prefix_path.steps),
+            )
+            if (
+                prefix_path.status != "ready"
+                or not prefix_path.contract_pass
+                or any(
+                    left.canonical_bytes() != right.canonical_bytes()
+                    for left, right in zip(replayed, loaded.checkpoints, strict=True)
+                )
+            ):
+                raise NonlinearFrameError(
+                    "corotational_direct_control_restart_exact_replay_mismatch",
+                    "/restart_checkpoint_chain",
+                    "Restart checkpoint bytes differ from deterministic control replay.",
+                )
+        else:
+            root = initial_stateful_corotational_fiber_frame2d_checkpoint(problem)
+            if root.canonical_bytes() != loaded.root_checkpoint.canonical_bytes():
+                raise NonlinearFrameError(
+                    "corotational_direct_control_restart_root_mismatch",
+                    "/restart_checkpoint_chain",
+                    "Restart root differs from exact genesis.",
+                )
+            prefix_path = StatefulCorotationalFiberFrame2DDisplacementControlPathResult(
+                status="ready",
+                control_global_dof=control_global_dof,
+                target_control_displacements_m=(),
+                initial_checkpoint=root,
+                final_checkpoint=root,
+                steps=(),
+            )
+        replayed_prefix = prefix_count
+        remaining = targets[prefix_count:]
+        if remaining:
+            suffix = run_segment(
+                remaining,
+                initial_checkpoint=prefix_path.final_checkpoint,
+            )
+            path = StatefulCorotationalFiberFrame2DDisplacementControlPathResult(
+                status=suffix.status,
+                control_global_dof=control_global_dof,
+                target_control_displacements_m=expected_prefix + remaining,
+                initial_checkpoint=prefix_path.initial_checkpoint,
+                final_checkpoint=suffix.final_checkpoint,
+                steps=prefix_path.steps + suffix.steps,
+            )
+            newly_solved = len(suffix.steps)
+        else:
+            path = prefix_path
+            newly_solved = 0
+    checkpoints = (
+        path.initial_checkpoint,
+        *(step.accepted_checkpoint for step in path.steps if step.committed),
+    )
+    chain = make_stateful_corotational_fiber_frame2d_checkpoint_chain(
+        problem,
+        checkpoints,
+    )
+    raw = dump_stateful_corotational_fiber_frame2d_checkpoint_chain_bytes(
+        problem,
+        chain,
+    )
+    return _CorotationalDirectControlExecution(
+        path=path,
+        chain=chain,
+        checkpoint_bytes=raw,
+        restart_supplied=restart is not None,
+        replayed_prefix_step_count=replayed_prefix,
+        newly_solved_step_count=newly_solved,
+    )
+
+
 def _resume_contract_hash(
     compiled: _CompiledPortal, config: NonlinearFrameConfig
 ) -> str:
@@ -1530,6 +2030,7 @@ def _resume_contract_hash(
         {
             "schema_version": "nonlinear-frame-resume-contract.v1",
             "profile": config.profile,
+            "control_mode": config.control_mode,
             "model_content_hash": compiled.compilation.model_content_hash,
             "compiler_hash": compiled.compilation.compiler_hash,
             "problem_contract_hash": compiled.problem.contract_hash,
@@ -1539,6 +2040,14 @@ def _resume_contract_hash(
             "increment_tolerance_m": config.increment_tolerance_m,
             "maximum_iterations": config.maximum_iterations,
             "matrix_backend": config.matrix_backend,
+            "control_node_id": config.control_node_id,
+            "control_dof": config.control_dof,
+            "target_control_displacements_m": list(
+                config.target_control_displacements_m
+            ),
+            "control_tolerance_m": config.control_tolerance_m,
+            "load_factor_increment_tolerance": (config.load_factor_increment_tolerance),
+            "load_factor_coordinate_scale_m": (config.load_factor_coordinate_scale_m),
         }
     )
 
@@ -1775,6 +2284,24 @@ def _blocked_authority() -> Mapping[str, str]:
     )
 
 
+def _corotational_candidate_authority() -> Mapping[str, str]:
+    return MappingProxyType(
+        {
+            "convergence": "inherited_bounded_candidate",
+            "displacement": "exact_bounded_candidate",
+            "reaction": "exact_bounded_candidate",
+            "member_force": "exact_bounded_candidate",
+            "section_resultant": "exact_bounded_candidate",
+            "fiber_result": "exact_bounded_candidate",
+            "fallback": "not_used",
+            "public_api": "developer_preview_candidate",
+            "external_vv": "not_attached",
+            "engineering_design": "not_authoritative",
+            "release_readiness": "not_authoritative",
+        }
+    )
+
+
 def _result_payload(
     result: NonlinearFrameResult, *, include_hash: bool
 ) -> dict[str, Any]:
@@ -1894,6 +2421,59 @@ def _corotational_linear_solver_metrics(
         "sparse_factorization_policy_hash": (
             next(iter(policy_hashes)) if len(policy_hashes) == 1 else None
         ),
+    }
+
+
+def _direct_control_solver_metrics(
+    execution: _CorotationalDirectControlExecution | None,
+) -> dict[str, Any]:
+    steps = execution.path.steps if execution is not None else ()
+    return {
+        "no_solve_contract_pass": False,
+        "fallback_count": sum(
+            int(bool(step.trial_solution.metrics.get("fallback_used")))
+            for step in steps
+        ),
+        "regularization_count": sum(
+            int(bool(step.trial_solution.metrics.get("regularization_used")))
+            for step in steps
+        ),
+        "residual_gate_passed": bool(
+            steps
+            and all(
+                step.trial_solution.metrics.get("residual_gate_passed") is True
+                for step in steps
+            )
+        ),
+        "control_gate_passed": bool(
+            steps
+            and all(
+                step.trial_solution.metrics.get("control_gate_passed") is True
+                for step in steps
+            )
+        ),
+        "increment_gate_passed": bool(
+            steps
+            and all(
+                step.trial_solution.metrics.get("increment_gate_passed") is True
+                for step in steps
+            )
+        ),
+        "line_search_step_count": sum(
+            len(step.trial_solution.line_search_history) for step in steps
+        ),
+        "iteration_count": sum(
+            len(step.trial_solution.convergence_history) for step in steps
+        ),
+        "sparse_backend_used": False,
+        "native_sparse_assembly_used": False,
+        "sparse_factorization_count": 0,
+        "sparse_factorization_diagnostics_passed": None,
+        "sparse_factorization_max_condition_number_1": None,
+        "sparse_factorization_min_normalized_absolute_pivot": None,
+        "sparse_factorization_max_backward_error": None,
+        "sparse_factorization_diagnostic_hashes": [],
+        "sparse_factorization_policy_hash": None,
     }
 
 
@@ -2230,6 +2810,7 @@ __all__ = [
     "UNIFIED_NONLINEAR_FRAME_SCHEMA_VERSION",
     "NonlinearFrameConfig",
     "NonlinearFrameCheckpointAdvance",
+    "NonlinearFrameControlMode",
     "NonlinearFrameError",
     "NonlinearFrameProfile",
     "NonlinearFrameResult",

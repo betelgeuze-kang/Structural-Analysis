@@ -46,8 +46,11 @@ result = run_stateful_corotational_fiber_frame2d_displacement_control_path(
 )
 ```
 
-This is an internal dense CPU candidate. It does not change the unified nonlinear
-frame API or J1–J5 public-candidate contract. Rotational control, native sparse
-augmented factorization, follower and distributed loads, member releases and
-offsets, independent Level 2 comparisons, engineering design authority, and
-release promotion remain open.
+This lower-level solver remains an internal dense CPU candidate and does not by
+itself create public or engineering authority. The unified
+`analyze_nonlinear_frame` adapter now exposes its bounded connected-frame path
+through the common result envelope, exact terminal-parent engineering recovery,
+and complete checkpoint-chain replay. Rotational or multiple-coordinate control,
+native sparse augmented factorization, direct-control CLI flags, independent
+Level 2 comparisons, engineering design authority, and release promotion remain
+open.

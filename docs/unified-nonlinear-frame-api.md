@@ -34,6 +34,30 @@ schema-validated exact conditioning receipt for every factorization; see
 [Corotational Fiber-Frame Native Sparse Assembly](corotational-fiber-frame-native-sparse.md).
 The fixed-chord profile remains dense-only.
 
+The connected profile additionally accepts dense direct displacement control
+through the same Python entry point and result envelope:
+
+```python
+result = analyze_nonlinear_frame(
+    model,
+    NonlinearFrameConfig(
+        profile="corotational_connected_frame2d.v1",
+        control_mode="direct_displacement_control",
+        control_node_id="N2",
+        control_dof="UX",
+        target_control_displacements_m=(2.5e-5, 5.0e-5),
+    ),
+)
+```
+
+The selected coordinate must be one free `UX` or `UY` DOF. The augmented dense
+Newton solve treats the proportional load factor as an unknown and requires the
+equilibrium, control, increment, material-validity, line-search, no-fallback, and
+no-regularization gates. Its accepted path is normalized into the same exact
+terminal-parent engineering recovery and epoch-zero checkpoint chain used by
+load control. Restart artifacts are replayed from genesis byte-for-byte before
+remaining displacement targets execute.
+
 A fully constrained connected-frame model with only prescribed values follows a
 reaction-only no-solve contract. It commits the proportional checkpoint path and
 exact recovery without Newton iterations or a convergence claim; sparse
@@ -61,9 +85,9 @@ The same envelope preserves the existing fixed-chord authority while converting
 fiber stress output from MPa to Pa. The corotational endpoints remain bounded
 Developer Preview candidates. Parallel members, disconnected graphs,
 production-scale conditioning, density-derived self-weight, arbitrarily rotated
-local axes, unified direct displacement and arc-length control, both independent
-Level 2 comparisons, design-code authority, and release promotion remain
-separate gates.
+local axes, unified arc-length control, direct-control CLI flags and native sparse
+augmented execution, both independent Level 2 comparisons, design-code authority,
+and release promotion remain separate gates.
 
 The connected profile does execute finite rigid offsets, optional RZ end
 releases, uniform dead loads in explicitly declared chord-bound member-local

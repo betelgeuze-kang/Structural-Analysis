@@ -171,6 +171,45 @@ def _fixed_payload() -> dict:
     return payload
 
 
+def _direct_control_payload() -> dict:
+    payload = _base_payload()
+    payload.update(
+        {
+            "nodes": [
+                {"id": "N1", "coordinates": [0.0, 0.0, 0.0]},
+                {"id": "N2", "coordinates": [1.0, 0.0, 0.0]},
+            ],
+            "elements": [
+                {
+                    "id": "controlled-member",
+                    "type": "stateful_corotational_rc_fiber_frame2d",
+                    "nodes": ["N1", "N2"],
+                    "section": "RC1",
+                    "integration_order": 3,
+                }
+            ],
+            "loads": [
+                {
+                    "node": "N2",
+                    "components": {
+                        "FX": 1.0,
+                        "FY": 0.0,
+                        "FZ": 0.0,
+                        "MX": 0.0,
+                        "MY": 0.0,
+                        "MZ": 0.0,
+                    },
+                }
+            ],
+            "supports": [
+                {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+                {"node": "N2", "dofs": ["UY", "RZ"]},
+            ],
+        }
+    )
+    return payload
+
+
 def _portal_payload() -> dict:
     payload = _base_payload()
     payload.update(
@@ -315,6 +354,89 @@ def test_unified_api_preserves_fixed_chord_profile_and_normalizes_stress_to_pa(
     assert "stress_Pa" in result.fiber_results[0]
     assert "stress_MPa" not in result.fiber_results[0]
     assert result.checkpoint_artifact()
+
+
+def test_unified_direct_control_returns_exact_engineering_result_and_restart(
+    tmp_path: Path,
+) -> None:
+    model = _model(tmp_path, _direct_control_payload(), "direct-control.json")
+    config = NonlinearFrameConfig(
+        profile=COROTATIONAL_GENERAL_PROFILE,
+        control_mode="direct_displacement_control",
+        control_node_id="N2",
+        control_dof="UX",
+        target_control_displacements_m=(2.5e-5, 5.0e-5),
+    )
+    result = analyze_nonlinear_frame(model, config)
+    report = validate_nonlinear_frame_result(result)
+
+    assert result.status == "ready"
+    assert report.contract_pass is True
+    assert report.exact_engineering_recovery is True
+    assert report.exact_checkpoint_chain_replay is True
+    assert result.configuration["control_mode"] == "direct_displacement_control"
+    assert result.node_displacements[1]["UX_m"] == 5.0e-5
+    assert result.checkpoint["terminal_control_displacement_m"] == 5.0e-5
+    assert result.metrics["terminal_control_target_passed"] is True
+    assert result.metrics["residual_gate_passed"] is True
+    assert result.metrics["control_gate_passed"] is True
+    assert result.metrics["increment_gate_passed"] is True
+    assert result.metrics["fallback_count"] == 0
+    assert result.metrics["regularization_count"] == 0
+    assert result.contract_bindings["control_recovery_adapter_hash"].startswith(
+        "sha256:"
+    )
+    assert "direct displacement control" in result.claim_boundary
+    chain = json.loads(result.checkpoint_artifact())
+    assert [row["epoch"] for row in chain["checkpoints"]] == [0, 1, 2]
+
+    replayed = analyze_nonlinear_frame(
+        model,
+        config,
+        restart_checkpoint_chain=result.checkpoint_artifact(),
+    )
+    assert validate_nonlinear_frame_result(replayed).contract_pass is True
+    assert replayed.metrics["replayed_prefix_step_count"] == 2
+    assert replayed.metrics["newly_solved_step_count"] == 0
+    assert replayed.node_displacements == result.node_displacements
+    assert replayed.support_reactions == result.support_reactions
+    assert replayed.member_end_forces == result.member_end_forces
+    assert replayed.section_results == result.section_results
+    assert replayed.fiber_results == result.fiber_results
+    assert replayed.checkpoint_artifact() == result.checkpoint_artifact()
+
+
+def test_unified_direct_control_rejects_sparse_backend() -> None:
+    with pytest.raises(ValueError, match="only the dense backend"):
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            control_mode="direct_displacement_control",
+            control_node_id="N2",
+            control_dof="UX",
+            target_control_displacements_m=(1.0e-5,),
+            matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+        )
+
+
+def test_unified_direct_control_blocks_constrained_coordinate(tmp_path: Path) -> None:
+    model = _model(tmp_path, _direct_control_payload(), "constrained-control.json")
+    result = analyze_nonlinear_frame(
+        model,
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            control_mode="direct_displacement_control",
+            control_node_id="N1",
+            control_dof="UX",
+            target_control_displacements_m=(1.0e-5,),
+        ),
+    )
+
+    assert result.status == "blocked"
+    assert result.contract_pass is False
+    assert result.checkpoint == {"available": False}
+    assert result.unsupported_features[0]["kind"] == (
+        "corotational_direct_control_dof_constrained"
+    )
 
 
 @pytest.fixture(scope="module")

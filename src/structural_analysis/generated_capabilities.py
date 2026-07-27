@@ -155,29 +155,35 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
                   'or native COO/CSR candidate with branching, support UX/UY/RZ subsets, '
                   'proportional nodal loads and prescribed displacement, finite rigid offsets, '
                   'optional RZ end releases, uniform dead loads in explicitly declared chord-bound '
-                  'member-local axes, and SI mass-per-length/global-gravity self-weight; '
-                  'disconnected graphs, parallel members, density-derived self-weight, arbitrarily '
-                  'rotated local axes, unified direct displacement/arc-length control, '
-                  'production-scale conditioning, both independent Level 2 comparisons, and '
-                  'release promotion remain open.'],
+                  'member-local axes, SI mass-per-length/global-gravity self-weight, and bounded '
+                  'dense direct displacement control for one free UX/UY coordinate with exact '
+                  'recovery and checkpoint restart; disconnected graphs, parallel members, '
+                  'density-derived self-weight, arbitrarily rotated local axes, unified arc-length '
+                  'control, production-scale conditioning, both independent Level 2 comparisons, '
+                  'and release promotion remain open.'],
   'profile': 'corotational_connected_frame2d.v1',
   'public': False,
   'status': 'experimental',
   'title': 'Corotational 2D fiber frame'},
- {'authority': 'bounded_internal_direct_displacement_control_candidate',
+ {'authority': 'bounded_public_direct_displacement_control_candidate',
   'authority_status': 'candidate',
   'category': 'analysis',
   'evidence': ['src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_displacement_control.py',
+               'src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py',
+               'src/structural_analysis/api/nonlinear_frame.py',
                'tests/test_stateful_corotational_fiber_frame2d_displacement_control.py',
+               'tests/test_corotational_fiber_frame_engineering_recovery.py',
+               'tests/test_unified_nonlinear_frame_api.py',
                'docs/stateful-corotational-fiber-frame2d-displacement-control.md'],
   'id': 'analysis.nonlinear_corotational_fiber_frame_2d_direct_displacement',
   'implementation_status': 'implemented',
-  'interfaces': ['internal_python'],
-  'limitations': ['Connected bounded planar corotational fiber frames support one free '
-                  'translational control DOF, proportional load factor, proportional '
-                  'support-motion coupling, line search, rollback, and exact checkpoint restart; '
-                  'unified public API wiring, general control coordinates, native sparse '
-                  'execution, external Level 2 comparison, and release promotion remain open.'],
+  'interfaces': ['python_api', 'checkpoint_artifact', 'internal_python'],
+  'limitations': ['Connected bounded planar corotational fiber frames expose one free UX/UY '
+                  'control DOF through the unified Python result envelope with proportional load '
+                  'factor, proportional support-motion coupling, line search, rollback, exact '
+                  'terminal engineering recovery, and exact checkpoint restart; CLI flags, '
+                  'multiple/general control coordinates, native sparse execution, external Level 2 '
+                  'comparison, and release promotion remain open.'],
   'profile': 'dense_augmented_consistent_direct_displacement_control.v1',
   'public': False,
   'status': 'experimental',
