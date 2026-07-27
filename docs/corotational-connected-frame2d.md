@@ -46,11 +46,16 @@ recovery to a canonical composite artifact containing complete committed frame
 ancestry plus the continuation direction, radius, and cumulative progress.
 Restart requires deterministic genesis replay of the entire artifact.
 
+Both control modes are available through the CLI and the durable Job Service.
+Successful control jobs atomically publish the exact terminal checkpoint,
+unified result, and validation evidence. Workbench verifies those artifact
+hashes and renders control/terminal/recovery/result-row fields with explicit
+available, unavailable, or invalid states without acquiring solver authority.
+
 Finite rigid offsets, optional RZ end releases, uniform dead loads in explicitly
 declared chord-bound member-local axes, and self-weight from explicit SI
 mass-per-length/global-gravity inputs are executed within the bounded connected
 profile. Density-derived self-weight, arbitrarily rotated local axes,
-control-mode CLI flags and native sparse augmented execution, disconnected
-graphs, parallel members, production-scale conditioning, independent Level 2
-comparison evidence, design authority, and release promotion remain outside
-this slice.
+native sparse augmented control execution, disconnected graphs, parallel
+members, production-scale conditioning, independent Level 2 comparison
+evidence, design authority, and release promotion remain outside this slice.

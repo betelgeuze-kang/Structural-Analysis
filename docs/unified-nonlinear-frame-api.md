@@ -103,13 +103,34 @@ structural-analysis-nonlinear-frame \
   --checkpoint-out checkpoint-chain.json
 ```
 
+Control modes use the same command and output bundle. For example:
+
+```bash
+structural-analysis-nonlinear-frame model.json \
+  --profile corotational_connected_frame2d.v1 \
+  --control-mode arc_length \
+  --control-node-id N2 \
+  --control-dof UY \
+  --target-control-displacement -0.03 \
+  --checkpoint-out arc-checkpoint.json \
+  --out arc-result.json \
+  --report-out arc-report.json
+```
+
+The durable Job Service accepts the same exact direct/arc configuration. A
+control job executes atomically, publishes its terminal checkpoint, result, and
+validation evidence as content-addressed artifacts, and binds all three hashes
+in the completion transaction. Workbench verifies the referenced result/evidence
+pair and displays control, terminal, recovery, fallback, and result-row values
+with explicit `available`, `unavailable`, or `invalid` states; it never infers
+solver truth from orchestration status.
+
 The same envelope preserves the existing fixed-chord authority while converting
 fiber stress output from MPa to Pa. The corotational endpoints remain bounded
 Developer Preview candidates. Parallel members, disconnected graphs,
 production-scale conditioning, density-derived self-weight, arbitrarily rotated
-local axes, control-mode CLI flags and native sparse augmented execution, both
-independent Level 2 comparisons, design-code authority, and release promotion
-remain separate gates.
+local axes, native sparse augmented control execution, both independent Level 2
+comparisons, design-code authority, and release promotion remain separate gates.
 
 The connected profile does execute finite rigid offsets, optional RZ end
 releases, uniform dead loads in explicitly declared chord-bound member-local

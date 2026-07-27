@@ -50,7 +50,7 @@ This lower-level solver remains an internal dense CPU candidate and does not by
 itself create public or engineering authority. The unified
 `analyze_nonlinear_frame` adapter now exposes its bounded connected-frame path
 through the common result envelope, exact terminal-parent engineering recovery,
-and complete checkpoint-chain replay. Rotational or multiple-coordinate control,
-native sparse augmented factorization, direct-control CLI flags, independent
-Level 2 comparisons, engineering design authority, and release promotion remain
-open.
+complete checkpoint-chain replay, CLI, durable Job Service, and read-only
+Workbench result summary. Rotational or multiple-coordinate control, native
+sparse augmented factorization, independent Level 2 comparisons, engineering
+design authority, and release promotion remain open.

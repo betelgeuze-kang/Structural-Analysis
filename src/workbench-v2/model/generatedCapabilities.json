@@ -251,20 +251,29 @@
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_displacement_control.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
         "src/structural_analysis/api/nonlinear_frame.py",
+        "src/structural_analysis/api/nonlinear_frame_cli.py",
+        "src/structural_analysis/execution/nonlinear_frame_worker.py",
+        "src/workbench-v2/model/jobProvider.ts",
+        "src/workbench-v2/components/JobServicePanel.tsx",
         "tests/test_stateful_corotational_fiber_frame2d_displacement_control.py",
         "tests/test_corotational_fiber_frame_engineering_recovery.py",
         "tests/test_unified_nonlinear_frame_api.py",
+        "tests/test_durable_job_service.py",
+        "tests/frontend/workbench-v2-job-contract.spec.ts",
         "docs/stateful-corotational-fiber-frame2d-displacement-control.md"
       ],
       "id": "analysis.nonlinear_corotational_fiber_frame_2d_direct_displacement",
       "implementation_status": "implemented",
       "interfaces": [
         "python_api",
+        "cli",
         "checkpoint_artifact",
+        "job_service",
+        "workbench",
         "internal_python"
       ],
       "limitations": [
-        "Connected bounded planar corotational fiber frames expose one free UX/UY control DOF through the unified Python result envelope with proportional load factor, proportional support-motion coupling, line search, rollback, exact terminal engineering recovery, and exact checkpoint restart; CLI flags, multiple/general control coordinates, native sparse execution, external Level 2 comparison, and release promotion remain open."
+        "Connected bounded planar corotational fiber frames expose one free UX/UY control DOF through the unified Python/CLI result envelope and durable Job/Workbench path with proportional load factor, proportional support-motion coupling, line search, rollback, exact terminal engineering recovery, and exact checkpoint restart; multiple/general control coordinates, native sparse execution, external Level 2 comparison, and release promotion remain open."
       ],
       "profile": "dense_augmented_consistent_direct_displacement_control.v1",
       "public": false,
@@ -279,20 +288,29 @@
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
         "src/structural_analysis/api/nonlinear_frame.py",
+        "src/structural_analysis/api/nonlinear_frame_cli.py",
+        "src/structural_analysis/execution/nonlinear_frame_worker.py",
+        "src/workbench-v2/model/jobProvider.ts",
+        "src/workbench-v2/components/JobServicePanel.tsx",
         "tests/test_stateful_corotational_fiber_frame2d_arc_length.py",
         "tests/test_corotational_fiber_frame_engineering_recovery.py",
         "tests/test_unified_nonlinear_frame_api.py",
+        "tests/test_durable_job_service.py",
+        "tests/frontend/workbench-v2-job-contract.spec.ts",
         "docs/stateful-corotational-fiber-frame2d-arc-length.md"
       ],
       "id": "analysis.nonlinear_corotational_fiber_frame_2d_arc_length",
       "implementation_status": "implemented",
       "interfaces": [
         "python_api",
+        "cli",
         "checkpoint_artifact",
+        "job_service",
+        "workbench",
         "internal_python"
       ],
       "limitations": [
-        "Bounded dense spherical arc-length continuation is exposed through the unified Python result envelope with material-state commit/rollback, adaptive step reduction, exact terminal engineering recovery, a composite full frame-ancestry plus continuation-state checkpoint, deterministic genesis replay, and limit-point traversal; CLI flags, multiple/general monitor coordinates, native sparse execution, external Level 2 comparison, Lee-frame promotion, and release promotion remain open."
+        "Bounded dense spherical arc-length continuation is exposed through the unified Python/CLI result envelope and durable Job/Workbench path with material-state commit/rollback, adaptive step reduction, exact terminal engineering recovery, a composite full frame-ancestry plus continuation-state checkpoint, deterministic genesis replay, and limit-point traversal; multiple/general monitor coordinates, native sparse execution, external Level 2 comparison, Lee-frame promotion, and release promotion remain open."
       ],
       "profile": "stateful_corotational_fiber_frame2d_arc_length_continuation.v1",
       "public": false,

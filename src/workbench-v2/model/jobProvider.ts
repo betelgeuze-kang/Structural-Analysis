@@ -4,6 +4,7 @@ import {
   type JobArtifactReference,
   type WorkbenchJobView,
 } from './jobSchema'
+import type { EngineeringValue, ExplicitValue, TextValue } from './caseSchema'
 
 export type JobLoadStatus = 'unconfigured' | 'loading' | 'ready' | 'missing' | 'invalid' | 'error'
 
@@ -12,6 +13,28 @@ export interface JobLoadResult {
   job: WorkbenchJobView | null
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
+  resultSummary?: WorkbenchJobResultSummary | null
+}
+
+export interface WorkbenchJobResultSummary {
+  solverId: TextValue
+  controlMode: TextValue
+  publicApiAuthority: TextValue
+  externalVvAuthority: TextValue
+  terminalLoadFactor: EngineeringValue
+  terminalEpoch: EngineeringValue
+  terminalControlDisplacement: EngineeringValue
+  exactEngineeringRecovery: ExplicitValue<boolean>
+  exactCheckpointChainReplay: ExplicitValue<boolean>
+  fallbackCount: EngineeringValue
+  regularizationCount: EngineeringValue
+  acceptedStepCount: EngineeringValue
+  rejectedStepCount: EngineeringValue
+  nodeDisplacementRows: EngineeringValue
+  supportReactionRows: EngineeringValue
+  memberEndForceRows: EngineeringValue
+  sectionResultRows: EngineeringValue
+  fiberResultRows: EngineeringValue
 }
 
 const JOB_VIEW_MAX_BYTES = 256 * 1024
@@ -75,6 +98,7 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       artifactStatus: result.integrityUnavailable || evidence.integrityUnavailable
         ? 'integrity_unavailable'
         : 'verified',
+      resultSummary: normalizeResultSummary(resultPayload),
     }
   } catch (error: unknown) {
     if ((error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
@@ -127,4 +151,97 @@ function parseJson(bytes: Uint8Array, label: string): unknown {
 
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
+}
+
+function unavailable<T>(label: string): ExplicitValue<T> {
+  return { state: 'unavailable', reason: `${label} is not present` }
+}
+
+function invalid<T>(label: string, detail: string): ExplicitValue<T> {
+  return { state: 'invalid', reason: `${label} is invalid (${detail})` }
+}
+
+function textValue(recordValue: unknown, key: string, label: string): TextValue {
+  if (!record(recordValue) || !(key in recordValue)) return unavailable(label)
+  const value = recordValue[key]
+  return typeof value === 'string' && value.trim() !== ''
+    ? { state: 'available', value }
+    : invalid(label, 'expected a non-empty string')
+}
+
+function numberValue(
+  recordValue: unknown,
+  key: string,
+  label: string,
+  domain: (value: number) => boolean = () => true,
+): EngineeringValue {
+  if (!record(recordValue) || !(key in recordValue)) return unavailable(label)
+  const value = recordValue[key]
+  return typeof value === 'number' && Number.isFinite(value) && domain(value)
+    ? { state: 'available', value }
+    : invalid(label, 'expected a finite value in the declared domain')
+}
+
+function booleanValue(recordValue: unknown, key: string, label: string): ExplicitValue<boolean> {
+  if (!record(recordValue) || !(key in recordValue)) return unavailable(label)
+  const value = recordValue[key]
+  return typeof value === 'boolean'
+    ? { state: 'available', value }
+    : invalid(label, 'expected a boolean')
+}
+
+function arrayCount(recordValue: unknown, key: string, label: string): EngineeringValue {
+  if (!record(recordValue) || !(key in recordValue)) return unavailable(label)
+  const value = recordValue[key]
+  return Array.isArray(value)
+    ? { state: 'available', value: value.length }
+    : invalid(label, 'expected an array')
+}
+
+function terminalControlDisplacement(checkpoint: unknown): EngineeringValue {
+  if (!record(checkpoint)) return unavailable('checkpoint terminal control displacement')
+  if ('terminal_control_displacement_m' in checkpoint) {
+    return numberValue(
+      checkpoint,
+      'terminal_control_displacement_m',
+      'checkpoint.terminal_control_displacement_m',
+    )
+  }
+  if ('terminal_monitor_displacement_m' in checkpoint) {
+    return numberValue(
+      checkpoint,
+      'terminal_monitor_displacement_m',
+      'checkpoint.terminal_monitor_displacement_m',
+    )
+  }
+  return unavailable('checkpoint terminal control displacement')
+}
+
+export function normalizeResultSummary(payload: unknown): WorkbenchJobResultSummary {
+  const result = record(payload) ? payload : {}
+  const configuration = record(result.configuration) ? result.configuration : undefined
+  const checkpoint = record(result.checkpoint) ? result.checkpoint : undefined
+  const metrics = record(result.metrics) ? result.metrics : undefined
+  const authority = record(result.authority) ? result.authority : undefined
+  const nonNegativeInteger = (value: number): boolean => Number.isInteger(value) && value >= 0
+  return {
+    solverId: textValue(result, 'solver_id', 'solver_id'),
+    controlMode: textValue(configuration, 'control_mode', 'configuration.control_mode'),
+    publicApiAuthority: textValue(authority, 'public_api', 'authority.public_api'),
+    externalVvAuthority: textValue(authority, 'external_vv', 'authority.external_vv'),
+    terminalLoadFactor: numberValue(checkpoint, 'terminal_load_factor', 'checkpoint.terminal_load_factor'),
+    terminalEpoch: numberValue(checkpoint, 'terminal_epoch', 'checkpoint.terminal_epoch', nonNegativeInteger),
+    terminalControlDisplacement: terminalControlDisplacement(checkpoint),
+    exactEngineeringRecovery: booleanValue(metrics, 'exact_engineering_recovery', 'metrics.exact_engineering_recovery'),
+    exactCheckpointChainReplay: booleanValue(metrics, 'exact_checkpoint_chain_replay', 'metrics.exact_checkpoint_chain_replay'),
+    fallbackCount: numberValue(metrics, 'fallback_count', 'metrics.fallback_count', nonNegativeInteger),
+    regularizationCount: numberValue(metrics, 'regularization_count', 'metrics.regularization_count', nonNegativeInteger),
+    acceptedStepCount: numberValue(metrics, 'accepted_step_count', 'metrics.accepted_step_count', nonNegativeInteger),
+    rejectedStepCount: numberValue(metrics, 'rejected_step_count', 'metrics.rejected_step_count', nonNegativeInteger),
+    nodeDisplacementRows: arrayCount(result, 'node_displacements', 'node_displacements'),
+    supportReactionRows: arrayCount(result, 'support_reactions', 'support_reactions'),
+    memberEndForceRows: arrayCount(result, 'member_end_forces', 'member_end_forces'),
+    sectionResultRows: arrayCount(result, 'section_results', 'section_results'),
+    fiberResultRows: arrayCount(result, 'fiber_results', 'fiber_results'),
+  }
 }

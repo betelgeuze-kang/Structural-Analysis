@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { createHash } from 'node:crypto'
-import { loadWorkbenchJob } from '../../src/workbench-v2/model/jobProvider'
+import { loadWorkbenchJob, normalizeResultSummary } from '../../src/workbench-v2/model/jobProvider'
 import { validateWorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
 
 const hash = `sha256:${'1'.repeat(64)}`
@@ -71,7 +71,30 @@ function digest(bytes: Uint8Array): string {
 
 test('Workbench verifies a succeeded result/evidence pair before display', async () => {
   const encoder = new TextEncoder()
-  const resultBytes = encoder.encode(JSON.stringify({ schema_version: 'unified-nonlinear-frame-result.v1' }))
+  const resultBytes = encoder.encode(JSON.stringify({
+    schema_version: 'unified-nonlinear-frame-result.v1',
+    solver_id: 'public_cpu_corotational_rc_fiber_frame_arc_length_v1',
+    configuration: { control_mode: 'arc_length' },
+    checkpoint: {
+      terminal_load_factor: -2.5,
+      terminal_epoch: 7,
+      terminal_monitor_displacement_m: -0.03,
+    },
+    metrics: {
+      exact_engineering_recovery: true,
+      exact_checkpoint_chain_replay: true,
+      fallback_count: 0,
+      regularization_count: 0,
+      accepted_step_count: 7,
+      rejected_step_count: 1,
+    },
+    authority: { public_api: 'developer_preview_candidate', external_vv: 'not_attached' },
+    node_displacements: [{ node_id: 'N1' }, { node_id: 'N2' }],
+    support_reactions: [{ node_id: 'N1', dof: 'UY' }],
+    member_end_forces: [{ member_id: 'M1' }],
+    section_results: [{ member_id: 'M1', section_index: 0 }],
+    fiber_results: [{ member_id: 'M1', fiber_index: 0 }],
+  }))
   const resultHash = digest(resultBytes)
   const evidenceBytes = encoder.encode(JSON.stringify({
     schema_version: 'structural-analysis-job-completion-evidence.v1',
@@ -99,9 +122,34 @@ test('Workbench verifies a succeeded result/evidence pair before display', async
   try {
     const loaded = await loadWorkbenchJob('https://example.test/v1/jobs/job_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
     expect(loaded).toMatchObject({ status: 'ready', artifactStatus: 'verified', errors: [] })
+    expect(loaded.resultSummary).toMatchObject({
+      controlMode: { state: 'available', value: 'arc_length' },
+      terminalLoadFactor: { state: 'available', value: -2.5 },
+      terminalControlDisplacement: { state: 'available', value: -0.03 },
+      acceptedStepCount: { state: 'available', value: 7 },
+      nodeDisplacementRows: { state: 'available', value: 2 },
+    })
   } finally {
     globalThis.fetch = originalFetch
   }
+})
+
+test('Workbench result summary preserves unavailable and invalid engineering states', () => {
+  const summary = normalizeResultSummary({
+    schema_version: 'unified-nonlinear-frame-result.v1',
+    configuration: { control_mode: 'arc_length' },
+    checkpoint: { terminal_load_factor: 'not-a-number', terminal_epoch: -1 },
+    metrics: { fallback_count: -1, exact_engineering_recovery: 'yes' },
+    node_displacements: 'not-an-array',
+  })
+
+  expect(summary.terminalLoadFactor.state).toBe('invalid')
+  expect(summary.terminalEpoch.state).toBe('invalid')
+  expect(summary.fallbackCount.state).toBe('invalid')
+  expect(summary.exactEngineeringRecovery.state).toBe('invalid')
+  expect(summary.nodeDisplacementRows.state).toBe('invalid')
+  expect(summary.terminalControlDisplacement.state).toBe('unavailable')
+  expect(summary.supportReactionRows.state).toBe('unavailable')
 })
 
 test('Workbench blocks a tampered published result', async () => {

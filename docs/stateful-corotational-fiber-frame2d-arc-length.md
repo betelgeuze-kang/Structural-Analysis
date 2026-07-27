@@ -106,6 +106,11 @@ requires deterministic genesis replay. Follower loads, a general
 section/material codec registry, sparse production execution, ROCm/HIP parity,
 and an externally accepted nonlinear benchmark remain open.
 
+The unified adapter is also reachable through the CLI and durable Job Service.
+Successful jobs publish the composite checkpoint, result, and core validation
+evidence atomically; Workbench consumes those references read-only and preserves
+available, unavailable, and invalid engineering-value states.
+
 Fully constrained `F=0` models remain reaction-only outcomes and cannot enter
 this displacement-monitored arc-length branch or make a convergence claim.
 Authoritative G1, full-building equilibrium, external acceptance, and

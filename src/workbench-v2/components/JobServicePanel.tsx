@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
-import type { JobLoadStatus } from '../model/jobProvider'
+import type { JobLoadStatus, WorkbenchJobResultSummary } from '../model/jobProvider'
 import type { WorkbenchJobView } from '../model/jobSchema'
+import type { ExplicitValue, TextValue } from '../model/caseSchema'
+import { EngineeringValueText } from './EngineeringValueText'
 import { StateChip, type ChipState } from './StateChip'
 
 interface JobServicePanelProps {
@@ -8,6 +10,7 @@ interface JobServicePanelProps {
   job: WorkbenchJobView | null
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
+  resultSummary?: WorkbenchJobResultSummary | null
 }
 
 function chip(job: WorkbenchJobView): ChipState {
@@ -20,7 +23,27 @@ function shortHash(value: string): string {
   return `${value.slice(0, 15)}…${value.slice(-8)}`
 }
 
-export function JobServicePanel({ loadStatus, job, errors, artifactStatus }: JobServicePanelProps): ReactElement {
+function explicitText(value: TextValue): ReactElement {
+  return value.state === 'available' ? (
+    <span data-engineering-value-state="available">{value.value}</span>
+  ) : (
+    <span data-engineering-value-state={value.state} title={value.reason}>
+      {value.state === 'unavailable' ? 'Unavailable' : 'Invalid'}
+    </span>
+  )
+}
+
+function explicitBoolean(value: ExplicitValue<boolean>): ReactElement {
+  return value.state === 'available' ? (
+    <span data-engineering-value-state="available">{value.value ? 'Yes' : 'No'}</span>
+  ) : (
+    <span data-engineering-value-state={value.state} title={value.reason}>
+      {value.state === 'unavailable' ? 'Unavailable' : 'Invalid'}
+    </span>
+  )
+}
+
+export function JobServicePanel({ loadStatus, job, errors, artifactStatus, resultSummary }: JobServicePanelProps): ReactElement {
   if (loadStatus !== 'ready' || !job) {
     const label = loadStatus === 'loading' ? 'Loading durable job status…' : loadStatus === 'unconfigured'
       ? 'No durable job endpoint is configured for this Workbench session.'
@@ -58,6 +81,31 @@ export function JobServicePanel({ loadStatus, job, errors, artifactStatus }: Job
       <p className="wb2-muted" data-job-authority={job.result_authority}>
         Job state is orchestration evidence only. Convergence and engineering values come from the referenced core result/evidence pair.
       </p>
+      {resultSummary ? (
+        <>
+          <h3 className="wb2-subtitle">Verified core result</h3>
+          <dl className="wb2-kv" data-job-result-summary>
+            <dt>Solver</dt><dd>{explicitText(resultSummary.solverId)}</dd>
+            <dt>Control mode</dt><dd>{explicitText(resultSummary.controlMode)}</dd>
+            <dt>Public API authority</dt><dd>{explicitText(resultSummary.publicApiAuthority)}</dd>
+            <dt>External V&amp;V</dt><dd>{explicitText(resultSummary.externalVvAuthority)}</dd>
+            <dt>Terminal load factor</dt><dd><EngineeringValueText value={resultSummary.terminalLoadFactor} /></dd>
+            <dt>Terminal epoch</dt><dd><EngineeringValueText value={resultSummary.terminalEpoch} integer /></dd>
+            <dt>Terminal control displacement (m)</dt><dd><EngineeringValueText value={resultSummary.terminalControlDisplacement} /></dd>
+            <dt>Exact engineering recovery</dt><dd>{explicitBoolean(resultSummary.exactEngineeringRecovery)}</dd>
+            <dt>Exact checkpoint replay</dt><dd>{explicitBoolean(resultSummary.exactCheckpointChainReplay)}</dd>
+            <dt>Fallback count</dt><dd><EngineeringValueText value={resultSummary.fallbackCount} integer /></dd>
+            <dt>Regularization count</dt><dd><EngineeringValueText value={resultSummary.regularizationCount} integer /></dd>
+            <dt>Accepted steps</dt><dd><EngineeringValueText value={resultSummary.acceptedStepCount} integer /></dd>
+            <dt>Rejected steps</dt><dd><EngineeringValueText value={resultSummary.rejectedStepCount} integer /></dd>
+            <dt>Displacement rows</dt><dd><EngineeringValueText value={resultSummary.nodeDisplacementRows} integer /></dd>
+            <dt>Reaction rows</dt><dd><EngineeringValueText value={resultSummary.supportReactionRows} integer /></dd>
+            <dt>Member-force rows</dt><dd><EngineeringValueText value={resultSummary.memberEndForceRows} integer /></dd>
+            <dt>Section-result rows</dt><dd><EngineeringValueText value={resultSummary.sectionResultRows} integer /></dd>
+            <dt>Fiber-result rows</dt><dd><EngineeringValueText value={resultSummary.fiberResultRows} integer /></dd>
+          </dl>
+        </>
+      ) : null}
     </section>
   )
 }
