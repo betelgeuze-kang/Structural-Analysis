@@ -42,6 +42,12 @@ def test_registry_is_valid_and_all_generated_surfaces_are_current() -> None:
         "shadow_only": 1,
         "blocked": 4,
     }
+    assert Counter(
+        row["implementation_status"] for row in registry["capabilities"]
+    ) == {"implemented": 15, "partial": 4}
+    assert Counter(
+        row["authority_status"] for row in registry["capabilities"]
+    ) == {"granted": 10, "candidate": 5, "none": 4}
     assert generator.check_outputs(ROOT) == []
 
 
@@ -52,6 +58,8 @@ def test_public_api_filters_rows_and_returns_independent_copies() -> None:
     assert len(all_rows) == 19
     assert len(public_rows) == 10
     assert all(row["public"] for row in public_rows)
+    assert all(row["implementation_status"] == "implemented" for row in public_rows)
+    assert all(row["authority_status"] == "granted" for row in public_rows)
     assert all(row["status"] in {"supported", "bounded_public"} for row in public_rows)
     assert any(
         row["id"] == "vv.opensees_level2" and not row["public"] for row in all_rows
@@ -108,6 +116,27 @@ def test_workbench_consumes_generated_registry_without_truth_ownership() -> None
     assert len(payload["capabilities"]) == 19
     assert "generatedCapabilities.json" in component
     assert "data-wb2-capability-table" in component
+    assert "data-implementation-status" in component
+    assert "data-authority-status" in component
+
+
+def test_registry_validation_rejects_conflated_or_invalid_authority_axes() -> None:
+    registry = deepcopy(generator.load_registry(ROOT))
+    registry["capabilities"][0]["authority_status"] = "none"
+
+    with pytest.raises(
+        generator.CapabilityRegistryError,
+        match="public capability cannot have authority_status none",
+    ):
+        generator.validate_registry(registry, repo_root=ROOT)
+
+    registry = deepcopy(generator.load_registry(ROOT))
+    registry["capabilities"][0]["implementation_status"] = "unknown"
+    with pytest.raises(
+        generator.CapabilityRegistryError,
+        match="invalid implementation_status",
+    ):
+        generator.validate_registry(registry, repo_root=ROOT)
 
 
 def test_registry_validation_fails_closed_for_missing_evidence() -> None:

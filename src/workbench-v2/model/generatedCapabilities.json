@@ -9,11 +9,13 @@
   "capabilities": [
     {
       "authority": "validated_input_contract",
+      "authority_status": "granted",
       "category": "model_io",
       "evidence": [
         "tests/test_structural_analysis_core_api.py"
       ],
       "id": "model.neutral_canonical",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli"
@@ -28,12 +30,14 @@
     },
     {
       "authority": "input_translation_with_provenance",
+      "authority_status": "granted",
       "category": "model_io",
       "evidence": [
         "src/structural_analysis/io/midas/loader.py",
         "tests/test_structural_analysis_core_api.py"
       ],
       "id": "io.midas_mgt",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli"
@@ -48,12 +52,14 @@
     },
     {
       "authority": "entity_scan_and_model_health_only",
+      "authority_status": "granted",
       "category": "model_io",
       "evidence": [
         "src/structural_analysis/io/ifc/loader.py",
         "tests/test_structural_analysis_core_api.py"
       ],
       "id": "io.ifc_model_health",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli"
@@ -68,12 +74,14 @@
     },
     {
       "authority": "numerical_and_engineering_within_supported_elements",
+      "authority_status": "granted",
       "category": "analysis",
       "evidence": [
         "docs/authoritative-cpu-linear-solver.md",
         "tests/test_structural_analysis_core_api.py"
       ],
       "id": "analysis.linear_static",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli",
@@ -89,12 +97,14 @@
     },
     {
       "authority": "numerical_within_explicit_frame_truss_mass_profile",
+      "authority_status": "granted",
       "category": "analysis",
       "evidence": [
         "docs/phase2-whole-model-modal-analysis.md",
         "tests/test_whole_model_modal_analysis.py"
       ],
       "id": "analysis.modal",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli"
@@ -109,12 +119,14 @@
     },
     {
       "authority": "numerical_within_explicit_preload_profile",
+      "authority_status": "granted",
       "category": "analysis",
       "evidence": [
         "docs/phase2-whole-model-linear-buckling.md",
         "tests/test_whole_model_buckling_analysis.py"
       ],
       "id": "analysis.linear_buckling",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli"
@@ -129,12 +141,14 @@
     },
     {
       "authority": "bounded_material_geometric_newton",
+      "authority_status": "granted",
       "category": "analysis",
       "evidence": [
         "docs/public-two-bar-nonlinear-truss.md",
         "src/structural_analysis/api/nonlinear_truss.py"
       ],
       "id": "analysis.nonlinear_two_bar_truss",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli"
@@ -149,12 +163,14 @@
     },
     {
       "authority": "exact_reaction_member_section_fiber_recovery",
+      "authority_status": "granted",
       "category": "analysis",
       "evidence": [
         "docs/public-rc-fiber-frame.md",
         "tests/test_public_rc_fiber_frame_api.py"
       ],
       "id": "analysis.nonlinear_rc_fiber_frame_fixed_chord",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli"
@@ -169,6 +185,7 @@
     },
     {
       "authority": "comparison_contract_only_no_result_promotion",
+      "authority_status": "granted",
       "category": "result_contract",
       "evidence": [
         "docs/engine-v2-result-quantity-contract.md",
@@ -177,6 +194,7 @@
         "tests/test_result_quantity_catalog.py"
       ],
       "id": "contract.result_quantity_catalog",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "json_schema"
@@ -191,6 +209,7 @@
     },
     {
       "authority": "bounded_j1_j5_and_exact_engineering_recovery_candidate",
+      "authority_status": "candidate",
       "category": "analysis",
       "evidence": [
         "docs/unified-nonlinear-frame-api.md",
@@ -209,6 +228,7 @@
         "examples/public_corotational_branching_frame.json"
       ],
       "id": "analysis.nonlinear_corotational_fiber_frame_2d",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli"
@@ -223,6 +243,7 @@
     },
     {
       "authority": "bounded_native_coo_csr_and_fail_closed_exact_conditioning_candidate",
+      "authority_status": "candidate",
       "category": "backend",
       "evidence": [
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py",
@@ -236,6 +257,7 @@
         "docs/sparse-factorization-conditioning-diagnostics.md"
       ],
       "id": "backend.nonlinear_sparse",
+      "implementation_status": "implemented",
       "interfaces": [
         "python_api",
         "cli",
@@ -251,6 +273,7 @@
     },
     {
       "authority": "none",
+      "authority_status": "none",
       "category": "verification",
       "evidence": [
         "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
@@ -266,6 +289,7 @@
         "docs/external-code-to-code-technical-execution.md"
       ],
       "id": "vv.opensees_level2",
+      "implementation_status": "partial",
       "interfaces": [
         "evidence"
       ],
@@ -279,6 +303,7 @@
     },
     {
       "authority": "none",
+      "authority_status": "none",
       "category": "verification",
       "evidence": [
         "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
@@ -287,6 +312,7 @@
         "docs/external-code-to-code-technical-execution.md"
       ],
       "id": "vv.second_solver_level2",
+      "implementation_status": "partial",
       "interfaces": [
         "evidence"
       ],
@@ -300,6 +326,7 @@
     },
     {
       "authority": "bounded_source_bound_uniaxial_crack_band_candidate",
+      "authority_status": "candidate",
       "category": "material",
       "evidence": [
         "src/structural_analysis/materials/concrete_damage.py",
@@ -311,6 +338,7 @@
         "docs/fracture-energy-concrete-mesh-objectivity.md"
       ],
       "id": "material.fracture_energy_concrete",
+      "implementation_status": "implemented",
       "interfaces": [
         "internal_python",
         "evidence"
@@ -325,6 +353,7 @@
     },
     {
       "authority": "bounded_repository_benchmark_candidate",
+      "authority_status": "candidate",
       "category": "analysis",
       "evidence": [
         "src/structural_analysis/benchmark/stateful_corotational_steel_frame_cyclic.py",
@@ -337,6 +366,7 @@
         "tests/test_stateful_corotational_linked_frame_cyclic_benchmark.py"
       ],
       "id": "analysis.cyclic_corotational_fiber_frames",
+      "implementation_status": "implemented",
       "interfaces": [
         "internal_python",
         "evidence"
@@ -351,12 +381,14 @@
     },
     {
       "authority": "consumer_only",
+      "authority_status": "granted",
       "category": "application",
       "evidence": [
         "docs/workbench-v2.md",
         "tests/frontend/workbench-v2-e2e.spec.ts"
       ],
       "id": "app.workbench_result_evidence",
+      "implementation_status": "implemented",
       "interfaces": [
         "workbench"
       ],
@@ -370,6 +402,7 @@
     },
     {
       "authority": "proposal_and_evaluation_only",
+      "authority_status": "candidate",
       "category": "ai_control",
       "evidence": [
         "src/structural_analysis/ai/shadow_solver_controller.py",
@@ -382,6 +415,7 @@
         "tests/test_ai_offline_counterfactual.py"
       ],
       "id": "ai.solver_shadow_control",
+      "implementation_status": "implemented",
       "interfaces": [
         "internal_python",
         "evidence"
@@ -397,6 +431,7 @@
     },
     {
       "authority": "none",
+      "authority_status": "none",
       "category": "ai_control",
       "evidence": [
         "docs/ai-shadow-solver-controller.md",
@@ -404,6 +439,7 @@
         "docs/structural-analysis-ai-engine-gap-ledger.md"
       ],
       "id": "ai.guarded_execution",
+      "implementation_status": "partial",
       "interfaces": [
         "internal_python"
       ],
@@ -418,6 +454,7 @@
     },
     {
       "authority": "none",
+      "authority_status": "none",
       "category": "backend",
       "evidence": [
         "docs/engine-v2-cpu-hip-fgmres-recurrence.md",
@@ -426,6 +463,7 @@
         "tests/test_engine_v2_hip_fgmres_stage4_status.py"
       ],
       "id": "backend.rocm_hip_production",
+      "implementation_status": "partial",
       "interfaces": [
         "hardware_runner"
       ],

@@ -26,6 +26,8 @@ ALLOWED_STATUSES = {
     "blocked",
 }
 PUBLIC_STATUSES = {"supported", "bounded_public"}
+IMPLEMENTATION_STATUSES = {"implemented", "partial", "not_implemented"}
+AUTHORITY_STATUSES = {"granted", "candidate", "none"}
 
 
 class CapabilityRegistryError(ValueError):
@@ -61,6 +63,17 @@ def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
         status = str(row.get("status", "")).strip()
         if status not in ALLOWED_STATUSES:
             raise CapabilityRegistryError(f"{capability_id}: invalid status {status}")
+        implementation_status = str(row.get("implementation_status", "")).strip()
+        if implementation_status not in IMPLEMENTATION_STATUSES:
+            raise CapabilityRegistryError(
+                f"{capability_id}: invalid implementation_status "
+                f"{implementation_status}"
+            )
+        authority_status = str(row.get("authority_status", "")).strip()
+        if authority_status not in AUTHORITY_STATUSES:
+            raise CapabilityRegistryError(
+                f"{capability_id}: invalid authority_status {authority_status}"
+            )
         public = row.get("public")
         if not isinstance(public, bool):
             raise CapabilityRegistryError(f"{capability_id}: public must be boolean")
@@ -86,6 +99,18 @@ def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
             raise CapabilityRegistryError(
                 f"{capability_id}: public capability cannot have authority none"
             )
+        if authority_status == "none" and public:
+            raise CapabilityRegistryError(
+                f"{capability_id}: public capability cannot have authority_status none"
+            )
+        if authority_status == "granted" and not public:
+            raise CapabilityRegistryError(
+                f"{capability_id}: granted authority must be public"
+            )
+        if implementation_status == "not_implemented" and authority_status != "none":
+            raise CapabilityRegistryError(
+                f"{capability_id}: unimplemented capability cannot have authority"
+            )
     authority = registry.get("authority_rules")
     if not isinstance(authority, dict):
         raise CapabilityRegistryError("authority_rules must be an object")
@@ -109,8 +134,8 @@ def _cell(value: Any) -> str:
 
 def render_table(registry: dict[str, Any]) -> str:
     lines = [
-        "| Capability | Status | Public | Authority | Interfaces | Exact profile / boundary |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| Capability | Implementation | Authority status | Public | Authority scope | Interfaces | Exact profile / boundary |",
+        "| --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in registry["capabilities"]:
         boundary = f"{row['profile']}; {row['limitations'][0]}"
@@ -119,7 +144,8 @@ def render_table(registry: dict[str, Any]) -> str:
             + " | ".join(
                 [
                     _cell(row["title"]),
-                    _cell(row["status"]),
+                    _cell(row["implementation_status"]),
+                    _cell(row["authority_status"]),
                     "yes" if row["public"] else "no",
                     _cell(row["authority"]),
                     _cell(row["interfaces"]),

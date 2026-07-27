@@ -6,6 +6,8 @@ interface CapabilityRow {
   title: string
   category: string
   status: 'supported' | 'bounded_public' | 'experimental' | 'shadow_only' | 'blocked'
+  implementation_status: 'implemented' | 'partial' | 'not_implemented'
+  authority_status: 'granted' | 'candidate' | 'none'
   public: boolean
   authority: string
   interfaces: string[]
@@ -47,17 +49,25 @@ export function CapabilitySupportPanel(): ReactElement {
           <thead>
             <tr>
               <th scope="col">Capability</th>
-              <th scope="col">Status</th>
+              <th scope="col">Implementation</th>
+              <th scope="col">Authority status</th>
               <th scope="col">Public</th>
-              <th scope="col">Authority</th>
+              <th scope="col">Authority scope</th>
               <th scope="col">Boundary</th>
             </tr>
           </thead>
           <tbody>
             {registry.capabilities.map((row) => (
-              <tr key={row.id} data-capability-id={row.id} data-capability-status={row.status}>
+              <tr
+                key={row.id}
+                data-capability-id={row.id}
+                data-capability-status={row.status}
+                data-implementation-status={row.implementation_status}
+                data-authority-status={row.authority_status}
+              >
                 <th scope="row">{row.title}</th>
-                <td>{row.status}</td>
+                <td>{row.implementation_status}</td>
+                <td>{row.authority_status}</td>
                 <td>{row.public ? 'yes' : 'no'}</td>
                 <td>{row.authority}</td>
                 <td>{row.profile}; {row.limitations[0]}</td>

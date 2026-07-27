@@ -10,6 +10,8 @@
   "capabilities": [
     {
       "id": "model.neutral_canonical",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "Neutral canonical model",
       "category": "model_io",
       "status": "supported",
@@ -22,6 +24,8 @@
     },
     {
       "id": "io.midas_mgt",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "MIDAS MGT import",
       "category": "model_io",
       "status": "bounded_public",
@@ -37,6 +41,8 @@
     },
     {
       "id": "io.ifc_model_health",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "IFC model-health import",
       "category": "model_io",
       "status": "bounded_public",
@@ -52,6 +58,8 @@
     },
     {
       "id": "analysis.linear_static",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "Linear static analysis",
       "category": "analysis",
       "status": "bounded_public",
@@ -67,6 +75,8 @@
     },
     {
       "id": "analysis.modal",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "Whole-model modal analysis",
       "category": "analysis",
       "status": "bounded_public",
@@ -82,6 +92,8 @@
     },
     {
       "id": "analysis.linear_buckling",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "Whole-model linear buckling",
       "category": "analysis",
       "status": "bounded_public",
@@ -97,6 +109,8 @@
     },
     {
       "id": "analysis.nonlinear_two_bar_truss",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "Nonlinear two-bar truss",
       "category": "analysis",
       "status": "bounded_public",
@@ -112,6 +126,8 @@
     },
     {
       "id": "analysis.nonlinear_rc_fiber_frame_fixed_chord",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "Fixed-chord RC fiber frame",
       "category": "analysis",
       "status": "bounded_public",
@@ -127,6 +143,8 @@
     },
     {
       "id": "contract.result_quantity_catalog",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "ResultIR SI quantity and tolerance catalog",
       "category": "result_contract",
       "status": "bounded_public",
@@ -144,6 +162,8 @@
     },
     {
       "id": "analysis.nonlinear_corotational_fiber_frame_2d",
+      "implementation_status": "implemented",
+      "authority_status": "candidate",
       "title": "Corotational 2D fiber frame",
       "category": "analysis",
       "status": "experimental",
@@ -171,6 +191,8 @@
     },
     {
       "id": "backend.nonlinear_sparse",
+      "implementation_status": "implemented",
+      "authority_status": "candidate",
       "title": "Native sparse nonlinear backend",
       "category": "backend",
       "status": "experimental",
@@ -193,6 +215,8 @@
     },
     {
       "id": "vv.opensees_level2",
+      "implementation_status": "partial",
+      "authority_status": "none",
       "title": "OpenSees Level 2 verification",
       "category": "verification",
       "status": "blocked",
@@ -217,6 +241,8 @@
     },
     {
       "id": "vv.second_solver_level2",
+      "implementation_status": "partial",
+      "authority_status": "none",
       "title": "Second independent solver Level 2 verification",
       "category": "verification",
       "status": "blocked",
@@ -234,6 +260,8 @@
     },
     {
       "id": "material.fracture_energy_concrete",
+      "implementation_status": "implemented",
+      "authority_status": "candidate",
       "title": "Fracture-energy concrete",
       "category": "material",
       "status": "experimental",
@@ -254,6 +282,8 @@
     },
     {
       "id": "analysis.cyclic_corotational_fiber_frames",
+      "implementation_status": "implemented",
+      "authority_status": "candidate",
       "title": "Cyclic corotational fiber-frame benchmarks",
       "category": "analysis",
       "status": "experimental",
@@ -275,6 +305,8 @@
     },
     {
       "id": "app.workbench_result_evidence",
+      "implementation_status": "implemented",
+      "authority_status": "granted",
       "title": "Workbench result and evidence review",
       "category": "application",
       "status": "bounded_public",
@@ -290,6 +322,8 @@
     },
     {
       "id": "ai.solver_shadow_control",
+      "implementation_status": "implemented",
+      "authority_status": "candidate",
       "title": "AI solver shadow control",
       "category": "ai_control",
       "status": "shadow_only",
@@ -314,6 +348,8 @@
     },
     {
       "id": "ai.guarded_execution",
+      "implementation_status": "partial",
+      "authority_status": "none",
       "title": "Guarded AI execution",
       "category": "ai_control",
       "status": "blocked",
@@ -333,6 +369,8 @@
     },
     {
       "id": "backend.rocm_hip_production",
+      "implementation_status": "partial",
+      "authority_status": "none",
       "title": "ROCm/HIP production backend",
       "category": "backend",
       "status": "blocked",
