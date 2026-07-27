@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import type { RunStatus } from '../model/workbenchState'
 import type { CaseAnalysis } from '../model/caseSchema'
 import { StateChip } from './StateChip'
+import { EngineeringValueText } from './EngineeringValueText'
 
 const STAGES: { key: RunStatus; label: string }[] = [
   { key: 'idle', label: 'Idle' },
@@ -14,11 +15,6 @@ interface AnalysisRibbonProps {
   runStatus: RunStatus
   analysis?: CaseAnalysis
   convergenceAvailable: boolean
-}
-
-function fmt(value: number): string {
-  if (value !== 0 && (Math.abs(value) < 1e-3 || Math.abs(value) >= 1e6)) return value.toExponential(3)
-  return Number.isInteger(value) ? String(value) : value.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')
 }
 
 export function AnalysisRibbon({ runStatus, analysis, convergenceAvailable }: AnalysisRibbonProps): ReactElement {
@@ -59,11 +55,11 @@ export function AnalysisRibbon({ runStatus, analysis, convergenceAvailable }: An
         <dl className="wb2-kv wb2-analysis-kv">
           <dt>Type</dt><dd>{analysis.type}</dd>
           <dt>Solver</dt><dd>{analysis.solver}</dd>
-          <dt>Load scale</dt><dd>{fmt(analysis.loadScale)}</dd>
-          <dt>Iterations</dt><dd>{analysis.iterationCount}</dd>
-          <dt>Residual tolerance</dt><dd>{fmt(analysis.residualTolerance)}</dd>
-          <dt>Final normalized residual</dt><dd>{fmt(analysis.finalNormalizedResidual)}</dd>
-          <dt>Final relative increment</dt><dd>{fmt(analysis.finalRelativeIncrement)}</dd>
+          <dt>Load scale</dt><dd><EngineeringValueText value={analysis.loadScale} /></dd>
+          <dt>Iterations</dt><dd><EngineeringValueText value={analysis.iterationCount} integer /></dd>
+          <dt>Residual tolerance</dt><dd><EngineeringValueText value={analysis.residualTolerance} /></dd>
+          <dt>Final normalized residual</dt><dd><EngineeringValueText value={analysis.finalNormalizedResidual} /></dd>
+          <dt>Final relative increment</dt><dd><EngineeringValueText value={analysis.finalRelativeIncrement} /></dd>
         </dl>
       ) : null}
     </section>

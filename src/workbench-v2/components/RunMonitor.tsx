@@ -1,6 +1,12 @@
 import type { ReactElement } from 'react'
-import type { CaseAnalysis, ResidualStep } from '../model/caseSchema'
+import {
+  isAvailableValue,
+  type CaseAnalysis,
+  type EngineeringValue,
+  type ResidualStep,
+} from '../model/caseSchema'
 import type { RunStatus } from '../model/workbenchState'
+import { EngineeringValueText } from './EngineeringValueText'
 import { StateChip } from './StateChip'
 
 interface RunMonitorProps {
@@ -8,11 +14,6 @@ interface RunMonitorProps {
   analysis?: CaseAnalysis
   residualHistory: ResidualStep[]
   convergenceAvailable: boolean
-}
-
-function fmt(value: number): string {
-  if (value !== 0 && (Math.abs(value) < 1e-3 || Math.abs(value) >= 1e6)) return value.toExponential(3)
-  return Number.isInteger(value) ? String(value) : value.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')
 }
 
 const STATUS_LABEL: Record<RunStatus, string> = {
@@ -44,11 +45,19 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
     )
   }
 
-  const recorded = residualHistory.length
-  const total = Math.max(analysis.iterationCount, recorded)
-  const pct = total > 0 ? Math.min(100, Math.round((recorded / total) * 100)) : 0
-  const latest = recorded ? residualHistory[recorded - 1] : null
-  const withinTolerance = analysis.finalNormalizedResidual <= analysis.residualTolerance
+  const usableSteps = residualHistory.filter(
+    (step) => isAvailableValue(step.iteration) && isAvailableValue(step.residual),
+  )
+  const recorded = usableSteps.length
+  const total = isAvailableValue(analysis.iterationCount) ? analysis.iterationCount.value : null
+  const pct = total != null && total > 0 ? Math.min(100, Math.round((recorded / total) * 100)) : 0
+  const latestResidual: EngineeringValue = usableSteps.length
+    ? usableSteps[usableSteps.length - 1].residual
+    : { state: 'unavailable', reason: 'no residual step is available' }
+  const withinTolerance =
+    isAvailableValue(analysis.finalNormalizedResidual) && isAvailableValue(analysis.residualTolerance)
+      ? analysis.finalNormalizedResidual.value <= analysis.residualTolerance.value
+      : null
   const statusState = runStatus === 'converged' ? 'LIVE' : runStatus === 'failed' ? 'BLOCKED' : 'UNAVAILABLE'
 
   return (
@@ -60,32 +69,40 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
         <span className="wb2-run-status-label" data-run-status>{STATUS_LABEL[runStatus]}</span>
       </div>
 
-      <div
-        className="wb2-run-progress"
-        role="progressbar"
-        aria-valuemin={0}
-        aria-valuemax={total}
-        aria-valuenow={recorded}
-        aria-label="Recorded iterations"
-        data-run-progress={pct}
-      >
-        <div className="wb2-run-progress__bar" style={{ width: `${pct}%` }} />
-      </div>
+      {total != null ? (
+        <div
+          className="wb2-run-progress"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={Math.max(total, recorded)}
+          aria-valuenow={recorded}
+          aria-label="Recorded iterations"
+          data-run-progress={pct}
+        >
+          <div className="wb2-run-progress__bar" style={{ width: `${pct}%` }} />
+        </div>
+      ) : null}
       <p className="wb2-run-progress__caption">
-        {recorded} of {total} iteration(s) recorded · load scale {fmt(analysis.loadScale)}
+        {recorded} recorded of <EngineeringValueText value={analysis.iterationCount} integer /> iteration(s) · load scale{' '}
+        <EngineeringValueText value={analysis.loadScale} />
       </p>
 
       <dl className="wb2-kv">
-        <dt>Latest residual</dt><dd className="wb2-mono">{latest ? fmt(latest.residual) : 'n/a'}</dd>
-        <dt>Final residual</dt><dd className="wb2-mono">{fmt(analysis.finalNormalizedResidual)}</dd>
-        <dt>Tolerance</dt><dd className="wb2-mono">{fmt(analysis.residualTolerance)}</dd>
-        <dt>Final rel. increment</dt><dd className="wb2-mono">{fmt(analysis.finalRelativeIncrement)}</dd>
+        <dt>Latest residual</dt><dd className="wb2-mono"><EngineeringValueText value={latestResidual} /></dd>
+        <dt>Final residual</dt><dd className="wb2-mono"><EngineeringValueText value={analysis.finalNormalizedResidual} /></dd>
+        <dt>Tolerance</dt><dd className="wb2-mono"><EngineeringValueText value={analysis.residualTolerance} /></dd>
+        <dt>Final rel. increment</dt><dd className="wb2-mono"><EngineeringValueText value={analysis.finalRelativeIncrement} /></dd>
       </dl>
 
-      <p className={`wb2-result-tol${withinTolerance ? ' is-ok' : ' is-no'}`} data-run-within-tol={String(withinTolerance)}>
-        {withinTolerance
-          ? 'Final residual is at or below tolerance.'
-          : 'Final residual is above tolerance — run is not converged.'}
+      <p
+        className={`wb2-result-tol${withinTolerance === true ? ' is-ok' : withinTolerance === false ? ' is-no' : ''}`}
+        data-run-within-tol={withinTolerance == null ? 'unavailable' : String(withinTolerance)}
+      >
+        {withinTolerance == null
+          ? 'Tolerance comparison is unavailable unless both values are available.'
+          : withinTolerance
+            ? 'Final residual is at or below tolerance.'
+            : 'Final residual is above tolerance — run is not converged.'}
       </p>
     </section>
   )
