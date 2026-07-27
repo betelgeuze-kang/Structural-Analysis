@@ -14,10 +14,19 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
     StatefulCorotationalFiberFrame2DProblem,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_engineering_recovery import (
+    COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE,
     CorotationalFiberFrameEngineeringRecoveryError,
+    create_corotational_direct_displacement_recovery_adapter,
     create_corotational_fiber_frame_engineering_result_ir,
+    validate_corotational_fiber_frame_control_recovery_adapter,
     validate_corotational_fiber_frame_engineering_result_ir,
     validate_corotational_fiber_frame_engineering_result_manifest,
+)
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control import (
+    run_stateful_corotational_fiber_frame2d_displacement_control_path,
+)
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
+    compile_corotational_fiber_frame_general_profile,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_j1_j5 import (
     CorotationalFiberFrameJ1J5Error,
@@ -88,6 +97,46 @@ def _result():
     )
 
 
+def _direct_control_adapter():
+    coordinates = ((0.0, 0.0), (1.0, 0.0))
+    section = make_rectangular_stateful_rc_fiber_section()
+    problem = StatefulCorotationalFiberFrame2DProblem(
+        case_id="direct-control-engineering-recovery",
+        node_coordinates_m=coordinates,
+        members=(
+            StatefulCorotationalFiberFrame2DMember(
+                member_id="controlled-member",
+                node_i=0,
+                node_j=1,
+                element=StatefulCorotationalFiberBeam2D(
+                    node_coordinates_m=coordinates,
+                    section=cast(AxialCurvatureSection, section),
+                    integration_order=3,
+                    element_id="controlled-member",
+                ),
+            ),
+        ),
+        fixed_global_dofs=(0, 1, 2, 4, 5),
+        reference_external_loads=((3, 1.0),),
+        rotation_coordinate_scale_m=1.0,
+    )
+    compilation = compile_corotational_fiber_frame_general_profile(
+        problem,
+        model_content_hash=canonical_hash(
+            {"fixture": "direct-control-engineering-recovery.v1"}
+        ),
+    )
+    path = run_stateful_corotational_fiber_frame2d_displacement_control_path(
+        problem,
+        (2.5e-5, 5.0e-5),
+        control_global_dof=3,
+    )
+    return create_corotational_direct_displacement_recovery_adapter(
+        compilation,
+        path,
+    )
+
+
 def _rehash_manifest(manifest: dict) -> None:
     body = dict(manifest)
     body.pop("engineering_result_hash")
@@ -116,6 +165,59 @@ def test_exact_recovery_binds_all_engineering_axes_and_si_quantities() -> None:
         validate_corotational_fiber_frame_engineering_result_manifest(manifest)
         == manifest
     )
+
+
+def test_direct_control_path_has_exact_recovery_and_detached_manifest() -> None:
+    adapter = _direct_control_adapter()
+    validated = validate_corotational_fiber_frame_control_recovery_adapter(adapter)
+    result = create_corotational_fiber_frame_engineering_result_ir(
+        engineering_result_id="direct.control.engineering.v1",
+        source_adapter=validated,
+    )
+    manifest = result.to_manifest()
+
+    assert result.authority_profile == (
+        COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE
+    )
+    assert result.load_factor == adapter.terminal_load_factor
+    assert result.load_factor != 1.0
+    assert result.artifact("node_translation_m")[1, 0] == 5.0e-5
+    assert result.metrics["terminal_assembly_replay_exact"] is True
+    assert result.metrics["no_fallback_or_regularization"] is True
+    assert adapter._path.steps[-1].residual_gate_passed is True
+    assert adapter._path.steps[-1].control_gate_passed is True
+    assert adapter._path.steps[-1].increment_gate_passed is True
+    assert (
+        validate_corotational_fiber_frame_engineering_result_manifest(manifest)
+        == manifest
+    )
+
+
+def test_direct_control_recovery_rejects_rehashed_gate_tampering() -> None:
+    adapter = _direct_control_adapter()
+    terminal_step = adapter._path.steps[-1]
+    tampered_step = replace(
+        terminal_step,
+        solver_relative_residual=terminal_step.residual_tolerance * 2.0,
+    )
+    tampered_path = replace(
+        adapter._path,
+        steps=(*adapter._path.steps[:-1], tampered_step),
+    )
+    provisional = replace(
+        adapter,
+        adapter_hash="sha256:" + "0" * 64,
+        _path=tampered_path,
+    )
+    manifest_body = provisional.to_manifest()
+    manifest_body.pop("adapter_hash")
+    tampered = replace(
+        provisional,
+        adapter_hash=canonical_hash(manifest_body),
+    )
+
+    with pytest.raises(ValueError, match="control recovery step 1 binding is invalid"):
+        validate_corotational_fiber_frame_control_recovery_adapter(tampered)
 
 
 def test_recovered_reactions_close_whole_portal_force_and_moment_equilibrium() -> None:

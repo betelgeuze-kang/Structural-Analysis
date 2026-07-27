@@ -41,7 +41,8 @@
     "authority_profile": {
       "enum": [
         "exact_bounded_portal_engineering_candidate.v1",
-        "exact_connected_frame2d_engineering_candidate.v1"
+        "exact_connected_frame2d_engineering_candidate.v1",
+        "exact_connected_frame2d_control_engineering_candidate.v1"
       ]
     },
     "compiler_hash": {"$ref": "#/$defs/hash"},
@@ -51,7 +52,7 @@
     "terminal_checkpoint_hash": {"$ref": "#/$defs/hash"},
     "terminal_assembly_hash": {"$ref": "#/$defs/hash"},
     "quantity_catalog_hash": {"$ref": "#/$defs/hash"},
-    "load_factor": {"const": 1.0},
+    "load_factor": {"type": "number"},
     "counts": {
       "type": "object",
       "additionalProperties": false,
@@ -147,6 +148,17 @@
             "detached_manifest_requires_retained_artifact_bytes",
             "detached_manifest_source_authenticity_not_established"
           ]
+        },
+        {
+          "const": [
+            "connected_planar_frame_graph_only",
+            "direct_displacement_control_dense_only",
+            "one_free_translational_control_coordinate",
+            "external_level2_not_attached",
+            "public_capability_not_promoted",
+            "detached_manifest_requires_retained_artifact_bytes",
+            "detached_manifest_source_authenticity_not_established"
+          ]
         }
       ]
     },
@@ -174,13 +186,57 @@
           },
           "counts": {
             "properties": {"node": {"const": 4}, "member": {"const": 3}}
-          }
+          },
+          "load_factor": {"const": 1.0}
         }
       },
       "else": {
-        "properties": {
-          "authority_profile": {
-            "const": "exact_connected_frame2d_engineering_candidate.v1"
+        "if": {
+          "properties": {
+            "authority_profile": {
+              "const": "exact_connected_frame2d_engineering_candidate.v1"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "load_factor": {"const": 1.0},
+            "limitations": {
+              "const": [
+                "connected_planar_frame_graph_only",
+                "proportional_nodal_load_only",
+                "prescribed_displacement_scaled_by_load_factor",
+                "load_control_cpu_dense_or_native_sparse_newton_only",
+                "parallel_members_not_supported",
+                "disconnected_graphs_not_supported",
+                "member_end_releases_not_supported",
+                "rigid_offsets_not_supported",
+                "distributed_member_loads_not_supported",
+                "direct_displacement_control_not_supported",
+                "external_level2_not_attached",
+                "public_capability_not_promoted",
+                "detached_manifest_requires_retained_artifact_bytes",
+                "detached_manifest_source_authenticity_not_established"
+              ]
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "authority_profile": {
+              "const": "exact_connected_frame2d_control_engineering_candidate.v1"
+            },
+            "limitations": {
+              "const": [
+                "connected_planar_frame_graph_only",
+                "direct_displacement_control_dense_only",
+                "one_free_translational_control_coordinate",
+                "external_level2_not_attached",
+                "public_capability_not_promoted",
+                "detached_manifest_requires_retained_artifact_bytes",
+                "detached_manifest_source_authenticity_not_established"
+              ]
+            }
           }
         }
       }

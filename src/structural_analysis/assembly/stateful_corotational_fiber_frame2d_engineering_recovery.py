@@ -22,16 +22,26 @@ from jsonschema import Draft202012Validator, validators
 import numpy as np
 
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
+    StatefulCorotationalFiberFrame2DAssembly,
     StatefulCorotationalFiberFrame2DProblem,
     assemble_stateful_corotational_fiber_frame2d,
+    validate_stateful_corotational_fiber_frame2d_checkpoint,
+)
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control import (
+    StatefulCorotationalFiberFrame2DDisplacementControlPathResult,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_j1_j5 import (
     CorotationalFiberFrameJ1J5Adapter,
     validate_corotational_fiber_frame_j1_j5_adapter,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
+    CorotationalFiberFrameGeneralCompilation,
     CorotationalFiberFrameGeneralJ1J5Adapter,
+    validate_corotational_general_compilation,
     validate_corotational_fiber_frame_general_j1_j5_adapter,
+)
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state import (
+    StatefulCorotationalFiberFrame2DCheckpoint,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
     StatefulCorotationalFiberFrame2DLoadPathResult,
@@ -66,6 +76,9 @@ COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND = (
 )
 COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE = (
     "exact_connected_frame2d_engineering_candidate.v1"
+)
+COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE = (
+    "exact_connected_frame2d_control_engineering_candidate.v1"
 )
 COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND = (
     "corotational_connected_frame2d_reaction_member_section_fiber"
@@ -120,6 +133,365 @@ _GENERAL_LIMITATIONS = (
     "detached_manifest_requires_retained_artifact_bytes",
     "detached_manifest_source_authenticity_not_established",
 )
+_CONTROL_LIMITATIONS = (
+    "connected_planar_frame_graph_only",
+    "direct_displacement_control_dense_only",
+    "one_free_translational_control_coordinate",
+    "external_level2_not_attached",
+    "public_capability_not_promoted",
+    "detached_manifest_requires_retained_artifact_bytes",
+    "detached_manifest_source_authenticity_not_established",
+)
+
+
+@dataclass(frozen=True)
+class CorotationalControlRecoveryStep:
+    parent_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
+    accepted_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
+    trial_assembly: StatefulCorotationalFiberFrame2DAssembly
+    control_global_dof: int
+    target_control_displacement_m: float
+    solver_relative_residual: float
+    residual_tolerance: float
+    control_error_m: float
+    control_tolerance_m: float
+    free_increment_abs_m: float
+    increment_tolerance_m: float
+    load_factor_increment_abs: float
+    load_factor_increment_tolerance: float
+    residual_gate_passed: Literal[True]
+    control_gate_passed: Literal[True]
+    increment_gate_passed: Literal[True]
+    regularization_used: Literal[False]
+    fallback_used: Literal[False]
+    committed: Literal[True] = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "parent_checkpoint_hash": self.parent_checkpoint.state_hash,
+            "accepted_checkpoint_hash": self.accepted_checkpoint.state_hash,
+            "trial_assembly_hash": canonical_hash(self.trial_assembly.to_dict()),
+            "control_global_dof": self.control_global_dof,
+            "target_control_displacement_m": self.target_control_displacement_m,
+            "solver_relative_residual": self.solver_relative_residual,
+            "residual_tolerance": self.residual_tolerance,
+            "control_error_m": self.control_error_m,
+            "control_tolerance_m": self.control_tolerance_m,
+            "free_increment_abs_m": self.free_increment_abs_m,
+            "increment_tolerance_m": self.increment_tolerance_m,
+            "load_factor_increment_abs": self.load_factor_increment_abs,
+            "load_factor_increment_tolerance": (self.load_factor_increment_tolerance),
+            "residual_gate_passed": self.residual_gate_passed,
+            "control_gate_passed": self.control_gate_passed,
+            "increment_gate_passed": self.increment_gate_passed,
+            "regularization_used": self.regularization_used,
+            "fallback_used": self.fallback_used,
+            "committed": self.committed,
+        }
+
+
+@dataclass(frozen=True)
+class CorotationalControlRecoveryPath:
+    control_mode: Literal["direct_displacement_control"]
+    source_contract_hash: str
+    control_global_dof: int
+    target_control_displacements_m: tuple[float, ...]
+    initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
+    final_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
+    steps: tuple[CorotationalControlRecoveryStep, ...]
+    terminal_target_passed: Literal[True]
+    status: Literal["ready"] = "ready"
+    contract_pass: Literal[True] = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "control_mode": self.control_mode,
+            "source_contract_hash": self.source_contract_hash,
+            "control_global_dof": self.control_global_dof,
+            "target_control_displacements_m": list(self.target_control_displacements_m),
+            "initial_checkpoint_hash": self.initial_checkpoint.state_hash,
+            "final_checkpoint_hash": self.final_checkpoint.state_hash,
+            "steps": [step.to_dict() for step in self.steps],
+            "terminal_target_passed": self.terminal_target_passed,
+            "status": self.status,
+            "contract_pass": self.contract_pass,
+        }
+
+
+@dataclass(frozen=True)
+class CorotationalFiberFrameControlRecoveryAdapter:
+    adapter_hash: str
+    compiler_hash: str
+    model_content_hash: str
+    problem_contract_hash: str
+    terminal_checkpoint_hash: str
+    terminal_load_factor: float
+    control_mode: Literal["direct_displacement_control"]
+    source_contract_hash: str
+    authority_profile: str
+    _compilation: CorotationalFiberFrameGeneralCompilation = field(
+        repr=False,
+        compare=False,
+    )
+    _path: CorotationalControlRecoveryPath = field(repr=False, compare=False)
+
+    def to_manifest(self) -> dict[str, Any]:
+        return {
+            "schema_version": "corotational-control-recovery-adapter.v1",
+            "adapter_hash": self.adapter_hash,
+            "compiler_hash": self.compiler_hash,
+            "model_content_hash": self.model_content_hash,
+            "problem_contract_hash": self.problem_contract_hash,
+            "terminal_checkpoint_hash": self.terminal_checkpoint_hash,
+            "terminal_load_factor": self.terminal_load_factor,
+            "control_mode": self.control_mode,
+            "source_contract_hash": self.source_contract_hash,
+            "authority_profile": self.authority_profile,
+            "control_path": self._path.to_dict(),
+        }
+
+
+def create_corotational_direct_displacement_recovery_adapter(
+    compilation: CorotationalFiberFrameGeneralCompilation,
+    path: StatefulCorotationalFiberFrame2DDisplacementControlPathResult,
+) -> CorotationalFiberFrameControlRecoveryAdapter:
+    """Bind a committed direct-control path to exact terminal recovery."""
+
+    validate_corotational_general_compilation(compilation)
+    if type(path) is not StatefulCorotationalFiberFrame2DDisplacementControlPathResult:
+        raise ValueError("path must be an exact direct displacement-control result")
+    if path.status != "ready" or not path.contract_pass or not path.steps:
+        raise ValueError("direct displacement-control path is not recovery-ready")
+    problem = compilation._problem
+    validate_stateful_corotational_fiber_frame2d_checkpoint(
+        problem,
+        path.initial_checkpoint,
+    )
+    validate_stateful_corotational_fiber_frame2d_checkpoint(
+        problem,
+        path.final_checkpoint,
+    )
+    recovery_steps: list[CorotationalControlRecoveryStep] = []
+    parent = path.initial_checkpoint
+    for index, step in enumerate(path.steps):
+        metrics = step.trial_solution.metrics
+        if (
+            not step.committed
+            or step.parent_checkpoint.state_hash != parent.state_hash
+            or step.accepted_checkpoint.parent_state_hash != parent.state_hash
+            or step.metrics.get("solver_contract_pass") is not True
+            or metrics.get("contract_pass") is not True
+            or metrics.get("residual_gate_passed") is not True
+            or metrics.get("control_gate_passed") is not True
+            or metrics.get("increment_gate_passed") is not True
+            or metrics.get("regularization_used") is not False
+            or metrics.get("fallback_used") is not False
+        ):
+            raise ValueError(f"direct displacement-control step {index} is not exact")
+        validate_stateful_corotational_fiber_frame2d_checkpoint(
+            problem,
+            step.accepted_checkpoint,
+        )
+        recovery_steps.append(
+            CorotationalControlRecoveryStep(
+                parent_checkpoint=step.parent_checkpoint,
+                accepted_checkpoint=step.accepted_checkpoint,
+                trial_assembly=step.trial_assembly,
+                control_global_dof=path.control_global_dof,
+                target_control_displacement_m=float(
+                    metrics["target_control_displacement_m"]
+                ),
+                solver_relative_residual=float(metrics["relative_residual"]),
+                residual_tolerance=float(metrics["residual_tolerance"]),
+                control_error_m=float(metrics["control_error_m"]),
+                control_tolerance_m=float(metrics["control_tolerance_m"]),
+                free_increment_abs_m=float(metrics["final_free_increment_abs_m"]),
+                increment_tolerance_m=float(metrics["increment_tolerance_m"]),
+                load_factor_increment_abs=float(
+                    metrics["final_load_factor_increment_abs"]
+                ),
+                load_factor_increment_tolerance=float(
+                    metrics["load_factor_increment_tolerance"]
+                ),
+                residual_gate_passed=True,
+                control_gate_passed=True,
+                increment_gate_passed=True,
+                regularization_used=False,
+                fallback_used=False,
+            )
+        )
+        parent = step.accepted_checkpoint
+    if parent.state_hash != path.final_checkpoint.state_hash:
+        raise ValueError("direct displacement-control terminal checkpoint is stale")
+    source_contract_hash = canonical_hash(path.to_dict())
+    control_path = CorotationalControlRecoveryPath(
+        control_mode="direct_displacement_control",
+        source_contract_hash=source_contract_hash,
+        control_global_dof=path.control_global_dof,
+        target_control_displacements_m=path.target_control_displacements_m,
+        initial_checkpoint=path.initial_checkpoint,
+        final_checkpoint=path.final_checkpoint,
+        steps=tuple(recovery_steps),
+        terminal_target_passed=True,
+    )
+    provisional = CorotationalFiberFrameControlRecoveryAdapter(
+        adapter_hash=_HASH_ZERO,
+        compiler_hash=compilation.compiler_hash,
+        model_content_hash=compilation.model_content_hash,
+        problem_contract_hash=compilation.problem_contract_hash,
+        terminal_checkpoint_hash=path.final_checkpoint.state_hash,
+        terminal_load_factor=path.final_checkpoint.load_factor,
+        control_mode="direct_displacement_control",
+        source_contract_hash=source_contract_hash,
+        authority_profile=(
+            COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE
+        ),
+        _compilation=compilation,
+        _path=control_path,
+    )
+    adapter = replace(
+        provisional,
+        adapter_hash=canonical_hash(
+            {
+                key: value
+                for key, value in provisional.to_manifest().items()
+                if key != "adapter_hash"
+            }
+        ),
+    )
+    return validate_corotational_fiber_frame_control_recovery_adapter(adapter)
+
+
+def validate_corotational_fiber_frame_control_recovery_adapter(
+    adapter: CorotationalFiberFrameControlRecoveryAdapter,
+) -> CorotationalFiberFrameControlRecoveryAdapter:
+    if type(adapter) is not CorotationalFiberFrameControlRecoveryAdapter:
+        raise ValueError("adapter type is invalid")
+    compilation = validate_corotational_general_compilation(adapter._compilation)
+    path = adapter._path
+    if type(path) is not CorotationalControlRecoveryPath:
+        raise ValueError("control recovery path type is invalid")
+    problem = compilation._problem
+    expected_hash = canonical_hash(
+        {
+            key: value
+            for key, value in adapter.to_manifest().items()
+            if key != "adapter_hash"
+        }
+    )
+    if (
+        adapter.adapter_hash != expected_hash
+        or adapter.compiler_hash != compilation.compiler_hash
+        or adapter.model_content_hash != compilation.model_content_hash
+        or adapter.problem_contract_hash != compilation.problem_contract_hash
+        or adapter.terminal_checkpoint_hash != path.final_checkpoint.state_hash
+        or adapter.terminal_load_factor != path.final_checkpoint.load_factor
+        or adapter.control_mode != path.control_mode
+        or adapter.source_contract_hash != path.source_contract_hash
+        or adapter.authority_profile
+        != COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE
+        or path.control_mode != "direct_displacement_control"
+        or path.status != "ready"
+        or path.contract_pass is not True
+        or path.terminal_target_passed is not True
+        or not path.steps
+    ):
+        raise ValueError("control recovery adapter binding is invalid")
+    validate_stateful_corotational_fiber_frame2d_checkpoint(
+        problem,
+        path.initial_checkpoint,
+    )
+    validate_stateful_corotational_fiber_frame2d_checkpoint(
+        problem,
+        path.final_checkpoint,
+    )
+    if (
+        type(path.control_global_dof) is not int
+        or path.control_global_dof not in problem.free_global_dofs
+        or path.control_global_dof % 3 not in (0, 1)
+        or len(path.steps) != len(path.target_control_displacements_m)
+    ):
+        raise ValueError("control recovery path coordinate binding is invalid")
+    parent = path.initial_checkpoint
+    for index, (step, target) in enumerate(
+        zip(path.steps, path.target_control_displacements_m, strict=True)
+    ):
+        validate_stateful_corotational_fiber_frame2d_checkpoint(
+            problem,
+            step.parent_checkpoint,
+        )
+        validate_stateful_corotational_fiber_frame2d_checkpoint(
+            problem,
+            step.accepted_checkpoint,
+        )
+        relative_residual = _finite_metric(step.solver_relative_residual)
+        residual_tolerance = _finite_metric(step.residual_tolerance)
+        control_error = _finite_metric(step.control_error_m)
+        control_tolerance = _finite_metric(step.control_tolerance_m)
+        free_increment = _finite_metric(step.free_increment_abs_m)
+        increment_tolerance = _finite_metric(step.increment_tolerance_m)
+        load_increment = _finite_metric(step.load_factor_increment_abs)
+        load_increment_tolerance = _finite_metric(step.load_factor_increment_tolerance)
+        assembly = step.trial_assembly
+        accepted = step.accepted_checkpoint
+        exact_element_states = bool(
+            len(assembly.trial_element_states) == len(accepted.element_states)
+            and all(
+                trial.canonical_bytes() == committed.canonical_bytes()
+                for trial, committed in zip(
+                    assembly.trial_element_states,
+                    accepted.element_states,
+                    strict=True,
+                )
+            )
+        )
+        assembled_relative_residual = (
+            float(np.linalg.norm(assembly.residual_kn, ord=np.inf))
+            / problem.reference_force_scale()
+        )
+        if (
+            type(step) is not CorotationalControlRecoveryStep
+            or step.parent_checkpoint.state_hash != parent.state_hash
+            or accepted.parent_state_hash != parent.state_hash
+            or accepted.epoch != parent.epoch + 1
+            or accepted.step_index != parent.step_index + 1
+            or assembly.parent_checkpoint_hash != parent.state_hash
+            or assembly.target_load_factor != accepted.load_factor
+            or not _exact_array(
+                assembly.global_displacements,
+                np.asarray(accepted.global_displacements, dtype=np.float64),
+            )
+            or not exact_element_states
+            or step.control_global_dof != path.control_global_dof
+            or step.target_control_displacement_m != target
+            or accepted.global_displacements[path.control_global_dof] != target
+            or not math.isclose(
+                relative_residual,
+                assembled_relative_residual,
+                rel_tol=0.0,
+                abs_tol=np.finfo(np.float64).eps,
+            )
+            or residual_tolerance <= 0.0
+            or control_tolerance <= 0.0
+            or increment_tolerance <= 0.0
+            or load_increment_tolerance <= 0.0
+            or relative_residual > residual_tolerance
+            or abs(control_error) > control_tolerance
+            or free_increment > increment_tolerance
+            or load_increment > load_increment_tolerance
+            or step.residual_gate_passed is not True
+            or step.control_gate_passed is not True
+            or step.increment_gate_passed is not True
+            or step.regularization_used is not False
+            or step.fallback_used is not False
+            or step.committed is not True
+        ):
+            raise ValueError(f"control recovery step {index} binding is invalid")
+        parent = accepted
+    if parent.canonical_bytes() != path.final_checkpoint.canonical_bytes():
+        raise ValueError("control recovery terminal checkpoint binding is invalid")
+    return adapter
+
 
 _STRICT_JSON_TYPE_CHECKER = Draft202012Validator.TYPE_CHECKER.redefine(
     "integer", lambda _checker, value: type(value) is int
@@ -130,7 +502,9 @@ _StrictDraft202012Validator = validators.extend(
 )
 
 CorotationalEngineeringSourceAdapter = (
-    CorotationalFiberFrameJ1J5Adapter | CorotationalFiberFrameGeneralJ1J5Adapter
+    CorotationalFiberFrameJ1J5Adapter
+    | CorotationalFiberFrameGeneralJ1J5Adapter
+    | CorotationalFiberFrameControlRecoveryAdapter
 )
 
 _ARRAY_SPECS: Mapping[
@@ -515,10 +889,19 @@ def _validate_detached_manifest_semantics(payload: Mapping[str, Any]) -> None:
         payload["result_kind"]
         == COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND
     ):
-        expected_authority_profile = (
-            COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE
-        )
-        expected_limitations = _GENERAL_LIMITATIONS
+        if (
+            payload["authority_profile"]
+            == COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE
+        ):
+            expected_authority_profile = (
+                COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE
+            )
+            expected_limitations = _CONTROL_LIMITATIONS
+        else:
+            expected_authority_profile = (
+                COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE
+            )
+            expected_limitations = _GENERAL_LIMITATIONS
         count_profile_passed = (
             2 <= counts["node"] <= 128 and 1 <= counts["member"] <= 256
         )
@@ -617,10 +1000,12 @@ def _validate_source_adapter(
         return validate_corotational_fiber_frame_j1_j5_adapter(adapter)
     if type(adapter) is CorotationalFiberFrameGeneralJ1J5Adapter:
         return validate_corotational_fiber_frame_general_j1_j5_adapter(adapter)
+    if type(adapter) is CorotationalFiberFrameControlRecoveryAdapter:
+        return validate_corotational_fiber_frame_control_recovery_adapter(adapter)
     _fail(
         "corotational_engineering_source_adapter_type_invalid",
         "/source_adapter",
-        "Expected an exact portal or connected-frame J1-J5 adapter.",
+        "Expected an exact portal, connected-frame, or control-recovery adapter.",
     )
 
 
@@ -639,10 +1024,16 @@ def _source_profile(
             COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE,
             _GENERAL_LIMITATIONS,
         )
+    if type(adapter) is CorotationalFiberFrameControlRecoveryAdapter:
+        return (
+            COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND,
+            COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE,
+            _CONTROL_LIMITATIONS,
+        )
     _fail(
         "corotational_engineering_source_adapter_type_invalid",
         "/source_adapter",
-        "Expected an exact portal or connected-frame J1-J5 adapter.",
+        "Expected an exact portal, connected-frame, or control-recovery adapter.",
     )
 
 
@@ -933,21 +1324,32 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         external_scatter, replay.external_loads_global
     )
     free_residual_relative = _linf(replay.residual_kn) / problem.reference_force_scale()
-    no_solve_terminal = bool(
-        terminal_step.metrics.get("no_solve_contract_pass") is True
-        and terminal_step.trial_solution.metrics.get("solver_executed") is False
-        and terminal_step.trial_solution.metrics.get("convergence_claim") is False
-        and terminal_step.trial_solution.metrics.get("relative_residual") is None
-        and terminal_step.trial_solution.metrics.get("residual_gate_passed") is None
-        and terminal_step.trial_solution.metrics.get("increment_gate_passed") is None
-    )
-    terminal_relative_residual = (
-        free_residual_relative
-        if no_solve_terminal
-        else _finite_metric(
-            terminal_step.trial_solution.metrics.get("relative_residual")
+    if type(terminal_step) is CorotationalControlRecoveryStep:
+        no_solve_terminal = False
+        terminal_relative_residual = _finite_metric(
+            terminal_step.solver_relative_residual
         )
-    )
+        residual_tolerance = _finite_metric(terminal_step.residual_tolerance)
+    else:
+        no_solve_terminal = bool(
+            terminal_step.metrics.get("no_solve_contract_pass") is True
+            and terminal_step.trial_solution.metrics.get("solver_executed") is False
+            and terminal_step.trial_solution.metrics.get("convergence_claim") is False
+            and terminal_step.trial_solution.metrics.get("relative_residual") is None
+            and terminal_step.trial_solution.metrics.get("residual_gate_passed") is None
+            and terminal_step.trial_solution.metrics.get("increment_gate_passed")
+            is None
+        )
+        terminal_relative_residual = (
+            free_residual_relative
+            if no_solve_terminal
+            else _finite_metric(
+                terminal_step.trial_solution.metrics.get("relative_residual")
+            )
+        )
+        residual_tolerance = _finite_metric(
+            terminal_step.trial_solution.config.residual_tolerance
+        )
     if (
         not state_bytes_exact
         or scatter_error > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
@@ -961,10 +1363,8 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
         or section_error > COROTATIONAL_FIBER_FRAME_ENGINEERING_CONSISTENCY_TOLERANCE
         or fiber_error > COROTATIONAL_FIBER_FRAME_ENGINEERING_FIBER_STRAIN_TOLERANCE
-        or free_residual_relative
-        > terminal_step.trial_solution.config.residual_tolerance
-        or terminal_relative_residual
-        > terminal_step.trial_solution.config.residual_tolerance
+        or free_residual_relative > residual_tolerance
+        or terminal_relative_residual > residual_tolerance
     ):
         _fail(
             "corotational_recovery_consistency_gate_failed",
@@ -1048,8 +1448,11 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
 
 
 def _terminal_path_target_passed(
-    path: StatefulCorotationalFiberFrame2DLoadPathResult,
+    path: StatefulCorotationalFiberFrame2DLoadPathResult
+    | CorotationalControlRecoveryPath,
 ) -> bool:
+    if type(path) is CorotationalControlRecoveryPath:
+        return path.terminal_target_passed is True
     return bool(path.steps and path.final_checkpoint.load_factor == 1.0)
 
 
@@ -1211,13 +1614,17 @@ __all__ = [
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RECOVERY_PROFILE",
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND",
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION",
+    "COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE",
     "COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE",
     "COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND",
     "CorotationalEngineeringArrayDescriptor",
     "CorotationalEngineeringSourceAdapter",
+    "CorotationalFiberFrameControlRecoveryAdapter",
     "CorotationalFiberFrameEngineeringRecoveryError",
     "CorotationalFiberFrameEngineeringResultIR",
     "create_corotational_fiber_frame_engineering_result_ir",
+    "create_corotational_direct_displacement_recovery_adapter",
+    "validate_corotational_fiber_frame_control_recovery_adapter",
     "validate_corotational_fiber_frame_engineering_result_ir",
     "validate_corotational_fiber_frame_engineering_result_manifest",
 ]
