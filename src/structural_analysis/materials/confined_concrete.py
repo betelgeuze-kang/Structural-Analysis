@@ -8,6 +8,11 @@ import math
 import struct
 from typing import Any
 
+from structural_analysis.materials.admissibility import (
+    MaterialAdmissibility,
+    require_scalar_loading_path_admissible,
+)
+
 
 CONFINED_CONCRETE_PROFILE = "mander_uniaxial_monotonic_compression.v1"
 CONFINED_CONCRETE_STATE_SCHEMA_VERSION = "confined-concrete-envelope-state.v1"
@@ -37,6 +42,13 @@ class ConfinedConcreteMaterial:
     ultimate_compressive_strain: float = 0.02
     residual_strength_ratio: float = 0.05
     material_id: str = "confined_concrete_mander_1d"
+    loading_domain: str = "monotonic_compression"
+    supports_unloading: bool = False
+    supports_reversal: bool = False
+    supports_cyclic: bool = False
+    supports_tension: bool = False
+    supports_compression: bool = True
+    supports_multiaxial: bool = False
 
     def __post_init__(self) -> None:
         for name in (
@@ -100,6 +112,18 @@ class ConfinedConcreteMaterial:
             self.elastic_modulus_mpa - self.secant_peak_modulus_mpa
         )
 
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return MaterialAdmissibility(
+            loading_domain=self.loading_domain,
+            supports_unloading=self.supports_unloading,
+            supports_reversal=self.supports_reversal,
+            supports_cyclic=self.supports_cyclic,
+            supports_tension=self.supports_tension,
+            supports_compression=self.supports_compression,
+            supports_multiaxial=self.supports_multiaxial,
+        )
+
     def initial_state(self) -> ConfinedConcreteState:
         return ConfinedConcreteState()
 
@@ -111,6 +135,11 @@ class ConfinedConcreteMaterial:
         if type(committed_state) is not ConfinedConcreteState:
             raise ValueError("committed_state must be an exact ConfinedConcreteState")
         value = _finite("strain", strain)
+        require_scalar_loading_path_admissible(
+            self.admissibility,
+            (committed_state.strain, value),
+            owner=self.material_id,
+        )
         envelope = confined_concrete_response(value, self)
         state = ConfinedConcreteState(
             strain=value,

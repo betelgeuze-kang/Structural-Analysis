@@ -1,5 +1,12 @@
 """Production material contracts used by authoritative solver paths."""
 
+from structural_analysis.materials.admissibility import (
+    MaterialAdmissibility,
+    MaterialPathNotAdmissibleError,
+    ScalarLoadingPathDemand,
+    require_scalar_loading_path_admissible,
+    scalar_loading_path_demand,
+)
 from structural_analysis.materials.bilinear_link import (
     BilinearCombinedHardeningLink,
     BilinearLinkResponse,
@@ -142,6 +149,8 @@ __all__ = [
     "FRACTURE_ENERGY_DAMAGE_ALGORITHM",
     "FRACTURE_ENERGY_TANGENT_DEFINITION",
     "ElasticIsotropicMaterial",
+    "MaterialAdmissibility",
+    "MaterialPathNotAdmissibleError",
     "FractureEnergyConcreteDamageMaterial",
     "FiberSectionNewtonConfig",
     "FiberSectionNewtonResult",
@@ -172,6 +181,7 @@ __all__ = [
     "StatefulFiberSectionState",
     "StatefulRCFiberSection",
     "StatefulSectionFiber",
+    "ScalarLoadingPathDemand",
     "STATE_SCHEMA_VERSION",
     "TANGENT_DEFINITION",
     "UniaxialPlasticityResponse",
@@ -192,6 +202,8 @@ __all__ = [
     "integrate_stateful_fiber_section_history",
     "integrate_concrete_damage_history",
     "integrate_strain_history",
+    "require_scalar_loading_path_admissible",
+    "scalar_loading_path_demand",
     "make_rectangular_stateful_rc_fiber_section",
     "solve_stateful_fiber_section_resultants",
 ]
