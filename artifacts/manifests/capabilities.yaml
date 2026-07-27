@@ -171,13 +171,14 @@
       "authority": "bounded_j1_j5_and_exact_engineering_recovery_candidate",
       "interfaces": ["python_api", "cli"],
       "profile": "corotational_connected_frame2d.v1",
-      "limitations": ["Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense or native COO/CSR candidate with branching, support UX/UY/RZ subsets, proportional nodal loads, and proportional prescribed displacement; disconnected graphs, parallel members, releases, rigid offsets, distributed loads, direct displacement control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."],
+      "limitations": ["Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense or native COO/CSR candidate with branching, support UX/UY/RZ subsets, proportional nodal loads and prescribed displacement, finite rigid offsets, optional RZ end releases, and uniform dead loads in initial member-local axes; disconnected graphs, parallel members, automatic self-weight, user-rotated local axes, unified direct displacement/arc-length control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."],
       "evidence": [
         "docs/unified-nonlinear-frame-api.md",
         "docs/corotational-connected-frame2d.md",
         "docs/corotational-fiber-frame-native-sparse.md",
         "src/structural_analysis/api/nonlinear_frame.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py",
+        "src/structural_analysis/assembly/corotational_frame2d_member_features.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
@@ -185,8 +186,45 @@
         "src/structural_analysis/schemas/corotational_fiber_frame_general_j1_j5_v1.schema.json",
         "tests/test_corotational_fiber_frame_general.py",
         "tests/test_corotational_fiber_frame_sparse.py",
+        "tests/test_corotational_frame2d_member_features.py",
         "tests/test_unified_nonlinear_frame_api.py",
         "examples/public_corotational_branching_frame.json"
+      ]
+    },
+    {
+      "id": "analysis.nonlinear_corotational_fiber_frame_2d_direct_displacement",
+      "implementation_status": "implemented",
+      "authority_status": "candidate",
+      "title": "Corotational 2D fiber-frame direct displacement control",
+      "category": "analysis",
+      "status": "experimental",
+      "public": false,
+      "authority": "bounded_internal_direct_displacement_control_candidate",
+      "interfaces": ["internal_python"],
+      "profile": "dense_augmented_consistent_direct_displacement_control.v1",
+      "limitations": ["Connected bounded planar corotational fiber frames support one free translational control DOF, proportional load factor, proportional support-motion coupling, line search, rollback, and exact checkpoint restart; unified public API wiring, general control coordinates, native sparse execution, external Level 2 comparison, and release promotion remain open."],
+      "evidence": [
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_displacement_control.py",
+        "tests/test_stateful_corotational_fiber_frame2d_displacement_control.py",
+        "docs/stateful-corotational-fiber-frame2d-displacement-control.md"
+      ]
+    },
+    {
+      "id": "analysis.nonlinear_corotational_fiber_frame_2d_arc_length",
+      "implementation_status": "implemented",
+      "authority_status": "candidate",
+      "title": "Corotational 2D fiber-frame arc-length control",
+      "category": "analysis",
+      "status": "experimental",
+      "public": false,
+      "authority": "bounded_internal_stateful_arc_length_candidate",
+      "interfaces": ["internal_python", "checkpoint_artifact"],
+      "profile": "stateful_corotational_fiber_frame2d_arc_length_continuation.v1",
+      "limitations": ["Bounded dense spherical arc-length continuation supports material-state commit/rollback, adaptive step reduction, source-bound exact checkpoints, and limit-point traversal; unified public API wiring, native sparse execution, external Level 2 comparison, Lee-frame promotion, and release promotion remain open."],
+      "evidence": [
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py",
+        "tests/test_stateful_corotational_fiber_frame2d_arc_length.py",
+        "docs/stateful-corotational-fiber-frame2d-arc-length.md"
       ]
     },
     {

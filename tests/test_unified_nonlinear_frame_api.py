@@ -479,6 +479,9 @@ def test_general_public_profile_executes_release_offset_and_distributed_load(
     assert result.status == "ready"
     assert validate_nonlinear_frame_result(result).contract_pass is True
     assert result.unsupported_features == ()
+    assert "finite rigid offsets" in result.claim_boundary
+    assert "optional RZ end releases" in result.claim_boundary
+    assert "uniform dead loads" in result.claim_boundary
     assert result.member_end_forces[0]["member_features"]["release_j_rz"] is True
     assert result.member_end_forces[0]["member_features"][
         "uniform_load_local_kn_per_m"

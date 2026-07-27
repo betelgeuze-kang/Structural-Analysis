@@ -38,7 +38,9 @@ support-motion coupling, exact rollback, and accepted-checkpoint restart. That
 internal solver is documented separately and is not wired into this unified
 J1–J5 profile.
 
-Member end releases, rigid offsets, distributed member loads, unified-profile
-direct displacement control, disconnected graphs, parallel members,
+Finite rigid offsets, optional RZ end releases, and uniform dead loads in the
+initial member-local axes are executed within the bounded connected profile.
+Automatic self-weight, user-rotated local axes, unified-profile direct
+displacement and arc-length control, disconnected graphs, parallel members,
 production-scale conditioning, independent Level 2 comparison evidence, design
 authority, and release promotion remain outside this slice.
