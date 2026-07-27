@@ -14,8 +14,10 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
     StatefulCorotationalFiberFrame2DProblem,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_engineering_recovery import (
+    COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE,
     COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE,
     CorotationalFiberFrameEngineeringRecoveryError,
+    create_corotational_arc_length_recovery_adapter,
     create_corotational_direct_displacement_recovery_adapter,
     create_corotational_fiber_frame_engineering_result_ir,
     validate_corotational_fiber_frame_control_recovery_adapter,
@@ -27,6 +29,9 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displaceme
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
     compile_corotational_fiber_frame_general_profile,
+)
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_arc_length import (
+    stateful_corotational_fiber_frame2d_arc_length_continuation,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_j1_j5 import (
     CorotationalFiberFrameJ1J5Error,
@@ -47,7 +52,14 @@ from structural_analysis.engine_v2.contracts._canonical import (
 from structural_analysis.engine_v2.contracts.result_quantity import (
     default_result_quantity_catalog,
 )
-from structural_analysis.materials import make_rectangular_stateful_rc_fiber_section
+from structural_analysis.materials import (
+    AsymmetricConcreteDamageMaterial,
+    BilinearCombinedHardeningSteel,
+    make_rectangular_stateful_rc_fiber_section,
+)
+from structural_analysis.solvers.nonlinear.vector_arc_length import (
+    VectorArcLengthConfig,
+)
 
 
 def _adapter():
@@ -137,6 +149,83 @@ def _direct_control_adapter():
     )
 
 
+def _arc_length_adapter():
+    coordinates = ((-1.0, 0.0), (0.0, 0.1), (1.0, 0.0))
+    steel = BilinearCombinedHardeningSteel(
+        elastic_modulus_mpa=200_000.0,
+        yield_stress_mpa=1.0e12,
+        isotropic_hardening_modulus_mpa=0.0,
+        kinematic_hardening_modulus_mpa=0.0,
+    )
+    concrete = AsymmetricConcreteDamageMaterial(
+        elastic_modulus_mpa=200_000.0,
+        tensile_strength_mpa=1.0e12,
+        compressive_strength_mpa=1.0e12,
+        tensile_softening_rate=1.0,
+        compressive_softening_rate=1.0,
+    )
+    members = tuple(
+        StatefulCorotationalFiberFrame2DMember(
+            member_id=member_id,
+            node_i=node_i,
+            node_j=node_j,
+            element=StatefulCorotationalFiberBeam2D(
+                node_coordinates_m=(coordinates[node_i], coordinates[node_j]),
+                section=make_rectangular_stateful_rc_fiber_section(
+                    width_m=0.02,
+                    depth_m=0.02,
+                    cover_m=0.004,
+                    concrete_layer_count=4,
+                    top_bar_count=1,
+                    bottom_bar_count=1,
+                    bar_area_m2=1.0e-8,
+                    section_id=f"section-{member_id}",
+                    steel=steel,
+                    concrete=concrete,
+                ),
+                integration_order=3,
+                element_id=member_id,
+            ),
+        )
+        for member_id, node_i, node_j in (
+            ("arch-left", 0, 1),
+            ("arch-right", 1, 2),
+        )
+    )
+    problem = StatefulCorotationalFiberFrame2DProblem(
+        case_id="arc-length-engineering-recovery",
+        node_coordinates_m=coordinates,
+        members=members,
+        fixed_global_dofs=tuple(dof for dof in range(9) if dof != 4),
+        reference_external_loads=((4, -1.0),),
+        rotation_coordinate_scale_m=1.0,
+    )
+    compilation = compile_corotational_fiber_frame_general_profile(
+        problem,
+        model_content_hash=canonical_hash(
+            {"fixture": "arc-length-engineering-recovery.v1"}
+        ),
+    )
+    path = stateful_corotational_fiber_frame2d_arc_length_continuation(
+        problem,
+        config=VectorArcLengthConfig(
+            target_monitor_dof_index=0,
+            target_monitor_displacement_m=-0.03,
+            target_direction=-1,
+            initial_arc_length_m=0.006,
+            minimum_arc_length_m=0.00075,
+            maximum_arc_length_m=0.006,
+            failed_step_reduction=0.5,
+            load_factor_metric_scale_m=0.001,
+            residual_tolerance_kn=1.0e-9,
+            constraint_tolerance_m2=1.0e-12,
+            maximum_corrector_iterations=12,
+            maximum_attempt_count=20,
+        ),
+    )
+    return create_corotational_arc_length_recovery_adapter(compilation, path)
+
+
 def _rehash_manifest(manifest: dict) -> None:
     body = dict(manifest)
     body.pop("engineering_result_hash")
@@ -217,6 +306,58 @@ def test_direct_control_recovery_rejects_rehashed_gate_tampering() -> None:
     )
 
     with pytest.raises(ValueError, match="control recovery step 1 binding is invalid"):
+        validate_corotational_fiber_frame_control_recovery_adapter(tampered)
+
+
+def test_arc_length_path_has_exact_recovery_and_detached_manifest() -> None:
+    adapter = _arc_length_adapter()
+    validated = validate_corotational_fiber_frame_control_recovery_adapter(adapter)
+    result = create_corotational_fiber_frame_engineering_result_ir(
+        engineering_result_id="arc.length.engineering.v1",
+        source_adapter=validated,
+    )
+    manifest = result.to_manifest()
+
+    assert result.authority_profile == (
+        COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE
+    )
+    assert result.artifact("node_translation_m")[1, 1] <= -0.03
+    assert adapter.control_mode == "arc_length"
+    assert adapter._path.terminal_target_passed is True
+    assert adapter._path.steps[-1].residual_gate_passed is True
+    assert adapter._path.steps[-1].constraint_gate_passed is True
+    assert result.metrics["terminal_assembly_replay_exact"] is True
+    assert result.metrics["no_fallback_or_regularization"] is True
+    assert (
+        validate_corotational_fiber_frame_engineering_result_manifest(manifest)
+        == manifest
+    )
+
+
+def test_arc_length_recovery_rejects_rehashed_constraint_tampering() -> None:
+    adapter = _arc_length_adapter()
+    terminal_step = adapter._path.steps[-1]
+    tampered_step = replace(
+        terminal_step,
+        constraint_residual_m2=terminal_step.constraint_tolerance_m2 * 2.0,
+    )
+    tampered_path = replace(
+        adapter._path,
+        steps=(*adapter._path.steps[:-1], tampered_step),
+    )
+    provisional = replace(
+        adapter,
+        adapter_hash="sha256:" + "0" * 64,
+        _path=tampered_path,
+    )
+    manifest_body = provisional.to_manifest()
+    manifest_body.pop("adapter_hash")
+    tampered = replace(
+        provisional,
+        adapter_hash=canonical_hash(manifest_body),
+    )
+
+    with pytest.raises(ValueError, match="arc-length recovery step"):
         validate_corotational_fiber_frame_control_recovery_adapter(tampered)
 
 

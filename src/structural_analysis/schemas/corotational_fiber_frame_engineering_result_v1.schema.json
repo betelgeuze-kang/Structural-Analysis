@@ -42,7 +42,8 @@
       "enum": [
         "exact_bounded_portal_engineering_candidate.v1",
         "exact_connected_frame2d_engineering_candidate.v1",
-        "exact_connected_frame2d_control_engineering_candidate.v1"
+        "exact_connected_frame2d_control_engineering_candidate.v1",
+        "exact_connected_frame2d_arc_length_engineering_candidate.v1"
       ]
     },
     "compiler_hash": {"$ref": "#/$defs/hash"},
@@ -159,6 +160,18 @@
             "detached_manifest_requires_retained_artifact_bytes",
             "detached_manifest_source_authenticity_not_established"
           ]
+        },
+        {
+          "const": [
+            "connected_planar_frame_graph_only",
+            "spherical_arc_length_dense_only",
+            "one_free_monitor_coordinate",
+            "adaptive_radius_reduction_with_exact_rollback",
+            "external_level2_not_attached",
+            "public_capability_not_promoted",
+            "detached_manifest_requires_retained_artifact_bytes",
+            "detached_manifest_source_authenticity_not_established"
+          ]
         }
       ]
     },
@@ -222,20 +235,45 @@
           }
         },
         "else": {
-          "properties": {
-            "authority_profile": {
-              "const": "exact_connected_frame2d_control_engineering_candidate.v1"
-            },
-            "limitations": {
-              "const": [
-                "connected_planar_frame_graph_only",
-                "direct_displacement_control_dense_only",
-                "one_free_translational_control_coordinate",
-                "external_level2_not_attached",
-                "public_capability_not_promoted",
-                "detached_manifest_requires_retained_artifact_bytes",
-                "detached_manifest_source_authenticity_not_established"
-              ]
+          "if": {
+            "properties": {
+              "authority_profile": {
+                "const": "exact_connected_frame2d_control_engineering_candidate.v1"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "limitations": {
+                "const": [
+                  "connected_planar_frame_graph_only",
+                  "direct_displacement_control_dense_only",
+                  "one_free_translational_control_coordinate",
+                  "external_level2_not_attached",
+                  "public_capability_not_promoted",
+                  "detached_manifest_requires_retained_artifact_bytes",
+                  "detached_manifest_source_authenticity_not_established"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "authority_profile": {
+                "const": "exact_connected_frame2d_arc_length_engineering_candidate.v1"
+              },
+              "limitations": {
+                "const": [
+                  "connected_planar_frame_graph_only",
+                  "spherical_arc_length_dense_only",
+                  "one_free_monitor_coordinate",
+                  "adaptive_radius_reduction_with_exact_rollback",
+                  "external_level2_not_attached",
+                  "public_capability_not_promoted",
+                  "detached_manifest_requires_retained_artifact_bytes",
+                  "detached_manifest_source_authenticity_not_established"
+                ]
+              }
             }
           }
         }

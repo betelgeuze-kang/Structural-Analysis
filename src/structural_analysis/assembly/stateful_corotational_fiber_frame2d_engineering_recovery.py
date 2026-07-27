@@ -27,6 +27,9 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
     assemble_stateful_corotational_fiber_frame2d,
     validate_stateful_corotational_fiber_frame2d_checkpoint,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_arc_length import (
+    StatefulCorotationalFiberFrame2DArcLengthResult,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control import (
     StatefulCorotationalFiberFrame2DDisplacementControlPathResult,
 )
@@ -79,6 +82,9 @@ COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE = (
 )
 COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE = (
     "exact_connected_frame2d_control_engineering_candidate.v1"
+)
+COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE = (
+    "exact_connected_frame2d_arc_length_engineering_candidate.v1"
 )
 COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND = (
     "corotational_connected_frame2d_reaction_member_section_fiber"
@@ -137,6 +143,16 @@ _CONTROL_LIMITATIONS = (
     "connected_planar_frame_graph_only",
     "direct_displacement_control_dense_only",
     "one_free_translational_control_coordinate",
+    "external_level2_not_attached",
+    "public_capability_not_promoted",
+    "detached_manifest_requires_retained_artifact_bytes",
+    "detached_manifest_source_authenticity_not_established",
+)
+_ARC_LENGTH_LIMITATIONS = (
+    "connected_planar_frame_graph_only",
+    "spherical_arc_length_dense_only",
+    "one_free_monitor_coordinate",
+    "adaptive_radius_reduction_with_exact_rollback",
     "external_level2_not_attached",
     "public_capability_not_promoted",
     "detached_manifest_requires_retained_artifact_bytes",
@@ -219,6 +235,80 @@ class CorotationalControlRecoveryPath:
 
 
 @dataclass(frozen=True)
+class CorotationalArcLengthRecoveryStep:
+    parent_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
+    accepted_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
+    trial_assembly: StatefulCorotationalFiberFrame2DAssembly
+    arc_length_m: float
+    solver_relative_residual: float
+    residual_tolerance: float
+    constraint_residual_m2: float
+    constraint_tolerance_m2: float
+    residual_gate_passed: Literal[True]
+    constraint_gate_passed: Literal[True]
+    monitor_direction_gate_passed: Literal[True]
+    regularization_used: Literal[False]
+    fallback_used: Literal[False]
+    committed: Literal[True] = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "parent_checkpoint_hash": self.parent_checkpoint.state_hash,
+            "accepted_checkpoint_hash": self.accepted_checkpoint.state_hash,
+            "trial_assembly_hash": canonical_hash(self.trial_assembly.to_dict()),
+            "arc_length_m": self.arc_length_m,
+            "solver_relative_residual": self.solver_relative_residual,
+            "residual_tolerance": self.residual_tolerance,
+            "constraint_residual_m2": self.constraint_residual_m2,
+            "constraint_tolerance_m2": self.constraint_tolerance_m2,
+            "residual_gate_passed": self.residual_gate_passed,
+            "constraint_gate_passed": self.constraint_gate_passed,
+            "monitor_direction_gate_passed": (self.monitor_direction_gate_passed),
+            "regularization_used": self.regularization_used,
+            "fallback_used": self.fallback_used,
+            "committed": self.committed,
+        }
+
+
+@dataclass(frozen=True)
+class CorotationalArcLengthRecoveryPath:
+    control_mode: Literal["arc_length"]
+    source_contract_hash: str
+    monitor_global_dof: int
+    target_monitor_displacement_m: float
+    target_direction: Literal[-1, 1]
+    displacement_metric_weights: tuple[float, ...]
+    load_factor_metric_scale_m: float
+    initial_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
+    final_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
+    steps: tuple[CorotationalArcLengthRecoveryStep, ...]
+    attempt_count: int
+    rejected_attempt_count: int
+    terminal_target_passed: Literal[True]
+    status: Literal["ready"] = "ready"
+    contract_pass: Literal[True] = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "control_mode": self.control_mode,
+            "source_contract_hash": self.source_contract_hash,
+            "monitor_global_dof": self.monitor_global_dof,
+            "target_monitor_displacement_m": self.target_monitor_displacement_m,
+            "target_direction": self.target_direction,
+            "displacement_metric_weights": list(self.displacement_metric_weights),
+            "load_factor_metric_scale_m": self.load_factor_metric_scale_m,
+            "initial_checkpoint_hash": self.initial_checkpoint.state_hash,
+            "final_checkpoint_hash": self.final_checkpoint.state_hash,
+            "steps": [step.to_dict() for step in self.steps],
+            "attempt_count": self.attempt_count,
+            "rejected_attempt_count": self.rejected_attempt_count,
+            "terminal_target_passed": self.terminal_target_passed,
+            "status": self.status,
+            "contract_pass": self.contract_pass,
+        }
+
+
+@dataclass(frozen=True)
 class CorotationalFiberFrameControlRecoveryAdapter:
     adapter_hash: str
     compiler_hash: str
@@ -226,14 +316,17 @@ class CorotationalFiberFrameControlRecoveryAdapter:
     problem_contract_hash: str
     terminal_checkpoint_hash: str
     terminal_load_factor: float
-    control_mode: Literal["direct_displacement_control"]
+    control_mode: Literal["direct_displacement_control", "arc_length"]
     source_contract_hash: str
     authority_profile: str
     _compilation: CorotationalFiberFrameGeneralCompilation = field(
         repr=False,
         compare=False,
     )
-    _path: CorotationalControlRecoveryPath = field(repr=False, compare=False)
+    _path: CorotationalControlRecoveryPath | CorotationalArcLengthRecoveryPath = field(
+        repr=False,
+        compare=False,
+    )
 
     def to_manifest(self) -> dict[str, Any]:
         return {
@@ -362,6 +455,156 @@ def create_corotational_direct_displacement_recovery_adapter(
     return validate_corotational_fiber_frame_control_recovery_adapter(adapter)
 
 
+def create_corotational_arc_length_recovery_adapter(
+    compilation: CorotationalFiberFrameGeneralCompilation,
+    path: StatefulCorotationalFiberFrame2DArcLengthResult,
+) -> CorotationalFiberFrameControlRecoveryAdapter:
+    """Bind a committed spherical arc-length path to exact terminal recovery."""
+
+    validate_corotational_general_compilation(compilation)
+    if type(path) is not StatefulCorotationalFiberFrame2DArcLengthResult:
+        raise ValueError("path must be an exact arc-length result")
+    if (
+        path.status != "ready"
+        or path.metrics.get("contract_pass") is not True
+        or path.metrics.get("target_monitor_displacement_reached") is not True
+        or path.source_problem_contract_hash != compilation.problem_contract_hash
+        or not path.attempts
+    ):
+        raise ValueError("arc-length path is not recovery-ready")
+    problem = compilation._problem
+    initial = path.initial_state
+    final = path.final_state
+    validate_stateful_corotational_fiber_frame2d_checkpoint(problem, initial)
+    validate_stateful_corotational_fiber_frame2d_checkpoint(problem, final)
+    free_index = path.config.target_monitor_dof_index
+    if not 0 <= free_index < len(problem.free_global_dofs):
+        raise ValueError("arc-length monitor coordinate is invalid")
+    monitor_global_dof = problem.free_global_dofs[free_index]
+    reference_scale = problem.reference_force_scale()
+    recovery_steps: list[CorotationalArcLengthRecoveryStep] = []
+    parent = initial
+    rejected_count = 0
+    for index, attempt in enumerate(path.attempts):
+        vector_metrics = attempt.vector_result.metrics
+        if not attempt.committed:
+            rejected_count += 1
+            if (
+                attempt.outcome != "rolled_back"
+                or attempt.rollback_exact is not True
+                or attempt.final_assembly is not None
+                or attempt.parent_checkpoint.state_hash != parent.state_hash
+                or attempt.accepted_checkpoint.canonical_bytes()
+                != parent.canonical_bytes()
+            ):
+                raise ValueError(f"arc-length rejected attempt {index} is not exact")
+            continue
+        vector_attempts = attempt.vector_result.attempts
+        final_assembly = attempt.final_assembly
+        if (
+            final_assembly is None
+            or len(vector_attempts) != 1
+            or vector_attempts[0].get("accepted") is not True
+            or attempt.parent_checkpoint.state_hash != parent.state_hash
+            or attempt.accepted_checkpoint.parent_state_hash != parent.state_hash
+            or final_assembly.parent_checkpoint_hash != parent.state_hash
+            or vector_metrics.get("contract_pass") is not True
+            or vector_metrics.get("fallback_count") != 0
+            or vector_metrics.get("regularization_count") != 0
+        ):
+            raise ValueError(f"arc-length committed attempt {index} is not exact")
+        validate_stateful_corotational_fiber_frame2d_checkpoint(
+            problem,
+            attempt.accepted_checkpoint,
+        )
+        vector_attempt = vector_attempts[0]
+        recovery_steps.append(
+            CorotationalArcLengthRecoveryStep(
+                parent_checkpoint=attempt.parent_checkpoint,
+                accepted_checkpoint=attempt.accepted_checkpoint,
+                trial_assembly=final_assembly,
+                arc_length_m=float(attempt.arc_length_m),
+                solver_relative_residual=float(vector_attempt["residual_inf_norm_kn"])
+                / reference_scale,
+                residual_tolerance=float(path.config.residual_tolerance_kn)
+                / reference_scale,
+                constraint_residual_m2=float(vector_attempt["constraint_residual_m2"]),
+                constraint_tolerance_m2=float(path.config.constraint_tolerance_m2),
+                residual_gate_passed=True,
+                constraint_gate_passed=True,
+                monitor_direction_gate_passed=True,
+                regularization_used=False,
+                fallback_used=False,
+            )
+        )
+        parent = attempt.accepted_checkpoint
+    if not recovery_steps or parent.canonical_bytes() != final.canonical_bytes():
+        raise ValueError("arc-length terminal checkpoint is stale")
+    terminal_generalized = (
+        np.asarray(
+            final.global_displacements,
+            dtype=np.float64,
+        )
+        / problem.physical_coordinate_scale
+    )
+    terminal_target_passed = bool(
+        path.config.target_direction
+        * (
+            terminal_generalized[monitor_global_dof]
+            - path.config.target_monitor_displacement_m
+        )
+        >= 0.0
+    )
+    if not terminal_target_passed:
+        raise ValueError("arc-length terminal monitor target did not pass")
+    source_contract_hash = canonical_hash(path.to_dict())
+    recovery_path = CorotationalArcLengthRecoveryPath(
+        control_mode="arc_length",
+        source_contract_hash=source_contract_hash,
+        monitor_global_dof=monitor_global_dof,
+        target_monitor_displacement_m=float(path.config.target_monitor_displacement_m),
+        target_direction=path.config.target_direction,
+        displacement_metric_weights=(
+            tuple(1.0 for _ in problem.free_global_dofs)
+            if path.config.displacement_metric_weights is None
+            else tuple(path.config.displacement_metric_weights)
+        ),
+        load_factor_metric_scale_m=float(path.config.load_factor_metric_scale_m),
+        initial_checkpoint=initial,
+        final_checkpoint=final,
+        steps=tuple(recovery_steps),
+        attempt_count=len(path.attempts),
+        rejected_attempt_count=rejected_count,
+        terminal_target_passed=True,
+    )
+    provisional = CorotationalFiberFrameControlRecoveryAdapter(
+        adapter_hash=_HASH_ZERO,
+        compiler_hash=compilation.compiler_hash,
+        model_content_hash=compilation.model_content_hash,
+        problem_contract_hash=compilation.problem_contract_hash,
+        terminal_checkpoint_hash=final.state_hash,
+        terminal_load_factor=final.load_factor,
+        control_mode="arc_length",
+        source_contract_hash=source_contract_hash,
+        authority_profile=(
+            COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE
+        ),
+        _compilation=compilation,
+        _path=recovery_path,
+    )
+    adapter = replace(
+        provisional,
+        adapter_hash=canonical_hash(
+            {
+                key: value
+                for key, value in provisional.to_manifest().items()
+                if key != "adapter_hash"
+            }
+        ),
+    )
+    return validate_corotational_fiber_frame_control_recovery_adapter(adapter)
+
+
 def validate_corotational_fiber_frame_control_recovery_adapter(
     adapter: CorotationalFiberFrameControlRecoveryAdapter,
 ) -> CorotationalFiberFrameControlRecoveryAdapter:
@@ -369,9 +612,17 @@ def validate_corotational_fiber_frame_control_recovery_adapter(
         raise ValueError("adapter type is invalid")
     compilation = validate_corotational_general_compilation(adapter._compilation)
     path = adapter._path
-    if type(path) is not CorotationalControlRecoveryPath:
+    if type(path) not in (
+        CorotationalControlRecoveryPath,
+        CorotationalArcLengthRecoveryPath,
+    ):
         raise ValueError("control recovery path type is invalid")
     problem = compilation._problem
+    expected_authority_profile = (
+        COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE
+        if type(path) is CorotationalControlRecoveryPath
+        else COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE
+    )
     expected_hash = canonical_hash(
         {
             key: value
@@ -388,9 +639,7 @@ def validate_corotational_fiber_frame_control_recovery_adapter(
         or adapter.terminal_load_factor != path.final_checkpoint.load_factor
         or adapter.control_mode != path.control_mode
         or adapter.source_contract_hash != path.source_contract_hash
-        or adapter.authority_profile
-        != COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE
-        or path.control_mode != "direct_displacement_control"
+        or adapter.authority_profile != expected_authority_profile
         or path.status != "ready"
         or path.contract_pass is not True
         or path.terminal_target_passed is not True
@@ -405,6 +654,11 @@ def validate_corotational_fiber_frame_control_recovery_adapter(
         problem,
         path.final_checkpoint,
     )
+    if type(path) is CorotationalArcLengthRecoveryPath:
+        _validate_arc_length_recovery_path(problem, path)
+        return adapter
+    if path.control_mode != "direct_displacement_control":
+        raise ValueError("direct control recovery mode is invalid")
     if (
         type(path.control_global_dof) is not int
         or path.control_global_dof not in problem.free_global_dofs
@@ -491,6 +745,146 @@ def validate_corotational_fiber_frame_control_recovery_adapter(
     if parent.canonical_bytes() != path.final_checkpoint.canonical_bytes():
         raise ValueError("control recovery terminal checkpoint binding is invalid")
     return adapter
+
+
+def _validate_arc_length_recovery_path(
+    problem: StatefulCorotationalFiberFrame2DProblem,
+    path: CorotationalArcLengthRecoveryPath,
+) -> None:
+    if (
+        path.control_mode != "arc_length"
+        or type(path.monitor_global_dof) is not int
+        or path.monitor_global_dof not in problem.free_global_dofs
+        or path.target_direction not in (-1, 1)
+        or type(path.attempt_count) is not int
+        or type(path.rejected_attempt_count) is not int
+        or path.rejected_attempt_count < 0
+        or path.attempt_count != len(path.steps) + path.rejected_attempt_count
+        or len(path.displacement_metric_weights) != len(problem.free_global_dofs)
+    ):
+        raise ValueError("arc-length recovery path binding is invalid")
+    metric_weights = np.asarray(
+        path.displacement_metric_weights,
+        dtype=np.float64,
+    )
+    load_scale = _finite_metric(path.load_factor_metric_scale_m)
+    target = _finite_metric(path.target_monitor_displacement_m)
+    if (
+        load_scale <= 0.0
+        or not np.all(np.isfinite(metric_weights))
+        or np.any(metric_weights <= 0.0)
+    ):
+        raise ValueError("arc-length recovery metric is invalid")
+    free_dofs = list(problem.free_global_dofs)
+    monitor_free_index = problem.free_global_dofs.index(path.monitor_global_dof)
+    parent = path.initial_checkpoint
+    for index, step in enumerate(path.steps):
+        if type(step) is not CorotationalArcLengthRecoveryStep:
+            raise ValueError(f"arc-length recovery step {index} type is invalid")
+        validate_stateful_corotational_fiber_frame2d_checkpoint(
+            problem,
+            step.parent_checkpoint,
+        )
+        validate_stateful_corotational_fiber_frame2d_checkpoint(
+            problem,
+            step.accepted_checkpoint,
+        )
+        assembly = step.trial_assembly
+        accepted = step.accepted_checkpoint
+        relative_residual = _finite_metric(step.solver_relative_residual)
+        residual_tolerance = _finite_metric(step.residual_tolerance)
+        constraint_residual = _finite_metric(step.constraint_residual_m2)
+        constraint_tolerance = _finite_metric(step.constraint_tolerance_m2)
+        arc_length = _finite_metric(step.arc_length_m)
+        assembled_relative_residual = (
+            float(np.linalg.norm(assembly.residual_kn, ord=np.inf))
+            / problem.reference_force_scale()
+        )
+        parent_generalized = (
+            np.asarray(
+                parent.global_displacements,
+                dtype=np.float64,
+            )
+            / problem.physical_coordinate_scale
+        )
+        accepted_generalized = (
+            np.asarray(
+                accepted.global_displacements,
+                dtype=np.float64,
+            )
+            / problem.physical_coordinate_scale
+        )
+        free_increment = accepted_generalized[free_dofs] - parent_generalized[free_dofs]
+        load_increment = accepted.load_factor - parent.load_factor
+        recomputed_constraint = float(
+            np.dot(metric_weights * free_increment, free_increment)
+            + (load_scale * load_increment) ** 2
+            - arc_length**2
+        )
+        exact_element_states = bool(
+            len(assembly.trial_element_states) == len(accepted.element_states)
+            and all(
+                trial.canonical_bytes() == committed.canonical_bytes()
+                for trial, committed in zip(
+                    assembly.trial_element_states,
+                    accepted.element_states,
+                    strict=True,
+                )
+            )
+        )
+        if (
+            step.parent_checkpoint.state_hash != parent.state_hash
+            or accepted.parent_state_hash != parent.state_hash
+            or accepted.epoch != parent.epoch + 1
+            or accepted.step_index != parent.step_index + 1
+            or assembly.parent_checkpoint_hash != parent.state_hash
+            or assembly.target_load_factor != accepted.load_factor
+            or not _exact_array(
+                assembly.global_displacements,
+                np.asarray(accepted.global_displacements, dtype=np.float64),
+            )
+            or not exact_element_states
+            or not math.isclose(
+                relative_residual,
+                assembled_relative_residual,
+                rel_tol=0.0,
+                abs_tol=np.finfo(np.float64).eps,
+            )
+            or not math.isclose(
+                constraint_residual,
+                recomputed_constraint,
+                rel_tol=0.0,
+                abs_tol=max(np.finfo(np.float64).eps, constraint_tolerance * 1.0e-6),
+            )
+            or residual_tolerance <= 0.0
+            or constraint_tolerance <= 0.0
+            or arc_length <= 0.0
+            or relative_residual > residual_tolerance
+            or abs(constraint_residual) > constraint_tolerance
+            or path.target_direction * free_increment[monitor_free_index] <= 0.0
+            or step.residual_gate_passed is not True
+            or step.constraint_gate_passed is not True
+            or step.monitor_direction_gate_passed is not True
+            or step.regularization_used is not False
+            or step.fallback_used is not False
+            or step.committed is not True
+        ):
+            raise ValueError(f"arc-length recovery step {index} binding is invalid")
+        parent = accepted
+    terminal_generalized = (
+        np.asarray(
+            path.final_checkpoint.global_displacements,
+            dtype=np.float64,
+        )
+        / problem.physical_coordinate_scale
+    )
+    if (
+        parent.canonical_bytes() != path.final_checkpoint.canonical_bytes()
+        or path.target_direction
+        * (terminal_generalized[path.monitor_global_dof] - target)
+        < 0.0
+    ):
+        raise ValueError("arc-length recovery terminal binding is invalid")
 
 
 _STRICT_JSON_TYPE_CHECKER = Draft202012Validator.TYPE_CHECKER.redefine(
@@ -897,6 +1291,14 @@ def _validate_detached_manifest_semantics(payload: Mapping[str, Any]) -> None:
                 COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE
             )
             expected_limitations = _CONTROL_LIMITATIONS
+        elif (
+            payload["authority_profile"]
+            == COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE
+        ):
+            expected_authority_profile = (
+                COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE
+            )
+            expected_limitations = _ARC_LENGTH_LIMITATIONS
         else:
             expected_authority_profile = (
                 COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE
@@ -1025,6 +1427,12 @@ def _source_profile(
             _GENERAL_LIMITATIONS,
         )
     if type(adapter) is CorotationalFiberFrameControlRecoveryAdapter:
+        if adapter.control_mode == "arc_length":
+            return (
+                COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND,
+                COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE,
+                _ARC_LENGTH_LIMITATIONS,
+            )
         return (
             COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND,
             COROTATIONAL_FIBER_FRAME_CONTROL_ENGINEERING_AUTHORITY_PROFILE,
@@ -1324,7 +1732,10 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
         external_scatter, replay.external_loads_global
     )
     free_residual_relative = _linf(replay.residual_kn) / problem.reference_force_scale()
-    if type(terminal_step) is CorotationalControlRecoveryStep:
+    if type(terminal_step) in (
+        CorotationalControlRecoveryStep,
+        CorotationalArcLengthRecoveryStep,
+    ):
         no_solve_terminal = False
         terminal_relative_residual = _finite_metric(
             terminal_step.solver_relative_residual
@@ -1449,9 +1860,13 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
 
 def _terminal_path_target_passed(
     path: StatefulCorotationalFiberFrame2DLoadPathResult
-    | CorotationalControlRecoveryPath,
+    | CorotationalControlRecoveryPath
+    | CorotationalArcLengthRecoveryPath,
 ) -> bool:
-    if type(path) is CorotationalControlRecoveryPath:
+    if type(path) in (
+        CorotationalControlRecoveryPath,
+        CorotationalArcLengthRecoveryPath,
+    ):
         return path.terminal_target_passed is True
     return bool(path.steps and path.final_checkpoint.load_factor == 1.0)
 
@@ -1611,6 +2026,7 @@ def _fail(code: str, path: str, message: str) -> NoReturn:
 
 __all__ = [
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE",
+    "COROTATIONAL_FIBER_FRAME_ARC_LENGTH_ENGINEERING_AUTHORITY_PROFILE",
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RECOVERY_PROFILE",
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND",
     "COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION",
@@ -1623,6 +2039,7 @@ __all__ = [
     "CorotationalFiberFrameEngineeringRecoveryError",
     "CorotationalFiberFrameEngineeringResultIR",
     "create_corotational_fiber_frame_engineering_result_ir",
+    "create_corotational_arc_length_recovery_adapter",
     "create_corotational_direct_displacement_recovery_adapter",
     "validate_corotational_fiber_frame_control_recovery_adapter",
     "validate_corotational_fiber_frame_engineering_result_ir",
