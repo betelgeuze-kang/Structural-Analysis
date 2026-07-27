@@ -210,6 +210,78 @@ def _direct_control_payload() -> dict:
     return payload
 
 
+def _arc_length_payload() -> dict:
+    payload = _base_payload()
+    payload["materials"][0].update(
+        {
+            "yield_stress_mpa": 1.0e12,
+            "isotropic_hardening_modulus_mpa": 0.0,
+            "kinematic_hardening_modulus_mpa": 0.0,
+        }
+    )
+    payload["materials"][1].update(
+        {
+            "elastic_modulus_mpa": 200_000.0,
+            "tensile_strength_mpa": 1.0e12,
+            "compressive_strength_mpa": 1.0e12,
+            "tensile_softening_rate": 1.0,
+            "compressive_softening_rate": 1.0,
+        }
+    )
+    payload["sections"][0].update(
+        {
+            "width_m": 0.02,
+            "depth_m": 0.02,
+            "cover_m": 0.004,
+            "concrete_layer_count": 4,
+            "top_bar_count": 1,
+            "bottom_bar_count": 1,
+            "bar_area_m2": 1.0e-8,
+        }
+    )
+    payload.update(
+        {
+            "nodes": [
+                {"id": "N1", "coordinates": [-1.0, 0.0, 0.0]},
+                {"id": "N2", "coordinates": [0.0, 0.1, 0.0]},
+                {"id": "N3", "coordinates": [1.0, 0.0, 0.0]},
+            ],
+            "elements": [
+                {
+                    "id": member_id,
+                    "type": "stateful_corotational_rc_fiber_frame2d",
+                    "nodes": list(nodes),
+                    "section": "RC1",
+                    "integration_order": 3,
+                }
+                for member_id, nodes in (
+                    ("arch-left", ("N1", "N2")),
+                    ("arch-right", ("N2", "N3")),
+                )
+            ],
+            "loads": [
+                {
+                    "node": "N2",
+                    "components": {
+                        "FX": 0.0,
+                        "FY": -1.0,
+                        "FZ": 0.0,
+                        "MX": 0.0,
+                        "MY": 0.0,
+                        "MZ": 0.0,
+                    },
+                }
+            ],
+            "supports": [
+                {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+                {"node": "N2", "dofs": ["UX", "RZ"]},
+                {"node": "N3", "dofs": ["UX", "UY", "RZ"]},
+            ],
+        }
+    )
+    return payload
+
+
 def _portal_payload() -> dict:
     payload = _base_payload()
     payload.update(
@@ -436,6 +508,86 @@ def test_unified_direct_control_blocks_constrained_coordinate(tmp_path: Path) ->
     assert result.checkpoint == {"available": False}
     assert result.unsupported_features[0]["kind"] == (
         "corotational_direct_control_dof_constrained"
+    )
+
+
+def test_unified_arc_length_returns_exact_composite_checkpoint_and_restart(
+    tmp_path: Path,
+) -> None:
+    model = _model(tmp_path, _arc_length_payload(), "arc-length.json")
+    config = NonlinearFrameConfig(
+        profile=COROTATIONAL_GENERAL_PROFILE,
+        control_mode="arc_length",
+        control_node_id="N2",
+        control_dof="UY",
+        target_control_displacements_m=(-0.03,),
+        maximum_iterations=12,
+        arc_length_maximum_attempt_count=20,
+    )
+    result = analyze_nonlinear_frame(model, config)
+    report = validate_nonlinear_frame_result(result)
+
+    assert result.status == "ready"
+    assert report.contract_pass is True
+    assert report.exact_engineering_recovery is True
+    assert report.exact_checkpoint_chain_replay is True
+    assert result.configuration["control_mode"] == "arc_length"
+    assert result.node_displacements[1]["UY_m"] <= -0.03
+    assert result.metrics["target_monitor_displacement_reached"] is True
+    assert result.metrics["rollback_exact"] is True
+    assert result.metrics["equilibrium_constraint_gate"] is True
+    assert result.metrics["fallback_count"] == 0
+    assert result.metrics["regularization_count"] == 0
+    assert result.checkpoint["complete_ancestry_included"] is True
+    assert result.checkpoint["arc_length_continuation_state_included"] is True
+    artifact = json.loads(result.checkpoint_artifact())
+    assert artifact["schema_version"] == (
+        "corotational-arc-length-composite-checkpoint.v1"
+    )
+    assert artifact["frame_checkpoint_chain"]["checkpoint_count"] == (
+        result.metrics["accepted_step_count"] + 1
+    )
+    assert (
+        artifact["arc_length_checkpoint"]["checkpoint_hash"]
+        == (result.checkpoint["arc_length_checkpoint_hash"])
+    )
+    assert "spherical arc-length" in result.claim_boundary
+
+    replayed = analyze_nonlinear_frame(
+        model,
+        config,
+        restart_checkpoint_chain=result.checkpoint_artifact(),
+    )
+    assert validate_nonlinear_frame_result(replayed).contract_pass is True
+    assert (
+        replayed.metrics["replayed_prefix_step_count"]
+        == (result.metrics["accepted_step_count"])
+    )
+    assert replayed.metrics["newly_solved_step_count"] == 0
+    assert replayed.node_displacements == result.node_displacements
+    assert replayed.support_reactions == result.support_reactions
+    assert replayed.member_end_forces == result.member_end_forces
+    assert replayed.section_results == result.section_results
+    assert replayed.fiber_results == result.fiber_results
+    assert replayed.checkpoint_artifact() == result.checkpoint_artifact()
+
+    tampered_artifact = json.loads(result.checkpoint_artifact())
+    tampered_artifact["attempt_trace_hash"] = "sha256:" + "0" * 64
+    tampered_bytes = json.dumps(
+        tampered_artifact,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    blocked = analyze_nonlinear_frame(
+        model,
+        config,
+        restart_checkpoint_chain=tampered_bytes,
+    )
+    assert blocked.status == "blocked"
+    assert blocked.unsupported_features[0]["kind"] == (
+        "corotational_arc_length_restart_exact_replay_mismatch"
     )
 
 

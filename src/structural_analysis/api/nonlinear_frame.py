@@ -37,6 +37,12 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_checkpoint
     load_stateful_corotational_fiber_frame2d_checkpoint_chain_bytes,
     make_stateful_corotational_fiber_frame2d_checkpoint_chain,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_arc_length import (
+    StatefulCorotationalFiberFrame2DArcLengthCheckpoint,
+    StatefulCorotationalFiberFrame2DArcLengthResult,
+    load_stateful_corotational_fiber_frame2d_arc_length_checkpoint_bytes,
+    stateful_corotational_fiber_frame2d_arc_length_continuation,
+)
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displacement_control import (
     StatefulCorotationalFiberFrame2DDisplacementControlConfig,
     StatefulCorotationalFiberFrame2DDisplacementControlPathResult,
@@ -45,6 +51,7 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_displaceme
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_engineering_recovery import (
     CorotationalEngineeringSourceAdapter,
     CorotationalFiberFrameEngineeringResultIR,
+    create_corotational_arc_length_recovery_adapter,
     create_corotational_direct_displacement_recovery_adapter,
     create_corotational_fiber_frame_engineering_result_ir,
 )
@@ -93,6 +100,9 @@ from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_SPARSE_MATRIX_BACKEND,
     NewtonRaphsonConfig,
 )
+from structural_analysis.solvers.nonlinear.vector_arc_length import (
+    VectorArcLengthConfig,
+)
 
 
 UNIFIED_NONLINEAR_FRAME_SCHEMA_VERSION = "unified-nonlinear-frame-result.v1"
@@ -120,8 +130,9 @@ UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY = (
     "the same consistent load operator. The connected-frame profile also exposes "
     "dense direct displacement control for one free UX or UY coordinate with exact "
     "checkpoint ancestry and terminal engineering recovery. Density-derived "
-    "self-weight, arbitrarily rotated local axes, and arc-length control remain "
-    "outside this unified public slice. Both profiles remain "
+    "self-weight and arbitrarily rotated local axes remain outside this unified "
+    "public slice. The same profile exposes bounded dense spherical arc-length "
+    "control with exact rollback, ancestry, and terminal recovery. Both profiles remain "
     "candidates until two independent Level 2 comparisons pass. No profile grants "
     "design-code, final-design, commercial, or release-readiness authority."
 )
@@ -131,7 +142,11 @@ NonlinearFrameProfile = Literal[
     "corotational_one_bay_portal.v1",
     "corotational_connected_frame2d.v1",
 ]
-NonlinearFrameControlMode = Literal["load_control", "direct_displacement_control"]
+NonlinearFrameControlMode = Literal[
+    "load_control",
+    "direct_displacement_control",
+    "arc_length",
+]
 
 _HASH_ZERO = "sha256:" + "0" * 64
 _STABLE_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
@@ -199,6 +214,12 @@ class NonlinearFrameConfig:
     control_tolerance_m: float = 1.0e-12
     load_factor_increment_tolerance: float = 1.0e-12
     load_factor_coordinate_scale_m: float = 1.0e-3
+    arc_length_initial_m: float = 6.0e-3
+    arc_length_minimum_m: float = 7.5e-4
+    arc_length_maximum_m: float = 6.0e-3
+    arc_length_failed_step_reduction: float = 0.5
+    arc_length_constraint_tolerance_m2: float = 1.0e-12
+    arc_length_maximum_attempt_count: int = 100
 
     def __post_init__(self) -> None:
         if self.profile not in (
@@ -212,6 +233,7 @@ class NonlinearFrameConfig:
         if self.control_mode not in (
             "load_control",
             "direct_displacement_control",
+            "arc_length",
         ):
             raise ValueError("control_mode is not supported")
         if (
@@ -221,14 +243,14 @@ class NonlinearFrameConfig:
             raise ValueError(
                 "the fixed-chord profile currently supports only the dense backend"
             )
-        if self.control_mode == "direct_displacement_control":
+        if self.control_mode in ("direct_displacement_control", "arc_length"):
             if self.profile != COROTATIONAL_GENERAL_PROFILE:
                 raise ValueError(
-                    "direct displacement control requires the connected Frame2D profile"
+                    "non-load control requires the connected Frame2D profile"
                 )
             if self.matrix_backend != VECTOR_MATRIX_BACKEND:
                 raise ValueError(
-                    "direct displacement control currently supports only the dense backend"
+                    "direct and arc-length control currently support only the dense backend"
                 )
             if (
                 type(self.control_node_id) is not str
@@ -237,12 +259,22 @@ class NonlinearFrameConfig:
                 raise ValueError("control_node_id must be a stable node identifier")
             if self.control_dof not in ("UX", "UY"):
                 raise ValueError("control_dof must be UX or UY")
+            target_count = (
+                len(self.target_control_displacements_m)
+                if type(self.target_control_displacements_m) is tuple
+                else -1
+            )
+            valid_target_count = (
+                1 <= target_count <= 64
+                if self.control_mode == "direct_displacement_control"
+                else target_count == 1
+            )
             if (
                 type(self.target_control_displacements_m) is not tuple
-                or not 1 <= len(self.target_control_displacements_m) <= 64
+                or not valid_target_count
             ):
                 raise ValueError(
-                    "target_control_displacements_m must contain 1-64 targets"
+                    "direct control requires 1-64 targets and arc-length requires one target"
                 )
         elif (
             self.control_node_id is not None
@@ -265,6 +297,11 @@ class NonlinearFrameConfig:
             "control_tolerance_m",
             "load_factor_increment_tolerance",
             "load_factor_coordinate_scale_m",
+            "arc_length_initial_m",
+            "arc_length_minimum_m",
+            "arc_length_maximum_m",
+            "arc_length_failed_step_reduction",
+            "arc_length_constraint_tolerance_m2",
         ):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, (int, float)):
@@ -273,6 +310,21 @@ class NonlinearFrameConfig:
             if not math.isfinite(normalized) or normalized <= 0.0:
                 raise ValueError(f"{name} must be a finite positive number")
             object.__setattr__(self, name, normalized)
+        if not 0.0 < self.arc_length_failed_step_reduction < 1.0:
+            raise ValueError(
+                "arc_length_failed_step_reduction must be between zero and one"
+            )
+        if self.arc_length_minimum_m > self.arc_length_initial_m:
+            raise ValueError("arc_length_minimum_m cannot exceed arc_length_initial_m")
+        if self.arc_length_initial_m > self.arc_length_maximum_m:
+            raise ValueError("arc_length_initial_m cannot exceed arc_length_maximum_m")
+        if (
+            type(self.arc_length_maximum_attempt_count) is not int
+            or not 1 <= self.arc_length_maximum_attempt_count <= 1000
+        ):
+            raise ValueError(
+                "arc_length_maximum_attempt_count must be an integer in [1, 1000]"
+            )
         normalized_targets: list[float] = []
         for value in self.target_control_displacements_m:
             if isinstance(value, bool) or not isinstance(value, (int, float)):
@@ -460,6 +512,16 @@ class _CorotationalDirectControlExecution:
     newly_solved_step_count: int
 
 
+@dataclass(frozen=True)
+class _CorotationalArcLengthExecution:
+    path: StatefulCorotationalFiberFrame2DArcLengthResult
+    chain: StatefulCorotationalFiberFrame2DCheckpointChain
+    checkpoint_bytes: bytes
+    restart_supplied: bool
+    replayed_prefix_step_count: int
+    newly_solved_step_count: int
+
+
 def analyze_nonlinear_frame(
     model: CanonicalModel,
     config: NonlinearFrameConfig | None = None,
@@ -482,6 +544,12 @@ def analyze_nonlinear_frame(
         return _analyze_fixed_chord(snapshot, cfg, restart_checkpoint_chain)
     if cfg.control_mode == "direct_displacement_control":
         return _analyze_corotational_direct_control(
+            snapshot,
+            cfg,
+            restart_checkpoint_chain,
+        )
+    if cfg.control_mode == "arc_length":
+        return _analyze_corotational_arc_length(
             snapshot,
             cfg,
             restart_checkpoint_chain,
@@ -1202,6 +1270,245 @@ def _analyze_corotational_direct_control(
             "compiler_hash": compiled.compilation.compiler_hash,
             "control_recovery_adapter_hash": adapter.adapter_hash,
             "control_source_contract_hash": adapter.source_contract_hash,
+            "engineering_result_hash": engineering.engineering_result_hash,
+            "engineering_array_bundle_hash": engineering.array_bundle_hash,
+            "quantity_catalog_hash": engineering.quantity_catalog_hash,
+            "checkpoint_chain_hash": execution.chain.chain_hash,
+        },
+        checkpoint=checkpoint,
+        authority=_corotational_candidate_authority(),
+        node_displacements=_corotational_node_rows(compiled, engineering),
+        support_reactions=_corotational_reaction_rows(compiled, engineering),
+        member_end_forces=_corotational_member_rows(compiled, engineering),
+        section_results=_corotational_section_rows(compiled, engineering),
+        fiber_results=_corotational_fiber_rows(compiled, engineering),
+        convergence_history=history,
+        metrics=metrics,
+        unsupported_features=(),
+        warnings=tuple(warnings),
+        checkpoint_bytes=execution.checkpoint_bytes,
+    )
+
+
+def _analyze_corotational_arc_length(
+    model: CanonicalModel,
+    config: NonlinearFrameConfig,
+    restart: bytes | bytearray | memoryview | None,
+) -> NonlinearFrameResult:
+    configuration = {
+        "profile": config.profile,
+        "control_mode": config.control_mode,
+        "control_node_id": config.control_node_id,
+        "control_dof": config.control_dof,
+        "target_monitor_displacement_m": config.target_control_displacements_m[0],
+        "scaled_residual_tolerance": config.residual_tolerance,
+        "arc_length_initial_m": config.arc_length_initial_m,
+        "arc_length_minimum_m": config.arc_length_minimum_m,
+        "arc_length_maximum_m": config.arc_length_maximum_m,
+        "arc_length_failed_step_reduction": (config.arc_length_failed_step_reduction),
+        "arc_length_constraint_tolerance_m2": (
+            config.arc_length_constraint_tolerance_m2
+        ),
+        "arc_length_maximum_attempt_count": (config.arc_length_maximum_attempt_count),
+        "load_factor_metric_scale_m": config.load_factor_coordinate_scale_m,
+        "maximum_corrector_iterations": config.maximum_iterations,
+        "matrix_backend": config.matrix_backend,
+        "stiffness_storage": "numpy_dense_augmented_ndarray",
+        "restart_supplied": restart is not None,
+        "restart_checkpoint_artifact_hash": (
+            _artifact_hash(restart) if restart is not None else None
+        ),
+    }
+    unsupported: list[Mapping[str, Any]] = [
+        dict(row) for row in model.unsupported_features
+    ]
+    warnings = list(model.warnings)
+    compiled: _CompiledPortal | None = None
+    execution: _CorotationalArcLengthExecution | None = None
+    adapter: CorotationalEngineeringSourceAdapter | None = None
+    engineering: CorotationalFiberFrameEngineeringResultIR | None = None
+    monitor_global_dof: int | None = None
+    if not unsupported:
+        try:
+            compiled = _compile_portal(model, general_profile=True)
+            monitor_global_dof = _direct_control_global_dof(compiled, config)
+            execution = _run_corotational_arc_length_path(
+                compiled,
+                config,
+                monitor_global_dof=monitor_global_dof,
+                restart=restart,
+            )
+            if (
+                execution.path.status != "ready"
+                or execution.path.metrics.get("contract_pass") is not True
+            ):
+                raise NonlinearFrameError(
+                    "corotational_arc_length_solver_blocked",
+                    "/solver",
+                    "The configured spherical arc-length path did not close exactly.",
+                )
+            if (
+                type(compiled.compilation)
+                is not CorotationalFiberFrameGeneralCompilation
+            ):
+                raise NonlinearFrameError(
+                    "corotational_arc_length_compiler_invalid",
+                    "/compiler",
+                    "Arc-length control requires the exact general compiler.",
+                )
+            adapter = create_corotational_arc_length_recovery_adapter(
+                compiled.compilation,
+                execution.path,
+            )
+            digest = model.canonical_model_checksum.removeprefix("sha256:")[:20]
+            engineering = create_corotational_fiber_frame_engineering_result_ir(
+                engineering_result_id=f"engineering.arc_length.{digest}",
+                source_adapter=adapter,
+            )
+        except (
+            NonlinearFrameError,
+            StatefulCorotationalFiberFrame2DCheckpointChainArtifactError,
+            ValueError,
+        ) as exc:
+            unsupported.append(
+                {
+                    "kind": str(
+                        getattr(
+                            exc,
+                            "code",
+                            "corotational_arc_length_execution_failed",
+                        )
+                    ),
+                    "path": str(
+                        getattr(
+                            exc,
+                            "path",
+                            (
+                                "/restart_checkpoint_chain"
+                                if restart is not None and execution is None
+                                else "/solver"
+                            ),
+                        )
+                    ),
+                    "detail": str(exc),
+                }
+            )
+
+    ready = bool(
+        compiled is not None
+        and execution is not None
+        and adapter is not None
+        and engineering is not None
+        and monitor_global_dof is not None
+        and not unsupported
+    )
+    if not ready:
+        return _make_result(
+            status="blocked",
+            profile=config.profile,
+            source_result_hash=None,
+            model=model,
+            solver_id="public_cpu_corotational_rc_fiber_frame_arc_length_v1",
+            compiler_profile=COROTATIONAL_FIBER_FRAME_GENERAL_COMPILER_PROFILE,
+            configuration=configuration,
+            contract_bindings=(
+                {"problem_contract_hash": compiled.problem.contract_hash}
+                if compiled is not None
+                else {}
+            ),
+            checkpoint={"available": False},
+            authority=_blocked_authority(),
+            node_displacements=(),
+            support_reactions=(),
+            member_end_forces=(),
+            section_results=(),
+            fiber_results=(),
+            convergence_history=(),
+            metrics={
+                "solver_executed": execution is not None,
+                "exact_engineering_recovery": False,
+                "exact_checkpoint_chain_replay": False,
+                **_arc_length_solver_metrics(execution),
+                "external_level2_attached": False,
+            },
+            unsupported_features=tuple(unsupported),
+            warnings=tuple(warnings),
+            checkpoint_bytes=None,
+        )
+
+    assert compiled is not None
+    assert execution is not None
+    assert adapter is not None
+    assert engineering is not None
+    assert monitor_global_dof is not None
+    terminal = execution.chain.terminal_checkpoint
+    checkpoint = {
+        "available": True,
+        "storage_profile": "corotational-arc-length-composite-checkpoint.v1",
+        "chain_hash": execution.chain.chain_hash,
+        "artifact_hash": _artifact_hash(execution.checkpoint_bytes),
+        "artifact_byte_length": len(execution.checkpoint_bytes),
+        "root_state_hash": execution.chain.root_checkpoint.state_hash,
+        "terminal_state_hash": terminal.state_hash,
+        "terminal_epoch": terminal.epoch,
+        "terminal_load_factor": terminal.load_factor,
+        "monitor_global_dof": monitor_global_dof,
+        "terminal_monitor_displacement_m": terminal.global_displacements[
+            monitor_global_dof
+        ],
+        "arc_length_checkpoint_hash": (execution.path.final_checkpoint.checkpoint_hash),
+        "arc_length_path_contract_hash": execution.path.path_contract_hash,
+        "complete_ancestry_included": True,
+        "arc_length_continuation_state_included": True,
+        "prefix_replay_required": True,
+    }
+    history = tuple(
+        {
+            "attempt_index": attempt.attempt_index,
+            "arc_length_m": attempt.arc_length_m,
+            "outcome": attempt.outcome,
+            "stop_reason": attempt.stop_reason,
+            "committed": attempt.committed,
+            "rollback_exact": attempt.rollback_exact,
+            "accepted_load_factor": attempt.accepted_checkpoint.load_factor,
+            "residual_inf_norm_kn": attempt.vector_result.attempts[0].get(
+                "residual_inf_norm_kn"
+            ),
+            "constraint_residual_m2": attempt.vector_result.attempts[0].get(
+                "constraint_residual_m2"
+            ),
+        }
+        for attempt in execution.path.attempts
+    )
+    metrics = {
+        **_arc_length_solver_metrics(execution),
+        "solver_executed": True,
+        "exact_engineering_recovery": True,
+        "exact_checkpoint_chain_replay": True,
+        "checkpoint_chain_replay_claim": True,
+        "control_mode": "arc_length",
+        "monitor_global_dof": monitor_global_dof,
+        "restart_supplied": execution.restart_supplied,
+        "replayed_prefix_step_count": execution.replayed_prefix_step_count,
+        "newly_solved_step_count": execution.newly_solved_step_count,
+        "terminal_solved_load_factor": terminal.load_factor,
+        "external_level2_attached": False,
+        **dict(engineering.metrics),
+    }
+    return _make_result(
+        status="ready",
+        profile=config.profile,
+        source_result_hash=engineering.engineering_result_hash,
+        model=model,
+        solver_id="public_cpu_corotational_rc_fiber_frame_arc_length_v1",
+        compiler_profile=compiled.compilation.compiler_profile,
+        configuration=configuration,
+        contract_bindings={
+            "problem_contract_hash": compiled.problem.contract_hash,
+            "compiler_hash": compiled.compilation.compiler_hash,
+            "arc_length_recovery_adapter_hash": adapter.adapter_hash,
+            "arc_length_source_contract_hash": adapter.source_contract_hash,
+            "arc_length_path_contract_hash": execution.path.path_contract_hash,
             "engineering_result_hash": engineering.engineering_result_hash,
             "engineering_array_bundle_hash": engineering.array_bundle_hash,
             "quantity_catalog_hash": engineering.quantity_catalog_hash,
@@ -2023,6 +2330,233 @@ def _run_corotational_direct_control_path(
     )
 
 
+def _public_arc_length_config(
+    compiled: _CompiledPortal,
+    config: NonlinearFrameConfig,
+    *,
+    monitor_global_dof: int,
+) -> VectorArcLengthConfig:
+    monitor_free_index = compiled.problem.free_global_dofs.index(monitor_global_dof)
+    target = config.target_control_displacements_m[0]
+    return VectorArcLengthConfig(
+        target_monitor_dof_index=monitor_free_index,
+        target_monitor_displacement_m=target,
+        target_direction=1 if target > 0.0 else -1,
+        initial_arc_length_m=config.arc_length_initial_m,
+        minimum_arc_length_m=config.arc_length_minimum_m,
+        maximum_arc_length_m=config.arc_length_maximum_m,
+        failed_step_reduction=config.arc_length_failed_step_reduction,
+        load_factor_metric_scale_m=config.load_factor_coordinate_scale_m,
+        residual_tolerance_kn=(
+            config.residual_tolerance * compiled.problem.reference_force_scale()
+        ),
+        tangent_solve_residual_tolerance_kn=(
+            config.residual_tolerance * compiled.problem.reference_force_scale()
+        ),
+        constraint_tolerance_m2=config.arc_length_constraint_tolerance_m2,
+        maximum_corrector_iterations=config.maximum_iterations,
+        maximum_attempt_count=config.arc_length_maximum_attempt_count,
+    )
+
+
+def _dump_corotational_arc_length_composite_checkpoint(
+    compiled: _CompiledPortal,
+    path: StatefulCorotationalFiberFrame2DArcLengthResult,
+    chain: StatefulCorotationalFiberFrame2DCheckpointChain,
+) -> bytes:
+    frame_bytes = dump_stateful_corotational_fiber_frame2d_checkpoint_chain_bytes(
+        compiled.problem,
+        chain,
+    )
+    arc_bytes = path.final_checkpoint.to_bytes()
+    payload = {
+        "schema_version": "corotational-arc-length-composite-checkpoint.v1",
+        "problem_contract_hash": compiled.problem.contract_hash,
+        "path_contract_hash": path.path_contract_hash,
+        "frame_checkpoint_chain_hash": chain.chain_hash,
+        "arc_length_checkpoint_hash": path.final_checkpoint.checkpoint_hash,
+        "attempt_trace_hash": canonical_hash(
+            [attempt.to_dict() for attempt in path.attempts]
+        ),
+        "accepted_step_count": int(path.metrics["accepted_step_count"]),
+        "rejected_step_count": int(path.metrics["rejected_step_count"]),
+        "frame_checkpoint_chain": json.loads(frame_bytes),
+        "arc_length_checkpoint": json.loads(arc_bytes),
+    }
+    return json.dumps(
+        payload,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _load_corotational_arc_length_composite_checkpoint(
+    data: bytes | bytearray | memoryview,
+    compiled: _CompiledPortal,
+    config: VectorArcLengthConfig,
+) -> tuple[
+    StatefulCorotationalFiberFrame2DArcLengthCheckpoint,
+    StatefulCorotationalFiberFrame2DCheckpointChain,
+]:
+    raw = bytes(data)
+    try:
+        payload = json.loads(raw)
+        canonical = json.dumps(
+            payload,
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    except (UnicodeDecodeError, TypeError, ValueError, OverflowError) as exc:
+        raise NonlinearFrameError(
+            "corotational_arc_length_checkpoint_invalid",
+            "/restart_checkpoint_chain",
+            "Arc-length composite checkpoint is not finite canonical JSON.",
+        ) from exc
+    expected_keys = {
+        "schema_version",
+        "problem_contract_hash",
+        "path_contract_hash",
+        "frame_checkpoint_chain_hash",
+        "arc_length_checkpoint_hash",
+        "attempt_trace_hash",
+        "accepted_step_count",
+        "rejected_step_count",
+        "frame_checkpoint_chain",
+        "arc_length_checkpoint",
+    }
+    if (
+        type(payload) is not dict
+        or set(payload) != expected_keys
+        or canonical != raw
+        or payload["schema_version"]
+        != "corotational-arc-length-composite-checkpoint.v1"
+        or payload["problem_contract_hash"] != compiled.problem.contract_hash
+        or type(payload["accepted_step_count"]) is not int
+        or payload["accepted_step_count"] < 1
+        or type(payload["rejected_step_count"]) is not int
+        or payload["rejected_step_count"] < 0
+        or not all(
+            isinstance(payload[name], str) and payload[name].startswith("sha256:")
+            for name in (
+                "path_contract_hash",
+                "frame_checkpoint_chain_hash",
+                "arc_length_checkpoint_hash",
+                "attempt_trace_hash",
+            )
+        )
+    ):
+        raise NonlinearFrameError(
+            "corotational_arc_length_checkpoint_binding_invalid",
+            "/restart_checkpoint_chain",
+            "Arc-length composite checkpoint metadata is invalid.",
+        )
+    nested_options = {
+        "ensure_ascii": False,
+        "allow_nan": False,
+        "sort_keys": True,
+        "separators": (",", ":"),
+    }
+    frame_bytes = json.dumps(
+        payload["frame_checkpoint_chain"],
+        **nested_options,
+    ).encode("utf-8")
+    arc_bytes = json.dumps(
+        payload["arc_length_checkpoint"],
+        **nested_options,
+    ).encode("utf-8")
+    chain = load_stateful_corotational_fiber_frame2d_checkpoint_chain_bytes(
+        frame_bytes,
+        compiled.problem,
+    )
+    boundary = load_stateful_corotational_fiber_frame2d_arc_length_checkpoint_bytes(
+        arc_bytes,
+        compiled.problem,
+        config,
+    )
+    if (
+        chain.chain_hash != payload["frame_checkpoint_chain_hash"]
+        or boundary.checkpoint_hash != payload["arc_length_checkpoint_hash"]
+        or boundary.path_contract_hash != payload["path_contract_hash"]
+        or boundary.accepted_checkpoint.canonical_bytes()
+        != chain.terminal_checkpoint.canonical_bytes()
+        or boundary.progress.accepted_step_count != payload["accepted_step_count"]
+        or boundary.progress.rejected_step_count != payload["rejected_step_count"]
+    ):
+        raise NonlinearFrameError(
+            "corotational_arc_length_checkpoint_cross_binding_invalid",
+            "/restart_checkpoint_chain",
+            "Arc-length continuation state and frame ancestry do not agree.",
+        )
+    return boundary, chain
+
+
+def _run_corotational_arc_length_path(
+    compiled: _CompiledPortal,
+    config: NonlinearFrameConfig,
+    *,
+    monitor_global_dof: int,
+    restart: bytes | bytearray | memoryview | None,
+) -> _CorotationalArcLengthExecution:
+    solver_config = _public_arc_length_config(
+        compiled,
+        config,
+        monitor_global_dof=monitor_global_dof,
+    )
+    loaded_chain: StatefulCorotationalFiberFrame2DCheckpointChain | None = None
+    if restart is not None:
+        _loaded_boundary, loaded_chain = (
+            _load_corotational_arc_length_composite_checkpoint(
+                restart,
+                compiled,
+                solver_config,
+            )
+        )
+    path = stateful_corotational_fiber_frame2d_arc_length_continuation(
+        compiled.problem,
+        config=solver_config,
+    )
+    checkpoints = (
+        path.initial_state,
+        *(
+            attempt.accepted_checkpoint
+            for attempt in path.attempts
+            if attempt.committed
+        ),
+    )
+    chain = make_stateful_corotational_fiber_frame2d_checkpoint_chain(
+        compiled.problem,
+        checkpoints,
+    )
+    raw = _dump_corotational_arc_length_composite_checkpoint(
+        compiled,
+        path,
+        chain,
+    )
+    if restart is not None and (
+        raw != bytes(restart)
+        or loaded_chain is None
+        or loaded_chain.chain_hash != chain.chain_hash
+    ):
+        raise NonlinearFrameError(
+            "corotational_arc_length_restart_exact_replay_mismatch",
+            "/restart_checkpoint_chain",
+            "Arc-length restart artifact differs from deterministic genesis replay.",
+        )
+    accepted_count = int(path.metrics["accepted_step_count"])
+    return _CorotationalArcLengthExecution(
+        path=path,
+        chain=chain,
+        checkpoint_bytes=raw,
+        restart_supplied=restart is not None,
+        replayed_prefix_step_count=(accepted_count if restart is not None else 0),
+        newly_solved_step_count=(0 if restart is not None else accepted_count),
+    )
+
+
 def _resume_contract_hash(
     compiled: _CompiledPortal, config: NonlinearFrameConfig
 ) -> str:
@@ -2048,6 +2582,18 @@ def _resume_contract_hash(
             "control_tolerance_m": config.control_tolerance_m,
             "load_factor_increment_tolerance": (config.load_factor_increment_tolerance),
             "load_factor_coordinate_scale_m": (config.load_factor_coordinate_scale_m),
+            "arc_length_initial_m": config.arc_length_initial_m,
+            "arc_length_minimum_m": config.arc_length_minimum_m,
+            "arc_length_maximum_m": config.arc_length_maximum_m,
+            "arc_length_failed_step_reduction": (
+                config.arc_length_failed_step_reduction
+            ),
+            "arc_length_constraint_tolerance_m2": (
+                config.arc_length_constraint_tolerance_m2
+            ),
+            "arc_length_maximum_attempt_count": (
+                config.arc_length_maximum_attempt_count
+            ),
         }
     )
 
@@ -2464,6 +3010,52 @@ def _direct_control_solver_metrics(
         ),
         "iteration_count": sum(
             len(step.trial_solution.convergence_history) for step in steps
+        ),
+        "sparse_backend_used": False,
+        "native_sparse_assembly_used": False,
+        "sparse_factorization_count": 0,
+        "sparse_factorization_diagnostics_passed": None,
+        "sparse_factorization_max_condition_number_1": None,
+        "sparse_factorization_min_normalized_absolute_pivot": None,
+        "sparse_factorization_max_backward_error": None,
+        "sparse_factorization_diagnostic_hashes": [],
+        "sparse_factorization_policy_hash": None,
+    }
+
+
+def _arc_length_solver_metrics(
+    execution: _CorotationalArcLengthExecution | None,
+) -> dict[str, Any]:
+    metrics = execution.path.metrics if execution is not None else {}
+    return {
+        "no_solve_contract_pass": False,
+        "fallback_count": int(metrics.get("fallback_count", 0)),
+        "regularization_count": int(metrics.get("regularization_count", 0)),
+        "accepted_step_count": int(metrics.get("accepted_step_count", 0)),
+        "rejected_step_count": int(metrics.get("rejected_step_count", 0)),
+        "failed_step_reduction_count": int(
+            metrics.get("failed_step_reduction_count", 0)
+        ),
+        "dense_linear_solve_count": int(metrics.get("dense_linear_solve_count", 0)),
+        "corrector_iteration_count": int(metrics.get("corrector_iteration_count", 0)),
+        "target_monitor_displacement_reached": bool(
+            metrics.get("target_monitor_displacement_reached", False)
+        ),
+        "rollback_exact": bool(metrics.get("rollback_exact", False)),
+        "equilibrium_constraint_gate": bool(
+            metrics.get("equilibrium_constraint_gate", False)
+        ),
+        "parent_binding_gate": bool(metrics.get("parent_binding_gate", False)),
+        "parent_immutable_gate": bool(metrics.get("parent_immutable_gate", False)),
+        "monitor_direction_gate": bool(metrics.get("monitor_direction_gate", False)),
+        "descending_load_branch_observed": bool(
+            metrics.get("descending_load_branch_observed", False)
+        ),
+        "negative_load_factor_observed": bool(
+            metrics.get("negative_load_factor_observed", False)
+        ),
+        "rehardening_load_branch_observed": bool(
+            metrics.get("rehardening_load_branch_observed", False)
         ),
         "sparse_backend_used": False,
         "native_sparse_assembly_used": False,

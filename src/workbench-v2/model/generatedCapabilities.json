@@ -236,7 +236,7 @@
         "cli"
       ],
       "limitations": [
-        "Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense or native COO/CSR candidate with branching, support UX/UY/RZ subsets, proportional nodal loads and prescribed displacement, finite rigid offsets, optional RZ end releases, uniform dead loads in explicitly declared chord-bound member-local axes, SI mass-per-length/global-gravity self-weight, and bounded dense direct displacement control for one free UX/UY coordinate with exact recovery and checkpoint restart; disconnected graphs, parallel members, density-derived self-weight, arbitrarily rotated local axes, unified arc-length control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."
+        "Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense or native COO/CSR candidate with branching, support UX/UY/RZ subsets, proportional nodal loads and prescribed displacement, finite rigid offsets, optional RZ end releases, uniform dead loads in explicitly declared chord-bound member-local axes, SI mass-per-length/global-gravity self-weight, bounded dense direct displacement control, and bounded dense spherical arc-length control for one free UX/UY monitor coordinate with exact recovery and checkpoint restart; disconnected graphs, parallel members, density-derived self-weight, arbitrarily rotated local axes, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."
       ],
       "profile": "corotational_connected_frame2d.v1",
       "public": false,
@@ -272,22 +272,27 @@
       "title": "Corotational 2D fiber-frame direct displacement control"
     },
     {
-      "authority": "bounded_internal_stateful_arc_length_candidate",
+      "authority": "bounded_public_stateful_arc_length_candidate",
       "authority_status": "candidate",
       "category": "analysis",
       "evidence": [
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_arc_length.py",
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
+        "src/structural_analysis/api/nonlinear_frame.py",
         "tests/test_stateful_corotational_fiber_frame2d_arc_length.py",
+        "tests/test_corotational_fiber_frame_engineering_recovery.py",
+        "tests/test_unified_nonlinear_frame_api.py",
         "docs/stateful-corotational-fiber-frame2d-arc-length.md"
       ],
       "id": "analysis.nonlinear_corotational_fiber_frame_2d_arc_length",
       "implementation_status": "implemented",
       "interfaces": [
-        "internal_python",
-        "checkpoint_artifact"
+        "python_api",
+        "checkpoint_artifact",
+        "internal_python"
       ],
       "limitations": [
-        "Bounded dense spherical arc-length continuation supports material-state commit/rollback, adaptive step reduction, source-bound exact checkpoints, and limit-point traversal; unified public API wiring, native sparse execution, external Level 2 comparison, Lee-frame promotion, and release promotion remain open."
+        "Bounded dense spherical arc-length continuation is exposed through the unified Python result envelope with material-state commit/rollback, adaptive step reduction, exact terminal engineering recovery, a composite full frame-ancestry plus continuation-state checkpoint, deterministic genesis replay, and limit-point traversal; CLI flags, multiple/general monitor coordinates, native sparse execution, external Level 2 comparison, Lee-frame promotion, and release promotion remain open."
       ],
       "profile": "stateful_corotational_fiber_frame2d_arc_length_continuation.v1",
       "public": false,

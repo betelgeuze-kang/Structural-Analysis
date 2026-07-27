@@ -58,6 +58,28 @@ terminal-parent engineering recovery and epoch-zero checkpoint chain used by
 load control. Restart artifacts are replayed from genesis byte-for-byte before
 remaining displacement targets execute.
 
+The same coordinate fields select bounded spherical arc-length continuation:
+
+```python
+result = analyze_nonlinear_frame(
+    model,
+    NonlinearFrameConfig(
+        profile="corotational_connected_frame2d.v1",
+        control_mode="arc_length",
+        control_node_id="N2",
+        control_dof="UY",
+        target_control_displacements_m=(-0.03,),
+    ),
+)
+```
+
+Arc-length results retain every committed frame state in an epoch-zero chain
+and the terminal continuation direction, radius, cumulative progress, and
+accepted/rejected counts in one canonical composite checkpoint. A supplied
+artifact is cross-validated and then reproduced from genesis byte-for-byte.
+Only after that replay does the common exact engineering recovery expose the
+terminal displacement, reaction, member, section, and fiber results.
+
 A fully constrained connected-frame model with only prescribed values follows a
 reaction-only no-solve contract. It commits the proportional checkpoint path and
 exact recovery without Newton iterations or a convergence claim; sparse
@@ -85,9 +107,9 @@ The same envelope preserves the existing fixed-chord authority while converting
 fiber stress output from MPa to Pa. The corotational endpoints remain bounded
 Developer Preview candidates. Parallel members, disconnected graphs,
 production-scale conditioning, density-derived self-weight, arbitrarily rotated
-local axes, unified arc-length control, direct-control CLI flags and native sparse
-augmented execution, both independent Level 2 comparisons, design-code authority,
-and release promotion remain separate gates.
+local axes, control-mode CLI flags and native sparse augmented execution, both
+independent Level 2 comparisons, design-code authority, and release promotion
+remain separate gates.
 
 The connected profile does execute finite rigid offsets, optional RZ end
 releases, uniform dead loads in explicitly declared chord-bound member-local

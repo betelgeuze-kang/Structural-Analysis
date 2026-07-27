@@ -98,9 +98,13 @@ accepted shallow-arch or Lee-frame benchmark receipt.
 
 This slice closes the optional dense spherical arc-length branch for the
 bounded stateful corotational 2D fiber-frame assembly and its built-in material
-state codec. It does not provide follower loads, a general section/material
-codec registry, checkpoint-chain replay, sparse production execution, ROCm/HIP
-parity, or an externally accepted nonlinear benchmark.
+state codec. The lower-level contract still does not claim checkpoint-chain
+replay by itself. The unified `analyze_nonlinear_frame` adapter now adds exact
+terminal engineering recovery and a composite artifact that binds the complete
+committed frame ancestry to the source/path-bound continuation checkpoint, then
+requires deterministic genesis replay. Follower loads, a general
+section/material codec registry, sparse production execution, ROCm/HIP parity,
+and an externally accepted nonlinear benchmark remain open.
 
 Fully constrained `F=0` models remain reaction-only outcomes and cannot enter
 this displacement-monitored arc-length branch or make a convergence claim.

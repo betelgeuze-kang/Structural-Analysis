@@ -39,11 +39,18 @@ terminal-parent engineering recovery, a complete epoch-zero checkpoint chain,
 and byte-exact accepted-checkpoint restart. The lower-level solver remains
 available as an internal assembly contract and is documented separately.
 
+The unified Python entry point also exposes bounded dense spherical arc-length
+control for one free `UX` or `UY` monitor coordinate. Accepted and rejected
+attempts retain exact rollback evidence; the result binds terminal engineering
+recovery to a canonical composite artifact containing complete committed frame
+ancestry plus the continuation direction, radius, and cumulative progress.
+Restart requires deterministic genesis replay of the entire artifact.
+
 Finite rigid offsets, optional RZ end releases, uniform dead loads in explicitly
 declared chord-bound member-local axes, and self-weight from explicit SI
 mass-per-length/global-gravity inputs are executed within the bounded connected
 profile. Density-derived self-weight, arbitrarily rotated local axes,
-unified-profile arc-length control, direct-control CLI flags and native sparse
-augmented execution, disconnected graphs, parallel members, production-scale
-conditioning, independent Level 2 comparison evidence, design authority, and
-release promotion remain outside this slice.
+control-mode CLI flags and native sparse augmented execution, disconnected
+graphs, parallel members, production-scale conditioning, independent Level 2
+comparison evidence, design authority, and release promotion remain outside
+this slice.
