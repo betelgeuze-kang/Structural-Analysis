@@ -17,6 +17,7 @@ from pathlib import Path
 import numpy as np
 
 from newton_adaptive_damping import AdaptiveNewtonConfig, solve_with_adaptive_damping
+from structural_analysis.dynamics import build_transient_checkpoint_authority
 
 
 G = 9.80665
@@ -26,6 +27,7 @@ REASONS = {
     "ERR_GM_INPUT": "ground-motion input is missing or invalid",
     "ERR_NEWMARK_STABILITY": "newmark integration diverged or produced non-finite response",
     "ERR_ENERGY_DIVERGENCE": "energy balance or equilibrium residual checks failed",
+    "ERR_CHECKPOINT_AUTHORITY": "transient checkpoint source-authentic replay failed",
 }
 
 
@@ -266,6 +268,37 @@ def main() -> None:
         ),
         nonlinear_stiffness_ratio=float(args.nonlinear_stiffness_ratio),
     )
+    replay_result = _newmark_sdof(
+        ag_g=ag,
+        dt=dt,
+        period_s=float(args.period_s),
+        damping_ratio=float(args.damping_ratio),
+        mass_kg=float(args.mass_kg),
+        use_adaptive_newton=bool(args.use_adaptive_newton),
+        adaptive_cfg=AdaptiveNewtonConfig(
+            max_iter=int(args.adaptive_newton_max_iter),
+            tol=float(args.adaptive_newton_tol),
+            lambda_init=1e-3,
+        ),
+        nonlinear_stiffness_ratio=float(args.nonlinear_stiffness_ratio),
+    )
+    initial_state = {
+        "displacement_m": 0.0,
+        "velocity_mps": 0.0,
+        "acceleration_mps2": -float(ag[0]) * G,
+    }
+    force_history = tuple(
+        -float(args.mass_kg) * float(acceleration_g) * G
+        for acceleration_g in ag
+    )
+    checkpoint_authority = build_transient_checkpoint_authority(
+        parent_content=gm_path.read_bytes(),
+        force_history=force_history,
+        initial_state=initial_state,
+        source_result=result,
+        replay_result=replay_result,
+        source_authentic_requested=True,
+    )
     metrics = result["metrics"]
 
     finite_ok = all(math.isfinite(float(v)) for v in metrics.values())
@@ -273,14 +306,18 @@ def main() -> None:
     residual_ok = finite_ok and float(metrics["equilibrium_residual_ratio"]) <= float(args.max_residual_ratio)
     energy_ok = finite_ok and float(metrics["energy_balance_relative_error"]) <= float(args.max_energy_balance_error)
     stable = bool(non_divergent and residual_ok and energy_ok)
+    checkpoint_ok = bool(checkpoint_authority.source_authentic_checkpoint)
     newton_ok = True
     if bool(args.use_adaptive_newton):
         steps = max(1, int(result["metrics"].get("adaptive_newton_step_count", 0)))
         conv = int(result["metrics"].get("adaptive_newton_converged_count", 0))
         newton_ok = bool(conv / steps >= 0.95)
         stable = bool(stable and newton_ok)
+    stable = bool(stable and checkpoint_ok)
 
-    if not finite_ok or not non_divergent or not newton_ok:
+    if not checkpoint_ok:
+        reason_code = "ERR_CHECKPOINT_AUTHORITY"
+    elif not finite_ok or not non_divergent or not newton_ok:
         reason_code = "ERR_NEWMARK_STABILITY"
     elif not residual_ok or not energy_ok:
         reason_code = "ERR_ENERGY_DIVERGENCE"
@@ -307,9 +344,11 @@ def main() -> None:
             "energy_balance_pass": energy_ok,
             "newmark_stability_pass": stable,
             "adaptive_newton_converged_pass": bool(newton_ok),
+            "source_authentic_checkpoint_pass": checkpoint_ok,
         },
         "metrics": metrics,
         "trace_head": result["trace"],
+        "transient_checkpoint": checkpoint_authority.to_dict(),
         "contract_pass": bool(stable),
         "reason_code": reason_code,
         "reason": REASONS[reason_code],
