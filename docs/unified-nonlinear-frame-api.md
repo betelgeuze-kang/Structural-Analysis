@@ -60,11 +60,13 @@ structural-analysis-nonlinear-frame \
 The same envelope preserves the existing fixed-chord authority while converting
 fiber stress output from MPa to Pa. The corotational endpoints remain bounded
 Developer Preview candidates. Parallel members, disconnected graphs,
-production-scale conditioning, automatic self-weight, user-rotated local axes,
-unified direct displacement and arc-length control, both independent Level 2
-comparisons, design-code authority, and release promotion remain separate gates.
+production-scale conditioning, density-derived self-weight, arbitrarily rotated
+local axes, unified direct displacement and arc-length control, both independent
+Level 2 comparisons, design-code authority, and release promotion remain
+separate gates.
 
 The connected profile does execute finite rigid offsets, optional RZ end
-releases, and uniform dead loads expressed in the initial member-local axes.
-Those features use the same exact checkpoint replay and engineering recovery
-gates as the remaining connected-frame path.
+releases, uniform dead loads in explicitly declared chord-bound member-local
+axes, and self-weight derived from explicit SI mass-per-length and global gravity
+inputs. Those features use the same exact checkpoint replay and engineering
+recovery gates as the remaining connected-frame path.

@@ -38,9 +38,10 @@ support-motion coupling, exact rollback, and accepted-checkpoint restart. That
 internal solver is documented separately and is not wired into this unified
 J1–J5 profile.
 
-Finite rigid offsets, optional RZ end releases, and uniform dead loads in the
-initial member-local axes are executed within the bounded connected profile.
-Automatic self-weight, user-rotated local axes, unified-profile direct
-displacement and arc-length control, disconnected graphs, parallel members,
-production-scale conditioning, independent Level 2 comparison evidence, design
-authority, and release promotion remain outside this slice.
+Finite rigid offsets, optional RZ end releases, uniform dead loads in explicitly
+declared chord-bound member-local axes, and self-weight from explicit SI
+mass-per-length/global-gravity inputs are executed within the bounded connected
+profile. Density-derived self-weight, arbitrarily rotated local axes,
+unified-profile direct displacement and arc-length control, disconnected graphs,
+parallel members, production-scale conditioning, independent Level 2 comparison
+evidence, design authority, and release promotion remain outside this slice.

@@ -97,6 +97,12 @@ class CorotationalFrame2DMemberFeatures:
     release_i_rz: bool = False
     release_j_rz: bool = False
     uniform_load_local_kn_per_m: tuple[float, float] = (0.0, 0.0)
+    local_x_axis_global: tuple[float, float] | None = None
+    local_y_axis_global: tuple[float, float] | None = None
+    local_axis_explicit: bool = False
+    self_weight_local_kn_per_m: tuple[float, float] = (0.0, 0.0)
+    self_weight_mass_per_length_kg_per_m: float | None = None
+    self_weight_gravity_global_m_per_s2: tuple[float, float] | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -119,6 +125,66 @@ class CorotationalFrame2DMemberFeatures:
                 name="uniform_load_local_kn_per_m",
             ),
         )
+        object.__setattr__(
+            self,
+            "self_weight_local_kn_per_m",
+            _pair(
+                self.self_weight_local_kn_per_m,
+                name="self_weight_local_kn_per_m",
+            ),
+        )
+        if type(self.local_axis_explicit) is not bool:
+            raise ValueError("local_axis_explicit must be a boolean")
+        if (self.local_x_axis_global is None) != (self.local_y_axis_global is None):
+            raise ValueError("local x and y axes must be provided together")
+        if self.local_x_axis_global is None:
+            if self.local_axis_explicit:
+                raise ValueError("explicit local axis requires x and y vectors")
+        else:
+            x_axis = _pair(self.local_x_axis_global, name="local_x_axis_global")
+            y_axis = _pair(self.local_y_axis_global, name="local_y_axis_global")
+            x = np.asarray(x_axis, dtype=np.float64)
+            y = np.asarray(y_axis, dtype=np.float64)
+            if not np.isclose(np.linalg.norm(x), 1.0, rtol=0.0, atol=1.0e-12):
+                raise ValueError("local_x_axis_global must be a unit vector")
+            if not np.isclose(np.linalg.norm(y), 1.0, rtol=0.0, atol=1.0e-12):
+                raise ValueError("local_y_axis_global must be a unit vector")
+            if not np.isclose(float(x @ y), 0.0, rtol=0.0, atol=1.0e-12):
+                raise ValueError("local axes must be orthogonal")
+            determinant = float(x[0] * y[1] - x[1] * y[0])
+            if not np.isclose(determinant, 1.0, rtol=0.0, atol=1.0e-12):
+                raise ValueError("local axes must form a right-handed basis")
+            object.__setattr__(self, "local_x_axis_global", x_axis)
+            object.__setattr__(self, "local_y_axis_global", y_axis)
+        mass = self.self_weight_mass_per_length_kg_per_m
+        gravity = self.self_weight_gravity_global_m_per_s2
+        if mass is None:
+            if gravity is not None or self.self_weight_local_kn_per_m != (0.0, 0.0):
+                raise ValueError(
+                    "self-weight provenance and local load must be provided together"
+                )
+        else:
+            normalized_mass = _finite(mass, name="self_weight_mass_per_length_kg_per_m")
+            if normalized_mass <= 0.0 or gravity is None:
+                raise ValueError(
+                    "self-weight mass must be positive and include gravity"
+                )
+            normalized_gravity = _pair(
+                gravity,
+                name="self_weight_gravity_global_m_per_s2",
+            )
+            if normalized_gravity == (0.0, 0.0):
+                raise ValueError("self-weight gravity vector must be nonzero")
+            object.__setattr__(
+                self,
+                "self_weight_mass_per_length_kg_per_m",
+                normalized_mass,
+            )
+            object.__setattr__(
+                self,
+                "self_weight_gravity_global_m_per_s2",
+                normalized_gravity,
+            )
 
     @property
     def released_element_dofs(self) -> tuple[int, ...]:
@@ -136,7 +202,22 @@ class CorotationalFrame2DMemberFeatures:
 
     @property
     def has_distributed_load(self) -> bool:
-        return any(value != 0.0 for value in self.uniform_load_local_kn_per_m)
+        return any(value != 0.0 for value in self.combined_uniform_load_local_kn_per_m)
+
+    @property
+    def has_self_weight(self) -> bool:
+        return self.self_weight_mass_per_length_kg_per_m is not None
+
+    @property
+    def combined_uniform_load_local_kn_per_m(self) -> tuple[float, float]:
+        return tuple(
+            explicit + self_weight
+            for explicit, self_weight in zip(
+                self.uniform_load_local_kn_per_m,
+                self.self_weight_local_kn_per_m,
+                strict=True,
+            )
+        )
 
     @property
     def has_release(self) -> bool:
@@ -154,6 +235,29 @@ class CorotationalFrame2DMemberFeatures:
             "release_i_rz": self.release_i_rz,
             "release_j_rz": self.release_j_rz,
             "uniform_load_local_kn_per_m": list(self.uniform_load_local_kn_per_m),
+            "self_weight_local_kn_per_m": list(self.self_weight_local_kn_per_m),
+            "combined_uniform_load_local_kn_per_m": list(
+                self.combined_uniform_load_local_kn_per_m
+            ),
+            "self_weight_mass_per_length_kg_per_m": (
+                self.self_weight_mass_per_length_kg_per_m
+            ),
+            "self_weight_gravity_global_m_per_s2": (
+                None
+                if self.self_weight_gravity_global_m_per_s2 is None
+                else list(self.self_weight_gravity_global_m_per_s2)
+            ),
+            "local_axis_explicit": self.local_axis_explicit,
+            "local_x_axis_global": (
+                None
+                if self.local_x_axis_global is None
+                else list(self.local_x_axis_global)
+            ),
+            "local_y_axis_global": (
+                None
+                if self.local_y_axis_global is None
+                else list(self.local_y_axis_global)
+            ),
             "rigid_offset_operator": COROTATIONAL_FRAME2D_RIGID_OFFSET_OPERATOR,
             "release_operator": COROTATIONAL_FRAME2D_RELEASE_OPERATOR,
             "distributed_load_operator": (
@@ -276,7 +380,7 @@ def consistent_uniform_load_element_global(
         raise ValueError("element type is invalid")
     if type(features) is not CorotationalFrame2DMemberFeatures:
         raise ValueError("features type is invalid")
-    qx, qy = features.uniform_load_local_kn_per_m
+    qx, qy = features.combined_uniform_load_local_kn_per_m
     length = element.initial_length_m
     local = np.asarray(
         [
@@ -293,13 +397,29 @@ def consistent_uniform_load_element_global(
     delta = coordinates[1] - coordinates[0]
     cosine = float(delta[0] / length)
     sine = float(delta[1] / length)
+    if features.local_x_axis_global is None:
+        x_axis = (cosine, sine)
+        y_axis = (-sine, cosine)
+    else:
+        x_axis = features.local_x_axis_global
+        y_axis = features.local_y_axis_global
+        assert y_axis is not None
+        if not np.allclose(
+            x_axis, (cosine, sine), rtol=0.0, atol=1.0e-12
+        ) or not np.allclose(
+            y_axis,
+            (-sine, cosine),
+            rtol=0.0,
+            atol=1.0e-12,
+        ):
+            raise ValueError("explicit local axes must match the initial member chord")
     local_from_global = np.asarray(
         [
-            [cosine, sine, 0.0, 0.0, 0.0, 0.0],
-            [-sine, cosine, 0.0, 0.0, 0.0, 0.0],
+            [x_axis[0], x_axis[1], 0.0, 0.0, 0.0, 0.0],
+            [y_axis[0], y_axis[1], 0.0, 0.0, 0.0, 0.0],
             [0.0, 0.0, 1.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, cosine, sine, 0.0],
-            [0.0, 0.0, 0.0, -sine, cosine, 0.0],
+            [0.0, 0.0, 0.0, x_axis[0], x_axis[1], 0.0],
+            [0.0, 0.0, 0.0, y_axis[0], y_axis[1], 0.0],
             [0.0, 0.0, 0.0, 0.0, 0.0, 1.0],
         ],
         dtype=np.float64,

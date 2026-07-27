@@ -171,7 +171,7 @@
       "authority": "bounded_j1_j5_and_exact_engineering_recovery_candidate",
       "interfaces": ["python_api", "cli"],
       "profile": "corotational_connected_frame2d.v1",
-      "limitations": ["Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense or native COO/CSR candidate with branching, support UX/UY/RZ subsets, proportional nodal loads and prescribed displacement, finite rigid offsets, optional RZ end releases, and uniform dead loads in initial member-local axes; disconnected graphs, parallel members, automatic self-weight, user-rotated local axes, unified direct displacement/arc-length control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."],
+      "limitations": ["Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense or native COO/CSR candidate with branching, support UX/UY/RZ subsets, proportional nodal loads and prescribed displacement, finite rigid offsets, optional RZ end releases, uniform dead loads in explicitly declared chord-bound member-local axes, and SI mass-per-length/global-gravity self-weight; disconnected graphs, parallel members, density-derived self-weight, arbitrarily rotated local axes, unified direct displacement/arc-length control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."],
       "evidence": [
         "docs/unified-nonlinear-frame-api.md",
         "docs/corotational-connected-frame2d.md",
