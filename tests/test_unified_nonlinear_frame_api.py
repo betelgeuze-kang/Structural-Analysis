@@ -109,6 +109,14 @@ def _member_feature_payload() -> dict:
                         "j": [-0.2, 0.0],
                     },
                     "end_releases": {"i": [], "j": ["RZ"]},
+                    "local_axis": {
+                        "x_axis_global": [1.0, 0.0],
+                        "y_axis_global": [0.0, 1.0],
+                    },
+                    "self_weight": {
+                        "mass_per_length_kg_per_m": 100.0,
+                        "gravity_global_m_per_s2": [0.0, -10.0],
+                    },
                     "uniform_distributed_load_local": {
                         "basis": "initial_member_local",
                         "behavior": "dead",
@@ -531,7 +539,15 @@ def test_general_public_profile_executes_release_offset_and_distributed_load(
     assert "finite rigid offsets" in result.claim_boundary
     assert "optional RZ end releases" in result.claim_boundary
     assert "uniform dead loads" in result.claim_boundary
+    assert "generate self-weight" in result.claim_boundary
     assert result.member_end_forces[0]["member_features"]["release_j_rz"] is True
+    assert result.member_end_forces[0]["member_features"]["local_axis_explicit"] is True
+    assert result.member_end_forces[0]["member_features"][
+        "self_weight_local_kn_per_m"
+    ] == [0.0, -1.0]
+    assert result.member_end_forces[0]["member_features"][
+        "combined_uniform_load_local_kn_per_m"
+    ] == [0.0, -3.0]
     assert result.member_end_forces[0]["member_features"][
         "uniform_load_local_kn_per_m"
     ] == [0.0, -2.0]
@@ -545,7 +561,7 @@ def test_general_public_profile_executes_release_offset_and_distributed_load(
         (row["node_id"], row["dof"]): row["value_si"]
         for row in result.support_reactions
     }
-    assert abs(reaction_by_dof[("N1", "UY")] - 7200.0) < 2.0e-6
+    assert abs(reaction_by_dof[("N1", "UY")] - 10_800.0) < 3.0e-6
 
     replayed = analyze_nonlinear_frame(
         model,
