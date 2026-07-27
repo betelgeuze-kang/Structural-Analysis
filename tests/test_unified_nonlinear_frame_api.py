@@ -1062,6 +1062,82 @@ def test_unified_cli_writes_result_report_and_checkpoint_atomically(
     assert checkpoint_path.read_bytes() == result.checkpoint_artifact()
 
 
+@pytest.mark.parametrize(
+    ("mode", "targets", "extra"),
+    [
+        (
+            "direct_displacement_control",
+            (2.5e-5, 5.0e-5),
+            ["--control-tolerance", "2e-12"],
+        ),
+        (
+            "arc_length",
+            (-0.03,),
+            [
+                "--arc-length-initial",
+                "0.006",
+                "--arc-length-minimum",
+                "0.00075",
+                "--arc-length-maximum",
+                "0.006",
+                "--arc-length-max-attempts",
+                "20",
+            ],
+        ),
+    ],
+)
+def test_unified_cli_forwards_control_modes_without_narrowing(
+    tmp_path: Path,
+    portal_result,
+    monkeypatch: pytest.MonkeyPatch,
+    mode: str,
+    targets: tuple[float, ...],
+    extra: list[str],
+) -> None:
+    model, source_result = portal_result
+    captured: list[NonlinearFrameConfig] = []
+
+    def _capture_config(_model, config, **_kwargs):
+        captured.append(config)
+        return source_result
+
+    monkeypatch.setattr(nonlinear_frame_cli, "analyze_nonlinear_frame", _capture_config)
+    target_args = [
+        argument
+        for target in targets
+        for argument in ("--target-control-displacement", str(target))
+    ]
+    exit_code = nonlinear_frame_cli.main(
+        [
+            model.source_path,
+            "--profile",
+            COROTATIONAL_GENERAL_PROFILE,
+            "--control-mode",
+            mode,
+            "--control-node-id",
+            "N2",
+            "--control-dof",
+            "UY",
+            *target_args,
+            *extra,
+            "--out",
+            str(tmp_path / f"{mode}-result.json"),
+            "--report-out",
+            str(tmp_path / f"{mode}-report.json"),
+        ]
+    )
+
+    assert exit_code == 0
+    assert captured[0].control_mode == mode
+    assert captured[0].control_node_id == "N2"
+    assert captured[0].control_dof == "UY"
+    assert captured[0].target_control_displacements_m == targets
+    if mode == "direct_displacement_control":
+        assert captured[0].control_tolerance_m == 2.0e-12
+    else:
+        assert captured[0].arc_length_maximum_attempt_count == 20
+
+
 def test_unified_cli_runs_connected_frame_profile(tmp_path: Path) -> None:
     model = _model(tmp_path, _branching_payload(), "cli-branching.json")
     result_path = tmp_path / "general-result.json"

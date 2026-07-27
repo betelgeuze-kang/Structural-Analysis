@@ -25,7 +25,8 @@ from structural_analysis.execution.job_service import (
 
 JOB_HTTP_API_PROFILE = "structural-analysis-durable-job-http-api.v1"
 _JOB_ROUTE = re.compile(
-    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})(?:/(?P<artifact>result|evidence|resume|cancel))?$"
+    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})"
+    r"(?:/(?P<artifact>checkpoint|result|evidence|resume|cancel))?$"
 )
 _MAX_HTTP_BODY = 192 * 1024 * 1024
 
@@ -68,7 +69,11 @@ class DurableJobHttpApi:
             if not path.startswith("/") or "?" in path or "#" in path:
                 _api_fail("route_invalid", 404, "Route does not exist.")
             if len(raw) > _MAX_HTTP_BODY:
-                _api_fail("request_too_large", 413, "HTTP body exceeds the bounded API profile.")
+                _api_fail(
+                    "request_too_large",
+                    413,
+                    "HTTP body exceeds the bounded API profile.",
+                )
             if path == "/v1/jobs" and normalized_method == "POST":
                 return self._submit(normalized_headers, raw)
             match = _JOB_ROUTE.fullmatch(path)
@@ -138,13 +143,23 @@ class DurableJobHttpApi:
                     authorization_token=token,
                 ).to_dict(),
             )
-        if operation in {"result", "evidence"} and method == "GET":
+        if operation in {"checkpoint", "result", "evidence"} and method == "GET":
             job = self.service.get_job(
                 job_id, tenant_id=tenant_id, authorization_token=token
             )
-            reference = job.result if operation == "result" else job.evidence
+            reference = (
+                job.checkpoint
+                if operation == "checkpoint"
+                else job.result
+                if operation == "result"
+                else job.evidence
+            )
             artifact_payload = (
-                self.service.read_result(
+                self.service.read_checkpoint(
+                    job_id, tenant_id=tenant_id, authorization_token=token
+                )
+                if operation == "checkpoint"
+                else self.service.read_result(
                     job_id, tenant_id=tenant_id, authorization_token=token
                 )
                 if operation == "result"
@@ -249,7 +264,9 @@ class DurableJobHttpApi:
         elif operation == "complete":
             evidence = payload.get("evidence")
             if type(evidence) is not dict:
-                _api_fail("evidence_invalid", 400, "Completion evidence must be an object.")
+                _api_fail(
+                    "evidence_invalid", 400, "Completion evidence must be an object."
+                )
             job = self.service.complete_job(
                 job_id,
                 worker_id=worker_id,
@@ -282,9 +299,7 @@ class DurableJobWSGIApplication:
     def __call__(
         self,
         environ: Mapping[str, Any],
-        start_response: Callable[
-            [str, list[tuple[str, str]]], Any
-        ],
+        start_response: Callable[[str, list[tuple[str, str]]], Any],
     ) -> Iterable[bytes]:
         raw_length = str(environ.get("CONTENT_LENGTH") or "0")
         try:
@@ -349,7 +364,9 @@ def _json_body(body: bytes) -> dict[str, Any]:
         result: dict[str, Any] = {}
         for key, value in values:
             if key in result:
-                _api_fail("json_duplicate_key", 400, "Duplicate JSON keys are rejected.")
+                _api_fail(
+                    "json_duplicate_key", 400, "Duplicate JSON keys are rejected."
+                )
             result[key] = value
         return result
 
@@ -382,7 +399,9 @@ def _json_response(status: int, payload: Mapping[str, Any]) -> JobHttpResponse:
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
-    return JobHttpResponse(status=status, headers=_headers("application/json"), body=body)
+    return JobHttpResponse(
+        status=status, headers=_headers("application/json"), body=body
+    )
 
 
 def _error_response(status: int, code: str, detail: str) -> JobHttpResponse:

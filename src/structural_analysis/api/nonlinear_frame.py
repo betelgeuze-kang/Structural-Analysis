@@ -109,6 +109,7 @@ UNIFIED_NONLINEAR_FRAME_SCHEMA_VERSION = "unified-nonlinear-frame-result.v1"
 UNIFIED_NONLINEAR_FRAME_REPORT_SCHEMA_VERSION = (
     "unified-nonlinear-frame-validation-report.v1"
 )
+NONLINEAR_FRAME_CHECKPOINT_MAX_BYTES = 64 * 1024 * 1024
 FIXED_CHORD_SERIAL_PROFILE: Final[Literal["fixed_chord_serial_cantilever.v1"]] = (
     "fixed_chord_serial_cantilever.v1"
 )
@@ -2401,6 +2402,12 @@ def _load_corotational_arc_length_composite_checkpoint(
     StatefulCorotationalFiberFrame2DCheckpointChain,
 ]:
     raw = bytes(data)
+    if len(raw) > NONLINEAR_FRAME_CHECKPOINT_MAX_BYTES:
+        raise NonlinearFrameError(
+            "corotational_arc_length_checkpoint_too_large",
+            "/restart_checkpoint_chain",
+            "Arc-length composite checkpoint exceeds the bounded byte limit.",
+        )
     try:
         payload = json.loads(raw)
         canonical = json.dumps(
@@ -3402,6 +3409,7 @@ __all__ = [
     "UNIFIED_NONLINEAR_FRAME_SCHEMA_VERSION",
     "NonlinearFrameConfig",
     "NonlinearFrameCheckpointAdvance",
+    "NONLINEAR_FRAME_CHECKPOINT_MAX_BYTES",
     "NonlinearFrameControlMode",
     "NonlinearFrameError",
     "NonlinearFrameProfile",

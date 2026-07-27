@@ -297,7 +297,7 @@ class DurableJobService:
             + b"\0"
             + idempotency_key.encode("utf-8")
         )
-        total_steps = int(normalized_request["config"]["load_steps"])
+        total_steps = _request_progress_total(normalized_request)
         request_ref = self._put_blob(
             request_bytes,
             role="request",
@@ -600,10 +600,35 @@ class DurableJobService:
         result_bytes: bytes | bytearray | memoryview,
         result_media_type: str,
         evidence: Mapping[str, Any],
+        terminal_checkpoint_bytes: bytes | bytearray | memoryview | None = None,
+        terminal_checkpoint_media_type: str | None = None,
+        terminal_resume_contract_hash: str | None = None,
     ) -> JobView:
         """Atomically publish a worker-validated result/evidence pair."""
 
         self._authorize_worker(worker_id, authorization_token)
+        terminal_checkpoint_supplied = terminal_checkpoint_bytes is not None
+        if terminal_checkpoint_supplied != (
+            terminal_checkpoint_media_type is not None
+            and terminal_resume_contract_hash is not None
+        ):
+            _fail(
+                "terminal_checkpoint_bundle_invalid",
+                "/terminal_checkpoint",
+                "Terminal checkpoint bytes, media type, and resume hash are all-or-none.",
+            )
+        terminal_checkpoint_ref = None
+        if terminal_checkpoint_supplied:
+            assert terminal_checkpoint_bytes is not None
+            assert terminal_checkpoint_media_type is not None
+            assert terminal_resume_contract_hash is not None
+            _hash(terminal_resume_contract_hash, "/terminal_resume_contract_hash")
+            terminal_checkpoint_ref = self._put_blob(
+                bytes(terminal_checkpoint_bytes),
+                role="checkpoint",
+                media_type=terminal_checkpoint_media_type,
+                maximum_bytes=_MAX_CHECKPOINT_BYTES,
+            )
         normalized_result = bytes(result_bytes)
         _bounded(normalized_result, _MAX_RESULT_BYTES, "/result")
         result_payload = _strict_json_object(normalized_result, "/result")
@@ -646,14 +671,34 @@ class DurableJobService:
                     "/result/schema_version",
                     "The result does not implement the immutable requested contract.",
                 )
-            expected_bindings = {
-                "job_id": job_id,
-                "request_hash": str(row["request_hash"]),
-                "checkpoint_hash": (
+            existing_resume_contract = (
+                str(row["resume_contract_hash"])
+                if row["resume_contract_hash"] is not None
+                else None
+            )
+            if (
+                terminal_checkpoint_ref is not None
+                and existing_resume_contract is not None
+                and existing_resume_contract != terminal_resume_contract_hash
+            ):
+                _fail(
+                    "terminal_resume_contract_mismatch",
+                    "/terminal_resume_contract_hash",
+                    "Terminal checkpoint differs from the persisted resume contract.",
+                )
+            completion_checkpoint_hash = (
+                terminal_checkpoint_ref.content_hash
+                if terminal_checkpoint_ref is not None
+                else (
                     str(row["checkpoint_hash"])
                     if row["checkpoint_hash"] is not None
                     else None
-                ),
+                )
+            )
+            expected_bindings = {
+                "job_id": job_id,
+                "request_hash": str(row["request_hash"]),
+                "checkpoint_hash": completion_checkpoint_hash,
                 "result_artifact_hash": result_hash,
             }
             for key, expected in expected_bindings.items():
@@ -683,6 +728,7 @@ class DurableJobService:
                     "worker_id": worker_id,
                     "result_hash": result_hash,
                     "evidence_hash": evidence_hash,
+                    "checkpoint_hash": completion_checkpoint_hash,
                     "progress_completed": int(row["progress_total"]),
                 },
                 updates={
@@ -693,6 +739,16 @@ class DurableJobService:
                     "evidence_hash": evidence_ref.content_hash,
                     "evidence_size": evidence_ref.byte_length,
                     "evidence_media_type": evidence_ref.media_type,
+                    **(
+                        {
+                            "checkpoint_hash": terminal_checkpoint_ref.content_hash,
+                            "checkpoint_size": terminal_checkpoint_ref.byte_length,
+                            "checkpoint_media_type": terminal_checkpoint_ref.media_type,
+                            "resume_contract_hash": terminal_resume_contract_hash,
+                        }
+                        if terminal_checkpoint_ref is not None
+                        else {}
+                    ),
                     "error_code": None,
                     **_clear_lease(),
                 },
@@ -717,9 +773,7 @@ class DurableJobService:
                 "Use a stable lowercase machine error code.",
             )
         if type(retriable) is not bool:
-            _fail(
-                "retriable_invalid", "/retriable", "retriable must be boolean."
-            )
+            _fail("retriable_invalid", "/retriable", "retriable must be boolean.")
         now, now_us = self._now()
         with self._transaction() as connection:
             row = self._job_row(connection, job_id)
@@ -845,6 +899,29 @@ class DurableJobService:
             authorization_token=authorization_token,
             role="result",
             maximum_bytes=_MAX_RESULT_BYTES,
+        )
+
+    def read_checkpoint(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+    ) -> bytes:
+        self._authorize_tenant(tenant_id, authorization_token)
+        with self._connect() as connection:
+            row = self._job_row(connection, job_id)
+        self._require_tenant(row, tenant_id)
+        if row["checkpoint_hash"] is None:
+            _fail(
+                "artifact_not_published",
+                "/checkpoint",
+                "The job has not published a checkpoint artifact.",
+            )
+        return self._read_blob(
+            str(row["checkpoint_hash"]),
+            int(row["checkpoint_size"]),
+            maximum_bytes=_MAX_CHECKPOINT_BYTES,
         )
 
     def read_evidence(
@@ -1305,9 +1382,7 @@ class DurableJobService:
         return payload
 
     def _blob_path(self, content_hash: str) -> Path:
-        digest = _hash(content_hash, "/artifact/content_hash").removeprefix(
-            "sha256:"
-        )
+        digest = _hash(content_hash, "/artifact/content_hash").removeprefix("sha256:")
         return self._blob_root / digest[:2] / digest
 
     def _read_published_artifact(
@@ -1335,9 +1410,7 @@ class DurableJobService:
             maximum_bytes=maximum_bytes,
         )
 
-    def _row_references(
-        self, row: sqlite3.Row
-    ) -> dict[str, ArtifactReference | None]:
+    def _row_references(self, row: sqlite3.Row) -> dict[str, ArtifactReference | None]:
         references: dict[str, ArtifactReference | None] = {}
         for role in ("request", "checkpoint", "result", "evidence"):
             content_hash = row[f"{role}_hash"]
@@ -1586,6 +1659,22 @@ def _lease_token_hash(job_id: str, token: str) -> str:
     return _sha256(
         f"structural-analysis-job-lease.v1\0{job_id}\0".encode("utf-8")
         + value.encode("utf-8")
+    )
+
+
+def _request_progress_total(request: Mapping[str, Any]) -> int:
+    config = request.get("config")
+    if not isinstance(config, Mapping):  # pragma: no cover - schema invariant
+        _fail("job_config_invalid", "/request/config", "Job config is missing.")
+    mode = config.get("control_mode")
+    if mode == "load_control":
+        return int(config["load_steps"])
+    if mode in ("direct_displacement_control", "arc_length"):
+        return 1
+    _fail(
+        "job_control_mode_invalid",
+        "/request/config/control_mode",
+        "Job control mode is unsupported.",
     )
 
 

@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from structural_analysis.api.nonlinear_frame import (
+    COROTATIONAL_GENERAL_PROFILE,
     COROTATIONAL_PORTAL_PROFILE,
     NonlinearFrameConfig,
     analyze_nonlinear_frame,
@@ -29,6 +30,7 @@ from structural_analysis.execution.nonlinear_frame_worker import (
 )
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.solvers.nonlinear.newton import (
+    VECTOR_MATRIX_BACKEND,
     VECTOR_SPARSE_MATRIX_BACKEND,
 )
 
@@ -51,9 +53,7 @@ class MutableClock:
 
 def _model_payload() -> dict:
     return json.loads(
-        Path("examples/public_corotational_rc_portal.json").read_text(
-            encoding="utf-8"
-        )
+        Path("examples/public_corotational_rc_portal.json").read_text(encoding="utf-8")
     )
 
 
@@ -72,6 +72,50 @@ def _request(*, load_steps: int = 4) -> dict:
             "matrix_backend": VECTOR_SPARSE_MATRIX_BACKEND,
             "control_mode": "load_control",
         },
+        "result_contract": "unified-nonlinear-frame-result.v1",
+    }
+
+
+def _control_request(mode: str) -> dict:
+    common = {
+        "profile": COROTATIONAL_GENERAL_PROFILE,
+        "load_steps": 4,
+        "residual_tolerance": 1.0e-10,
+        "increment_tolerance_m": 1.0e-12,
+        "maximum_iterations": 80 if mode == "direct_displacement_control" else 20,
+        "matrix_backend": VECTOR_MATRIX_BACKEND,
+        "control_mode": mode,
+        "control_node_id": "N4",
+        "control_dof": "UX" if mode == "direct_displacement_control" else "UY",
+        "target_control_displacements_m": (
+            [1.0e-5] if mode == "direct_displacement_control" else [-1.0e-4]
+        ),
+        "load_factor_coordinate_scale_m": 1.0e-3,
+    }
+    if mode == "direct_displacement_control":
+        common.update(
+            {
+                "control_tolerance_m": 1.0e-12,
+                "load_factor_increment_tolerance": 1.0e-12,
+            }
+        )
+    else:
+        common.update(
+            {
+                "arc_length_initial_m": 1.0e-3,
+                "arc_length_minimum_m": 1.25e-4,
+                "arc_length_maximum_m": 1.0e-3,
+                "arc_length_failed_step_reduction": 0.5,
+                "arc_length_constraint_tolerance_m2": 1.0e-12,
+                "arc_length_maximum_attempt_count": 20,
+            }
+        )
+    return {
+        "schema_version": "structural-analysis-job-request.v1",
+        "operation": "nonlinear_frame",
+        "case_id": f"durable-{mode}",
+        "model": _model_payload(),
+        "config": common,
         "result_contract": "unified-nonlinear-frame-result.v1",
     }
 
@@ -99,9 +143,7 @@ def _submit(service: DurableJobService, *, key: str = "portal-run-1"):
 
 
 def _claim(service: DurableJobService):
-    claim = service.claim_next(
-        worker_id="worker-a", authorization_token=WORKER_TOKEN
-    )
+    claim = service.claim_next(worker_id="worker-a", authorization_token=WORKER_TOKEN)
     assert claim is not None
     return claim
 
@@ -278,19 +320,102 @@ def test_exact_checkpoint_resume_survives_service_restart_and_matches_full_path(
         "convergence_history",
     ):
         assert resumed_payload[key] == direct[key]
-    assert resumed_payload["checkpoint"]["chain_hash"] == direct["checkpoint"][
-        "chain_hash"
-    ]
-    assert resumed_payload["checkpoint"]["terminal_state_hash"] == direct[
-        "checkpoint"
-    ]["terminal_state_hash"]
+    assert (
+        resumed_payload["checkpoint"]["chain_hash"]
+        == direct["checkpoint"]["chain_hash"]
+    )
+    assert (
+        resumed_payload["checkpoint"]["terminal_state_hash"]
+        == direct["checkpoint"]["terminal_state_hash"]
+    )
     assert resumed_payload["metrics"]["replayed_prefix_step_count"] == 2
     assert resumed_payload["metrics"]["newly_solved_step_count"] == 2
-    assert service.validate_integrity(
-        submitted.job_id,
+    assert (
+        service.validate_integrity(
+            submitted.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )["contract_pass"]
+        is True
+    )
+
+
+@pytest.mark.parametrize(
+    "mode",
+    ["direct_displacement_control", "arc_length"],
+)
+def test_control_jobs_publish_terminal_checkpoint_result_and_evidence_atomically(
+    tmp_path: Path,
+    mode: str,
+) -> None:
+    service = _service(tmp_path / mode)
+    submitted = service.submit_job(
         tenant_id="tenant-a",
         authorization_token=TENANT_A_TOKEN,
-    )["contract_pass"] is True
+        idempotency_key=f"{mode}-run-1",
+        request=_control_request(mode),
+    )
+
+    assert submitted.progress_completed == 0
+    assert submitted.progress_total == 1
+    final = execute_nonlinear_frame_claim(
+        service,
+        _claim(service),
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+    )
+
+    assert final.status == "succeeded"
+    assert final.progress_completed == final.progress_total == 1
+    assert final.checkpoint is not None
+    assert final.can_resume is False
+    checkpoint_bytes = service.read_checkpoint(
+        final.job_id,
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+    )
+    assert hashlib.sha256(checkpoint_bytes).hexdigest() == (
+        final.checkpoint.content_hash.removeprefix("sha256:")
+    )
+    checkpoint_response = DurableJobHttpApi(service).handle(
+        "GET",
+        f"/v1/jobs/{final.job_id}/checkpoint",
+        headers={
+            "Authorization": f"Bearer {TENANT_A_TOKEN}",
+            "X-Structural-Tenant": "tenant-a",
+        },
+    )
+    assert checkpoint_response.status == 200
+    assert checkpoint_response.body == checkpoint_bytes
+    result_payload = json.loads(
+        service.read_result(
+            final.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )
+    )
+    evidence = json.loads(
+        service.read_evidence(
+            final.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )
+    )
+    assert validate_nonlinear_frame_manifest(result_payload)["contract_pass"] is True
+    assert result_payload["configuration"]["control_mode"] == mode
+    assert result_payload["checkpoint"]["artifact_hash"] == (
+        final.checkpoint.content_hash
+    )
+    assert evidence["checkpoint_hash"] == final.checkpoint.content_hash
+    assert evidence["result_artifact_hash"] == final.result.content_hash
+    assert (
+        service.validate_integrity(
+            final.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )["contract_pass"]
+        is True
+    )
 
 
 def test_failed_checkpoint_resume_requires_exact_optimistic_hashes(

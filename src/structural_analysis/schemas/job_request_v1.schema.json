@@ -44,8 +44,125 @@
         "matrix_backend": {
           "enum": ["numpy_linalg_solve_dense", "scipy_sparse_spsolve_cpu"]
         },
-        "control_mode": {"const": "load_control"}
-      }
+        "control_mode": {
+          "enum": ["load_control", "direct_displacement_control", "arc_length"]
+        },
+        "control_node_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "control_dof": {"enum": ["UX", "UY"]},
+        "target_control_displacements_m": {
+          "type": "array",
+          "items": {"type": "number"}
+        },
+        "control_tolerance_m": {"type": "number", "exclusiveMinimum": 0},
+        "load_factor_increment_tolerance": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "load_factor_coordinate_scale_m": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "arc_length_initial_m": {"type": "number", "exclusiveMinimum": 0},
+        "arc_length_minimum_m": {"type": "number", "exclusiveMinimum": 0},
+        "arc_length_maximum_m": {"type": "number", "exclusiveMinimum": 0},
+        "arc_length_failed_step_reduction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "arc_length_constraint_tolerance_m2": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "arc_length_maximum_attempt_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"control_mode": {"const": "load_control"}}},
+          "then": {
+            "not": {
+              "anyOf": [
+                {"required": ["control_node_id"]},
+                {"required": ["control_dof"]},
+                {"required": ["target_control_displacements_m"]},
+                {"required": ["control_tolerance_m"]},
+                {"required": ["load_factor_increment_tolerance"]},
+                {"required": ["load_factor_coordinate_scale_m"]},
+                {"required": ["arc_length_initial_m"]},
+                {"required": ["arc_length_minimum_m"]},
+                {"required": ["arc_length_maximum_m"]},
+                {"required": ["arc_length_failed_step_reduction"]},
+                {"required": ["arc_length_constraint_tolerance_m2"]},
+                {"required": ["arc_length_maximum_attempt_count"]}
+              ]
+            }
+          },
+          "else": {
+            "required": [
+              "control_node_id",
+              "control_dof",
+              "target_control_displacements_m",
+              "load_factor_coordinate_scale_m"
+            ],
+            "if": {
+              "properties": {
+                "control_mode": {"const": "direct_displacement_control"}
+              }
+            },
+            "then": {
+              "required": [
+                "control_tolerance_m",
+                "load_factor_increment_tolerance"
+              ],
+              "properties": {
+                "target_control_displacements_m": {
+                  "minItems": 1,
+                  "maxItems": 64
+                }
+              },
+              "not": {
+                "anyOf": [
+                  {"required": ["arc_length_initial_m"]},
+                  {"required": ["arc_length_minimum_m"]},
+                  {"required": ["arc_length_maximum_m"]},
+                  {"required": ["arc_length_failed_step_reduction"]},
+                  {"required": ["arc_length_constraint_tolerance_m2"]},
+                  {"required": ["arc_length_maximum_attempt_count"]}
+                ]
+              }
+            },
+            "else": {
+              "required": [
+                "arc_length_initial_m",
+                "arc_length_minimum_m",
+                "arc_length_maximum_m",
+                "arc_length_failed_step_reduction",
+                "arc_length_constraint_tolerance_m2",
+                "arc_length_maximum_attempt_count"
+              ],
+              "properties": {
+                "target_control_displacements_m": {
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "not": {
+                "anyOf": [
+                  {"required": ["control_tolerance_m"]},
+                  {"required": ["load_factor_increment_tolerance"]}
+                ]
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

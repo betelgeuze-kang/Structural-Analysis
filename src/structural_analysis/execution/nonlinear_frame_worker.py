@@ -59,8 +59,7 @@ def execute_nonlinear_frame_claim(
     if claim.job.status != "running":
         _fail("worker_claim_not_running", "The supplied claim is not active.")
     if checkpoint_step_budget is not None and (
-        type(checkpoint_step_budget) is not int
-        or not 1 <= checkpoint_step_budget <= 64
+        type(checkpoint_step_budget) is not int or not 1 <= checkpoint_step_budget <= 64
     ):
         _fail(
             "worker_checkpoint_budget_invalid",
@@ -76,7 +75,7 @@ def execute_nonlinear_frame_claim(
         source_path=f"job://{claim.job.job_id}/canonical-model.json",
     )
     config = _config(request["config"])
-    expected_total = config.load_steps
+    expected_total = config.load_steps if config.control_mode == "load_control" else 1
     if claim.job.progress_total != expected_total:
         _fail(
             "worker_progress_contract_mismatch",
@@ -152,12 +151,18 @@ def execute_nonlinear_frame_claim(
             "The core result validator did not authorize publication.",
         )
     result_bytes = _canonical_json_bytes(result.to_dict())
+    terminal_checkpoint_bytes = (
+        result.checkpoint_artifact() if config.control_mode != "load_control" else None
+    )
+    completion_checkpoint_hash = (
+        "sha256:" + hashlib.sha256(terminal_checkpoint_bytes).hexdigest()
+        if terminal_checkpoint_bytes is not None
+        else (claim.job.checkpoint.content_hash if claim.job.checkpoint else None)
+    )
     evidence = build_job_completion_evidence(
         job_id=claim.job.job_id,
         request_hash=claim.job.request.content_hash,
-        checkpoint_hash=(
-            claim.job.checkpoint.content_hash if claim.job.checkpoint else None
-        ),
+        checkpoint_hash=completion_checkpoint_hash,
         result_bytes=result_bytes,
         validation_report=report.to_dict(),
         validator_id=NONLINEAR_FRAME_VALIDATOR_ID,
@@ -170,6 +175,13 @@ def execute_nonlinear_frame_claim(
         result_bytes=result_bytes,
         result_media_type=RESULT_MEDIA_TYPE,
         evidence=evidence,
+        terminal_checkpoint_bytes=terminal_checkpoint_bytes,
+        terminal_checkpoint_media_type=(
+            CHECKPOINT_MEDIA_TYPE if terminal_checkpoint_bytes is not None else None
+        ),
+        terminal_resume_contract_hash=(
+            expected_resume_hash if terminal_checkpoint_bytes is not None else None
+        ),
     )
 
 
@@ -197,7 +209,7 @@ def _request_object(payload: bytes) -> dict[str, Any]:
 def _config(payload: Any) -> NonlinearFrameConfig:
     if type(payload) is not dict:
         _fail("worker_config_invalid", "Job config must be an object.")
-    expected_keys = {
+    common_keys = {
         "profile",
         "load_steps",
         "residual_tolerance",
@@ -206,19 +218,79 @@ def _config(payload: Any) -> NonlinearFrameConfig:
         "matrix_backend",
         "control_mode",
     }
-    if set(payload) != expected_keys or payload.get("control_mode") != "load_control":
+    mode = payload.get("control_mode")
+    direct_keys = common_keys | {
+        "control_node_id",
+        "control_dof",
+        "target_control_displacements_m",
+        "control_tolerance_m",
+        "load_factor_increment_tolerance",
+        "load_factor_coordinate_scale_m",
+    }
+    arc_keys = common_keys | {
+        "control_node_id",
+        "control_dof",
+        "target_control_displacements_m",
+        "load_factor_coordinate_scale_m",
+        "arc_length_initial_m",
+        "arc_length_minimum_m",
+        "arc_length_maximum_m",
+        "arc_length_failed_step_reduction",
+        "arc_length_constraint_tolerance_m2",
+        "arc_length_maximum_attempt_count",
+    }
+    expected_keys = (
+        common_keys
+        if mode == "load_control"
+        else direct_keys
+        if mode == "direct_displacement_control"
+        else arc_keys
+        if mode == "arc_length"
+        else set()
+    )
+    if set(payload) != expected_keys:
         _fail(
             "worker_config_invalid",
-            "The v1 durable worker accepts only the exact load-control configuration.",
+            "The durable worker requires the exact selected control configuration.",
         )
     try:
         return NonlinearFrameConfig(
             profile=cast(NonlinearFrameProfile, payload["profile"]),
+            control_mode=payload["control_mode"],
             load_steps=payload["load_steps"],
             residual_tolerance=payload["residual_tolerance"],
             increment_tolerance_m=payload["increment_tolerance_m"],
             maximum_iterations=payload["maximum_iterations"],
             matrix_backend=payload["matrix_backend"],
+            control_node_id=payload.get("control_node_id"),
+            control_dof=payload.get("control_dof"),
+            target_control_displacements_m=tuple(
+                payload.get("target_control_displacements_m", ())
+            ),
+            control_tolerance_m=payload.get("control_tolerance_m", 1.0e-12),
+            load_factor_increment_tolerance=payload.get(
+                "load_factor_increment_tolerance",
+                1.0e-12,
+            ),
+            load_factor_coordinate_scale_m=payload.get(
+                "load_factor_coordinate_scale_m",
+                1.0e-3,
+            ),
+            arc_length_initial_m=payload.get("arc_length_initial_m", 6.0e-3),
+            arc_length_minimum_m=payload.get("arc_length_minimum_m", 7.5e-4),
+            arc_length_maximum_m=payload.get("arc_length_maximum_m", 6.0e-3),
+            arc_length_failed_step_reduction=payload.get(
+                "arc_length_failed_step_reduction",
+                0.5,
+            ),
+            arc_length_constraint_tolerance_m2=payload.get(
+                "arc_length_constraint_tolerance_m2",
+                1.0e-12,
+            ),
+            arc_length_maximum_attempt_count=payload.get(
+                "arc_length_maximum_attempt_count",
+                100,
+            ),
         )
     except (KeyError, TypeError, ValueError) as exc:
         raise NonlinearFrameWorkerError(
