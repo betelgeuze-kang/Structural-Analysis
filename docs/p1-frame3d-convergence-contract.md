@@ -83,11 +83,61 @@ Prefix plus resume reproduces the uninterrupted terminal checkpoint exactly.
 Failure exposes a stable code and exact parent-rollback receipt; no failed trial
 is checkpointed.
 
-## Remaining P1 continuation work
+## Scaled spherical arc-length continuation
 
-Direct displacement control does not by itself provide general limit-point
-traversal. Arc-length continuation and an independent external Frame3D
-comparison remain required before any broader numerical-authority claim.
+`stateful_corotational_frame3d_arc_length_continuation` traces one proportional
+nodal-load path with a free translational UX/UY/UZ monitor. The displacement
+coordinates and equilibrium equations use the common 6DOF scaling:
+
+```text
+q_translation = u / L_char
+q_rotation    = theta
+R_scaled      = D_R^-1 R
+K_scaled      = D_R^-1 K D_u
+```
+
+The load factor is included in a dimensionless spherical constraint:
+
+```text
+delta_q^T delta_q
+  + (load_factor_metric_scale * delta_lambda)^2
+  = arc_length^2
+```
+
+Every predictor uses a passing sparse solve and orients its tangent against the
+last accepted unit tangent. Every corrector solves the dimensionless augmented
+equilibrium/constraint Jacobian and applies backtracking to a normalized
+scaled-residual/constraint merit. Commit additionally requires scaled residual,
+constraint, scaled coordinate increment, load-factor increment, line-search,
+material admissibility, final reassembly, parent immutability, sparse
+diagnostics, no-regularization, and no-fallback gates.
+
+Failed retriable attempts serialize and compare the exact parent checkpoint,
+then reduce only the arc radius. The boundary checkpoint binds the generic
+physical state checkpoint, current radius, previous unit tangent, attempt
+counters, path contract, and its own hash. Resume from either a committed or
+rolled-back boundary reproduces the uninterrupted terminal state exactly.
+Unsupported constitutive paths are non-retriable.
+
+The result receipt exposes raw translation/rotation residual and increment
+observations, dimensionless scaled observations, characteristic length,
+reference force, scaling hash, augmented condition estimate and scope,
+constraint residual, adaptive-radius use, and separate failed-attempt rollback
+evidence. When there is no accepted step or no failed attempt, the corresponding
+observation is `null`; the receipt does not manufacture a numeric zero or a
+successful rollback.
+
+The focused shallow-arch test crosses the first maximum load, follows a
+descending branch into negative load factor, and reaches the configured
+displacement target without regularization or fallback. This is bounded
+in-repository evidence, not independent external validation.
+
+## Remaining P1 authority work
+
+An independent external Frame3D comparison remains required before any broader
+numerical-authority or release claim. The arc-length profile does not support
+rotational or multiple monitor constraints, non-proportional or follower loads,
+or a general prescribed-displacement pattern.
 
 ## Focused verification
 
@@ -95,6 +145,7 @@ comparison remain required before any broader numerical-authority claim.
 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_corotational_frame3d_sparse.py \
   tests/test_stateful_corotational_frame3d_displacement_control.py \
+  tests/test_stateful_corotational_frame3d_arc_length.py \
   tests/test_stateful_corotational_fiber_frame3d.py \
   tests/test_stateful_corotational_frame3d_materials.py \
   tests/test_stateful_corotational_partial_composite_frame3d.py

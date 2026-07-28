@@ -67,7 +67,9 @@ STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY = (
     "Experimental bounded sparse Frame3D direct displacement-control candidate "
     "for one free translational DOF and proportional nodal reference loading. "
     "Rotational control, multiple control equations, prescribed-displacement "
-    "patterns, arc length, follower loads, production-scale authority, "
+    "patterns, and follower loads remain outside this profile; arc-length "
+    "continuation is exposed by a separate bounded candidate. Production-scale "
+    "authority, "
     "independent external V&V, and release promotion remain open."
 )
 
