@@ -42,6 +42,7 @@ from structural_analysis.elements.stateful_corotational_partial_composite_frame3
 from structural_analysis.engine_v2.contracts._canonical import (
     array_data_hash,
     canonical_hash,
+    canonical_json_bytes,
     immutable_array,
 )
 from structural_analysis.materials.uniaxial_plasticity import (
@@ -106,7 +107,7 @@ STATEFUL_COROTATIONAL_FRAME3D_SPARSE_CHECKPOINT_SCHEMA_VERSION = (
     "stateful-corotational-frame3d-sparse-checkpoint.v1"
 )
 STATEFUL_COROTATIONAL_FRAME3D_SPARSE_RESULT_SCHEMA_VERSION = (
-    "stateful-corotational-frame3d-sparse-result.v1"
+    "stateful-corotational-frame3d-sparse-result.v2"
 )
 STATEFUL_COROTATIONAL_FRAME3D_SPARSE_STORAGE_PROFILE = (
     "member_12x12_triplet_coalesce_sorted_csr_fp64.v1"
@@ -124,6 +125,15 @@ STATEFUL_COROTATIONAL_FRAME3D_SPARSE_CLAIM_BOUNDARY = (
 )
 _ZERO_HASH = "sha256:" + "0" * 64
 _MPA_M2_TO_KN = 1000.0
+_RETRIABLE_STEP_FAILURE_CODES = frozenset(
+    {
+        "invalid_geometry_or_material_trial",
+        "invalid_newton_correction",
+        "line_search_failed",
+        "maximum_iterations_exhausted",
+        "sparse_factorization_failed",
+    }
+)
 
 AxialMaterial: TypeAlias = (
     BilinearCombinedHardeningSteel
@@ -176,6 +186,17 @@ class _LineSearchSelection:
 
 class StatefulCorotationalFrame3DSparseError(RuntimeError):
     """Fail-closed model, state, factorization, or convergence error."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        code: str = "stateful_corotational_frame3d_sparse_error",
+        attempts: Iterable[Mapping[str, Any]] = (),
+    ) -> None:
+        super().__init__(message)
+        self.code = str(code)
+        self.attempts = tuple(dict(row) for row in attempts)
 
 
 @dataclass(frozen=True)
@@ -265,6 +286,9 @@ class StatefulCorotationalFrame3DSparseConfig:
     line_search_reduction_factor: float = 0.5
     line_search_minimum_alpha: float = 2.0**-12
     line_search_sufficient_decrease: float = 1.0e-4
+    maximum_cutback_attempts_per_target: int = 8
+    load_cutback_factor: float = 0.5
+    minimum_load_factor_increment: float = 1.0e-6
     reference_force_floor_kn: float = 1.0
     factorization_policy: FactorizationPolicy = field(
         default_factory=lambda: SparseFactorizationPolicy(
@@ -293,6 +317,13 @@ class StatefulCorotationalFrame3DSparseConfig:
             raise ValueError(
                 "maximum_line_search_iterations must be a positive integer"
             )
+        if (
+            type(self.maximum_cutback_attempts_per_target) is not int
+            or self.maximum_cutback_attempts_per_target < 0
+        ):
+            raise ValueError(
+                "maximum_cutback_attempts_per_target must be a nonnegative integer"
+            )
         reduction = _finite(
             self.line_search_reduction_factor,
             "line_search_reduction_factor",
@@ -305,18 +336,34 @@ class StatefulCorotationalFrame3DSparseConfig:
             self.line_search_sufficient_decrease,
             "line_search_sufficient_decrease",
         )
+        cutback_factor = _finite(
+            self.load_cutback_factor,
+            "load_cutback_factor",
+        )
+        minimum_increment = _positive(
+            self.minimum_load_factor_increment,
+            "minimum_load_factor_increment",
+        )
         if not 0.0 < reduction < 1.0:
             raise ValueError("line_search_reduction_factor must be in (0, 1)")
         if not 0.0 < minimum_alpha <= 1.0:
             raise ValueError("line_search_minimum_alpha must be in (0, 1]")
         if not 0.0 < sufficient_decrease < 1.0:
             raise ValueError("line_search_sufficient_decrease must be in (0, 1)")
+        if not 0.0 < cutback_factor < 1.0:
+            raise ValueError("load_cutback_factor must be in (0, 1)")
         object.__setattr__(self, "line_search_reduction_factor", reduction)
         object.__setattr__(self, "line_search_minimum_alpha", minimum_alpha)
         object.__setattr__(
             self,
             "line_search_sufficient_decrease",
             sufficient_decrease,
+        )
+        object.__setattr__(self, "load_cutback_factor", cutback_factor)
+        object.__setattr__(
+            self,
+            "minimum_load_factor_increment",
+            minimum_increment,
         )
         if type(self.factorization_policy) not in (
             SparseFactorizationPolicy,
@@ -355,6 +402,20 @@ class StatefulCorotationalFrame3DSparseConfig:
                 "minimum_alpha": self.line_search_minimum_alpha,
                 "sufficient_decrease": self.line_search_sufficient_decrease,
                 "invalid_geometry_or_material_trial": "reject_and_backtrack",
+            },
+            "adaptive_load_cutback": {
+                "algorithm": "retry_from_immutable_accepted_checkpoint.v1",
+                "maximum_attempts_per_requested_target": (
+                    self.maximum_cutback_attempts_per_target
+                ),
+                "reduction_factor": self.load_cutback_factor,
+                "minimum_load_factor_increment": (
+                    self.minimum_load_factor_increment
+                ),
+                "retryable_failure_codes": sorted(
+                    _RETRIABLE_STEP_FAILURE_CODES
+                ),
+                "unsupported_constitutive_path": "fail_closed_without_cutback",
             },
             "regularization_allowed": False,
             "fallback_allowed": False,
@@ -591,12 +652,94 @@ class StatefulCorotationalFrame3DSparseStep:
 
 
 @dataclass(frozen=True)
+class StatefulCorotationalFrame3DSparseAttempt:
+    attempt_index: int
+    requested_load_factor: float
+    attempted_load_factor: float
+    parent_load_factor: float
+    parent_checkpoint_hash: str
+    cutback_count: int
+    outcome: str
+    failure_code: str | None
+    rollback_exact: bool | None
+    cutback_applied: bool
+    next_attempt_load_factor: float | None
+    accepted_checkpoint_hash: str | None
+
+    def __post_init__(self) -> None:
+        if type(self.attempt_index) is not int or self.attempt_index < 1:
+            raise ValueError("attempt_index must be a positive integer")
+        if type(self.cutback_count) is not int or self.cutback_count < 0:
+            raise ValueError("cutback_count must be a nonnegative integer")
+        for name in (
+            "requested_load_factor",
+            "attempted_load_factor",
+            "parent_load_factor",
+        ):
+            object.__setattr__(self, name, _finite(getattr(self, name), name))
+        if (
+            not isinstance(self.parent_checkpoint_hash, str)
+            or not _optional_hash(self.parent_checkpoint_hash)
+        ):
+            raise ValueError("parent_checkpoint_hash is invalid")
+        if self.outcome == "accepted":
+            if (
+                self.failure_code is not None
+                or self.rollback_exact is not None
+                or self.cutback_applied
+                or self.next_attempt_load_factor is not None
+                or not _optional_hash(self.accepted_checkpoint_hash)
+                or self.accepted_checkpoint_hash is None
+            ):
+                raise ValueError("accepted attempt metadata is inconsistent")
+        elif self.outcome == "rolled_back":
+            if (
+                not isinstance(self.failure_code, str)
+                or not self.failure_code
+                or type(self.rollback_exact) is not bool
+                or self.accepted_checkpoint_hash is not None
+            ):
+                raise ValueError("rolled-back attempt metadata is inconsistent")
+            if self.cutback_applied != (self.next_attempt_load_factor is not None):
+                raise ValueError("cutback retry metadata is inconsistent")
+            if self.next_attempt_load_factor is not None:
+                object.__setattr__(
+                    self,
+                    "next_attempt_load_factor",
+                    _finite(
+                        self.next_attempt_load_factor,
+                        "next_attempt_load_factor",
+                    ),
+                )
+        else:
+            raise ValueError("attempt outcome is invalid")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "attempt_index": self.attempt_index,
+            "requested_load_factor": self.requested_load_factor,
+            "attempted_load_factor": self.attempted_load_factor,
+            "parent_load_factor": self.parent_load_factor,
+            "parent_checkpoint_hash": self.parent_checkpoint_hash,
+            "cutback_count": self.cutback_count,
+            "outcome": self.outcome,
+            "failure_code": self.failure_code,
+            "rollback_exact": self.rollback_exact,
+            "cutback_applied": self.cutback_applied,
+            "next_attempt_load_factor": self.next_attempt_load_factor,
+            "accepted_checkpoint_hash": self.accepted_checkpoint_hash,
+        }
+
+
+@dataclass(frozen=True)
 class StatefulCorotationalFrame3DSparseResult:
     schema_version: str
     profile: str
     model_hash: str
     solver_contract_hash: str
     start_checkpoint_hash: str
+    requested_load_factors: tuple[float, ...]
+    attempts: tuple[StatefulCorotationalFrame3DSparseAttempt, ...]
     steps: tuple[StatefulCorotationalFrame3DSparseStep, ...]
     checkpoints: tuple[StatefulCorotationalFrame3DSparseCheckpoint, ...]
     maximum_free_residual_inf_norm_kn: float
@@ -606,6 +749,8 @@ class StatefulCorotationalFrame3DSparseResult:
     result_hash: str
     exact_checkpoint_resume_supported: bool
     material_commit_rollback_supported: bool
+    adaptive_load_cutback_used: bool
+    failed_attempt_rollback_exact: bool | None
     regularization_used: bool
     fallback_used: bool
     contract_pass: bool
@@ -622,6 +767,8 @@ class StatefulCorotationalFrame3DSparseResult:
             "model_hash": self.model_hash,
             "solver_contract_hash": self.solver_contract_hash,
             "start_checkpoint_hash": self.start_checkpoint_hash,
+            "requested_load_factors": list(self.requested_load_factors),
+            "attempts": [row.to_dict() for row in self.attempts],
             "steps": [step.to_dict() for step in self.steps],
             "checkpoints": [row.to_dict() for row in self.checkpoints],
             "maximum_free_residual_inf_norm_kn": (
@@ -640,6 +787,10 @@ class StatefulCorotationalFrame3DSparseResult:
             ),
             "material_commit_rollback_supported": (
                 self.material_commit_rollback_supported
+            ),
+            "adaptive_load_cutback_used": self.adaptive_load_cutback_used,
+            "failed_attempt_rollback_exact": (
+                self.failed_attempt_rollback_exact
             ),
             "regularization_used": self.regularization_used,
             "fallback_used": self.fallback_used,
@@ -1024,10 +1175,102 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
     factors = _load_factors(load_factors, after=checkpoint.load_factor)
     checkpoints = [checkpoint]
     steps: list[StatefulCorotationalFrame3DSparseStep] = []
-    for factor in factors:
-        step = _solve_step(model, config, factor, checkpoints[-1])
-        steps.append(step)
-        checkpoints.append(step.checkpoint)
+    attempts: list[StatefulCorotationalFrame3DSparseAttempt] = []
+    for requested_factor in factors:
+        attempted_factor = requested_factor
+        cutback_count = 0
+        while True:
+            parent = checkpoints[-1]
+            parent_bytes = canonical_json_bytes(parent.to_dict())
+            try:
+                step = _solve_step(
+                    model,
+                    config,
+                    attempted_factor,
+                    parent,
+                )
+            except StatefulCorotationalFrame3DSparseError as error:
+                rollback_exact = bool(
+                    parent_bytes == canonical_json_bytes(parent.to_dict())
+                )
+                increment = attempted_factor - parent.load_factor
+                reduced_increment = increment * config.load_cutback_factor
+                retry_factor = parent.load_factor + reduced_increment
+                retriable = error.code in _RETRIABLE_STEP_FAILURE_CODES
+                cutback_applied = bool(
+                    rollback_exact
+                    and retriable
+                    and cutback_count
+                    < config.maximum_cutback_attempts_per_target
+                    and abs(reduced_increment)
+                    >= config.minimum_load_factor_increment
+                    and retry_factor != parent.load_factor
+                    and retry_factor != attempted_factor
+                )
+                attempt = StatefulCorotationalFrame3DSparseAttempt(
+                    attempt_index=len(attempts) + 1,
+                    requested_load_factor=requested_factor,
+                    attempted_load_factor=attempted_factor,
+                    parent_load_factor=parent.load_factor,
+                    parent_checkpoint_hash=parent.checkpoint_hash,
+                    cutback_count=cutback_count,
+                    outcome="rolled_back",
+                    failure_code=error.code,
+                    rollback_exact=rollback_exact,
+                    cutback_applied=cutback_applied,
+                    next_attempt_load_factor=(
+                        retry_factor if cutback_applied else None
+                    ),
+                    accepted_checkpoint_hash=None,
+                )
+                attempts.append(attempt)
+                if not rollback_exact:
+                    raise StatefulCorotationalFrame3DSparseError(
+                        "failed Frame3D step mutated its accepted parent checkpoint",
+                        code="parent_state_mutated",
+                        attempts=(row.to_dict() for row in attempts),
+                    ) from error
+                if not cutback_applied:
+                    if retriable:
+                        terminal_code = "adaptive_load_cutback_exhausted"
+                        message = (
+                            f"requested load factor {requested_factor} exhausted "
+                            "adaptive load cutback after "
+                            f"{cutback_count} reductions; last failure: {error}"
+                        )
+                    else:
+                        terminal_code = error.code
+                        message = str(error)
+                    raise StatefulCorotationalFrame3DSparseError(
+                        message,
+                        code=terminal_code,
+                        attempts=(row.to_dict() for row in attempts),
+                    ) from error
+                cutback_count += 1
+                attempted_factor = retry_factor
+                continue
+
+            attempts.append(
+                StatefulCorotationalFrame3DSparseAttempt(
+                    attempt_index=len(attempts) + 1,
+                    requested_load_factor=requested_factor,
+                    attempted_load_factor=attempted_factor,
+                    parent_load_factor=parent.load_factor,
+                    parent_checkpoint_hash=parent.checkpoint_hash,
+                    cutback_count=cutback_count,
+                    outcome="accepted",
+                    failure_code=None,
+                    rollback_exact=None,
+                    cutback_applied=False,
+                    next_attempt_load_factor=None,
+                    accepted_checkpoint_hash=step.checkpoint.checkpoint_hash,
+                )
+            )
+            steps.append(step)
+            checkpoints.append(step.checkpoint)
+            if attempted_factor == requested_factor:
+                break
+            attempted_factor = requested_factor
     maximum_residual = max(
         (row.free_residual_inf_norm_kn for row in steps),
         default=checkpoint.residual_inf_norm_kn,
@@ -1051,12 +1294,25 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
     scaling_hashes = tuple(
         dict.fromkeys(row.equation_scaling.scaling_hash for row in steps)
     )
+    failed_attempts = tuple(
+        row for row in attempts if row.outcome == "rolled_back"
+    )
+    failed_attempt_rollback_exact = (
+        None
+        if not failed_attempts
+        else all(row.rollback_exact is True for row in failed_attempts)
+    )
+    adaptive_load_cutback_used = any(
+        row.cutback_applied for row in failed_attempts
+    )
     payload = {
         "schema_version": STATEFUL_COROTATIONAL_FRAME3D_SPARSE_RESULT_SCHEMA_VERSION,
         "profile": STATEFUL_COROTATIONAL_FRAME3D_SPARSE_PROFILE,
         "model_hash": model.model_hash,
         "solver_contract_hash": config.contract_hash,
         "start_checkpoint_hash": checkpoint.checkpoint_hash,
+        "requested_load_factors": list(factors),
+        "attempts": [row.to_dict() for row in attempts],
         "steps": [step.to_dict() for step in steps],
         "maximum_free_residual_inf_norm_kn": maximum_residual,
         "maximum_scaled_residual_inf_norm": maximum_scaled_residual,
@@ -1064,6 +1320,8 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
         "equation_scaling_hashes": list(scaling_hashes),
         "exact_checkpoint_resume_supported": True,
         "material_commit_rollback_supported": True,
+        "adaptive_load_cutback_used": adaptive_load_cutback_used,
+        "failed_attempt_rollback_exact": failed_attempt_rollback_exact,
         "regularization_used": False,
         "fallback_used": False,
         "contract_pass": True,
@@ -1075,6 +1333,8 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
         model_hash=model.model_hash,
         solver_contract_hash=config.contract_hash,
         start_checkpoint_hash=checkpoint.checkpoint_hash,
+        requested_load_factors=factors,
+        attempts=tuple(attempts),
         steps=tuple(steps),
         checkpoints=tuple(checkpoints),
         maximum_free_residual_inf_norm_kn=maximum_residual,
@@ -1084,6 +1344,8 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
         result_hash=canonical_hash(payload),
         exact_checkpoint_resume_supported=True,
         material_commit_rollback_supported=True,
+        adaptive_load_cutback_used=adaptive_load_cutback_used,
+        failed_attempt_rollback_exact=failed_attempt_rollback_exact,
         regularization_used=False,
         fallback_used=False,
         contract_pass=True,
@@ -1354,11 +1616,13 @@ def _solve_step(
             )
         except MaterialPathNotAdmissibleError as error:
             raise StatefulCorotationalFrame3DSparseError(
-                f"unsupported_constitutive_path: {error}"
+                f"unsupported_constitutive_path: {error}",
+                code="unsupported_constitutive_path",
             ) from error
         except (ValueError, FloatingPointError) as error:
             raise StatefulCorotationalFrame3DSparseError(
-                f"invalid geometry or material trial at iteration {iteration}"
+                f"invalid geometry or material trial at iteration {iteration}",
+                code="invalid_geometry_or_material_trial",
             ) from error
         _require_parent_unchanged(parent, parent_signature)
         scaled_tangent = scaling.scale_tangent(assembly.tangent_free_csr)
@@ -1371,7 +1635,8 @@ def _solve_step(
             )
         except (SparseFactorizationError, ScalableSparseFactorizationError) as error:
             raise StatefulCorotationalFrame3DSparseError(
-                f"sparse factorization failed without fallback: {error.code}"
+                f"sparse factorization failed without fallback: {error.code}",
+                code="sparse_factorization_failed",
             ) from error
         diagnostics.append(diagnostic)
         if (
@@ -1379,7 +1644,8 @@ def _solve_step(
             or not np.all(np.isfinite(scaled_correction))
         ):
             raise StatefulCorotationalFrame3DSparseError(
-                "scaled sparse Newton correction is invalid"
+                "scaled sparse Newton correction is invalid",
+                code="invalid_newton_correction",
             )
         correction = scaling.unscale_increment(scaled_correction)
         observation = scaling.observe(
@@ -1466,7 +1732,8 @@ def _solve_step(
                     if not passed
                 )
                 raise StatefulCorotationalFrame3DSparseError(
-                    f"Frame3D convergence commit contract failed: {failed}"
+                    f"Frame3D convergence commit contract failed: {failed}",
+                    code="convergence_commit_contract_failed",
                 )
             trace_row["accepted"] = True
             trace_row["final_reassembled_equilibrium"] = True
@@ -1535,7 +1802,8 @@ def _solve_step(
         accepted_alphas.append(selected.alpha)
         displacement = selected.displacement
     raise StatefulCorotationalFrame3DSparseError(
-        f"load factor {factor} did not converge in {config.maximum_iterations} iterations"
+        f"load factor {factor} did not converge in {config.maximum_iterations} iterations",
+        code="maximum_iterations_exhausted",
     )
 
 
@@ -1617,10 +1885,12 @@ def _backtracking_line_search(
     if invalid_codes == {"unsupported_constitutive_path"}:
         raise StatefulCorotationalFrame3DSparseError(
             "unsupported_constitutive_path: "
-            "no admissible positive backtracking line-search step"
+            "no admissible positive backtracking line-search step",
+            code="unsupported_constitutive_path",
         )
     raise StatefulCorotationalFrame3DSparseError(
-        "line_search_failed_to_reduce_scaled_residual_without_fallback"
+        "line_search_failed_to_reduce_scaled_residual_without_fallback",
+        code="line_search_failed",
     )
 
 
@@ -1640,7 +1910,8 @@ def _require_parent_unchanged(
 ) -> None:
     if _checkpoint_parent_signature(checkpoint) != expected:
         raise StatefulCorotationalFrame3DSparseError(
-            "accepted parent state mutated during a trial"
+            "accepted parent state mutated during a trial",
+            code="parent_state_mutated",
         )
 
 

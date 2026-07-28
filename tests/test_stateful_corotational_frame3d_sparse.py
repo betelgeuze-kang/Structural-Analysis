@@ -18,6 +18,7 @@ from structural_analysis.assembly.corotational_frame3d_global import (
 from structural_analysis.assembly.stateful_corotational_frame3d_sparse import (
     STATEFUL_COROTATIONAL_FRAME3D_SPARSE_CHECKPOINT_SCHEMA_VERSION,
     STATEFUL_COROTATIONAL_FRAME3D_SPARSE_PROFILE,
+    STATEFUL_COROTATIONAL_FRAME3D_SPARSE_RESULT_SCHEMA_VERSION,
     StatefulCorotationalFrame3DSparseConfig,
     StatefulCorotationalFrame3DSparseError,
     StatefulCorotationalFrame3DSparseModel,
@@ -272,6 +273,9 @@ def test_cyclic_material_commit_and_exact_checkpoint_resume() -> None:
     )
     assert one_shot.exact_checkpoint_resume_supported is True
     assert one_shot.material_commit_rollback_supported is True
+    assert one_shot.adaptive_load_cutback_used is False
+    assert one_shot.failed_attempt_rollback_exact is None
+    assert all(row.outcome == "accepted" for row in one_shot.attempts)
     assert one_shot.regularization_used is False
     assert one_shot.fallback_used is False
     assert one_shot.contract_pass is True
@@ -279,7 +283,10 @@ def test_cyclic_material_commit_and_exact_checkpoint_resume() -> None:
 
 def test_failed_trial_does_not_mutate_accepted_material_parent() -> None:
     model = _axial_model()
-    config = StatefulCorotationalFrame3DSparseConfig(maximum_iterations=1)
+    config = StatefulCorotationalFrame3DSparseConfig(
+        maximum_iterations=1,
+        maximum_cutback_attempts_per_target=0,
+    )
     prefix = solve_stateful_corotational_frame3d_sparse_load_path(
         model,
         (0.5,),
@@ -291,7 +298,7 @@ def test_failed_trial_does_not_mutate_accepted_material_parent() -> None:
 
     with pytest.raises(
         StatefulCorotationalFrame3DSparseError, match="did not converge"
-    ):
+    ) as failure:
         solve_stateful_corotational_frame3d_sparse_load_path(
             model,
             (1.0,),
@@ -299,6 +306,12 @@ def test_failed_trial_does_not_mutate_accepted_material_parent() -> None:
             resume_from=accepted,
         )
 
+    assert failure.value.code == "adaptive_load_cutback_exhausted"
+    assert len(failure.value.attempts) == 1
+    assert failure.value.attempts[0]["failure_code"] == (
+        "maximum_iterations_exhausted"
+    )
+    assert failure.value.attempts[0]["rollback_exact"] is True
     assert accepted.checkpoint_hash == accepted_hash
     assert accepted.material_states[0].state_hash == accepted_state_hash
     validate_stateful_corotational_frame3d_sparse_checkpoint(
@@ -306,6 +319,149 @@ def test_failed_trial_does_not_mutate_accepted_material_parent() -> None:
         model=model,
         config=config,
     )
+
+
+def test_adaptive_load_cutback_retries_from_exact_accepted_parent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _axial_model()
+    config = StatefulCorotationalFrame3DSparseConfig(
+        maximum_cutback_attempts_per_target=4,
+        load_cutback_factor=0.5,
+        minimum_load_factor_increment=1.0e-8,
+    )
+    original = sparse_module._solve_step
+    injected = False
+
+    def _reject_first_requested_target(
+        model_arg: object,
+        config_arg: object,
+        factor: float,
+        parent: object,
+    ):
+        nonlocal injected
+        if not injected and factor == 1.0:
+            injected = True
+            raise StatefulCorotationalFrame3DSparseError(
+                "injected bounded nonconvergence",
+                code="maximum_iterations_exhausted",
+            )
+        return original(model_arg, config_arg, factor, parent)
+
+    monkeypatch.setattr(
+        sparse_module,
+        "_solve_step",
+        _reject_first_requested_target,
+    )
+    result = solve_stateful_corotational_frame3d_sparse_load_path(
+        model,
+        (1.0,),
+        config=config,
+    )
+
+    assert result.schema_version == (
+        STATEFUL_COROTATIONAL_FRAME3D_SPARSE_RESULT_SCHEMA_VERSION
+    )
+    assert result.requested_load_factors == (1.0,)
+    assert [row.load_factor for row in result.steps] == [0.5, 1.0]
+    assert [row.outcome for row in result.attempts] == [
+        "rolled_back",
+        "accepted",
+        "accepted",
+    ]
+    rejected = result.attempts[0]
+    assert rejected.parent_checkpoint_hash == result.start_checkpoint_hash
+    assert rejected.failure_code == "maximum_iterations_exhausted"
+    assert rejected.rollback_exact is True
+    assert rejected.cutback_applied is True
+    assert rejected.next_attempt_load_factor == pytest.approx(0.5)
+    assert result.adaptive_load_cutback_used is True
+    assert result.failed_attempt_rollback_exact is True
+    assert result.final_checkpoint.load_factor == pytest.approx(1.0)
+    assert result.contract_pass is True
+
+
+def test_adaptive_load_cutback_exhaustion_preserves_parent_and_diagnostics(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _axial_model()
+    config = StatefulCorotationalFrame3DSparseConfig(
+        maximum_cutback_attempts_per_target=2,
+        load_cutback_factor=0.5,
+        minimum_load_factor_increment=1.0e-8,
+    )
+    accepted = initial_stateful_corotational_frame3d_sparse_checkpoint(
+        model,
+        config=config,
+    )
+    accepted_payload = accepted.to_dict()
+
+    def _always_fail(*_args: object, **_kwargs: object):
+        raise StatefulCorotationalFrame3DSparseError(
+            "injected line-search exhaustion",
+            code="line_search_failed",
+        )
+
+    monkeypatch.setattr(sparse_module, "_solve_step", _always_fail)
+    with pytest.raises(
+        StatefulCorotationalFrame3DSparseError,
+        match="exhausted adaptive load cutback",
+    ) as failure:
+        solve_stateful_corotational_frame3d_sparse_load_path(
+            model,
+            (1.0,),
+            config=config,
+            resume_from=accepted,
+        )
+
+    assert failure.value.code == "adaptive_load_cutback_exhausted"
+    assert [row["attempted_load_factor"] for row in failure.value.attempts] == [
+        1.0,
+        0.5,
+        0.25,
+    ]
+    assert [row["cutback_applied"] for row in failure.value.attempts] == [
+        True,
+        True,
+        False,
+    ]
+    assert all(
+        row["failure_code"] == "line_search_failed"
+        and row["rollback_exact"] is True
+        for row in failure.value.attempts
+    )
+    assert accepted.to_dict() == accepted_payload
+
+
+def test_adaptive_load_cutback_configuration_is_strict_and_hashed() -> None:
+    config = StatefulCorotationalFrame3DSparseConfig(
+        maximum_cutback_attempts_per_target=3,
+        load_cutback_factor=0.25,
+        minimum_load_factor_increment=1.0e-5,
+    )
+    manifest = config.to_manifest()["adaptive_load_cutback"]
+
+    assert manifest["maximum_attempts_per_requested_target"] == 3
+    assert manifest["reduction_factor"] == pytest.approx(0.25)
+    assert manifest["minimum_load_factor_increment"] == pytest.approx(1.0e-5)
+    assert manifest["unsupported_constitutive_path"] == (
+        "fail_closed_without_cutback"
+    )
+    assert "maximum_iterations_exhausted" in manifest[
+        "retryable_failure_codes"
+    ]
+    assert config.contract_hash.startswith("sha256:")
+
+    with pytest.raises(ValueError, match="nonnegative integer"):
+        StatefulCorotationalFrame3DSparseConfig(
+            maximum_cutback_attempts_per_target=-1
+        )
+    with pytest.raises(ValueError, match=r"must be in \(0, 1\)"):
+        StatefulCorotationalFrame3DSparseConfig(load_cutback_factor=1.0)
+    with pytest.raises(ValueError, match="must be positive"):
+        StatefulCorotationalFrame3DSparseConfig(
+            minimum_load_factor_increment=0.0
+        )
 
 
 def test_sparse_factorization_failure_and_invalid_history_fail_closed() -> None:
@@ -521,7 +677,7 @@ def test_confined_concrete_unloading_is_rejected_at_solver_level() -> None:
     with pytest.raises(
         StatefulCorotationalFrame3DSparseError,
         match="unsupported_constitutive_path",
-    ):
+    ) as failure:
         solve_stateful_corotational_frame3d_sparse_load_path(
             model,
             (0.5,),
@@ -529,6 +685,10 @@ def test_confined_concrete_unloading_is_rejected_at_solver_level() -> None:
             resume_from=accepted,
         )
 
+    assert failure.value.code == "unsupported_constitutive_path"
+    assert len(failure.value.attempts) == 1
+    assert failure.value.attempts[0]["cutback_applied"] is False
+    assert failure.value.attempts[0]["rollback_exact"] is True
     assert loaded.final_checkpoint == accepted
     assert (
         loaded.final_checkpoint.material_states[0].state_hash
