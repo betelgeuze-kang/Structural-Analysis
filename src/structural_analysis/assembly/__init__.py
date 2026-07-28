@@ -34,6 +34,16 @@ from structural_analysis.assembly.stateful_corotational_frame3d_sparse import (
     stateful_corotational_frame3d_member_response,
     validate_stateful_corotational_frame3d_sparse_checkpoint,
 )
+from structural_analysis.assembly.stateful_corotational_frame3d_displacement_control import (
+    STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY,
+    STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_PROFILE,
+    STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_RESULT_SCHEMA_VERSION,
+    StatefulCorotationalFrame3DDisplacementControlConfig,
+    StatefulCorotationalFrame3DDisplacementControlError,
+    StatefulCorotationalFrame3DDisplacementControlResult,
+    StatefulCorotationalFrame3DDisplacementControlStep,
+    solve_stateful_corotational_frame3d_displacement_control_path,
+)
 from structural_analysis.assembly.buckling import (
     GEOMETRIC_STIFFNESS_FORMULATION,
     GEOMETRIC_STIFFNESS_SIGN_CONVENTION,
@@ -342,6 +352,13 @@ __all__ = [
     "STATEFUL_COROTATIONAL_FRAME3D_SPARSE_PROFILE",
     "STATEFUL_COROTATIONAL_FRAME3D_SPARSE_RESULT_SCHEMA_VERSION",
     "STATEFUL_COROTATIONAL_FRAME3D_SPARSE_STORAGE_PROFILE",
+    "STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY",
+    "STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_PROFILE",
+    "STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_RESULT_SCHEMA_VERSION",
+    "StatefulCorotationalFrame3DDisplacementControlConfig",
+    "StatefulCorotationalFrame3DDisplacementControlError",
+    "StatefulCorotationalFrame3DDisplacementControlResult",
+    "StatefulCorotationalFrame3DDisplacementControlStep",
     "StatefulCorotationalFrame3DDenseReference",
     "StatefulCorotationalFrame3DDenseSparseParityReceipt",
     "StatefulCorotationalFrame3DMemberResponse",
@@ -357,6 +374,7 @@ __all__ = [
     "assemble_stateful_corotational_frame3d_sparse",
     "initial_stateful_corotational_frame3d_sparse_checkpoint",
     "solve_stateful_corotational_frame3d_sparse_load_path",
+    "solve_stateful_corotational_frame3d_displacement_control_path",
     "stateful_corotational_frame3d_dense_sparse_parity_receipt",
     "stateful_corotational_frame3d_member_response",
     "validate_stateful_corotational_frame3d_sparse_checkpoint",
