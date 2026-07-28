@@ -72,9 +72,10 @@ STATEFUL_COROTATIONAL_FRAME3D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY = (
     "binds each authored leg and reversal to a rolling v2 target-chain receipt, and "
     "keeps the monotonic v1 direction receipt unchanged. Other material families "
     "and general cyclic behavior remain unsupported. "
-    "Multiple simultaneous control DOFs, prescribed supports, arc-length "
-    "continuation, independent external 3D V&V, design authority, and release "
-    "authority remain unsupported."
+    "Multiple simultaneous control DOFs and prescribed supports remain unsupported. "
+    "Arc-length continuation is exposed by a separate bounded candidate. "
+    "Production-scale authority, "
+    "independent external V&V, and release promotion remain open."
 )
 _ZERO_HASH = "sha256:" + "0" * 64
 
