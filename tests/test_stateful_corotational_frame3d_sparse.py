@@ -10,6 +10,7 @@ from jsonschema import Draft202012Validator
 import numpy as np
 import pytest
 
+import structural_analysis.assembly.stateful_corotational_frame3d_sparse as sparse_module
 from structural_analysis.assembly.corotational_frame3d_global import (
     CorotationalFrame3DMember,
     CorotationalFrame3DModel,
@@ -33,6 +34,9 @@ from structural_analysis.elements.timoshenko_frame3d import (
 )
 from structural_analysis.materials.uniaxial_plasticity import (
     BilinearCombinedHardeningSteel,
+)
+from structural_analysis.materials.confined_concrete import (
+    ConfinedConcreteMaterial,
 )
 
 
@@ -387,3 +391,146 @@ def test_material_modulus_must_match_elastic_geometric_reference() -> None:
     inconsistent = BilinearCombinedHardeningSteel(elastic_modulus_mpa=190_000.0)
     with pytest.raises(ValueError, match="elastic modulus mismatch"):
         StatefulCorotationalFrame3DSparseModel(base, (inconsistent,))
+
+
+def test_scaled_residual_and_increment_are_both_required_for_commit() -> None:
+    model = _axial_model()
+    result = solve_stateful_corotational_frame3d_sparse_load_path(
+        model,
+        (0.01,),
+        config=StatefulCorotationalFrame3DSparseConfig(
+            residual_relative_tolerance=2.0e-2,
+            increment_relative_tolerance=1.0e-12,
+            increment_absolute_tolerance_m=1.0e-14,
+        ),
+    )
+
+    first = result.steps[0].convergence_trace[0]
+    assert first["residual_gate_pass"] is True
+    assert first["increment_gate_pass"] is False
+    assert result.steps[0].checkpoint.converged_iterations > 0
+    assert all(result.steps[0].convergence_checks.values())
+    assert result.maximum_scaled_residual_inf_norm >= 0.0
+    assert result.maximum_scaled_increment_inf_norm >= 0.0
+    assert result.equation_scaling_hashes == (
+        result.steps[0].equation_scaling.scaling_hash,
+    )
+
+
+def test_invalid_full_trial_is_rejected_and_positive_backtrack_is_used(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model = _axial_model()
+    original = sparse_module.assemble_stateful_corotational_frame3d_sparse
+    injected = False
+
+    def _reject_first_nonzero_trial(*args: object, **kwargs: object):
+        nonlocal injected
+        displacement = np.asarray(kwargs["trial_displacement"], dtype=np.float64)
+        if not injected and np.linalg.norm(displacement, ord=np.inf) > 0.0:
+            injected = True
+            raise ValueError("invalid_geometry_trial")
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(
+        sparse_module,
+        "assemble_stateful_corotational_frame3d_sparse",
+        _reject_first_nonzero_trial,
+    )
+    result = solve_stateful_corotational_frame3d_sparse_load_path(
+        model,
+        (1.0,),
+        config=StatefulCorotationalFrame3DSparseConfig(),
+    )
+
+    first_search = result.steps[0].convergence_trace[0]
+    assert first_search["line_search_attempts"][0]["invalid_trial"] is True
+    assert (
+        first_search["line_search_attempts"][0]["invalid_trial_code"]
+        == "invalid_geometry_or_material_trial"
+    )
+    assert first_search["accepted_line_search_alpha"] == pytest.approx(0.5)
+    assert result.steps[0].accepted_line_search_alphas[0] == pytest.approx(0.5)
+    assert all(result.steps[0].convergence_checks.values())
+
+
+def test_rotation_equations_publish_separate_moment_scaling_evidence() -> None:
+    load = [0.0] * 12
+    load[11] = 10.0
+    elastic = CorotationalFrame3DModel(
+        node_coordinates_m=((0.0, 0.0, 0.0), (2.0, 0.0, 0.0)),
+        members=(CorotationalFrame3DMember("member-1", 0, 1, _section()),),
+        restrained_dofs=tuple(range(6)),
+        reference_load_kn=tuple(load),
+        model_id="stateful-moment-cantilever",
+    )
+    model = StatefulCorotationalFrame3DSparseModel(elastic, (_material(),))
+
+    result = solve_stateful_corotational_frame3d_sparse_load_path(
+        model,
+        (1.0,),
+        config=StatefulCorotationalFrame3DSparseConfig(),
+    )
+    first = result.steps[0].convergence_trace[0]["equation_scaling"]
+    final = result.steps[0].equation_scaling
+
+    assert first["translation_residual_norm"] == pytest.approx(0.0, abs=1.0e-8)
+    assert first["rotation_residual_norm"] == pytest.approx(10.0)
+    assert final.characteristic_length == pytest.approx(2.0)
+    assert final.rotation_increment_norm >= 0.0
+    assert final.scaled_tangent_condition > 0.0
+    assert all(
+        diagnostic.contract_pass
+        for diagnostic in result.steps[0].factorization_diagnostics
+    )
+
+
+def test_confined_concrete_unloading_is_rejected_at_solver_level() -> None:
+    material = ConfinedConcreteMaterial(effective_lateral_pressure_mpa=2.0)
+    props = FrameProps(
+        area_m2=0.02,
+        e_n_per_m2=material.elastic_modulus_mpa * 1000.0,
+        g_n_per_m2=1.2e7,
+        iy_m4=5.0e-5,
+        iz_m4=8.0e-5,
+        j_m4=1.0e-5,
+    )
+    section = TimoshenkoFrame3DSection(
+        props,
+        effective_shear_area_y_m2=0.015,
+        effective_shear_area_z_m2=0.012,
+    )
+    load = [0.0] * 12
+    load[6] = -300.0
+    elastic = CorotationalFrame3DModel(
+        node_coordinates_m=((0.0, 0.0, 0.0), (2.0, 0.0, 0.0)),
+        members=(CorotationalFrame3DMember("member-1", 0, 1, section),),
+        restrained_dofs=tuple(range(6)),
+        reference_load_kn=tuple(load),
+        model_id="confined-concrete-unloading-guard",
+    )
+    model = StatefulCorotationalFrame3DSparseModel(elastic, (material,))
+    config = StatefulCorotationalFrame3DSparseConfig(maximum_iterations=40)
+    loaded = solve_stateful_corotational_frame3d_sparse_load_path(
+        model,
+        (1.0,),
+        config=config,
+    )
+    accepted = loaded.final_checkpoint
+
+    with pytest.raises(
+        StatefulCorotationalFrame3DSparseError,
+        match="unsupported_constitutive_path",
+    ):
+        solve_stateful_corotational_frame3d_sparse_load_path(
+            model,
+            (0.5,),
+            config=config,
+            resume_from=accepted,
+        )
+
+    assert loaded.final_checkpoint == accepted
+    assert (
+        loaded.final_checkpoint.material_states[0].state_hash
+        == accepted.material_states[0].state_hash
+    )

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
 import math
-from typing import Any, Iterable
+from typing import Any, Iterable, Literal
 
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
@@ -12,6 +12,9 @@ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 NONLINEAR_TRANSIENT_PROFILE = "newmark_average_acceleration_bilinear_sdof.v1"
 NONLINEAR_TRANSIENT_SCHEMA_VERSION = "nonlinear-transient-solution.v1"
 NONLINEAR_TRANSIENT_CHECKPOINT_SCHEMA_VERSION = "nonlinear-transient-checkpoint.v1"
+NONLINEAR_TRANSIENT_CHECKPOINT_AUTHORITY_SCHEMA_VERSION = (
+    "nonlinear-transient-checkpoint-authority.v2"
+)
 NONLINEAR_TRANSIENT_CLAIM_BOUNDARY = (
     "Deterministic force-driven SDOF bilinear kinematic-hardening reference; "
     "not a whole-frame, ground-motion, damping-calibration, or release path."
@@ -173,6 +176,40 @@ class NonlinearTransientCheckpoint:
 
 
 @dataclass(frozen=True)
+class NonlinearTransientCheckpointAuthority:
+    schema_version: str
+    authority: Literal[
+        "self_consistent_checkpoint",
+        "source_authenticated_checkpoint",
+    ]
+    checkpoint_hash: str
+    self_consistent_checkpoint: bool
+    source_authenticated_checkpoint: bool
+    parent_chain_complete: bool
+    parent_chain_hash: str | None
+    force_history_hash: str | None
+    force_history_sample_count: int
+    initial_condition_hash: str | None
+    newmark_kinematic_replay_pass: bool
+    dynamic_equilibrium_replay_pass: bool
+    external_work_replay_pass: bool
+    damping_dissipation_replay_pass: bool
+    plastic_dissipation_replay_pass: bool
+    deterministic_checkpoint_replay_pass: bool
+    receipt_hash: str
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = asdict(self)
+        claimed = payload.pop("receipt_hash")
+        if claimed != canonical_hash(payload):
+            raise NonlinearTransientError(
+                "checkpoint authority receipt hash mismatch"
+            )
+        payload["receipt_hash"] = claimed
+        return payload
+
+
+@dataclass(frozen=True)
 class NonlinearTransientStep:
     step_index: int
     time_s: float
@@ -212,6 +249,8 @@ class NonlinearTransientSolution:
     maximum_relative_residual: float
     maximum_absolute_energy_balance_error_kn_m: float
     yielded_step_count: int
+    start_checkpoint_authority: str
+    source_authenticated_resume: bool
     result_hash: str
     deterministic: bool
     exact_checkpoint_resume_supported: bool
@@ -338,6 +377,7 @@ def solve_bilinear_transient(
         config,
         checkpoint,
         future_forces=forces[1:],
+        start_checkpoint_authority="self_consistent_checkpoint",
     )
 
 
@@ -347,16 +387,48 @@ def resume_bilinear_transient(
     future_applied_forces_kn: Iterable[float],
     *,
     config: NonlinearTransientConfig,
+    checkpoint_chain: Iterable[NonlinearTransientCheckpoint] | None = None,
+    force_history_prefix_kn: Iterable[float] | None = None,
+    required_checkpoint_authority: Literal[
+        "self_consistent_checkpoint",
+        "source_authenticated_checkpoint",
+    ] = "source_authenticated_checkpoint",
 ) -> NonlinearTransientSolution:
-    """Resume from an exact checkpoint; future forces exclude the checkpoint force."""
+    """Resume under explicit checkpoint authority.
 
-    validate_nonlinear_transient_checkpoint(
+    Source-authenticated resume is the default and requires the complete
+    checkpoint chain plus the force-history prefix through ``checkpoint``.
+    Detached self-consistent resume remains available only by explicit request.
+    Future forces exclude the checkpoint force.
+    """
+
+    if required_checkpoint_authority not in (
+        "self_consistent_checkpoint",
+        "source_authenticated_checkpoint",
+    ):
+        raise ValueError("required_checkpoint_authority is invalid")
+    authority = validate_nonlinear_transient_checkpoint_authority(
         checkpoint,
         model=model,
         config=config,
+        checkpoint_chain=checkpoint_chain,
+        force_history_prefix_kn=force_history_prefix_kn,
+        require_source_authentication=(
+            required_checkpoint_authority == "source_authenticated_checkpoint"
+        ),
     )
+    if authority.authority != required_checkpoint_authority:
+        raise NonlinearTransientError(
+            "checkpoint authority does not satisfy resume requirement"
+        )
     future = _force_history(future_applied_forces_kn, allow_empty=True)
-    return _integrate(model, config, checkpoint, future_forces=future)
+    return _integrate(
+        model,
+        config,
+        checkpoint,
+        future_forces=future,
+        start_checkpoint_authority=authority.authority,
+    )
 
 
 def validate_nonlinear_transient_checkpoint(
@@ -404,6 +476,358 @@ def validate_nonlinear_transient_checkpoint(
     expected_hash = canonical_hash(_checkpoint_payload(checkpoint, include_hash=False))
     if checkpoint.checkpoint_hash != expected_hash:
         raise NonlinearTransientError("checkpoint hash mismatch")
+    response = evaluate_bilinear_restoring_force(
+        model,
+        checkpoint.displacement_m,
+        checkpoint.material_state,
+    )
+    dynamic_residual = (
+        model.mass_kn_s2_per_m * checkpoint.acceleration_m_per_s2
+        + model.damping_kn_s_per_m * checkpoint.velocity_m_per_s
+        + response.force_kn
+        - checkpoint.applied_force_kn
+    )
+    dynamic_scale = max(
+        abs(checkpoint.applied_force_kn),
+        abs(model.mass_kn_s2_per_m * checkpoint.acceleration_m_per_s2)
+        + abs(model.damping_kn_s_per_m * checkpoint.velocity_m_per_s)
+        + abs(response.force_kn),
+        1.0,
+    )
+    if abs(dynamic_residual) > (
+        config.residual_absolute_tolerance_kn
+        + config.residual_relative_tolerance * dynamic_scale
+    ):
+        raise NonlinearTransientError(
+            "checkpoint dynamic equilibrium is inconsistent"
+        )
+    if response.state != checkpoint.material_state:
+        raise NonlinearTransientError(
+            "checkpoint material state is not idempotent"
+        )
+
+
+def validate_nonlinear_transient_checkpoint_authority(
+    checkpoint: NonlinearTransientCheckpoint,
+    *,
+    model: BilinearOscillator,
+    config: NonlinearTransientConfig,
+    checkpoint_chain: Iterable[NonlinearTransientCheckpoint] | None = None,
+    force_history_prefix_kn: Iterable[float] | None = None,
+    require_source_authentication: bool = False,
+) -> NonlinearTransientCheckpointAuthority:
+    """Validate detached self-consistency or replay a complete source chain."""
+
+    validate_nonlinear_transient_checkpoint(
+        checkpoint,
+        model=model,
+        config=config,
+    )
+    if type(require_source_authentication) is not bool:
+        raise TypeError("require_source_authentication must be boolean")
+    if checkpoint_chain is None and force_history_prefix_kn is None:
+        if require_source_authentication:
+            raise NonlinearTransientError(
+                "source_authenticated_checkpoint_requires_complete_chain"
+            )
+        return _make_checkpoint_authority(
+            checkpoint=checkpoint,
+            authority="self_consistent_checkpoint",
+            parent_chain_complete=False,
+            parent_chain_hash=None,
+            force_history_hash=None,
+            force_history_sample_count=0,
+            initial_condition_hash=None,
+            source_checks=False,
+        )
+    if checkpoint_chain is None or force_history_prefix_kn is None:
+        raise NonlinearTransientError(
+            "checkpoint chain and force-history prefix must be supplied together"
+        )
+
+    chain = tuple(checkpoint_chain)
+    forces = _force_history(force_history_prefix_kn, allow_empty=False)
+    if len(chain) != checkpoint.step_index + 1 or len(forces) != len(chain):
+        raise NonlinearTransientError(
+            "source_authenticated_checkpoint_requires_complete_chain"
+        )
+    if not chain or chain[-1] != checkpoint:
+        raise NonlinearTransientError(
+            "source checkpoint does not match the complete chain terminal"
+        )
+    for index, row in enumerate(chain):
+        validate_nonlinear_transient_checkpoint(row, model=model, config=config)
+        if row.step_index != index:
+            raise NonlinearTransientError(
+                "checkpoint chain indices are not contiguous from zero"
+            )
+        if row.applied_force_kn != forces[index]:
+            raise NonlinearTransientError(
+                "checkpoint force history does not match the bound prefix"
+            )
+        if index == 0:
+            _validate_initial_checkpoint_source(model, config, row)
+            continue
+        parent = chain[index - 1]
+        if row.parent_checkpoint_hash != parent.checkpoint_hash:
+            raise NonlinearTransientError(
+                "checkpoint parent body/hash chain mismatch"
+            )
+        _replay_checkpoint_transition(
+            model=model,
+            config=config,
+            parent=parent,
+            checkpoint=row,
+        )
+
+    initial_condition_hash = canonical_hash(
+        {
+            "displacement_m": chain[0].displacement_m,
+            "velocity_m_per_s": chain[0].velocity_m_per_s,
+            "acceleration_m_per_s2": chain[0].acceleration_m_per_s2,
+            "material_state": chain[0].material_state.to_dict(),
+            "initial_mechanical_energy_kn_m": (
+                chain[0].initial_mechanical_energy_kn_m
+            ),
+        }
+    )
+    return _make_checkpoint_authority(
+        checkpoint=checkpoint,
+        authority="source_authenticated_checkpoint",
+        parent_chain_complete=True,
+        parent_chain_hash=canonical_hash([row.to_dict() for row in chain]),
+        force_history_hash=canonical_hash(list(forces)),
+        force_history_sample_count=len(forces),
+        initial_condition_hash=initial_condition_hash,
+        source_checks=True,
+    )
+
+
+def _validate_initial_checkpoint_source(
+    model: BilinearOscillator,
+    config: NonlinearTransientConfig,
+    checkpoint: NonlinearTransientCheckpoint,
+) -> None:
+    if (
+        checkpoint.step_index != 0
+        or checkpoint.parent_checkpoint_hash is not None
+        or checkpoint.material_state != BilinearMaterialState()
+    ):
+        raise NonlinearTransientError(
+            "initial checkpoint source state is not path-unambiguous"
+        )
+    response = evaluate_bilinear_restoring_force(
+        model,
+        checkpoint.displacement_m,
+        BilinearMaterialState(),
+    )
+    if response.yielded:
+        raise NonlinearTransientError(
+            "initial checkpoint source state is outside the elastic domain"
+        )
+    expected_acceleration = (
+        checkpoint.applied_force_kn
+        - model.damping_kn_s_per_m * checkpoint.velocity_m_per_s
+        - response.force_kn
+    ) / model.mass_kn_s2_per_m
+    expected_energy = (
+        0.5
+        * model.mass_kn_s2_per_m
+        * checkpoint.velocity_m_per_s**2
+        + response.stored_energy_kn_m
+    )
+    _require_replay_close(
+        checkpoint.acceleration_m_per_s2,
+        expected_acceleration,
+        "initial-condition acceleration replay",
+    )
+    _require_replay_close(
+        checkpoint.initial_mechanical_energy_kn_m,
+        expected_energy,
+        "initial mechanical-energy replay",
+    )
+    _require_replay_close(
+        checkpoint.external_work_kn_m,
+        0.0,
+        "initial external-work replay",
+    )
+    _require_replay_close(
+        checkpoint.damping_dissipation_kn_m,
+        0.0,
+        "initial damping-dissipation replay",
+    )
+    if checkpoint.time_step_s != config.time_step_s:
+        raise NonlinearTransientError(
+            "initial checkpoint integration source mismatch"
+        )
+
+
+def _replay_checkpoint_transition(
+    *,
+    model: BilinearOscillator,
+    config: NonlinearTransientConfig,
+    parent: NonlinearTransientCheckpoint,
+    checkpoint: NonlinearTransientCheckpoint,
+) -> None:
+    dt = config.time_step_s
+    beta = config.newmark_beta
+    gamma = config.newmark_gamma
+    displacement_predictor = (
+        parent.displacement_m
+        + dt * parent.velocity_m_per_s
+        + dt**2 * (0.5 - beta) * parent.acceleration_m_per_s2
+    )
+    velocity_predictor = (
+        parent.velocity_m_per_s
+        + dt * (1.0 - gamma) * parent.acceleration_m_per_s2
+    )
+    expected_acceleration = (
+        checkpoint.displacement_m - displacement_predictor
+    ) / (beta * dt**2)
+    expected_velocity = (
+        velocity_predictor + gamma * dt * checkpoint.acceleration_m_per_s2
+    )
+    _require_replay_close(
+        checkpoint.acceleration_m_per_s2,
+        expected_acceleration,
+        "Newmark acceleration replay",
+    )
+    _require_replay_close(
+        checkpoint.velocity_m_per_s,
+        expected_velocity,
+        "Newmark velocity replay",
+    )
+
+    response = evaluate_bilinear_restoring_force(
+        model,
+        checkpoint.displacement_m,
+        parent.material_state,
+    )
+    if response.state != checkpoint.material_state:
+        raise NonlinearTransientError(
+            "plastic-dissipation/material-state replay mismatch"
+        )
+    equilibrium = (
+        model.mass_kn_s2_per_m * checkpoint.acceleration_m_per_s2
+        + model.damping_kn_s_per_m * checkpoint.velocity_m_per_s
+        + response.force_kn
+        - checkpoint.applied_force_kn
+    )
+    equilibrium_scale = max(
+        abs(checkpoint.applied_force_kn),
+        abs(model.mass_kn_s2_per_m * checkpoint.acceleration_m_per_s2)
+        + abs(model.damping_kn_s_per_m * checkpoint.velocity_m_per_s)
+        + abs(response.force_kn),
+        1.0,
+    )
+    if abs(equilibrium) > (
+        config.residual_absolute_tolerance_kn
+        + config.residual_relative_tolerance * equilibrium_scale
+    ):
+        raise NonlinearTransientError("dynamic-equilibrium replay mismatch")
+
+    expected_external_work = parent.external_work_kn_m + 0.5 * (
+        parent.applied_force_kn + checkpoint.applied_force_kn
+    ) * (checkpoint.displacement_m - parent.displacement_m)
+    expected_damping = parent.damping_dissipation_kn_m + (
+        0.5
+        * model.damping_kn_s_per_m
+        * (
+            parent.velocity_m_per_s**2
+            + checkpoint.velocity_m_per_s**2
+        )
+        * dt
+    )
+    _require_replay_close(
+        checkpoint.external_work_kn_m,
+        expected_external_work,
+        "external-work replay",
+    )
+    _require_replay_close(
+        checkpoint.damping_dissipation_kn_m,
+        expected_damping,
+        "damping-dissipation replay",
+    )
+    _require_replay_close(
+        checkpoint.material_state.plastic_dissipation_kn_m,
+        response.state.plastic_dissipation_kn_m,
+        "plastic-dissipation replay",
+    )
+    _require_replay_close(
+        checkpoint.initial_mechanical_energy_kn_m,
+        parent.initial_mechanical_energy_kn_m,
+        "initial-energy lineage replay",
+    )
+
+    _, replayed = _advance_one_step(
+        model,
+        config,
+        parent,
+        checkpoint.applied_force_kn,
+    )
+    if replayed != checkpoint:
+        raise NonlinearTransientError(
+            "deterministic checkpoint replay mismatch"
+        )
+
+
+def _make_checkpoint_authority(
+    *,
+    checkpoint: NonlinearTransientCheckpoint,
+    authority: Literal[
+        "self_consistent_checkpoint",
+        "source_authenticated_checkpoint",
+    ],
+    parent_chain_complete: bool,
+    parent_chain_hash: str | None,
+    force_history_hash: str | None,
+    force_history_sample_count: int,
+    initial_condition_hash: str | None,
+    source_checks: bool,
+) -> NonlinearTransientCheckpointAuthority:
+    provisional = NonlinearTransientCheckpointAuthority(
+        schema_version=(
+            NONLINEAR_TRANSIENT_CHECKPOINT_AUTHORITY_SCHEMA_VERSION
+        ),
+        authority=authority,
+        checkpoint_hash=checkpoint.checkpoint_hash,
+        self_consistent_checkpoint=True,
+        source_authenticated_checkpoint=source_checks,
+        parent_chain_complete=parent_chain_complete,
+        parent_chain_hash=parent_chain_hash,
+        force_history_hash=force_history_hash,
+        force_history_sample_count=force_history_sample_count,
+        initial_condition_hash=initial_condition_hash,
+        newmark_kinematic_replay_pass=source_checks,
+        dynamic_equilibrium_replay_pass=True,
+        external_work_replay_pass=source_checks,
+        damping_dissipation_replay_pass=source_checks,
+        plastic_dissipation_replay_pass=source_checks,
+        deterministic_checkpoint_replay_pass=source_checks,
+        receipt_hash=_ZERO_HASH,
+    )
+    payload = asdict(provisional)
+    payload.pop("receipt_hash")
+    receipt = replace(
+        provisional,
+        receipt_hash=canonical_hash(payload),
+    )
+    receipt.to_dict()
+    return receipt
+
+
+def _require_replay_close(
+    actual: float,
+    expected: float,
+    owner: str,
+) -> None:
+    if not math.isclose(
+        actual,
+        expected,
+        rel_tol=1.0e-10,
+        abs_tol=1.0e-12,
+    ):
+        raise NonlinearTransientError(f"{owner} mismatch")
 
 
 def _integrate(
@@ -412,6 +836,7 @@ def _integrate(
     start: NonlinearTransientCheckpoint,
     *,
     future_forces: tuple[float, ...],
+    start_checkpoint_authority: str,
 ) -> NonlinearTransientSolution:
     validate_nonlinear_transient_checkpoint(start, model=model, config=config)
     checkpoints = [start]
@@ -440,6 +865,11 @@ def _integrate(
         maximum_relative_residual=maximum_residual,
         maximum_absolute_energy_balance_error_kn_m=maximum_energy_error,
         yielded_step_count=sum(step.yielded for step in steps),
+        start_checkpoint_authority=start_checkpoint_authority,
+        source_authenticated_resume=bool(
+            start.step_index > 0
+            and start_checkpoint_authority == "source_authenticated_checkpoint"
+        ),
         result_hash=_ZERO_HASH,
         deterministic=True,
         exact_checkpoint_resume_supported=True,
@@ -770,6 +1200,7 @@ def _nonnegative_float(value: Any, name: str) -> float:
 
 
 __all__ = [
+    "NONLINEAR_TRANSIENT_CHECKPOINT_AUTHORITY_SCHEMA_VERSION",
     "NONLINEAR_TRANSIENT_CHECKPOINT_SCHEMA_VERSION",
     "NONLINEAR_TRANSIENT_CLAIM_BOUNDARY",
     "NONLINEAR_TRANSIENT_PROFILE",
@@ -778,6 +1209,7 @@ __all__ = [
     "BilinearOscillator",
     "BilinearRestoringResponse",
     "NonlinearTransientCheckpoint",
+    "NonlinearTransientCheckpointAuthority",
     "NonlinearTransientConfig",
     "NonlinearTransientError",
     "NonlinearTransientSolution",
@@ -786,4 +1218,5 @@ __all__ = [
     "resume_bilinear_transient",
     "solve_bilinear_transient",
     "validate_nonlinear_transient_checkpoint",
+    "validate_nonlinear_transient_checkpoint_authority",
 ]

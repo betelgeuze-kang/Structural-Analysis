@@ -5,6 +5,9 @@ import json
 import pytest
 
 import structural_analysis.materials as materials
+from structural_analysis.materials.admissibility import (
+    MaterialPathNotAdmissibleError,
+)
 from structural_analysis.materials.bond_slip import (
     BondSlipMaterial,
     BondSlipState,
@@ -56,8 +59,8 @@ def test_confined_concrete_is_explicitly_bounded_and_validated() -> None:
         ultimate_compressive_strain=0.03,
     )
     residual = confined_concrete_response(-0.04, material)
-    assert residual.branch == "residual_cutoff"
-    assert residual.consistent_tangent_mpa == 0.0
+    assert residual.branch == "continuous_residual_tail"
+    assert residual.consistent_tangent_mpa <= 0.0
     assert residual.stress_mpa < 0.0
     assert "multiaxial" in residual.claim_boundary
     with pytest.raises(ValueError, match="ultimate_compressive_strain"):
@@ -165,6 +168,45 @@ def test_confined_concrete_stateful_envelope_replay_is_idempotent() -> None:
     assert first.state.maximum_compressive_strain == pytest.approx(8.0e-4)
     assert replay.state == first.state
     assert replay.state.state_hash == first.state.state_hash
+
+
+def test_confined_concrete_blocks_unloading_reversal_and_tension() -> None:
+    material = ConfinedConcreteMaterial(effective_lateral_pressure_mpa=2.0)
+    accepted = material.integrate(-2.0e-3, material.initial_state()).state
+
+    for unsupported_strain in (-1.0e-3, 1.0e-4):
+        with pytest.raises(
+            MaterialPathNotAdmissibleError,
+            match="unsupported_constitutive_path",
+        ):
+            material.integrate(unsupported_strain, accepted)
+
+
+def test_confined_concrete_residual_tail_is_stress_and_tangent_continuous() -> None:
+    material = ConfinedConcreteMaterial(
+        effective_lateral_pressure_mpa=1.5,
+        ultimate_compressive_strain=0.03,
+    )
+    epsilon = 1.0e-10
+    at_ultimate = confined_concrete_response(
+        -material.ultimate_compressive_strain,
+        material,
+    )
+    after_ultimate = confined_concrete_response(
+        -material.ultimate_compressive_strain - epsilon,
+        material,
+    )
+
+    assert after_ultimate.stress_mpa == pytest.approx(
+        at_ultimate.stress_mpa,
+        rel=0.0,
+        abs=abs(at_ultimate.consistent_tangent_mpa) * epsilon * 1.01,
+    )
+    assert after_ultimate.consistent_tangent_mpa == pytest.approx(
+        at_ultimate.consistent_tangent_mpa,
+        rel=1.0e-7,
+        abs=1.0e-8,
+    )
 
 
 def test_condensed_partial_interaction_material_tangent_and_reversal_state() -> None:

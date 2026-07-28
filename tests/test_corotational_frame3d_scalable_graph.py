@@ -108,21 +108,24 @@ def test_actual_258_equation_frame_uses_blocked_exact_sparse_diagnostics() -> No
     assert result.final_checkpoint.displacement[-6] > 0.0
     assert result.steps[0].checkpoint.converged_iterations == 1
     diagnostics = result.steps[0].factorization_diagnostics
-    assert len(diagnostics) == 1
-    diagnostic = diagnostics[0]
-    assert type(diagnostic) is ScalableSparseFactorizationDiagnostic
-    assert diagnostic.equation_count == 258
-    assert diagnostic.inverse_solve_block_count == 9
-    assert diagnostic.condition_estimate_is_exact is True
-    assert diagnostic.condition_number_1 < policy.maximum_condition_number_1
-    assert diagnostic.contract_pass is True
-    assert diagnostic.claims["integrated_nonlinear_3d_backend"] is True
-    assert diagnostic.claims["production_scale_sparse_policy"] is False
-    assert diagnostic.claims["external_vv"] is False
-    assert diagnostic.claims["release_authority"] is False
-    assert diagnostic.regularization_used is False
-    assert diagnostic.fallback_used is False
-    assert diagnostic.to_manifest()["contract_pass"] is True
+    assert len(diagnostics) == 2
+    for diagnostic in diagnostics:
+        assert type(diagnostic) is ScalableSparseFactorizationDiagnostic
+        assert diagnostic.equation_count == 258
+        assert diagnostic.inverse_solve_block_count == 9
+        assert diagnostic.condition_estimate_is_exact is True
+        assert diagnostic.condition_number_1 < policy.maximum_condition_number_1
+        assert diagnostic.contract_pass is True
+        assert diagnostic.claims["integrated_nonlinear_3d_backend"] is True
+        assert diagnostic.claims["production_scale_sparse_policy"] is False
+        assert diagnostic.claims["external_vv"] is False
+        assert diagnostic.claims["release_authority"] is False
+        assert diagnostic.regularization_used is False
+        assert diagnostic.fallback_used is False
+        assert diagnostic.to_manifest()["contract_pass"] is True
+    assert result.steps[0].equation_scaling.scaled_tangent_condition == pytest.approx(
+        diagnostics[-1].condition_number_1
+    )
 
     schema = json.loads(
         (

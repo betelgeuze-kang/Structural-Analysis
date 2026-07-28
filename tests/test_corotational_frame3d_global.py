@@ -125,6 +125,31 @@ def test_global_cantilever_matches_timoshenko_closed_form_and_recovers_reactions
     assert reactions[5] == pytest.approx(-2.0, rel=1.0e-8, abs=1.0e-8)
     assert terminal.free_residual_inf_norm_kn <= 2.0e-8
     assert terminal.relative_residual <= 2.0e-8
+    assert terminal.equation_scaling.characteristic_length == pytest.approx(2.0)
+    assert terminal.equation_scaling.scaled_residual_norm <= (
+        config.residual_relative_tolerance
+        + config.residual_absolute_tolerance_kn
+        / terminal.equation_scaling.reference_force
+    )
+    assert terminal.equation_scaling.scaled_increment_norm <= (
+        config.increment_relative_tolerance
+        + config.increment_absolute_tolerance_m
+        / terminal.equation_scaling.characteristic_length
+    )
+    assert terminal.condition_number == pytest.approx(
+        terminal.equation_scaling.scaled_tangent_condition
+    )
+    assert all(terminal.convergence_checks.values())
+    assert terminal.accepted_line_search_alphas
+    assert solution.maximum_scaled_residual_inf_norm >= (
+        terminal.equation_scaling.scaled_residual_norm
+    )
+    assert solution.maximum_scaled_increment_inf_norm >= (
+        terminal.equation_scaling.scaled_increment_norm
+    )
+    assert solution.equation_scaling_hashes == (
+        terminal.equation_scaling.scaling_hash,
+    )
     assert len(terminal.members) == 1
     assert terminal.members[0].current_length_m > terminal.members[0].initial_length_m
     assert terminal.members[0].strain_energy_kn_m > 0.0

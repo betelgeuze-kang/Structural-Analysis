@@ -1,5 +1,13 @@
 """Production material contracts used by authoritative solver paths."""
 
+from structural_analysis.materials.admissibility import (
+    MaterialAdmissibility,
+    MaterialPathNotAdmissibleError,
+    ScalarLoadingPathDemand,
+    UNSUPPORTED_CONSTITUTIVE_PATH,
+    require_scalar_loading_path_admissible,
+    scalar_loading_path_demand,
+)
 from structural_analysis.materials.bilinear_link import (
     BilinearCombinedHardeningLink,
     BilinearLinkResponse,
@@ -149,6 +157,8 @@ __all__ = [
     "GAP_LINK_CLOSURE_CONVENTION",
     "GAP_LINK_STATE_SCHEMA_VERSION",
     "GAP_LINK_TANGENT_DEFINITION",
+    "MaterialAdmissibility",
+    "MaterialPathNotAdmissibleError",
     "PARTIAL_COMPOSITE_CLAIM_BOUNDARY",
     "PARTIAL_COMPOSITE_PROFILE",
     "ParallelCompositeSectionResponse",
@@ -172,10 +182,12 @@ __all__ = [
     "StatefulFiberSectionState",
     "StatefulRCFiberSection",
     "StatefulSectionFiber",
+    "ScalarLoadingPathDemand",
     "STATE_SCHEMA_VERSION",
     "TANGENT_DEFINITION",
     "UniaxialPlasticityResponse",
     "UniaxialPlasticityState",
+    "UNSUPPORTED_CONSTITUTIVE_PATH",
     "finite_difference_consistent_tangent_check",
     "finite_difference_concrete_damage_tangent_check",
     "finite_difference_composite_section_tangent_check",
@@ -193,5 +205,7 @@ __all__ = [
     "integrate_concrete_damage_history",
     "integrate_strain_history",
     "make_rectangular_stateful_rc_fiber_section",
+    "require_scalar_loading_path_admissible",
+    "scalar_loading_path_demand",
     "solve_stateful_fiber_section_resultants",
 ]

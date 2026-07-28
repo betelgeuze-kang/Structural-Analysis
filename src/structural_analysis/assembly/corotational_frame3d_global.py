@@ -21,6 +21,14 @@ from structural_analysis.elements.timoshenko_frame3d import (
     TimoshenkoFrame3DSection,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.solvers.equation_scaling import (
+    EquationScaling6DOF,
+    EquationScaling6DOFTransform,
+    characteristic_length_from_coordinates,
+    frame3d_dof_labels,
+    make_equation_scaling_6dof,
+    reference_force_from_mixed_load,
+)
 
 
 COROTATIONAL_FRAME3D_GLOBAL_PROFILE = (
@@ -194,19 +202,52 @@ class CorotationalFrame3DModel:
 class CorotationalFrame3DGlobalConfig:
     residual_relative_tolerance: float = 1.0e-8
     residual_absolute_tolerance_kn: float = 1.0e-7
+    increment_relative_tolerance: float = 1.0e-8
+    increment_absolute_tolerance_m: float = 1.0e-10
     maximum_iterations: int = 20
     maximum_condition_number: float = 1.0e14
+    maximum_line_search_iterations: int = 12
+    line_search_reduction_factor: float = 0.5
+    line_search_minimum_alpha: float = 2.0**-12
+    line_search_sufficient_decrease: float = 1.0e-4
+    reference_force_floor_kn: float = 1.0
 
     def __post_init__(self) -> None:
         for name in (
             "residual_relative_tolerance",
             "residual_absolute_tolerance_kn",
+            "increment_relative_tolerance",
+            "increment_absolute_tolerance_m",
             "maximum_condition_number",
+            "reference_force_floor_kn",
         ):
             value = _positive_float(getattr(self, name), name)
             object.__setattr__(self, name, value)
         if type(self.maximum_iterations) is not int or self.maximum_iterations < 1:
             raise ValueError("maximum_iterations must be a positive integer")
+        if (
+            type(self.maximum_line_search_iterations) is not int
+            or self.maximum_line_search_iterations < 1
+        ):
+            raise ValueError(
+                "maximum_line_search_iterations must be a positive integer"
+            )
+        for name in (
+            "line_search_reduction_factor",
+            "line_search_minimum_alpha",
+            "line_search_sufficient_decrease",
+        ):
+            object.__setattr__(
+                self,
+                name,
+                _finite_float(getattr(self, name), name),
+            )
+        if not 0.0 < self.line_search_reduction_factor < 1.0:
+            raise ValueError("line_search_reduction_factor must be in (0, 1)")
+        if not 0.0 < self.line_search_minimum_alpha <= 1.0:
+            raise ValueError("line_search_minimum_alpha must be in (0, 1]")
+        if not 0.0 < self.line_search_sufficient_decrease < 1.0:
+            raise ValueError("line_search_sufficient_decrease must be in (0, 1)")
 
     @property
     def contract_hash(self) -> str:
@@ -217,11 +258,26 @@ class CorotationalFrame3DGlobalConfig:
             "profile": COROTATIONAL_FRAME3D_GLOBAL_PROFILE,
             "residual_relative_tolerance": self.residual_relative_tolerance,
             "residual_absolute_tolerance_kn": self.residual_absolute_tolerance_kn,
+            "increment_relative_tolerance": self.increment_relative_tolerance,
+            "increment_absolute_tolerance_m": (
+                self.increment_absolute_tolerance_m
+            ),
             "maximum_iterations": self.maximum_iterations,
             "maximum_condition_number": self.maximum_condition_number,
+            "reference_force_floor_kn": self.reference_force_floor_kn,
             "linear_solver": "numpy_dense_solve",
             "load_control": "strictly_increasing_positive_factors",
-            "line_search": False,
+            "equation_scaling": (
+                "force_moment_translation_rotation_diagonal_6dof.v1"
+            ),
+            "line_search": {
+                "algorithm": "backtracking_armijo_scaled_residual.v1",
+                "maximum_iterations": self.maximum_line_search_iterations,
+                "reduction_factor": self.line_search_reduction_factor,
+                "minimum_alpha": self.line_search_minimum_alpha,
+                "sufficient_decrease": self.line_search_sufficient_decrease,
+                "invalid_geometry_trial": "reject_and_backtrack",
+            },
             "regularization_allowed": False,
             "fallback_allowed": False,
         }
@@ -287,6 +343,9 @@ class CorotationalFrame3DGlobalStep:
     free_residual_inf_norm_kn: float
     relative_residual: float
     condition_number: float
+    equation_scaling: EquationScaling6DOF
+    accepted_line_search_alphas: tuple[float, ...]
+    convergence_checks: dict[str, bool]
     checkpoint: CorotationalFrame3DGlobalCheckpoint
     members: tuple[CorotationalFrame3DMemberResult, ...]
 
@@ -304,6 +363,9 @@ class CorotationalFrame3DGlobalSolution:
     steps: tuple[CorotationalFrame3DGlobalStep, ...]
     checkpoints: tuple[CorotationalFrame3DGlobalCheckpoint, ...]
     maximum_free_residual_inf_norm_kn: float
+    maximum_scaled_residual_inf_norm: float
+    maximum_scaled_increment_inf_norm: float
+    equation_scaling_hashes: tuple[str, ...]
     result_hash: str
     exact_checkpoint_resume_supported: bool
     regularization_used: bool
@@ -372,14 +434,16 @@ def initial_corotational_frame3d_global_checkpoint(
         model,
         np.zeros(model.total_dofs, dtype=np.float64),
     )
-    residual = float(
-        np.linalg.norm(assembly.internal_force[list(model.free_dofs)], ord=np.inf)
+    scaling = _equation_scaling(model, config)
+    residual_free = assembly.internal_force[list(model.free_dofs)]
+    scaled_residual = float(
+        np.linalg.norm(scaling.scale_residual(residual_free), ord=np.inf)
     )
-    tolerance = _residual_tolerance(model, config, 0.0)
-    if residual > tolerance:
+    if scaled_residual > _scaled_residual_tolerance(config, scaling):
         raise CorotationalFrame3DGlobalError(
             "zero state does not satisfy the unloaded equilibrium contract"
         )
+    residual = _translation_component_norm(residual_free, scaling.dof_labels)
     return _make_checkpoint(
         model=model,
         config=config,
@@ -433,6 +497,17 @@ def solve_corotational_frame3d_global_load_path(
         (step.free_residual_inf_norm_kn for step in steps),
         default=checkpoint.residual_inf_norm_kn,
     )
+    maximum_scaled_residual = max(
+        (step.equation_scaling.scaled_residual_norm for step in steps),
+        default=0.0,
+    )
+    maximum_scaled_increment = max(
+        (step.equation_scaling.scaled_increment_norm for step in steps),
+        default=0.0,
+    )
+    scaling_hashes = tuple(
+        dict.fromkeys(step.equation_scaling.scaling_hash for step in steps)
+    )
     payload = {
         "schema_version": COROTATIONAL_FRAME3D_GLOBAL_SCHEMA_VERSION,
         "profile": COROTATIONAL_FRAME3D_GLOBAL_PROFILE,
@@ -441,6 +516,9 @@ def solve_corotational_frame3d_global_load_path(
         "start_checkpoint_hash": checkpoint.checkpoint_hash,
         "steps": [step.to_dict() for step in steps],
         "maximum_free_residual_inf_norm_kn": maximum_residual,
+        "maximum_scaled_residual_inf_norm": maximum_scaled_residual,
+        "maximum_scaled_increment_inf_norm": maximum_scaled_increment,
+        "equation_scaling_hashes": list(scaling_hashes),
         "exact_checkpoint_resume_supported": True,
         "regularization_used": False,
         "fallback_used": False,
@@ -456,6 +534,9 @@ def solve_corotational_frame3d_global_load_path(
         steps=tuple(steps),
         checkpoints=tuple(checkpoints),
         maximum_free_residual_inf_norm_kn=maximum_residual,
+        maximum_scaled_residual_inf_norm=maximum_scaled_residual,
+        maximum_scaled_increment_inf_norm=maximum_scaled_increment,
+        equation_scaling_hashes=scaling_hashes,
         result_hash=canonical_hash(payload),
         exact_checkpoint_resume_supported=True,
         regularization_used=False,
@@ -502,15 +583,23 @@ def validate_corotational_frame3d_global_checkpoint(
         assembly = assemble_corotational_frame3d_global(model, values)
         external = checkpoint.load_factor * np.asarray(model.reference_load_kn)
         residual = assembly.internal_force - external
-        free_residual = float(
-            np.linalg.norm(residual[list(model.free_dofs)], ord=np.inf)
+        scaling = _equation_scaling(model, config)
+        residual_free = residual[list(model.free_dofs)]
+        scaled_residual = float(
+            np.linalg.norm(scaling.scale_residual(residual_free), ord=np.inf)
         )
-        tolerance = _residual_tolerance(model, config, checkpoint.load_factor)
-        if free_residual > tolerance:
+        if scaled_residual > _scaled_residual_tolerance(config, scaling):
             raise CorotationalFrame3DGlobalError(
                 "checkpoint free-equation equilibrium is invalid"
             )
-        comparison_tolerance = max(tolerance, 1.0e-12)
+        free_residual = _translation_component_norm(
+            residual_free,
+            scaling.dof_labels,
+        )
+        comparison_tolerance = max(
+            config.residual_absolute_tolerance_kn,
+            1.0e-12,
+        )
         if abs(free_residual - checkpoint.residual_inf_norm_kn) > comparison_tolerance:
             raise CorotationalFrame3DGlobalError(
                 "checkpoint residual observation is inconsistent"
@@ -529,16 +618,100 @@ def _solve_step(
     displacement = np.array(initial_displacement, dtype=np.float64, copy=True)
     free = np.asarray(model.free_dofs, dtype=np.int64)
     applied = factor * np.asarray(model.reference_load_kn, dtype=np.float64)
-    tolerance = _residual_tolerance(model, config, factor)
-    condition_number = 0.0
+    scaling = _equation_scaling(model, config)
+    residual_tolerance = _scaled_residual_tolerance(config, scaling)
+    increment_tolerance = _scaled_increment_tolerance(config, scaling)
+    accepted_alphas: list[float] = []
     for iteration in range(config.maximum_iterations + 1):
-        assembly = assemble_corotational_frame3d_global(model, displacement)
+        try:
+            assembly = assemble_corotational_frame3d_global(model, displacement)
+        except (ValueError, FloatingPointError) as error:
+            raise CorotationalFrame3DGlobalError(
+                f"invalid geometry trial at iteration {iteration}"
+            ) from error
         residual = assembly.internal_force - applied
-        free_residual = float(np.linalg.norm(residual[free], ord=np.inf))
-        if free_residual <= tolerance:
-            relative_residual = free_residual / max(
-                float(np.linalg.norm(applied[free], ord=np.inf)),
-                1.0,
+        residual_free = residual[free]
+        tangent_free = assembly.tangent[np.ix_(free, free)]
+        scaled_tangent = scaling.scale_tangent(tangent_free)
+        scaled_residual = scaling.scale_residual(residual_free)
+        condition_number = float(np.linalg.cond(scaled_tangent, p=1))
+        if (
+            not math.isfinite(condition_number)
+            or condition_number > config.maximum_condition_number
+        ):
+            raise CorotationalFrame3DGlobalError(
+                "scaled free tangent is singular or exceeds the conditioning policy"
+            )
+        try:
+            scaled_correction = np.linalg.solve(
+                scaled_tangent,
+                -scaled_residual,
+            )
+        except np.linalg.LinAlgError as error:
+            raise CorotationalFrame3DGlobalError(
+                "scaled free tangent factorization failed without fallback"
+            ) from error
+        if not np.all(np.isfinite(scaled_correction)):
+            raise CorotationalFrame3DGlobalError(
+                "scaled Newton correction is non-finite"
+            )
+        correction = scaling.unscale_increment(scaled_correction)
+        observation = scaling.observe(
+            residual=residual_free,
+            increment=correction,
+            scaled_tangent_condition=condition_number,
+        )
+        residual_gate = bool(
+            observation.scaled_residual_norm <= residual_tolerance
+        )
+        increment_gate = bool(
+            observation.scaled_increment_norm <= increment_tolerance
+        )
+        if residual_gate and increment_gate:
+            final_assembly = assemble_corotational_frame3d_global(
+                model,
+                displacement,
+            )
+            final_residual = final_assembly.internal_force - applied
+            final_residual_free = final_residual[free]
+            final_scaled_residual = float(
+                np.linalg.norm(
+                    scaling.scale_residual(final_residual_free),
+                    ord=np.inf,
+                )
+            )
+            final_reassembled = bool(
+                np.array_equal(
+                    final_assembly.internal_force,
+                    assembly.internal_force,
+                )
+                and np.array_equal(final_assembly.tangent, assembly.tangent)
+                and final_scaled_residual <= residual_tolerance
+            )
+            checks = {
+                "scaled_residual_gate": residual_gate,
+                "scaled_increment_gate": increment_gate,
+                "line_search_step_valid": all(
+                    config.line_search_minimum_alpha <= alpha <= 1.0
+                    for alpha in accepted_alphas
+                ),
+                "final_reassembled_equilibrium": final_reassembled,
+                "scaled_condition_number_pass": bool(
+                    condition_number <= config.maximum_condition_number
+                ),
+                "regularization_not_used": True,
+                "fallback_not_used": True,
+            }
+            if not all(checks.values()):
+                failed = ",".join(
+                    name for name, passed in checks.items() if not passed
+                )
+                raise CorotationalFrame3DGlobalError(
+                    f"dense Frame3D convergence commit contract failed: {failed}"
+                )
+            free_residual = _translation_component_norm(
+                final_residual_free,
+                scaling.dof_labels,
             )
             checkpoint = _make_checkpoint(
                 model=model,
@@ -549,39 +722,65 @@ def _solve_step(
                 residual_inf_norm_kn=free_residual,
                 parent_checkpoint_hash=parent_checkpoint.checkpoint_hash,
             )
+            validate_corotational_frame3d_global_checkpoint(
+                checkpoint,
+                model=model,
+                config=config,
+                require_equilibrium=True,
+            )
             reactions = tuple(
-                (dof, float(residual[dof])) for dof in model.restrained_dofs
+                (dof, float(final_residual[dof]))
+                for dof in model.restrained_dofs
             )
             return CorotationalFrame3DGlobalStep(
                 load_factor=factor,
                 applied_load=tuple(float(value) for value in applied),
                 reactions=reactions,
                 free_residual_inf_norm_kn=free_residual,
-                relative_residual=relative_residual,
+                relative_residual=observation.scaled_residual_norm,
                 condition_number=condition_number,
+                equation_scaling=observation,
+                accepted_line_search_alphas=tuple(accepted_alphas),
+                convergence_checks=checks,
                 checkpoint=checkpoint,
-                members=_recover_members(model, assembly),
+                members=_recover_members(model, final_assembly),
             )
         if iteration == config.maximum_iterations:
             break
-        tangent_free = assembly.tangent[np.ix_(free, free)]
-        condition_number = float(np.linalg.cond(tangent_free, p=1))
-        if (
-            not math.isfinite(condition_number)
-            or condition_number > config.maximum_condition_number
-        ):
-            raise CorotationalFrame3DGlobalError(
-                "free tangent is singular or exceeds the conditioning policy"
+        selected_alpha: float | None = None
+        selected_displacement: np.ndarray | None = None
+        alpha = 1.0
+        for _ in range(config.maximum_line_search_iterations):
+            if alpha + 1.0e-15 < config.line_search_minimum_alpha:
+                break
+            trial = np.array(displacement, dtype=np.float64, copy=True)
+            trial[free] += alpha * correction
+            try:
+                candidate = assemble_corotational_frame3d_global(model, trial)
+            except (ValueError, FloatingPointError):
+                alpha *= config.line_search_reduction_factor
+                continue
+            candidate_residual = candidate.internal_force[free] - applied[free]
+            candidate_scaled = float(
+                np.linalg.norm(
+                    scaling.scale_residual(candidate_residual),
+                    ord=np.inf,
+                )
             )
-        try:
-            correction = np.linalg.solve(tangent_free, -residual[free])
-        except np.linalg.LinAlgError as error:
+            required = (
+                1.0 - config.line_search_sufficient_decrease * alpha
+            ) * observation.scaled_residual_norm
+            if candidate_scaled <= residual_tolerance or candidate_scaled <= required:
+                selected_alpha = alpha
+                selected_displacement = trial
+                break
+            alpha *= config.line_search_reduction_factor
+        if selected_alpha is None or selected_displacement is None:
             raise CorotationalFrame3DGlobalError(
-                "free tangent factorization failed without fallback"
-            ) from error
-        if not np.all(np.isfinite(correction)):
-            raise CorotationalFrame3DGlobalError("Newton correction is non-finite")
-        displacement[free] += correction
+                "line_search_failed_to_reduce_scaled_residual_without_fallback"
+            )
+        accepted_alphas.append(selected_alpha)
+        displacement = selected_displacement
     raise CorotationalFrame3DGlobalError(
         f"load factor {factor} did not converge in {config.maximum_iterations} iterations"
     )
@@ -687,16 +886,60 @@ def _load_factors(values: Iterable[float], *, after: float) -> tuple[float, ...]
     return factors
 
 
-def _residual_tolerance(
+def _equation_scaling(
     model: CorotationalFrame3DModel,
     config: CorotationalFrame3DGlobalConfig,
-    load_factor: float,
-) -> float:
-    free_load = np.asarray(model.reference_load_kn)[list(model.free_dofs)]
-    scale = max(float(np.linalg.norm(load_factor * free_load, ord=np.inf)), 1.0)
-    return config.residual_absolute_tolerance_kn + (
-        config.residual_relative_tolerance * scale
+) -> EquationScaling6DOFTransform:
+    free = model.free_dofs
+    labels = frame3d_dof_labels(free)
+    characteristic_length = characteristic_length_from_coordinates(
+        model.node_coordinates_m
     )
+    free_load = np.asarray(model.reference_load_kn, dtype=np.float64)[
+        list(free)
+    ]
+    reference_force = reference_force_from_mixed_load(
+        free_load,
+        characteristic_length=characteristic_length,
+        dof_labels=labels,
+        minimum_reference_force=config.reference_force_floor_kn,
+    )
+    return make_equation_scaling_6dof(
+        reference_force=reference_force,
+        characteristic_length=characteristic_length,
+        dof_labels=labels,
+    )
+
+
+def _scaled_residual_tolerance(
+    config: CorotationalFrame3DGlobalConfig,
+    scaling: EquationScaling6DOFTransform,
+) -> float:
+    return config.residual_relative_tolerance + (
+        config.residual_absolute_tolerance_kn / scaling.reference_force
+    )
+
+
+def _scaled_increment_tolerance(
+    config: CorotationalFrame3DGlobalConfig,
+    scaling: EquationScaling6DOFTransform,
+) -> float:
+    return config.increment_relative_tolerance + (
+        config.increment_absolute_tolerance_m / scaling.characteristic_length
+    )
+
+
+def _translation_component_norm(
+    values: Any,
+    labels: tuple[str, ...],
+) -> float:
+    vector = np.asarray(values, dtype=np.float64)
+    mask = np.asarray(
+        [label in {"UX", "UY", "UZ"} for label in labels],
+        dtype=bool,
+    )
+    selected = vector[mask]
+    return float(np.linalg.norm(selected, ord=np.inf)) if selected.size else 0.0
 
 
 def _validate_connected_graph(

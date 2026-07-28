@@ -8,6 +8,12 @@ import math
 import struct
 from typing import Any
 
+from structural_analysis.materials.admissibility import (
+    MaterialAdmissibility,
+    MaterialPathNotAdmissibleError,
+    require_scalar_loading_path_admissible,
+)
+
 
 CONFINED_CONCRETE_PROFILE = "mander_uniaxial_monotonic_compression.v1"
 CONFINED_CONCRETE_STATE_SCHEMA_VERSION = "confined-concrete-envelope-state.v1"
@@ -17,6 +23,8 @@ CONFINED_CONCRETE_CLAIM_BOUNDARY = (
     "member failure, published validation, or design-code authority."
 )
 _STATE_DOMAIN = b"structural-analysis/confined-concrete-envelope-state/v1\0"
+_PATH_TOLERANCE = 1.0e-12
+_FLOAT_TINY = float.fromhex("0x1.0000000000000p-1022")
 
 
 def _finite(name: str, value: Any) -> float:
@@ -103,6 +111,52 @@ class ConfinedConcreteMaterial:
     def initial_state(self) -> ConfinedConcreteState:
         return ConfinedConcreteState()
 
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return MaterialAdmissibility(
+            loading_domain=CONFINED_CONCRETE_PROFILE,
+            supports_monotonic=True,
+            supports_unloading=False,
+            supports_reversal=False,
+            supports_cyclic=False,
+            supports_tension=False,
+            supports_compression=True,
+            supports_multiaxial=False,
+            supports_localization_regularization=False,
+        )
+
+    @property
+    def supports_monotonic(self) -> bool:
+        return self.admissibility.supports_monotonic
+
+    @property
+    def supports_unloading(self) -> bool:
+        return self.admissibility.supports_unloading
+
+    @property
+    def supports_reversal(self) -> bool:
+        return self.admissibility.supports_reversal
+
+    @property
+    def supports_cyclic(self) -> bool:
+        return self.admissibility.supports_cyclic
+
+    @property
+    def supports_tension(self) -> bool:
+        return self.admissibility.supports_tension
+
+    @property
+    def supports_compression(self) -> bool:
+        return self.admissibility.supports_compression
+
+    @property
+    def supports_multiaxial(self) -> bool:
+        return self.admissibility.supports_multiaxial
+
+    @property
+    def supports_localization_regularization(self) -> bool:
+        return self.admissibility.supports_localization_regularization
+
     def integrate(
         self,
         strain: float,
@@ -111,12 +165,29 @@ class ConfinedConcreteMaterial:
         if type(committed_state) is not ConfinedConcreteState:
             raise ValueError("committed_state must be an exact ConfinedConcreteState")
         value = _finite("strain", strain)
+        require_scalar_loading_path_admissible(
+            self.admissibility,
+            (committed_state.strain, value),
+            owner=self.material_id,
+        )
+        magnitude = max(-value, 0.0)
+        if (
+            magnitude + _PATH_TOLERANCE
+            < committed_state.maximum_compressive_strain
+        ):
+            raise MaterialPathNotAdmissibleError(
+                "unsupported_constitutive_path: "
+                f"owner={self.material_id} "
+                f"accepted_maximum_compression="
+                f"{committed_state.maximum_compressive_strain:.17g} "
+                f"trial_compression={magnitude:.17g}"
+            )
         envelope = confined_concrete_response(value, self)
         state = ConfinedConcreteState(
             strain=value,
             maximum_compressive_strain=max(
                 committed_state.maximum_compressive_strain,
-                max(-value, 0.0),
+                magnitude,
             ),
         )
         return StatefulConfinedConcreteResponse(
@@ -244,20 +315,30 @@ def confined_concrete_response(
         )
     magnitude = -value
     if magnitude > selected.ultimate_compressive_strain:
-        residual = _envelope_magnitude(
+        ultimate_stress, ultimate_tangent = _envelope_magnitude(
             selected.ultimate_compressive_strain,
             selected,
-        )[0]
+        )
         residual = min(
-            residual,
+            ultimate_stress,
             selected.residual_strength_ratio
             * selected.confined_compressive_strength_mpa,
         )
+        excess = magnitude - selected.ultimate_compressive_strain
+        difference = ultimate_stress - residual
+        if difference <= _FLOAT_TINY:
+            stress = ultimate_stress
+            tangent = 0.0
+        else:
+            decay = max(-ultimate_tangent / difference, 0.0)
+            exponential = math.exp(-decay * excess)
+            stress = residual + difference * exponential
+            tangent = -decay * difference * exponential
         return ConfinedConcreteResponse(
             strain=value,
-            stress_mpa=-residual,
-            consistent_tangent_mpa=0.0,
-            branch="residual_cutoff",
+            stress_mpa=-stress,
+            consistent_tangent_mpa=tangent,
+            branch="continuous_residual_tail",
             confinement_strength_gain=gain,
         )
     stress, tangent = _envelope_magnitude(magnitude, selected)
@@ -300,8 +381,6 @@ def _envelope_magnitude(
         / (denominator * denominator * material.confined_peak_strain)
     )
     return stress, tangent
-
-
 def finite_difference_confined_concrete_tangent(
     material: ConfinedConcreteMaterial,
     *,

@@ -10,6 +10,8 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator
 
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+import structural_analysis.solvers.nonlinear.transient as transient_module
 from structural_analysis.solvers.nonlinear.transient import (
     NONLINEAR_TRANSIENT_PROFILE,
     BilinearMaterialState,
@@ -19,6 +21,7 @@ from structural_analysis.solvers.nonlinear.transient import (
     evaluate_bilinear_restoring_force,
     resume_bilinear_transient,
     solve_bilinear_transient,
+    validate_nonlinear_transient_checkpoint_authority,
 )
 
 
@@ -112,6 +115,8 @@ def test_checkpoint_resume_reproduces_full_chain_exactly() -> None:
         prefix.checkpoints[-1],
         forces[121:],
         config=config,
+        checkpoint_chain=prefix.checkpoints,
+        force_history_prefix_kn=forces[:121],
     )
     joined = (*prefix.checkpoints, *resumed.checkpoints[1:])
 
@@ -121,6 +126,8 @@ def test_checkpoint_resume_reproduces_full_chain_exactly() -> None:
     assert resumed.start_step_index == 120
     assert resumed.end_step_index == 240
     assert full.exact_checkpoint_resume_supported is True
+    assert resumed.start_checkpoint_authority == "source_authenticated_checkpoint"
+    assert resumed.source_authenticated_resume is True
     schema = json.loads(
         (
             Path(__file__).resolve().parents[1]
@@ -152,6 +159,157 @@ def test_checkpoint_tamper_and_cross_model_resume_fail_closed() -> None:
             [0.0],
             config=config,
         )
+
+
+def test_detached_resume_requires_explicit_self_consistent_authority() -> None:
+    model = BilinearOscillator(1.0, 100.0, 5.0, 0.05)
+    config = NonlinearTransientConfig(time_step_s=0.01)
+    prefix = solve_bilinear_transient(
+        model,
+        [0.0, 1.0, 2.0],
+        config=config,
+    )
+
+    with pytest.raises(
+        NonlinearTransientError,
+        match="requires_complete_chain",
+    ):
+        resume_bilinear_transient(
+            model,
+            prefix.checkpoints[-1],
+            [3.0],
+            config=config,
+        )
+
+    resumed = resume_bilinear_transient(
+        model,
+        prefix.checkpoints[-1],
+        [3.0],
+        config=config,
+        required_checkpoint_authority="self_consistent_checkpoint",
+    )
+    assert resumed.start_checkpoint_authority == "self_consistent_checkpoint"
+    assert resumed.source_authenticated_resume is False
+
+
+def test_source_authenticated_checkpoint_replays_complete_physics_chain() -> None:
+    model = BilinearOscillator(0.5, 1000.0, 5.0, 0.05, 0.5)
+    config = NonlinearTransientConfig(time_step_s=0.01)
+    forces = [12.0 * math.sin(0.07 * index) for index in range(31)]
+    solution = solve_bilinear_transient(model, forces, config=config)
+
+    authority = validate_nonlinear_transient_checkpoint_authority(
+        solution.checkpoints[-1],
+        model=model,
+        config=config,
+        checkpoint_chain=solution.checkpoints,
+        force_history_prefix_kn=forces,
+        require_source_authentication=True,
+    )
+    payload = authority.to_dict()
+
+    assert authority.authority == "source_authenticated_checkpoint"
+    assert authority.self_consistent_checkpoint is True
+    assert authority.source_authenticated_checkpoint is True
+    assert authority.parent_chain_complete is True
+    assert authority.force_history_sample_count == len(forces)
+    assert authority.parent_chain_hash.startswith("sha256:")
+    assert authority.force_history_hash.startswith("sha256:")
+    assert authority.initial_condition_hash.startswith("sha256:")
+    assert authority.newmark_kinematic_replay_pass is True
+    assert authority.dynamic_equilibrium_replay_pass is True
+    assert authority.external_work_replay_pass is True
+    assert authority.damping_dissipation_replay_pass is True
+    assert authority.plastic_dissipation_replay_pass is True
+    assert authority.deterministic_checkpoint_replay_pass is True
+    assert payload["receipt_hash"].startswith("sha256:")
+
+
+def test_rehashed_fabricated_parent_chain_is_rejected() -> None:
+    model = BilinearOscillator(0.5, 1000.0, 5.0, 0.05, 0.5)
+    config = NonlinearTransientConfig(time_step_s=0.01)
+    forces = [0.0, 1.0, 2.0]
+    solution = solve_bilinear_transient(model, forces, config=config)
+    checkpoint = solution.checkpoints[-1]
+    fabricated = _rehash_checkpoint(
+        replace(
+            checkpoint,
+            parent_checkpoint_hash="sha256:" + "1" * 64,
+        )
+    )
+    chain = (*solution.checkpoints[:-1], fabricated)
+
+    with pytest.raises(
+        NonlinearTransientError,
+        match="parent body/hash chain mismatch",
+    ):
+        validate_nonlinear_transient_checkpoint_authority(
+            fabricated,
+            model=model,
+            config=config,
+            checkpoint_chain=chain,
+            force_history_prefix_kn=forces,
+            require_source_authentication=True,
+        )
+
+
+def test_rehashed_work_and_newmark_fabrications_are_rejected_by_replay() -> None:
+    model = BilinearOscillator(0.5, 1000.0, 5.0, 0.05, 0.5)
+    config = NonlinearTransientConfig(time_step_s=0.01)
+    forces = [0.0, 1.0, 2.0]
+    solution = solve_bilinear_transient(model, forces, config=config)
+    checkpoint = solution.checkpoints[-1]
+
+    fabricated_work = _rehash_checkpoint(
+        replace(
+            checkpoint,
+            external_work_kn_m=checkpoint.external_work_kn_m + 1.0,
+        )
+    )
+    with pytest.raises(NonlinearTransientError, match="external-work replay"):
+        validate_nonlinear_transient_checkpoint_authority(
+            fabricated_work,
+            model=model,
+            config=config,
+            checkpoint_chain=(*solution.checkpoints[:-1], fabricated_work),
+            force_history_prefix_kn=forces,
+            require_source_authentication=True,
+        )
+
+    velocity_delta = 0.1
+    fabricated_force = (
+        checkpoint.applied_force_kn
+        + model.damping_kn_s_per_m * velocity_delta
+    )
+    fabricated_newmark = _rehash_checkpoint(
+        replace(
+            checkpoint,
+            velocity_m_per_s=checkpoint.velocity_m_per_s + velocity_delta,
+            applied_force_kn=fabricated_force,
+        )
+    )
+    altered_forces = (*forces[:-1], fabricated_force)
+    with pytest.raises(NonlinearTransientError, match="Newmark velocity replay"):
+        validate_nonlinear_transient_checkpoint_authority(
+            fabricated_newmark,
+            model=model,
+            config=config,
+            checkpoint_chain=(*solution.checkpoints[:-1], fabricated_newmark),
+            force_history_prefix_kn=altered_forces,
+            require_source_authentication=True,
+        )
+
+
+def _rehash_checkpoint(checkpoint):
+    provisional = replace(
+        checkpoint,
+        checkpoint_hash="sha256:" + "0" * 64,
+    )
+    payload = transient_module._checkpoint_payload(
+        provisional,
+        include_hash=False,
+    )
+    return replace(provisional, checkpoint_hash=canonical_hash(payload))
 
 
 def test_invalid_profile_inputs_and_newton_failure_do_not_fallback() -> None:
