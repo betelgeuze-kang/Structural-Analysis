@@ -185,12 +185,42 @@ def test_public_two_plane_column_converges_to_euler_load_and_replays(
     assert result.metrics["semantic_result_hash"] == (
         replay.metrics["semantic_result_hash"]
     )
+    scaling = result.metrics["equation_scaling"]
+    assert scaling["status"] == "available"
+    assert scaling["value"]["solve_applied"] is True
+    assert scaling["value"]["characteristic_length"] == pytest.approx(3.0)
+    assert scaling["value"]["reference_force"] > 0.0
+    assert scaling["value"]["scaling_hash"].startswith("sha256:")
+    assert (
+        scaling["value"]["scaled_stiffness_condition_number"]["status"]
+        == "available"
+    )
+    assert (
+        scaling["value"]["scaled_geometric_stiffness_condition_number"][
+            "status"
+        ]
+        == "available"
+    )
+    assert (
+        scaling["value"]["scaled_geometric_stiffness_condition_number"][
+            "value"
+        ]
+        > 0.0
+    )
+    assert (
+        result.metrics["reference_static_equation_scaling"]["status"]
+        == "available"
+    )
     compressions = result.metrics["reference_member_compression_forces"]
     assert len(compressions) == 16
     assert [row["reference_compression_force_kn"] for row in compressions] == (
         pytest.approx([100.0] * 16, rel=1.0e-12)
     )
     for row in result.metrics["modes"]:
+        assert row["scaled_residual_relative_inf"] is not None
+        assert row["scaled_residual_relative_inf"] <= 1.0e-8
+        assert row["raw_translational_residual_norm"] is not None
+        assert row["raw_rotational_residual_norm"] is not None
         shapes = row["max_component_normalized_node_shapes"]
         assert max(
             abs(value)

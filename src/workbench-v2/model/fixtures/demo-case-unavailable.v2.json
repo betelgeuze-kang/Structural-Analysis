@@ -2,7 +2,7 @@
   "schemaVersion": "workbench-case.v2",
   "provenance": {
     "sourcePath": "demo/midrise-import-only.case.json",
-    "sourceSha256": "sha256:demounavail0000000000000000000000000000000000000000000000000000000",
+    "sourceSha256": "sha256:2da75bc0234a260cf3133af7be8b8a965aa367c0955b2cbebf41186b1dda6839",
     "sourceCommitSha": "demo-local",
     "engineVersion": "structural-analysis@0.3.0",
     "generatedAt": "2026-06-21T00:00:00+00:00"

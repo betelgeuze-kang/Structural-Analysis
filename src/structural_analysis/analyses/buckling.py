@@ -27,6 +27,14 @@ from structural_analysis.solvers.buckling import (
     BucklingAnalysisError,
     solve_linear_buckling,
 )
+from structural_analysis.solvers.equation_scaling import (
+    EQUATION_SCALING_6DOF_VERSION,
+    EquationScaling6DOFError,
+    characteristic_length_from_coordinates,
+    frame3d_dof_labels,
+    make_equation_scaling_6dof,
+    reference_force_from_stiffness,
+)
 
 
 AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID = (
@@ -150,6 +158,22 @@ def run_authoritative_linear_buckling(
     reduced_stiffness = assembly.stiffness[np.ix_(free, free)]
     reduced_geometric = assembly.geometric_stiffness[np.ix_(free, free)]
     try:
+        characteristic_length = characteristic_length_from_coordinates(
+            assembly.node_coordinates
+        )
+        free_dof_labels = frame3d_dof_labels(
+            tuple(int(index) for index in assembly.free_dofs)
+        )
+        reference_force = reference_force_from_stiffness(
+            reduced_stiffness,
+            characteristic_length=characteristic_length,
+            dof_labels=free_dof_labels,
+        )
+        equation_scaling = make_equation_scaling_6dof(
+            reference_force=reference_force,
+            characteristic_length=characteristic_length,
+            dof_labels=free_dof_labels,
+        )
         buckling = solve_linear_buckling(
             reduced_stiffness,
             reduced_geometric,
@@ -159,8 +183,9 @@ def run_authoritative_linear_buckling(
             cluster_relative_tolerance=1.0e-9,
             residual_relative_tolerance=tolerance,
             orthogonality_tolerance=tolerance,
+            equation_scaling=equation_scaling,
         )
-    except BucklingAnalysisError as exc:
+    except (BucklingAnalysisError, EquationScaling6DOFError) as exc:
         return _blocked_solution(
             model,
             unsupported=[
@@ -195,7 +220,18 @@ def run_authoritative_linear_buckling(
             "step": "linear_buckling_mode",
             "iteration": mode.mode_number,
             "residual_norm": mode.residual_relative_inf,
-            "relative_increment": 0.0,
+            "raw_residual_relative_norm": mode.raw_residual_relative_inf,
+            "dimensionless_scaled_residual_norm": (
+                mode.scaled_residual_relative_inf
+            ),
+            "raw_translational_residual_norm": (
+                mode.raw_translational_residual_norm
+            ),
+            "raw_rotational_residual_norm": (
+                mode.raw_rotational_residual_norm
+            ),
+            "relative_increment": None,
+            "relative_increment_applicable": False,
             "status": "ready",
         }
         for mode in buckling.modes
@@ -216,6 +252,32 @@ def run_authoritative_linear_buckling(
         "sparse_backend_used": False,
         "stiffness_storage": "dense_numpy_binary64",
         "geometric_stiffness_storage": "dense_numpy_binary64",
+        "equation_scaling": {
+            "status": "available",
+            "value": {
+                "schema_version": EQUATION_SCALING_6DOF_VERSION,
+                "solve_applied": buckling.equation_scaling_applied,
+                "reference_force": buckling.reference_force,
+                "reference_force_basis": (
+                    "absolute_stiffness_action_for_unit_scaled_coordinates"
+                ),
+                "characteristic_length": buckling.characteristic_length,
+                "scaling_hash": buckling.equation_scaling_hash,
+                "scaled_stiffness_condition_number": _condition_evidence(
+                    buckling.scaled_stiffness_condition_number,
+                    reason="scaled_stiffness_condition_is_nonfinite",
+                ),
+                "scaled_geometric_stiffness_condition_number": (
+                    _condition_evidence(
+                        buckling.scaled_geometric_stiffness_condition_number,
+                        reason=(
+                            "scaled_geometric_stiffness_is_singular_or_"
+                            "condition_is_nonfinite"
+                        ),
+                    )
+                ),
+            },
+        },
         "geometric_stiffness_formulation": (
             assembly.geometric_stiffness_formulation
         ),
@@ -231,6 +293,13 @@ def run_authoritative_linear_buckling(
         "reference_static_residual_norm": reference.metrics["residual_norm"],
         "reference_static_relative_residual": reference.metrics["relative_residual"],
         "reference_static_max_displacement": reference.metrics["max_displacement"],
+        "reference_static_equation_scaling": reference.metrics.get(
+            "equation_scaling",
+            {
+                "status": "unavailable",
+                "reason": "reference_static_scaling_evidence_missing",
+            },
+        ),
         "reference_member_compression_forces": compression_rows,
         "reference_compression_scale_kn": assembly.reference_compression_scale_kn,
         "total_dof_count": int(assembly.stiffness.shape[0]),
@@ -321,6 +390,18 @@ def _mode_rows(assembly: BucklingAssembly, *, buckling: Any) -> list[dict[str, A
                     mode.generalized_geometric_stiffness
                 ),
                 "residual_relative_inf": mode.residual_relative_inf,
+                "raw_residual_relative_inf": (
+                    mode.raw_residual_relative_inf
+                ),
+                "raw_translational_residual_norm": (
+                    mode.raw_translational_residual_norm
+                ),
+                "raw_rotational_residual_norm": (
+                    mode.raw_rotational_residual_norm
+                ),
+                "scaled_residual_relative_inf": (
+                    mode.scaled_residual_relative_inf
+                ),
                 "reduced_stiffness_normalized_shape_sha256": _vector_hash(
                     reduced_stiffness_normalized
                 ),
@@ -331,6 +412,16 @@ def _mode_rows(assembly: BucklingAssembly, *, buckling: Any) -> list[dict[str, A
             }
         )
     return rows
+
+
+def _condition_evidence(
+    value: float | None,
+    *,
+    reason: str,
+) -> dict[str, Any]:
+    if value is None:
+        return {"status": "unavailable", "reason": reason}
+    return {"status": "available", "value": value}
 
 
 def _node_shape_rows(

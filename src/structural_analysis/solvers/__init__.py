@@ -10,6 +10,7 @@ from structural_analysis.solvers.equation_scaling import (
     frame3d_dof_labels,
     make_equation_scaling_6dof,
     reference_force_from_mixed_load,
+    reference_force_from_stiffness,
 )
 
 __all__ = [
@@ -22,4 +23,5 @@ __all__ = [
     "frame3d_dof_labels",
     "make_equation_scaling_6dof",
     "reference_force_from_mixed_load",
+    "reference_force_from_stiffness",
 ]

@@ -1,5 +1,8 @@
 import { useState, type ReactElement } from 'react'
-import type { WorkbenchCaseV2 } from '../model/caseSchema'
+import {
+  evidenceValue,
+  type WorkbenchCaseV2,
+} from '../model/caseSchema'
 import type { DataMode, RunStatus } from '../model/workbenchState'
 import {
   reviewDraftPersistenceMetadata,
@@ -17,6 +20,8 @@ export interface ComparisonRow {
   referenceResultsAvailable: boolean
   referenceResultsPath: string | null
   runnerId: string | null
+  referenceEquationScalingAvailable: boolean
+  referenceEquationScalingHash: string | null
 }
 
 interface ExportPanelProps {
@@ -87,20 +92,26 @@ export function ExportPanel({
       const evidenceManifest = await loadEvidenceManifestRef(baseUrl)
 
       const bundle = {
-        schema_version: 'workbench-v2-export.v2',
+        schema_version: 'workbench-v2-export.v3',
         data_mode: dataMode,
         is_demo: dataMode === 'demo',
         exported_at: new Date().toISOString(),
         run_status: runStatus,
         convergence_available: convergenceAvailable,
-        source_path: caseV2.provenance.sourcePath,
-        source_sha256: caseV2.provenance.sourceSha256,
-        source_commit_sha: caseV2.provenance.sourceCommitSha,
+        source_path: evidenceValue(caseV2.provenance.sourcePath),
+        source_path_evidence: caseV2.provenance.sourcePath,
+        source_sha256: evidenceValue(caseV2.provenance.sourceSha256),
+        source_sha256_evidence: caseV2.provenance.sourceSha256,
+        source_commit_sha: evidenceValue(
+          caseV2.provenance.sourceCommitSha,
+        ),
+        source_commit_sha_evidence: caseV2.provenance.sourceCommitSha,
         analysis_result_sha256: analysisResultSha256,
         provenance: caseV2.provenance,
         model: caseV2.model,
         analysis: caseV2.analysis ?? null,
-        residual_history: caseV2.residualHistory,
+        residual_history: evidenceValue(caseV2.residualHistory),
+        residual_history_evidence: caseV2.residualHistory,
         selected_member_id: selectedMemberId,
         viewer_deep_link: viewerDeepLink,
         // Blockers exactly as displayed — never silently dropped.

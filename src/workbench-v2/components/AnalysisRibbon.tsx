@@ -1,6 +1,10 @@
 import type { ReactElement } from 'react'
 import type { RunStatus } from '../model/workbenchState'
-import type { CaseAnalysis } from '../model/caseSchema'
+import {
+  evidenceField,
+  formatEvidence,
+  type CaseAnalysis,
+} from '../model/caseSchema'
 import { StateChip } from './StateChip'
 
 const STAGES: { key: RunStatus; label: string }[] = [
@@ -57,13 +61,43 @@ export function AnalysisRibbon({ runStatus, analysis, convergenceAvailable }: An
 
       {analysis ? (
         <dl className="wb2-kv wb2-analysis-kv">
-          <dt>Type</dt><dd>{analysis.type}</dd>
-          <dt>Solver</dt><dd>{analysis.solver}</dd>
-          <dt>Load scale</dt><dd>{fmt(analysis.loadScale)}</dd>
-          <dt>Iterations</dt><dd>{analysis.iterationCount}</dd>
-          <dt>Residual tolerance</dt><dd>{fmt(analysis.residualTolerance)}</dd>
-          <dt>Final normalized residual</dt><dd>{fmt(analysis.finalNormalizedResidual)}</dd>
-          <dt>Final relative increment</dt><dd>{fmt(analysis.finalRelativeIncrement)}</dd>
+          <dt>Type</dt><dd>{formatEvidence(analysis.type)}</dd>
+          <dt>Solver</dt><dd>{formatEvidence(analysis.solver)}</dd>
+          <dt>Load scale</dt><dd>{formatEvidence(analysis.loadScale, fmt)}</dd>
+          <dt>Iterations</dt><dd>{formatEvidence(analysis.iterationCount, String)}</dd>
+          <dt>Residual tolerance</dt><dd>{formatEvidence(analysis.residualTolerance, fmt)}</dd>
+          <dt>Final normalized residual</dt><dd>{formatEvidence(analysis.finalNormalizedResidual, fmt)}</dd>
+          <dt>Final relative increment</dt><dd>{formatEvidence(analysis.finalRelativeIncrement, fmt)}</dd>
+          <dt>Characteristic length</dt><dd>
+            {formatEvidence(
+              evidenceField(analysis.equationScaling, (value) => value.characteristicLength),
+              fmt,
+            )}
+          </dd>
+          <dt>Scaled residual</dt><dd>
+            {formatEvidence(
+              evidenceField(analysis.equationScaling, (value) => value.dimensionlessScaledResidual),
+              fmt,
+            )}
+          </dd>
+          <dt>Scaled increment</dt><dd>
+            {formatEvidence(
+              evidenceField(analysis.equationScaling, (value) => value.dimensionlessScaledIncrement),
+              fmt,
+            )}
+          </dd>
+          <dt>Scaled condition</dt><dd>
+            {formatEvidence(
+              evidenceField(analysis.equationScaling, (value) => value.scaledConditionNumber),
+              fmt,
+            )}
+          </dd>
+          <dt>Scaling hash</dt><dd className="wb2-mono">
+            {formatEvidence(
+              evidenceField(analysis.equationScaling, (value) => value.scalingHash),
+              (value) => value.slice(0, 19),
+            )}
+          </dd>
         </dl>
       ) : null}
     </section>

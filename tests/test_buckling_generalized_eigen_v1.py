@@ -14,6 +14,9 @@ from structural_analysis.solvers.buckling import (
     BucklingAnalysisError,
     solve_linear_buckling,
 )
+from structural_analysis.solvers.equation_scaling import (
+    make_equation_scaling_6dof,
+)
 
 
 def test_singular_geometric_stiffness_filters_infinite_mode() -> None:
@@ -45,6 +48,38 @@ def test_small_scaled_geometric_stiffness_keeps_finite_mode() -> None:
     assert solution.finite_positive_eigenvalue_count == 1
     assert solution.critical_load_factor == pytest.approx(1.0e15, rel=1.0e-14)
     assert solution.modes[0].residual_relative_inf <= 1.0e-14
+
+
+def test_buckling_kernel_scaled_solve_preserves_physical_eigenproblem() -> None:
+    stiffness = np.asarray([[100.0, 20.0], [20.0, 800.0]])
+    geometric = np.asarray([[10.0, 1.0], [1.0, 20.0]])
+    scaling = make_equation_scaling_6dof(
+        reference_force=200.0,
+        characteristic_length=4.0,
+        dof_labels=("UX", "RZ"),
+    )
+
+    raw = solve_linear_buckling(stiffness, geometric, mode_count=2)
+    scaled = solve_linear_buckling(
+        stiffness,
+        geometric,
+        mode_count=2,
+        equation_scaling=scaling,
+    )
+
+    assert [mode.load_factor for mode in scaled.modes] == pytest.approx(
+        [mode.load_factor for mode in raw.modes],
+        rel=1.0e-14,
+    )
+    assert scaled.equation_scaling_applied is True
+    assert scaled.equation_scaling_hash == scaling.scaling_hash
+    assert scaled.scaled_stiffness_condition_number is not None
+    assert scaled.scaled_geometric_stiffness_condition_number is not None
+    for mode in scaled.modes:
+        assert mode.raw_translational_residual_norm is not None
+        assert mode.raw_rotational_residual_norm is not None
+        assert mode.scaled_residual_relative_inf is not None
+        assert mode.scaled_residual_relative_inf <= 1.0e-14
 
 
 def test_repeated_buckling_eigenspace_has_stable_coordinate_axis_basis() -> None:

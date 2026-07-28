@@ -35,6 +35,8 @@ export interface BenchmarkVerification {
   referenceResultsPath: string | null
   referenceSolver: string | null
   referenceSolverVersion: string | null
+  equationScalingAvailable: boolean
+  equationScalingHash: string | null
   acquisitionCommand: string | null
   runnerId: string | null
 }
@@ -93,6 +95,9 @@ function asAvailability(v: unknown): LocalAvailability {
 
 function normalizeVerification(v: unknown): BenchmarkVerification {
   const r = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>
+  const scalingHash = str(r.equationScalingHash)
+  const validScalingHash =
+    scalingHash != null && /^sha256:[0-9a-f]{64}$/.test(scalingHash)
   return {
     licenseId: str(r.licenseId),
     licenseUrl: str(r.licenseUrl),
@@ -103,6 +108,9 @@ function normalizeVerification(v: unknown): BenchmarkVerification {
     referenceResultsPath: str(r.referenceResultsPath),
     referenceSolver: str(r.referenceSolver),
     referenceSolverVersion: str(r.referenceSolverVersion),
+    equationScalingAvailable:
+      bool(r.equationScalingAvailable) && validScalingHash,
+    equationScalingHash: validScalingHash ? scalingHash : null,
     acquisitionCommand: str(r.acquisitionCommand),
     runnerId: str(r.runnerId),
   }

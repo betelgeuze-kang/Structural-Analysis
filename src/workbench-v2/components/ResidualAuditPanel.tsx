@@ -1,5 +1,11 @@
 import type { ReactElement } from 'react'
-import type { ResidualStep } from '../model/caseSchema'
+import {
+  evidenceField,
+  evidenceValue,
+  formatEvidence,
+  type EvidenceValue,
+  type ResidualStep,
+} from '../model/caseSchema'
 
 function fmt(value: number): string {
   if (value !== 0 && (Math.abs(value) < 1e-3 || Math.abs(value) >= 1e6)) return value.toExponential(3)
@@ -7,9 +13,9 @@ function fmt(value: number): string {
 }
 
 interface ResidualAuditPanelProps {
-  residualHistory: ResidualStep[]
+  residualHistory: EvidenceValue<ResidualStep[]>
   sourceLabel: string
-  residualTolerance?: number
+  residualTolerance?: EvidenceValue<number>
 }
 
 const CHART_W = 460
@@ -26,7 +32,18 @@ const PAD_B = 26
  * only when residual history exists (never fabricated).
  */
 function ResidualChart({ history, tolerance }: { history: ResidualStep[]; tolerance?: number }): ReactElement {
-  const positive = history.filter((s) => s.residual > 0)
+  const positive = history.flatMap((step) => {
+    const iteration = evidenceValue(step.iteration)
+    const residual = evidenceValue(
+      evidenceField(
+        step.equationScaling,
+        (value) => value.dimensionlessScaledResidual,
+      ),
+    )
+    return iteration != null && residual != null && residual > 0
+      ? [{ iteration, residual }]
+      : []
+  })
   const residualValues = positive.map((s) => s.residual)
   const candidates = [...residualValues]
   if (tolerance != null && tolerance > 0) candidates.push(tolerance)
@@ -57,7 +74,7 @@ function ResidualChart({ history, tolerance }: { history: ResidualStep[]; tolera
       className="wb2-residual-chart"
       viewBox={`0 0 ${CHART_W} ${CHART_H}`}
       role="img"
-      aria-label="Residual versus iteration on a base-10 log scale"
+      aria-label="Dimensionless scaled residual versus iteration on a base-10 log scale"
       data-wb2-residual-chart
       preserveAspectRatio="xMidYMid meet"
     >
@@ -86,40 +103,78 @@ function ResidualChart({ history, tolerance }: { history: ResidualStep[]; tolera
 }
 
 export function ResidualAuditPanel({ residualHistory, sourceLabel, residualTolerance }: ResidualAuditPanelProps): ReactElement {
-  const hasPositive = residualHistory.some((s) => s.residual > 0)
+  const history = evidenceValue(residualHistory)
+  const tolerance = evidenceValue(residualTolerance)
+  const hasPositive = history?.some((step) => {
+    const residual = evidenceValue(
+      evidenceField(
+        step.equationScaling,
+        (value) => value.dimensionlessScaledResidual,
+      ),
+    )
+    return residual != null && residual > 0
+  }) ?? false
   return (
     <section className="wb2-panel" aria-labelledby="wb2-residual-title">
       <h2 id="wb2-residual-title" className="wb2-panel__title">Residual audit</h2>
-      {residualHistory.length ? (
+      {history && history.length ? (
         <>
-          {hasPositive ? <ResidualChart history={residualHistory} tolerance={residualTolerance} /> : null}
+          {hasPositive ? <ResidualChart history={history} tolerance={tolerance ?? undefined} /> : null}
           <div className="wb2-table-scroll" role="region" aria-label="Residual history table" tabIndex={0}>
             <table className="wb2-table">
               <thead>
                 <tr>
                   <th className="wb2-num">Iter</th>
-                  <th className="wb2-num">Residual</th>
-                  <th className="wb2-num">Rel. increment</th>
+                  <th className="wb2-num">Legacy residual</th>
+                  <th className="wb2-num">Raw transl. residual</th>
+                  <th className="wb2-num">Raw rot. residual</th>
+                  <th className="wb2-num">Scaled residual</th>
+                  <th className="wb2-num">Raw transl. increment</th>
+                  <th className="wb2-num">Raw rot. increment</th>
+                  <th className="wb2-num">Scaled increment</th>
+                  <th className="wb2-num">Scaled condition</th>
+                  <th className="wb2-num">Legacy rel. increment</th>
                   <th className="wb2-num">Alpha</th>
+                  <th>Scaling hash</th>
                 </tr>
               </thead>
               <tbody>
-                {residualHistory.map((step) => (
-                  <tr key={step.iteration}>
-                    <td className="wb2-num">{step.iteration}</td>
-                    <td className="wb2-num">{fmt(step.residual)}</td>
-                    <td className="wb2-num">{fmt(step.relativeIncrement)}</td>
-                    <td className="wb2-num">{fmt(step.alpha)}</td>
-                  </tr>
-                ))}
+                {history.map((step, index) => {
+                  const scaling = step.equationScaling
+                  return (
+                    <tr key={index}>
+                      <td className="wb2-num">{formatEvidence(step.iteration, String)}</td>
+                      <td className="wb2-num">{formatEvidence(step.residual, fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(evidenceField(scaling, (value) => value.rawTranslationalResidual), fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(evidenceField(scaling, (value) => value.rawRotationalResidual), fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(evidenceField(scaling, (value) => value.dimensionlessScaledResidual), fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(evidenceField(scaling, (value) => value.rawTranslationIncrement), fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(evidenceField(scaling, (value) => value.rawRotationIncrement), fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(evidenceField(scaling, (value) => value.dimensionlessScaledIncrement), fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(evidenceField(scaling, (value) => value.scaledConditionNumber), fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(step.relativeIncrement, fmt)}</td>
+                      <td className="wb2-num">{formatEvidence(step.alpha, fmt)}</td>
+                      <td className="wb2-mono">
+                        {formatEvidence(
+                          evidenceField(scaling, (value) => value.scalingHash),
+                          (value) => value.slice(0, 19),
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
           <p className="wb2-provenance" data-wb2-provenance>Source: {sourceLabel}</p>
         </>
+      ) : history ? (
+        <p className="wb2-empty" data-wb2-empty-history>
+          Residual history is explicitly available but contains no recorded iterations.
+        </p>
       ) : (
         <p className="wb2-unavailable" data-wb2-unavailable>
-          No residual history attached. Convergence trace cannot be shown for this case.
+          Residual history is {formatEvidence(residualHistory)}. Convergence trace cannot be shown.
         </p>
       )}
     </section>

@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type ReactElement } from 'react'
 import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
-import type { WorkbenchCaseV2 } from './model/caseSchema'
+import {
+  evidenceValue,
+  type WorkbenchCaseV2,
+} from './model/caseSchema'
 import { defaultDemoCaseId, type DemoCaseId } from './model/demoCases'
 import { initialWorkbenchState, workbenchReducer } from './model/workbenchState'
 import { WorkbenchShell } from './components/WorkbenchShell'
@@ -66,7 +69,9 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
   )
   const reviewDraftStatesRef = useRef<ReadonlyMap<string, ReviewDraftState>>(reviewDraftStates)
 
-  const reviewSourceCommitSha = caseV2?.provenance.sourceCommitSha ?? null
+  const reviewSourceCommitSha = evidenceValue(
+    caseV2?.provenance.sourceCommitSha,
+  )
 
   const reviewDraftState = useMemo(() => {
     if (!reviewSourceCommitSha) return null
@@ -103,6 +108,10 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
         referenceResultsAvailable: c.verification.referenceResultsAvailable,
         referenceResultsPath: c.verification.referenceResultsPath,
         runnerId: c.verification.runnerId,
+        referenceEquationScalingAvailable: (
+          c.verification.equationScalingAvailable
+        ),
+        referenceEquationScalingHash: c.verification.equationScalingHash,
       }))
   }, [compareIds])
 
@@ -122,8 +131,13 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
         setSourceLabel(res.sourcePath)
         if (res.status === 'ready' && res.caseV2) {
           const w = res.validation?.warnings ?? []
-          const reviewCommitSha = res.caseV2.provenance.sourceCommitSha
-          if (!reviewDraftStatesRef.current.has(reviewCommitSha)) {
+          const reviewCommitSha = evidenceValue(
+            res.caseV2.provenance.sourceCommitSha,
+          )
+          if (
+            reviewCommitSha
+            && !reviewDraftStatesRef.current.has(reviewCommitSha)
+          ) {
             const nextReviewStates = new Map(reviewDraftStatesRef.current)
             nextReviewStates.set(reviewCommitSha, loadReviewDraftState(reviewCommitSha))
             reviewDraftStatesRef.current = nextReviewStates
@@ -274,7 +288,14 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
 
       {/* Decision: Review + Export */}
       <div id="wb2-sec-review" className="wb2-section">
-        {caseV2 && !reviewDraftState ? (
+        {caseV2 && !reviewSourceCommitSha ? (
+          <section className="wb2-panel" aria-labelledby="wb2-verdict-title">
+            <h2 id="wb2-verdict-title" className="wb2-panel__title">Review decision</h2>
+            <p className="wb2-unavailable" data-wb2-unavailable>
+              Review persistence is UNAVAILABLE because the source commit is not available.
+            </p>
+          </section>
+        ) : caseV2 && !reviewDraftState ? (
           <section className="wb2-panel" aria-labelledby="wb2-verdict-title">
             <h2 id="wb2-verdict-title" className="wb2-panel__title">Review decision</h2>
             <p className="wb2-empty" role="status" data-wb2-review-loading>
@@ -303,6 +324,13 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
             baseUrl={baseUrl}
             reviewDraftState={reviewDraftState}
           />
+        ) : caseV2 && !reviewSourceCommitSha ? (
+          <section className="wb2-panel" aria-labelledby="wb2-export-title">
+            <h2 id="wb2-export-title" className="wb2-panel__title">Export</h2>
+            <p className="wb2-unavailable" data-wb2-unavailable>
+              Export is UNAVAILABLE because reviewer persistence cannot be bound to a source commit.
+            </p>
+          </section>
         ) : caseV2 ? (
           <section className="wb2-panel" aria-labelledby="wb2-export-title">
             <h2 id="wb2-export-title" className="wb2-panel__title">Export</h2>

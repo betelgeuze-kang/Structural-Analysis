@@ -1,5 +1,11 @@
 import type { ReactElement } from 'react'
-import type { WorkbenchCaseV2 } from '../model/caseSchema'
+import {
+  evidenceField,
+  evidenceValue,
+  formatEvidence,
+  type EvidenceValue,
+  type WorkbenchCaseV2,
+} from '../model/caseSchema'
 import type { ComparisonRow } from './ExportPanel'
 
 interface ComparePanelProps {
@@ -16,14 +22,34 @@ interface ComparePanelProps {
  * panel shows the gap honestly instead of inventing numbers.
  */
 export function ComparePanel({ caseV2, rows, onClear }: ComparePanelProps): ReactElement {
+  const currentScalingHash: EvidenceValue<string> = caseV2?.analysis
+    ? evidenceField(
+        caseV2.analysis.equationScaling,
+        (value) => value.scalingHash,
+      )
+    : { status: 'unavailable' }
+  const currentScalingAvailable = evidenceValue(currentScalingHash) != null
+
   return (
     <section className="wb2-panel" aria-labelledby="wb2-compare-title" data-compare-panel>
       <h2 id="wb2-compare-title" className="wb2-panel__title">Compare</h2>
 
       {caseV2 ? (
         <p className="wb2-note">
-          Current case: <code className="wb2-mono">{caseV2.provenance.sourcePath}</code> @{' '}
-          <code className="wb2-mono">{caseV2.provenance.sourceCommitSha.slice(0, 12)}</code>
+          Current case: <code className="wb2-mono">{formatEvidence(caseV2.provenance.sourcePath)}</code> @{' '}
+          <code className="wb2-mono">
+            {formatEvidence(
+              caseV2.provenance.sourceCommitSha,
+              (value) => value.slice(0, 12),
+            )}
+          </code>
+          {' '}· scaling{' '}
+          <code className="wb2-mono">
+            {formatEvidence(
+              currentScalingHash,
+              (value) => `${value.slice(0, 19)}…`,
+            )}
+          </code>
         </p>
       ) : null}
 
@@ -45,11 +71,17 @@ export function ComparePanel({ caseV2, rows, onClear }: ComparePanelProps): Reac
                   <th>Reference solver</th>
                   <th>Runner</th>
                   <th>Comparison status</th>
+                  <th>Reference scaling</th>
+                  <th>Scaled residual comparison</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => {
                   const ready = r.referenceResultsAvailable && !!r.runnerId && r.comparable
+                  const scaledReady =
+                    currentScalingAvailable
+                    && r.referenceEquationScalingAvailable
+                    && r.referenceEquationScalingHash != null
                   return (
                     <tr key={r.id} data-compare-row={r.id}>
                       <td>{r.title}</td>
@@ -66,6 +98,26 @@ export function ComparePanel({ caseV2, rows, onClear }: ComparePanelProps): Reac
                             : !r.referenceResultsAvailable
                               ? 'blocked — no reference results attached'
                               : 'blocked — no runner registered'}
+                      </td>
+                      <td>
+                        {r.referenceEquationScalingAvailable
+                          && r.referenceEquationScalingHash
+                          ? (
+                              <code
+                                className="wb2-mono"
+                                title={r.referenceEquationScalingHash}
+                              >
+                                {r.referenceEquationScalingHash.slice(0, 19)}…
+                              </code>
+                            )
+                          : 'UNAVAILABLE'}
+                      </td>
+                      <td data-scaled-compare-status={scaledReady ? 'ready' : 'blocked'}>
+                        {scaledReady
+                          ? 'ready — both source-bound scaling receipts are attached'
+                          : !currentScalingAvailable
+                            ? 'blocked — current scaling evidence unavailable'
+                            : 'blocked — reference scaling evidence unavailable'}
                       </td>
                     </tr>
                   )

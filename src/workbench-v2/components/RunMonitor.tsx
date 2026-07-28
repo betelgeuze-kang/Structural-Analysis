@@ -1,12 +1,18 @@
 import type { ReactElement } from 'react'
-import type { CaseAnalysis, ResidualStep } from '../model/caseSchema'
+import {
+  evidenceValue,
+  formatEvidence,
+  type CaseAnalysis,
+  type EvidenceValue,
+  type ResidualStep,
+} from '../model/caseSchema'
 import type { RunStatus } from '../model/workbenchState'
 import { StateChip } from './StateChip'
 
 interface RunMonitorProps {
   runStatus: RunStatus
   analysis?: CaseAnalysis
-  residualHistory: ResidualStep[]
+  residualHistory: EvidenceValue<ResidualStep[]>
   convergenceAvailable: boolean
 }
 
@@ -44,11 +50,20 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
     )
   }
 
-  const recorded = residualHistory.length
-  const total = Math.max(analysis.iterationCount, recorded)
-  const pct = total > 0 ? Math.min(100, Math.round((recorded / total) * 100)) : 0
-  const latest = recorded ? residualHistory[recorded - 1] : null
-  const withinTolerance = analysis.finalNormalizedResidual <= analysis.residualTolerance
+  const history = evidenceValue(residualHistory)
+  const recorded = history?.length ?? null
+  const total = evidenceValue(analysis.iterationCount)
+  const pct =
+    recorded != null && total != null && total > 0
+      ? Math.min(100, Math.round((recorded / total) * 100))
+      : 0
+  const latest = history?.length ? history[history.length - 1] : null
+  const finalResidual = evidenceValue(analysis.finalNormalizedResidual)
+  const residualTolerance = evidenceValue(analysis.residualTolerance)
+  const withinTolerance =
+    finalResidual != null && residualTolerance != null
+      ? finalResidual <= residualTolerance
+      : null
   const statusState = runStatus === 'converged' ? 'LIVE' : runStatus === 'failed' ? 'BLOCKED' : 'UNAVAILABLE'
 
   return (
@@ -64,26 +79,37 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
         className="wb2-run-progress"
         role="progressbar"
         aria-valuemin={0}
-        aria-valuemax={total}
-        aria-valuenow={recorded}
+        aria-valuemax={total ?? 1}
+        aria-valuenow={recorded ?? undefined}
         aria-label="Recorded iterations"
         data-run-progress={pct}
       >
         <div className="wb2-run-progress__bar" style={{ width: `${pct}%` }} />
       </div>
       <p className="wb2-run-progress__caption">
-        {recorded} of {total} iteration(s) recorded · load scale {fmt(analysis.loadScale)}
+        {formatEvidence(residualHistory, (rows) => String(rows.length))} of{' '}
+        {formatEvidence(analysis.iterationCount, String)} iteration(s) recorded · load scale{' '}
+        {formatEvidence(analysis.loadScale, fmt)}
       </p>
 
       <dl className="wb2-kv">
-        <dt>Latest residual</dt><dd className="wb2-mono">{latest ? fmt(latest.residual) : 'n/a'}</dd>
-        <dt>Final residual</dt><dd className="wb2-mono">{fmt(analysis.finalNormalizedResidual)}</dd>
-        <dt>Tolerance</dt><dd className="wb2-mono">{fmt(analysis.residualTolerance)}</dd>
-        <dt>Final rel. increment</dt><dd className="wb2-mono">{fmt(analysis.finalRelativeIncrement)}</dd>
+        <dt>Latest residual</dt><dd className="wb2-mono">
+          {latest
+            ? formatEvidence(latest.residual, fmt)
+            : formatEvidence(residualHistory, () => 'NO RECORDED ITERATION')}
+        </dd>
+        <dt>Final residual</dt><dd className="wb2-mono">{formatEvidence(analysis.finalNormalizedResidual, fmt)}</dd>
+        <dt>Tolerance</dt><dd className="wb2-mono">{formatEvidence(analysis.residualTolerance, fmt)}</dd>
+        <dt>Final rel. increment</dt><dd className="wb2-mono">{formatEvidence(analysis.finalRelativeIncrement, fmt)}</dd>
       </dl>
 
-      <p className={`wb2-result-tol${withinTolerance ? ' is-ok' : ' is-no'}`} data-run-within-tol={String(withinTolerance)}>
-        {withinTolerance
+      <p
+        className={`wb2-result-tol${withinTolerance == null ? '' : withinTolerance ? ' is-ok' : ' is-no'}`}
+        data-run-within-tol={withinTolerance == null ? 'unavailable' : String(withinTolerance)}
+      >
+        {withinTolerance == null
+          ? 'Tolerance comparison is UNAVAILABLE because one or both required values are not available.'
+          : withinTolerance
           ? 'Final residual is at or below tolerance.'
           : 'Final residual is above tolerance — run is not converged.'}
       </p>

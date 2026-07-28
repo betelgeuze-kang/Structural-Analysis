@@ -12,6 +12,9 @@ from structural_analysis.solvers._generalized_eigen import (
     semantic_modes_sha256,
 )
 from structural_analysis.solvers.modal import ModalAnalysisError, solve_modal_modes
+from structural_analysis.solvers.equation_scaling import (
+    make_equation_scaling_6dof,
+)
 
 
 def test_two_dof_shear_system_matches_closed_form_modes() -> None:
@@ -49,6 +52,40 @@ def test_modal_kernel_excludes_rigid_modes_without_regularization() -> None:
     assert solution.modes[0].eigenvalue_rad2_per_s2 == pytest.approx(4.0)
     assert solution.stiffness_minimum_eigenvalue == pytest.approx(0.0)
     assert solution.regularization_applied is False
+
+
+def test_modal_kernel_scaled_solve_preserves_physical_eigenproblem() -> None:
+    stiffness = np.asarray([[100.0, 20.0], [20.0, 800.0]])
+    mass = np.asarray([[2.0, 0.1], [0.1, 8.0]])
+    scaling = make_equation_scaling_6dof(
+        reference_force=200.0,
+        characteristic_length=4.0,
+        dof_labels=("UX", "RZ"),
+    )
+
+    raw = solve_modal_modes(stiffness, mass, mode_count=2)
+    scaled = solve_modal_modes(
+        stiffness,
+        mass,
+        mode_count=2,
+        equation_scaling=scaling,
+    )
+
+    assert [mode.eigenvalue_rad2_per_s2 for mode in scaled.modes] == (
+        pytest.approx(
+            [mode.eigenvalue_rad2_per_s2 for mode in raw.modes],
+            rel=1.0e-14,
+        )
+    )
+    assert scaled.equation_scaling_applied is True
+    assert scaled.equation_scaling_hash == scaling.scaling_hash
+    assert scaled.scaled_stiffness_condition_number is not None
+    assert scaled.scaled_mass_condition_number is not None
+    for mode in scaled.modes:
+        assert mode.raw_translational_residual_norm is not None
+        assert mode.raw_rotational_residual_norm is not None
+        assert mode.scaled_residual_relative_inf is not None
+        assert mode.scaled_residual_relative_inf <= 1.0e-14
 
 
 def test_repeated_modal_eigenspace_has_stable_coordinate_axis_basis() -> None:

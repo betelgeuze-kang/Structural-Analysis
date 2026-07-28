@@ -21,6 +21,15 @@ from structural_analysis.assembly.linear_static import (
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.results.viewer import build_linear_static_viewer_payload
+from structural_analysis.solvers.equation_scaling import (
+    EquationScaling6DOF,
+    EquationScaling6DOFError,
+    build_equation_scaling_6dof,
+    characteristic_length_from_coordinates,
+    frame3d_dof_labels,
+    make_equation_scaling_6dof,
+    reference_force_from_mixed_load,
+)
 
 MATRIX_BACKEND = "numpy_linalg_solve_dense"
 SPARSE_MATRIX_BACKEND = "scipy_sparse_spsolve_cpu"
@@ -144,36 +153,73 @@ def _solve_linear_static(
     active = set(assembly.active_dofs)
     free = sorted(active - constrained)
     free_displacements = np.zeros(len(free), dtype=float)
+    equation_scaling: EquationScaling6DOF | None = None
+    scaling_transform = None
     if free:
         free_stiffness = assembly.stiffness[np.ix_(free, free)]
         free_loads = assembly.loads[free]
         try:
+            characteristic_length = characteristic_length_from_coordinates(
+                assembly.node_coordinates
+            )
+            free_dof_labels = frame3d_dof_labels(free)
+            reference_force = reference_force_from_mixed_load(
+                free_loads,
+                characteristic_length=characteristic_length,
+                dof_labels=free_dof_labels,
+            )
+            scaling_transform = make_equation_scaling_6dof(
+                reference_force=reference_force,
+                characteristic_length=characteristic_length,
+                dof_labels=free_dof_labels,
+            )
+            scaled_stiffness = scaling_transform.scale_tangent(free_stiffness)
+            scaled_loads = scaling_transform.scale_residual(free_loads)
             if sparse_backend_used:
                 rank_deficiency_detail = _small_sparse_rank_deficiency_detail(
-                    free_stiffness.tocsr()
+                    scaled_stiffness.tocsr()
                 )
                 if rank_deficiency_detail is not None:
                     raise ValueError(rank_deficiency_detail)
                 with warnings_module.catch_warnings():
                     warnings_module.simplefilter("error", MatrixRankWarning)
-                    free_displacements = np.asarray(
-                        spsolve(free_stiffness.tocsc(), free_loads),
+                    scaled_displacements = np.asarray(
+                        spsolve(scaled_stiffness.tocsc(), scaled_loads),
                         dtype=float,
                     )
-                if not np.all(np.isfinite(free_displacements)):
+                if not np.all(np.isfinite(scaled_displacements)):
                     raise ValueError("sparse solve returned non-finite displacements")
             else:
-                free_displacements = np.linalg.solve(free_stiffness, free_loads)
-        except (np.linalg.LinAlgError, ValueError, MatrixRankWarning) as exc:
+                scaled_displacements = np.linalg.solve(
+                    scaled_stiffness,
+                    scaled_loads,
+                )
+            free_displacements = scaling_transform.unscale_increment(
+                scaled_displacements
+            )
+        except (
+            EquationScaling6DOFError,
+            np.linalg.LinAlgError,
+            ValueError,
+            MatrixRankWarning,
+        ) as exc:
             return _blocked_response(
                 [
                     {
-                        "kind": "linear_static_singular_stiffness",
+                        "kind": (
+                            "linear_static_equation_scaling_failed"
+                            if isinstance(exc, EquationScaling6DOFError)
+                            else "linear_static_singular_stiffness"
+                        ),
                         "detail": str(exc),
                         "free_dof_count": len(free),
                         "constrained_dof_count": len(constrained),
                         "guard_outcome": "blocked",
-                        "mechanism_guard": "singular_or_rigid_body",
+                        "mechanism_guard": (
+                            "physical_equation_scaling"
+                            if isinstance(exc, EquationScaling6DOFError)
+                            else "singular_or_rigid_body"
+                        ),
                         "regularization_used": False,
                         "fallback_used": False,
                     }
@@ -204,14 +250,38 @@ def _solve_linear_static(
         if residual_free.size
         else 0.0
     )
+    if free:
+        assert scaling_transform is not None
+        try:
+            equation_scaling = build_equation_scaling_6dof(
+                reference_force=scaling_transform.reference_force,
+                characteristic_length=scaling_transform.characteristic_length,
+                residual=residual_free,
+                increment=free_displacements,
+                tangent=free_stiffness,
+                dof_labels=scaling_transform.dof_labels,
+            )
+        except EquationScaling6DOFError as exc:
+            return _blocked_response(
+                [
+                    {
+                        "kind": "linear_static_equation_scaling_failed",
+                        "detail": str(exc),
+                        "free_dof_count": len(free),
+                        "guard_outcome": "blocked",
+                        "regularization_used": False,
+                        "fallback_used": False,
+                    }
+                ],
+                model,
+                assembly=assembly,
+                free_dof_count=len(free),
+                matrix_backend=matrix_backend,
+                sparse_backend_used=sparse_backend_used,
+            )
     constrained_reaction_norm = (
         float(np.linalg.norm(reaction_constrained, ord=np.inf))
         if reaction_constrained.size
-        else 0.0
-    )
-    load_norm = (
-        float(np.linalg.norm(assembly.loads, ord=np.inf))
-        if assembly.loads.size
         else 0.0
     )
     displacement_norm = (
@@ -219,14 +289,19 @@ def _solve_linear_static(
         if displacements.size
         else 0.0
     )
-    relative_residual = residual_norm / max(load_norm, 1.0)
+    scaled_residual_norm = (
+        equation_scaling.scaled_residual_norm
+        if equation_scaling is not None
+        else 0.0
+    )
+    relative_residual = scaled_residual_norm
     strain_energy = float(0.5 * displacements @ internal_forces)
     linear_ramp_external_work = float(0.5 * displacements @ external_forces)
     energy_balance_error = abs(strain_energy - linear_ramp_external_work)
     stiffness_symmetry_error = _stiffness_symmetry_error(assembly.stiffness)
     status = (
         "ready"
-        if residual_norm <= tolerance * max(load_norm, 1.0)
+        if scaled_residual_norm <= tolerance
         else "degraded"
     )
     warnings = list(assembly.warnings)
@@ -280,10 +355,51 @@ def _solve_linear_static(
             "residual_norm": residual_norm,
             "free_residual_norm": residual_norm,
             "free_equilibrium_residual_norm": residual_norm,
+            "raw_translational_residual_norm": (
+                equation_scaling.translation_residual_norm
+                if equation_scaling is not None
+                else None
+            ),
+            "raw_rotational_residual_norm": (
+                equation_scaling.rotation_residual_norm
+                if equation_scaling is not None
+                else None
+            ),
+            "dimensionless_scaled_residual_norm": (
+                scaled_residual_norm
+                if equation_scaling is not None
+                else None
+            ),
             "constrained_reaction_norm": constrained_reaction_norm,
             "relative_residual": relative_residual,
             "max_displacement": displacement_norm,
             "increment_norm": displacement_norm,
+            "raw_translation_increment_norm": (
+                equation_scaling.translation_increment_norm
+                if equation_scaling is not None
+                else None
+            ),
+            "raw_rotation_increment_norm": (
+                equation_scaling.rotation_increment_norm
+                if equation_scaling is not None
+                else None
+            ),
+            "dimensionless_scaled_increment_norm": (
+                equation_scaling.scaled_increment_norm
+                if equation_scaling is not None
+                else None
+            ),
+            "equation_scaling": (
+                {
+                    "status": "available",
+                    "value": equation_scaling.to_dict(),
+                }
+                if equation_scaling is not None
+                else {
+                    "status": "unavailable",
+                    "reason": "linear_static_has_no_free_equations",
+                }
+            ),
             "relative_increment_applicable": False,
             "regularization_used": False,
             "fallback_used": False,
@@ -324,8 +440,19 @@ def _solve_linear_static(
                 "residual_norm": residual_norm,
                 "relative_residual": relative_residual,
                 "increment_norm": displacement_norm,
-                "relative_increment": 0.0,
+                "relative_increment": None,
                 "relative_increment_applicable": False,
+                "equation_scaling": (
+                    {
+                        "status": "available",
+                        "value": equation_scaling.to_dict(),
+                    }
+                    if equation_scaling is not None
+                    else {
+                        "status": "unavailable",
+                        "reason": "linear_static_has_no_free_equations",
+                    }
+                ),
                 "increment_definition": (
                     "single_direct_linear_solve; no iterative relative increment"
                 ),

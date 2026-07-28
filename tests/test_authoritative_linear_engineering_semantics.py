@@ -173,9 +173,20 @@ def test_reactions_residuals_and_increment_semantics_are_separated(
     assert history["increment_norm"] == pytest.approx(
         result.metrics["max_displacement"]
     )
-    assert history["relative_increment"] == 0.0
+    assert history["relative_increment"] is None
     assert history["relative_increment_applicable"] is False
     assert "no iterative relative increment" in history["increment_definition"]
+    scaling = result.metrics["equation_scaling"]
+    assert scaling["status"] == "available"
+    assert scaling["value"]["characteristic_length"] == pytest.approx(2.0)
+    assert scaling["value"]["reference_force"] == pytest.approx(10.0)
+    assert scaling["value"]["scaled_residual_norm"] <= 1.0e-12
+    assert scaling["value"]["scaled_increment_norm"] > 0.0
+    assert scaling["value"]["scaling_hash"].startswith("sha256:")
+    assert (
+        result.metrics["dimensionless_scaled_residual_norm"]
+        == scaling["value"]["scaled_residual_norm"]
+    )
 
     viewer = result.metrics["viewer_payload"]
     assert viewer["schema_version"] == "structural-analysis-viewer-payload.v2"

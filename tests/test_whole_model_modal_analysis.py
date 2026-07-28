@@ -203,6 +203,16 @@ def test_public_cantilever_modal_path_matches_one_element_closed_eigenvalues(
     assert result.metrics["mass_normalized_mode_vectors_inlined"] is False
     assert result.metrics["raw_result_hash"] == replay.metrics["raw_result_hash"]
     assert result.metrics["semantic_result_hash"] == replay.metrics["semantic_result_hash"]
+    scaling = result.metrics["equation_scaling"]
+    assert scaling["status"] == "available"
+    assert scaling["value"]["solve_applied"] is True
+    assert scaling["value"]["characteristic_length"] == pytest.approx(2.0)
+    assert scaling["value"]["reference_force"] > 0.0
+    assert scaling["value"]["scaling_hash"].startswith("sha256:")
+    assert (
+        scaling["value"]["scaled_mass_condition_number"]["status"]
+        == "available"
+    )
 
     actual_eigenvalues = [
         row["eigenvalue_rad2_per_s2"] for row in result.metrics["modes"]
@@ -218,6 +228,10 @@ def test_public_cantilever_modal_path_matches_one_element_closed_eigenvalues(
     ]["cumulative_effective_modal_mass_ratio"]
     assert last_cumulative == pytest.approx(1.0, abs=1.0e-14)
     for row in result.metrics["modes"]:
+        assert row["scaled_residual_relative_inf"] is not None
+        assert row["scaled_residual_relative_inf"] <= 1.0e-10
+        assert row["raw_translational_residual_norm"] is not None
+        assert row["raw_rotational_residual_norm"] is not None
         shapes = row["max_component_normalized_node_shapes"]
         base = shapes[0]["components"]
         assert all(value == 0.0 for value in base.values())
@@ -262,6 +276,12 @@ def test_free_free_frame_excludes_six_rigid_body_modes(tmp_path: Path) -> None:
     assert result.metrics["rigid_mode_count"] == 6
     assert len(result.metrics["modes"]) == 6
     assert all(row["frequency_hz"] > 0.0 for row in result.metrics["modes"])
+    assert (
+        result.metrics["equation_scaling"]["value"][
+            "scaled_stiffness_condition_number"
+        ]["status"]
+        == "unavailable"
+    )
 
 
 def test_repeated_bending_cluster_must_be_selected_completely(tmp_path: Path) -> None:

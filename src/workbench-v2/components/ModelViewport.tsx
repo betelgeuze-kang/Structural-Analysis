@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type ReactElement } from 'react'
-import type { CaseModel } from '../model/caseSchema'
+import {
+  formatEvidence,
+  type CaseModel,
+  type EvidenceValue,
+} from '../model/caseSchema'
 import type { DataMode } from '../model/workbenchState'
 import { buildViewerUrl, createViewerBridge, type ViewerBridge } from '../model/viewerBridge'
 import { CopyButton } from './CopyButton'
@@ -9,8 +13,8 @@ interface ModelViewportProps {
   selectedMemberId: string | null
   onMemberSelected: (memberId: string | null) => void
   dataMode: DataMode
-  sourcePath: string
-  sourceCommit: string
+  sourcePath: EvidenceValue<string>
+  sourceCommit: EvidenceValue<string>
   projectId?: string | null
 }
 
@@ -74,8 +78,9 @@ export function ModelViewport({
       </div>
 
       <p className="wb2-viewport-meta">
-        {model.nodeCount.toLocaleString()} nodes · {model.elementCount.toLocaleString()} elements ·{' '}
-        {model.dofCount.toLocaleString()} DOF
+        {formatEvidence(model.nodeCount, (value) => value.toLocaleString())} nodes ·{' '}
+        {formatEvidence(model.elementCount, (value) => value.toLocaleString())} elements ·{' '}
+        {formatEvidence(model.dofCount, (value) => value.toLocaleString())} DOF
       </p>
 
       {/* Selection inspector + manual focus. Selection round-trips with the
@@ -127,8 +132,8 @@ export function ModelViewport({
       </div>
 
       <dl className="wb2-kv wb2-viewport-prov">
-        <dt>Analysis source</dt><dd><code className="wb2-mono">{sourcePath}</code></dd>
-        <dt>Source commit</dt><dd><code className="wb2-mono">{sourceCommit.slice(0, 12)}</code></dd>
+        <dt>Analysis source</dt><dd><code className="wb2-mono">{formatEvidence(sourcePath)}</code></dd>
+        <dt>Source commit</dt><dd><code className="wb2-mono">{formatEvidence(sourceCommit, (value) => value.slice(0, 12))}</code></dd>
       </dl>
 
       <p className="wb2-note">

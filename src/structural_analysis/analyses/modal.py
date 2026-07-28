@@ -19,6 +19,14 @@ from structural_analysis.assembly.modal import (
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.modal import ModalAnalysisError, solve_modal_modes
+from structural_analysis.solvers.equation_scaling import (
+    EQUATION_SCALING_6DOF_VERSION,
+    EquationScaling6DOFError,
+    characteristic_length_from_coordinates,
+    frame3d_dof_labels,
+    make_equation_scaling_6dof,
+    reference_force_from_stiffness,
+)
 
 
 AUTHORITATIVE_CPU_MODAL_SOLVER_ID = "authoritative_cpu_modal_fea_3d_v1"
@@ -89,6 +97,22 @@ def run_authoritative_modal(
     reduced_stiffness = assembly.stiffness[np.ix_(free, free)]
     reduced_mass = assembly.mass[np.ix_(free, free)]
     try:
+        characteristic_length = characteristic_length_from_coordinates(
+            assembly.node_coordinates
+        )
+        free_dof_labels = frame3d_dof_labels(
+            tuple(int(index) for index in assembly.free_dofs)
+        )
+        reference_force = reference_force_from_stiffness(
+            reduced_stiffness,
+            characteristic_length=characteristic_length,
+            dof_labels=free_dof_labels,
+        )
+        equation_scaling = make_equation_scaling_6dof(
+            reference_force=reference_force,
+            characteristic_length=characteristic_length,
+            dof_labels=free_dof_labels,
+        )
         modal = solve_modal_modes(
             reduced_stiffness,
             reduced_mass,
@@ -98,8 +122,9 @@ def run_authoritative_modal(
             cluster_relative_tolerance=1.0e-9,
             residual_relative_tolerance=tolerance,
             orthogonality_tolerance=tolerance,
+            equation_scaling=equation_scaling,
         )
-    except ModalAnalysisError as exc:
+    except (EquationScaling6DOFError, ModalAnalysisError) as exc:
         return _blocked_solution(
             model,
             unsupported=[
@@ -124,7 +149,18 @@ def run_authoritative_modal(
             "step": "modal_mode",
             "iteration": mode.mode_number,
             "residual_norm": mode.residual_relative_inf,
-            "relative_increment": 0.0,
+            "raw_residual_relative_norm": mode.raw_residual_relative_inf,
+            "dimensionless_scaled_residual_norm": (
+                mode.scaled_residual_relative_inf
+            ),
+            "raw_translational_residual_norm": (
+                mode.raw_translational_residual_norm
+            ),
+            "raw_rotational_residual_norm": (
+                mode.raw_rotational_residual_norm
+            ),
+            "relative_increment": None,
+            "relative_increment_applicable": False,
             "status": "ready",
         }
         for mode in modal.modes
@@ -145,6 +181,29 @@ def run_authoritative_modal(
         "sparse_backend_used": False,
         "stiffness_storage": "dense_numpy_binary64",
         "mass_storage": "dense_numpy_binary64",
+        "equation_scaling": {
+            "status": "available",
+            "value": {
+                "schema_version": EQUATION_SCALING_6DOF_VERSION,
+                "solve_applied": modal.equation_scaling_applied,
+                "reference_force": modal.reference_force,
+                "reference_force_basis": (
+                    "absolute_stiffness_action_for_unit_scaled_coordinates"
+                ),
+                "characteristic_length": modal.characteristic_length,
+                "scaling_hash": modal.equation_scaling_hash,
+                "scaled_stiffness_condition_number": _condition_evidence(
+                    modal.scaled_stiffness_condition_number,
+                    reason=(
+                        "scaled_stiffness_is_singular_or_condition_is_nonfinite"
+                    ),
+                ),
+                "scaled_mass_condition_number": _condition_evidence(
+                    modal.scaled_mass_condition_number,
+                    reason="scaled_mass_condition_is_nonfinite",
+                ),
+            },
+        },
         "mass_matrix_unit": assembly.mass_matrix_unit,
         "material_density_unit": assembly.density_unit,
         "mass_formulation": assembly.mass_formulation,
@@ -257,6 +316,18 @@ def _mode_rows(
                 "generalized_mass": mode.generalized_mass,
                 "generalized_stiffness": mode.generalized_stiffness,
                 "residual_relative_inf": mode.residual_relative_inf,
+                "raw_residual_relative_inf": (
+                    mode.raw_residual_relative_inf
+                ),
+                "raw_translational_residual_norm": (
+                    mode.raw_translational_residual_norm
+                ),
+                "raw_rotational_residual_norm": (
+                    mode.raw_rotational_residual_norm
+                ),
+                "scaled_residual_relative_inf": (
+                    mode.scaled_residual_relative_inf
+                ),
                 "reduced_mass_normalized_shape_sha256": _vector_hash(vector),
                 "max_component_normalized_node_shapes": _node_shape_rows(
                     assembly,
@@ -272,6 +343,16 @@ def _mode_rows(
             for label, coefficient in total_mass_coefficients.items()
         },
     )
+
+
+def _condition_evidence(
+    value: float | None,
+    *,
+    reason: str,
+) -> dict[str, Any]:
+    if value is None:
+        return {"status": "unavailable", "reason": reason}
+    return {"status": "available", "value": value}
 
 
 def _node_shape_rows(

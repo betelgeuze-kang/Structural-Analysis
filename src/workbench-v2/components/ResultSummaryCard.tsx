@@ -1,5 +1,9 @@
 import type { ReactElement } from 'react'
-import type { WorkbenchCaseV2 } from '../model/caseSchema'
+import {
+  evidenceValue,
+  formatEvidence,
+  type WorkbenchCaseV2,
+} from '../model/caseSchema'
 
 interface ResultSummaryCardProps {
   caseV2: WorkbenchCaseV2
@@ -20,7 +24,13 @@ function fmt(value: number): string {
  */
 export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummaryCardProps): ReactElement {
   const analysis = caseV2.analysis
-  const verdict: Verdict = !convergenceAvailable || !analysis ? 'unavailable' : analysis.converged ? 'converged' : 'failed'
+  const converged = evidenceValue(analysis?.converged)
+  const verdict: Verdict =
+    !convergenceAvailable || !analysis || converged == null
+      ? 'unavailable'
+      : converged
+        ? 'converged'
+        : 'failed'
 
   const verdictLabel =
     verdict === 'converged' ? 'Converged' : verdict === 'failed' ? 'Did not converge' : 'Convergence unavailable'
@@ -28,7 +38,11 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
     verdict === 'converged' ? 'wb2-chip--live' : verdict === 'failed' ? 'wb2-chip--blocked' : 'wb2-chip--unavailable'
 
   const withinTolerance =
-    analysis != null ? analysis.finalNormalizedResidual <= analysis.residualTolerance : null
+    analysis != null
+      && evidenceValue(analysis.finalNormalizedResidual) != null
+      && evidenceValue(analysis.residualTolerance) != null
+      ? evidenceValue(analysis.finalNormalizedResidual)! <= evidenceValue(analysis.residualTolerance)!
+      : null
 
   return (
     <section className="wb2-panel wb2-result-card" aria-labelledby="wb2-result-title" data-result-verdict={verdict}>
@@ -40,7 +54,7 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
           <span className="wb2-result-sub">No analysis attached — status is not inferred.</span>
         ) : (
           <span className="wb2-result-sub">
-            {analysis!.type} · {analysis!.solver}
+            {formatEvidence(analysis!.type)} · {formatEvidence(analysis!.solver)}
           </span>
         )}
       </div>
@@ -49,19 +63,19 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
         <dl className="wb2-result-metrics">
           <div className="wb2-result-metric">
             <dt>Final residual</dt>
-            <dd className="wb2-mono">{fmt(analysis.finalNormalizedResidual)}</dd>
+            <dd className="wb2-mono">{formatEvidence(analysis.finalNormalizedResidual, fmt)}</dd>
           </div>
           <div className="wb2-result-metric">
             <dt>Tolerance</dt>
-            <dd className="wb2-mono">{fmt(analysis.residualTolerance)}</dd>
+            <dd className="wb2-mono">{formatEvidence(analysis.residualTolerance, fmt)}</dd>
           </div>
           <div className="wb2-result-metric">
             <dt>Iterations</dt>
-            <dd className="wb2-mono">{analysis.iterationCount}</dd>
+            <dd className="wb2-mono">{formatEvidence(analysis.iterationCount, String)}</dd>
           </div>
           <div className="wb2-result-metric">
             <dt>Load scale</dt>
-            <dd className="wb2-mono">{fmt(analysis.loadScale)}</dd>
+            <dd className="wb2-mono">{formatEvidence(analysis.loadScale, fmt)}</dd>
           </div>
         </dl>
       ) : (
@@ -71,8 +85,13 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
       )}
 
       {analysis ? (
-        <p className={`wb2-result-tol${withinTolerance ? ' is-ok' : ' is-no'}`} data-result-within-tol={String(withinTolerance)}>
-          {withinTolerance
+        <p
+          className={`wb2-result-tol${withinTolerance == null ? '' : withinTolerance ? ' is-ok' : ' is-no'}`}
+          data-result-within-tol={withinTolerance == null ? 'unavailable' : String(withinTolerance)}
+        >
+          {withinTolerance == null
+            ? 'Tolerance comparison is UNAVAILABLE.'
+            : withinTolerance
             ? 'Final residual is at or below the requested tolerance.'
             : 'Final residual is above the requested tolerance.'}
         </p>

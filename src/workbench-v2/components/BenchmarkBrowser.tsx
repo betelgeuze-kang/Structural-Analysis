@@ -77,6 +77,12 @@ function CaseCard({
         <dd>{c.truthClass} ({yn(v.truthClassVerified)}){v.truthEvidencePath ? <> · <code className="wb2-mono" title={v.truthEvidencePath}>evidence</code></> : null}</dd>
         <dt>Reference</dt>
         <dd>{v.referenceResultsAvailable ? `available${v.referenceSolver ? ` · ${v.referenceSolver}` : ''}` : 'not attached'}</dd>
+        <dt>Equation scaling</dt>
+        <dd>
+          {v.equationScalingAvailable && v.equationScalingHash
+            ? <code className="wb2-mono" title={v.equationScalingHash}>{v.equationScalingHash.slice(0, 19)}…</code>
+            : 'UNAVAILABLE'}
+        </dd>
         <dt>Checksum</dt>
         <dd>{c.checksum ? <code className="wb2-mono" title={c.checksum}>{c.checksum.slice(0, 20)}…</code> : 'unavailable'}</dd>
         <dt>Availability</dt>

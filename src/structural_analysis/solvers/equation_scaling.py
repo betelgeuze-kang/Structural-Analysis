@@ -275,6 +275,61 @@ def reference_force_from_mixed_load(
     return max(_inf_norm(force_equivalents), floor)
 
 
+def reference_force_from_stiffness(
+    tangent: Any,
+    *,
+    characteristic_length: float,
+    dof_labels: Sequence[str],
+    minimum_reference_force: float = 1.0,
+) -> float:
+    """Derive a force scale from one dimensionless-coordinate stiffness action.
+
+    The representative increment is one characteristic length for translation
+    coordinates and one radian for rotation coordinates. Absolute row sums
+    avoid cancellation, and moment rows are converted back to force by the
+    characteristic length. This is intended for load-free eigenproblems where
+    no external force vector exists.
+    """
+
+    length = _positive_finite(characteristic_length, "characteristic_length")
+    floor = _positive_finite(
+        minimum_reference_force,
+        "minimum_reference_force",
+    )
+    labels = _normalize_labels(dof_labels)
+    _validate_tangent(tangent, expected_order=len(labels))
+    increment_scales = np.asarray(
+        [
+            length if label in TRANSLATION_DOF_LABELS else 1.0
+            for label in labels
+        ],
+        dtype=np.float64,
+    )
+    if issparse(tangent):
+        absolute_tangent = abs(tangent.tocsr(copy=False))
+        row_actions = np.asarray(
+            absolute_tangent @ increment_scales,
+            dtype=np.float64,
+        ).reshape(-1)
+    else:
+        absolute_tangent = np.abs(np.asarray(tangent, dtype=np.float64))
+        row_actions = absolute_tangent @ increment_scales
+    force_equivalents = np.asarray(
+        [
+            abs(value)
+            if label in TRANSLATION_DOF_LABELS
+            else abs(value) / length
+            for value, label in zip(row_actions, labels, strict=True)
+        ],
+        dtype=np.float64,
+    )
+    if not np.all(np.isfinite(force_equivalents)):
+        raise EquationScaling6DOFError(
+            "stiffness-derived reference force must be finite"
+        )
+    return max(_inf_norm(force_equivalents), floor)
+
+
 def frame3d_dof_labels(dofs: Sequence[int]) -> tuple[str, ...]:
     """Map canonical global 6DOF indices to physical equation labels."""
 
@@ -393,4 +448,5 @@ __all__ = [
     "frame3d_dof_labels",
     "make_equation_scaling_6dof",
     "reference_force_from_mixed_load",
+    "reference_force_from_stiffness",
 ]

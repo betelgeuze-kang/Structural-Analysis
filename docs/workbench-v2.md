@@ -109,13 +109,42 @@ only (no member list), so member focus is a free-form tool — no member-level
 data is fabricated. In demo mode the viewer shows its own sample model, so the
 two provenances are kept independent and never treated as the same artifact.
 
+## Evidence values and convergence traces
+
+Workbench does not replace missing engineering evidence with plausible numeric
+defaults. Provenance, model counts, analysis values, and each residual-history
+field are normalized as one of:
+
+- `available` — the producer supplied a value that satisfies the field contract
+- `unavailable` — the producer supplied no evidence
+- `invalid` — evidence was supplied but failed validation
+- `unsupported` — the producer explicitly declares the result unsupported
+
+An explicit numeric zero remains `available: 0`; an absent value is displayed
+as **UNAVAILABLE**. Counts and iterations must be nonnegative integers,
+tolerances must be positive finite values, line-search `alpha` must be in
+`(0, 1]`, source checksums must match `sha256:<64 lowercase hex digits>`, and
+residual-history iterations must be strictly increasing without duplicates.
+Unknown nested fields are preserved so a newer producer's evidence is not
+silently discarded by an older Workbench reader.
+
+For 6DOF frame results, raw translational and rotational residuals and
+increments remain visible as separate dimensional quantities. A dimensionless
+scaled residual, scaled increment, or scaled condition number is displayed only
+when the result carries the corresponding equation-scaling receipt, including
+the characteristic length and scaling hash. Workbench does not derive scaled
+values from legacy residual fields.
+
 ## Compare
 
 Adding benchmark rows (in Benchmarks) populates the Compare set. The table shows,
 per row, whether it is accuracy-comparable, whether reference results and a
 runner are present, and what is still required to compare. **No accuracy delta is
 computed in the app** — real numbers come only from a run against attached
-references on a registered runner.
+references on a registered runner. Current and reference scaling receipts are
+reported independently. A scaled-residual comparison remains unavailable unless
+both sides publish compatible scaling evidence; that limitation does not by
+itself rewrite the benchmark's general accuracy-comparability state.
 
 ## Evidence reader
 
@@ -147,11 +176,12 @@ dropped nor mislabeled as saved.
 
 ## Export bundle
 
-The export JSON includes provenance, source + analysis checksums, the viewer
-deep link, displayed blockers, selected comparison rows, an evidence manifest
-reference (commit + checksum, or unavailable), the reviewer draft, and its
-persistence receipt. A claim boundary states the references are for integrity,
-not a verdict.
+The `workbench-v2-export.v3` JSON includes provenance, source + analysis
+checksums, raw values or `null`, their evidence-value wrappers, the convergence
+trace and equation-scaling receipt, the viewer deep link, displayed blockers,
+selected comparison rows, an evidence manifest reference (commit + checksum, or
+unavailable), the reviewer draft, and its persistence receipt. A claim boundary
+states the references are for integrity, not a verdict.
 
 ## Local development
 

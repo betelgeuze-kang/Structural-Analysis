@@ -2,7 +2,7 @@
   "schemaVersion": "workbench-case.v2",
   "provenance": {
     "sourcePath": "demo/highrise-overload.case.json",
-    "sourceSha256": "sha256:demofail000000000000000000000000000000000000000000000000000000000",
+    "sourceSha256": "sha256:d1dc49b25358796a020188c1b4de4b348970575407c7aaea6cd980061a595cd9",
     "sourceCommitSha": "demo-local",
     "engineVersion": "structural-analysis@0.3.0",
     "generatedAt": "2026-06-21T00:00:00+00:00"

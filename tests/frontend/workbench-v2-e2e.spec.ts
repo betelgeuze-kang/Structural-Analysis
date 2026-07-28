@@ -74,14 +74,15 @@ test.describe('Workbench v2 — demo case samples', () => {
     await expect(page.locator('[data-wb2-case="unavailable"]')).toBeVisible()
   })
 
-  test('converged sample shows a converged verdict, residual chart, and within-tolerance', async ({ page }) => {
+  test('converged sample keeps its explicit verdict but does not invent a scaled trace', async ({ page }) => {
     await open(page)
     await page.locator('[data-wb2-case="converged"]').click()
     const card = page.locator('[data-result-verdict]')
     await expect(card).toHaveAttribute('data-result-verdict', 'converged')
     await expect(card.locator('[data-result-chip]')).toContainText(/Converged/i)
-    await expect(page.locator('[data-wb2-residual-chart]')).toBeVisible()
-    await expect(page.locator('[data-wb2-tol-line]')).toBeAttached()
+    await expect(page.locator('[data-wb2-residual-chart]')).toHaveCount(0)
+    await expect(page.locator('[data-wb2-tol-line]')).toHaveCount(0)
+    await expect(page.locator('#wb2-sec-results')).toContainText('UNAVAILABLE')
     await expect(card.locator('[data-result-within-tol="true"]')).toBeVisible()
   })
 

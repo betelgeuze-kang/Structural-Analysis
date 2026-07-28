@@ -11,6 +11,7 @@ from structural_analysis.solvers import (
     frame3d_dof_labels,
     make_equation_scaling_6dof,
     reference_force_from_mixed_load,
+    reference_force_from_stiffness,
 )
 
 
@@ -116,6 +117,22 @@ def test_model_scale_helpers_keep_moments_out_of_force_norm() -> None:
     assert labels == ("UX", "RY", "UX", "RZ")
     assert length == pytest.approx(13.0)
     assert force == pytest.approx(20.0)
+
+
+def test_load_free_reference_force_is_derived_from_stiffness_action() -> None:
+    force = reference_force_from_stiffness(
+        np.diag((50.0, 800.0)),
+        characteristic_length=4.0,
+        dof_labels=("UX", "RZ"),
+    )
+    sparse_force = reference_force_from_stiffness(
+        csr_matrix(np.diag((50.0, 800.0))),
+        characteristic_length=4.0,
+        dof_labels=("UX", "RZ"),
+    )
+
+    assert force == pytest.approx(200.0)
+    assert sparse_force == pytest.approx(force)
 
 
 def test_invalid_scaling_fails_closed() -> None:
