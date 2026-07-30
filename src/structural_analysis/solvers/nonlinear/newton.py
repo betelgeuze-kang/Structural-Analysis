@@ -10,6 +10,12 @@ import numpy as np
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import MatrixRankWarning, spsolve
 
+from structural_analysis.solvers.equation_scaling import (
+    EquationScaling6DOF,
+    EquationScaling6DOFError,
+    build_equation_scaling_6dof,
+)
+
 RESIDUAL_FORMULA = "F_internal_minus_F_external"
 GLOBALIZATION = "backtracking_line_search"
 MATRIX_BACKEND = "numpy_linalg_solve_scalar"
@@ -132,6 +138,7 @@ class NewtonRaphsonConfig:
     max_iterations: int = 25
     line_search_alphas: tuple[float, ...] = (1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125)
     matrix_backend: str = VECTOR_MATRIX_BACKEND
+    characteristic_length_m: float = 1.0
 
 
 def _vector_backend_metadata(matrix_backend: str) -> dict[str, Any]:
@@ -201,6 +208,57 @@ def _relative_residual_vector(problem: VectorEquilibriumProblem, residual: np.nd
     return float(np.linalg.norm(residual, ord=np.inf)) / problem.reference_force_scale()
 
 
+def _vector_dof_labels(
+    problem: VectorEquilibriumProblem,
+    vector_size: int,
+) -> tuple[str, ...]:
+    provider = getattr(problem, "equation_dof_labels", None)
+    if callable(provider):
+        labels = tuple(str(label).upper() for label in provider())
+        if len(labels) != vector_size:
+            raise EquationScaling6DOFError(
+                "problem equation_dof_labels length does not match vector size"
+            )
+        return labels
+    return tuple("UX" for _ in range(vector_size))
+
+
+def _vector_equation_scaling(
+    problem: VectorEquilibriumProblem,
+    cfg: NewtonRaphsonConfig,
+    *,
+    residual_kn: np.ndarray,
+    increment_m: np.ndarray,
+    tangent_kn_per_m: np.ndarray,
+) -> EquationScaling6DOF:
+    return build_equation_scaling_6dof(
+        reference_force=problem.reference_force_scale(),
+        characteristic_length=cfg.characteristic_length_m,
+        residual=residual_kn,
+        increment=increment_m,
+        tangent=tangent_kn_per_m,
+        dof_labels=_vector_dof_labels(problem, residual_kn.size),
+    )
+
+
+def _scalar_equation_scaling(
+    problem: ScalarAxialEquilibriumProblem,
+    cfg: NewtonRaphsonConfig,
+    *,
+    residual_kn: float,
+    increment_m: float,
+    tangent_kn_per_m: float,
+) -> EquationScaling6DOF:
+    return build_equation_scaling_6dof(
+        reference_force=problem.reference_force_scale(),
+        characteristic_length=cfg.characteristic_length_m,
+        residual=(residual_kn,),
+        increment=(increment_m,),
+        tangent=np.asarray([[tangent_kn_per_m]], dtype=float),
+        dof_labels=("UX",),
+    )
+
+
 def _line_search(
     problem: ScalarAxialEquilibriumProblem,
     *,
@@ -208,21 +266,50 @@ def _line_search(
     newton_increment_m: float,
     residual_before: float,
     alphas: tuple[float, ...],
+    cfg: NewtonRaphsonConfig,
 ) -> tuple[float, float, list[dict[str, Any]]]:
     attempts: list[dict[str, Any]] = []
     best_alpha = 0.0
     best_residual = residual_before
     best_displacement = displacement_m
+    tangent_before = problem.tangent_stiffness(displacement_m)
+    residual_norm_before = _scalar_equation_scaling(
+        problem,
+        cfg,
+        residual_kn=residual_before,
+        increment_m=newton_increment_m,
+        tangent_kn_per_m=tangent_before,
+    ).scaled_residual_norm
     for alpha in alphas:
         trial_displacement = displacement_m + alpha * newton_increment_m
-        trial_residual = problem.residual(trial_displacement)
-        accepted = abs(trial_residual) < abs(residual_before)
+        try:
+            trial_residual = problem.residual(trial_displacement)
+            trial_scaling = _scalar_equation_scaling(
+                problem,
+                cfg,
+                residual_kn=trial_residual,
+                increment_m=alpha * newton_increment_m,
+                tangent_kn_per_m=problem.tangent_stiffness(trial_displacement),
+            )
+        except (ValueError, ArithmeticError) as exc:
+            attempts.append(
+                {
+                    "alpha": alpha,
+                    "trial_displacement_m": trial_displacement,
+                    "accepted": False,
+                    "invalid_trial": True,
+                    "invalid_trial_reason": type(exc).__name__,
+                }
+            )
+            continue
+        accepted = trial_scaling.scaled_residual_norm < residual_norm_before
         attempts.append(
             {
                 "alpha": alpha,
                 "trial_displacement_m": trial_displacement,
                 "trial_residual_kn": trial_residual,
                 "trial_relative_residual": _relative_residual(problem, trial_residual),
+                "equation_scaling_6dof": trial_scaling.to_dict(),
                 "accepted": accepted,
             }
         )
@@ -244,16 +331,43 @@ def _vector_line_search(
     newton_increment_m: np.ndarray,
     residual_before: np.ndarray,
     alphas: tuple[float, ...],
+    cfg: NewtonRaphsonConfig,
+    tangent_before: np.ndarray,
 ) -> tuple[np.ndarray, float, list[dict[str, Any]]]:
     attempts: list[dict[str, Any]] = []
     best_alpha = 0.0
     best_residual = residual_before
     best_displacement = free_displacements_m.copy()
-    residual_norm_before = float(np.linalg.norm(residual_before, ord=np.inf))
+    residual_norm_before = _vector_equation_scaling(
+        problem,
+        cfg,
+        residual_kn=residual_before,
+        increment_m=newton_increment_m,
+        tangent_kn_per_m=tangent_before,
+    ).scaled_residual_norm
     for alpha in alphas:
         trial_displacement = free_displacements_m + alpha * newton_increment_m
-        trial_residual, _ = problem.assemble(trial_displacement)
-        trial_norm = float(np.linalg.norm(trial_residual, ord=np.inf))
+        try:
+            trial_residual, trial_tangent = problem.assemble(trial_displacement)
+            trial_scaling = _vector_equation_scaling(
+                problem,
+                cfg,
+                residual_kn=trial_residual,
+                increment_m=alpha * newton_increment_m,
+                tangent_kn_per_m=trial_tangent,
+            )
+        except (ValueError, ArithmeticError) as exc:
+            attempts.append(
+                {
+                    "alpha": alpha,
+                    "trial_free_displacements_m": trial_displacement.tolist(),
+                    "accepted": False,
+                    "invalid_trial": True,
+                    "invalid_trial_reason": type(exc).__name__,
+                }
+            )
+            continue
+        trial_norm = trial_scaling.scaled_residual_norm
         accepted = trial_norm < residual_norm_before
         attempts.append(
             {
@@ -261,12 +375,19 @@ def _vector_line_search(
                 "trial_free_displacements_m": trial_displacement.tolist(),
                 "trial_residual_kn": trial_residual.tolist(),
                 "trial_relative_residual": _relative_residual_vector(problem, trial_residual),
+                "equation_scaling_6dof": trial_scaling.to_dict(),
                 "accepted": accepted,
             }
         )
         if accepted:
             return trial_displacement, alpha, attempts
-        if trial_norm < float(np.linalg.norm(best_residual, ord=np.inf)):
+        if trial_norm < _vector_equation_scaling(
+            problem,
+            cfg,
+            residual_kn=best_residual,
+            increment_m=np.zeros_like(newton_increment_m),
+            tangent_kn_per_m=tangent_before,
+        ).scaled_residual_norm:
             best_residual = trial_residual
             best_alpha = alpha
             best_displacement = trial_displacement
@@ -282,6 +403,18 @@ def newton_raphson_vector(
 ) -> NewtonRaphsonVectorSolution:
     """Solve assembled R(u)=F_internal(u)-F_external with Newton and line search."""
     cfg = config or NewtonRaphsonConfig()
+    if (
+        not np.isfinite(cfg.characteristic_length_m)
+        or cfg.characteristic_length_m <= 0.0
+    ):
+        return _blocked_vector_solution(
+            problem,
+            cfg,
+            free_displacements_m=problem.initial_free_displacements_m().astype(float).copy(),
+            history=[],
+            line_search_history=[],
+            detail="invalid_characteristic_length",
+        )
     if cfg.matrix_backend not in VECTOR_MATRIX_BACKENDS:
         return _blocked_vector_solution(
             problem,
@@ -300,9 +433,10 @@ def newton_raphson_vector(
 
     for iteration in range(cfg.max_iterations + 1):
         residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
-        relative_residual = _relative_residual_vector(problem, residual_kn)
-        residual_gate_passed = relative_residual <= cfg.residual_tolerance
-
+        residual_gate_precheck = (
+            _relative_residual_vector(problem, residual_kn)
+            <= cfg.residual_tolerance
+        )
         try:
             newton_increment_m = _solve_vector_increment(
                 jacobian_kn_per_m,
@@ -318,12 +452,33 @@ def newton_raphson_vector(
                 line_search_history=line_search_history,
                 detail=(
                     "singular_tangent_stiffness_at_residual_gate"
-                    if residual_gate_passed
+                    if residual_gate_precheck
                     else "singular_tangent_stiffness"
                 ),
             )
+        try:
+            equation_scaling = _vector_equation_scaling(
+                problem,
+                cfg,
+                residual_kn=residual_kn,
+                increment_m=newton_increment_m,
+                tangent_kn_per_m=jacobian_kn_per_m,
+            )
+        except EquationScaling6DOFError:
+            return _blocked_vector_solution(
+                problem,
+                cfg,
+                free_displacements_m=free_displacements_m,
+                history=history,
+                line_search_history=line_search_history,
+                detail="equation_scaling_invalid",
+            )
+        relative_residual = equation_scaling.scaled_residual_norm
+        residual_gate_passed = relative_residual <= cfg.residual_tolerance
         residual_based_increment_abs = float(np.linalg.norm(newton_increment_m, ord=np.inf))
-        increment_gate_passed = residual_based_increment_abs <= cfg.increment_tolerance
+        increment_gate_passed = (
+            equation_scaling.scaled_increment_norm <= cfg.increment_tolerance
+        )
 
         if residual_gate_passed and increment_gate_passed:
             history.append(
@@ -333,7 +488,9 @@ def newton_raphson_vector(
                     "residual_kn": residual_kn.tolist(),
                     "relative_residual": relative_residual,
                     "newton_increment_m": newton_increment_m.tolist(),
+                    "accepted_increment_m": newton_increment_m.tolist(),
                     "increment_abs_m": residual_based_increment_abs,
+                    "equation_scaling_6dof": equation_scaling.to_dict(),
                     "line_search_alpha": 1.0,
                     "line_search_attempt_count": 0,
                     "residual_gate_passed": True,
@@ -349,10 +506,22 @@ def newton_raphson_vector(
             newton_increment_m=newton_increment_m,
             residual_before=residual_kn,
             alphas=cfg.line_search_alphas,
+            cfg=cfg,
+            tangent_before=jacobian_kn_per_m,
         )
-        increment_abs = float(np.linalg.norm(next_displacement_m - free_displacements_m, ord=np.inf))
-        increment_gate_passed = increment_abs <= cfg.increment_tolerance
-        accepted = line_search_alpha > 0.0 or increment_gate_passed
+        accepted_increment = next_displacement_m - free_displacements_m
+        increment_abs = float(np.linalg.norm(accepted_increment, ord=np.inf))
+        accepted_scaling = _vector_equation_scaling(
+            problem,
+            cfg,
+            residual_kn=residual_kn,
+            increment_m=accepted_increment,
+            tangent_kn_per_m=jacobian_kn_per_m,
+        )
+        increment_gate_passed = (
+            accepted_scaling.scaled_increment_norm <= cfg.increment_tolerance
+        )
+        accepted = line_search_alpha > 0.0
         line_search_history.append(
             {
                 "iteration": iteration,
@@ -370,7 +539,9 @@ def newton_raphson_vector(
                 "residual_kn": residual_kn.tolist(),
                 "relative_residual": relative_residual,
                 "newton_increment_m": newton_increment_m.tolist(),
+                "accepted_increment_m": accepted_increment.tolist(),
                 "increment_abs_m": increment_abs,
+                "equation_scaling_6dof": accepted_scaling.to_dict(),
                 "line_search_alpha": line_search_alpha,
                 "line_search_attempt_count": len(attempts),
                 "residual_gate_passed": residual_gate_passed,
@@ -409,11 +580,24 @@ def newton_raphson_vector(
             detail="iteration_loop_exhausted",
         )
 
-    final_residual, _ = problem.assemble(free_displacements_m)
-    final_relative_residual = _relative_residual_vector(problem, final_residual)
+    final_residual, final_tangent = problem.assemble(free_displacements_m)
+    final_increment = np.asarray(
+        history[-1].get("accepted_increment_m", np.zeros_like(free_displacements_m)),
+        dtype=float,
+    )
+    final_scaling = _vector_equation_scaling(
+        problem,
+        cfg,
+        residual_kn=final_residual,
+        increment_m=final_increment,
+        tangent_kn_per_m=final_tangent,
+    )
+    final_relative_residual = final_scaling.scaled_residual_norm
     final_increment_abs = float(history[-1]["increment_abs_m"]) if history else 0.0
     residual_gate_passed = final_relative_residual <= cfg.residual_tolerance
-    increment_gate_passed = final_increment_abs <= cfg.increment_tolerance or (
+    increment_gate_passed = (
+        final_scaling.scaled_increment_norm <= cfg.increment_tolerance
+    ) or (
         history[-1]["iteration"] == 0 and residual_gate_passed
     )
     contract_pass = residual_gate_passed and increment_gate_passed
@@ -422,6 +606,7 @@ def newton_raphson_vector(
         "free_displacements_m": free_displacements_m.tolist(),
         "residual_kn": final_residual.tolist(),
         "relative_residual": final_relative_residual,
+        "equation_scaling_6dof": final_scaling.to_dict(),
         "residual_formula": RESIDUAL_FORMULA,
         "tangent_definition": "dF_internal_du_consistent",
         "globalization": GLOBALIZATION,
@@ -472,6 +657,8 @@ def _blocked_vector_solution(
             "free_displacements_m": free_displacements_m.tolist(),
             "residual_kn": residual_kn.tolist(),
             "relative_residual": _relative_residual_vector(problem, residual_kn),
+            "equation_scaling_6dof": None,
+            "equation_scaling_valid": False,
             "residual_formula": RESIDUAL_FORMULA,
             "globalization": GLOBALIZATION,
             **backend_metadata,
@@ -503,6 +690,18 @@ def newton_raphson_scalar(
 ) -> NewtonRaphsonSolution:
     """Solve R(u)=F_internal(u)-F_external with consistent tangent and line search."""
     cfg = config or NewtonRaphsonConfig()
+    if (
+        not np.isfinite(cfg.characteristic_length_m)
+        or cfg.characteristic_length_m <= 0.0
+    ):
+        return _blocked_solution(
+            problem,
+            cfg,
+            displacement_m=float(problem.initial_displacement_m),
+            history=[],
+            line_search_history=[],
+            detail="invalid_characteristic_length",
+        )
     if cfg.matrix_backend not in SCALAR_CONFIG_BACKENDS:
         return _blocked_solution(
             problem,
@@ -520,10 +719,11 @@ def newton_raphson_scalar(
 
     for iteration in range(cfg.max_iterations + 1):
         residual_kn = problem.residual(displacement_m)
-        relative_residual = _relative_residual(problem, residual_kn)
         tangent_kn_per_m = problem.tangent_stiffness(displacement_m)
         internal_force_kn = problem.internal_force(displacement_m)
-        residual_gate_passed = relative_residual <= cfg.residual_tolerance
+        residual_gate_precheck = (
+            _relative_residual(problem, residual_kn) <= cfg.residual_tolerance
+        )
 
         if abs(tangent_kn_per_m) <= np.finfo(float).tiny:
             return _blocked_solution(
@@ -534,14 +734,25 @@ def newton_raphson_scalar(
                 line_search_history=line_search_history,
                 detail=(
                     "singular_tangent_stiffness_at_residual_gate"
-                    if residual_gate_passed
+                    if residual_gate_precheck
                     else "singular_tangent_stiffness"
                 ),
             )
         else:
             residual_based_increment_m = -residual_kn / tangent_kn_per_m
             residual_based_increment_abs = abs(residual_based_increment_m)
-        increment_gate_passed = residual_based_increment_abs <= cfg.increment_tolerance
+        equation_scaling = _scalar_equation_scaling(
+            problem,
+            cfg,
+            residual_kn=residual_kn,
+            increment_m=residual_based_increment_m,
+            tangent_kn_per_m=tangent_kn_per_m,
+        )
+        relative_residual = equation_scaling.scaled_residual_norm
+        residual_gate_passed = relative_residual <= cfg.residual_tolerance
+        increment_gate_passed = (
+            equation_scaling.scaled_increment_norm <= cfg.increment_tolerance
+        )
 
         if residual_gate_passed and increment_gate_passed:
             history.append(
@@ -554,7 +765,9 @@ def newton_raphson_scalar(
                     "external_force_kn": problem.external_force_kn,
                     "tangent_kn_per_m": tangent_kn_per_m,
                     "newton_increment_m": residual_based_increment_m,
+                    "accepted_increment_m": residual_based_increment_m,
                     "increment_abs": residual_based_increment_abs,
+                    "equation_scaling_6dof": equation_scaling.to_dict(),
                     "line_search_alpha": 1.0,
                     "line_search_attempt_count": 0,
                     "residual_gate_passed": True,
@@ -575,10 +788,21 @@ def newton_raphson_scalar(
             newton_increment_m=newton_increment_m,
             residual_before=residual_kn,
             alphas=cfg.line_search_alphas,
+            cfg=cfg,
         )
         increment_abs = abs(next_displacement_m - displacement_m)
-        increment_gate_passed = increment_abs <= cfg.increment_tolerance
-        accepted = line_search_alpha > 0.0 or increment_gate_passed
+        accepted_increment = next_displacement_m - displacement_m
+        accepted_scaling = _scalar_equation_scaling(
+            problem,
+            cfg,
+            residual_kn=residual_kn,
+            increment_m=accepted_increment,
+            tangent_kn_per_m=tangent_kn_per_m,
+        )
+        increment_gate_passed = (
+            accepted_scaling.scaled_increment_norm <= cfg.increment_tolerance
+        )
+        accepted = line_search_alpha > 0.0
         line_search_history.append(
             {
                 "iteration": iteration,
@@ -599,7 +823,9 @@ def newton_raphson_scalar(
                 "external_force_kn": problem.external_force_kn,
                 "tangent_kn_per_m": tangent_kn_per_m,
                 "newton_increment_m": newton_increment_m,
+                "accepted_increment_m": accepted_increment,
                 "increment_abs": increment_abs,
+                "equation_scaling_6dof": accepted_scaling.to_dict(),
                 "line_search_alpha": line_search_alpha,
                 "line_search_attempt_count": len(attempts),
                 "residual_gate_passed": residual_gate_passed,
@@ -639,10 +865,20 @@ def newton_raphson_scalar(
         )
 
     final_residual = problem.residual(displacement_m)
-    final_relative_residual = _relative_residual(problem, final_residual)
+    final_increment = float(history[-1].get("accepted_increment_m", 0.0))
+    final_scaling = _scalar_equation_scaling(
+        problem,
+        cfg,
+        residual_kn=final_residual,
+        increment_m=final_increment,
+        tangent_kn_per_m=problem.tangent_stiffness(displacement_m),
+    )
+    final_relative_residual = final_scaling.scaled_residual_norm
     final_increment_abs = float(history[-1]["increment_abs"]) if history else 0.0
     residual_gate_passed = final_relative_residual <= cfg.residual_tolerance
-    increment_gate_passed = final_increment_abs <= cfg.increment_tolerance or (
+    increment_gate_passed = (
+        final_scaling.scaled_increment_norm <= cfg.increment_tolerance
+    ) or (
         history[-1]["iteration"] == 0 and residual_gate_passed
     )
     contract_pass = residual_gate_passed and increment_gate_passed
@@ -653,6 +889,7 @@ def newton_raphson_scalar(
         "external_force_kn": problem.external_force_kn,
         "residual_kn": final_residual,
         "relative_residual": final_relative_residual,
+        "equation_scaling_6dof": final_scaling.to_dict(),
         "tangent_kn_per_m": problem.tangent_stiffness(displacement_m),
         "residual_formula": RESIDUAL_FORMULA,
         "tangent_definition": "dF_internal_du_consistent",
@@ -704,6 +941,8 @@ def _blocked_solution(
             "displacement_m": displacement_m,
             "residual_kn": residual_kn,
             "relative_residual": _relative_residual(problem, residual_kn),
+            "equation_scaling_6dof": None,
+            "equation_scaling_valid": False,
             "residual_formula": RESIDUAL_FORMULA,
             "globalization": GLOBALIZATION,
             "matrix_backend": (

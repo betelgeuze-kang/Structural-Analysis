@@ -231,8 +231,35 @@
             "supports_trial_commit_rollback": {"const": true}
           }
         },
+        "admissibility": {"$ref": "#/$defs/materialAdmissibility"},
         "source_id": {"type": ["string", "null"]},
         "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "materialAdmissibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "loading_domain",
+        "supports_monotonic",
+        "supports_unloading",
+        "supports_reversal",
+        "supports_cyclic",
+        "supports_tension",
+        "supports_compression",
+        "supports_multiaxial",
+        "supports_localization_regularization"
+      ],
+      "properties": {
+        "loading_domain": {"type": "string", "minLength": 1},
+        "supports_monotonic": {"type": "boolean"},
+        "supports_unloading": {"type": "boolean"},
+        "supports_reversal": {"type": "boolean"},
+        "supports_cyclic": {"type": "boolean"},
+        "supports_tension": {"type": "boolean"},
+        "supports_compression": {"type": "boolean"},
+        "supports_multiaxial": {"type": "boolean"},
+        "supports_localization_regularization": {"type": "boolean"}
       }
     },
     "frameSection": {

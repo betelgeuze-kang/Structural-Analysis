@@ -58,11 +58,10 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     assert outcomes["G1"]["source_receipt_path_count"] == 21
     assert outcomes["G1"]["source_receipt_missing_path_count"] == 0
     assert outcomes["G1"]["closure_requirement_count"] == 9
-    assert outcomes["G1"]["closure_requirement_pass_count"] == 2
-    assert outcomes["G1"]["closure_requirement_fail_count"] == 7
+    assert outcomes["G1"]["closure_requirement_pass_count"] == 3
+    assert outcomes["G1"]["closure_requirement_fail_count"] == 6
     assert outcomes["G1"]["closure_requirement_failed_ids"] == [
         "full_load_scale_1_0_reached",
-        "strict_full_load_hip_newton_checkpoint_available",
         "full_line_mesh_nonlinear_equilibrium_closed",
         "full_frame_6dof_nonlinear_equilibrium_closed",
         "coupled_frame_surface_nonlinear_equilibrium_closed",

@@ -20,6 +20,7 @@ ADR은 현재 G1-G10 또는 AI-G1-AI-G10 폐쇄 증거가 아니다. 구현과 f
 5. [ADR-005: AI Proposal and Rollback Contract](005-ai-proposal-and-rollback-contract.md)
 6. [ADR-006: Complexity and Benchmark Contract](006-complexity-and-benchmark-contract.md)
 7. [ADR-007: V&V and Promotion Policy](007-vv-and-promotion-policy.md)
+8. [ADR-008: Repository Package Boundaries](008-repository-package-boundaries.md)
 
 ## 변경 규칙
 

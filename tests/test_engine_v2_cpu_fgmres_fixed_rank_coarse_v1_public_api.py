@@ -63,5 +63,5 @@ def test_exact_schema_resources_ship_with_the_package() -> None:
 
 
 def test_public_surface_counts_include_the_additive_contract() -> None:
-    assert len(engine_v2.__all__) == 1211
+    assert len(engine_v2.__all__) == 1263
     assert len(solvers.__all__) == 66

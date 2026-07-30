@@ -1,0 +1,278 @@
+{
+  "schema_version": "structural-analysis-capability-registry.v2",
+  "registry_scope": "nonlinear_frame_material_and_transient_authority_slice",
+  "authority_model": {
+    "representable": "The typed model or solver contract can express the capability.",
+    "implemented": "Source implementing the bounded capability is merged.",
+    "executable": "A deterministic repository entry point and focused tests execute it.",
+    "public": "The capability is part of the supported public product contract.",
+    "numerical_authority": "Authority of the computed numerical response, independent of API visibility.",
+    "recovery_authority": "Authority of recovered result or checkpoint fields, independent of numerical authority.",
+    "external_vv_level": "Highest independently established external V&V level; zero means none.",
+    "release_eligible": "The capability may participate in a release claim."
+  },
+  "rules": {
+    "implemented_does_not_imply_public": true,
+    "executable_does_not_imply_numerical_promotion": true,
+    "candidate_result_authority_does_not_imply_release_eligibility": true,
+    "release_requires_public": true,
+    "release_requires_external_vv_level": 2,
+    "fallback_promotion_allowed": false
+  },
+  "capabilities": [
+    {
+      "id": "frame2d.rigid_offset",
+      "title": "Frame2D finite rigid offset",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "bounded_candidate",
+      "recovery_authority": "exact_bounded_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "ed7ea935f0318ba5102edd7f2a197a7beaf013f7",
+      "merged_pr": 227,
+      "source_paths_at_ref": [
+        "src/structural_analysis/assembly/corotational_frame2d_member_features.py",
+        "src/structural_analysis/api/nonlinear_frame.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_corotational_frame2d_member_features.py",
+        "tests/test_unified_nonlinear_frame_api.py"
+      ],
+      "limitations": [
+        "Bounded connected planar Frame2D candidate only.",
+        "No independent Level 2/3 V&V, design authority, or release eligibility."
+      ]
+    },
+    {
+      "id": "frame2d.release.rz",
+      "title": "Frame2D RZ end release",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "bounded_candidate",
+      "recovery_authority": "exact_bounded_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "ed7ea935f0318ba5102edd7f2a197a7beaf013f7",
+      "merged_pr": 227,
+      "source_paths_at_ref": [
+        "src/structural_analysis/assembly/corotational_frame2d_member_features.py",
+        "src/structural_analysis/api/nonlinear_frame.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_corotational_frame2d_member_features.py",
+        "tests/test_unified_nonlinear_frame_api.py"
+      ],
+      "limitations": [
+        "RZ-only bounded release with same-parent local equilibrium and Schur condensation.",
+        "No broader release family or release promotion."
+      ]
+    },
+    {
+      "id": "frame2d.uniform_member_load",
+      "title": "Frame2D uniform member dead load",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "bounded_candidate",
+      "recovery_authority": "exact_bounded_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "ed7ea935f0318ba5102edd7f2a197a7beaf013f7",
+      "merged_pr": 227,
+      "source_paths_at_ref": [
+        "src/structural_analysis/assembly/corotational_frame2d_member_features.py",
+        "src/structural_analysis/api/nonlinear_frame.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_corotational_frame2d_member_features.py",
+        "tests/test_unified_nonlinear_frame_api.py"
+      ],
+      "limitations": [
+        "Uniform dead load in the initial member-local axis only.",
+        "No general distributed, follower, thermal, or moving member load authority."
+      ]
+    },
+    {
+      "id": "frame2d.direct_displacement_control",
+      "title": "Frame2D direct displacement control",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "bounded_candidate",
+      "recovery_authority": "checkpoint_replay_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "91e00a57db8fae1b2975c291f4439acdb75879ae",
+      "hardening_ref": "da87ef0221705b9483a0b239e151495b66244011",
+      "merged_pr": 197,
+      "source_paths_at_ref": [
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_displacement_control.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_stateful_corotational_fiber_frame2d_displacement_control.py"
+      ],
+      "limitations": [
+        "Internal dense augmented-Newton path with one free UX/UY control DOF.",
+        "Unified public J1-J5 exposure, native sparse execution, and external V&V remain open."
+      ]
+    },
+    {
+      "id": "frame3d.corotational",
+      "title": "Global corotational Frame3D",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "bounded_candidate",
+      "recovery_authority": "bounded_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "74f1c7d9d9c9611d74752acaf57684e1ba4799a9",
+      "merged_pr": 231,
+      "source_paths_at_ref": [
+        "src/structural_analysis/assembly/corotational_frame3d_global.py",
+        "src/structural_analysis/elements/corotational_frame3d.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_corotational_frame3d_global.py",
+        "tests/test_corotational_frame3d_scalable_graph.py"
+      ],
+      "limitations": [
+        "Bounded internal 3D graph candidate.",
+        "No independent external 3D comparison or release authority."
+      ]
+    },
+    {
+      "id": "frame3d.stateful_fiber",
+      "title": "Stateful corotational fiber Frame3D",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "bounded_candidate",
+      "recovery_authority": "state_checkpoint_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "b5d530bd4377e9eee4771e3b2df50c3ffc316ed4",
+      "merged_pr": 237,
+      "source_paths_at_ref": [
+        "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py",
+        "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_stateful_corotational_fiber_frame3d.py",
+        "tests/test_stateful_corotational_frame3d_sparse.py"
+      ],
+      "limitations": [
+        "Two- or three-point axial-biaxial fiber integration over a bounded Timoshenko reference.",
+        "Shear and torsion remain elastic; analytic 3D tangents and external V&V remain open."
+      ]
+    },
+    {
+      "id": "material.confined_concrete",
+      "title": "Mander monotonic confined concrete",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "constitutive_candidate",
+      "recovery_authority": "state_lineage_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "12c9bfbc1106cb82fc2d161a0596d91a8583f7d9",
+      "merged_pr": 235,
+      "source_paths_at_ref": [
+        "src/structural_analysis/materials/confined_concrete.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_confined_concrete_material.py"
+      ],
+      "limitations": [
+        "Monotonic uniaxial compression envelope only.",
+        "Cyclic confinement, multiaxial behavior, published calibration, and release authority remain unsupported."
+      ]
+    },
+    {
+      "id": "material.bond_slip",
+      "title": "Cyclic bond-slip connector",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "constitutive_candidate",
+      "recovery_authority": "state_lineage_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "12c9bfbc1106cb82fc2d161a0596d91a8583f7d9",
+      "merged_pr": 235,
+      "source_paths_at_ref": [
+        "src/structural_analysis/materials/bond_slip.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_bond_slip_material.py"
+      ],
+      "limitations": [
+        "Bounded SI-unit connector material point.",
+        "Connector groups, published calibration, independent V&V, and release authority remain open."
+      ]
+    },
+    {
+      "id": "material.partial_composite",
+      "title": "Steel-concrete partial composite interaction",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "constitutive_candidate",
+      "recovery_authority": "state_lineage_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "12c9bfbc1106cb82fc2d161a0596d91a8583f7d9",
+      "integration_ref": "b5d530bd4377e9eee4771e3b2df50c3ffc316ed4",
+      "merged_pr": 235,
+      "source_paths_at_ref": [
+        "src/structural_analysis/materials/partial_composite.py",
+        "src/structural_analysis/elements/stateful_corotational_partial_composite_frame3d.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_partial_composite_material.py",
+        "tests/test_stateful_corotational_partial_composite_frame3d.py"
+      ],
+      "limitations": [
+        "Condensed single-slip-mode axial member coupling.",
+        "General shear lag, uplift/contact, connector groups, and external V&V remain open."
+      ]
+    },
+    {
+      "id": "analysis.nonlinear_transient_sdof",
+      "title": "Nonlinear transient SDOF",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": false,
+      "numerical_authority": "bounded_reference_candidate",
+      "recovery_authority": "checkpoint_replay_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "implementation_ref": "698aec6cffa9d4efab5eb8b7c332f9ba6a529c6d",
+      "merged_pr": 233,
+      "source_paths_at_ref": [
+        "src/structural_analysis/solvers/nonlinear/transient_sdof.py"
+      ],
+      "verification_paths_at_ref": [
+        "tests/test_nonlinear_transient_sdof.py"
+      ],
+      "limitations": [
+        "Fail-closed Newmark average-acceleration bilinear SDOF reference kernel.",
+        "MDOF nonlinear dynamics, general hysteretic materials, external V&V, and release authority remain open."
+      ]
+    }
+  ]
+}

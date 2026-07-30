@@ -183,6 +183,7 @@ def _fully_rehash_result(plan, result, **array_updates):
             total_energy=forged.total_strain_energy_j,
             free_residual_linf=forged.free_residual_linf,
             scaled_free_residual=forged.scaled_free_residual,
+            equation_scaling_6dof=forged.equation_scaling_6dof,
         ),
     )
 
@@ -600,6 +601,7 @@ def test_result_validator_rejects_physics_consistent_singular_ready_forgery() ->
             total_energy=forged.total_strain_energy_j,
             free_residual_linf=forged.free_residual_linf,
             scaled_free_residual=forged.scaled_free_residual,
+            equation_scaling_6dof=forged.equation_scaling_6dof,
         ),
     )
 

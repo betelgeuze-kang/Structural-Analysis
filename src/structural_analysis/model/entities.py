@@ -8,6 +8,8 @@ import json
 from math import isfinite
 from typing import Any, ClassVar
 
+from structural_analysis.materials.admissibility import MaterialAdmissibility
+
 
 FRAME_DOF_LABELS = ("UX", "UY", "UZ", "RX", "RY", "RZ")
 LOAD_COMPONENT_LABELS = ("FX", "FY", "FZ", "MX", "MY", "MZ")
@@ -221,7 +223,32 @@ class ElasticMaterial(CanonicalEntity):
     poisson_ratio: float | None = None
     density: float | None = None
     material_type: str = "elastic"
+    loading_domain: str = "finite_linear_elastic_3d"
+    supports_monotonic: bool = True
+    supports_unloading: bool = True
+    supports_reversal: bool = True
+    supports_cyclic: bool = True
+    supports_tension: bool = True
+    supports_compression: bool = True
+    supports_multiaxial: bool = True
+    supports_localization_regularization: bool = False
     extras_json: str = field(default="{}", repr=False)
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return MaterialAdmissibility(
+            loading_domain=self.loading_domain,
+            supports_monotonic=self.supports_monotonic,
+            supports_unloading=self.supports_unloading,
+            supports_reversal=self.supports_reversal,
+            supports_cyclic=self.supports_cyclic,
+            supports_tension=self.supports_tension,
+            supports_compression=self.supports_compression,
+            supports_multiaxial=self.supports_multiaxial,
+            supports_localization_regularization=(
+                self.supports_localization_regularization
+            ),
+        )
 
     @classmethod
     def from_mapping(cls, payload: Mapping[str, Any]) -> "ElasticMaterial":

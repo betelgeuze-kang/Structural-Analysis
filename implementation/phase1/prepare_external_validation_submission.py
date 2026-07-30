@@ -11,8 +11,13 @@ import html
 import json
 from pathlib import Path
 import shutil
+import sys
 from typing import Any
 import zipfile
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -38,8 +43,6 @@ from implementation.phase1.generate_midas_native_writeback_diff_receipts import 
 )
 from implementation.phase1.pdf_rendering import configure_matplotlib_cjk_pdf, finalize_pdf_figure
 from implementation.phase1.ui_design_tokens import build_signal_desk_light_css
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
 CONSTITUTIVE_INTERACTION_NOTE = (
     "expanded constitutive/interaction families are surfaced explicitly as shared summary lines across the "

@@ -1,0 +1,146 @@
+{
+  "schema_version": "structural-analysis-issue-supersession-inventory.v1",
+  "repository": "betelgeuze-kang/Structural-Analysis",
+  "observed_at": "2026-07-28T01:52:00Z",
+  "observation_source": "github_connector_and_gh_cli_read_only_plus_authorized_issue_resolution",
+  "observed_open_issue_count": 5,
+  "open_issues": [
+    {
+      "number": 143,
+      "title": "Extract active FINAL_GUARD and sealed-checkpoint handoff from source-quarry PR #77",
+      "state": "open",
+      "classification": "source_quarry_backlog",
+      "linked_pull_requests": [77],
+      "merged_implementation_pull_requests": [],
+      "disposition": "extract_only_genuinely_missing_current_main_behavior"
+    },
+    {
+      "number": 144,
+      "title": "Extract retained HIP ResultIR/DiagnosticIR and device-provenance capabilities from source-quarry PR #78",
+      "state": "open",
+      "classification": "source_quarry_backlog",
+      "linked_pull_requests": [78],
+      "merged_implementation_pull_requests": [],
+      "disposition": "inventory_then_extract_one_concern_per_pull_request"
+    },
+    {
+      "number": 214,
+      "title": "Bind spatial-truss evidence to the actual linear assembly sources",
+      "state": "open",
+      "classification": "active_pull_request",
+      "linked_pull_requests": [215],
+      "merged_implementation_pull_requests": [],
+      "disposition": "rebase_then_re_execute_clean_runner_container"
+    },
+    {
+      "number": 220,
+      "title": "Harden external V&V clean-runner asset and child-receipt validation",
+      "state": "open",
+      "classification": "active_pull_request",
+      "linked_pull_requests": [221],
+      "merged_implementation_pull_requests": [],
+      "disposition": "hold_until_clean_runner_container_re_execution"
+    },
+    {
+      "number": 242,
+      "title": "Add read-only repository hygiene inventory gate",
+      "state": "open",
+      "classification": "active_pull_request",
+      "linked_pull_requests": [243],
+      "merged_implementation_pull_requests": [],
+      "disposition": "review_open_pull_request"
+    }
+  ],
+  "implemented_but_open_issues": [],
+  "orphan_issues": [],
+  "resolved_issues": [
+    {
+      "number": 207,
+      "state": "closed",
+      "state_reason": "completed",
+      "resolution": "resolved_by",
+      "resolved_by_pull_request": 241,
+      "merge_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+      "normalization_comment_id": 5098996102
+    },
+    {
+      "number": 210,
+      "state": "closed",
+      "state_reason": "completed",
+      "resolution": "resolved_by",
+      "resolved_by_pull_request": 239,
+      "merge_commit_sha": "da87ef0221705b9483a0b239e151495b66244011",
+      "normalization_comment_id": 5098996178
+    },
+    {
+      "number": 212,
+      "state": "closed",
+      "state_reason": "completed",
+      "resolution": "resolved_by",
+      "resolved_by_pull_request": 239,
+      "merge_commit_sha": "da87ef0221705b9483a0b239e151495b66244011",
+      "normalization_comment_id": 5098996271
+    },
+    {
+      "number": 216,
+      "state": "closed",
+      "state_reason": "completed",
+      "resolution": "resolved_by",
+      "resolved_by_pull_request": 239,
+      "merge_commit_sha": "da87ef0221705b9483a0b239e151495b66244011",
+      "normalization_comment_id": 5098996372
+    },
+    {
+      "number": 218,
+      "state": "closed",
+      "state_reason": "completed",
+      "resolution": "resolved_by",
+      "resolved_by_pull_request": 239,
+      "merge_commit_sha": "da87ef0221705b9483a0b239e151495b66244011",
+      "normalization_comment_id": 5098996554
+    }
+  ],
+  "superseded_pull_requests": [
+    {
+      "number": 206,
+      "state": "closed",
+      "merged": false,
+      "disposition": "superseded",
+      "superseded_by_pull_request": 241,
+      "normalization_comment_id": 5098996800
+    },
+    {
+      "number": 211,
+      "state": "closed",
+      "merged": false,
+      "disposition": "superseded",
+      "superseded_by_pull_request": 239,
+      "normalization_comment_id": 5098997061
+    },
+    {
+      "number": 213,
+      "state": "closed",
+      "merged": false,
+      "disposition": "superseded",
+      "superseded_by_pull_request": 239,
+      "normalization_comment_id": 5098997274
+    },
+    {
+      "number": 217,
+      "state": "closed",
+      "merged": false,
+      "disposition": "superseded",
+      "superseded_by_pull_request": 239,
+      "normalization_comment_id": 5098997436
+    },
+    {
+      "number": 219,
+      "state": "closed",
+      "merged": false,
+      "disposition": "superseded",
+      "superseded_by_pull_request": 239,
+      "normalization_comment_id": 5098997560
+    }
+  ],
+  "claim_boundary": "This inventory records issue and supersession hygiene only. It does not prove solver authority, external V&V, design authority, release eligibility, or repository-wide product readiness."
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-midas-mgt-model",
-  "generated_at": "2026-07-01T11:12:38.276777+00:00",
+  "generated_at": "2026-07-27T17:01:26.933591+00:00",
   "source": {
     "path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
     "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",

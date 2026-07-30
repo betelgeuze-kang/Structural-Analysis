@@ -22,8 +22,8 @@ def test_restart_trace_ir_public_api_is_additive_unique_and_exact() -> None:
         assert getattr(assembly_backend, name) is value
         assert name in engine_v2.__all__
         assert name in assembly_backend.__all__
-    assert len(engine_v2.__all__) == 1211
-    assert len(assembly_backend.__all__) == 1019
+    assert len(engine_v2.__all__) == 1263
+    assert len(assembly_backend.__all__) == 1071
     assert len(engine_v2.__all__) == len(set(engine_v2.__all__))
     assert len(assembly_backend.__all__) == len(set(assembly_backend.__all__))
 

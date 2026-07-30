@@ -17,6 +17,7 @@ from pathlib import Path
 import numpy as np
 
 from newton_adaptive_damping import AdaptiveNewtonConfig, solve_with_adaptive_damping
+from structural_analysis.dynamics import build_transient_checkpoint_authority
 
 
 G = 9.80665
@@ -26,6 +27,7 @@ REASONS = {
     "ERR_GM_INPUT": "ground-motion input is missing or invalid",
     "ERR_NEWMARK_STABILITY": "newmark integration diverged or produced non-finite response",
     "ERR_ENERGY_DIVERGENCE": "energy balance or equilibrium residual checks failed",
+    "ERR_CHECKPOINT_AUTHORITY": "transient checkpoint source-authentic replay failed",
 }
 
 
@@ -103,6 +105,10 @@ def _newmark_sdof(
     a5 = dt * ((gamma / (2.0 * beta)) - 1.0)
     k_eff = k + a0 * mass_kg + a1 * c
     k_nl = float(max(0.0, nonlinear_stiffness_ratio) * k)
+    reference_force_n = max(
+        mass_kg * max(abs(value) for value in ag_g) * G,
+        1.0,
+    )
 
     u = 0.0
     v = 0.0
@@ -123,7 +129,7 @@ def _newmark_sdof(
     for i, ag in enumerate(ag_g):
         p = -mass_kg * ag * G
         if i == 0:
-            residual = mass_kg * a + c * v + k * u - p
+            residual = mass_kg * a + c * v + k * u + k_nl * u * abs(u) - p
         else:
             p_eff = p + mass_kg * (a0 * u + a2 * v + a3 * a) + c * (a1 * u + a4 * v + a5 * a)
             if use_adaptive_newton:
@@ -131,12 +137,16 @@ def _newmark_sdof(
 
                 def _residual_fn(x: np.ndarray) -> np.ndarray:
                     uu = float(x[0])
-                    val = k_eff * uu + k_nl * uu * abs(uu) - p_eff
+                    val = (
+                        k_eff * uu + k_nl * uu * abs(uu) - p_eff
+                    ) / reference_force_n
                     return np.array([val], dtype=float)
 
                 def _jacobian_fn(x: np.ndarray) -> np.ndarray:
                     uu = float(x[0])
-                    jj = k_eff + 2.0 * k_nl * abs(uu)
+                    jj = (
+                        k_eff + 2.0 * k_nl * abs(uu)
+                    ) / reference_force_n
                     return np.array([[jj]], dtype=float)
 
                 solved = solve_with_adaptive_damping(np.array([u], dtype=float), _residual_fn, _jacobian_fn, cfg)
@@ -146,16 +156,43 @@ def _newmark_sdof(
                     newton_converged_count += 1
                 newton_backtracks_total += int(solved.get("line_search_backtracks", 0))
             else:
-                u_next = p_eff / max(k_eff, 1e-12)
+                if k_nl <= 0.0 or p_eff == 0.0:
+                    u_next = p_eff / max(k_eff, 1e-12)
+                else:
+                    magnitude = (
+                        2.0
+                        * abs(p_eff)
+                        / (
+                            k_eff
+                            + math.sqrt(
+                                k_eff * k_eff
+                                + 4.0 * k_nl * abs(p_eff)
+                            )
+                        )
+                    )
+                    u_next = math.copysign(magnitude, p_eff)
             a_next = a0 * (u_next - u) - a2 * v - a3 * a
             v_next = v + dt * ((1.0 - gamma) * a + gamma * a_next)
             u, v, a = u_next, v_next, a_next
-            residual = mass_kg * a + c * v + k * u - p
+            residual = (
+                mass_kg * a
+                + c * v
+                + k * u
+                + k_nl * u * abs(u)
+                - p
+            )
 
-        d_energy += c * v * v * dt
-        in_work += p * v * dt
-        e_mech = 0.5 * mass_kg * v * v + 0.5 * k * u * u
-        base_shear = abs(k * u + c * v)
+        external_work_increment = p * v * dt
+        damping_dissipation_increment = c * v * v * dt
+        plastic_dissipation_increment = 0.0
+        d_energy += damping_dissipation_increment
+        in_work += external_work_increment
+        e_mech = (
+            0.5 * mass_kg * v * v
+            + 0.5 * k * u * u
+            + k_nl * abs(u) ** 3 / 3.0
+        )
+        base_shear = abs(k * u + k_nl * u * abs(u) + c * v)
 
         max_abs_u = max(max_abs_u, abs(u))
         max_abs_v = max(max_abs_v, abs(v))
@@ -163,20 +200,31 @@ def _newmark_sdof(
         max_abs_residual = max(max_abs_residual, abs(residual))
         max_base_shear = max(max_base_shear, base_shear)
 
-        if i < 400:
-            trace.append(
-                {
-                    "step": i,
-                    "u_m": u,
-                    "v_mps": v,
-                    "a_mps2": a,
-                    "residual_n": residual,
-                    "e_mech_j": e_mech,
-                }
-            )
+        trace.append(
+            {
+                "step": i,
+                "force_n": p,
+                "u_m": u,
+                "v_mps": v,
+                "a_mps2": a,
+                "residual_n": residual,
+                "e_mech_j": e_mech,
+                "external_work_increment_j": external_work_increment,
+                "damping_dissipation_increment_j": (
+                    damping_dissipation_increment
+                ),
+                "plastic_dissipation_increment_j": (
+                    plastic_dissipation_increment
+                ),
+            }
+        )
 
-    final_mech = 0.5 * mass_kg * v * v + 0.5 * k * u * u
-    ref_force = mass_kg * max(max(abs(x) for x in ag_g), 1e-6) * G
+    final_mech = (
+        0.5 * mass_kg * v * v
+        + 0.5 * k * u * u
+        + k_nl * abs(u) ** 3 / 3.0
+    )
+    ref_force = reference_force_n
     residual_ratio = max_abs_residual / max(ref_force, 1e-9)
     energy_balance_rel = abs((final_mech + d_energy) - in_work) / max(abs(in_work), 1e-9)
 
@@ -190,6 +238,8 @@ def _newmark_sdof(
             "equilibrium_residual_max_n": max_abs_residual,
             "equilibrium_residual_ratio": residual_ratio,
             "dissipated_energy_j": d_energy,
+            "damping_dissipation_j": d_energy,
+            "plastic_dissipation_j": 0.0,
             "input_work_j": in_work,
             "final_mechanical_energy_j": final_mech,
             "energy_balance_relative_error": energy_balance_rel,
@@ -205,8 +255,11 @@ def _newmark_sdof(
             "damping_ratio": damping_ratio,
             "newmark_beta": beta,
             "newmark_gamma": gamma,
+            "time_step_s": dt,
             "adaptive_newton_enabled": bool(use_adaptive_newton),
             "nonlinear_stiffness_ratio": float(nonlinear_stiffness_ratio),
+            "nonlinear_stiffness_n_per_m2": k_nl,
+            "plastic_dissipation_model": "none",
         },
     }
 
@@ -266,6 +319,37 @@ def main() -> None:
         ),
         nonlinear_stiffness_ratio=float(args.nonlinear_stiffness_ratio),
     )
+    replay_result = _newmark_sdof(
+        ag_g=ag,
+        dt=dt,
+        period_s=float(args.period_s),
+        damping_ratio=float(args.damping_ratio),
+        mass_kg=float(args.mass_kg),
+        use_adaptive_newton=bool(args.use_adaptive_newton),
+        adaptive_cfg=AdaptiveNewtonConfig(
+            max_iter=int(args.adaptive_newton_max_iter),
+            tol=float(args.adaptive_newton_tol),
+            lambda_init=1e-3,
+        ),
+        nonlinear_stiffness_ratio=float(args.nonlinear_stiffness_ratio),
+    )
+    initial_state = {
+        "displacement_m": 0.0,
+        "velocity_mps": 0.0,
+        "acceleration_mps2": -float(ag[0]) * G,
+    }
+    force_history = tuple(
+        -float(args.mass_kg) * float(acceleration_g) * G
+        for acceleration_g in ag
+    )
+    checkpoint_authority = build_transient_checkpoint_authority(
+        parent_content=gm_path.read_bytes(),
+        force_history=force_history,
+        initial_state=initial_state,
+        source_result=result,
+        replay_result=replay_result,
+        source_authentic_requested=True,
+    )
     metrics = result["metrics"]
 
     finite_ok = all(math.isfinite(float(v)) for v in metrics.values())
@@ -273,14 +357,18 @@ def main() -> None:
     residual_ok = finite_ok and float(metrics["equilibrium_residual_ratio"]) <= float(args.max_residual_ratio)
     energy_ok = finite_ok and float(metrics["energy_balance_relative_error"]) <= float(args.max_energy_balance_error)
     stable = bool(non_divergent and residual_ok and energy_ok)
+    checkpoint_ok = bool(checkpoint_authority.source_authentic_checkpoint)
     newton_ok = True
     if bool(args.use_adaptive_newton):
         steps = max(1, int(result["metrics"].get("adaptive_newton_step_count", 0)))
         conv = int(result["metrics"].get("adaptive_newton_converged_count", 0))
         newton_ok = bool(conv / steps >= 0.95)
         stable = bool(stable and newton_ok)
+    stable = bool(stable and checkpoint_ok)
 
-    if not finite_ok or not non_divergent or not newton_ok:
+    if not checkpoint_ok:
+        reason_code = "ERR_CHECKPOINT_AUTHORITY"
+    elif not finite_ok or not non_divergent or not newton_ok:
         reason_code = "ERR_NEWMARK_STABILITY"
     elif not residual_ok or not energy_ok:
         reason_code = "ERR_ENERGY_DIVERGENCE"
@@ -307,9 +395,12 @@ def main() -> None:
             "energy_balance_pass": energy_ok,
             "newmark_stability_pass": stable,
             "adaptive_newton_converged_pass": bool(newton_ok),
+            "source_authentic_checkpoint_pass": checkpoint_ok,
         },
         "metrics": metrics,
-        "trace_head": result["trace"],
+        "trace": result["trace"],
+        "trace_head": result["trace"][:400],
+        "transient_checkpoint": checkpoint_authority.to_dict(),
         "contract_pass": bool(stable),
         "reason_code": reason_code,
         "reason": REASONS[reason_code],

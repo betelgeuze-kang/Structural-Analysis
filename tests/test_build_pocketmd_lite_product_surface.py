@@ -532,21 +532,17 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "receipt_bundle_completion_report"
     ].endswith("pocketmd_lite_topk_rows_from_receipt_bundle_report.json")
     handoff_receipts = handoff["receipt_bundle_completion_report"]
-    assert handoff_receipts["status"] == "operator_receipts_completion_required"
+    assert handoff_receipts["status"] == "rows_materialized"
     assert handoff_receipts["receipt_count"] == 6
-    assert handoff_receipts["ready_receipt_count"] == 0
-    assert handoff_receipts["incomplete_receipt_count"] == 6
+    assert handoff_receipts["ready_receipt_count"] == 6
+    assert handoff_receipts["incomplete_receipt_count"] == 0
     assert handoff_receipts["metric_family_completion_action_count"] == 5
     assert handoff_receipts["metric_family_completion_actions"][0][
         "metric_family_id"
     ] == "local_min_survival"
-    assert handoff_receipts["first_incomplete_receipt"]["receipt_ref"].endswith(
-        "pocketmd_lite_case_001/rank_01_refinement_receipt.json"
-    )
-    assert handoff["source_acquisition_plan"]["status"] == (
-        "operator_acquisition_required"
-    )
-    assert handoff["source_acquisition_plan"]["actual_closure_ready"] is False
+    assert handoff_receipts["first_incomplete_receipt"]["receipt_ref"] == ""
+    assert handoff["source_acquisition_plan"]["status"] == "ready"
+    assert handoff["source_acquisition_plan"]["actual_closure_ready"] is True
     assert handoff["source_acquisition_plan"]["required_total_candidate_rows"] == 6
     assert handoff["source_acquisition_plan"]["phase4_refinement_receipt_plan"][
         "receipt_role_count"
@@ -637,13 +633,11 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_source_acquisition_plan.json"
     )
-    assert operator["source_acquisition_plan"]["status"] == (
-        "operator_acquisition_required"
-    )
-    assert operator["source_acquisition_plan"]["actual_closure_ready"] is False
+    assert operator["source_acquisition_plan"]["status"] == "ready"
+    assert operator["source_acquisition_plan"]["actual_closure_ready"] is True
     assert operator["source_acquisition_plan"]["required_case_count"] == 3
     assert operator["source_acquisition_plan"]["required_total_candidate_rows"] == 6
-    assert operator["source_acquisition_plan"]["missing_row_input_action_count"] == 1
+    assert operator["source_acquisition_plan"]["missing_row_input_action_count"] == 0
     assert (
         operator["source_acquisition_plan"][
             "template_preflight_role_receipt_blocked_count"
@@ -662,54 +656,8 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["source_acquisition_plan"][
         "first_blocked_operator_input_source_receipt"
     ]["field"] == "source_id"
-    source_action = operator["source_acquisition_plan"][
-        "first_missing_row_input_action"
-    ]
-    assert source_action["row_input_id"] == "pocketmd_rows"
-    assert source_action["default_row_artifact"].endswith(
-        "pocketmd_lite_topk_rows.json"
-    )
-    assert source_action["row_preflight_action_packet"][
-        "template_preflight_artifact"
-    ].endswith("pocketmd_lite_topk_rows_template_preflight.json")
-    assert source_action["row_preflight_action_packet"][
-        "missing_required_slot_count"
-    ] == 6
-    assert source_action["row_preflight_action_packet"][
-        "template_preflight_role_receipt_blocked_count"
-    ] == 24
-    assert source_action["row_preflight_action_packet"][
-        "template_preflight_operator_input_source_receipt_blocked_count"
-    ] == 5
-    assert source_action["row_preflight_action_packet"][
-        "first_blocked_role_receipt"
-    ]["candidate_id"] == "pocketmd_lite_case_001_rank_01"
-    assert source_action["row_preflight_action_packet"][
-        "first_blocked_operator_input_source_receipt"
-    ]["field"] == "source_id"
-    assert source_action["row_preflight_action_packet"][
-        "import_rows_command"
-    ].startswith("python3 scripts/materialize_pocketmd_lite_operator_intake_from_rows.py")
-    assert source_action["top_k_rows_action_packet"][
-        "materialize_survival_command"
-    ].startswith("python3 scripts/materialize_pocketmd_lite_topk_survival_report.py")
-    assert source_action["top_k_rows_action_packet"][
-        "phase4_metric_receipt_action_count"
-    ] == 8
-    assert source_action["top_k_rows_action_packet"][
-        "role_receipt_plan_summary"
-    ]["role_receipt_blocked_count"] == 24
-    assert source_action["top_k_rows_action_packet"][
-        "role_receipt_plan_summary"
-    ]["first_blocked_role_receipt"]["role_id"] == (
-        "upstream_top_k_candidate_scope_receipt"
-    )
-    assert source_action["top_k_rows_action_packet"][
-        "operator_input_source_receipt_plan_summary"
-    ]["blocked_count"] == 5
-    assert source_action["top_k_rows_action_packet"][
-        "operator_input_source_receipt_plan_summary"
-    ]["first_blocked_receipt"]["field"] == "source_id"
+    assert operator["source_acquisition_plan"]["first_missing_row_input_action"] == {}
+    assert operator["source_acquisition_plan"]["detected_row_artifact_count"] == 1
     assert operator["source_acquisition_plan"]["refinement_execution_plan"][
         "required_candidate_slot_count"
     ] == 6
@@ -721,7 +669,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "operator_refinement_rows_required"
     )
     assert operator["refinement_execution_plan"]["execution_plan_ready"] is True
-    assert operator["refinement_execution_plan"]["operator_rows_ready"] is False
+    assert operator["refinement_execution_plan"]["operator_rows_ready"] is True
     assert operator["refinement_execution_plan"]["required_case_count"] == 3
     assert operator["refinement_execution_plan"][
         "required_candidate_slot_count"
@@ -750,11 +698,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "clash_relief_materialized",
         "report_blockers_resolved",
     ]
-    assert operator["source_acquisition_plan"]["blockers"] == [
-        "pocketmd_lite_topk_rows_not_acquired",
-        "upstream_top_k_candidate_receipts_not_attached",
-        "lite_refinement_metric_receipts_not_attached",
-    ]
+    assert operator["source_acquisition_plan"]["blockers"] == []
     assert operator["raw_row_dropzone"] == {
         "auto_detection_policy": (
             "Place real PocketMD Lite top-k row files at the default paths, "
@@ -793,7 +737,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["summary"]["phase4_topk_row_closure_matrix_count"] == 1
     assert operator["summary"]["row_template_artifact_count"] == 1
     assert operator["summary"]["refinement_execution_plan_ready"] is True
-    assert operator["summary"]["operator_rows_ready"] is False
+    assert operator["summary"]["operator_rows_ready"] is True
     assert operator["summary"]["required_candidate_slot_count"] == 6
     assert (
         operator["summary"][
@@ -1286,7 +1230,7 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         refinement_execution_plan_out.read_text(encoding="utf-8")
     )
     assert refinement_execution_plan_payload["required_candidate_slot_count"] == 6
-    assert refinement_execution_plan_payload["operator_rows_ready"] is False
+    assert refinement_execution_plan_payload["operator_rows_ready"] is True
     assert survival_payload["topk_refinement_completion_audit"]["status"] == "blocked"
     assert (
         survival_payload["topk_refinement_completion_audit"][
@@ -1302,20 +1246,17 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     )
     operator_markdown = operator_md_out.read_text(encoding="utf-8")
     assert "# PocketMD Lite Operator Intake Packet" in operator_markdown
-    assert "## Source Acquisition Actions" in operator_markdown
-    assert "pocketmd_lite_topk_rows_template_preflight.json" in operator_markdown
+    assert "`source_acquisition_plan_status`: `ready`" in operator_markdown
+    assert "## Receipt Completion Report" in operator_markdown
+    assert "`status`: `rows_materialized`" in operator_markdown
+    assert "`ready_receipt_count`: `6`" in operator_markdown
+    assert "`incomplete_receipt_count`: `0`" in operator_markdown
     assert "`template_preflight_role_receipt_blocked_count`: `24`" in (
-        operator_markdown
-    )
-    assert "`first_blocked_role_receipt`: `upstream_top_k_candidate_scope_receipt` / `pocketmd_lite_case_001_rank_01`" in (
         operator_markdown
     )
     assert (
         "`template_preflight_operator_input_source_receipt_blocked_count`: `5`"
         in operator_markdown
-    )
-    assert "`first_blocked_operator_input_source_receipt`: `source_id`" in (
-        operator_markdown
     )
     assert "materialize_pocketmd_lite_operator_intake_from_rows.py" in (
         operator_markdown

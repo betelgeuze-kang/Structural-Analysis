@@ -67,7 +67,7 @@ def test_phase2_linear_reference_builds_honest_reference_artifacts() -> None:
     assert metrics["stiffness_storage"] == "dense_numpy"
     assert metrics["matrix_backend"] == "numpy_linalg_solve_dense"
     assert metrics["sparse_backend_used"] is False
-    assert metrics["stiffness_order"] == 6
+    assert metrics["stiffness_order"] == 12
     assert metrics["free_stiffness_order"] == 1
     assert metrics["relative_residual"] == 0.0
     assert metrics["energy_balance_error"] == 0.0
@@ -130,7 +130,7 @@ def test_phase2_linear_reference_builds_honest_reference_artifacts() -> None:
     assert tangent_jacobian["residual_contract"] == "F_internal_minus_F_external"
     assert tangent_jacobian["tangent_jacobian_definition"] == "dR_du_equals_assembled_dense_stiffness"
     assert tangent_jacobian["free_dof_count"] == 1
-    assert tangent_jacobian["free_dof_indices"] == [3]
+    assert tangent_jacobian["free_dof_indices"] == [6]
     assert tangent_jacobian["equilibrium_residual_gate_passed"] is True
     assert tangent_jacobian["tangent_equals_stiffness_gate_passed"] is True
     assert tangent_jacobian["tangent_free_block_gate_passed"] is True

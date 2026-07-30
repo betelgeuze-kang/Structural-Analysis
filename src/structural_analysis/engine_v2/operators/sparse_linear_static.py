@@ -17,6 +17,7 @@ from typing import Any
 from jsonschema import Draft202012Validator
 import numpy as np
 
+from structural_analysis.engine_v2.buffers import DOF_ORDER
 from structural_analysis.engine_v2.contracts._canonical import (
     array_content_hash,
     array_data_hash,
@@ -29,6 +30,11 @@ from structural_analysis.engine_v2.contracts.execution_plan_v2 import (
     PlanArrayDescriptorV2,
     _csr_matvec,
     validate_execution_plan_v2,
+)
+from structural_analysis.solvers.equation_scaling import (
+    EquationScaling6DOF,
+    build_equation_scaling_6dof,
+    characteristic_length_from_coordinates,
 )
 
 SPARSE_LINEAR_STATIC_RESULT_V2_SCHEMA_VERSION = (
@@ -66,6 +72,7 @@ class SparseLinearStaticResultV2:
     total_strain_energy_j: float
     free_residual_linf: float
     scaled_free_residual: float
+    equation_scaling_6dof: EquationScaling6DOF
     constrained_dofs: tuple[int, ...]
     free_dofs: tuple[int, ...]
     descriptors: tuple[PlanArrayDescriptorV2, ...]
@@ -94,6 +101,7 @@ class SparseLinearStaticResultV2:
                 "total_strain_energy_j": self.total_strain_energy_j,
                 "free_residual_linf": self.free_residual_linf,
                 "scaled_free_residual": self.scaled_free_residual,
+                "equation_scaling_6dof": self.equation_scaling_6dof.to_dict(),
             },
             "constraint_partition": {
                 "constrained_dofs": list(self.constrained_dofs),
@@ -129,11 +137,21 @@ def solve_sparse_execution_plan_v2(plan: ExecutionPlanV2) -> SparseLinearStaticR
 
     residual = plan.residual(displacement)
     free_residual_linf = float(np.max(np.abs(residual[free]))) if free.size else 0.0
-    load_scale = max(
+    reference_force = max(
         1.0,
-        float(np.max(np.abs(plan.array("global_load")[free]))) if free.size else 0.0,
+        float(np.max(np.abs(plan.array("global_load")))),
     )
-    scaled_residual = free_residual_linf / load_scale
+    equation_scaling = build_equation_scaling_6dof(
+        reference_force=reference_force,
+        characteristic_length=characteristic_length_from_coordinates(
+            plan._source_buffers.array("node_coordinates_m")
+        ),
+        residual=residual[free],
+        increment=displacement[free],
+        tangent=_reduced_matrix(plan),
+        dof_labels=tuple(DOF_ORDER[index % _DOFS_PER_NODE] for index in free),
+    )
+    scaled_residual = equation_scaling.scaled_residual_norm
     status = "ready" if scaled_residual <= plan.residual_tolerance else "failed"
 
     reactions = np.zeros(plan.dof_count, dtype="<f8")
@@ -186,6 +204,7 @@ def solve_sparse_execution_plan_v2(plan: ExecutionPlanV2) -> SparseLinearStaticR
         total_energy=total_energy,
         free_residual_linf=free_residual_linf,
         scaled_free_residual=scaled_residual,
+        equation_scaling_6dof=equation_scaling,
     )
     result = SparseLinearStaticResultV2(
         schema_version=SPARSE_LINEAR_STATIC_RESULT_V2_SCHEMA_VERSION,
@@ -199,6 +218,7 @@ def solve_sparse_execution_plan_v2(plan: ExecutionPlanV2) -> SparseLinearStaticR
         total_strain_energy_j=total_energy,
         free_residual_linf=free_residual_linf,
         scaled_free_residual=scaled_residual,
+        equation_scaling_6dof=equation_scaling,
         constrained_dofs=plan.constrained_dofs,
         free_dofs=plan.free_dofs,
         descriptors=descriptors,
@@ -331,13 +351,21 @@ def validate_sparse_linear_static_result_v2(
         _result_fail("sparse_linear_static_result_energy_mismatch")
 
     expected_linf = float(np.max(np.abs(expected_residual[free]))) if free.size else 0.0
-    load_scale = max(
+    reference_force = max(
         1.0,
-        float(np.max(np.abs(expected_plan.array("global_load")[free])))
-        if free.size
-        else 0.0,
+        float(np.max(np.abs(expected_plan.array("global_load")))),
     )
-    expected_scaled = expected_linf / load_scale
+    expected_scaling = build_equation_scaling_6dof(
+        reference_force=reference_force,
+        characteristic_length=characteristic_length_from_coordinates(
+            expected_plan._source_buffers.array("node_coordinates_m")
+        ),
+        residual=expected_residual[free],
+        increment=displacement[free],
+        tangent=_reduced_matrix(expected_plan),
+        dof_labels=tuple(DOF_ORDER[index % _DOFS_PER_NODE] for index in free),
+    )
+    expected_scaled = expected_scaling.scaled_residual_norm
     if not math.isclose(
         result.free_residual_linf, expected_linf, rel_tol=0.0, abs_tol=0.0
     ):
@@ -346,6 +374,8 @@ def validate_sparse_linear_static_result_v2(
         result.scaled_free_residual, expected_scaled, rel_tol=0.0, abs_tol=0.0
     ):
         _result_fail("sparse_linear_static_result_residual_metric_mismatch")
+    if result.equation_scaling_6dof != expected_scaling:
+        _result_fail("sparse_linear_static_result_equation_scaling_mismatch")
     expected_status = (
         "ready" if expected_scaled <= expected_plan.residual_tolerance else "failed"
     )
@@ -358,15 +388,15 @@ def validate_sparse_linear_static_result_v2(
         total_energy=result.total_strain_energy_j,
         free_residual_linf=result.free_residual_linf,
         scaled_free_residual=result.scaled_free_residual,
+        equation_scaling_6dof=result.equation_scaling_6dof,
     )
     if result.result_hash != expected_hash:
         _result_fail("sparse_linear_static_result_hash_mismatch")
 
 
-def _solve_reduced_system(plan: ExecutionPlanV2) -> np.ndarray:
+def _reduced_matrix(plan: ExecutionPlanV2) -> Any:
     try:
         from scipy.sparse import csr_matrix
-        from scipy.sparse.linalg import MatrixRankWarning, spsolve
     except ImportError as exc:  # pragma: no cover - environment-dependent
         raise SparseLinearStaticErrorV2(
             "sparse_linear_static_scipy_unavailable",
@@ -388,6 +418,20 @@ def _solve_reduced_system(plan: ExecutionPlanV2) -> np.ndarray:
             "sparse_linear_static_csr_construction_mismatch",
             "SciPy did not preserve the retained sorted reduced CSR slots.",
         )
+    return reduced_matrix
+
+
+def _solve_reduced_system(plan: ExecutionPlanV2) -> np.ndarray:
+    try:
+        from scipy.sparse.linalg import MatrixRankWarning, spsolve
+    except ImportError as exc:  # pragma: no cover - environment-dependent
+        raise SparseLinearStaticErrorV2(
+            "sparse_linear_static_scipy_unavailable",
+            "SciPy is required for the explicit sparse-direct execution path.",
+        ) from exc
+
+    free_count = len(plan.free_dofs)
+    reduced_matrix = _reduced_matrix(plan)
     free = np.asarray(plan.free_dofs, dtype=np.int64)
     try:
         with warnings.catch_warnings():
@@ -471,6 +515,7 @@ def _result_hash(
     total_energy: float,
     free_residual_linf: float,
     scaled_free_residual: float,
+    equation_scaling_6dof: EquationScaling6DOF,
 ) -> str:
     return canonical_hash(
         {
@@ -484,6 +529,7 @@ def _result_hash(
             "total_strain_energy_j": total_energy,
             "free_residual_linf": free_residual_linf,
             "scaled_free_residual": scaled_free_residual,
+            "equation_scaling_6dof": equation_scaling_6dof.to_dict(),
         }
     )
 

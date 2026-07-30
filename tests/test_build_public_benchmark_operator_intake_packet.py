@@ -63,7 +63,7 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["first_operator_evidence_gap"]["slot_id"] == (
         "casf_pdbbind_subset_intake"
     )
-    assert packet["source_of_truth_status"] == "seed_ready_materialization_blocked"
+    assert packet["source_of_truth_status"] == "ready"
     assert packet["source_acquisition_plan"]["artifact"] == (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_phase2_source_acquisition_plan.json"
@@ -82,12 +82,10 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     ]
     assert packet["source_acquisition_plan"]["phase2_row_audit"][
         "status"
-    ] == "operator_evidence_required"
+    ] == "ready"
     assert packet["source_acquisition_plan"]["phase2_row_audit"][
         "missing_row_inputs"
-    ] == [
-        "vina_gnina_rows",
-    ]
+    ] == []
     assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
         "artifact"
     ] == (
@@ -96,10 +94,10 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     )
     assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
         "execution_plan_ready"
-    ] is False
+    ] is True
     assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
         "status"
-    ] == "engine_input_blocked"
+    ] == "ready_for_engine_execution"
     assert packet["source_acquisition_plan"]["vina_gnina_execution_plan"][
         "required_engine_run_count"
     ] == 24
@@ -110,16 +108,16 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "vina_gnina_rows_template_preflight_summary"
     ]["role_receipt_blocked_count"] == 72
     runtime = packet["source_acquisition_plan"]["vina_gnina_runtime_readiness"]
-    assert runtime["status"] == "execution_plan_blocked"
-    assert runtime["adapter_row_preflight_status"] == "row_artifact_missing"
-    assert runtime["adapter_row_preflight_blocker"] == (
-        "public_benchmark_vina_gnina_rows_not_detected"
+    assert runtime["status"] == "adapter_materialization_ready"
+    assert runtime["adapter_row_preflight_status"] == (
+        "row_artifact_detected_validated"
     )
-    assert runtime["adapter_case_count"] == 0
-    assert packet["summary"]["vina_gnina_runtime_adapter_case_count"] == 0
+    assert runtime["adapter_row_preflight_blocker"] == ""
+    assert runtime["adapter_case_count"] == 12
+    assert packet["summary"]["vina_gnina_runtime_adapter_case_count"] == 12
     assert packet["summary"][
         "vina_gnina_runtime_adapter_row_preflight_status"
-    ] == "row_artifact_missing"
+    ] == "row_artifact_detected_validated"
     assert packet["summary"][
         "vina_gnina_rows_template_role_receipt_blocked_count"
     ] == 72
@@ -181,38 +179,14 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert receipt_roles["vina_gnina_rows"]["receipt_role_id"] == (
         "vina_gnina_engine_comparison_receipt"
     )
-    assert packet["source_of_truth_blockers"] == [
-        "casf_pdbbind_source_material_not_attached",
-        "casf_pdbbind_case_checksums_missing",
-        "casf_pdbbind_ligand_symmetry_contracts_missing",
-        "public_benchmark_real_pose_predictions_missing",
-        "public_benchmark_real_pose_validity_rows_missing",
-        "public_benchmark_real_rmsd_rows_missing",
-        "public_benchmark_pose_success_harness_rows_missing",
-        "dud_e_lit_pcba_enrichment_rows_missing",
-        "vina_gnina_comparison_rows_missing",
-        "public_benchmark_external_receipts_missing",
-    ]
+    assert packet["source_of_truth_blockers"] == []
     detail_register = {
         row["slot_id"]: row for row in packet["source_of_truth_blocker_detail_register"]
     }
-    assert packet["source_of_truth_blocker_detail_count"] == 4
-    assert packet["source_of_truth_first_blocker_detail"]["slot_id"] == (
-        "casf_pdbbind_subset_intake"
-    )
-    assert packet["summary"]["source_of_truth_blocker_detail_count"] == 4
-    assert detail_register["dud_e_lit_pcba_enrichment_intake"]["blockers"] == [
-        "dud_e_lit_pcba_enrichment_targets_missing",
-        "dud_e_lit_pcba_scored_molecules_missing",
-        "dud_e_lit_pcba_active_decoy_labels_missing",
-        "public_benchmark_external_receipts_missing",
-    ]
-    assert detail_register["vina_gnina_comparison_intake"]["blockers"] == [
-        "vina_gnina_comparison_cases_missing",
-        "vina_gnina_engine_runs_missing",
-        "vina_gnina_external_receipts_missing",
-        "public_benchmark_external_receipts_missing",
-    ]
+    assert packet["source_of_truth_blocker_detail_count"] == 0
+    assert packet["source_of_truth_first_blocker_detail"] == {}
+    assert packet["summary"]["source_of_truth_blocker_detail_count"] == 0
+    assert detail_register == {}
     assert packet["manifest_contract_count"] == 1
     assert packet["first_manifest_contract_id"] == (
         "casf_pdbbind_subset_manifest_contract"
@@ -424,21 +398,15 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["execution_preflight_checklist_count"] == len(
         packet["materialization_sequence"]
     )
-    assert packet["first_execution_preflight_blocker"]["step_id"] == (
-        "materialize_public_benchmark_phase2_row_audit"
-    )
-    assert packet["first_execution_preflight_blocker"]["operator_slot_id"] == ""
-    assert packet["first_execution_preflight_blocker"]["first_blocker"] == (
-        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
-    )
+    assert packet["first_execution_preflight_blocker"] == {}
     execution = {
         row["step_id"]: row for row in packet["execution_preflight_checklist"]
     }
     assert execution["materialize_public_benchmark_phase2_row_audit"][
         "current_artifact"
     ]["ready_values"] == {
-        "phase2_ready": False,
-        "component_ready_count": 4,
+        "phase2_ready": True,
+        "component_ready_count": 5,
         "component_count": 5,
     }
     assert execution["materialize_subset_manifest"]["current_ready"] is True
@@ -467,12 +435,10 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "real_benchmark_case_count": 12,
         "real_pose_case_count": 12,
     }
-    assert execution["validate_external_receipts"]["first_blocker"] == (
-        "public_benchmark_external_receipts_missing"
-    )
+    assert execution["validate_external_receipts"]["first_blocker"] == ""
     assert execution["validate_external_receipts"]["current_artifact"][
         "ready_values"
-    ]["public_benchmark_external_receipts_ready"] is False
+    ]["public_benchmark_external_receipts_ready"] is True
     assert packet["summary"]["first_blocked_target"] == "casf_pdbbind_subset_intake"
     assert packet["summary"]["operator_evidence_gap_count"] == 4
     assert packet["summary"]["first_manifest_contract_id"] == (
@@ -481,16 +447,10 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["summary"]["execution_preflight_checklist_count"] == len(
         packet["materialization_sequence"]
     )
-    assert packet["summary"]["first_execution_preflight_step_id"] == (
-        "materialize_public_benchmark_phase2_row_audit"
-    )
-    assert packet["summary"]["first_execution_preflight_blocker"] == (
-        "vina_gnina_comparison_adapter::vina_gnina_rows_not_provided"
-    )
-    assert packet["summary"]["phase2_row_audit_status"] == (
-        "operator_evidence_required"
-    )
-    assert packet["summary"]["phase2_row_audit_missing_row_input_count"] == 1
+    assert packet["summary"]["first_execution_preflight_step_id"] == ""
+    assert packet["summary"]["first_execution_preflight_blocker"] == ""
+    assert packet["summary"]["phase2_row_audit_status"] == "ready"
+    assert packet["summary"]["phase2_row_audit_missing_row_input_count"] == 0
     gate_plan = {row["slot_id"]: row for row in packet["gate_unblock_plan"]}
     assert gate_plan["casf_pdbbind_subset_intake"]["unblocks_tier_beta_criteria"] == [
         "casf_pdbbind_subset_materialized",
@@ -641,15 +601,15 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert row_matrix["vina_gnina_rows"]["runtime_action_packet"][
         "first_blocked_case_input_slot"
     ] == {
-        "case_id": "casf2016_4llx",
-        "operator_action": "fill_vina_gnina_input_manifest_row_for_casf2016_4llx",
+        "case_id": "",
+        "operator_action": "",
     }
     assert row_matrix["vina_gnina_rows"]["runtime_action_packet"][
         "first_blocked_engine_run_slot"
     ] == {
-        "case_id": "casf2016_4llx",
-        "engine_id": "vina",
-        "docking_run_id": "casf2016_4llx_vina_run",
+        "case_id": "",
+        "engine_id": "",
+        "docking_run_id": "",
     }
 
     gap_register = {
@@ -964,6 +924,7 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     assert len(vina_gnina_input_manifest) == 12
     assert vina_gnina_input_manifest[0]["case_id"] == "casf2016_4llx"
     assert vina_gnina_input_manifest[0]["protein_structure_path"] == (
+        "tmp/public_benchmark_vina_gnina/casf2016_source_files/"
         "CASF-2016/coreset/4llx/4llx_protein.pdb"
     )
     assert vina_gnina_input_manifest[0]["protein_structure_checksum"].startswith(
@@ -973,7 +934,8 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
         "sha256:"
     )
     assert vina_gnina_input_manifest[0]["prepared_receptor_path"] == (
-        "prepared/4llx_receptor"
+        "tmp/public_benchmark_vina_gnina/prepared_inputs/"
+        "casf2016_4llx/4llx_receptor.pdbqt"
     )
     assert vina_gnina_input_manifest[0]["vina_config_ref"] == (
         "operator_attached/vina_gnina/casf2016_4llx/vina_config.json"
@@ -1000,7 +962,8 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     ]["consistency_rule"].startswith("pose_success must equal")
     assert "# Public Benchmark Operator Intake Packet" in markdown
     assert (
-        "- `vina_gnina_adapter_row_preflight_status`: `row_artifact_missing`"
+        "- `vina_gnina_adapter_row_preflight_status`: "
+        "`row_artifact_detected_validated`"
         in markdown
     )
     assert (
@@ -1009,13 +972,12 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     )
     assert (
         "- `vina_gnina_first_blocked_case_input_slot`: "
-        "`casf2016_4llx` / "
-        "`fill_vina_gnina_input_manifest_row_for_casf2016_4llx`"
+        "`` / ``"
         in markdown
     )
     assert (
         "- `vina_gnina_first_blocked_engine_run_slot`: "
-        "`casf2016_4llx` / `vina` / `casf2016_4llx_vina_run`"
+        "`` / `` / ``"
         in markdown
     )
     assert (

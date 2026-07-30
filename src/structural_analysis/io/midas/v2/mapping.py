@@ -464,6 +464,17 @@ def map_mgt_document_to_model_ir(document: MgtDocument) -> MGTMappingOutcome:
                         "state_update_epoch": "none",
                         "supports_trial_commit_rollback": True,
                     },
+                    "admissibility": {
+                        "loading_domain": "finite_linear_elastic_3d",
+                        "supports_monotonic": True,
+                        "supports_unloading": True,
+                        "supports_reversal": True,
+                        "supports_cyclic": True,
+                        "supports_tension": True,
+                        "supports_compression": True,
+                        "supports_multiaxial": True,
+                        "supports_localization_regularization": False,
+                    },
                     "source_id": f"mgt:MATERIAL:{parsed.id}",
                     "extensions": {
                         "midas_mgt:source_type": parsed.material_type,

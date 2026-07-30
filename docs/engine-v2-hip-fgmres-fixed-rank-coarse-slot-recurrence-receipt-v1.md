@@ -48,7 +48,16 @@ sequences. Dimensions freeze the free DOF count, restart policy, retained
 rank, expected application count, and the `1/0/4/1/5` logical/legacy/slot/guard
 launch constants. The validator also fixes `maximum_restart_count` to
 `ceil(max_iterations / restart_dimension)`, requires the full fixed-program
-coordinate count `R*M`, and bounds retained rank by the free-DOF count.
+coordinate count `R*M`, and bounds retained rank by the free-DOF count. Schema
+preflight applies the source-plan limits before coordinate materialization:
+`M <= 16`, `I <= 4096`, padded applications `<= 4110`, and retained rank
+`<= 16`. The application maximum is `max_M ceil(4096/M)*M`, not the raw
+iteration limit; the maximum occurs at `M=15`.
+Nested scalar values are exact-typed; `bool`-as-`int` and `str` subclass
+aliases are rejected instead of being normalized into valid-looking wire data.
+The final global receipt must also match a receipt rebuilt from the exact
+global owner. This direct rebuild avoids acquiring the global lock while the
+slot lock is held and preserves the established global-to-slot lock order.
 
 No pointer, stream handle, module handle, function handle, owner identity,
 lease ID, or process token is serialized. Hexadecimal pointer-like exception
@@ -67,9 +76,12 @@ also rejected. Coherently shortened schedules, oversized retained ranks,
 foreign reason codes, and non-tuple application containers are rejected even
 when their outer receipt hashes are recomputed. Reason detail is bounded to
 `320` characters. A closed or cleanup-failed receipt must show every accepted
-physical launch acknowledged. Directly acknowledging the physical slot and
-guard owners cannot impersonate the recurrence parent's fence; live receipt
-validation detects that mismatch.
+physical launch acknowledged. Parent-fence ordinal `1` acknowledges exactly
+the accepted canonical prefix, capped at slot/guard `4/1`; ordinal `2`
+acknowledges every accepted launch. Poison is terminal, so telemetry may carry
+at most one failed attempt beyond its successful application rows. Directly
+acknowledging the physical slot and guard owners cannot impersonate the
+recurrence parent's fence; live receipt validation detects that mismatch.
 
 ## Claims and exclusions
 
@@ -99,10 +111,10 @@ Current-source verification includes:
 
 - live full-route, incomplete-close, partial-prefix, failed-open cleanup,
   lock-order, parent-fence bypass, strict receipt, and forgery coverage: `7
-  passed in 130.89s`;
+  passed in 131.45s`;
 - public receipt module/schema packaging and identity-preserving re-export: `2
   passed in 1.80s`;
-- capability plus public API checks: `25 passed in 1.96s`; and
+- capability plus public API checks: `25 passed in 2.06s`; and
 - Ruff lint/format and JSON/schema parsing: passed.
 
 The public Engine/Assembly/Solvers symbol counts are `1263/1071/66`; the
@@ -110,9 +122,14 @@ receipt module exports `14` unique names.
 
 ## Next step
 
-The next evidence must execute the entire typed slot plus guard route on local
-`gfx1030`, bind this receipt to that run, and compare final vectors, counters,
-coarse status, solve record, and the fixed-rank CPU reference. Independent
-external `gfx1100` execution follows. Until then, this remains a strict public
-contract for a private test-double-integrated route, not a promoted solver
-result.
+PR #78 and its current branch are frozen as a source quarry; this milestone is
+not extended in place. The master-roadmap current-main extraction sequence is
+PR A core contracts, PR B equation scaling, PR C CPU FGMRES, PR D CPU
+fixed-rank coarse, PR E backend-neutral result types, PR F HIP substrate, PR G
+HIP fixed-rank coarse, PR H canonical full-solve integration, and PR I hardware
+evidence. PR H must compare final vectors, counters, coarse status, solve record,
+and the fixed-rank CPU reference without a hidden host branch. PR I then binds
+the same source/wheel to self-hosted `gfx1030`, independent `gfx1100`, a signed
+receipt, and the durable replay ledger. Until those extracted PRs pass, this
+remains a strict public contract for a private test-double-integrated route,
+not a promoted solver result.

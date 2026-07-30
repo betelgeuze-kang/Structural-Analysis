@@ -110,17 +110,20 @@ Focused coverage includes fixed-coordinate interleaving, exact launch/fence
 accounting, zero additional application activity, exclusive lifetime and
 coordinate forgery, strict schema/hash and pointer-free serialization,
 downstream terminal-observer binding, fence acknowledgement interruption
-recovery, partial accepted-launch poison cleanup, and close-before-run false
-claims. Adjacent legacy canonical/global/live/coarse suites remain required to
-confirm that the no-overlay recurrence behavior is unchanged.
+recovery, partial accepted-launch poison cleanup, close-before-run false claims,
+healthy close rejection before a parent fence acknowledges pending coarse work,
+and coherently rehashed status/terminal/reason forgery rejection. Adjacent legacy
+canonical/global/live/coarse suites remain required to confirm that the
+no-overlay recurrence behavior is unchanged.
 
 Current-source local results:
 
-- focused overlay integration/adversarial suite: `7 passed in 217.72s`;
-- public API/package schema plus capability matrix: `22 passed in 1.95s`;
+- focused overlay integration/adversarial suite: `8 passed in 239.62s`;
+- public API/package schema plus capability matrix: `22 passed in 1.99s`;
 - adjacent coarse context: `24 passed in 190.08s`;
 - adjacent live checkpoint context: `42 passed in 204.33s`;
 - adjacent canonical predecessor: `14 passed in 113.18s`;
+- adjacent sealed checkpoint transaction: `30 passed in 449.24s`;
 - adjacent global recurrence: `54 passed in 1212.23s (0:20:12)`; and
 - cross-surface public-count compatibility: `9 passed in 42.47s`.
 

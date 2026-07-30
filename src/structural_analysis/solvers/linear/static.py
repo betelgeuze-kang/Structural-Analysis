@@ -21,6 +21,10 @@ from structural_analysis.assembly.linear_static import (
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.results.viewer import build_linear_static_viewer_payload
+from structural_analysis.solvers.equation_scaling import (
+    build_equation_scaling_6dof,
+    characteristic_length_from_coordinates,
+)
 
 MATRIX_BACKEND = "numpy_linalg_solve_dense"
 SPARSE_MATRIX_BACKEND = "scipy_sparse_spsolve_cpu"
@@ -219,14 +223,31 @@ def _solve_linear_static(
         if displacements.size
         else 0.0
     )
-    relative_residual = residual_norm / max(load_norm, 1.0)
+    reference_force = max(load_norm, 1.0)
+    characteristic_length = characteristic_length_from_coordinates(
+        assembly.node_coordinates,
+    )
+    free_tangent = (
+        assembly.stiffness[np.ix_(free, free)]
+        if free
+        else np.zeros((0, 0), dtype=float)
+    )
+    equation_scaling = build_equation_scaling_6dof(
+        reference_force=reference_force,
+        characteristic_length=characteristic_length,
+        residual=residual_free,
+        increment=free_displacements,
+        tangent=free_tangent,
+        dof_labels=tuple(DOF_LABELS[index % len(DOF_LABELS)] for index in free),
+    )
+    relative_residual = equation_scaling.scaled_residual_norm
     strain_energy = float(0.5 * displacements @ internal_forces)
     linear_ramp_external_work = float(0.5 * displacements @ external_forces)
     energy_balance_error = abs(strain_energy - linear_ramp_external_work)
     stiffness_symmetry_error = _stiffness_symmetry_error(assembly.stiffness)
     status = (
         "ready"
-        if residual_norm <= tolerance * max(load_norm, 1.0)
+        if equation_scaling.scaled_residual_norm <= tolerance
         else "degraded"
     )
     warnings = list(assembly.warnings)
@@ -282,6 +303,7 @@ def _solve_linear_static(
             "free_equilibrium_residual_norm": residual_norm,
             "constrained_reaction_norm": constrained_reaction_norm,
             "relative_residual": relative_residual,
+            "equation_scaling_6dof": equation_scaling.to_dict(),
             "max_displacement": displacement_norm,
             "increment_norm": displacement_norm,
             "relative_increment_applicable": False,

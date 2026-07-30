@@ -74,7 +74,7 @@ const directRowsPreview = buildEvidenceIngestPreview({
 const csvText = [
   'drawing_id,artifact_path,member_count,node_count,element_count',
   ...new Array(STRUCTURE_VIEWER_INGEST_MAX_ROW_COUNT + 1).fill('row,row.csv,1,2,1'),
-].join('\n');
+].join('\\n');
 const csvPreview = buildEvidenceIngestPreviewFromText(csvText, {
   sourceType: 'csv',
   projectId: 'csv_limit',

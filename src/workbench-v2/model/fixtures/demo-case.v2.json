@@ -2,7 +2,7 @@
   "schemaVersion": "workbench-case.v2",
   "provenance": {
     "sourcePath": "demo/highrise-demo.case.json",
-    "sourceSha256": "sha256:demo000000000000000000000000000000000000000000000000000000000000",
+    "sourceSha256": "sha256:0000000000000000000000000000000000000000000000000000000000000001",
     "sourceCommitSha": "demo-local",
     "engineVersion": "structural-optimization-workbench@1.0.0",
     "generatedAt": "2026-06-21T00:00:00+00:00"

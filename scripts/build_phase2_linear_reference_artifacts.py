@@ -92,6 +92,11 @@ def analytic_axial_bar_payload() -> dict[str, Any]:
 
 def mechanism_payload() -> dict[str, Any]:
     payload = analytic_axial_bar_payload()
+    # Keep two translational DOFs active while retaining a rank-one truss
+    # stiffness.  An axis-aligned truss has only UX active and is stable once
+    # N1 is fixed, so it is not a mechanism under the solver's active-DOF
+    # contract.
+    payload["nodes"][1]["coordinates"] = [2.0, 1.0, 0.0]
     payload["supports"] = [{"id": "SUP1", "node": "N1", "dofs": "all"}]
     payload["metadata"] = {
         "case_id": "phase2_axial_bar_mechanism_guard",
@@ -518,8 +523,8 @@ def build_tangent_jacobian_verification(
         }
 
     constrained = set(assembly.constrained_dofs)
-    all_dofs = set(range(assembly.loads.shape[0]))
-    free = sorted(all_dofs - constrained)
+    active_dofs = set(assembly.active_dofs)
+    free = sorted(active_dofs - constrained)
     free_stiffness = assembly.stiffness[np.ix_(free, free)]
     try:
         free_displacements = np.linalg.solve(free_stiffness, assembly.loads[free])

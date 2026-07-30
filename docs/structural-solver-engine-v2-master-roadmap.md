@@ -4,6 +4,7 @@
 - Version: 0.2.65 HIP FGMRES fixed-rank coarse slot recurrence strict receipt local candidate milestone
 - 기준일: 2026-07-17
 - 현재 마일스톤: [HIP FGMRES fixed-rank coarse slot recurrence receipt v1](engine-v2-hip-fgmres-fixed-rank-coarse-slot-recurrence-receipt-v1.md)은 private live typed-slot+terminal-guard route에 Draft 2020-12 strict pointer-free public receipt/schema를 추가한다. Receipt는 exact live/coarse opening receipt, recurrence/coarse/slot/guard identity와 source, full/partition schedule 및 `R*M` 좌표·epoch hash를 결속하고 application마다 logical/legacy/slot/guard/physical `1/0/4/1/5`를 기록한다. Slot·guard accept와 parent-fence ack는 분리되며 partial global prefix는 successful row로 승격되지 않고 poisoned telemetry로만 남는다. Detached validation은 schema/hash/내부 의미 일관성만, `expected_context` validation은 process-local provenance와 freshness까지 검증한다. Coherent shortened schedule, oversized rank, stale opening, status/context/telemetry/reason/container 위조와 unredacted hex pointer detail을 거부한다. Full sealed test double은 logical `4`, Jacobi `0`, slot `16/16`, guard `4/4`, parent fence `2`; public symbols는 `1263/1071/66`이다. Live mutation context는 여전히 private이고 actual integrated typed-slot device full-solve parity, full-iteration host-copy-zero, external actual `gfx1100`, AMG/DD·O(N)·speedup·signed evidence·promotion/commercial은 미검증이다.
+- P0 통합 결정: PR #78은 더 확장하지 않고 현재 branch를 source quarry로 동결한다. 후속 구현은 이 branch에 누적하지 않으며, 각 범위를 current `main`에서 새 branch/PR로 다시 추출하고 해당 commit에서 검증한다. 정확한 merge 순서는 아래의 PR A→J이다.
 - 감사 기준: v0.2.37 reviewed trust-anchor lifecycle feature-branch publication; `origin/main` 병합으로 해석하지 않음
 - 범위: 독립 구조해석 솔버, ROCm/HIP 가속, 물리제약 AI 보조솔버, 도면 최적화 폐루프
 - Claim boundary: 이 문서는 목표 아키텍처와 구현 순서를 정의한다. 현재 제품 준비도나 G1-G10/AI-G1-AI-G10 폐쇄를 선언하지 않는다.
@@ -14,7 +15,8 @@
 
 | 문서 | 권한 |
 | --- | --- |
-| 본 문서 | Engine v2 목표 구조, 의존성 규칙, 구현 순서, 단계별 종료 기준 |
+| 본 문서 | Engine v2 논리 module 구조, 수치 계약, 내부 구현 순서와 단계별 종료 기준 |
+| [Repository architecture and product roadmap](repository-architecture-and-product-roadmap.md) | 최종 물리 package 경계와 제품 P0-P3/PR 1-18 순서 |
 | [GitHub documentation status](github-documentation-status.md) | 현재 공개 가능한 claim과 GitHub 문서 상태 |
 | [Commercialization current state](commercialization-gap-current-state.md) | 현재 상용화 상태 요약 |
 | [Commercial solver gap ledger](commercial-structural-solver-product-gap-ledger.md) | G1-G10 현재 상태와 미폐쇄 증거 |
@@ -23,7 +25,10 @@
 | [Independent productization plan](independent-commercial-productization-plan.md) | 릴리스 및 독립제품 승격 기준 |
 | [Architecture definition document](architecture-definition-document.md) | 기존 Hybrid Physics-AI 연구 방향과 역사적 맥락 |
 
-충돌 시 현재 상태와 허용 claim은 gap ledger와 readiness 문서가 우선한다. 미래 Engine v2 구조와 구현 순서는 본 문서가 우선한다. 어느 로드맵 항목도 authoritative receipt와 집중 검증 없이 완료로 승격하지 않는다.
+충돌 시 현재 상태와 허용 claim은 gap ledger와 readiness 문서가 우선한다. 최종 물리
+package 경계와 제품 P0-P3/PR 1-18 순서는 repository roadmap과 ADR-008이 우선하고,
+Engine v2의 수치 계약·논리 module 구조·내부 작업 순서는 본 문서가 우선한다. 어느
+로드맵 항목도 authoritative receipt와 집중 검증 없이 완료로 승격하지 않는다.
 
 ## 2. 제품 결정
 
@@ -134,8 +139,13 @@ MGT / IFC / OpenSees / ETABS / DXF
 
 ### 5.1 목표 저장소 경계
 
+> 아래 경로는 Engine v2의 논리적 module/ownership 경계다. 최종 물리 package
+> layout과 repository 수준의 migration 순서는
+> [Repository Architecture and Product Development Roadmap](repository-architecture-and-product-roadmap.md)과
+> [ADR-008](adr/008-repository-package-boundaries.md)이 우선한다.
+
 ```text
-schema/sair/                   # versioned ModelIR/StateIR/ResultIR
+schema/sair/                   # ModelIR/StateIR, then scaled NumericalResultIR/DiagnosticIR
 
 engine/
   core/                        # units, IDs, frames, SoA, DOF map
@@ -165,6 +175,12 @@ validation/{elements,operators,benchmarks,cross_solver,hardware}/
 - AI는 immutable `StateView`를 읽고 proposal만 반환한다.
 - optimization은 `SolverSession.verify(DesignDelta)`를 통과한 변경만 채택한다.
 - backend는 fallback, host transfer, precision, hardware를 receipt에 기록한다.
+- result contract는 `ExecutionPlan` scale hash를 반드시 참조하며 PR B 이전에
+  numerical authority를 발행하지 않는다.
+- legacy input은 outer-boundary adapter를 통해 `ModelIR`로만 들어오고 Engine v2
+  core는 legacy public API/Viewer를 import하지 않는다.
+- v2 output은 PR E 이후 `NumericalResultIR`/`DiagnosticIR`에서 v1/Viewer로만
+  투영하며 adapter는 source보다 높은 authority를 만들지 않는다.
 - unsupported entity나 변환 손실은 fail-closed 또는 명시적 partial-import로 종료한다.
 
 ## 6. 핵심 데이터 계약
@@ -188,6 +204,9 @@ validation/{elements,operators,benchmarks,cross_solver,hardware}/
 - partition, halo, coarse hierarchy
 - device layout와 kernel specialization
 - geometry, topology, property hash와 symbolic 재사용 범위
+- force/moment equation-scale policy와 characteristic length
+- DOF별 equation-scale vector 및 canonical scale hash
+- raw residual과 scaled residual의 의미, governing node/DOF 추적 계약
 
 ### 6.3 `StateSnapshot`
 
@@ -205,14 +224,26 @@ validation/{elements,operators,benchmarks,cross_solver,hardware}/
 - component/element force breakdown
 - residual/JVP parity와 finite-difference audit hook
 
-### 6.5 `ResultIR`
+### 6.5 Backend-neutral result contracts
 
-- displacement, velocity, acceleration, reaction
-- member force, stress, strain, integration-point history
-- modal, buckling, response spectrum, dynamic envelope
-- convergence history와 failure reason
-- backend, hardware, precision, version, checksum
-- code-check와 optimization provenance
+Equation scaling PR이 merge되기 전에는 어떤 legacy `ResultIR`도 새 backend-neutral
+권한으로 승격하지 않는다. Scaling policy/vector/hash와 raw/scaled residual 의미가
+`ExecutionPlan`에 고정된 뒤 다음 두 결과 축을 분리한다.
+
+- `NumericalResultIR`: authoritative 수치 결과 후보, displacement/reaction/member
+  force/stress/strain 및 raw/scaled terminal residual과 governing node/DOF
+- `DiagnosticIR`: partial iterate, checkpoint history, failure/max-iteration 진단이며
+  final numerical authority가 없음
+- `SourceBindingReceipt`: model/plan/state/operator/scale/source/wheel identity를 한
+  실행 입력 집합으로 결박하며 hardware 실행이나 외부 서명을 주장하지 않음
+- `ExternalProvenanceReceipt`: runner, architecture, active trust key, signature와
+  external ledger 위치를 별도 축으로 기록하며 수치 authority를 스스로 만들지 않음
+- disposition, numerical authority, backend execution, evidence/provenance를 서로
+  독립된 축으로 표현
+- backend, hardware, precision, version, execution/scale/checksum binding
+- legacy v1 adapter와 authority를 추가하지 않는 Viewer adapter
+- modal, buckling, response spectrum, dynamic envelope 및 code-check/optimization
+  provenance는 지원 capability가 열릴 때 additive 확장
 
 ### 6.6 `AICorrectionProposal`
 
@@ -418,7 +449,7 @@ ModelIR / drawing
 | T-GNN/PINN/simplicial scripts | `python/experiments` | baseline/ablation, product claim 금지 |
 | projection scaffold | `ai/projection` test seed | dense projector 제거 후 재작성 |
 | design optimization runner | `optimization/candidate_generation` | proxy ranker로 제한, full verification 연결 |
-| viewer/delivery comparison | `apps/workbench` | ResultIR/VerificationReceipt 공식 소비 |
+| viewer/delivery comparison | `apps/workbench` | scaled `NumericalResultIR`/`DiagnosticIR`/VerificationReceipt 공식 소비 |
 
 기존 파일 이동·삭제 전 입력 fixture와 checksum, 새/기존 parity, rollback 가능한 commit, claim 변화 없음, production dependency 제거 테스트를 확보한다.
 
@@ -431,13 +462,15 @@ ModelIR / drawing
 산출물:
 
 - ADR-001 Numerical truth and claim boundary
-- ADR-002 ModelIR/StateIR/ResultIR schema
+- ADR-002 ModelIR/StateIR schema와 backend-neutral result authority 분리 원칙
 - ADR-003 Operator ABI and constitutive source policy
 - ADR-004 Backend, fallback, precision, residency contract
 - ADR-005 AI proposal and rollback contract
 - ADR-006 Complexity and benchmark contract
 - ADR-007 V&V and promotion policy
 - 새 module skeleton과 dependency lint
+- force/moment equation scaling, characteristic length, per-equation vector와
+  `ExecutionPlan` scale hash
 - frame/shell CPU reference operator
 - MGT -> ModelIR v2 adapter와 round-trip audit
 - HIP `DeviceExecutionContext` 첫 버전
@@ -448,6 +481,7 @@ ModelIR / drawing
 종료 기준:
 
 - CPU/HIP DOF ordering과 residual 의미론 일치
+- raw/scaled residual, governing node/DOF와 scale hash의 CPU/HIP 의미론 일치
 - 숨은 fallback 없이 HIP kernel invocation 증명
 - AI proposal 실패 시 원본 state rollback
 - unsupported MGT 항목 silent loss 0건
@@ -571,7 +605,7 @@ ModelIR / drawing
 - v0.2.62는 위 첫 단계의 source/loader seam을 분리해 selected route의 logical row 1개, legacy Jacobi launch 0개, schedule claim 1개, companion physical launch 4개를 고정했고 raw recurrence owner가 checkpoint/audit ledger에 logical pending 1개를 예약했다. 이 milestone 자체의 live 미연결 경계는 역사적으로 유지되며 v0.2.63이 그 seam을 private live dispatch에서 소비한다.
 - v0.2.63은 dispatch 전 exclusive selector와 companion physical pending/parent fence 공동 회수를 test-double 경로에서 구현해 실제 legacy Jacobi 호출 `0`을 관찰했다. 당시에는 post-gate status direct binding과 actual module 실행이 없었다.
 - v0.2.64는 status direct terminal publication을 fifth same-stream device launch로 구현하고 actual local `gfx1030` guard 실행과 zero-copy launch window를 확인했다. 이 milestone에는 live route strict receipt/schema가 없었고 전체 typed-slot recurrence actual device 수치 parity도 미증명이었다.
-- v0.2.65는 private typed-slot recurrence의 pointer-free strict public receipt/schema와 live provenance/freshness 검증까지 구현했다. 따라서 `coarse application recurrence/terminal-state 통합`은 관찰 계약까지 갖췄지만 전체 typed-slot recurrence의 actual device 수치 parity가 없으므로 항목은 계속 partial이다. 다음 추진은 actual integrated local `gfx1030` full-solve CPU parity → receipt-bound hardware observation → independent external `gfx1100` 순서다.
+- v0.2.65는 private typed-slot recurrence의 pointer-free strict public receipt/schema와 live provenance/freshness 검증까지 구현했다. 따라서 `coarse application recurrence/terminal-state 통합`은 관찰 계약까지 갖췄지만 전체 typed-slot recurrence의 actual device 수치 parity가 없으므로 항목은 계속 partial이다. 이 source-quarry branch에서 구현을 이어 붙이지 않으며, current-main PR A-G를 선행한 뒤 PR H에서 integrated full-solve CPU/HIP parity를, PR I에서 deterministic multi-block·rank/large-F·crossover scalability를, PR J에서 동일 artifact의 self-hosted `gfx1030`·independent `gfx1100` signed/durable evidence를 각각 다시 검증한다.
 - broad iteration-host-copy-zero convergence 정책, GPU reaction/recovery/energy 및 authoritative hardware/signed 결속
 - E(3) feature와 attention-free temporal runtime
 - calibrated OOD/UQ와 proposal을 실제 소비하는 iterative solver warm-start
@@ -579,6 +613,64 @@ ModelIR / drawing
 - sparse-only model compilation, device solver 및 실제 FE family를 포함하는 end-to-end complexity harness
 
 따라서 Phase 0 전체 또는 G1/G9/AI gap closure로 승격하지 않는다.
+
+#### P0 — PR #78 source-quarry freeze와 current-main 추출 로드맵
+
+PR #78은 여기서 동결한다. 이 branch의 역할은 이미 구현된 계약·엔진·테스트를
+찾아낼 수 있는 source quarry이며, 후속 기능을 계속 쌓는 통합 PR이 아니다.
+
+동결 규칙:
+
+1. PR #78에는 신규 제품 기능, schema version, capability 승격, hardware evidence를
+   추가하지 않는다.
+2. 후속 PR은 직전 PR이 merge된 current `main`에서 새 branch를 만든다. PR #78의
+   대형 commit을 통째로 가져오지 않고 해당 PR 범위의 최소 코드·테스트·문서만
+   review 가능한 형태로 추출한다.
+3. Quarry에서 얻은 과거 test timing이나 hardware observation은 새 PR의 권위가
+   아니다. 각 추출 commit에서 focused/adjacent 검증과 claim boundary를 다시
+   발행한다.
+4. 아래 순서는 merge dependency다. 뒤 PR의 타입이나 runtime을 앞 PR에 미리
+   노출하지 않는다.
+
+```text
+PR A core contracts
+  -> PR B equation scaling
+  -> PR C CPU FGMRES
+  -> PR D CPU fixed-rank coarse
+  -> PR E result and diagnostic authority
+  -> PR F HIP runtime substrate
+  -> PR G HIP fixed-rank coarse
+  -> PR H canonical recurrence integration
+  -> PR I GPU scalability
+  -> PR J hardware evidence
+```
+
+| PR | 추출 범위 | merge 완료 기준 | 명시적 제외 |
+| --- | --- | --- | --- |
+| A — Engine v2 core contracts | ADR, canonical array/hash, `ModelIR`, `StateIR`, `ExecutionPlan`, 기존 public API adapter 방향 | canonical encoding/hash 재현, schema/unknown-field/type rejection, backend-neutral dependency lint, legacy→v2 단방향·비승격 adapter 규칙 고정 | adapter 구현, ResultIR authority, equation scaling 구현, CPU/HIP solver |
+| B — Equation scaling | force/moment scale policy, characteristic length, per-equation scale vector, `ExecutionPlan` scale hash, governing node/DOF, raw+scaled residual | 단위/모델 replay에서 동일 scale vector/hash, raw↔scaled residual 추적, governing location 결정성 | ResultIR 승격, Krylov/coarse/HIP |
+| C — CPU FGMRES | CPU reference, checkpoint history, deterministic recurrence | fixed schedule/restart replay, terminal reason/history 결정성, 독립 direct oracle 비교 | coarse correction, HIP, product result authority |
+| D — CPU fixed-rank coarse | coarse artifact, CPU apply, CPU full solve, complexity receipts, realistic mode families | artifact/apply/full-solve parity, bounded rank, realistic mode-family replay, sparse work/storage 식과 size-family 계측 | HIP kernel/runtime, result/viewer 승격 |
+| E — Result·Diagnostic authority separation | `NumericalResultIR`, `DiagnosticIR`, `SourceBindingReceipt`, `ExternalProvenanceReceipt`, authority-axis separation, v1 API/Viewer adapter | scale hash와 raw/scaled terminal residual 결박, source/external provenance 축 분리, diagnostic의 numerical promotion 차단, adapter가 authority를 추가하지 않음 | HIP 실행 증명, hardware promotion |
+| F — HIP runtime substrate | device identity, allocation lineage, runtime context, resident CSR/operator, Krylov primitives | exact runtime/device/stream lineage, allocation/fence 수명, resident CSR lifetime, hidden fallback·중간 host branch/copy 차단 | fixed-rank coarse와 canonical full solve |
+| G — HIP fixed-rank coarse application | plan, kernel, RTC loader, allocation context, actual small-device gate | frozen source/ABI, compile/load/launch/fence/unload 수명, isolated CPU coarse parity, non-promoting actual small-device 실행 | canonical preconditioner row 치환, full-solve 승격, scalability claim |
+| H — Canonical recurrence integration | Jacobi operation 치환, device status terminal binding, partial-output consumption 차단, full FGMRES solve, checkpoint/rollback | logical/physical ledger 일치, CPU/HIP full-solve 수치 비교, hidden host branch 0, failure/partial launch rollback과 terminal publication | scalability, two-architecture·signed·durable hardware claim |
+| I — GPU scalability | deterministic multi-block coarse dot, rank `1/2/4/8/16`, large-F tests, iteration/wall-time crossover, memory/launch profiling | rank·size family의 수치 결정성, sparse work/storage 계측, crossover와 peak memory/launch receipt 재현 | independent second architecture, signed/durable evidence, commercial promotion |
+| J — Hardware evidence | self-hosted `gfx1030`, independent `gfx1100`, active trust key, same source/wheel hash, signed envelope, durable external ledger | 동일 final artifact의 두 architecture 실행, independent runner signature, receipt replay와 durable single-use/ordering 검증, same-artifact multiarchitecture comparison | 미실행 architecture 추정, quarry observation 재사용, commercial promotion 자동 선언 |
+
+Equation scaling은 ResultIR 승격의 선행조건이다. PR A는 result authority를 만들지
+않고, PR B가 scale policy/vector/hash와 raw/scaled residual 의미를 고정한 뒤에만
+PR E가 `NumericalResultIR`와 `DiagnosticIR`를 도입한다. PR C/D의 결과는 그 전까지
+CPU solver 내부 receipt이며 제품 result authority가 아니다.
+
+PR H까지는 구현·수치통합, PR I는 독립 scalability 단계이고 PR J만 authoritative
+hardware provenance 단계다. 따라서 local `gfx1030` 실행 한 건, HIPRTC compile,
+test double, unsigned receipt를 PR J의
+`gfx1030+gfx1100` 동일-artifact signed evidence로 소급 승격하지 않는다.
+
+G1 full-load/material Newton, Viewer #102, molecular quarantine, PM readiness artifact는
+이 Engine v2 extraction PR A-J의 코드·게이트·증빙과 섞지 않는다. 필요한 경우 각각
+별도 mainline PR과 별도 claim boundary에서 진행한다.
 
 ### Phase 1: 90-180일, Developer Preview
 
@@ -623,13 +715,16 @@ ModelIR / drawing
 
 | 기간 | 작업 | 완료 기준 |
 | --- | --- | --- |
-| Week 1-2 | ADR 7종, capability matrix, legacy dependency map, golden corpus | 아키텍처/claim/rollback 리뷰 승인 |
-| Week 3-4 | ModelIR/StateIR/ResultIR, MGT subset adapter | unit/frame/ID/offset/release round-trip, silent loss 0 |
-| Week 5-6 | frame/shell CPU reference operator | patch/rigid-body/energy/tangent/golden parity |
-| Week 7-8 | HIP resident context와 runtime dispatch | persistent allocation, residual/JVP, residency telemetry |
-| Week 9-10 | device Krylov와 complexity harness | 5-size cold/warm RAM/VRAM/transfer report |
-| Week 11-12 | E(3), temporal state, fixed-rank QR/RLS | equivariance, projection, replay, rollback/OOD test |
-| Week 13 | 수직 슬라이스 통합 go/no-go | MGT -> IR -> CPU/HIP -> AI proposal -> ResultIR |
+| Week 1 | PR A — ADR와 core contracts 추출 | canonical array/hash, ModelIR/StateIR/ExecutionPlan strict 검증과 public API adapter 방향 고정 |
+| Week 2-3 | PR B — equation scaling | scale vector/hash, governing node/DOF, raw+scaled residual replay |
+| Week 4-5 | PR C — CPU FGMRES | deterministic recurrence/checkpoint와 direct-oracle 비교 |
+| Week 6 | PR D — CPU fixed-rank coarse | artifact/apply/full solve, realistic mode families와 complexity receipt |
+| Week 7 | PR E — result/diagnostic authority | NumericalResultIR/DiagnosticIR, source/external receipts와 두 adapter |
+| Week 8-9 | PR F — HIP runtime substrate | device/allocation lineage, runtime context, resident CSR/operator, Krylov 수명·fallback gate |
+| Week 10 | PR G — HIP fixed-rank coarse | plan/kernel/RTC/context, isolated CPU parity와 actual small-device gate |
+| Week 11-12 | PR H — canonical integration | Jacobi replacement, terminal binding, partial-output 차단, full solve, rollback |
+| Week 13-14 | PR I — GPU scalability | deterministic multi-block, rank 1/2/4/8/16, large-F crossover와 profiling |
+| Week 15+ | PR J — hardware evidence | same-artifact gfx1030/gfx1100, active key, signed envelope, durable external ledger |
 
 통과하지 못한 항목은 gap ledger에 partial 또는 counter-evidence로 유지한다.
 
@@ -753,7 +848,7 @@ research prototype
 - no-backprop audit와 E(3) equivariance gate 통과
 - 실제 end-to-end complexity/hardware benchmark
 - 모든 최적화 결과 full authoritative reanalysis 통과
-- 계산서, ResultIR, audit receipt, 도면 diff provenance 연결
+- 계산서, scaled `NumericalResultIR`/`DiagnosticIR`, audit receipt, 도면 diff provenance 연결
 - Windows/Linux package, crash recovery, checkpoint/restart, support bundle
 - 허용 claim, known limitations, 책임 경계의 문서/UI 일치
 
@@ -817,7 +912,8 @@ source/schema/hardware-harness aggregate
 
 | 버전 | 날짜 | 변경 |
 | --- | --- | --- |
-| 0.2.65 local candidate milestone | 2026-07-17 | [HIP FGMRES fixed-rank coarse slot recurrence receipt v1](engine-v2-hip-fgmres-fixed-rank-coarse-slot-recurrence-receipt-v1.md)을 추가했다. Draft 2020-12 strict schema와 canonical receipt/application hashes가 exact live/coarse opening receipts, recurrence/coarse/slot/guard identities와 sources, full/partition schedules, full fixed-program `R*M` 좌표와 epochs, restart ceil/rank bound를 결속한다. Application row는 logical/legacy/slot/guard/physical `1/0/4/1/5`; telemetry는 slot·guard acceptance와 parent-fence acknowledgement를 분리한다. Detached validation은 self-consistency만, `expected_context`는 process-local provenance/freshness까지 검증하며 stale opening, coherent status/context/telemetry/reason, shortened schedule, oversized rank, non-tuple container, unknown field와 unredacted hex detail을 거부한다. Full route와 partial poisoned prefix, direct companion-fence bypass, open cleanup/lock-order를 포함한 focused `7 passed in 130.89s`, receipt public API `2 passed in 1.80s`, public/capability `25 passed in 1.96s`; public Engine/Assembly/Solvers는 `1263/1071/66`이다. Live context는 private이고 actual integrated device execution/parity, full-iteration host-copy-zero, external `gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 미증명이다. |
+| P0 current-main extraction decision | 2026-07-17 | PR #78은 source quarry로 동결하고 더 키우지 않는다. 후속은 current `main`에서 A core contracts → B equation scaling → C CPU FGMRES → D CPU fixed-rank coarse → E result/diagnostic authority → F HIP runtime substrate → G HIP fixed-rank coarse application → H canonical recurrence integration → I GPU scalability → J hardware evidence 순서로 최소 범위를 추출한다. PR A는 legacy public API→v2 단방향·비승격 adapter 방향만 고정하고 구현은 PR E에 둔다. Equation scaling과 `ExecutionPlan` scale hash/raw+scaled residual 계약은 ResultIR 승격보다 반드시 먼저 merge되며, hardware provenance는 동일 source/wheel의 self-hosted `gfx1030`·independent `gfx1100`·active key·signed envelope·durable external ledger를 함께 만족하는 PR J에서만 다룬다. G1 Newton, Viewer #102, molecular quarantine, PM readiness는 별도 mainline 경계로 격리한다. |
+| 0.2.65 local candidate milestone | 2026-07-17 | [HIP FGMRES fixed-rank coarse slot recurrence receipt v1](engine-v2-hip-fgmres-fixed-rank-coarse-slot-recurrence-receipt-v1.md)을 추가했다. Draft 2020-12 strict schema와 canonical receipt/application hashes가 exact live/coarse opening receipts, recurrence/coarse/slot/guard identities와 sources, full/partition schedules, full fixed-program `R*M` 좌표와 epochs, restart ceil/rank bound를 결속한다. Application row는 logical/legacy/slot/guard/physical `1/0/4/1/5`; telemetry는 slot·guard acceptance와 parent-fence acknowledgement를 분리한다. Detached validation은 self-consistency만, `expected_context`는 process-local provenance/freshness까지 검증하며 stale opening, coherent status/context/telemetry/reason, shortened schedule, oversized rank, non-tuple container, unknown field와 unredacted hex detail을 거부한다. Full route와 partial poisoned prefix, direct companion-fence bypass, open cleanup/lock-order를 포함한 focused `7 passed in 131.45s`, receipt public API `2 passed in 1.80s`, public/capability `25 passed in 2.06s`; public Engine/Assembly/Solvers는 `1263/1071/66`이다. Live context는 private이고 actual integrated device execution/parity, full-iteration host-copy-zero, external actual `gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 미증명이다. |
 | 0.2.64 local candidate milestone | 2026-07-17 | [HIP FGMRES fixed-rank coarse terminal guard v1](engine-v2-hip-fgmres-fixed-rank-coarse-terminal-guard-v1.md)을 추가했다. Frozen recurrence source 뒤의 exact `1x1` guard가 coarse status를 first-error-wins solve-record terminal state에 device-side로 게시한다. Exact inactive 단독값만 no-op이며 mixed bit는 fail-closed하고, uncertain launch는 matching fence 전 재제출할 수 없다. Native unload 반환 `0`은 finalization 중단 뒤에도 known-success로 보존돼 double unload를 막는다. Live route는 logical row `1`당 slot `4`+guard `1`을 같은 stream과 기존 parent fence로 소유한다. Full test-double route는 logical `4`, legacy Jacobi `0`, slot `16/16`, guard `4/4`, parent fence `2`; recurrence focused는 guard success/rejection/exception의 single-ledger semantics를 확인했다. Actual local `gfx1030` guard 실행은 nonfinite status를 terminal status/code/error/origin `6/43/4/2`로 게시하고 launch-window H2D/D2H delta `0`을 확인했다. Current device-visible guard suites `21 passed`, guard+slot RTC safety `8 passed`, live recurrence `7 passed`, adjacent canonical/overlay/selected-global `26 passed`, full RTC `141 passed`, public/capability `25 passed`를 통과했고 독립 재실행한 guard/live/full-RTC 합계는 `169 passed`다. `gfx1030/gfx1100` HIPRTC compile 및 당시 public symbols `1249/1057/66`도 확인했다. 이 관찰은 process-local·unsigned·non-promoting이다. 이 milestone에서 private live receipt/schema는 미증명이었고 v0.2.65가 후속 구현했지만, actual integrated typed-slot full solve/parity, full-iteration host-copy-zero, external actual `gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 계속 false 또는 미검증이다. |
 | 0.2.63 local candidate milestone | 2026-07-17 | [HIP FGMRES typed fixed-rank coarse slot live recurrence v1](engine-v2-hip-fgmres-fixed-rank-coarse-slot-recurrence-v1.md)을 추가했다. Exact live checkpoint/coarse child exclusive route가 v0.2.62 typed slot을 canonical prefix와 global suffix dispatch 전에 선택하고 immutable Jacobi coordinates 전부를 gate/dot/solve/apply로 치환한다. Full sealed test-double route는 logical application `4`, legacy Jacobi vector launch `0`, physical accepted/parent-fenced `16/16`, parent fence `2`, generic coarse launch `0`을 관찰했다. Partial global prefix는 physical total `5`를 poison 상태로 exact parent fence했고, open second-lease failure의 first-lease rollback, incomplete/parent-fence-bypass close 거부, live queue lock을 slot callback 전에 해제하는 lock-order 보강을 추가했다. v0.2.64 guard 결합 후 focused `7 passed in 131.91s`, adjacent canonical/additive-overlay/selected-global `25 passed in 411.67s`, Ruff lint/format을 통과했다. Public symbols는 당시 `1232/1040/66`이었다. Context는 private이며 strict public receipt/schema, actual module/device 실행, post-gate terminal status direct binding, integrated full-solve parity, host-copy-zero, external `gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 해당 milestone에서 false 또는 미검증이었다. |
 | 0.2.62 local candidate milestone | 2026-07-17 | [HIP FGMRES typed fixed-rank coarse slot v1](engine-v2-hip-fgmres-fixed-rank-coarse-slot-v1.md)을 추가했다. Frozen recurrence-v2와 coarse-v1 source를 byte-identical하게 유지하면서 namespaced coarse source와 typed supplement를 하나의 HIPRTC translation unit으로 합성한다. Selected fixed-rank route의 logical `APPLY_JACOBI_INDEXED` 1개는 legacy Jacobi launch `0`, schedule epoch claim `1`, exact gate/dot/solve/apply launch `4`로 고정되고 inactive padding은 bit 31로 epoch/numeric access/output write 없이 종료한다. 전용 RTC owner는 eleven pointer full extent·alignment·overlap, partial/rejected/ambiguous/BaseException launch, exact-stream fence, serialized/nonreentrant operation, task-local compile handoff, rejected/uncertain unload와 successful native unload 뒤 finalization 중단을 fail-closed로 소유한다. Raw recurrence RTC owner는 four physical launches를 checkpoint pending/audit ledger의 logical row 1개로 예약한다. Combined source/ABI는 `sha256:6035e258…f1fd`/`sha256:412b0a8a…6c69`, source `gfx1030/gfx1100` compile, selected aggregate `69 passed, 3 hardware skipped in 5.76s`, full recurrence RTC v2 `137 passed in 44.63s`, public symbols `1232/1040/66`을 확인했다. `/dev/kfd`가 없어 actual typed-slot module load/실행은 없었다. Live canonical/global selector의 seam 소비, 실제 Jacobi 치환, post-gate status terminal binding, integrated full-solve parity, host-copy-zero, external `gfx1100`, AMG/DD, O(N), speedup, signed evidence, promotion/commercial은 false 또는 미검증이다. |

@@ -7,12 +7,16 @@ from typing import Any, Protocol
 
 import numpy as np
 
+from structural_analysis.materials.admissibility import MaterialAdmissibility
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.newton import RESIDUAL_FORMULA
 
 
 class AxialMaterialLaw(Protocol):
     """Scalar axial constitutive law evaluated on element elongation."""
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility: ...
 
     def internal_force(self, elongation_m: float) -> float: ...
 
@@ -26,6 +30,20 @@ class CubicSpringAxialMaterialLaw:
     linear_stiffness_kn_per_m: float = 100.0
     cubic_stiffness_kn_per_m3: float = 1000.0
     model_kind: str = "scalar_nonlinear_axial_cubic_spring"
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return MaterialAdmissibility(
+            loading_domain="finite_uniaxial_path_independent",
+            supports_monotonic=True,
+            supports_unloading=True,
+            supports_reversal=True,
+            supports_cyclic=True,
+            supports_tension=True,
+            supports_compression=True,
+            supports_multiaxial=False,
+            supports_localization_regularization=False,
+        )
 
     def internal_force(self, elongation_m: float) -> float:
         u = float(elongation_m)
@@ -47,6 +65,20 @@ class StrainCubicAxialMaterialLaw:
     linear_strain_stiffness_kn: float = 200.0
     cubic_strain_stiffness_kn: float = 1000.0
     model_kind: str = "strain_nonlinear_axial_cubic_bar"
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return MaterialAdmissibility(
+            loading_domain="finite_uniaxial_path_independent",
+            supports_monotonic=True,
+            supports_unloading=True,
+            supports_reversal=True,
+            supports_cyclic=True,
+            supports_tension=True,
+            supports_compression=True,
+            supports_multiaxial=False,
+            supports_localization_regularization=False,
+        )
 
     def internal_force(self, elongation_m: float) -> float:
         strain = float(elongation_m) / self.length_m

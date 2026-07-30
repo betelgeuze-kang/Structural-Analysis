@@ -7,6 +7,10 @@ from typing import Any
 
 import numpy as np
 
+from structural_analysis.materials.admissibility import (
+    MaterialAdmissibility,
+    require_scalar_loading_path_admissible,
+)
 from structural_analysis.solvers.nonlinear.newton import (
     RESIDUAL_FORMULA,
     NewtonRaphsonConfig,
@@ -33,9 +37,34 @@ class StateUpdatedBilinearMaterialProblem:
     section_integration: str = "frame_fiber"
     strain_mode: str = "axial"
     state_persistence_label: str = "trial_state_to_committed_state"
+    loading_domain: str = "finite_uniaxial_bilinear_isotropic_hardening"
+    supports_monotonic: bool = True
+    supports_unloading: bool = True
+    supports_reversal: bool = True
+    supports_cyclic: bool = True
+    supports_tension: bool = True
+    supports_compression: bool = True
+    supports_multiaxial: bool = False
+    supports_localization_regularization: bool = False
 
     def reference_force_scale(self) -> float:
         return max(abs(self.external_force_kn), 1.0)
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return MaterialAdmissibility(
+            loading_domain=self.loading_domain,
+            supports_monotonic=self.supports_monotonic,
+            supports_unloading=self.supports_unloading,
+            supports_reversal=self.supports_reversal,
+            supports_cyclic=self.supports_cyclic,
+            supports_tension=self.supports_tension,
+            supports_compression=self.supports_compression,
+            supports_multiaxial=self.supports_multiaxial,
+            supports_localization_regularization=(
+                self.supports_localization_regularization
+            ),
+        )
 
 
 @dataclass(frozen=True)
@@ -473,6 +502,11 @@ def solve_state_updated_material_path_history(
 ) -> StateUpdatedMaterialPathHistoryResult:
     """Solve a path history while carrying committed material state forward."""
 
+    require_scalar_loading_path_admissible(
+        spec.base_problem.admissibility,
+        (force for _, force in spec.steps),
+        owner=spec.base_problem.case_id,
+    )
     previous_displacement = float(spec.base_problem.initial_displacement_m)
     previous_committed = {
         "plastic_displacement_m": float(
@@ -713,6 +747,16 @@ def solve_state_updated_frame_shell_coupled_material_load_step_history(
         spec or default_state_updated_frame_shell_coupled_material_load_step_spec()
     )
     base = load_step_spec.base_problem
+    require_scalar_loading_path_admissible(
+        base.frame_problem.admissibility,
+        (forces[0] for _, forces in load_step_spec.steps),
+        owner=base.frame_problem.case_id,
+    )
+    require_scalar_loading_path_admissible(
+        base.shell_problem.admissibility,
+        (forces[1] for _, forces in load_step_spec.steps),
+        owner=base.shell_problem.case_id,
+    )
     previous_displacements = tuple(float(value) for value in base.initial_free_displacements_m)
     previous_committed = {
         "frame": _committed_state_from_problem(base.frame_problem),
@@ -2061,6 +2105,7 @@ def _return_mapping_update(
         "section_integration": problem.section_integration,
         "strain_mode": problem.strain_mode,
         "state_persistence_label": problem.state_persistence_label,
+        "material_admissibility": problem.admissibility.to_dict(),
     }
     if yield_function <= 0.0:
         return {

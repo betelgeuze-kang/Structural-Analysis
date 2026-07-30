@@ -55,6 +55,7 @@
     "dimensions": { "$ref": "#/$defs/dimensions" },
     "applications": {
       "type": "array",
+      "maxItems": 4110,
       "items": { "$ref": "#/$defs/application" }
     },
     "application_sequence_hash": { "$ref": "#/$defs/hash" },
@@ -74,7 +75,7 @@
       "additionalProperties": false,
       "required": ["code", "detail"],
       "properties": {
-        "code": { "type": "string", "minLength": 1 },
+        "code": { "type": "string", "minLength": 1, "maxLength": 64 },
         "detail": { "type": "string", "minLength": 1, "maxLength": 320 }
       }
     },
@@ -151,14 +152,14 @@
         "total_physical_launches_per_application"
       ],
       "properties": {
-        "free_dof_count": { "type": "integer", "minimum": 1 },
-        "restart_dimension": { "type": "integer", "minimum": 1 },
-        "max_iterations": { "type": "integer", "minimum": 1 },
-        "maximum_restart_count": { "type": "integer", "minimum": 1 },
-        "retained_rank": { "type": "integer", "minimum": 1 },
-        "expected_application_count": { "type": "integer", "minimum": 1 },
+        "free_dof_count": { "type": "integer", "minimum": 1, "maximum": 9223372036854775807 },
+        "restart_dimension": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "max_iterations": { "type": "integer", "minimum": 1, "maximum": 4096 },
+        "maximum_restart_count": { "type": "integer", "minimum": 1, "maximum": 4096 },
+        "retained_rank": { "type": "integer", "minimum": 1, "maximum": 16 },
+        "expected_application_count": { "type": "integer", "minimum": 1, "maximum": 4110 },
         "canonical_prefix_application_count": { "const": 1 },
-        "global_suffix_application_count": { "type": "integer", "minimum": 0 },
+        "global_suffix_application_count": { "type": "integer", "minimum": 0, "maximum": 4109 },
         "logical_recurrence_launches_per_application": { "const": 1 },
         "legacy_jacobi_launches_per_application": { "const": 0 },
         "physical_slot_launches_per_application": { "const": 4 },

@@ -56,6 +56,12 @@ HipFgmresFixedRankCoarseSlotRecurrenceStatusV1 = Literal[
 _SCHEMA_RESOURCE = "hip_fgmres_fixed_rank_coarse_slot_recurrence_v1.schema.json"
 _ZERO_HASH = "sha256:" + "0" * 64
 _HASH_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
+_MAX_RESTART_DIMENSION = 16
+_MAX_ITERATIONS = 4096
+_MAX_PADDED_APPLICATION_COUNT = max(
+    ((_MAX_ITERATIONS + width - 1) // width) * width
+    for width in range(1, _MAX_RESTART_DIMENSION + 1)
+)
 
 
 class HipFgmresFixedRankCoarseSlotRecurrenceReceiptV1Error(RuntimeError):
@@ -123,8 +129,8 @@ class HipFgmresFixedRankCoarseSlotRecurrenceDimensionsV1:
     physical_terminal_guard_launches_per_application: Literal[1] = 1
     total_physical_launches_per_application: Literal[5] = 5
 
-    def to_dict(self) -> dict[str, int]:
-        return {name: int(value) for name, value in asdict(self).items()}
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -167,8 +173,8 @@ class HipFgmresFixedRankCoarseSlotRecurrenceTelemetryV1:
     host_status_branch_count: Literal[0] = 0
     fallback_count: Literal[0] = 0
 
-    def to_dict(self) -> dict[str, int]:
-        return {name: int(value) for name, value in asdict(self).items()}
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -249,6 +255,45 @@ def validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
         or type(receipt.applications) is not tuple
         or any(
             type(row) is not HipFgmresFixedRankCoarseSlotRecurrenceApplicationV1
+            for row in receipt.applications
+        )
+    ):
+        _fail("hip_fgmres_coarse_slot_receipt_nested_type_invalid", "/receipt")
+    if (
+        type(receipt.status) is not str
+        or type(receipt.evidence_scope) is not str
+        or type(receipt.actual_backend) is not str
+        or any(type(value) is not str for value in receipt.bindings.to_dict().values())
+        or any(
+            type(value) is not int for value in receipt.dimensions.to_dict().values()
+        )
+        or any(type(value) is not int for value in receipt.telemetry.to_dict().values())
+        or any(type(value) is not bool for value in receipt.claims.to_dict().values())
+        or (
+            receipt.reason is not None
+            and (
+                type(receipt.reason.code) is not str
+                or type(receipt.reason.detail) is not str
+            )
+        )
+        or any(
+            type(row.phase) is not str
+            or type(row.recurrence_descriptor_hash) is not str
+            or any(
+                type(getattr(row, name)) is not int
+                for name in (
+                    "sequence",
+                    "schedule_epoch",
+                    "restart_index",
+                    "column_index",
+                    "logical_index",
+                    "logical_recurrence_launch_count",
+                    "legacy_jacobi_launch_count",
+                    "physical_slot_launch_count",
+                    "physical_terminal_guard_launch_count",
+                    "physical_launch_count",
+                )
+            )
             for row in receipt.applications
         )
     ):
@@ -403,11 +448,16 @@ def validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
         or not _valid_hash(receipt.application_sequence_hash)
         or dimensions.free_dof_count <= 0
         or dimensions.restart_dimension <= 0
+        or dimensions.restart_dimension > _MAX_RESTART_DIMENSION
         or dimensions.max_iterations <= 0
+        or dimensions.max_iterations > _MAX_ITERATIONS
         or dimensions.maximum_restart_count <= 0
+        or dimensions.maximum_restart_count > _MAX_ITERATIONS
         or dimensions.retained_rank <= 0
+        or dimensions.retained_rank > _MAX_RESTART_DIMENSION
         or dimensions.retained_rank > dimensions.free_dof_count
         or expected_count <= 0
+        or expected_count > _MAX_PADDED_APPLICATION_COUNT
         or dimensions.maximum_restart_count
         != (dimensions.max_iterations + dimensions.restart_dimension - 1)
         // dimensions.restart_dimension
@@ -416,7 +466,10 @@ def validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
         or len(applications) > expected_count
         or actual_coordinates != expected_coordinates[: len(applications)]
         or epochs != tuple(sorted(set(epochs)))
-        or any(value == _ZERO_HASH for value in receipt.bindings.to_dict().values())
+        or any(
+            not _valid_hash(value) or value == _ZERO_HASH
+            for value in receipt.bindings.to_dict().values()
+        )
         or (
             receipt.reason is not None
             and re.search(r"(?i)0x[0-9a-f]+", receipt.reason.detail) is not None
@@ -440,12 +493,18 @@ def validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
         or not reason_valid
         or not reason_code_valid
         or (
+            receipt.reason is not None
+            and receipt.reason.code == "hip_fgmres_coarse_slot_recurrence_poisoned"
+            and telemetry.application_attempt_count == 0
+        )
+        or (
             receipt.status in healthy_state_valid
             and not healthy_state_valid[receipt.status]
         )
         or not len(applications)
         <= telemetry.application_attempt_count
         <= expected_count
+        or telemetry.application_attempt_count > len(applications) + 1
         or telemetry.application_success_count != len(applications)
         or telemetry.logical_recurrence_launch_count != len(applications)
         or telemetry.retained_jacobi_launch_count != 0
@@ -480,6 +539,18 @@ def validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
                 != telemetry.physical_terminal_guard_launch_accept_count
             )
         )
+        or (
+            telemetry.parent_fence_ack_count == 1
+            and (
+                telemetry.physical_slot_launch_ack_count
+                != min(4, telemetry.physical_slot_launch_accept_count)
+                or telemetry.physical_terminal_guard_launch_ack_count
+                != min(
+                    1,
+                    telemetry.physical_terminal_guard_launch_accept_count,
+                )
+            )
+        )
         or any(
             getattr(telemetry, name) != 0
             for name in (
@@ -504,6 +575,8 @@ def validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
         or receipt.claims.speedup_proven is not False
         or receipt.claims.commercial_ready is not False
         or receipt.claims.promotion_eligible is not False
+        or not _valid_hash(receipt.global_context_id)
+        or not _valid_hash(receipt.global_receipt_hash)
         or (receipt.global_context_id != _ZERO_HASH) is not global_bound
         or (receipt.global_receipt_hash != _ZERO_HASH) is not global_bound
         or (global_bound and not all_rows_fenced)
@@ -598,7 +671,7 @@ def _receipt_payload(
         "context_id": receipt.context_id,
         "evidence_scope": receipt.evidence_scope,
         "actual_backend": receipt.actual_backend,
-        "promotion_eligible": False,
+        "promotion_eligible": receipt.promotion_eligible,
         "reason": None if receipt.reason is None else receipt.reason.to_dict(),
         "bindings": receipt.bindings.to_dict(),
         "dimensions": receipt.dimensions.to_dict(),

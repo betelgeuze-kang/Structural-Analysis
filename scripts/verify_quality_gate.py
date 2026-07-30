@@ -62,6 +62,11 @@ def _pr_commands(
     )
     return [
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
+        [
+            _python(),
+            "scripts/check_issue_supersession_inventory.py",
+            "--json",
+        ],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
         _structural_scope_command(fail_blocked=fail_structural_scope_blocked),

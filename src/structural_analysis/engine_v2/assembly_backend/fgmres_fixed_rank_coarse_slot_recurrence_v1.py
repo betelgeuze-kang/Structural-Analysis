@@ -573,10 +573,19 @@ class HipFgmresFixedRankCoarseSlotRecurrenceV1:
             validated = validate_hip_fgmres_global_recurrence_receipt_v1(
                 receipt,  # type: ignore[arg-type]
             )
-            if validated.status != "recurrence_fenced":
+            # The legitimate publisher already owns the global-context lock
+            # while it calls through the live route.  Rebuilding directly
+            # avoids a slot->global lock inversion while still rejecting a
+            # detached receipt from a different global execution.
+            expected_owner_receipt = typed_owner._build_receipt("recurrence_fenced")
+            if (
+                validated.status != "recurrence_fenced"
+                or validated.context_id != typed_owner._context_id
+                or validated.receipt_hash != expected_owner_receipt.receipt_hash
+            ):
                 _fail(
                     "hip_fgmres_coarse_slot_recurrence_global_publication_invalid",
-                    "/global_receipt/status",
+                    "/global_receipt/owner",
                     cleanup_owner=self,
                 )
             self._global_context_id = validated.context_id

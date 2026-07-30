@@ -34,6 +34,22 @@ Release-facing documentation must stay synchronized with:
 - `implementation/phase1/release_evidence/productization/developer_preview_rc_status.json`
 - `implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json`
 
+## Canonical status summary
+
+Canonical product readiness snapshot: status `blocked`, blocker_count `45`, paid_pilot_ready=`false`, release_ready=`false`. Canonical blocker categories: numerical `4`, benchmark `10`, software product `15`, future commercial `16`. Inspect it without writing evidence with `python3 scripts/build_product_readiness_snapshot.py --json --no-write`.
+
+Open Benchmark Developer Preview readiness: `developer_preview_readiness.json` and `developer_preview_readiness.md` report developer_preview_ready=`false`, blocker_count `10`, future_commercial_blocker_count `35`; the Developer Preview blocker split is numerical `4`, benchmark `2`, software product `4`. The boundary keeps customer shadow, license approval, commercial SLA, the 30-run CI streak, and each external approval receipt in the future Commercial Release context. It excludes autonomous AI/GNN/surrogate truth claims until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed. The freeze policy is new feature freeze `frozen_until_developer_preview_baseline_is_clean`, AI training freeze `frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed`, and GPU/HIP track `performance_track_after_cpu_reference_parity`.
+
+Developer Preview RC status: `developer_preview_rc_status.json` and `developer_preview_rc_status.md` report status `blocked`, deliverables `10/10`, final gates `6/9`. The remaining gates are selected medium models, Linux/Windows reproducibility, and human new-user workflow observation. The clean-clone checks do not close full Phase 3, G1 full nonlinear full-mesh/material Newton, or Linux/Windows parity.
+
+Independent commercial product status: `python3 scripts/check_independent_product_readiness.py --json`. Current status is blocked at `80.0/100`.
+
+PM release areas are `4/16` green with `64` open blockers, `42` release-area blockers, `11` external-input-required blockers, and `53` local-remediation-ready blockers. `python3 scripts/report_release_evidence_freshness.py` currently reports `3/14` artifacts passing; `developer_preview_rc_status.json` remains visible because evidence freshness does not close Developer Preview RC final gates.
+
+Release mode runs `python3 scripts/check_github_actions_self_hosted_runner_status.py --check --fail-blocked` and `python3 scripts/build_product_readiness_snapshot.py --check --fail-blocked` without rewriting tracked evidence. A runner query failure remains a blocker; only an explicitly requested `--write-query-error-evidence` operation may write query-error evidence.
+
+Commercial scope remains bounded: `engineer_in_loop_accelerated_coverage_ready=true`, `full_commercial_replacement_ready=false`; this is not full autonomous replacement. EB receipts stay `0/4` in `external_benchmark_submission_updates.json`. RH closure evidence is now signed/attached in `residual_holdout_closure_updates.json`. Inspect the bounded level with `python3 scripts/report_commercialization_level.py`.
+
 ## Developer Preview boundary
 
 Developer Preview deliverables are packaged, but final gates remain open. Use:
@@ -68,6 +84,21 @@ The independent solver architecture and implementation sequence are maintained i
 [Structural Solver Engine v2 master roadmap](docs/structural-solver-engine-v2-master-roadmap.md).
 Engine v2 milestone receipts are development evidence only; they do not change the
 commercial-readiness boundary stated above.
+
+Capability implementation and authority are tracked separately in
+[`validation/capabilities/structural_capability_registry.v2.json`](validation/capabilities/structural_capability_registry.v2.json).
+In that registry, `implemented` and `executable` do not mean `public`, external V&V,
+or `release_eligible`. In particular, bounded Frame2D rigid offsets, RZ releases,
+uniform member loads, direct displacement control, Frame3D candidates, material
+candidates, and nonlinear transient SDOF execution are recorded as implemented
+candidates without promoting them to release support.
+
+Repository-level package boundaries, the P0-P3 product stages, and the ordered PR 1-18
+program are maintained in the
+[Repository Architecture and Product Development Roadmap](docs/repository-architecture-and-product-roadmap.md).
+These are target-state gates, not statements of current support. The corresponding
+dependency invariants are accepted in
+[ADR-008](docs/adr/008-repository-package-boundaries.md).
 
 ## Workstation delivery posture
 

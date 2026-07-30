@@ -89,10 +89,10 @@ Current device-visible reruns produced `21 passed in 8.16s` for the guard
 suites, including both local `gfx1030` hardware tests. The observation remains
 process-local, unsigned, and non-promoting. Guard plus typed-slot RTC lifecycle
 safety produced `8 passed in 1.89s`; the v0.2.65 live
-slot-plus-guard-and-receipt recurrence produced `7 passed in 130.89s`;
+slot-plus-guard-and-receipt recurrence produced `7 passed in 131.45s`;
 adjacent canonical/overlay/selected-global regression
 produced `26 passed in 461.50s`; public API plus capability checks produced `25
-passed in 1.96s`; and full recurrence RTC produced `141 passed in 46.18s`. The
+passed in 2.06s`; and full recurrence RTC produced `141 passed in 46.18s`. The
 independently rerun guard/live/full-RTC components total `169 passed`.
 
 At this v0.2.64 boundary, aggregate public symbol counts were
@@ -115,7 +115,12 @@ eligibility, or commercial readiness.
 
 The next order is:
 
-1. run the entire typed-slot recurrence on local `gfx1030` and compare final
+1. in extracted current-main PR H, run the entire typed-slot recurrence and
+   compare final
    vectors, counters, status, and the CPU fixed-rank reference;
-2. obtain independent external `gfx1100` execution evidence; and
+2. in PR I, bind the same source/wheel to self-hosted `gfx1030` and independent
+   external `gfx1100` execution evidence; and
 3. only then evaluate promotion and performance claims.
+
+PR #78 and the current source-quarry branch are not extended to perform these
+steps.

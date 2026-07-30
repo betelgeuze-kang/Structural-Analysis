@@ -53,12 +53,42 @@
       "required": [
         "total_strain_energy_j",
         "free_residual_linf",
-        "scaled_free_residual"
+        "scaled_free_residual",
+        "equation_scaling_6dof"
       ],
       "properties": {
         "total_strain_energy_j": {"type": "number", "minimum": 0},
         "free_residual_linf": {"type": "number", "minimum": 0},
-        "scaled_free_residual": {"type": "number", "minimum": 0}
+        "scaled_free_residual": {"type": "number", "minimum": 0},
+        "equation_scaling_6dof": {"$ref": "#/$defs/equationScaling6DOF"}
+      }
+    },
+    "equationScaling6DOF": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_force",
+        "characteristic_length",
+        "translation_residual_norm",
+        "rotation_residual_norm",
+        "scaled_residual_norm",
+        "translation_increment_norm",
+        "rotation_increment_norm",
+        "scaled_increment_norm",
+        "scaled_tangent_condition",
+        "scaling_hash"
+      ],
+      "properties": {
+        "reference_force": {"type": "number", "exclusiveMinimum": 0},
+        "characteristic_length": {"type": "number", "exclusiveMinimum": 0},
+        "translation_residual_norm": {"type": "number", "minimum": 0},
+        "rotation_residual_norm": {"type": "number", "minimum": 0},
+        "scaled_residual_norm": {"type": "number", "minimum": 0},
+        "translation_increment_norm": {"type": "number", "minimum": 0},
+        "rotation_increment_norm": {"type": "number", "minimum": 0},
+        "scaled_increment_norm": {"type": "number", "minimum": 0},
+        "scaled_tangent_condition": {"type": "number", "minimum": 1},
+        "scaling_hash": {"$ref": "#/$defs/sha256"}
       }
     },
     "partition": {

@@ -12,6 +12,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 import math
 
+from structural_analysis.materials.admissibility import (
+    MaterialAdmissibility,
+    require_scalar_loading_path_admissible,
+)
+
 
 MPA_TO_PA = 1.0e6
 
@@ -38,6 +43,15 @@ class ConcreteMaterial:
     tension_softening_strain: float = 6.0e-4
     residual_tension_ratio: float = 0.05
     confinement_gain: float = 1.00
+    loading_domain: str = "bounded_uniaxial_concrete"
+    supports_monotonic: bool = True
+    supports_unloading: bool = True
+    supports_reversal: bool = True
+    supports_cyclic: bool = True
+    supports_tension: bool = True
+    supports_compression: bool = True
+    supports_multiaxial: bool = False
+    supports_localization_regularization: bool = False
 
     @property
     def elastic_modulus_mpa(self) -> float:
@@ -46,6 +60,10 @@ class ConcreteMaterial:
     @property
     def confined_fc_mpa(self) -> float:
         return float(self.fc_mpa) * float(self.confinement_gain)
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return _material_admissibility(self)
 
 
 @dataclass(frozen=True)
@@ -57,10 +75,23 @@ class SteelMaterial:
     fracture_strain: float = 0.12
     local_buckling_strain: float = 0.0
     post_buckling_residual_ratio: float = 0.35
+    loading_domain: str = "bounded_uniaxial_monotonic_envelope"
+    supports_monotonic: bool = True
+    supports_unloading: bool = False
+    supports_reversal: bool = False
+    supports_cyclic: bool = False
+    supports_tension: bool = True
+    supports_compression: bool = True
+    supports_multiaxial: bool = False
+    supports_localization_regularization: bool = False
 
     @property
     def eps_y(self) -> float:
         return float(self.fy_mpa) / max(float(self.es_mpa), 1e-9)
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return _material_admissibility(self)
 
 
 @dataclass(frozen=True)
@@ -69,10 +100,23 @@ class BondSlipMaterial:
     slip_y_mm: float = 0.45
     slip_u_mm: float = 3.5
     residual_ratio: float = 0.25
+    loading_domain: str = "bounded_uniaxial_bond_slip"
+    supports_monotonic: bool = True
+    supports_unloading: bool = True
+    supports_reversal: bool = True
+    supports_cyclic: bool = True
+    supports_tension: bool = True
+    supports_compression: bool = True
+    supports_multiaxial: bool = False
+    supports_localization_regularization: bool = False
 
     @property
     def peak_force_kn(self) -> float:
         return float(self.k0_kn_per_mm) * float(self.slip_y_mm)
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return _material_admissibility(self)
 
 
 @dataclass(frozen=True)
@@ -83,6 +127,35 @@ class CompositeActionMaterial:
     connector_slip_u_strain: float = 4.0e-3
     residual_action_ratio: float = 0.25
     concrete_tension_carry_ratio: float = 0.15
+    loading_domain: str = "bounded_uniaxial_monotonic_composite_envelope"
+    supports_monotonic: bool = True
+    supports_unloading: bool = False
+    supports_reversal: bool = False
+    supports_cyclic: bool = False
+    supports_tension: bool = True
+    supports_compression: bool = True
+    supports_multiaxial: bool = False
+    supports_localization_regularization: bool = False
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return _material_admissibility(self)
+
+
+def _material_admissibility(material: object) -> MaterialAdmissibility:
+    return MaterialAdmissibility(
+        loading_domain=str(getattr(material, "loading_domain")),
+        supports_monotonic=bool(getattr(material, "supports_monotonic")),
+        supports_unloading=bool(getattr(material, "supports_unloading")),
+        supports_reversal=bool(getattr(material, "supports_reversal")),
+        supports_cyclic=bool(getattr(material, "supports_cyclic")),
+        supports_tension=bool(getattr(material, "supports_tension")),
+        supports_compression=bool(getattr(material, "supports_compression")),
+        supports_multiaxial=bool(getattr(material, "supports_multiaxial")),
+        supports_localization_regularization=bool(
+            getattr(material, "supports_localization_regularization")
+        ),
+    )
 
 
 @dataclass(frozen=True)
@@ -226,6 +299,11 @@ def concrete_response(strain: float, mat: ConcreteMaterial | None = None) -> Mat
         mat = ConcreteMaterial()
 
     e = float(strain)
+    require_scalar_loading_path_admissible(
+        mat.admissibility,
+        (e,),
+        owner="ConcreteMaterial",
+    )
     ec = float(mat.elastic_modulus_mpa)
     if e >= 0.0:
         if e <= mat.eps_t_crack:
@@ -315,6 +393,12 @@ def concrete_cyclic_response(
         mat = ConcreteMaterial()
 
     e = float(strain)
+    require_scalar_loading_path_admissible(
+        mat.admissibility,
+        (state.previous_strain, e),
+        prior_increment_sign=state.last_increment_sign,
+        owner="ConcreteMaterial",
+    )
     envelope = concrete_response(e, mat)
     increment = e - float(state.previous_strain)
     increment_sign = _sign_with_tol(increment)
@@ -683,6 +767,12 @@ def bond_slip_cyclic_response(
         mat = BondSlipMaterial()
 
     slip = float(slip_mm)
+    require_scalar_loading_path_admissible(
+        mat.admissibility,
+        (state.previous_slip_mm, slip),
+        prior_increment_sign=state.last_increment_sign,
+        owner="BondSlipMaterial",
+    )
     envelope = bond_slip_response(slip, mat)
     increment = slip - float(state.previous_slip_mm)
     increment_sign = _sign_with_tol(increment)
@@ -890,7 +980,19 @@ def composite_action_response(
 
 
 def confined_concrete(base: ConcreteMaterial, confinement_ratio: float) -> ConcreteMaterial:
-    return replace(base, confinement_gain=_clamp(confinement_ratio, 1.0, 2.0))
+    return replace(
+        base,
+        confinement_gain=_clamp(confinement_ratio, 1.0, 2.0),
+        loading_domain="mander_uniaxial_monotonic_compression.v1",
+        supports_monotonic=True,
+        supports_unloading=False,
+        supports_reversal=False,
+        supports_cyclic=False,
+        supports_tension=False,
+        supports_compression=True,
+        supports_multiaxial=False,
+        supports_localization_regularization=False,
+    )
 
 
 @dataclass(frozen=True)

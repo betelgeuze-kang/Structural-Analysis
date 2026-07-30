@@ -105,8 +105,14 @@ evidence, promotion eligibility, or commercial readiness.
 
 The next implementation order is:
 
-1. run an actual integrated local `gfx1030` full solve and compare the final
+1. extract the route only after PR A-G establish core, scaling, CPU, result,
+   and HIP substrate contracts;
+2. in current-main PR H, run the integrated full solve and compare the final
    vectors, counters, terminal record, and fixed-rank CPU reference;
-2. obtain independent external `gfx1100` execution evidence; and
-3. only then evaluate promotion and performance claims from those actual
+3. in PR I, obtain same-artifact self-hosted `gfx1030` and independent external
+   `gfx1100` evidence; and
+4. only then evaluate promotion and performance claims from those actual
    observations.
+
+PR #78 and the current source-quarry branch are frozen and do not receive this
+follow-on implementation.

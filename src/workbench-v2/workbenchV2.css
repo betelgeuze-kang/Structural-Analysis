@@ -88,6 +88,8 @@
 
 .wb2-unavailable { display: flex; align-items: center; gap: 9px; padding: 11px 13px; border-radius: 12px; border: 1px dashed rgba(148, 168, 190, 0.4); background: rgba(148, 168, 190, 0.06); color: #b6c4d4; font-size: 12.5px; }
 .wb2-unavailable::before { content: '\2014'; font-weight: 800; color: #8aa0b5; }
+.wb2-engineering-value--unavailable { color: #aebdcc; font-style: italic; }
+.wb2-engineering-value--invalid { color: #ff9c93; font-weight: 700; }
 
 .wb2-note { margin: 10px 0 0; color: #c3d2e0; font-size: 12.5px; line-height: 1.5; }
 .wb2-note--warn { color: #ffb3ac; }

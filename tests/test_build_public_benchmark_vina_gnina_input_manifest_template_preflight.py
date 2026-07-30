@@ -74,13 +74,15 @@ def test_current_vina_gnina_input_manifest_template_preflight_surfaces_gaps() ->
     assert payload["summary"]["prepared_input_requirement_count"] == 24
     assert payload["summary"]["prepared_input_missing_count"] == 24
     assert payload["summary"]["receipt_ref_requirement_count"] == 60
-    assert payload["summary"]["receipt_ref_missing_count"] == 60
+    assert payload["summary"]["receipt_ref_missing_count"] == 12
     first_row = payload["case_preflight_rows"][0]
     assert first_row["case_id"] == "casf2016_4llx"
     assert "prepared_receptor_checksum" in first_row["missing_required_fields"]
     assert "prepared_ligand_checksum" in first_row["missing_required_fields"]
     assert "protein_structure_path" in first_row["missing_local_file_fields"]
-    assert "vina_config_ref" in first_row["missing_receipt_ref_fields"]
+    assert first_row["missing_receipt_ref_fields"] == [
+        "input_preparation_provenance_ref"
+    ]
     first_source_file = payload["source_file_acquisition_plan"][0]
     assert first_source_file["case_id"] == "casf2016_4llx"
     assert first_source_file["file_role"] == "source_protein_structure"
@@ -103,7 +105,9 @@ def test_current_vina_gnina_input_manifest_template_preflight_surfaces_gaps() ->
     assert first_prepared_file["operator_action"] == (
         "prepare_vina_gnina_input_and_record_checksum"
     )
-    assert payload["receipt_ref_plan"][0]["operator_action"] == "attach_vina_config_ref"
+    assert payload["receipt_ref_plan"][0]["operator_action"] == (
+        "verify_manifest_receipt_ref"
+    )
     markdown = module.render_public_benchmark_vina_gnina_input_manifest_template_preflight_markdown(
         payload
     )

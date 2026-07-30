@@ -418,6 +418,99 @@ def test_all_jacobi_rows_are_replaced_by_one_logical_five_launch_slot(
             validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
                 forged_rank
             )
+        bool_alias_dimensions = replace(opening.dimensions, retained_rank=True)
+        bool_alias = _coherently_rehash_slot_receipt(
+            opening,
+            dimensions=bool_alias_dimensions,
+            context_id=slot_receipt_module._context_id_for(
+                opening.bindings,
+                bool_alias_dimensions,
+                opening.actual_backend,
+            ),
+        )
+
+        class _StringAlias(str):
+            pass
+
+        binding_alias = replace(
+            opening.bindings,
+            full_schedule_hash=_StringAlias(opening.bindings.full_schedule_hash),
+        )
+        aliased_binding_receipt = _coherently_rehash_slot_receipt(
+            opening,
+            bindings=binding_alias,
+            context_id=slot_receipt_module._context_id_for(
+                binding_alias,
+                opening.dimensions,
+                opening.actual_backend,
+            ),
+        )
+        for aliased in (
+            bool_alias,
+            aliased_binding_receipt,
+            _coherently_rehash_slot_receipt(
+                opening,
+                telemetry=replace(
+                    opening.telemetry,
+                    application_attempt_count=False,
+                ),
+            ),
+            _coherently_rehash_slot_receipt(
+                opening,
+                status=_StringAlias("context_ready"),
+            ),
+        ):
+            with pytest.raises(
+                HipFgmresFixedRankCoarseSlotRecurrenceReceiptV1Error,
+                match="nested_type_invalid",
+            ):
+                validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
+                    aliased
+                )
+        maximum_padded_program_dimensions = replace(
+            opening.dimensions,
+            restart_dimension=15,
+            max_iterations=4096,
+            maximum_restart_count=274,
+            expected_application_count=4110,
+            global_suffix_application_count=4109,
+        )
+        maximum_padded_program = _coherently_rehash_slot_receipt(
+            opening,
+            dimensions=maximum_padded_program_dimensions,
+            context_id=slot_receipt_module._context_id_for(
+                opening.bindings,
+                maximum_padded_program_dimensions,
+                opening.actual_backend,
+            ),
+        )
+        assert (
+            validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
+                maximum_padded_program
+            )
+            is maximum_padded_program
+        )
+        oversized_program_dimensions = replace(
+            maximum_padded_program_dimensions,
+            expected_application_count=4111,
+            global_suffix_application_count=4110,
+        )
+        oversized_program = _coherently_rehash_slot_receipt(
+            opening,
+            dimensions=oversized_program_dimensions,
+            context_id=slot_receipt_module._context_id_for(
+                opening.bindings,
+                oversized_program_dimensions,
+                opening.actual_backend,
+            ),
+        )
+        with pytest.raises(
+            HipFgmresFixedRankCoarseSlotRecurrenceReceiptV1Error,
+            match="schema_invalid",
+        ):
+            validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
+                oversized_program
+            )
         with pytest.raises(
             HipFgmresFixedRankCoarseSlotRecurrenceReceiptV1Error,
             match="nested_type_invalid",
@@ -439,6 +532,40 @@ def test_all_jacobi_rows_are_replaced_by_one_logical_five_launch_slot(
         ):
             validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
                 forged_reason
+            )
+        forged_poison_without_attempt = _coherently_rehash_slot_receipt(
+            opening,
+            status="poisoned",
+            reason=HipFgmresFixedRankCoarseSlotRecurrenceReasonV1(
+                "hip_fgmres_coarse_slot_recurrence_poisoned",
+                "forged poison without an application attempt",
+            ),
+        )
+        with pytest.raises(
+            HipFgmresFixedRankCoarseSlotRecurrenceReceiptV1Error,
+            match="receipt_invalid",
+        ):
+            validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
+                forged_poison_without_attempt
+            )
+        forged_multiple_failed_attempts = _coherently_rehash_slot_receipt(
+            opening,
+            status="poisoned",
+            reason=HipFgmresFixedRankCoarseSlotRecurrenceReasonV1(
+                "hip_fgmres_coarse_slot_recurrence_poisoned",
+                "forged multiple failed attempts after poison",
+            ),
+            telemetry=replace(
+                opening.telemetry,
+                application_attempt_count=2,
+            ),
+        )
+        with pytest.raises(
+            HipFgmresFixedRankCoarseSlotRecurrenceReceiptV1Error,
+            match="receipt_invalid",
+        ):
+            validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
+                forged_multiple_failed_attempts
             )
         redacted_forgery = _coherently_rehash_slot_receipt(
             opening,
@@ -533,6 +660,36 @@ def test_all_jacobi_rows_are_replaced_by_one_logical_five_launch_slot(
         assert receipt.global_context_id == global_receipt.context_id
         assert receipt.global_receipt_hash == global_receipt.receipt_hash
 
+        global_owner = stack["global"].context
+        original_global_builder = type(global_owner)._build_receipt
+
+        def foreign_global_builder(self: Any, status: Any) -> Any:
+            return replace(
+                original_global_builder(self, status),
+                receipt_hash="sha256:" + "d" * 64,
+            )
+
+        with monkeypatch.context() as owner_patch:
+            owner_patch.setattr(
+                type(global_owner),
+                "_build_receipt",
+                foreign_global_builder,
+            )
+            context._state = "global_fenced"
+            try:
+                with pytest.raises(
+                    HipFgmresFixedRankCoarseSlotRecurrenceV1Error,
+                    match="global_publication_invalid",
+                ):
+                    context._bind_global_recurrence_receipt(
+                        context._token,
+                        stack["live"].context,
+                        owner=global_owner,
+                        receipt=global_receipt,
+                    )
+            finally:
+                context._state = "global_receipt_bound"
+
         for forged in (
             _coherently_rehash_slot_receipt(receipt, status="context_ready"),
             _coherently_rehash_slot_receipt(
@@ -579,6 +736,25 @@ def test_slot_context_rejects_close_between_canonical_and_global_phases(
         ):
             validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
                 forged_closed
+            )
+        forged_partial_parent_ack = _coherently_rehash_slot_receipt(
+            context.receipt(),
+            status="poisoned",
+            reason=HipFgmresFixedRankCoarseSlotRecurrenceReasonV1(
+                "hip_fgmres_coarse_slot_recurrence_poisoned",
+                "forged partial canonical parent acknowledgement",
+            ),
+            telemetry=replace(
+                context.receipt().telemetry,
+                physical_slot_launch_ack_count=3,
+            ),
+        )
+        with pytest.raises(
+            HipFgmresFixedRankCoarseSlotRecurrenceReceiptV1Error,
+            match="receipt_invalid",
+        ):
+            validate_hip_fgmres_fixed_rank_coarse_slot_recurrence_receipt_v1(
+                forged_partial_parent_ack
             )
         with pytest.raises(
             HipFgmresFixedRankCoarseSlotRecurrenceV1Error,

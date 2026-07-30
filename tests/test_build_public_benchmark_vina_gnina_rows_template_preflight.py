@@ -70,7 +70,7 @@ def test_current_vina_gnina_rows_template_preflight_surfaces_gaps() -> None:
     assert payload["status"] == "operator_rows_completion_required"
     assert payload["contract_pass"] is True
     assert payload["adapter_template_ready"] is False
-    assert payload["expected_rows_detected"] is False
+    assert payload["expected_rows_detected"] is True
     assert payload["summary"]["expected_engine_run_slot_count"] == 24
     assert payload["summary"]["template_row_count"] == 24
     assert payload["summary"]["template_slot_coverage_complete"] is True

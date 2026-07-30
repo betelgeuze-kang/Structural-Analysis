@@ -1,0 +1,738 @@
+{
+  "acceptance": {
+    "accepted": true,
+    "batch_duration_passed": true,
+    "batch_length_stability_passed": true,
+    "bootstrap_ci_passed": true,
+    "coefficient_of_variation_passed": true,
+    "correctness_passed": true,
+    "end_repeat_drift_passed": true,
+    "evaluated": true,
+    "hardware_profile_matched": true,
+    "minimum_ols_r2": 0.98,
+    "off_cache_occupancy_precondition_passed": true,
+    "ols_slope_passed": true,
+    "outcome": "accepted",
+    "r2_passed": true,
+    "robust_slope_passed": true,
+    "scope": "hiprtc_fused_csr_residual_jvp_kernel_only",
+    "slope_lower_inclusive": 0.85,
+    "slope_upper_inclusive": 1.15,
+    "timed_region_clean": true
+  },
+  "actual_backend": "hip",
+  "agent_enumerator": "/usr/bin/rocm_agent_enumerator",
+  "architecture": "gfx1030",
+  "claim_scope": "hiprtc_fused_csr_residual_jvp_kernel_only",
+  "claims": {
+    "commercial_readiness": false,
+    "end_to_end_o_n": false,
+    "kernel_scope_initial_linear_scaling_accepted": true,
+    "kernel_scope_timing_measured": true,
+    "numerical_parity_measured_in_timed_region": false,
+    "physical_dram_bytes_measured": false,
+    "solver_o_n": false,
+    "solver_speedup": false,
+    "structural_solver_executed": false
+  },
+  "configuration": {
+    "automatic_size_downscaling": false,
+    "bootstrap_replicates": 2000,
+    "bootstrap_seed": 20260711,
+    "end_repeat_definition": "same_allocation_same_size_after_main_trials_before_correctness_download",
+    "fit_max_n": 16777220,
+    "fit_min_n": 4194305,
+    "fit_regime": "predeclared_dram_resident_large_problem",
+    "fit_regime_rationale": "Lower row counts are excluded a priori from the default fit because launch, occupancy, and cache-capacity transitions are non-asymptotic kernel regimes.",
+    "max_batch_launches": 4096,
+    "maximum_batch_length_stability_relative_delta": 0.03,
+    "maximum_coefficient_of_variation": 0.05,
+    "maximum_end_repeat_relative_drift": 0.05,
+    "maximum_payload_fraction_of_free_memory": 0.5,
+    "measurement_order": [
+      4194305,
+      16777220,
+      6291456,
+      12582912,
+      8388608
+    ],
+    "measurement_order_policy": "alternating_low_high_predeclared",
+    "minimum_free_device_bytes": 2147483648,
+    "minimum_ols_r2": 0.98,
+    "off_cache_precondition": {
+      "expected_architecture": "gfx1030",
+      "expected_device_name_token": "6900 XT",
+      "hardware_profile_source": "predeclared_rx6900xt_gfx1030",
+      "kernel_block_size": 256,
+      "minimum_blocks_per_compute_unit": 8,
+      "minimum_unique_read_multiple": 2,
+      "reference_cache_bytes": 134217728,
+      "reference_compute_units": 80
+    },
+    "pilot_launches": 4,
+    "repeats": 7,
+    "sizes": [
+      4194305,
+      6291456,
+      8388608,
+      12582912,
+      16777220
+    ],
+    "slope_lower_inclusive": 0.85,
+    "slope_upper_inclusive": 1.15,
+    "stability_repeats": 3,
+    "target_batch_ms": 20.0,
+    "warmup_launches": 20
+  },
+  "decision": "accepted",
+  "detected_architectures": [
+    "gfx1030"
+  ],
+  "device": {
+    "capability_receipt_hash": "sha256:65725640e227053e1c26fc666e15ed6cf3c6c50645f7c90d37c8e20af8c6261d",
+    "driver_version_raw": 60032831,
+    "free_memory_bytes_before": 17110663168,
+    "hardware_profile_matched": true,
+    "name": "AMD Radeon RX 6900 XT",
+    "runtime_version_raw": 60032831,
+    "total_memory_bytes": 17163091968
+  },
+  "device_ordinal": 0,
+  "environment": {
+    "amd_serialize_copy": null,
+    "amd_serialize_kernel": null,
+    "clean_worker_reexec": true,
+    "hip_launch_blocking": null,
+    "host_wall_clock_used_for_acceptance": false,
+    "serialization_overrides_present_in_worker": [],
+    "serialization_overrides_removed_before_runtime_init": [],
+    "timing_api": "hip_event_elapsed_time"
+  },
+  "evidence_authenticity": "unsigned_local_measurement",
+  "evidence_scope": "native_hiprtc_kernel_event_timing",
+  "fallback_count": 0,
+  "fallback_policy": "forbidden",
+  "fit": {
+    "bootstrap_method": "stratified_trial_resample_theil_sen",
+    "bootstrap_replicates": 2000,
+    "bootstrap_seed": 20260711,
+    "bootstrap_slope_ci95_lower": 1.008438142329402,
+    "bootstrap_slope_ci95_upper": 1.0097521171224966,
+    "method": "theil_sen_log_log_with_ols_diagnostic",
+    "ols_intercept_log_ms": -15.689871983500487,
+    "ols_r2": 0.9999851739795943,
+    "ols_slope": 1.0089193438586543,
+    "pairwise_slope_count": 10,
+    "point_count": 5,
+    "robust_intercept_log_ms": -15.689657311055166,
+    "robust_r2": 0.9999825733931282,
+    "robust_slope": 1.0089559192333883,
+    "row_count_max": 16777220,
+    "row_count_min": 4194305
+  },
+  "harness_identity": {
+    "benchmark_script_resource": "scripts/benchmark_engine_v2_rtc_kernel_scaling.py",
+    "benchmark_script_sha256": "sha256:697d9ce877a3a56963a8be286cb6fc3d8d8dba6da9c0b7c411a0784b103825eb",
+    "numpy_version": "1.26.4",
+    "python_implementation": "cpython",
+    "python_version": "3.10.12",
+    "report_schema_resource": "src/structural_analysis/schemas/rtc_kernel_scaling_report_v1.schema.json",
+    "report_schema_sha256": "sha256:c668ec599b01e1ce84cfc746eb0d3cc6506da5b4289fb5891f7010a7c30622fa"
+  },
+  "kernel_identity": {
+    "architecture": "gfx1030",
+    "code_object_sha256": "sha256:9df864a9a06d9551a485c62215d6b6a408e1cc97e64be0c41c92f44b636e632d",
+    "hiprtc_library_sha256": "sha256:7c7ab6d1e45ca133f7e9218257a99c7278696ca14c043e9181965afd032ce002",
+    "hiprtc_version_major": 9,
+    "hiprtc_version_minor": 0,
+    "identity_hash": "sha256:8f9fd3038cfa9d960f057ec13c8d79e91eb8d867031b80f2a4a9c07e8b4c245c",
+    "kernel_symbol": "engine_v2_csr_residual_jvp_v1",
+    "runtime_library_sha256": "sha256:3210b3126e1bab3fbfe4eaaf5110562026494ab93a973daf03dbc1e603a8fceb",
+    "source_sha256": "sha256:7a93c761597494546d680e465f65ca5dff2c5f71cd0281be8e5c858d0b0ce54a"
+  },
+  "nonpromoting": true,
+  "promotion_eligible": false,
+  "reason": null,
+  "report_hash": "sha256:dddf5f60b1f847acb7223bde38a0f7c2b5a5062089028e8c2401531136d707c3",
+  "requested_backend": "hip",
+  "samples": [
+    {
+      "allocated_device_payload_bytes": 335544380,
+      "allocation_count": 8,
+      "batch_length_stability_2k_per_launch_ms": 0.7384940959789135,
+      "batch_length_stability_2k_raw_batch_elapsed_ms": [
+        79.75736236572266,
+        79.74564361572266,
+        79.77323913574219
+      ],
+      "batch_length_stability_k_per_launch_ms": 0.7387297594988788,
+      "batch_length_stability_k_raw_batch_elapsed_ms": [
+        39.905853271484375,
+        39.89140701293945,
+        39.881526947021484
+      ],
+      "batch_length_stability_relative_delta": 0.0003190118130954325,
+      "calibration_trials": [
+        {
+          "calibration_index": 0,
+          "launch_count": 27,
+          "median_batch_elapsed_ms": 19.96969985961914,
+          "raw_batch_elapsed_ms": [
+            19.95111083984375,
+            19.96969985961914,
+            19.97410011291504
+          ]
+        },
+        {
+          "calibration_index": 1,
+          "launch_count": 54,
+          "median_batch_elapsed_ms": 39.89140701293945,
+          "raw_batch_elapsed_ms": [
+            39.905853271484375,
+            39.89140701293945,
+            39.881526947021484
+          ]
+        }
+      ],
+      "coefficient_of_variation": 0.0003098377998407684,
+      "correctness": {
+        "absolute_tolerance": 1e-10,
+        "finite": true,
+        "jvp_max_abs_error": 0.0,
+        "jvp_relative_l2_error": 0.0,
+        "passed": true,
+        "performed_outside_timed_region": true,
+        "relative_l2_tolerance": 1e-10,
+        "residual_max_abs_error": 2.710505431213761e-20,
+        "residual_relative_l2_error": 1.0997216507981289e-16
+      },
+      "csr_nnz": 12582913,
+      "double_batch_launch_count": 108,
+      "end_repeat_batch_elapsed_ms": 39.88850402832031,
+      "end_repeat_per_launch_ms": 0.7386760005244503,
+      "end_repeat_relative_drift": 0.00037885396436777624,
+      "event_timed_kernel_launch_count_total": 1003,
+      "event_timing_scope": "steady_state_stream_dispatch_plus_kernel",
+      "fallback_count": 0,
+      "fit_trial_kernel_launch_count": 378,
+      "fp64_equivalent_operations_per_launch": 54525957,
+      "grid_block_count": 16385,
+      "initial_h2d_bytes": 268435500,
+      "initial_h2d_operation_count": 6,
+      "maximum_per_launch_ms": 0.7392107645670573,
+      "mean_per_launch_ms": 0.7389002905951606,
+      "median_absolute_deviation_per_launch_ms": 0.0001446052833840028,
+      "median_batch_elapsed_ms": 39.903621673583984,
+      "median_per_launch_ms": 0.7389559569182219,
+      "minimum_per_launch_ms": 0.7385049042878328,
+      "outside_timed_region_d2h_bytes": 67108880,
+      "outside_timed_region_d2h_operation_count": 2,
+      "physical_dram_bytes": "not_instrumented",
+      "pilot_batch_elapsed_ms": 2.9669079780578613,
+      "pilot_launch_count": 4,
+      "raw_trials": [
+        {
+          "batch_elapsed_ms": 39.903621673583984,
+          "per_launch_ms": 0.7389559569182219,
+          "trial_index": 0
+        },
+        {
+          "batch_elapsed_ms": 39.917381286621094,
+          "per_launch_ms": 0.7392107645670573,
+          "trial_index": 1
+        },
+        {
+          "batch_elapsed_ms": 39.89581298828125,
+          "per_launch_ms": 0.7388113516348379,
+          "trial_index": 2
+        },
+        {
+          "batch_elapsed_ms": 39.90632629394531,
+          "per_launch_ms": 0.7390060424804688,
+          "trial_index": 3
+        },
+        {
+          "batch_elapsed_ms": 39.908538818359375,
+          "per_launch_ms": 0.7390470151548032,
+          "trial_index": 4
+        },
+        {
+          "batch_elapsed_ms": 39.89336395263672,
+          "per_launch_ms": 0.7387659991229022,
+          "trial_index": 5
+        },
+        {
+          "batch_elapsed_ms": 39.87926483154297,
+          "per_launch_ms": 0.7385049042878328,
+          "trial_index": 6
+        }
+      ],
+      "resident_touched_bytes": 335544380,
+      "row_count": 4194305,
+      "source_logical_bytes_per_launch": 486539324,
+      "standard_deviation_per_launch_ms": 0.000228939240339709,
+      "timed_batch_launch_count": 54,
+      "timed_region_allocation_count": 0,
+      "timed_region_d2h_operation_count": 0,
+      "timed_region_h2d_operation_count": 0,
+      "timed_trial_count": 7,
+      "unique_read_bytes": 268435500,
+      "warmup_launch_count": 20
+    },
+    {
+      "allocated_device_payload_bytes": 503316460,
+      "allocation_count": 8,
+      "batch_length_stability_2k_per_launch_ms": 1.10795081289191,
+      "batch_length_stability_2k_raw_batch_elapsed_ms": [
+        42.028560638427734,
+        42.24072265625,
+        42.10213088989258
+      ],
+      "batch_length_stability_k_per_launch_ms": 1.1062020753559314,
+      "batch_length_stability_k_raw_batch_elapsed_ms": [
+        21.015071868896484,
+        21.021631240844727,
+        21.017839431762695
+      ],
+      "batch_length_stability_relative_delta": 0.0015808481785897224,
+      "calibration_trials": [
+        {
+          "calibration_index": 0,
+          "launch_count": 19,
+          "median_batch_elapsed_ms": 21.017839431762695,
+          "raw_batch_elapsed_ms": [
+            21.015071868896484,
+            21.021631240844727,
+            21.017839431762695
+          ]
+        }
+      ],
+      "coefficient_of_variation": 0.0014722587289132285,
+      "correctness": {
+        "absolute_tolerance": 1e-10,
+        "finite": true,
+        "jvp_max_abs_error": 0.0,
+        "jvp_relative_l2_error": 0.0,
+        "passed": true,
+        "performed_outside_timed_region": true,
+        "relative_l2_tolerance": 1e-10,
+        "residual_max_abs_error": 2.710505431213761e-20,
+        "residual_relative_l2_error": 1.099720472711866e-16
+      },
+      "csr_nnz": 18874366,
+      "double_batch_launch_count": 38,
+      "end_repeat_batch_elapsed_ms": 21.019439697265625,
+      "end_repeat_per_launch_ms": 1.1062862998560856,
+      "end_repeat_relative_drift": 0.00017700654978665623,
+      "event_timed_kernel_launch_count_total": 327,
+      "event_timing_scope": "steady_state_stream_dispatch_plus_kernel",
+      "fallback_count": 0,
+      "fit_trial_kernel_launch_count": 133,
+      "fp64_equivalent_operations_per_launch": 81788920,
+      "grid_block_count": 24576,
+      "initial_h2d_bytes": 402653164,
+      "initial_h2d_operation_count": 6,
+      "maximum_per_launch_ms": 1.1104890923751027,
+      "mean_per_launch_ms": 1.1072201262739367,
+      "median_absolute_deviation_per_launch_ms": 0.0003026661119962526,
+      "median_batch_elapsed_ms": 21.023160934448242,
+      "median_per_launch_ms": 1.1064821544446444,
+      "minimum_per_launch_ms": 1.1056757475200452,
+      "outside_timed_region_d2h_bytes": 100663296,
+      "outside_timed_region_d2h_operation_count": 2,
+      "physical_dram_bytes": "not_instrumented",
+      "pilot_batch_elapsed_ms": 4.4339919090271,
+      "pilot_launch_count": 4,
+      "raw_trials": [
+        {
+          "batch_elapsed_ms": 21.022560119628906,
+          "per_launch_ms": 1.1064505326120477,
+          "trial_index": 0
+        },
+        {
+          "batch_elapsed_ms": 21.055831909179688,
+          "per_launch_ms": 1.1082016794305098,
+          "trial_index": 1
+        },
+        {
+          "batch_elapsed_ms": 21.099292755126953,
+          "per_launch_ms": 1.1104890923751027,
+          "trial_index": 2
+        },
+        {
+          "batch_elapsed_ms": 21.028911590576172,
+          "per_launch_ms": 1.1067848205566406,
+          "trial_index": 3
+        },
+        {
+          "batch_elapsed_ms": 21.023160934448242,
+          "per_launch_ms": 1.1064821544446444,
+          "trial_index": 4
+        },
+        {
+          "batch_elapsed_ms": 21.022680282592773,
+          "per_launch_ms": 1.106456856978567,
+          "trial_index": 5
+        },
+        {
+          "batch_elapsed_ms": 21.00783920288086,
+          "per_launch_ms": 1.1056757475200452,
+          "trial_index": 6
+        }
+      ],
+      "resident_touched_bytes": 503316460,
+      "row_count": 6291456,
+      "source_logical_bytes_per_launch": 729808840,
+      "standard_deviation_per_launch_ms": 0.0016301144957352105,
+      "timed_batch_launch_count": 19,
+      "timed_region_allocation_count": 0,
+      "timed_region_d2h_operation_count": 0,
+      "timed_region_h2d_operation_count": 0,
+      "timed_trial_count": 7,
+      "unique_read_bytes": 402653164,
+      "warmup_launch_count": 20
+    },
+    {
+      "allocated_device_payload_bytes": 671088620,
+      "allocation_count": 8,
+      "batch_length_stability_2k_per_launch_ms": 1.4873928342546736,
+      "batch_length_stability_2k_raw_batch_elapsed_ms": [
+        41.57414627075195,
+        41.735939025878906,
+        41.64699935913086
+      ],
+      "batch_length_stability_k_per_launch_ms": 1.4842790876116072,
+      "batch_length_stability_k_raw_batch_elapsed_ms": [
+        20.776397705078125,
+        20.795299530029297,
+        20.7799072265625
+      ],
+      "batch_length_stability_relative_delta": 0.002097817498781054,
+      "calibration_trials": [
+        {
+          "calibration_index": 0,
+          "launch_count": 14,
+          "median_batch_elapsed_ms": 20.7799072265625,
+          "raw_batch_elapsed_ms": [
+            20.776397705078125,
+            20.795299530029297,
+            20.7799072265625
+          ]
+        }
+      ],
+      "coefficient_of_variation": 0.0018654738557041242,
+      "correctness": {
+        "absolute_tolerance": 1e-10,
+        "finite": true,
+        "jvp_max_abs_error": 0.0,
+        "jvp_relative_l2_error": 0.0,
+        "passed": true,
+        "performed_outside_timed_region": true,
+        "relative_l2_tolerance": 1e-10,
+        "residual_max_abs_error": 2.710505431213761e-20,
+        "residual_relative_l2_error": 1.0997263021661479e-16
+      },
+      "csr_nnz": 25165822,
+      "double_batch_launch_count": 28,
+      "end_repeat_batch_elapsed_ms": 20.781387329101562,
+      "end_repeat_per_launch_ms": 1.4843848092215401,
+      "end_repeat_relative_drift": 0.000506011036838264,
+      "event_timed_kernel_launch_count_total": 242,
+      "event_timing_scope": "steady_state_stream_dispatch_plus_kernel",
+      "fallback_count": 0,
+      "fit_trial_kernel_launch_count": 98,
+      "fp64_equivalent_operations_per_launch": 109051896,
+      "grid_block_count": 32768,
+      "initial_h2d_bytes": 536870892,
+      "initial_h2d_operation_count": 6,
+      "maximum_per_launch_ms": 1.4922936303274972,
+      "mean_per_launch_ms": 1.486280090954839,
+      "median_absolute_deviation_per_launch_ms": 0.00040285927908767505,
+      "median_batch_elapsed_ms": 20.791908264160156,
+      "median_per_launch_ms": 1.4851363045828683,
+      "minimum_per_launch_ms": 1.4844462530953544,
+      "outside_timed_region_d2h_bytes": 134217728,
+      "outside_timed_region_d2h_operation_count": 2,
+      "physical_dram_bytes": "not_instrumented",
+      "pilot_batch_elapsed_ms": 5.950376033782959,
+      "pilot_launch_count": 4,
+      "raw_trials": [
+        {
+          "batch_elapsed_ms": 20.78224754333496,
+          "per_launch_ms": 1.4844462530953544,
+          "trial_index": 0
+        },
+        {
+          "batch_elapsed_ms": 20.78626823425293,
+          "per_launch_ms": 1.4847334453037806,
+          "trial_index": 1
+        },
+        {
+          "batch_elapsed_ms": 20.89211082458496,
+          "per_launch_ms": 1.4922936303274972,
+          "trial_index": 2
+        },
+        {
+          "batch_elapsed_ms": 20.817747116088867,
+          "per_launch_ms": 1.4869819368634904,
+          "trial_index": 3
+        },
+        {
+          "batch_elapsed_ms": 20.79330825805664,
+          "per_launch_ms": 1.485236304146903,
+          "trial_index": 4
+        },
+        {
+          "batch_elapsed_ms": 20.791908264160156,
+          "per_launch_ms": 1.4851363045828683,
+          "trial_index": 5
+        },
+        {
+          "batch_elapsed_ms": 20.791858673095703,
+          "per_launch_ms": 1.4851327623639787,
+          "trial_index": 6
+        }
+      ],
+      "resident_touched_bytes": 671088620,
+      "row_count": 8388608,
+      "source_logical_bytes_per_launch": 973078472,
+      "standard_deviation_per_launch_ms": 0.0027726166519298,
+      "timed_batch_launch_count": 14,
+      "timed_region_allocation_count": 0,
+      "timed_region_d2h_operation_count": 0,
+      "timed_region_h2d_operation_count": 0,
+      "timed_trial_count": 7,
+      "unique_read_bytes": 536870892,
+      "warmup_launch_count": 20
+    },
+    {
+      "allocated_device_payload_bytes": 1006632940,
+      "allocation_count": 8,
+      "batch_length_stability_2k_per_launch_ms": 2.2314230600992837,
+      "batch_length_stability_2k_raw_batch_elapsed_ms": [
+        40.16561508178711,
+        40.147254943847656,
+        40.21084213256836
+      ],
+      "batch_length_stability_k_per_launch_ms": 2.2324146694607205,
+      "batch_length_stability_k_raw_batch_elapsed_ms": [
+        20.083032608032227,
+        20.111263275146484,
+        20.091732025146484
+      ],
+      "batch_length_stability_relative_delta": 0.00044418690443221744,
+      "calibration_trials": [
+        {
+          "calibration_index": 0,
+          "launch_count": 9,
+          "median_batch_elapsed_ms": 20.091732025146484,
+          "raw_batch_elapsed_ms": [
+            20.083032608032227,
+            20.111263275146484,
+            20.091732025146484
+          ]
+        }
+      ],
+      "coefficient_of_variation": 0.0011876240429178828,
+      "correctness": {
+        "absolute_tolerance": 1e-10,
+        "finite": true,
+        "jvp_max_abs_error": 0.0,
+        "jvp_relative_l2_error": 0.0,
+        "passed": true,
+        "performed_outside_timed_region": true,
+        "relative_l2_tolerance": 1e-10,
+        "residual_max_abs_error": 2.710505431213761e-20,
+        "residual_relative_l2_error": 1.0997242293025222e-16
+      },
+      "csr_nnz": 37748734,
+      "double_batch_launch_count": 18,
+      "end_repeat_batch_elapsed_ms": 20.09250259399414,
+      "end_repeat_per_launch_ms": 2.232500288221571,
+      "end_repeat_relative_drift": 0.00022503087765453843,
+      "event_timed_kernel_launch_count_total": 157,
+      "event_timing_scope": "steady_state_stream_dispatch_plus_kernel",
+      "fallback_count": 0,
+      "fit_trial_kernel_launch_count": 63,
+      "fp64_equivalent_operations_per_launch": 163577848,
+      "grid_block_count": 49152,
+      "initial_h2d_bytes": 805306348,
+      "initial_h2d_operation_count": 6,
+      "maximum_per_launch_ms": 2.23544798956977,
+      "mean_per_launch_ms": 2.2321484883626304,
+      "median_absolute_deviation_per_launch_ms": 0.0025422837999129477,
+      "median_batch_elapsed_ms": 20.087982177734375,
+      "median_per_launch_ms": 2.231998019748264,
+      "minimum_per_launch_ms": 2.229010264078776,
+      "outside_timed_region_d2h_bytes": 201326592,
+      "outside_timed_region_d2h_operation_count": 2,
+      "physical_dram_bytes": "not_instrumented",
+      "pilot_batch_elapsed_ms": 8.89200496673584,
+      "pilot_launch_count": 4,
+      "raw_trials": [
+        {
+          "batch_elapsed_ms": 20.098262786865234,
+          "per_launch_ms": 2.233140309651693,
+          "trial_index": 0
+        },
+        {
+          "batch_elapsed_ms": 20.11903190612793,
+          "per_launch_ms": 2.23544798956977,
+          "trial_index": 1
+        },
+        {
+          "batch_elapsed_ms": 20.065101623535156,
+          "per_launch_ms": 2.229455735948351,
+          "trial_index": 2
+        },
+        {
+          "batch_elapsed_ms": 20.087982177734375,
+          "per_launch_ms": 2.231998019748264,
+          "trial_index": 3
+        },
+        {
+          "batch_elapsed_ms": 20.118751525878906,
+          "per_launch_ms": 2.2354168362087674,
+          "trial_index": 4
+        },
+        {
+          "batch_elapsed_ms": 20.061092376708984,
+          "per_launch_ms": 2.229010264078776,
+          "trial_index": 5
+        },
+        {
+          "batch_elapsed_ms": 20.075132369995117,
+          "per_launch_ms": 2.230570263332791,
+          "trial_index": 6
+        }
+      ],
+      "resident_touched_bytes": 1006632940,
+      "row_count": 12582912,
+      "source_logical_bytes_per_launch": 1459617736,
+      "standard_deviation_per_launch_ms": 0.0026509532121422675,
+      "timed_batch_launch_count": 9,
+      "timed_region_allocation_count": 0,
+      "timed_region_d2h_operation_count": 0,
+      "timed_region_h2d_operation_count": 0,
+      "timed_trial_count": 7,
+      "unique_read_bytes": 805306348,
+      "warmup_launch_count": 20
+    },
+    {
+      "allocated_device_payload_bytes": 1342177580,
+      "allocation_count": 8,
+      "batch_length_stability_2k_per_launch_ms": 2.9875880650111606,
+      "batch_length_stability_2k_raw_batch_elapsed_ms": [
+        41.82623291015625,
+        41.884193420410156,
+        41.823020935058594
+      ],
+      "batch_length_stability_k_per_launch_ms": 2.9932558877127513,
+      "batch_length_stability_k_raw_batch_elapsed_ms": [
+        20.952791213989258,
+        20.93954086303711,
+        20.956939697265625
+      ],
+      "batch_length_stability_relative_delta": 0.0018935309623400408,
+      "calibration_trials": [
+        {
+          "calibration_index": 0,
+          "launch_count": 7,
+          "median_batch_elapsed_ms": 20.952791213989258,
+          "raw_batch_elapsed_ms": [
+            20.952791213989258,
+            20.93954086303711,
+            20.956939697265625
+          ]
+        }
+      ],
+      "coefficient_of_variation": 0.00046620989841404756,
+      "correctness": {
+        "absolute_tolerance": 1e-10,
+        "finite": true,
+        "jvp_max_abs_error": 0.0,
+        "jvp_relative_l2_error": 0.0,
+        "passed": true,
+        "performed_outside_timed_region": true,
+        "relative_l2_tolerance": 1e-10,
+        "residual_max_abs_error": 2.710505431213761e-20,
+        "residual_relative_l2_error": 1.0997235918769511e-16
+      },
+      "csr_nnz": 50331658,
+      "double_batch_launch_count": 14,
+      "end_repeat_batch_elapsed_ms": 20.930259704589844,
+      "end_repeat_per_launch_ms": 2.990037100655692,
+      "end_repeat_relative_drift": 1.968342491602024e-05,
+      "event_timed_kernel_launch_count_total": 123,
+      "event_timing_scope": "steady_state_stream_dispatch_plus_kernel",
+      "fallback_count": 0,
+      "fit_trial_kernel_launch_count": 49,
+      "fp64_equivalent_operations_per_launch": 218103852,
+      "grid_block_count": 65537,
+      "initial_h2d_bytes": 1073742060,
+      "initial_h2d_operation_count": 6,
+      "maximum_per_launch_ms": 2.9923646109444753,
+      "mean_per_launch_ms": 2.990589881429867,
+      "median_absolute_deviation_per_launch_ms": 0.0012653895786827185,
+      "median_batch_elapsed_ms": 20.93067169189453,
+      "median_per_launch_ms": 2.990095955984933,
+      "minimum_per_launch_ms": 2.988449914114816,
+      "outside_timed_region_d2h_bytes": 268435520,
+      "outside_timed_region_d2h_operation_count": 2,
+      "physical_dram_bytes": "not_instrumented",
+      "pilot_batch_elapsed_ms": 11.961294174194336,
+      "pilot_launch_count": 4,
+      "raw_trials": [
+        {
+          "batch_elapsed_ms": 20.939529418945312,
+          "per_launch_ms": 2.991361345563616,
+          "trial_index": 0
+        },
+        {
+          "batch_elapsed_ms": 20.94434928894043,
+          "per_launch_ms": 2.992049898420061,
+          "trial_index": 1
+        },
+        {
+          "batch_elapsed_ms": 20.9300594329834,
+          "per_launch_ms": 2.9900084904261996,
+          "trial_index": 2
+        },
+        {
+          "batch_elapsed_ms": 20.946552276611328,
+          "per_launch_ms": 2.9923646109444753,
+          "trial_index": 3
+        },
+        {
+          "batch_elapsed_ms": 20.928592681884766,
+          "per_launch_ms": 2.9897989545549666,
+          "trial_index": 4
+        },
+        {
+          "batch_elapsed_ms": 20.93067169189453,
+          "per_launch_ms": 2.990095955984933,
+          "trial_index": 5
+        },
+        {
+          "batch_elapsed_ms": 20.91914939880371,
+          "per_launch_ms": 2.988449914114816,
+          "trial_index": 6
+        }
+      ],
+      "resident_touched_bytes": 1342177580,
+      "row_count": 16777220,
+      "source_logical_bytes_per_launch": 1946157464,
+      "standard_deviation_per_launch_ms": 0.0013942426048194967,
+      "timed_batch_launch_count": 7,
+      "timed_region_allocation_count": 0,
+      "timed_region_d2h_operation_count": 0,
+      "timed_region_h2d_operation_count": 0,
+      "timed_trial_count": 7,
+      "unique_read_bytes": 1073742060,
+      "warmup_launch_count": 20
+    }
+  ],
+  "schema_version": "structural-analysis-rtc-kernel-scaling-report.v1",
+  "signature": null,
+  "status": "accepted"
+}

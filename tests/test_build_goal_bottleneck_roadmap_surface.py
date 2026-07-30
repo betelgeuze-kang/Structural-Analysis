@@ -167,8 +167,18 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert briefing["primary_release_blocker"] == (
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
-    assert briefing["refresh_required_operator_action_count"] == 0
-    assert briefing["refresh_required_operator_actions"] == []
+    assert briefing["refresh_required_operator_action_count"] == 1
+    assert briefing["refresh_required_operator_actions"] == [
+        {
+            "action_id": "refresh_release_evidence_freshness",
+            "status": "refresh_required",
+            "reason": (
+                "release_evidence_freshness_report has stale or incomplete "
+                "source-of-truth blockers"
+            ),
+            "artifact": "release_evidence_freshness_report",
+        }
+    ]
 
     release_area_handoffs = {
         row["blocker_id"]: row
@@ -494,6 +504,25 @@ def test_goal_bottleneck_surface_exposes_active_thread_goal_audit() -> None:
         "operator_input_source_receipt_pass::operator_input_source_receipt_required"
         in pocketmd["blockers"]
     )
+
+
+def test_source_of_truth_classification_readiness_is_independent_of_freshness_gaps() -> None:
+    row = module._source_of_truth_row(
+        {
+            "summary": {
+                "source_of_truth_gap_candidate_count": 5,
+                "source_of_truth_gap_fix_count": 2,
+                "source_of_truth_gap_no_op_count": 0,
+                "source_of_truth_gap_aggregator_review_count": 3,
+                "blocker_count": 19,
+            }
+        }
+    )
+
+    assert row["state"] == "ready"
+    assert row["bottleneck"] == ""
+    assert row["first_blocker"] == ""
+    assert row["summary"]["freshness_blocker_count"] == 19
 
 
 def test_goal_bottleneck_surface_uses_science_closure_aggregate_not_raw_rows(

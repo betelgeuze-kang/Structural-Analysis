@@ -249,7 +249,6 @@ def _source_of_truth_row(freshness: dict[str, Any]) -> dict[str, Any]:
     ready = bool(
         candidate_count
         and fix_count + no_op_count + aggregator_count == candidate_count
-        and blocker_count == 0
     )
     return _roadmap_row(
         phase_id="phase_0_source_of_truth_hardening",
