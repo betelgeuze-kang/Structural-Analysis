@@ -20,6 +20,16 @@ EQUATION_SCALING_FIELDS = {
     "scaled_tangent_condition",
     "scaling_hash",
 }
+SOURCE_BOUND_SCALING_FIELDS = {
+    "schema_version",
+    "policy",
+    "source_identity_hash",
+    "source_node_coordinates_hash",
+    "source_reference_load_hash",
+    "source_free_dofs_hash",
+    "row_equilibration_hash",
+    "column_equilibration_hash",
+}
 
 
 def test_mgt_native_modal_buckling_solver_generates_ready_evidence(tmp_path: Path) -> None:
@@ -53,7 +63,8 @@ def test_mgt_native_modal_buckling_solver_generates_ready_evidence(tmp_path: Pat
     assert modal["fallback_used"] is False
     assert modal["regularization_used"] is False
     assert all(
-        set(mode["equation_scaling_6dof"]) == EQUATION_SCALING_FIELDS
+        EQUATION_SCALING_FIELDS <= set(mode["equation_scaling_6dof"])
+        and SOURCE_BOUND_SCALING_FIELDS <= set(mode["equation_scaling_6dof"])
         and mode["equation_scaling_6dof"]["scaled_residual_norm"] <= 1.0e-8
         for mode in modal["modes"]
     )
@@ -63,7 +74,8 @@ def test_mgt_native_modal_buckling_solver_generates_ready_evidence(tmp_path: Pat
     assert buckling["final_reassembled_residual_pass"] is True
     assert buckling["fallback_used"] is False
     assert buckling["regularization_used"] is False
-    assert set(buckling["equation_scaling_6dof"]) == EQUATION_SCALING_FIELDS
+    assert EQUATION_SCALING_FIELDS <= set(buckling["equation_scaling_6dof"])
+    assert SOURCE_BOUND_SCALING_FIELDS <= set(buckling["equation_scaling_6dof"])
     assert buckling["equation_scaling_6dof"]["scaled_residual_norm"] <= 1.0e-8
     comparison = payload["benchmark_contract"]
     assert comparison["equation_scaling_6dof"] is None

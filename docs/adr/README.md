@@ -30,6 +30,7 @@ evidence는 각각의 후속 PR gate를 통과하기 전까지 구현 완료로 
 5. [ADR-005: AI Proposal and Rollback Contract](005-ai-proposal-and-rollback-contract.md)
 6. [ADR-006: Complexity and Benchmark Contract](006-complexity-and-benchmark-contract.md)
 7. [ADR-007: V&V and Promotion Policy](007-vv-and-promotion-policy.md)
+8. [ADR-008: Repository Package Boundaries](008-repository-package-boundaries.md)
 
 ## 변경 규칙
 

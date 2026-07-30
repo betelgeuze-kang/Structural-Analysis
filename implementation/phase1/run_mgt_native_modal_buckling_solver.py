@@ -25,9 +25,16 @@ from solve_mgt_beam_mesh_3d_global import (
     _select_beam_submesh,
     _select_vertical_chain_elements,
 )
-from structural_analysis.solvers.equation_scaling import (
-    build_equation_scaling_6dof,
-    characteristic_length_from_coordinates,
+from structural_analysis.engine_v2.contracts._canonical import (
+    array_data_hash,
+    canonical_hash,
+)
+from structural_analysis.solvers.equation_scaling_6dof import (
+    create_equation_scaling_6dof,
+    exact_scaled_condition_number_1,
+    scale_linear_system_6dof,
+    scaled_increment_metrics_6dof,
+    scaled_residual_metrics_6dof,
 )
 
 
@@ -36,11 +43,72 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 PRODUCTIZATION = REPO_ROOT / "implementation/phase1/release_evidence/productization"
 DEFAULT_ROUNDTRIP = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
 DEFAULT_CROSSVAL = PRODUCTIZATION / "commercial_solver_cross_validation.json"
-_PLANAR_DOF_LABELS = ("UX", "UZ", "RY")
+_PLANAR_TO_SPATIAL_DOF = (0, 2, 4)
 
 
-def _free_dof_labels(free: list[int]) -> tuple[str, ...]:
-    return tuple(_PLANAR_DOF_LABELS[index % DOF_PER_NODE] for index in free)
+def _equation_scaling_evidence(
+    *,
+    analysis_kind: str,
+    node_coordinates_m: np.ndarray,
+    free: list[int],
+    reference_free: np.ndarray,
+    residual_free: np.ndarray,
+    increment_free: np.ndarray,
+    tangent_free: np.ndarray,
+) -> dict[str, Any]:
+    """Build source-bound scaling plus response metrics for one eigensystem."""
+
+    free_6dof = [
+        (dof // DOF_PER_NODE) * 6 + _PLANAR_TO_SPATIAL_DOF[dof % DOF_PER_NODE]
+        for dof in free
+    ]
+    reference_load = np.zeros(node_coordinates_m.shape[0] * 6, dtype=np.float64)
+    reference_load[np.asarray(free_6dof, dtype=int)] = np.asarray(
+        reference_free,
+        dtype=np.float64,
+    )
+    source_identity_hash = canonical_hash(
+        {
+            "analysis_kind": analysis_kind,
+            "node_coordinates_hash": array_data_hash(
+                np.asarray(node_coordinates_m, dtype="<f8")
+            ),
+            "reference_load_hash": array_data_hash(
+                np.asarray(reference_load, dtype="<f8")
+            ),
+            "tangent_hash": array_data_hash(
+                np.asarray(tangent_free, dtype="<f8")
+            ),
+        }
+    )
+    scaling = create_equation_scaling_6dof(
+        source_identity_hash=source_identity_hash,
+        node_coordinates_m=node_coordinates_m,
+        reference_equation_load=reference_load,
+        free_dofs=free_6dof,
+    )
+    residual = scaled_residual_metrics_6dof(residual_free, free_6dof, scaling)
+    increment = scaled_increment_metrics_6dof(increment_free, free_6dof, scaling)
+    scaled_tangent, _scaled_rhs, _column_scale = scale_linear_system_6dof(
+        tangent_free,
+        reference_free,
+        free_6dof,
+        scaling,
+    )
+    return {
+        **scaling.to_manifest(),
+        "reference_force": scaling.reference_force,
+        "characteristic_length": scaling.characteristic_length_m,
+        "translation_residual_norm": residual["translation"],
+        "rotation_residual_norm": residual["rotation"],
+        "scaled_residual_norm": residual["scaled"],
+        "translation_increment_norm": increment["translation"],
+        "rotation_increment_norm": increment["rotation"],
+        "scaled_increment_norm": increment["scaled"],
+        "scaled_tangent_condition": exact_scaled_condition_number_1(
+            scaled_tangent
+        ),
+    }
 
 
 def _remap_elements(
@@ -145,7 +213,7 @@ def _modal_solve(
     mass_diag: np.ndarray,
     free: list[int],
     mode_count: int,
-    characteristic_length: float,
+    node_coordinates_m: np.ndarray,
 ) -> dict[str, Any]:
     if not free:
         return {"status": "blocked", "blockers": ["no_free_dofs"], "modes": []}
@@ -165,17 +233,14 @@ def _modal_solve(
         vector_free = vector_free / norm
         elastic_force = k_ff @ vector_free
         inertia_force = omega_sq * m_ff * vector_free
-        equation_scaling = build_equation_scaling_6dof(
-            reference_force=max(
-                1.0,
-                float(np.linalg.norm(elastic_force, ord=np.inf)),
-                float(np.linalg.norm(inertia_force, ord=np.inf)),
-            ),
-            characteristic_length=characteristic_length,
-            residual=elastic_force - inertia_force,
-            increment=vector_free,
-            tangent=k_ff,
-            dof_labels=_free_dof_labels(free),
+        equation_scaling = _equation_scaling_evidence(
+            analysis_kind=f"modal_mode_{mode_index}",
+            node_coordinates_m=node_coordinates_m,
+            free=free,
+            reference_free=elastic_force,
+            residual_free=elastic_force - inertia_force,
+            increment_free=vector_free,
+            tangent_free=k_ff,
         )
         modes.append(
             {
@@ -186,7 +251,7 @@ def _modal_solve(
                 "free_dof_shape_head": [float(v) for v in vector_free[:12].tolist()],
                 "modal_mass_normalized": False,
                 "mode_shape_normalization": "max_abs_free_dof_equals_one",
-                "equation_scaling_6dof": equation_scaling.to_dict(),
+                "equation_scaling_6dof": equation_scaling,
             }
         )
     residual_gate_pass = bool(
@@ -222,7 +287,7 @@ def _buckling_solve(
     k_geometric_total: np.ndarray,
     free: list[int],
     element_euler_factors: list[float],
-    characteristic_length: float,
+    node_coordinates_m: np.ndarray,
 ) -> dict[str, Any]:
     if not free:
         return {"status": "blocked", "blockers": ["no_free_dofs"]}
@@ -268,21 +333,18 @@ def _buckling_solve(
         critical_vector = critical_vector / norm
         elastic_force = k_ff @ critical_vector
         geometric_force = critical * (kg_ff @ critical_vector)
-        equation_scaling = build_equation_scaling_6dof(
-            reference_force=max(
-                1.0,
-                float(np.linalg.norm(elastic_force, ord=np.inf)),
-                float(np.linalg.norm(geometric_force, ord=np.inf)),
-            ),
-            characteristic_length=characteristic_length,
-            residual=elastic_force - geometric_force,
-            increment=critical_vector,
-            tangent=k_ff,
-            dof_labels=_free_dof_labels(free),
+        equation_scaling = _equation_scaling_evidence(
+            analysis_kind="buckling_critical_mode",
+            node_coordinates_m=node_coordinates_m,
+            free=free,
+            reference_free=elastic_force,
+            residual_free=elastic_force - geometric_force,
+            increment_free=critical_vector,
+            tangent_free=k_ff,
         )
     residual_gate_pass = bool(
         equation_scaling is not None
-        and equation_scaling.scaled_residual_norm <= 1.0e-8
+        and float(equation_scaling["scaled_residual_norm"]) <= 1.0e-8
     )
     ready = bool(
         critical > 1.0
@@ -304,7 +366,7 @@ def _buckling_solve(
         "geometric_stiffness_positive_rank": int(np.count_nonzero(keep)) if eig_kg.size else 0,
         "euler_member_factor_min": float(min(element_euler_factors)) if element_euler_factors else None,
         "equation_scaling_6dof": (
-            equation_scaling.to_dict() if equation_scaling is not None else None
+            equation_scaling
         ),
         "residual_gate_pass": residual_gate_pass,
         "final_reassembled_residual_pass": residual_gate_pass,
@@ -440,13 +502,12 @@ def run_mgt_native_modal_buckling_solver(
         material_props=material_props,
         element_axial_forces=axial_forces,
     )
-    characteristic_length = characteristic_length_from_coordinates(node_xyz_sub)
     modal = _modal_solve(
         k_global=k_elastic,
         mass_diag=mass_diag,
         free=free,
         mode_count=mode_count,
-        characteristic_length=characteristic_length,
+        node_coordinates_m=node_xyz_sub,
     )
     buckling = _buckling_solve(
         k_elastic=k_elastic,
@@ -458,7 +519,7 @@ def run_mgt_native_modal_buckling_solver(
             section_props=section_props,
             material_props=material_props,
         ),
-        characteristic_length=characteristic_length,
+        node_coordinates_m=node_xyz_sub,
     )
     benchmark = _commercial_benchmark_contract(commercial_crossval_json)
     modal_ready = modal.get("status") == "ready" and int(modal.get("mode_count") or 0) >= min(3, int(mode_count))

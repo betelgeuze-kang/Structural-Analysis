@@ -200,7 +200,8 @@ class ConfinedConcreteMaterial:
                 "unsupported_constitutive_path",
                 (
                     "mander_uniaxial_monotonic_compression.v1 has no "
-                    f"unloading/reversal/tension law; trial compression "
+                    f"unloading/reversal/tension law; unsupported=unloading; "
+                    f"trial compression "
                     f"{trial_compression!r}, accepted maximum "
                     f"{accepted_maximum!r}"
                 ),
