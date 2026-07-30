@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:3bbf772d3e57250515094f2075dd1bb0743a8dacc3ff79ba7626051586be82ca",
+  "artifact_hash": "sha256:1b005172cd7939ebe2bd628e5e45b4607cbdae67f972ca0bdccd5a65076de751",
   "blockers_remaining": [
     "independent_operator_attestation_missing",
     "product_legal_license_approval_missing",
@@ -7,50 +7,96 @@
     "public_corotational_material_nonlinear_external_family_missing",
     "verification_hierarchy_operator_manifest_missing",
     "verification_level_2_not_achieved",
-    "release_readiness_not_established",
-    "external_runtime_current_source_rerun_missing"
+    "exact_cross_environment_buckling_semantic_hash_mismatch_within_tolerance",
+    "current_source_container_cross_environment_parity_missing",
+    "release_readiness_not_established"
   ],
-  "claim_boundary": "This receipt preserves an earlier same-operator, container-isolated actual OpenSees/CalculiX execution and binds current candidate source bytes through current-product-only replays against the checksum-bound stored external values. The current generation did not execute either external runtime, so same-operator container reproduction of the current source is not claimed and external_runtime_current_source_rerun_missing remains explicit. The recorded isolation and runtime inventory describe the earlier execution. This remains a narrow non-promoting technical candidate, not an independent operator attestation, material-nonlinear or cyclic family validation, legal approval, Verification Level 2 promotion, broad structural-family validation, commercial equivalence, design authority, or release readiness.",
+  "claim_boundary": "This receipt proves a same-operator, container-isolated reproduction of the narrow non-promoting OpenSees/CalculiX technical comparisons, including the public one-bay corotational portal's four-step elastic-state load path and the bounded planar rigid-offset, RZ-release, uniform-member-load path, plus a bounded OpenSees 3D elastic Timoshenko cantilever under combined transverse forces and torsion, and the six-member CalculiX spatial-truss comparison. The source mount was read-only, runtime networking had no default route, and every external asset matched its pinned SHA-256 before execution. The source bytes are checksum-bound over the recorded base commit; this is not an independent operator attestation, material-nonlinear or cyclic family validation, legal approval, Verification Level 2 promotion, broad structural-family validation, commercial equivalence, design authority, or release readiness.",
   "claims": {
     "actual_external_solver_execution": true,
     "commercial_equivalence": false,
-    "cross_environment_numerical_parity": true,
+    "cross_environment_numerical_parity": false,
     "current_candidate_source_bytes_checksum_bound": true,
     "design_authority": false,
     "external_runtime_redistribution_approval": false,
     "independent_operator_attestation": false,
     "product_legal_license_approval": false,
     "release_readiness": false,
-    "same_operator_container_isolated_reproduction": false,
+    "same_operator_container_isolated_reproduction": true,
     "verification_level_2": false
   },
   "cross_environment_parity": {
     "absolute_tolerance": 1e-12,
-    "exact_semantic_hash_parity": true,
+    "container_only_metric_keys": [],
+    "container_scalar_count": 161,
+    "exact_semantic_hash_parity": false,
+    "host_only_metric_keys": [
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/final_accumulated_plastic_strain/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/final_accumulated_plastic_strain/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/final_backstress_mpa/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/final_backstress_mpa/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/final_dissipated_energy_density_mj_per_m3/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/final_dissipated_energy_density_mj_per_m3/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/final_plastic_strain/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/final_plastic_strain/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_1_base_N1_UX_kN/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_1_base_N1_UX_kN/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_1_proportional_load_factor/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_1_proportional_load_factor/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_1_tip_N2_UX_m/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_1_tip_N2_UX_m/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_2_base_N1_UX_kN/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_2_base_N1_UX_kN/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_2_proportional_load_factor/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_2_proportional_load_factor/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_2_tip_N2_UX_m/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_2_tip_N2_UX_m/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_3_base_N1_UX_kN/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_3_base_N1_UX_kN/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_3_proportional_load_factor/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_3_proportional_load_factor/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_3_tip_N2_UX_m/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_3_tip_N2_UX_m/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_4_base_N1_UX_kN/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_4_base_N1_UX_kN/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_4_proportional_load_factor/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_4_proportional_load_factor/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_4_tip_N2_UX_m/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_4_tip_N2_UX_m/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_5_base_N1_UX_kN/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_5_base_N1_UX_kN/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_5_proportional_load_factor/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_5_proportional_load_factor/reference_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_5_tip_N2_UX_m/product_value",
+      "code_to_code/frame3d_direct_control_cyclic_axial_reversal/target_5_tip_N2_UX_m/reference_value"
+    ],
     "host_reference_receipts": {
       "code_to_code": {
-        "artifact_hash": "sha256:6ce78631795f4b0b7d941de33e6b8656b8a1de77c09ed71b76cb427a10099818",
-        "file_sha256": "sha256:fff697fc2e59495bea260a8c7c1fb8903475e31fb44d55d015b87d85e0c69ec0",
+        "artifact_hash": "sha256:25e4dfbaec19c87f225b31a9ceb12307fb62b495c5153c464d8b437fb37f34e9",
+        "file_sha256": "sha256:25f0d832fb206db721aad25da2b44b834d8713b945e08d4b962ede561a9b21f7",
         "path": "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json"
       },
       "modal_buckling": {
-        "artifact_hash": "sha256:41818765dd8135fb67204ea4351e4780c144615efb72a7ccd4e10faf4239ad3d",
-        "file_sha256": "sha256:d6d6d1a671a996b9e7c7bd3a898b360f4e428e88a2c9ac062c9d8ef2895c3007",
+        "artifact_hash": "sha256:3593574ff9b6c80d74ac7a8ec1a95fb4c06cf73621b7b3a4cb1077a0456af4dd",
+        "file_sha256": "sha256:f5a372de529b004c3f73aa740e67f2034c4643335bf6bf2b835a60dfd6efd4ea",
         "path": "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json"
       }
     },
-    "maximum_absolute_delta": 2.219557870830613e-12,
+    "host_scalar_count": 199,
+    "maximum_absolute_delta": 2.6121327323380683e-12,
     "maximum_relative_delta": 1.6209256159527285e-12,
+    "metric_set_match": false,
     "nonzero_delta_count": 3,
-    "numerical_contract_pass": true,
+    "numerical_contract_pass": false,
     "relative_tolerance": 1e-12,
-    "scalar_comparison_count": 73,
+    "scalar_comparison_count": 161,
     "semantic_hash_matches": {
       "buckling_model_hash": true,
-      "buckling_semantic_result_hash": true,
+      "buckling_semantic_result_hash": false,
       "modal_model_hash": true,
       "modal_semantic_result_hash": true
-    }
+    },
+    "source_set_match": false
   },
   "external_assets": [
     {
@@ -79,7 +125,7 @@
       "sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a"
     }
   ],
-  "generated_at": "2026-07-26T06:44:42.237138+00:00",
+  "generated_at": "2026-07-30T13:38:12.065647+00:00",
   "isolation": {
     "designated_output_mount_writable": true,
     "isolation_contract_pass": true,
@@ -88,7 +134,7 @@
   },
   "product_receipts": {
     "code_to_code": {
-      "artifact_hash": "sha256:cfde1a3948be607c3555cbdbd907ca0c50c2b1db764d7a1338185adc9802d13a",
+      "artifact_hash": "sha256:577f71771b2ecbe78cc4f1ce54ad0a3d4d4445bf752f54847ad319e811ed22cc",
       "cases": [
         {
           "case_id": "two_dof_shear_modal",
@@ -106,6 +152,36 @@
           "metric_count": 12
         },
         {
+          "case_id": "bounded_planar_member_feature_load_path",
+          "contract_pass": true,
+          "metric_count": 8
+        },
+        {
+          "case_id": "bounded_planar_prescribed_settlement_load_path",
+          "contract_pass": true,
+          "metric_count": 9
+        },
+        {
+          "case_id": "spatial_frame3d_cantilever_combined_load",
+          "contract_pass": true,
+          "metric_count": 10
+        },
+        {
+          "case_id": "frame3d_direct_control_axial_yield",
+          "contract_pass": true,
+          "metric_count": 8
+        },
+        {
+          "case_id": "frame3d_direct_control_torsion",
+          "contract_pass": true,
+          "metric_count": 3
+        },
+        {
+          "case_id": "frame3d_direct_control_bending_rotations",
+          "contract_pass": true,
+          "metric_count": 6
+        },
+        {
           "case_id": "axial_member_tip_load",
           "contract_pass": true,
           "metric_count": 2
@@ -116,14 +192,14 @@
           "metric_count": 12
         }
       ],
-      "file_sha256": "sha256:75b99e49863714b29ca1b2d167179725443553604dcec3a148f6578b127d8aa8",
-      "fresh_external_runtime_execution": false,
+      "file_sha256": "sha256:999c7aee42f2dddc11c52f826364fb5a59a74ee27100c99cee426e6cc14282d7",
+      "fresh_external_runtime_execution": true,
       "path": "artifacts/vv/opensees_calculix_clean_runner/external_code_to_code_receipt.json",
-      "source_set_hash": "sha256:c252505a7178b7cc82da89442a050e50d5008654dd5376e30678fa0768c90829",
+      "source_set_hash": "sha256:b4b00578df6a96dd5897a148be6d9d5eb569673e37b3cd02fcb8dd3315a76bbf",
       "technical_contract_pass": true
     },
     "modal_buckling": {
-      "artifact_hash": "sha256:ecc7de074f5225890ad86c229171fc08d33f4a818dc03fe06ed2afeeb020a641",
+      "artifact_hash": "sha256:9978c81db1de01fc763821b7d68956a1ed19dbcf53ad6bd838d725bbea25654c",
       "cases": [
         {
           "case_id": "whole_model_frame_consistent_mass_modal",
@@ -136,10 +212,10 @@
           "metric_count": 3
         }
       ],
-      "file_sha256": "sha256:2ecedae09e7cc57d37fc2987f29709e7dcdfe320138cee2ae1b1da38807dc7f6",
-      "fresh_external_runtime_execution": false,
+      "file_sha256": "sha256:38a62567352ae76b37becba4f6b726a7eb3f789480bcea4859b7ae7d0f12c177",
+      "fresh_external_runtime_execution": true,
       "path": "artifacts/vv/opensees_calculix_clean_runner/external_modal_buckling_receipt.json",
-      "source_set_hash": "sha256:306c56be561fcbb000b10455f05ee21ff2a3d96ee86d969109c544b94da5b1f2",
+      "source_set_hash": "sha256:ff95a79c658aff1ed85bd59a6547a884ae602881965de676cca057ef8fbe23e2",
       "technical_contract_pass": true
     }
   },
@@ -153,7 +229,7 @@
       "libopenmpi3": "4.1.4-3+b1",
       "libquadmath0": "12.2.0-14+deb12u1"
     },
-    "derived_image_id": "sha256:c767e13c09a8cb2eb4a12cc63ac43c2f117bb0fdf351803e526c818aa04c8ec8",
+    "derived_image_id": "sha256:846549de51ea7d3bff3fdeb98552d2fe4662af6fd77e1b3d6624a616f1687bee",
     "dockerfile_sha256": "sha256:4fdb72214bee7fbce13415e5c6a3d8602c176a6b5ea5f2b1d037c7b1b959f049",
     "machine": "x86_64",
     "python_executable_sha256": "sha256:22e747b1e8a04719d4af2094133a0479b33728d2e4d03ab01539064dc6f45cfb",
@@ -168,13 +244,13 @@
       "typing-extensions": "4.15.0"
     },
     "python_version": "3.11.15",
-    "runner_source_sha256": "sha256:9901a18b7a4dcdd19dd6879497e3eccd0dd6284f805efdbefa7e9fd52f40b56c",
-    "schema_sha256": "sha256:3316cf81944b7901a442c863dc174395ac7a236a94bb87645541a40f2109a0bb",
+    "runner_source_sha256": "sha256:abad90956f93a2157195eca199458fb31f7b44a001ee07dc93fda4b5ee1417de",
+    "schema_sha256": "sha256:db8da093ed9ee59fa7ecce6f2578c65184e9aafe14172216caee17cddadfd81d",
     "system": "Linux",
     "wrapper_sha256": "sha256:a62cf874e0089852dbd8eb9d27e1ee2f90cd11fbb44f3350fb814d02e9dcdb24"
   },
   "schema_version": "structural-analysis-external-vv-clean-runner-receipt.v1",
-  "source_commit_sha": "8f0bc26ab942134edb92eb9ed0c082e78a5aac86",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "container_isolated_external_vv_technical_candidate"

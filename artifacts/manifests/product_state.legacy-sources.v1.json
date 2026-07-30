@@ -1,0 +1,118 @@
+{
+  "schema_version": "product-state.legacy-sources.v1",
+  "snapshot_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "current_authority": false,
+  "records": [
+    {
+      "id": "workstation_delivery_readiness_legacy_pass",
+      "category": "workstation_readiness",
+      "repository_path": "implementation/phase1/workstation_delivery_readiness.json",
+      "snapshot": {
+        "storage_kind": "git_object",
+        "git_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+        "git_object_format": "sha1",
+        "git_blob_oid": "74b232e04ad139baa0443fa7f5761493e0e8bd61",
+        "content_sha256": "sha256:81b773de77ec0a31f3ddb23f5819b16717d54161e645a705c19ad9455c7d71f6"
+      },
+      "artifact": {
+        "schema_version": "workstation-delivery-readiness.v1",
+        "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+        "status": "ready",
+        "contract_pass": true,
+        "generated_at": "2026-07-02T22:01:35.184840+00:00"
+      },
+      "classification": "historical_only",
+      "current_product_authority": false,
+      "reason": "Legacy workstation PASS predates the current source and cannot establish current readiness."
+    },
+    {
+      "id": "product_readiness_snapshot_legacy",
+      "category": "product_readiness",
+      "repository_path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+      "snapshot": {
+        "storage_kind": "git_object",
+        "git_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+        "git_object_format": "sha1",
+        "git_blob_oid": "629e6c14a4653b0c8e39f0b91142db7288e12abc",
+        "content_sha256": "sha256:30cfdf80b864611be57bc94418a9ee92f9f0b8837beb02ad44882dea0e58cef5"
+      },
+      "artifact": {
+        "schema_version": "product-readiness-snapshot.v1",
+        "source_commit_sha": "4a99235ccde98e0b36dbb6d7913f1fc62f8a4ff7",
+        "status": "stale_or_inconsistent",
+        "contract_pass": null,
+        "generated_at": "2026-07-23T06:07:08.066021+00:00"
+      },
+      "classification": "historical_only",
+      "current_product_authority": false,
+      "reason": "The snapshot is retained for provenance but is not bound to current source."
+    },
+    {
+      "id": "g1_f2g_f2h_cause_narrowing_legacy",
+      "category": "g1_readiness",
+      "repository_path": "implementation/phase1/release_evidence/productization/g1_f2g_f2h_cause_narrowing_status.json",
+      "snapshot": {
+        "storage_kind": "git_object",
+        "git_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+        "git_object_format": "sha1",
+        "git_blob_oid": "4a9cfbae05a70d3f712639f64b3f28321b64c67c",
+        "content_sha256": "sha256:75b0be3db833ba6ff32fe4b5ddb393dd5d6d98e1cf97841acae36066be656fb4"
+      },
+      "artifact": {
+        "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
+        "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+        "status": "ready",
+        "contract_pass": true,
+        "generated_at": "2026-07-02T22:02:35.426592+00:00"
+      },
+      "classification": "historical_only",
+      "current_product_authority": false,
+      "reason": "Cause narrowing was a bounded diagnostic and never established full G1 readiness."
+    },
+    {
+      "id": "g1_full_load_hip_newton_lane_legacy",
+      "category": "g1_readiness",
+      "repository_path": "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+      "snapshot": {
+        "storage_kind": "git_object",
+        "git_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+        "git_object_format": "sha1",
+        "git_blob_oid": "33a18966a5125e65b11eb2fc4a3f6c2d69f9bc20",
+        "content_sha256": "sha256:c1b31c863b692a6c70b5b4ae2c88a44b2feb6e135c551c60b272584fde2dbe64"
+      },
+      "artifact": {
+        "schema_version": "g1-full-load-hip-newton-lane.v1",
+        "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+        "status": "blocked",
+        "contract_pass": false,
+        "generated_at": "2026-07-02T22:02:30.166358+00:00"
+      },
+      "classification": "historical_only",
+      "current_product_authority": false,
+      "reason": "The historical lane remained blocked and cannot carry current G1 authority."
+    },
+    {
+      "id": "g1_direct_residual_terminal_gate_legacy",
+      "category": "g1_readiness",
+      "repository_path": "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
+      "snapshot": {
+        "storage_kind": "git_object",
+        "git_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+        "git_object_format": "sha1",
+        "git_blob_oid": "6a1a21383ad0015b973def1b6966d48db4e65ef6",
+        "content_sha256": "sha256:4e5f08fa9c5f6f82b30083d8127c4b75523a503b4a614f3c8d5b9860215c480d"
+      },
+      "artifact": {
+        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+        "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+        "status": "ready",
+        "contract_pass": true,
+        "generated_at": "2026-07-02T22:06:57.597451+00:00"
+      },
+      "classification": "historical_only",
+      "current_product_authority": false,
+      "reason": "A bounded terminal checkpoint PASS does not establish current full-load or full-mesh G1 readiness."
+    }
+  ],
+  "claim_boundary": "These immutable Git-object identities preserve legacy evidence provenance only. A historical ready or pass value cannot establish current product, solver, G1, workstation, release, or numerical authority."
+}

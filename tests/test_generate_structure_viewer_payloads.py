@@ -1,11 +1,22 @@
+from pathlib import Path
+
+import pytest
+
 from implementation.phase1.generate_structure_viewer_payloads import (
     build_index_preset_payloads,
     build_payloads,
     generate_panel_zone_singlefile_html,
 )
 
+RELEASE_VIEWER = Path(
+    "implementation/phase1/release/visualization/"
+    "structural_optimization_viewer.json"
+)
+
 
 def test_build_payloads_exposes_expected_viewer_keys() -> None:
+    if not RELEASE_VIEWER.exists():
+        pytest.skip("non-committed release viewer payload is unavailable")
     payloads = build_payloads()
 
     assert set(payloads) == {"index", "charts", "optimization_history", "panel_zone"}
@@ -45,6 +56,8 @@ def test_build_index_preset_payloads_exposes_midas33_raw_model() -> None:
 
 
 def test_generate_panel_zone_singlefile_html_inlines_payload_and_vendor_modules() -> None:
+    if not RELEASE_VIEWER.exists():
+        pytest.skip("non-committed release viewer payload is unavailable")
     payloads = build_payloads()
 
     html = generate_panel_zone_singlefile_html(payloads["panel_zone"])

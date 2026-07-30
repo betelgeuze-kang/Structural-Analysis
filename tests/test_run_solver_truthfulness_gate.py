@@ -71,6 +71,7 @@ def test_solver_truthfulness_gate_passes_with_explicit_runtime_paths(tmp_path: P
     physics_branching = tmp_path / "physics_branching_report.json"
     track_dataset = tmp_path / "track_dynamics_dataset_report.json"
     tunnel_dataset = tmp_path / "tunnel_dynamics_dataset_report.json"
+    solver_hip = tmp_path / "solver_hip_e2e_contract_report.json"
     out = tmp_path / "solver_truthfulness_gate_report.json"
 
     truthful_summary = "Solver truthfulness: PASS | reports=4/4 | explicit=4/4 | surrogate_free=4/4 | cpu_fallback=0/4"
@@ -110,6 +111,30 @@ def test_solver_truthfulness_gate_passes_with_explicit_runtime_paths(tmp_path: P
             runtime_backend="numpy",
         ),
     )
+    _write_json(
+        solver_hip,
+        {
+            "contract_pass": True,
+            "checks": {
+                "strict_probe_pass": True,
+                "all_main_loops_gpu_pass": True,
+                "all_production_kernel_pass": True,
+                "no_surrogate_runtime_markers_pass": True,
+                "no_cpu_backend_pass": True,
+                "no_cpu_required_pass": True,
+                "no_cpu_fallback_pass": True,
+            },
+            "summary": {
+                "solver_count": 2,
+                "production_kernel_solver_count": 2,
+                "surrogate_runtime_free_solver_count": 2,
+                "force_jacobian_consistent_solver_count": 2,
+                "hazard_family_count": 2,
+                "topology_family_count": 2,
+                "load_path_family_count": 2,
+            },
+        },
+    )
 
     proc = subprocess.run(
         [
@@ -123,6 +148,8 @@ def test_solver_truthfulness_gate_passes_with_explicit_runtime_paths(tmp_path: P
             str(track_dataset),
             "--tunnel-dynamics-dataset-report",
             str(tunnel_dataset),
+            "--solver-hip-report",
+            str(solver_hip),
             "--out",
             str(out),
         ],

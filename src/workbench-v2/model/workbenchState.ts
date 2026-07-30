@@ -4,7 +4,7 @@
 // Run status now derives from analysis.converged, and convergence that is not
 // present is reported as UNAVAILABLE (convergenceAvailable=false), never guessed.
 
-import type { WorkbenchCaseV2 } from './caseSchema'
+import { isAvailableValue, type WorkbenchCaseV2 } from './caseSchema'
 
 export type DataMode = 'demo' | 'live' | 'stale' | 'unavailable'
 
@@ -31,7 +31,8 @@ export const initialWorkbenchState: WorkbenchState = {
 /** Derive run status from analysis. Never infers convergence from residual length. */
 export function deriveRunStatus(caseV2: WorkbenchCaseV2, convergenceAvailable: boolean): RunStatus {
   if (!convergenceAvailable || !caseV2.analysis) return 'idle'
-  if (caseV2.analysis.converged) return 'converged'
+  if (!isAvailableValue(caseV2.analysis.converged)) return 'idle'
+  if (caseV2.analysis.converged.value) return 'converged'
   return caseV2.analysis.status ?? 'failed'
 }
 

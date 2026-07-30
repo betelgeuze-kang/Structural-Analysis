@@ -118,7 +118,18 @@ def _collect_source_receipt_paths(value: Any, *, field_path: str = "") -> list[d
         for key, child in value.items():
             child_path = f"{field_path}.{key}" if field_path else str(key)
             if key == "source_receipts" or str(key).endswith("_source_receipts"):
-                rows.extend(_source_receipt_entries(child, field_path=child_path))
+                evidence_status = (
+                    "unavailable"
+                    if str(key).endswith("unavailable_source_receipts")
+                    else "available"
+                )
+                rows.extend(
+                    _source_receipt_entries(
+                        child,
+                        field_path=child_path,
+                        evidence_status=evidence_status,
+                    )
+                )
             rows.extend(_collect_source_receipt_paths(child, field_path=child_path))
     elif isinstance(value, list):
         for index, child in enumerate(value):
@@ -131,10 +142,17 @@ def _collect_source_receipt_paths(value: Any, *, field_path: str = "") -> list[d
     return rows
 
 
-def _source_receipt_entries(value: Any, *, field_path: str) -> list[dict[str, str]]:
+def _source_receipt_entries(
+    value: Any, *, field_path: str, evidence_status: str
+) -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
     if isinstance(value, str):
-        return [{"field_path": field_path, "receipt_key": "", "path": value}]
+        return [{
+            "field_path": field_path,
+            "receipt_key": "",
+            "path": value,
+            "evidence_status": evidence_status,
+        }]
     if isinstance(value, list):
         for index, child in enumerate(value):
             if isinstance(child, str):
@@ -143,6 +161,7 @@ def _source_receipt_entries(value: Any, *, field_path: str) -> list[dict[str, st
                         "field_path": field_path,
                         "receipt_key": str(index),
                         "path": child,
+                        "evidence_status": evidence_status,
                     }
                 )
         return rows
@@ -154,6 +173,7 @@ def _source_receipt_entries(value: Any, *, field_path: str) -> list[dict[str, st
                         "field_path": field_path,
                         "receipt_key": str(key),
                         "path": child,
+                        "evidence_status": evidence_status,
                     }
                 )
             elif isinstance(child, list):
@@ -164,6 +184,7 @@ def _source_receipt_entries(value: Any, *, field_path: str) -> list[dict[str, st
                                 "field_path": field_path,
                                 "receipt_key": f"{key}[{index}]",
                                 "path": item,
+                                "evidence_status": evidence_status,
                             }
                         )
     return rows
@@ -174,13 +195,30 @@ def _source_receipt_path_summary(
 ) -> dict[str, Any]:
     entries = _collect_source_receipt_paths(_as_dict(row.get("evidence")))
     missing = []
+    unavailable = []
+    unavailable_but_present = []
     for entry in entries:
         receipt_path = Path(entry["path"])
         resolved = receipt_path if receipt_path.is_absolute() else repo_root / receipt_path
-        if not resolved.exists():
+        exists = resolved.exists()
+        if entry["evidence_status"] == "unavailable":
+            if exists:
+                unavailable_but_present.append(entry)
+            else:
+                unavailable.append(entry)
+        elif not exists:
             missing.append(entry)
     return {
         "source_receipt_path_count": len(entries),
+        "source_receipt_available_path_count": sum(
+            entry["evidence_status"] == "available" for entry in entries
+        ),
+        "source_receipt_unavailable_path_count": len(unavailable),
+        "source_receipt_unavailable_paths": unavailable,
+        "source_receipt_unavailable_but_present_path_count": len(
+            unavailable_but_present
+        ),
+        "source_receipt_unavailable_but_present_paths": unavailable_but_present,
         "source_receipt_missing_path_count": len(missing),
         "source_receipt_missing_paths": missing,
     }
@@ -220,6 +258,11 @@ def build_gap_ledger_evidence_audit(
         for row_id, summary in source_receipt_path_summaries.items()
         if int(summary["source_receipt_path_count"]) == 0
     ]
+    source_receipt_unavailable_but_present_rows = [
+        row_id
+        for row_id, summary in source_receipt_path_summaries.items()
+        if int(summary["source_receipt_unavailable_but_present_path_count"]) > 0
+    ]
 
     blockers = [
         *[f"closed_row_missing_evidence:{row_id}" for row_id in closed_missing_evidence],
@@ -233,6 +276,10 @@ def build_gap_ledger_evidence_audit(
         *[f"nonclosed_row_missing_evidence:{row_id}" for row_id in nonclosed_missing_evidence],
         *[f"source_receipts_absent:{row_id}" for row_id in source_receipt_absent_rows],
         *[f"source_receipt_path_missing:{row_id}" for row_id in source_receipt_missing_rows],
+        *[
+            f"unavailable_source_receipt_present:{row_id}"
+            for row_id in source_receipt_unavailable_but_present_rows
+        ],
     ]
     contract_pass = not blockers
     total_source_receipt_path_count = sum(
@@ -241,6 +288,10 @@ def build_gap_ledger_evidence_audit(
     )
     total_source_receipt_missing_path_count = sum(
         int(summary["source_receipt_missing_path_count"])
+        for summary in source_receipt_path_summaries.values()
+    )
+    total_source_receipt_unavailable_path_count = sum(
+        int(summary["source_receipt_unavailable_path_count"])
         for summary in source_receipt_path_summaries.values()
     )
 
@@ -289,7 +340,22 @@ def build_gap_ledger_evidence_audit(
         "source_receipt_path_coverage": {
             "source_receipt_path_count": total_source_receipt_path_count,
             "source_receipt_existing_path_count": (
-                total_source_receipt_path_count - total_source_receipt_missing_path_count
+                total_source_receipt_path_count
+                - total_source_receipt_missing_path_count
+                - total_source_receipt_unavailable_path_count
+            ),
+            "source_receipt_unavailable_path_count": total_source_receipt_unavailable_path_count,
+            "source_receipt_unavailable_row_ids": [
+                row_id
+                for row_id, summary in source_receipt_path_summaries.items()
+                if int(summary["source_receipt_unavailable_path_count"]) > 0
+            ],
+            "source_receipt_unavailable_but_present_path_count": sum(
+                int(summary["source_receipt_unavailable_but_present_path_count"])
+                for summary in source_receipt_path_summaries.values()
+            ),
+            "source_receipt_unavailable_but_present_row_ids": (
+                source_receipt_unavailable_but_present_rows
             ),
             "source_receipt_absent_row_count": len(source_receipt_absent_rows),
             "source_receipt_absent_row_ids": source_receipt_absent_rows,
@@ -298,8 +364,10 @@ def build_gap_ledger_evidence_audit(
             "claim_boundary": (
                 "This checks only explicit source_receipts and *_source_receipts "
                 "paths that the ledger status advertises as evidence or guard "
-                "inputs. It does not require terminal closure-evidence paths that "
-                "are intentionally absent for partial or external-blocked rows."
+                "inputs. Paths declared through unavailable_source_receipts remain "
+                "visible without being treated as available evidence. Available "
+                "paths that are missing and unavailable paths that exist are "
+                "contract violations."
             ),
         },
         "row_outcomes": [

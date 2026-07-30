@@ -10,7 +10,10 @@ from structural_analysis.api.nonlinear_frame import (
     NonlinearFrameConfig,
     NonlinearFrameProfile,
     advance_nonlinear_frame_checkpoint,
+    advance_nonlinear_frame_model_ir_checkpoint,
     analyze_nonlinear_frame,
+    analyze_nonlinear_frame_model_ir,
+    nonlinear_frame_model_ir_resume_contract_hash,
     nonlinear_frame_resume_contract_hash,
     validate_nonlinear_frame_result,
 )
@@ -22,6 +25,7 @@ from structural_analysis.execution.job_service import (
     build_job_completion_evidence,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+from structural_analysis.model_ir import MODEL_IR_V2_SCHEMA_VERSION, parse_model_ir_v2
 
 
 CHECKPOINT_MEDIA_TYPE = "application/vnd.structural-analysis.checkpoint+json"
@@ -70,11 +74,17 @@ def execute_nonlinear_frame_claim(
     if request_hash != claim.job.request.content_hash:
         _fail("worker_request_integrity_failed", "Request bytes changed after claim.")
     request = _request_object(claim.request_bytes)
-    model_bytes = _canonical_json_bytes(request["model"])
-    model = load_neutral_json_bytes(
-        model_bytes,
-        source_path=f"job://{claim.job.job_id}/canonical-model.json",
-    )
+    model_payload = request["model"]
+    is_model_ir = model_payload.get("schema_version") == MODEL_IR_V2_SCHEMA_VERSION
+    if is_model_ir:
+        model_ir = parse_model_ir_v2(model_payload)
+        model = None
+    else:
+        model_ir = None
+        model = load_neutral_json_bytes(
+            _canonical_json_bytes(model_payload),
+            source_path=f"job://{claim.job.job_id}/canonical-model.json",
+        )
     config = _config(request["config"])
     expected_total = config.load_steps
     if claim.job.progress_total != expected_total:
@@ -87,7 +97,13 @@ def execute_nonlinear_frame_claim(
             "worker_checkpoint_reference_mismatch",
             "Checkpoint bytes and the persisted reference disagree.",
         )
-    expected_resume_hash = nonlinear_frame_resume_contract_hash(model, config)
+    if model_ir is not None:
+        expected_resume_hash = nonlinear_frame_model_ir_resume_contract_hash(
+            model_ir, config
+        )
+    else:
+        assert model is not None
+        expected_resume_hash = nonlinear_frame_resume_contract_hash(model, config)
     if (
         claim.job.resume_contract_hash is not None
         and claim.job.resume_contract_hash != expected_resume_hash
@@ -104,12 +120,21 @@ def execute_nonlinear_frame_claim(
         )
 
     if checkpoint_step_budget is not None and checkpoint_step_budget < remaining:
-        advance = advance_nonlinear_frame_checkpoint(
-            model,
-            config,
-            maximum_new_steps=checkpoint_step_budget,
-            restart_checkpoint_chain=claim.checkpoint_bytes,
-        )
+        if model_ir is not None:
+            advance = advance_nonlinear_frame_model_ir_checkpoint(
+                model_ir,
+                config,
+                maximum_new_steps=checkpoint_step_budget,
+                restart_checkpoint_chain=claim.checkpoint_bytes,
+            )
+        else:
+            assert model is not None
+            advance = advance_nonlinear_frame_checkpoint(
+                model,
+                config,
+                maximum_new_steps=checkpoint_step_budget,
+                restart_checkpoint_chain=claim.checkpoint_bytes,
+            )
         expected_completed = claim.job.progress_completed + checkpoint_step_budget
         if (
             advance.completed_steps != expected_completed
@@ -132,11 +157,19 @@ def execute_nonlinear_frame_claim(
             resume_contract_hash=advance.resume_contract_hash,
         )
 
-    result = analyze_nonlinear_frame(
-        model,
-        config,
-        restart_checkpoint_chain=claim.checkpoint_bytes,
-    )
+    if model_ir is not None:
+        result = analyze_nonlinear_frame_model_ir(
+            model_ir,
+            config,
+            restart_checkpoint_chain=claim.checkpoint_bytes,
+        )
+    else:
+        assert model is not None
+        result = analyze_nonlinear_frame(
+            model,
+            config,
+            restart_checkpoint_chain=claim.checkpoint_bytes,
+        )
     report = validate_nonlinear_frame_result(result)
     if not report.contract_pass:
         service.fail_job(

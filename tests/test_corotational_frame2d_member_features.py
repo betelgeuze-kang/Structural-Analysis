@@ -216,3 +216,7 @@ def test_feature_load_path_sparse_parity_checkpoint_and_exact_recovery() -> None
     assert engineering.metrics["member_feature_scaled_linf"] == 0.0
     assert engineering.metrics["external_scatter_scaled_linf"] == 0.0
     assert engineering.metrics["release_equilibrium_scaled_linf"] < 1.0e-12
+    assert engineering.authority_axes["member_features"] == "exact_bounded_candidate"
+    assert "member_end_releases_not_supported" not in engineering.limitations
+    assert "rigid_offsets_not_supported" not in engineering.limitations
+    assert "distributed_member_loads_not_supported" not in engineering.limitations

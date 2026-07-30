@@ -25,9 +25,9 @@ def test_template_evidence_safety_report_accepts_current_templates() -> None:
 
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
-    assert payload["summary"]["template_count"] == 7
-    assert payload["summary"]["validator_probe_count"] == 7
-    assert payload["summary"]["validator_probe_pass_count"] == 7
+    assert payload["summary"]["template_count"] == 9
+    assert payload["summary"]["validator_probe_count"] == 9
+    assert payload["summary"]["validator_probe_pass_count"] == 9
     assert payload["blockers"] == []
     assert all(row["template_only"] is True for row in payload["template_rows"])
     assert all(row["pass_signal_paths"] == [] for row in payload["template_rows"])
@@ -45,6 +45,17 @@ def test_template_evidence_safety_report_accepts_current_templates() -> None:
     )
     assert any(
         row["state"] == "template_rejected_as_fresh_validation_evidence"
+        for row in payload["validator_probes"]
+        if "state" in row
+    )
+    assert any(
+        row["state"]
+        == "template_rejected_as_external_vv_operator_attestation"
+        for row in payload["validator_probes"]
+        if "state" in row
+    )
+    assert any(
+        row["state"] == "template_rejected_as_external_vv_level2_promotion"
         for row in payload["validator_probes"]
         if "state" in row
     )

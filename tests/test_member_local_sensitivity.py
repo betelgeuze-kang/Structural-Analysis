@@ -1,13 +1,26 @@
 from pathlib import Path
 import subprocess
+
 import numpy as np
+import pytest
 
 DATASET = Path('implementation/phase1/release/design_optimization/design_optimization_dataset.npz')
+CODE_CHECK = Path(
+    "implementation/phase1/release/kds_compliance/code_check_report.json"
+)
+PBD_REVIEW = Path(
+    "implementation/phase1/release/pbd_review/pbd_review_package_report.json"
+)
 
 
 def _ensure_dataset():
     if DATASET.exists():
         return
+    if not CODE_CHECK.exists() or not PBD_REVIEW.exists():
+        pytest.skip(
+            "legacy member-local integration requires the non-committed "
+            "code-check and PBD-review evidence inputs"
+        )
     subprocess.run(['python3', 'implementation/phase1/generate_design_optimization_dataset.py'], check=True)
 
 

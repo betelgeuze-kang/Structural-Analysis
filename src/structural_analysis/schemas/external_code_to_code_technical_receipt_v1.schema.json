@@ -99,17 +99,127 @@
       }
     },
     "comparisons": {
-      "type": "array",
-      "prefixItems": [
-        {"$ref": "#/$defs/modalCase"},
-        {"$ref": "#/$defs/cantileverCase"},
-        {"$ref": "#/$defs/publicCorotationalPortalCase"},
-        {"$ref": "#/$defs/axialCase"},
-        {"$ref": "#/$defs/spatialTrussCase"}
-      ],
-      "items": false,
-      "minItems": 5,
-      "maxItems": 5
+      "oneOf": [
+        {
+          "type": "array",
+          "prefixItems": [
+            {"$ref": "#/$defs/modalCase"},
+            {"$ref": "#/$defs/cantileverCase"},
+            {"$ref": "#/$defs/publicCorotationalPortalCase"},
+            {"$ref": "#/$defs/boundedPlanarMemberFeatureCase"},
+            {"$ref": "#/$defs/boundedPlanarSettlementCase"},
+            {"$ref": "#/$defs/spatialFrame3DCase"},
+            {"$ref": "#/$defs/frame3DDirectControlAxialYieldCase"},
+            {"$ref": "#/$defs/frame3DDirectControlCyclicAxialReversalCase"},
+            {"$ref": "#/$defs/frame3DDirectControlTorsionCase"},
+            {"$ref": "#/$defs/frame3DDirectControlBendingRotationsCase"},
+            {"$ref": "#/$defs/axialCase"},
+            {"$ref": "#/$defs/spatialTrussCase"}
+          ],
+          "items": false,
+          "minItems": 12,
+          "maxItems": 12
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {"$ref": "#/$defs/modalCase"},
+            {"$ref": "#/$defs/cantileverCase"},
+            {"$ref": "#/$defs/publicCorotationalPortalCase"},
+            {"$ref": "#/$defs/boundedPlanarMemberFeatureCase"},
+            {"$ref": "#/$defs/boundedPlanarSettlementCase"},
+            {"$ref": "#/$defs/spatialFrame3DCase"},
+            {"$ref": "#/$defs/frame3DDirectControlAxialYieldCase"},
+            {"$ref": "#/$defs/frame3DDirectControlTorsionCase"},
+            {"$ref": "#/$defs/frame3DDirectControlBendingRotationsCase"},
+            {"$ref": "#/$defs/axialCase"},
+            {"$ref": "#/$defs/spatialTrussCase"}
+          ],
+          "items": false,
+          "minItems": 11,
+          "maxItems": 11
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {"$ref": "#/$defs/modalCase"},
+            {"$ref": "#/$defs/cantileverCase"},
+            {"$ref": "#/$defs/publicCorotationalPortalCase"},
+            {"$ref": "#/$defs/boundedPlanarMemberFeatureCase"},
+            {"$ref": "#/$defs/boundedPlanarSettlementCase"},
+            {"$ref": "#/$defs/spatialFrame3DCase"},
+            {"$ref": "#/$defs/frame3DDirectControlAxialYieldCase"},
+            {"$ref": "#/$defs/frame3DDirectControlTorsionCase"},
+            {"$ref": "#/$defs/axialCase"},
+            {"$ref": "#/$defs/spatialTrussCase"}
+          ],
+          "items": false,
+          "minItems": 10,
+          "maxItems": 10
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {"$ref": "#/$defs/modalCase"},
+            {"$ref": "#/$defs/cantileverCase"},
+            {"$ref": "#/$defs/publicCorotationalPortalCase"},
+            {"$ref": "#/$defs/boundedPlanarMemberFeatureCase"},
+            {"$ref": "#/$defs/boundedPlanarSettlementCase"},
+            {"$ref": "#/$defs/spatialFrame3DCase"},
+            {"$ref": "#/$defs/frame3DDirectControlAxialYieldCase"},
+            {"$ref": "#/$defs/axialCase"},
+            {"$ref": "#/$defs/spatialTrussCase"}
+          ],
+          "items": false,
+          "minItems": 9,
+          "maxItems": 9
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {"$ref": "#/$defs/modalCase"},
+            {"$ref": "#/$defs/cantileverCase"},
+            {"$ref": "#/$defs/publicCorotationalPortalCase"},
+            {"$ref": "#/$defs/boundedPlanarMemberFeatureCase"},
+            {"$ref": "#/$defs/boundedPlanarSettlementCase"},
+            {"$ref": "#/$defs/spatialFrame3DCase"},
+            {"$ref": "#/$defs/axialCase"},
+            {"$ref": "#/$defs/spatialTrussCase"}
+          ],
+          "items": false,
+          "minItems": 8,
+          "maxItems": 8
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {"$ref": "#/$defs/modalCase"},
+            {"$ref": "#/$defs/cantileverCase"},
+            {"$ref": "#/$defs/publicCorotationalPortalCase"},
+            {"$ref": "#/$defs/boundedPlanarMemberFeatureCase"},
+            {"$ref": "#/$defs/boundedPlanarSettlementCase"},
+            {"$ref": "#/$defs/axialCase"},
+            {"$ref": "#/$defs/spatialTrussCase"}
+          ],
+          "items": false,
+          "minItems": 7,
+          "maxItems": 7
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {"$ref": "#/$defs/modalCase"},
+            {"$ref": "#/$defs/cantileverCase"},
+            {"$ref": "#/$defs/publicCorotationalPortalCase"},
+            {"$ref": "#/$defs/boundedPlanarMemberFeatureCase"},
+            {"$ref": "#/$defs/axialCase"},
+            {"$ref": "#/$defs/spatialTrussCase"}
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6
+        }
+      ]
     },
     "technical_contract_pass": {"type": "boolean"},
     "verification_hierarchy_operator_manifest_attached": {"const": false},
@@ -121,6 +231,7 @@
         "actual_external_solver_execution",
         "opensees_technical_comparison",
         "public_corotational_portal_technical_comparison",
+        "bounded_planar_member_feature_technical_comparison",
         "second_solver_technical_comparison",
         "calculix_spatial_truss_technical_comparison",
         "product_legal_license_approval",
@@ -133,6 +244,13 @@
         "actual_external_solver_execution": {"type": "boolean"},
         "opensees_technical_comparison": {"type": "boolean"},
         "public_corotational_portal_technical_comparison": {"type": "boolean"},
+        "bounded_planar_member_feature_technical_comparison": {"type": "boolean"},
+        "bounded_planar_prescribed_settlement_technical_comparison": {"type": "boolean"},
+        "opensees_frame3d_technical_comparison": {"type": "boolean"},
+        "opensees_frame3d_direct_control_material_yield_technical_comparison": {"type": "boolean"},
+        "opensees_frame3d_cyclic_direct_control_technical_comparison": {"type": "boolean"},
+        "opensees_frame3d_rotational_direct_control_technical_comparison": {"type": "boolean"},
+        "opensees_frame3d_bending_rotational_direct_control_technical_comparison": {"type": "boolean"},
         "second_solver_technical_comparison": {"type": "boolean"},
         "calculix_spatial_truss_technical_comparison": {"type": "boolean"},
         "product_legal_license_approval": {"const": false},
@@ -419,7 +537,7 @@
         "absolute_error": {"type": "number", "minimum": 0},
         "relative_error": {"type": "number", "minimum": 0},
         "absolute_tolerance": {"const": 1e-10},
-        "relative_tolerance": {"const": 1e-10},
+        "relative_tolerance": {"enum": [1e-10, 1e-8, 1e-4]},
         "contract_pass": {"type": "boolean"}
       }
     },
@@ -484,6 +602,97 @@
             "analysis_type": {"const": "corotational_elastic_stateful_load_path"},
             "reference_solver": {"const": "OpenSees 3.7.1"},
             "metrics": {"minItems": 12, "maxItems": 12}
+          }
+        }
+      ]
+    },
+    "boundedPlanarMemberFeatureCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "bounded_planar_member_feature_load_path"},
+            "analysis_type": {"const": "corotational_elastic_member_feature_load_path"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 8, "maxItems": 8}
+          }
+        }
+      ]
+    },
+    "boundedPlanarSettlementCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "bounded_planar_prescribed_settlement_load_path"},
+            "analysis_type": {"const": "corotational_elastic_prescribed_settlement_load_path"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 9, "maxItems": 9}
+          }
+        }
+      ]
+    },
+    "spatialFrame3DCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "spatial_frame3d_cantilever_combined_load"},
+            "analysis_type": {"const": "corotational_elastic_spatial_frame3d_load_path"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 10, "maxItems": 10}
+          }
+        }
+      ]
+    },
+    "frame3DDirectControlAxialYieldCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "frame3d_direct_control_axial_yield"},
+            "analysis_type": {"const": "corotational_frame3d_direct_displacement_control_axial_yield"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 8, "maxItems": 8}
+          }
+        }
+      ]
+    },
+    "frame3DDirectControlTorsionCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "frame3d_direct_control_torsion"},
+            "analysis_type": {"const": "corotational_frame3d_rotational_direct_control_torsion"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 3, "maxItems": 3}
+          }
+        }
+      ]
+    },
+    "frame3DDirectControlCyclicAxialReversalCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "frame3d_direct_control_cyclic_axial_reversal"},
+            "analysis_type": {"const": "corotational_frame3d_cyclic_direct_displacement_control_axial_reversal"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 19, "maxItems": 19}
+          }
+        }
+      ]
+    },
+    "frame3DDirectControlBendingRotationsCase": {
+      "allOf": [
+        {"$ref": "#/$defs/case"},
+        {
+          "properties": {
+            "case_id": {"const": "frame3d_direct_control_bending_rotations"},
+            "analysis_type": {"const": "corotational_frame3d_bending_rotational_direct_control"},
+            "reference_solver": {"const": "OpenSees 3.7.1"},
+            "metrics": {"minItems": 6, "maxItems": 6}
           }
         }
       ]

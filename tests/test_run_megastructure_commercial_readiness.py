@@ -6,6 +6,8 @@ import sys
 import hashlib
 from pathlib import Path
 
+import pytest
+
 
 SCRIPT = Path("implementation/phase1/run_megastructure_commercial_readiness.py")
 
@@ -87,12 +89,18 @@ def test_commercial_readiness_enforces_measured_benchmark_breadth(tmp_path: Path
         },
     )
 
-    for stem in ("rwth", "atwood", "commercial"):
+    case_paths_by_stem = {
+        "rwth": cases_a,
+        "atwood": cases_b,
+        "commercial": cases_c,
+    }
+    for stem, cases_path in case_paths_by_stem.items():
         model_dir = work_dir / "models" / stem
         _write_json(
             model_dir / "hf_benchmark.json",
             {
                 "contract_pass": True,
+                "source_cases_sha256": hashlib.sha256(cases_path.read_bytes()).hexdigest(),
                 "metrics": {
                     "drift_error_pct": 1.0,
                     "base_shear_error_pct": 1.0,
@@ -197,6 +205,8 @@ def test_commercial_readiness_enforces_measured_benchmark_breadth(tmp_path: Path
 
 
 def test_commercial_readiness_reruns_stale_benchmark_report_when_cases_hash_changes(tmp_path: Path) -> None:
+    pytest.importorskip("torch", reason="stale benchmark regeneration requires the optional torch runtime")
+
     work_dir = tmp_path / "work"
     out_path = tmp_path / "commercial_readiness_report.json"
     cases_path = tmp_path / "cases.json"

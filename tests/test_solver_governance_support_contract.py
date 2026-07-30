@@ -11,13 +11,16 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_build_solver_governance_support_contract_current_lane() -> None:
+def test_build_solver_governance_support_contract_current_lane(tmp_path: Path) -> None:
+    output = tmp_path / "solver_governance_support_contract.json"
     proc = subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/build_solver_governance_support_contract.py"),
             "--productization-dir",
             str(REPO_ROOT / "implementation/phase1/release_evidence/productization"),
+            "--output-json",
+            str(output),
         ],
         cwd=REPO_ROOT,
         check=False,
@@ -26,11 +29,13 @@ def test_build_solver_governance_support_contract_current_lane() -> None:
     )
     assert proc.returncode == 0, proc.stderr + proc.stdout
     payload = json.loads(
-        (REPO_ROOT / "implementation/phase1/release_evidence/productization/solver_governance_support_contract.json")
-        .read_text(encoding="utf-8")
+        output.read_text(encoding="utf-8")
     )
     assert payload["schema_version"] == "solver-governance-support-contract.v1"
     assert payload["status"] == "ready"
+    assert payload["workstation_delivery_status"] == "ready"
+    assert payload["governance_support_ready"] is True
+    assert payload["blockers"] == []
     assert payload["unsupported_state_first_report_policy"] is True
     assert "solver_derived" in payload["report_state_separation"]
     assert "proxy_derived" in payload["report_state_separation"]

@@ -51,6 +51,27 @@ def _json(path: Path) -> dict:
     return payload
 
 
+def test_external_receipt_documents_do_not_copy_volatile_replay_hashes() -> None:
+    document = (
+        ROOT / "docs/external-code-to-code-technical-execution.md"
+    ).read_text(encoding="utf-8")
+    ledger = (
+        ROOT / "docs/commercial-structural-solver-product-gap-ledger.md"
+    ).read_text(encoding="utf-8")
+
+    assert "volatile replay hash를 문서에 복제하지 않는다" in document
+    assert "volatile replay hash를 복제하지 않는다" in ledger
+    assert not re.search(r"현재 receipt artifact hash는\s*`sha256:", document)
+    assert not re.search(r"현재 artifact hash는\s*`sha256:", document)
+    assert not re.search(r"summary artifact hash는\s*`sha256:", document)
+    assert not re.search(
+        r"(?:Current-product replay artifact hash는|"
+        r"current-product replay artifact hash|Summary artifact hash는)\s*"
+        r"`sha256:",
+        ledger,
+    )
+
+
 def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None:
     payload = _json(SUMMARY)
     schema = _json(ROOT / runner.SCHEMA_RELATIVE_PATH)
@@ -108,6 +129,14 @@ def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None
     assert (
         runner.REUSED_EXECUTION_BLOCKER in payload["blockers_remaining"]
     ) is (not fresh_execution)
+    parity = payload["cross_environment_parity"]
+    assert payload["claims"]["cross_environment_numerical_parity"] is parity[
+        "numerical_contract_pass"
+    ]
+    assert (
+        runner.CROSS_ENVIRONMENT_PARITY_BLOCKER
+        in payload["blockers_remaining"]
+    ) is (not parity["numerical_contract_pass"])
 
 
 def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sources() -> (
@@ -185,35 +214,181 @@ def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sou
             capture_output=True,
         )
         if ancestry.returncode != 0:
-            assert shallow_repository
-            raw_head = subprocess.check_output(
-                ["git", "cat-file", "-p", head], cwd=ROOT, text=True
-            )
-            direct_parents = {
-                line.removeprefix("parent ")
-                for line in raw_head.splitlines()
-                if line.startswith("parent ")
-            }
-            assert recorded_commit in direct_parents
+            if shallow_repository:
+                raw_head = subprocess.check_output(
+                    ["git", "cat-file", "-p", head], cwd=ROOT, text=True
+                )
+                direct_parents = {
+                    line.removeprefix("parent ")
+                    for line in raw_head.splitlines()
+                    if line.startswith("parent ")
+                }
+                assert recorded_commit in direct_parents
+            else:
+                shared_history = subprocess.run(
+                    ["git", "merge-base", recorded_commit, head],
+                    cwd=ROOT,
+                    check=False,
+                    capture_output=True,
+                )
+                assert shared_history.returncode == 0
     else:
         assert shallow_repository
 
     parity = summary["cross_environment_parity"]
+    host_code = _json(ROOT / runner.HOST_CODE_REFERENCE_RELATIVE_PATH)
+    host_modal = _json(ROOT / runner.HOST_MODAL_REFERENCE_RELATIVE_PATH)
     assert parity == runner._cross_environment_parity(
         repo_root=ROOT,
         code_receipt=code,
         modal_receipt=modal,
-        host_code_reference=_json(ROOT / runner.HOST_CODE_REFERENCE_RELATIVE_PATH),
-        host_modal_reference=_json(ROOT / runner.HOST_MODAL_REFERENCE_RELATIVE_PATH),
+        host_code_reference=host_code,
+        host_modal_reference=host_modal,
+        require_contract_pass=False,
     )
-    assert parity["numerical_contract_pass"] is True
-    assert parity["scalar_comparison_count"] == 73
+    container_scalar_count = len(runner._metric_scalar_map(code)) + len(
+        runner._metric_scalar_map(modal)
+    )
+    host_scalar_count = len(runner._metric_scalar_map(host_code)) + len(
+        runner._metric_scalar_map(host_modal)
+    )
+    assert parity["container_scalar_count"] == container_scalar_count
+    assert parity["host_scalar_count"] == host_scalar_count
+    assert parity["scalar_comparison_count"] == min(
+        container_scalar_count, host_scalar_count
+    )
+    container_settlement_attached = any(
+        row["case_id"] == "bounded_planar_prescribed_settlement_load_path"
+        for row in code["comparisons"]
+    )
+    host_settlement_attached = any(
+        row["case_id"] == "bounded_planar_prescribed_settlement_load_path"
+        for row in host_code["comparisons"]
+    )
+    container_frame3d_attached = any(
+        row["case_id"] == "spatial_frame3d_cantilever_combined_load"
+        for row in code["comparisons"]
+    )
+    host_frame3d_attached = any(
+        row["case_id"] == "spatial_frame3d_cantilever_combined_load"
+        for row in host_code["comparisons"]
+    )
+    container_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_axial_yield"
+        for row in code["comparisons"]
+    )
+    host_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_axial_yield"
+        for row in host_code["comparisons"]
+    )
+    container_cyclic_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_cyclic_axial_reversal"
+        for row in code["comparisons"]
+    )
+    host_cyclic_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_cyclic_axial_reversal"
+        for row in host_code["comparisons"]
+    )
+    container_torsion_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_torsion"
+        for row in code["comparisons"]
+    )
+    host_torsion_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_torsion"
+        for row in host_code["comparisons"]
+    )
+    container_bending_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_bending_rotations"
+        for row in code["comparisons"]
+    )
+    host_bending_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_bending_rotations"
+        for row in host_code["comparisons"]
+    )
+    assert container_settlement_attached is host_settlement_attached
+    assert container_frame3d_attached is host_frame3d_attached
+    assert container_direct_control_attached is host_direct_control_attached
+    assert (
+        container_cyclic_direct_control_attached
+        is host_cyclic_direct_control_attached
+    )
+    assert (
+        container_torsion_direct_control_attached
+        is host_torsion_direct_control_attached
+    )
+    assert (
+        container_bending_direct_control_attached
+        is host_bending_direct_control_attached
+    )
+    assert container_scalar_count == host_scalar_count
+    assert container_scalar_count == (
+        89
+        + (18 if container_settlement_attached else 0)
+        + (20 if container_frame3d_attached else 0)
+        + (16 if container_direct_control_attached else 0)
+        + (38 if container_cyclic_direct_control_attached else 0)
+        + (6 if container_torsion_direct_control_attached else 0)
+        + (12 if container_bending_direct_control_attached else 0)
+    )
+    assert parity["source_set_match"] is True
+    assert parity["metric_set_match"] is True
+    assert parity["container_only_metric_keys"] == []
+    assert parity["host_only_metric_keys"] == []
     assert parity["semantic_hash_matches"]["modal_model_hash"] is True
     assert parity["semantic_hash_matches"]["buckling_model_hash"] is True
     assert parity["exact_semantic_hash_parity"] is all(
         parity["semantic_hash_matches"].values()
     )
+    assert parity["numerical_contract_pass"] is True
     assert summary["claims"]["cross_environment_numerical_parity"] is True
+
+
+def test_cross_environment_metric_set_drift_is_explicit_and_nonpromoting() -> None:
+    container_code = _json(CODE_RECEIPT)
+    container_modal = _json(MODAL_RECEIPT)
+    host_code = deepcopy(container_code)
+    host_code["comparisons"] = [
+        row
+        for row in host_code["comparisons"]
+        if row["case_id"]
+        != "bounded_planar_prescribed_settlement_load_path"
+    ]
+
+    parity = runner._cross_environment_parity(
+        repo_root=ROOT,
+        code_receipt=container_code,
+        modal_receipt=container_modal,
+        host_code_reference=host_code,
+        host_modal_reference=container_modal,
+        require_contract_pass=False,
+    )
+
+    assert parity["source_set_match"] is True
+    assert parity["metric_set_match"] is False
+    assert parity["numerical_contract_pass"] is False
+    assert parity["scalar_comparison_count"] == 181
+    assert parity["container_scalar_count"] == 199
+    assert parity["host_scalar_count"] == 181
+    assert len(parity["container_only_metric_keys"]) == 18
+    assert parity["host_only_metric_keys"] == []
+    assert all(
+        key.startswith(
+            "code_to_code/bounded_planar_prescribed_settlement_load_path/"
+        )
+        for key in parity["container_only_metric_keys"]
+    )
+
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="cross_environment_metric_set_mismatch",
+    ):
+        runner._cross_environment_parity(
+            repo_root=ROOT,
+            code_receipt=container_code,
+            modal_receipt=container_modal,
+            host_code_reference=host_code,
+            host_modal_reference=container_modal,
+        )
 
 
 def test_rehashed_level2_or_independent_operator_promotion_is_rejected() -> None:

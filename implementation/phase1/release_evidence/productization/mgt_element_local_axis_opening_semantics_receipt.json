@@ -1,9 +1,9 @@
 {
   "schema_version": "mgt-element-local-axis-opening-semantics-receipt.v1",
-  "generated_at": "2026-07-01T11:07:07.000223+00:00",
+  "generated_at": "2026-07-28T18:50:05.206900+00:00",
   "status": "ready",
   "source": {
-    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "path": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
     "sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
     "size_bytes": 2205887,
     "source_family": "midas_mgt",
@@ -46,7 +46,7 @@
     "generic_opening_cutout_runtime_semantics_ready": false
   },
   "solver_consumption": {
-    "frame_solve_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
+    "frame_solve_json": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
     "frame_solve_status": "ready",
     "frame_local_axis_support": {
       "elem_angle_array_present": true,

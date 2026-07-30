@@ -4,7 +4,7 @@
   "claim_boundary_version": "developer-preview-core-api-v1",
   "convergence_history": [],
   "developer_preview": true,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "input_checksum": "sha256:f641e21744ae1ef328db9f136d301f5c7f891d287dfaf25b1549bc6dac5ac0f9",
   "metrics": {
     "analysis_fidelity": "cpu_reference_linear_fea",

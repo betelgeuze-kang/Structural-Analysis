@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "implementation" / "phase1" / "generate_reference_regression_report.py"
@@ -90,6 +92,8 @@ def test_reference_regression_baseline_export_matches_committed_fixture(tmp_path
 
 
 def test_reference_regression_release_report_matches_committed_artifact(tmp_path: Path) -> None:
+    if not RELEASE_REPORT.exists():
+        pytest.skip("non-committed release regression report is unavailable")
     out = tmp_path / "reference_regression_report.json"
     baseline_arg = str(BASELINE.relative_to(ROOT))
     proc = subprocess.run(

@@ -1,14 +1,14 @@
 {
   "schema_version": "mgt-opening-source-noop-ready-receipt.v1",
-  "generated_at": "2026-07-01T11:07:12.537099+00:00",
+  "generated_at": "2026-07-28T18:50:11.009992+00:00",
   "status": "ready",
   "current_source_opening_noop_ready": true,
   "current_source_opening_marker_count": 0,
   "generic_opening_cutout_ready": false,
   "source": {
-    "local_axis_opening_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_element_local_axis_opening_semantics_receipt.json",
+    "local_axis_opening_receipt": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_element_local_axis_opening_semantics_receipt.json",
     "local_axis_opening_receipt_exists": true,
-    "shell_bending_tangent_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_surface_shell_bending_tangent.json",
+    "shell_bending_tangent_receipt": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_surface_shell_bending_tangent.json",
     "shell_bending_tangent_receipt_exists": true,
     "local_axis_summary": {
       "local_axis_row_count": 12728,

@@ -2,43 +2,49 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_release_html_surfaces_include_route_context_banner() -> None:
-    viewer_html = (
+    release_html_paths = [
         ROOT
         / "implementation"
         / "phase1"
         / "release"
         / "visualization"
-        / "structural_optimization_viewer.html"
-    ).read_text(encoding="utf-8")
-    drawing_html = (
+        / "structural_optimization_viewer.html",
         ROOT
         / "implementation"
         / "phase1"
         / "release"
         / "visualization"
-        / "optimized_drawing_review.html"
-    ).read_text(encoding="utf-8")
-    benchmark_html = (
+        / "optimized_drawing_review.html",
         ROOT
         / "implementation"
         / "phase1"
         / "release"
         / "visualization"
-        / "benchmark_optimization_review.html"
-    ).read_text(encoding="utf-8")
-    committee_html = (
+        / "benchmark_optimization_review.html",
         ROOT
         / "implementation"
         / "phase1"
         / "release"
         / "committee_review"
-        / "committee_review_dashboard.html"
-    ).read_text(encoding="utf-8")
+        / "committee_review_dashboard.html",
+    ]
+    missing_release_html = [str(path) for path in release_html_paths if not path.exists()]
+    if missing_release_html:
+        pytest.skip(
+            "generated release HTML is not available in this checkout: "
+            + ", ".join(missing_release_html)
+        )
+
+    viewer_html, drawing_html, benchmark_html, committee_html = [
+        path.read_text(encoding="utf-8") for path in release_html_paths
+    ]
 
     for html in (viewer_html, drawing_html, benchmark_html, committee_html):
         assert "route-context-banner" in html

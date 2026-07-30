@@ -4,10 +4,15 @@
 // - UNKNOWN FIELDS ARE ALLOWED (forward-compatible): unrecognized keys are kept
 //   and ignored, never an error.
 // - HARD BLOCK (case rejected) when: schemaVersion is wrong, the source checksum
-//   is missing, or the explicit unit/coordinate contract is missing or unsupported.
+//   is missing or not strict sha256:<64 lowercase hex>, or the explicit
+//   unit/coordinate contract is missing or unsupported.
 //   We will not show analysis values after silently coercing engineering semantics.
 // - SOFT (convergence unavailable) when analysis.converged is absent: the case
 //   still loads, but convergence is reported as UNAVAILABLE, never inferred.
+// - Every numeric engineering value is normalized to one explicit status:
+//   available (with a domain-valid finite number), unavailable (field absent),
+//   invalid (present but malformed, non-finite, or outside its domain), or
+//   unsupported (the producer explicitly declares that result unsupported).
 
 export type UnitSystem = 'SI'
 export type CoordinateSystem = 'global_xyz'
@@ -18,34 +23,81 @@ export interface CaseProvenance {
   sourceCommitSha: string
   engineVersion: string
   generatedAt: string
+  [extra: string]: unknown
 }
+
+export interface AvailableValue<T> {
+  status: 'available'
+  value: T
+}
+
+export interface UnavailableValue {
+  status: 'unavailable'
+}
+
+export interface InvalidValue {
+  status: 'invalid'
+  reason: string
+}
+
+export interface UnsupportedValue {
+  status: 'unsupported'
+  reason: string
+}
+
+export type EvidenceValue<T> =
+  | AvailableValue<T>
+  | UnavailableValue
+  | InvalidValue
+  | UnsupportedValue
+export type ExplicitValue<T> = EvidenceValue<T>
+export type EngineeringValue = EvidenceValue<number>
+export type TextValue = EvidenceValue<string>
 
 export interface CaseModel {
   unitSystem: UnitSystem
   coordinateSystem: CoordinateSystem
-  nodeCount: number
-  elementCount: number
-  dofCount: number
+  nodeCount: EngineeringValue
+  elementCount: EngineeringValue
+  dofCount: EngineeringValue
+  [extra: string]: unknown
 }
 
 export interface CaseAnalysis {
   type: string
   solver: string
-  converged: boolean
-  loadScale: number
-  iterationCount: number
-  residualTolerance: number
-  finalNormalizedResidual: number
-  finalRelativeIncrement: number
+  converged: ExplicitValue<boolean>
+  loadScale: EngineeringValue
+  iterationCount: EngineeringValue
+  residualTolerance: EngineeringValue
+  finalNormalizedResidual: EngineeringValue
+  finalRelativeIncrement: EngineeringValue
+  equationScaling6DOF: EquationScaling6DOFValues
   /** Optional explicit run status when not converged (e.g. 'failed'). */
   status?: 'idle' | 'validating' | 'running' | 'converged' | 'failed'
+  [extra: string]: unknown
+}
+
+export interface EquationScaling6DOFValues {
+  reference_force: EngineeringValue
+  characteristic_length: EngineeringValue
+  translation_residual_norm: EngineeringValue
+  rotation_residual_norm: EngineeringValue
+  scaled_residual_norm: EngineeringValue
+  translation_increment_norm: EngineeringValue
+  rotation_increment_norm: EngineeringValue
+  scaled_increment_norm: EngineeringValue
+  scaled_tangent_condition: EngineeringValue
+  scaling_hash: TextValue
+  [extra: string]: unknown
 }
 
 export interface ResidualStep {
-  iteration: number
-  residual: number
-  relativeIncrement: number
-  alpha: number
+  iteration: EngineeringValue
+  residual: EngineeringValue
+  relativeIncrement: EngineeringValue
+  alpha: EngineeringValue
+  [extra: string]: unknown
 }
 
 export interface WorkbenchCaseV2 {
@@ -72,30 +124,225 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 function str(v: unknown): string | null {
   return typeof v === 'string' && v.trim() !== '' ? v : null
 }
-function fin(v: unknown): number | null {
-  return typeof v === 'number' && Number.isFinite(v) ? v : null
+
+function hasOwn(record: Record<string, unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(record, key)
+}
+
+export function isAvailableValue<T>(value: ExplicitValue<T>): value is AvailableValue<T> {
+  return value.status === 'available'
+}
+
+function unavailable(): UnavailableValue {
+  return { status: 'unavailable' }
+}
+
+function invalid(reason: string, warnings: string[]): InvalidValue {
+  warnings.push(reason)
+  return { status: 'invalid', reason }
+}
+
+type RawEvidence =
+  | { kind: 'value'; value: unknown }
+  | UnavailableValue
+  | InvalidValue
+  | UnsupportedValue
+
+/**
+ * Producers may emit a primitive value or an explicit EvidenceValue envelope.
+ * Missing fields remain unavailable. An explicit unsupported status is preserved;
+ * malformed envelopes become invalid and never fall back to a numeric value.
+ */
+function rawEvidence(
+  record: Record<string, unknown>,
+  key: string,
+  label: string,
+  warnings: string[],
+): RawEvidence {
+  if (!hasOwn(record, key)) return unavailable()
+  const raw = record[key]
+  if (!isRecord(raw) || !hasOwn(raw, 'status')) return { kind: 'value', value: raw }
+
+  if (raw.status === 'available') {
+    if (!hasOwn(raw, 'value')) {
+      return invalid(`${label} is invalid (available evidence has no value)`, warnings)
+    }
+    return { kind: 'value', value: raw.value }
+  }
+  if (raw.status === 'unavailable') return unavailable()
+  if (raw.status === 'invalid' || raw.status === 'unsupported') {
+    const reason = str(raw.reason)
+    if (!reason) {
+      return invalid(`${label} is invalid (${String(raw.status)} evidence has no reason)`, warnings)
+    }
+    if (raw.status === 'unsupported') return { status: 'unsupported', reason }
+    warnings.push(`${label} is invalid (${reason})`)
+    return { status: 'invalid', reason }
+  }
+  return invalid(`${label} is invalid (unknown evidence status)`, warnings)
+}
+
+type NumberDomain = (value: number) => string | null
+
+const finiteNumber: NumberDomain = () => null
+const nonNegativeNumber: NumberDomain = (value) => (
+  value >= 0 ? null : 'must be greater than or equal to zero'
+)
+const positiveNumber: NumberDomain = (value) => (
+  value > 0 ? null : 'must be greater than zero'
+)
+const openClosedUnitInterval: NumberDomain = (value) => (
+  value > 0 && value <= 1 ? null : 'must be greater than zero and less than or equal to one'
+)
+const atLeastOne: NumberDomain = (value) => (
+  value >= 1 ? null : 'must be greater than or equal to one'
+)
+const nonNegativeInteger: NumberDomain = (value) => (
+  Number.isInteger(value) && value >= 0 ? null : 'must be a non-negative integer'
+)
+
+function engineeringNumber(
+  record: Record<string, unknown>,
+  key: string,
+  label: string,
+  domain: NumberDomain,
+  warnings: string[],
+): EngineeringValue {
+  const evidence = rawEvidence(record, key, label, warnings)
+  if (!('kind' in evidence)) return evidence
+  const value = evidence.value
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return invalid(`${label} is invalid (expected a finite number)`, warnings)
+  }
+  const domainError = domain(value)
+  if (domainError) return invalid(`${label} is invalid (${domainError})`, warnings)
+  return { status: 'available', value }
+}
+
+function explicitBoolean(
+  record: Record<string, unknown>,
+  key: string,
+  label: string,
+  warnings: string[],
+): ExplicitValue<boolean> {
+  const evidence = rawEvidence(record, key, label, warnings)
+  if (!('kind' in evidence)) return evidence
+  const value = evidence.value
+  if (typeof value !== 'boolean') {
+    return invalid(`${label} is invalid (expected a boolean)`, warnings)
+  }
+  return { status: 'available', value }
+}
+
+function explicitSha256(
+  record: Record<string, unknown>,
+  key: string,
+  label: string,
+  warnings: string[],
+): TextValue {
+  const evidence = rawEvidence(record, key, label, warnings)
+  if (!('kind' in evidence)) return evidence
+  const value = evidence.value
+  if (typeof value !== 'string' || !/^sha256:[0-9a-f]{64}$/.test(value)) {
+    return invalid(`${label} is invalid (expected sha256:<64 lowercase hex>)`, warnings)
+  }
+  return { status: 'available', value }
+}
+
+function normalizeEquationScaling(
+  analysis: Record<string, unknown>,
+  warnings: string[],
+): EquationScaling6DOFValues {
+  const label = 'analysis.equation_scaling_6dof'
+  const raw = analysis.equation_scaling_6dof
+  if (raw !== undefined && !isRecord(raw)) {
+    warnings.push(`${label} is invalid (expected an object)`)
+  }
+  const scaling = isRecord(raw) ? raw : {}
+  const missingOrInvalid = <T>(field: string): ExplicitValue<T> => (
+    raw === undefined
+      ? unavailable()
+      : { status: 'invalid', reason: `${label} is invalid (expected an object)` }
+  )
+  const number = (
+    field: string,
+    domain: NumberDomain,
+  ): EngineeringValue => (
+    isRecord(raw)
+      ? engineeringNumber(scaling, field, `${label}.${field}`, domain, warnings)
+      : missingOrInvalid<number>(field)
+  )
+  return {
+    ...scaling,
+    reference_force: number('reference_force', positiveNumber),
+    characteristic_length: number('characteristic_length', positiveNumber),
+    translation_residual_norm: number('translation_residual_norm', nonNegativeNumber),
+    rotation_residual_norm: number('rotation_residual_norm', nonNegativeNumber),
+    scaled_residual_norm: number('scaled_residual_norm', nonNegativeNumber),
+    translation_increment_norm: number('translation_increment_norm', nonNegativeNumber),
+    rotation_increment_norm: number('rotation_increment_norm', nonNegativeNumber),
+    scaled_increment_norm: number('scaled_increment_norm', nonNegativeNumber),
+    scaled_tangent_condition: number('scaled_tangent_condition', atLeastOne),
+    scaling_hash: isRecord(raw)
+      ? explicitSha256(scaling, 'scaling_hash', `${label}.scaling_hash`, warnings)
+      : missingOrInvalid<string>('scaling_hash'),
+  }
 }
 
 function toRunStatus(v: unknown): CaseAnalysis['status'] {
   return v === 'idle' || v === 'validating' || v === 'running' || v === 'converged' || v === 'failed' ? v : undefined
 }
 
-function normalizeResidualHistory(v: unknown): ResidualStep[] {
-  if (!Array.isArray(v)) return []
-  return v
-    .map((row) => {
-      if (!isRecord(row)) return null
-      const iteration = fin(row.iteration)
-      const residual = fin(row.residual)
-      if (iteration == null || residual == null) return null
+function normalizeResidualHistory(v: unknown, warnings: string[]): ResidualStep[] {
+  if (v === undefined) return []
+  if (!Array.isArray(v)) {
+    warnings.push('residualHistory is invalid (expected an array)')
+    return []
+  }
+  const history = v
+    .map((row, index) => {
+      if (!isRecord(row)) {
+        warnings.push(`residualHistory[${index}] is invalid (expected an object)`)
+        return null
+      }
       return {
-        iteration,
-        residual,
-        relativeIncrement: fin(row.relativeIncrement) ?? 0,
-        alpha: fin(row.alpha) ?? 1,
+        ...row,
+        iteration: engineeringNumber(row, 'iteration', `residualHistory[${index}].iteration`, nonNegativeInteger, warnings),
+        residual: engineeringNumber(row, 'residual', `residualHistory[${index}].residual`, nonNegativeNumber, warnings),
+        relativeIncrement: engineeringNumber(
+          row,
+          'relativeIncrement',
+          `residualHistory[${index}].relativeIncrement`,
+          nonNegativeNumber,
+          warnings,
+        ),
+        alpha: engineeringNumber(row, 'alpha', `residualHistory[${index}].alpha`, openClosedUnitInterval, warnings),
       }
     })
     .filter((r): r is ResidualStep => r != null)
+
+  const seenIterations = new Set<number>()
+  let previousIteration: number | null = null
+  return history.map((row, index) => {
+    if (!isAvailableValue(row.iteration)) return row
+    const iteration = row.iteration.value
+    let reason: string | null = null
+    if (seenIterations.has(iteration)) {
+      reason = `residualHistory[${index}].iteration is invalid (duplicate iteration ${iteration})`
+    } else if (previousIteration != null && iteration <= previousIteration) {
+      reason = (
+        `residualHistory[${index}].iteration is invalid `
+        + `(iterations must be strictly increasing; previous ${previousIteration}, current ${iteration})`
+      )
+    }
+    seenIterations.add(iteration)
+    if (reason) {
+      warnings.push(reason)
+      return { ...row, iteration: { status: 'invalid', reason } }
+    }
+    previousIteration = iteration
+    return row
+  })
 }
 
 /**
@@ -116,7 +363,19 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
   }
 
   const prov = isRecord(raw.provenance) ? raw.provenance : {}
-  if (!str(prov.sourceSha256)) errors.push('provenance.sourceSha256 is missing (source checksum required)')
+  const sourceSha256 = explicitSha256(
+    prov,
+    'sourceSha256',
+    'provenance.sourceSha256',
+    warnings,
+  )
+  if (sourceSha256.status === 'unavailable') {
+    errors.push('provenance.sourceSha256 is missing — UNAVAILABLE (source checksum required)')
+  } else if (sourceSha256.status === 'invalid') {
+    errors.push(`provenance.sourceSha256 is INVALID (${sourceSha256.reason})`)
+  } else if (sourceSha256.status === 'unsupported') {
+    errors.push(`provenance.sourceSha256 is UNSUPPORTED (${sourceSha256.reason})`)
+  }
 
   const model = isRecord(raw.model) ? raw.model : {}
   const unitSystem = str(model.unitSystem)
@@ -133,8 +392,20 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
   }
 
   const analysis = isRecord(raw.analysis) ? raw.analysis : null
-  const convergenceAvailable = analysis != null && typeof analysis.converged === 'boolean'
-  if (!convergenceAvailable) warnings.push('analysis.converged is missing — convergence is UNAVAILABLE, not inferred')
+  if (hasOwn(raw, 'analysis') && analysis == null) {
+    warnings.push('analysis is invalid (expected an object)')
+  }
+  const converged = analysis
+    ? explicitBoolean(analysis, 'converged', 'analysis.converged', warnings)
+    : unavailable()
+  const convergenceAvailable = isAvailableValue(converged)
+  if (converged.status === 'unavailable') {
+    warnings.push('analysis.converged is missing — convergence is UNAVAILABLE, not inferred')
+  } else if (converged.status === 'invalid') {
+    warnings.push('analysis.converged is INVALID — convergence is UNAVAILABLE, not inferred')
+  } else if (converged.status === 'unsupported') {
+    warnings.push('analysis.converged is UNSUPPORTED — convergence is UNAVAILABLE, not inferred')
+  }
 
   if (errors.length > 0) {
     return { ok: false, value: null, errors, warnings, convergenceAvailable }
@@ -147,33 +418,61 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
     ...raw,
     schemaVersion: 'workbench-case.v2',
     provenance: {
+      ...prov,
       sourcePath: str(prov.sourcePath) ?? 'unknown',
-      sourceSha256: str(prov.sourceSha256) as string,
+      sourceSha256: (sourceSha256 as AvailableValue<string>).value,
       sourceCommitSha: str(prov.sourceCommitSha) ?? 'unknown',
       engineVersion: str(prov.engineVersion) ?? 'unknown',
       generatedAt: str(prov.generatedAt) ?? 'unknown',
     },
     model: {
+      ...model,
       unitSystem: unitSystem as UnitSystem,
       coordinateSystem: coordinateSystem as CoordinateSystem,
-      nodeCount: fin(model.nodeCount) ?? 0,
-      elementCount: fin(model.elementCount) ?? 0,
-      dofCount: fin(model.dofCount) ?? 0,
+      nodeCount: engineeringNumber(model, 'nodeCount', 'model.nodeCount', nonNegativeInteger, warnings),
+      elementCount: engineeringNumber(model, 'elementCount', 'model.elementCount', nonNegativeInteger, warnings),
+      dofCount: engineeringNumber(model, 'dofCount', 'model.dofCount', nonNegativeInteger, warnings),
     },
-    analysis: convergenceAvailable
+    analysis: analysis
       ? {
-          type: str(analysis!.type) ?? 'unknown',
-          solver: str(analysis!.solver) ?? 'unknown',
-          converged: analysis!.converged as boolean,
-          loadScale: fin(analysis!.loadScale) ?? 1,
-          iterationCount: fin(analysis!.iterationCount) ?? 0,
-          residualTolerance: fin(analysis!.residualTolerance) ?? 0,
-          finalNormalizedResidual: fin(analysis!.finalNormalizedResidual) ?? 0,
-          finalRelativeIncrement: fin(analysis!.finalRelativeIncrement) ?? 0,
-          status: toRunStatus(analysis!.status),
+          ...analysis,
+          type: str(analysis.type) ?? 'unknown',
+          solver: str(analysis.solver) ?? 'unknown',
+          converged,
+          loadScale: engineeringNumber(analysis, 'loadScale', 'analysis.loadScale', finiteNumber, warnings),
+          iterationCount: engineeringNumber(
+            analysis,
+            'iterationCount',
+            'analysis.iterationCount',
+            nonNegativeInteger,
+            warnings,
+          ),
+          residualTolerance: engineeringNumber(
+            analysis,
+            'residualTolerance',
+            'analysis.residualTolerance',
+            positiveNumber,
+            warnings,
+          ),
+          finalNormalizedResidual: engineeringNumber(
+            analysis,
+            'finalNormalizedResidual',
+            'analysis.finalNormalizedResidual',
+            nonNegativeNumber,
+            warnings,
+          ),
+          finalRelativeIncrement: engineeringNumber(
+            analysis,
+            'finalRelativeIncrement',
+            'analysis.finalRelativeIncrement',
+            nonNegativeNumber,
+            warnings,
+          ),
+          equationScaling6DOF: normalizeEquationScaling(analysis, warnings),
+          status: toRunStatus(analysis.status),
         }
       : undefined,
-    residualHistory: normalizeResidualHistory(raw.residualHistory),
+    residualHistory: normalizeResidualHistory(raw.residualHistory, warnings),
   } as WorkbenchCaseV2
 
   return { ok: true, value, errors, warnings, convergenceAvailable }

@@ -9,16 +9,22 @@ from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator
+from referencing import Registry, Resource
 
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.solvers.nonlinear.transient import (
     NONLINEAR_TRANSIENT_PROFILE,
     BilinearMaterialState,
     BilinearOscillator,
+    NonlinearTransientCheckpoint,
+    NonlinearTransientCheckpointChain,
     NonlinearTransientConfig,
     NonlinearTransientError,
     evaluate_bilinear_restoring_force,
     resume_bilinear_transient,
     solve_bilinear_transient,
+    validate_nonlinear_transient_checkpoint,
+    validate_nonlinear_transient_checkpoint_chain,
 )
 
 
@@ -109,7 +115,7 @@ def test_checkpoint_resume_reproduces_full_chain_exactly() -> None:
     prefix = solve_bilinear_transient(model, forces[:121], config=config)
     resumed = resume_bilinear_transient(
         model,
-        prefix.checkpoints[-1],
+        prefix.checkpoint_chain,
         forces[121:],
         config=config,
     )
@@ -121,6 +127,13 @@ def test_checkpoint_resume_reproduces_full_chain_exactly() -> None:
     assert resumed.start_step_index == 120
     assert resumed.end_step_index == 240
     assert full.exact_checkpoint_resume_supported is True
+    assert (
+        full.detached_checkpoint_validation_authority
+        == "self_consistent_checkpoint"
+    )
+    assert full.resume_checkpoint_authority == "source_authenticated_checkpoint"
+    assert full.checkpoint_chain.authority == "source_authenticated_checkpoint"
+    assert resumed.checkpoint_chain == full.checkpoint_chain
     schema = json.loads(
         (
             Path(__file__).resolve().parents[1]
@@ -128,6 +141,20 @@ def test_checkpoint_resume_reproduces_full_chain_exactly() -> None:
         ).read_text(encoding="utf-8")
     )
     Draft202012Validator(schema).validate(full.checkpoints[-1].to_dict())
+    chain_schema = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "src/structural_analysis/schemas/"
+            "nonlinear_transient_checkpoint_chain_v1.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    registry = Registry().with_resource(
+        schema["$id"],
+        Resource.from_contents(schema),
+    )
+    Draft202012Validator(chain_schema, registry=registry).validate(
+        full.checkpoint_chain.to_dict()
+    )
 
 
 def test_checkpoint_tamper_and_cross_model_resume_fail_closed() -> None:
@@ -137,19 +164,85 @@ def test_checkpoint_tamper_and_cross_model_resume_fail_closed() -> None:
     checkpoint = solution.checkpoints[-1]
 
     with pytest.raises(NonlinearTransientError, match="checkpoint hash mismatch"):
-        resume_bilinear_transient(
-            model,
+        validate_nonlinear_transient_checkpoint(
             replace(checkpoint, displacement_m=checkpoint.displacement_m + 0.01),
-            [0.0],
+            model=model,
             config=config,
         )
 
     other_model = replace(model, mass_kn_s2_per_m=2.0)
-    with pytest.raises(NonlinearTransientError, match="model hash mismatch"):
+    with pytest.raises(NonlinearTransientError, match="contract binding mismatch"):
         resume_bilinear_transient(
             other_model,
-            checkpoint,
+            solution.checkpoint_chain,
             [0.0],
+            config=config,
+        )
+
+
+def test_source_authenticated_chain_rejects_coherently_rehashed_fabrication() -> None:
+    model = BilinearOscillator(1.0, 100.0, 5.0, 0.05, 0.5)
+    config = NonlinearTransientConfig(time_step_s=0.01)
+    solution = solve_bilinear_transient(
+        model,
+        [0.0, 1.0, 2.0, -1.0],
+        config=config,
+    )
+    chain = solution.checkpoint_chain
+    terminal = chain.checkpoints[-1]
+    velocity_delta = 0.01
+    fabricated = _rehash_checkpoint(
+        replace(
+            terminal,
+            velocity_m_per_s=terminal.velocity_m_per_s + velocity_delta,
+            acceleration_m_per_s2=(
+                terminal.acceleration_m_per_s2
+                - model.damping_kn_s_per_m
+                * velocity_delta
+                / model.mass_kn_s2_per_m
+            ),
+        )
+    )
+    fabricated_chain = _rehash_chain(
+        replace(
+            chain,
+            checkpoints=(*chain.checkpoints[:-1], fabricated),
+        )
+    )
+
+    validate_nonlinear_transient_checkpoint(
+        fabricated,
+        model=model,
+        config=config,
+    )
+    with pytest.raises(
+        NonlinearTransientError,
+        match="source replay mismatch",
+    ):
+        validate_nonlinear_transient_checkpoint_chain(
+            fabricated_chain,
+            model=model,
+            config=config,
+        )
+
+    forces = (*chain.applied_force_history_kn[:-1], -2.0)
+    force_tampered = replace(
+        chain,
+        applied_force_history_kn=forces,
+        force_history_hash=canonical_hash(
+            {
+                "schema_version": "nonlinear-transient-force-history.v1",
+                "applied_force_history_kn": list(forces),
+            }
+        ),
+    )
+    with pytest.raises(
+        NonlinearTransientError,
+        match="source replay mismatch",
+    ):
+        validate_nonlinear_transient_checkpoint_chain(
+            _rehash_chain(force_tampered),
+            model=model,
             config=config,
         )
 
@@ -175,3 +268,19 @@ def test_invalid_profile_inputs_and_newton_failure_do_not_fallback() -> None:
                 maximum_iterations=1,
             ),
         )
+
+
+def _rehash_checkpoint(
+    checkpoint: NonlinearTransientCheckpoint,
+) -> NonlinearTransientCheckpoint:
+    payload = checkpoint.to_dict()
+    payload.pop("checkpoint_hash")
+    return replace(checkpoint, checkpoint_hash=canonical_hash(payload))
+
+
+def _rehash_chain(
+    chain: NonlinearTransientCheckpointChain,
+) -> NonlinearTransientCheckpointChain:
+    payload = chain.to_dict()
+    payload.pop("chain_hash")
+    return replace(chain, chain_hash=canonical_hash(payload))

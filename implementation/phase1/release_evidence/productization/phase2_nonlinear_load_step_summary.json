@@ -21,10 +21,10 @@
   "expected_full_load_displacement_m": 0.39300273897110216,
   "full_load_gate_passed": true,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-23T06:01:20.338571+00:00",
+  "generated_at": "2026-07-28T17:22:42.472510+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
-    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:66a6f26457b38f04a05e1b485d30e6de41287ab4fcec4ae80a8de0f7105e7e38",
+    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:4ef27ccf8db7613c32f84165c1813c72663513c2e670f298a75db41c0c25f808",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1"
   },
   "max_partition_final_displacement_spread_m": 2.220446049250313e-16,
@@ -77,7 +77,7 @@
   "residual_contract": "F_internal_minus_F_external",
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-nonlinear-load-step-artifacts.v1",
-  "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "status": "ready",
   "target_load_factor": 1.0,
   "truth_class": "analytic_truth"

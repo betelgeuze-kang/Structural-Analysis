@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/nonlinear-transient-checkpoint-chain-v1.schema.json",
+  "title": "Source-authenticated nonlinear transient checkpoint chain v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "model_hash",
+    "integration_contract_hash",
+    "authority",
+    "initial_displacement_m",
+    "initial_velocity_m_per_s",
+    "initial_condition_hash",
+    "force_history_hash",
+    "applied_force_history_kn",
+    "checkpoints",
+    "chain_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "nonlinear-transient-checkpoint-chain.v1"
+    },
+    "profile": {
+      "const": "newmark_average_acceleration_bilinear_sdof.v1"
+    },
+    "model_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "integration_contract_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "authority": {
+      "const": "source_authenticated_checkpoint"
+    },
+    "initial_displacement_m": {
+      "type": "number"
+    },
+    "initial_velocity_m_per_s": {
+      "type": "number"
+    },
+    "initial_condition_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "force_history_hash": {
+      "$ref": "#/$defs/hash"
+    },
+    "applied_force_history_kn": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "number"
+      }
+    },
+    "checkpoints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "nonlinear_transient_checkpoint_v1.schema.json"
+      }
+    },
+    "chain_hash": {
+      "$ref": "#/$defs/hash"
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

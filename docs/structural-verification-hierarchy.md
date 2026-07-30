@@ -40,7 +40,7 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   실행해 cantilever tip-load 식, simply-supported midpoint-load 식, 유한
   column `EA/EI`와 beam `EI`를 포함한 one-bay portal slope-deflection 식과
   비교한다. Artifact hash는
-  `sha256:c9f789c4f04a25fb317f043c9c50cbd633ba77ab68340fcc83c957896342b90b`다.
+  `sha256:472f80a3718f5debfcb83e87f08e7119f90a4592df803af62e61b1d5366b4471`다.
 - Portal의 12개 displacement/rotation/reaction 비교에서 최대 절대 오차는
   `1.4921397450962104e-13`, 최대 상대 오차는
   `9.237055564881303e-15`이고, free relative residual은
@@ -50,10 +50,12 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   candidate는 존재하지만 hierarchy evidence credit은 여전히 `0/2`다.
   `external_code_to_code_technical_execution_receipt.json`은 2자유도 modal,
   cantilever static, 공개 corotational portal의 4-step elastic-state load path,
-  axial-member static, 6-member tetrahedral spatial-truss static의 다섯 case와
-  31개 metric을 통과하며
+  rigid-offset/RZ-release/uniform-member-load bounded planar path,
+  1 kN 기준하중과 `-0.1 mm` 지점침하가 결합된 source-bound bounded planar
+  path, axial-member static, 6-member tetrahedral spatial-truss static의 일곱
+  case와 48개 metric을 통과하며
   artifact hash
-  `sha256:1b490fae40f6dafc559561367a33a2c2323f69efbbb2119ac35ab2ed4fc1f31d`를
+  `sha256:dce3d05c6f694474d7327e8766858b93ed3ec07324587075a97f8a4d36782c7a`를
   기록한다. 추가
   `external_modal_buckling_technical_execution_receipt.json`은 공개 전체 모델
   frame modal을 OpenSees에, 반복 2모드 frame 선형좌굴을 CalculiX B32에
@@ -62,10 +64,10 @@ Level 2는 독립 reference solver 이름·확인된 버전이 필요하다. Lev
   principal-correlation-squared는 `0.9999999970332671`로 통과한다. 네 mode
   matrix는 little-endian binary artifact로 분리돼 있다. 추가 receipt의
   artifact hash는
-  `sha256:77dce301c45f9f25c88445aff95d196ca1aa7b771f46fa79a94f9fea69d3e712`다.
-  동일 운영자 container-isolated clean runner도 두 영수증을 재현했고 73개
+  `sha256:b28112ee8e73af7e1506ae1b0c2e4d25a3a857812618f7f7d3e33b28f4ea808f`다.
+  동일 운영자 container-isolated clean runner도 두 영수증을 재현했고 107개
   host/container scalar 계약을 통과했다. 해당 summary artifact hash는
-  `sha256:99c7fc02f3f76c6a6b84c3f5da6b0a9218a73fb4b49fc579c546c2774983a85e`다.
+  `sha256:b07e198d5fd74ce56edb386f2b770b79320b8d3abb38cfd5e6562f90daa22a8f`다.
   그러나 제품 법무 승인, redistribution 승인, 독립 운영자 재현·서명,
   material-nonlinear 구조형식 breadth, published benchmark decision과 operator manifest가 없으므로
   `verification_hierarchy_credit=false`이고 Level 2로 승격하지 않는다. 중형

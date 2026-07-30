@@ -36,10 +36,28 @@ Every accepted step emits a canonical SHA-256 checkpoint containing:
 - cumulative external work, damping dissipation, and initial mechanical
   energy.
 
-Resume validates the complete checkpoint before advancing. A prefix solve plus
-resume produces the same checkpoint chain and terminal bytes as an uninterrupted
-solve. The detached shape is defined by
+The detached checkpoint validator establishes only
+`self_consistent_checkpoint` authority. It checks the schema/profile, model and
+integration hashes, time/index relation, finite state, material-state
+consistency, current dynamic equilibrium, parent-hash shape, and self-hash. It
+does not authorize resume because a detached parent hash is not a parent body.
+The detached shape is defined by
 `src/structural_analysis/schemas/nonlinear_transient_checkpoint_v1.schema.json`.
+
+Resume requires a genesis-rooted `NonlinearTransientCheckpointChain` with
+`source_authenticated_checkpoint` authority. The chain retains the complete
+force-history prefix, force-history hash, initial displacement/velocity and
+initial-condition hash, every parent checkpoint body, and a chain hash. Its
+validator reconstructs the initial acceleration and replays every Newmark step,
+dynamic equilibrium, material transition, external-work increment,
+damping-dissipation increment, and plastic-dissipation transition. A coherently
+rehashed but fabricated checkpoint is rejected when it differs from replay.
+The chain shape is defined by
+`src/structural_analysis/schemas/nonlinear_transient_checkpoint_chain_v1.schema.json`.
+
+A prefix solve plus source-authenticated resume produces the same complete chain
+and terminal bytes as an uninterrupted solve. Future forces exclude the
+terminal force already retained by the supplied chain.
 
 The solution also records equilibrium residuals and an energy-balance
 diagnostic. Linear undamped free vibration conserves algorithmic energy to
@@ -54,11 +72,12 @@ PYTHONPATH=src python3 -m pytest -q tests/test_nonlinear_transient.py
 
 The focused suite covers closed-form linear free vibration, energy
 conservation, analytic/finite-difference material tangent agreement, cyclic
-yield/reversal, exact checkpoint resume, schema validation, tamper rejection,
-cross-model rejection, and fail-closed Newton nonconvergence.
+yield/reversal, exact checkpoint resume, schema validation, detached
+self-consistency, source-authenticated Newmark/work replay, coherently rehashed
+fabrication rejection, cross-model rejection, and fail-closed Newton
+nonconvergence.
 
 This profile is not a multi-DOF frame integrator, ground-motion/base-excitation
 workflow, Rayleigh-damping calibration, adaptive time-step method, nonlinear
 member formulation, external benchmark, Verification Level 3 result, or
 release-ready dynamics capability.
-

@@ -38,7 +38,7 @@
   },
   "contract_pass": true,
   "contract_scope": "actual_mgt_dual_target_compile_and_host_fixture_parser_only",
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "fixture": {
     "accumulation_profile": "reference_then_sorted_frame_then_sorted_geometry_sequential_fp64.v1",
     "array_count": 21,
@@ -66,7 +66,7 @@
     "schedule_profile": "free_row_sorted_element_local_incidence.v1",
     "schema_version": "engine-v2-hip-current-tangent-operator-fixture.v1"
   },
-  "generated_at": "2026-07-19T11:13:44.371242+00:00",
+  "generated_at": "2026-07-28T06:43:34.653368+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
     "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
@@ -91,10 +91,10 @@
     "state_data_hash": "sha256:7da92568f855e09df91d4a561cf678c65bddd0cd2d161393aa548cafb316a58d",
     "state_policy": "full_unit_zero_state_linear_predictor"
   },
-  "receipt_hash": "sha256:b0fc0084f50d7f2bc2ebdd603fb7633d1c0aad296e13f7ae7d4ab34a2b8638f9",
+  "receipt_hash": "sha256:bd0058768bed8461b0be4ce51934fbb4b63e495b08aa59a3027c34bd66091f8d",
   "schema_version": "g1-mgt-hip-current-tangent-host-parser-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "de08647587de76bc2a387278eac7b8884e4cb76a",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "synthetic_compile_receipt": {

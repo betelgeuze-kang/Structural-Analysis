@@ -1,6 +1,6 @@
 {
   "schema_version": "solver-governance-support-contract.v1",
-  "generated_at": "2026-07-01T11:12:29.137118+00:00",
+  "generated_at": "2026-07-30T15:00:56.650802+00:00",
   "status": "ready",
   "governance_support_ready": true,
   "bundle_status": "ready",
@@ -40,10 +40,10 @@
       "claim_boundary_label"
     ],
     "artifact_examples": {
-      "delivery_bundle": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
-      "gap_ledger": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
-      "ai_review_queue": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json",
-      "load_stage_semantics": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json"
+      "delivery_bundle": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
+      "gap_ledger": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+      "ai_review_queue": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/ai_review_queue.json",
+      "load_stage_semantics": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json"
     }
   },
   "engineer_review_workflow": {

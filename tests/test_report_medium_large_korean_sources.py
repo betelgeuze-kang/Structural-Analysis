@@ -28,9 +28,14 @@ def test_combined_catalog_has_medium_and_large_records() -> None:
 
 
 def test_report_medium_large_cli_on_repo_catalog(tmp_path: Path) -> None:
-    catalog_path = REPO_ROOT / "implementation/phase1/open_data/korea/korean_source_catalog.json"
+    catalog_path = tmp_path / "korean_source_catalog.json"
     subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts" / "generate_korean_source_catalog.py")],
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts" / "generate_korean_source_catalog.py"),
+            "--out",
+            str(catalog_path),
+        ],
         cwd=REPO_ROOT,
         check=True,
     )

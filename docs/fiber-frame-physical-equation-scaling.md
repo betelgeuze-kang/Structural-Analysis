@@ -16,6 +16,15 @@ binds it to the exact J1 topology-plan hash. It does not call
 Existing ExecutionPlan v1, StateIR v1, schemas, capability profiles, and golden
 hashes are unchanged.
 
+The same contracts now accept the exact fixed-chord and corotational planar
+fiber-frame problem types. Corotational topology identity additionally binds
+finite-offset/release feature contracts and includes consistent equivalent
+nodal loads from supported uniform member dead loads. This generalization does
+not create general member-load authority. ModelIR v2 now has a separate
+`bounded_planar_frame_alpha` branch for this exact supported slice; it does not
+broaden the unchanged `engine_v2_phase0_linear_3d` profile or make the nonlinear
+topology an Engine v2 `ExecutionPlan v1`.
+
 ## Source-unit boundary
 
 The bounded fiber-frame source uses node-major physical equations
@@ -59,8 +68,12 @@ divisor(RX, RY, RZ) = F_ref * L_char
 ```
 
 Constrained-equation loads are committed as source bytes but cannot set
-`F_ref`. A topology with no free physical equations fails closed and remains a
-separate no-solve/reaction-only path.
+`F_ref`. Solver-coordinate mapping may retain a zero reference-load vector
+because that receipt describes coordinates rather than convergence. Physical
+equation scaling still requires a nonzero load on the declared free equations.
+A topology with no free physical equations remains a separate
+no-solve/reaction-only path. A topology with free equations but no free
+reference load fails closed before iterative execution.
 
 The embedded `structural-analysis-equation-scaling.v1` source commitment binds:
 
@@ -118,6 +131,12 @@ current solver converts into generalized Newton coordinates. Solver-coordinate
 scaling from J1 and physical force/moment nondimensionalization from J2 remain
 separate contracts.
 
+The unified corotational API receives the assembly's exact free-equation
+residual. `trace_stateful_fiber_frame2d_free_physical_residual` scatters it
+through the topology plan's explicit free-solver-DOF map before using the same
+trace contract. Zeros outside that declared scope are padding only and carry no
+reaction authority.
+
 ## Persistence and fail-closed checks
 
 Binding source/scale arrays and all trace vectors have canonical little-endian
@@ -140,6 +159,7 @@ plan.
 ```python
 from structural_analysis.assembly.stateful_fiber_frame2d_physical_equation_scaling import (
     create_stateful_fiber_frame2d_physical_equation_scaling,
+    trace_stateful_fiber_frame2d_free_physical_residual,
     trace_stateful_fiber_frame2d_physical_residual,
 )
 ```
@@ -181,5 +201,7 @@ and cross-artifact source replay.
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src python3 -m pytest -q \
   tests/test_stateful_fiber_frame2d_physical_equation_scaling.py \
   tests/test_stateful_fiber_frame2d_execution_topology.py \
+  tests/test_stateful_corotational_fiber_frame2d_equation_scaling.py \
+  tests/test_unified_nonlinear_frame_api.py \
   tests/test_engine_v2_equation_scaling_v1.py
 ```

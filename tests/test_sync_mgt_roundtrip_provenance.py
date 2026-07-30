@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -51,13 +52,23 @@ def test_refresh_provenance_only_without_parse(tmp_path: Path) -> None:
     assert payload.get("parse") is None
 
 
-def test_sync_cli_parse_on_repo_optimized_mgt() -> None:
-    out = REPO_ROOT / "implementation/phase1/release_evidence/productization/mgt_roundtrip_parse_cli_test.json"
+def test_sync_cli_parse_on_repo_optimized_mgt(tmp_path: Path) -> None:
+    source_mgt = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
+    mgt = tmp_path / "optimized.mgt"
+    shutil.copy2(source_mgt, mgt)
+    roundtrip = tmp_path / "optimized.roundtrip.json"
+    out = tmp_path / "mgt_roundtrip_parse_cli.json"
     proc = subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/sync_optimized_mgt_roundtrip.py"),
             "--parse",
+            "--mgt",
+            str(mgt),
+            "--roundtrip-json",
+            str(roundtrip),
+            "--npz-out",
+            str(tmp_path / "optimized.roundtrip.npz"),
             "--output-json",
             str(out),
         ],
@@ -72,12 +83,22 @@ def test_sync_cli_parse_on_repo_optimized_mgt() -> None:
     assert (payload.get("parse") or {}).get("contract_pass") is True
 
 
-def test_sync_cli_on_repo_optimized_mgt() -> None:
+def test_sync_cli_on_repo_optimized_mgt(tmp_path: Path) -> None:
+    source_mgt = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
+    source_roundtrip = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+    mgt = tmp_path / "optimized.mgt"
+    roundtrip = tmp_path / "optimized.roundtrip.json"
+    shutil.copy2(source_mgt, mgt)
+    shutil.copy2(source_roundtrip, roundtrip)
     proc = subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/sync_optimized_mgt_roundtrip.py"),
             "--sync-only",
+            "--mgt",
+            str(mgt),
+            "--roundtrip-json",
+            str(roundtrip),
         ],
         cwd=REPO_ROOT,
         check=False,

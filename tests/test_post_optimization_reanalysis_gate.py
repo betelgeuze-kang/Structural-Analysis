@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -15,8 +16,8 @@ CHANGES = (
 )
 
 
-def test_reanalysis_gate_records_roundtrip_and_changes() -> None:
-    out = REPO_ROOT / "implementation/phase1/release_evidence/productization/reanalysis_gate_test.json"
+def test_reanalysis_gate_records_roundtrip_and_changes(tmp_path: Path) -> None:
+    out = tmp_path / "reanalysis_gate.json"
     cmd = [
         sys.executable,
         str(REPO_ROOT / "scripts/run_post_optimization_reanalysis_gate.py"),
@@ -42,14 +43,16 @@ def test_reanalysis_gate_records_roundtrip_and_changes() -> None:
     }
 
 
-def test_reanalysis_gate_sync_mgt_provenance() -> None:
-    out = REPO_ROOT / "implementation/phase1/release_evidence/productization/reanalysis_gate_sync_test.json"
+def test_reanalysis_gate_sync_mgt_provenance(tmp_path: Path) -> None:
+    out = tmp_path / "reanalysis_gate_sync.json"
+    roundtrip = tmp_path / "midas_generator_33.optimized.roundtrip.json"
+    shutil.copy2(ROUNDTRIP, roundtrip)
     proc = subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/run_post_optimization_reanalysis_gate.py"),
             "--optimized-roundtrip-json",
-            str(ROUNDTRIP),
+            str(roundtrip),
             "--changes-json",
             str(CHANGES),
             "--output-json",

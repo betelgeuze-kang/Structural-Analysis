@@ -167,7 +167,9 @@ def _source_of_truth_row(freshness: dict[str, Any]) -> dict[str, Any]:
     )
     no_op_count = _as_int(summary.get("source_of_truth_gap_no_op_count"))
     aggregator_count = _as_int(summary.get("source_of_truth_gap_aggregator_review_count"))
-    blocker_count = _as_int(summary.get("blocker_count"))
+    blocker_count = _as_int(
+        summary.get("source_of_truth_gap_classification_blocker_count")
+    )
     ready = bool(
         candidate_count
         and fix_count + no_op_count + aggregator_count == candidate_count

@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_planar_external_scaling_case_package_v1.schema.json",
+  "title": "Bounded planar external scaling case package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_id",
+    "source_commit_sha",
+    "external_result_schema",
+    "python_requirements",
+    "operator_readme",
+    "execution_workflow",
+    "cases",
+    "summary",
+    "claims",
+    "contract_pass",
+    "blockers",
+    "claim_boundary",
+    "artifact_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "bounded-planar-external-scaling-case-package.v1"
+    },
+    "package_id": {
+      "const": "bounded-planar-scaling-invariance-v1"
+    },
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "external_result_schema": {
+      "$ref": "#/$defs/fileArtifact"
+    },
+    "python_requirements": {
+      "$ref": "#/$defs/fileArtifact"
+    },
+    "operator_readme": {
+      "$ref": "#/$defs/fileArtifact"
+    },
+    "execution_workflow": {
+      "$ref": "#/$defs/fileArtifact"
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/unitCase"
+        },
+        {
+          "$ref": "#/$defs/characteristicCase"
+        }
+      ],
+      "items": false
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_count",
+        "product_ready_count",
+        "external_ready_count"
+      ],
+      "properties": {
+        "case_count": {
+          "const": 2
+        },
+        "product_ready_count": {
+          "const": 2
+        },
+        "external_ready_count": {
+          "const": 0
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_model_ir_inputs",
+        "current_product_invariance_replay",
+        "opensees_runner_syntax_checked",
+        "runtime_dependency_pinned",
+        "output_authenticity_contract",
+        "external_solver_execution",
+        "external_reference_attached",
+        "verification_matrix_credit",
+        "verification_level_2"
+      ],
+      "properties": {
+        "exact_model_ir_inputs": {
+          "const": true
+        },
+        "current_product_invariance_replay": {
+          "const": true
+        },
+        "opensees_runner_syntax_checked": {
+          "const": true
+        },
+        "runtime_dependency_pinned": {
+          "const": true
+        },
+        "output_authenticity_contract": {
+          "const": true
+        },
+        "external_solver_execution": {
+          "const": false
+        },
+        "external_reference_attached": {
+          "const": false
+        },
+        "verification_matrix_credit": {
+          "const": false
+        },
+        "verification_level_2": {
+          "const": false
+        }
+      }
+    },
+    "contract_pass": {
+      "const": true
+    },
+    "blockers": {
+      "type": "array",
+      "contains": {
+        "const": "external_runtime_execution_missing"
+      },
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 80
+    },
+    "artifact_hash": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "fileArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "file_sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "jsonArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "file_sha256",
+        "artifact_hash"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifact_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "caseBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "requirement_id",
+        "model_pair",
+        "opensees_runner",
+        "product_result",
+        "product_invariance_contract_pass",
+        "external_execution_status",
+        "external_reference_attached",
+        "blockers"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string"
+        },
+        "requirement_id": {
+          "type": "string"
+        },
+        "model_pair": {
+          "$ref": "#/$defs/jsonArtifact"
+        },
+        "opensees_runner": {
+          "$ref": "#/$defs/fileArtifact"
+        },
+        "product_result": {
+          "$ref": "#/$defs/jsonArtifact"
+        },
+        "product_invariance_contract_pass": {
+          "const": true
+        },
+        "external_execution_status": {
+          "const": "unavailable"
+        },
+        "external_reference_attached": {
+          "const": false
+        },
+        "blockers": {
+          "type": "array",
+          "contains": {
+            "const": "external_runtime_execution_missing"
+          },
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "unitCase": {
+      "$ref": "#/$defs/caseBase",
+      "properties": {
+        "case_id": {
+          "const": "bounded_planar_scaling_unit_invariance"
+        },
+        "requirement_id": {
+          "const": "scaling.unit_invariance"
+        }
+      }
+    },
+    "characteristicCase": {
+      "$ref": "#/$defs/caseBase",
+      "properties": {
+        "case_id": {
+          "const": "bounded_planar_scaling_characteristic_length_invariance"
+        },
+        "requirement_id": {
+          "const": "scaling.characteristic_length_invariance"
+        }
+      }
+    }
+  }
+}

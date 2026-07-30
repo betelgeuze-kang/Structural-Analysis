@@ -1,0 +1,116 @@
+{
+  "template_only": true,
+  "schema_version": "structural-analysis-external-vv-operator-attestation.v1",
+  "attestation_id": "OWNER_INPUT_REQUIRED",
+  "signed_at": "OWNER_INPUT_REQUIRED",
+  "source_commit_sha": "OWNER_INPUT_REQUIRED",
+  "operator": {
+    "name": "OWNER_INPUT_REQUIRED",
+    "organization": "OWNER_INPUT_REQUIRED",
+    "contact": "OWNER_INPUT_REQUIRED",
+    "independence_basis": "OWNER_INPUT_REQUIRED: describe organizational and financial independence from the product team",
+    "conflict_check_completed": true,
+    "signer_public_key_sha256": "OWNER_INPUT_REQUIRED"
+  },
+  "execution": {
+    "started_at": "OWNER_INPUT_REQUIRED",
+    "completed_at": "OWNER_INPUT_REQUIRED",
+    "host_platform": "OWNER_INPUT_REQUIRED",
+    "runner_command": "scripts/run_external_vv_clean_runner.sh <external-asset-directory>",
+    "supplementary_runner_commands": [
+      "python opensees/bounded_planar_linear_portal.py external-results/bounded_planar_linear_portal.json",
+      "python opensees/bounded_planar_linear_multistory.py external-results/bounded_planar_linear_multistory.json",
+      "python runner/run_case.py --case-id bounded_planar_modal_rigid_mode --model models/bounded_planar_modal_rigid_mode.model.json --out external-results/bounded_planar_modal_rigid_mode.json",
+      "python runner/run_case.py --case-id bounded_planar_modal_repeated_mode --model models/bounded_planar_modal_repeated_mode.model.json --out external-results/bounded_planar_modal_repeated_mode.json",
+      "python runner/run_case.py --case-id bounded_planar_buckling_portal --model models/bounded_planar_buckling_portal.model.json --out external-results/bounded_planar_buckling_portal.json",
+      "python opensees/bounded_planar_negative_mechanism.py external-results/bounded_planar_negative_mechanism.json",
+      "python opensees/bounded_planar_negative_singular.py external-results/bounded_planar_negative_singular.json",
+      "python opensees/bounded_planar_negative_invalid_geometry.py external-results/bounded_planar_negative_invalid_geometry.json",
+      "python opensees/bounded_planar_scaling_unit_invariance.py external-results/bounded_planar_scaling_unit_invariance.json",
+      "python opensees/bounded_planar_scaling_characteristic_length_invariance.py external-results/bounded_planar_scaling_characteristic_length_invariance.json",
+      "python runner/run_case.py --case-id bounded_planar_p_delta --model models/bounded_planar_p_delta.case.json --out external-results/bounded_planar_p_delta.json",
+      "python runner/run_case.py --case-id bounded_planar_snap_through --model models/bounded_planar_snap_through.case.json --out external-results/bounded_planar_snap_through.json",
+      "python runner/run_case.py --case-id bounded_planar_steel_yield --model models/bounded_planar_steel_yield.case.json --out external-results/bounded_planar_steel_yield.json",
+      "python runner/run_case.py --case-id bounded_planar_rc_fiber --model models/bounded_planar_rc_fiber.case.json --out external-results/bounded_planar_rc_fiber.json",
+      "python runner/run_case.py --case-id bounded_planar_section_recovery --model models/bounded_planar_section_recovery.case.json --out external-results/bounded_planar_section_recovery.json",
+      "python runner/run_case.py --case-id bounded_planar_fiber_recovery --model models/bounded_planar_fiber_recovery.case.json --out external-results/bounded_planar_fiber_recovery.json"
+    ],
+    "repository_mount_read_only": true,
+    "runtime_network_disabled": true
+  },
+  "bundle": {
+    "clean_runner": {"path": "clean_runner_receipt.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+    "code_to_code": {"path": "external_code_to_code_receipt.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+    "modal_buckling": {"path": "external_modal_buckling_receipt.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+    "bounded_planar_linear": {
+      "execution_package_manifest": {"path": "bounded-planar-linear-package/manifest.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "technical_receipt": {"path": "linear-results/technical-receipt.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "external_results": [
+        {"path": "linear-results/bounded_planar_linear_portal.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "linear-results/bounded_planar_linear_multistory.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"}
+      ]
+    },
+    "bounded_planar_modal_buckling": {
+      "execution_package_manifest": {"path": "bounded-planar-modal-buckling-package/manifest.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "technical_receipt": {"path": "modal-buckling-results/technical-receipt.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "external_results": [
+        {"path": "modal-buckling-results/bounded_planar_modal_rigid_mode.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "modal-buckling-results/bounded_planar_modal_repeated_mode.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "modal-buckling-results/bounded_planar_buckling_portal.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"}
+      ]
+    },
+    "bounded_planar_negative": {
+      "execution_package_manifest": {"path": "bounded-planar-negative-package/manifest.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "technical_receipt": {"path": "negative-technical-receipt.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "external_results": [
+        {"path": "negative-results/bounded_planar_negative_mechanism.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "negative-results/bounded_planar_negative_singular.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "negative-results/bounded_planar_negative_invalid_geometry.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"}
+      ]
+    },
+    "bounded_planar_scaling": {
+      "execution_package_manifest": {"path": "bounded-planar-scaling-package/manifest.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "technical_receipt": {"path": "scaling-results/technical-receipt.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "external_results": [
+        {"path": "scaling-results/bounded_planar_scaling_unit_invariance.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "scaling-results/bounded_planar_scaling_characteristic_length_invariance.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"}
+      ]
+    },
+    "bounded_planar_nonlinear_material_recovery": {
+      "execution_package_manifest": {"path": "bounded-planar-nonlinear-material-recovery-package/manifest.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "technical_receipt": {"path": "nonlinear-material-recovery-technical-receipt.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+      "external_results": [
+        {"path": "nonlinear-material-recovery-results/bounded_planar_p_delta.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "nonlinear-material-recovery-results/bounded_planar_snap_through.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "nonlinear-material-recovery-results/bounded_planar_steel_yield.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "nonlinear-material-recovery-results/bounded_planar_rc_fiber.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "nonlinear-material-recovery-results/bounded_planar_section_recovery.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "nonlinear-material-recovery-results/bounded_planar_fiber_recovery.json", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"}
+      ]
+    },
+    "mode_vectors": [
+      {"path": "mode_vectors/product_modal_modes.f64le", "file_sha256": "OWNER_INPUT_REQUIRED"},
+      {"path": "mode_vectors/opensees_modal_modes.f64le", "file_sha256": "OWNER_INPUT_REQUIRED"},
+      {"path": "mode_vectors/product_buckling_modes.f64le", "file_sha256": "OWNER_INPUT_REQUIRED"},
+      {"path": "mode_vectors/calculix_buckling_modes.f64le", "file_sha256": "OWNER_INPUT_REQUIRED"}
+    ]
+  },
+  "declarations": {
+    "independent_from_product_team": true,
+    "external_runtimes_executed_by_operator": true,
+    "no_external_execution_reuse": true,
+    "submitted_bundle_unmodified_after_execution": true,
+    "supplementary_results_executed_by_operator": true,
+    "identity_credentials_verified_by_project": false
+  },
+  "signature": {
+    "algorithm": "rsa-sha256",
+    "signed_payload_sha256": "OWNER_INPUT_REQUIRED",
+    "public_key_path": "operator-public-key.pem",
+    "public_key_sha256": "OWNER_INPUT_REQUIRED",
+    "signature_path": "operator-attestation.sig",
+    "signature_sha256": "OWNER_INPUT_REQUIRED"
+  },
+  "contract_pass": false,
+  "claim_boundary": "Template only. Populate every OWNER_INPUT_REQUIRED field, hash the exact fresh clean-runner bundle, sign the canonical attestation body without the signature block, and submit it for identity, license, scientific-decision, and hierarchy review. This template itself is never evidence."
+}

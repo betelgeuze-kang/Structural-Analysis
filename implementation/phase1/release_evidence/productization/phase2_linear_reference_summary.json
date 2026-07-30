@@ -31,7 +31,7 @@
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": true,
   "energy_gate_passed": true,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "errors": {
     "n1_reaction_ux_abs": 0.0,
     "n2_ux_abs": 0.0
@@ -43,12 +43,12 @@
   },
   "fallback_used": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-19T06:18:29.262452+00:00",
+  "generated_at": "2026-07-29T06:40:30.834838+00:00",
   "input_checksums": {
-    "src/structural_analysis/api/core.py": "sha256:ae1acaf746974778fc6eba58e4e4ebc8f11b41f3d030f60e020929f8b9035783",
+    "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
     "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
     "src/structural_analysis/schemas/result.schema.json": "sha256:4697b4b32b92dd8963fdfafa083678ea1ae43501a287ab78b950b5dc32c787be",
-    "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28"
+    "src/structural_analysis/solvers/linear/static.py": "sha256:065c4e9deb01fe2f55dc51fbc0fa342e550fd4c1b47c25e96e024f57913dc1a4"
   },
   "linear_axial_convergence_case_count": 4,
   "linear_axial_convergence_suite_ready": true,
@@ -63,7 +63,7 @@
   "residual_gate_passed": true,
   "rigid_body_blocked_without_regularization": true,
   "schema_version": "phase2-linear-reference-artifacts.v1",
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "sparse_backend_api_config_matrix_backend": "scipy_sparse_spsolve_cpu",
   "sparse_backend_api_config_solver": "phase2_linear_reference_sparse_api",
   "sparse_backend_api_path_verification_ready": true,

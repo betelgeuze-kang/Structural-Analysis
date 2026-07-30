@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SNAPSHOT = (
@@ -221,6 +223,8 @@ def test_docs_do_not_claim_github_sync_complete_while_snapshot_blocks() -> None:
 
 
 def test_readme_independent_product_score_matches_receipt() -> None:
+    if not INDEPENDENT_PRODUCT.is_file():
+        pytest.skip("independent product readiness is an ignored release integration artifact")
     payload = json.loads(INDEPENDENT_PRODUCT.read_text(encoding="utf-8"))
     expected = (
         "Independent commercial product status:"

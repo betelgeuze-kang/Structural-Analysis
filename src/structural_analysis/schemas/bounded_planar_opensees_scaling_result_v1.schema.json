@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_planar_opensees_scaling_result_v1.schema.json",
+  "title": "Bounded planar OpenSees scaling result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_id",
+    "case_id",
+    "executed_at",
+    "runner_file_sha256",
+    "source_model_pair_file_sha256",
+    "runtime",
+    "variants",
+    "relative_differences",
+    "maximum_relative_difference",
+    "relative_tolerance",
+    "contract_pass",
+    "blockers",
+    "artifact_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "bounded-planar-opensees-scaling-result.v1"
+    },
+    "package_id": {
+      "const": "bounded-planar-scaling-invariance-v1"
+    },
+    "case_id": {
+      "enum": [
+        "bounded_planar_scaling_unit_invariance",
+        "bounded_planar_scaling_characteristic_length_invariance"
+      ]
+    },
+    "executed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "runner_file_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "source_model_pair_file_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "python_version",
+        "platform",
+        "openseespy_version",
+        "opensees_core_version"
+      ],
+      "properties": {
+        "python_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        },
+        "openseespy_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "opensees_core_version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "variants": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "variant_id",
+          "raw_metrics_si",
+          "normalized_metrics"
+        ],
+        "properties": {
+          "variant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "raw_metrics_si": {
+            "$ref": "#/$defs/metrics"
+          },
+          "normalized_metrics": {
+            "$ref": "#/$defs/metrics"
+          }
+        }
+      }
+    },
+    "relative_differences": {
+      "$ref": "#/$defs/metrics"
+    },
+    "maximum_relative_difference": {
+      "type": "number",
+      "minimum": 0
+    },
+    "relative_tolerance": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "contract_pass": {
+      "type": "boolean"
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "artifact_hash": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "metrics": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "number"
+      }
+    }
+  }
+}

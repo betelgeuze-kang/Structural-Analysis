@@ -51,6 +51,42 @@ def test_modal_kernel_excludes_rigid_modes_without_regularization() -> None:
     assert solution.regularization_applied is False
 
 
+def test_modal_coordinate_scaling_recovers_physical_modes_and_eigenvalues() -> None:
+    stiffness = np.asarray([[4.0, -1.0], [-1.0, 9.0]], dtype=np.float64)
+    mass = np.asarray([[2.0, 0.0], [0.0, 3.0]], dtype=np.float64)
+    unscaled = solve_modal_modes(stiffness, mass, mode_count=2)
+    scaled = solve_modal_modes(
+        stiffness,
+        mass,
+        mode_count=2,
+        coordinate_recovery_scale=np.asarray([1.0, 0.125]),
+    )
+
+    assert [row.eigenvalue_rad2_per_s2 for row in scaled.modes] == pytest.approx(
+        [row.eigenvalue_rad2_per_s2 for row in unscaled.modes],
+        rel=1.0e-14,
+    )
+    for expected, actual in zip(unscaled.modes, scaled.modes, strict=True):
+        assert actual.mass_normalized_shape == pytest.approx(
+            expected.mass_normalized_shape,
+            rel=1.0e-14,
+            abs=1.0e-14,
+        )
+        assert actual.residual_relative_inf <= 1.0e-14
+    assert scaled.stiffness_matrix_hash == unscaled.stiffness_matrix_hash
+    assert scaled.mass_matrix_hash == unscaled.mass_matrix_hash
+
+
+def test_modal_coordinate_scaling_rejects_invalid_scale() -> None:
+    with pytest.raises(ModalAnalysisError, match="finite positive DOF vector"):
+        solve_modal_modes(
+            np.eye(2),
+            np.eye(2),
+            mode_count=1,
+            coordinate_recovery_scale=np.asarray([1.0, 0.0]),
+        )
+
+
 def test_repeated_modal_eigenspace_has_stable_coordinate_axis_basis() -> None:
     stiffness = np.diag([4.0, 4.0, 9.0])
     mass = np.eye(3, dtype=np.float64)

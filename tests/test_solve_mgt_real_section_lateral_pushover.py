@@ -9,8 +9,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_native_dual_lateral_pushover_plausible() -> None:
-    out = Path("/tmp/native_lat_test.json")
+def test_native_dual_lateral_pushover_plausible(tmp_path: Path) -> None:
+    out = tmp_path / "native_lat.json"
     proc = subprocess.run(
         [
             sys.executable,
@@ -94,25 +94,26 @@ def test_fixed_guided_drift_converges_with_mesh_refinement() -> None:
     assert abs(d24c - d12c) / max(d12c, 1.0e-12) < 0.15
 
 
-def test_wind_comparison_dual_native_tier() -> None:
+def test_wind_comparison_dual_native_tier(tmp_path: Path) -> None:
     sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
     from extract_midas_wind_same_mesh_result import extract_midas_wind_same_mesh_result  # noqa: E402
     from run_midas_gen_same_mesh_native_comparison import run_midas_gen_same_mesh_native_comparison  # noqa: E402
     from solve_mgt_real_section_lateral_pushover import solve_wind_native_lateral_dual  # noqa: E402
 
     base = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized"
-    result_json = base.parent / "midas_generator_33.optimized.midas_gen_same_mesh_result.wind_test.json"
     lateral = solve_wind_native_lateral_dual(
         roundtrip_npz=Path(str(base) + ".roundtrip.npz"),
         mgt_path=Path(str(base) + ".mgt"),
     )
-    lateral_out = base.parent / "midas_generator_33.optimized.mgt_real_section_lateral_pushover_test.json"
+    lateral_out = tmp_path / "mgt_real_section_lateral_pushover.json"
     lateral_out.write_text(json.dumps(lateral, indent=2) + "\n", encoding="utf-8")
 
     wind = extract_midas_wind_same_mesh_result(
         mgt_path=Path(str(base) + ".mgt"),
         roundtrip_json=Path(str(base) + ".roundtrip.json"),
     )
+    result_json = tmp_path / "midas_gen_same_mesh_result.wind.json"
+    result_json.write_text(json.dumps(wind, indent=2) + "\n", encoding="utf-8")
     lumped = float(wind["metrics"]["drift_ratio_pct"])
 
     report = run_midas_gen_same_mesh_native_comparison(

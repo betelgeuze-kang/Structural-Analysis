@@ -123,8 +123,18 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert briefing["primary_release_blocker"] == (
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
-    assert briefing["refresh_required_operator_action_count"] == 0
-    assert briefing["refresh_required_operator_actions"] == []
+    assert briefing["refresh_required_operator_action_count"] == 1
+    assert briefing["refresh_required_operator_actions"] == [
+        {
+            "action_id": "refresh_release_evidence_freshness",
+            "artifact": "release_evidence_freshness_report",
+            "reason": (
+                "release_evidence_freshness_report has stale or incomplete "
+                "source-of-truth blockers"
+            ),
+            "status": "refresh_required",
+        }
+    ]
 
     release_area_handoffs = {
         row["blocker_id"]: row
@@ -359,6 +369,13 @@ def test_goal_bottleneck_roadmap_surface_promotes_stale_refresh_operator_action(
 def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -> None:
     surface = module.build_goal_bottleneck_roadmap_surface(repo_root=REPO_ROOT)
     rows = _row_by_phase(surface)
+    product_capabilities = json.loads(
+        (
+            REPO_ROOT
+            / "implementation/phase1/release_evidence/surface/"
+            / "product_capabilities_surface.json"
+        ).read_text(encoding="utf-8")
+    )
 
     assert set(rows) == {
         "phase_0_source_of_truth_hardening",
@@ -380,8 +397,8 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
         "operator_action_count": kpis["operator_action_count"],
         "approval_token_count": kpis["approval_token_count"],
         "action_register_contract_pass": False,
-        "product_capability_count": 1,
-        "blocked_capability_count": 0,
+        "product_capability_count": product_capabilities["capability_count"],
+        "blocked_capability_count": product_capabilities["blocked_capability_count"],
     }
     assert phase_1["next_actions"] == ["work_release_decision_operator_actions"]
     assert surface["primary_roadmap_bottleneck"] == (

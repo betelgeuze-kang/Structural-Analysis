@@ -13,17 +13,17 @@
   "blockers": [],
   "claim_boundary": "This packet is a Developer Preview owner-evidence handoff for blocked RC final gates. It does not acquire IFC sources, run import evidence, or create benchmark, Windows, or human UX evidence; does not promote Developer Preview readiness; and does not close Commercial Release, G1, customer shadow, external benchmark, license, SLA, or GitHub CI streak gates.",
   "contract_pass": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "evidence_closure_pass": false,
   "evidence_intake_artifact_count": 16,
   "evidence_refresh_command_count": 17,
   "final_gate_count": 9,
   "final_gate_pass_count": 5,
-  "generated_at": "2026-07-19T07:22:04.948799+00:00",
+  "generated_at": "2026-07-30T06:04:47.870157+00:00",
   "input_checksums": {
     "docs/developer_preview_final_gate_action_register.md": "sha256:983780912d2a3400d15846b046f4910e86cc1c8a1c2509643ee99adccc0b3dcf",
-    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:21da4b1e31ee4605b64aacd085714d34671a560fba0b4c969edad32f8519b3f0",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:b02caecac3f2e59899f6c73cbb6aa5c352669749094a51736ce916e544d2d689",
+    "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:a2ffc143fdb4a191b69a8c2d19a4222c4cdc04ec84e1634fcc94f200899f6a5b",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:3f5a61946808f94526642de4f55b79db44a6328778ed554f90f7aa79180172d1",
     "scripts/build_developer_preview_final_gate_owner_packet.py": "sha256:072c1fc82c9896565ffb00614e6dc2c22f632e78a12dc863dd5ae19301479168"
   },
   "nearest_abf_slice": [
@@ -55,12 +55,13 @@
     {
       "closure_decision_required": "technical_IFC_import_and_silent_loss_evidence_passes",
       "contract_pass": false,
-      "current_blocker_count": 8,
+      "current_blocker_count": 9,
       "current_blockers": [
         "dirty_import_execution_missing",
         "ifc_import_health_execution_count_below_required:0/10",
         "import_health_execution_missing",
         "phase3_ifc_import_case_count_below_minimum",
+        "selected_file_checksums_missing",
         "silent_data_loss_negative_gate_not_executed",
         "silent_import_loss_gate_not_executed",
         "source_file_not_acquired",
@@ -1159,12 +1160,13 @@
       ],
       "closure_decision_required": "technical_IFC_import_and_silent_loss_evidence_passes",
       "contract_pass": false,
-      "current_blocker_count": 8,
+      "current_blocker_count": 9,
       "current_blockers": [
         "dirty_import_execution_missing",
         "ifc_import_health_execution_count_below_required:0/10",
         "import_health_execution_missing",
         "phase3_ifc_import_case_count_below_minimum",
+        "selected_file_checksums_missing",
         "silent_data_loss_negative_gate_not_executed",
         "silent_import_loss_gate_not_executed",
         "source_file_not_acquired",
@@ -1257,7 +1259,7 @@
         },
         {
           "artifact": "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json",
-          "blocker_count": 13,
+          "blocker_count": 14,
           "blockers": [
             "dirty_import_execution_missing",
             "ifc_import_health_execution_count_below_required:0/10",
@@ -1268,6 +1270,7 @@
             "phase3_ifc_source_license_quantity_credit_below_required:0/10",
             "phase3_ifc_source_license_review_blockers_not_cleared:3",
             "product_legal_license_review_pending",
+            "selected_file_checksums_missing",
             "silent_data_loss_negative_gate_not_executed",
             "silent_import_loss_gate_not_executed",
             "source_file_not_acquired",
@@ -1305,7 +1308,7 @@
     },
     {
       "blocker_grouping_metadata": {
-        "blocker_count": 1,
+        "blocker_count": 2,
         "grouping_policy": "Preserve every blocker while separating direct platform parity receipt gaps from git clean-clone spillover that is tracked by the separate clean-checkout RC gate.",
         "groups": {
           "git_clean_clone_spillover": {
@@ -1315,8 +1318,10 @@
             "scope": "tracked_elsewhere_clean_checkout_gate"
           },
           "platform_receipt_contract": {
-            "blocker_count": 0,
-            "blockers": [],
+            "blocker_count": 1,
+            "blockers": [
+              "platform_replay_receipt_not_passed:linux"
+            ],
             "description": "Present platform replay receipts that do not satisfy the contract.",
             "scope": "direct_linux_windows_parity_gate"
           },
@@ -1339,9 +1344,10 @@
       ],
       "closure_decision_required": "direct_windows_replay_receipt_passes",
       "contract_pass": false,
-      "current_blocker_count": 1,
+      "current_blocker_count": 2,
       "current_blockers": [
-        "platform_replay_receipt_missing:windows"
+        "platform_replay_receipt_missing:windows",
+        "platform_replay_receipt_not_passed:linux"
       ],
       "current_evidence_gap_state": "owner_evidence_required",
       "current_evidence_refs": [
@@ -1399,13 +1405,29 @@
               "return_code": 0
             }
           ],
-          "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+          "required_source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
           "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
           "slot_id": "attach_windows_platform_replay_receipt",
           "source_artifact": "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
           "validation_commands_after_attachment": [
             "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
             "python3 scripts/build_developer_preview_rc_status.py --check"
+          ]
+        },
+        {
+          "minimum_evidence": [
+            "existing receipt schema_version, platform, replay commands, cleanliness, scorecard, and checksums all satisfy the parity status contract",
+            "platform_replay_receipt_not_passed blocker disappears from phase6_linux_windows_parity_status.json"
+          ],
+          "platform": "linux",
+          "required_artifact": "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json",
+          "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+          "slot_id": "repair_linux_platform_replay_receipt",
+          "source_artifact": "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
+          "validation_commands_after_attachment": [
+            "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+            "python3 scripts/build_developer_preview_rc_status.py --check",
+            "python3 scripts/build_product_readiness_snapshot.py --check"
           ]
         },
         {
@@ -1423,9 +1445,10 @@
           ]
         }
       ],
-      "owner_unblock_plan_count": 2,
+      "owner_unblock_plan_count": 3,
       "owner_unblock_slot_ids": [
         "attach_windows_platform_replay_receipt",
+        "repair_linux_platform_replay_receipt",
         "rerun_linux_windows_parity_and_dp_rc_checks"
       ],
       "prohibited_substitutes": [
@@ -1455,9 +1478,10 @@
       "upstream_handoff_sources": [
         {
           "artifact": "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json",
-          "blocker_count": 1,
+          "blocker_count": 2,
           "blockers": [
-            "platform_replay_receipt_missing:windows"
+            "platform_replay_receipt_missing:windows",
+            "platform_replay_receipt_not_passed:linux"
           ],
           "contract_pass": false,
           "gate_unblock_plan": [
@@ -1491,12 +1515,27 @@
                   "return_code": 0
                 }
               ],
-              "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+              "required_source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
               "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
               "slot_id": "attach_windows_platform_replay_receipt",
               "validation_commands_after_attachment": [
                 "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
                 "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "minimum_evidence": [
+                "existing receipt schema_version, platform, replay commands, cleanliness, scorecard, and checksums all satisfy the parity status contract",
+                "platform_replay_receipt_not_passed blocker disappears from phase6_linux_windows_parity_status.json"
+              ],
+              "platform": "linux",
+              "required_artifact": "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json",
+              "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+              "slot_id": "repair_linux_platform_replay_receipt",
+              "validation_commands_after_attachment": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check",
+                "python3 scripts/build_product_readiness_snapshot.py --check"
               ]
             },
             {
@@ -1513,10 +1552,10 @@
               ]
             }
           ],
-          "gate_unblock_plan_count": 2,
+          "gate_unblock_plan_count": 3,
           "missing_evidence_breakdown": [],
           "missing_evidence_count": 0,
-          "operator_next_action_count": 2,
+          "operator_next_action_count": 3,
           "operator_next_actions": [
             {
               "forbidden_shortcuts": [
@@ -1548,12 +1587,27 @@
                   "return_code": 0
                 }
               ],
-              "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+              "required_source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
               "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
               "slot_id": "attach_windows_platform_replay_receipt",
               "validation_commands_after_attachment": [
                 "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
                 "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "minimum_evidence": [
+                "existing receipt schema_version, platform, replay commands, cleanliness, scorecard, and checksums all satisfy the parity status contract",
+                "platform_replay_receipt_not_passed blocker disappears from phase6_linux_windows_parity_status.json"
+              ],
+              "platform": "linux",
+              "required_artifact": "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json",
+              "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+              "slot_id": "repair_linux_platform_replay_receipt",
+              "validation_commands_after_attachment": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check",
+                "python3 scripts/build_product_readiness_snapshot.py --check"
               ]
             },
             {
@@ -1571,7 +1625,7 @@
             }
           ],
           "present": true,
-          "recommended_next_action_count": 2,
+          "recommended_next_action_count": 3,
           "recommended_next_actions": [
             {
               "forbidden_shortcuts": [
@@ -1603,12 +1657,27 @@
                   "return_code": 0
                 }
               ],
-              "required_source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+              "required_source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
               "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
               "slot_id": "attach_windows_platform_replay_receipt",
               "validation_commands_after_attachment": [
                 "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
                 "python3 scripts/build_developer_preview_rc_status.py --check"
+              ]
+            },
+            {
+              "minimum_evidence": [
+                "existing receipt schema_version, platform, replay commands, cleanliness, scorecard, and checksums all satisfy the parity status contract",
+                "platform_replay_receipt_not_passed blocker disappears from phase6_linux_windows_parity_status.json"
+              ],
+              "platform": "linux",
+              "required_artifact": "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json",
+              "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+              "slot_id": "repair_linux_platform_replay_receipt",
+              "validation_commands_after_attachment": [
+                "python3 scripts/build_phase6_linux_windows_parity_status.py --check",
+                "python3 scripts/build_developer_preview_rc_status.py --check",
+                "python3 scripts/build_product_readiness_snapshot.py --check"
               ]
             },
             {
@@ -2117,7 +2186,7 @@
     }
   ],
   "owner_review_required": true,
-  "owner_unblock_plan_count": 15,
+  "owner_unblock_plan_count": 16,
   "ready_gate_items": [
     "analytic_component_benchmark_all_pass",
     "large_models_crash_oom_free",
@@ -2130,7 +2199,7 @@
   "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
   "reused_evidence": false,
   "schema_version": "developer-preview-final-gate-owner-packet.v1",
-  "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "status": "ready_for_owner_review",
   "summary_line": "Developer Preview final gate owner packet: READY_FOR_OWNER_REVIEW | blocked_gates=4/9 | handoff_rows=4"
 }

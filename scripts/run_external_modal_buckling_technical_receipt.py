@@ -32,6 +32,9 @@ for candidate in (SCRIPT_DIR, SRC_ROOT):
 
 import run_external_code_to_code_technical_receipt as external_base  # noqa: E402
 from release_evidence_metadata import git_head, input_checksums  # noqa: E402
+from source_bound_python_inventory import (  # noqa: E402
+    expand_local_python_sources,
+)
 from structural_analysis import ANALYSIS_ENGINE_VERSION  # noqa: E402
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model  # noqa: E402
 
@@ -110,6 +113,7 @@ SOURCE_PATHS = (
     Path("src/structural_analysis/assembly/buckling.py"),
     Path("src/structural_analysis/elements/frame3d.py"),
     Path("src/structural_analysis/solvers/_generalized_eigen.py"),
+    Path("tests/test_source_bound_python_inventory.py"),
 )
 
 
@@ -242,7 +246,8 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _source_checksums(repo_root: Path) -> dict[str, str]:
-    checksums = input_checksums(SOURCE_PATHS, repo_root=repo_root)
+    source_paths = expand_local_python_sources(SOURCE_PATHS, repo_root=repo_root)
+    checksums = input_checksums(source_paths, repo_root=repo_root)
     missing = [path for path, checksum in checksums.items() if checksum == "missing"]
     if missing:
         raise ExternalModalBucklingReceiptError(

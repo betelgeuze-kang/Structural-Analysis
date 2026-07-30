@@ -13,7 +13,6 @@ from scipy.sparse import csr_matrix, issparse
 from scipy.sparse.linalg import (
     ArpackNoConvergence,
     LinearOperator,
-    eigs,
     eigsh,
     splu,
 )
@@ -159,11 +158,27 @@ def solve_sparse_modal_modes(
             name="mass",
             tolerance=tolerances["symmetry_relative_tolerance"],
         )
-        mass_minimum, mass_scale = _extreme_eigenvalues(
-            m_matrix,
-            maximum_iterations=maximum_iterations,
-            arpack_tolerance=tolerances["arpack_tolerance"],
+        try:
+            mass_factor = splu(m_matrix.tocsc())
+        except RuntimeError as exc:
+            raise SparseGeneralizedEigenError(
+                "mass must be numerically positive definite"
+            ) from exc
+        mass_inverse = LinearOperator(
+            shape=m_matrix.shape,
+            matvec=mass_factor.solve,
+            dtype=np.float64,
         )
+        try:
+            mass_minimum, mass_scale = _extreme_eigenvalues(
+                m_matrix,
+                maximum_iterations=maximum_iterations,
+                arpack_tolerance=tolerances["arpack_tolerance"],
+            )
+        except (ArpackNoConvergence, RuntimeError, ValueError, np.linalg.LinAlgError) as exc:
+            raise SparseGeneralizedEigenError(
+                "mass must be numerically positive definite"
+            ) from exc
         _require_numerically_positive_definite(
             mass_minimum,
             mass_scale,
@@ -186,6 +201,7 @@ def solve_sparse_modal_modes(
             k_matrix,
             k=candidate_count,
             M=m_matrix,
+            Minv=mass_inverse,
             which="SM",
             tol=tolerances["arpack_tolerance"],
             maxiter=maximum_iterations,
@@ -199,6 +215,7 @@ def solve_sparse_modal_modes(
                 k_matrix,
                 k=1,
                 M=m_matrix,
+                Minv=mass_inverse,
                 which="LA",
                 return_eigenvectors=False,
                 tol=tolerances["arpack_tolerance"],
@@ -401,33 +418,27 @@ def solve_sparse_linear_buckling(
                 "geometric stiffness violates the positive-semidefinite contract"
             )
         stiffness_factor = splu(k_matrix.tocsc())
-        reciprocal_operator = LinearOperator(
+        stiffness_inverse = LinearOperator(
             shape=k_matrix.shape,
-            matvec=lambda vector: stiffness_factor.solve(kg_matrix @ vector),
+            matvec=stiffness_factor.solve,
             dtype=np.float64,
         )
-        raw_reciprocals, raw_vectors = eigs(
-            reciprocal_operator,
+        raw_reciprocals, raw_vectors = eigsh(
+            kg_matrix,
             k=candidate_count,
-            which="LR",
+            M=k_matrix,
+            Minv=stiffness_inverse,
+            which="LA",
             tol=tolerances["arpack_tolerance"],
             maxiter=maximum_iterations,
             v0=_deterministic_start(n),
         )
-        reciprocal_complex = np.asarray(raw_reciprocals, dtype=np.complex128)
-        vector_complex = np.asarray(raw_vectors, dtype=np.complex128)
-        complex_scale = max(float(np.max(np.abs(reciprocal_complex.real))), 1.0)
-        if (
-            not np.all(np.isfinite(reciprocal_complex))
-            or not np.all(np.isfinite(vector_complex))
-            or float(np.max(np.abs(reciprocal_complex.imag))) > 1.0e-12 * complex_scale
-            or float(np.max(np.abs(vector_complex.imag))) > 1.0e-10
-        ):
+        reciprocals = np.asarray(raw_reciprocals, dtype=np.float64)
+        vectors = np.asarray(raw_vectors, dtype=np.float64)
+        if not np.all(np.isfinite(reciprocals)) or not np.all(np.isfinite(vectors)):
             raise SparseGeneralizedEigenError(
-                "buckling reciprocal operator returned a material complex mode"
+                "buckling reciprocal operator returned non-finite modes"
             )
-        reciprocals = np.asarray(reciprocal_complex.real, dtype=np.float64)
-        vectors = np.asarray(vector_complex.real, dtype=np.float64)
         reciprocal_scale = max(float(np.max(np.abs(reciprocals))), 1.0)
         positive_threshold = finite_tolerance * reciprocal_scale
         positive_candidate_indices = [
@@ -598,8 +609,8 @@ def _operator_candidate_count(dof_count: int, requested: int) -> int:
         raise SparseGeneralizedEigenError(
             "sparse extraction requires mode_count <= dof_count - 2"
         )
-    # scipy.sparse.linalg.eigs falls back to dense scipy.linalg.eig when
-    # k >= N - 1.  Keep one further vector outside the requested subspace.
+    # scipy.sparse.linalg.eigsh requires k < N. Keep one further vector
+    # outside the requested subspace so cluster-cut detection stays sparse.
     return min(dof_count - 2, max(requested + 8, 2 * requested + 2))
 
 

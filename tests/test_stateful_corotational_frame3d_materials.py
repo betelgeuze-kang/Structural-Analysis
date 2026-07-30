@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 from pathlib import Path
 
@@ -16,16 +17,21 @@ from structural_analysis.assembly.corotational_frame3d_global import (
 from structural_analysis.assembly.stateful_corotational_frame3d_sparse import (
     AxialMaterial,
     StatefulCorotationalFrame3DSparseConfig,
+    StatefulCorotationalFrame3DSparseError,
     StatefulCorotationalFrame3DSparseModel,
+    assemble_stateful_corotational_frame3d_dense_reference,
+    assemble_stateful_corotational_frame3d_sparse,
     initial_stateful_corotational_frame3d_sparse_checkpoint,
     solve_stateful_corotational_frame3d_sparse_load_path,
     stateful_corotational_frame3d_dense_sparse_parity_receipt,
     stateful_corotational_frame3d_member_response,
+    validate_stateful_corotational_frame3d_sparse_checkpoint,
 )
 from structural_analysis.elements.frame3d import FrameProps
 from structural_analysis.elements.timoshenko_frame3d import (
     TimoshenkoFrame3DSection,
 )
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.materials.composite_section import (
     ParallelCompositeSectionResponse,
     ParallelCompositeSectionState,
@@ -243,6 +249,46 @@ def test_parallel_composite_commits_nested_state_and_resumes_exactly() -> None:
     Draft202012Validator(schema).validate(one_shot.final_checkpoint.to_dict())
 
 
+def test_parallel_composite_checkpoint_rejects_unreachable_nested_concrete() -> None:
+    material = ParallelSteelConcreteSectionMaterial(steel_area_fraction=0.5)
+    effective_modulus_mpa = (
+        material.steel_area_fraction * material.steel.elastic_modulus_mpa
+        + material.concrete_area_fraction * material.concrete.elastic_modulus_mpa
+    )
+    model = _single_member_model(
+        material,
+        elastic_modulus_mpa=effective_modulus_mpa,
+        reference_load_kn=100.0,
+        model_id="parallel-composite-admissibility",
+    )
+    config = StatefulCorotationalFrame3DSparseConfig()
+    checkpoint = initial_stateful_corotational_frame3d_sparse_checkpoint(
+        model,
+        config=config,
+    )
+    state = checkpoint.material_states[0]
+    assert type(state) is ParallelCompositeSectionState
+    forged_state = ParallelCompositeSectionState(
+        steel_state=state.steel_state,
+        concrete_state=ConcreteDamageState(
+            dissipated_energy_density_mj_per_m3=1.0
+        ),
+    )
+    forged = replace(checkpoint, material_states=(forged_state,))
+    payload = forged.to_dict()
+    payload.pop("checkpoint_hash")
+    forged = replace(forged, checkpoint_hash=canonical_hash(payload))
+
+    with pytest.raises(StatefulCorotationalFrame3DSparseError) as error:
+        validate_stateful_corotational_frame3d_sparse_checkpoint(
+            forged,
+            model=model,
+            config=config,
+            require_equilibrium=False,
+        )
+    assert error.value.reason_code == "material_state_admissibility_failed"
+
+
 def test_parallel_composite_member_reports_constituent_response() -> None:
     material = ParallelSteelConcreteSectionMaterial()
     effective_modulus_mpa = (
@@ -352,6 +398,61 @@ def test_confined_concrete_envelope_is_bound_to_member_state_and_tangent() -> No
         ).read_text(encoding="utf-8")
     )
     Draft202012Validator(schema).validate(result.final_checkpoint.to_dict())
+
+
+def test_confined_concrete_frame3d_reversal_is_a_stable_solver_error() -> None:
+    material = ConfinedConcreteMaterial(effective_lateral_pressure_mpa=2.0)
+    model = _single_member_model(
+        material,
+        elastic_modulus_mpa=material.elastic_modulus_mpa,
+        reference_load_kn=-300.0,
+        model_id="confined-concrete-reversal-blocked",
+    )
+    config = StatefulCorotationalFrame3DSparseConfig(maximum_iterations=40)
+    prefix = solve_stateful_corotational_frame3d_sparse_load_path(
+        model,
+        (0.5, 1.0),
+        config=config,
+    )
+    parent_bytes = prefix.final_checkpoint.material_states[0].canonical_bytes()
+    manifest = model.to_manifest()["axial_materials"][0]
+    assert manifest["path_capabilities"]["supports_monotonic"] is True
+    assert manifest["path_capabilities"]["supports_unloading"] is False
+    unloading_trial = np.asarray(prefix.final_checkpoint.displacement).copy()
+    unloading_trial[6] *= 0.5
+
+    for assemble in (
+        assemble_stateful_corotational_frame3d_sparse,
+        assemble_stateful_corotational_frame3d_dense_reference,
+    ):
+        with pytest.raises(
+            StatefulCorotationalFrame3DSparseError,
+            match="^unsupported_constitutive_path: member member-1:",
+        ):
+            assemble(
+                model,
+                prefix.final_checkpoint,
+                target_load_factor=-0.5,
+                trial_displacement=unloading_trial,
+            )
+
+    with pytest.raises(
+        StatefulCorotationalFrame3DSparseError,
+        match=(
+            "^unsupported_constitutive_path: member member-1: "
+            "mander_uniaxial_monotonic_compression"
+        ),
+    ):
+        solve_stateful_corotational_frame3d_sparse_load_path(
+            model,
+            (-0.5,),
+            config=config,
+            resume_from=prefix.final_checkpoint,
+        )
+    assert (
+        prefix.final_checkpoint.material_states[0].canonical_bytes()
+        == parent_bytes
+    )
 
 
 def test_condensed_partial_interaction_has_exact_same_parent_schur_tangent() -> None:
@@ -495,3 +596,39 @@ def test_partial_interaction_member_length_and_area_bindings_fail_closed() -> No
             model_id="invalid-partial-area-binding",
             area_m2=0.005,
         )
+
+
+def test_partial_interaction_local_failure_has_stable_frame3d_reason_code() -> None:
+    material = CondensedPartialCompositeAxialMaterial(
+        member_length_m=2.0,
+        reference_area_m2=0.005,
+        maximum_local_iterations=1,
+    )
+    model = _single_member_model(
+        material,
+        elastic_modulus_mpa=material.initial_effective_modulus_mpa,
+        reference_load_kn=500.0,
+        model_id="partial-composite-local-failure",
+        area_m2=material.reference_area_m2,
+    )
+    config = StatefulCorotationalFrame3DSparseConfig()
+    parent = initial_stateful_corotational_frame3d_sparse_checkpoint(
+        model,
+        config=config,
+    )
+    trial = np.asarray(parent.displacement, dtype=np.float64).copy()
+    trial[6] = 1.0e-2
+
+    for assemble in (
+        assemble_stateful_corotational_frame3d_sparse,
+        assemble_stateful_corotational_frame3d_dense_reference,
+    ):
+        with pytest.raises(StatefulCorotationalFrame3DSparseError) as error:
+            assemble(
+                model,
+                parent,
+                target_load_factor=1.0,
+                trial_displacement=trial,
+            )
+        assert error.value.reason_code == "material_integration_failed"
+    assert parent.material_states[0] == material.initial_state()

@@ -20,12 +20,13 @@ def test_structure_viewer_visual_regression_is_wired_to_package_and_full_gate() 
     )
     assert "scripts/measure-structure-viewer-visual-regression.mjs" in frontend_contract
     assert "verify:viewer-visual-regression" in quality_gate
-    assert quality_gate.index("verify:viewer-performance-probe") < quality_gate.index(
-        "verify:viewer-visual-regression"
+    performance_index = quality_gate.index("verify:viewer-performance-probe")
+    visual_index = quality_gate.index("verify:viewer-visual-regression")
+    full_commercialization_index = quality_gate.index(
+        "report_commercialization_level.py",
+        visual_index,
     )
-    assert quality_gate.index("verify:viewer-visual-regression") < quality_gate.index(
-        "report_commercialization_level.py"
-    )
+    assert performance_index < visual_index < full_commercialization_index
     assert "tests/test_structure_viewer_visual_regression_contract.py" in viewer_contracts
 
 
@@ -79,3 +80,10 @@ def test_structure_viewer_visual_regression_has_dry_run_and_claim_boundary(tmp_p
     assert "visual_case_scope" in script_text
     assert "compareSignatures" in script_text
     assert "viewport_screenshot_sha256" in script_text
+    assert "activateRenderMode" in script_text
+    assert 'data-viewport-tool-render-mode="${normalizedMode}"' in script_text
+    assert "activateViewPreset" in script_text
+    assert 'data-viewport-view-preset="${normalizedPreset}"' in script_text
+    assert "ensureWorkspaceChrome" in script_text
+    assert "data-si-shell" in script_text
+    assert "aria-pressed" in script_text

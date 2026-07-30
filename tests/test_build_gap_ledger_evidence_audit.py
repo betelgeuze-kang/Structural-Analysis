@@ -29,24 +29,27 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     assert payload["full_gap_ledger_ready"] is False
     assert payload["ledger_status"] == "open"
     assert payload["row_count"] == 20
-    assert payload["closed_row_count"] == 17
-    assert payload["nonclosed_row_count"] == 3
+    assert payload["closed_row_count"] == 16
+    assert payload["nonclosed_row_count"] == 4
     closed = payload["closed_evidence_coverage"]
-    assert closed["closed_rows_with_evidence_count"] == 17
-    assert closed["closed_rows_without_blockers_count"] == 17
+    assert closed["closed_rows_with_evidence_count"] == 16
+    assert closed["closed_rows_without_blockers_count"] == 16
     assert closed["closed_missing_evidence_ids"] == []
     assert closed["closed_with_blockers_ids"] == []
     assert closed["closed_missing_claim_boundary_ids"] == []
     assert closed["closed_missing_boundary_or_next_gate_ids"] == []
     nonclosed = payload["nonclosed_visibility"]
-    assert nonclosed["nonclosed_rows_with_blockers_count"] == 3
-    assert nonclosed["nonclosed_rows_with_claim_boundary_count"] == 3
-    assert nonclosed["nonclosed_rows_with_evidence_count"] == 3
+    assert nonclosed["nonclosed_rows_with_blockers_count"] == 4
+    assert nonclosed["nonclosed_rows_with_claim_boundary_count"] == 4
+    assert nonclosed["nonclosed_rows_with_evidence_count"] == 4
     assert nonclosed["nonclosed_missing_blocker_ids"] == []
     assert nonclosed["nonclosed_missing_claim_boundary_ids"] == []
     source_paths = payload["source_receipt_path_coverage"]
     assert source_paths["source_receipt_path_count"] == 112
-    assert source_paths["source_receipt_existing_path_count"] == 112
+    assert source_paths["source_receipt_existing_path_count"] == 109
+    assert source_paths["source_receipt_unavailable_path_count"] == 3
+    assert source_paths["source_receipt_unavailable_row_ids"] == ["G6", "AI-G6"]
+    assert source_paths["source_receipt_unavailable_but_present_path_count"] == 0
     assert source_paths["source_receipt_absent_row_count"] == 0
     assert source_paths["source_receipt_absent_row_ids"] == []
     assert source_paths["source_receipt_missing_path_count"] == 0
@@ -78,6 +81,7 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
         "eb_receipt_peer_spd_hinge",
         "eb_receipt_tpu_hffb",
     ]
+    assert outcomes["G6"]["source_receipt_unavailable_path_count"] == 2
     assert outcomes["G7"]["closure_requirement_count"] == 5
     assert outcomes["G7"]["closure_requirement_pass_count"] == 0
     assert outcomes["G7"]["closure_requirement_fail_count"] == 5
@@ -94,6 +98,7 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     assert outcomes["G2"]["next_gate_present"] is True
     assert outcomes["AI-G1"]["source_receipt_path_count"] == 8
     assert outcomes["AI-G1"]["source_receipt_missing_path_count"] == 0
+    assert outcomes["AI-G6"]["source_receipt_unavailable_path_count"] == 1
     assert "does not create authoritative evidence" in payload["claim_boundary"]
 
 

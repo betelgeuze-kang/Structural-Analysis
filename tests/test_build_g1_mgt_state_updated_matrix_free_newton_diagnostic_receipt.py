@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import importlib.util
 from pathlib import Path
 import sys
@@ -10,9 +11,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = (
-    ROOT
-    / "scripts/"
-    "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py"
+    ROOT / "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py"
 )
 SPEC = importlib.util.spec_from_file_location(
     "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt",
@@ -72,20 +71,18 @@ def test_committed_receipt_records_two_stable_full_step_descents() -> None:
     assert residual_contract["mode"] == (
         "reference_csr_plus_load_frame_delta_plus_finite_chord_correction"
     )
-    assert residual_contract[
-        "reference_csr_parent_matches_analytic_tangent"
-    ] is True
-    assert residual_contract[
-        "load_frame_delta_parent_matches_analytic_tangent"
-    ] is True
-    assert residual_contract[
-        "finite_chord_correction_parent_matches_analytic_tangent"
-    ] is True
+    assert residual_contract["reference_csr_parent_matches_analytic_tangent"] is True
+    assert residual_contract["load_frame_delta_parent_matches_analytic_tangent"] is True
+    assert (
+        residual_contract["finite_chord_correction_parent_matches_analytic_tangent"]
+        is True
+    )
     residual_audit = adapter["residual_parent_equivalence_audit"]
     assert residual_audit["status"] == "ready"
     assert residual_audit["applicable"] is True
-    assert residual_audit["parent_component_difference_inf_n"] <= (
-        residual_audit["comparison_tolerance_n"]
+    assert (
+        residual_audit["parent_component_difference_inf_n"]
+        <= (residual_audit["comparison_tolerance_n"])
     )
     assert residual_audit["parent_component_gate_passed"] is True
     assert residual_audit["parent_repeat_bytes_exact"] is True
@@ -98,24 +95,19 @@ def test_committed_receipt_records_two_stable_full_step_descents() -> None:
     solver_binding = receipt["solver_binding"]
     assert solver_binding["operator_binding"]["status"] == "ready"
     assert solver_binding["operator_binding"]["equation_count"] == 70_560
-    assert solver_binding["operator_binding"]["residual_formula_hash"] == (
-        residual_contract["residual_formula_hash"]
+    assert (
+        solver_binding["operator_binding"]["residual_formula_hash"]
+        == (residual_contract["residual_formula_hash"])
     )
     assert solver_binding["operator_binding"][
         "current_tangent_operator_contract_hash"
-    ] == (
-        "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177"
-    )
-    assert solver_binding[
-        "operator_callback_formula_parent_arrays_bound"
-    ] is True
+    ] == ("sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177")
+    assert solver_binding["operator_callback_formula_parent_arrays_bound"] is True
     assert solver_binding["accumulation_profile"] == (
         "ascending_index_python_fsum_fp64.v1"
     )
     assert solver_binding["deterministic_host_recurrence_arithmetic"] is True
-    assert solver_binding[
-        "cross_platform_end_to_end_deterministic_claim"
-    ] is False
+    assert solver_binding["cross_platform_end_to_end_deterministic_claim"] is False
 
     attempts = receipt["newton_attempts"]
     assert len(attempts) == 2
@@ -141,9 +133,9 @@ def test_committed_receipt_records_two_stable_full_step_descents() -> None:
     assert first["tangent_solve"]["operator_action_count"] == 6
     assert first["tangent_solve"]["explicit_residual_inf_kn"] <= 5.0e-7
     assert first["tangent_solve"]["operator_binding_ready"] is True
-    assert first["tangent_solve"][
-        "deterministic_host_recurrence_arithmetic_claim"
-    ] is True
+    assert (
+        first["tangent_solve"]["deterministic_host_recurrence_arithmetic_claim"] is True
+    )
 
     assert second["attempt_index"] == 2
     assert second["accepted"] is True
@@ -172,9 +164,7 @@ def test_committed_receipt_records_two_stable_full_step_descents() -> None:
     assert metrics["residual_gate_kn"] == 5.0e-7
     assert metrics["residual_gate_passed"] is True
     assert metrics["accepted_residual_reduction_factor_inf"] > 2.5e9
-    assert metrics["final_accepted_state_data_hash"] == second[
-        "state_after_data_hash"
-    ]
+    assert metrics["final_accepted_state_data_hash"] == second["state_after_data_hash"]
     assert metrics["total_tangent_iteration_count"] == 5
     assert metrics["total_tangent_operator_action_count"] == 10
     assert metrics["fallback_count"] == 0
@@ -186,14 +176,10 @@ def test_committed_receipt_records_two_stable_full_step_descents() -> None:
     assert claims["local_cpu_matrix_free_state_tangent_diagnostic"] is True
     assert claims["all_tangent_solves_operator_bound"] is True
     assert claims["all_tangent_solves_deterministic_host_arithmetic"] is True
-    assert claims[
-        "all_tangent_operator_formula_parent_arrays_bound"
-    ] is True
+    assert claims["all_tangent_operator_formula_parent_arrays_bound"] is True
     assert claims["explicit_tangent_residual_replay"] is True
     assert claims["cancellation_stable_finite_chord_evaluation"] is True
-    assert claims[
-        "residual_parent_operator_matches_analytic_tangent"
-    ] is True
+    assert claims["residual_parent_operator_matches_analytic_tangent"] is True
     assert claims["residual_formula_hash_verified"] is True
     assert claims["first_full_newton_step_residual_descent"] is True
     assert claims["second_full_newton_step_residual_descent"] is True
@@ -205,12 +191,11 @@ def test_committed_receipt_records_two_stable_full_step_descents() -> None:
     assert claims["cross_platform_deterministic_recurrence"] is False
     assert claims["production_rocm_hip_nonlinear_parity"] is False
     assert claims["g1_full_building_closure"] is False
-    assert "accepted_diagnostic_residual_above_g1_gate" not in receipt[
-        "blockers_remaining"
-    ]
-    assert "full_nonlinear_continuation_not_executed" in receipt[
-        "blockers_remaining"
-    ]
+    assert (
+        "accepted_diagnostic_residual_above_g1_gate"
+        not in receipt["blockers_remaining"]
+    )
+    assert "full_nonlinear_continuation_not_executed" in receipt["blockers_remaining"]
 
 
 def test_committed_receipt_validates_against_schema() -> None:
@@ -237,3 +222,45 @@ def test_check_reports_missing_receipt_without_running_actual_model(
 
     assert ok is False
     assert message == "g1_mgt_state_updated_matrix_free_newton_missing"
+
+
+def test_portable_comparison_accepts_bounded_platform_numeric_drift() -> None:
+    existing = _committed_receipt()
+    expected = deepcopy(existing)
+    expected["generated_at"] = "2099-01-01T00:00:00+00:00"
+    expected["source_commit_sha"] = "f" * 40
+    expected["inputs"]["initial_state_data_hash"] = "sha256:" + "1" * 64
+    first = expected["newton_attempts"][0]
+    first["trial_residual_inf_kn"] += 1.0e-10
+    first["accepted_after_residual_inf_kn"] += 1.0e-10
+    expected["newton_attempts"][1]["before_residual_inf_kn"] += 1.0e-10
+    first["trial_state_data_hash"] = "sha256:" + "2" * 64
+    first["tangent_solve"]["contract_hash"] = "sha256:" + "3" * 64
+    first["tangent_solve"]["solution_data_hash"] = "sha256:" + "4" * 64
+
+    assert module._portable_receipt_difference(existing, expected) is None
+    assert module._portable_receipt_invariant_error(existing) is None
+    assert module._portable_receipt_invariant_error(expected) is None
+
+
+def test_portable_comparison_rejects_source_or_contract_tampering() -> None:
+    existing = _committed_receipt()
+
+    checksum_tamper = deepcopy(existing)
+    first_path = next(iter(checksum_tamper["input_checksums"]))
+    checksum_tamper["input_checksums"][first_path] = "sha256:" + "0" * 64
+    assert module._portable_receipt_difference(existing, checksum_tamper) == (
+        f"input_checksums.{first_path}"
+    )
+
+    claim_tamper = deepcopy(existing)
+    claim_tamper["claims"]["globalized_newton"] = True
+    assert module._portable_receipt_difference(existing, claim_tamper) == (
+        "claims.globalized_newton"
+    )
+
+    failed_gate = deepcopy(existing)
+    failed_gate["metrics"]["final_accepted_residual_inf_kn"] += 1.0e-4
+    assert module._portable_receipt_invariant_error(failed_gate) == (
+        "metrics.final_accepted_residual_inf_kn"
+    )

@@ -63,6 +63,28 @@ jobs:
           set -o pipefail
           python scripts/run_product_ci_lane.py --lane legacy_evidence --ruff --compile 2>&1 | tee legacy-evidence-lane.log
 
+      - name: Materialize exact current-source V&V inputs
+        shell: bash
+        run: |
+          python scripts/run_external_code_to_code_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "CI product replay; external execution bytes reused without freshness credit."
+          python scripts/run_external_modal_buckling_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "CI product replay; external execution bytes reused without freshness credit."
+          python scripts/build_bounded_planar_external_linear_case_package.py
+          python scripts/build_bounded_planar_external_negative_case_package.py
+          python scripts/build_bounded_planar_external_scaling_case_package.py
+          python scripts/build_bounded_planar_external_modal_buckling_case_package.py
+          python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+          python scripts/build_bounded_planar_external_vv_matrix.py
+          python scripts/build_internal_license_due_diligence.py --fail-blocked
+          python scripts/build_bounded_planar_external_linear_case_package.py --check
+          python scripts/build_bounded_planar_external_negative_case_package.py --check
+          python scripts/build_bounded_planar_external_scaling_case_package.py --check
+          python scripts/build_bounded_planar_external_modal_buckling_case_package.py --check
+          python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py --check
+
       - name: Deterministic legacy evidence contracts
         run: >-
           python -m pytest -q
@@ -72,6 +94,19 @@ jobs:
           tests/test_external_code_to_code_technical_receipt.py
           tests/test_external_modal_buckling_technical_receipt.py
           tests/test_external_vv_clean_runner_contract.py
+          tests/test_validate_external_vv_operator_attestation.py
+          tests/test_promote_external_vv_level2.py
+          tests/test_build_bounded_planar_external_linear_case_package.py
+          tests/test_build_bounded_planar_external_negative_case_package.py
+          tests/test_build_bounded_planar_external_scaling_case_package.py
+          tests/test_build_bounded_planar_external_modal_buckling_case_package.py
+          tests/test_build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+          tests/test_ingest_bounded_planar_external_linear_results.py
+          tests/test_ingest_bounded_planar_external_negative_results.py
+          tests/test_ingest_bounded_planar_external_scaling_results.py
+          tests/test_ingest_bounded_planar_external_modal_buckling_results.py
+          tests/test_ingest_bounded_planar_external_nonlinear_material_recovery_results.py
+          tests/test_build_bounded_planar_external_vv_matrix.py
           tests/test_source_boundary_ci_contract.py
 
       - name: Upload legacy evidence receipt

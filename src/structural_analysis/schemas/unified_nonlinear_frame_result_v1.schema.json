@@ -11,6 +11,7 @@
     "result_hash",
     "profile",
     "source_result_hash",
+    "engineering_result_ir",
     "canonical_model_checksum",
     "input_checksum",
     "solver_id",
@@ -37,6 +38,22 @@
     "result_hash": {"$ref": "#/$defs/hash"},
     "profile": {"enum": ["fixed_chord_serial_cantilever.v1", "corotational_one_bay_portal.v1", "corotational_connected_frame2d.v1"]},
     "source_result_hash": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+    "engineering_result_ir": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["schema_version", "engineering_result_hash", "array_bundle_hash", "quantity_catalog_hash", "authority_axes"],
+          "properties": {
+            "schema_version": {"const": "corotational-fiber-frame2d-engineering-result-ir.v1"},
+            "engineering_result_hash": {"$ref": "#/$defs/hash"},
+            "array_bundle_hash": {"$ref": "#/$defs/hash"},
+            "quantity_catalog_hash": {"$ref": "#/$defs/hash"},
+            "authority_axes": {"type": "object"}
+          }
+        },
+        {"type": "null"}
+      ]
+    },
     "canonical_model_checksum": {"$ref": "#/$defs/hash"},
     "input_checksum": {"$ref": "#/$defs/hash"},
     "solver_id": {"type": "string", "minLength": 1},
@@ -47,7 +64,7 @@
     "authority": {
       "type": "object",
       "additionalProperties": {"type": "string"},
-      "required": ["convergence", "displacement", "reaction", "member_force", "section_resultant", "fiber_result", "fallback", "public_api", "external_vv", "engineering_design", "release_readiness"]
+      "required": ["convergence", "displacement", "reaction", "member_force", "member_features", "section_resultant", "fiber_result", "fallback", "public_api", "external_vv", "engineering_design", "release_readiness"]
     },
     "node_displacements": {"$ref": "#/$defs/objectArray"},
     "support_reactions": {"$ref": "#/$defs/objectArray"},
@@ -56,12 +73,41 @@
     "fiber_results": {"$ref": "#/$defs/objectArray"},
     "convergence_history": {"$ref": "#/$defs/objectArray"},
     "metrics": {"type": "object"},
-    "unsupported_features": {"$ref": "#/$defs/objectArray"},
+    "unsupported_features": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/unsupportedFeature"}
+    },
     "warnings": {"type": "array", "items": {"type": "string"}},
     "claim_boundary": {"type": "string", "minLength": 1}
   },
   "$defs": {
     "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "unsupportedFeature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason_code", "kind", "path", "detail"],
+      "properties": {
+        "reason_code": {
+          "enum": [
+            "equation_scaling_unavailable",
+            "input_contract_unsupported",
+            "mechanism_detected",
+            "profile_feature_unsupported",
+            "restart_artifact_invalid",
+            "singular_system_detected",
+            "solver_execution_failed",
+            "source_model_unsupported"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,127}$"
+        },
+        "path": {"type": "string", "pattern": "^/"},
+        "detail": {"type": "string", "minLength": 1},
+        "source_context": {"type": "object"}
+      }
+    },
     "objectArray": {"type": "array", "items": {"type": "object"}}
   }
 }

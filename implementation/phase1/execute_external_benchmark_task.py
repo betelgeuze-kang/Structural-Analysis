@@ -19,6 +19,7 @@ from implementation.phase1.hardest_external_10case_catalog import (
     extract_case_kpis,
     load_case_payloads,
     primary_summary_head,
+    resolve_case_path,
 )
 
 
@@ -406,6 +407,9 @@ def _execute_hardest_case(
     task: dict[str, Any],
     run_dir: Path,
     dry_run: bool,
+    signing_private_key: Path,
+    signing_public_key: Path,
+    case_source_root: Path,
 ) -> tuple[bool, str, dict[str, Any], Path]:
     case_id = str(task.get("case_id", "") or "")
     case_catalog = catalog_map()
@@ -442,7 +446,10 @@ def _execute_hardest_case(
         )
         return True, "PASS_DRY_RUN", execution_payload, result_path
 
-    primary_payload, supporting_payloads = load_case_payloads(case_row)
+    primary_payload, supporting_payloads = load_case_payloads(
+        case_row,
+        source_root=case_source_root,
+    )
     supporting_status = {
         role: _truthy(payload) for role, payload in supporting_payloads.items()
     }
@@ -451,7 +458,7 @@ def _execute_hardest_case(
     kpi_rows = extract_case_kpis(case_row, primary_payload, supporting_payloads)
     supporting_artifacts = []
     for role, raw_path in (case_row.get("supporting_reports") or {}).items():
-        report_path = Path(str(raw_path))
+        report_path = resolve_case_path(str(raw_path), source_root=case_source_root)
         supporting_artifacts.append(
             {
                 "role": str(role),
@@ -559,8 +566,13 @@ def _execute_hardest_case(
     bundle_id = f"{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{case_id}"
     bundle_dir.mkdir(parents=True, exist_ok=True)
     copied_artifacts: list[dict[str, Any]] = []
-    for src in [(REPO_ROOT / str(case_row.get("primary_report_path", "") or "")).resolve()] + [
-        (REPO_ROOT / str(path)).resolve()
+    for src in [
+        resolve_case_path(
+            str(case_row.get("primary_report_path", "") or ""),
+            source_root=case_source_root,
+        )
+    ] + [
+        resolve_case_path(str(path), source_root=case_source_root)
         for path in (case_row.get("supporting_reports") or {}).values()
     ]:
         if not src.exists():
@@ -577,8 +589,8 @@ def _execute_hardest_case(
         )
     shutil.copy2(kpi_receipt_json, bundle_dir / kpi_receipt_json.name)
     shutil.copy2(kpi_receipt_md, bundle_dir / kpi_receipt_md.name)
-    if DEFAULT_RELEASE_SIGNING_PUB.exists():
-        shutil.copy2(DEFAULT_RELEASE_SIGNING_PUB, bundle_dir / DEFAULT_RELEASE_SIGNING_PUB.name)
+    if signing_public_key.exists():
+        shutil.copy2(signing_public_key, bundle_dir / signing_public_key.name)
     for src in native_roundtrip_appendix_artifacts:
         dst = bundle_dir / src.name
         shutil.copy2(src, dst)
@@ -613,12 +625,12 @@ def _execute_hardest_case(
                 "bytes": int(kpi_receipt_md.stat().st_size),
             },
             {
-                "path": str(bundle_dir / DEFAULT_RELEASE_SIGNING_PUB.name),
-                "source_path": str(DEFAULT_RELEASE_SIGNING_PUB),
-                "sha256": _sha256_file(DEFAULT_RELEASE_SIGNING_PUB),
-                "bytes": int(DEFAULT_RELEASE_SIGNING_PUB.stat().st_size),
+                "path": str(bundle_dir / signing_public_key.name),
+                "source_path": str(signing_public_key),
+                "sha256": _sha256_file(signing_public_key),
+                "bytes": int(signing_public_key.stat().st_size),
             }
-            if DEFAULT_RELEASE_SIGNING_PUB.exists()
+            if signing_public_key.exists()
             else {},
         ],
     }
@@ -628,7 +640,7 @@ def _execute_hardest_case(
     _write_json(bundle_manifest_path, bundle_manifest)
     signature_b64 = _sign_manifest_bytes(
         bundle_manifest,
-        private_key=DEFAULT_RELEASE_SIGNING_KEY,
+        private_key=signing_private_key,
     )
     _write_text(bundle_signature_path, signature_b64 + "\n")
     with zipfile.ZipFile(bundle_zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
@@ -650,7 +662,7 @@ def _execute_hardest_case(
     execution_payload["bundle_id"] = bundle_id
     execution_payload["bundle_signature_path"] = str(bundle_signature_path)
     execution_payload["bundle_manifest_path"] = str(bundle_manifest_path)
-    execution_payload["bundle_public_key_path"] = str(DEFAULT_RELEASE_SIGNING_PUB)
+    execution_payload["bundle_public_key_path"] = str(signing_public_key)
     return contract_pass, reason_code, execution_payload, result_path
 
 
@@ -665,6 +677,15 @@ def main() -> None:
     parser.add_argument("--midas-json", default="implementation/phase1/midas_model.json")
     parser.add_argument("--midas-conversion", default="implementation/phase1/midas_mgt_conversion_report.json")
     parser.add_argument("--wind-gate-report", default="implementation/phase1/wind_time_history_gate_report.json")
+    parser.add_argument(
+        "--signing-private-key",
+        default=str(DEFAULT_RELEASE_SIGNING_KEY),
+    )
+    parser.add_argument(
+        "--signing-public-key",
+        default=str(DEFAULT_RELEASE_SIGNING_PUB),
+    )
+    parser.add_argument("--case-source-root", default=str(REPO_ROOT))
     parser.add_argument("--refresh-release-surfaces", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--dry-run", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
@@ -724,6 +745,9 @@ def main() -> None:
             task=task,
             run_dir=run_dir,
             dry_run=bool(args.dry_run),
+            signing_private_key=Path(args.signing_private_key),
+            signing_public_key=Path(args.signing_public_key),
+            case_source_root=Path(args.case_source_root),
         )
     else:
         report = {

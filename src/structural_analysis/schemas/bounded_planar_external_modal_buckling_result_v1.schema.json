@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_planar_external_modal_buckling_result_v1.schema.json",
+  "title": "Bounded planar external modal/buckling result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "package_id", "case_id", "analysis_type", "external_solver", "executed_at", "runner_file_sha256", "source_model_file_sha256", "runtime", "observations", "contract_pass", "blockers", "artifact_hash"],
+  "properties": {
+    "schema_version": {"const": "bounded-planar-external-modal-buckling-result.v1"},
+    "package_id": {"const": "bounded-planar-modal-buckling-v1"},
+    "case_id": {"enum": ["bounded_planar_modal_rigid_mode", "bounded_planar_modal_repeated_mode", "bounded_planar_buckling_portal"]},
+    "analysis_type": {"enum": ["modal", "linear_buckling"]},
+    "external_solver": {"enum": ["OpenSees", "CalculiX"]},
+    "executed_at": {"type": "string", "format": "date-time"},
+    "runner_file_sha256": {"$ref": "#/$defs/sha"},
+    "source_model_file_sha256": {"$ref": "#/$defs/sha"},
+    "runtime": {"type": "object", "additionalProperties": false, "required": ["solver_version", "python_version", "platform"], "properties": {"solver_version": {"type": "string", "minLength": 1}, "python_version": {"type": "string", "minLength": 1}, "platform": {"type": "string", "minLength": 1}}},
+    "observations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eigenvalues", "rigid_mode_count", "mode_vectors"],
+      "properties": {
+        "eigenvalues": {"type": "array", "minItems": 2, "maxItems": 12, "items": {"type": "number"}},
+        "rigid_mode_count": {"type": ["integer", "null"], "minimum": 0, "maximum": 6},
+        "mode_vectors": {"type": "array", "maxItems": 12, "items": {"type": "array", "minItems": 1, "items": {"type": "number"}}}
+      }
+    },
+    "contract_pass": {"const": true},
+    "blockers": {"type": "array", "maxItems": 0},
+    "artifact_hash": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {"sha": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}}
+}

@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:178aa66e8ca286d2202c0322c9cf6fcd3bba14c0712c7885c189224e48232ee8",
+  "artifact_hash": "sha256:472f80a3718f5debfcb83e87f08e7119f90a4592df803af62e61b1d5366b4471",
   "blockers_remaining": [
     "independent_code_to_code_evidence_not_included",
     "published_benchmark_evidence_not_included",
@@ -60,7 +60,7 @@
         "energy_balance_error": 0.0,
         "fallback_used": false,
         "regularization_used": false,
-        "relative_residual": 8.326672684688674e-17,
+        "relative_residual": 4.163336342344337e-17,
         "residual_formula": "F_internal_minus_F_external",
         "stiffness_symmetry_error": 0.0
       },
@@ -95,13 +95,13 @@
           "zero_reference_absolute_tolerance": 1e-12
         },
         {
-          "absolute_error": 0.0,
+          "absolute_error": 7.105427357601002e-15,
           "absolute_tolerance": 1e-10,
-          "actual": 15.0,
+          "actual": 14.999999999999993,
           "contract_pass": true,
           "expected": 15.0,
           "quantity": "left_reaction_UY",
-          "relative_error": 0.0,
+          "relative_error": 4.736951571734001e-16,
           "relative_tolerance": 1e-10,
           "unit": "kN",
           "zero_reference_absolute_tolerance": 1e-12
@@ -125,7 +125,7 @@
       "model_payload_hash": "sha256:98273ce806560edf6c5fee0e8109d50a128f880a5d054dae85446235be86cad9",
       "numerical_checks": {
         "contract_pass": true,
-        "energy_balance_error": 5.551115123125783e-17,
+        "energy_balance_error": 2.7755575615628914e-17,
         "fallback_used": false,
         "regularization_used": false,
         "relative_residual": 2.3684757858670006e-16,
@@ -151,37 +151,37 @@
       "category": "portal_frame",
       "comparisons": [
         {
-          "absolute_error": 2.688821387764051e-17,
+          "absolute_error": 2.7321894746634712e-17,
           "absolute_tolerance": 1e-10,
-          "actual": 0.0029950988804305027,
+          "actual": 0.0029950988804305022,
           "contract_pass": true,
           "expected": 0.0029950988804305296,
           "quantity": "left_roof_sway_UX",
-          "relative_error": 8.97740440334827e-15,
+          "relative_error": 9.122201248563564e-15,
           "relative_tolerance": 1e-10,
           "unit": "m",
           "zero_reference_absolute_tolerance": 1e-12
         },
         {
-          "absolute_error": 2.688821387764051e-17,
+          "absolute_error": 2.7321894746634712e-17,
           "absolute_tolerance": 1e-10,
-          "actual": 0.0029950988804305027,
+          "actual": 0.0029950988804305022,
           "contract_pass": true,
           "expected": 0.0029950988804305296,
           "quantity": "right_roof_sway_UX",
-          "relative_error": 8.97740440334827e-15,
+          "relative_error": 9.122201248563564e-15,
           "relative_tolerance": 1e-10,
           "unit": "m",
           "zero_reference_absolute_tolerance": 1e-12
         },
         {
-          "absolute_error": 4.489274620447792e-20,
+          "absolute_error": 4.573977915173222e-20,
           "absolute_tolerance": 1e-10,
-          "actual": 5.004084266307847e-06,
+          "actual": 5.004084266307846e-06,
           "contract_pass": true,
           "expected": 5.004084266307892e-06,
           "quantity": "left_roof_vertical_UY",
-          "relative_error": 8.971221069704455e-15,
+          "relative_error": 9.14048939177435e-15,
           "relative_tolerance": 1e-10,
           "unit": "m",
           "zero_reference_absolute_tolerance": 1e-12
@@ -199,25 +199,25 @@
           "zero_reference_absolute_tolerance": 1e-12
         },
         {
-          "absolute_error": 4.445228907190568e-18,
+          "absolute_error": 4.553649124439119e-18,
           "absolute_tolerance": 1e-10,
-          "actual": -0.000496732586953682,
+          "actual": -0.0004967325869536819,
           "contract_pass": true,
           "expected": -0.0004967325869536864,
           "quantity": "left_joint_rotation_RZ",
-          "relative_error": 8.94893756508273e-15,
+          "relative_error": 9.167204334962797e-15,
           "relative_tolerance": 1e-10,
           "unit": "rad",
           "zero_reference_absolute_tolerance": 1e-12
         },
         {
-          "absolute_error": 4.445228907190568e-18,
+          "absolute_error": 4.553649124439119e-18,
           "absolute_tolerance": 1e-10,
-          "actual": -0.000496732586953682,
+          "actual": -0.0004967325869536819,
           "contract_pass": true,
           "expected": -0.0004967325869536864,
           "quantity": "right_joint_rotation_RZ",
-          "relative_error": 8.94893756508273e-15,
+          "relative_error": 9.167204334962797e-15,
           "relative_tolerance": 1e-10,
           "unit": "rad",
           "zero_reference_absolute_tolerance": 1e-12
@@ -247,13 +247,13 @@
           "zero_reference_absolute_tolerance": 1e-12
         },
         {
-          "absolute_error": 6.128431095930864e-14,
+          "absolute_error": 6.217248937900877e-14,
           "absolute_tolerance": 1e-10,
-          "actual": -6.672112355077129,
+          "actual": -6.672112355077128,
           "contract_pass": true,
           "expected": -6.67211235507719,
           "quantity": "left_base_reaction_UY",
-          "relative_error": 9.185143729282963e-15,
+          "relative_error": 9.318261754345035e-15,
           "relative_tolerance": 1e-10,
           "unit": "kN",
           "zero_reference_absolute_tolerance": 1e-12
@@ -301,10 +301,10 @@
       "model_payload_hash": "sha256:cb5e9dad466d66b351e6a7fef040aacfa61ff115d5c2bbe7a9b448f1d2431fe2",
       "numerical_checks": {
         "contract_pass": true,
-        "energy_balance_error": 4.2674197509029455e-16,
+        "energy_balance_error": 4.3021142204224816e-16,
         "fallback_used": false,
         "regularization_used": false,
-        "relative_residual": 1.4210854715202004e-14,
+        "relative_residual": 1.4388490399142028e-14,
         "residual_formula": "F_internal_minus_F_external",
         "stiffness_symmetry_error": 0.0
       },
@@ -353,10 +353,10 @@
       "src/structural_analysis/results/schema.py": "sha256:d968361004fa20409e24b8eb6f8d475ce1b06e5cd4c6a7e00829356a28c210b4",
       "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
       "src/structural_analysis/schemas/analytic_frame_verification_v1.schema.json": "sha256:8310a8ade94f872975c04e77d690c42e2ff04baa0566da536f1ae21bfab5e75c",
-      "src/structural_analysis/solvers/linear/static.py": "sha256:a04b0376a2af01eb0650fc7d1fde3eb6b628b75503af37ab25179eb8ab15fa28",
+      "src/structural_analysis/solvers/linear/static.py": "sha256:065c4e9deb01fe2f55dc51fbc0fa342e550fd4c1b47c25e96e024f57913dc1a4",
       "tests/test_analytic_frame_verification.py": "sha256:8bd6190ebef7fc3278259b5736b252956cd4c5ff7fd544c24278c6e5fa27ea1c"
     },
-    "source_set_hash": "sha256:45c9e65b9fba2c65327491bd13db7a5951ac5ff841e8c5251f80ae82b0704b5f"
+    "source_set_hash": "sha256:0d67695b2295c2a926def55789ef1d09348d39e83dd6a05f6c363c92b69a4777"
   },
   "summary": {
     "case_count": 3,

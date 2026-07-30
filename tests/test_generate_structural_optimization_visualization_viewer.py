@@ -7,6 +7,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 
 def _load_viewer_module():
     module_path = Path(__file__).resolve().parents[1] / "implementation/phase1/generate_structural_optimization_visualization_viewer.py"
@@ -2125,6 +2127,15 @@ def test_case_catalog_markup_includes_runtime_submission_lane_surface_when_nativ
 
 
 def test_generate_structural_optimization_visualization_viewer(tmp_path: Path) -> None:
+    opensees_compare_report = Path(
+        "implementation/phase1/release/benchmark_expansion/"
+        "opensees_scbf_family_compare.json"
+    )
+    if not opensees_compare_report.exists():
+        pytest.skip(
+            "full viewer integration requires the non-committed OpenSees "
+            "family-compare release artifact"
+        )
     release_gap = tmp_path / "release_gap_report.json"
     commercial_workflow_breadth_report = tmp_path / "commercial_workflow_breadth_report.json"
     export_report = tmp_path / "export_report.json"

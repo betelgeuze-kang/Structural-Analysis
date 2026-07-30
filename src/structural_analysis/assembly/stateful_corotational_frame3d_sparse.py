@@ -12,11 +12,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
 import math
+from numbers import Integral, Real
 from types import MappingProxyType
 from typing import Any, Iterable, Mapping, TypeAlias, TypeGuard, cast
 
 import numpy as np
-from scipy.sparse import coo_matrix, csr_matrix
+from scipy.sparse import coo_matrix, csr_matrix, diags
 
 from structural_analysis.assembly.corotational_frame3d_global import (
     CorotationalFrame3DMember,
@@ -40,8 +41,10 @@ from structural_analysis.elements.stateful_corotational_partial_composite_frame3
     StatefulCorotationalPartialCompositeFrame3DState,
 )
 from structural_analysis.engine_v2.contracts._canonical import (
+    CanonicalContractError,
     array_data_hash,
     canonical_hash,
+    canonical_json_bytes,
     immutable_array,
 )
 from structural_analysis.materials.uniaxial_plasticity import (
@@ -49,6 +52,7 @@ from structural_analysis.materials.uniaxial_plasticity import (
     UniaxialPlasticityResponse,
     UniaxialPlasticityState,
 )
+from structural_analysis.materials.bond_slip import BondSlipState
 from structural_analysis.materials.concrete_damage import (
     AsymmetricConcreteDamageMaterial,
     ConcreteDamageResponse,
@@ -56,6 +60,8 @@ from structural_analysis.materials.concrete_damage import (
     FractureEnergyConcreteDamageMaterial,
 )
 from structural_analysis.materials.confined_concrete import (
+    CONFINED_CONCRETE_PATH_CAPABILITIES,
+    ConfinedConcreteAdmissibilityError,
     ConfinedConcreteMaterial,
     ConfinedConcreteState,
     StatefulConfinedConcreteResponse,
@@ -69,6 +75,12 @@ from structural_analysis.materials.partial_composite import (
     CondensedPartialCompositeAxialMaterial,
     CondensedPartialCompositeAxialResponse,
     CondensedPartialCompositeAxialState,
+)
+from structural_analysis.solvers.equation_scaling_6dof import (
+    create_equation_scaling_6dof,
+    equilibration_vectors_6dof,
+    scaled_increment_metrics_6dof,
+    scaled_residual_metrics_6dof,
 )
 from structural_analysis.solvers.nonlinear.scalable_sparse_factorization import (
     ScalableSparseFactorizationDiagnostic,
@@ -94,14 +106,24 @@ STATEFUL_COROTATIONAL_FRAME3D_SPARSE_CHECKPOINT_SCHEMA_VERSION = (
     "stateful-corotational-frame3d-sparse-checkpoint.v1"
 )
 STATEFUL_COROTATIONAL_FRAME3D_SPARSE_RESULT_SCHEMA_VERSION = (
-    "stateful-corotational-frame3d-sparse-result.v1"
+    "stateful-corotational-frame3d-sparse-result.v2"
 )
 STATEFUL_COROTATIONAL_FRAME3D_SPARSE_STORAGE_PROFILE = (
     "member_12x12_triplet_coalesce_sorted_csr_fp64.v1"
 )
+STATEFUL_COROTATIONAL_FRAME3D_EQUATION_SCALING_SCHEMA_VERSION = (
+    "stateful-corotational-frame3d-equation-scaling-6dof.v1"
+)
+STATEFUL_COROTATIONAL_FRAME3D_EQUATION_SCALING_POLICY = (
+    "centroid_diameter_force_moment_6dof.v1"
+)
 STATEFUL_COROTATIONAL_FRAME3D_SPARSE_CLAIM_BOUNDARY = (
     "Experimental bounded-graph 3D corotational Timoshenko path with native "
     "COO/CSR assembly, fail-closed exact-condition SuperLU diagnostics, and "
+    "model-bound 6DOF force/moment equation scaling with residual-and-increment "
+    "commit gates, residual-decreasing backtracking line search, and bounded "
+    "explicitly convergence-classified adaptive load cutback with rejected-trial "
+    "rollback and exact material-response accepted-parent hash binding, plus "
     "stateful axial steel, concrete damage, confined-concrete envelope, "
     "perfect-bond parallel composite, or single-slip-mode partial-interaction "
     "integration, plus bounded 2/3-point axial-biaxial distributed-fiber and "
@@ -157,6 +179,17 @@ FactorizationDiagnostic: TypeAlias = (
 
 class StatefulCorotationalFrame3DSparseError(RuntimeError):
     """Fail-closed model, state, factorization, or convergence error."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        reason_code: str = "frame3d_sparse_error",
+        retryable_convergence_failure: bool = False,
+    ):
+        super().__init__(message)
+        self.reason_code = reason_code
+        self.retryable_convergence_failure = retryable_convergence_failure
 
 
 @dataclass(frozen=True)
@@ -239,7 +272,24 @@ class StatefulCorotationalFrame3DSparseModel:
 class StatefulCorotationalFrame3DSparseConfig:
     residual_relative_tolerance: float = 1.0e-8
     residual_absolute_tolerance_kn: float = 1.0e-7
+    increment_relative_tolerance: float = 1.0e-10
+    increment_absolute_tolerance_m: float = 1.0e-12
     maximum_iterations: int = 30
+    minimum_characteristic_length_m: float = 1.0e-12
+    minimum_reference_force_kn: float = 1.0
+    line_search_alphas: tuple[float, ...] = (
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+    )
+    adaptive_load_cutback_enabled: bool = True
+    load_cutback_ratio: float = 0.5
+    maximum_load_cutback_depth: int = 8
+    maximum_load_cutback_substeps: int = 256
+    minimum_load_increment_factor: float = 1.0e-6
     factorization_policy: FactorizationPolicy = field(
         default_factory=lambda: SparseFactorizationPolicy(
             maximum_condition_number_1=1.0e14,
@@ -253,10 +303,57 @@ class StatefulCorotationalFrame3DSparseConfig:
         for name in (
             "residual_relative_tolerance",
             "residual_absolute_tolerance_kn",
+            "increment_relative_tolerance",
+            "increment_absolute_tolerance_m",
+            "minimum_characteristic_length_m",
+            "minimum_reference_force_kn",
         ):
             object.__setattr__(self, name, _positive(getattr(self, name), name))
         if type(self.maximum_iterations) is not int or self.maximum_iterations < 1:
             raise ValueError("maximum_iterations must be a positive integer")
+        if not isinstance(self.line_search_alphas, tuple) or not self.line_search_alphas:
+            raise ValueError("line_search_alphas must be a non-empty tuple")
+        normalized_alphas: list[float] = []
+        previous = math.inf
+        for index, value in enumerate(self.line_search_alphas):
+            alpha = _positive(value, f"line_search_alphas[{index}]")
+            if alpha > 1.0 or alpha >= previous:
+                raise ValueError(
+                    "line_search_alphas must be strictly decreasing in (0, 1]"
+                )
+            normalized_alphas.append(alpha)
+            previous = alpha
+        if normalized_alphas[0] != 1.0:
+            raise ValueError("line_search_alphas must start with 1")
+        object.__setattr__(self, "line_search_alphas", tuple(normalized_alphas))
+        if type(self.adaptive_load_cutback_enabled) is not bool:
+            raise ValueError("adaptive_load_cutback_enabled must be a boolean")
+        ratio = _positive(self.load_cutback_ratio, "load_cutback_ratio")
+        if ratio >= 1.0:
+            raise ValueError("load_cutback_ratio must be in (0, 1)")
+        object.__setattr__(self, "load_cutback_ratio", ratio)
+        if (
+            type(self.maximum_load_cutback_depth) is not int
+            or self.maximum_load_cutback_depth < 0
+        ):
+            raise ValueError(
+                "maximum_load_cutback_depth must be a nonnegative integer"
+            )
+        if (
+            type(self.maximum_load_cutback_substeps) is not int
+            or self.maximum_load_cutback_substeps < 1
+        ):
+            raise ValueError(
+                "maximum_load_cutback_substeps must be a positive integer"
+            )
+        object.__setattr__(
+            self,
+            "minimum_load_increment_factor",
+            _positive(
+                self.minimum_load_increment_factor,
+                "minimum_load_increment_factor",
+            ),
+        )
         if type(self.factorization_policy) not in (
             SparseFactorizationPolicy,
             ScalableSparseFactorizationPolicy,
@@ -274,15 +371,123 @@ class StatefulCorotationalFrame3DSparseConfig:
             "profile": STATEFUL_COROTATIONAL_FRAME3D_SPARSE_PROFILE,
             "residual_relative_tolerance": self.residual_relative_tolerance,
             "residual_absolute_tolerance_kn": self.residual_absolute_tolerance_kn,
+            "increment_relative_tolerance": self.increment_relative_tolerance,
+            "increment_absolute_tolerance_m": self.increment_absolute_tolerance_m,
             "maximum_iterations": self.maximum_iterations,
+            "minimum_characteristic_length_m": (
+                self.minimum_characteristic_length_m
+            ),
+            "minimum_reference_force_kn": self.minimum_reference_force_kn,
             "assembly": STATEFUL_COROTATIONAL_FRAME3D_SPARSE_STORAGE_PROFILE,
+            "equation_scaling": (
+                STATEFUL_COROTATIONAL_FRAME3D_EQUATION_SCALING_POLICY
+            ),
             "linear_solver": _factorization_backend_label(self.factorization_policy),
             "factorization_policy": self.factorization_policy.to_manifest(),
-            "load_control": "ordered_finite_targets_with_reversal_allowed",
-            "line_search": False,
+            "load_control": {
+                "policy": "ordered_finite_targets_with_reversal_allowed",
+                "adaptive_cutback": {
+                    "enabled": self.adaptive_load_cutback_enabled,
+                    "ratio": self.load_cutback_ratio,
+                    "maximum_depth": self.maximum_load_cutback_depth,
+                    "maximum_accepted_substeps": (
+                        self.maximum_load_cutback_substeps
+                    ),
+                    "minimum_increment_factor": (
+                        self.minimum_load_increment_factor
+                    ),
+                    "retry_reason_codes": [
+                        "maximum_iterations_exceeded",
+                        "line_search_failed",
+                    ],
+                    "retry_requires_explicit_convergence_classification": True,
+                },
+            },
+            "line_search": {
+                "policy": "strict_scaled_residual_decrease.v1",
+                "alphas": list(self.line_search_alphas),
+            },
             "regularization_allowed": False,
             "fallback_allowed": False,
         }
+
+
+@dataclass(frozen=True)
+class StatefulCorotationalFrame3DEquationScaling6DOF:
+    """Model-bound force/moment and displacement/rotation scaling."""
+
+    schema_version: str
+    scaling_hash: str
+    policy: str
+    model_hash: str
+    characteristic_length_m: float
+    reference_force_kn: float
+    residual_translation_scale_kn: float
+    residual_rotation_scale_kn_m: float
+    increment_translation_scale_m: float
+    increment_rotation_scale_rad: float
+    source_node_coordinates_hash: str
+    source_reference_load_hash: str
+    source_free_dofs_hash: str
+    row_equilibration_hash: str
+    column_equilibration_hash: str
+
+    def to_dict(self) -> dict[str, Any]:
+        payload = _equation_scaling_payload(self, include_hash=True)
+        if (
+            self.schema_version
+            != STATEFUL_COROTATIONAL_FRAME3D_EQUATION_SCALING_SCHEMA_VERSION
+            or self.policy
+            != STATEFUL_COROTATIONAL_FRAME3D_EQUATION_SCALING_POLICY
+            or not _optional_hash(self.model_hash)
+            or self.model_hash is None
+            or any(
+                not _optional_hash(value) or value is None
+                for value in (
+                    self.scaling_hash,
+                    self.source_node_coordinates_hash,
+                    self.source_reference_load_hash,
+                    self.source_free_dofs_hash,
+                    self.row_equilibration_hash,
+                    self.column_equilibration_hash,
+                )
+            )
+        ):
+            raise StatefulCorotationalFrame3DSparseError(
+                "equation scaling identity or hash binding is invalid"
+            )
+        if any(
+            not math.isfinite(value) or value <= 0.0
+            for value in (
+                self.characteristic_length_m,
+                self.reference_force_kn,
+                self.residual_translation_scale_kn,
+                self.residual_rotation_scale_kn_m,
+                self.increment_translation_scale_m,
+                self.increment_rotation_scale_rad,
+            )
+        ):
+            raise StatefulCorotationalFrame3DSparseError(
+                "equation scaling contains an invalid physical scale"
+            )
+        if (
+            self.residual_translation_scale_kn != self.reference_force_kn
+            or self.residual_rotation_scale_kn_m
+            != self.reference_force_kn * self.characteristic_length_m
+            or self.increment_translation_scale_m
+            != self.characteristic_length_m
+            or self.increment_rotation_scale_rad != 1.0
+        ):
+            raise StatefulCorotationalFrame3DSparseError(
+                "equation scaling derived scales are inconsistent"
+            )
+        if self.scaling_hash != canonical_hash(
+            _equation_scaling_payload(self, include_hash=False)
+        ):
+            raise StatefulCorotationalFrame3DSparseError(
+                "equation scaling hash mismatch"
+            )
+        return payload
 
 
 @dataclass(frozen=True)
@@ -485,6 +690,27 @@ class StatefulCorotationalFrame3DSparseStep:
     checkpoint: StatefulCorotationalFrame3DSparseCheckpoint
     free_residual_inf_norm_kn: float
     relative_residual: float
+    raw_translational_residual_inf_norm_kn: float
+    raw_rotational_residual_inf_norm_kn_m: float
+    scaled_residual_inf_norm: float
+    scaled_residual_tolerance: float
+    raw_translation_increment_inf_norm_m: float
+    raw_rotation_increment_inf_norm_rad: float
+    scaled_increment_inf_norm: float
+    scaled_increment_tolerance: float
+    residual_gate_passed: bool
+    increment_gate_passed: bool
+    line_search_required: bool
+    selected_line_search_alpha: float | None
+    line_search_valid: bool
+    material_admissibility_passed: bool
+    final_reassembled_equilibrium_passed: bool
+    parent_state_immutable: bool
+    sparse_diagnostic_passed: bool
+    scaled_condition_number_1: float
+    equation_scaling_hash: str
+    convergence_history: tuple[Mapping[str, Any], ...]
+    line_search_history: tuple[Mapping[str, Any], ...]
     reactions: tuple[tuple[int, float], ...]
     factorization_diagnostics: tuple[FactorizationDiagnostic, ...]
     member_results: tuple[Mapping[str, Any], ...]
@@ -496,11 +722,74 @@ class StatefulCorotationalFrame3DSparseStep:
             "checkpoint": self.checkpoint.to_dict(),
             "free_residual_inf_norm_kn": self.free_residual_inf_norm_kn,
             "relative_residual": self.relative_residual,
+            "raw_translational_residual_inf_norm_kn": (
+                self.raw_translational_residual_inf_norm_kn
+            ),
+            "raw_rotational_residual_inf_norm_kn_m": (
+                self.raw_rotational_residual_inf_norm_kn_m
+            ),
+            "scaled_residual_inf_norm": self.scaled_residual_inf_norm,
+            "scaled_residual_tolerance": self.scaled_residual_tolerance,
+            "raw_translation_increment_inf_norm_m": (
+                self.raw_translation_increment_inf_norm_m
+            ),
+            "raw_rotation_increment_inf_norm_rad": (
+                self.raw_rotation_increment_inf_norm_rad
+            ),
+            "scaled_increment_inf_norm": self.scaled_increment_inf_norm,
+            "scaled_increment_tolerance": self.scaled_increment_tolerance,
+            "residual_gate_passed": self.residual_gate_passed,
+            "increment_gate_passed": self.increment_gate_passed,
+            "line_search_required": self.line_search_required,
+            "selected_line_search_alpha": self.selected_line_search_alpha,
+            "line_search_valid": self.line_search_valid,
+            "material_admissibility_passed": self.material_admissibility_passed,
+            "final_reassembled_equilibrium_passed": (
+                self.final_reassembled_equilibrium_passed
+            ),
+            "parent_state_immutable": self.parent_state_immutable,
+            "sparse_diagnostic_passed": self.sparse_diagnostic_passed,
+            "scaled_condition_number_1": self.scaled_condition_number_1,
+            "equation_scaling_hash": self.equation_scaling_hash,
+            "convergence_history": [
+                _thaw_trace_value(row) for row in self.convergence_history
+            ],
+            "line_search_history": [
+                _thaw_trace_value(row) for row in self.line_search_history
+            ],
             "reactions": [list(row) for row in self.reactions],
             "factorization_diagnostics": [
                 row.to_manifest() for row in self.factorization_diagnostics
             ],
             "member_results": [dict(row) for row in self.member_results],
+        }
+
+
+@dataclass(frozen=True)
+class StatefulCorotationalFrame3DLoadCutbackAttempt:
+    attempt_index: int
+    recursion_depth: int
+    requested_target_load_factor: float
+    rejected_target_load_factor: float
+    accepted_parent_load_factor: float
+    accepted_parent_checkpoint_hash: str
+    cutback_target_load_factor: float
+    reason_code: str
+    parent_state_immutable: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "attempt_index": self.attempt_index,
+            "recursion_depth": self.recursion_depth,
+            "requested_target_load_factor": self.requested_target_load_factor,
+            "rejected_target_load_factor": self.rejected_target_load_factor,
+            "accepted_parent_load_factor": self.accepted_parent_load_factor,
+            "accepted_parent_checkpoint_hash": (
+                self.accepted_parent_checkpoint_hash
+            ),
+            "cutback_target_load_factor": self.cutback_target_load_factor,
+            "reason_code": self.reason_code,
+            "parent_state_immutable": self.parent_state_immutable,
         }
 
 
@@ -511,12 +800,19 @@ class StatefulCorotationalFrame3DSparseResult:
     model_hash: str
     solver_contract_hash: str
     start_checkpoint_hash: str
+    requested_load_factors: tuple[float, ...]
     steps: tuple[StatefulCorotationalFrame3DSparseStep, ...]
     checkpoints: tuple[StatefulCorotationalFrame3DSparseCheckpoint, ...]
+    load_cutback_history: tuple[StatefulCorotationalFrame3DLoadCutbackAttempt, ...]
     maximum_free_residual_inf_norm_kn: float
+    maximum_scaled_residual_inf_norm: float
+    maximum_scaled_increment_inf_norm: float
+    equation_scaling: StatefulCorotationalFrame3DEquationScaling6DOF
     result_hash: str
     exact_checkpoint_resume_supported: bool
     material_commit_rollback_supported: bool
+    adaptive_load_cutback_supported: bool
+    adaptive_load_cutback_used: bool
     regularization_used: bool
     fallback_used: bool
     contract_pass: bool
@@ -533,11 +829,22 @@ class StatefulCorotationalFrame3DSparseResult:
             "model_hash": self.model_hash,
             "solver_contract_hash": self.solver_contract_hash,
             "start_checkpoint_hash": self.start_checkpoint_hash,
+            "requested_load_factors": list(self.requested_load_factors),
             "steps": [step.to_dict() for step in self.steps],
             "checkpoints": [row.to_dict() for row in self.checkpoints],
+            "load_cutback_history": [
+                row.to_dict() for row in self.load_cutback_history
+            ],
             "maximum_free_residual_inf_norm_kn": (
                 self.maximum_free_residual_inf_norm_kn
             ),
+            "maximum_scaled_residual_inf_norm": (
+                self.maximum_scaled_residual_inf_norm
+            ),
+            "maximum_scaled_increment_inf_norm": (
+                self.maximum_scaled_increment_inf_norm
+            ),
+            "equation_scaling": self.equation_scaling.to_dict(),
             "result_hash": self.result_hash,
             "exact_checkpoint_resume_supported": (
                 self.exact_checkpoint_resume_supported
@@ -545,6 +852,10 @@ class StatefulCorotationalFrame3DSparseResult:
             "material_commit_rollback_supported": (
                 self.material_commit_rollback_supported
             ),
+            "adaptive_load_cutback_supported": (
+                self.adaptive_load_cutback_supported
+            ),
+            "adaptive_load_cutback_used": self.adaptive_load_cutback_used,
             "regularization_used": self.regularization_used,
             "fallback_used": self.fallback_used,
             "contract_pass": self.contract_pass,
@@ -568,6 +879,7 @@ def stateful_corotational_frame3d_member_response(
         raise ValueError("axial_material must be a supported exact material")
     if not _material_state_matches(axial_material, committed_state):
         raise ValueError("committed_state does not match axial_material")
+    _validate_material_state_admissibility(axial_material, committed_state)
     coordinates = np.asarray(node_coordinates_m, dtype=np.float64)
     displacement = np.asarray(element_displacements, dtype=np.float64)
     if coordinates.shape != (2, 3) or not np.all(np.isfinite(coordinates)):
@@ -580,6 +892,11 @@ def stateful_corotational_frame3d_member_response(
             displacement,
             committed_state,
             reference_section=member.section,
+        )
+        _validate_material_response_lineage(
+            axial_material,
+            committed_state,
+            distributed,
         )
         return StatefulCorotationalFrame3DMemberResponse(
             member_id=member.member_id,
@@ -597,6 +914,11 @@ def stateful_corotational_frame3d_member_response(
             displacement,
             committed_state,
             reference_section=member.section,
+        )
+        _validate_material_response_lineage(
+            axial_material,
+            committed_state,
+            partial,
         )
         return StatefulCorotationalFrame3DMemberResponse(
             member_id=member.member_id,
@@ -620,6 +942,11 @@ def stateful_corotational_frame3d_member_response(
         axial_material,
         axial_strain,
         committed_state,
+    )
+    _validate_material_response_lineage(
+        axial_material,
+        committed_state,
+        material_response,
     )
     area = member.section.frame.area_m2
     axial_force = material_response.stress_mpa * area * _MPA_M2_TO_KN
@@ -662,7 +989,7 @@ def stateful_corotational_frame3d_member_response(
         + np.outer(axial_gradient, axial_gradient) * tangent_correction
         + axial_hessian * force_correction
     )
-    tangent = 0.5 * (tangent + tangent.T)
+    tangent[:] = 0.5 * (tangent + tangent.T)
     if not np.all(np.isfinite(internal)) or not np.all(np.isfinite(tangent)):
         raise StatefulCorotationalFrame3DSparseError(
             "stateful member response produced non-finite data"
@@ -679,11 +1006,106 @@ def stateful_corotational_frame3d_member_response(
     )
 
 
+def stateful_corotational_frame3d_equation_scaling_6dof(
+    model: StatefulCorotationalFrame3DSparseModel,
+    *,
+    config: StatefulCorotationalFrame3DSparseConfig,
+) -> StatefulCorotationalFrame3DEquationScaling6DOF:
+    """Derive deterministic 6DOF force/moment scaling from model evidence."""
+
+    if type(model) is not StatefulCorotationalFrame3DSparseModel:
+        raise ValueError(
+            "model must be an exact StatefulCorotationalFrame3DSparseModel"
+        )
+    if type(config) is not StatefulCorotationalFrame3DSparseConfig:
+        raise ValueError(
+            "config must be an exact StatefulCorotationalFrame3DSparseConfig"
+        )
+    coordinates = np.asarray(
+        model.elastic_model.node_coordinates_m,
+        dtype=np.float64,
+    )
+    if (
+        coordinates.ndim != 2
+        or coordinates.shape[1] != 3
+        or not np.all(np.isfinite(coordinates))
+    ):
+        raise StatefulCorotationalFrame3DSparseError(
+            "equation scaling node coordinates are invalid"
+        )
+    reference_load = np.asarray(
+        model.elastic_model.reference_load_kn,
+        dtype=np.float64,
+    )
+    free = np.asarray(model.free_dofs, dtype=np.int64)
+    common = create_equation_scaling_6dof(
+        source_identity_hash=model.model_hash,
+        node_coordinates_m=coordinates,
+        reference_equation_load=reference_load,
+        free_dofs=model.free_dofs,
+        minimum_characteristic_length_m=config.minimum_characteristic_length_m,
+        minimum_reference_force=config.minimum_reference_force_kn,
+    )
+    characteristic_length = common.characteristic_length_m
+    reference_force = common.reference_force
+    row_scale, column_scale = equilibration_vectors_6dof(
+        model.free_dofs, characteristic_length
+    )
+    provisional = StatefulCorotationalFrame3DEquationScaling6DOF(
+        schema_version=(
+            STATEFUL_COROTATIONAL_FRAME3D_EQUATION_SCALING_SCHEMA_VERSION
+        ),
+        scaling_hash=_ZERO_HASH,
+        policy=STATEFUL_COROTATIONAL_FRAME3D_EQUATION_SCALING_POLICY,
+        model_hash=model.model_hash,
+        characteristic_length_m=characteristic_length,
+        reference_force_kn=reference_force,
+        residual_translation_scale_kn=reference_force,
+        residual_rotation_scale_kn_m=reference_force * characteristic_length,
+        increment_translation_scale_m=characteristic_length,
+        increment_rotation_scale_rad=1.0,
+        source_node_coordinates_hash=array_data_hash(
+            np.asarray(coordinates, dtype="<f8")
+        ),
+        source_reference_load_hash=array_data_hash(
+            np.asarray(reference_load, dtype="<f8")
+        ),
+        source_free_dofs_hash=array_data_hash(np.asarray(free, dtype="<i8")),
+        row_equilibration_hash=array_data_hash(
+            np.asarray(row_scale, dtype="<f8")
+        ),
+        column_equilibration_hash=array_data_hash(
+            np.asarray(column_scale, dtype="<f8")
+        ),
+    )
+    scaling = replace(
+        provisional,
+        scaling_hash=canonical_hash(
+            _equation_scaling_payload(provisional, include_hash=False)
+        ),
+    )
+    if (
+        not math.isfinite(scaling.characteristic_length_m)
+        or not math.isfinite(scaling.reference_force_kn)
+        or scaling.characteristic_length_m <= 0.0
+        or scaling.reference_force_kn <= 0.0
+        or not math.isfinite(scaling.residual_rotation_scale_kn_m)
+    ):
+        raise StatefulCorotationalFrame3DSparseError(
+            "equation scaling contains a non-finite or non-positive scale"
+        )
+    return scaling
+
+
 def initial_stateful_corotational_frame3d_sparse_checkpoint(
     model: StatefulCorotationalFrame3DSparseModel,
     *,
     config: StatefulCorotationalFrame3DSparseConfig,
 ) -> StatefulCorotationalFrame3DSparseCheckpoint:
+    scaling = stateful_corotational_frame3d_equation_scaling_6dof(
+        model,
+        config=config,
+    )
     states = tuple(
         _initial_material_state(material) for material in model.axial_materials
     )
@@ -696,7 +1118,12 @@ def initial_stateful_corotational_frame3d_sparse_checkpoint(
         displacement=displacement,
     )
     residual = _linf(assembly.residual_free)
-    if residual > _residual_tolerance(model, config, 0.0):
+    residual_metrics = _scaled_residual_metrics(
+        assembly.residual_free,
+        model.free_dofs,
+        scaling,
+    )
+    if residual_metrics["scaled"] > _scaled_residual_tolerance(config, scaling):
         raise StatefulCorotationalFrame3DSparseError(
             "zero state does not satisfy unloaded equilibrium"
         )
@@ -763,17 +1190,35 @@ def assemble_stateful_corotational_frame3d_dense_reference(
         strict=True,
     ):
         dofs = _member_dofs(member)
-        response = stateful_corotational_frame3d_member_response(
-            member=member,
-            node_coordinates_m=coordinates[[member.node_i, member.node_j]],
-            element_displacements=values[list(dofs)],
-            axial_material=material,
-            committed_state=parent,
-        )
+        try:
+            response = stateful_corotational_frame3d_member_response(
+                member=member,
+                node_coordinates_m=coordinates[[member.node_i, member.node_j]],
+                element_displacements=values[list(dofs)],
+                axial_material=material,
+                committed_state=parent,
+            )
+        except ConfinedConcreteAdmissibilityError as error:
+            raise StatefulCorotationalFrame3DSparseError(
+                f"{error.code}: member {member.member_id}: {error.detail}",
+                reason_code=error.code,
+            ) from error
+        except StatefulCorotationalFrame3DSparseError:
+            raise
+        except RuntimeError as error:
+            raise StatefulCorotationalFrame3DSparseError(
+                f"material integration failed for member {member.member_id}: {error}",
+                reason_code="material_integration_failed",
+            ) from error
+        except (ValueError, ArithmeticError) as error:
+            raise StatefulCorotationalFrame3DSparseError(
+                f"member trial is inadmissible for {member.member_id}: {error}",
+                reason_code="member_trial_inadmissible",
+            ) from error
         internal[list(dofs)] += response.internal_force_global
         tangent[np.ix_(dofs, dofs)] += response.consistent_tangent_global
         states.append(response.trial_state)
-    tangent = 0.5 * (tangent + tangent.T)
+    tangent[:] = 0.5 * (tangent + tangent.T)
     external = factor * np.asarray(
         model.elastic_model.reference_load_kn,
         dtype=np.float64,
@@ -895,6 +1340,124 @@ def stateful_corotational_frame3d_dense_sparse_parity_receipt(
     return receipt
 
 
+_LOAD_CUTBACK_RETRY_REASON_CODES = frozenset(
+    {
+        "maximum_iterations_exceeded",
+        "line_search_failed",
+    }
+)
+
+
+def _load_cutback_failure_is_retryable(
+    error: StatefulCorotationalFrame3DSparseError,
+) -> bool:
+    return bool(
+        error.retryable_convergence_failure
+        and error.reason_code in _LOAD_CUTBACK_RETRY_REASON_CODES
+    )
+
+
+def _solve_target_with_adaptive_load_cutback(
+    model: StatefulCorotationalFrame3DSparseModel,
+    config: StatefulCorotationalFrame3DSparseConfig,
+    scaling: StatefulCorotationalFrame3DEquationScaling6DOF,
+    *,
+    requested_target: float,
+    target: float,
+    parent: StatefulCorotationalFrame3DSparseCheckpoint,
+    history: list[StatefulCorotationalFrame3DLoadCutbackAttempt],
+) -> tuple[StatefulCorotationalFrame3DSparseStep, ...]:
+    accepted: list[StatefulCorotationalFrame3DSparseStep] = []
+    accepted_parent = parent
+    attempt_target = target
+    cutback_depth = 0
+    while True:
+        parent_checkpoint_hash = accepted_parent.checkpoint_hash
+        parent_state_hashes = tuple(
+            state.state_hash for state in accepted_parent.material_states
+        )
+        try:
+            step = _solve_step(
+                model,
+                config,
+                scaling,
+                attempt_target,
+                accepted_parent,
+            )
+        except StatefulCorotationalFrame3DSparseError as error:
+            parent_immutable = bool(
+                accepted_parent.checkpoint_hash == parent_checkpoint_hash
+                and tuple(
+                    state.state_hash for state in accepted_parent.material_states
+                )
+                == parent_state_hashes
+            )
+            if not parent_immutable:
+                raise StatefulCorotationalFrame3DSparseError(
+                    "failed Frame3D trial mutated its accepted parent",
+                    reason_code="failed_trial_parent_mutated",
+                ) from error
+            if (
+                not config.adaptive_load_cutback_enabled
+                or not _load_cutback_failure_is_retryable(error)
+            ):
+                raise
+            increment = attempt_target - accepted_parent.load_factor
+            cutback_target = (
+                accepted_parent.load_factor
+                + config.load_cutback_ratio * increment
+            )
+            left_increment = abs(
+                cutback_target - accepted_parent.load_factor
+            )
+            right_increment = abs(attempt_target - cutback_target)
+            cutback_available = bool(
+                cutback_depth < config.maximum_load_cutback_depth
+                and math.isfinite(cutback_target)
+                and cutback_target
+                not in (accepted_parent.load_factor, attempt_target)
+                and min(left_increment, right_increment)
+                >= config.minimum_load_increment_factor
+            )
+            if not cutback_available:
+                raise StatefulCorotationalFrame3DSparseError(
+                    "adaptive load cutback exhausted before requested target "
+                    f"{requested_target}; rejected target {attempt_target}; "
+                    f"reason {error.reason_code}",
+                    reason_code="adaptive_load_cutback_exhausted",
+                ) from error
+            history.append(
+                StatefulCorotationalFrame3DLoadCutbackAttempt(
+                    attempt_index=len(history),
+                    recursion_depth=cutback_depth,
+                    requested_target_load_factor=requested_target,
+                    rejected_target_load_factor=attempt_target,
+                    accepted_parent_load_factor=accepted_parent.load_factor,
+                    accepted_parent_checkpoint_hash=(
+                        accepted_parent.checkpoint_hash
+                    ),
+                    cutback_target_load_factor=cutback_target,
+                    reason_code=error.reason_code,
+                    parent_state_immutable=True,
+                )
+            )
+            attempt_target = cutback_target
+            cutback_depth += 1
+            continue
+        accepted.append(step)
+        accepted_parent = step.checkpoint
+        if attempt_target == requested_target:
+            return tuple(accepted)
+        if len(accepted) >= config.maximum_load_cutback_substeps:
+            raise StatefulCorotationalFrame3DSparseError(
+                "adaptive load cutback exceeded the accepted-substep bound "
+                f"before requested target {requested_target}",
+                reason_code="adaptive_load_cutback_substep_limit_exceeded",
+            )
+        attempt_target = requested_target
+        cutback_depth = 0
+
+
 def solve_stateful_corotational_frame3d_sparse_load_path(
     model: StatefulCorotationalFrame3DSparseModel,
     load_factors: Iterable[float],
@@ -910,6 +1473,10 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
         raise ValueError(
             "config must be an exact StatefulCorotationalFrame3DSparseConfig"
         )
+    scaling = stateful_corotational_frame3d_equation_scaling_6dof(
+        model,
+        config=config,
+    )
     checkpoint = (
         initial_stateful_corotational_frame3d_sparse_checkpoint(model, config=config)
         if resume_from is None
@@ -923,13 +1490,43 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
     factors = _load_factors(load_factors, after=checkpoint.load_factor)
     checkpoints = [checkpoint]
     steps: list[StatefulCorotationalFrame3DSparseStep] = []
+    load_cutback_history: list[StatefulCorotationalFrame3DLoadCutbackAttempt] = []
     for factor in factors:
-        step = _solve_step(model, config, factor, checkpoints[-1])
-        steps.append(step)
-        checkpoints.append(step.checkpoint)
+        accepted_steps = _solve_target_with_adaptive_load_cutback(
+            model,
+            config,
+            scaling,
+            requested_target=factor,
+            target=factor,
+            parent=checkpoints[-1],
+            history=load_cutback_history,
+        )
+        steps.extend(accepted_steps)
+        checkpoints.extend(step.checkpoint for step in accepted_steps)
     maximum_residual = max(
         (row.free_residual_inf_norm_kn for row in steps),
         default=checkpoint.residual_inf_norm_kn,
+    )
+    maximum_scaled_residual = max(
+        (row.scaled_residual_inf_norm for row in steps),
+        default=0.0,
+    )
+    maximum_scaled_increment = max(
+        (row.scaled_increment_inf_norm for row in steps),
+        default=0.0,
+    )
+    contract_pass = bool(
+        steps
+        and all(
+            row.residual_gate_passed
+            and row.increment_gate_passed
+            and row.line_search_valid
+            and row.material_admissibility_passed
+            and row.final_reassembled_equilibrium_passed
+            and row.parent_state_immutable
+            and row.sparse_diagnostic_passed
+            for row in steps
+        )
     )
     payload = {
         "schema_version": STATEFUL_COROTATIONAL_FRAME3D_SPARSE_RESULT_SCHEMA_VERSION,
@@ -937,13 +1534,22 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
         "model_hash": model.model_hash,
         "solver_contract_hash": config.contract_hash,
         "start_checkpoint_hash": checkpoint.checkpoint_hash,
+        "requested_load_factors": list(factors),
         "steps": [step.to_dict() for step in steps],
+        "load_cutback_history": [
+            row.to_dict() for row in load_cutback_history
+        ],
         "maximum_free_residual_inf_norm_kn": maximum_residual,
+        "maximum_scaled_residual_inf_norm": maximum_scaled_residual,
+        "maximum_scaled_increment_inf_norm": maximum_scaled_increment,
+        "equation_scaling": scaling.to_dict(),
         "exact_checkpoint_resume_supported": True,
         "material_commit_rollback_supported": True,
+        "adaptive_load_cutback_supported": True,
+        "adaptive_load_cutback_used": bool(load_cutback_history),
         "regularization_used": False,
         "fallback_used": False,
-        "contract_pass": True,
+        "contract_pass": contract_pass,
         "claim_boundary": STATEFUL_COROTATIONAL_FRAME3D_SPARSE_CLAIM_BOUNDARY,
     }
     return StatefulCorotationalFrame3DSparseResult(
@@ -952,15 +1558,22 @@ def solve_stateful_corotational_frame3d_sparse_load_path(
         model_hash=model.model_hash,
         solver_contract_hash=config.contract_hash,
         start_checkpoint_hash=checkpoint.checkpoint_hash,
+        requested_load_factors=factors,
         steps=tuple(steps),
         checkpoints=tuple(checkpoints),
+        load_cutback_history=tuple(load_cutback_history),
         maximum_free_residual_inf_norm_kn=maximum_residual,
+        maximum_scaled_residual_inf_norm=maximum_scaled_residual,
+        maximum_scaled_increment_inf_norm=maximum_scaled_increment,
+        equation_scaling=scaling,
         result_hash=canonical_hash(payload),
         exact_checkpoint_resume_supported=True,
         material_commit_rollback_supported=True,
+        adaptive_load_cutback_supported=True,
+        adaptive_load_cutback_used=bool(load_cutback_history),
         regularization_used=False,
         fallback_used=False,
-        contract_pass=True,
+        contract_pass=contract_pass,
         claim_boundary=STATEFUL_COROTATIONAL_FRAME3D_SPARSE_CLAIM_BOUNDARY,
     )
 
@@ -984,6 +1597,8 @@ def validate_stateful_corotational_frame3d_sparse_checkpoint(
     if (
         checkpoint.profile != STATEFUL_COROTATIONAL_FRAME3D_SPARSE_PROFILE
         or checkpoint.model_hash != model.model_hash
+        or not _optional_hash(checkpoint.solver_contract_hash)
+        or checkpoint.solver_contract_hash is None
         or (
             config is not None
             and checkpoint.solver_contract_hash != config.contract_hash
@@ -994,7 +1609,20 @@ def validate_stateful_corotational_frame3d_sparse_checkpoint(
         )
     if type(checkpoint.step_index) is not int or checkpoint.step_index < 0:
         raise StatefulCorotationalFrame3DSparseError("checkpoint step index is invalid")
-    values = _displacement(model, checkpoint.displacement)
+    try:
+        values = _displacement(model, checkpoint.displacement)
+    except ValueError as error:
+        raise StatefulCorotationalFrame3DSparseError(
+            f"checkpoint displacement is invalid: {error}",
+            reason_code="checkpoint_displacement_invalid",
+        ) from error
+    if canonical_json_bytes(list(checkpoint.displacement)) != canonical_json_bytes(
+        values.tolist()
+    ):
+        raise StatefulCorotationalFrame3DSparseError(
+            "checkpoint displacement changes during binary64 normalization",
+            reason_code="checkpoint_displacement_numeric_domain_mismatch",
+        )
     if len(checkpoint.material_states) != len(model.elastic_model.members) or any(
         not _material_state_matches(material, state)
         for material, state in zip(
@@ -1006,48 +1634,104 @@ def validate_stateful_corotational_frame3d_sparse_checkpoint(
         raise StatefulCorotationalFrame3DSparseError(
             "checkpoint material state rows are invalid"
         )
+    for material, state in zip(
+        model.axial_materials,
+        checkpoint.material_states,
+        strict=True,
+    ):
+        _validate_material_state_admissibility(material, state)
     if (
-        not math.isfinite(checkpoint.load_factor)
+        type(checkpoint.load_factor) is not float
+        or not math.isfinite(checkpoint.load_factor)
         or type(checkpoint.converged_iterations) is not int
         or checkpoint.converged_iterations < 0
+        or type(checkpoint.residual_inf_norm_kn) is not float
         or not math.isfinite(checkpoint.residual_inf_norm_kn)
         or checkpoint.residual_inf_norm_kn < 0.0
         or not _optional_hash(checkpoint.parent_checkpoint_hash)
+        or (checkpoint.step_index == 0)
+        != (checkpoint.parent_checkpoint_hash is None)
+        or (checkpoint.step_index == 0 and checkpoint.converged_iterations != 0)
+        or (
+            checkpoint.step_index > 0
+            and checkpoint.parent_checkpoint_hash == _ZERO_HASH
+        )
+        or (
+            config is not None
+            and checkpoint.converged_iterations > config.maximum_iterations
+        )
     ):
         raise StatefulCorotationalFrame3DSparseError(
             "checkpoint scalar metadata is invalid"
         )
+    if checkpoint.step_index == 0:
+        initial_states = tuple(
+            _initial_material_state(material) for material in model.axial_materials
+        )
+        zero_displacement = np.zeros(model.total_dofs, dtype=np.float64)
+        genesis_assembly = _assemble_sparse_core(
+            model,
+            initial_states,
+            parent_checkpoint_hash=_ZERO_HASH,
+            target_load_factor=0.0,
+            displacement=zero_displacement,
+        )
+        genesis_state_hashes = tuple(
+            state.state_hash for state in genesis_assembly.trial_material_states
+        )
+        genesis_residual = _linf(genesis_assembly.residual_free)
+        if (
+            checkpoint.load_factor != 0.0
+            or np.any(values != 0.0)
+            or checkpoint.residual_inf_norm_kn != genesis_residual
+            or tuple(state.state_hash for state in checkpoint.material_states)
+            != genesis_state_hashes
+        ):
+            raise StatefulCorotationalFrame3DSparseError(
+                "checkpoint genesis state is not the deterministic unloaded initial state",
+                reason_code="checkpoint_genesis_state_invalid",
+            )
     expected_hash = canonical_hash(_checkpoint_payload(checkpoint, include_hash=False))
     if checkpoint.checkpoint_hash != expected_hash:
         raise StatefulCorotationalFrame3DSparseError("checkpoint hash mismatch")
+    replay_assembly = _assemble_sparse_core(
+        model,
+        checkpoint.material_states,
+        parent_checkpoint_hash=checkpoint.checkpoint_hash,
+        target_load_factor=checkpoint.load_factor,
+        displacement=values,
+    )
+    if tuple(
+        state.state_hash for state in replay_assembly.trial_material_states
+    ) != tuple(state.state_hash for state in checkpoint.material_states):
+        raise StatefulCorotationalFrame3DSparseError(
+            "checkpoint material state is not idempotent at its stored displacement",
+            reason_code="checkpoint_material_state_replay_invalid",
+        )
     if require_equilibrium:
         if config is None:
             raise ValueError("config is required for equilibrium validation")
-        assembly = _assemble_sparse_core(
+        scaling = stateful_corotational_frame3d_equation_scaling_6dof(
             model,
-            checkpoint.material_states,
-            parent_checkpoint_hash=checkpoint.checkpoint_hash,
-            target_load_factor=checkpoint.load_factor,
-            displacement=values,
+            config=config,
         )
-        residual = _linf(assembly.residual_free)
-        tolerance = _residual_tolerance(model, config, checkpoint.load_factor)
-        if residual > tolerance:
+        residual = _linf(replay_assembly.residual_free)
+        residual_metrics = _scaled_residual_metrics(
+            replay_assembly.residual_free,
+            model.free_dofs,
+            scaling,
+        )
+        scaled_tolerance = _scaled_residual_tolerance(config, scaling)
+        if residual_metrics["scaled"] > scaled_tolerance:
             raise StatefulCorotationalFrame3DSparseError(
                 "checkpoint free-equation equilibrium is invalid"
             )
         if abs(residual - checkpoint.residual_inf_norm_kn) > max(
-            tolerance,
+            config.residual_absolute_tolerance_kn,
             1.0e-12,
         ):
             raise StatefulCorotationalFrame3DSparseError(
                 "checkpoint residual observation is inconsistent"
-            )
-        if tuple(state.state_hash for state in assembly.trial_material_states) != tuple(
-            state.state_hash for state in checkpoint.material_states
-        ):
-            raise StatefulCorotationalFrame3DSparseError(
-                "checkpoint material state is not self-consistent"
             )
     return checkpoint
 
@@ -1076,13 +1760,31 @@ def _assemble_sparse_core(
         strict=True,
     ):
         dofs = _member_dofs(member)
-        response = stateful_corotational_frame3d_member_response(
-            member=member,
-            node_coordinates_m=coordinates[[member.node_i, member.node_j]],
-            element_displacements=displacement[list(dofs)],
-            axial_material=material,
-            committed_state=parent,
-        )
+        try:
+            response = stateful_corotational_frame3d_member_response(
+                member=member,
+                node_coordinates_m=coordinates[[member.node_i, member.node_j]],
+                element_displacements=displacement[list(dofs)],
+                axial_material=material,
+                committed_state=parent,
+            )
+        except ConfinedConcreteAdmissibilityError as error:
+            raise StatefulCorotationalFrame3DSparseError(
+                f"{error.code}: member {member.member_id}: {error.detail}",
+                reason_code=error.code,
+            ) from error
+        except StatefulCorotationalFrame3DSparseError:
+            raise
+        except RuntimeError as error:
+            raise StatefulCorotationalFrame3DSparseError(
+                f"material integration failed for member {member.member_id}: {error}",
+                reason_code="material_integration_failed",
+            ) from error
+        except (ValueError, ArithmeticError) as error:
+            raise StatefulCorotationalFrame3DSparseError(
+                f"member trial is inadmissible for {member.member_id}: {error}",
+                reason_code="member_trial_inadmissible",
+            ) from error
         internal[list(dofs)] += response.internal_force_global
         tangent = response.consistent_tangent_global
         for local_row, global_row in enumerate(dofs):
@@ -1201,13 +1903,23 @@ def _assemble_sparse_core(
 def _solve_step(
     model: StatefulCorotationalFrame3DSparseModel,
     config: StatefulCorotationalFrame3DSparseConfig,
+    scaling: StatefulCorotationalFrame3DEquationScaling6DOF,
     factor: float,
     parent: StatefulCorotationalFrame3DSparseCheckpoint,
 ) -> StatefulCorotationalFrame3DSparseStep:
     displacement = np.asarray(parent.displacement, dtype=np.float64).copy()
     free = list(model.free_dofs)
-    tolerance = _residual_tolerance(model, config, factor)
+    residual_tolerance = _scaled_residual_tolerance(config, scaling)
+    increment_tolerance = _scaled_increment_tolerance(config, scaling)
     diagnostics: list[FactorizationDiagnostic] = []
+    convergence_history: list[Mapping[str, Any]] = []
+    line_search_history: list[Mapping[str, Any]] = []
+    selected_line_search_alpha: float | None = None
+    line_search_required = False
+    parent_checkpoint_hash = parent.checkpoint_hash
+    parent_state_hashes = tuple(state.state_hash for state in parent.material_states)
+    first_admissibility_error: StatefulCorotationalFrame3DSparseError | None = None
+    inadmissible_trial_count = 0
     for iteration in range(config.maximum_iterations + 1):
         assembly = assemble_stateful_corotational_frame3d_sparse(
             model,
@@ -1216,56 +1928,267 @@ def _solve_step(
             trial_displacement=displacement,
         )
         residual = _linf(assembly.residual_free)
-        if residual <= tolerance:
+        residual_metrics = _scaled_residual_metrics(
+            assembly.residual_free,
+            model.free_dofs,
+            scaling,
+        )
+        scaled_tangent, scaled_rhs, column_scale = _scaled_newton_system(
+            assembly.tangent_free_csr,
+            assembly.residual_free,
+            model.free_dofs,
+            scaling,
+        )
+        try:
+            equivalent_correction, diagnostic = _solve_sparse_tangent(
+                scaled_tangent,
+                scaled_rhs,
+                config.factorization_policy,
+            )
+        except (SparseFactorizationError, ScalableSparseFactorizationError) as error:
+            raise StatefulCorotationalFrame3DSparseError(
+                f"sparse factorization failed without fallback: {error.code}",
+                reason_code="sparse_factorization_failed",
+            ) from error
+        diagnostics.append(diagnostic)
+        correction = np.asarray(column_scale * equivalent_correction)
+        if correction.shape != (len(free),) or not np.all(np.isfinite(correction)):
+            raise StatefulCorotationalFrame3DSparseError(
+                "scaled sparse Newton correction is invalid"
+            )
+        increment_metrics = _scaled_increment_metrics(
+            correction,
+            model.free_dofs,
+            scaling,
+        )
+        residual_gate = residual_metrics["scaled"] <= residual_tolerance
+        increment_gate = increment_metrics["scaled"] <= increment_tolerance
+        convergence_row: dict[str, Any] = {
+            "iteration": iteration,
+            "assembly_hash": assembly.assembly_hash,
+            "raw_translational_residual_inf_norm_kn": residual_metrics[
+                "translation"
+            ],
+            "raw_rotational_residual_inf_norm_kn_m": residual_metrics["rotation"],
+            "scaled_residual_inf_norm": residual_metrics["scaled"],
+            "scaled_residual_tolerance": residual_tolerance,
+            "raw_translation_increment_inf_norm_m": increment_metrics[
+                "translation"
+            ],
+            "raw_rotation_increment_inf_norm_rad": increment_metrics["rotation"],
+            "scaled_increment_inf_norm": increment_metrics["scaled"],
+            "scaled_increment_tolerance": increment_tolerance,
+            "residual_gate_passed": residual_gate,
+            "increment_gate_passed": increment_gate,
+            "scaled_condition_number_1": diagnostic.condition_number_1,
+            "sparse_diagnostic_hash": diagnostic.diagnostic_hash,
+        }
+        if residual_gate and increment_gate:
+            convergence_row["accepted"] = True
+            convergence_row["selected_line_search_alpha"] = None
+            convergence_history.append(MappingProxyType(convergence_row))
+            final_assembly = assemble_stateful_corotational_frame3d_sparse(
+                model,
+                parent,
+                target_load_factor=factor,
+                trial_displacement=displacement,
+            )
+            final_metrics = _scaled_residual_metrics(
+                final_assembly.residual_free,
+                model.free_dofs,
+                scaling,
+            )
+            final_reassembled_equilibrium = bool(
+                final_assembly.assembly_hash == assembly.assembly_hash
+                and final_metrics["scaled"] <= residual_tolerance
+                and tuple(
+                    state.state_hash
+                    for state in final_assembly.trial_material_states
+                )
+                == tuple(
+                    state.state_hash for state in assembly.trial_material_states
+                )
+            )
+            parent_immutable = bool(
+                parent.checkpoint_hash == parent_checkpoint_hash
+                and tuple(
+                    state.state_hash for state in parent.material_states
+                )
+                == parent_state_hashes
+            )
+            sparse_diagnostic_passed = bool(
+                diagnostics and all(row.contract_pass for row in diagnostics)
+            )
+            line_search_valid = bool(
+                not line_search_required or selected_line_search_alpha is not None
+            )
+            if not (
+                final_reassembled_equilibrium
+                and parent_immutable
+                and sparse_diagnostic_passed
+                and line_search_valid
+            ):
+                raise StatefulCorotationalFrame3DSparseError(
+                    "final Frame3D convergence contract failed before commit",
+                    reason_code="final_convergence_contract_failed",
+                )
             checkpoint = _make_checkpoint(
                 model=model,
                 config=config,
                 step_index=parent.step_index + 1,
                 load_factor=factor,
                 displacement=displacement,
-                material_states=assembly.trial_material_states,
+                material_states=final_assembly.trial_material_states,
                 converged_iterations=iteration,
                 residual_inf_norm_kn=residual,
                 parent_checkpoint_hash=parent.checkpoint_hash,
             )
-            applied_free = assembly.external_force[free]
-            relative = residual / max(_linf(applied_free), 1.0)
             return StatefulCorotationalFrame3DSparseStep(
                 step_index=checkpoint.step_index,
                 load_factor=factor,
                 checkpoint=checkpoint,
                 free_residual_inf_norm_kn=residual,
-                relative_residual=relative,
+                relative_residual=residual_metrics["scaled"],
+                raw_translational_residual_inf_norm_kn=residual_metrics[
+                    "translation"
+                ],
+                raw_rotational_residual_inf_norm_kn_m=residual_metrics["rotation"],
+                scaled_residual_inf_norm=residual_metrics["scaled"],
+                scaled_residual_tolerance=residual_tolerance,
+                raw_translation_increment_inf_norm_m=increment_metrics[
+                    "translation"
+                ],
+                raw_rotation_increment_inf_norm_rad=increment_metrics["rotation"],
+                scaled_increment_inf_norm=increment_metrics["scaled"],
+                scaled_increment_tolerance=increment_tolerance,
+                residual_gate_passed=True,
+                increment_gate_passed=True,
+                line_search_required=line_search_required,
+                selected_line_search_alpha=selected_line_search_alpha,
+                line_search_valid=line_search_valid,
+                material_admissibility_passed=True,
+                final_reassembled_equilibrium_passed=(
+                    final_reassembled_equilibrium
+                ),
+                parent_state_immutable=parent_immutable,
+                sparse_diagnostic_passed=sparse_diagnostic_passed,
+                scaled_condition_number_1=diagnostic.condition_number_1,
+                equation_scaling_hash=scaling.scaling_hash,
+                convergence_history=tuple(convergence_history),
+                line_search_history=tuple(line_search_history),
                 reactions=tuple(
-                    (dof, float(assembly.reactions[dof]))
+                    (dof, float(final_assembly.reactions[dof]))
                     for dof in model.elastic_model.restrained_dofs
                 ),
                 factorization_diagnostics=tuple(diagnostics),
                 member_results=tuple(
                     MappingProxyType(response.recovery_manifest())
-                    for response in assembly.member_responses
+                    for response in final_assembly.member_responses
                 ),
             )
         if iteration == config.maximum_iterations:
+            convergence_row["accepted"] = False
+            convergence_row["selected_line_search_alpha"] = None
+            convergence_history.append(MappingProxyType(convergence_row))
+            if first_admissibility_error is not None:
+                raise first_admissibility_error
             break
-        try:
-            correction, diagnostic = _solve_sparse_tangent(
-                assembly.tangent_free_csr,
-                -assembly.residual_free,
-                config.factorization_policy,
+        line_search_required = True
+        attempts: list[dict[str, Any]] = []
+        selected_displacement: np.ndarray | None = None
+        selected_line_search_alpha = None
+        for alpha in config.line_search_alphas:
+            candidate = displacement.copy()
+            candidate[free] += alpha * correction
+            try:
+                trial = assemble_stateful_corotational_frame3d_sparse(
+                    model,
+                    parent,
+                    target_load_factor=factor,
+                    trial_displacement=candidate,
+                )
+            except (
+                StatefulCorotationalFrame3DSparseError,
+                ValueError,
+                FloatingPointError,
+            ) as error:
+                inadmissible_trial_count += 1
+                admissibility_error = (
+                    error
+                    if isinstance(error, StatefulCorotationalFrame3DSparseError)
+                    else StatefulCorotationalFrame3DSparseError(
+                        f"Frame3D line-search trial is inadmissible: {error}",
+                        reason_code="member_trial_inadmissible",
+                    )
+                )
+                if first_admissibility_error is None:
+                    first_admissibility_error = admissibility_error
+                attempts.append(
+                    {
+                        "alpha": alpha,
+                        "accepted": False,
+                        "admissible": False,
+                        "reason": type(error).__name__,
+                        "reason_code": getattr(
+                            error,
+                            "reason_code",
+                            "member_trial_inadmissible",
+                        ),
+                    }
+                )
+                continue
+            trial_metrics = _scaled_residual_metrics(
+                trial.residual_free,
+                model.free_dofs,
+                scaling,
             )
-        except (SparseFactorizationError, ScalableSparseFactorizationError) as error:
-            raise StatefulCorotationalFrame3DSparseError(
-                f"sparse factorization failed without fallback: {error.code}"
-            ) from error
-        diagnostics.append(diagnostic)
-        if correction.shape != (len(free),) or not np.all(np.isfinite(correction)):
-            raise StatefulCorotationalFrame3DSparseError(
-                "sparse Newton correction is invalid"
+            accepted = bool(
+                math.isfinite(trial_metrics["scaled"])
+                and trial_metrics["scaled"] < residual_metrics["scaled"]
             )
-        displacement[free] += correction
+            attempts.append(
+                {
+                    "alpha": alpha,
+                    "accepted": accepted,
+                    "admissible": True,
+                    "trial_assembly_hash": trial.assembly_hash,
+                    "trial_scaled_residual_inf_norm": trial_metrics["scaled"],
+                }
+            )
+            if accepted:
+                selected_line_search_alpha = alpha
+                selected_displacement = candidate
+                break
+        line_search_row = MappingProxyType(
+            {
+                "iteration": iteration,
+                "selected_alpha": selected_line_search_alpha,
+                "attempts": tuple(
+                    MappingProxyType(dict(attempt)) for attempt in attempts
+                ),
+            }
+        )
+        line_search_history.append(line_search_row)
+        convergence_row["selected_line_search_alpha"] = (
+            selected_line_search_alpha
+        )
+        convergence_row["accepted"] = selected_displacement is not None
+        convergence_row["inadmissible_trial_count"] = inadmissible_trial_count
+        convergence_history.append(MappingProxyType(convergence_row))
+        if selected_displacement is None:
+            if first_admissibility_error is not None:
+                raise first_admissibility_error
+            raise StatefulCorotationalFrame3DSparseError(
+                "line search failed to produce an admissible "
+                "scaled-residual-decreasing trial",
+                reason_code="line_search_failed",
+                retryable_convergence_failure=True,
+            )
+        displacement = selected_displacement
     raise StatefulCorotationalFrame3DSparseError(
-        f"load factor {factor} did not converge in {config.maximum_iterations} iterations"
+        f"load factor {factor} did not converge in {config.maximum_iterations} iterations",
+        reason_code="maximum_iterations_exceeded",
+        retryable_convergence_failure=True,
     )
 
 
@@ -1376,6 +2299,143 @@ def _material_state_matches(
     if type(material) is StatefulCorotationalPartialCompositeFrame3D:
         return type(state) is StatefulCorotationalPartialCompositeFrame3DState
     return False
+
+
+def _validate_material_state_admissibility(
+    material: AxialMaterial,
+    state: AxialMaterialState,
+) -> None:
+    """Apply material-aware invariants before any checkpoint or trial reuse."""
+
+    try:
+        if type(material) is BilinearCombinedHardeningSteel:
+            assert type(state) is UniaxialPlasticityState
+            material.validate_state_admissibility(state)
+        elif type(material) in (
+            AsymmetricConcreteDamageMaterial,
+            FractureEnergyConcreteDamageMaterial,
+        ):
+            assert type(state) is ConcreteDamageState
+            material.validate_state_admissibility(state)
+        elif type(material) is ParallelSteelConcreteSectionMaterial:
+            assert type(state) is ParallelCompositeSectionState
+            material.steel.validate_state_admissibility(state.steel_state)
+            material.concrete.validate_state_admissibility(state.concrete_state)
+        elif type(material) is ConfinedConcreteMaterial:
+            assert type(state) is ConfinedConcreteState
+            material.validate_state_admissibility(state)
+        elif type(material) is CondensedPartialCompositeAxialMaterial:
+            assert type(state) is CondensedPartialCompositeAxialState
+            material.partial_composite.connector.validate_state_admissibility(
+                state.component_state.connector_state
+            )
+        elif type(material) is StatefulCorotationalFiberFrame3D:
+            assert type(state) is StatefulCorotationalFiberFrame3DState
+            material.validate_state(state)
+            for section_state in state.integration_point_states:
+                _validate_biaxial_section_material_states(
+                    material.section,
+                    section_state,
+                )
+        elif type(material) is StatefulCorotationalPartialCompositeFrame3D:
+            assert type(state) is StatefulCorotationalPartialCompositeFrame3DState
+            material.validate_state(state)
+            for section_state in state.steel_section_states:
+                _validate_biaxial_section_material_states(
+                    material.steel_section,
+                    section_state,
+                )
+            for section_state in state.concrete_section_states:
+                _validate_biaxial_section_material_states(
+                    material.concrete_section,
+                    section_state,
+                )
+            for connector_state in state.connector_states:
+                assert type(connector_state) is BondSlipState
+                material.connector.validate_state_admissibility(connector_state)
+    except ValueError as error:
+        raise StatefulCorotationalFrame3DSparseError(
+            f"material state is inadmissible: {error}",
+            reason_code="material_state_admissibility_failed",
+        ) from error
+
+
+def _validate_biaxial_section_material_states(
+    section: Any,
+    state: Any,
+) -> None:
+    section.validate_state(state)
+    for fiber, fiber_state in zip(
+        section.fibers,
+        state.fiber_states,
+        strict=True,
+    ):
+        if type(fiber.material) is BilinearCombinedHardeningSteel:
+            assert type(fiber_state) is UniaxialPlasticityState
+            fiber.material.validate_state_admissibility(fiber_state)
+        elif type(fiber.material) in (
+            AsymmetricConcreteDamageMaterial,
+            FractureEnergyConcreteDamageMaterial,
+        ):
+            assert type(fiber_state) is ConcreteDamageState
+            fiber.material.validate_state_admissibility(fiber_state)
+        elif type(fiber.material) is ConfinedConcreteMaterial:
+            assert type(fiber_state) is ConfinedConcreteState
+            fiber.material.validate_state_admissibility(fiber_state)
+
+
+def _material_response_matches(
+    material: AxialMaterial,
+    response: object,
+) -> bool:
+    if type(material) is BilinearCombinedHardeningSteel:
+        return type(response) is UniaxialPlasticityResponse
+    if type(material) in (
+        AsymmetricConcreteDamageMaterial,
+        FractureEnergyConcreteDamageMaterial,
+    ):
+        return type(response) is ConcreteDamageResponse
+    if type(material) is ParallelSteelConcreteSectionMaterial:
+        return type(response) is ParallelCompositeSectionResponse
+    if type(material) is ConfinedConcreteMaterial:
+        return type(response) is StatefulConfinedConcreteResponse
+    if type(material) is CondensedPartialCompositeAxialMaterial:
+        return type(response) is CondensedPartialCompositeAxialResponse
+    if type(material) is StatefulCorotationalFiberFrame3D:
+        return type(response) is StatefulCorotationalFiberFrame3DResponse
+    if type(material) is StatefulCorotationalPartialCompositeFrame3D:
+        return type(response) is StatefulCorotationalPartialCompositeFrame3DResponse
+    return False
+
+
+def _validate_material_response_lineage(
+    material: AxialMaterial,
+    committed_state: AxialMaterialState,
+    response: AxialMaterialResponse,
+) -> None:
+    if not _material_response_matches(material, response):
+        raise StatefulCorotationalFrame3DSparseError(
+            "material response type does not match its exact material family",
+            reason_code="material_response_type_mismatch",
+        )
+    if type(response) in (
+        StatefulCorotationalFiberFrame3DResponse,
+        StatefulCorotationalPartialCompositeFrame3DResponse,
+    ):
+        response_parent_hash = response.parent_state_hash
+    else:
+        response_parent_hash = response.committed_state_hash
+    if response_parent_hash != committed_state.state_hash:
+        raise StatefulCorotationalFrame3DSparseError(
+            "material response was not evaluated from the accepted parent state",
+            reason_code="material_response_parent_state_mismatch",
+        )
+    if not _material_state_matches(material, response.state):
+        raise StatefulCorotationalFrame3DSparseError(
+            "material response trial state does not match its exact material family",
+            reason_code="material_response_trial_state_mismatch",
+        )
+    _validate_material_state_admissibility(material, response.state)
 
 
 def _initial_material_state(material: AxialMaterial) -> AxialMaterialState:
@@ -1517,6 +2577,7 @@ def _material_manifest(material: AxialMaterial) -> dict[str, Any]:
             "confined_peak_strain": material.confined_peak_strain,
             "ultimate_compressive_strain": material.ultimate_compressive_strain,
             "residual_strength_ratio": material.residual_strength_ratio,
+            "path_capabilities": dict(CONFINED_CONCRETE_PATH_CAPABILITIES),
         }
     if isinstance(material, CondensedPartialCompositeAxialMaterial):
         component = material.partial_composite
@@ -1572,6 +2633,11 @@ def _validate_member_material_binding(
         StatefulCorotationalFiberFrame3D,
         StatefulCorotationalPartialCompositeFrame3D,
     ):
+        distributed = cast(
+            StatefulCorotationalFiberFrame3D
+            | StatefulCorotationalPartialCompositeFrame3D,
+            material,
+        )
         binding_label = (
             "distributed-fiber"
             if type(material) is StatefulCorotationalFiberFrame3D
@@ -1580,18 +2646,18 @@ def _validate_member_material_binding(
         coordinates = np.asarray(model.node_coordinates_m, dtype=np.float64)
         member_coordinates = coordinates[[member.node_i, member.node_j]]
         material_coordinates = np.asarray(
-            material.node_coordinates_m,
+            distributed.node_coordinates_m,
             dtype=np.float64,
         )
         if not np.array_equal(member_coordinates, material_coordinates):
             raise ValueError(
                 f"member {member.member_id} {binding_label} coordinate binding mismatch"
             )
-        if member.local_axis_roll_deg != material.local_axis_roll_deg:
+        if member.local_axis_roll_deg != distributed.local_axis_roll_deg:
             raise ValueError(
                 f"member {member.member_id} {binding_label} roll binding mismatch"
             )
-        material.validate_reference_section(member.section)
+        distributed.validate_reference_section(member.section)
         return
     if type(material) is not CondensedPartialCompositeAxialMaterial:
         return
@@ -1653,13 +2719,55 @@ def _displacement(
     model: StatefulCorotationalFrame3DSparseModel,
     values: Any,
 ) -> np.ndarray:
-    vector = np.asarray(values, dtype=np.float64)
-    if vector.shape != (model.total_dofs,) or not np.all(np.isfinite(vector)):
+    try:
+        _validate_real_binary64_source(values)
+        vector = immutable_array(values, dtype="<f8")
+    except (CanonicalContractError, TypeError, ValueError, OverflowError) as error:
+        raise ValueError(
+            "displacement must contain finite, losslessly representable "
+            "real binary64 values"
+        ) from error
+    if vector.shape != (model.total_dofs,):
         raise ValueError(f"displacement must be a finite {model.total_dofs}-vector")
     restrained = list(model.elastic_model.restrained_dofs)
     if np.any(vector[restrained] != 0.0):
         raise ValueError("restrained displacement entries must be exactly zero")
     return np.array(vector, dtype=np.float64, copy=True)
+
+
+def _validate_real_binary64_source(value: Any) -> None:
+    """Reject scalar kinds that NumPy would silently coerce before hashing."""
+
+    if np.ma.isMaskedArray(value):
+        raise CanonicalContractError("Masked numeric sources are not contract-safe.")
+    if isinstance(value, np.ndarray):
+        if value.dtype.hasobject or value.dtype.kind not in "iuf":
+            raise CanonicalContractError(
+                "Only integer and real floating-point sources are contract-safe."
+            )
+        return
+    if isinstance(value, (list, tuple)):
+        for item in value:
+            _validate_real_binary64_source(item)
+        return
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise CanonicalContractError(
+            "Only integer and real floating-point sources are contract-safe."
+        )
+    try:
+        converted = float(value)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise CanonicalContractError(
+            "Numeric source cannot be represented as binary64."
+        ) from error
+    if not math.isfinite(converted) or value != converted:
+        raise CanonicalContractError(
+            "Numeric source cannot be represented exactly as binary64."
+        )
+    if isinstance(value, Integral) and int(converted) != int(value):
+        raise CanonicalContractError(
+            "Integer source cannot be represented exactly as binary64."
+        )
 
 
 def _load_factors(values: Iterable[float], *, after: float) -> tuple[float, ...]:
@@ -1676,25 +2784,128 @@ def _load_factors(values: Iterable[float], *, after: float) -> tuple[float, ...]
     return factors
 
 
-def _residual_tolerance(
-    model: StatefulCorotationalFrame3DSparseModel,
+def _equation_scaling_payload(
+    scaling: StatefulCorotationalFrame3DEquationScaling6DOF,
+    *,
+    include_hash: bool,
+) -> dict[str, Any]:
+    payload = {
+        "schema_version": scaling.schema_version,
+        "policy": scaling.policy,
+        "model_hash": scaling.model_hash,
+        "characteristic_length_m": scaling.characteristic_length_m,
+        "reference_force_kn": scaling.reference_force_kn,
+        "residual_translation_scale_kn": scaling.residual_translation_scale_kn,
+        "residual_rotation_scale_kn_m": scaling.residual_rotation_scale_kn_m,
+        "increment_translation_scale_m": scaling.increment_translation_scale_m,
+        "increment_rotation_scale_rad": scaling.increment_rotation_scale_rad,
+        "source_node_coordinates_hash": scaling.source_node_coordinates_hash,
+        "source_reference_load_hash": scaling.source_reference_load_hash,
+        "source_free_dofs_hash": scaling.source_free_dofs_hash,
+        "row_equilibration_hash": scaling.row_equilibration_hash,
+        "column_equilibration_hash": scaling.column_equilibration_hash,
+    }
+    if include_hash:
+        payload["scaling_hash"] = scaling.scaling_hash
+    return payload
+
+
+def _thaw_trace_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {str(key): _thaw_trace_value(item) for key, item in value.items()}
+    if isinstance(value, (tuple, list)):
+        return [_thaw_trace_value(item) for item in value]
+    return value
+
+
+def _free_equation_equilibration(
+    free_dofs: tuple[int, ...],
+    characteristic_length_m: float,
+) -> tuple[np.ndarray, np.ndarray]:
+    return equilibration_vectors_6dof(free_dofs, characteristic_length_m)
+
+
+def _scaled_residual_metrics(
+    residual_free: Any,
+    free_dofs: tuple[int, ...],
+    scaling: StatefulCorotationalFrame3DEquationScaling6DOF,
+) -> dict[str, float]:
+    return scaled_residual_metrics_6dof(residual_free, free_dofs, scaling)
+
+
+def _scaled_increment_metrics(
+    correction_free: Any,
+    free_dofs: tuple[int, ...],
+    scaling: StatefulCorotationalFrame3DEquationScaling6DOF,
+) -> dict[str, float]:
+    return scaled_increment_metrics_6dof(correction_free, free_dofs, scaling)
+
+
+def _scaled_newton_system(
+    tangent_free: csr_matrix,
+    residual_free: Any,
+    free_dofs: tuple[int, ...],
+    scaling: StatefulCorotationalFrame3DEquationScaling6DOF,
+) -> tuple[csr_matrix, np.ndarray, np.ndarray]:
+    residual = np.asarray(residual_free, dtype=np.float64)
+    row_scale, column_scale = _free_equation_equilibration(
+        free_dofs,
+        scaling.characteristic_length_m,
+    )
+    scaled_tangent = (
+        diags(row_scale, offsets=0, format="csr")
+        @ tangent_free
+        @ diags(column_scale, offsets=0, format="csr")
+    ).tocsr()
+    scaled_tangent.sum_duplicates()
+    scaled_tangent.eliminate_zeros()
+    scaled_tangent.sort_indices()
+    scaled_rhs = -row_scale * residual
+    if (
+        scaled_tangent.shape != tangent_free.shape
+        or not scaled_tangent.has_canonical_format
+        or not np.all(np.isfinite(scaled_tangent.data))
+        or not np.all(np.isfinite(scaled_rhs))
+    ):
+        raise StatefulCorotationalFrame3DSparseError(
+            "scaled 6DOF Newton system is invalid"
+        )
+    return scaled_tangent, scaled_rhs, column_scale
+
+
+def _scaled_residual_tolerance(
     config: StatefulCorotationalFrame3DSparseConfig,
-    factor: float,
+    scaling: StatefulCorotationalFrame3DEquationScaling6DOF,
 ) -> float:
-    reference = np.asarray(model.elastic_model.reference_load_kn, dtype=np.float64)
-    scale = max(_linf(factor * reference[list(model.free_dofs)]), 1.0)
-    return config.residual_absolute_tolerance_kn + (
-        config.residual_relative_tolerance * scale
+    return config.residual_relative_tolerance + (
+        config.residual_absolute_tolerance_kn / scaling.reference_force_kn
+    )
+
+
+def _scaled_increment_tolerance(
+    config: StatefulCorotationalFrame3DSparseConfig,
+    scaling: StatefulCorotationalFrame3DEquationScaling6DOF,
+) -> float:
+    return config.increment_relative_tolerance + (
+        config.increment_absolute_tolerance_m / scaling.characteristic_length_m
     )
 
 
 def _finite(value: Any, name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
-        raise ValueError(f"{name} must be a finite number")
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable binary64 number"
+        )
     normalized = float(value)
-    if not math.isfinite(normalized):
-        raise ValueError(f"{name} must be a finite number")
-    return normalized
+    if (
+        not math.isfinite(normalized)
+        or value != normalized
+        or (type(value) is int and int(normalized) != value)
+    ):
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable binary64 number"
+        )
+    return 0.0 if normalized == 0.0 else normalized
 
 
 def _positive(value: Any, name: str) -> float:

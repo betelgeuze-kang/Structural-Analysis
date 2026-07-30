@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,7 +17,9 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     resource_model = (ROOT / "src" / "workbench" / "resourceModel.ts").read_text(encoding="utf-8")
     tsconfig = json.loads((ROOT / "tsconfig.json").read_text(encoding="utf-8"))
 
-    assert "import App from './App'" in main_tsx
+    assert "const LegacyApp = lazy(() => import('./App'))" in main_tsx
+    assert "import { WorkbenchPage } from './workbench-v2/WorkbenchPage'" in main_tsx
+    assert "return surface === 'legacy-app' ? <LegacyAppSurface />" in main_tsx
     assert "import './index.css'" in main_tsx
     assert ".authoring-card--coverage-matrix" in index_css
     assert ".authoring-coverage-grid__head" in index_css
@@ -147,16 +151,20 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     assert "Open writeback breadth JSON" in app_tsx
     assert "Scope anchor" in app_tsx
     assert "portfolio scope note is coverage, not readiness" in app_tsx
-    portfolio_report = json.loads(
-        (ROOT / "implementation" / "phase1" / "release" / "authoring" / "portfolio" / "native_authoring_ops_portfolio.json").read_text(
-            encoding="utf-8"
-        )
+    portfolio_path = (
+        ROOT
+        / "implementation/phase1/release/authoring/portfolio/"
+        "native_authoring_ops_portfolio.json"
     )
-    family_tracks_report = json.loads(
-        (ROOT / "implementation" / "phase1" / "release" / "authoring" / "portfolio" / "native_authoring_family_tracks.json").read_text(
-            encoding="utf-8"
-        )
+    family_tracks_path = (
+        ROOT
+        / "implementation/phase1/release/authoring/portfolio/"
+        "native_authoring_family_tracks.json"
     )
+    if not portfolio_path.exists() or not family_tracks_path.exists():
+        pytest.skip("non-committed legacy authoring portfolio artifacts are unavailable")
+    portfolio_report = json.loads(portfolio_path.read_text(encoding="utf-8"))
+    family_tracks_report = json.loads(family_tracks_path.read_text(encoding="utf-8"))
     expected_family_ids = {
         "sample_tower",
         "steel_braced_frame",

@@ -1,0 +1,119 @@
+{
+  "template_only": true,
+  "schema_version": "external-vv-level2-promotion.v1",
+  "promotion_id": "OWNER_INPUT_REQUIRED",
+  "source_commit_sha": "OWNER_INPUT_REQUIRED",
+  "reviewed_at": "OWNER_INPUT_REQUIRED",
+  "operator_attestation": {
+    "path": "operator-attestation.json",
+    "file_sha256": "OWNER_INPUT_REQUIRED",
+    "artifact_hash": "OWNER_INPUT_REQUIRED"
+  },
+  "verification_matrix": {
+    "path": "bounded-planar-external-vv-matrix.json",
+    "file_sha256": "OWNER_INPUT_REQUIRED",
+    "artifact_hash": "OWNER_INPUT_REQUIRED"
+  },
+  "project_reviewer": {
+    "name": "OWNER_INPUT_REQUIRED",
+    "organization": "OWNER_INPUT_REQUIRED",
+    "role": "OWNER_INPUT_REQUIRED",
+    "contact": "OWNER_INPUT_REQUIRED",
+    "authorized_for_project": false,
+    "independent_from_operator": false,
+    "signer_public_key_sha256": "OWNER_INPUT_REQUIRED"
+  },
+  "identity_review": {
+    "operator_identity_authenticated": false,
+    "credentials_reference": "OWNER_INPUT_REQUIRED",
+    "credential_evidence": {
+      "path": "OWNER_INPUT_REQUIRED",
+      "file_sha256": "OWNER_INPUT_REQUIRED"
+    },
+    "conflict_review_passed": false,
+    "review_notes": "OWNER_INPUT_REQUIRED"
+  },
+  "license_reviews": [
+    {
+      "solver": "OpenSees",
+      "license_id": "OWNER_INPUT_REQUIRED",
+      "approval_status": "OWNER_INPUT_REQUIRED",
+      "local_execution_allowed": false,
+      "commercial_use_allowed": false,
+      "redistribution_allowed": false,
+      "evidence": {
+        "path": "OWNER_INPUT_REQUIRED",
+        "file_sha256": "OWNER_INPUT_REQUIRED"
+      }
+    },
+    {
+      "solver": "CalculiX",
+      "license_id": "OWNER_INPUT_REQUIRED",
+      "approval_status": "OWNER_INPUT_REQUIRED",
+      "local_execution_allowed": false,
+      "commercial_use_allowed": false,
+      "redistribution_allowed": false,
+      "evidence": {
+        "path": "OWNER_INPUT_REQUIRED",
+        "file_sha256": "OWNER_INPUT_REQUIRED"
+      }
+    }
+  ],
+  "scientific_reviews": [
+    {
+      "category": "opensees_code_to_code",
+      "reference": {
+        "name": "OpenSeesPy Linux runtime",
+        "version": "OWNER_INPUT_REQUIRED",
+        "version_verified": false,
+        "independent_from_product": true
+      },
+      "source": {
+        "url_or_doi": "OWNER_INPUT_REQUIRED",
+        "sha256": "OWNER_INPUT_REQUIRED"
+      },
+      "artifacts": [
+        {"path": "OWNER_INPUT_REQUIRED", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "OWNER_INPUT_REQUIRED", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"}
+      ],
+      "decision": {"decision": "OWNER_INPUT_REQUIRED"}
+    },
+    {
+      "category": "second_solver_code_to_code",
+      "reference": {
+        "name": "CalculiX ccx",
+        "version": "OWNER_INPUT_REQUIRED",
+        "version_verified": false,
+        "independent_from_product": true
+      },
+      "source": {
+        "url_or_doi": "OWNER_INPUT_REQUIRED",
+        "sha256": "OWNER_INPUT_REQUIRED"
+      },
+      "artifacts": [
+        {"path": "OWNER_INPUT_REQUIRED", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"},
+        {"path": "OWNER_INPUT_REQUIRED", "file_sha256": "OWNER_INPUT_REQUIRED", "artifact_hash": "OWNER_INPUT_REQUIRED"}
+      ],
+      "decision": {"decision": "OWNER_INPUT_REQUIRED"}
+    }
+  ],
+  "declarations": {
+    "operator_identity_authenticated": false,
+    "conflict_review_passed": false,
+    "legal_use_approved": false,
+    "scientific_review_completed": false,
+    "formal_level_2_promotion_approved": false,
+    "release_authority_granted": false,
+    "design_authority_granted": false
+  },
+  "signature": {
+    "algorithm": "rsa-sha256",
+    "signed_payload_sha256": "OWNER_INPUT_REQUIRED",
+    "public_key_path": "project-reviewer-public-key.pem",
+    "public_key_sha256": "OWNER_INPUT_REQUIRED",
+    "signature_path": "project-review.sig",
+    "signature_sha256": "OWNER_INPUT_REQUIRED"
+  },
+  "contract_pass": false,
+  "claim_boundary": "Template only. It grants no verification hierarchy, design, release, commercial-equivalence, legal, or redistribution authority."
+}

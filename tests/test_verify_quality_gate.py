@@ -5,7 +5,9 @@ from pathlib import Path
 from types import SimpleNamespace
 
 
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "verify_quality_gate.py"
+SCRIPT_PATH = (
+    Path(__file__).resolve().parent.parent / "scripts" / "verify_quality_gate.py"
+)
 SPEC = importlib.util.spec_from_file_location("verify_quality_gate", SCRIPT_PATH)
 assert SPEC is not None
 verify_quality_gate = importlib.util.module_from_spec(SPEC)
@@ -20,7 +22,9 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert exit_code == 0
     assert "scripts/check_p0_closure_status.py --json --fail-core-open" in output
     assert "scripts/check_p1_readiness_status.py --json --fail-core-open" in output
-    assert "scripts/check_p1_benchmark_breadth_status.py --json --fail-core-open" in output
+    assert (
+        "scripts/check_p1_benchmark_breadth_status.py --json --fail-core-open" in output
+    )
     assert "npm audit --audit-level high" in output
     assert output.index("npm ci") < output.index("npm audit --audit-level high")
     assert "verify:viewer-manifest" in output
@@ -37,9 +41,9 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     )
     assert "--tracked-only --check" in scope_line
     assert "--fail-blocked" not in scope_line
-    assert output.index("scripts/report_source_boundary_footprint.py --check") < output.index(
-        scope_line
-    )
+    assert output.index(
+        "scripts/report_source_boundary_footprint.py --check"
+    ) < output.index(scope_line)
     assert output.index(scope_line) < output.index(
         "scripts/check_product_ci_boundaries.py --fail-blocked"
     )
@@ -54,17 +58,13 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
         in output
     )
     assert (
-        "scripts/run_engine_v2_hip_sparse_lu_apply.py --compile-only --check"
-        in output
+        "scripts/run_engine_v2_hip_sparse_lu_apply.py --compile-only --check" in output
     )
     assert (
         "scripts/run_engine_v2_hip_current_tangent_operator.py "
         "--compile-only --check" in output
     )
-    assert (
-        "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py --check"
-        in output
-    )
+    assert "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py --check" in output
     assert "scripts/build_engine_v2_hip_fgmres_stage4_status.py --check" in output
     assert (
         "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py "
@@ -82,7 +82,7 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert (
         "scripts/"
         "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py "
-        "--check" in output
+        "--portable-check" in output
     )
     assert (
         "scripts/build_g1_mgt_matrix_free_preconditioner_candidate_audit.py "
@@ -98,10 +98,7 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert "tests/test_engine_v2_canonical_contract.py" in output
     assert "tests/test_engine_v2_current_tangent_operator_v1.py" in output
     assert "tests/test_engine_v2_hip_current_tangent_operator.py" in output
-    assert (
-        "tests/test_engine_v2_hip_current_tangent_operator_runner.py"
-        in output
-    )
+    assert "tests/test_engine_v2_hip_current_tangent_operator_runner.py" in output
     assert "tests/test_canonical_sparse_lu_factor.py" in output
     assert "tests/test_engine_v2_hip_sparse_lu_apply.py" in output
     assert "tests/test_engine_v2_hip_sparse_lu_apply_runner.py" in output
@@ -110,10 +107,7 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
         in output
     )
     assert "-k not test_committed_receipt_is_reproducible" in output
-    assert (
-        "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py"
-        in output
-    )
+    assert "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py" in output
     assert "tests/test_project_ops_api_service.py" in output
     assert "-m pytest -q\n" not in output
 
@@ -123,15 +117,29 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
 
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "scripts/check_p0_closure_status.py --json --fail-open" in output
-    assert "scripts/check_p1_readiness_status.py --json --fail-blocked" in output
-    assert "scripts/check_p1_benchmark_breadth_status.py --json --fail-blocked" in output
+    assert "scripts/check_p0_closure_status.py --json --fail-core-open" in output
+    assert "scripts/check_p0_closure_status.py --json --fail-open" not in output
+    assert "scripts/check_p1_readiness_status.py --json --fail-core-open" in output
+    assert (
+        "scripts/check_p1_benchmark_breadth_status.py --json --fail-core-open" in output
+    )
+    assert "scripts/check_p1_readiness_status.py --json --fail-blocked" not in output
+    assert (
+        "scripts/check_p1_benchmark_breadth_status.py --json --fail-blocked"
+        not in output
+    )
     assert (
         "scripts/check_structural_scope_contamination.py --tracked-only --check --fail-blocked"
         in output
     )
-    assert "scripts/run_product_ci_lane.py --lane legacy_evidence --ruff --compile" in output
-    assert "scripts/run_product_ci_lane.py --lane molecular_quarantine --ruff --compile" in output
+    assert (
+        "scripts/run_product_ci_lane.py --lane legacy_evidence --ruff --compile"
+        in output
+    )
+    assert (
+        "scripts/run_product_ci_lane.py --lane molecular_quarantine --ruff --compile"
+        in output
+    )
     assert "-m pytest -q" in output
     assert "verify:viewer-report-pdf" in output
     assert "verify:viewer-performance-probe" in output
@@ -146,9 +154,9 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
         "verify:viewer-visual-regression"
     )
     assert (
-        "scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0"
-        in output
+        "scripts/report_commercialization_level.py --closure-mode conditional" in output
     )
+    assert "--fail-below 9.0" not in output
     assert output.index("verify:viewer-visual-regression") < output.index(
         "scripts/report_commercialization_level.py"
     )
@@ -160,12 +168,30 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     assert output.index("scripts/build_developer_preview_readiness.py") < output.index(
         "scripts/build_phase1_core_api_contract_artifacts.py"
     )
-    assert "scripts/build_phase2_frame_shell_material_coupling_artifacts.py --check" in output
-    assert "scripts/build_phase2_state_updated_steel_material_artifacts.py --check" in output
-    assert "scripts/build_phase2_state_updated_concrete_damage_artifacts.py --check" in output
-    assert "scripts/build_phase2_state_updated_composite_section_artifacts.py --check" in output
-    assert "scripts/build_phase2_state_updated_bilinear_link_artifacts.py --check" in output
-    assert "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py --check" in output
+    assert (
+        "scripts/build_phase2_frame_shell_material_coupling_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_state_updated_steel_material_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_state_updated_concrete_damage_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_state_updated_composite_section_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_state_updated_bilinear_link_artifacts.py --check"
+        in output
+    )
+    assert (
+        "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py --check"
+        in output
+    )
     assert "scripts/build_phase2_whole_model_modal_artifacts.py --check" in output
     assert "scripts/build_phase2_whole_model_buckling_artifacts.py --check" in output
     assert "scripts/run_external_modal_buckling_technical_receipt.py --check" in output
@@ -206,7 +232,7 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     assert (
         "scripts/"
         "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py "
-        "--check" in output
+        "--portable-check" in output
     )
     assert (
         "scripts/"
@@ -215,14 +241,10 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     )
     assert output.index(
         "scripts/build_phase2_adaptive_newton_continuation_artifacts.py"
-    ) < output.index(
-        "scripts/build_phase2_state_updated_steel_material_artifacts.py"
-    )
+    ) < output.index("scripts/build_phase2_state_updated_steel_material_artifacts.py")
     assert output.index(
         "scripts/build_phase2_state_updated_steel_material_artifacts.py"
-    ) < output.index(
-        "scripts/build_phase2_state_updated_concrete_damage_artifacts.py"
-    )
+    ) < output.index("scripts/build_phase2_state_updated_concrete_damage_artifacts.py")
     assert output.index(
         "scripts/build_phase2_state_updated_concrete_damage_artifacts.py"
     ) < output.index(
@@ -230,14 +252,10 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     )
     assert output.index(
         "scripts/build_phase2_state_updated_composite_section_artifacts.py"
-    ) < output.index(
-        "scripts/build_phase2_state_updated_bilinear_link_artifacts.py"
-    )
+    ) < output.index("scripts/build_phase2_state_updated_bilinear_link_artifacts.py")
     assert output.index(
         "scripts/build_phase2_state_updated_bilinear_link_artifacts.py"
-    ) < output.index(
-        "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py"
-    )
+    ) < output.index("scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py")
     assert output.index(
         "scripts/build_phase2_geometric_nonlinear_benchmark_artifacts.py"
     ) < output.index("scripts/build_phase2_shallow_arch_arc_length_artifacts.py")
@@ -268,9 +286,7 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     )
     assert output.index(
         "scripts/build_phase2_load_coupled_sparse_chain_arc_length_artifacts.py"
-    ) < output.index(
-        "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py"
-    )
+    ) < output.index("scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py")
     assert output.index(
         "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py"
     ) < output.index(
@@ -279,47 +295,41 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     assert output.index(
         "scripts/build_g1_mgt_state_updated_frame_axial_geometry_preflight.py"
     ) < output.index(
-        "scripts/"
-        "build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py"
+        "scripts/build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py"
     )
     assert output.index(
-        "scripts/"
-        "build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py"
+        "scripts/build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py"
     ) < output.index(
-        "scripts/"
-        "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py"
+        "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py"
     )
     assert output.index(
-        "scripts/"
-        "build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py"
+        "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py"
     ) < output.index(
-        "scripts/"
-        "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
+        "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
     )
     assert output.index(
-        "scripts/"
-        "build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
+        "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py"
     ) < output.index("scripts/build_phase2_nonlinear_load_step_artifacts.py")
-    assert output.index("scripts/build_phase2_material_mesh_newton_artifacts.py") < output.index(
+    assert output.index(
+        "scripts/build_phase2_material_mesh_newton_artifacts.py"
+    ) < output.index("scripts/build_phase2_patch_rigidbody_artifacts.py")
+    assert output.index(
         "scripts/build_phase2_patch_rigidbody_artifacts.py"
-    )
-    assert output.index("scripts/build_phase2_patch_rigidbody_artifacts.py") < output.index(
+    ) < output.index("scripts/build_phase2_mesh_load_step_convergence_artifacts.py")
+    assert output.index(
         "scripts/build_phase2_mesh_load_step_convergence_artifacts.py"
-    )
-    assert output.index("scripts/build_phase2_mesh_load_step_convergence_artifacts.py") < output.index(
+    ) < output.index("scripts/build_phase2_frame_shell_material_coupling_artifacts.py")
+    assert output.index(
         "scripts/build_phase2_frame_shell_material_coupling_artifacts.py"
-    )
-    assert output.index("scripts/build_phase2_frame_shell_material_coupling_artifacts.py") < output.index(
-        "scripts/build_phase3_benchmark_factory_artifacts.py"
-    )
+    ) < output.index("scripts/build_phase3_benchmark_factory_artifacts.py")
     assert "scripts/check_workstation_delivery_readiness.py --json" in output
-    assert output.index("scripts/build_phase1_core_api_contract_artifacts.py") < output.index(
-        "scripts/check_workstation_delivery_readiness.py"
-    )
+    assert output.index(
+        "scripts/build_phase1_core_api_contract_artifacts.py"
+    ) < output.index("scripts/check_workstation_delivery_readiness.py")
     assert "scripts/check_independent_product_readiness.py --json" in output
-    assert output.index("scripts/check_workstation_delivery_readiness.py") < output.index(
-        "scripts/check_independent_product_readiness.py"
-    )
+    assert output.index(
+        "scripts/check_workstation_delivery_readiness.py"
+    ) < output.index("scripts/check_independent_product_readiness.py")
     assert "git diff --check" in output
 
 
@@ -328,9 +338,18 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
 
     output = capsys.readouterr().out
     assert exit_code == 0
+    assert "scripts/check_p0_closure_status.py --json --fail-open" in output
+    assert "scripts/check_p1_readiness_status.py --json --fail-blocked" in output
+    assert (
+        "scripts/check_p1_benchmark_breadth_status.py --json --fail-blocked" in output
+    )
     assert "-m pytest -q" in output
     assert "verify:viewer-visual-regression" in output
     assert "scripts/check_generated_worktree_clean.py --show-ok" in output
+    assert (
+        "scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0"
+        in output
+    )
     assert "scripts/check_github_actions_runner_policy.py --fail-blocked" in output
     assert "scripts/check_github_actions_self_hosted_runner_status.py" in output
     assert "github_actions_self_hosted_runner_status.json" in output
@@ -346,8 +365,13 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
     assert "scripts/build_developer_preview_readiness.py --check" in output
     assert "scripts/build_phase1_core_api_contract_artifacts.py --check" in output
     assert "scripts/build_phase2_patch_rigidbody_artifacts.py --check" in output
-    assert "scripts/build_phase2_mesh_load_step_convergence_artifacts.py --check" in output
-    assert "scripts/build_phase2_frame_shell_material_coupling_artifacts.py --check" in output
+    assert (
+        "scripts/build_phase2_mesh_load_step_convergence_artifacts.py --check" in output
+    )
+    assert (
+        "scripts/build_phase2_frame_shell_material_coupling_artifacts.py --check"
+        in output
+    )
     assert "product_readiness_snapshot.json" in output
     assert "tests/test_product_readiness_snapshot_doc_sync.py" in output
     assert "--fail-blocked" in output
@@ -361,24 +385,27 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
     assert output.index("verify:viewer-visual-regression") < output.index(
         "scripts/check_github_actions_runner_policy.py"
     )
-    assert output.index("scripts/check_generated_worktree_clean.py --show-ok") < output.index(
-        "scripts/check_github_actions_runner_policy.py"
-    )
+    assert output.index(
+        "scripts/check_generated_worktree_clean.py --show-ok"
+    ) < output.index("scripts/check_p0_closure_status.py --json --fail-open")
+    assert output.index(
+        "scripts/check_p0_closure_status.py --json --fail-open"
+    ) < output.index("scripts/check_github_actions_runner_policy.py")
     assert output.index("git diff --check") < output.index(
         "scripts/check_github_actions_runner_policy.py"
     )
     assert output.index("scripts/check_github_actions_runner_policy.py") < output.index(
         "scripts/check_github_actions_self_hosted_runner_status.py"
     )
-    assert output.index("scripts/check_github_actions_self_hosted_runner_status.py") < output.index(
-        "scripts/build_product_readiness_snapshot.py"
-    )
+    assert output.index(
+        "scripts/check_github_actions_self_hosted_runner_status.py"
+    ) < output.index("scripts/build_product_readiness_snapshot.py")
     assert output.index("scripts/build_product_readiness_snapshot.py") < output.index(
         "tests/test_product_readiness_snapshot_doc_sync.py"
     )
-    assert output.index("tests/test_product_readiness_snapshot_doc_sync.py") < output.rindex(
-        "git diff --check"
-    )
+    assert output.index(
+        "tests/test_product_readiness_snapshot_doc_sync.py"
+    ) < output.rindex("git diff --check")
 
 
 def test_quality_gate_release_mode_returns_nonzero_but_runs_followup_checks(
@@ -388,7 +415,9 @@ def test_quality_gate_release_mode_returns_nonzero_but_runs_followup_checks(
 
     def fake_run(command, *, cwd, check):
         calls.append(command)
-        returncode = 1 if "scripts/build_product_readiness_snapshot.py" in command else 0
+        returncode = (
+            1 if "scripts/build_product_readiness_snapshot.py" in command else 0
+        )
         return SimpleNamespace(returncode=returncode)
 
     monkeypatch.setattr(verify_quality_gate.subprocess, "run", fake_run)
@@ -397,7 +426,9 @@ def test_quality_gate_release_mode_returns_nonzero_but_runs_followup_checks(
 
     rendered = [" ".join(command) for command in calls]
     assert exit_code == 1
-    assert any("scripts/build_product_readiness_snapshot.py" in item for item in rendered)
+    assert any(
+        "scripts/build_product_readiness_snapshot.py" in item for item in rendered
+    )
     runner_status_line = next(
         item
         for item in rendered
@@ -407,16 +438,28 @@ def test_quality_gate_release_mode_returns_nonzero_but_runs_followup_checks(
     assert " --fail-blocked" in runner_status_line
     assert "--write-query-error-evidence" not in runner_status_line
     snapshot_gate_line = next(
-        item for item in rendered if "scripts/build_product_readiness_snapshot.py" in item
+        item
+        for item in rendered
+        if "scripts/build_product_readiness_snapshot.py" in item
     )
     assert " --check" in snapshot_gate_line
     assert " --fail-blocked" in snapshot_gate_line
-    assert any("tests/test_product_readiness_snapshot_doc_sync.py" in item for item in rendered)
+    assert any(
+        "tests/test_product_readiness_snapshot_doc_sync.py" in item for item in rendered
+    )
     assert rendered[-1] == "git diff --check"
     assert rendered.index(
-        next(item for item in rendered if "scripts/build_product_readiness_snapshot.py" in item)
+        next(
+            item
+            for item in rendered
+            if "scripts/build_product_readiness_snapshot.py" in item
+        )
     ) < rendered.index(
-        next(item for item in rendered if "tests/test_product_readiness_snapshot_doc_sync.py" in item)
+        next(
+            item
+            for item in rendered
+            if "tests/test_product_readiness_snapshot_doc_sync.py" in item
+        )
     )
 
 
@@ -442,8 +485,12 @@ def test_quality_gate_release_mode_continues_after_runner_status_failure(
         "scripts/check_github_actions_self_hosted_runner_status.py" in item
         for item in rendered
     )
-    assert any("scripts/build_product_readiness_snapshot.py" in item for item in rendered)
-    assert any("tests/test_product_readiness_snapshot_doc_sync.py" in item for item in rendered)
+    assert any(
+        "scripts/build_product_readiness_snapshot.py" in item for item in rendered
+    )
+    assert any(
+        "tests/test_product_readiness_snapshot_doc_sync.py" in item for item in rendered
+    )
     assert rendered[-1] == "git diff --check"
     assert rendered.index(
         next(
@@ -452,7 +499,11 @@ def test_quality_gate_release_mode_continues_after_runner_status_failure(
             if "scripts/check_github_actions_self_hosted_runner_status.py" in item
         )
     ) < rendered.index(
-        next(item for item in rendered if "scripts/build_product_readiness_snapshot.py" in item)
+        next(
+            item
+            for item in rendered
+            if "scripts/build_product_readiness_snapshot.py" in item
+        )
     )
 
 
@@ -479,4 +530,6 @@ def test_quality_gate_release_mode_fails_when_final_diff_check_fails(
         "scripts/check_github_actions_self_hosted_runner_status.py" in item
         for item in rendered
     )
-    assert any("scripts/build_product_readiness_snapshot.py" in item for item in rendered)
+    assert any(
+        "scripts/build_product_readiness_snapshot.py" in item for item in rendered
+    )

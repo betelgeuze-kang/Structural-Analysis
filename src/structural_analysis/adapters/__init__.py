@@ -1,0 +1,61 @@
+"""Explicit non-core adapters between engine contracts and product models."""
+
+from structural_analysis.adapters.bounded_frame3d_direct_control_model_ir import (
+    BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_ADAPTER_PROFILE,
+    BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_ADAPTER_SCHEMA_VERSION,
+    BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_CAPABILITY_PROFILE,
+    BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_CLAIM_BOUNDARY,
+    BoundedFrame3DDirectControlModelIRAdapter,
+    BoundedFrame3DDirectControlModelIRAdapterError,
+    adapt_bounded_frame3d_direct_control_model_ir_v2,
+    validate_bounded_frame3d_direct_control_model_ir_adapter,
+)
+from structural_analysis.adapters.bounded_planar_execution_plan import (
+    BOUNDED_PLANAR_EXECUTION_PLAN_AUTHORITY_PROFILE,
+    BOUNDED_PLANAR_EXECUTION_PLAN_SCHEMA_VERSION,
+    BoundedPlanarExecutionPlanBinding,
+    BoundedPlanarExecutionPlanError,
+    create_bounded_planar_execution_plan_binding,
+    validate_bounded_planar_execution_plan_binding,
+    validate_bounded_planar_execution_plan_manifest,
+)
+from structural_analysis.adapters.bounded_planar_model_ir import (
+    BOUNDED_PLANAR_MODEL_IR_ADAPTER_PROFILE,
+    BOUNDED_PLANAR_MODEL_IR_ADAPTER_SCHEMA_VERSION,
+    BOUNDED_PLANAR_MODEL_IR_CAPABILITY_PROFILE,
+    BOUNDED_PLANAR_MODEL_IR_DOF_COMPONENTS,
+    BOUNDED_PLANAR_MODEL_IR_INACTIVE_DOF_COMPONENTS,
+    BoundedPlanarModelIRAdapter,
+    BoundedPlanarModelIRAdapterError,
+    adapt_bounded_planar_model_ir_v2,
+    validate_bounded_planar_model_ir_adapter,
+    validate_bounded_planar_model_ir_adapter_manifest,
+)
+
+__all__ = [
+    "BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_ADAPTER_PROFILE",
+    "BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_ADAPTER_SCHEMA_VERSION",
+    "BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_CAPABILITY_PROFILE",
+    "BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_CLAIM_BOUNDARY",
+    "BOUNDED_PLANAR_EXECUTION_PLAN_AUTHORITY_PROFILE",
+    "BOUNDED_PLANAR_EXECUTION_PLAN_SCHEMA_VERSION",
+    "BOUNDED_PLANAR_MODEL_IR_ADAPTER_PROFILE",
+    "BOUNDED_PLANAR_MODEL_IR_ADAPTER_SCHEMA_VERSION",
+    "BOUNDED_PLANAR_MODEL_IR_CAPABILITY_PROFILE",
+    "BOUNDED_PLANAR_MODEL_IR_DOF_COMPONENTS",
+    "BOUNDED_PLANAR_MODEL_IR_INACTIVE_DOF_COMPONENTS",
+    "BoundedPlanarExecutionPlanBinding",
+    "BoundedPlanarExecutionPlanError",
+    "BoundedPlanarModelIRAdapter",
+    "BoundedPlanarModelIRAdapterError",
+    "BoundedFrame3DDirectControlModelIRAdapter",
+    "BoundedFrame3DDirectControlModelIRAdapterError",
+    "adapt_bounded_frame3d_direct_control_model_ir_v2",
+    "adapt_bounded_planar_model_ir_v2",
+    "create_bounded_planar_execution_plan_binding",
+    "validate_bounded_planar_execution_plan_binding",
+    "validate_bounded_planar_execution_plan_manifest",
+    "validate_bounded_planar_model_ir_adapter",
+    "validate_bounded_planar_model_ir_adapter_manifest",
+    "validate_bounded_frame3d_direct_control_model_ir_adapter",
+]

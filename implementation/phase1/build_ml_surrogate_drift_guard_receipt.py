@@ -90,7 +90,7 @@ def _per_component_drift(
                 live = None
         breach_threshold = baseline * float(drift_multiplier) if baseline > 0.0 else threshold * float(drift_multiplier)
         drift_breach = bool(
-            live is not None and baseline > 0.0 and live > breach_threshold
+            live is not None and breach_threshold > 0.0 and live > breach_threshold
         )
         rows.append(
             {

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import math
+from numbers import Integral, Real
 import struct
 from typing import Any, Iterable
 
@@ -19,12 +20,28 @@ _STATE_DOMAIN = b"structural-analysis/bond-slip-state/v1\0"
 
 
 def _finite(name: str, value: Any) -> float:
-    if isinstance(value, bool) or type(value) not in (int, float):
-        raise ValueError(f"{name} must be a finite number")
-    result = float(value)
-    if not math.isfinite(result):
-        raise ValueError(f"{name} must be a finite number")
-    return result
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        )
+    try:
+        result = float(value)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        ) from error
+    if (
+        not math.isfinite(result)
+        or value != result
+        or (
+            isinstance(value, Integral)
+            and int(result) != int(value)
+        )
+    ):
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        )
+    return 0.0 if result == 0.0 else result
 
 
 def _sign(value: float, tolerance: float = 1.0e-15) -> int:
@@ -74,6 +91,114 @@ class BondSlipMaterial:
     def peak_force_n(self) -> float:
         return self.initial_stiffness_n_per_m * self.yield_slip_m
 
+    def validate_state_admissibility(
+        self,
+        state: BondSlipState,
+    ) -> BondSlipState:
+        """Reject algebraically impossible cyclic degradation states."""
+
+        if type(state) is not BondSlipState:
+            raise ValueError("state must be an exact BondSlipState")
+        slip_tolerance = max(
+            1.0e-15,
+            1.0e-12
+            * max(
+                self.ultimate_slip_m,
+                state.maximum_absolute_slip_m,
+                abs(state.previous_slip_m),
+            ),
+        )
+        if (
+            state.maximum_absolute_slip_m + slip_tolerance
+            < abs(state.previous_slip_m)
+        ):
+            raise ValueError("maximum slip is below the retained connector slip")
+        energy_tolerance = max(
+            1.0e-15,
+            1.0e-12 * self.peak_force_n * self.ultimate_slip_m,
+        )
+        expected_stiffness = min(
+            1.0 - self.minimum_stiffness_ratio,
+            self.reversal_stiffness_degradation * state.reversal_count,
+        )
+        expected_strength = min(
+            0.8,
+            self.reversal_strength_degradation * state.reversal_count,
+        )
+        if not math.isclose(
+            state.stiffness_degradation,
+            expected_stiffness,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-12,
+        ) or not math.isclose(
+            state.strength_degradation,
+            expected_strength,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-12,
+        ):
+            raise ValueError("connector degradation is inconsistent with reversals")
+        if state.reversal_count == 0:
+            expected_sign = _sign(state.previous_slip_m)
+            envelope_force = bond_slip_envelope(state.previous_slip_m, self)[0]
+            if (
+                state.last_increment_sign != expected_sign
+                or not math.isclose(
+                    state.maximum_absolute_slip_m,
+                    abs(state.previous_slip_m),
+                    rel_tol=1.0e-12,
+                    abs_tol=1.0e-15,
+                )
+                or not math.isclose(
+                    state.previous_force_n,
+                    envelope_force,
+                    rel_tol=1.0e-12,
+                    abs_tol=1.0e-9,
+                )
+            ):
+                raise ValueError("zero-reversal connector state is inconsistent")
+            if (
+                state.maximum_absolute_slip_m
+                <= self.yield_slip_m + slip_tolerance
+                and state.dissipated_energy_j > energy_tolerance
+            ):
+                raise ValueError(
+                    "elastic zero-reversal connector state cannot retain dissipation"
+                )
+            monotonic_energy_bound = (
+                self.peak_force_n * state.maximum_absolute_slip_m
+            )
+            if (
+                state.dissipated_energy_j
+                > monotonic_energy_bound + energy_tolerance
+            ):
+                raise ValueError(
+                    "zero-reversal connector dissipation exceeds monotonic work"
+                )
+        elif (
+            state.last_increment_sign == 0
+            or state.maximum_absolute_slip_m <= 0.0
+        ):
+            raise ValueError("reversed connector state lacks path direction or slip")
+        if state.reversal_count > 0:
+            force_bound = self.peak_force_n + (
+                2.0
+                * self.initial_stiffness_n_per_m
+                * state.maximum_absolute_slip_m
+                * (state.reversal_count + 1)
+            )
+            if math.isfinite(force_bound):
+                force_tolerance = max(1.0e-9, 1.0e-12 * force_bound)
+                if abs(state.previous_force_n) > force_bound + force_tolerance:
+                    raise ValueError(
+                        "connector force exceeds the retained path reachability bound"
+                    )
+        if (
+            state.maximum_absolute_slip_m == 0.0
+            and state.dissipated_energy_j != 0.0
+        ):
+            raise ValueError("zero-slip connector state cannot retain dissipation")
+        return state
+
 
 @dataclass(frozen=True)
 class BondSlipState:
@@ -96,9 +221,16 @@ class BondSlipState:
             "dissipated_energy_j",
         ):
             object.__setattr__(self, name, _finite(name, getattr(self, name)))
-        if self.last_increment_sign not in {-1, 0, 1}:
+        if (
+            type(self.last_increment_sign) is not int
+            or self.last_increment_sign not in {-1, 0, 1}
+        ):
             raise ValueError("last_increment_sign must be -1, 0, or 1")
-        if type(self.reversal_count) is not int or self.reversal_count < 0:
+        if (
+            type(self.reversal_count) is not int
+            or self.reversal_count < 0
+            or self.reversal_count > 2**63 - 1
+        ):
             raise ValueError("reversal_count must be a non-negative integer")
         if self.maximum_absolute_slip_m < 0.0:
             raise ValueError("maximum_absolute_slip_m must be non-negative")
@@ -201,10 +333,18 @@ def integrate_bond_slip(
     material: BondSlipMaterial | None = None,
 ) -> BondSlipResponse:
     selected = material or BondSlipMaterial()
+    selected.validate_state_admissibility(committed_state)
     slip = _finite("slip_m", slip_m)
     force, tangent, branch = bond_slip_envelope(slip, selected)
     increment = slip - committed_state.previous_slip_m
     increment_sign = _sign(increment)
+    position_sign = _sign(slip)
+    if (
+        increment_sign == 0
+        and position_sign != 0
+        and committed_state.last_increment_sign == 0
+    ):
+        increment_sign = position_sign
     reversal = bool(
         committed_state.last_increment_sign
         and increment_sign
@@ -265,6 +405,7 @@ def integrate_bond_slip(
             committed_state.dissipated_energy_j + dissipated_increment
         ),
     )
+    selected.validate_state_admissibility(state)
     return BondSlipResponse(
         slip_m=slip,
         force_n=force,

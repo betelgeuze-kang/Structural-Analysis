@@ -245,14 +245,26 @@ def catalog_map() -> dict[str, dict[str, Any]]:
     return {str(row["case_id"]): dict(row) for row in CASE_CATALOG}
 
 
-def _resolve_repo_path(raw: str) -> Path:
-    return (REPO_ROOT / raw).resolve()
+def resolve_case_path(raw: str, *, source_root: Path | None = None) -> Path:
+    path = Path(raw)
+    if path.is_absolute():
+        return path.resolve()
+    return ((source_root or REPO_ROOT) / path).resolve()
 
 
-def load_case_payloads(case_row: dict[str, Any]) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
-    primary_payload = _load_json(_resolve_repo_path(str(case_row.get("primary_report_path", "") or "")))
+def load_case_payloads(
+    case_row: dict[str, Any],
+    *,
+    source_root: Path | None = None,
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    primary_payload = _load_json(
+        resolve_case_path(
+            str(case_row.get("primary_report_path", "") or ""),
+            source_root=source_root,
+        )
+    )
     supporting_payloads = {
-        role: _load_json(_resolve_repo_path(str(path) or ""))
+        role: _load_json(resolve_case_path(str(path) or "", source_root=source_root))
         for role, path in (case_row.get("supporting_reports") or {}).items()
     }
     return primary_payload, supporting_payloads
@@ -295,4 +307,3 @@ def primary_summary_head(primary_payload: dict[str, Any], limit: int = 8) -> dic
     if not isinstance(summary, dict):
         return {}
     return {key: summary[key] for key in list(summary.keys())[:limit]}
-

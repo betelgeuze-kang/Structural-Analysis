@@ -126,6 +126,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "ifc_import_health_execution_count_below_required:0/10",
         "import_health_execution_missing",
         "phase3_ifc_import_case_count_below_minimum",
+        "selected_file_checksums_missing",
         "silent_data_loss_negative_gate_not_executed",
         "silent_import_loss_gate_not_executed",
         "source_file_not_acquired",
@@ -201,6 +202,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["residual_and_convergence_history_present"]["blockers"] == []
     assert final_gates["linux_windows_reproducibility_confirmed"]["blockers"] == [
         "platform_replay_receipt_missing:windows",
+        "platform_replay_receipt_not_passed:linux",
     ]
     parity_gate_grouping = final_gates["linux_windows_reproducibility_confirmed"][
         "blocker_grouping_metadata"
@@ -215,6 +217,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "platform_replay_receipt_missing:windows" in parity_gate_grouping["groups"][
         "platform_receipt_presence"
     ]["blockers"]
+    assert parity_gate_grouping["groups"]["platform_receipt_contract"]["blockers"] == [
+        "platform_replay_receipt_not_passed:linux"
+    ]
     assert parity_gate_grouping["groups"]["git_clean_clone_spillover"]["blockers"] == []
     assert (
         "git_clean_clone_reproduction_not_passed"
@@ -546,7 +551,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert ifc_handoff["evidence_requirements"]["product_release_credit_ready"] is False
     assert "source_file_not_acquired" in ifc_handoff["import_health_blockers"]
     assert "import_health_execution_missing" in ifc_handoff["import_health_blockers"]
-    assert "selected_file_checksums_missing" not in ifc_handoff["source_license_blockers"]
+    assert "selected_file_checksums_missing" in ifc_handoff["source_license_blockers"]
     assert "product_legal_license_review_pending" in ifc_handoff["source_license_blockers"]
     assert "ifc_import_health_execution_count_below_required:0/10" in ifc_handoff[
         "silent_import_loss_blockers"
@@ -562,6 +567,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "ifc_import_health_execution_count_below_required:0/10",
         "import_health_execution_missing",
         "phase3_ifc_import_case_count_below_minimum",
+        "selected_file_checksums_missing",
         "silent_data_loss_negative_gate_not_executed",
         "silent_import_loss_gate_not_executed",
         "source_file_not_acquired",
@@ -590,7 +596,10 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "phase3_ifc_import_case_count_below_minimum",
         "source_file_not_acquired",
     ]
-    assert grouping["groups"]["checksum"]["blockers"] == ["source_sha256_missing"]
+    assert grouping["groups"]["checksum"]["blockers"] == [
+        "selected_file_checksums_missing",
+        "source_sha256_missing",
+    ]
     assert "ifc_import_health_execution_count_below_required:0/10" in grouping[
         "groups"
     ]["import_execution"]["blockers"]
@@ -767,17 +776,23 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "manifest" in parity_contract["checksum_keys"]
     assert "scorecard" in parity_contract["checksum_keys"]
     assert "case_count" in parity_contract["scorecard_identity_fields"]
-    assert parity_handoff["blocked_by"] == ["platform_replay_receipt_missing:windows"]
+    assert parity_handoff["blocked_by"] == [
+        "platform_replay_receipt_missing:windows",
+        "platform_replay_receipt_not_passed:linux",
+    ]
     assert parity_handoff["parity_blocker_grouping"]["schema_version"] == (
         "phase6-linux-windows-parity-blocker-groups.v1"
     )
     assert parity_handoff["parity_blocker_grouping"]["groups"][
         "git_clean_clone_spillover"
     ]["blockers"] == []
-    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 1
+    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 2
     assert parity_handoff["parity_gate_blocker_grouping"]["groups"][
         "git_clean_clone_spillover"
     ]["blockers"] == []
+    assert parity_handoff["parity_gate_blocker_grouping"]["groups"][
+        "platform_receipt_contract"
+    ]["blockers"] == ["platform_replay_receipt_not_passed:linux"]
     assert any(
         "structural_analysis.benchmark.cli" in command
         for command in parity_handoff["required_commands"]

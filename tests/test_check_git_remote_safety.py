@@ -120,3 +120,55 @@ def test_missing_expected_remote_is_blocked(tmp_path: Path) -> None:
         "protected remote `origin` must point to betelgeuze-kang/Structural-Analysis: https://github.com/example/other.git",
         "expected remote target not configured: betelgeuze-kang/Structural-Analysis",
     ]
+
+
+def _init_local_proxy(tmp_path: Path, remote_url: str) -> Path:
+    proxy = tmp_path / "proxy"
+    subprocess.run(["git", "init", "-q", str(proxy)], check=True)
+    subprocess.run(
+        ["git", "-C", str(proxy), "remote", "add", "origin", remote_url],
+        check=True,
+    )
+    return proxy
+
+
+def test_local_git_proxy_to_expected_repository_passes(tmp_path: Path) -> None:
+    proxy = _init_local_proxy(
+        tmp_path,
+        "git@github.com:betelgeuze-kang/Structural-Analysis.git",
+    )
+    fixture = _write_remote_fixture(
+        tmp_path,
+        f"origin\t{proxy} (fetch)\norigin\t{proxy} (push)\n",
+    )
+
+    proc = _run_remote_check(fixture, "--json")
+
+    assert proc.returncode == 0
+    payload = json.loads(proc.stdout)
+    assert payload["ok"] is True
+    assert payload["resolved_slugs"]["origin"] == [
+        "betelgeuze-kang/Structural-Analysis"
+    ]
+
+
+def test_local_git_proxy_to_wrong_repository_is_blocked(tmp_path: Path) -> None:
+    proxy = _init_local_proxy(
+        tmp_path,
+        "https://github.com/example/wrong.git",
+    )
+    fixture = _write_remote_fixture(tmp_path, f"origin\t{proxy} (fetch)\n")
+
+    proc = _run_remote_check(fixture, "--json")
+
+    assert proc.returncode == 1
+    payload = json.loads(proc.stdout)
+    assert payload["ok"] is False
+    assert payload["resolved_slugs"]["origin"] == [None]
+    assert payload["errors"] == [
+        (
+            "protected remote `origin` must point to "
+            f"betelgeuze-kang/Structural-Analysis: {proxy}"
+        ),
+        "expected remote target not configured: betelgeuze-kang/Structural-Analysis",
+    ]

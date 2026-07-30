@@ -68,6 +68,37 @@ def _pr_commands(
         [_python(), "scripts/check_large_git_blobs.py", "--scope", "current"],
         [_python(), "scripts/check_core_quality.py", "--contract-only"],
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
+        [_python(), "scripts/check_repository_hygiene_inventory.py"],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_linear_case_package.py",
+            "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_negative_case_package.py",
+            "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_scaling_case_package.py",
+            "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_modal_buckling_case_package.py",
+            "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_vv_matrix.py",
+            "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_internal_license_due_diligence.py",
+            "--check",
+        ],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
         _structural_scope_command(fail_blocked=fail_structural_scope_blocked),
@@ -229,7 +260,7 @@ def _pr_commands(
             "scripts/"
             "build_g1_mgt_state_updated_matrix_free_newton_"
             "diagnostic_receipt.py",
-            "--check",
+            "--portable-check",
         ],
         [
             _python(),
@@ -427,6 +458,19 @@ def _pr_commands(
             "tests/test_current_head_readiness_ci.py",
             "tests/test_check_large_git_blobs.py",
             "tests/test_check_pr_issue_metadata.py",
+            "tests/test_check_repository_hygiene_inventory.py",
+            "tests/test_prune_ignored_test_experiments.py",
+            "tests/test_build_bounded_planar_external_linear_case_package.py",
+            "tests/test_build_bounded_planar_external_negative_case_package.py",
+            "tests/test_build_bounded_planar_external_scaling_case_package.py",
+            "tests/test_build_bounded_planar_external_modal_buckling_case_package.py",
+            "tests/test_ingest_bounded_planar_external_linear_results.py",
+            "tests/test_ingest_bounded_planar_external_negative_results.py",
+            "tests/test_ingest_bounded_planar_external_scaling_results.py",
+            "tests/test_ingest_bounded_planar_external_modal_buckling_results.py",
+            "tests/test_build_bounded_planar_external_vv_matrix.py",
+            "tests/test_build_internal_license_due_diligence.py",
+            "tests/test_build_product_state.py",
             "tests/test_check_product_ci_boundaries.py",
             "tests/test_product_ci_workflow_contract.py",
             "tests/test_verify_quality_gate_contract.py",
@@ -457,14 +501,39 @@ def _command_groups(mode: str) -> list[list[str]]:
         # Quarantined non-structural paths are valid while they remain fully
         # manifested and excluded from the structural product surface. The PR
         # lane checks audit consistency but leaves owner-decision closure to the
-        # full/release lane and the dedicated quarantine workflow.
+        # release lane and the dedicated quarantine workflow.
         return _pr_commands(
             p1_failure_mode="core",
             fail_structural_scope_blocked=False,
         )
     if mode == "release":
+        full_commands = _command_groups("full")
+        commercialization_report = next(
+            command
+            for command in full_commands
+            if "--closure-mode" in command and "conditional" in command
+        )
         return [
-            *_command_groups("full"),
+            *full_commands,
+            [*commercialization_report, "--fail-below", "9.0"],
+            [
+                _python(),
+                "scripts/check_p0_closure_status.py",
+                "--json",
+                "--fail-open",
+            ],
+            [
+                _python(),
+                "scripts/check_p1_readiness_status.py",
+                "--json",
+                "--fail-blocked",
+            ],
+            [
+                _python(),
+                "scripts/check_p1_benchmark_breadth_status.py",
+                "--json",
+                "--fail-blocked",
+            ],
             [
                 _python(),
                 "scripts/check_github_actions_runner_policy.py",
@@ -498,9 +567,8 @@ def _command_groups(mode: str) -> list[list[str]]:
             ["git", "diff", "--check"],
         ]
     return [
-        [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-open"],
         *_pr_commands(
-            p1_failure_mode="blocked",
+            p1_failure_mode="core",
             fail_structural_scope_blocked=True,
         ),
         _lane_command("legacy_evidence"),
@@ -515,8 +583,6 @@ def _command_groups(mode: str) -> list[list[str]]:
             "scripts/report_commercialization_level.py",
             "--closure-mode",
             "conditional",
-            "--fail-below",
-            "9.0",
         ],
         [_python(), "scripts/build_developer_preview_readiness.py", "--check"],
         [_python(), "scripts/build_phase1_core_api_contract_artifacts.py", "--check"],

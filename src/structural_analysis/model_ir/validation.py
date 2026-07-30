@@ -11,9 +11,18 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from jsonschema import Draft202012Validator, validators
+import numpy as np
 
 MODEL_IR_V2_SCHEMA_VERSION = "structural-analysis-model-ir.v2"
 _ZERO_LENGTH_TOLERANCE_M = 1.0e-12
+_BOUNDED_FRAME3D_MAX_ABS_COORDINATE_M = 1.0e9
+_BOUNDED_FRAME3D_MODULUS_PA_RANGE = (1.0e-3, 1.0e18)
+_BOUNDED_FRAME3D_YIELD_STRESS_PA_RANGE = (1.0e-6, 1.0e18)
+_BOUNDED_FRAME3D_POSITIVE_HARDENING_PA_RANGE = (1.0e-12, 1.0e18)
+_BOUNDED_FRAME3D_AREA_M2_RANGE = (1.0e-18, 1.0e12)
+_BOUNDED_FRAME3D_INERTIA_M4_RANGE = (1.0e-36, 1.0e36)
+_BOUNDED_FRAME3D_MAX_ABS_LOAD_SI = 1.0e18
+_BOUNDED_FRAME3D_MAX_ABS_ROLL_RAD = 1.0e6
 
 _EXPECTED_UNIT_SCALES: dict[str, dict[str, float]] = {
     "length": {"m": 1.0, "mm": 1.0e-3, "cm": 1.0e-2, "ft": 0.3048, "in": 0.0254},
@@ -304,8 +313,16 @@ def validate_model_ir_v2(payload: Any) -> ModelIRValidationReport:
 
 
 def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue]:
-    yield from _finite_number_issues(payload)
+    finite_issues = tuple(_finite_number_issues(payload))
+    yield from finite_issues
+    if finite_issues:
+        return
     yield from _unit_scale_issues(payload)
+    bounded_planar = payload["capability_profile"] == "bounded_planar_frame_alpha"
+    bounded_frame3d_direct_control = (
+        payload["capability_profile"]
+        == "bounded_frame3d_direct_displacement_control"
+    )
 
     families = (
         "nodes",
@@ -322,7 +339,8 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
         yield from _indexed_family_issues(payload[family], family)
 
     node_ids = {str(row["id"]) for row in payload["nodes"]}
-    material_ids = {str(row["id"]) for row in payload["materials"]}
+    material_by_id = {str(row["id"]): row for row in payload["materials"]}
+    material_ids = set(material_by_id)
     section_by_id = {str(row["id"]): row for row in payload["sections"]}
     element_ids = {str(row["id"]) for row in payload["elements"]}
     constraint_ids = {str(row["id"]) for row in payload["constraints"]}
@@ -347,22 +365,29 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
         for node_id in node_pair:
             if node_id not in node_ids:
                 yield _missing_reference(f"{base}/node_ids", "node", node_id)
-        material_id = str(element["material_id"])
-        if material_id not in material_ids:
-            yield _missing_reference(f"{base}/material_id", "material", material_id)
         section_id = str(element["section_id"])
         section = section_by_id.get(section_id)
         if section is None:
             yield _missing_reference(f"{base}/section_id", "section", section_id)
         else:
             expected_family = (
-                "frame_3d" if element["type"] == "frame_3d" else "truss_3d"
+                "rectangular_rc_fiber_2d"
+                if bounded_planar
+                else (
+                    "frame_3d" if element["type"] == "frame_3d" else "truss_3d"
+                )
             )
             if section["family_id"] != expected_family:
                 yield ModelIRValidationIssue(
                     "element_section_family_mismatch",
                     f"{base}/section_id",
                     f"Element type {element['type']} requires section family {expected_family}.",
+                )
+        if not bounded_planar:
+            material_id = str(element["material_id"])
+            if material_id not in material_ids:
+                yield _missing_reference(
+                    f"{base}/material_id", "material", material_id
                 )
         if all(node_id in node_coordinates for node_id in node_pair):
             offsets = element["offsets"]
@@ -376,7 +401,13 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
                 + float(offsets["j_global_m"][axis])
                 for axis in range(3)
             )
-            length = math.sqrt(sum((end[axis] - start[axis]) ** 2 for axis in range(3)))
+            length = math.dist(start, end)
+            if not math.isfinite(length):
+                yield ModelIRValidationIssue(
+                    "element_effective_length_not_finite",
+                    base,
+                    "Element length after offsets must remain finite.",
+                )
             if length <= _ZERO_LENGTH_TOLERANCE_M:
                 yield ModelIRValidationIssue(
                     "element_zero_effective_length",
@@ -430,7 +461,7 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
             nonzero = nonzero or any(
                 float(value) != 0.0 for value in load["components_si"].values()
             )
-        if not nonzero:
+        if not nonzero and not bounded_planar:
             yield ModelIRValidationIssue(
                 "load_pattern_all_zero",
                 base,
@@ -507,16 +538,551 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
                 f"Entity {entity_id} is not a {row['entity_kind']}.",
             )
 
+    if bounded_planar:
+        yield from _bounded_planar_issues(
+            payload,
+            node_ids=node_ids,
+            material_by_id=material_by_id,
+            section_by_id=section_by_id,
+            constrained_dofs=constrained_dofs,
+        )
+    if bounded_frame3d_direct_control:
+        yield from _bounded_frame3d_direct_control_issues(
+            payload,
+            node_ids=node_ids,
+            material_by_id=material_by_id,
+            section_by_id=section_by_id,
+            constrained_dofs=constrained_dofs,
+        )
+
+
+def _bounded_frame3d_direct_control_issues(
+    payload: dict[str, Any],
+    *,
+    node_ids: set[str],
+    material_by_id: dict[str, dict[str, Any]],
+    section_by_id: dict[str, dict[str, Any]],
+    constrained_dofs: dict[tuple[str, str], float],
+) -> Iterable[ModelIRValidationIssue]:
+    """Enforce the source contract consumed by bounded Frame3D direct control."""
+
+    numeric_issues = tuple(_bounded_frame3d_numeric_issues(payload))
+    yield from numeric_issues
+    if numeric_issues:
+        return
+    known_constrained_dofs = {
+        (node_id, component): value
+        for (node_id, component), value in constrained_dofs.items()
+        if node_id in node_ids
+    }
+    load_to_dof = {
+        "FX": "UX",
+        "FY": "UY",
+        "FZ": "UZ",
+        "MX": "RX",
+        "MY": "RY",
+        "MZ": "RZ",
+    }
+    for index, material in enumerate(payload["materials"]):
+        base = f"/materials/{index}"
+        if material["law_id"] != "bilinear_combined_hardening_steel":
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_material_law_unsupported",
+                f"{base}/law_id",
+                "Every bounded Frame3D member requires bilinear combined-hardening steel.",
+            )
+        if "shear_modulus_pa" not in material["parameters"]:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_shear_modulus_missing",
+                f"{base}/parameters/shear_modulus_pa",
+                "Frame3D requires an explicit positive shear modulus; no Poisson fallback is allowed.",
+            )
+
+    coordinates = {
+        str(row["id"]): tuple(float(value) for value in row["coordinates_m"])
+        for row in payload["nodes"]
+    }
+    if len(set(coordinates.values())) != len(coordinates):
+        yield ModelIRValidationIssue(
+            "bounded_frame3d_node_coordinate_duplicate",
+            "/nodes",
+            "Bounded Frame3D nodes must have unique 3D coordinates.",
+        )
+
+    graph: dict[str, set[str]] = {node_id: set() for node_id in node_ids}
+    undirected_pairs: set[tuple[str, str]] = set()
+    referenced_materials: set[str] = set()
+    referenced_sections: set[str] = set()
+    for index, element in enumerate(payload["elements"]):
+        base = f"/elements/{index}"
+        node_i, node_j = (str(value) for value in element["node_ids"])
+        pair = tuple(sorted((node_i, node_j)))
+        if pair in undirected_pairs:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_parallel_member_unsupported",
+                f"{base}/node_ids",
+                "Parallel or duplicate members are outside the bounded v1 profile.",
+            )
+        undirected_pairs.add(pair)
+        if node_i in graph and node_j in graph:
+            graph[node_i].add(node_j)
+            graph[node_j].add(node_i)
+        referenced_materials.add(str(element["material_id"]))
+        referenced_sections.add(str(element["section_id"]))
+        offsets = element["offsets"]
+        if any(
+            float(value) != 0.0
+            for end in ("i_global_m", "j_global_m")
+            for value in offsets[end]
+        ):
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_rigid_offset_unsupported",
+                f"{base}/offsets",
+                "Rigid offsets are not consumed by the bounded Frame3D direct-control solver.",
+            )
+        releases = element["releases"]
+        if releases["i"] or releases["j"]:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_release_unsupported",
+                f"{base}/releases",
+                "Member end releases are not consumed by the bounded Frame3D direct-control solver.",
+            )
+    if referenced_materials != set(material_by_id):
+        yield ModelIRValidationIssue(
+            "bounded_frame3d_material_reference_set_invalid",
+            "/materials",
+            "Every and only declared bounded Frame3D material must be referenced.",
+        )
+    if referenced_sections != set(section_by_id):
+        yield ModelIRValidationIssue(
+            "bounded_frame3d_section_reference_set_invalid",
+            "/sections",
+            "Every and only declared bounded Frame3D section must be referenced.",
+        )
+    if node_ids:
+        start = min(node_ids)
+        visited = {start}
+        pending = [start]
+        while pending:
+            current = pending.pop()
+            for neighbor in sorted(graph[current]):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    pending.append(neighbor)
+        if visited != node_ids:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_graph_disconnected",
+                "/elements",
+                "The bounded Frame3D member graph must include every node.",
+            )
+
+    for (node_id, component), value in known_constrained_dofs.items():
+        if value != 0.0:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_prescribed_support_unsupported",
+                "/constraints",
+                f"Node {node_id} component {component} must be fixed at zero.",
+            )
+    free_equation_count = len(node_ids) * 6 - len(known_constrained_dofs)
+    if not 1 <= free_equation_count <= 768:
+        yield ModelIRValidationIssue(
+            "bounded_frame3d_free_equation_count_out_of_range",
+            "/constraints",
+            "Bounded Frame3D requires between 1 and 768 free equations.",
+        )
+
+    if coordinates:
+        coordinate_values = np.asarray(list(coordinates.values()), dtype=np.float64)
+        spans = np.ptp(coordinate_values, axis=0)
+        characteristic_length = max(float(np.linalg.norm(spans)), 1.0)
+        coordinate_origin = np.mean(coordinate_values, axis=0)
+        rigid_rows: list[tuple[float, float, float, float, float, float]] = []
+        for (node_id, component), _value in sorted(
+            known_constrained_dofs.items()
+        ):
+            x, y, z = (
+                (coordinate - origin) / characteristic_length
+                for coordinate, origin in zip(
+                    coordinates[node_id], coordinate_origin, strict=True
+                )
+            )
+            rigid_rows.append(
+                {
+                    "UX": (1.0, 0.0, 0.0, 0.0, z, -y),
+                    "UY": (0.0, 1.0, 0.0, -z, 0.0, x),
+                    "UZ": (0.0, 0.0, 1.0, y, -x, 0.0),
+                    "RX": (0.0, 0.0, 0.0, 1.0, 0.0, 0.0),
+                    "RY": (0.0, 0.0, 0.0, 0.0, 1.0, 0.0),
+                    "RZ": (0.0, 0.0, 0.0, 0.0, 0.0, 1.0),
+                }[component]
+            )
+        rigid_matrix = np.asarray(rigid_rows, dtype=np.float64).reshape((-1, 6))
+        rigid_rank = int(np.linalg.matrix_rank(rigid_matrix)) if rigid_rows else 0
+        if rigid_rank < 6:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_rigid_body_restraint_rank_insufficient",
+                "/constraints",
+                f"Support rows restrain only {rigid_rank}/6 rigid-body modes.",
+            )
+
+    pattern = payload["load_patterns"][0]
+    seen_load_nodes: set[str] = set()
+    free_reference_load_present = False
+    for load_index, load in enumerate(pattern["nodal_loads"]):
+        base = f"/load_patterns/0/nodal_loads/{load_index}"
+        node_id = str(load["node_id"])
+        if node_id in seen_load_nodes:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_duplicate_nodal_load",
+                f"{base}/node_id",
+                "Use at most one bounded Frame3D nodal-load row per node.",
+            )
+        seen_load_nodes.add(node_id)
+        components = load["components_si"]
+        nonzero_components = [
+            component
+            for component, value in components.items()
+            if float(value) != 0.0
+        ]
+        if not nonzero_components:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_zero_nodal_load",
+                f"{base}/components_si",
+                "A declared bounded Frame3D reference-load row must be nonzero.",
+            )
+        for load_component in nonzero_components:
+            dof = load_to_dof[load_component]
+            if (node_id, dof) in known_constrained_dofs:
+                yield ModelIRValidationIssue(
+                    "bounded_frame3d_reference_load_on_restrained_dof",
+                    f"{base}/components_si/{load_component}",
+                    "Reference loads on restrained equations are outside the bounded profile.",
+                )
+            else:
+                free_reference_load_present = True
+    if not free_reference_load_present:
+        yield ModelIRValidationIssue(
+            "bounded_frame3d_free_reference_load_missing",
+            "/load_patterns/0/nodal_loads",
+            "Direct displacement control requires a nonzero reference load on a free equation.",
+        )
+
+
+def _bounded_frame3d_numeric_issues(
+    payload: dict[str, Any],
+) -> Iterable[ModelIRValidationIssue]:
+    """Reject values that cannot survive the bounded SI-to-solver projection."""
+
+    for index, node in enumerate(payload["nodes"]):
+        for axis, value in enumerate(node["coordinates_m"]):
+            if abs(float(value)) > _BOUNDED_FRAME3D_MAX_ABS_COORDINATE_M:
+                yield ModelIRValidationIssue(
+                    "bounded_frame3d_coordinate_magnitude_out_of_range",
+                    f"/nodes/{index}/coordinates_m/{axis}",
+                    "Bounded Frame3D coordinates must have magnitude at most 1e9 m.",
+                )
+    for axis, value in enumerate(payload["coordinate_system"]["origin_m"]):
+        if abs(float(value)) > _BOUNDED_FRAME3D_MAX_ABS_COORDINATE_M:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_coordinate_magnitude_out_of_range",
+                f"/coordinate_system/origin_m/{axis}",
+                "Bounded Frame3D origin coordinates must have magnitude at most 1e9 m.",
+            )
+
+    for index, material in enumerate(payload["materials"]):
+        parameters = material["parameters"]
+        for name in ("elastic_modulus_pa", "shear_modulus_pa"):
+            if name not in parameters:
+                continue
+            value = float(parameters[name])
+            lower, upper = _BOUNDED_FRAME3D_MODULUS_PA_RANGE
+            if not lower <= value <= upper:
+                yield ModelIRValidationIssue(
+                    "bounded_frame3d_material_conversion_out_of_range",
+                    f"/materials/{index}/parameters/{name}",
+                    "Elastic/shear modulus must remain positive and finite after SI conversion.",
+                )
+        yield_value = float(parameters["yield_stress_pa"])
+        lower, upper = _BOUNDED_FRAME3D_YIELD_STRESS_PA_RANGE
+        if not lower <= yield_value <= upper:
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_material_conversion_out_of_range",
+                f"/materials/{index}/parameters/yield_stress_pa",
+                "Yield stress must remain positive and finite after MPa conversion.",
+            )
+        for name in (
+            "isotropic_hardening_modulus_pa",
+            "kinematic_hardening_modulus_pa",
+            "yield_tolerance_pa",
+        ):
+            value = float(parameters[name])
+            lower, upper = _BOUNDED_FRAME3D_POSITIVE_HARDENING_PA_RANGE
+            if value != 0.0 and not lower <= value <= upper:
+                yield ModelIRValidationIssue(
+                    "bounded_frame3d_material_conversion_out_of_range",
+                    f"/materials/{index}/parameters/{name}",
+                    "Nonzero hardening/tolerance values must survive MPa conversion.",
+                )
+
+    for index, section in enumerate(payload["sections"]):
+        parameters = section["parameters"]
+        for name in ("area_m2", "shear_area_y_m2", "shear_area_z_m2"):
+            value = float(parameters[name])
+            lower, upper = _BOUNDED_FRAME3D_AREA_M2_RANGE
+            if not lower <= value <= upper:
+                yield ModelIRValidationIssue(
+                    "bounded_frame3d_section_value_out_of_range",
+                    f"/sections/{index}/parameters/{name}",
+                    "Frame area terms are outside the bounded arithmetic range.",
+                )
+        for name in ("iy_m4", "iz_m4", "torsional_constant_m4"):
+            value = float(parameters[name])
+            lower, upper = _BOUNDED_FRAME3D_INERTIA_M4_RANGE
+            if not lower <= value <= upper:
+                yield ModelIRValidationIssue(
+                    "bounded_frame3d_section_value_out_of_range",
+                    f"/sections/{index}/parameters/{name}",
+                    "Frame inertia terms are outside the bounded arithmetic range.",
+                )
+
+    for index, element in enumerate(payload["elements"]):
+        if (
+            abs(float(element["local_axis_rotation_rad"]))
+            > _BOUNDED_FRAME3D_MAX_ABS_ROLL_RAD
+        ):
+            yield ModelIRValidationIssue(
+                "bounded_frame3d_roll_magnitude_out_of_range",
+                f"/elements/{index}/local_axis_rotation_rad",
+                "Local-axis roll is outside the bounded arithmetic range.",
+            )
+
+    for pattern_index, pattern in enumerate(payload["load_patterns"]):
+        for load_index, load in enumerate(pattern["nodal_loads"]):
+            for component, value in load["components_si"].items():
+                if abs(float(value)) > _BOUNDED_FRAME3D_MAX_ABS_LOAD_SI:
+                    yield ModelIRValidationIssue(
+                        "bounded_frame3d_load_magnitude_out_of_range",
+                        f"/load_patterns/{pattern_index}/nodal_loads/{load_index}/components_si/{component}",
+                        "Reference force/moment is outside the bounded arithmetic range.",
+                    )
+
+
+def _bounded_planar_issues(
+    payload: dict[str, Any],
+    *,
+    node_ids: set[str],
+    material_by_id: dict[str, dict[str, Any]],
+    section_by_id: dict[str, dict[str, Any]],
+    constrained_dofs: dict[tuple[str, str], float],
+) -> Iterable[ModelIRValidationIssue]:
+    """Enforce the exact bounded connected Frame2D ModelIR profile."""
+
+    active_components = {"UX", "UY", "RZ"}
+    inactive_components = {"UZ", "RX", "RY"}
+    material_law_by_id = {
+        material_id: str(row["law_id"])
+        for material_id, row in material_by_id.items()
+    }
+    referenced_materials: set[str] = set()
+    for index, section in enumerate(payload["sections"]):
+        base = f"/sections/{index}"
+        steel_id = str(section["steel_material_id"])
+        concrete_id = str(section["concrete_material_id"])
+        referenced_materials.update((steel_id, concrete_id))
+        if material_law_by_id.get(steel_id) != "bilinear_combined_hardening_steel":
+            yield ModelIRValidationIssue(
+                "bounded_planar_section_steel_material_invalid",
+                f"{base}/steel_material_id",
+                "Section steel material must reference the bounded bilinear steel law.",
+            )
+        if material_law_by_id.get(concrete_id) != "asymmetric_concrete_damage":
+            yield ModelIRValidationIssue(
+                "bounded_planar_section_concrete_material_invalid",
+                f"{base}/concrete_material_id",
+                "Section concrete material must reference the bounded asymmetric concrete law.",
+            )
+        parameters = section["parameters"]
+        cover = float(parameters["cover_m"])
+        if 2.0 * cover >= min(
+            float(parameters["width_m"]), float(parameters["depth_m"])
+        ):
+            yield ModelIRValidationIssue(
+                "bounded_planar_section_cover_invalid",
+                f"{base}/parameters/cover_m",
+                "Twice the cover must be smaller than both section dimensions.",
+            )
+    if referenced_materials != set(material_by_id):
+        yield ModelIRValidationIssue(
+            "bounded_planar_unused_material",
+            "/materials",
+            "Every bounded planar material must be referenced by a section.",
+        )
+
+    coordinates = {
+        str(row["id"]): tuple(float(value) for value in row["coordinates_m"])
+        for row in payload["nodes"]
+    }
+    for index, node in enumerate(payload["nodes"]):
+        if float(node["coordinates_m"][2]) != 0.0:
+            yield ModelIRValidationIssue(
+                "bounded_planar_node_out_of_plane",
+                f"/nodes/{index}/coordinates_m/2",
+                "Bounded planar nodes require Z=0.",
+            )
+    if len({(row[0], row[1]) for row in coordinates.values()}) != len(coordinates):
+        yield ModelIRValidationIssue(
+            "bounded_planar_node_coordinate_duplicate",
+            "/nodes",
+            "Bounded planar node XY coordinates must be unique.",
+        )
+
+    graph: dict[str, set[str]] = {node_id: set() for node_id in node_ids}
+    undirected_pairs: set[tuple[str, str]] = set()
+    referenced_sections: set[str] = set()
+    member_load_present = False
+    for index, element in enumerate(payload["elements"]):
+        base = f"/elements/{index}"
+        node_i, node_j = (str(value) for value in element["node_ids"])
+        pair = tuple(sorted((node_i, node_j)))
+        if pair in undirected_pairs:
+            yield ModelIRValidationIssue(
+                "bounded_planar_parallel_member_unsupported",
+                f"{base}/node_ids",
+                "The bounded profile does not support parallel members.",
+            )
+        undirected_pairs.add(pair)
+        if node_i in graph and node_j in graph:
+            graph[node_i].add(node_j)
+            graph[node_j].add(node_i)
+        referenced_sections.add(str(element["section_id"]))
+        offsets = element["offsets"]
+        if any(
+            float(offsets[end][2]) != 0.0
+            for end in ("i_global_m", "j_global_m")
+        ):
+            yield ModelIRValidationIssue(
+                "bounded_planar_offset_out_of_plane",
+                f"{base}/offsets",
+                "Bounded planar rigid offsets require zero global Z components.",
+            )
+        releases = element["releases"]
+        if any(set(releases[end]) - {"RZ"} for end in ("i", "j")):
+            yield ModelIRValidationIssue(
+                "bounded_planar_release_unsupported",
+                f"{base}/releases",
+                "Only an optional RZ release at either member end is supported.",
+            )
+        member_load = element["uniform_distributed_load_local"]
+        member_load_present = member_load_present or any(
+            float(member_load[key]) != 0.0 for key in ("qx_n_per_m", "qy_n_per_m")
+        )
+    if referenced_sections != set(section_by_id):
+        yield ModelIRValidationIssue(
+            "bounded_planar_unused_section",
+            "/sections",
+            "Every bounded planar section must be referenced by a member.",
+        )
+    if node_ids:
+        start = min(node_ids)
+        visited = {start}
+        pending = [start]
+        while pending:
+            current = pending.pop()
+            for neighbor in sorted(graph[current]):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    pending.append(neighbor)
+        if visited != node_ids:
+            yield ModelIRValidationIssue(
+                "bounded_planar_graph_disconnected",
+                "/elements",
+                "The bounded planar member graph must be connected.",
+            )
+
+    inactive_missing = sorted(
+        (node_id, component)
+        for node_id in node_ids
+        for component in inactive_components
+        if (node_id, component) not in constrained_dofs
+    )
+    if inactive_missing:
+        node_id, component = inactive_missing[0]
+        yield ModelIRValidationIssue(
+            "bounded_planar_inactive_dof_unrestrained",
+            "/constraints",
+            f"Node {node_id} inactive component {component} must be restrained.",
+        )
+    for (node_id, component), value in constrained_dofs.items():
+        if component in inactive_components and value != 0.0:
+            yield ModelIRValidationIssue(
+                "bounded_planar_inactive_dof_prescribed_nonzero",
+                "/constraints",
+                f"Node {node_id} inactive component {component} must be fixed at zero.",
+            )
+    if not any(component in active_components for _node, component in constrained_dofs):
+        yield ModelIRValidationIssue(
+            "bounded_planar_active_support_missing",
+            "/constraints",
+            "At least one active UX, UY, or RZ support is required.",
+        )
+
+    pattern = payload["load_patterns"][0]
+    seen_load_nodes: set[str] = set()
+    nodal_load_present = False
+    for load_index, load in enumerate(pattern["nodal_loads"]):
+        base = f"/load_patterns/0/nodal_loads/{load_index}"
+        node_id = str(load["node_id"])
+        if node_id in seen_load_nodes:
+            yield ModelIRValidationIssue(
+                "bounded_planar_duplicate_nodal_load",
+                f"{base}/node_id",
+                "Use at most one bounded planar nodal-load row per node.",
+            )
+        seen_load_nodes.add(node_id)
+        components = load["components_si"]
+        if any(float(components[key]) != 0.0 for key in ("FZ", "MX", "MY")):
+            yield ModelIRValidationIssue(
+                "bounded_planar_load_out_of_plane",
+                f"{base}/components_si",
+                "Only in-plane FX, FY, and MZ nodal loads are supported.",
+            )
+        in_plane_nonzero = any(
+            float(components[key]) != 0.0 for key in ("FX", "FY", "MZ")
+        )
+        if not in_plane_nonzero:
+            yield ModelIRValidationIssue(
+                "bounded_planar_zero_nodal_load",
+                f"{base}/components_si",
+                "A declared bounded planar nodal-load row must be nonzero.",
+            )
+        nodal_load_present = nodal_load_present or in_plane_nonzero
+    prescribed_present = any(
+        component in active_components and value != 0.0
+        for (_node_id, component), value in constrained_dofs.items()
+    )
+    if not (nodal_load_present or member_load_present or prescribed_present):
+        yield ModelIRValidationIssue(
+            "bounded_planar_load_missing",
+            "/load_patterns/0",
+            "At least one nodal, member, or prescribed-displacement load is required.",
+        )
+
 
 def _finite_number_issues(
     value: Any, path: str = ""
 ) -> Iterable[ModelIRValidationIssue]:
-    if isinstance(value, bool) or value is None or isinstance(value, (str, int)):
+    if isinstance(value, bool) or value is None or isinstance(value, str):
         return
-    if isinstance(value, float):
-        if not math.isfinite(value):
+    if isinstance(value, (int, float)):
+        try:
+            normalized = float(value)
+        except OverflowError:
+            normalized = math.inf
+        if not math.isfinite(normalized):
             yield ModelIRValidationIssue(
-                "non_finite_number", path or "/", "NaN and Infinity are forbidden."
+                "non_finite_number",
+                path or "/",
+                "Numbers must be finite and representable as binary64 values.",
             )
         return
     if isinstance(value, list):

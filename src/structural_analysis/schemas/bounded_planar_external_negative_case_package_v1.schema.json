@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_planar_external_negative_case_package_v1.schema.json",
+  "title": "Bounded planar external negative case package v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_id",
+    "source_commit_sha",
+    "external_result_schema",
+    "python_requirements",
+    "operator_readme",
+    "execution_workflow",
+    "cases",
+    "summary",
+    "claims",
+    "contract_pass",
+    "blockers",
+    "claim_boundary",
+    "artifact_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "bounded-planar-external-negative-case-package.v1"},
+    "package_id": {"const": "bounded-planar-negative-rejection-v1"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "external_result_schema": {"$ref": "#/$defs/fileArtifact"},
+    "python_requirements": {"$ref": "#/$defs/fileArtifact"},
+    "operator_readme": {"$ref": "#/$defs/fileArtifact"},
+    "execution_workflow": {"$ref": "#/$defs/fileArtifact"},
+    "cases": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"$ref": "#/$defs/mechanismCase"},
+        {"$ref": "#/$defs/singularCase"},
+        {"$ref": "#/$defs/invalidGeometryCase"}
+      ],
+      "items": false
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_count", "product_rejection_ready_count", "external_ready_count"],
+      "properties": {
+        "case_count": {"const": 3},
+        "product_rejection_ready_count": {"const": 3},
+        "external_ready_count": {"const": 0}
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_model_ir_inputs",
+        "current_product_rejection",
+        "opensees_runner_syntax_checked",
+        "runtime_dependency_pinned",
+        "output_authenticity_contract",
+        "external_solver_execution",
+        "external_reference_attached",
+        "verification_matrix_credit",
+        "verification_level_2"
+      ],
+      "properties": {
+        "exact_model_ir_inputs": {"const": true},
+        "current_product_rejection": {"const": true},
+        "opensees_runner_syntax_checked": {"const": true},
+        "runtime_dependency_pinned": {"const": true},
+        "output_authenticity_contract": {"const": true},
+        "external_solver_execution": {"const": false},
+        "external_reference_attached": {"const": false},
+        "verification_matrix_credit": {"const": false},
+        "verification_level_2": {"const": false}
+      }
+    },
+    "contract_pass": {"const": true},
+    "blockers": {
+      "type": "array",
+      "contains": {"const": "external_runtime_execution_missing"},
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "claim_boundary": {"type": "string", "minLength": 80},
+    "artifact_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "fileArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "jsonArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256", "artifact_hash"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "caseBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "requirement_id",
+        "model_ir",
+        "opensees_runner",
+        "product_result",
+        "expected_product_reason_code",
+        "expected_external_observation",
+        "product_rejection_contract_pass",
+        "external_execution_status",
+        "external_result_attached",
+        "blockers"
+      ],
+      "properties": {
+        "case_id": {"type": "string"},
+        "requirement_id": {"type": "string"},
+        "model_ir": {"$ref": "#/$defs/jsonArtifact"},
+        "opensees_runner": {"$ref": "#/$defs/fileArtifact"},
+        "product_result": {"$ref": "#/$defs/jsonArtifact"},
+        "expected_product_reason_code": {"type": "string"},
+        "expected_external_observation": {"type": "string"},
+        "product_rejection_contract_pass": {"const": true},
+        "external_execution_status": {"const": "unavailable"},
+        "external_result_attached": {"const": false},
+        "blockers": {
+          "type": "array",
+          "contains": {"const": "external_runtime_execution_missing"},
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      }
+    },
+    "mechanismCase": {
+      "allOf": [
+        {"$ref": "#/$defs/caseBase"},
+        {
+          "properties": {
+            "case_id": {"const": "bounded_planar_negative_mechanism"},
+            "requirement_id": {"const": "negative.mechanism"},
+            "expected_product_reason_code": {"const": "mechanism_detected"},
+            "expected_external_observation": {"const": "released_mechanism_rejected"}
+          }
+        }
+      ]
+    },
+    "singularCase": {
+      "allOf": [
+        {"$ref": "#/$defs/caseBase"},
+        {
+          "properties": {
+            "case_id": {"const": "bounded_planar_negative_singular"},
+            "requirement_id": {"const": "negative.singular"},
+            "expected_product_reason_code": {"const": "singular_system_detected"},
+            "expected_external_observation": {"const": "rank_deficient_system_rejected"}
+          }
+        }
+      ]
+    },
+    "invalidGeometryCase": {
+      "allOf": [
+        {"$ref": "#/$defs/caseBase"},
+        {
+          "properties": {
+            "case_id": {"const": "bounded_planar_negative_invalid_geometry"},
+            "requirement_id": {"const": "negative.invalid_geometry"},
+            "expected_product_reason_code": {"const": "invalid_geometry"},
+            "expected_external_observation": {"const": "invalid_geometry_preflight_rejected"}
+          }
+        }
+      ]
+    }
+  }
+}

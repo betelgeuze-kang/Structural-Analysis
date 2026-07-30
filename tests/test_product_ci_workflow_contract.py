@@ -95,6 +95,23 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
     assert "scripts/run_product_ci_lane.py" in workflow
     assert "--lane legacy_evidence" in workflow
     assert "tests/test_build_product_readiness_snapshot.py" in workflow
+    assert "tests/test_validate_external_vv_operator_attestation.py" in workflow
+    assert "tests/test_promote_external_vv_level2.py" in workflow
+    assert (
+        "scripts/build_bounded_planar_external_linear_case_package.py" in workflow
+    )
+    assert (
+        "scripts/build_bounded_planar_external_negative_case_package.py" in workflow
+    )
+    assert (
+        "tests/test_build_bounded_planar_external_linear_case_package.py" in workflow
+    )
+    assert (
+        "tests/test_build_bounded_planar_external_negative_case_package.py" in workflow
+    )
+    assert "tests/test_ingest_bounded_planar_external_linear_results.py" in workflow
+    assert "tests/test_ingest_bounded_planar_external_negative_results.py" in workflow
+    assert "tests/test_build_bounded_planar_external_vv_matrix.py" in workflow
 
 
 def test_molecular_code_is_checked_only_as_quarantine() -> None:

@@ -1,0 +1,58 @@
+{
+  "schema_version": "structural-analysis-model-ir.v2",
+  "model_id": "bounded-frame3d-direct-control-rz-bending",
+  "capability_profile": "bounded_frame3d_direct_displacement_control",
+  "provenance": {
+    "source_format": "generated",
+    "source_ref": "generated:bounded-frame3d-direct-control-rz-bending:v1",
+    "source_sha256": "sha256:8bc85d70a971d433d53528dcc9f1f31fde3fbf6f4491cdf37ee7d2ecaeaab1de",
+    "normalizer_id": "bounded-frame3d-direct-control-sample-builder",
+    "normalizer_version": "1",
+    "source_units": {"length": "m", "force": "N", "mass": "kg", "time": "s", "rotation": "rad"},
+    "unit_scales_to_si": {"length_to_m": 1.0, "force_to_n": 1.0, "mass_to_kg": 1.0, "time_to_s": 1.0, "rotation_to_rad": 1.0},
+    "extensions": {}
+  },
+  "units": {"length": "m", "force": "N", "mass": "kg", "time": "s", "rotation": "rad"},
+  "coordinate_system": {"frame_id": "global", "axis_order": ["X", "Y", "Z"], "up_axis": "Z", "handedness": "right", "origin_m": [0.0, 0.0, 0.0]},
+  "dof_components": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+  "nodes": [
+    {"id": "N1", "index": 0, "coordinates_m": [0.0, 0.0, 0.0], "source_id": "generated:N1", "extensions": {}},
+    {"id": "N2", "index": 1, "coordinates_m": [2.0, 0.0, 0.0], "source_id": "generated:N2", "extensions": {}}
+  ],
+  "materials": [
+    {
+      "id": "S1", "index": 0, "law_id": "bilinear_combined_hardening_steel", "parameter_set_version": "1",
+      "parameters": {"elastic_modulus_pa": 200000000000.0, "shear_modulus_pa": 80000000000.0, "yield_stress_pa": 250000000.0, "isotropic_hardening_modulus_pa": 1000000000.0, "kinematic_hardening_modulus_pa": 1000000000.0, "yield_tolerance_pa": 0.0001},
+      "state_schema": {"stateful": true, "state_update_epoch": "accepted_step", "supports_trial_commit_rollback": true},
+      "source_id": "generated:S1", "extensions": {}
+    }
+  ],
+  "sections": [
+    {
+      "id": "SEC1", "index": 0, "family_id": "frame_3d", "parameter_set_version": "1",
+      "parameters": {"area_m2": 0.02, "iy_m4": 0.00005, "iz_m4": 0.00008, "torsional_constant_m4": 0.00001, "shear_area_y_m2": 0.015, "shear_area_z_m2": 0.012},
+      "source_id": "generated:SEC1", "extensions": {}
+    }
+  ],
+  "elements": [
+    {
+      "id": "E1", "index": 0, "type": "frame_3d", "formulation": "stateful_corotational_timoshenko_frame3d", "node_ids": ["N1", "N2"],
+      "material_id": "S1", "section_id": "SEC1", "local_axis_rotation_rad": 0.0,
+      "offsets": {"i_global_m": [0.0, 0.0, 0.0], "j_global_m": [0.0, 0.0, 0.0]}, "releases": {"i": [], "j": []},
+      "source_id": "generated:E1", "extensions": {}
+    }
+  ],
+  "constraints": [
+    {"id": "BC1", "index": 0, "type": "fixed_dofs", "node_id": "N1", "dofs": ["UX", "UY", "UZ", "RX", "RY", "RZ"], "prescribed_values_si": {"UX": 0.0, "UY": 0.0, "UZ": 0.0, "RX": 0.0, "RY": 0.0, "RZ": 0.0}, "source_id": "generated:BC1", "extensions": {}}
+  ],
+  "load_patterns": [
+    {
+      "id": "LP1", "index": 0, "analysis_type": "nonlinear_static_direct_displacement_control", "self_weight": [0.0, 0.0, 0.0],
+      "nodal_loads": [
+        {"id": "L1", "index": 0, "node_id": "N2", "components_si": {"FX": 0.0, "FY": 0.0, "FZ": 0.0, "MX": 0.0, "MY": 0.0, "MZ": 1000.0}, "source_id": "generated:L1", "extensions": {}}
+      ],
+      "source_id": "generated:LP1", "extensions": {}
+    }
+  ],
+  "load_combinations": [], "time_functions": [], "construction_stages": [], "roundtrip_map": [], "unsupported_features": [], "extensions": {}
+}

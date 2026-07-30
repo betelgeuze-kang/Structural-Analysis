@@ -45,6 +45,7 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
         "ifc_import_health_execution_count_below_required:0/10",
         "import_health_execution_missing",
         "phase3_ifc_import_case_count_below_minimum",
+        "selected_file_checksums_missing",
         "silent_data_loss_negative_gate_not_executed",
         "silent_import_loss_gate_not_executed",
         "source_file_not_acquired",
@@ -86,7 +87,7 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
     )
     assert "source_file_not_acquired" in payload["blockers"]
     assert "source_sha256_missing" in payload["blockers"]
-    assert "selected_file_checksums_missing" not in payload["blockers"]
+    assert "selected_file_checksums_missing" in payload["blockers"]
     assert "product_legal_license_review_pending" in payload["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in payload["blockers"]
     assert "phase3_ifc_import_case_count_below_minimum" in payload["blockers"]
@@ -119,7 +120,10 @@ def test_phase6_silent_import_loss_status_blocks_on_license_quantity_and_query_s
         "phase3_ifc_import_case_count_below_minimum",
         "source_file_not_acquired",
     ]
-    assert groups["checksum"]["blockers"] == ["source_sha256_missing"]
+    assert groups["checksum"]["blockers"] == [
+        "selected_file_checksums_missing",
+        "source_sha256_missing",
+    ]
     assert "product_legal_license_review_pending" in groups["license_legal"]["blockers"]
     assert "phase3_ifc_source_license_review_blockers_not_cleared:3" in groups["license_legal"]["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in groups["quantity_credit"]["blockers"]

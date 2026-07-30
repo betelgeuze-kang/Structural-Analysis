@@ -18,12 +18,12 @@
   "contract_pass": true,
   "engine_version": "0.3.0",
   "g1_closure_claim": false,
-  "generated_at": "2026-07-23T06:01:16.278779+00:00",
+  "generated_at": "2026-07-30T07:57:08.943940+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
     "scripts/build_phase2_material_newton_breadth_artifacts.py": "sha256:70ddf9616395c00cbc1e69d27b8e6dafa160c2d36e3445bfc12b4ac7e6d13248",
-    "scripts/verify_quality_gate.py": "sha256:48907ed7b93870854cd9c663f6a710d7ffb683dceb6d4191a9d02957dfc94a02",
-    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:66a6f26457b38f04a05e1b485d30e6de41287ab4fcec4ae80a8de0f7105e7e38",
+    "scripts/verify_quality_gate.py": "sha256:6574f5040ef5f72d02addf3a2c9fa9c551a7db1805d813c938ed5d7f29fbbea0",
+    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:4ef27ccf8db7613c32f84165c1813c72663513c2e670f298a75db41c0c25f808",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
     "tests/test_build_phase2_material_newton_breadth_artifacts.py": "sha256:d38dee83861672f3a9fb8f84982ca28fb5dc07b0ebb65a59b4cfd494c0b95893"
   },
@@ -67,7 +67,7 @@
   "residual_contract": "F_internal_minus_F_external",
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-material-newton-breadth-artifacts.v1",
-  "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "sparse_backend_used": false,
   "status": "ready",
   "truth_class": "analytic_truth"

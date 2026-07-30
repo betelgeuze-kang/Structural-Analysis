@@ -21,7 +21,22 @@ bar buckling, bond coupling, published calibration, or code compliance.
 
 `ConfinedConcreteState` adds immutable current/max-compression lineage so a 3D
 member checkpoint can replay the envelope exactly. It does not add an unloading
-law: the constitutive response is still the disclosed monotonic envelope.
+law. Stateful integration publishes an explicit path-capability object:
+monotonic compression is supported; unloading, reversal, cyclic response,
+tension, multiaxial response, and localization regularization are unsupported.
+Once compression has been accepted, any trial with a smaller compression
+magnitude fails with `unsupported_constitutive_path`. A trial beyond
+`ultimate_compressive_strain` fails with the explicit
+`confined_concrete_crushing_event`; the frame solver does not continue through
+the envelope evaluator's discontinuous residual cutoff. Both events preserve
+the accepted parent state and are raised from dense and sparse assembly with the
+member ID.
+
+The stateless `confined_concrete_response` function retains the disclosed full
+envelope, including `residual_cutoff`, for bounded response inspection and
+tangent checks. That post-ultimate branch is not admissible in stateful solver
+execution. Material and state scalars reject coercive or value-losing binary64
+sources before state hashing and normalize signed zero.
 
 ## Bond-slip connector
 
@@ -30,6 +45,14 @@ law: the constitutive response is still the disclosed monotonic envelope.
 count, stiffness and strength degradation, and accumulated nonnegative
 dissipation. Cyclic unloading/reloading is evaluated from the caller-owned
 committed state; trial evaluation never mutates that parent.
+
+Checkpoint reuse validates that maximum slip contains the retained slip,
+degradation matches the exact reversal count and material parameters, and a
+zero-reversal state agrees with the monotonic envelope and bounded monotonic
+work. Reversed states also reject forces outside a conservative bound derived
+from retained maximum slip, reversal count, peak force, and initial stiffness.
+Discrete sign/count fields require exact integer types and hash-encoding range;
+coercive or value-losing binary64 state inputs fail before hashing.
 
 This is one local connector point. Distributed anchorage, reinforcing-bar
 development, interface quadrature, and published cyclic calibration remain
@@ -83,6 +106,15 @@ section at two or three lengthwise Gauss points; see
 
 The section by itself does not add connector kinematics, multiaxial concrete,
 or shear/torsion material coupling.
+
+Concrete damage checkpoints bind damage to retained tensile/compressive
+history and bound path-dependent dissipation between an analytic
+continuous-history lower limit and the single-jump upper limit; crack-band
+states bind dissipation exactly to their retained history. Confined-concrete
+states must remain at the current monotonic compression maximum. These checks,
+the steel hardening invariants, and bond-slip degradation invariants are
+traversed through parallel-composite, fiber-section, and distributed
+partial-composite states before checkpoint or trial reuse.
 
 ## Distributed partial-composite member
 

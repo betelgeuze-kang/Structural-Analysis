@@ -49,6 +49,10 @@ def _stage_drop(tmp_path: Path, drop_name: str) -> Path:
 def test_panel_zone_solver_verified_live_intake_dry_run_allows_trusted_input(tmp_path: Path) -> None:
     inbox = _stage_drop(tmp_path, "trusted_drop_package")
     out = tmp_path / "live_intake_report.json"
+    design_optimization_dataset = tmp_path / "design_optimization_dataset_report.json"
+    pbd_review_package = tmp_path / "pbd_review_package_report.json"
+    design_optimization_dataset.write_text("{}\n", encoding="utf-8")
+    pbd_review_package.write_text("{}\n", encoding="utf-8")
     proc = subprocess.run(
         [
             sys.executable,
@@ -63,6 +67,10 @@ def test_panel_zone_solver_verified_live_intake_dry_run_allows_trusted_input(tmp
             str(tmp_path / "consume_report.json"),
             "--handoff-report-out",
             str(tmp_path / "handoff_report.json"),
+            "--design-optimization-dataset",
+            str(design_optimization_dataset),
+            "--pbd-review-package",
+            str(pbd_review_package),
             "--dry-run",
             "--out",
             str(out),

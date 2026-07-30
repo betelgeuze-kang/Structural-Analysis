@@ -22,7 +22,9 @@ def _sha256(path: Path) -> str:
 def test_run_panel_zone_solver_verified_handoff_from_raw_sources_drives_green_panel_chain_without_touching_release(tmp_path: Path) -> None:
     pbd = tmp_path / "pbd_review_package_report.json"
     pbd.write_text(json.dumps({"contract_pass": True}, indent=2), encoding="utf-8")
-    live_release_gap_hash_before = _sha256(LIVE_RELEASE_GAP)
+    live_release_gap_hash_before = (
+        _sha256(LIVE_RELEASE_GAP) if LIVE_RELEASE_GAP.exists() else None
+    )
     out = tmp_path / "panel_zone_solver_verified_handoff_report.json"
     clash_report = tmp_path / "panel_zone_clash_report.json"
     proc = subprocess.run(
@@ -74,8 +76,11 @@ def test_run_panel_zone_solver_verified_handoff_from_raw_sources_drives_green_pa
     assert payload["checks"]["release_surface_refresh_pass"] is True
     assert payload["checks"]["external_validation_refresh_pass"] is True
     assert "panel_zone_solver_verified_bundle" in [str(step.get("step")) for step in payload["steps"]]
-    assert LIVE_RELEASE_GAP.exists()
-    assert _sha256(LIVE_RELEASE_GAP) == live_release_gap_hash_before
+    if live_release_gap_hash_before is None:
+        assert not LIVE_RELEASE_GAP.exists()
+    else:
+        assert LIVE_RELEASE_GAP.exists()
+        assert _sha256(LIVE_RELEASE_GAP) == live_release_gap_hash_before
 
     report_payload = _load_json(clash_report)
     assert report_payload["contract_pass"] is True

@@ -82,6 +82,8 @@
         "ubuntu_python_3_10_and_3_12_execution",
         "windows_python_3_10_and_3_12_execution",
         "cross_platform_contract_and_binary_hash_identity",
+        "bounded_planar_four_way_exact_replay",
+        "bounded_planar_settlement_four_way_exact_replay",
         "cpu_hip_numerical_parity",
         "developer_preview_windows_gate",
         "product_readiness"
@@ -91,6 +93,8 @@
         "ubuntu_python_3_10_and_3_12_execution": {"type": "boolean"},
         "windows_python_3_10_and_3_12_execution": {"type": "boolean"},
         "cross_platform_contract_and_binary_hash_identity": {"type": "boolean"},
+        "bounded_planar_four_way_exact_replay": {"type": "boolean"},
+        "bounded_planar_settlement_four_way_exact_replay": {"type": "boolean"},
         "cpu_hip_numerical_parity": {"const": false},
         "developer_preview_windows_gate": {"const": false},
         "product_readiness": {"const": false}

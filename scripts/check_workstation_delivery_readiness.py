@@ -5,17 +5,24 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import subprocess
 import sys
 from typing import Any
 
+from jsonschema import Draft202012Validator
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import input_checksums  # noqa: E402
+from validate_client_input_package import (  # noqa: E402
+    _safe_file_inventory,
+    _source_row,
+)
 
 
 SCHEMA_VERSION = "workstation-delivery-readiness.v1"
@@ -33,6 +40,11 @@ DEFAULT_JOB_RETENTION_POLICY = Path("implementation/phase1/workstation_job_reten
 DEFAULT_VIEWER_BROWSER_PERFORMANCE_PROBE = Path("implementation/phase1/structure_viewer_browser_performance_probe.json")
 DEFAULT_VIEWER_VISUAL_REGRESSION_BASELINE = Path("implementation/phase1/structure_viewer_visual_regression_baseline.json")
 DEFAULT_DELIVERY_VIEWER_SMOKE = Path("implementation/phase1/workstation_delivery_viewer_smoke.json")
+CLIENT_INPUT_VALIDATOR = REPO_ROOT / "scripts/validate_client_input_package.py"
+CLIENT_INPUT_SCHEMA = REPO_ROOT / (
+    "src/structural_analysis/schemas/"
+    "client_input_validation_report_v1.schema.json"
+)
 
 
 def _now_utc_iso() -> str:
@@ -56,6 +68,43 @@ def _load_json(path: Path) -> dict[str, Any]:
         return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
+
+
+def _sha256_path(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return "sha256:" + digest.hexdigest()
+
+
+def _canonical_hash(value: Any) -> str:
+    encoded = json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def _repository_input_rows(repository_path: str) -> list[dict[str, Any]]:
+    relative = Path(repository_path)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError("client_input_repository_path_escape")
+    candidate = REPO_ROOT / relative
+    if candidate.is_symlink():
+        raise ValueError("client_input_repository_path_missing_or_symlink")
+    resolved_candidate = candidate.resolve()
+    try:
+        resolved_candidate.relative_to(REPO_ROOT.resolve())
+    except ValueError as exc:
+        raise ValueError("client_input_repository_path_escape") from exc
+    if not candidate.exists() or not candidate.is_dir():
+        raise ValueError("client_input_repository_path_missing_or_symlink")
+    files = _safe_file_inventory(candidate)
+    return [_source_row(path, candidate) for path in files]
 
 
 def _gate(label: str, ok: bool, blockers: list[str] | None = None, **extra: Any) -> dict[str, Any]:
@@ -278,9 +327,104 @@ def _delivery_viewer_smoke_gate(path: Path, payload: dict[str, Any]) -> dict[str
 
 def _client_input_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
     status = str(payload.get("status", "missing") if payload else "missing")
+    binding = payload.get("input_binding", {}) if payload else {}
+    if not isinstance(binding, dict):
+        binding = {}
+    checks = payload.get("checks", {}) if payload else {}
+    if not isinstance(checks, dict):
+        checks = {}
+    schema_valid = False
+    if path.exists() and payload and CLIENT_INPUT_SCHEMA.is_file():
+        try:
+            schema = json.loads(CLIENT_INPUT_SCHEMA.read_text(encoding="utf-8"))
+            Draft202012Validator.check_schema(schema)
+            Draft202012Validator(schema).validate(payload)
+            schema_valid = True
+        except Exception:
+            schema_valid = False
+    artifact_hash_valid = bool(
+        payload
+        and payload.get("artifact_hash")
+        == _canonical_hash(
+            {
+                key: value
+                for key, value in payload.items()
+                if key != "artifact_hash"
+            }
+        )
+    )
+    repository_binding_valid = False
+    repository_path = binding.get("repository_path")
+    if (
+        isinstance(repository_path, str)
+        and repository_path
+        and binding.get("source_kind") == "repository_reference_fixture"
+        and binding.get("current_worktree_bound") is True
+        and binding.get("commit_tree_bound") is False
+    ):
+        try:
+            current_rows = _repository_input_rows(repository_path)
+            repository_binding_valid = bool(
+                current_rows == payload.get("file_rows")
+                and binding.get("file_count") == len(current_rows)
+                and binding.get("total_bytes")
+                == sum(int(row["bytes"]) for row in current_rows)
+                and binding.get("input_set_hash") == _canonical_hash(current_rows)
+                and binding.get("source_commit_sha") == _git_head()
+                and payload.get("source_commit_sha") == _git_head()
+                and binding.get("validator_path")
+                == "scripts/validate_client_input_package.py"
+                and binding.get("validator_sha256")
+                == _sha256_path(CLIENT_INPUT_VALIDATOR)
+                and binding.get("schema_path")
+                == (
+                    "src/structural_analysis/schemas/"
+                    "client_input_validation_report_v1.schema.json"
+                )
+                and binding.get("schema_sha256")
+                == _sha256_path(CLIENT_INPUT_SCHEMA)
+            )
+        except (OSError, TypeError, ValueError):
+            repository_binding_valid = False
+    issue_lists_empty = all(
+        payload.get(name) == []
+        for name in ("missing_data_report", "blockers", "needs_review")
+    )
+    checks_pass = bool(checks) and all(value is True for value in checks.values())
     blockers = [
         *(["client_input_validation_report_missing"] if not path.exists() else []),
-        *(["client_input_validation_blocked"] if status == "blocked" else []),
+        *(["client_input_validation_schema_invalid"] if path.exists() and not schema_valid else []),
+        *(["client_input_validation_not_ready"] if path.exists() and status != "ready" else []),
+        *(
+            ["client_input_validation_contract_not_passed"]
+            if path.exists() and payload.get("contract_pass") is not True
+            else []
+        ),
+        *(
+            ["client_input_validation_reason_not_pass"]
+            if path.exists()
+            and (
+                payload.get("reason_code") != "PASS"
+                or payload.get("reason_codes") != ["PASS"]
+            )
+            else []
+        ),
+        *(["client_input_validation_checks_failed"] if path.exists() and not checks_pass else []),
+        *(
+            ["client_input_validation_missing_data_open"]
+            if path.exists() and not issue_lists_empty
+            else []
+        ),
+        *(
+            ["client_input_validation_artifact_hash_invalid"]
+            if path.exists() and not artifact_hash_valid
+            else []
+        ),
+        *(
+            ["client_input_validation_current_worktree_binding_invalid"]
+            if path.exists() and not repository_binding_valid
+            else []
+        ),
     ]
     return _gate(
         "Client input validation report",
@@ -289,6 +433,12 @@ def _client_input_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
         path=str(path),
         validation_status=status,
         missing_data_report=payload.get("missing_data_report", []) if payload else [],
+        report_schema_valid=schema_valid,
+        report_artifact_hash_valid=artifact_hash_valid,
+        current_worktree_binding_valid=repository_binding_valid,
+        commit_tree_bound=bool(binding.get("commit_tree_bound", False)),
+        source_kind=str(binding.get("source_kind", "")),
+        repository_path=str(binding.get("repository_path", "")),
     )
 
 

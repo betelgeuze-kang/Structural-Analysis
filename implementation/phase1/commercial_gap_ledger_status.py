@@ -55,10 +55,17 @@ def _repo_relative_path(value: Any) -> str | None:
     if not value:
         return None
     path = Path(str(value))
+    if not path.is_absolute():
+        return path.as_posix()
     try:
-        return str(path.relative_to(REPO_ROOT))
+        return path.relative_to(REPO_ROOT).as_posix()
     except ValueError:
-        return str(path)
+        pass
+    parts = path.parts
+    for anchor in ("implementation", "artifacts", "docs", "scripts", "src", "tests"):
+        if anchor in parts:
+            return Path(*parts[parts.index(anchor) :]).as_posix()
+    return path.as_posix()
 
 
 def _external_submission_closure_gate(
@@ -170,6 +177,8 @@ def _external_submission_closure_gate(
                 PRODUCTIZATION.relative_to(REPO_ROOT)
                 / "external_benchmark_submission_updates.json"
             ),
+        },
+        "unavailable_source_receipts": {
             "external_benchmark_submission_readiness": str(
                 RELEASE.relative_to(REPO_ROOT)
                 / "external_benchmark_submission_readiness.json"
@@ -6842,13 +6851,15 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                         PRODUCTIZATION.relative_to(REPO_ROOT)
                         / "external_benchmark_submission_updates.json"
                     ),
-                    "external_benchmark_submission_readiness": str(
-                        RELEASE.relative_to(REPO_ROOT)
-                        / "external_benchmark_submission_readiness.json"
-                    ),
                     "residual_holdout_closure_updates": str(
                         PRODUCTIZATION.relative_to(REPO_ROOT)
                         / "residual_holdout_closure_updates.json"
+                    ),
+                },
+                "unavailable_source_receipts": {
+                    "external_benchmark_submission_readiness": str(
+                        RELEASE.relative_to(REPO_ROOT)
+                        / "external_benchmark_submission_readiness.json"
                     ),
                 },
                 "external_closure_requirements": [
@@ -8833,6 +8844,11 @@ def _ai_rows(productization_dir: Path | None = None) -> list[dict[str, Any]]:
                     ),
                     "source_receipts": external_submission_closure_gate.get(
                         "source_receipts"
+                    ),
+                    "unavailable_source_receipts": (
+                        external_submission_closure_gate.get(
+                            "unavailable_source_receipts"
+                        )
                     ),
                     "queue_status": external_submission_closure_gate.get(
                         "queue_status"

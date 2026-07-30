@@ -26,6 +26,16 @@ ALLOWED_STATUSES = {
     "blocked",
 }
 PUBLIC_STATUSES = {"supported", "bounded_public"}
+REQUIRED_AUTHORITY_AXES = {
+    "representable",
+    "implemented",
+    "executable",
+    "public",
+    "numerical_authority",
+    "recovery_authority",
+    "external_vv_level",
+    "release_eligible",
+}
 
 
 class CapabilityRegistryError(ValueError):
@@ -45,7 +55,7 @@ def load_registry(repo_root: Path = ROOT) -> dict[str, Any]:
 
 
 def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
-    if registry.get("schema_version") != "structural-analysis-capabilities.v1":
+    if registry.get("schema_version") != "structural-analysis-capabilities.v2":
         raise CapabilityRegistryError("unsupported schema_version")
     rows = registry.get("capabilities")
     if not isinstance(rows, list) or not rows:
@@ -56,7 +66,9 @@ def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
             raise CapabilityRegistryError(f"capabilities[{index}] must be an object")
         capability_id = str(row.get("id", "")).strip()
         if not capability_id or capability_id in seen:
-            raise CapabilityRegistryError(f"invalid or duplicate capability id: {capability_id}")
+            raise CapabilityRegistryError(
+                f"invalid or duplicate capability id: {capability_id}"
+            )
         seen.add(capability_id)
         status = str(row.get("status", "")).strip()
         if status not in ALLOWED_STATUSES:
@@ -67,6 +79,52 @@ def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
         if public != (status in PUBLIC_STATUSES):
             raise CapabilityRegistryError(
                 f"{capability_id}: public flag must match supported/bounded_public status"
+            )
+        missing_axes = REQUIRED_AUTHORITY_AXES - set(row)
+        if missing_axes:
+            raise CapabilityRegistryError(
+                f"{capability_id}: missing authority axes {sorted(missing_axes)}"
+            )
+        for axis in (
+            "representable",
+            "implemented",
+            "executable",
+            "public",
+            "release_eligible",
+        ):
+            if not isinstance(row.get(axis), bool):
+                raise CapabilityRegistryError(
+                    f"{capability_id}: {axis} must be boolean"
+                )
+        if row["implemented"] and not row["representable"]:
+            raise CapabilityRegistryError(
+                f"{capability_id}: implemented requires representable"
+            )
+        if row["executable"] and not row["implemented"]:
+            raise CapabilityRegistryError(
+                f"{capability_id}: executable requires implemented"
+            )
+        if row["public"] and not row["executable"]:
+            raise CapabilityRegistryError(
+                f"{capability_id}: public requires executable"
+            )
+        for axis in ("numerical_authority", "recovery_authority"):
+            if not str(row.get(axis, "")).strip():
+                raise CapabilityRegistryError(
+                    f"{capability_id}: {axis} must be explicit"
+                )
+        external_vv_level = row.get("external_vv_level")
+        if (
+            not isinstance(external_vv_level, int)
+            or isinstance(external_vv_level, bool)
+            or not 0 <= external_vv_level <= 3
+        ):
+            raise CapabilityRegistryError(
+                f"{capability_id}: external_vv_level must be an integer from 0 to 3"
+            )
+        if row.get("authority") != row["numerical_authority"]:
+            raise CapabilityRegistryError(
+                f"{capability_id}: compatibility authority must equal numerical_authority"
             )
         interfaces = row.get("interfaces")
         limitations = row.get("limitations")
@@ -90,13 +148,39 @@ def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
     if not isinstance(authority, dict):
         raise CapabilityRegistryError("authority_rules must be an object")
     if authority.get("solver_truth_owner") != "structural_analysis_core":
-        raise CapabilityRegistryError("solver truth owner must remain structural_analysis_core")
+        raise CapabilityRegistryError(
+            "solver truth owner must remain structural_analysis_core"
+        )
     if authority.get("workbench_truth_owner") != "none":
         raise CapabilityRegistryError("Workbench cannot own solver truth")
     if authority.get("ai_truth_owner") != "none":
         raise CapabilityRegistryError("AI control cannot own solver truth")
     if authority.get("fallback_promotion_allowed") is not False:
         raise CapabilityRegistryError("fallback promotion must remain disabled")
+    if authority.get("implemented_does_not_imply_public") is not True:
+        raise CapabilityRegistryError("implemented must not imply public")
+    if (
+        authority.get("candidate_result_authority_does_not_imply_release_eligibility")
+        is not True
+    ):
+        raise CapabilityRegistryError(
+            "candidate result authority must not imply release eligibility"
+        )
+    release_vv_level = authority.get("release_requires_external_vv_level")
+    if not isinstance(release_vv_level, int) or release_vv_level < 1:
+        raise CapabilityRegistryError(
+            "release external V&V requirement must be a positive integer"
+        )
+    for row in rows:
+        if row["release_eligible"]:
+            if authority.get("release_requires_public") is True and not row["public"]:
+                raise CapabilityRegistryError(
+                    f"{row['id']}: release eligibility requires public"
+                )
+            if row["external_vv_level"] < release_vv_level:
+                raise CapabilityRegistryError(
+                    f"{row['id']}: release eligibility lacks external V&V"
+                )
 
 
 def _cell(value: Any) -> str:
@@ -109,8 +193,8 @@ def _cell(value: Any) -> str:
 
 def render_table(registry: dict[str, Any]) -> str:
     lines = [
-        "| Capability | Status | Public | Authority | Interfaces | Exact profile / boundary |",
-        "| --- | --- | --- | --- | --- | --- |",
+        "| Capability | Status | Representable | Implemented | Executable | Public | Numerical authority | Recovery authority | External V&V | Release eligible | Exact profile / boundary |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- | --- |",
     ]
     for row in registry["capabilities"]:
         boundary = f"{row['profile']}; {row['limitations'][0]}"
@@ -120,9 +204,14 @@ def render_table(registry: dict[str, Any]) -> str:
                 [
                     _cell(row["title"]),
                     _cell(row["status"]),
+                    "yes" if row["representable"] else "no",
+                    "yes" if row["implemented"] else "no",
+                    "yes" if row["executable"] else "no",
                     "yes" if row["public"] else "no",
-                    _cell(row["authority"]),
-                    _cell(row["interfaces"]),
+                    _cell(row["numerical_authority"]),
+                    _cell(row["recovery_authority"]),
+                    _cell(row["external_vv_level"]),
+                    "yes" if row["release_eligible"] else "no",
                     _cell(boundary),
                 ]
             )
@@ -135,8 +224,10 @@ def render_readme_block(registry: dict[str, Any]) -> str:
     return (
         f"{BEGIN_MARKER}\n"
         "## Generated capability support matrix\n\n"
-        "This table is generated from artifacts/manifests/capabilities.yaml. "
-        "Do not edit it directly.\n\n"
+        "This table is generated from the v2 registry at "
+        "`artifacts/manifests/capabilities.yaml`. Do not edit it directly. "
+        "`implemented` and `executable` do not mean `public`; numerical, "
+        "recovery, external-V&V, and release authority remain independent.\n\n"
         f"{render_table(registry)}\n"
         f"{END_MARKER}"
     )
@@ -146,7 +237,9 @@ def replace_marked_block(text: str, block: str) -> str:
     if BEGIN_MARKER not in text and END_MARKER not in text:
         return text.rstrip() + "\n\n" + block + "\n"
     if text.count(BEGIN_MARKER) != 1 or text.count(END_MARKER) != 1:
-        raise CapabilityRegistryError("README capability markers must occur exactly once")
+        raise CapabilityRegistryError(
+            "README capability markers must occur exactly once"
+        )
     before, remainder = text.split(BEGIN_MARKER, 1)
     _, after = remainder.split(END_MARKER, 1)
     return before.rstrip() + "\n\n" + block + after.rstrip() + "\n"
@@ -155,13 +248,16 @@ def replace_marked_block(text: str, block: str) -> str:
 def render_api_doc(registry: dict[str, Any]) -> str:
     return (
         "# API Capability Support\n\n"
-        "Generated from artifacts/manifests/capabilities.yaml. Do not edit directly.\n\n"
+        "Generated from the v2 registry at artifacts/manifests/capabilities.yaml. "
+        "Do not edit directly. Implemented or executable candidate rows are not "
+        "public or release-eligible unless those independent axes say so.\n\n"
         + render_table(registry)
         + "\n\n"
         "The Python API exposes the same registry through "
         "structural_analysis.api.capabilities(). The structural-analysis CLI "
         "prints it with --capabilities. Experimental, shadow-only, and blocked "
-        "rows are discovery metadata, not executable public support.\n"
+        "rows are discovery metadata, not executable public support. Workbench "
+        "consumes the same generated rows and owns no solver truth.\n"
     )
 
 
@@ -234,7 +330,7 @@ def main(argv: list[str] | None = None) -> int:
         write_outputs(args.repo_root)
     mismatches = check_outputs(args.repo_root)
     report = {
-        "schema_version": "capability-surface-generation-check.v1",
+        "schema_version": "capability-surface-generation-check.v2",
         "status": "pass" if not mismatches else "blocked",
         "contract_pass": not mismatches,
         "registry": REGISTRY_PATH.as_posix(),

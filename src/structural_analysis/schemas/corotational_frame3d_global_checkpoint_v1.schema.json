@@ -21,7 +21,7 @@
       "const": "corotational-frame3d-global-checkpoint.v1"
     },
     "profile": {
-      "const": "dense_elastic_corotational_timoshenko_frame3d_load_control.v1"
+      "const": "dense_elastic_corotational_timoshenko_frame3d_load_control.v2"
     },
     "model_hash": {"$ref": "#/$defs/hash"},
     "solver_contract_hash": {"$ref": "#/$defs/hash"},

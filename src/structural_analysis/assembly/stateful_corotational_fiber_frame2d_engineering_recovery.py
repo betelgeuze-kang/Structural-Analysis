@@ -76,7 +76,7 @@ COROTATIONAL_FIBER_FRAME_ENGINEERING_FIBER_STRAIN_TOLERANCE = 1.0e-14
 _HASH_ZERO = "sha256:" + "0" * 64
 _STABLE_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 
-_AUTHORITY_AXES = MappingProxyType(
+_PORTAL_AUTHORITY_AXES = MappingProxyType(
     {
         "convergence": "inherited_bounded_candidate",
         "displacement": "exact_bounded_candidate",
@@ -90,6 +90,12 @@ _AUTHORITY_AXES = MappingProxyType(
         "external_vv": "not_attached",
         "engineering_design": "not_authoritative",
         "release_readiness": "not_authoritative",
+    }
+)
+_GENERAL_AUTHORITY_AXES = MappingProxyType(
+    {
+        **dict(_PORTAL_AUTHORITY_AXES),
+        "member_features": "exact_bounded_candidate",
     }
 )
 _LIMITATIONS = (
@@ -111,9 +117,6 @@ _GENERAL_LIMITATIONS = (
     "load_control_cpu_dense_or_native_sparse_newton_only",
     "parallel_members_not_supported",
     "disconnected_graphs_not_supported",
-    "member_end_releases_not_supported",
-    "rigid_offsets_not_supported",
-    "distributed_member_loads_not_supported",
     "direct_displacement_control_not_supported",
     "external_level2_not_attached",
     "public_capability_not_promoted",
@@ -331,7 +334,9 @@ def create_corotational_fiber_frame_engineering_result_ir(
     """Replay and freeze exact SI engineering results for a bounded profile."""
 
     adapter = _validate_source_adapter(source_adapter)
-    result_kind, authority_profile, limitations = _source_profile(adapter)
+    result_kind, authority_profile, authority_axes, limitations = _source_profile(
+        adapter
+    )
     result_id = _stable_id(engineering_result_id, "/engineering_result_id")
     replay = _recover(adapter)
     descriptors = _descriptors(replay.arrays, replay.order_hashes)
@@ -359,7 +364,7 @@ def create_corotational_fiber_frame_engineering_result_ir(
         fiber_count=int(replay.counts["fiber"]),
         member_ids=replay.member_ids,
         metrics=replay.metrics,
-        authority_axes=_AUTHORITY_AXES,
+        authority_axes=authority_axes,
         limitations=limitations,
         array_bundle_hash=array_bundle_hash,
         descriptors=descriptors,
@@ -392,7 +397,9 @@ def validate_corotational_fiber_frame_engineering_result_ir(
             "Expected exact CorotationalFiberFrameEngineeringResultIR.",
         )
     adapter = _validate_source_adapter(result._adapter)
-    result_kind, authority_profile, limitations = _source_profile(adapter)
+    result_kind, authority_profile, authority_axes, limitations = _source_profile(
+        adapter
+    )
     replay = _recover(adapter)
     expected_descriptors = _descriptors(replay.arrays, replay.order_hashes)
     expected_bundle_hash = canonical_hash(
@@ -422,7 +429,7 @@ def validate_corotational_fiber_frame_engineering_result_ir(
         and result.fiber_count == replay.counts["fiber"]
         and result.member_ids == replay.member_ids
         and dict(result.metrics) == dict(replay.metrics)
-        and dict(result.authority_axes) == dict(_AUTHORITY_AXES)
+        and dict(result.authority_axes) == dict(authority_axes)
         and result.limitations == limitations
         and result.descriptors == expected_descriptors
         and result.array_bundle_hash == expected_bundle_hash
@@ -509,6 +516,7 @@ def _validate_detached_manifest_semantics(payload: Mapping[str, Any]) -> None:
         expected_authority_profile = (
             COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE
         )
+        expected_authority_axes = _PORTAL_AUTHORITY_AXES
         expected_limitations = _LIMITATIONS
         count_profile_passed = counts["node"] == 4 and counts["member"] == 3
     elif (
@@ -518,6 +526,7 @@ def _validate_detached_manifest_semantics(payload: Mapping[str, Any]) -> None:
         expected_authority_profile = (
             COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE
         )
+        expected_authority_axes = _GENERAL_AUTHORITY_AXES
         expected_limitations = _GENERAL_LIMITATIONS
         count_profile_passed = (
             2 <= counts["node"] <= 128 and 1 <= counts["member"] <= 256
@@ -532,7 +541,7 @@ def _validate_detached_manifest_semantics(payload: Mapping[str, Any]) -> None:
         payload["quantity_catalog_hash"]
         != default_result_quantity_catalog().catalog_hash
         or payload["authority_profile"] != expected_authority_profile
-        or payload["authority_axes"] != dict(_AUTHORITY_AXES)
+        or payload["authority_axes"] != dict(expected_authority_axes)
         or payload["limitations"] != list(expected_limitations)
         or not count_profile_passed
         or len(payload["member_ids"]) != counts["member"]
@@ -626,17 +635,19 @@ def _validate_source_adapter(
 
 def _source_profile(
     adapter: CorotationalEngineeringSourceAdapter,
-) -> tuple[str, str, tuple[str, ...]]:
+) -> tuple[str, str, Mapping[str, str], tuple[str, ...]]:
     if type(adapter) is CorotationalFiberFrameJ1J5Adapter:
         return (
             COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_KIND,
             COROTATIONAL_FIBER_FRAME_ENGINEERING_AUTHORITY_PROFILE,
+            _PORTAL_AUTHORITY_AXES,
             _LIMITATIONS,
         )
     if type(adapter) is CorotationalFiberFrameGeneralJ1J5Adapter:
         return (
             COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_RESULT_KIND,
             COROTATIONAL_FIBER_FRAME_GENERAL_ENGINEERING_AUTHORITY_PROFILE,
+            _GENERAL_AUTHORITY_AXES,
             _GENERAL_LIMITATIONS,
         )
     _fail(

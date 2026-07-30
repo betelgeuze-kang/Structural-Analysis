@@ -1,0 +1,387 @@
+{
+  "schema_version": "structural-analysis-repository-hygiene-inventory.v3",
+  "observed_at": "2026-07-28T22:23:28Z",
+  "repository": "betelgeuze-kang/Structural-Analysis",
+  "default_branch": "main",
+  "observed_default_branch_head": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "observation_source": "github_rest_api_and_git_ls_remote_read_only",
+  "external_mutation_authorized": false,
+  "external_actions_performed": [],
+  "freshness_contract": {
+    "maximum_live_observation_age_seconds": 86400,
+    "live_observation_required_for_freshness": true,
+    "offline_inventory_can_claim_freshness": false,
+    "required_live_fields": [
+      "repository",
+      "observed_at",
+      "default_branch_head",
+      "open_pull_requests.number",
+      "open_pull_requests.state",
+      "open_pull_requests.head_sha",
+      "candidate_pull_request.base_sha",
+      "candidate_pull_request.head_sha",
+      "candidate_pull_request.commit_count",
+      "candidate_pull_request.changed_file_count",
+      "candidate_pull_request.behind_by",
+      "open_issues.number",
+      "open_issues.state",
+      "tracked_issues.number",
+      "tracked_issues.state",
+      "superseded_pull_requests.number",
+      "superseded_pull_requests.state"
+    ]
+  },
+  "open_pull_request_scope": {
+    "selection_rule": "all_open_pull_requests_except_declared_candidate_self",
+    "observed_unfiltered_open_pull_request_count": 3,
+    "candidate_pull_request": {
+      "number": 243,
+      "head_sha": "10ea62ccd87f71ffb5080904cef36054c9332487",
+      "base_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+      "merge_base_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+      "commit_count": 1,
+      "changed_file_count": 4,
+      "ahead_by": 1,
+      "behind_by": 0,
+      "included_in_open_pull_requests": false,
+      "reason": "inventory_candidate_self_observation",
+      "metadata_check_observation": {
+        "workflow_run_id": 30207954774,
+        "workflow_run_conclusion": "failure",
+        "workflow_run_started_at": "2026-07-26T15:19:50Z",
+        "pull_request_body_updated_at": "2026-07-26T15:24:33Z",
+        "candidate_head_validator_contract_pass": false,
+        "candidate_head_validator_blockers": [
+          "commit_count_claim_mismatch:claimed=76:actual=1"
+        ],
+        "current_worktree_validator_contract_pass": true,
+        "closing_issue_numbers": [
+          242
+        ],
+        "rerun_after_body_update_observed": false,
+        "status": "validator_fix_not_on_candidate_head"
+      }
+    }
+  },
+  "observed_open_pull_request_count": 2,
+  "open_pull_requests": [
+    {
+      "number": 215,
+      "title": "Bind spatial-truss evidence to actual computational sources",
+      "state": "open",
+      "head_sha": "c1d7db29d668a665a81bbb239ed5e9432d8ad434",
+      "mergeable": false,
+      "mergeable_state": "dirty",
+      "observed_commit_count": 9,
+      "observed_changed_file_count": 7,
+      "observed_updated_at": "2026-07-26T14:48:26Z",
+      "metadata_consistent": true,
+      "recommended_disposition": "rebase_then_re_execute_clean_runner_container",
+      "disposition_authorized": false,
+      "blockers": [
+        "merge_conflict_against_current_default_branch",
+        "clean_runner_source_set_hash_requires_container_re_execution",
+        "external_solver_assets_not_available_in_repository_or_locally"
+      ]
+    },
+    {
+      "number": 221,
+      "title": "Harden external V&V clean-runner evidence validation",
+      "state": "open",
+      "head_sha": "54ec98606782125c5a272c42a2feeac645b9757b",
+      "mergeable": true,
+      "mergeable_state": "unstable",
+      "observed_commit_count": 2,
+      "observed_changed_file_count": 2,
+      "observed_updated_at": "2026-07-26T14:48:26Z",
+      "metadata_consistent": true,
+      "recommended_disposition": "hold_until_clean_runner_container_re_execution",
+      "disposition_authorized": false,
+      "blockers": [
+        "runner_source_sha256_requires_container_re_execution",
+        "external_solver_assets_not_available_in_repository_or_locally"
+      ]
+    }
+  ],
+  "issue_hygiene_scope": {
+    "selection_rule": "all_open_issues_plus_declared_resolved_watchlist",
+    "observed_open_issue_count": 5,
+    "open_issues": [
+      {
+        "number": 143,
+        "title": "Extract active FINAL_GUARD and sealed-checkpoint handoff from source-quarry PR #77",
+        "state": "open",
+        "classification": "active_source_extraction",
+        "related_pull_requests": [
+          77
+        ],
+        "observed_updated_at": "2026-07-20T11:25:01Z",
+        "disposition_authorized": false,
+        "blockers": [
+          "current_main_source_quarry_inventory_pending",
+          "actual_gfx_hardware_evidence_external"
+        ]
+      },
+      {
+        "number": 144,
+        "title": "Extract retained HIP ResultIR/DiagnosticIR and device-provenance capabilities from source-quarry PR #78",
+        "state": "open",
+        "classification": "active_source_extraction",
+        "related_pull_requests": [
+          78
+        ],
+        "observed_updated_at": "2026-07-20T11:25:20Z",
+        "disposition_authorized": false,
+        "blockers": [
+          "current_main_source_quarry_inventory_pending",
+          "actual_gfx_hardware_evidence_external"
+        ]
+      },
+      {
+        "number": 214,
+        "title": "Bind spatial-truss evidence to the actual linear assembly sources",
+        "state": "open",
+        "classification": "active_pull_request",
+        "related_pull_requests": [
+          215
+        ],
+        "observed_updated_at": "2026-07-24T23:22:46Z",
+        "disposition_authorized": false,
+        "blockers": [
+          "pull_request_215_open",
+          "current_main_source_provenance_repair_not_merged"
+        ]
+      },
+      {
+        "number": 220,
+        "title": "Harden external V&V clean-runner asset and child-receipt validation",
+        "state": "open",
+        "classification": "active_pull_request",
+        "related_pull_requests": [
+          221
+        ],
+        "observed_updated_at": "2026-07-24T23:58:31Z",
+        "disposition_authorized": false,
+        "blockers": [
+          "pull_request_221_open",
+          "current_main_clean_runner_hardening_not_merged"
+        ]
+      },
+      {
+        "number": 242,
+        "title": "Add read-only repository hygiene inventory gate",
+        "state": "open",
+        "classification": "candidate_self",
+        "related_pull_requests": [
+          243
+        ],
+        "observed_updated_at": "2026-07-26T15:19:08Z",
+        "disposition_authorized": false,
+        "blockers": [
+          "candidate_pull_request_243_open",
+          "candidate_metadata_validator_fix_not_on_observed_head",
+          "candidate_metadata_check_rerun_missing_after_validator_sync"
+        ]
+      }
+    ],
+    "observed_implemented_but_open_issue_count": 0,
+    "implemented_but_open_issues": [],
+    "observed_orphan_issue_count": 0,
+    "orphan_issues": [],
+    "resolved_issue_watchlist": [
+      {
+        "number": 207,
+        "state": "closed",
+        "state_reason": "completed",
+        "closed_at": "2026-07-28T01:51:47Z",
+        "resolution": "resolved_by_pull_request",
+        "resolved_by_pull_request": 241
+      },
+      {
+        "number": 210,
+        "state": "closed",
+        "state_reason": "completed",
+        "closed_at": "2026-07-28T01:51:48Z",
+        "resolution": "resolved_by_pull_request",
+        "resolved_by_pull_request": 239
+      },
+      {
+        "number": 212,
+        "state": "closed",
+        "state_reason": "completed",
+        "closed_at": "2026-07-28T01:51:50Z",
+        "resolution": "resolved_by_pull_request",
+        "resolved_by_pull_request": 239
+      },
+      {
+        "number": 216,
+        "state": "closed",
+        "state_reason": "completed",
+        "closed_at": "2026-07-28T01:51:51Z",
+        "resolution": "resolved_by_pull_request",
+        "resolved_by_pull_request": 239
+      },
+      {
+        "number": 218,
+        "state": "closed",
+        "state_reason": "completed",
+        "closed_at": "2026-07-28T01:51:52Z",
+        "resolution": "resolved_by_pull_request",
+        "resolved_by_pull_request": 239
+      }
+    ]
+  },
+  "superseded_pull_requests": [
+    {
+      "number": 77,
+      "state": "closed",
+      "merged": false,
+      "superseded_by_issue": 143
+    },
+    {
+      "number": 78,
+      "state": "closed",
+      "merged": false,
+      "superseded_by_issue": 144
+    },
+    {
+      "number": 206,
+      "state": "closed",
+      "merged": false,
+      "superseded_by_pull_request": 241
+    },
+    {
+      "number": 211,
+      "state": "closed",
+      "merged": false,
+      "superseded_by_pull_request": 239
+    },
+    {
+      "number": 213,
+      "state": "closed",
+      "merged": false,
+      "superseded_by_pull_request": 239
+    },
+    {
+      "number": 217,
+      "state": "closed",
+      "merged": false,
+      "superseded_by_pull_request": 239
+    },
+    {
+      "number": 219,
+      "state": "closed",
+      "merged": false,
+      "superseded_by_pull_request": 239
+    }
+  ],
+  "recently_closed_without_merge_pull_requests": [
+    {
+      "number": 137,
+      "title": "Fix concrete-damage artifact determinism and mismatch diagnostics",
+      "state": "closed",
+      "merged": false,
+      "observed_updated_at": "2026-07-24T17:40:48Z",
+      "closure_recorded_by_this_repository": false
+    },
+    {
+      "number": 206,
+      "title": "Fix Lee-frame candidate acceptance API drift",
+      "state": "closed",
+      "merged": false,
+      "observed_updated_at": "2026-07-26T14:42:36Z",
+      "superseded_by_pull_request": 241
+    },
+    {
+      "number": 211,
+      "title": "Harden sparse factorization fail-closed semantics",
+      "state": "closed",
+      "merged": false,
+      "observed_updated_at": "2026-07-26T13:50:03Z",
+      "superseded_by_pull_request": 239
+    },
+    {
+      "number": 213,
+      "title": "Reject prescribed displacement in portal J1-J5 profile",
+      "state": "closed",
+      "merged": false,
+      "observed_updated_at": "2026-07-26T13:50:05Z",
+      "superseded_by_pull_request": 239
+    },
+    {
+      "number": 217,
+      "title": "Harden direct displacement-control fail-closed behavior",
+      "state": "closed",
+      "merged": false,
+      "observed_updated_at": "2026-07-26T13:50:06Z",
+      "superseded_by_pull_request": 239
+    },
+    {
+      "number": 219,
+      "title": "Harden detached connected-Frame2D J1-J5 bindings",
+      "state": "closed",
+      "merged": false,
+      "observed_updated_at": "2026-07-26T13:50:08Z",
+      "superseded_by_pull_request": 239
+    }
+  ],
+  "recently_merged_pull_requests": [
+    {
+      "number": 233,
+      "title": "Add bounded nonlinear transient and sparse generalized-eigen kernels",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-07-26T11:00:52Z",
+      "merge_commit_sha": "698aec6cffa9d4efab5eb8b7c332f9ba6a529c6d"
+    },
+    {
+      "number": 235,
+      "title": "Add bounded P2 material candidates",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-07-26T11:40:01Z",
+      "merge_commit_sha": "12c9bfbc1106cb82fc2d161a0596d91a8583f7d9"
+    },
+    {
+      "number": 237,
+      "title": "Add bounded stateful 3D fiber/composite members and native sparse Frame3D path",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-07-26T13:08:46Z",
+      "merge_commit_sha": "b5d530bd4377e9eee4771e3b2df50c3ffc316ed4"
+    },
+    {
+      "number": 239,
+      "title": "Port fail-closed hardening onto current main",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-07-26T13:49:29Z",
+      "merge_commit_sha": "da87ef0221705b9483a0b239e151495b66244011"
+    },
+    {
+      "number": 241,
+      "title": "Repair Lee-frame verification candidate API drift",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-07-26T14:42:09Z",
+      "merge_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0"
+    }
+  ],
+  "remote_branch_inventory": {
+    "stale_after_days": 90,
+    "observed_remote_branch_count": 182,
+    "observed_stale_remote_branch_count": 0,
+    "staleness_assessment_complete": false,
+    "deletion_authorized": false,
+    "deleted_branches": []
+  },
+  "closure_pass": false,
+  "closure_blockers": [
+    "open_pr_215_conflicts_with_default_branch",
+    "open_pr_221_blocked_on_clean_runner_container_re_execution",
+    "external_solver_assets_unavailable_for_clean_runner_re_execution",
+    "remote_branch_age_inventory_not_authoritative",
+    "external_pr_or_branch_mutation_not_authorized"
+  ],
+  "claim_boundary": "This is a read-only inventory of observed GitHub state. The authoritative PR rows explicitly exclude candidate pull request #243 from the three unfiltered open pull requests; the issue rows enumerate every observed open issue, distinguish active work from implemented-but-open and orphan classifications, retain an exact resolved-issue watchlist, and record declared supersession links. An offline copy cannot claim freshness; freshness is available only after a matching live observation passes the declared age, default-branch-head, PR, issue, and supersession checks. The manifest records no PR close, branch deletion, merge, push, issue close, or issue mutation, and it cannot close repository hygiene until the two in-scope open pull requests are unblocked by container re-execution and an authorized human supplies the remaining dispositions."
+}

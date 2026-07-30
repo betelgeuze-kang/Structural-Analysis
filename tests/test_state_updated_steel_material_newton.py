@@ -16,6 +16,7 @@ from structural_analysis.assembly.stateful_axial import (
 )
 from structural_analysis.materials.uniaxial_plasticity import (
     BilinearCombinedHardeningSteel,
+    UniaxialPlasticityState,
     finite_difference_consistent_tangent_check,
     integrate_strain_history,
 )
@@ -27,6 +28,50 @@ CONFIG = NewtonRaphsonConfig(
     increment_tolerance=1.0e-12,
     max_iterations=20,
 )
+
+
+@pytest.mark.parametrize("value", (True, "0.0", 2**53 + 1, 0.0 + 0.0j))
+def test_steel_state_and_material_reject_coercive_binary64_sources(
+    value: object,
+) -> None:
+    with pytest.raises(ValueError, match="losslessly representable real binary64"):
+        UniaxialPlasticityState(plastic_strain=value)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="losslessly representable real binary64"):
+        BilinearCombinedHardeningSteel(  # type: ignore[arg-type]
+            yield_stress_mpa=value,
+        )
+    material = BilinearCombinedHardeningSteel()
+    with pytest.raises(ValueError, match="losslessly representable real binary64"):
+        material.integrate(value, material.initial_state())  # type: ignore[arg-type]
+
+
+def test_steel_state_normalizes_exact_numeric_sources_before_hashing() -> None:
+    state = UniaxialPlasticityState(
+        plastic_strain=-0.0,
+        backstress_mpa=0,
+        accumulated_plastic_strain=0,
+        dissipated_energy_density_mj_per_m3=0,
+    )
+    material = BilinearCombinedHardeningSteel(
+        elastic_modulus_mpa=200_000,
+        yield_stress_mpa=250,
+        isotropic_hardening_modulus_mpa=3_000,
+        kinematic_hardening_modulus_mpa=5_000,
+        yield_tolerance_mpa=0,
+    )
+
+    assert state.state_hash == UniaxialPlasticityState().state_hash
+    assert all(
+        type(value) is float
+        for value in (
+            state.plastic_strain,
+            state.backstress_mpa,
+            state.accumulated_plastic_strain,
+            state.dissipated_energy_density_mj_per_m3,
+            material.elastic_modulus_mpa,
+            material.yield_stress_mpa,
+        )
+    )
 
 
 @pytest.mark.parametrize(

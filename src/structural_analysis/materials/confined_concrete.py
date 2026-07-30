@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import hashlib
 import math
 import struct
+from types import MappingProxyType
 from typing import Any
 
 
@@ -14,18 +15,50 @@ CONFINED_CONCRETE_STATE_SCHEMA_VERSION = "confined-concrete-envelope-state.v1"
 CONFINED_CONCRETE_CLAIM_BOUNDARY = (
     "Monotonic uniaxial compression-envelope candidate only. It does not model "
     "cyclic pinching, multiaxial stress, bar buckling, bond slip, localization, "
-    "member failure, published validation, or design-code authority."
+    "an unloading law, published validation, or design-code authority. Stateful "
+    "integration fails closed on unloading/reversal and emits an explicit crushing "
+    "event beyond the ultimate compressive strain."
+)
+CONFINED_CONCRETE_PATH_CAPABILITIES = MappingProxyType(
+    {
+        "supports_monotonic": True,
+        "supports_unloading": False,
+        "supports_reversal": False,
+        "supports_cyclic": False,
+        "supports_tension": False,
+        "supports_compression": True,
+        "supports_multiaxial": False,
+        "supports_localization_regularization": False,
+    }
 )
 _STATE_DOMAIN = b"structural-analysis/confined-concrete-envelope-state/v1\0"
+_PATH_TOLERANCE = 1.0e-15
+
+
+class ConfinedConcreteAdmissibilityError(ValueError):
+    """Stable fail-closed constitutive-path or material-failure event."""
+
+    def __init__(self, code: str, detail: str) -> None:
+        self.code = code
+        self.detail = detail
+        super().__init__(f"{code}: {detail}")
 
 
 def _finite(name: str, value: Any) -> float:
     if isinstance(value, bool) or type(value) not in (int, float):
-        raise ValueError(f"{name} must be a finite number")
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        )
     result = float(value)
-    if not math.isfinite(result):
-        raise ValueError(f"{name} must be a finite number")
-    return result
+    if (
+        not math.isfinite(result)
+        or value != result
+        or (type(value) is int and int(result) != value)
+    ):
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        )
+    return 0.0 if result == 0.0 else result
 
 
 @dataclass(frozen=True)
@@ -103,20 +136,64 @@ class ConfinedConcreteMaterial:
     def initial_state(self) -> ConfinedConcreteState:
         return ConfinedConcreteState()
 
+    def validate_state_admissibility(
+        self,
+        state: ConfinedConcreteState,
+    ) -> ConfinedConcreteState:
+        if type(state) is not ConfinedConcreteState:
+            raise ValueError("state must be an exact ConfinedConcreteState")
+        expected_maximum = max(-state.strain, 0.0)
+        if (
+            state.strain > _PATH_TOLERANCE
+            or not math.isclose(
+                state.maximum_compressive_strain,
+                expected_maximum,
+                rel_tol=1.0e-12,
+                abs_tol=_PATH_TOLERANCE,
+            )
+            or state.maximum_compressive_strain
+            > self.ultimate_compressive_strain + _PATH_TOLERANCE
+        ):
+            raise ValueError(
+                "confined-concrete state is inconsistent with monotonic compression"
+            )
+        return state
+
     def integrate(
         self,
         strain: float,
         committed_state: ConfinedConcreteState,
     ) -> StatefulConfinedConcreteResponse:
-        if type(committed_state) is not ConfinedConcreteState:
-            raise ValueError("committed_state must be an exact ConfinedConcreteState")
+        self.validate_state_admissibility(committed_state)
         value = _finite("strain", strain)
+        trial_compression = max(-value, 0.0)
+        accepted_maximum = committed_state.maximum_compressive_strain
+        if trial_compression > self.ultimate_compressive_strain + _PATH_TOLERANCE:
+            raise ConfinedConcreteAdmissibilityError(
+                "confined_concrete_crushing_event",
+                (
+                    f"trial compression {trial_compression!r} exceeds ultimate "
+                    f"compressive strain {self.ultimate_compressive_strain!r}"
+                ),
+            )
+        if value > _PATH_TOLERANCE or (
+            trial_compression + _PATH_TOLERANCE < accepted_maximum
+        ):
+            raise ConfinedConcreteAdmissibilityError(
+                "unsupported_constitutive_path",
+                (
+                    "mander_uniaxial_monotonic_compression.v1 has no "
+                    f"unloading/reversal/tension law; trial compression "
+                    f"{trial_compression!r}, accepted maximum "
+                    f"{accepted_maximum!r}"
+                ),
+            )
         envelope = confined_concrete_response(value, self)
         state = ConfinedConcreteState(
             strain=value,
             maximum_compressive_strain=max(
-                committed_state.maximum_compressive_strain,
-                max(-value, 0.0),
+                accepted_maximum,
+                trial_compression,
             ),
         )
         return StatefulConfinedConcreteResponse(
@@ -132,11 +209,11 @@ class ConfinedConcreteMaterial:
 
 @dataclass(frozen=True)
 class ConfinedConcreteState:
-    """Immutable envelope lineage used by member checkpoints.
+    """Immutable monotonic-path lineage used by member checkpoints.
 
-    The maximum strain is evidence metadata, not an unloading rule. Re-evaluating
-    the accepted strain from the accepted state is idempotent, which keeps
-    checkpoint validation exact while preserving the monotonic-envelope boundary.
+    The maximum strain is replay evidence and the admissibility boundary.
+    Re-evaluating the accepted strain is idempotent; a smaller later compression
+    is rejected because this material has no unloading or reversal law.
     """
 
     strain: float = 0.0
@@ -332,8 +409,10 @@ def finite_difference_confined_concrete_tangent(
 
 __all__ = [
     "CONFINED_CONCRETE_CLAIM_BOUNDARY",
+    "CONFINED_CONCRETE_PATH_CAPABILITIES",
     "CONFINED_CONCRETE_PROFILE",
     "CONFINED_CONCRETE_STATE_SCHEMA_VERSION",
+    "ConfinedConcreteAdmissibilityError",
     "ConfinedConcreteMaterial",
     "ConfinedConcreteResponse",
     "ConfinedConcreteState",

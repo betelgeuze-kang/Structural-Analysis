@@ -2,7 +2,7 @@
   "schemaVersion": "workbench-case.v2",
   "provenance": {
     "sourcePath": "sample/demo-highrise.workbench-case.json",
-    "sourceSha256": "sha256:samplelivecase00000000000000000000000000000000000000000000000000",
+    "sourceSha256": "sha256:0000000000000000000000000000000000000000000000000000000000000004",
     "sourceCommitSha": "sample-not-a-release",
     "engineVersion": "structural-analysis@0.3.0-sample",
     "generatedAt": "2026-06-21T00:00:00+00:00"

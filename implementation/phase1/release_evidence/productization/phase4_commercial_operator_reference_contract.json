@@ -27,8 +27,8 @@
   "contract_pass": false,
   "current_reference_solver_count": 0,
   "developer_preview_release_candidate_claim": false,
-  "engine_version": "1.0.0",
-  "generated_at": "2026-07-18T14:04:27.258843+00:00",
+  "engine_version": "0.3.0",
+  "generated_at": "2026-07-30T04:04:56.479657+00:00",
   "gui_traceability_contract": {
     "contract_pass": true,
     "focused_tests": [
@@ -164,7 +164,7 @@
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "status": "blocked",
   "truth_class": "comparison_reference",
   "validation_rules": [

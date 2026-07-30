@@ -567,6 +567,8 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         "--out",
         str(args.peer_metric_records),
     ]
+    if args.peer_kpi_receipt is not None:
+        peer_cmd.extend(["--kpi-receipt", str(args.peer_kpi_receipt)])
     peer_step = _run_command(peer_cmd)
     peer_step.update({"label": "PEER TBI benchmark metric records", "path": str(args.peer_metric_records)})
     steps.append(peer_step)
@@ -600,6 +602,10 @@ def build_chain(args: argparse.Namespace) -> dict[str, Any]:
         str(args.row_provenance),
         "--json",
     ]
+    if args.open_data_restore_plan is not None:
+        p1_cmd.extend(
+            ["--open-data-restore-plan", str(args.open_data_restore_plan)]
+        )
     p0_status_temp_dir: tempfile.TemporaryDirectory[str] | None = None
     if p0_status_path is None and args.publication_evidence_index is None:
         p0_status_temp_dir = tempfile.TemporaryDirectory(prefix="clean-checkout-p0-open-")
@@ -925,6 +931,18 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, default=Path("implementation/phase1/real_project_corpus_seed_manifest.json"))
     parser.add_argument("--coverage-matrix", type=Path, default=Path("implementation/phase1/real_project_parser_coverage_matrix.json"))
     parser.add_argument("--peer-metric-records", type=Path, default=Path("implementation/phase1/peer_tbi_benchmark_metric_records.json"))
+    parser.add_argument(
+        "--peer-kpi-receipt",
+        type=Path,
+        default=None,
+        help="Optional measured-run KPI receipt used to populate PEER nonlinear-response metrics.",
+    )
+    parser.add_argument(
+        "--open-data-restore-plan",
+        type=Path,
+        default=None,
+        help="Optional explicit open-data restore receipt for clean-checkout P1 readiness.",
+    )
     parser.add_argument("--row-provenance", type=Path, default=Path("implementation/phase1/real_project_row_provenance_report.json"))
     parser.add_argument(
         "--midas-kds-validation-report",

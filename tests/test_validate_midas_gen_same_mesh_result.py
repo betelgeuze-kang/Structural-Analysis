@@ -29,10 +29,10 @@ def test_validate_live_example_fixture() -> None:
     assert "live_ready=True" in proc.stdout
 
 
-def test_csv_convert_to_live_result() -> None:
+def test_csv_convert_to_live_result(tmp_path: Path) -> None:
     csv_path = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_summary.example.csv"
     roundtrip = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
-    out = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_converted_test.json"
+    out = tmp_path / "midas_gen_same_mesh_result_converted.json"
     proc = subprocess.run(
         [
             sys.executable,
@@ -58,10 +58,10 @@ def test_csv_convert_to_live_result() -> None:
     assert payload["metrics"]["drift_ratio_pct"] == 1.92
 
 
-def test_live_example_comparison_status() -> None:
+def test_live_example_comparison_status(tmp_path: Path) -> None:
     result = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.live.example.json"
     roundtrip = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
-    out = REPO_ROOT / "implementation/phase1/release_evidence/productization/midas_gen_same_mesh_native_comparison_live_test.json"
+    out = tmp_path / "midas_gen_same_mesh_native_comparison_live.json"
     proc = subprocess.run(
         [
             sys.executable,

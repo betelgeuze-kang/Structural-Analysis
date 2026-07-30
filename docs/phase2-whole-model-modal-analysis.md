@@ -16,6 +16,14 @@ UX/UY/UZ participation and effective modal mass.
   translational truss consistent mass.
 - The solver is `authoritative_cpu_modal_fea_3d_v1` with the strict
   `scipy_linalg_eigh_dense` generalized-eigen backend.
+- The public wrapper derives the common source-bound 6DOF characteristic
+  length and applies the symmetric coordinate transform `C^T K C` and
+  `C^T M C`. Extracted vectors are recovered with `phi = C q` and residual,
+  orthogonality, matrix hashes, and result hashes are evaluated in the original
+  physical coordinates.
+- The result records the scaling hash and manifest plus exact scaled stiffness
+  and mass condition numbers when the reduced system has at most 256 equations.
+  Larger or singular systems report the diagnostic as unavailable.
 - No diagonal regularization or fallback solver is permitted.
 - An incomplete repeated-eigenvalue cluster fails closed.
 - Dense execution is capped at 512 free DOFs. Sparse extraction and binary
@@ -46,9 +54,9 @@ broader product claims listed below.
 Current bindings:
 
 - result artifact:
-  `sha256:d0effdfc1e269fcd169b5901a8187fcf8eb5a154dba2b12fc05767d8548be5ca`
+  `sha256:0fb654e00cdf73715a44ac09d63ec808fe589287988ee686921b70ecddcb6902`
 - source-set:
-  `sha256:545a38c7d97cd827351c9cd39f66573331839f43d46ea91bfb21fbad6415ecd9`
+  `sha256:787ac759ce7c9bb8b680e9f307522fb9a6bdf3be7bb21112875f40a5b0d2f812`
 
 Artifacts:
 
@@ -75,3 +83,12 @@ parity, general or mixed-stress whole-model buckling beyond the separate bounded
 compression-frame receipt, a broad independent modal corpus beyond the separate
 one-frame OpenSees technical comparison, Verification Level 2, commercial
 equivalence, or release readiness.
+
+The source-bound package at
+`artifacts/vv/bounded_planar_external_modal_buckling_case_package/` now prepares
+exact free-free rigid-mode and symmetric repeated-mode external cases. It records
+no execution credit by itself. Separate current-source receipts now bind fresh
+OpenSees modal and CalculiX buckling execution, while the same-operator
+supplemental receipt supplies the packaged rigid/repeated-mode and portal rows.
+Those exact matrix rows are therefore `fresh_external_technical`; the package
+alone still cannot claim external execution or Level 2 authority.

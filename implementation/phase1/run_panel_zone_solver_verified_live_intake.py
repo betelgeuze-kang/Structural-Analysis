@@ -14,7 +14,9 @@ from typing import Any
 
 from generate_panel_zone_solver_verified_inbox_status import DEFAULT_ARCHIVE_ROOT
 from run_panel_zone_solver_verified_handoff import (
+    DEFAULT_DATASET,
     DEFAULT_PANEL_ZONE_INBOX,
+    DEFAULT_PBD_PACKAGE,
     DEFAULT_TRUSTED_SOURCE_ORIGIN_CLASS,
     _release_refresh_source_allowed,
 )
@@ -76,6 +78,8 @@ def main() -> None:
     parser.add_argument("--inbox-status-report", default=str(DEFAULT_INBOX_STATUS))
     parser.add_argument("--consume-report-out", default=str(DEFAULT_CONSUME_REPORT))
     parser.add_argument("--handoff-report-out", default=str(DEFAULT_HANDOFF_REPORT))
+    parser.add_argument("--design-optimization-dataset", default=str(DEFAULT_DATASET))
+    parser.add_argument("--pbd-review-package", default=str(DEFAULT_PBD_PACKAGE))
     parser.add_argument("--trusted-source-origin-class", default=DEFAULT_TRUSTED_SOURCE_ORIGIN_CLASS)
     parser.add_argument("--allow-untrusted-source", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--archive-on-success", action=argparse.BooleanOptionalAction, default=True)
@@ -152,6 +156,10 @@ def main() -> None:
             str(inbox_status_report),
             "--archive-dir",
             str(args.archive_dir),
+            "--design-optimization-dataset",
+            str(args.design_optimization_dataset),
+            "--pbd-review-package",
+            str(args.pbd_review_package),
             "--archive-on-success" if bool(args.archive_on_success) else "--no-archive-on-success",
             "--clean-inbox-on-success" if bool(args.clean_inbox_on_success) else "--no-clean-inbox-on-success",
             "--refresh-release-surfaces",
@@ -195,6 +203,8 @@ def main() -> None:
             "inbox_status_report": str(inbox_status_report),
             "consume_report_out": str(consume_report_out),
             "handoff_report_out": str(handoff_report_out),
+            "design_optimization_dataset": str(args.design_optimization_dataset),
+            "pbd_review_package": str(args.pbd_review_package),
             "trusted_source_origin_class": expected_trusted,
             "allow_untrusted_source": bool(args.allow_untrusted_source),
             "archive_on_success": bool(args.archive_on_success),

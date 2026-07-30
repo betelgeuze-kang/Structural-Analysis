@@ -27,18 +27,16 @@ def test_release_publication_runbook_names_the_p1_quality_slice() -> None:
     assert "P0-1 is closed" in text
 
 
-def test_readme_pins_the_current_commercial_scope_and_sidecar_closure() -> None:
+def test_readme_pins_the_canonical_readiness_scope() -> None:
     text = _read_doc("README.md")
 
-    assert "Commercial" in text
-    assert "engineer_in_loop_accelerated_coverage_ready=true" in text
-    assert "full_commercial_replacement_ready=false" in text
-    assert "EB receipts stay `0/4`" in text
-    assert "RH closure evidence is now signed/attached" in text
-    assert "external_benchmark_submission_updates.json" in text
-    assert "residual_holdout_closure_updates.json" in text
-    assert "report_commercialization_level.py" in text
-    assert "not full autonomous replacement" in text
+    assert "Readiness source of truth" in text
+    assert "developer_preview_ready=`false`" in text
+    assert "release_ready=`false`" in text
+    assert "Developer Preview RC status" in text
+    assert "status `blocked`" in text
+    assert "Commercial Release claims blocked" in text
+    assert "not presented as a commercial-code replacement" in text
 
 
 def test_viewer_contract_surfaces_the_p1_handoff_slice() -> None:
@@ -94,5 +92,12 @@ def test_release_facing_docs_keep_bounded_commercial_language() -> None:
 
     for text in docs:
         assert "Commercial" in text
-        assert "engineer_in_loop_accelerated_coverage_ready=true" in text
-        assert "full_commercial_replacement_ready=false" in text
+        assert "full_commercial_replacement_ready=true" not in text
+        assert any(
+            boundary in text
+            for boundary in (
+                "full_commercial_replacement_ready=false",
+                "release_ready=`false`",
+                "Commercial Release claims blocked",
+            )
+        )

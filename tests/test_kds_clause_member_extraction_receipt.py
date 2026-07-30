@@ -34,12 +34,25 @@ def test_kds_clause_member_extraction_default_pass(tmp_path: Path) -> None:
     assert payload["summary"]["family_expected_count"] == 6
     assert payload["summary"]["family_coverage_ready"] is True
     assert len(payload["per_clause_summary"]) >= 16
-    assert all("clause_id" in row and "max_dcr" in row for row in payload["per_clause_summary"])
     assert all(
-        row["family"] in {
-            "beam", "column", "wall", "slab", "foundation",
-            "connection", "axial", "shear", "moment",
-            "interaction", "serviceability", "stability", "general",
+        "clause_id" in row and "max_dcr" in row for row in payload["per_clause_summary"]
+    )
+    assert all(
+        row["family"]
+        in {
+            "beam",
+            "column",
+            "wall",
+            "slab",
+            "foundation",
+            "connection",
+            "axial",
+            "shear",
+            "moment",
+            "interaction",
+            "serviceability",
+            "stability",
+            "general",
         }
         for row in payload["per_clause_summary"]
     )
@@ -47,7 +60,10 @@ def test_kds_clause_member_extraction_default_pass(tmp_path: Path) -> None:
     assert "rule_family_max_dcr" in payload["summary"]
     assert "rule_family_dcr_count" in payload["summary"]
     assert "claim_boundary" in payload
-    assert "drift" in payload["claim_boundary"].lower() or "rule family" in payload["claim_boundary"].lower()
+    assert (
+        "drift" in payload["claim_boundary"].lower()
+        or "rule family" in payload["claim_boundary"].lower()
+    )
 
 
 def test_kds_clause_member_extraction_auto_fit_capacity(tmp_path: Path) -> None:
@@ -95,12 +111,22 @@ def test_kds_clause_member_extraction_uses_solver_provenance(tmp_path: Path) -> 
     assert payload["source"]["midas_model_name"] != ""
 
 
-def test_kds_clause_member_extraction_writes_productization_receipt() -> None:
-    """Sanity-check: the CLI default writes the canonical productization receipt path."""
-    out = DEFAULT_OUT
-    before = out.read_text(encoding="utf-8") if out.is_file() else ""
+def test_kds_clause_member_extraction_canonical_output_contract(tmp_path: Path) -> None:
+    """Keep the canonical path contract without mutating tracked evidence in tests."""
+    assert DEFAULT_OUT.relative_to(REPO_ROOT).as_posix() == (
+        "implementation/phase1/release_evidence/productization/"
+        "kds_clause_member_extraction_receipt.json"
+    )
+    out = tmp_path / DEFAULT_OUT.name
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--hf-csv", "implementation/phase1/commercial_hf_export_sample.csv"],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--hf-csv",
+            "implementation/phase1/commercial_hf_export_sample.csv",
+            "--output-json",
+            str(out),
+        ],
         check=False,
         capture_output=True,
         text=True,
@@ -109,5 +135,3 @@ def test_kds_clause_member_extraction_writes_productization_receipt() -> None:
     assert out.is_file()
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["schema_version"] == "kds-clause-member-extraction-receipt.v1"
-    after = out.read_text(encoding="utf-8")
-    assert after != before or before == ""

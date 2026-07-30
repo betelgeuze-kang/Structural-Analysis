@@ -1,0 +1,150 @@
+name: OpenSees CalculiX Current Source Clean Runner
+
+# Same-operator technical execution only. The runtime assets remain outside the
+# repository and are not uploaded. A passing run does not establish independent
+# reproduction, legal approval, Verification Level 2, or release authority.
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+  EXTERNAL_ASSET_DIR: "/tmp/structural-analysis-external-assets"
+  RECEIPT_DIR: "artifacts/vv/opensees_calculix_clean_runner"
+  SUMMARY_RECEIPT: "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json"
+  ATTESTATION_BUNDLE: "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.sigstore.json"
+  ATTESTATION_VERIFICATION: "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.attestation-verification.json"
+  GH_TOKEN: "${{ github.token }}"
+
+concurrency:
+  group: opensees-calculix-current-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  execute-and-attest:
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact current-main source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install product and contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Acquire exact external runtime assets outside the repository
+        run: |
+          mkdir -p "$EXTERNAL_ASSET_DIR"
+          python -m pip download \
+            --no-deps \
+            --only-binary=:all: \
+            --dest "$EXTERNAL_ASSET_DIR" \
+            openseespy==3.7.1.2 \
+            openseespylinux==3.7.1.2
+          sudo apt-get update
+          cd "$EXTERNAL_ASSET_DIR"
+          apt-get download \
+            calculix-ccx=2.17-3 \
+            libarpack2=3.8.0-1 \
+            libspooles2.2=2.2-14
+
+      - name: Verify exact external asset names and SHA-256
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import os
+
+          expected = {
+              "openseespy-3.7.1.2-py3-none-any.whl": "1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
+              "openseespylinux-3.7.1.2-py3-none-any.whl": "63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a",
+              "calculix-ccx_2.17-3_amd64.deb": "3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e",
+              "libarpack2_3.8.0-1_amd64.deb": "07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a",
+              "libspooles2.2_2.2-14_amd64.deb": "34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917",
+          }
+          root = Path(os.environ["EXTERNAL_ASSET_DIR"])
+          observed = {path.name for path in root.iterdir() if path.is_file()}
+          if observed != set(expected):
+              raise SystemExit(f"external_asset_set_invalid:{sorted(observed)}")
+          for name, digest in expected.items():
+              actual = hashlib.sha256((root / name).read_bytes()).hexdigest()
+              if actual != digest:
+                  raise SystemExit(f"external_asset_hash_invalid:{name}")
+          print("external runtime assets: exact hashes verified")
+          PY
+
+      - name: Execute network-disabled read-only clean runner
+        run: bash scripts/run_external_vv_clean_runner.sh "$EXTERNAL_ASSET_DIR"
+
+      - name: Verify fresh current-source execution boundary
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import os
+
+          payload = json.loads(Path(os.environ["SUMMARY_RECEIPT"]).read_text())
+          claims = payload.get("claims", {})
+          blockers = payload.get("blockers_remaining", [])
+          required = {
+              "source_commit_sha": os.environ["SOURCE_SHA"],
+              "technical_contract_pass": True,
+          }
+          for key, expected in required.items():
+              if payload.get(key) != expected:
+                  raise SystemExit(f"clean_runner_summary_invalid:{key}")
+          if claims.get("same_operator_container_isolated_reproduction") is not True:
+              raise SystemExit("clean_runner_fresh_reproduction_missing")
+          if claims.get("actual_external_solver_execution") is not True:
+              raise SystemExit("clean_runner_external_execution_missing")
+          if claims.get("verification_level_2") is not False:
+              raise SystemExit("clean_runner_level2_promotion_forbidden")
+          if "external_runtime_current_source_rerun_missing" in blockers:
+              raise SystemExit("clean_runner_current_source_blocker_not_cleared")
+          print("current-source OpenSees/CalculiX clean runner: technical pass")
+          PY
+
+      - name: Attest clean-runner summary provenance
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.SUMMARY_RECEIPT }}
+
+      - name: Retain and verify exact provenance bundle
+        run: |
+          cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE"
+          gh attestation verify "$SUMMARY_RECEIPT" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$ATTESTATION_BUNDLE" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-current-source.yml" \
+            --source-digest "$SOURCE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$ATTESTATION_VERIFICATION"
+
+      - name: Upload receipts without external runtime assets
+        uses: actions/upload-artifact@v7
+        with:
+          name: opensees-calculix-current-source-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.RECEIPT_DIR }}
+          if-no-files-found: error
+          retention-days: 90

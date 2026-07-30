@@ -53,7 +53,51 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     assert payload["technical_contract_pass"] is True
     assert len(payload["external_assets"]) == 5
     assert all(not row["bundled_in_repository"] for row in payload["external_assets"])
-    assert len(payload["comparisons"]) == 5
+    assert len(payload["comparisons"]) == 12
+    source_checksums = payload["internal_source"]["input_checksums"]
+    assert "src/structural_analysis/solvers/equation_scaling_6dof.py" in (
+        source_checksums
+    )
+    assert "scripts/source_bound_python_inventory.py" in source_checksums
+    assert "src/structural_analysis/assembly/linear_static.py" in source_checksums
+    assert "src/structural_analysis/model_ir/validation.py" in source_checksums
+    assert "tests/test_equation_scaling_6dof.py" in source_checksums
+    assert (
+        "src/structural_analysis/assembly/"
+        "stateful_corotational_frame3d_sparse.py"
+    ) in source_checksums
+    assert "src/structural_analysis/api/frame3d_direct_control.py" in source_checksums
+    assert (
+        "src/structural_analysis/schemas/"
+        "bounded_frame3d_direct_control_result_v2.schema.json"
+        in source_checksums
+    )
+    assert (
+        "src/structural_analysis/schemas/"
+        "bounded_frame3d_direct_control_checkpoint_v2.schema.json"
+        in source_checksums
+    )
+    assert (
+        "src/structural_analysis/schemas/"
+        "stateful_corotational_frame3d_displacement_control_resume_binding_v2.schema.json"
+        in source_checksums
+    )
+    assert (
+        "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json"
+        in source_checksums
+    )
+    assert (
+        "examples/bounded_frame3d_direct_control_torsion.model-ir.v2.json"
+        in source_checksums
+    )
+    assert (
+        "examples/bounded_frame3d_direct_control_ry_bending.model-ir.v2.json"
+        in source_checksums
+    )
+    assert (
+        "examples/bounded_frame3d_direct_control_rz_bending.model-ir.v2.json"
+        in source_checksums
+    )
     assert all(row["contract_pass"] for row in payload["comparisons"])
     assert all(
         metric["contract_pass"]
@@ -86,7 +130,169 @@ def test_stored_receipt_validates_and_records_actual_technical_execution() -> No
     assert payload["claims"][
         "public_corotational_portal_technical_comparison"
     ] is True
-    spatial_truss = payload["comparisons"][4]
+    member_feature = payload["comparisons"][3]
+    assert member_feature["case_id"] == (
+        "bounded_planar_member_feature_load_path"
+    )
+    assert len(member_feature["metrics"]) == 8
+    assert payload["claims"][
+        "bounded_planar_member_feature_technical_comparison"
+    ] is True
+    assert {
+        row["quantity"] for row in member_feature["metrics"]
+    } == {
+        "node_N2_UX_m",
+        "node_N2_UY_m",
+        "support_N1_UX_N",
+        "support_N1_UY_N",
+        "support_N1_RZ_N_m",
+        "support_N2_RZ_N_m",
+        "member_E1_end_i_MZ_N_m",
+        "member_E1_end_j_MZ_N_m",
+    }
+    settlement = payload["comparisons"][4]
+    assert settlement["case_id"] == (
+        "bounded_planar_prescribed_settlement_load_path"
+    )
+    assert len(settlement["metrics"]) == 9
+    assert payload["claims"][
+        "bounded_planar_prescribed_settlement_technical_comparison"
+    ] is True
+    assert {
+        row["quantity"] for row in settlement["metrics"]
+    } == {
+        "node_N2_UX_m",
+        "node_N2_UY_m",
+        "support_N1_UX_N",
+        "support_N1_UY_N",
+        "support_N1_RZ_N_m",
+        "support_N2_UY_N",
+        "support_N2_RZ_N_m",
+        "member_E1_end_i_MZ_N_m",
+        "member_E1_end_j_MZ_N_m",
+    }
+    spatial_frame3d = payload["comparisons"][5]
+    assert spatial_frame3d["case_id"] == (
+        "spatial_frame3d_cantilever_combined_load"
+    )
+    assert len(spatial_frame3d["metrics"]) == 10
+    assert payload["claims"][
+        "opensees_frame3d_technical_comparison"
+    ] is True
+    assert {
+        metric["relative_tolerance"] for metric in spatial_frame3d["metrics"]
+    } == {module.SPATIAL_FRAME3D_RELATIVE_TOLERANCE}
+    assert {
+        metric["absolute_tolerance"] for metric in spatial_frame3d["metrics"]
+    } == {module.SPATIAL_FRAME3D_ABSOLUTE_TOLERANCE}
+    direct_control = payload["comparisons"][6]
+    assert direct_control["case_id"] == "frame3d_direct_control_axial_yield"
+    assert len(direct_control["metrics"]) == 8
+    assert payload["claims"][
+        "opensees_frame3d_direct_control_material_yield_technical_comparison"
+    ] is True
+    assert [row["quantity"] for row in direct_control["metrics"]] == [
+        quantity for quantity, _field in module.FRAME3D_DIRECT_CONTROL_METRIC_SPECS
+    ]
+    assert {
+        metric["relative_tolerance"] for metric in direct_control["metrics"]
+    } == {module.FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE}
+    assert {
+        metric["absolute_tolerance"] for metric in direct_control["metrics"]
+    } == {module.FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE}
+    plastic_strain = next(
+        row for row in direct_control["metrics"] if row["quantity"] == "plastic_strain"
+    )
+    assert plastic_strain["product_value"] > 0.0
+    assert plastic_strain["reference_value"] > 0.0
+    cyclic_direct_control = payload["comparisons"][7]
+    assert cyclic_direct_control["case_id"] == (
+        "frame3d_direct_control_cyclic_axial_reversal"
+    )
+    assert cyclic_direct_control["analysis_type"] == (
+        "corotational_frame3d_cyclic_direct_displacement_control_axial_reversal"
+    )
+    assert len(cyclic_direct_control["metrics"]) == 19
+    assert payload["claims"][
+        "opensees_frame3d_cyclic_direct_control_technical_comparison"
+    ] is True
+    assert [row["quantity"] for row in cyclic_direct_control["metrics"]] == [
+        quantity
+        for quantity, _target_index, _field in (
+            module.FRAME3D_CYCLIC_DIRECT_CONTROL_METRIC_SPECS
+        )
+    ]
+    assert {
+        metric["relative_tolerance"]
+        for metric in cyclic_direct_control["metrics"]
+    } == {module.FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE}
+    assert {
+        metric["absolute_tolerance"]
+        for metric in cyclic_direct_control["metrics"]
+    } == {module.FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE}
+    cyclic_by_quantity = {
+        row["quantity"]: row for row in cyclic_direct_control["metrics"]
+    }
+    for target_index, target in enumerate(
+        module.FRAME3D_CYCLIC_DIRECT_CONTROL_TARGETS_M,
+        start=1,
+    ):
+        assert cyclic_by_quantity[
+            f"target_{target_index}_tip_N2_UX_m"
+        ]["reference_value"] == pytest.approx(target)
+    assert cyclic_by_quantity["final_plastic_strain"][
+        "reference_value"
+    ] == pytest.approx(-0.0002718623004345328)
+    assert cyclic_by_quantity["final_backstress_mpa"][
+        "reference_value"
+    ] == pytest.approx(-0.2718623004345328)
+    assert cyclic_by_quantity["final_accumulated_plastic_strain"][
+        "reference_value"
+    ] == pytest.approx(0.00464432238734123)
+    assert cyclic_by_quantity[
+        "final_dissipated_energy_density_mj_per_m3"
+    ]["reference_value"] == pytest.approx(1.1610805968353075)
+    torsion_direct_control = payload["comparisons"][8]
+    assert torsion_direct_control["case_id"] == (
+        "frame3d_direct_control_torsion"
+    )
+    assert len(torsion_direct_control["metrics"]) == 3
+    assert payload["claims"][
+        "opensees_frame3d_rotational_direct_control_technical_comparison"
+    ] is True
+    assert [row["quantity"] for row in torsion_direct_control["metrics"]] == [
+        quantity
+        for quantity, _field in (
+            module.FRAME3D_DIRECT_CONTROL_TORSION_METRIC_SPECS
+        )
+    ]
+    assert {
+        metric["relative_tolerance"]
+        for metric in torsion_direct_control["metrics"]
+    } == {module.FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE}
+    assert {
+        metric["absolute_tolerance"]
+        for metric in torsion_direct_control["metrics"]
+    } == {module.FRAME3D_DIRECT_CONTROL_ABSOLUTE_TOLERANCE}
+    bending_direct_control = payload["comparisons"][9]
+    assert bending_direct_control["case_id"] == (
+        "frame3d_direct_control_bending_rotations"
+    )
+    assert len(bending_direct_control["metrics"]) == 6
+    assert payload["claims"][
+        "opensees_frame3d_bending_rotational_direct_control_technical_comparison"
+    ] is True
+    assert [row["quantity"] for row in bending_direct_control["metrics"]] == [
+        quantity
+        for quantity, _control_dof, _field in (
+            module.FRAME3D_DIRECT_CONTROL_BENDING_METRIC_SPECS
+        )
+    ]
+    assert {
+        metric["relative_tolerance"]
+        for metric in bending_direct_control["metrics"]
+    } == {module.FRAME3D_DIRECT_CONTROL_RELATIVE_TOLERANCE}
+    spatial_truss = payload["comparisons"][11]
     assert spatial_truss["case_id"] == (
         "tetrahedral_spatial_truss_combined_load"
     )
@@ -129,6 +335,57 @@ def test_receipt_does_not_promote_legal_hierarchy_or_release_claims() -> None:
     assert "does not achieve Verification Level 2" in payload["claim_boundary"]
 
 
+def test_product_replay_migrates_only_the_known_prior_claim_boundary() -> None:
+    stored = _stored_receipt()
+    refreshed = module.refresh_external_code_to_code_product_replay(
+        stored,
+        repo_root=ROOT,
+        reuse_reason="current-source settlement migration test",
+    )
+
+    assert refreshed["claim_boundary"] == module.CLAIM_BOUNDARY
+    assert refreshed["replay_provenance"]["external_execution_reused"] is True
+    settlement_attached = any(
+        row["case_id"] == "bounded_planar_prescribed_settlement_load_path"
+        for row in refreshed["comparisons"]
+    )
+    assert refreshed["claims"][
+        "bounded_planar_prescribed_settlement_technical_comparison"
+    ] is settlement_attached
+    assert (
+        module.SETTLEMENT_EXTERNAL_RERUN_BLOCKER
+        in refreshed["blockers_remaining"]
+    ) is (not settlement_attached)
+    cyclic_direct_control_attached = any(
+        row["case_id"] == "frame3d_direct_control_cyclic_axial_reversal"
+        for row in refreshed["comparisons"]
+    )
+    assert refreshed["claims"][
+        "opensees_frame3d_cyclic_direct_control_technical_comparison"
+    ] is cyclic_direct_control_attached
+    assert (
+        module.FRAME3D_DIRECT_CONTROL_CYCLIC_EXTERNAL_RERUN_BLOCKER
+        in refreshed["blockers_remaining"]
+    ) is (not cyclic_direct_control_attached)
+
+    forged = deepcopy(stored)
+    forged["claim_boundary"] = (
+        "Arbitrary migration text cannot be accepted even when it is long enough "
+        "to satisfy the structural schema because it is not one of the exact known "
+        "historical claim-boundary hashes approved for migration. " * 4
+    )
+    forged["artifact_hash"] = module._artifact_hash(forged)
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_claim_boundary_invalid",
+    ):
+        module.refresh_external_code_to_code_product_replay(
+            forged,
+            repo_root=ROOT,
+            reuse_reason="must fail",
+        )
+
+
 def test_validation_rejects_rehashed_comparison_tampering() -> None:
     tampered = deepcopy(_stored_receipt())
     tampered["comparisons"][0]["metrics"][0]["product_value"] += 0.25
@@ -140,6 +397,102 @@ def test_validation_rejects_rehashed_comparison_tampering() -> None:
     ):
         module.validate_external_code_to_code_technical_receipt(
             tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+
+def test_validation_rejects_frame3d_tolerance_tampering() -> None:
+    tampered = deepcopy(_stored_receipt())
+    frame3d = next(
+        row
+        for row in tampered["comparisons"]
+        if row["case_id"] == "spatial_frame3d_cantilever_combined_load"
+    )
+    frame3d["metrics"][0]["relative_tolerance"] = 1.0e-10
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_comparison_tolerance_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+    tampered_cyclic = deepcopy(_stored_receipt())
+    cyclic_direct_control = next(
+        row
+        for row in tampered_cyclic["comparisons"]
+        if row["case_id"] == "frame3d_direct_control_cyclic_axial_reversal"
+    )
+    cyclic_direct_control["metrics"][0]["relative_tolerance"] = 1.0e-4
+    tampered_cyclic["artifact_hash"] = module._artifact_hash(tampered_cyclic)
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_comparison_tolerance_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered_cyclic,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+    tampered_bending = deepcopy(_stored_receipt())
+    bending_direct_control = next(
+        row
+        for row in tampered_bending["comparisons"]
+        if row["case_id"] == "frame3d_direct_control_bending_rotations"
+    )
+    bending_direct_control["metrics"][0]["relative_tolerance"] = 1.0e-4
+    tampered_bending["artifact_hash"] = module._artifact_hash(
+        tampered_bending
+    )
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_comparison_tolerance_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered_bending,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+    tampered_torsion = deepcopy(_stored_receipt())
+    torsion_direct_control = next(
+        row
+        for row in tampered_torsion["comparisons"]
+        if row["case_id"] == "frame3d_direct_control_torsion"
+    )
+    torsion_direct_control["metrics"][0]["relative_tolerance"] = 1.0e-4
+    tampered_torsion["artifact_hash"] = module._artifact_hash(
+        tampered_torsion
+    )
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_comparison_tolerance_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered_torsion,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+    tampered_direct = deepcopy(_stored_receipt())
+    direct_control = next(
+        row
+        for row in tampered_direct["comparisons"]
+        if row["case_id"] == "frame3d_direct_control_axial_yield"
+    )
+    direct_control["metrics"][0]["relative_tolerance"] = 1.0e-4
+    tampered_direct["artifact_hash"] = module._artifact_hash(tampered_direct)
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_comparison_tolerance_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered_direct,
             repo_root=ROOT,
             require_current_sources=False,
         )
@@ -214,3 +567,38 @@ def test_cli_offline_check_validates_stored_receipt() -> None:
 
     assert completed.returncode == 0, completed.stderr + completed.stdout
     assert "external_code_to_code_technical_receipt_consistent" in completed.stdout
+
+
+def test_cli_refresh_can_use_a_validated_current_reference_receipt(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "embedded-code-receipt.json"
+    reference = (
+        ROOT
+        / "implementation/phase1/release_evidence/productization/"
+        "external_code_to_code_technical_execution_receipt.json"
+    )
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--out",
+            str(out),
+            "--refresh-product-replay",
+            "--reuse-reference-receipt",
+            str(reference),
+            "--reuse-reason",
+            "test validated current reference synchronization",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr + completed.stdout
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["replay_provenance"]["external_execution_reused"] is True
+    assert [row["case_id"] for row in payload["comparisons"]] == [
+        row["case_id"] for row in _stored_receipt()["comparisons"]
+    ]

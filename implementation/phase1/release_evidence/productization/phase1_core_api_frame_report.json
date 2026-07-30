@@ -90,13 +90,20 @@
   "contract_pass": true,
   "convergence_history": [
     {
+      "dimensionless_scaled_residual": 4.163336342344337e-17,
       "increment_definition": "single_direct_linear_solve; no iterative relative increment",
       "increment_norm": 0.0026666666666666666,
       "iteration": 1,
+      "raw_rotation_increment": 0.002,
+      "raw_rotational_residual": 8.326672684688674e-16,
+      "raw_translation_increment": 0.0026666666666666666,
+      "raw_translational_residual": 0.0,
       "relative_increment": 0.0,
       "relative_increment_applicable": false,
-      "relative_residual": 8.326672684688674e-17,
+      "relative_residual": 4.163336342344337e-17,
       "residual_norm": 8.326672684688674e-16,
+      "scaled_increment": 0.002,
+      "scaling_hash": "sha256:c153f74914a2d7dc82ee330396a8297e0002d53bdb9d94d06cfb3ef96e0b0ab4",
       "status": "ready",
       "step": "linear_static"
     }

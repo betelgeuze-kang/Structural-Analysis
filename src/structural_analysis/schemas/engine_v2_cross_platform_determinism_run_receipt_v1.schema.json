@@ -12,6 +12,8 @@
     "coordinate",
     "execution",
     "model_fixture",
+    "bounded_planar_fixture",
+    "bounded_planar_settlement_fixture",
     "golden_set_hash",
     "expected_goldens",
     "observed_goldens",
@@ -101,6 +103,30 @@
         "observed_data_hash": {"$ref": "#/$defs/hash"}
       }
     },
+    "bounded_planar_fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "expected_data_hash", "observed_data_hash"],
+      "properties": {
+        "path": {
+          "const": "examples/bounded_planar_frame_alpha.model-ir.v2.json"
+        },
+        "expected_data_hash": {"$ref": "#/$defs/hash"},
+        "observed_data_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "bounded_planar_settlement_fixture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "expected_data_hash", "observed_data_hash"],
+      "properties": {
+        "path": {
+          "const": "examples/bounded_planar_settlement.model-ir.v2.json"
+        },
+        "expected_data_hash": {"$ref": "#/$defs/hash"},
+        "observed_data_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
     "golden_set_hash": {"$ref": "#/$defs/hash"},
     "expected_goldens": {"$ref": "#/$defs/goldens"},
     "observed_goldens": {"$ref": "#/$defs/goldens"},
@@ -119,6 +145,8 @@
         "exact_contract_hash_replay",
         "canonical_binary_write_readback",
         "github_actions_coordinate_execution",
+        "bounded_planar_exact_replay",
+        "bounded_planar_settlement_exact_replay",
         "four_way_cross_platform_determinism",
         "cpu_hip_numerical_parity",
         "developer_preview_windows_gate"
@@ -127,6 +155,8 @@
         "exact_contract_hash_replay": {"type": "boolean"},
         "canonical_binary_write_readback": {"type": "boolean"},
         "github_actions_coordinate_execution": {"type": "boolean"},
+        "bounded_planar_exact_replay": {"type": "boolean"},
+        "bounded_planar_settlement_exact_replay": {"type": "boolean"},
         "four_way_cross_platform_determinism": {"const": false},
         "cpu_hip_numerical_parity": {"const": false},
         "developer_preview_windows_gate": {"const": false}
@@ -158,7 +188,35 @@
         "scaling_vector_bundle_hash",
         "residual_vector_bundle_hash",
         "cpu_fgmres_run_hash",
-        "cpu_fgmres_solution_data_hash"
+        "cpu_fgmres_solution_data_hash",
+        "bounded_planar_result_hash",
+        "bounded_planar_replay_result_hash",
+        "bounded_planar_checkpoint_artifact_hash",
+        "bounded_planar_checkpoint_chain_hash",
+        "bounded_planar_engineering_result_hash",
+        "bounded_planar_execution_topology_plan_hash",
+        "bounded_planar_equation_scaling_binding_hash",
+        "bounded_planar_engine_equation_scaling_hash",
+        "bounded_planar_terminal_residual_trace_hash",
+        "bounded_planar_model_ir_content_hash",
+        "bounded_planar_model_ir_semantic_hash",
+        "bounded_planar_model_ir_provenance_hash",
+        "bounded_planar_model_ir_adapter_hash",
+        "bounded_planar_execution_plan_binding_hash",
+        "bounded_planar_settlement_result_hash",
+        "bounded_planar_settlement_replay_result_hash",
+        "bounded_planar_settlement_checkpoint_artifact_hash",
+        "bounded_planar_settlement_checkpoint_chain_hash",
+        "bounded_planar_settlement_engineering_result_hash",
+        "bounded_planar_settlement_execution_topology_plan_hash",
+        "bounded_planar_settlement_equation_scaling_binding_hash",
+        "bounded_planar_settlement_engine_equation_scaling_hash",
+        "bounded_planar_settlement_terminal_residual_trace_hash",
+        "bounded_planar_settlement_model_ir_content_hash",
+        "bounded_planar_settlement_model_ir_semantic_hash",
+        "bounded_planar_settlement_model_ir_provenance_hash",
+        "bounded_planar_settlement_model_ir_adapter_hash",
+        "bounded_planar_settlement_execution_plan_binding_hash"
       ],
       "properties": {
         "model_ir_content_hash": {"$ref": "#/$defs/hash"},
@@ -176,7 +234,35 @@
         "scaling_vector_bundle_hash": {"$ref": "#/$defs/hash"},
         "residual_vector_bundle_hash": {"$ref": "#/$defs/hash"},
         "cpu_fgmres_run_hash": {"$ref": "#/$defs/hash"},
-        "cpu_fgmres_solution_data_hash": {"$ref": "#/$defs/hash"}
+        "cpu_fgmres_solution_data_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_result_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_replay_result_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_checkpoint_artifact_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_checkpoint_chain_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_engineering_result_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_execution_topology_plan_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_equation_scaling_binding_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_engine_equation_scaling_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_terminal_residual_trace_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_model_ir_semantic_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_model_ir_provenance_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_model_ir_adapter_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_execution_plan_binding_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_result_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_replay_result_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_checkpoint_artifact_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_checkpoint_chain_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_engineering_result_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_execution_topology_plan_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_equation_scaling_binding_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_engine_equation_scaling_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_terminal_residual_trace_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_model_ir_semantic_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_model_ir_provenance_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_model_ir_adapter_hash": {"$ref": "#/$defs/hash"},
+        "bounded_planar_settlement_execution_plan_binding_hash": {"$ref": "#/$defs/hash"}
       }
     },
     "binaryArtifact": {

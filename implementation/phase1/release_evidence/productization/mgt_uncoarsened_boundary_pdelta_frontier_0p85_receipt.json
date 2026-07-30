@@ -1,16 +1,16 @@
 {
   "schema_version": "mgt-uncoarsened-boundary-pdelta-frontier-0p85-receipt.v1",
-  "generated_at": "2026-07-01T11:07:54.982115+00:00",
+  "generated_at": "2026-07-28T18:50:22.906608+00:00",
   "status": "partial",
   "frontier_0p85_reached": false,
   "target_load_scale": 0.85,
   "frontier_load_scale": 0.656,
   "source": {
-    "segment_dir": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_segments",
+    "segment_dir": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_segments",
     "segment_count": 76,
-    "source_aggregate_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_continuation.json",
+    "source_aggregate_json": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_continuation.json",
     "source_aggregate_frontier": 0.0,
-    "source_checkpoint_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoints/accepted_load_0p45.npz",
+    "source_checkpoint_npz": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoints/accepted_load_0p45.npz",
     "source_checkpoint_exists": true,
     "source_seed_load_scale": 0.45
   },

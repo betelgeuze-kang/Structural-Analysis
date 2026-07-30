@@ -40,6 +40,24 @@ def test_core_quality_workflow_is_an_approved_deterministic_hosted_lane() -> Non
     )
 
 
+def test_product_truth_and_external_technical_workflows_are_approved_hosted_lanes() -> (
+    None
+):
+    expected = {
+        ".github/workflows/bounded-planar-negative-opensees-technical.yml",
+        ".github/workflows/bounded-planar-modal-buckling-technical.yml",
+        ".github/workflows/bounded-planar-opensees-technical.yml",
+        ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
+        ".github/workflows/product-state-current.yml",
+        ".github/workflows/python-test-collection.yml",
+        ".github/workflows/repository-hygiene-freshness.yml",
+    }
+
+    assert expected <= (
+        check_github_actions_runner_policy.DEFAULT_GITHUB_HOSTED_WORKFLOWS
+    )
+
+
 def test_runner_policy_blocks_unapproved_github_hosted_runner(tmp_path: Path) -> None:
     workflow_dir = _workflow_dir(tmp_path)
     (workflow_dir / "custom.yml").write_text(

@@ -20,6 +20,7 @@ import { BenchmarkBrowser } from './components/BenchmarkBrowser'
 import { ComparePanel } from './components/ComparePanel'
 import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
 import { JobServicePanel } from './components/JobServicePanel'
+import { EquationScalingPanel } from './components/EquationScalingPanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
@@ -217,7 +218,10 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
       <div id="wb2-sec-analysis" className="wb2-section">
         {providerMode === 'demo' ? <CaseSelector selectedId={demoCaseId} onSelect={setDemoCaseId} /> : null}
         {caseV2 ? (
-          <AnalysisRibbon runStatus={state.runStatus} analysis={caseV2.analysis} convergenceAvailable={state.convergenceAvailable} />
+          <>
+            <AnalysisRibbon runStatus={state.runStatus} analysis={caseV2.analysis} convergenceAvailable={state.convergenceAvailable} />
+            <EquationScalingPanel analysis={caseV2.analysis} />
+          </>
         ) : (
           <section className="wb2-panel"><h2 className="wb2-panel__title">Analysis</h2><p className="wb2-unavailable" data-wb2-unavailable>No analysis attached.</p></section>
         )}
@@ -229,6 +233,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
           job={jobLoad.job}
           errors={jobLoad.errors}
           artifactStatus={jobLoad.artifactStatus}
+          engineeringResultIr={jobLoad.engineeringResultIr}
         />
         {caseV2 ? (
           <RunMonitor

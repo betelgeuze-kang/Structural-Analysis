@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_planar_external_negative_execution_receipt_v1.schema.json",
+  "title": "Bounded planar external negative execution receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_commit_sha",
+    "package_binding",
+    "runtime_policy",
+    "cases",
+    "summary",
+    "status",
+    "technical_contract_pass",
+    "claims",
+    "blockers",
+    "claim_boundary",
+    "artifact_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "bounded-planar-external-negative-execution-receipt.v1"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "package_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package_id", "path", "file_sha256", "artifact_hash", "source_commit_sha"],
+      "properties": {
+        "package_id": {"const": "bounded-planar-negative-rejection-v1"},
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"},
+        "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "runtime_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["openseespy_version", "opensees_core_version"],
+      "properties": {
+        "openseespy_version": {"const": "3.7.1.2"},
+        "opensees_core_version": {"const": "3.7.1"}
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {
+          "allOf": [
+            {"$ref": "#/$defs/case"},
+            {
+              "properties": {
+                "case_id": {"const": "bounded_planar_negative_mechanism"},
+                "requirement_id": {"const": "negative.mechanism"},
+                "rejection_authority": {"const": "external_solver_expected_rejection"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/case"},
+            {
+              "properties": {
+                "case_id": {"const": "bounded_planar_negative_singular"},
+                "requirement_id": {"const": "negative.singular"},
+                "rejection_authority": {"const": "external_solver_tangent_rank_rejection"}
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {"$ref": "#/$defs/case"},
+            {
+              "properties": {
+                "case_id": {"const": "bounded_planar_negative_invalid_geometry"},
+                "requirement_id": {"const": "negative.invalid_geometry"},
+                "rejection_authority": {"const": "independent_input_contract_rejection"}
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_count",
+        "self_consistent_result_count",
+        "external_engine_invoked_case_count",
+        "independent_preflight_case_count",
+        "technical_rejection_pass_count"
+      ],
+      "properties": {
+        "case_count": {"const": 3},
+        "self_consistent_result_count": {"const": 3},
+        "external_engine_invoked_case_count": {"const": 2},
+        "independent_preflight_case_count": {"const": 1},
+        "technical_rejection_pass_count": {"const": 3}
+      }
+    },
+    "status": {"const": "technical_pass"},
+    "technical_contract_pass": {"const": true},
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_bytes_authenticated",
+        "external_results_self_consistent",
+        "exact_rejection_classifications",
+        "invalid_geometry_external_solver_execution",
+        "fresh_current_source_external_execution",
+        "independent_operator_attested",
+        "legal_use_approved",
+        "verification_matrix_credit",
+        "verification_level_2"
+      ],
+      "properties": {
+        "package_bytes_authenticated": {"const": true},
+        "external_results_self_consistent": {"const": true},
+        "exact_rejection_classifications": {"const": true},
+        "invalid_geometry_external_solver_execution": {"const": false},
+        "fresh_current_source_external_execution": {"const": false},
+        "independent_operator_attested": {"const": false},
+        "legal_use_approved": {"const": false},
+        "verification_matrix_credit": {"const": false},
+        "verification_level_2": {"const": false}
+      }
+    },
+    "blockers": {
+      "const": [
+        "fresh_current_source_execution_not_attested",
+        "independent_operator_attestation_missing",
+        "product_legal_license_approval_missing",
+        "formal_level2_promotion_receipt_missing"
+      ]
+    },
+    "claim_boundary": {"type": "string", "minLength": 120},
+    "artifact_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python_version", "platform", "openseespy_version", "opensees_core_version"],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "minLength": 1},
+        "openseespy_version": {"const": "3.7.1.2"},
+        "opensees_core_version": {"const": "3.7.1"}
+      }
+    },
+    "externalResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "file_sha256",
+        "artifact_hash",
+        "executed_at",
+        "runner_file_sha256",
+        "source_model_file_sha256",
+        "runtime",
+        "external_engine_invoked",
+        "model_construction_succeeded",
+        "analysis_return_code",
+        "exception_type",
+        "tangent_rank_check",
+        "observation"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"},
+        "executed_at": {"type": "string", "format": "date-time"},
+        "runner_file_sha256": {"$ref": "#/$defs/sha256"},
+        "source_model_file_sha256": {"$ref": "#/$defs/sha256"},
+        "runtime": {"$ref": "#/$defs/runtime"},
+        "external_engine_invoked": {"type": "boolean"},
+        "model_construction_succeeded": {"type": "boolean"},
+        "analysis_return_code": {"type": ["integer", "null"]},
+        "exception_type": {"type": ["string", "null"], "minLength": 1},
+        "tangent_rank_check": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/tangentRankCheck"}
+          ]
+        },
+        "observation": {
+          "enum": [
+            "released_mechanism_rejected",
+            "rank_deficient_system_rejected",
+            "invalid_geometry_preflight_rejected"
+          ]
+        }
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "requirement_id",
+        "rejection_authority",
+        "external_result",
+        "technical_rejection_pass",
+        "blockers"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "requirement_id": {"type": "string", "minLength": 1},
+        "rejection_authority": {
+          "enum": [
+            "external_solver_expected_rejection",
+            "external_solver_tangent_rank_rejection",
+            "independent_input_contract_rejection"
+          ]
+        },
+        "external_result": {"$ref": "#/$defs/externalResult"},
+        "technical_rejection_pass": {"const": true},
+        "blockers": {"const": []}
+      }
+    },
+    "tangentRankCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "equation_count",
+        "matrix_value_count",
+        "maximum_absolute_entry",
+        "relative_pivot_tolerance",
+        "absolute_pivot_tolerance",
+        "numerical_rank",
+        "rank_deficient"
+      ],
+      "properties": {
+        "equation_count": {"type": "integer", "minimum": 1},
+        "matrix_value_count": {"type": "integer", "minimum": 1},
+        "maximum_absolute_entry": {"type": "number", "minimum": 0},
+        "relative_pivot_tolerance": {"const": 1e-12},
+        "absolute_pivot_tolerance": {"type": "number", "minimum": 0},
+        "numerical_rank": {"type": "integer", "minimum": 0},
+        "rank_deficient": {"type": "boolean"}
+      }
+    }
+  }
+}

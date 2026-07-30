@@ -341,6 +341,17 @@ def test_corotational_profile_exposes_exact_normalized_engineering_results(
     assert all("stress_Pa" in row for row in result.fiber_results)
     assert result.metrics["fallback_count"] == 0
     assert result.metrics["regularization_count"] == 0
+    assert result.engineering_result_ir is not None
+    assert result.engineering_result_ir["schema_version"] == (
+        "corotational-fiber-frame2d-engineering-result-ir.v1"
+    )
+    assert result.engineering_result_ir["engineering_result_hash"] == (
+        result.source_result_hash
+    )
+    assert (
+        result.engineering_result_ir["engineering_result_hash"]
+        == (result.contract_bindings["engineering_result_hash"])
+    )
     chain = json.loads(result.checkpoint_artifact())
     assert chain["checkpoint_count"] == 5
     assert [row["epoch"] for row in chain["checkpoints"]] == [0, 1, 2, 3, 4]
@@ -420,6 +431,24 @@ def test_corotational_public_api_exposes_native_sparse_full_si_parity(
     assert replayed.checkpoint_artifact() == sparse.checkpoint_artifact()
 
 
+def test_rehashed_outer_result_cannot_hide_engineering_result_ir_tampering(
+    portal_result,
+) -> None:
+    _, result = portal_result
+    payload = result.to_dict()
+    assert payload["engineering_result_ir"] is not None
+    payload["engineering_result_ir"]["counts"]["member"] += 1
+    body = dict(payload)
+    body.pop("result_hash")
+    payload["result_hash"] = nonlinear_frame_api.canonical_hash(body)
+
+    with pytest.raises(
+        ValueError,
+        match="corotational_engineering_result_(schema_invalid|hash_mismatch)",
+    ):
+        validate_nonlinear_frame_manifest(payload)
+
+
 def test_fixed_chord_profile_rejects_sparse_backend() -> None:
     with pytest.raises(ValueError, match="fixed-chord"):
         NonlinearFrameConfig(
@@ -451,6 +480,25 @@ def test_connected_frame_profile_supports_branching_prescribed_and_restart(
     assert result.metrics["solver_executed"] is True
     assert result.metrics["native_sparse_assembly_used"] is True
     assert result.metrics["sparse_factorization_diagnostics_passed"] is True
+    assert result.configuration["equation_scaling"]["status"] == "available"
+    assert result.metrics["terminal_physical_residual_trace_status"] == "available"
+    assert (
+        result.metrics["terminal_physical_residual_trace_hash"]
+        == (result.contract_bindings["terminal_physical_residual_trace_hash"])
+    )
+    for key in (
+        "model_ir_adapter_hash",
+        "nonlinear_execution_topology_plan_hash",
+        "dof_ordering_hash",
+        "solver_coordinate_scaling_hash",
+        "physical_equation_scaling_binding_hash",
+        "engine_equation_scaling_hash",
+        "equation_order_hash",
+    ):
+        assert result.contract_bindings[key].startswith("sha256:")
+    assert result.metrics["raw_translational_residual_linf_n"] >= 0.0
+    assert result.metrics["raw_rotational_residual_linf_nm"] >= 0.0
+    assert result.metrics["dimensionless_scaled_residual_linf"] >= 0.0
 
     replayed = analyze_nonlinear_frame(
         model,
@@ -462,6 +510,7 @@ def test_connected_frame_profile_supports_branching_prescribed_and_restart(
     assert replayed.node_displacements == result.node_displacements
     assert replayed.support_reactions == result.support_reactions
     assert replayed.checkpoint_artifact() == result.checkpoint_artifact()
+    assert replayed.contract_bindings == result.contract_bindings
 
 
 def test_general_public_profile_executes_release_offset_and_distributed_load(
@@ -483,6 +532,11 @@ def test_general_public_profile_executes_release_offset_and_distributed_load(
     assert result.member_end_forces[0]["member_features"][
         "uniform_load_local_kn_per_m"
     ] == [0.0, -2.0]
+    assert result.authority["member_features"] == "exact_bounded_candidate"
+    assert result.engineering_result_ir is not None
+    assert result.engineering_result_ir["authority_axes"]["member_features"] == (
+        "exact_bounded_candidate"
+    )
     assert abs(result.member_end_forces[0]["local_end_j"]["MZ_Nm"]) < 1.0e-8
     reaction_by_dof = {
         (row["node_id"], row["dof"]): row["value_si"]
@@ -564,9 +618,176 @@ def test_connected_frame_prescribed_only_commits_without_newton(
     assert result.metrics["no_solve_contract_pass"] is True
     assert result.metrics["sparse_factorization_count"] == 0
     assert result.metrics["sparse_factorization_diagnostics_passed"] is False
+    assert result.configuration["equation_scaling"] == {
+        "status": "unavailable",
+        "reason": "no_free_reference_load",
+    }
+    assert result.metrics["terminal_physical_residual_trace_status"] == "unavailable"
+    assert result.metrics["terminal_physical_residual_trace_reason"] == (
+        "no_free_equations_no_convergence_claim"
+    )
+    assert "nonlinear_execution_topology_plan_hash" in result.contract_bindings
+    assert "physical_equation_scaling_binding_hash" not in result.contract_bindings
+    assert "terminal_physical_residual_trace_hash" not in result.contract_bindings
     assert result.convergence_history == ()
     assert result.node_displacements[-1]["UX_m"] == 1.0e-4
     assert result.support_reactions
+
+
+def test_connected_frame_prescribed_only_with_free_equations_fails_closed(
+    tmp_path: Path,
+) -> None:
+    payload = _branching_payload()
+    payload["loads"] = []
+    payload["supports"] = [
+        {"node": "N1", "dofs": ["UX", "UY", "RZ"]},
+        {
+            "node": "N2",
+            "dofs": ["UX", "UY"],
+            "prescribed_values": {"UX": 2.0e-4},
+        },
+        {"node": "N4", "dofs": ["RZ"]},
+    ]
+
+    result = analyze_nonlinear_frame(
+        _model(tmp_path, payload, "prescribed-only-free-equations.json"),
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            load_steps=2,
+            matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+        ),
+    )
+
+    assert result.status == "blocked"
+    assert result.contract_pass is False
+    assert result.configuration["equation_scaling"] == {
+        "status": "unavailable",
+        "reason": "no_free_reference_load",
+    }
+    assert result.unsupported_features == (
+        {
+            "reason_code": "equation_scaling_unavailable",
+            "kind": "corotational_equation_scaling_unavailable",
+            "path": "/solver/equation_scaling",
+            "detail": (
+                "corotational_equation_scaling_unavailable@"
+                "/solver/equation_scaling: An iterative path with free equations "
+                "requires a source-bound reference force; prescribed motion alone "
+                "does not create one."
+            ),
+        },
+    )
+    assert "nonlinear_execution_topology_plan_hash" in result.contract_bindings
+    assert "physical_equation_scaling_binding_hash" not in result.contract_bindings
+    assert result.convergence_history == ()
+    assert result.checkpoint == {"available": False}
+
+
+def test_blocked_result_normalizes_source_diagnostics_to_stable_reason_codes(
+    tmp_path: Path,
+) -> None:
+    payload = _branching_payload()
+    payload["unsupported_features"] = [
+        {
+            "kind": "vendor_constraint_unsupported",
+            "detail": "The source constraint family has no bounded adapter.",
+            "vendor_code": 91,
+        }
+    ]
+
+    result = analyze_nonlinear_frame(
+        _model(tmp_path, payload, "source-unsupported.json"),
+        NonlinearFrameConfig(profile=COROTATIONAL_GENERAL_PROFILE),
+    )
+
+    assert result.status == "blocked"
+    assert result.unsupported_features == (
+        {
+            "reason_code": "source_model_unsupported",
+            "kind": "vendor_constraint_unsupported",
+            "path": "/unsupported_features/0",
+            "detail": "The source constraint family has no bounded adapter.",
+            "source_context": {"vendor_code": 91},
+        },
+    )
+    assert validate_nonlinear_frame_result(result).contract_pass is False
+
+
+def test_connected_frame_distinguishes_released_mechanism_from_singular_system(
+    tmp_path: Path,
+) -> None:
+    mechanism = _portal_payload()
+    for element in mechanism["elements"]:
+        element["end_releases"] = {"i": ["RZ"], "j": ["RZ"]}
+    mechanism_result = analyze_nonlinear_frame(
+        _model(tmp_path, mechanism, "released-mechanism.json"),
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            load_steps=2,
+            maximum_iterations=20,
+        ),
+    )
+
+    assert mechanism_result.status == "blocked"
+    assert mechanism_result.unsupported_features[0]["reason_code"] == (
+        "mechanism_detected"
+    )
+    assert mechanism_result.unsupported_features[0]["kind"] == (
+        "corotational_released_mechanism_detected"
+    )
+    assert mechanism_result.unsupported_features[0]["path"] == "/solver/tangent"
+    assert mechanism_result.metrics["fallback_count"] == 0
+    assert mechanism_result.metrics["regularization_count"] == 0
+
+    singular = _portal_payload()
+    singular["supports"] = [{"node": "N1", "dofs": ["UX", "UY"]}]
+    singular_result = analyze_nonlinear_frame(
+        _model(tmp_path, singular, "singular-system.json"),
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            load_steps=2,
+            maximum_iterations=20,
+        ),
+    )
+
+    assert singular_result.status == "blocked"
+    assert singular_result.unsupported_features[0]["reason_code"] == (
+        "singular_system_detected"
+    )
+    assert singular_result.unsupported_features[0]["kind"] == (
+        "corotational_rigid_body_constraint_rank_deficient"
+    )
+    assert singular_result.unsupported_features[0]["path"] == "/supports"
+    assert singular_result.metrics["solver_executed"] is False
+    assert singular_result.metrics["fallback_count"] == 0
+    assert singular_result.metrics["regularization_count"] == 0
+
+
+def test_result_schema_rejects_unknown_unsupported_reason_code(
+    tmp_path: Path,
+) -> None:
+    payload = _branching_payload()
+    payload["elements"] = payload["elements"][:-1]
+    result = analyze_nonlinear_frame(
+        _model(tmp_path, payload, "unknown-reason-code.json"),
+        NonlinearFrameConfig(profile=COROTATIONAL_GENERAL_PROFILE),
+    )
+    manifest = result.to_dict()
+    manifest["unsupported_features"][0]["reason_code"] = "unstable_typo"
+
+    with pytest.raises(ValueError, match="unsupported_features"):
+        validate_nonlinear_frame_manifest(manifest)
+
+
+def test_unsupported_reason_code_catalog_matches_packaged_schema() -> None:
+    schema = nonlinear_frame_api._result_schema_validator().schema
+    schema_codes = tuple(
+        schema["$defs"]["unsupportedFeature"]["properties"]["reason_code"]["enum"]
+    )
+
+    assert schema_codes == (
+        nonlinear_frame_api.UNIFIED_NONLINEAR_FRAME_UNSUPPORTED_REASON_CODES
+    )
 
 
 def test_connected_frame_profile_rejects_disconnected_graph(tmp_path: Path) -> None:

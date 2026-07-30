@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 from implementation.phase1.generate_release_gap_report import _foundation_member_count_from_counts
 from tests.test_foundation_realish_fixture import (
     _run_dataset_fixture,
@@ -157,6 +159,8 @@ def test_release_gap_report_uses_engineer_in_loop_holdout_model(tmp_path: Path) 
     solver_hip = tmp_path / "solver_hip.json"
     rc = tmp_path / "rc.json"
     quality = tmp_path / "quality.json"
+    pbd_hinge_refresh = tmp_path / "pbd_hinge_refresh.json"
+    panel_zone = tmp_path / "panel_zone.json"
     out_json = tmp_path / "gap.json"
     out_md = tmp_path / "gap.md"
 
@@ -164,6 +168,30 @@ def test_release_gap_report_uses_engineer_in_loop_holdout_model(tmp_path: Path) 
     for path in [ci, freeze, promotion, authority, hip, midas, construction, diaphragm, repro, registry, kds, solver_hip, rc, quality]:
         _write(path, {"contract_pass": True, "summary": {}, "checks": {}, "global_metrics": {}, "grade": {}, "frontend_payload": {}})
     _write(static, {"pass": True})
+    _write(
+        pbd_hinge_refresh,
+        {
+            "contract_pass": True,
+            "summary": {
+                "hinge_refresh_artifact_present": True,
+                "hinge_refresh_artifact_kind": "recomputed_member_local_hinge_state",
+                "hinge_refresh_source_mode": "test_fixture",
+            },
+        },
+    )
+    _write(
+        panel_zone,
+        {
+            "contract_pass": True,
+            "summary": {
+                "panel_zone_internal_engine_complete": True,
+                "panel_zone_external_validation_pending": False,
+                "panel_zone_validation_boundary": "solver_verified",
+                "panel_zone_external_validation_artifact_closed": True,
+                "panel_zone_external_validation_status_label": "verified",
+            },
+        },
+    )
     _write(
         commercial,
         {
@@ -225,6 +253,10 @@ def test_release_gap_report_uses_engineer_in_loop_holdout_model(tmp_path: Path) 
         str(rc),
         "--quality-mgt-corpus",
         str(quality),
+        "--pbd-hinge-refresh-report",
+        str(pbd_hinge_refresh),
+        "--panel-zone-clash-report",
+        str(panel_zone),
         "--out-json",
         str(out_json),
         "--out-md",
@@ -869,6 +901,19 @@ def test_release_gap_report_reads_custom_mgt_export_paths(tmp_path: Path) -> Non
 
 
 def test_release_gap_report_emits_advanced_holdout_readiness(tmp_path: Path) -> None:
+    required_release_inputs = [
+        Path("implementation/phase1/pbd_hinge_refresh_report.json"),
+        Path("implementation/phase1/panel_zone_clash_report.json"),
+        Path("implementation/phase1/release/design_optimization/foundation_optimization_report.json"),
+        Path("implementation/phase1/wind_tunnel_raw_mapping_report.json"),
+    ]
+    missing_release_inputs = [str(path) for path in required_release_inputs if not path.exists()]
+    if missing_release_inputs:
+        pytest.skip(
+            "release integration inputs are not available in this checkout: "
+            + ", ".join(missing_release_inputs)
+        )
+
     nightly = tmp_path / "nightly.json"
     ci = tmp_path / "ci.json"
     static = tmp_path / "static.json"

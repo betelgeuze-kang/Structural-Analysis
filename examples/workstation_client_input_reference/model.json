@@ -1,0 +1,45 @@
+{
+  "schema_version": "workstation-client-input-reference.v1",
+  "metadata": {
+    "revision": "A",
+    "source_classification": "repository_reference_fixture",
+    "units": {
+      "force": "kN",
+      "length": "m"
+    },
+    "claim_boundary": "This fixture proves only the bounded client-input validation workflow; it is not operator-attached client data or structural-design evidence."
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": "N1",
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": "N2",
+        "x": 0.0,
+        "y": 0.0,
+        "z": 3.0
+      }
+    ],
+    "elements": [
+      {
+        "id": "E1",
+        "i": "N1",
+        "j": "N2",
+        "type": "frame3d"
+      }
+    ],
+    "loads": {
+      "DL": [
+        {
+          "dof": "UZ",
+          "node_id": "N2",
+          "value": -1.0
+        }
+      ]
+    }
+  }
+}

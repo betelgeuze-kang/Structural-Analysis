@@ -173,6 +173,16 @@ def test_rejects_escaping_output_path(tmp_path: Path) -> None:
     assert "command_output_path_escapes_repo" in payload["blockers"]
 
 
+def test_accepts_output_path_with_parent_created_by_command(tmp_path: Path) -> None:
+    payload = _report_for_commands(
+        tmp_path,
+        ["python3 scripts/ok.py --out generated/nested/output.json"],
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["blockers"] == []
+
+
 def test_rejects_non_string_command(tmp_path: Path) -> None:
     payload = _report_for_commands(tmp_path, ["python3 scripts/ok.py", 17])
 
@@ -181,11 +191,37 @@ def test_rejects_non_string_command(tmp_path: Path) -> None:
     assert payload["summary"]["command_count"] == 2
 
 
-def test_accepts_current_pm_release_command_artifacts() -> None:
+def test_accepts_current_pm_release_command_artifacts_in_clean_checkout(monkeypatch) -> None:
+    original_specs = (
+        build_pm_release_reproduction_command_audit._package_regeneration_output_specs
+    )
+
+    def clean_checkout_specs() -> list[tuple[str, Path, str]]:
+        return [
+            (
+                label,
+                (
+                    Path(
+                        "implementation/phase1/release/support_bundle/"
+                        ".pytest-missing-pm-failure-bundle-coverage.json"
+                    )
+                    if label == "pm_failure_bundle_coverage"
+                    else path
+                ),
+                producer,
+            )
+            for label, path, producer in original_specs()
+        ]
+
+    monkeypatch.setattr(
+        build_pm_release_reproduction_command_audit,
+        "_package_regeneration_output_specs",
+        clean_checkout_specs,
+    )
     payload = build_pm_release_reproduction_command_audit.build_report()
 
-    assert payload["contract_pass"] is True
-    assert payload["reason_code"] == "PASS"
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT_BLOCKED"
     assert payload["summary"]["artifact_count"] == 7
     assert payload["summary"]["artifact_pass_count"] == 7
     assert payload["summary"]["command_count"] > 0
@@ -229,10 +265,21 @@ def test_accepts_current_pm_release_command_artifacts() -> None:
         for command in payload["package_regeneration_commands"]
     )
     assert payload["summary"]["package_regeneration_expected_output_count"] == 23
-    assert payload["summary"]["package_regeneration_expected_output_pass_count"] == 23
-    assert payload["summary"]["package_regeneration_output_violation_count"] == 0
+    failed_outputs = [
+        row
+        for row in payload["package_regeneration_output_rows"]
+        if row["contract_pass"] is False
+    ]
+    assert payload["summary"]["package_regeneration_expected_output_pass_count"] == (
+        23 - len(failed_outputs)
+    )
+    assert payload["summary"]["package_regeneration_output_violation_count"] == len(
+        failed_outputs
+    )
     assert any(
-        row["label"] == "pm_failure_bundle_coverage" and row["contract_pass"] is True
+        row["label"] == "pm_failure_bundle_coverage"
+        and row["contract_pass"] is False
+        and row["blockers"] == ["package_output_missing"]
         for row in payload["package_regeneration_output_rows"]
     )
     assert any(
@@ -253,7 +300,9 @@ def test_accepts_current_pm_release_command_artifacts() -> None:
         row["label"] == "gap_closure_status" and row["contract_pass"] is True
         for row in payload["package_regeneration_output_rows"]
     )
-    assert payload["blockers"] == []
+    assert payload["blockers"] == sorted(
+        f"{row['label']}:package_output_missing" for row in failed_outputs
+    )
 
 
 def test_package_recipe_tracks_support_failure_bundle_coverage_output(tmp_path: Path) -> None:

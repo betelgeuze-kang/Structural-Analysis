@@ -82,6 +82,7 @@ def solve_modal_modes(
     mass: np.ndarray,
     *,
     mode_count: int,
+    coordinate_recovery_scale: np.ndarray | None = None,
     symmetry_relative_tolerance: float = 1.0e-12,
     positive_semidefinite_relative_tolerance: float = 1.0e-12,
     rigid_mode_relative_tolerance: float = 1.0e-12,
@@ -139,9 +140,24 @@ def solve_modal_modes(
             name="stiffness",
             relative_tolerance=positive_semidefinite_relative_tolerance,
         )
+        recovery_scale = _coordinate_recovery_scale(
+            coordinate_recovery_scale,
+            int(k_matrix.shape[0]),
+        )
+        solve_stiffness = (
+            recovery_scale[:, None] * k_matrix * recovery_scale[None, :]
+        )
+        solve_mass = recovery_scale[:, None] * m_matrix * recovery_scale[None, :]
+        if not (
+            np.all(np.isfinite(solve_stiffness))
+            and np.all(np.isfinite(solve_mass))
+        ):
+            raise GeneralizedEigenContractError(
+                "coordinate-scaled modal matrices must be finite"
+            )
         raw_values, raw_vectors = eigh(
-            k_matrix,
-            m_matrix,
+            solve_stiffness,
+            solve_mass,
             check_finite=False,
             driver="gvd",
         )
@@ -169,11 +185,16 @@ def solve_modal_modes(
         ):
             canonical[:, cluster] = canonicalize_eigenspace(
                 selected_vectors[:, cluster],
-                metric=m_matrix,
+                metric=solve_mass,
             )
+        physical_modes = recovery_scale[:, None] * canonical
         values = np.asarray(
             [
-                float(canonical[:, index] @ k_matrix @ canonical[:, index])
+                float(
+                    physical_modes[:, index]
+                    @ k_matrix
+                    @ physical_modes[:, index]
+                )
                 for index in range(requested)
             ],
             dtype=np.float64,
@@ -184,7 +205,7 @@ def solve_modal_modes(
                 raise GeneralizedEigenContractError(
                     f"mode {index + 1} has a non-positive Rayleigh eigenvalue"
                 )
-            vector = canonical[:, index]
+            vector = physical_modes[:, index]
             residual = k_matrix @ vector - eigenvalue * (m_matrix @ vector)
             denominator = max(
                 float(np.linalg.norm(k_matrix @ vector, ord=np.inf))
@@ -213,8 +234,8 @@ def solve_modal_modes(
                     residual_relative_inf=residual_relative,
                 )
             )
-        mass_gram = canonical.T @ m_matrix @ canonical
-        stiffness_gram = canonical.T @ k_matrix @ canonical
+        mass_gram = physical_modes.T @ m_matrix @ physical_modes
+        stiffness_gram = physical_modes.T @ k_matrix @ physical_modes
         mass_error = float(np.max(np.abs(mass_gram - np.eye(requested))))
         stiffness_scale = max(float(np.max(np.abs(values))), 1.0)
         stiffness_error = float(
@@ -242,8 +263,11 @@ def solve_modal_modes(
         mass_minimum_eigenvalue=mass_minimum,
         stiffness_matrix_hash=matrix_sha256(k_matrix),
         mass_matrix_hash=matrix_sha256(m_matrix),
-        raw_result_hash=raw_modes_sha256(values.tolist(), canonical),
-        semantic_result_hash=semantic_modes_sha256(values.tolist(), canonical),
+        raw_result_hash=raw_modes_sha256(values.tolist(), physical_modes),
+        semantic_result_hash=semantic_modes_sha256(
+            values.tolist(),
+            physical_modes,
+        ),
         semantic_hash_profile=SEMANTIC_HASH_PROFILE,
         symmetry_projection_applied=bool(k_projected or m_projected),
         regularization_applied=False,
@@ -257,3 +281,21 @@ def _mode_count(value: int) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
         raise ModalAnalysisError("mode_count must be a positive integer")
     return value
+
+
+def _coordinate_recovery_scale(
+    value: np.ndarray | None,
+    size: int,
+) -> np.ndarray:
+    if value is None:
+        return np.ones(size, dtype=np.float64)
+    scale = np.asarray(value, dtype=np.float64)
+    if (
+        scale.shape != (size,)
+        or not np.all(np.isfinite(scale))
+        or np.any(scale <= 0.0)
+    ):
+        raise ModalAnalysisError(
+            "coordinate_recovery_scale must be a finite positive DOF vector"
+        )
+    return scale

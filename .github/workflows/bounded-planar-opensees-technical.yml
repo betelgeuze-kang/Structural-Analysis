@@ -1,0 +1,106 @@
+name: Bounded Planar OpenSees Technical Execution
+
+# Executes the checksum-bound package against pinned OpenSeesPy on current main.
+# The signed artifact is same-operator technical evidence only. It does not
+# establish independent reproduction, legal approval, Level 2, or release authority.
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+  RESULT_DIR: ".ci/bounded-planar-opensees/results"
+  RECEIPT_PATH: ".ci/bounded-planar-opensees/technical-receipt.json"
+  ATTESTATION_BUNDLE_PATH: ".ci/bounded-planar-opensees/technical-receipt.sigstore.json"
+  ATTESTATION_VERIFICATION_PATH: ".ci/bounded-planar-opensees/attestation-verification.json"
+  GH_TOKEN: "${{ github.token }}"
+
+concurrency:
+  group: bounded-planar-opensees-technical-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  execute:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact current-main source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install product and contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Materialize exact current-source execution package
+        run: python scripts/build_bounded_planar_external_linear_case_package.py
+
+      - name: Verify generated execution package
+        run: >-
+          python scripts/build_bounded_planar_external_linear_case_package.py
+          --check
+
+      - name: Install pinned external runtime
+        run: >-
+          python -m pip install
+          -r artifacts/vv/bounded_planar_external_linear_case_package/requirements.txt
+
+      - name: Execute checksum-bound OpenSees cases
+        run: |
+          mkdir -p "$RESULT_DIR"
+          python artifacts/vv/bounded_planar_external_linear_case_package/opensees/bounded_planar_linear_portal.py \
+            "$RESULT_DIR/bounded_planar_linear_portal.json"
+          python artifacts/vv/bounded_planar_external_linear_case_package/opensees/bounded_planar_linear_multistory.py \
+            "$RESULT_DIR/bounded_planar_linear_multistory.json"
+
+      - name: Build fail-closed technical receipt
+        run: >-
+          python scripts/ingest_bounded_planar_external_linear_results.py
+          --package-dir artifacts/vv/bounded_planar_external_linear_case_package
+          --results-dir "$RESULT_DIR"
+          --out "$RECEIPT_PATH"
+          --fail-technical-blocked
+
+      - name: Attest technical receipt provenance
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.RECEIPT_PATH }}
+
+      - name: Retain and verify exact provenance bundle
+        run: |
+          cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE_PATH"
+          gh attestation verify "$RECEIPT_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$ATTESTATION_BUNDLE_PATH" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/bounded-planar-opensees-technical.yml" \
+            --source-digest "$SOURCE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$ATTESTATION_VERIFICATION_PATH"
+
+      - name: Upload receipt, results, and bound package
+        uses: actions/upload-artifact@v7
+        with:
+          name: bounded-planar-opensees-technical-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .ci/bounded-planar-opensees
+            artifacts/vv/bounded_planar_external_linear_case_package
+          if-no-files-found: error
+          retention-days: 90

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_planar_opensees_linear_result_v1.schema.json",
+  "title": "Bounded planar OpenSees linear execution result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_id",
+    "case_id",
+    "executed_at",
+    "runner_file_sha256",
+    "source_model_file_sha256",
+    "runtime",
+    "return_codes",
+    "metrics",
+    "contract_pass",
+    "blockers",
+    "artifact_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "bounded-planar-opensees-linear-result.v1"},
+    "package_id": {"const": "bounded-planar-linear-portal-multistory-v1"},
+    "case_id": {
+      "enum": [
+        "bounded_planar_linear_portal",
+        "bounded_planar_linear_multistory"
+      ]
+    },
+    "executed_at": {"type": "string", "format": "date-time"},
+    "runner_file_sha256": {"$ref": "#/$defs/sha256"},
+    "source_model_file_sha256": {"$ref": "#/$defs/sha256"},
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "python_version",
+        "platform",
+        "openseespy_version",
+        "opensees_core_version"
+      ],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "minLength": 1},
+        "openseespy_version": {"type": "string", "minLength": 1},
+        "opensees_core_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "return_codes": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {"type": "integer"}
+    },
+    "metrics": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {"pattern": "^(node|reaction)\\.[A-Za-z0-9_.-]+$"},
+      "additionalProperties": {"type": "number"}
+    },
+    "contract_pass": {"type": "boolean"},
+    "blockers": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "nonzero_return_code",
+          "nonfinite_metric",
+          "openseespy_version_mismatch",
+          "opensees_core_version_mismatch"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "artifact_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

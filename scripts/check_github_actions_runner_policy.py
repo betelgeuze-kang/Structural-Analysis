@@ -22,6 +22,10 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
     {
         ".github/workflows/authoritative-core-evidence-resync.yml",
         ".github/workflows/authoritative-linear-core-ci.yml",
+        ".github/workflows/bounded-planar-negative-opensees-technical.yml",
+        ".github/workflows/bounded-planar-modal-buckling-technical.yml",
+        ".github/workflows/bounded-planar-opensees-technical.yml",
+        ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
         ".github/workflows/ci.yml",
         ".github/workflows/core-quality-ci.yml",
         ".github/workflows/engine-v2-contract-ci.yml",
@@ -30,7 +34,11 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/frontend-web-ci.yml",
         ".github/workflows/legacy-evidence-ci.yml",
         ".github/workflows/nightly-full-quality.yml",
+        ".github/workflows/opensees-calculix-current-source.yml",
         ".github/workflows/pr-metadata-ci.yml",
+        ".github/workflows/product-state-current.yml",
+        ".github/workflows/python-test-collection.yml",
+        ".github/workflows/repository-hygiene-freshness.yml",
         ".github/workflows/runtime-input-viewer-ci.yml",
         ".github/workflows/science-quarantine-ci.yml",
         ".github/workflows/viewer-browser-ci.yml",
@@ -249,8 +257,9 @@ def check_runner_policy(
         "blockers": blockers,
         "claim_boundary": (
             "Deterministic structural-core, Engine v2 contract, frontend, viewer, "
-            "legacy-evidence, science-quarantine, workflow-contract, and canonical "
-            "nightly lanes may use explicitly allowlisted GitHub-hosted runners. "
+            "legacy-evidence, product-state, repository-hygiene, external technical "
+            "V&V, science-quarantine, workflow-contract, and canonical nightly lanes "
+            "may use explicitly allowlisted GitHub-hosted runners. "
             "Hardware, GPU, private-corpus, release-publication, and other non-allowlisted "
             "lanes must remain self-hosted. Science-quarantine execution does not promote "
             "that code into the structural product surface."

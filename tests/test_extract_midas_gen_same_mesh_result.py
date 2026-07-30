@@ -9,10 +9,9 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_extract_model_derived_real_quantities() -> None:
-    out = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived_test.json"
+def _extract_model_derived_result(out: Path) -> subprocess.CompletedProcess[str]:
     condensed = REPO_ROOT / "implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json"
-    proc = subprocess.run(
+    return subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/extract_midas_gen_same_mesh_result.py"),
@@ -25,6 +24,11 @@ def test_extract_model_derived_real_quantities() -> None:
         capture_output=True,
         text=True,
     )
+
+
+def test_extract_model_derived_real_quantities(tmp_path: Path) -> None:
+    out = tmp_path / "midas_gen_same_mesh_result.model_derived.json"
+    proc = _extract_model_derived_result(out)
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["source"]["kind"] == "model_derived_estimate"
@@ -36,8 +40,10 @@ def test_extract_model_derived_real_quantities() -> None:
     assert "kds_seismic" in payload
 
 
-def test_extract_validates_as_non_live() -> None:
-    result = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.model_derived_test.json"
+def test_extract_validates_as_non_live(tmp_path: Path) -> None:
+    result = tmp_path / "midas_gen_same_mesh_result.model_derived.json"
+    extract_proc = _extract_model_derived_result(result)
+    assert extract_proc.returncode == 0, extract_proc.stderr
     roundtrip = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
     proc = subprocess.run(
         [

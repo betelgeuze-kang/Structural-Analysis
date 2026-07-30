@@ -10,16 +10,16 @@
   },
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
-  "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-02T19:34:56.138173+00:00",
+  "engine_version": "structural-analysis@0.3.0",
+  "generated_at": "2026-07-28T08:34:53.739676+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:96f6abad63b1f8deb7c27a0fe24fe1f0f8b9759277fa42e9a6755f1cefdcf182",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:eb011cd3596cd26cdb04fb473c353eded116f7e6a17d9bfb3d6b5997734e82a5",
-    "scripts/build_pm_release_gate_completion_audit.py": "sha256:39246c0a8e4784455e85036062d2aa268cbe4c01393b924790e076d86a9b81cc"
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:3bc10933352fbf4466e649fe8990790ff467d3ac6c03d5ff59f262e26620d0f4",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:70b4d52619607d53de23e57abcd17e70cbfe7958f7b2afc82760c29ac35df24d",
+    "scripts/build_pm_release_gate_completion_audit.py": "sha256:e8b769fb1957ef875361d7d4cb29a22b88a89ab1d3a8296a5e76dfa6c3d5743b"
   },
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=13/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304",
   "reason_code": "ERR_PM_REQUIREMENTS_BLOCKED",
   "reuse_policy": "pm_release_gate_completion_audit_aggregates_pm_report_and_closure_board",
   "reused_evidence": true,
@@ -87,7 +87,7 @@
           "x64"
         ],
         "ci_runner_status": "blocked",
-        "ci_streak_source_evidence_age_hours": 26.966,
+        "ci_streak_source_evidence_age_hours": 33.75,
         "ci_streak_source_evidence_freshness_pass": true,
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 1,
@@ -127,16 +127,20 @@
     },
     {
       "area": "strict_ci",
-      "blockers": [],
+      "blockers": [
+        "strict_ci::direct_require_hip_failed_without_cpu_only_scope"
+      ],
       "checks": {
         "cpu_only_product_mode_declared": false,
-        "direct_require_hip_or_cpu_scope_pass": true,
+        "direct_require_hip_or_cpu_scope_pass": false,
         "direct_require_ndtha_pass": true,
         "strict_ci_require_hip_artifact_or_cpu_scope_pass": true,
         "strict_ci_require_ndtha_artifact_pass": true
       },
       "claim_boundary": "",
-      "closure_states": {},
+      "closure_states": {
+        "strict_ci::direct_require_hip_failed_without_cpu_only_scope": "local_remediation_ready"
+      },
       "evidence_artifacts": {
         "ci_require_hip": "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json",
         "ci_require_ndtha": "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json",
@@ -144,13 +148,21 @@
         "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "strict_ci::direct_require_hip_failed_without_cpu_only_scope: Resolve `direct_require_hip_failed_without_cpu_only_scope` in Strict CI evidence, regenerate PM release reports, and attach the updated evidence.",
+      "next_actions": [
+        {
+          "blocker_id": "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `direct_require_hip_failed_without_cpu_only_scope` in Strict CI evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "require NDTHA and require HIP or explicit CPU product mode",
       "requirement_id": "release_area.strict_ci",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_local_remediation_ready",
       "summary_snapshot": {
         "ci_require_hip_reason_code": "PASS",
         "ci_require_ndtha_reason_code": "PASS"
@@ -159,64 +171,268 @@
     },
     {
       "area": "evidence_freshness",
-      "blockers": [],
+      "blockers": [
+        "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+        "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+        "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+        "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+        "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+        "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+        "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+        "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+        "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+        "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact"
+      ],
       "checks": {
-        "dependency_mtime_rows_pass": true,
+        "dependency_mtime_rows_pass": false,
         "engine_version_rows_present": true,
         "input_checksum_rows_present": true,
-        "release_evidence_freshness_contract_pass": true,
+        "release_evidence_freshness_contract_pass": false,
         "release_evidence_freshness_report_present": true,
         "reuse_marker_rows_present": true,
-        "source_commit_rows_match": true
+        "source_commit_rows_match": false
       },
       "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
-      "closure_states": {},
+      "closure_states": {
+        "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::evidence_console_scope_status::source_commit_mismatch": "local_remediation_ready",
+        "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::p0_closure_status::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::p1_readiness_status::producer_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact": "local_remediation_ready",
+        "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact": "local_remediation_ready"
+      },
       "evidence_artifacts": {
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "19 blockers: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "next_actions": [
+        {
+          "blocker_id": "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "release_evidence_metadata_missing",
+          "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "release evidence generated_at/source commit/engine version/input checksum/reuse marker and producer recency",
       "requirement_id": "release_area.evidence_freshness",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_local_remediation_ready",
       "summary_snapshot": {
         "artifact_count": 14,
-        "blocker_count": 0,
-        "current_source_commit_sha": "58271baed3d677dadc09d932ba14c1c4fb06227b",
+        "blocker_count": 19,
+        "current_source_commit_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "max_age_days": 30.0,
-        "pass_count": 14
+        "pass_count": 3
       },
       "title": "Evidence Freshness"
     },
     {
       "area": "core_engine",
-      "blockers": [],
+      "blockers": [
+        "core_engine::core_depth_milestone_not_green",
+        "core_engine::commercial_readiness_contract_not_green",
+        "core_engine::commercial_accuracy_contract_not_green"
+      ],
       "checks": {
-        "commercial_accuracy_contract_pass": true,
-        "commercial_readiness_contract_pass": true,
-        "core_depth_milestone_pass": true,
+        "commercial_accuracy_contract_pass": false,
+        "commercial_readiness_contract_pass": false,
+        "core_depth_milestone_pass": false,
         "core_family_p95_accuracy_report_pass": true,
         "family_p95_error_evidence_present": true,
         "family_p95_error_limited_pass": true
       },
       "claim_boundary": "Core p95 uses HF-vs-topk comparison accuracy evidence; high-noise robustness p95 is tracked separately and is not counted as core engine family p95.",
-      "closure_states": {},
+      "closure_states": {
+        "core_engine::commercial_accuracy_contract_not_green": "local_remediation_ready",
+        "core_engine::commercial_readiness_contract_not_green": "local_remediation_ready",
+        "core_engine::core_depth_milestone_not_green": "local_remediation_ready"
+      },
       "evidence_artifacts": {
         "commercial_readiness": "implementation/phase1/commercial_readiness_report.strict_breadth.json",
         "core_depth": "implementation/phase1/element_material_breadth_gate_report.json",
         "core_family_p95_accuracy": "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "core_engine::core_depth_milestone_not_green: Resolve `core_depth_milestone_not_green` in Core Engine evidence, regenerate PM release reports, and attach the updated evidence.; core_engine::commercial_readiness_contract_not_green: Resolve `commercial_readiness_contract_not_green` in Core Engine evidence, regenerate PM release reports, and attach the updated evidence.; core_engine::commercial_accuracy_contract_not_green: Resolve `commercial_accuracy_contract_not_green` in Core Engine evidence, regenerate PM release reports, and attach the updated evidence.",
+      "next_actions": [
+        {
+          "blocker_id": "core_engine::core_depth_milestone_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `core_depth_milestone_not_green` in Core Engine evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "core_engine::commercial_readiness_contract_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `commercial_readiness_contract_not_green` in Core Engine evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "core_engine::commercial_accuracy_contract_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `commercial_accuracy_contract_not_green` in Core Engine evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "family p95 error within Limited/GA budget",
       "requirement_id": "release_area.core_engine",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_local_remediation_ready",
       "summary_snapshot": {
         "max_family_p95_error_pct": 2.262251278851306,
         "max_family_p95_error_pct_limit": 5.0,
@@ -319,30 +535,42 @@
     },
     {
       "area": "runtime",
-      "blockers": [],
+      "blockers": [
+        "runtime::strict_runtime_milestone_not_green"
+      ],
       "checks": {
         "p95_runtime_budget_exceed_rate_pass": true,
         "p95_runtime_budget_exceed_rate_present": true,
         "runtime_memory_budget_report_pass": true,
         "runtime_packaging_pass": true,
-        "strict_runtime_milestone_pass": true,
+        "strict_runtime_milestone_pass": false,
         "workstation_budget_contract_pass": true
       },
       "claim_boundary": "Existing workstation budgets pass, but PM p95 exceed-rate requires explicit release evidence.",
-      "closure_states": {},
+      "closure_states": {
+        "runtime::strict_runtime_milestone_not_green": "local_remediation_ready"
+      },
       "evidence_artifacts": {
         "runtime_memory_budget": "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json",
         "runtime_packaging": "implementation/phase1/production_runtime_packaging_manifest.json",
         "workstation_budget": "implementation/phase1/workstation_service_budget.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "runtime::strict_runtime_milestone_not_green: Resolve `strict_runtime_milestone_not_green` in Runtime evidence, regenerate PM release reports, and attach the updated evidence.",
+      "next_actions": [
+        {
+          "blocker_id": "runtime::strict_runtime_milestone_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `strict_runtime_milestone_not_green` in Runtime evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "p95 runtime budget exceed rate within budget",
       "requirement_id": "release_area.runtime",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_local_remediation_ready",
       "summary_snapshot": {
         "max_runtime_budget_exceed_rate": 0.05,
         "p95_runtime_budget_exceed_rate": 0.0
@@ -382,47 +610,78 @@
     },
     {
       "area": "gpu_device",
-      "blockers": [],
+      "blockers": [
+        "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+        "gpu_device::device_residency_target_not_met"
+      ],
       "checks": {
         "cpu_fallback_release_forbidden_pass": true,
         "cpu_only_product_mode_declared": false,
-        "device_residency_target_pass": true,
-        "gpu_strict_pass": true
+        "device_residency_target_pass": false,
+        "gpu_strict_pass": false
       },
       "claim_boundary": "",
-      "closure_states": {},
+      "closure_states": {
+        "gpu_device::device_residency_target_not_met": "local_remediation_ready",
+        "gpu_device::gpu_strict_failed_without_cpu_only_scope": "local_remediation_ready"
+      },
       "evidence_artifacts": {
         "runtime_policy": "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json",
         "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "gpu_device::gpu_strict_failed_without_cpu_only_scope: Resolve `gpu_strict_failed_without_cpu_only_scope` in GPU / Device evidence, regenerate PM release reports, and attach the updated evidence.; gpu_device::device_residency_target_not_met: Resolve `device_residency_target_not_met` in GPU / Device evidence, regenerate PM release reports, and attach the updated evidence.",
+      "next_actions": [
+        {
+          "blocker_id": "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `gpu_strict_failed_without_cpu_only_scope` in GPU / Device evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "gpu_device::device_residency_target_not_met",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `device_residency_target_not_met` in GPU / Device evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "release mode CPU fallback forbidden or scoped CPU-only product mode",
       "requirement_id": "release_area.gpu_device",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_local_remediation_ready",
       "summary_snapshot": {
-        "device_residency_ratio_min": 1.0,
+        "device_residency_ratio_min": 0.0,
         "official_solver_backend": "amd_rocm_hip"
       },
       "title": "GPU / Device"
     },
     {
       "area": "interop",
-      "blockers": [],
+      "blockers": [
+        "interop::midas_interop_not_green",
+        "interop::midas_native_roundtrip_not_green",
+        "interop::midas_exact_roundtrip_not_green",
+        "interop::kds_full_crosswalk_not_green"
+      ],
       "checks": {
-        "kds_full_crosswalk_pass": true,
-        "midas_exact_roundtrip_pass": true,
-        "midas_interop_pass": true,
-        "midas_native_roundtrip_pass": true,
+        "kds_full_crosswalk_pass": false,
+        "midas_exact_roundtrip_pass": false,
+        "midas_interop_pass": false,
+        "midas_native_roundtrip_pass": false,
         "opensees_roundtrip_trace_pass": true,
         "opensees_roundtrip_trace_report_pass": true,
         "opensees_trace_pass": true
       },
       "claim_boundary": "OpenSees evidence is a topology canonicalization/reload trace, not a full solver execution roundtrip.",
-      "closure_states": {},
+      "closure_states": {
+        "interop::kds_full_crosswalk_not_green": "local_remediation_ready",
+        "interop::midas_exact_roundtrip_not_green": "local_remediation_ready",
+        "interop::midas_interop_not_green": "local_remediation_ready",
+        "interop::midas_native_roundtrip_not_green": "local_remediation_ready"
+      },
       "evidence_artifacts": {
         "midas_exact_roundtrip": "implementation/phase1/midas_exact_roundtrip_closure_gate_report.json",
         "midas_interop": "implementation/phase1/midas_interoperability_gate_report.json",
@@ -432,45 +691,113 @@
         "opensees_topology": "implementation/phase1/opensees_topology_report.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "interop::midas_interop_not_green: Resolve `midas_interop_not_green` in Interop evidence, regenerate PM release reports, and attach the updated evidence.; interop::midas_native_roundtrip_not_green: Resolve `midas_native_roundtrip_not_green` in Interop evidence, regenerate PM release reports, and attach the updated evidence.; interop::midas_exact_roundtrip_not_green: Resolve `midas_exact_roundtrip_not_green` in Interop evidence, regenerate PM release reports, and attach the updated evidence.; interop::kds_full_crosswalk_not_green: Resolve `kds_full_crosswalk_not_green` in Interop evidence, regenerate PM release reports, and attach the updated evidence.",
+      "next_actions": [
+        {
+          "blocker_id": "interop::midas_interop_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `midas_interop_not_green` in Interop evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::midas_native_roundtrip_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `midas_native_roundtrip_not_green` in Interop evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::midas_exact_roundtrip_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `midas_exact_roundtrip_not_green` in Interop evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::kds_full_crosswalk_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `kds_full_crosswalk_not_green` in Interop evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "MIDAS/KDS/OpenSees roundtrip trace evidence",
       "requirement_id": "release_area.interop",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_local_remediation_ready",
       "summary_snapshot": {
-        "midas_exact_case_ratio": 1.0,
+        "midas_exact_case_ratio": null,
         "opensees_schema_version": "1.0"
       },
       "title": "Interop"
     },
     {
       "area": "report",
-      "blockers": [],
+      "blockers": [
+        "report::commercial_packaging_milestone_not_green",
+        "report::reviewer_package_auto_not_green",
+        "report::repro_command_missing_from_report_evidence",
+        "report::reproducibility_lock_not_green"
+      ],
       "checks": {
-        "commercial_packaging_milestone_pass": true,
-        "repro_command_present": true,
-        "reproducibility_lock_pass": true,
-        "reviewer_package_auto_pass": true
+        "commercial_packaging_milestone_pass": false,
+        "repro_command_present": false,
+        "reproducibility_lock_pass": false,
+        "reviewer_package_auto_pass": false
       },
       "claim_boundary": "",
-      "closure_states": {},
+      "closure_states": {
+        "report::commercial_packaging_milestone_not_green": "local_remediation_ready",
+        "report::repro_command_missing_from_report_evidence": "local_remediation_ready",
+        "report::reproducibility_lock_not_green": "local_remediation_ready",
+        "report::reviewer_package_auto_not_green": "local_remediation_ready"
+      },
       "evidence_artifacts": {
         "release_registry": "implementation/phase1/release/release_registry.json",
         "reproducibility_lock": "implementation/phase1/reproducibility_version_lock_report.json",
         "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "report::commercial_packaging_milestone_not_green: Resolve `commercial_packaging_milestone_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.; report::reviewer_package_auto_not_green: Resolve `reviewer_package_auto_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.; report::repro_command_missing_from_report_evidence: Resolve `repro_command_missing_from_report_evidence` in Report evidence, regenerate PM release reports, and attach the updated evidence.; report::reproducibility_lock_not_green: Resolve `reproducibility_lock_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.",
+      "next_actions": [
+        {
+          "blocker_id": "report::commercial_packaging_milestone_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `commercial_packaging_milestone_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::reviewer_package_auto_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `reviewer_package_auto_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::repro_command_missing_from_report_evidence",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `repro_command_missing_from_report_evidence` in Report evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::reproducibility_lock_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `reproducibility_lock_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "reviewer package and reproduction commands",
       "requirement_id": "release_area.report",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_local_remediation_ready",
       "summary_snapshot": {
-        "release_registry_signed": true
+        "release_registry_signed": false
       },
       "title": "Report"
     },
@@ -539,7 +866,9 @@
     },
     {
       "area": "support",
-      "blockers": [],
+      "blockers": [
+        "support::pm_blocker_closure_board_count_mismatch"
+      ],
       "checks": {
         "ci_streak_intake_packet_in_failure_bundle": true,
         "ci_streak_manifest_in_failure_bundle": true,
@@ -558,7 +887,7 @@
         "pm_blocker_action_register_in_failure_bundle": true,
         "pm_blocker_closure_board_handoff_ready_pass": true,
         "pm_blocker_closure_board_in_failure_bundle": true,
-        "pm_blocker_closure_board_register_count_match": true,
+        "pm_blocker_closure_board_register_count_match": false,
         "pm_failure_bundle_coverage_index_pass": true,
         "pm_owner_evidence_request_packet_in_failure_bundle": true,
         "pm_release_gate_completion_audit_in_failure_bundle": true,
@@ -575,7 +904,9 @@
         "validation_manual_in_failure_bundle": true
       },
       "claim_boundary": "",
-      "closure_states": {},
+      "closure_states": {
+        "support::pm_blocker_closure_board_count_mismatch": "local_remediation_ready"
+      },
       "evidence_artifacts": {
         "limitation_manual": "docs/release-limitation-manual.md",
         "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -586,13 +917,21 @@
         "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "support::pm_blocker_closure_board_count_mismatch: Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
+      "next_actions": [
+        {
+          "blocker_id": "support::pm_blocker_closure_board_count_mismatch",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "known issues, failure bundle, and rollback evidence",
       "requirement_id": "release_area.support",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_local_remediation_ready",
       "summary_snapshot": {
         "ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
@@ -606,11 +945,11 @@
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 12,
         "pm_blocker_closure_board_open_blocker_count": 12,
-        "pm_blocker_register_external_owner_input_ready_count": 10,
+        "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 64,
+        "pm_blocker_register_open_blocker_count": 64,
+        "pm_blocker_register_release_area_blocker_count": 42,
         "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
@@ -619,8 +958,8 @@
         "pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
         "pm_release_reproduction_command_audit_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 567,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=567 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 509,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
         "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
@@ -636,7 +975,8 @@
     {
       "area": "security",
       "blockers": [
-        "security::license_status_not_configured"
+        "security::license_status_not_configured",
+        "security::repro_build_not_green"
       ],
       "checks": {
         "frontend_dependency_audit_pass": true,
@@ -644,13 +984,14 @@
         "frontend_dependency_high_or_critical_zero_pass": true,
         "license_status_closure_report_present": true,
         "license_status_configured_pass": false,
-        "repro_build_pass": true,
+        "repro_build_pass": false,
         "sbom_present_pass": true,
         "secrets_negative_start_or_no_default_secret_pass": true
       },
       "claim_boundary": "Security area is release-gate evidence only; live deployment hardening remains governed by the runbook.",
       "closure_states": {
-        "security::license_status_not_configured": "external_owner_input_ready"
+        "security::license_status_not_configured": "external_owner_input_ready",
+        "security::repro_build_not_green": "local_remediation_ready"
       },
       "evidence_artifacts": {
         "frontend_dependency_audit": "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json",
@@ -661,7 +1002,7 @@
         "security_runbook": "docs/production-ops-security.md"
       },
       "group": "release_area",
-      "next_action": "security::license_status_not_configured: Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
+      "next_action": "security::license_status_not_configured: Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.; security::repro_build_not_green: Resolve `repro_build_not_green` in Security evidence, regenerate PM release reports, and attach the updated evidence.",
       "next_actions": [
         {
           "blocker_id": "security::license_status_not_configured",
@@ -669,13 +1010,20 @@
           "evidence_state": "not_configured",
           "next_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
           "owner": "product_legal_owner"
+        },
+        {
+          "blocker_id": "security::repro_build_not_green",
+          "closure_state": "local_remediation_ready",
+          "evidence_state": "open_release_evidence_blocker",
+          "next_action": "Resolve `repro_build_not_green` in Security evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner": "release_owner"
         }
       ],
       "pass": false,
       "requirement": "secrets/license/SBOM/repro build pass",
       "requirement_id": "release_area.security",
       "source_present": true,
-      "status": "blocked_external_owner_input_ready",
+      "status": "blocked_mixed_closure_ready",
       "summary_snapshot": {
         "frontend_dependency_high_or_critical_vulnerability_count": 0,
         "frontend_dependency_vulnerability_total": 0,
@@ -700,16 +1048,18 @@
     },
     {
       "area": "github_sync",
-      "blockers": [],
+      "blockers": [
+        "github_sync::github_sync_preflight::local_head_mismatch"
+      ],
       "checks": {
         "github_sync_feature_fast_forward_possible": true,
         "github_sync_feature_synced_to_head": true,
         "github_sync_main_fast_forward_possible": true,
         "github_sync_main_synced_to_head": true,
         "github_sync_preflight_artifact_present": true,
-        "github_sync_preflight_clean": true,
-        "github_sync_preflight_head_matches_current": true,
-        "github_sync_preflight_source_state_fresh": true,
+        "github_sync_preflight_clean": false,
+        "github_sync_preflight_head_matches_current": false,
+        "github_sync_preflight_source_state_fresh": false,
         "github_sync_preflight_status": "synced",
         "github_sync_remote_mutation_approval_pending": false,
         "github_sync_remote_safety_ok": true,
@@ -717,21 +1067,144 @@
         "github_sync_worktree_clean": true
       },
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
-      "closure_states": {},
+      "closure_states": {
+        "github_sync::github_sync_preflight::local_head_mismatch": "external_owner_input_ready"
+      },
       "evidence_artifacts": {
         "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
       },
       "group": "release_area",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "github_sync::github_sync_preflight::local_head_mismatch: Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+      "next_actions": [
+        {
+          "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
+          "closure_state": "external_owner_input_ready",
+          "evidence_state": "synced",
+          "next_action": "Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "read-only GitHub sync preflight is clean or explicitly approved",
       "requirement_id": "release_area.github_sync",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked_external_owner_input_ready",
       "summary_snapshot": {
-        "changed_paths_since_preflight_head": [],
-        "current_head_sha": "58271baed3d677dadc09d932ba14c1c4fb06227b",
+        "changed_paths_since_preflight_head": [
+          ".github/workflows/authoritative-core-evidence-resync.yml",
+          ".github/workflows/authoritative-linear-core-ci.yml",
+          ".github/workflows/ci.yml",
+          ".github/workflows/frontend-web-ci.yml",
+          ".github/workflows/legacy-evidence-ci.yml",
+          ".github/workflows/nightly-full-quality.yml",
+          ".github/workflows/nightly-heavy-solver.yml",
+          ".github/workflows/runtime-input-viewer-ci.yml",
+          ".github/workflows/science-quarantine-ci.yml",
+          ".github/workflows/viewer-browser-ci.yml",
+          ".github/workflows/workflow-contract-ci.yml",
+          "README.md",
+          "docs/authoritative-cpu-linear-solver.md",
+          "docs/commercialization-gap-current-state.claim-boundary-update.md",
+          "docs/engineering/local-free-g1-closure-contract-runbook.md",
+          "docs/engineering/local-free-static-risk-pr-split-plan.md",
+          "docs/pm/local-free-claim-boundary-audit-pack.md",
+          "docs/pm/local-free-closure-index.md",
+          "docs/pm/local-free-developer-preview-final-gate-pack.md",
+          "docs/pm/local-free-evidence-intake-template-pack.md",
+          "docs/pm/local-free-pm-release-blocker-closure-pack.md",
+          "docs/pm/local-free-readme-current-state-applied-safe-wording.md",
+          "docs/pm/local-free-readme-current-state-claim-boundary-patch.md",
+          "docs/pm/local-free-release-surface-owner-decisions.candidate.json",
+          "docs/pm/local-free-release-surface-owner-decisions.draft.json",
+          "docs/pm/local-free-structural-scope-release-surface-decision-pack.md",
+          "implementation/phase1/customer_shadow_evidence_status.json",
+          "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py",
+          "implementation/phase1/workstation_delivery_readiness.json",
+          "pyproject.toml",
+          "requirements.txt",
+          "scripts/build_ci_streak_intake_packet.py",
+          "scripts/build_g1_load_dependent_near_null_packet.py",
+          "scripts/build_phase1_core_api_contract_artifacts.py",
+          "scripts/check_github_actions_runner_policy.py",
+          "scripts/check_product_ci_boundaries.py",
+          "scripts/check_repo_hygiene.py",
+          "scripts/run_product_ci_lane.py",
+          "scripts/verify-workbench-v2-e2e.mjs",
+          "scripts/verify_phase1_evidence_source_state.py",
+          "scripts/verify_quality_gate.py",
+          "setup.cfg",
+          "src/structural_analysis/__init__.py",
+          "src/structural_analysis/analyses/__init__.py",
+          "src/structural_analysis/analyses/linear_static.py",
+          "src/structural_analysis/api/__init__.py",
+          "src/structural_analysis/api/_output_integrity.py",
+          "src/structural_analysis/api/cli.py",
+          "src/structural_analysis/api/core.py",
+          "src/structural_analysis/assembly/linear_static.py",
+          "src/structural_analysis/elements/frame3d.py",
+          "src/structural_analysis/io/midas/__init__.py",
+          "src/structural_analysis/io/midas/canonical.py",
+          "src/structural_analysis/io/midas/raw_parser.py",
+          "src/structural_analysis/materials/__init__.py",
+          "src/structural_analysis/materials/elastic.py",
+          "src/structural_analysis/model/__init__.py",
+          "src/structural_analysis/model/entities.py",
+          "src/structural_analysis/model/schema.py",
+          "src/structural_analysis/results/__init__.py",
+          "src/structural_analysis/results/schema.py",
+          "src/structural_analysis/results/validation.py",
+          "src/structural_analysis/results/viewer.py",
+          "src/structural_analysis/schemas/result.schema.json",
+          "src/structural_analysis/schemas/validation_report.schema.json",
+          "src/structural_analysis/schemas/viewer_payload.schema.json",
+          "src/structural_analysis/solvers/linear/static.py",
+          "src/structure-viewer/viewer-authoritative-payload-contract.js",
+          "src/structure-viewer/viewer-evidence-ingest-model.js",
+          "src/structure-viewer/viewer-force-diagram-overlay.js",
+          "src/structure-viewer/viewer-report-export.js",
+          "src/structure-viewer/viewer-report-panel-renderer.js",
+          "src/structure-viewer/viewer-story-analysis-panel.js",
+          "src/workbench-v2/model/caseSchema.ts",
+          "src/workbench-v2/model/evidenceAdapter.ts",
+          "tests/frontend/workbench-v2-live-provider-guard.spec.ts",
+          "tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts",
+          "tests/test_authoritative_linear_cli_output_integrity.py",
+          "tests/test_authoritative_linear_cli_output_preflight.py",
+          "tests/test_authoritative_linear_engineering_semantics.py",
+          "tests/test_authoritative_linear_evidence_contract.py",
+          "tests/test_authoritative_linear_evidence_workflow_contract.py",
+          "tests/test_authoritative_linear_frame.py",
+          "tests/test_authoritative_linear_frame_reference_cases.py",
+          "tests/test_authoritative_linear_viewer_public_api.py",
+          "tests/test_authoritative_linear_viewer_resource_limits.py",
+          "tests/test_build_ci_streak_intake_packet.py",
+          "tests/test_build_phase1_core_api_contract_artifacts.py",
+          "tests/test_build_product_readiness_snapshot.py",
+          "tests/test_check_github_actions_runner_policy.py",
+          "tests/test_check_product_ci_boundaries.py",
+          "tests/test_check_repo_hygiene.py",
+          "tests/test_elastic_material_contract.py",
+          "tests/test_materialize_public_benchmark_enrichment_scorecard.py",
+          "tests/test_mgt_frame_kernel_extraction.py",
+          "tests/test_midas_explicit_adapter.py",
+          "tests/test_midas_mgt_nodal_load_contract.py",
+          "tests/test_phase1_core_api_source_state.py",
+          "tests/test_product_ci_workflow_contract.py",
+          "tests/test_result_validation_tolerance.py",
+          "tests/test_runtime_dependency_contract.py",
+          "tests/test_source_boundary_ci_contract.py",
+          "tests/test_structural_analysis_core_api.py",
+          "tests/test_structure_viewer_dom_safety_contract.py",
+          "tests/test_structure_viewer_drawing_sheet_package_contract.py",
+          "tests/test_structure_viewer_evidence_ingest_auto_contract.py",
+          "tests/test_structure_viewer_evidence_ingest_direct_rows_contract.py",
+          "tests/test_structure_viewer_evidence_ingest_invalid_json_contract.py",
+          "tests/test_structure_viewer_evidence_ingest_model_contract.py",
+          "tests/test_typed_domain_model.py",
+          "tests/test_verify_quality_gate.py",
+          "tests/test_verify_quality_gate_contract.py"
+        ],
+        "current_head_sha": "f684386c28b95255e00b9e514816be3ff05f20a8",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -739,9 +1212,9 @@
         "pending_remote_update_actions": [],
         "pending_remote_update_count": 0,
         "pending_remote_update_targets": [],
-        "preflight_local_head_sha": "58271baed3d677dadc09d932ba14c1c4fb06227b",
-        "preflight_source_commit_sha": "58271baed3d677dadc09d932ba14c1c4fb06227b",
-        "preflight_source_state_kind": "exact",
+        "preflight_local_head_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+        "preflight_source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+        "preflight_source_state_kind": "source_delta",
         "r4_risk": "No remote mutation remains.",
         "reason_code": "PASS",
         "remote_feature_ref": "origin/codex/seed-pr-ci-source-evidence",
@@ -950,11 +1423,19 @@
       "title": "Residual Release Hardening"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "element_material_breadth_gate_not_green",
+        "contact_material_coupled_case_count_lt_10_or_missing",
+        "rc_steel_composite_material_family_missing",
+        "structural_contact_contract_missing",
+        "ssi_foundation_link_missing_from_core_summary",
+        "panel_contact_failure_reason_code_missing",
+        "nonlinear_residual_integrated_case_missing"
+      ],
       "check_key": "contact_material_coupled_case_count_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "contact_material_coupled_case_count_pass": true
+        "contact_material_coupled_case_count_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -962,28 +1443,33 @@
       },
       "group": "milestone",
       "milestone": "M2",
-      "pass": true,
+      "pass": false,
       "requirement": "contact-material coupled case count >= 10",
       "requirement_id": "m2_contact_material_cases",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "beam_shell_contact_coupling_signal_count": 21,
-        "contact_material_coupled_case_count": 31,
-        "material_model_types": [
-          "rc_composite",
-          "steel_elastic_plastic"
-        ],
-        "nonlinear_residual_integrated_case_count": 3
+        "beam_shell_contact_coupling_signal_count": 0,
+        "contact_material_coupled_case_count": 0,
+        "material_model_types": [],
+        "nonlinear_residual_integrated_case_count": 0
       },
       "title": "Core Engine Depth Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "element_material_breadth_gate_not_green",
+        "contact_material_coupled_case_count_lt_10_or_missing",
+        "rc_steel_composite_material_family_missing",
+        "structural_contact_contract_missing",
+        "ssi_foundation_link_missing_from_core_summary",
+        "panel_contact_failure_reason_code_missing",
+        "nonlinear_residual_integrated_case_missing"
+      ],
       "check_key": "rc_material_present",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "rc_material_present": true
+        "rc_material_present": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -991,28 +1477,33 @@
       },
       "group": "milestone",
       "milestone": "M2",
-      "pass": true,
+      "pass": false,
       "requirement": "RC/steel/composite/contact appear in one report",
       "requirement_id": "m2_rc_steel_composite_contact",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "beam_shell_contact_coupling_signal_count": 21,
-        "contact_material_coupled_case_count": 31,
-        "material_model_types": [
-          "rc_composite",
-          "steel_elastic_plastic"
-        ],
-        "nonlinear_residual_integrated_case_count": 3
+        "beam_shell_contact_coupling_signal_count": 0,
+        "contact_material_coupled_case_count": 0,
+        "material_model_types": [],
+        "nonlinear_residual_integrated_case_count": 0
       },
       "title": "Core Engine Depth Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "element_material_breadth_gate_not_green",
+        "contact_material_coupled_case_count_lt_10_or_missing",
+        "rc_steel_composite_material_family_missing",
+        "structural_contact_contract_missing",
+        "ssi_foundation_link_missing_from_core_summary",
+        "panel_contact_failure_reason_code_missing",
+        "nonlinear_residual_integrated_case_missing"
+      ],
       "check_key": "steel_material_present",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "steel_material_present": true
+        "steel_material_present": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1020,28 +1511,33 @@
       },
       "group": "milestone",
       "milestone": "M2",
-      "pass": true,
+      "pass": false,
       "requirement": "steel material evidence present",
       "requirement_id": "m2_steel_material_present",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "beam_shell_contact_coupling_signal_count": 21,
-        "contact_material_coupled_case_count": 31,
-        "material_model_types": [
-          "rc_composite",
-          "steel_elastic_plastic"
-        ],
-        "nonlinear_residual_integrated_case_count": 3
+        "beam_shell_contact_coupling_signal_count": 0,
+        "contact_material_coupled_case_count": 0,
+        "material_model_types": [],
+        "nonlinear_residual_integrated_case_count": 0
       },
       "title": "Core Engine Depth Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "element_material_breadth_gate_not_green",
+        "contact_material_coupled_case_count_lt_10_or_missing",
+        "rc_steel_composite_material_family_missing",
+        "structural_contact_contract_missing",
+        "ssi_foundation_link_missing_from_core_summary",
+        "panel_contact_failure_reason_code_missing",
+        "nonlinear_residual_integrated_case_missing"
+      ],
       "check_key": "composite_material_present",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "composite_material_present": true
+        "composite_material_present": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1049,28 +1545,33 @@
       },
       "group": "milestone",
       "milestone": "M2",
-      "pass": true,
+      "pass": false,
       "requirement": "composite material evidence present",
       "requirement_id": "m2_composite_material_present",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "beam_shell_contact_coupling_signal_count": 21,
-        "contact_material_coupled_case_count": 31,
-        "material_model_types": [
-          "rc_composite",
-          "steel_elastic_plastic"
-        ],
-        "nonlinear_residual_integrated_case_count": 3
+        "beam_shell_contact_coupling_signal_count": 0,
+        "contact_material_coupled_case_count": 0,
+        "material_model_types": [],
+        "nonlinear_residual_integrated_case_count": 0
       },
       "title": "Core Engine Depth Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "element_material_breadth_gate_not_green",
+        "contact_material_coupled_case_count_lt_10_or_missing",
+        "rc_steel_composite_material_family_missing",
+        "structural_contact_contract_missing",
+        "ssi_foundation_link_missing_from_core_summary",
+        "panel_contact_failure_reason_code_missing",
+        "nonlinear_residual_integrated_case_missing"
+      ],
       "check_key": "structural_contact_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "structural_contact_pass": true
+        "structural_contact_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1078,28 +1579,33 @@
       },
       "group": "milestone",
       "milestone": "M2",
-      "pass": true,
+      "pass": false,
       "requirement": "structural contact evidence present",
       "requirement_id": "m2_structural_contact_present",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "beam_shell_contact_coupling_signal_count": 21,
-        "contact_material_coupled_case_count": 31,
-        "material_model_types": [
-          "rc_composite",
-          "steel_elastic_plastic"
-        ],
-        "nonlinear_residual_integrated_case_count": 3
+        "beam_shell_contact_coupling_signal_count": 0,
+        "contact_material_coupled_case_count": 0,
+        "material_model_types": [],
+        "nonlinear_residual_integrated_case_count": 0
       },
       "title": "Core Engine Depth Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "element_material_breadth_gate_not_green",
+        "contact_material_coupled_case_count_lt_10_or_missing",
+        "rc_steel_composite_material_family_missing",
+        "structural_contact_contract_missing",
+        "ssi_foundation_link_missing_from_core_summary",
+        "panel_contact_failure_reason_code_missing",
+        "nonlinear_residual_integrated_case_missing"
+      ],
       "check_key": "ssi_foundation_link_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "ssi_foundation_link_pass": true
+        "ssi_foundation_link_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1107,28 +1613,33 @@
       },
       "group": "milestone",
       "milestone": "M2",
-      "pass": true,
+      "pass": false,
       "requirement": "SSI/foundation link included in core summary",
       "requirement_id": "m2_ssi_foundation_link",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "beam_shell_contact_coupling_signal_count": 21,
-        "contact_material_coupled_case_count": 31,
-        "material_model_types": [
-          "rc_composite",
-          "steel_elastic_plastic"
-        ],
-        "nonlinear_residual_integrated_case_count": 3
+        "beam_shell_contact_coupling_signal_count": 0,
+        "contact_material_coupled_case_count": 0,
+        "material_model_types": [],
+        "nonlinear_residual_integrated_case_count": 0
       },
       "title": "Core Engine Depth Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "element_material_breadth_gate_not_green",
+        "contact_material_coupled_case_count_lt_10_or_missing",
+        "rc_steel_composite_material_family_missing",
+        "structural_contact_contract_missing",
+        "ssi_foundation_link_missing_from_core_summary",
+        "panel_contact_failure_reason_code_missing",
+        "nonlinear_residual_integrated_case_missing"
+      ],
       "check_key": "panel_contact_failure_reason_code_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "panel_contact_failure_reason_code_pass": true
+        "panel_contact_failure_reason_code_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1136,28 +1647,33 @@
       },
       "group": "milestone",
       "milestone": "M2",
-      "pass": true,
+      "pass": false,
       "requirement": "panel/contact failure mode reason_code separated",
       "requirement_id": "m2_panel_contact_reason_code",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "beam_shell_contact_coupling_signal_count": 21,
-        "contact_material_coupled_case_count": 31,
-        "material_model_types": [
-          "rc_composite",
-          "steel_elastic_plastic"
-        ],
-        "nonlinear_residual_integrated_case_count": 3
+        "beam_shell_contact_coupling_signal_count": 0,
+        "contact_material_coupled_case_count": 0,
+        "material_model_types": [],
+        "nonlinear_residual_integrated_case_count": 0
       },
       "title": "Core Engine Depth Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "element_material_breadth_gate_not_green",
+        "contact_material_coupled_case_count_lt_10_or_missing",
+        "rc_steel_composite_material_family_missing",
+        "structural_contact_contract_missing",
+        "ssi_foundation_link_missing_from_core_summary",
+        "panel_contact_failure_reason_code_missing",
+        "nonlinear_residual_integrated_case_missing"
+      ],
       "check_key": "nonlinear_residual_same_case_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "nonlinear_residual_same_case_pass": true
+        "nonlinear_residual_same_case_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1165,24 +1681,24 @@
       },
       "group": "milestone",
       "milestone": "M2",
-      "pass": true,
+      "pass": false,
       "requirement": "nonlinear and residual pass in the same case",
       "requirement_id": "m2_nonlinear_residual_same_case",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "beam_shell_contact_coupling_signal_count": 21,
-        "contact_material_coupled_case_count": 31,
-        "material_model_types": [
-          "rc_composite",
-          "steel_elastic_plastic"
-        ],
-        "nonlinear_residual_integrated_case_count": 3
+        "beam_shell_contact_coupling_signal_count": 0,
+        "contact_material_coupled_case_count": 0,
+        "material_model_types": [],
+        "nonlinear_residual_integrated_case_count": 0
       },
       "title": "Core Engine Depth Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "require_hip_failed_without_cpu_only_product_mode",
+        "device_residency_below_target"
+      ],
       "check_key": "require_ndtha_pass",
       "check_value": true,
       "checks": {
@@ -1204,7 +1720,7 @@
       "source_present": true,
       "status": "pass",
       "summary_snapshot": {
-        "device_residency_ratio_min": 1.0,
+        "device_residency_ratio_min": 0.0,
         "host_copy_share": 0.0,
         "max_host_copy_share": 0.05,
         "min_device_residency_ratio": 0.99,
@@ -1214,11 +1730,14 @@
       "title": "Strict Runtime Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "require_hip_failed_without_cpu_only_product_mode",
+        "device_residency_below_target"
+      ],
       "check_key": "require_hip_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "require_hip_pass": true
+        "require_hip_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1230,13 +1749,13 @@
       },
       "group": "milestone",
       "milestone": "M3",
-      "pass": true,
+      "pass": false,
       "requirement": "require_hip passes or CPU-only product mode is declared",
       "requirement_id": "m3_require_hip_or_cpu_scope",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "device_residency_ratio_min": 1.0,
+        "device_residency_ratio_min": 0.0,
         "host_copy_share": 0.0,
         "max_host_copy_share": 0.05,
         "min_device_residency_ratio": 0.99,
@@ -1246,7 +1765,10 @@
       "title": "Strict Runtime Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "require_hip_failed_without_cpu_only_product_mode",
+        "device_residency_below_target"
+      ],
       "check_key": "cpu_fallback_release_forbidden_pass",
       "check_value": true,
       "checks": {
@@ -1268,7 +1790,7 @@
       "source_present": true,
       "status": "pass",
       "summary_snapshot": {
-        "device_residency_ratio_min": 1.0,
+        "device_residency_ratio_min": 0.0,
         "host_copy_share": 0.0,
         "max_host_copy_share": 0.05,
         "min_device_residency_ratio": 0.99,
@@ -1278,11 +1800,14 @@
       "title": "Strict Runtime Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "require_hip_failed_without_cpu_only_product_mode",
+        "device_residency_below_target"
+      ],
       "check_key": "device_residency_target_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "device_residency_target_pass": true
+        "device_residency_target_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1294,13 +1819,13 @@
       },
       "group": "milestone",
       "milestone": "M3",
-      "pass": true,
+      "pass": false,
       "requirement": "device residency target is explicit and met",
       "requirement_id": "m3_device_residency",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "device_residency_ratio_min": 1.0,
+        "device_residency_ratio_min": 0.0,
         "host_copy_share": 0.0,
         "max_host_copy_share": 0.05,
         "min_device_residency_ratio": 0.99,
@@ -1310,7 +1835,10 @@
       "title": "Strict Runtime Closure"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "require_hip_failed_without_cpu_only_product_mode",
+        "device_residency_below_target"
+      ],
       "check_key": "host_copy_share_pass",
       "check_value": true,
       "checks": {
@@ -1332,7 +1860,7 @@
       "source_present": true,
       "status": "pass",
       "summary_snapshot": {
-        "device_residency_ratio_min": 1.0,
+        "device_residency_ratio_min": 0.0,
         "host_copy_share": 0.0,
         "max_host_copy_share": 0.05,
         "min_device_residency_ratio": 0.99,
@@ -1482,11 +2010,18 @@
       "title": "Benchmark Breadth Expansion"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "workflow_productization_gate_not_green",
+        "viewer_reviewer_customer_preset_missing",
+        "pdf_report_or_reviewer_package_missing",
+        "audit_trail_action_source_trace_missing",
+        "signed_release_registry_missing_or_failed",
+        "pm_blocker_closure_board_count_mismatch"
+      ],
       "check_key": "viewer_reviewer_customer_surface_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "viewer_reviewer_customer_surface_pass": true
+        "viewer_reviewer_customer_surface_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1503,11 +2038,11 @@
       },
       "group": "milestone",
       "milestone": "M5",
-      "pass": true,
+      "pass": false,
       "requirement": "reviewer/customer viewer preset",
       "requirement_id": "m5_viewer_mode",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
         "limitation_manual_required_terms": [
           "claim boundary",
@@ -1522,19 +2057,19 @@
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 12,
         "pm_blocker_closure_board_open_blocker_count": 12,
-        "pm_blocker_register_external_owner_input_ready_count": 10,
+        "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 64,
+        "pm_blocker_register_open_blocker_count": 64,
+        "pm_blocker_register_release_area_blocker_count": 42,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 567,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=567 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 509,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 0,
-        "release_evidence_freshness_contract_pass": true,
-        "release_registry_artifact_count": 12,
+        "release_evidence_freshness_blocker_count": 19,
+        "release_evidence_freshness_contract_pass": false,
+        "release_registry_artifact_count": 0,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
@@ -1569,16 +2104,23 @@
           "interop",
           "reproduction commands"
         ],
-        "viewer_mode": "static_release_artifact_viewer"
+        "viewer_mode": ""
       },
       "title": "Commercial Packaging"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "workflow_productization_gate_not_green",
+        "viewer_reviewer_customer_preset_missing",
+        "pdf_report_or_reviewer_package_missing",
+        "audit_trail_action_source_trace_missing",
+        "signed_release_registry_missing_or_failed",
+        "pm_blocker_closure_board_count_mismatch"
+      ],
       "check_key": "pdf_report_or_reviewer_package_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "pdf_report_or_reviewer_package_pass": true
+        "pdf_report_or_reviewer_package_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1595,11 +2137,11 @@
       },
       "group": "milestone",
       "milestone": "M5",
-      "pass": true,
+      "pass": false,
       "requirement": "PDF/report or reviewer package generated",
       "requirement_id": "m5_pdf_or_reviewer_package",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
         "limitation_manual_required_terms": [
           "claim boundary",
@@ -1614,19 +2156,19 @@
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 12,
         "pm_blocker_closure_board_open_blocker_count": 12,
-        "pm_blocker_register_external_owner_input_ready_count": 10,
+        "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 64,
+        "pm_blocker_register_open_blocker_count": 64,
+        "pm_blocker_register_release_area_blocker_count": 42,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 567,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=567 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 509,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 0,
-        "release_evidence_freshness_contract_pass": true,
-        "release_registry_artifact_count": 12,
+        "release_evidence_freshness_blocker_count": 19,
+        "release_evidence_freshness_contract_pass": false,
+        "release_registry_artifact_count": 0,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
@@ -1661,16 +2203,23 @@
           "interop",
           "reproduction commands"
         ],
-        "viewer_mode": "static_release_artifact_viewer"
+        "viewer_mode": ""
       },
       "title": "Commercial Packaging"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "workflow_productization_gate_not_green",
+        "viewer_reviewer_customer_preset_missing",
+        "pdf_report_or_reviewer_package_missing",
+        "audit_trail_action_source_trace_missing",
+        "signed_release_registry_missing_or_failed",
+        "pm_blocker_closure_board_count_mismatch"
+      ],
       "check_key": "audit_trail_action_source_trace_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "audit_trail_action_source_trace_pass": true
+        "audit_trail_action_source_trace_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1687,11 +2236,11 @@
       },
       "group": "milestone",
       "milestone": "M5",
-      "pass": true,
+      "pass": false,
       "requirement": "audit trail has action and source row trace",
       "requirement_id": "m5_audit_trail",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
         "limitation_manual_required_terms": [
           "claim boundary",
@@ -1706,19 +2255,19 @@
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 12,
         "pm_blocker_closure_board_open_blocker_count": 12,
-        "pm_blocker_register_external_owner_input_ready_count": 10,
+        "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 64,
+        "pm_blocker_register_open_blocker_count": 64,
+        "pm_blocker_register_release_area_blocker_count": 42,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 567,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=567 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 509,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 0,
-        "release_evidence_freshness_contract_pass": true,
-        "release_registry_artifact_count": 12,
+        "release_evidence_freshness_blocker_count": 19,
+        "release_evidence_freshness_contract_pass": false,
+        "release_registry_artifact_count": 0,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
@@ -1753,16 +2302,23 @@
           "interop",
           "reproduction commands"
         ],
-        "viewer_mode": "static_release_artifact_viewer"
+        "viewer_mode": ""
       },
       "title": "Commercial Packaging"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "workflow_productization_gate_not_green",
+        "viewer_reviewer_customer_preset_missing",
+        "pdf_report_or_reviewer_package_missing",
+        "audit_trail_action_source_trace_missing",
+        "signed_release_registry_missing_or_failed",
+        "pm_blocker_closure_board_count_mismatch"
+      ],
       "check_key": "signed_release_registry_pass",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "signed_release_registry_pass": true
+        "signed_release_registry_pass": false
       },
       "claim_boundary": "",
       "evidence_artifacts": {
@@ -1779,11 +2335,11 @@
       },
       "group": "milestone",
       "milestone": "M5",
-      "pass": true,
+      "pass": false,
       "requirement": "release registry is signed",
       "requirement_id": "m5_signed_release_registry",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
         "limitation_manual_required_terms": [
           "claim boundary",
@@ -1798,19 +2354,19 @@
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 12,
         "pm_blocker_closure_board_open_blocker_count": 12,
-        "pm_blocker_register_external_owner_input_ready_count": 10,
+        "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 64,
+        "pm_blocker_register_open_blocker_count": 64,
+        "pm_blocker_register_release_area_blocker_count": 42,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 567,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=567 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 509,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 0,
-        "release_evidence_freshness_contract_pass": true,
-        "release_registry_artifact_count": 12,
+        "release_evidence_freshness_blocker_count": 19,
+        "release_evidence_freshness_contract_pass": false,
+        "release_registry_artifact_count": 0,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
@@ -1845,12 +2401,19 @@
           "interop",
           "reproduction commands"
         ],
-        "viewer_mode": "static_release_artifact_viewer"
+        "viewer_mode": ""
       },
       "title": "Commercial Packaging"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "workflow_productization_gate_not_green",
+        "viewer_reviewer_customer_preset_missing",
+        "pdf_report_or_reviewer_package_missing",
+        "audit_trail_action_source_trace_missing",
+        "signed_release_registry_missing_or_failed",
+        "pm_blocker_closure_board_count_mismatch"
+      ],
       "check_key": "support_bundle_export_pass",
       "check_value": true,
       "checks": {
@@ -1890,19 +2453,19 @@
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 12,
         "pm_blocker_closure_board_open_blocker_count": 12,
-        "pm_blocker_register_external_owner_input_ready_count": 10,
+        "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 64,
+        "pm_blocker_register_open_blocker_count": 64,
+        "pm_blocker_register_release_area_blocker_count": 42,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 567,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=567 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 509,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 0,
-        "release_evidence_freshness_contract_pass": true,
-        "release_registry_artifact_count": 12,
+        "release_evidence_freshness_blocker_count": 19,
+        "release_evidence_freshness_contract_pass": false,
+        "release_registry_artifact_count": 0,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
@@ -1937,12 +2500,19 @@
           "interop",
           "reproduction commands"
         ],
-        "viewer_mode": "static_release_artifact_viewer"
+        "viewer_mode": ""
       },
       "title": "Commercial Packaging"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "workflow_productization_gate_not_green",
+        "viewer_reviewer_customer_preset_missing",
+        "pdf_report_or_reviewer_package_missing",
+        "audit_trail_action_source_trace_missing",
+        "signed_release_registry_missing_or_failed",
+        "pm_blocker_closure_board_count_mismatch"
+      ],
       "check_key": "validation_manual_content_pass",
       "check_value": true,
       "checks": {
@@ -1982,19 +2552,19 @@
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 12,
         "pm_blocker_closure_board_open_blocker_count": 12,
-        "pm_blocker_register_external_owner_input_ready_count": 10,
+        "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 64,
+        "pm_blocker_register_open_blocker_count": 64,
+        "pm_blocker_register_release_area_blocker_count": 42,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 567,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=567 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 509,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 0,
-        "release_evidence_freshness_contract_pass": true,
-        "release_registry_artifact_count": 12,
+        "release_evidence_freshness_blocker_count": 19,
+        "release_evidence_freshness_contract_pass": false,
+        "release_registry_artifact_count": 0,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
@@ -2029,12 +2599,19 @@
           "interop",
           "reproduction commands"
         ],
-        "viewer_mode": "static_release_artifact_viewer"
+        "viewer_mode": ""
       },
       "title": "Commercial Packaging"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "workflow_productization_gate_not_green",
+        "viewer_reviewer_customer_preset_missing",
+        "pdf_report_or_reviewer_package_missing",
+        "audit_trail_action_source_trace_missing",
+        "signed_release_registry_missing_or_failed",
+        "pm_blocker_closure_board_count_mismatch"
+      ],
       "check_key": "limitation_manual_content_pass",
       "check_value": true,
       "checks": {
@@ -2074,19 +2651,19 @@
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 12,
         "pm_blocker_closure_board_open_blocker_count": 12,
-        "pm_blocker_register_external_owner_input_ready_count": 10,
+        "pm_blocker_register_external_owner_input_ready_count": 11,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 12,
-        "pm_blocker_register_open_blocker_count": 12,
-        "pm_blocker_register_release_area_blocker_count": 5,
+        "pm_blocker_register_handoff_ready_count": 64,
+        "pm_blocker_register_open_blocker_count": 64,
+        "pm_blocker_register_release_area_blocker_count": 42,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 567,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=567 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 509,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=509 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 0,
-        "release_evidence_freshness_contract_pass": true,
-        "release_registry_artifact_count": 12,
+        "release_evidence_freshness_blocker_count": 19,
+        "release_evidence_freshness_contract_pass": false,
+        "release_registry_artifact_count": 0,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
@@ -2121,16 +2698,18 @@
           "interop",
           "reproduction commands"
         ],
-        "viewer_mode": "static_release_artifact_viewer"
+        "viewer_mode": ""
       },
       "title": "Commercial Packaging"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "technical_paid_pilot_candidate_false"
+      ],
       "check_key": "technical_paid_pilot_candidate",
-      "check_value": true,
+      "check_value": false,
       "checks": {
-        "technical_paid_pilot_candidate": true
+        "technical_paid_pilot_candidate": false
       },
       "claim_boundary": "Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use.",
       "evidence_artifacts": {
@@ -2139,15 +2718,23 @@
         "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
       },
       "group": "release_tier",
-      "next_action": "",
-      "next_actions": [],
-      "pass": true,
+      "next_action": "Regenerate the PM release gate after milestone or scope-guard evidence changes.",
+      "next_actions": [
+        {
+          "blocker_id": "technical_paid_pilot_candidate_false",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Regenerate the PM release gate after milestone or scope-guard evidence changes.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
       "requirement": "limited milestone evidence supports only a constrained paid pilot candidate",
       "requirement_id": "release_tier.technical_paid_pilot_candidate",
       "source_present": true,
-      "status": "pass",
+      "status": "blocked",
       "summary_snapshot": {
-        "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
+        "recommended_scope": "Release blocked until core PM gates have green evidence.",
         "release_tiers": {
           "customer_shadow_completed_project_ready": false,
           "customer_shadow_evidence_status": "implementation/phase1/customer_shadow_evidence_status.json",
@@ -2178,9 +2765,46 @@
             "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
             "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
             "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+            "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+            "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+            "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+            "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+            "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+            "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+            "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+            "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+            "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+            "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+            "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+            "core_engine::core_depth_milestone_not_green",
+            "core_engine::commercial_readiness_contract_not_green",
+            "core_engine::commercial_accuracy_contract_not_green",
+            "runtime::strict_runtime_milestone_not_green",
+            "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+            "gpu_device::device_residency_target_not_met",
+            "interop::midas_interop_not_green",
+            "interop::midas_native_roundtrip_not_green",
+            "interop::midas_exact_roundtrip_not_green",
+            "interop::kds_full_crosswalk_not_green",
+            "report::commercial_packaging_milestone_not_green",
+            "report::reviewer_package_auto_not_green",
+            "report::repro_command_missing_from_report_evidence",
+            "report::reproducibility_lock_not_green",
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
-            "security::license_status_not_configured"
+            "support::pm_blocker_closure_board_count_mismatch",
+            "security::license_status_not_configured",
+            "security::repro_build_not_green",
+            "github_sync::github_sync_preflight::local_head_mismatch"
           ],
           "ga_enterprise_evidence_gate_pass": false,
           "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -2192,12 +2816,12 @@
           "ga_validation_case_threshold": 300,
           "ga_validation_case_threshold_met": true,
           "limited_commercial_full_gate_ready": false,
-          "limited_commercial_milestone_ready": true,
-          "paid_pilot": true,
+          "limited_commercial_milestone_ready": false,
+          "paid_pilot": false,
           "paid_pilot_scope_guard_pass": true,
           "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
-          "technical_paid_pilot_candidate": true
+          "technical_paid_pilot_candidate": false
         }
       },
       "title": "Technical Paid Pilot Candidate"
@@ -2224,7 +2848,7 @@
       "source_present": true,
       "status": "pass",
       "summary_snapshot": {
-        "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
+        "recommended_scope": "Release blocked until core PM gates have green evidence.",
         "release_tiers": {
           "customer_shadow_completed_project_ready": false,
           "customer_shadow_evidence_status": "implementation/phase1/customer_shadow_evidence_status.json",
@@ -2255,9 +2879,46 @@
             "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
             "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
             "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+            "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+            "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+            "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+            "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+            "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+            "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+            "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+            "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+            "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+            "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+            "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+            "core_engine::core_depth_milestone_not_green",
+            "core_engine::commercial_readiness_contract_not_green",
+            "core_engine::commercial_accuracy_contract_not_green",
+            "runtime::strict_runtime_milestone_not_green",
+            "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+            "gpu_device::device_residency_target_not_met",
+            "interop::midas_interop_not_green",
+            "interop::midas_native_roundtrip_not_green",
+            "interop::midas_exact_roundtrip_not_green",
+            "interop::kds_full_crosswalk_not_green",
+            "report::commercial_packaging_milestone_not_green",
+            "report::reviewer_package_auto_not_green",
+            "report::repro_command_missing_from_report_evidence",
+            "report::reproducibility_lock_not_green",
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
-            "security::license_status_not_configured"
+            "support::pm_blocker_closure_board_count_mismatch",
+            "security::license_status_not_configured",
+            "security::repro_build_not_green",
+            "github_sync::github_sync_preflight::local_head_mismatch"
           ],
           "ga_enterprise_evidence_gate_pass": false,
           "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -2269,12 +2930,12 @@
           "ga_validation_case_threshold": 300,
           "ga_validation_case_threshold_met": true,
           "limited_commercial_full_gate_ready": false,
-          "limited_commercial_milestone_ready": true,
-          "paid_pilot": true,
+          "limited_commercial_milestone_ready": false,
+          "paid_pilot": false,
           "paid_pilot_scope_guard_pass": true,
           "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
-          "technical_paid_pilot_candidate": true
+          "technical_paid_pilot_candidate": false
         }
       },
       "title": "Paid Pilot Scope Guard"
@@ -2283,9 +2944,46 @@
       "blockers": [
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+        "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+        "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+        "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+        "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+        "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+        "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+        "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+        "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+        "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+        "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+        "core_engine::core_depth_milestone_not_green",
+        "core_engine::commercial_readiness_contract_not_green",
+        "core_engine::commercial_accuracy_contract_not_green",
+        "runtime::strict_runtime_milestone_not_green",
+        "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+        "gpu_device::device_residency_target_not_met",
+        "interop::midas_interop_not_green",
+        "interop::midas_native_roundtrip_not_green",
+        "interop::midas_exact_roundtrip_not_green",
+        "interop::kds_full_crosswalk_not_green",
+        "report::commercial_packaging_milestone_not_green",
+        "report::reviewer_package_auto_not_green",
+        "report::repro_command_missing_from_report_evidence",
+        "report::reproducibility_lock_not_green",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "security::license_status_not_configured"
+        "support::pm_blocker_closure_board_count_mismatch",
+        "security::license_status_not_configured",
+        "security::repro_build_not_green",
+        "github_sync::github_sync_preflight::local_head_mismatch"
       ],
       "check_key": "limited_commercial_full_gate_ready",
       "check_value": false,
@@ -2316,6 +3014,244 @@
           "owner": "release_owner"
         },
         {
+          "blocker_id": "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "core_engine::core_depth_milestone_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "core_engine::commercial_readiness_contract_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "core_engine::commercial_accuracy_contract_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "runtime::strict_runtime_milestone_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "gpu_device::device_residency_target_not_met",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::midas_interop_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::midas_native_roundtrip_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::midas_exact_roundtrip_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::kds_full_crosswalk_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::commercial_packaging_milestone_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::reviewer_package_auto_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::repro_command_missing_from_report_evidence",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::reproducibility_lock_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
           "blocker_id": "ux::human_new_user_observation_missing_or_failed",
           "closure_state": "blocked",
           "evidence_state": "release_tier_blocked",
@@ -2330,7 +3266,28 @@
           "owner": "release_owner"
         },
         {
+          "blocker_id": "support::pm_blocker_closure_board_count_mismatch",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
           "blocker_id": "security::license_status_not_configured",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "security::repro_build_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
           "closure_state": "blocked",
           "evidence_state": "release_tier_blocked",
           "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
@@ -2343,7 +3300,7 @@
       "source_present": true,
       "status": "blocked",
       "summary_snapshot": {
-        "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
+        "recommended_scope": "Release blocked until core PM gates have green evidence.",
         "release_tiers": {
           "customer_shadow_completed_project_ready": false,
           "customer_shadow_evidence_status": "implementation/phase1/customer_shadow_evidence_status.json",
@@ -2374,9 +3331,46 @@
             "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
             "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
             "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+            "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+            "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+            "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+            "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+            "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+            "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+            "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+            "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+            "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+            "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+            "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+            "core_engine::core_depth_milestone_not_green",
+            "core_engine::commercial_readiness_contract_not_green",
+            "core_engine::commercial_accuracy_contract_not_green",
+            "runtime::strict_runtime_milestone_not_green",
+            "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+            "gpu_device::device_residency_target_not_met",
+            "interop::midas_interop_not_green",
+            "interop::midas_native_roundtrip_not_green",
+            "interop::midas_exact_roundtrip_not_green",
+            "interop::kds_full_crosswalk_not_green",
+            "report::commercial_packaging_milestone_not_green",
+            "report::reviewer_package_auto_not_green",
+            "report::repro_command_missing_from_report_evidence",
+            "report::reproducibility_lock_not_green",
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
-            "security::license_status_not_configured"
+            "support::pm_blocker_closure_board_count_mismatch",
+            "security::license_status_not_configured",
+            "security::repro_build_not_green",
+            "github_sync::github_sync_preflight::local_head_mismatch"
           ],
           "ga_enterprise_evidence_gate_pass": false,
           "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -2388,12 +3382,12 @@
           "ga_validation_case_threshold": 300,
           "ga_validation_case_threshold_met": true,
           "limited_commercial_full_gate_ready": false,
-          "limited_commercial_milestone_ready": true,
-          "paid_pilot": true,
+          "limited_commercial_milestone_ready": false,
+          "paid_pilot": false,
           "paid_pilot_scope_guard_pass": true,
           "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
-          "technical_paid_pilot_candidate": true
+          "technical_paid_pilot_candidate": false
         }
       },
       "title": "Limited Commercial Full Gate"
@@ -2408,9 +3402,46 @@
         "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+        "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+        "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+        "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+        "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+        "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+        "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+        "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+        "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+        "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+        "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+        "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+        "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+        "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+        "core_engine::core_depth_milestone_not_green",
+        "core_engine::commercial_readiness_contract_not_green",
+        "core_engine::commercial_accuracy_contract_not_green",
+        "runtime::strict_runtime_milestone_not_green",
+        "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+        "gpu_device::device_residency_target_not_met",
+        "interop::midas_interop_not_green",
+        "interop::midas_native_roundtrip_not_green",
+        "interop::midas_exact_roundtrip_not_green",
+        "interop::kds_full_crosswalk_not_green",
+        "report::commercial_packaging_milestone_not_green",
+        "report::reviewer_package_auto_not_green",
+        "report::repro_command_missing_from_report_evidence",
+        "report::reproducibility_lock_not_green",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "security::license_status_not_configured"
+        "support::pm_blocker_closure_board_count_mismatch",
+        "security::license_status_not_configured",
+        "security::repro_build_not_green",
+        "github_sync::github_sync_preflight::local_head_mismatch"
       ],
       "check_key": "ga_enterprise_evidence_gate_pass",
       "check_value": false,
@@ -2483,6 +3514,244 @@
           "owner": "release_owner"
         },
         {
+          "blocker_id": "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "core_engine::core_depth_milestone_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "core_engine::commercial_readiness_contract_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "core_engine::commercial_accuracy_contract_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "runtime::strict_runtime_milestone_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "gpu_device::device_residency_target_not_met",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::midas_interop_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::midas_native_roundtrip_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::midas_exact_roundtrip_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "interop::kds_full_crosswalk_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::commercial_packaging_milestone_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::reviewer_package_auto_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::repro_command_missing_from_report_evidence",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "report::reproducibility_lock_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
           "blocker_id": "ux::human_new_user_observation_missing_or_failed",
           "closure_state": "blocked",
           "evidence_state": "release_tier_blocked",
@@ -2497,7 +3766,28 @@
           "owner": "release_owner"
         },
         {
+          "blocker_id": "support::pm_blocker_closure_board_count_mismatch",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
           "blocker_id": "security::license_status_not_configured",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "security::repro_build_not_green",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "github_sync::github_sync_preflight::local_head_mismatch",
           "closure_state": "blocked",
           "evidence_state": "release_tier_blocked",
           "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
@@ -2510,7 +3800,7 @@
       "source_present": true,
       "status": "blocked",
       "summary_snapshot": {
-        "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
+        "recommended_scope": "Release blocked until core PM gates have green evidence.",
         "release_tiers": {
           "customer_shadow_completed_project_ready": false,
           "customer_shadow_evidence_status": "implementation/phase1/customer_shadow_evidence_status.json",
@@ -2541,9 +3831,46 @@
             "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
             "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
             "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
+            "evidence_freshness::p0_closure_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_readiness_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact",
+            "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact",
+            "evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact",
+            "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+            "evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
+            "evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+            "evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::evidence_console_scope_status::source_commit_mismatch",
+            "evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact",
+            "evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact",
+            "evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact",
+            "evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact",
+            "evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact",
+            "evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact",
+            "core_engine::core_depth_milestone_not_green",
+            "core_engine::commercial_readiness_contract_not_green",
+            "core_engine::commercial_accuracy_contract_not_green",
+            "runtime::strict_runtime_milestone_not_green",
+            "gpu_device::gpu_strict_failed_without_cpu_only_scope",
+            "gpu_device::device_residency_target_not_met",
+            "interop::midas_interop_not_green",
+            "interop::midas_native_roundtrip_not_green",
+            "interop::midas_exact_roundtrip_not_green",
+            "interop::kds_full_crosswalk_not_green",
+            "report::commercial_packaging_milestone_not_green",
+            "report::reviewer_package_auto_not_green",
+            "report::repro_command_missing_from_report_evidence",
+            "report::reproducibility_lock_not_green",
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
-            "security::license_status_not_configured"
+            "support::pm_blocker_closure_board_count_mismatch",
+            "security::license_status_not_configured",
+            "security::repro_build_not_green",
+            "github_sync::github_sync_preflight::local_head_mismatch"
           ],
           "ga_enterprise_evidence_gate_pass": false,
           "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -2555,12 +3882,12 @@
           "ga_validation_case_threshold": 300,
           "ga_validation_case_threshold_met": true,
           "limited_commercial_full_gate_ready": false,
-          "limited_commercial_milestone_ready": true,
-          "paid_pilot": true,
+          "limited_commercial_milestone_ready": false,
+          "paid_pilot": false,
           "paid_pilot_scope_guard_pass": true,
           "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
-          "technical_paid_pilot_candidate": true
+          "technical_paid_pilot_candidate": false
         }
       },
       "title": "GA / Enterprise Evidence Gate"
@@ -2575,43 +3902,50 @@
     "reason": "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests hash this audit as an output artifact, so the audit avoids embedding support-bundle archive hashes that would create circular freshness claims.",
     "stable_summary_snapshot": true
   },
-  "source_commit_sha": "58271baed3d677dadc09d932ba14c1c4fb06227b",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "summary": {
     "blocked_external_owner_input_ready_count": 3,
     "blocked_handoff_incomplete_count": 0,
-    "blocked_local_remediation_ready_count": 0,
-    "blocked_release_area_claim_boundary_missing_count": 0,
-    "blocked_release_area_claim_boundary_missing_ids": [],
+    "blocked_local_remediation_ready_count": 8,
+    "blocked_release_area_claim_boundary_missing_count": 4,
+    "blocked_release_area_claim_boundary_missing_ids": [
+      "release_area.strict_ci",
+      "release_area.gpu_device",
+      "release_area.report",
+      "release_area.support"
+    ],
     "blocked_release_area_next_action_missing_count": 0,
     "blocked_release_area_next_action_missing_ids": [],
     "blocked_release_tier_claim_boundary_missing_count": 0,
     "blocked_release_tier_claim_boundary_missing_ids": [],
     "blocked_release_tier_next_action_missing_count": 0,
     "blocked_release_tier_next_action_missing_ids": [],
-    "blocked_requirement_count": 5,
+    "blocked_requirement_count": 29,
     "explicit_requirement_count": 52,
     "full_release_gate_ready": false,
-    "limited_commercial_milestone_ready": true,
+    "limited_commercial_milestone_ready": false,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "milestone_subrequirement_blocked_count": 0,
+    "milestone_subrequirement_blocked_count": 14,
     "milestone_subrequirement_count": 32,
-    "milestone_subrequirement_pass_count": 32,
+    "milestone_subrequirement_pass_count": 18,
     "missing_evidence_count": 0,
-    "paid_pilot_candidate": true,
-    "pass_requirement_count": 47,
-    "release_area_blocked_count": 3,
+    "paid_pilot_candidate": false,
+    "pass_requirement_count": 23,
+    "release_area_blocked_count": 12,
     "release_area_gate_ready": false,
-    "release_area_pass_count": 13,
+    "release_area_pass_count": 4,
     "release_area_requirement_count": 16,
-    "release_tier_blocked_count": 2,
-    "release_tier_pass_count": 2,
+    "release_tier_blocked_count": 3,
+    "release_tier_pass_count": 1,
     "release_tier_requirement_count": 4,
     "status_counts": {
-      "blocked": 2,
+      "blocked": 17,
       "blocked_external_owner_input_ready": 3,
-      "pass": 47
+      "blocked_local_remediation_ready": 8,
+      "blocked_mixed_closure_ready": 1,
+      "pass": 23
     }
   },
-  "summary_line": "PM release gate completion audit: BLOCKED | requirements=52 | pass=47 | blocked=5"
+  "summary_line": "PM release gate completion audit: BLOCKED | requirements=52 | pass=23 | blocked=29"
 }
