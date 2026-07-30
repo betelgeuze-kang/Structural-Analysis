@@ -101,6 +101,7 @@ def build_observation(
     observed_at: str,
     candidate_pull_request: dict[str, Any] | None = None,
     candidate_compare: dict[str, Any] | None = None,
+    candidate_files: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     if repository_payload.get("full_name") != repository:
         raise ValueError("repository identity mismatch")
@@ -157,7 +158,11 @@ def build_observation(
         changed_file_count = candidate_pull_request.get("changed_files")
         ahead_by = candidate_compare.get("ahead_by")
         behind_by = candidate_compare.get("behind_by")
-        comparison_files = candidate_compare.get("files")
+        comparison_files = (
+            candidate_files
+            if candidate_files is not None
+            else candidate_compare.get("files")
+        )
         if not isinstance(number, int) or number <= 0:
             raise ValueError("candidate pull request number invalid")
         if state != "open":
@@ -179,10 +184,20 @@ def build_observation(
                 raise ValueError(f"candidate pull request {label} invalid")
         if not isinstance(comparison_files, list):
             raise ValueError("candidate comparison files missing")
-        comparison_changed_path_count = len(comparison_files)
+        comparison_paths = [
+            str(row.get("filename") or "")
+            for row in comparison_files
+            if isinstance(row, dict)
+        ]
+        if (
+            len(comparison_paths) != len(comparison_files)
+            or any(not path for path in comparison_paths)
+            or len(comparison_paths) != len(set(comparison_paths))
+        ):
+            raise ValueError("candidate comparison file inventory invalid")
+        comparison_changed_path_count = len(comparison_paths)
         comparison_files_complete = bool(
-            changed_file_count <= 300
-            and comparison_changed_path_count == changed_file_count
+            comparison_changed_path_count == changed_file_count
         )
         normalized_candidate = {
             "number": number,
@@ -237,6 +252,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--superseded-pull-requests-json", type=Path, required=True)
     parser.add_argument("--candidate-pull-request-json", type=Path)
     parser.add_argument("--candidate-compare-json", type=Path)
+    parser.add_argument("--candidate-files-json", type=Path)
     parser.add_argument("--observed-at")
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
@@ -267,6 +283,11 @@ def main(argv: list[str] | None = None) -> int:
         candidate_compare=(
             _read_object(args.candidate_compare_json)
             if args.candidate_compare_json
+            else None
+        ),
+        candidate_files=(
+            _read_rows(args.candidate_files_json, label="candidate-file")
+            if args.candidate_files_json
             else None
         ),
     )

@@ -77,11 +77,17 @@ def build_report(
     live_observation_path: Path | None = None,
     checked_at: datetime | None = None,
     require_live_freshness: bool = False,
+    expected_candidate_number: int | None = None,
 ) -> dict[str, Any]:
     root = repo_root.resolve()
     path = inventory_path if inventory_path.is_absolute() else root / inventory_path
     inventory = _load_json(path)
     blockers: list[str] = []
+    if expected_candidate_number is not None and (
+        isinstance(expected_candidate_number, bool)
+        or expected_candidate_number <= 0
+    ):
+        blockers.append("expected_candidate_pull_request_number_invalid")
     if inventory.get("schema_version") != (
         "structural-analysis-repository-hygiene-inventory.v3"
     ):
@@ -425,10 +431,84 @@ def build_report(
         live_numbers = _pull_request_numbers(live_rows)
         if len(live_numbers) != len(set(live_numbers)):
             freshness_blockers.append("live_open_pull_requests_contain_duplicates")
+        live_candidate = live.get("candidate_pull_request")
+        live_candidate_number: int | None = None
+        if not isinstance(live_candidate, dict):
+            freshness_blockers.append("live_candidate_pull_request_missing")
+        else:
+            raw_live_candidate_number = live_candidate.get("number")
+            if (
+                isinstance(raw_live_candidate_number, int)
+                and not isinstance(raw_live_candidate_number, bool)
+                and raw_live_candidate_number > 0
+            ):
+                live_candidate_number = raw_live_candidate_number
+            else:
+                freshness_blockers.append(
+                    "live_candidate_pull_request_number_invalid"
+                )
+            if (
+                expected_candidate_number is not None
+                and live_candidate_number != expected_candidate_number
+            ):
+                freshness_blockers.append(
+                    "live_candidate_pull_request_number_mismatch"
+                )
+            if live_candidate.get("state") != "open":
+                freshness_blockers.append("live_candidate_pull_request_not_open")
+            if (
+                live_candidate_number is not None
+                and live_candidate_number not in live_numbers
+            ):
+                freshness_blockers.append(
+                    "live_candidate_pull_request_missing_from_open_scope"
+                )
+            for key in ("head_sha", "base_sha", "merge_base_sha"):
+                if not GIT_SHA_PATTERN.fullmatch(
+                    str(live_candidate.get(key, ""))
+                ):
+                    freshness_blockers.append(
+                        f"live_candidate_pull_request_{key}_invalid"
+                    )
+            for key in (
+                "commit_count",
+                "changed_file_count",
+                "ahead_by",
+                "behind_by",
+                "comparison_changed_path_count",
+            ):
+                value = live_candidate.get(key)
+                if (
+                    not isinstance(value, int)
+                    or isinstance(value, bool)
+                    or value < 0
+                ):
+                    freshness_blockers.append(
+                        f"live_candidate_pull_request_{key}_invalid"
+                    )
+            if live_candidate.get("comparison_files_complete") is not True:
+                freshness_blockers.append(
+                    "candidate_pull_request_comparison_files_incomplete"
+                )
+            if (
+                isinstance(live_candidate.get("comparison_changed_path_count"), int)
+                and isinstance(live_candidate.get("changed_file_count"), int)
+                and live_candidate.get("comparison_changed_path_count")
+                != live_candidate.get("changed_file_count")
+            ):
+                freshness_blockers.append(
+                    "candidate_pull_request_comparison_path_count_drift"
+                )
+        excluded_candidate_numbers = {
+            number
+            for number in (candidate_number, live_candidate_number)
+            if isinstance(number, int) and number > 0
+        }
         scoped_live_rows = [
             row
             for row in live_rows
-            if isinstance(row, dict) and row.get("number") != candidate_number
+            if isinstance(row, dict)
+            and row.get("number") not in excluded_candidate_numbers
         ]
         scoped_live_numbers = sorted(_pull_request_numbers(scoped_live_rows))
         if scoped_live_numbers != sorted(pull_request_numbers):
@@ -445,44 +525,25 @@ def build_report(
                 freshness_blockers.append(f"live_pull_request_not_open:{number}")
             if live_row.get("head_sha") != recorded.get("head_sha"):
                 freshness_blockers.append(f"open_pull_request_head_drift:{number}")
-        live_candidate = live.get("candidate_pull_request")
-        static_candidate = scope.get("candidate_pull_request")
-        if not isinstance(live_candidate, dict):
-            freshness_blockers.append("live_candidate_pull_request_missing")
-        elif not isinstance(static_candidate, dict):
-            freshness_blockers.append("candidate_pull_request_exclusion_missing")
-        else:
-            candidate_field_pairs = (
-                ("number", "number"),
-                ("head_sha", "head_sha"),
-                ("base_sha", "base_sha"),
-                ("merge_base_sha", "merge_base_sha"),
-                ("commit_count", "commit_count"),
-                ("changed_file_count", "changed_file_count"),
-                ("ahead_by", "ahead_by"),
-                ("behind_by", "behind_by"),
-            )
-            for live_key, static_key in candidate_field_pairs:
-                if live_candidate.get(live_key) != static_candidate.get(static_key):
-                    freshness_blockers.append(
-                        f"candidate_pull_request_{live_key}_drift"
-                    )
-            if live_candidate.get("comparison_files_complete") is not True:
-                freshness_blockers.append(
-                    "candidate_pull_request_comparison_files_incomplete"
-                )
-            if live_candidate.get("comparison_changed_path_count") != (
-                static_candidate.get("changed_file_count")
-            ):
-                freshness_blockers.append(
-                    "candidate_pull_request_comparison_path_count_drift"
-                )
         live_open_issues = live.get("open_issues")
         if not isinstance(live_open_issues, list):
             freshness_blockers.append("live_open_issues_missing")
             live_open_issues = []
-        live_open_issue_numbers = sorted(_pull_request_numbers(live_open_issues))
-        recorded_open_issue_numbers = sorted(row["number"] for row in open_issue_rows)
+        candidate_issue_numbers = {
+            row["number"]
+            for row in open_issue_rows
+            if row.get("classification") == "candidate_self"
+        }
+        live_open_issue_numbers = sorted(
+            number
+            for number in _pull_request_numbers(live_open_issues)
+            if number not in candidate_issue_numbers
+        )
+        recorded_open_issue_numbers = sorted(
+            row["number"]
+            for row in open_issue_rows
+            if row["number"] not in candidate_issue_numbers
+        )
         if live_open_issue_numbers != recorded_open_issue_numbers:
             freshness_blockers.append("open_issue_scope_drift")
         recorded_open_issue_by_number = {row["number"]: row for row in open_issue_rows}
@@ -491,6 +552,8 @@ def build_report(
                 freshness_blockers.append("invalid_live_open_issue_row")
                 continue
             number = live_row.get("number")
+            if number in candidate_issue_numbers:
+                continue
             recorded = recorded_open_issue_by_number.get(number)
             if recorded is None:
                 continue
@@ -632,6 +695,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY)
     parser.add_argument("--live-observation", type=Path)
     parser.add_argument("--require-live-freshness", action="store_true")
+    parser.add_argument("--expected-candidate-number", type=int)
     parser.add_argument("--fail-open", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -640,6 +704,7 @@ def main(argv: list[str] | None = None) -> int:
         inventory_path=args.inventory,
         live_observation_path=args.live_observation,
         require_live_freshness=args.require_live_freshness,
+        expected_candidate_number=args.expected_candidate_number,
     )
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))

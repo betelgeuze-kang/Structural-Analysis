@@ -20,6 +20,7 @@ permissions:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   GH_TOKEN: ${{ github.token }}
+  EVENT_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
 
 jobs:
   validate:
@@ -66,11 +67,19 @@ jobs:
               '.superseded_pull_requests[].number' \
               artifacts/manifests/repository_hygiene_inventory.json
           ) | jq -s '.' > "$RUNNER_TEMP/superseded-pull-requests.json"
-          candidate_number="$(
-            python -c 'import json; print(json.load(open("artifacts/manifests/repository_hygiene_inventory.json"))["open_pull_request_scope"]["candidate_pull_request"]["number"])'
-          )"
+          candidate_number="${EVENT_PULL_REQUEST_NUMBER:-}"
+          if [[ ! "$candidate_number" =~ ^[1-9][0-9]*$ ]]; then
+            candidate_number="$(
+              python -c 'import json; print(json.load(open("artifacts/manifests/repository_hygiene_inventory.json"))["open_pull_request_scope"]["candidate_pull_request"]["number"])'
+            )"
+          fi
+          printf '%s\n' "$candidate_number" > "$RUNNER_TEMP/candidate-number.txt"
           gh api "/repos/$GITHUB_REPOSITORY/pulls/$candidate_number" \
             > "$RUNNER_TEMP/candidate-pull-request.json"
+          gh api --paginate \
+            "/repos/$GITHUB_REPOSITORY/pulls/$candidate_number/files?per_page=100" \
+            | jq -s 'add' \
+            > "$RUNNER_TEMP/candidate-files.json"
           read -r candidate_base_sha candidate_head_sha < <(
             python -c 'import json,sys; p=json.load(sys.stdin); print(p["base"]["sha"], p["head"]["sha"])' \
               < "$RUNNER_TEMP/candidate-pull-request.json"
@@ -87,6 +96,7 @@ jobs:
             --superseded-pull-requests-json "$RUNNER_TEMP/superseded-pull-requests.json" \
             --candidate-pull-request-json "$RUNNER_TEMP/candidate-pull-request.json" \
             --candidate-compare-json "$RUNNER_TEMP/candidate-compare.json" \
+            --candidate-files-json "$RUNNER_TEMP/candidate-files.json" \
             --out "$RUNNER_TEMP/repository-hygiene-live-observation.json"
 
       - name: Require live freshness
@@ -94,6 +104,7 @@ jobs:
           python scripts/check_repository_hygiene_inventory.py
           --live-observation "$RUNNER_TEMP/repository-hygiene-live-observation.json"
           --require-live-freshness
+          --expected-candidate-number "$(cat "$RUNNER_TEMP/candidate-number.txt")"
           --json
 
       - name: Upload read-only observation

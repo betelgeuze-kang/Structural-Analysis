@@ -113,6 +113,41 @@ def test_build_observation_normalizes_and_sorts_open_pull_requests() -> None:
     assert "no mutation" in payload["claim_boundary"]
 
 
+def test_paginated_candidate_files_support_large_pull_requests() -> None:
+    candidate = _candidate_detail()
+    candidate["changed_files"] = 430
+    comparison = _candidate_compare()
+    comparison["files"] = [
+        {"filename": f"compare-path-{index}"} for index in range(300)
+    ]
+    candidate_files = [
+        {"filename": f"pull-path-{index}"} for index in range(430)
+    ]
+
+    payload = observer.build_observation(
+        repository="betelgeuze-kang/Structural-Analysis",
+        repository_payload={
+            "full_name": "betelgeuze-kang/Structural-Analysis",
+            "default_branch": "main",
+        },
+        default_branch_commit={"sha": "f" * 40},
+        pull_requests=[_pr(243, "c")],
+        open_issues=[],
+        tracked_issues=[],
+        superseded_pull_requests=[],
+        observed_at="2026-07-30T22:43:34Z",
+        candidate_pull_request=candidate,
+        candidate_compare=comparison,
+        candidate_files=candidate_files,
+    )
+
+    assert payload["candidate_pull_request"]["changed_file_count"] == 430
+    assert payload["candidate_pull_request"][
+        "comparison_changed_path_count"
+    ] == 430
+    assert payload["candidate_pull_request"]["comparison_files_complete"] is True
+
+
 def test_build_observation_rejects_repository_identity_mismatch() -> None:
     with pytest.raises(ValueError, match="repository identity mismatch"):
         observer.build_observation(

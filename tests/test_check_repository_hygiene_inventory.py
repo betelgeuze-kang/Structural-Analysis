@@ -337,11 +337,86 @@ def test_live_observation_rejects_stale_timestamp_and_pr_scope_drift(tmp_path) -
     assert "open_pull_request_scope_drift" in report["freshness"]["blockers"]
 
 
-def test_live_observation_rejects_candidate_base_and_count_drift(tmp_path) -> None:
+def test_live_observation_accepts_current_event_candidate_without_self_reference(
+    tmp_path,
+) -> None:
     payload = _source_payload()
     live = _matching_live_observation(payload)
-    live["candidate_pull_request"]["base_sha"] = "a" * 40
-    live["candidate_pull_request"]["changed_file_count"] += 1
+    live["open_pull_requests"].append(
+        {
+            "number": 244,
+            "state": "open",
+            "head_sha": "d" * 40,
+        }
+    )
+    live["candidate_pull_request"] = {
+        "number": 244,
+        "state": "open",
+        "head_sha": "d" * 40,
+        "base_sha": "f" * 40,
+        "merge_base_sha": "f" * 40,
+        "commit_count": 3,
+        "changed_file_count": 430,
+        "ahead_by": 3,
+        "behind_by": 0,
+        "comparison_changed_path_count": 430,
+        "comparison_files_complete": True,
+    }
+    live_path = _write_json(tmp_path, "live.json", live)
+
+    report = inventory.build_report(
+        ROOT,
+        live_observation_path=live_path,
+        checked_at=datetime(2026, 7, 28, 7, 0, tzinfo=timezone.utc),
+        require_live_freshness=True,
+        expected_candidate_number=244,
+    )
+
+    assert report["contract_pass"] is True
+    assert report["freshness"]["status"] == "available"
+    assert report["freshness"]["blockers"] == []
+
+
+def test_live_observation_rejects_wrong_event_candidate_and_incomplete_files(
+    tmp_path,
+) -> None:
+    payload = _source_payload()
+    live = _matching_live_observation(payload)
+    live["candidate_pull_request"]["comparison_files_complete"] = False
+    live["candidate_pull_request"]["comparison_changed_path_count"] -= 1
+    live_path = _write_json(tmp_path, "live.json", live)
+
+    report = inventory.build_report(
+        ROOT,
+        live_observation_path=live_path,
+        checked_at=datetime(2026, 7, 28, 7, 0, tzinfo=timezone.utc),
+        require_live_freshness=True,
+        expected_candidate_number=244,
+    )
+
+    assert report["contract_pass"] is False
+    assert (
+        "live_candidate_pull_request_number_mismatch"
+        in report["freshness"]["blockers"]
+    )
+    assert (
+        "candidate_pull_request_comparison_files_incomplete"
+        in report["freshness"]["blockers"]
+    )
+    assert (
+        "candidate_pull_request_comparison_path_count_drift"
+        in report["freshness"]["blockers"]
+    )
+
+
+def test_candidate_self_issue_may_close_without_staling_authoritative_scope(
+    tmp_path,
+) -> None:
+    payload = _source_payload()
+    live = _matching_live_observation(payload)
+    live["open_issues"] = [
+        row for row in live["open_issues"] if row["number"] != 242
+    ]
     live_path = _write_json(tmp_path, "live.json", live)
 
     report = inventory.build_report(
@@ -351,12 +426,8 @@ def test_live_observation_rejects_candidate_base_and_count_drift(tmp_path) -> No
         require_live_freshness=True,
     )
 
-    assert report["contract_pass"] is False
-    assert "candidate_pull_request_base_sha_drift" in report["freshness"]["blockers"]
-    assert (
-        "candidate_pull_request_changed_file_count_drift"
-        in report["freshness"]["blockers"]
-    )
+    assert report["contract_pass"] is True
+    assert report["freshness"]["blockers"] == []
 
 
 def test_live_observation_rejects_issue_and_supersession_drift(tmp_path) -> None:
@@ -394,9 +465,13 @@ def test_hygiene_workflow_fetches_candidate_detail_and_comparison() -> None:
     ).read_text(encoding="utf-8")
 
     assert 'pulls/$candidate_number"' in workflow
+    assert "github.event.pull_request.number" in workflow
+    assert 'pulls/$candidate_number/files?per_page=100' in workflow
     assert 'compare/$candidate_base_sha...$candidate_head_sha"' in workflow
     assert "--candidate-pull-request-json" in workflow
     assert "--candidate-compare-json" in workflow
+    assert "--candidate-files-json" in workflow
+    assert "--expected-candidate-number" in workflow
     assert "--open-issues-json" in workflow
     assert "--tracked-issues-json" in workflow
     assert "--superseded-pull-requests-json" in workflow
