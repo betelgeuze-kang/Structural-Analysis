@@ -14,6 +14,7 @@ from types import MappingProxyType
 from typing import Any, Final, Literal, NoReturn, cast
 
 from jsonschema import Draft202012Validator
+import numpy as np
 
 from structural_analysis.assembly.corotational_frame2d_member_features import (
     CorotationalFrame2DMemberFeatures,
@@ -40,6 +41,7 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_engineerin
     CorotationalEngineeringSourceAdapter,
     CorotationalFiberFrameEngineeringResultIR,
     create_corotational_fiber_frame_engineering_result_ir,
+    validate_corotational_fiber_frame_engineering_result_manifest,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
     COROTATIONAL_FIBER_FRAME_GENERAL_COMPILER_PROFILE,
@@ -61,6 +63,16 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver imp
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state import (
     StatefulCorotationalFiberFrame2DCheckpoint,
 )
+from structural_analysis.assembly.stateful_fiber_frame2d_execution_topology import (
+    FiberFrameNonlinearExecutionTopologyPlan,
+    compile_stateful_fiber_frame2d_execution_topology,
+)
+from structural_analysis.assembly.stateful_fiber_frame2d_physical_equation_scaling import (
+    FiberFramePhysicalEquationScalingBinding,
+    FiberFramePhysicalResidualTrace,
+    create_stateful_fiber_frame2d_physical_equation_scaling,
+    trace_stateful_fiber_frame2d_free_physical_residual,
+)
 from structural_analysis.elements.stateful_corotational_fiber_beam2d import (
     StatefulCorotationalFiberBeam2D,
 )
@@ -80,6 +92,17 @@ from structural_analysis.model.schema import (
     CANONICAL_MODEL_SCHEMA_VERSION,
     CanonicalModel,
 )
+from structural_analysis.adapters.bounded_planar_model_ir import (
+    BoundedPlanarModelIRAdapter,
+    adapt_bounded_planar_model_ir_v2,
+    validate_bounded_planar_model_ir_adapter_manifest,
+)
+from structural_analysis.adapters.bounded_planar_execution_plan import (
+    BoundedPlanarExecutionPlanBinding,
+    create_bounded_planar_execution_plan_binding,
+    validate_bounded_planar_execution_plan_manifest,
+)
+from structural_analysis.model_ir.types import ModelIRDocument
 from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_MATRIX_BACKEND,
     VECTOR_MATRIX_BACKENDS,
@@ -91,6 +114,16 @@ from structural_analysis.solvers.nonlinear.newton import (
 UNIFIED_NONLINEAR_FRAME_SCHEMA_VERSION = "unified-nonlinear-frame-result.v1"
 UNIFIED_NONLINEAR_FRAME_REPORT_SCHEMA_VERSION = (
     "unified-nonlinear-frame-validation-report.v1"
+)
+UNIFIED_NONLINEAR_FRAME_UNSUPPORTED_REASON_CODES: Final[tuple[str, ...]] = (
+    "equation_scaling_unavailable",
+    "input_contract_unsupported",
+    "mechanism_detected",
+    "profile_feature_unsupported",
+    "restart_artifact_invalid",
+    "singular_system_detected",
+    "solver_execution_failed",
+    "source_model_unsupported",
 )
 FIXED_CHORD_SERIAL_PROFILE: Final[Literal["fixed_chord_serial_cantilever.v1"]] = (
     "fixed_chord_serial_cantilever.v1"
@@ -106,11 +139,12 @@ UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY = (
     "cantilever retains its existing Developer Preview authority. The corotational "
     "portal and connected-frame profiles bind J1-J5, exact terminal engineering "
     "recovery, and epoch-zero checkpoint-chain replay. The connected-frame profile "
-    "adds bounded connected graphs, multiple support components, and proportional "
-    "prescribed displacements; member releases, rigid offsets, distributed loads, and "
-    "direct displacement control remain outside this slice. Both profiles remain "
-    "candidates until two independent Level 2 comparisons pass. No profile grants "
-    "design-code, final-design, commercial, or release-readiness authority."
+    "adds bounded connected graphs, multiple support components, proportional "
+    "prescribed displacements, finite rigid offsets, RZ end releases, and uniform "
+    "dead member loads in initial local axes. Direct displacement control remains "
+    "outside the unified entry point. The connected profile is still a non-public "
+    "candidate until its promotion gates pass. No profile grants design-code, "
+    "final-design, commercial, or release-readiness authority."
 )
 
 NonlinearFrameProfile = Literal[
@@ -223,6 +257,7 @@ class NonlinearFrameResult:
     result_hash: str
     profile: NonlinearFrameProfile
     source_result_hash: str | None
+    engineering_result_ir: Mapping[str, Any] | None
     canonical_model_checksum: str
     input_checksum: str
     solver_id: str
@@ -344,6 +379,10 @@ class _CompiledPortal:
     node_ids: tuple[str, ...]
     section_by_member: tuple[StatefulRCFiberSection, ...]
     support_node_ids: tuple[str, ...]
+    model_ir_adapter_hash: str
+    topology_plan: FiberFrameNonlinearExecutionTopologyPlan
+    equation_scaling: FiberFramePhysicalEquationScalingBinding | None
+    bounded_execution_plan: BoundedPlanarExecutionPlanBinding | None
 
 
 @dataclass(frozen=True)
@@ -354,6 +393,72 @@ class _CorotationalExecution:
     restart_supplied: bool
     replayed_prefix_step_count: int
     newly_solved_step_count: int
+
+
+def _rigid_body_constraint_rank(problem: StatefulCorotationalFiberFrame2DProblem) -> int:
+    coordinates = np.asarray(problem.node_coordinates_m, dtype=np.float64)
+    spans = np.ptp(coordinates, axis=0)
+    characteristic_length = max(float(np.linalg.norm(spans)), 1.0)
+    rows: list[tuple[float, float, float]] = []
+    for dof in problem.fixed_global_dofs:
+        node_index, component = divmod(dof, 3)
+        x, y = coordinates[node_index] / characteristic_length
+        if component == 0:
+            rows.append((1.0, 0.0, -float(y)))
+        elif component == 1:
+            rows.append((0.0, 1.0, float(x)))
+        else:
+            rows.append((0.0, 0.0, 1.0))
+    matrix = np.asarray(rows, dtype=np.float64)
+    return int(np.linalg.matrix_rank(matrix, tol=1.0e-12))
+
+
+def _corotational_solver_blocked_error(
+    compiled: _CompiledPortal,
+    execution: _CorotationalExecution,
+    *,
+    general_profile: bool,
+) -> NonlinearFrameError:
+    steps = execution.path.steps
+    terminal_reason = (
+        str(steps[-1].metrics.get("terminal_reason") or "") if steps else ""
+    )
+    if terminal_reason == "singular_tangent_stiffness":
+        released_members = tuple(
+            member.member_id
+            for member in compiled.problem.members
+            if member.features.has_release
+        )
+        if released_members:
+            return NonlinearFrameError(
+                "corotational_released_mechanism_detected",
+                "/solver/tangent",
+                (
+                    "The tangent is singular for a model containing explicit RZ end "
+                    f"releases; released members={list(released_members)}. The trial "
+                    "was rejected without fallback or regularization."
+                ),
+            )
+        return NonlinearFrameError(
+            "corotational_singular_system_detected",
+            "/solver/tangent",
+            (
+                "The tangent is singular without an explicit released-member "
+                "mechanism. The trial was rejected without fallback or regularization."
+            ),
+        )
+    return NonlinearFrameError(
+        (
+            "corotational_general_solver_blocked"
+            if general_profile
+            else "corotational_portal_solver_blocked"
+        ),
+        "/solver",
+        (
+            "The configured load path did not commit exactly"
+            + (f"; terminal_reason={terminal_reason}." if terminal_reason else ".")
+        ),
+    )
 
 
 def analyze_nonlinear_frame(
@@ -376,7 +481,43 @@ def analyze_nonlinear_frame(
     snapshot = model.detached_analysis_snapshot()
     if cfg.profile == FIXED_CHORD_SERIAL_PROFILE:
         return _analyze_fixed_chord(snapshot, cfg, restart_checkpoint_chain)
-    return _analyze_corotational_portal(snapshot, cfg, restart_checkpoint_chain)
+    return _analyze_corotational_portal(
+        snapshot,
+        cfg,
+        restart_checkpoint_chain,
+        source_model_ir_adapter=None,
+    )
+
+
+def analyze_nonlinear_frame_model_ir(
+    document: ModelIRDocument,
+    config: NonlinearFrameConfig | None = None,
+    *,
+    restart_checkpoint_chain: bytes | bytearray | memoryview | None = None,
+) -> NonlinearFrameResult:
+    """Analyze the exact bounded planar ModelIR profile with source binding."""
+
+    cfg = (
+        NonlinearFrameConfig(profile=COROTATIONAL_GENERAL_PROFILE)
+        if config is None
+        else config
+    )
+    if type(cfg) is not NonlinearFrameConfig:
+        raise ValueError("config must be a NonlinearFrameConfig")
+    if cfg.profile != COROTATIONAL_GENERAL_PROFILE:
+        _fail(
+            "bounded_planar_model_ir_solver_profile_invalid",
+            "/config/profile",
+            "Bounded planar ModelIR requires corotational_connected_frame2d.v1.",
+        )
+    adapter = adapt_bounded_planar_model_ir_v2(document)
+    result = _analyze_corotational_portal(
+        adapter.canonical_model,
+        cfg,
+        restart_checkpoint_chain,
+        source_model_ir_adapter=adapter,
+    )
+    return _bind_source_model_ir_adapter(result, adapter)
 
 
 def advance_nonlinear_frame_checkpoint(
@@ -406,9 +547,60 @@ def advance_nonlinear_frame_checkpoint(
     ):
         raise ValueError("restart_checkpoint_chain must be bytes-like")
     snapshot = model.detached_analysis_snapshot()
-    compiled = _compile_portal(
+    return _advance_corotational_checkpoint(
         snapshot,
+        config,
+        maximum_new_steps=maximum_new_steps,
+        restart_checkpoint_chain=restart_checkpoint_chain,
+        source_model_ir_adapter=None,
+    )
+
+
+def advance_nonlinear_frame_model_ir_checkpoint(
+    document: ModelIRDocument,
+    config: NonlinearFrameConfig,
+    *,
+    maximum_new_steps: int,
+    restart_checkpoint_chain: bytes | bytearray | memoryview | None = None,
+) -> NonlinearFrameCheckpointAdvance:
+    """Advance an exact source-bound bounded planar ModelIR path."""
+
+    if type(config) is not NonlinearFrameConfig:
+        raise ValueError("config must be a NonlinearFrameConfig")
+    if config.profile != COROTATIONAL_GENERAL_PROFILE:
+        _fail(
+            "bounded_planar_model_ir_solver_profile_invalid",
+            "/config/profile",
+            "Bounded planar ModelIR requires corotational_connected_frame2d.v1.",
+        )
+    if type(maximum_new_steps) is not int or not 1 <= maximum_new_steps <= 64:
+        raise ValueError("maximum_new_steps must be an integer in [1, 64]")
+    if restart_checkpoint_chain is not None and not isinstance(
+        restart_checkpoint_chain, (bytes, bytearray, memoryview)
+    ):
+        raise ValueError("restart_checkpoint_chain must be bytes-like")
+    adapter = adapt_bounded_planar_model_ir_v2(document)
+    return _advance_corotational_checkpoint(
+        adapter.canonical_model,
+        config,
+        maximum_new_steps=maximum_new_steps,
+        restart_checkpoint_chain=restart_checkpoint_chain,
+        source_model_ir_adapter=adapter,
+    )
+
+
+def _advance_corotational_checkpoint(
+    model: CanonicalModel,
+    config: NonlinearFrameConfig,
+    *,
+    maximum_new_steps: int,
+    restart_checkpoint_chain: bytes | bytearray | memoryview | None,
+    source_model_ir_adapter: BoundedPlanarModelIRAdapter | None,
+) -> NonlinearFrameCheckpointAdvance:
+    compiled = _compile_portal(
+        model,
         general_profile=config.profile == COROTATIONAL_GENERAL_PROFILE,
+        source_model_ir_adapter=source_model_ir_adapter,
     )
     execution = _run_corotational_path(
         compiled,
@@ -475,6 +667,28 @@ def nonlinear_frame_resume_contract_hash(
     return _resume_contract_hash(compiled, config)
 
 
+def nonlinear_frame_model_ir_resume_contract_hash(
+    document: ModelIRDocument, config: NonlinearFrameConfig
+) -> str:
+    """Hash the exact ModelIR/adapter/compiler/load path for checkpoint reuse."""
+
+    if type(config) is not NonlinearFrameConfig:
+        raise ValueError("config must be a NonlinearFrameConfig")
+    if config.profile != COROTATIONAL_GENERAL_PROFILE:
+        _fail(
+            "bounded_planar_model_ir_solver_profile_invalid",
+            "/config/profile",
+            "Bounded planar ModelIR requires corotational_connected_frame2d.v1.",
+        )
+    adapter = adapt_bounded_planar_model_ir_v2(document)
+    compiled = _compile_portal(
+        adapter.canonical_model,
+        general_profile=True,
+        source_model_ir_adapter=adapter,
+    )
+    return _resume_contract_hash(compiled, config)
+
+
 def validate_nonlinear_frame_result(
     result: NonlinearFrameResult,
 ) -> NonlinearFrameValidationReport:
@@ -484,6 +698,20 @@ def validate_nonlinear_frame_result(
     if result.result_hash != expected_hash:
         raise ValueError("result_hash does not match the unified result payload")
     _validate_result_schema(result.to_dict())
+    _validate_engineering_result_ir_binding(
+        profile=result.profile,
+        status=result.status,
+        source_result_hash=result.source_result_hash,
+        engineering_result_ir=result.engineering_result_ir,
+        contract_bindings=result.contract_bindings,
+        authority=result.authority,
+    )
+    _validate_source_model_ir_adapter_binding(
+        profile=result.profile,
+        input_checksum=result.input_checksum,
+        canonical_model_checksum=result.canonical_model_checksum,
+        contract_bindings=result.contract_bindings,
+    )
     exact_recovery = bool(result.metrics.get("exact_engineering_recovery"))
     exact_replay = bool(result.metrics.get("exact_checkpoint_chain_replay"))
     fallback_count = int(result.metrics.get("fallback_count", 0))
@@ -562,6 +790,29 @@ def validate_nonlinear_frame_manifest(payload: Mapping[str, Any]) -> dict[str, A
     body.pop("result_hash")
     if claimed != canonical_hash(body):
         raise ValueError("result_hash does not match the unified result payload")
+    _validate_engineering_result_ir_binding(
+        profile=cast(NonlinearFrameProfile, normalized["profile"]),
+        status=cast(Literal["ready", "blocked"], normalized["status"]),
+        source_result_hash=cast(str | None, normalized["source_result_hash"]),
+        engineering_result_ir=cast(
+            Mapping[str, Any] | None,
+            normalized["engineering_result_ir"],
+        ),
+        contract_bindings=cast(
+            Mapping[str, Any],
+            normalized["contract_bindings"],
+        ),
+        authority=cast(Mapping[str, str], normalized["authority"]),
+    )
+    _validate_source_model_ir_adapter_binding(
+        profile=cast(NonlinearFrameProfile, normalized["profile"]),
+        input_checksum=str(normalized["input_checksum"]),
+        canonical_model_checksum=str(normalized["canonical_model_checksum"]),
+        contract_bindings=cast(
+            Mapping[str, Any],
+            normalized["contract_bindings"],
+        ),
+    )
     return normalized
 
 
@@ -596,6 +847,7 @@ def _analyze_fixed_chord(
             "member_force": str(
                 source.authority.get("member_force", "not_authoritative")
             ),
+            "member_features": "not_supported",
             "section_resultant": str(
                 source.authority.get("section_resultant", "not_authoritative")
             ),
@@ -626,6 +878,7 @@ def _analyze_fixed_chord(
         status="ready" if report.contract_pass else "blocked",
         profile=FIXED_CHORD_SERIAL_PROFILE,
         source_result_hash=source.result_hash,
+        engineering_result_ir=None,
         model=model,
         solver_id=source.solver_id,
         compiler_profile=source.compiler_profile,
@@ -653,6 +906,8 @@ def _analyze_corotational_portal(
     model: CanonicalModel,
     config: NonlinearFrameConfig,
     restart: bytes | bytearray | memoryview | None,
+    *,
+    source_model_ir_adapter: BoundedPlanarModelIRAdapter | None,
 ) -> NonlinearFrameResult:
     general_profile = config.profile == COROTATIONAL_GENERAL_PROFILE
     selected_compiler_profile = (
@@ -660,7 +915,7 @@ def _analyze_corotational_portal(
         if general_profile
         else "planar_one_bay_one_story_portal_explicit_fiber_section.v1"
     )
-    configuration = {
+    configuration: dict[str, Any] = {
         "profile": config.profile,
         "load_steps": config.load_steps,
         "target_load_factors": list(config.target_load_factors),
@@ -679,26 +934,74 @@ def _analyze_corotational_portal(
         ),
     }
     unsupported: list[Mapping[str, Any]] = [
-        dict(row) for row in model.unsupported_features
+        _normalize_unsupported_feature(row, index=index, source_model=True)
+        for index, row in enumerate(model.unsupported_features)
     ]
     warnings = list(model.warnings)
     compiled: _CompiledPortal | None = None
     execution: _CorotationalExecution | None = None
     adapter: CorotationalEngineeringSourceAdapter | None = None
     engineering: CorotationalFiberFrameEngineeringResultIR | None = None
+    terminal_trace: FiberFramePhysicalResidualTrace | None = None
     if not unsupported:
         try:
-            compiled = _compile_portal(model, general_profile=general_profile)
+            compiled = _compile_portal(
+                model,
+                general_profile=general_profile,
+                source_model_ir_adapter=source_model_ir_adapter,
+            )
+            rigid_body_rank = _rigid_body_constraint_rank(compiled.problem)
+            if rigid_body_rank < 3:
+                raise NonlinearFrameError(
+                    "corotational_rigid_body_constraint_rank_deficient",
+                    "/supports",
+                    (
+                        "Active support constraints eliminate only "
+                        f"{rigid_body_rank}/3 planar rigid-body modes. The system is "
+                        "rejected before solving without fallback or regularization."
+                    ),
+                )
+            if (
+                compiled.equation_scaling is None
+                and compiled.topology_plan.array("free_physical_dofs").size
+            ):
+                configuration["equation_scaling"] = {
+                    "status": "unavailable",
+                    "reason": "no_free_reference_load",
+                }
+                raise NonlinearFrameError(
+                    "corotational_equation_scaling_unavailable",
+                    "/solver/equation_scaling",
+                    (
+                        "An iterative path with free equations requires a "
+                        "source-bound reference force; prescribed motion alone "
+                        "does not create one."
+                    ),
+                )
             execution = _run_corotational_path(compiled, config, restart)
             if execution.path.status != "ready" or not execution.path.contract_pass:
-                raise NonlinearFrameError(
-                    (
-                        "corotational_general_solver_blocked"
-                        if general_profile
-                        else "corotational_portal_solver_blocked"
+                raise _corotational_solver_blocked_error(
+                    compiled,
+                    execution,
+                    general_profile=general_profile,
+                )
+            no_solve_path = all(
+                step.metrics.get("no_solve_contract_pass") is True
+                for step in execution.path.steps
+            )
+            if compiled.equation_scaling is not None:
+                terminal_trace = trace_stateful_fiber_frame2d_free_physical_residual(
+                    topology_plan=compiled.topology_plan,
+                    scaling_binding=compiled.equation_scaling,
+                    raw_free_residual_source_3dof=(
+                        execution.path.steps[-1].trial_assembly.residual_kn
                     ),
-                    "/solver",
-                    "The configured load path did not commit exactly.",
+                )
+            elif not no_solve_path:
+                raise NonlinearFrameError(
+                    "corotational_equation_scaling_unavailable",
+                    "/solver/equation_scaling",
+                    "Iterative execution requires a source-bound free-equation scale.",
                 )
             if isinstance(
                 compiled.compilation, CorotationalFiberFrameGeneralCompilation
@@ -753,6 +1056,13 @@ def _analyze_corotational_portal(
         and execution is not None
         and adapter is not None
         and engineering is not None
+        and (
+            terminal_trace is not None
+            or all(
+                step.metrics.get("no_solve_contract_pass") is True
+                for step in execution.path.steps
+            )
+        )
         and not unsupported
     )
     if not ready:
@@ -760,12 +1070,13 @@ def _analyze_corotational_portal(
             status="blocked",
             profile=config.profile,
             source_result_hash=None,
+            engineering_result_ir=None,
             model=model,
             solver_id="public_cpu_corotational_rc_fiber_frame_newton_v1",
             compiler_profile=selected_compiler_profile,
             configuration=configuration,
             contract_bindings=(
-                {"problem_contract_hash": compiled.problem.contract_hash}
+                _corotational_plan_bindings(compiled, terminal_trace)
                 if compiled is not None
                 else {}
             ),
@@ -819,6 +1130,30 @@ def _analyze_corotational_portal(
         for index, step in enumerate(execution.path.steps, start=1)
         for row in step.trial_solution.convergence_history
     )
+    scaling_metrics: dict[str, Any]
+    if terminal_trace is None:
+        scaling_metrics = {
+            "terminal_physical_residual_trace_status": "unavailable",
+            "terminal_physical_residual_trace_reason": (
+                "no_free_equations_no_convergence_claim"
+            ),
+        }
+    else:
+        scaling_metrics = {
+            "terminal_physical_residual_trace_status": "available",
+            "terminal_physical_residual_trace_hash": terminal_trace.trace_hash,
+            "characteristic_length_m": terminal_trace.characteristic_length_m,
+            "reference_force_n": terminal_trace.reference_force_n,
+            "raw_translational_residual_linf_n": (
+                terminal_trace.raw_translation_linf_n
+            ),
+            "raw_rotational_residual_linf_nm": (terminal_trace.raw_rotation_linf_nm),
+            "dimensionless_scaled_residual_linf": terminal_trace.scaled_linf,
+            "dimensionless_scaled_residual_l2": terminal_trace.scaled_l2,
+            "scaled_residual_governing_equation": (terminal_trace.governing_equation),
+            "scaled_residual_governing_node_id": (terminal_trace.governing_node_id),
+            "scaled_residual_governing_dof": terminal_trace.governing_dof,
+        }
     metrics = {
         "solver_executed": bool(
             execution.replayed_prefix_step_count or execution.newly_solved_step_count
@@ -835,18 +1170,41 @@ def _analyze_corotational_portal(
             matrix_backend=config.matrix_backend,
         ),
         "external_level2_attached": False,
+        **scaling_metrics,
         **dict(engineering.metrics),
+    }
+    if compiled.equation_scaling is None:
+        equation_scaling_configuration: dict[str, Any] = {
+            "status": "unavailable",
+            "reason": "no_free_reference_load",
+        }
+    else:
+        equation_scaling_configuration = {
+            "status": "available",
+            "schema_version": compiled.equation_scaling.engine_scaling.schema_version,
+            "characteristic_length_m": (
+                compiled.equation_scaling.characteristic_length_m
+            ),
+            "reference_force_n": compiled.equation_scaling.reference_force_n,
+            "equation_scope": (
+                compiled.equation_scaling.engine_scaling.reference_equation_scope
+            ),
+        }
+    configuration = {
+        **configuration,
+        "equation_scaling": equation_scaling_configuration,
     }
     return _make_result(
         status="ready",
         profile=config.profile,
         source_result_hash=engineering.engineering_result_hash,
+        engineering_result_ir=engineering.to_manifest(),
         model=model,
         solver_id="public_cpu_corotational_rc_fiber_frame_newton_v1",
         compiler_profile=adapter.compiler_profile,
         configuration=configuration,
         contract_bindings={
-            "problem_contract_hash": compiled.problem.contract_hash,
+            **_corotational_plan_bindings(compiled, terminal_trace),
             "compiler_hash": adapter.compiler_hash,
             "j1_j5_adapter_hash": adapter.adapter_hash,
             "engineering_result_hash": engineering.engineering_result_hash,
@@ -861,6 +1219,9 @@ def _analyze_corotational_portal(
                 "displacement": "exact_bounded_candidate",
                 "reaction": "exact_bounded_candidate",
                 "member_force": "exact_bounded_candidate",
+                "member_features": (
+                    "exact_bounded_candidate" if general_profile else "not_supported"
+                ),
                 "section_resultant": "exact_bounded_candidate",
                 "fiber_result": "exact_bounded_candidate",
                 "fallback": "not_used",
@@ -887,7 +1248,24 @@ def _compile_portal(
     model: CanonicalModel,
     *,
     general_profile: bool = False,
+    source_model_ir_adapter: BoundedPlanarModelIRAdapter | None = None,
 ) -> _CompiledPortal:
+    if source_model_ir_adapter is not None:
+        if type(source_model_ir_adapter) is not BoundedPlanarModelIRAdapter:
+            _fail(
+                "bounded_planar_model_ir_adapter_type_invalid",
+                "/source_model_ir_adapter",
+                "Expected an exact bounded planar ModelIR adapter.",
+            )
+        if (
+            source_model_ir_adapter.canonical_model_checksum
+            != model.canonical_model_checksum
+        ):
+            _fail(
+                "bounded_planar_model_ir_adapter_target_mismatch",
+                "/source_model_ir_adapter/canonical_model_checksum",
+                "ModelIR adapter target differs from the analysis snapshot.",
+            )
     if model.schema_version != CANONICAL_MODEL_SCHEMA_VERSION:
         _fail(
             "corotational_portal_schema_invalid",
@@ -1370,6 +1748,47 @@ def _compile_portal(
                 model_content_hash=model.canonical_model_checksum,
             )
         )
+        model_ir_adapter_hash = _corotational_model_ir_adapter_hash(
+            model=model,
+            problem=problem,
+            compilation=compilation,
+            node_ids=tuple(node_ids),
+        )
+        topology_plan = compile_stateful_fiber_frame2d_execution_topology(
+            problem,
+            model_ir_content_hash=(
+                source_model_ir_adapter.model_ir_content_hash
+                if source_model_ir_adapter is not None
+                else model_ir_adapter_hash
+            ),
+            node_ids=tuple(node_ids),
+        )
+        free_physical_dofs = topology_plan.array("free_physical_dofs")
+        reference_load = topology_plan.array("reference_external_load_physical_6dof")
+        has_free_reference_load = bool(
+            free_physical_dofs.size
+            and any(
+                float(reference_load[int(dof)]) != 0.0 for dof in free_physical_dofs
+            )
+        )
+        equation_scaling = (
+            create_stateful_fiber_frame2d_physical_equation_scaling(
+                problem,
+                topology_plan,
+            )
+            if has_free_reference_load
+            else None
+        )
+        bounded_execution_plan = (
+            create_bounded_planar_execution_plan_binding(
+                model_ir_adapter=source_model_ir_adapter,
+                problem=problem,
+                topology_plan=topology_plan,
+                equation_scaling=equation_scaling,
+            )
+            if source_model_ir_adapter is not None
+            else None
+        )
     except (CorotationalFiberFrameGeneralError, CorotationalFiberFrameJ1J5Error):
         raise
     except ValueError as exc:
@@ -1380,7 +1799,85 @@ def _compile_portal(
         node_ids=tuple(node_ids),
         section_by_member=tuple(member_sections),
         support_node_ids=tuple(support_ids),
+        model_ir_adapter_hash=model_ir_adapter_hash,
+        topology_plan=topology_plan,
+        equation_scaling=equation_scaling,
+        bounded_execution_plan=bounded_execution_plan,
     )
+
+
+def _corotational_model_ir_adapter_hash(
+    *,
+    model: CanonicalModel,
+    problem: StatefulCorotationalFiberFrame2DProblem,
+    compilation: (
+        CorotationalFiberFramePortalCompilation
+        | CorotationalFiberFrameGeneralCompilation
+    ),
+    node_ids: tuple[str, ...],
+) -> str:
+    """Bind the canonical input to the bounded nonlinear topology source.
+
+    This remains the fallback source identity for direct CanonicalModel calls.
+    The bounded ModelIR entry point binds its actual content hash separately.
+    """
+
+    return canonical_hash(
+        {
+            "schema_version": "nonlinear-frame-model-ir-adapter.v1",
+            "adapter_profile": "canonical_model_to_connected_frame2d_problem.v1",
+            "source_schema_version": model.schema_version,
+            "source_canonical_model_checksum": model.canonical_model_checksum,
+            "source_input_checksum": model.input_checksum,
+            "problem_contract_hash": problem.contract_hash,
+            "compiler_hash": compilation.compiler_hash,
+            "node_ids": list(node_ids),
+            "member_ids": [member.member_id for member in problem.members],
+            "member_feature_contract_hashes": [
+                member.features.contract_hash for member in problem.members
+            ],
+            "solver_dof_components": list(_ACTIVE_COMPONENTS),
+            "canonical_dof_components": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+            "model_ir_v2_representation_claim": False,
+            "claim_boundary": (
+                "Profile-specific fail-closed adapter identity only; no general "
+                "ModelIR v2 nonlinear-material representation authority."
+            ),
+        }
+    )
+
+
+def _corotational_plan_bindings(
+    compiled: _CompiledPortal,
+    terminal_trace: FiberFramePhysicalResidualTrace | None = None,
+) -> dict[str, Any]:
+    plan = compiled.topology_plan
+    scaling = compiled.equation_scaling
+    bindings: dict[str, Any] = {
+        "problem_contract_hash": compiled.problem.contract_hash,
+        "model_ir_adapter_hash": compiled.model_ir_adapter_hash,
+        "nonlinear_execution_topology_plan_hash": plan.plan_hash,
+        "dof_ordering_hash": plan.entity_mapping_hash,
+        "topology_hash": plan.topology_hash,
+        "solver_coordinate_scaling_hash": plan.solver_coordinate_scaling_hash,
+    }
+    if plan.model_ir_content_hash != compiled.model_ir_adapter_hash:
+        bindings["topology_model_ir_content_hash"] = plan.model_ir_content_hash
+    if compiled.bounded_execution_plan is not None:
+        bindings["bounded_planar_execution_plan"] = (
+            compiled.bounded_execution_plan.to_dict()
+        )
+    if scaling is not None:
+        bindings.update(
+            {
+                "physical_equation_scaling_binding_hash": scaling.binding_hash,
+                "engine_equation_scaling_hash": (scaling.engine_equation_scaling_hash),
+                "equation_order_hash": scaling.equation_order_hash,
+            }
+        )
+    if terminal_trace is not None:
+        bindings["terminal_physical_residual_trace_hash"] = terminal_trace.trace_hash
+    return bindings
 
 
 def _run_corotational_path(
@@ -1521,6 +2018,30 @@ def _resume_contract_hash(
             "model_content_hash": compiled.compilation.model_content_hash,
             "compiler_hash": compiled.compilation.compiler_hash,
             "problem_contract_hash": compiled.problem.contract_hash,
+            "model_ir_adapter_hash": compiled.model_ir_adapter_hash,
+            "nonlinear_execution_topology_plan_hash": (
+                compiled.topology_plan.plan_hash
+            ),
+            "bounded_planar_execution_plan_hash": (
+                compiled.bounded_execution_plan.binding_hash
+                if compiled.bounded_execution_plan is not None
+                else None
+            ),
+            **(
+                {
+                    "physical_equation_scaling_binding_hash": (
+                        compiled.equation_scaling.binding_hash
+                    ),
+                    "engine_equation_scaling_hash": (
+                        compiled.equation_scaling.engine_equation_scaling_hash
+                    ),
+                }
+                if compiled.equation_scaling is not None
+                else {
+                    "equation_scaling_status": "unavailable",
+                    "equation_scaling_reason": "no_free_reference_load",
+                }
+            ),
             "load_steps": config.load_steps,
             "target_load_factors": list(config.target_load_factors),
             "residual_tolerance": config.residual_tolerance,
@@ -1695,6 +2216,7 @@ def _make_result(
     status: Literal["ready", "blocked"],
     profile: NonlinearFrameProfile,
     source_result_hash: str | None,
+    engineering_result_ir: Mapping[str, Any] | None,
     model: CanonicalModel,
     solver_id: str,
     compiler_profile: str,
@@ -1720,6 +2242,11 @@ def _make_result(
         result_hash=_HASH_ZERO,
         profile=profile,
         source_result_hash=source_result_hash,
+        engineering_result_ir=(
+            None
+            if engineering_result_ir is None
+            else cast(Mapping[str, Any], _freeze_json(engineering_result_ir))
+        ),
         canonical_model_checksum=model.canonical_model_checksum,
         input_checksum=model.input_checksum,
         solver_id=solver_id,
@@ -1735,7 +2262,10 @@ def _make_result(
         fiber_results=tuple(dict(row) for row in fiber_results),
         convergence_history=tuple(dict(row) for row in convergence_history),
         metrics=MappingProxyType(dict(metrics)),
-        unsupported_features=tuple(dict(row) for row in unsupported_features),
+        unsupported_features=tuple(
+            _normalize_unsupported_feature(row, index=index)
+            for index, row in enumerate(unsupported_features)
+        ),
         warnings=tuple(str(row) for row in warnings),
         _checkpoint_bytes=checkpoint_bytes,
     )
@@ -1745,6 +2275,198 @@ def _make_result(
     )
 
 
+def _bind_source_model_ir_adapter(
+    result: NonlinearFrameResult,
+    adapter: BoundedPlanarModelIRAdapter,
+) -> NonlinearFrameResult:
+    if "source_model_ir_adapter" in result.contract_bindings:
+        raise ValueError("unified result already has a source ModelIR adapter binding")
+    receipt = adapter.to_dict()
+    validate_bounded_planar_model_ir_adapter_manifest(receipt)
+    provisional = replace(
+        result,
+        result_hash=_HASH_ZERO,
+        contract_bindings=MappingProxyType(
+            {
+                **dict(result.contract_bindings),
+                "source_model_ir_adapter": receipt,
+            }
+        ),
+    )
+    bound = replace(
+        provisional,
+        result_hash=canonical_hash(_result_payload(provisional, include_hash=False)),
+    )
+    validate_nonlinear_frame_result(bound)
+    return bound
+
+
+def _validate_source_model_ir_adapter_binding(
+    *,
+    profile: NonlinearFrameProfile,
+    input_checksum: str,
+    canonical_model_checksum: str,
+    contract_bindings: Mapping[str, Any],
+) -> None:
+    raw = contract_bindings.get("source_model_ir_adapter")
+    if raw is None:
+        return
+    if not isinstance(raw, Mapping):
+        raise ValueError("source ModelIR adapter binding must be an object")
+    receipt = validate_bounded_planar_model_ir_adapter_manifest(raw)
+    if profile != COROTATIONAL_GENERAL_PROFILE:
+        raise ValueError(
+            "source ModelIR adapter requires the connected Frame2D profile"
+        )
+    if input_checksum != receipt["model_ir_content_hash"]:
+        raise ValueError("unified input checksum differs from source ModelIR content")
+    if canonical_model_checksum != receipt["canonical_model_checksum"]:
+        raise ValueError("unified canonical model differs from ModelIR adapter target")
+    if (
+        contract_bindings.get("topology_model_ir_content_hash")
+        != receipt["model_ir_content_hash"]
+    ):
+        raise ValueError("nonlinear topology plan differs from source ModelIR content")
+    raw_plan = contract_bindings.get("bounded_planar_execution_plan")
+    if not isinstance(raw_plan, Mapping):
+        raise ValueError("source ModelIR result requires a bounded execution plan")
+    plan = validate_bounded_planar_execution_plan_manifest(raw_plan)
+    for plan_key, receipt_key in (
+        ("model_ir_content_hash", "model_ir_content_hash"),
+        ("model_ir_semantic_hash", "model_ir_semantic_hash"),
+        ("model_ir_provenance_hash", "model_ir_provenance_hash"),
+        ("model_ir_adapter_hash", "adapter_hash"),
+        ("canonical_model_checksum", "canonical_model_checksum"),
+        ("load_pattern_id", "load_pattern_id"),
+    ):
+        if plan[plan_key] != receipt[receipt_key]:
+            raise ValueError(
+                f"bounded execution plan {plan_key} differs from ModelIR adapter"
+            )
+    for binding_key, plan_key in (
+        ("problem_contract_hash", "problem_contract_hash"),
+        ("nonlinear_execution_topology_plan_hash", "topology_plan_hash"),
+        ("dof_ordering_hash", "entity_mapping_hash"),
+        ("topology_hash", "topology_hash"),
+        ("solver_coordinate_scaling_hash", "solver_coordinate_scaling_hash"),
+    ):
+        if contract_bindings.get(binding_key) != plan[plan_key]:
+            raise ValueError(
+                f"unified {binding_key} differs from bounded execution plan"
+            )
+    if plan["equation_scaling_status"] == "available":
+        for binding_key, plan_key in (
+            (
+                "physical_equation_scaling_binding_hash",
+                "physical_equation_scaling_binding_hash",
+            ),
+            ("engine_equation_scaling_hash", "engine_equation_scaling_hash"),
+            ("equation_order_hash", "equation_order_hash"),
+        ):
+            if contract_bindings.get(binding_key) != plan[plan_key]:
+                raise ValueError(
+                    f"unified {binding_key} differs from bounded execution plan"
+                )
+
+
+def _normalize_unsupported_feature(
+    row: Mapping[str, Any],
+    *,
+    index: int,
+    source_model: bool = False,
+) -> dict[str, Any]:
+    """Project blockers onto the stable public unsupported contract.
+
+    ``kind`` remains the detailed diagnostic identifier. ``reason_code`` is the
+    deliberately small routing vocabulary consumed by public callers. Source
+    diagnostics may carry arbitrary metadata, so fields outside the public
+    contract are retained under ``source_context`` rather than silently lost.
+    """
+
+    source = dict(row)
+    raw_kind = source.get("kind")
+    if isinstance(raw_kind, str) and re.fullmatch(r"[a-z][a-z0-9_]{2,127}", raw_kind):
+        kind = raw_kind
+    else:
+        kind = (
+            "canonical_model_unsupported_feature_invalid"
+            if source_model
+            else "corotational_unsupported_feature_invalid"
+        )
+
+    raw_path = source.get("path")
+    path = (
+        raw_path
+        if isinstance(raw_path, str) and raw_path.startswith("/")
+        else f"/unsupported_features/{index}"
+        if source_model
+        else "/solver"
+    )
+    raw_detail = source.get("detail")
+    detail = (
+        raw_detail.strip()
+        if isinstance(raw_detail, str) and raw_detail.strip()
+        else f"{kind}@{path}: Unsupported feature reported without detail."
+    )
+
+    supplied_reason = source.get("reason_code")
+    reason_code = (
+        supplied_reason
+        if isinstance(supplied_reason, str)
+        and supplied_reason in UNIFIED_NONLINEAR_FRAME_UNSUPPORTED_REASON_CODES
+        else _unsupported_reason_code(kind, path, source_model=source_model)
+    )
+    normalized: dict[str, Any] = {
+        "reason_code": reason_code,
+        "kind": kind,
+        "path": path,
+        "detail": detail,
+    }
+    existing_context = source.get("source_context")
+    source_context = (
+        {str(key): _thaw_json(value) for key, value in existing_context.items()}
+        if isinstance(existing_context, Mapping)
+        else {}
+    )
+    source_context.update(
+        {
+            str(key): _thaw_json(value)
+            for key, value in source.items()
+            if key not in {"reason_code", "kind", "path", "detail", "source_context"}
+        }
+    )
+    if source_context:
+        normalized["source_context"] = source_context
+    return normalized
+
+
+def _unsupported_reason_code(
+    kind: str,
+    path: str,
+    *,
+    source_model: bool,
+) -> str:
+    if source_model:
+        return "source_model_unsupported"
+    if kind == "corotational_equation_scaling_unavailable":
+        return "equation_scaling_unavailable"
+    if kind == "corotational_released_mechanism_detected":
+        return "mechanism_detected"
+    if kind == "corotational_singular_system_detected":
+        return "singular_system_detected"
+    if kind == "corotational_rigid_body_constraint_rank_deficient":
+        return "singular_system_detected"
+    if kind.startswith("corotational_restart_") or path.startswith(
+        "/restart_checkpoint_chain"
+    ):
+        return "restart_artifact_invalid"
+    if kind.endswith(("_execution_failed", "_solver_blocked")):
+        return "solver_execution_failed"
+    if "_unsupported" in kind or kind.startswith("corotational_member_"):
+        return "profile_feature_unsupported"
+    return "input_contract_unsupported"
+
+
 def _blocked_authority() -> Mapping[str, str]:
     return MappingProxyType(
         {
@@ -1752,6 +2474,7 @@ def _blocked_authority() -> Mapping[str, str]:
             "displacement": "not_authoritative",
             "reaction": "not_authoritative",
             "member_force": "not_authoritative",
+            "member_features": "not_authoritative",
             "section_resultant": "not_authoritative",
             "fiber_result": "not_authoritative",
             "fallback": "not_authoritative",
@@ -1772,6 +2495,11 @@ def _result_payload(
         "contract_pass": result.contract_pass,
         "profile": result.profile,
         "source_result_hash": result.source_result_hash,
+        "engineering_result_ir": (
+            _thaw_json(result.engineering_result_ir)
+            if result.engineering_result_ir is not None
+            else None
+        ),
         "canonical_model_checksum": result.canonical_model_checksum,
         "input_checksum": result.input_checksum,
         "solver_id": result.solver_id,
@@ -1794,6 +2522,86 @@ def _result_payload(
     if include_hash:
         payload["result_hash"] = result.result_hash
     return payload
+
+
+def _validate_engineering_result_ir_binding(
+    *,
+    profile: NonlinearFrameProfile,
+    status: Literal["ready", "blocked"],
+    source_result_hash: str | None,
+    engineering_result_ir: Mapping[str, Any] | None,
+    contract_bindings: Mapping[str, Any],
+    authority: Mapping[str, str],
+) -> None:
+    if profile == FIXED_CHORD_SERIAL_PROFILE:
+        if engineering_result_ir is not None:
+            raise ValueError(
+                "fixed-chord result must not invent a corotational engineering ResultIR"
+            )
+        return
+    if status == "blocked":
+        if engineering_result_ir is not None:
+            raise ValueError("blocked result must not expose an engineering ResultIR")
+        return
+    if engineering_result_ir is None:
+        raise ValueError("ready corotational result requires an engineering ResultIR")
+    manifest = validate_corotational_fiber_frame_engineering_result_manifest(
+        cast(Mapping[str, Any], _thaw_json(engineering_result_ir))
+    )
+    engineering_hash = manifest["engineering_result_hash"]
+    if (
+        source_result_hash != engineering_hash
+        or contract_bindings.get("engineering_result_hash") != engineering_hash
+        or contract_bindings.get("engineering_array_bundle_hash")
+        != manifest["array_bundle_hash"]
+        or contract_bindings.get("quantity_catalog_hash")
+        != manifest["quantity_catalog_hash"]
+    ):
+        raise ValueError(
+            "engineering ResultIR differs from unified result contract bindings"
+        )
+    expected_kind = (
+        "corotational_connected_frame2d_reaction_member_section_fiber"
+        if profile == COROTATIONAL_GENERAL_PROFILE
+        else "corotational_portal_reaction_member_section_fiber"
+    )
+    if manifest["result_kind"] != expected_kind:
+        raise ValueError("engineering ResultIR profile differs from unified profile")
+    for axis in (
+        "convergence",
+        "displacement",
+        "reaction",
+        "member_force",
+        "member_features",
+        "section_resultant",
+        "fiber_result",
+        "fallback",
+        "external_vv",
+        "engineering_design",
+        "release_readiness",
+    ):
+        if authority.get(axis) != manifest["authority_axes"].get(axis):
+            raise ValueError(f"engineering ResultIR authority axis differs: {axis}")
+
+
+def _freeze_json(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return MappingProxyType(
+            {str(key): _freeze_json(item) for key, item in value.items()}
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(_freeze_json(item) for item in value)
+    if value is None or type(value) in (bool, int, float, str):
+        return value
+    raise ValueError("engineering ResultIR must contain only finite JSON values")
+
+
+def _thaw_json(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {str(key): _thaw_json(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_thaw_json(item) for item in value]
+    return value
 
 
 def _artifact_hash(data: bytes | bytearray | memoryview) -> str:
@@ -2098,6 +2906,7 @@ __all__ = [
     "UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY",
     "UNIFIED_NONLINEAR_FRAME_REPORT_SCHEMA_VERSION",
     "UNIFIED_NONLINEAR_FRAME_SCHEMA_VERSION",
+    "UNIFIED_NONLINEAR_FRAME_UNSUPPORTED_REASON_CODES",
     "NonlinearFrameConfig",
     "NonlinearFrameCheckpointAdvance",
     "NonlinearFrameError",
@@ -2105,7 +2914,10 @@ __all__ = [
     "NonlinearFrameResult",
     "NonlinearFrameValidationReport",
     "analyze_nonlinear_frame",
+    "analyze_nonlinear_frame_model_ir",
     "advance_nonlinear_frame_checkpoint",
+    "advance_nonlinear_frame_model_ir_checkpoint",
+    "nonlinear_frame_model_ir_resume_contract_hash",
     "nonlinear_frame_resume_contract_hash",
     "validate_nonlinear_frame_manifest",
     "validate_nonlinear_frame_result",

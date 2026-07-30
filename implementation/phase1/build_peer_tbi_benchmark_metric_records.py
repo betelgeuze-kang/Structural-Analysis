@@ -344,9 +344,16 @@ def _reason_code(
     peer_source_exists: bool,
     peer_gate_exists: bool,
     required_groups_represented: bool,
+    required_values_present: bool,
     raw_redistribution_default: bool,
 ) -> str:
-    if peer_source_exists and peer_gate_exists and required_groups_represented and not raw_redistribution_default:
+    if (
+        peer_source_exists
+        and peer_gate_exists
+        and required_groups_represented
+        and required_values_present
+        and not raw_redistribution_default
+    ):
         return "PASS"
     if not peer_source_exists:
         return "ERR_PEER_TBI_SOURCE_FAMILY_MISSING"
@@ -354,7 +361,9 @@ def _reason_code(
         return "ERR_PEER_TBI_BENCHMARK_TARGETS_MISSING"
     if raw_redistribution_default:
         return "ERR_PEER_TBI_RAW_REDISTRIBUTION_NOT_BLOCKED"
-    return "ERR_REQUIRED_METRIC_GROUPS_MISSING"
+    if not required_groups_represented:
+        return "ERR_REQUIRED_METRIC_GROUPS_MISSING"
+    return "ERR_REQUIRED_METRIC_VALUES_UNAVAILABLE"
 
 
 def _value_present(value: Any) -> bool:
@@ -410,10 +419,12 @@ def build_metric_records(
         }
     )
     required_groups_represented = set(REQUIRED_METRIC_GROUPS) <= set(represented_groups)
+    required_values_present = set(REQUIRED_METRIC_GROUPS) <= set(groups_with_value)
     contract_pass = (
         peer_source_exists
         and peer_gate_exists
         and required_groups_represented
+        and required_values_present
         and not raw_redistribution_default
     )
     raw_redistribution_auto_allowed = False
@@ -429,6 +440,7 @@ def build_metric_records(
             peer_source_exists,
             peer_gate_exists,
             required_groups_represented,
+            required_values_present,
             raw_redistribution_default,
         ),
         "raw_redistribution_default": raw_redistribution_default,
@@ -470,7 +482,15 @@ def build_metric_records(
                 "required_metric_groups": REQUIRED_METRIC_GROUPS,
                 "coverage_matrix_targets": coverage_targets,
                 "represented_metric_groups": represented_groups,
-                "contract_pass": peer_gate_exists and required_groups_represented,
+                "metric_groups_with_value": groups_with_value,
+                "metric_groups_missing_value": sorted(
+                    set(REQUIRED_METRIC_GROUPS) - set(groups_with_value)
+                ),
+                "contract_pass": (
+                    peer_gate_exists
+                    and required_groups_represented
+                    and required_values_present
+                ),
             },
             {
                 "gate_id": "P1_RAW_REDISTRIBUTION_SAFETY",

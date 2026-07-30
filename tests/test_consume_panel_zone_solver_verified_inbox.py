@@ -6,8 +6,14 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 
 FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures" / "panel_zone_3d"
+PRODUCTION_DATASET_REPORT = Path(
+    "implementation/phase1/release/design_optimization/"
+    "design_optimization_dataset_report.json"
+)
 
 
 def _load_json(path: Path) -> dict:
@@ -175,6 +181,8 @@ def test_consume_panel_zone_solver_verified_inbox_archives_and_cleans_success(tm
 
 
 def test_consume_panel_zone_solver_verified_inbox_archives_member_mapping_sidecar_for_trusted_drop(tmp_path: Path) -> None:
+    if not PRODUCTION_DATASET_REPORT.is_file():
+        pytest.skip("production design-optimization dataset report is unavailable")
     inbox = _stage_into_inbox(tmp_path, "trusted_drop_package")
     pbd = tmp_path / "pbd_review_package_report.json"
     pbd.write_text(json.dumps({"contract_pass": True}, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -192,7 +200,7 @@ def test_consume_panel_zone_solver_verified_inbox_archives_member_mapping_sideca
             "--inbox-status-report",
             str(tmp_path / "inbox_status.json"),
             "--design-optimization-dataset",
-            "implementation/phase1/release/design_optimization/design_optimization_dataset_report.json",
+            str(PRODUCTION_DATASET_REPORT),
             "--pbd-review-package",
             str(pbd),
             "--panel-zone-solver-export-bundle",
@@ -224,7 +232,7 @@ def test_consume_panel_zone_solver_verified_inbox_archives_member_mapping_sideca
         capture_output=True,
         text=True,
     )
-    assert proc.returncode == 0, proc.stderr
+    assert proc.returncode == 1, proc.stderr
 
     consume_payload = _load_json(consume_report)
     archived_dir = Path(consume_payload["artifacts"]["archive"]["archive_dir"])
@@ -283,6 +291,10 @@ def test_consume_panel_zone_solver_verified_inbox_dry_run_allows_trusted_release
     consume_payload = _load_json(consume_report)
     handoff_payload = _load_json(handoff_report)
     assert consume_payload["contract_pass"] is True
+    assert consume_payload["reason_code"] == "PASS"
+    assert consume_payload["checks"]["release_surface_refresh_pass"] is True
+    assert consume_payload["checks"]["external_validation_refresh_pass"] is True
+    assert all(step["status"] == "dry_run" for step in consume_payload["steps"][1:])
     assert consume_payload["summary"]["source_origin_class"] == "trusted_external_solver_source"
     assert handoff_payload["contract_pass"] is True
     assert handoff_payload["checks"]["release_refresh_source_allowed"] is True

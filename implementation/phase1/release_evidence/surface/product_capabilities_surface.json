@@ -6,9 +6,9 @@
       "capability_id": "vv.opensees_level2",
       "capability_kind": "verification",
       "contract_pass": false,
-      "evidence_artifact_count": 11,
+      "evidence_artifact_count": 61,
       "first_blocked_target": "",
-      "first_next_action": "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent.",
+      "first_next_action": "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted.",
       "gate_unblock_plan_count": 0,
       "handoff_slot": {},
       "operator_intake_artifact": "",
@@ -26,9 +26,9 @@
       "capability_id": "vv.second_solver_level2",
       "capability_kind": "verification",
       "contract_pass": false,
-      "evidence_artifact_count": 4,
+      "evidence_artifact_count": 7,
       "first_blocked_target": "",
-      "first_next_action": "Fresh pinned CalculiX comparisons pass narrowly, but independent operator attestation, legal review, broader coverage, and a second-solver Level 2 promotion receipt are absent.",
+      "first_next_action": "Fresh checksum-bound current-source host receipts record actual same-operator CalculiX execution. The retained local clean-runner summary has mismatched host/container source and metric sets, so it is unavailable for current container-parity credit. No retained GitHub workflow attestation, independent operator attestation, legal review, broader coverage, or second-solver Level 2 promotion receipt is attached.",
       "gate_unblock_plan_count": 0,
       "handoff_slot": {},
       "operator_intake_artifact": "",
@@ -85,7 +85,7 @@
   "blocked_capability_register_count": 4,
   "blockers": [],
   "canonical_registry": "artifacts/manifests/capabilities.yaml",
-  "capability_count": 19,
+  "capability_count": 31,
   "capability_rows": [
     {
       "blocker_count": 0,
@@ -168,7 +168,9 @@
       "contract_pass": true,
       "evidence_artifacts": [
         "docs/authoritative-cpu-linear-solver.md",
-        "tests/test_structural_analysis_core_api.py"
+        "src/structural_analysis/solvers/equation_scaling_6dof.py",
+        "tests/test_structural_analysis_core_api.py",
+        "tests/test_equation_scaling_6dof.py"
       ],
       "next_actions": [],
       "state": "bounded_public",
@@ -180,6 +182,7 @@
           "workbench"
         ],
         "limitations": [
+          "Dense and sparse solves use the same source-bound 6DOF force/moment row and rotation-column scaling; scaling inputs reject coercive or value-losing conversion to real binary64, and exact scaled condition numbers are emitted only through 256 free equations and remain explicitly unavailable above that bound.",
           "No general shell, contact, staged-construction, or design-code authority."
         ],
         "profile": "cpu_dense_or_scipy_sparse_supported_frame_truss",
@@ -194,6 +197,9 @@
       "contract_pass": true,
       "evidence_artifacts": [
         "docs/phase2-whole-model-modal-analysis.md",
+        "src/structural_analysis/solvers/equation_scaling_6dof.py",
+        "src/structural_analysis/solvers/modal/solver.py",
+        "tests/test_modal_generalized_eigen_v1.py",
         "tests/test_whole_model_modal_analysis.py"
       ],
       "next_actions": [],
@@ -205,6 +211,7 @@
           "cli"
         ],
         "limitations": [
+          "The reduced stiffness and mass matrices use source-bound 6DOF symmetric coordinate scaling before eigen extraction; physical mode vectors are recovered and rechecked against the original matrices.",
           "The public default is dense and no independent Level 2 comparison is promoted."
         ],
         "profile": "dense_symmetric_generalized_eigen_v1",
@@ -219,6 +226,9 @@
       "contract_pass": true,
       "evidence_artifacts": [
         "docs/phase2-whole-model-linear-buckling.md",
+        "src/structural_analysis/solvers/equation_scaling_6dof.py",
+        "src/structural_analysis/solvers/buckling/solver.py",
+        "tests/test_buckling_generalized_eigen_v1.py",
         "tests/test_whole_model_buckling_analysis.py"
       ],
       "next_actions": [],
@@ -230,6 +240,7 @@
           "cli"
         ],
         "limitations": [
+          "The reduced elastic and geometric stiffness matrices use source-bound 6DOF symmetric coordinate scaling before eigen extraction; physical buckling vectors are recovered and rechecked against the original matrices.",
           "The public default is dense and no independent Level 2 comparison is promoted."
         ],
         "profile": "dense_symmetric_generalized_eigen_v1",
@@ -322,18 +333,41 @@
       "evidence_artifacts": [
         "docs/unified-nonlinear-frame-api.md",
         "docs/corotational-connected-frame2d.md",
+        "docs/fiber-frame-physical-equation-scaling.md",
         "docs/corotational-fiber-frame-native-sparse.md",
         "src/structural_analysis/api/nonlinear_frame.py",
+        "src/structural_analysis/adapters/bounded_planar_model_ir.py",
+        "src/structural_analysis/adapters/bounded_planar_execution_plan.py",
+        "src/structural_analysis/schemas/model_ir_v2.schema.json",
+        "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py",
+        "src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_checkpoint_chain_io.py",
         "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py",
         "src/structural_analysis/schemas/unified_nonlinear_frame_result_v1.schema.json",
         "src/structural_analysis/schemas/corotational_fiber_frame_general_j1_j5_v1.schema.json",
+        ".github/workflows/engine-v2-determinism-ci.yml",
+        "scripts/build_engine_v2_cross_platform_determinism_receipt.py",
+        "src/structural_analysis/schemas/engine_v2_cross_platform_determinism_run_receipt_v1.schema.json",
+        "src/structural_analysis/schemas/engine_v2_cross_platform_determinism_matrix_receipt_v1.schema.json",
+        "scripts/verify_bounded_planar_wheel_smoke.py",
+        ".github/workflows/opensees-calculix-current-source.yml",
         "tests/test_corotational_fiber_frame_general.py",
         "tests/test_corotational_fiber_frame_sparse.py",
+        "tests/test_engine_v2_cross_platform_goldens.py",
+        "tests/test_build_engine_v2_cross_platform_determinism_receipt.py",
+        "tests/test_stateful_corotational_fiber_frame2d_equation_scaling.py",
         "tests/test_unified_nonlinear_frame_api.py",
-        "examples/public_corotational_branching_frame.json"
+        "tests/test_bounded_planar_model_ir_adapter.py",
+        "tests/test_external_code_to_code_technical_receipt.py",
+        "examples/public_corotational_branching_frame.json",
+        "examples/bounded_planar_frame_alpha.model-ir.v2.json",
+        "examples/bounded_planar_settlement.model-ir.v2.json",
+        "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+        "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json",
+        "docs/external-code-to-code-technical-execution.md",
+        "docs/opensees-calculix-current-source-workflow.md"
       ],
       "next_actions": [],
       "state": "experimental",
@@ -344,7 +378,7 @@
           "cli"
         ],
         "limitations": [
-          "Connected planar 2-128-node, 1-256-non-parallel-member load-control CPU dense or native COO/CSR candidate with branching, support UX/UY/RZ subsets, proportional nodal loads, and proportional prescribed displacement; disconnected graphs, parallel members, releases, rigid offsets, distributed loads, direct displacement control, production-scale conditioning, both independent Level 2 comparisons, and release promotion remain open."
+          "Connected planar load-control remains experimental and non-public. ModelIR v2 profile bounded_planar_frame_alpha represents the exact nonlinear materials, rectangular RC fiber sections, six-DOF constraints, planar member features, and one nonlinear load pattern; its typed adapter binds source content/semantic/provenance hashes through a typed bounded nonlinear ExecutionPlan receipt, EquationScaling, topology, and unified engineering result. The ExecutionPlan receipt grants source-bound topology and DOF-ordering identity only; convergence and numerical-result authority remain separate. The unified entry executes bounded finite rigid offsets, RZ end releases, and initial-local uniform member dead loads with exact bounded engineering-recovery authority; blocked results expose a schema-enforced stable reason_code plus detailed kind/path/detail. The nonlinear ExecutionPlan remains distinct from linear-static Engine v2 ExecutionPlan v1. A source-bound Ubuntu/Windows and Python 3.10/3.12 exact result/checkpoint/recovery replay gate now enters through the public ModelIR v2 adapter for both the member-feature and prescribed-settlement fixtures and binds each fixture's content, semantic, provenance, adapter, execution-plan, result, checkpoint, and recovery hashes; no retained passing current-source four-way platform matrix receipt is attached yet. Fresh checksum-bound current-source host receipts record actual same-operator OpenSees/CalculiX execution for the exact cantilever, member-feature, prescribed-settlement, column-buckling, reaction, and member-recovery rows. The retained clean-runner summary has mismatched host/container source and metric sets, so same_operator_execution_binding is unavailable and supplies no current container-parity credit. The separate main-only GitHub provenance workflow still has no retained run attestation, so current_source_execution_attached=false remains for that workflow only. Independent operator attestation and Level 2 promotion remain absent, so external_vv_level stays 0. Direct displacement control remains lower-level only. Prescribed-only iterative paths with free equations and no force reference fail closed until a source-bound kinematic reference-force scaling contract exists. No other member-feature family, design, or release authority is created."
         ],
         "profile": "corotational_connected_frame2d.v1",
         "public": false
@@ -397,13 +431,63 @@
         "scripts/run_external_code_to_code_technical_receipt.py",
         "scripts/run_external_modal_buckling_technical_receipt.py",
         "scripts/run_external_vv_clean_runner.sh",
+        ".github/workflows/opensees-calculix-current-source.yml",
+        "scripts/validate_external_vv_operator_attestation.py",
+        "scripts/promote_external_vv_level2.py",
+        "scripts/build_bounded_planar_external_linear_case_package.py",
+        "scripts/ingest_bounded_planar_external_linear_results.py",
+        "scripts/build_bounded_planar_external_negative_case_package.py",
+        "scripts/ingest_bounded_planar_external_negative_results.py",
+        "scripts/build_bounded_planar_external_scaling_case_package.py",
+        "scripts/ingest_bounded_planar_external_scaling_results.py",
+        "scripts/build_bounded_planar_external_modal_buckling_case_package.py",
+        "scripts/ingest_bounded_planar_external_modal_buckling_results.py",
+        "scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py",
+        "scripts/run_bounded_planar_external_nonlinear_material_recovery_case.py",
+        "scripts/ingest_bounded_planar_external_nonlinear_material_recovery_results.py",
+        "scripts/build_bounded_planar_same_operator_supplemental_execution.py",
+        "scripts/build_bounded_planar_external_vv_matrix.py",
+        "scripts/build_bounded_planar_external_vv_matrix_from_operator_bundle.py",
+        "src/structural_analysis/schemas/external_vv_operator_attestation_v1.schema.json",
+        "src/structural_analysis/schemas/external_vv_level2_promotion_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_planar_external_linear_case_package_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_planar_opensees_linear_result_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_planar_external_linear_execution_receipt_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_planar_external_nonlinear_material_recovery_case_package_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_planar_opensees_nonlinear_material_recovery_result_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_planar_external_nonlinear_material_recovery_execution_receipt_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_planar_same_operator_supplemental_execution_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_planar_external_vv_matrix_status_v1.schema.json",
+        "docs/templates/external_vv_operator_attestation.template.json",
+        "docs/templates/external_vv_level2_promotion.template.json",
         "tests/test_external_code_to_code_technical_receipt.py",
         "tests/test_external_modal_buckling_technical_receipt.py",
         "tests/test_external_vv_clean_runner_contract.py",
-        "docs/external-code-to-code-technical-execution.md"
+        "tests/test_validate_external_vv_operator_attestation.py",
+        "tests/test_promote_external_vv_level2.py",
+        "tests/test_build_bounded_planar_external_linear_case_package.py",
+        "tests/test_ingest_bounded_planar_external_linear_results.py",
+        "tests/test_build_bounded_planar_external_nonlinear_material_recovery_case_package.py",
+        "tests/test_ingest_bounded_planar_external_nonlinear_material_recovery_results.py",
+        "tests/test_build_bounded_planar_same_operator_supplemental_execution.py",
+        "tests/test_build_bounded_planar_external_vv_matrix.py",
+        "tests/test_build_bounded_planar_external_vv_matrix_from_operator_bundle.py",
+        "docs/external-code-to-code-technical-execution.md",
+        "docs/external-vv-independent-operator-intake.md",
+        "docs/external-vv-level2-promotion-gate.md",
+        "docs/bounded-planar-external-vv-matrix.md",
+        "docs/opensees-calculix-current-source-workflow.md",
+        "artifacts/vv/bounded_planar_external_linear_case_package/manifest.json",
+        "artifacts/vv/bounded_planar_external_negative_case_package/manifest.json",
+        "artifacts/vv/bounded_planar_external_scaling_case_package/manifest.json",
+        "artifacts/vv/bounded_planar_external_modal_buckling_case_package/manifest.json",
+        "artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package/manifest.json",
+        "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipts/nonlinear-material-recovery-technical-receipt.json",
+        "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipt.json",
+        "artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json"
       ],
       "next_actions": [
-        "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent."
+        "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted."
       ],
       "state": "blocked",
       "summary": {
@@ -412,9 +496,9 @@
           "evidence"
         ],
         "limitations": [
-          "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent."
+          "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted."
         ],
-        "profile": "independent_operator_promotion_required",
+        "profile": "independent_operator_promotion_gate_v1",
         "public": false
       },
       "title": "OpenSees Level 2 verification"
@@ -426,12 +510,15 @@
       "contract_pass": false,
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+        ".github/workflows/opensees-calculix-current-source.yml",
+        "scripts/run_external_vv_clean_runner.sh",
         "scripts/run_external_modal_buckling_technical_receipt.py",
         "tests/test_external_modal_buckling_technical_receipt.py",
-        "docs/external-code-to-code-technical-execution.md"
+        "docs/external-code-to-code-technical-execution.md",
+        "docs/opensees-calculix-current-source-workflow.md"
       ],
       "next_actions": [
-        "Fresh pinned CalculiX comparisons pass narrowly, but independent operator attestation, legal review, broader coverage, and a second-solver Level 2 promotion receipt are absent."
+        "Fresh checksum-bound current-source host receipts record actual same-operator CalculiX execution. The retained local clean-runner summary has mismatched host/container source and metric sets, so it is unavailable for current container-parity credit. No retained GitHub workflow attestation, independent operator attestation, legal review, broader coverage, or second-solver Level 2 promotion receipt is attached."
       ],
       "state": "blocked",
       "summary": {
@@ -440,7 +527,7 @@
           "evidence"
         ],
         "limitations": [
-          "Fresh pinned CalculiX comparisons pass narrowly, but independent operator attestation, legal review, broader coverage, and a second-solver Level 2 promotion receipt are absent."
+          "Fresh checksum-bound current-source host receipts record actual same-operator CalculiX execution. The retained local clean-runner summary has mismatched host/container source and metric sets, so it is unavailable for current container-parity credit. No retained GitHub workflow attestation, independent operator attestation, legal review, broader coverage, or second-solver Level 2 promotion receipt is attached."
         ],
         "profile": "independent_operator_promotion_required",
         "public": false
@@ -515,7 +602,9 @@
       "contract_pass": true,
       "evidence_artifacts": [
         "docs/workbench-v2.md",
-        "tests/frontend/workbench-v2-e2e.spec.ts"
+        "src/workbench-v2/model/jobProvider.ts",
+        "tests/frontend/workbench-v2-e2e.spec.ts",
+        "tests/frontend/workbench-v2-job-contract.spec.ts"
       ],
       "next_actions": [],
       "state": "bounded_public",
@@ -525,9 +614,10 @@
           "workbench"
         ],
         "limitations": [
+          "Durable-job publication is accepted only when raw artifact hashes, the complete typed corotational engineering ResultIR shape and descriptor bundle, unified-result bindings, authority axes, and the exact core validation report all agree; legacy normalized result rows are not exposed by the durable reader.",
           "Workbench display and review decisions never create solver truth."
         ],
-        "profile": "typed_workbench_case_and_evidence_reader",
+        "profile": "typed_workbench_case_evidence_and_result_ir_reader",
         "public": true
       },
       "title": "Workbench result and evidence review"
@@ -620,21 +710,392 @@
         "public": false
       },
       "title": "ROCm/HIP production backend"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "frame2d.rigid_offset",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/assembly/corotational_frame2d_member_features.py",
+        "src/structural_analysis/api/nonlinear_frame.py",
+        "tests/test_corotational_frame2d_member_features.py",
+        "tests/test_unified_nonlinear_frame_api.py",
+        "examples/bounded_planar_frame_alpha.model-ir.v2.json",
+        "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+        "docs/external-code-to-code-technical-execution.md"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_candidate",
+        "interfaces": [
+          "python_api",
+          "cli",
+          "internal_python"
+        ],
+        "limitations": [
+          "Bounded connected planar Frame2D candidate only.",
+          "Stored same-operator OpenSees values still pass current-product replay for the combined member-feature sample, but a current-source external runtime rerun is missing.",
+          "No independent Level 2/3 V&V, design authority, or release eligibility."
+        ],
+        "profile": "connected_planar_frame2d_finite_rigid_offset_candidate.v1",
+        "public": false
+      },
+      "title": "Frame2D finite rigid offset"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "frame2d.release.rz",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/assembly/corotational_frame2d_member_features.py",
+        "src/structural_analysis/api/nonlinear_frame.py",
+        "tests/test_corotational_frame2d_member_features.py",
+        "tests/test_unified_nonlinear_frame_api.py",
+        "examples/bounded_planar_frame_alpha.model-ir.v2.json",
+        "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+        "docs/external-code-to-code-technical-execution.md"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_candidate",
+        "interfaces": [
+          "python_api",
+          "cli",
+          "internal_python"
+        ],
+        "limitations": [
+          "RZ-only bounded release with same-parent local equilibrium and Schur condensation.",
+          "Stored same-operator OpenSees values still pass current-product replay for the combined member-feature sample, but a current-source external runtime rerun is missing.",
+          "No broader release family or release promotion."
+        ],
+        "profile": "connected_planar_frame2d_rz_end_release_candidate.v1",
+        "public": false
+      },
+      "title": "Frame2D RZ end release"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "frame2d.uniform_member_load",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/assembly/corotational_frame2d_member_features.py",
+        "src/structural_analysis/api/nonlinear_frame.py",
+        "tests/test_corotational_frame2d_member_features.py",
+        "tests/test_unified_nonlinear_frame_api.py",
+        "examples/bounded_planar_frame_alpha.model-ir.v2.json",
+        "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+        "docs/external-code-to-code-technical-execution.md"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_candidate",
+        "interfaces": [
+          "python_api",
+          "cli",
+          "internal_python"
+        ],
+        "limitations": [
+          "Uniform dead load in the initial member-local axis only.",
+          "Stored same-operator OpenSees values still pass current-product replay for the combined member-feature sample, but a current-source external runtime rerun is missing.",
+          "No general distributed, follower, thermal, or moving member load authority."
+        ],
+        "profile": "connected_planar_frame2d_uniform_dead_load_candidate.v1",
+        "public": false
+      },
+      "title": "Frame2D uniform member dead load"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "frame2d.prescribed_support_displacement",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/adapters/bounded_planar_model_ir.py",
+        "src/structural_analysis/api/nonlinear_frame.py",
+        "tests/test_bounded_planar_model_ir_adapter.py",
+        "tests/test_external_code_to_code_technical_receipt.py",
+        "examples/bounded_planar_settlement.model-ir.v2.json",
+        "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+        "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json",
+        "docs/corotational-connected-frame2d.md",
+        "docs/external-code-to-code-technical-execution.md"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_candidate",
+        "interfaces": [
+          "python_api",
+          "cli",
+          "internal_python"
+        ],
+        "limitations": [
+          "Constrained UX, UY, or RZ terminal values are proportional to the load factor; this is distinct from direct displacement control of a free DOF.",
+          "The iterative settlement comparison requires an explicit nonzero free-equation reference load so EquationScaling remains evidence-backed; prescribed-only free-equation paths fail closed.",
+          "Stored same-operator host and container OpenSees values still pass current-product replay for one -0.1 mm settlement case, but the current-source external runtime rerun, independent Level 2/3 V&V, design authority, and release eligibility remain absent."
+        ],
+        "profile": "bounded_planar_frame2d_proportional_prescribed_support_candidate.v1",
+        "public": false
+      },
+      "title": "Frame2D prescribed support displacement"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "frame2d.direct_displacement_control",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_displacement_control.py",
+        "tests/test_stateful_corotational_fiber_frame2d_displacement_control.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_candidate",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "Internal dense augmented-Newton path with one free UX/UY control DOF.",
+          "Unified public J1-J5 exposure, native sparse execution, and external V&V remain open."
+        ],
+        "profile": "single_control_dof_dense_augmented_newton_candidate.v1",
+        "public": false
+      },
+      "title": "Frame2D direct displacement control"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "frame3d.corotational",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/p2-frame3d-global-load-path.md",
+        "src/structural_analysis/assembly/corotational_frame3d_global.py",
+        "src/structural_analysis/solvers/equation_scaling_6dof.py",
+        "src/structural_analysis/elements/corotational_frame3d.py",
+        "tests/test_corotational_frame3d_global.py",
+        "tests/test_corotational_frame3d_scalable_graph.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_candidate",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "Bounded internal 3D graph candidate; the dense load-control solve uses shared source-bound 6DOF force/moment scaling with fail-closed real-binary64 source validation, residual-and-increment commit gates, strict scaled-residual-decreasing backtracking, final equilibrium reassembly, and parent-checkpoint immutability checks.",
+          "No independent external 3D comparison or release authority."
+        ],
+        "profile": "bounded_global_corotational_frame3d_graph_candidate.v1",
+        "public": false
+      },
+      "title": "Global corotational Frame3D"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "frame3d.stateful_fiber",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py",
+        "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py",
+        "src/structural_analysis/schemas/stateful_corotational_frame3d_sparse_checkpoint_v1.schema.json",
+        "tests/test_stateful_corotational_fiber_frame3d.py",
+        "tests/test_stateful_corotational_frame3d_sparse.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_candidate",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "Two- or three-point axial-biaxial fiber integration over a bounded Timoshenko reference; native sparse load control uses model-bound 6DOF force/moment scaling, residual-and-increment commit gates, strict residual-decreasing backtracking, exact material-response accepted-parent hash binding, material-specific steel/concrete/bond-slip admissibility through nested states, binary64-exact checkpoint displacement identity, deterministic unloaded genesis plus non-genesis nonzero-parent invariants, checkpoint-displacement material-state replay, final equilibrium reassembly, fail-closed scaled factorization diagnostics, and explicitly convergence-classified adaptive load cutback with rejected-trial rollback and exact accepted-checkpoint resume. A zero-update child is valid only when a changed load acts on restrained equations and every replay, factorization, reassembly, and equilibrium gate passes.",
+          "Shear and torsion remain elastic; the separately registered direct-displacement-control candidate does not add arc-length, analytic 3D tangents, independent external 3D V&V, or release authority."
+        ],
+        "profile": "bounded_stateful_corotational_fiber_frame3d_candidate.v1",
+        "public": false
+      },
+      "title": "Stateful corotational fiber Frame3D"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "frame3d.direct_displacement_control",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/p2-frame3d-direct-displacement-control.md",
+        "examples/bounded_frame3d_direct_control.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control_torsion.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control_ry_bending.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control_rz_bending.model-ir.v2.json",
+        "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+        "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json",
+        "src/structural_analysis/adapters/bounded_frame3d_direct_control_model_ir.py",
+        "src/structural_analysis/api/frame3d_direct_control.py",
+        "src/structural_analysis/assembly/stateful_corotational_frame3d_displacement_control.py",
+        "src/structural_analysis/schemas/bounded_frame3d_direct_control_checkpoint_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_frame3d_direct_control_checkpoint_v2.schema.json",
+        "src/structural_analysis/schemas/bounded_frame3d_direct_control_result_v1.schema.json",
+        "src/structural_analysis/schemas/bounded_frame3d_direct_control_result_v2.schema.json",
+        "src/structural_analysis/schemas/stateful_corotational_frame3d_displacement_control_resume_binding_v1.schema.json",
+        "src/structural_analysis/schemas/stateful_corotational_frame3d_displacement_control_resume_binding_v2.schema.json",
+        "tests/test_bounded_frame3d_direct_control_api.py",
+        "tests/test_stateful_corotational_frame3d_displacement_control.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_candidate",
+        "interfaces": [
+          "internal_python",
+          "candidate_model_ir_v2_python_api"
+        ],
+        "limitations": [
+          "One free UX, UY, UZ, RX, RY, or RZ coordinate and one proportional reference-load factor are solved by a source-scaled sparse augmented Newton path with residual, increment, control, line-search, material-admissibility, final-reassembly, and factorization gates. Finite but constitutively unreachable bilinear-steel checkpoint states and target increments already inside the configured control tolerance fail before solving. Bounded adaptive target cutback retries only maximum-iteration or pure admissible merit-line-search failures, uses unit-specific minima plus depth/substep/whole-path attempt bounds, and hash-records every rejected target against an immutable accepted parent.",
+          "The direct-control Newton budget cannot exceed the sparse Frame3D budget bound into accepted checkpoints. Checkpoint converged_iterations counts applied Newton/line-search updates rather than the terminal gate-evaluation row, so bound-edge convergence remains self-validating. Terminal increment, load-increment, and condition scalars are unavailable when the terminal factorization fails; earlier successful diagnostics remain history only.",
+          "The bounded_frame3d_direct_displacement_control ModelIR v2 profile and candidate Python API expose source-bound zero-offset/unreleased graphs, binary64-exact projected coordinates/properties/loads, explicit bilinear steel/shear modulus, free-equation reference loads, ordered node/member/material recovery, and exact-resume artifacts while keeping capability-registry public=false. Persisted checkpoints require a deterministic unloaded genesis plus non-genesis nonzero-parent invariants, complete ordered recovery identities, finite repository-canonical JSON bytes, and raw-to-typed checkpoint/resume-binding/top-level-envelope numeric identity. A zero-update child is permitted only for a changed load confined to restrained equations after all replay, factorization, reassembly, and equilibrium gates pass. Default monotonic paths retain the v1 direction binding; opt-in reversal is limited to exact bilinear combined-hardening steel and uses a v2 last-leg/cumulative-count/rolling-target-chain binding whose completed-target count cannot exceed the accepted step index. The unsigned hashes provide internal consistency, not authentication against complete rehashing. Same-operator OpenSees 3D forceBeamColumn comparisons cover one monotonic axial-yield UX path, one five-target axial reversal path against the exact Hardening law, and pure-axis elastic RX, RY, and RZ paths. Coupled MY+MZ probing exposes formulation-dependent second-order torsional coupling and is not promoted; other cyclic histories/materials, coupled multi-axis or multi-control behavior, general material/shear/torsion coupling, and independent V&V remain open. A bare internal checkpoint is an unbound restart and an incomplete intermediate cutback checkpoint is not exact continuation. Prescribed supports, offsets/releases, arc-length continuation, Workbench execution, independent direct-control 3D V&V, design authority, and release authority remain unsupported."
+        ],
+        "profile": "stateful_corotational_frame3d_sparse_direct_displacement_control.v1",
+        "public": false
+      },
+      "title": "Frame3D direct displacement control"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "material.confined_concrete",
+      "capability_kind": "material",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/p2-material-candidates.md",
+        "src/structural_analysis/materials/confined_concrete.py",
+        "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py",
+        "tests/test_p2_material_candidates.py",
+        "tests/test_stateful_corotational_frame3d_materials.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "constitutive_candidate",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "Monotonic uniaxial compression envelope only. Stateful unloading, reversal, tension, and cyclic trials fail closed with unsupported_constitutive_path.",
+          "Ultimate-strain exceedance emits confined_concrete_crushing_event instead of silently entering the discontinuous residual cutoff in solver execution.",
+          "Multiaxial behavior, localization regularization, published calibration, and release authority remain unsupported."
+        ],
+        "profile": "mander_uniaxial_monotonic_compression.v1",
+        "public": false
+      },
+      "title": "Mander monotonic confined concrete"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "material.bond_slip",
+      "capability_kind": "material",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/materials/bond_slip.py",
+        "tests/test_bond_slip_interface.py",
+        "tests/test_p2_material_candidates.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "constitutive_candidate",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "Bounded SI-unit connector material point.",
+          "Connector groups, published calibration, independent V&V, and release authority remain open."
+        ],
+        "profile": "bounded_cyclic_bond_slip_material_point.v1",
+        "public": false
+      },
+      "title": "Cyclic bond-slip connector"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "material.partial_composite",
+      "capability_kind": "material",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/materials/partial_composite.py",
+        "src/structural_analysis/elements/stateful_corotational_partial_composite_frame3d.py",
+        "tests/test_p2_material_candidates.py",
+        "tests/test_stateful_corotational_partial_composite_frame3d.py"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "constitutive_candidate",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "Condensed single-slip-mode axial member coupling.",
+          "General shear lag, uplift/contact, connector groups, and external V&V remain open."
+        ],
+        "profile": "condensed_single_slip_partial_composite_candidate.v1",
+        "public": false
+      },
+      "title": "Steel-concrete partial composite interaction"
+    },
+    {
+      "blocker_count": 0,
+      "capability_id": "analysis.nonlinear_transient_sdof",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "src/structural_analysis/solvers/nonlinear/transient.py",
+        "src/structural_analysis/schemas/nonlinear_transient_checkpoint_v1.schema.json",
+        "src/structural_analysis/schemas/nonlinear_transient_checkpoint_chain_v1.schema.json",
+        "tests/test_nonlinear_transient.py",
+        "docs/nonlinear-transient-reference.md"
+      ],
+      "next_actions": [],
+      "state": "experimental",
+      "summary": {
+        "authority": "bounded_reference_candidate",
+        "interfaces": [
+          "internal_python"
+        ],
+        "limitations": [
+          "Fail-closed Newmark average-acceleration bilinear SDOF reference kernel.",
+          "Detached checkpoints have self-consistency authority only; resume requires a genesis-rooted source-authenticated force-history chain with full Newmark and work/dissipation replay.",
+          "MDOF nonlinear dynamics, general hysteretic materials, external V&V, and release authority remain open."
+        ],
+        "profile": "newmark_average_acceleration_bilinear_sdof_reference.v1",
+        "public": false
+      },
+      "title": "Nonlinear transient SDOF"
     }
   ],
   "claim_boundary": "This surface is generated from the canonical capability registry and retains supported, bounded-public, experimental, shadow-only, and blocked states without promotion. The structural evidence rollup is diagnostic and cannot override registry authority. Non-structural product domains are outside this repository's product scope.",
   "claim_locked": false,
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
-  "experimental_capability_count": 4,
+  "experimental_capability_count": 16,
   "first_blocked_capability": {
     "blocker_count": 1,
     "capability_id": "vv.opensees_level2",
     "capability_kind": "verification",
     "contract_pass": false,
-    "evidence_artifact_count": 11,
+    "evidence_artifact_count": 61,
     "first_blocked_target": "",
-    "first_next_action": "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent.",
+    "first_next_action": "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted.",
     "gate_unblock_plan_count": 0,
     "handoff_slot": {},
     "operator_intake_artifact": "",
@@ -648,11 +1109,11 @@
     "title": "OpenSees Level 2 verification"
   },
   "first_blocked_capability_id": "vv.opensees_level2",
-  "first_blocked_capability_next_action": "Fresh pinned technical comparisons and a same-operator container-isolated replay pass narrowly, including an elastic-state public corotational portal path, but independent operator attestation, legal review, material-nonlinear breadth, and a Level 2 promotion receipt are absent.",
+  "first_blocked_capability_next_action": "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-26T11:44:14.298948+00:00",
+  "generated_at": "2026-07-30T17:09:52.206502+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:ec5f1e21cb73871b9affd26589798582cda9a7e1f4033e2e0ccf3a69f10de4c8",
+    "artifacts/manifests/capabilities.yaml": "sha256:866df341a2d4147230a5aa54d6bcca2a08bfaf5dae8a678c23551fe5337318fb",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -662,7 +1123,7 @@
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
     "scripts/build_product_capabilities_surface.py": "sha256:79e3e6fc54e21901f3936e863625cee47ce786fbd6db8b6d27f24b622590907a",
-    "scripts/generate_capability_surfaces.py": "sha256:8630147c23e370148e70886d429fc0cff03745b34ffd72b2788823ec3960a5bc"
+    "scripts/generate_capability_surfaces.py": "sha256:6c52d940b255a21e4f42047bc7457e9c97ff690717b27f37720ede2301cb3a46"
   },
   "locked": false,
   "next_actions": [
@@ -683,7 +1144,7 @@
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "12c9bfbc1106cb82fc2d161a0596d91a8583f7d9",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",
@@ -709,7 +1170,7 @@
     "title": "Restricted alpha structural solver evidence"
   },
   "status": "ready",
-  "summary_line": "Product capabilities surface: READY | capabilities=19 | ready=10 | experimental=4 | shadow_only=1 | blocked=4",
+  "summary_line": "Product capabilities surface: READY | capabilities=31 | ready=10 | experimental=16 | shadow_only=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
   "surface_kind": "product_capabilities_surface",
   "surface_scope": "product_capability_discovery"

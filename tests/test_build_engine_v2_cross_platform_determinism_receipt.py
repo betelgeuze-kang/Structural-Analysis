@@ -116,11 +116,27 @@ def test_local_coordinate_receipt_passes_without_claiming_matrix() -> None:
     assert receipt["claims"]["exact_contract_hash_replay"] is True
     assert receipt["claims"]["canonical_binary_write_readback"] is True
     assert receipt["claims"]["github_actions_coordinate_execution"] is False
+    assert receipt["claims"]["bounded_planar_exact_replay"] is True
+    assert receipt["claims"]["bounded_planar_settlement_exact_replay"] is True
     assert receipt["claims"]["four_way_cross_platform_determinism"] is False
     assert receipt["model_fixture"] == {
         "path": "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json",
         "expected_data_hash": module.EXPECTED_MODEL_FIXTURE_DATA_HASH,
         "observed_data_hash": module.EXPECTED_MODEL_FIXTURE_DATA_HASH,
+    }
+    assert receipt["bounded_planar_fixture"] == {
+        "path": "examples/bounded_planar_frame_alpha.model-ir.v2.json",
+        "expected_data_hash": module.EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH,
+        "observed_data_hash": module.EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH,
+    }
+    assert receipt["bounded_planar_settlement_fixture"] == {
+        "path": "examples/bounded_planar_settlement.model-ir.v2.json",
+        "expected_data_hash": (
+            module.EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+        ),
+        "observed_data_hash": (
+            module.EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+        ),
     }
     assert receipt["observed_goldens"] == module.EXPECTED_GOLDENS
     assert receipt["observed_binary_artifacts"] == module.EXPECTED_BINARY_ARTIFACTS
@@ -194,6 +210,10 @@ def test_four_github_receipts_aggregate_to_exact_matrix_receipt(
     assert len(matrix["receipts"]) == 4
     assert matrix["claims"]["four_way_github_actions_exact_replay"] is True
     assert matrix["claims"]["windows_python_3_10_and_3_12_execution"] is True
+    assert matrix["claims"]["bounded_planar_four_way_exact_replay"] is True
+    assert (
+        matrix["claims"]["bounded_planar_settlement_four_way_exact_replay"] is True
+    )
     assert matrix["claims"]["developer_preview_windows_gate"] is False
     assert matrix["receipt_hash"] == module._receipt_hash(matrix)
 
@@ -264,3 +284,41 @@ def test_matrix_rechecks_runtime_identity_after_valid_receipt_rehash(
         "coordinate_actual_system_invalid:windows-latest|python-3.12"
         in matrix["blockers"]
     )
+
+
+def test_matrix_rejects_rehashed_settlement_fixture_tampering(
+    tmp_path: Path,
+) -> None:
+    receipts = _write_four_receipts(tmp_path)
+    tampered = copy.deepcopy(receipts[0])
+    tampered["bounded_planar_settlement_fixture"]["observed_data_hash"] = (
+        "sha256:" + "f" * 64
+    )
+    tampered["claims"]["bounded_planar_settlement_exact_replay"] = False
+    tampered["receipt_hash"] = module._receipt_hash(tampered)
+    path = tmp_path / "ubuntu-latest-python-3.10.json"
+    path.write_text(
+        json.dumps(tampered, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    matrix = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+
+    assert matrix["contract_pass"] is False
+    assert (
+        "coordinate_planar_settlement_replay_blocked:"
+        "ubuntu-latest|python-3.10"
+    ) in matrix["blockers"]
+    assert (
+        "coordinate_observed_planar_settlement_fixture_mismatch:"
+        "ubuntu-latest|python-3.10"
+    ) in matrix["blockers"]

@@ -329,7 +329,7 @@
   "external_validation_claim": false,
   "full_building_equilibrium_claim": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-23T06:01:30.117908+00:00",
+  "generated_at": "2026-07-28T17:21:57.459651+00:00",
   "input_checksums": {
     "docs/stateful-nonlinear-no-solve-reaction-only.md": "sha256:87a53e20bf131bd8452233693f8d36b6346073655ffc1b9acff7c4185afc4945",
     "scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py": "sha256:9d1015e93a9bd309fda2dda4d99cad032defed27c9b410750bce2e73d55524f9",
@@ -337,7 +337,7 @@
     "src/structural_analysis/engine_v2/contracts/execution_plan.py": "sha256:3320b83f990e9123104c3df0d0ad3fb1b8a0d12ee00197fb4ae9e40c61508823",
     "src/structural_analysis/engine_v2/contracts/execution_plan_reduced_csr.py": "sha256:fe976afefabdf7d47ea03f28d511b9a92bbb0b055e9efa47c2752934c86769d0",
     "src/structural_analysis/schemas/stateful_nonlinear_no_solve_reaction_only_v1.schema.json": "sha256:b24d65dae728bd1cccbcab60e992a846fa5fb93db8a6bf3dcbeb706c5df6c203",
-    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:66a6f26457b38f04a05e1b485d30e6de41287ab4fcec4ae80a8de0f7105e7e38",
+    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:4ef27ccf8db7613c32f84165c1813c72663513c2e670f298a75db41c0c25f808",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
     "tests/test_build_stateful_nonlinear_no_solve_reaction_only_artifact.py": "sha256:3b282fe7bea1e6740c0938df3cbdc0a84f75c0fc55651d2ddce9bfa3249a3aa0",
     "tests/test_nonlinear_fully_constrained_no_solve.py": "sha256:3b35187f7c8e2f564124d86ee603918c2b5ed25aa2c4cf5cf1a2c3edeed66ba3"
@@ -357,7 +357,7 @@
   "reused_evidence": false,
   "schema_path": "src/structural_analysis/schemas/stateful_nonlinear_no_solve_reaction_only_v1.schema.json",
   "schema_version": "stateful-nonlinear-no-solve-reaction-only.v1",
-  "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "status": "ready",
   "terminal_disposition": "no_solve_reaction_only",
   "truth_class": "deterministic_local_stateful_axial_fixture_truth",

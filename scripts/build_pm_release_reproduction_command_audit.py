@@ -130,13 +130,6 @@ def _path_inside_repo(path_text: str, *, repo_root: Path) -> bool:
     return True
 
 
-def _path_parent_exists(path_text: str, *, repo_root: Path) -> bool:
-    candidate = Path(path_text)
-    if not candidate.is_absolute():
-        candidate = repo_root / candidate
-    return candidate.resolve().parent.exists()
-
-
 def _script_exists(script_arg: str, *, repo_root: Path) -> bool:
     if not script_arg.startswith("scripts/"):
         return False
@@ -179,21 +172,18 @@ def _command_output_blockers(argv: list[str], *, repo_root: Path) -> list[str]:
     while index < len(argv):
         token = argv[index]
         path_text: str | None = None
-        directory_mode = False
         if token in OUTPUT_PATH_FLAGS or token in OUTPUT_DIRECTORY_FLAGS:
             if index + 1 >= len(argv):
                 blockers.append("command_unparseable")
                 index += 1
                 continue
             path_text = argv[index + 1]
-            directory_mode = token in OUTPUT_DIRECTORY_FLAGS
             index += 2
         elif any(token.startswith(f"{flag}=") for flag in OUTPUT_PATH_FLAGS):
             path_text = token.split("=", 1)[1]
             index += 1
         elif any(token.startswith(f"{flag}=") for flag in OUTPUT_DIRECTORY_FLAGS):
             path_text = token.split("=", 1)[1]
-            directory_mode = True
             index += 1
         else:
             index += 1
@@ -202,11 +192,6 @@ def _command_output_blockers(argv: list[str], *, repo_root: Path) -> list[str]:
             continue
         if not _path_inside_repo(path_text, repo_root=repo_root):
             blockers.append("command_output_path_escapes_repo")
-        elif directory_mode:
-            if not (repo_root / path_text).resolve().exists():
-                blockers.append("command_output_parent_missing")
-        elif not _path_parent_exists(path_text, repo_root=repo_root):
-            blockers.append("command_output_parent_missing")
     return blockers
 
 

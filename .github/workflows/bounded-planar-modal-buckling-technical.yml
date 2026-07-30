@@ -1,0 +1,115 @@
+name: Bounded Planar Modal Buckling Technical Execution
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+  RESULT_DIR: ".ci/bounded-planar-modal-buckling/results"
+  RECEIPT_PATH: ".ci/bounded-planar-modal-buckling/technical-receipt.json"
+  ATTESTATION_BUNDLE_PATH: ".ci/bounded-planar-modal-buckling/technical-receipt.sigstore.json"
+  ATTESTATION_VERIFICATION_PATH: ".ci/bounded-planar-modal-buckling/attestation-verification.json"
+  GH_TOKEN: "${{ github.token }}"
+
+concurrency:
+  group: bounded-planar-modal-buckling-technical-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  execute:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact current-main source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install product and contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Materialize exact current-source execution package
+        run: >-
+          python scripts/build_bounded_planar_external_modal_buckling_case_package.py
+
+      - name: Verify generated execution package
+        run: >-
+          python scripts/build_bounded_planar_external_modal_buckling_case_package.py
+          --check
+
+      - name: Install pinned external runtimes
+        run: |
+          python -m pip install \
+            -r artifacts/vv/bounded_planar_external_modal_buckling_case_package/requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y calculix-ccx=2.17-3
+
+      - name: Execute exact OpenSees and CalculiX cases
+        run: |
+          mkdir -p "$RESULT_DIR"
+          PACKAGE=artifacts/vv/bounded_planar_external_modal_buckling_case_package
+          python "$PACKAGE/runner/run_case.py" \
+            --case-id bounded_planar_modal_rigid_mode \
+            --model "$PACKAGE/models/bounded_planar_modal_rigid_mode.model.json" \
+            --out "$RESULT_DIR/bounded_planar_modal_rigid_mode.json"
+          python "$PACKAGE/runner/run_case.py" \
+            --case-id bounded_planar_modal_repeated_mode \
+            --model "$PACKAGE/models/bounded_planar_modal_repeated_mode.model.json" \
+            --out "$RESULT_DIR/bounded_planar_modal_repeated_mode.json"
+          python "$PACKAGE/runner/run_case.py" \
+            --case-id bounded_planar_buckling_portal \
+            --model "$PACKAGE/models/bounded_planar_buckling_portal.model.json" \
+            --out "$RESULT_DIR/bounded_planar_buckling_portal.json" \
+            --calculix-binary /usr/bin/ccx
+
+      - name: Build fail-closed technical receipt
+        run: >-
+          python scripts/ingest_bounded_planar_external_modal_buckling_results.py
+          --package-dir artifacts/vv/bounded_planar_external_modal_buckling_case_package
+          --results-dir "$RESULT_DIR"
+          --out "$RECEIPT_PATH"
+          --fail-technical-blocked
+
+      - name: Attest technical receipt provenance
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.RECEIPT_PATH }}
+
+      - name: Retain and verify exact provenance bundle
+        run: |
+          cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE_PATH"
+          gh attestation verify "$RECEIPT_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$ATTESTATION_BUNDLE_PATH" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/bounded-planar-modal-buckling-technical.yml" \
+            --source-digest "$SOURCE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$ATTESTATION_VERIFICATION_PATH"
+
+      - name: Upload receipt, results, and bound package
+        uses: actions/upload-artifact@v7
+        with:
+          name: bounded-planar-modal-buckling-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .ci/bounded-planar-modal-buckling
+            artifacts/vv/bounded_planar_external_modal_buckling_case_package
+          if-no-files-found: error
+          retention-days: 90

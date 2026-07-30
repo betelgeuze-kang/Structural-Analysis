@@ -13,11 +13,18 @@ from structural_analysis.materials.bond_slip import (
     integrate_bond_slip_history,
 )
 from structural_analysis.materials.confined_concrete import (
+    CONFINED_CONCRETE_PATH_CAPABILITIES,
+    ConfinedConcreteAdmissibilityError,
     ConfinedConcreteMaterial,
     ConfinedConcreteState,
     StatefulConfinedConcreteResponse,
     confined_concrete_response,
     finite_difference_confined_concrete_tangent,
+)
+from structural_analysis.materials.concrete_damage import (
+    AsymmetricConcreteDamageMaterial,
+    ConcreteDamageState,
+    FractureEnergyConcreteDamageMaterial,
 )
 from structural_analysis.materials.partial_composite import (
     CondensedPartialCompositeAxialMaterial,
@@ -113,6 +120,120 @@ def test_bond_slip_cyclic_reversals_degrade_deterministically() -> None:
     json.dumps(first[-1].to_dict(), allow_nan=False, sort_keys=True)
 
 
+def test_bond_slip_reversed_state_replay_is_idempotent() -> None:
+    material = BondSlipMaterial()
+    loaded = integrate_bond_slip(1.0e-3, BondSlipState(), material)
+    reversed_response = integrate_bond_slip(8.0e-4, loaded.state, material)
+    replay = integrate_bond_slip(
+        reversed_response.slip_m,
+        reversed_response.state,
+        material,
+    )
+
+    assert reversed_response.state.reversal_count == 1
+    assert reversed_response.state.last_increment_sign == -1
+    assert replay.state == reversed_response.state
+
+
+def test_material_states_reject_unreachable_internal_variable_combinations() -> None:
+    concrete = AsymmetricConcreteDamageMaterial()
+    impossible_energy = ConcreteDamageState(
+        dissipated_energy_density_mj_per_m3=1.0
+    )
+    with pytest.raises(ValueError, match="dissipated energy"):
+        concrete.validate_state_admissibility(impossible_energy)
+
+    tensile_history = 4.0 * concrete.tensile_threshold_strain
+    tensile_damage = concrete._damage_and_derivative(
+        tensile_history,
+        threshold_strain=concrete.tensile_threshold_strain,
+        softening_rate=concrete.tensile_softening_rate,
+    )[0]
+    old_algebraic_lower_bound = (
+        0.5
+        * concrete.elastic_modulus_mpa
+        * concrete.tensile_threshold_strain**2
+        * tensile_damage
+    )
+    unreachable_continuous_history_energy = ConcreteDamageState(
+        tensile_history_strain=tensile_history,
+        tensile_damage=tensile_damage,
+        dissipated_energy_density_mj_per_m3=old_algebraic_lower_bound,
+    )
+    with pytest.raises(ValueError, match="dissipated energy"):
+        concrete.validate_state_admissibility(
+            unreachable_continuous_history_energy
+        )
+
+    fracture = FractureEnergyConcreteDamageMaterial()
+    with pytest.raises(ValueError, match="dissipated energy"):
+        fracture.validate_state_admissibility(impossible_energy)
+
+    connector = BondSlipMaterial()
+    impossible_degradation = BondSlipState(
+        stiffness_degradation=0.5,
+        strength_degradation=0.5,
+    )
+    with pytest.raises(ValueError, match="degradation"):
+        connector.validate_state_admissibility(impossible_degradation)
+    with pytest.raises(ValueError, match="degradation"):
+        integrate_bond_slip(0.0, impossible_degradation, connector)
+
+    confined = ConfinedConcreteMaterial(effective_lateral_pressure_mpa=2.0)
+    impossible_unloading_state = ConfinedConcreteState(
+        strain=0.0,
+        maximum_compressive_strain=1.0e-3,
+    )
+    with pytest.raises(ValueError, match="monotonic compression"):
+        confined.validate_state_admissibility(impossible_unloading_state)
+
+
+@pytest.mark.parametrize("value", (True, "0.0", 2**53 + 1))
+def test_concrete_and_bond_states_reject_coercive_binary64_sources(
+    value: object,
+) -> None:
+    with pytest.raises(ValueError, match="losslessly representable real binary64"):
+        ConcreteDamageState(  # type: ignore[arg-type]
+            tensile_history_strain=value,
+        )
+    with pytest.raises(ValueError, match="losslessly representable real binary64"):
+        BondSlipState(previous_slip_m=value)  # type: ignore[arg-type]
+
+
+def test_bond_state_rejects_discrete_aliases_and_unreachable_force() -> None:
+    with pytest.raises(ValueError, match="last_increment_sign"):
+        BondSlipState(last_increment_sign=True)
+    with pytest.raises(ValueError, match="reversal_count"):
+        BondSlipState(reversal_count=2**63)
+
+    material = BondSlipMaterial()
+    unreachable = BondSlipState(
+        previous_force_n=1.0e100,
+        last_increment_sign=1,
+        reversal_count=1,
+        maximum_absolute_slip_m=1.0e-3,
+        stiffness_degradation=material.reversal_stiffness_degradation,
+        strength_degradation=material.reversal_strength_degradation,
+    )
+    with pytest.raises(ValueError, match="force exceeds"):
+        material.validate_state_admissibility(unreachable)
+
+    monotonic_unreachable = BondSlipState(
+        previous_slip_m=1.0e-3,
+        previous_force_n=bond_slip_envelope(1.0e-3, material)[0],
+        last_increment_sign=1,
+        maximum_absolute_slip_m=1.0e-3,
+        dissipated_energy_j=1.0e100,
+    )
+    with pytest.raises(ValueError, match="monotonic work"):
+        material.validate_state_admissibility(monotonic_unreachable)
+
+
+def test_confined_concrete_rejects_lossy_binary64_integer_source() -> None:
+    with pytest.raises(ValueError, match="losslessly representable real binary64"):
+        ConfinedConcreteState(strain=2**53 + 1)
+
+
 def test_partial_composite_keeps_constituent_and_connector_authority_separate() -> None:
     material = PartialCompositeMaterial()
     parent = PartialCompositeState()
@@ -145,6 +266,14 @@ def test_partial_composite_keeps_constituent_and_connector_authority_separate() 
 
 def test_material_namespace_exports_p2_candidates() -> None:
     assert materials.ConfinedConcreteMaterial is ConfinedConcreteMaterial
+    assert (
+        materials.ConfinedConcreteAdmissibilityError
+        is ConfinedConcreteAdmissibilityError
+    )
+    assert (
+        materials.CONFINED_CONCRETE_PATH_CAPABILITIES
+        is CONFINED_CONCRETE_PATH_CAPABILITIES
+    )
     assert materials.BondSlipMaterial is BondSlipMaterial
     assert materials.PartialCompositeMaterial is PartialCompositeMaterial
     assert materials.ConfinedConcreteState is ConfinedConcreteState
@@ -165,6 +294,45 @@ def test_confined_concrete_stateful_envelope_replay_is_idempotent() -> None:
     assert first.state.maximum_compressive_strain == pytest.approx(8.0e-4)
     assert replay.state == first.state
     assert replay.state.state_hash == first.state.state_hash
+
+
+def test_confined_concrete_stateful_path_fails_closed_on_unloading_or_crushing() -> None:
+    material = ConfinedConcreteMaterial(effective_lateral_pressure_mpa=2.0)
+    parent = material.initial_state()
+    accepted = material.integrate(-8.0e-4, parent)
+    accepted_bytes = accepted.state.canonical_bytes()
+
+    assert dict(CONFINED_CONCRETE_PATH_CAPABILITIES) == {
+        "supports_monotonic": True,
+        "supports_unloading": False,
+        "supports_reversal": False,
+        "supports_cyclic": False,
+        "supports_tension": False,
+        "supports_compression": True,
+        "supports_multiaxial": False,
+        "supports_localization_regularization": False,
+    }
+    with pytest.raises(
+        ConfinedConcreteAdmissibilityError,
+        match="^unsupported_constitutive_path:",
+    ) as unloading:
+        material.integrate(-4.0e-4, accepted.state)
+    assert unloading.value.code == "unsupported_constitutive_path"
+    with pytest.raises(
+        ConfinedConcreteAdmissibilityError,
+        match="^unsupported_constitutive_path:",
+    ):
+        material.integrate(1.0e-5, accepted.state)
+    with pytest.raises(
+        ConfinedConcreteAdmissibilityError,
+        match="^confined_concrete_crushing_event:",
+    ) as crushing:
+        material.integrate(
+            -(material.ultimate_compressive_strain + 1.0e-6),
+            accepted.state,
+        )
+    assert crushing.value.code == "confined_concrete_crushing_event"
+    assert accepted.state.canonical_bytes() == accepted_bytes
 
 
 def test_condensed_partial_interaction_material_tangent_and_reversal_state() -> None:

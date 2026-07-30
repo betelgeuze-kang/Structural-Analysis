@@ -1,0 +1,114 @@
+name: Bounded Planar Nonlinear Material Recovery Technical Execution
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+  PACKAGE_DIR: "artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package"
+  RESULT_DIR: ".ci/bounded-planar-nonlinear-material-recovery/results"
+  RECEIPT_PATH: ".ci/bounded-planar-nonlinear-material-recovery/technical-receipt.json"
+  ATTESTATION_BUNDLE_PATH: ".ci/bounded-planar-nonlinear-material-recovery/technical-receipt.sigstore.json"
+  ATTESTATION_VERIFICATION_PATH: ".ci/bounded-planar-nonlinear-material-recovery/attestation-verification.json"
+  GH_TOKEN: "${{ github.token }}"
+
+concurrency:
+  group: bounded-planar-nonlinear-material-recovery-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  execute:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact current-main source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install product and contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Materialize exact current-source execution package
+        run: >-
+          python
+          scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+
+      - name: Verify generated execution package
+        run: >-
+          python
+          scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+          --check
+
+      - name: Install pinned OpenSees runtime
+        run: python -m pip install -r "$PACKAGE_DIR/requirements.txt"
+
+      - name: Execute exact OpenSees cases
+        run: |
+          mkdir -p "$RESULT_DIR"
+          for case_id in \
+            bounded_planar_p_delta \
+            bounded_planar_snap_through \
+            bounded_planar_steel_yield \
+            bounded_planar_rc_fiber \
+            bounded_planar_section_recovery \
+            bounded_planar_fiber_recovery
+          do
+            python "$PACKAGE_DIR/runner/run_case.py" \
+              --case-id "$case_id" \
+              --model "$PACKAGE_DIR/models/$case_id.case.json" \
+              --out "$RESULT_DIR/$case_id.json"
+          done
+
+      - name: Build fail-closed technical receipt
+        run: >-
+          python
+          scripts/ingest_bounded_planar_external_nonlinear_material_recovery_results.py
+          --package-dir "$PACKAGE_DIR"
+          --results-dir "$RESULT_DIR"
+          --out "$RECEIPT_PATH"
+          --fail-technical-blocked
+
+      - name: Attest technical receipt provenance
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.RECEIPT_PATH }}
+
+      - name: Retain and verify exact provenance bundle
+        run: |
+          cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE_PATH"
+          gh attestation verify "$RECEIPT_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$ATTESTATION_BUNDLE_PATH" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml" \
+            --source-digest "$SOURCE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$ATTESTATION_VERIFICATION_PATH"
+
+      - name: Upload receipt, results, and bound package
+        uses: actions/upload-artifact@v7
+        with:
+          name: bounded-planar-nonlinear-material-recovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .ci/bounded-planar-nonlinear-material-recovery
+            artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package
+          if-no-files-found: error
+          retention-days: 90

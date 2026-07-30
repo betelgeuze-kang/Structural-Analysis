@@ -1,6 +1,6 @@
 {
   "analysis_scope": "public_api_dense_consistent_mass_frame_truss_modal",
-  "artifact_hash": "sha256:f0d113327a51d1646b1487549c1175f3a9e2d654ab9af954c99d199c2f787b68",
+  "artifact_hash": "sha256:9565f819b3618f17b4a6858eca682dfde825103360d97e9c8449a051e458d0e9",
   "blockers_remaining": [
     "general_frame_shell_modal_workflow_not_verified",
     "nodal_lumped_mass_not_connected",
@@ -43,10 +43,10 @@
       "scripts/build_phase2_whole_model_modal_artifacts.py": "sha256:837ecd557a2f44ccfb919f9fae5eb03f07496d0cd4fce0a05129fb2ef47d2796",
       "src/structural_analysis/__init__.py": "sha256:c19a8b5cb64b6f9a6c5d00712f6cd606be5511188d8caa690e9adf0d95542e04",
       "src/structural_analysis/analyses/__init__.py": "sha256:a10e34597dc201e15c41b13dad6e7a52e65982aaf37d9c5513f2319b46fb1ed7",
-      "src/structural_analysis/analyses/modal.py": "sha256:0b2ac841fd3c0589b7c1b3d299543c59861cc208873c9691c3f5860329acdd3e",
+      "src/structural_analysis/analyses/modal.py": "sha256:ae7923f121e53b044044789a73d63e3745f3ee5d8cd44e23354cb0df34b5261c",
       "src/structural_analysis/api/cli.py": "sha256:6e93b6a51e8e7521bec9490c992bd2a5b793762da4238ac1e1d732f5e234860a",
       "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
-      "src/structural_analysis/assembly/__init__.py": "sha256:de040efa0abb909cab2de59c7abde6cb618144ef76c0f9a2797e969615b43538",
+      "src/structural_analysis/assembly/__init__.py": "sha256:274ea066577931ff55420a81587dd5ef9ef8b3eda29ed7485364d9bc4081eca6",
       "src/structural_analysis/assembly/modal.py": "sha256:bf0909750f7d471541180c8dec8ac2037730e3b17b7ecbbedce0c5c74df83bd8",
       "src/structural_analysis/elements/axial.py": "sha256:47fb843e2e72ec68f23058b7c31a565212bd63e639a1fff04566b3034d3cf573",
       "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
@@ -54,11 +54,11 @@
       "src/structural_analysis/model_ir/types.py": "sha256:2f39624a815671b4dc6b62f4337e0cca40f505424b72224fc9b3b24e488d1aa1",
       "src/structural_analysis/schemas/whole_model_modal_v1.schema.json": "sha256:cea61f7e8d91927492b6562369f7210a29fe05546a6b66ac34db4bf098b7e523",
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
-      "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
+      "src/structural_analysis/solvers/modal/solver.py": "sha256:91109241e086ea4f24be4a8d4a3485a6ac185959e5d7b5b09b093dd8a75af523",
       "tests/test_build_phase2_whole_model_modal_artifacts.py": "sha256:db67f3dfa657f9318a1a7c03c39eeef887f2a5b6407e5c52bf594fa5a0279427",
-      "tests/test_whole_model_modal_analysis.py": "sha256:57e257f4cf2315536ec30332255b519ba627e1554d32920fc434cc6c9448b340"
+      "tests/test_whole_model_modal_analysis.py": "sha256:bb10629f7b3a820039e8bceafcf2c3fd0aa2693c563b138b423585c5ef5210d8"
     },
-    "source_set_hash": "sha256:2c3fdfbed8c0a0ea8793a3c6eeecb1dd5761d5e87ecb6c5e4f91d7df15fa8f27"
+    "source_set_hash": "sha256:8158a5fd7af9e86e55168cf00429802ff8b3ee4ea9e6a33f78fc8698ef17fee9"
   },
   "status": "partial",
   "summary": {
@@ -186,10 +186,10 @@
       "incomplete_selection_blocker_kind": "modal_generalized_eigen_contract_failed",
       "incomplete_selection_detail": "requested mode_count cuts a repeated or clustered eigenvalue group",
       "incomplete_selection_status": "blocked",
-      "raw_result_hash": "sha256:807a925ba2aea7e0b5ded860a39cc1993acf6e51f81462fc4560302bf79eb662",
+      "raw_result_hash": "sha256:9eb62842d2e3af61a67fc6be3c209b8df31c5b86bb1962d9a50b5cc03f2aa8d1",
       "regularization_used": false,
       "repeated_eigenvalue_relative_gap": 0.0,
-      "semantic_result_hash": "sha256:67460aa659bf9b1a57c0c482aef85a620ff89b5f9b3720c23cf9d2aed06f3356",
+      "semantic_result_hash": "sha256:bb7408fbd4421f9e926f5ba6a788c04c2a1a5693bf19270a5379e022c435ddcc",
       "solver_id": "authoritative_cpu_modal_fea_3d_v1",
       "truth_basis": "complete_repeated_eigenspace_selection_invariant"
     }

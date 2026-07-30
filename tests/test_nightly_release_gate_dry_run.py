@@ -12,11 +12,29 @@ FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures" / "panel_zone_3d"
 def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) -> None:
     out = tmp_path / "nightly_release_gate_report.json"
     ci_report = tmp_path / "ci_gate_report.json"
+    committee_summary_report = tmp_path / "committee_summary.json"
+    committee_summary_report.write_text(
+        json.dumps(
+            {
+                "measured_chain_rolling_selection_mode": "comparable_reference",
+                "measured_chain_comparable_reference_deployment_model": (
+                    "engineer_in_the_loop_accelerated_coverage"
+                ),
+                "measured_chain_comparable_reference_strict_design_opt_cost_smoke": True,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
     ci_report.write_text(
         json.dumps(
             {
                 "midas_section_library_summary_line": "MIDAS section-library: ok | artifacts=3 | embedded=3 | representative_links=3",
-                "midas_kds_geometry_bridge_summary_line": "MIDAS kds-geometry-bridge: ok | mapped_review_ids=0/12 | rows=1056 | strategies=unmapped:12 | source=kds_codecheck_bridge_metadata | registry=none 0/0",
+                "midas_kds_geometry_bridge_summary_line": (
+                    "MIDAS kds-geometry-bridge: ok | mapped_review_ids=12/12 | rows=1056 | "
+                    "strategies=exact:12 | exact=12 | heuristic=0 | "
+                    "source=kds_codecheck_bridge_metadata | registry=merged_registry 12/12"
+                ),
                 "midas_loadcomb_roundtrip_summary_line": "MIDAS loadcomb-roundtrip: ok | entry_row_coverage=midas_generator_33.json=1.00 | artifacts=3",
                 "solver_breadth_summary_line": "Solver breadth: PASS | shell=yes(elems=5,cases=31) | wall=yes(rows=1,cases=14,material=rc_composite) | interface=yes(ssi_nonlinear_boundary) | contact=interface_compression_surrogate",
                 "material_constitutive_summary_line": "Material constitutive gate: PASS | concrete_damage=yes(matrix=10/10,max=1.000) | cyclic_degradation=yes(matrix=8/8,residual_max=1.914%) | bond_interface=yes(matrix=11/11,bond_max=0.980) | matrix=29/29",
@@ -50,6 +68,8 @@ def test_nightly_release_gate_dry_run_includes_global_authority(tmp_path: Path) 
         "--allow-cpu-required",
         "--ci-report",
         str(ci_report),
+        "--committee-summary-report",
+        str(committee_summary_report),
         "--out",
         str(out),
     ]

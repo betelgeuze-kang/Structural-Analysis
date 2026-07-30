@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 import math
+from numbers import Integral, Real
 import struct
 from typing import Any, Iterable
 
@@ -13,13 +14,33 @@ STATE_SCHEMA_VERSION = "uniaxial-combined-hardening-state.v1"
 RETURN_MAPPING_ALGORITHM = "backward_euler_1d_radial_return"
 TANGENT_DEFINITION = "algorithmic_consistent_d_stress_d_total_strain"
 _STATE_HASH_DOMAIN = b"structural-analysis/uniaxial-plasticity-state/v1\0"
+_STATE_ADMISSIBILITY_RELATIVE_TOLERANCE = 1.0e-12
+_STATE_ADMISSIBILITY_ABSOLUTE_TOLERANCE = 1.0e-12
 
 
-def _require_finite(name: str, value: float) -> float:
-    normalized = float(value)
-    if not math.isfinite(normalized):
-        raise ValueError(f"{name} must be finite")
-    return normalized
+def _require_finite(name: str, value: Any) -> float:
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        )
+    try:
+        normalized = float(value)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        ) from error
+    if (
+        not math.isfinite(normalized)
+        or value != normalized
+        or (
+            isinstance(value, Integral)
+            and int(normalized) != int(value)
+        )
+    ):
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        )
+    return 0.0 if normalized == 0.0 else normalized
 
 
 @dataclass(frozen=True)
@@ -41,7 +62,11 @@ class UniaxialPlasticityState:
             "accumulated_plastic_strain",
             "dissipated_energy_density_mj_per_m3",
         ):
-            _require_finite(name, getattr(self, name))
+            object.__setattr__(
+                self,
+                name,
+                _require_finite(name, getattr(self, name)),
+            )
         if self.accumulated_plastic_strain < 0.0:
             raise ValueError("accumulated_plastic_strain must be non-negative")
         if self.dissipated_energy_density_mj_per_m3 < 0.0:
@@ -123,7 +148,11 @@ class BilinearCombinedHardeningSteel:
             "kinematic_hardening_modulus_mpa",
             "yield_tolerance_mpa",
         ):
-            _require_finite(name, getattr(self, name))
+            object.__setattr__(
+                self,
+                name,
+                _require_finite(name, getattr(self, name)),
+            )
         if self.elastic_modulus_mpa <= 0.0:
             raise ValueError("elastic_modulus_mpa must be positive")
         if self.yield_stress_mpa <= 0.0:
@@ -134,7 +163,7 @@ class BilinearCombinedHardeningSteel:
             raise ValueError("kinematic_hardening_modulus_mpa must be non-negative")
         if self.yield_tolerance_mpa < 0.0:
             raise ValueError("yield_tolerance_mpa must be non-negative")
-        if not str(self.material_id).strip():
+        if not isinstance(self.material_id, str) or not self.material_id.strip():
             raise ValueError("material_id must be non-empty")
 
     @property
@@ -154,6 +183,54 @@ class BilinearCombinedHardeningSteel:
     def initial_state(self) -> UniaxialPlasticityState:
         return UniaxialPlasticityState()
 
+    def validate_state_admissibility(
+        self,
+        state: UniaxialPlasticityState,
+    ) -> UniaxialPlasticityState:
+        """Reject finite but unreachable states for this exact hardening law."""
+
+        if type(state) is not UniaxialPlasticityState:
+            raise ValueError("state must be an exact UniaxialPlasticityState")
+        tolerance = _STATE_ADMISSIBILITY_ABSOLUTE_TOLERANCE + (
+            _STATE_ADMISSIBILITY_RELATIVE_TOLERANCE
+            * max(
+                abs(state.plastic_strain),
+                state.accumulated_plastic_strain,
+                1.0,
+            )
+        )
+        if abs(state.plastic_strain) > (
+            state.accumulated_plastic_strain + tolerance
+        ):
+            raise ValueError(
+                "absolute plastic strain exceeds accumulated plastic strain"
+            )
+        expected_backstress = (
+            self.kinematic_hardening_modulus_mpa * state.plastic_strain
+        )
+        if not math.isclose(
+            state.backstress_mpa,
+            expected_backstress,
+            rel_tol=_STATE_ADMISSIBILITY_RELATIVE_TOLERANCE,
+            abs_tol=_STATE_ADMISSIBILITY_ABSOLUTE_TOLERANCE,
+        ):
+            raise ValueError(
+                "backstress is inconsistent with kinematic plastic strain"
+            )
+        expected_energy = (
+            self.yield_stress_mpa * state.accumulated_plastic_strain
+        )
+        if not math.isclose(
+            state.dissipated_energy_density_mj_per_m3,
+            expected_energy,
+            rel_tol=_STATE_ADMISSIBILITY_RELATIVE_TOLERANCE,
+            abs_tol=_STATE_ADMISSIBILITY_ABSOLUTE_TOLERANCE,
+        ):
+            raise ValueError(
+                "dissipated energy is inconsistent with accumulated plastic strain"
+            )
+        return state
+
     def integrate(
         self,
         total_strain: float,
@@ -161,6 +238,7 @@ class BilinearCombinedHardeningSteel:
     ) -> UniaxialPlasticityResponse:
         """Evaluate one trial strain from an immutable committed state."""
         strain = _require_finite("total_strain", total_strain)
+        self.validate_state_admissibility(committed_state)
         elastic_trial = strain - committed_state.plastic_strain
         trial_stress = self.elastic_modulus_mpa * elastic_trial
         relative_trial_stress = trial_stress - committed_state.backstress_mpa

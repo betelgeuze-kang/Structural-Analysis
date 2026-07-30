@@ -4,6 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 
 SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "check_workstation_delivery_readiness.py"
 SPEC = importlib.util.spec_from_file_location("check_workstation_delivery_readiness", SCRIPT_PATH)
@@ -12,11 +14,55 @@ check_workstation_delivery_readiness = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(check_workstation_delivery_readiness)
 
+VALIDATOR_SCRIPT_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "scripts"
+    / "validate_client_input_package.py"
+)
+VALIDATOR_SPEC = importlib.util.spec_from_file_location(
+    "workstation_client_input_validator", VALIDATOR_SCRIPT_PATH
+)
+assert VALIDATOR_SPEC is not None and VALIDATOR_SPEC.loader is not None
+workstation_client_input_validator = importlib.util.module_from_spec(
+    VALIDATOR_SPEC
+)
+VALIDATOR_SPEC.loader.exec_module(workstation_client_input_validator)
+
 
 def _write_json(path: Path, payload: object) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
+
+
+def _ready_client_report(path: Path) -> Path:
+    fixture = (
+        Path(__file__).resolve().parent.parent
+        / "examples"
+        / "workstation_client_input_reference"
+    )
+    payload = workstation_client_input_validator.validate_client_input_package(
+        input_path=fixture,
+        source_kind="repository_reference_fixture",
+    )
+    return _write_json(path, payload)
+
+
+def test_repository_input_rows_rejects_nested_directory_symlink(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = tmp_path / "repo"
+    fixture = repository / "fixture"
+    outside = tmp_path / "outside"
+    fixture.mkdir(parents=True)
+    outside.mkdir()
+    _write_json(fixture / "model.json", {"safe": True})
+    (fixture / "linked").symlink_to(outside, target_is_directory=True)
+    monkeypatch.setattr(check_workstation_delivery_readiness, "REPO_ROOT", repository)
+
+    with pytest.raises(ValueError, match="input_symlink_rejected"):
+        check_workstation_delivery_readiness._repository_input_rows("fixture")
 
 
 def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -> None:
@@ -80,7 +126,7 @@ def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -
             },
         },
     )
-    client = _write_json(tmp_path / "client.json", {"status": "needs_review", "missing_data_report": ["units"]})
+    client = _ready_client_report(tmp_path / "client.json")
     job_record = _write_json(
         tmp_path / "job.json",
         {"schema_version": "workstation-job-record.v1", "job_id": "J1"},

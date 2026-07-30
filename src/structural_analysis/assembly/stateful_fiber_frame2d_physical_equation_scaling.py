@@ -22,13 +22,11 @@ from typing import Any, Literal
 
 import numpy as np
 
-from structural_analysis.assembly.stateful_fiber_frame2d import (
-    StatefulFiberFrame2DProblem,
-)
 from structural_analysis.assembly.stateful_fiber_frame2d_execution_topology import (
     FIBER_FRAME_EXECUTION_TOPOLOGY_SCHEMA_VERSION,
     FIBER_FRAME_PHYSICAL_DOF_COMPONENTS,
     FIBER_FRAME_SOLVER_DOF_COMPONENTS,
+    FiberFrame2DTopologyProblem,
     FiberFrameNonlinearExecutionTopologyPlan,
     physical_3dof_to_canonical_6dof,
     validate_fiber_frame_execution_topology_against_problem,
@@ -263,7 +261,7 @@ class FiberFramePhysicalResidualTrace:
 
 
 def create_stateful_fiber_frame2d_physical_equation_scaling(
-    problem: StatefulFiberFrame2DProblem,
+    problem: FiberFrame2DTopologyProblem,
     topology_plan: FiberFrameNonlinearExecutionTopologyPlan,
     *,
     minimum_characteristic_length_m: float = 1.0e-12,
@@ -413,6 +411,35 @@ def trace_stateful_fiber_frame2d_physical_residual(
         trace,
         topology_plan=plan,
         scaling_binding=binding,
+    )
+
+
+def trace_stateful_fiber_frame2d_free_physical_residual(
+    *,
+    topology_plan: FiberFrameNonlinearExecutionTopologyPlan,
+    scaling_binding: FiberFramePhysicalEquationScalingBinding,
+    raw_free_residual_source_3dof: Any,
+) -> FiberFramePhysicalResidualTrace:
+    """Trace an exact free-equation residual without inventing constrained values.
+
+    The source vector is scattered through the topology plan's explicit free
+    solver-equation map. Zeros outside that map are padding outside the trace's
+    declared ``free_equations`` scope and carry no reaction authority.
+    """
+
+    plan = validate_fiber_frame_execution_topology_plan(topology_plan)
+    free_solver_dofs = plan.array("free_solver_dofs")
+    free = _float_array(
+        raw_free_residual_source_3dof,
+        shape=(free_solver_dofs.size,),
+        path="/raw_free_residual_source_3dof",
+    )
+    global_source = np.zeros(plan.solver_dof_count, dtype="<f8")
+    global_source[free_solver_dofs] = free
+    return trace_stateful_fiber_frame2d_physical_residual(
+        topology_plan=plan,
+        scaling_binding=scaling_binding,
+        raw_residual_source_3dof=global_source,
     )
 
 
@@ -616,18 +643,12 @@ def validate_fiber_frame_physical_equation_scaling_binding(
 
 
 def validate_fiber_frame_physical_equation_scaling_against_problem(
-    problem: StatefulFiberFrame2DProblem,
+    problem: FiberFrame2DTopologyProblem,
     topology_plan: FiberFrameNonlinearExecutionTopologyPlan,
     binding: FiberFramePhysicalEquationScalingBinding,
 ) -> FiberFramePhysicalEquationScalingBinding:
     """Replay geometry, loads, units, free partition, policies, and scale bytes."""
 
-    if type(problem) is not StatefulFiberFrame2DProblem:
-        _fail(
-            "fiber_frame_physical_scaling_problem_type_invalid",
-            "/problem",
-            "Expected exact StatefulFiberFrame2DProblem.",
-        )
     plan = validate_fiber_frame_execution_topology_plan(topology_plan)
     validated_binding = validate_fiber_frame_physical_equation_scaling_binding(binding)
     if (
@@ -2126,6 +2147,7 @@ __all__ = [
     "FiberFramePhysicalResidualTrace",
     "FiberFramePhysicalScalingArrayDescriptor",
     "create_stateful_fiber_frame2d_physical_equation_scaling",
+    "trace_stateful_fiber_frame2d_free_physical_residual",
     "trace_stateful_fiber_frame2d_physical_residual",
     "validate_fiber_frame_physical_equation_scaling_against_problem",
     "validate_fiber_frame_physical_equation_scaling_array_bytes",

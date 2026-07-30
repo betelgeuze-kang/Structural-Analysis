@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_planar_opensees_negative_result_v1.schema.json",
+  "title": "Bounded planar OpenSees negative execution result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "package_id",
+    "case_id",
+    "executed_at",
+    "runner_file_sha256",
+    "source_model_file_sha256",
+    "runtime",
+    "external_engine_invoked",
+    "model_construction_succeeded",
+    "analysis_return_code",
+    "exception_type",
+    "tangent_rank_check",
+    "observation",
+    "classification_match",
+    "contract_pass",
+    "blockers",
+    "artifact_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "bounded-planar-opensees-negative-result.v1"},
+    "package_id": {"const": "bounded-planar-negative-rejection-v1"},
+    "case_id": {
+      "enum": [
+        "bounded_planar_negative_mechanism",
+        "bounded_planar_negative_singular",
+        "bounded_planar_negative_invalid_geometry"
+      ]
+    },
+    "executed_at": {"type": "string", "format": "date-time"},
+    "runner_file_sha256": {"$ref": "#/$defs/sha256"},
+    "source_model_file_sha256": {"$ref": "#/$defs/sha256"},
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python_version", "platform", "openseespy_version", "opensees_core_version"],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "minLength": 1},
+        "openseespy_version": {"type": "string", "minLength": 1},
+        "opensees_core_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "external_engine_invoked": {"type": "boolean"},
+    "model_construction_succeeded": {"type": "boolean"},
+    "analysis_return_code": {"type": ["integer", "null"]},
+    "exception_type": {"type": ["string", "null"], "minLength": 1},
+    "tangent_rank_check": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/tangentRankCheck"}
+      ]
+    },
+    "observation": {
+      "enum": [
+        "released_mechanism_rejected",
+        "rank_deficient_system_rejected",
+        "invalid_geometry_preflight_rejected",
+        "rejection_not_observed"
+      ]
+    },
+    "classification_match": {"type": "boolean"},
+    "contract_pass": {"type": "boolean"},
+    "blockers": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "source_model_hash_mismatch",
+          "openseespy_version_mismatch",
+          "opensees_core_version_mismatch",
+          "invalid_geometry_mismatch",
+          "tangent_rank_check_unavailable",
+          "expected_rejection_not_observed"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "artifact_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "tangentRankCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "equation_count",
+        "matrix_value_count",
+        "maximum_absolute_entry",
+        "relative_pivot_tolerance",
+        "absolute_pivot_tolerance",
+        "numerical_rank",
+        "rank_deficient"
+      ],
+      "properties": {
+        "equation_count": {"type": "integer", "minimum": 1},
+        "matrix_value_count": {"type": "integer", "minimum": 1},
+        "maximum_absolute_entry": {"type": "number", "minimum": 0},
+        "relative_pivot_tolerance": {"const": 1e-12},
+        "absolute_pivot_tolerance": {"type": "number", "minimum": 0},
+        "numerical_rank": {"type": "integer", "minimum": 0},
+        "rank_deficient": {"type": "boolean"}
+      }
+    }
+  }
+}

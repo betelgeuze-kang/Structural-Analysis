@@ -168,7 +168,7 @@
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-22T17:27:17.353844+00:00",
+  "generated_at": "2026-07-29T03:36:17.407710+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
@@ -179,13 +179,13 @@
     "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
     "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
-    "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py": "sha256:7150278daf4e0534a054ec3396bfe6fbc316e95f340ec33312e0f8d4e893effa",
+    "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py": "sha256:cd4e6cc1a8537ded1e9a79f3c48f7c3226b591d10c5c2b1655d807c11e398c77",
     "src/structural_analysis/engine_v2/contracts/_canonical.py": "sha256:78883ad07598edeb838de0ccce2717b362a323574bfe86822dfcfda665ecf11b",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
     "src/structural_analysis/schemas/g1_mgt_state_updated_matrix_free_newton_diagnostic_v1.schema.json": "sha256:927ceb497e967a55002dac240a7d9787b64f5451b4cb0ee30dc7608a9d2ad095",
     "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py": "sha256:02c9d30c47759562ab66c92422105078c5a987bc8f4bafe6027a8c3b07a01058",
-    "tests/test_build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py": "sha256:0aeef7600597135adea04193c94cbe62ea1bcba697c04b81b877d4cab6dccb74",
+    "tests/test_build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py": "sha256:3b4a028881f6e5d843e7b853922d4cd4fb4ec3ff99069f4b37933a8054ab3758",
     "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
     "tests/test_matrix_free_cpu_fgmres_state_tangent.py": "sha256:461b4518cc69ed168d505bf04d50d9cc5fa89f338f117fd0aa7d0550df8345ff"
   },
@@ -593,7 +593,7 @@
     "reference_preconditioner_values_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1"
   },
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }

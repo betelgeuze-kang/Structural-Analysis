@@ -3,18 +3,26 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from implementation.phase1.generate_native_authoring_family_local_evidence_manifest import (
     build_native_authoring_family_local_evidence_manifest,
 )
 
 
 def _build_default_manifest(tmp_path: Path) -> dict:
+    portfolio_path = Path(
+        "implementation/phase1/release/authoring/portfolio/"
+        "native_authoring_ops_portfolio.json"
+    )
+    if not portfolio_path.exists():
+        pytest.skip("non-committed default authoring portfolio is unavailable")
     out = tmp_path / "native_authoring_family_local_evidence_manifest.json"
     return build_native_authoring_family_local_evidence_manifest(
         family_corpus_manifest_path=Path(
             "implementation/phase1/release/authoring/portfolio/native_authoring_family_corpus_manifest.json"
         ),
-        portfolio_json_path=Path("implementation/phase1/release/authoring/portfolio/native_authoring_ops_portfolio.json"),
+        portfolio_json_path=portfolio_path,
         release_root=Path("implementation/phase1/release/authoring/portfolio"),
         korean_source_catalog_path=Path("implementation/phase1/open_data/korea/korean_source_catalog.json"),
         korean_source_ingest_report_path=Path("implementation/phase1/open_data/korea/korean_source_ingest_report.json"),

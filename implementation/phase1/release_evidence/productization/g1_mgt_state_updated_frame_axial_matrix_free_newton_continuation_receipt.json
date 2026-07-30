@@ -3203,7 +3203,7 @@
   },
   "contract_pass": true,
   "diagnostic_execution_ready": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "engineer_review_required": true,
   "evidence_closure_pass": false,
   "final_vector_artifact": {
@@ -3230,9 +3230,9 @@
     "schema_version": "g1-mgt-state-updated-frame-axial-live-load-1p0-diagnostic-vector.v1",
     "status": "ready"
   },
-  "generated_at": "2026-07-19T02:02:00.014517+00:00",
+  "generated_at": "2026-07-28T07:05:22.307808+00:00",
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:1c280b298bf7769b83be477804f70f1a4d9ddeedf87d8dad05a93e11e6089fc9",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
     "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
@@ -4701,7 +4701,7 @@
   },
   "schema_version": "g1-mgt-state-updated-frame-axial-matrix-free-newton-continuation-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "strict_g1_gate_full_load_probe": {

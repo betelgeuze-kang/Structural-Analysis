@@ -20,9 +20,25 @@ ANY_ISSUE_REFERENCE = re.compile(
 )
 EXACT_FILE_CLAIM = re.compile(r"(?i)\bexactly\s+([1-9][0-9]*)\s+changed\s+files?\b")
 NUMERIC_COMMIT_CLAIM = re.compile(
-    r"(?i)\b(?:exactly\s+)?([1-9][0-9]*)\s+commits?\b"
+    r"(?ix)"
+    r"(?:"
+    r"\bexactly\s+"
+    r"|"
+    r"\b(?:this|the)\s+(?:change|pull\s+request|pr)\s+"
+    r"(?:contains?|has)\s+(?:exactly\s+)?"
+    r")"
+    r"([1-9][0-9]*)\s+commits?\b"
+    r"(?!\s+(?:ahead|behind|between|from|since)\b)"
 )
-ONE_COMMIT_CLAIM = re.compile(r"(?i)\b(?:a|one)\s+commit\b")
+ONE_COMMIT_CLAIM = re.compile(
+    r"(?ix)"
+    r"\b(?:"
+    r"(?:this|the)\s+(?:change|pull\s+request|pr)\s+"
+    r"(?:contains?|has|is)"
+    r"|this\s+is"
+    r")\s+(?:a|one)\s+commit\b"
+    r"(?!\s+(?:ahead|behind|between|from|since)\b)"
+)
 PLACEHOLDER_TOKENS = ("OWNER_INPUT_REQUIRED", "TBD", "TODO:")
 
 

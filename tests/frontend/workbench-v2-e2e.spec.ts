@@ -122,9 +122,12 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
 
   test('generated capability registry preserves non-public and blocked rows', async ({ page }) => {
     await open(page)
+    const generatedRegistry = JSON.parse(
+      await readFile('src/workbench-v2/model/generatedCapabilities.json', 'utf8'),
+    ) as { capabilities: unknown[] }
     const table = page.locator('[data-wb2-capability-table]')
     await expect(table).toBeVisible()
-    await expect(table.locator('tbody tr')).toHaveCount(19)
+    await expect(table.locator('tbody tr')).toHaveCount(generatedRegistry.capabilities.length)
     await expect(
       table.locator('[data-capability-id="contract.result_quantity_catalog"]'),
     ).toHaveAttribute('data-capability-status', 'bounded_public')

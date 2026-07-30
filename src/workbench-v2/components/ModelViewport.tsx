@@ -3,6 +3,7 @@ import type { CaseModel } from '../model/caseSchema'
 import type { DataMode } from '../model/workbenchState'
 import { buildViewerUrl, createViewerBridge, type ViewerBridge } from '../model/viewerBridge'
 import { CopyButton } from './CopyButton'
+import { EngineeringValueText } from './EngineeringValueText'
 
 interface ModelViewportProps {
   model: CaseModel
@@ -74,8 +75,9 @@ export function ModelViewport({
       </div>
 
       <p className="wb2-viewport-meta">
-        {model.nodeCount.toLocaleString()} nodes · {model.elementCount.toLocaleString()} elements ·{' '}
-        {model.dofCount.toLocaleString()} DOF
+        <EngineeringValueText value={model.nodeCount} integer /> nodes ·{' '}
+        <EngineeringValueText value={model.elementCount} integer /> elements ·{' '}
+        <EngineeringValueText value={model.dofCount} integer /> DOF
       </p>
 
       {/* Selection inspector + manual focus. Selection round-trips with the

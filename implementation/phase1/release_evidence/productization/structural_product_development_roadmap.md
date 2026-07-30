@@ -1,6 +1,6 @@
 # Structural Product Development Roadmap
 
-Structural product roadmap: BLOCKED | evidence_progress=32.7% | stage_average=32.4% | ready_stages=1/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
+Structural product roadmap: BLOCKED | evidence_progress=30.8% | stage_average=29.3% | ready_stages=1/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
 
 ## Current Position
 
@@ -12,11 +12,11 @@ Structural product roadmap: BLOCKED | evidence_progress=32.7% | stage_average=32
 - `pm_milestones`: `2/5`
 - `pm_release_areas`: `4/16`
 - `release_ready`: `False`
-- `snapshot_blocker_count`: `114`
+- `snapshot_blocker_count`: `112`
 - `snapshot_status`: `stale_or_inconsistent`
 - `structural_scope_owner_decisions`: `86/86`
 - `structural_scope_release_surface_cleanup_decisions`: `0/0`
-- `workstation_delivery_ready`: `True`
+- `workstation_delivery_ready`: `False`
 
 ## Roadmap Stages
 
@@ -40,7 +40,7 @@ Structural product roadmap: BLOCKED | evidence_progress=32.7% | stage_average=32
 - `commercial_solver_claim_upgrade`: blocked (0/5, 0.0%)
   - first blocker: `schema_invalid`
   - next action: `close_external_benchmark_receipts`
-- `enterprise_productization`: partial (1/4, 25.0%)
+- `enterprise_productization`: blocked (0/4, 0.0%)
   - first blocker: `independent_product_ready_false`
   - next action: `add_durable_queue_postgres_and_object_storage_receipts`
 

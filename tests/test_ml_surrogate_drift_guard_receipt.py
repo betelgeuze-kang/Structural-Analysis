@@ -6,6 +6,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
+import pytest
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DRIFT_SCRIPT = REPO_ROOT / "scripts" / "build_ml_surrogate_drift_guard_receipt.py"
 CI_SCRIPT = REPO_ROOT / "scripts" / "check_ml_surrogate_drift_guard.py"
@@ -13,6 +16,40 @@ DEFAULT_OUT = (
     REPO_ROOT
     / "implementation/phase1/release_evidence/productization/ml_surrogate_drift_guard_receipt.json"
 )
+
+
+@pytest.fixture(autouse=True)
+def _validated_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    row_count = 60
+    state_npz = tmp_path / "design_optimization_state.npz"
+    checkpoint_dir = tmp_path / "checkpoint"
+    productization_dir = tmp_path / "productization"
+    np.savez_compressed(
+        state_npz,
+        group_ids=np.asarray([f"drift-guard-group-{index:03d}" for index in range(row_count)]),
+        max_dcr=np.full(row_count, 0.8),
+        member_story_drift_contribution_pct=np.full(row_count, 0.05),
+        group_cost_proxy=np.full(row_count, 1_000.0),
+    )
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_ml_surrogate_checkpoint.py"),
+            "--state-npz",
+            str(state_npz),
+            "--checkpoint-dir",
+            str(checkpoint_dir),
+            "--productization-dir",
+            str(productization_dir),
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr + proc.stdout
+    monkeypatch.setenv("PHASE1_ML_SURROGATE_OPT_IN", "1")
+    monkeypatch.setenv("PHASE1_ML_SURROGATE_CHECKPOINT", str(checkpoint_dir / "checkpoint.pt"))
 
 
 def _build_drift_receipt(

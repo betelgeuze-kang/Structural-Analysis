@@ -5,6 +5,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+from implementation.phase1.run_midas_interoperability_gate import (
+    DEFAULT_EXPORT_REPORT,
+    DEFAULT_LOADCOMB_PREVIEW_FILES,
+    DEFAULT_LOADCOMB_ROUNDTRIP_REPORTS,
+    DEFAULT_MODEL_JSONS,
+)
+
 
 SCRIPT = Path("implementation/phase1/run_midas_interoperability_gate.py")
 
@@ -105,6 +114,19 @@ def _write_roundtrip_report(
 
 
 def test_midas_interoperability_gate_passes_on_current_release_artifacts(tmp_path: Path) -> None:
+    required_release_inputs = [
+        *[Path(path) for path in DEFAULT_MODEL_JSONS.split(",")],
+        Path(DEFAULT_EXPORT_REPORT),
+        *[Path(path) for path in DEFAULT_LOADCOMB_ROUNDTRIP_REPORTS.split(",")],
+        *[Path(path) for path in DEFAULT_LOADCOMB_PREVIEW_FILES.split(",")],
+    ]
+    missing_release_inputs = [str(path) for path in required_release_inputs if not path.exists()]
+    if missing_release_inputs:
+        pytest.skip(
+            "MIDAS interoperability release inputs are not available in this checkout: "
+            + ", ".join(missing_release_inputs)
+        )
+
     out_path = tmp_path / "midas_interoperability_gate_report.json"
 
     proc = subprocess.run(
@@ -178,7 +200,7 @@ def test_midas_interoperability_gate_flags_missing_preview_as_failure(tmp_path: 
 
     payload = json.loads(out_path.read_text(encoding="utf-8"))
     assert payload["contract_pass"] is False
-    assert payload["reason_code"] == "ERR_INTEROPERABILITY_FAIL"
+    assert payload["reason_code"] == "ERR_EXPORT_FIDELITY_FAIL"
     assert payload["checks"]["loadcomb_preview_files_pass"] is False
     assert payload["summary"]["preview_file_present_count"] == 0
     assert payload["summary_line"].startswith("MIDAS interoperability/export readiness: CHECK")

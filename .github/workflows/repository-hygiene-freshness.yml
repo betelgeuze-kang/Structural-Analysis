@@ -1,0 +1,117 @@
+name: Repository Hygiene Freshness
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+    paths:
+      - "artifacts/manifests/repository_hygiene_inventory.json"
+      - "scripts/build_repository_hygiene_live_observation.py"
+      - "scripts/check_repository_hygiene_inventory.py"
+      - "tests/test_build_repository_hygiene_live_observation.py"
+      - "tests/test_check_repository_hygiene_inventory.py"
+      - ".github/workflows/repository-hygiene-freshness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  GH_TOKEN: ${{ github.token }}
+  EVENT_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Observe repository state without mutation
+        shell: bash
+        run: |
+          gh api "/repos/$GITHUB_REPOSITORY" > "$RUNNER_TEMP/repository.json"
+          default_branch="$(
+            python -c 'import json,sys; print(json.load(sys.stdin)["default_branch"])' \
+              < "$RUNNER_TEMP/repository.json"
+          )"
+          gh api "/repos/$GITHUB_REPOSITORY/commits/$default_branch" \
+            > "$RUNNER_TEMP/default-branch-commit.json"
+          gh api --paginate \
+            "/repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" \
+            | jq -s 'add' \
+            > "$RUNNER_TEMP/open-pull-requests.json"
+          gh api --paginate \
+            "/repos/$GITHUB_REPOSITORY/issues?state=open&per_page=100" \
+            | jq -s 'add' \
+            > "$RUNNER_TEMP/open-issues.json"
+          while read -r issue_number; do
+            gh api "/repos/$GITHUB_REPOSITORY/issues/$issue_number"
+          done < <(
+            jq -r \
+              '.issue_hygiene_scope.resolved_issue_watchlist[].number' \
+              artifacts/manifests/repository_hygiene_inventory.json
+          ) | jq -s '.' > "$RUNNER_TEMP/tracked-issues.json"
+          while read -r pull_request_number; do
+            gh api "/repos/$GITHUB_REPOSITORY/pulls/$pull_request_number"
+          done < <(
+            jq -r \
+              '.superseded_pull_requests[].number' \
+              artifacts/manifests/repository_hygiene_inventory.json
+          ) | jq -s '.' > "$RUNNER_TEMP/superseded-pull-requests.json"
+          candidate_number="${EVENT_PULL_REQUEST_NUMBER:-}"
+          if [[ ! "$candidate_number" =~ ^[1-9][0-9]*$ ]]; then
+            candidate_number="$(
+              python -c 'import json; print(json.load(open("artifacts/manifests/repository_hygiene_inventory.json"))["open_pull_request_scope"]["candidate_pull_request"]["number"])'
+            )"
+          fi
+          printf '%s\n' "$candidate_number" > "$RUNNER_TEMP/candidate-number.txt"
+          gh api "/repos/$GITHUB_REPOSITORY/pulls/$candidate_number" \
+            > "$RUNNER_TEMP/candidate-pull-request.json"
+          gh api --paginate \
+            "/repos/$GITHUB_REPOSITORY/pulls/$candidate_number/files?per_page=100" \
+            | jq -s 'add' \
+            > "$RUNNER_TEMP/candidate-files.json"
+          read -r candidate_base_sha candidate_head_sha < <(
+            python -c 'import json,sys; p=json.load(sys.stdin); print(p["base"]["sha"], p["head"]["sha"])' \
+              < "$RUNNER_TEMP/candidate-pull-request.json"
+          )
+          gh api "/repos/$GITHUB_REPOSITORY/compare/$candidate_base_sha...$candidate_head_sha" \
+            > "$RUNNER_TEMP/candidate-compare.json"
+          python scripts/build_repository_hygiene_live_observation.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-json "$RUNNER_TEMP/repository.json" \
+            --default-branch-commit-json "$RUNNER_TEMP/default-branch-commit.json" \
+            --open-pull-requests-json "$RUNNER_TEMP/open-pull-requests.json" \
+            --open-issues-json "$RUNNER_TEMP/open-issues.json" \
+            --tracked-issues-json "$RUNNER_TEMP/tracked-issues.json" \
+            --superseded-pull-requests-json "$RUNNER_TEMP/superseded-pull-requests.json" \
+            --candidate-pull-request-json "$RUNNER_TEMP/candidate-pull-request.json" \
+            --candidate-compare-json "$RUNNER_TEMP/candidate-compare.json" \
+            --candidate-files-json "$RUNNER_TEMP/candidate-files.json" \
+            --out "$RUNNER_TEMP/repository-hygiene-live-observation.json"
+
+      - name: Require live freshness
+        run: >-
+          python scripts/check_repository_hygiene_inventory.py
+          --live-observation "$RUNNER_TEMP/repository-hygiene-live-observation.json"
+          --require-live-freshness
+          --expected-candidate-number "$(cat "$RUNNER_TEMP/candidate-number.txt")"
+          --json
+
+      - name: Upload read-only observation
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: repository-hygiene-live-observation-${{ github.run_id }}
+          path: ${{ runner.temp }}/repository-hygiene-live-observation.json
+          if-no-files-found: warn
+          retention-days: 14

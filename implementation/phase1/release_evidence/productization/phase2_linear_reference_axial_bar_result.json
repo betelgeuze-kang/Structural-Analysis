@@ -4,28 +4,37 @@
   "claim_boundary_version": "developer-preview-core-api-v1",
   "convergence_history": [
     {
+      "dimensionless_scaled_residual": 0.0,
       "increment_definition": "single_direct_linear_solve; no iterative relative increment",
       "increment_norm": 0.1,
       "iteration": 1,
+      "raw_rotation_increment": 0.0,
+      "raw_rotational_residual": 0.0,
+      "raw_translation_increment": 0.1,
+      "raw_translational_residual": 0.0,
       "relative_increment": 0.0,
       "relative_increment_applicable": false,
       "relative_residual": 0.0,
       "residual_norm": 0.0,
+      "scaled_increment": 0.05,
+      "scaling_hash": "sha256:3e932c85567244b45d2d5e1835c93678c6d8e7d9cd201313b1fb4b9bc2754223",
       "status": "ready",
       "step": "linear_static"
     }
   ],
   "developer_preview": true,
-  "engine_version": "1.0.0",
+  "engine_version": "0.3.0",
   "input_checksum": "sha256:721e136f51bdf890b7169547d49c0d9ebda9a686afbb8c868abde8c396bd0eb2",
   "metrics": {
     "active_dof_count": 2,
     "analysis_fidelity": "cpu_reference_linear_fea",
     "analysis_input_snapshot": "detached_canonical_model_v1",
     "automatic_support_generation_used": false,
+    "characteristic_length": 2.0,
     "claim_boundary": "linear_static_axial_truss_preview_only",
     "constrained_dof_count": 8,
     "constrained_reaction_norm": 100.0,
+    "dimensionless_scaled_residual": 0.0,
     "displacements": {
       "N1": {
         "RX": 0.0,
@@ -46,6 +55,25 @@
     },
     "element_count": 1,
     "energy_balance_error": 0.0,
+    "equation_scaling_6dof": {
+      "characteristic_length_m": 2.0,
+      "column_equilibration_hash": "sha256:6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
+      "dof_count": 12,
+      "free_equation_count": 1,
+      "increment_rotation_scale_rad": 1.0,
+      "increment_translation_scale_m": 2.0,
+      "policy": "centroid_diameter_force_moment_6dof.v1",
+      "reference_force": 100.0,
+      "residual_rotation_scale": 200.0,
+      "residual_translation_scale": 100.0,
+      "row_equilibration_hash": "sha256:6c3c396ed6b5c36dcae172271f462051b1266b851e92df3deea8ac65478fd712",
+      "scaling_hash": "sha256:3e932c85567244b45d2d5e1835c93678c6d8e7d9cd201313b1fb4b9bc2754223",
+      "schema_version": "structural-analysis-equation-scaling-6dof.v1",
+      "source_free_dofs_hash": "sha256:23d7f42b1cdc1f0d492ebd756ed0fe8003995dda554d99418d47a81813650207",
+      "source_identity_hash": "sha256:7ff671bd5732868696378eba5b4ea806873a07fadd7d40d167d8f82cc6ab7384",
+      "source_node_coordinates_hash": "sha256:43a309259a4fe2e31e76b8b973eeedd87cc5e0dedbadff1e8d8da13b5911b520",
+      "source_reference_load_hash": "sha256:0828818893723c68fa5a3932d6dd7ee64a2fb04a790bf631797402508be316f6"
+    },
     "equilibrium_residual_definition": "free_dof_internal_minus_external_force",
     "equilibrium_residuals": {
       "N1": {
@@ -131,6 +159,10 @@
     "node_count": 2,
     "production_fail_closed": true,
     "provenance_policy": "engine_owned",
+    "raw_rotation_increment": 0.0,
+    "raw_rotational_residual": 0.0,
+    "raw_translation_increment": 0.1,
+    "raw_translational_residual": 0.0,
     "reaction_definition": "constrained_dof_internal_minus_external_force",
     "reactions": {
       "N1": {
@@ -155,6 +187,10 @@
     "relative_residual": 0.0,
     "residual_formula": "F_internal_minus_F_external",
     "residual_norm": 0.0,
+    "scaled_condition_number": 1.0,
+    "scaled_condition_number_status": "available",
+    "scaled_increment": 0.05,
+    "scaling_hash": "sha256:3e932c85567244b45d2d5e1835c93678c6d8e7d9cd201313b1fb4b9bc2754223",
     "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
     "sparse_backend_used": false,
     "stiffness_order": 12,

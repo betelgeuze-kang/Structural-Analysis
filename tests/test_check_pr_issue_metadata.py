@@ -70,6 +70,35 @@ def test_unlinked_pr_can_be_explicitly_allowed_for_exceptional_workflows() -> No
     assert report["require_closing_issue"] is False
 
 
+def test_branch_divergence_observation_is_not_a_pr_commit_count_claim() -> None:
+    report = validator.build_report(
+        _event(
+            body=(
+                "Closes #199\n\n"
+                "The roadmap candidate base is 76 commits behind main with "
+                "328 overlapping changed paths."
+            ),
+            commits=1,
+        )
+    )
+
+    assert report["contract_pass"] is True
+    assert report["actual_commit_count"] == 1
+    assert report["blockers"] == []
+
+
+def test_explicit_pr_commit_count_without_exactly_is_still_validated() -> None:
+    report = validator.build_report(
+        _event(
+            body="Closes #199\n\nThis PR has 3 commits.",
+            commits=2,
+        )
+    )
+
+    assert report["contract_pass"] is False
+    assert "commit_count_claim_mismatch:claimed=3:actual=2" in report["blockers"]
+
+
 def test_pr_metadata_workflow_is_read_only_and_runs_the_validator() -> None:
     workflow = (ROOT / ".github/workflows/pr-metadata-ci.yml").read_text(
         encoding="utf-8"

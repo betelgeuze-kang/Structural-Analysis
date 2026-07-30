@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/internal_license_due_diligence_v1.schema.json",
+  "title": "Non-promoting internal license due-diligence manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_hash",
+    "generated_at",
+    "source_commit_sha",
+    "engine_version",
+    "input_checksums",
+    "reused_evidence",
+    "reuse_policy",
+    "status",
+    "contract_pass",
+    "components",
+    "inventory",
+    "claims",
+    "blockers",
+    "external_actions",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "internal-license-due-diligence.v1"},
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "minLength": 20},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "engine_version": {"type": "string", "minLength": 1},
+    "input_checksums": {
+      "type": "object",
+      "minProperties": 8,
+      "additionalProperties": {"$ref": "#/$defs/hash"}
+    },
+    "reused_evidence": {"const": true},
+    "reuse_policy": {"type": "string", "minLength": 40},
+    "status": {"enum": ["complete", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "license_inventory",
+        "spdx_notices",
+        "redistribution_boundary",
+        "source_use_declarations"
+      ],
+      "properties": {
+        "license_inventory": {"$ref": "#/$defs/inventoryComponent"},
+        "spdx_notices": {"$ref": "#/$defs/countComponent"},
+        "redistribution_boundary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "contract_pass",
+            "explicit_boundary_count",
+            "bounded_preview_redistribution_allowed_count"
+          ],
+          "properties": {
+            "contract_pass": {"type": "boolean"},
+            "explicit_boundary_count": {"type": "integer", "minimum": 0},
+            "bounded_preview_redistribution_allowed_count": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "source_use_declarations": {"$ref": "#/$defs/declarationComponent"}
+      }
+    },
+    "inventory": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {"$ref": "#/$defs/inventoryRow"}
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "internal_due_diligence_complete",
+        "license_inventory_complete",
+        "spdx_notices_complete",
+        "redistribution_boundaries_explicit",
+        "source_use_declarations_complete",
+        "repo_generated_preview_seed_bundle_policy_ready",
+        "third_party_material_clearance_complete",
+        "external_runtime_redistribution_approved",
+        "external_benchmark_redistribution_approved",
+        "product_commercial_redistribution_approved",
+        "product_legal_approval",
+        "formal_verification_level_2",
+        "release_authority"
+      ],
+      "properties": {
+        "internal_due_diligence_complete": {"type": "boolean"},
+        "license_inventory_complete": {"type": "boolean"},
+        "spdx_notices_complete": {"type": "boolean"},
+        "redistribution_boundaries_explicit": {"type": "boolean"},
+        "source_use_declarations_complete": {"type": "boolean"},
+        "repo_generated_preview_seed_bundle_policy_ready": {"type": "boolean"},
+        "third_party_material_clearance_complete": {"const": false},
+        "external_runtime_redistribution_approved": {"const": false},
+        "external_benchmark_redistribution_approved": {"const": false},
+        "product_commercial_redistribution_approved": {"const": false},
+        "product_legal_approval": {"const": false},
+        "formal_verification_level_2": {"const": false},
+        "release_authority": {"const": false}
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "external_actions": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "claim_boundary": {"type": "string", "minLength": 200}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "inventoryComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_pass", "inventory_count", "required_inventory_count"],
+      "properties": {
+        "contract_pass": {"type": "boolean"},
+        "inventory_count": {"type": "integer", "minimum": 0},
+        "required_inventory_count": {"const": 7}
+      }
+    },
+    "countComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_pass", "notice_count"],
+      "properties": {
+        "contract_pass": {"type": "boolean"},
+        "notice_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "declarationComponent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_pass", "declaration_count"],
+      "properties": {
+        "contract_pass": {"type": "boolean"},
+        "declaration_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "inventoryRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inventory_id",
+        "category",
+        "source_evidence_path",
+        "source_evidence_sha256",
+        "material_presence",
+        "declared_license_posture",
+        "spdx_or_license_ref",
+        "use_scope",
+        "redistribution_boundary",
+        "redistribution_allowed",
+        "commercial_use_approved",
+        "product_legal_approval",
+        "source_use_declaration",
+        "review_status"
+      ],
+      "properties": {
+        "inventory_id": {"type": "string", "minLength": 3},
+        "category": {"type": "string", "minLength": 3},
+        "source_evidence_path": {"type": "string", "minLength": 3},
+        "source_evidence_sha256": {"$ref": "#/$defs/hash"},
+        "material_presence": {"type": "string", "minLength": 3},
+        "declared_license_posture": {"type": "string", "minLength": 3},
+        "spdx_or_license_ref": {"type": "string", "minLength": 3},
+        "use_scope": {"type": "string", "minLength": 3},
+        "redistribution_boundary": {"type": "string", "minLength": 10},
+        "redistribution_allowed": {"type": "boolean"},
+        "commercial_use_approved": {"const": false},
+        "product_legal_approval": {"const": false},
+        "source_use_declaration": {"type": "string", "minLength": 20},
+        "review_status": {"type": "string", "minLength": 3}
+      }
+    }
+  }
+}

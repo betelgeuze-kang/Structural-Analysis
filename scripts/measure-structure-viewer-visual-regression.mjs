@@ -247,6 +247,19 @@ async function settleAnimationFrames(page) {
   }))
 }
 
+async function ensureWorkspaceChrome(page, timeoutMs) {
+  if ((await page.locator('body').getAttribute('data-si-shell')) !== 'workspace') {
+    await page.locator('#toggle-workspace-chrome').click()
+  }
+  await page.waitForFunction(
+    () => document.body?.dataset?.siShell === 'workspace',
+    null,
+    { timeout: timeoutMs },
+  )
+  await page.locator('#project-workspace-section').waitFor({ state: 'visible', timeout: timeoutMs })
+  await settleAnimationFrames(page)
+}
+
 async function activateButton(page, selector, timeoutMs) {
   const button = page.locator(selector)
   await button.waitFor({ state: 'visible', timeout: timeoutMs })
@@ -254,6 +267,47 @@ async function activateButton(page, selector, timeoutMs) {
   await page.waitForFunction(
     (buttonSelector) => document.querySelector(buttonSelector)?.classList.contains('active') === true,
     selector,
+    { timeout: timeoutMs },
+  )
+}
+
+async function activateRenderMode(page, mode, timeoutMs) {
+  const normalizedMode = String(mode || '').trim().toLowerCase()
+  const legacySelector = `#btn-${normalizedMode}`
+  const toolSelector = `[data-viewport-tool-render-mode="${normalizedMode}"]`
+  const toolButton = page.locator(toolSelector).first()
+  if (await toolButton.isVisible()) {
+    await toolButton.click()
+  } else {
+    await page.locator(legacySelector).click()
+  }
+  await page.waitForFunction(
+    ({ legacyButtonSelector, viewportToolSelector }) => {
+      const legacyButton = document.querySelector(legacyButtonSelector)
+      const viewportTool = document.querySelector(viewportToolSelector)
+      return legacyButton?.classList.contains('active') === true
+        && viewportTool?.getAttribute('aria-pressed') === 'true'
+    },
+    { legacyButtonSelector: legacySelector, viewportToolSelector: toolSelector },
+    { timeout: timeoutMs },
+  )
+}
+
+async function activateViewPreset(page, preset, timeoutMs) {
+  const normalizedPreset = String(preset || '').trim().toLowerCase()
+  const legacySelector = `#btn-view-${normalizedPreset}`
+  const toolSelector = normalizedPreset === 'fit'
+    ? '[data-viewport-tool="fit-all"]'
+    : `[data-viewport-view-preset="${normalizedPreset}"]`
+  const toolButton = page.locator(toolSelector).first()
+  if (await toolButton.isVisible()) {
+    await toolButton.click()
+  } else {
+    await page.locator(legacySelector).click()
+  }
+  await page.waitForFunction(
+    (legacyButtonSelector) => document.querySelector(legacyButtonSelector)?.classList.contains('active') === true,
+    legacySelector,
     { timeout: timeoutMs },
   )
 }
@@ -459,7 +513,7 @@ async function applyLoadcombDraft(page, testCase, timeoutMs, evidenceState = {})
     )
     await page.locator('#viewport canvas').waitFor({ state: 'visible', timeout: timeoutMs })
     await waitForCanvasNonBlank(page, { timeout: timeoutMs })
-    await activateButton(page, `#btn-${String(testCase.renderMode || 'solid').trim().toLowerCase()}`, timeoutMs)
+    await activateRenderMode(page, testCase.renderMode || 'solid', timeoutMs)
     baseName = await getFirstLoadcombBaseName(page)
   }
   if (!baseName) {
@@ -482,11 +536,11 @@ async function applyLoadcombDraft(page, testCase, timeoutMs, evidenceState = {})
 async function applyCaseState(page, testCase, timeoutMs) {
   const viewPreset = String(testCase.viewPreset || '').trim().toLowerCase()
   if (viewPreset) {
-    await activateButton(page, `#btn-view-${viewPreset}`, timeoutMs)
+    await activateViewPreset(page, viewPreset, timeoutMs)
   }
 
   const renderMode = String(testCase.renderMode || 'wireframe').trim().toLowerCase()
-  await activateButton(page, `#btn-${renderMode}`, timeoutMs)
+  await activateRenderMode(page, renderMode, timeoutMs)
 
   const selectedMember = await selectMember(page, testCase.memberSearch, timeoutMs)
   const reviewStatus = await applyReviewState(page, testCase, timeoutMs)
@@ -522,6 +576,7 @@ async function captureCase(page, baseUrl, testCase, timeoutMs) {
   await page.goto(url, { timeout: timeoutMs, waitUntil: 'commit' })
   await page.locator('#viewport canvas').waitFor({ state: 'visible', timeout: timeoutMs })
   await waitForCanvasNonBlank(page, { timeout: timeoutMs })
+  await ensureWorkspaceChrome(page, timeoutMs)
   const appliedState = await applyCaseState(page, testCase, timeoutMs)
   await waitForCanvasNonBlank(page, { timeout: timeoutMs })
   const canvasMetrics = await assertCanvasWellFramed(page, {

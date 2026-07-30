@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 from implementation.phase1.generate_native_authoring_family_corpus_manifest import (
     build_native_authoring_family_corpus_manifest,
 )
@@ -417,9 +419,15 @@ def test_generate_native_authoring_family_corpus_manifest_cli_reads_catalogs(tmp
 def test_build_native_authoring_family_corpus_manifest_default_release_portfolio_covers_eight_families(
     tmp_path: Path,
 ) -> None:
+    portfolio_path = Path(
+        "implementation/phase1/release/authoring/portfolio/"
+        "native_authoring_ops_portfolio.json"
+    )
+    if not portfolio_path.exists():
+        pytest.skip("non-committed default authoring portfolio is unavailable")
     out = tmp_path / "native_authoring_family_corpus_manifest.json"
     payload = build_native_authoring_family_corpus_manifest(
-        portfolio_json_path=Path("implementation/phase1/release/authoring/portfolio/native_authoring_ops_portfolio.json"),
+        portfolio_json_path=portfolio_path,
         release_root=Path("implementation/phase1/release/authoring/portfolio"),
         korean_source_catalog_path=Path("implementation/phase1/open_data/korea/korean_source_catalog.json"),
         benchmark_diversification_catalog_path=Path("implementation/phase1/open_data/benchmark_diversification_catalog.json"),

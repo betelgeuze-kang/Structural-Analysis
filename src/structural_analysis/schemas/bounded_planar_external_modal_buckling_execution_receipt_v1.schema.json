@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_planar_external_modal_buckling_execution_receipt_v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "package_id", "source_commit_sha", "package_manifest_file_sha256", "package_manifest_artifact_hash", "cases", "summary", "claims", "technical_contract_pass", "blockers", "claim_boundary", "artifact_hash"],
+  "properties": {
+    "schema_version": {"const": "bounded-planar-external-modal-buckling-execution-receipt.v1"},
+    "package_id": {"const": "bounded-planar-modal-buckling-v1"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "package_manifest_file_sha256": {"$ref": "#/$defs/sha"}, "package_manifest_artifact_hash": {"$ref": "#/$defs/sha"},
+    "cases": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"$ref": "#/$defs/case"}},
+    "summary": {"type": "object", "additionalProperties": false, "required": ["case_count", "technical_pass_count"], "properties": {"case_count": {"const": 3}, "technical_pass_count": {"type": "integer", "minimum": 0, "maximum": 3}}},
+    "claims": {"type": "object", "additionalProperties": false, "required": ["fresh_external_solver_execution", "same_operator_technical_comparison", "independent_operator_attested", "legal_use_approved", "verification_matrix_credit", "verification_level_2"], "properties": {"fresh_external_solver_execution": {"const": false}, "same_operator_technical_comparison": {"const": true}, "independent_operator_attested": {"const": false}, "legal_use_approved": {"const": false}, "verification_matrix_credit": {"const": false}, "verification_level_2": {"const": false}}},
+    "technical_contract_pass": {"type": "boolean"},
+    "blockers": {"type": "array", "minItems": 3, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "claim_boundary": {"type": "string", "minLength": 120}, "artifact_hash": {"$ref": "#/$defs/sha"}
+  },
+  "$defs": {
+    "sha": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "comparison": {"type": "object", "additionalProperties": false, "required": ["metric_id", "product_value", "external_value", "absolute_error", "relative_error", "absolute_tolerance", "relative_tolerance", "contract_pass"], "properties": {"metric_id": {"type": "string", "minLength": 1}, "product_value": {"type": "number"}, "external_value": {"type": "number"}, "absolute_error": {"type": "number", "minimum": 0}, "relative_error": {"type": "number", "minimum": 0}, "absolute_tolerance": {"type": "number", "minimum": 0}, "relative_tolerance": {"type": "number", "minimum": 0}, "contract_pass": {"type": "boolean"}}},
+    "case": {"type": "object", "additionalProperties": false, "required": ["case_id", "requirement_id", "external_solver_id", "result_path", "result_file_sha256", "result_artifact_hash", "comparisons", "technical_contract_pass"], "properties": {"case_id": {"type": "string"}, "requirement_id": {"type": "string"}, "external_solver_id": {"enum": ["OpenSees", "CalculiX"]}, "result_path": {"type": "string", "minLength": 1}, "result_file_sha256": {"$ref": "#/$defs/sha"}, "result_artifact_hash": {"$ref": "#/$defs/sha"}, "comparisons": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/comparison"}}, "technical_contract_pass": {"type": "boolean"}}}
+  }
+}

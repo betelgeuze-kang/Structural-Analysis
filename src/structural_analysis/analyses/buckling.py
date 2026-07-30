@@ -27,6 +27,11 @@ from structural_analysis.solvers.buckling import (
     BucklingAnalysisError,
     solve_linear_buckling,
 )
+from structural_analysis.solvers.equation_scaling_6dof import (
+    create_equation_scaling_6dof,
+    equilibration_vectors_6dof,
+    exact_scaled_condition_number_1,
+)
 
 
 AUTHORITATIVE_CPU_BUCKLING_SOLVER_ID = (
@@ -149,11 +154,58 @@ def run_authoritative_linear_buckling(
     free = np.asarray(assembly.free_dofs, dtype=np.int64)
     reduced_stiffness = assembly.stiffness[np.ix_(free, free)]
     reduced_geometric = assembly.geometric_stiffness[np.ix_(free, free)]
+    reference_equation_load = _reference_equation_load(
+        reference.metrics,
+        assembly,
+    )
+    if reference_equation_load is None:
+        return _blocked_solution(
+            model,
+            unsupported=[
+                {
+                    "kind": "buckling_reference_load_vector_missing",
+                    "detail": (
+                        "The authoritative reference result did not expose one "
+                        "finite six-DOF external-force vector per assembled node."
+                    ),
+                }
+            ],
+            eigen_backend=eigen_backend,
+            reference_status=reference.status,
+            assembly=assembly,
+        )
+    equation_scaling = create_equation_scaling_6dof(
+        source_identity_hash=model.canonical_model_checksum,
+        node_coordinates_m=assembly.node_coordinates,
+        reference_equation_load=reference_equation_load,
+        free_dofs=assembly.free_dofs,
+    )
+    _, coordinate_recovery_scale = equilibration_vectors_6dof(
+        assembly.free_dofs,
+        equation_scaling.characteristic_length_m,
+    )
+    scaled_stiffness = (
+        coordinate_recovery_scale[:, None]
+        * reduced_stiffness
+        * coordinate_recovery_scale[None, :]
+    )
+    scaled_geometric = (
+        coordinate_recovery_scale[:, None]
+        * reduced_geometric
+        * coordinate_recovery_scale[None, :]
+    )
+    scaled_stiffness_condition = exact_scaled_condition_number_1(
+        scaled_stiffness
+    )
+    scaled_geometric_condition = exact_scaled_condition_number_1(
+        scaled_geometric
+    )
     try:
         buckling = solve_linear_buckling(
             reduced_stiffness,
             reduced_geometric,
             mode_count=mode_count,
+            coordinate_recovery_scale=coordinate_recovery_scale,
             positive_semidefinite_relative_tolerance=1.0e-10,
             finite_mode_relative_tolerance=1.0e-12,
             cluster_relative_tolerance=1.0e-9,
@@ -268,6 +320,20 @@ def run_authoritative_linear_buckling(
         "geometric_stiffness_matrix_hash": (
             buckling.geometric_stiffness_matrix_hash
         ),
+        "characteristic_length": equation_scaling.characteristic_length_m,
+        "scaling_hash": equation_scaling.scaling_hash,
+        "equation_scaling_6dof": equation_scaling.to_manifest(),
+        "symmetric_coordinate_scaling_applied": True,
+        "scaled_stiffness_condition_number_status": (
+            "available"
+            if scaled_stiffness_condition is not None
+            else "unsupported_exact_system_too_large_or_singular"
+        ),
+        "scaled_geometric_condition_number_status": (
+            "available"
+            if scaled_geometric_condition is not None
+            else "unsupported_exact_system_too_large_or_singular"
+        ),
         "raw_result_hash": buckling.raw_result_hash,
         "semantic_result_hash": buckling.semantic_result_hash,
         "semantic_hash_profile": buckling.semantic_hash_profile,
@@ -287,6 +353,14 @@ def run_authoritative_linear_buckling(
         "release_readiness": False,
         "claim_boundary": BUCKLING_CLAIM_BOUNDARY,
     }
+    if scaled_stiffness_condition is not None:
+        metrics["scaled_stiffness_condition_number"] = (
+            scaled_stiffness_condition
+        )
+    if scaled_geometric_condition is not None:
+        metrics["scaled_geometric_condition_number"] = (
+            scaled_geometric_condition
+        )
     return WholeModelBucklingSolution(
         status="ready",
         metrics=metrics,
@@ -331,6 +405,30 @@ def _mode_rows(assembly: BucklingAssembly, *, buckling: Any) -> list[dict[str, A
             }
         )
     return rows
+
+
+def _reference_equation_load(
+    metrics: dict[str, Any],
+    assembly: BucklingAssembly,
+) -> np.ndarray | None:
+    rows = metrics.get("external_forces")
+    if not isinstance(rows, dict):
+        return None
+    values: list[float] = []
+    for node_id in assembly.node_ids:
+        row = rows.get(node_id)
+        if not isinstance(row, dict):
+            return None
+        for label in DOF_LABELS:
+            value = row.get(label)
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, Real)
+                or not isfinite(float(value))
+            ):
+                return None
+            values.append(float(value))
+    return np.asarray(values, dtype=np.float64)
 
 
 def _node_shape_rows(

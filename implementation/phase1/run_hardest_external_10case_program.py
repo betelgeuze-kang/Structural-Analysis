@@ -107,6 +107,7 @@ def main() -> None:
     parser.add_argument("--updates-json", default=str(DEFAULT_UPDATES_JSON))
     parser.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
+    parser.add_argument("--case-source-root", default="")
     parser.add_argument("--refresh-release-surfaces", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--dry-run", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
@@ -207,6 +208,8 @@ def main() -> None:
             "--task-id",
             task_id,
         ]
+        if str(args.case_source_root).strip():
+            exec_cmd.extend(["--case-source-root", str(args.case_source_root)])
         if args.dry_run:
             exec_cmd.append("--dry-run")
         rc, payload, stdout, stderr = _run(exec_cmd)
@@ -257,12 +260,24 @@ def main() -> None:
     ]
     receipt_count = sum(1 for row in completed_rows if str(row.get("kpi_receipt_path", "") or "").strip())
     bundle_count = sum(1 for row in completed_rows if str(row.get("case_bundle_zip_path", "") or "").strip())
+    all_cases_complete = bool(
+        task_ids
+        and len(completed_rows) == len(task_ids)
+        and receipt_count == len(task_ids)
+        and bundle_count == len(task_ids)
+    )
     live_ready_template_path = _build_live_ready_template(kickoff_dir)
     report = {
         "schema_version": "1.0",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "contract_pass": rc == 0,
-        "reason_code": "PASS" if rc == 0 else "ERR_HARDEST_10CASE_PROGRAM",
+        "contract_pass": bool(rc == 0 and all_cases_complete),
+        "reason_code": (
+            "PASS"
+            if rc == 0 and all_cases_complete
+            else "ERR_HARDEST_10CASE_INCOMPLETE"
+            if rc == 0
+            else "ERR_HARDEST_10CASE_PROGRAM"
+        ),
         "summary": {
             "task_count": len(task_ids),
             "completed_case_count": len(completed_rows),

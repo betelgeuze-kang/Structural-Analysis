@@ -6,12 +6,18 @@ import subprocess
 import sys
 
 import numpy as np
+import pytest
 
 
 def test_prepare_rhino_3dm_baseline_bridge(tmp_path: Path) -> None:
     vendor_dir = Path("implementation/phase1/_vendor").resolve()
     sys.path.insert(0, str(vendor_dir))
-    import rhino3dm  # type: ignore
+    try:
+        import rhino3dm  # type: ignore
+    except ModuleNotFoundError as exc:
+        if exc.name in {"_rhino3dm", "rhino3dm._rhino3dm"}:
+            pytest.skip("optional rhino3dm native extension is not available in this checkout")
+        raise
 
     model = rhino3dm.File3dm()
     attrs = rhino3dm.ObjectAttributes()

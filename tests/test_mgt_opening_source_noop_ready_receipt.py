@@ -13,31 +13,51 @@ DEFAULT_OUT = (
 )
 
 
-def _ensure_dependencies() -> None:
-    """Make sure the upstream receipts exist before we build the no-op receipt."""
+def _build_dependencies(tmp_path: Path) -> tuple[Path, Path]:
+    """Build isolated upstream receipts without mutating tracked evidence."""
+    local_axis = tmp_path / "local_axis.json"
+    shell = tmp_path / "shell.json"
     subprocess.run(
         [
             sys.executable,
-            str(REPO_ROOT / "scripts" / "build_mgt_element_local_axis_opening_semantics_receipt.py"),
+            str(
+                REPO_ROOT
+                / "scripts"
+                / "build_mgt_element_local_axis_opening_semantics_receipt.py"
+            ),
+            "--output-json",
+            str(local_axis),
         ],
-        check=False,
+        check=True,
         capture_output=True,
     )
     subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts" / "run_mgt_surface_shell_bending_tangent.py"),
+            "--output-json",
+            str(shell),
         ],
-        check=False,
+        check=True,
         capture_output=True,
     )
+    return local_axis, shell
 
 
 def test_opening_source_noop_ready_receipt_default(tmp_path: Path) -> None:
-    _ensure_dependencies()
-    out = DEFAULT_OUT
+    local_axis, shell = _build_dependencies(tmp_path)
+    out = tmp_path / DEFAULT_OUT.name
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--output-json", str(out)],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--local-axis-opening-json",
+            str(local_axis),
+            "--shell-bending-tangent-json",
+            str(shell),
+            "--output-json",
+            str(out),
+        ],
         check=False,
         capture_output=True,
         text=True,
@@ -56,7 +76,9 @@ def test_opening_source_noop_ready_receipt_default(tmp_path: Path) -> None:
     assert payload["blockers"] == []
 
 
-def test_opening_source_noop_ready_receipt_fails_without_local_axis(tmp_path: Path) -> None:
+def test_opening_source_noop_ready_receipt_fails_without_local_axis(
+    tmp_path: Path,
+) -> None:
     out = tmp_path / "noop.json"
     proc = subprocess.run(
         [

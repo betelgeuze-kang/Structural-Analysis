@@ -47,6 +47,45 @@ def test_small_scaled_geometric_stiffness_keeps_finite_mode() -> None:
     assert solution.modes[0].residual_relative_inf <= 1.0e-14
 
 
+def test_buckling_coordinate_scaling_recovers_physical_modes_and_loads() -> None:
+    stiffness = np.asarray([[6.0, -1.0], [-1.0, 10.0]], dtype=np.float64)
+    geometric = np.asarray([[2.0, 0.0], [0.0, 1.0]], dtype=np.float64)
+    unscaled = solve_linear_buckling(stiffness, geometric, mode_count=2)
+    scaled = solve_linear_buckling(
+        stiffness,
+        geometric,
+        mode_count=2,
+        coordinate_recovery_scale=np.asarray([1.0, 0.2]),
+    )
+
+    assert [row.load_factor for row in scaled.modes] == pytest.approx(
+        [row.load_factor for row in unscaled.modes],
+        rel=1.0e-14,
+    )
+    for expected, actual in zip(unscaled.modes, scaled.modes, strict=True):
+        assert actual.stiffness_normalized_shape == pytest.approx(
+            expected.stiffness_normalized_shape,
+            rel=1.0e-14,
+            abs=1.0e-14,
+        )
+        assert actual.residual_relative_inf <= 1.0e-14
+    assert scaled.stiffness_matrix_hash == unscaled.stiffness_matrix_hash
+    assert (
+        scaled.geometric_stiffness_matrix_hash
+        == unscaled.geometric_stiffness_matrix_hash
+    )
+
+
+def test_buckling_coordinate_scaling_rejects_invalid_scale() -> None:
+    with pytest.raises(BucklingAnalysisError, match="finite positive DOF vector"):
+        solve_linear_buckling(
+            np.eye(2),
+            np.eye(2),
+            mode_count=1,
+            coordinate_recovery_scale=np.asarray([1.0, float("nan")]),
+        )
+
+
 def test_repeated_buckling_eigenspace_has_stable_coordinate_axis_basis() -> None:
     stiffness = np.diag([4.0, 4.0, 9.0])
     geometric = np.eye(3, dtype=np.float64)

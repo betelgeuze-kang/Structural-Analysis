@@ -82,7 +82,7 @@ test.describe('Workbench v2 — live evidence provider guardrails', () => {
           schemaVersion: 'workbench-case.v2',
           provenance: {
             sourcePath: 'guard/overlong-commit.workbench-case.json',
-            sourceSha256: 'sha256:guard',
+            sourceSha256: `sha256:${'b'.repeat(64)}`,
             sourceCommitSha,
             engineVersion: 'guard',
             generatedAt: '2026-07-19T00:00:00Z',

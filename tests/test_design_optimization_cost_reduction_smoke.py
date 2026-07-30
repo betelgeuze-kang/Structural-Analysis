@@ -109,9 +109,24 @@ def test_cost_reduction_smoke_reports_no_action_when_mask_blocks(monkeypatch) ->
 
 def test_cost_reduction_smoke_cli_runs_without_pythonpath(tmp_path: Path) -> None:
     out = tmp_path / "design_optimization_cost_reduction_smoke_report.json"
+    state_npz = tmp_path / "smoke_state.npz"
+    np.savez_compressed(state_npz, **_smoke_state())
 
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--ndtha-step-count", "1", "--out", str(out)],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--state-npz",
+            str(state_npz),
+            "--dataset-npz",
+            "",
+            "--objective-calibration-report",
+            str(tmp_path / "unavailable_calibration.json"),
+            "--ndtha-step-count",
+            "1",
+            "--out",
+            str(out),
+        ],
         check=False,
         capture_output=True,
         text=True,

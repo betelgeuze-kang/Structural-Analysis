@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import socket
 import threading
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+
+import pytest
 
 from implementation.phase1.project_ops_api_service import (
     _write_text_atomically,
@@ -15,6 +18,17 @@ from implementation.phase1.project_ops_api_service import (
 )
 
 TEST_PROJECT_OPS_HMAC_SECRET = "test-project-ops-hmac-secret"
+
+
+@pytest.fixture
+def loopback_socket_support() -> None:
+    try:
+        probe = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        probe.bind(("127.0.0.1", 0))
+    except OSError as exc:
+        pytest.skip(f"runner does not permit loopback TCP sockets: {exc}")
+    else:
+        probe.close()
 
 
 def test_atomic_text_write_never_truncates_the_visible_target(
@@ -579,7 +593,10 @@ def test_build_project_ops_snapshot_aggregates_release_ops_surfaces(tmp_path: Pa
     assert payload["artifacts"]["portfolio_json"].endswith("native_authoring_ops_portfolio.json")
 
 
-def test_write_project_ops_snapshot_and_http_endpoints(tmp_path: Path) -> None:
+def test_write_project_ops_snapshot_and_http_endpoints(
+    tmp_path: Path,
+    loopback_socket_support: None,
+) -> None:
     release_root = _prepare_release_root(tmp_path)
     snapshot_out = release_root / "project_ops_service_snapshot.json"
 
@@ -677,7 +694,10 @@ def test_write_project_ops_snapshot_and_http_endpoints(tmp_path: Path) -> None:
         thread.join(timeout=5)
 
 
-def test_project_ops_api_rejects_missing_auth_and_invalid_tenant(tmp_path: Path) -> None:
+def test_project_ops_api_rejects_missing_auth_and_invalid_tenant(
+    tmp_path: Path,
+    loopback_socket_support: None,
+) -> None:
     release_root = _prepare_release_root(tmp_path)
     server = create_project_ops_server(
         release_root=release_root,
@@ -711,7 +731,10 @@ def test_project_ops_api_rejects_missing_auth_and_invalid_tenant(tmp_path: Path)
         thread.join(timeout=5)
 
 
-def test_project_ops_api_surfaces_expired_license_as_degraded(tmp_path: Path) -> None:
+def test_project_ops_api_surfaces_expired_license_as_degraded(
+    tmp_path: Path,
+    loopback_socket_support: None,
+) -> None:
     release_root = _prepare_release_root(tmp_path)
     license_status = tmp_path / "license.json"
     _write_json(
@@ -742,7 +765,10 @@ def test_project_ops_api_surfaces_expired_license_as_degraded(tmp_path: Path) ->
         thread.join(timeout=5)
 
 
-def test_project_ops_api_rate_limits_by_tenant_actor(tmp_path: Path) -> None:
+def test_project_ops_api_rate_limits_by_tenant_actor(
+    tmp_path: Path,
+    loopback_socket_support: None,
+) -> None:
     release_root = _prepare_release_root(tmp_path)
     server = create_project_ops_server(
         release_root=release_root,
@@ -773,7 +799,10 @@ def test_project_ops_api_rate_limits_by_tenant_actor(tmp_path: Path) -> None:
         thread.join(timeout=5)
 
 
-def test_project_ops_api_rejects_oversized_request_metadata(tmp_path: Path) -> None:
+def test_project_ops_api_rejects_oversized_request_metadata(
+    tmp_path: Path,
+    loopback_socket_support: None,
+) -> None:
     release_root = _prepare_release_root(tmp_path)
     server = create_project_ops_server(
         release_root=release_root,
@@ -800,7 +829,10 @@ def test_project_ops_api_rejects_oversized_request_metadata(tmp_path: Path) -> N
         thread.join(timeout=5)
 
 
-def test_project_ops_api_writes_audit_digest_and_policy_manifest(tmp_path: Path) -> None:
+def test_project_ops_api_writes_audit_digest_and_policy_manifest(
+    tmp_path: Path,
+    loopback_socket_support: None,
+) -> None:
     release_root = _prepare_release_root(tmp_path)
     audit_log = tmp_path / "audit" / "project_ops.jsonl"
     audit_digest = tmp_path / "audit" / "project_ops.digest.json"
@@ -869,7 +901,10 @@ def test_project_ops_api_requires_explicit_secret_when_auth_enabled(tmp_path: Pa
         assert "PROJECT_OPS_JWT_HMAC_SECRET" in str(error)
 
 
-def test_project_ops_api_allows_no_auth_without_secret(tmp_path: Path) -> None:
+def test_project_ops_api_allows_no_auth_without_secret(
+    tmp_path: Path,
+    loopback_socket_support: None,
+) -> None:
     release_root = _prepare_release_root(tmp_path)
 
     server = create_project_ops_server(release_root=release_root, port=0, auth_required=False)

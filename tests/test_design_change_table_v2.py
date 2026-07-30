@@ -2,13 +2,24 @@ from pathlib import Path
 import json
 import subprocess
 
+import pytest
+
 REPORT = Path('implementation/phase1/release/design_optimization/design_optimization_cost_reduction_report.json')
 CHANGES = Path('implementation/phase1/release/design_optimization/design_optimization_cost_reduction_changes.json')
+SOLVER_LOOP_REPORT = Path(
+    "implementation/phase1/release/design_optimization/"
+    "design_optimization_solver_loop_long_report.json"
+)
 
 
 def _ensure_reports():
     if REPORT.exists() and CHANGES.exists():
         return
+    if not SOLVER_LOOP_REPORT.exists():
+        pytest.skip(
+            "legacy design-change integration requires the non-committed "
+            "design_optimization_solver_loop_long_report.json evidence input"
+        )
     subprocess.run(['python3', 'implementation/phase1/run_design_optimization_cost_reduction.py'], check=True)
 
 

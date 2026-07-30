@@ -1,15 +1,15 @@
 {
   "schema_version": "kds-clause-member-extraction-receipt.v1",
-  "generated_at": "2026-07-01T11:04:49.055730+00:00",
+  "generated_at": "2026-07-28T18:50:05.074107+00:00",
   "status": "partial",
   "contract_pass": false,
   "source": {
     "hf_csv": "implementation/phase1/commercial_hf_export_sample.csv",
     "hf_csv_sha256": "4d685cd857c08a29d235f2f3e17e1b1741bb7af5e4e4cc87189b3c59fa051f57",
     "hf_row_count": 12,
-    "detailing_matrix_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/kds_detailing_support_matrix.json",
+    "detailing_matrix_json": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/kds_detailing_support_matrix.json",
     "detailing_matrix_sha256": "b6d543992a13467955c6cf9354d8305dd5529d5d7fb4a902d6e302fbc962bd37",
-    "solver_equilibrium_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
+    "solver_equilibrium_json": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
     "solver_equilibrium_sha256": "5bf144aab17c0193a51b72e2ad26f1339a62de8b14e4581e9c1e9a8fa9f20ddf",
     "solver_equilibrium_status": "ready",
     "solver_mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",

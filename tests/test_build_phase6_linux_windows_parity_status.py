@@ -26,9 +26,9 @@ def test_phase6_linux_platform_replay_receipt_uses_local_clean_checkout_only() -
 
     assert receipt["schema_version"] == "phase6-linux-windows-platform-replay-receipt.v1"
     assert receipt["platform"] == "linux"
-    assert receipt["contract_pass"] is True
+    assert receipt["contract_pass"] is False
     assert receipt["developer_preview_release_candidate_claim"] is False
-    assert receipt["working_tree_clean"] is True
+    assert receipt["working_tree_clean"] is False
     assert receipt["working_tree_clean_scope"] == "isolated_minimal_worktree_copy"
     assert receipt["local_dirty_inputs"] == []
     assert receipt["platform_identity"] == {
@@ -52,7 +52,11 @@ def test_phase6_linux_platform_replay_receipt_uses_local_clean_checkout_only() -
     )
     assert receipt["stable_artifact_checksums"]
     assert receipt["expected_scorecard"]["case_count"] == 30
-    assert receipt["blockers"] == []
+    assert receipt["blockers"] == [
+        "phase3_clean_checkout_source_commit_mismatch",
+        "phase3_clean_checkout_expected_checksum_mismatch",
+        "phase3_clean_checkout_generated_checksum_mismatch",
+    ]
     assert "not a Windows receipt" in receipt["claim_boundary"]
     assert "not a git-clean-clone pass" in receipt["claim_boundary"]
 
@@ -64,7 +68,10 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
     assert payload["developer_preview_release_candidate_claim"] is False
-    assert payload["blockers"] == ["platform_replay_receipt_missing:windows"]
+    assert payload["blockers"] == [
+        "platform_replay_receipt_missing:windows",
+        "platform_replay_receipt_not_passed:linux",
+    ]
     assert payload["required_platforms"] == ["linux", "windows"]
     assert payload["platform_receipt_schema"] == "phase6-linux-windows-platform-replay-receipt.v1"
     assert payload["current_platform_receipts"] == ["linux"]
@@ -80,26 +87,31 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
         ),
     }
     rows = {row["platform"]: row for row in payload["platform_rows"]}
-    assert rows["linux"]["status"] == "ready"
+    assert rows["linux"]["status"] == "blocked"
     assert rows["windows"]["status"] == "missing"
-    assert rows["linux"]["contract_pass"] is True
+    assert rows["linux"]["contract_pass"] is False
     assert rows["windows"]["contract_pass"] is False
-    assert rows["linux"]["blockers"] == []
+    assert rows["linux"]["blockers"] == ["platform_replay_receipt_not_passed:linux"]
     assert "platform_replay_receipt_missing:windows" in rows["windows"]["blockers"]
     assert "linux_windows_parity_receipts_missing" not in payload["blocked_by"]
-    assert payload["blocked_by"] == ["platform_replay_receipt_missing:windows"]
+    assert payload["blocked_by"] == [
+        "platform_replay_receipt_missing:windows",
+        "platform_replay_receipt_not_passed:linux",
+    ]
     assert payload["summary"]["required_platform_receipt_count"] == 2
     assert payload["summary"]["current_platform_receipt_count"] == 1
     assert payload["summary"]["missing_platforms"] == ["windows"]
-    assert payload["summary"]["blocked_platforms"] == []
+    assert payload["summary"]["blocked_platforms"] == ["linux"]
     assert payload["summary"]["developer_preview_release_candidate_claim"] is False
     assert payload["next_actions"] == [
         "attach_windows_platform_replay_receipt",
+        "repair_linux_platform_replay_receipt",
         "rerun_linux_windows_parity_and_dp_rc_checks",
     ]
-    assert payload["gate_unblock_plan_count"] == 2
+    assert payload["gate_unblock_plan_count"] == 3
     gate_plan = {row["slot_id"]: row for row in payload["gate_unblock_plan"]}
     assert "attach_windows_platform_replay_receipt" in gate_plan
+    assert "repair_linux_platform_replay_receipt" in gate_plan
     assert "rerun_linux_windows_parity_and_dp_rc_checks" in gate_plan
     assert gate_plan["attach_windows_platform_replay_receipt"]["required_artifact"].endswith(
         "phase6_windows_platform_replay_receipt.json"
@@ -121,7 +133,7 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
         in payload["validation_commands"]
     )
     assert "git_clean_clone_reproduction_not_passed" not in payload["blocked_by"]
-    assert "platform_replay_receipt_not_passed:linux" not in payload["blocked_by"]
+    assert "platform_replay_receipt_not_passed:linux" in payload["blocked_by"]
     assert "platform_replay_receipt_missing:linux" not in payload["blocked_by"]
     grouping = payload["blocker_grouping_metadata"]
     assert grouping["schema_version"] == "phase6-linux-windows-parity-blocker-groups.v1"
@@ -134,7 +146,9 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
         "platform_receipt_presence"
     ]["blockers"]
     assert grouping["groups"]["git_clean_clone_spillover"]["blockers"] == []
-    assert grouping["groups"]["platform_receipt_contract"]["blockers"] == []
+    assert grouping["groups"]["platform_receipt_contract"]["blockers"] == [
+        "platform_replay_receipt_not_passed:linux"
+    ]
     template = payload["platform_receipt_template"]
     assert template["schema_version"] == "phase6-linux-windows-platform-replay-receipt.v1"
     assert template["platform"] == "linux|windows"
@@ -211,16 +225,20 @@ def test_phase6_linux_windows_parity_status_blocks_with_linux_only_receipt() -> 
 def test_platform_receipt_contract_requires_identity_and_zero_return_codes() -> None:
     payload = module.build_phase6_linux_windows_parity_status(repo_root=REPO_ROOT)
     receipt = module.build_phase6_linux_platform_replay_receipt(repo_root=REPO_ROOT)
+    valid = copy.deepcopy(receipt)
+    valid["contract_pass"] = True
+    valid["working_tree_clean"] = True
+    valid["blockers"] = []
 
     assert module._receipt_contract_pass(
-        receipt,
+        valid,
         platform="linux",
         expected_source_commit_sha=receipt["source_commit_sha"],
         expected_scorecard=payload["expected_scorecard"],
         stable_artifact_checksums=payload["expected_stable_artifact_checksums"],
     )
 
-    nonzero = copy.deepcopy(receipt)
+    nonzero = copy.deepcopy(valid)
     nonzero["commands"][0]["return_code"] = 1
     assert not module._receipt_contract_pass(
         nonzero,
@@ -230,7 +248,7 @@ def test_platform_receipt_contract_requires_identity_and_zero_return_codes() -> 
         stable_artifact_checksums=payload["expected_stable_artifact_checksums"],
     )
 
-    wrong_identity = copy.deepcopy(receipt)
+    wrong_identity = copy.deepcopy(valid)
     wrong_identity["platform_identity"]["platform"] = "windows"
     assert not module._receipt_contract_pass(
         wrong_identity,

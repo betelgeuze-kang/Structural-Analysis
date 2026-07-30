@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/external_vv_level2_promotion_v1.schema.json",
+  "title": "External V&V Level 2 promotion decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "promotion_id",
+    "source_commit_sha",
+    "reviewed_at",
+    "operator_attestation",
+    "verification_matrix",
+    "project_reviewer",
+    "identity_review",
+    "license_reviews",
+    "scientific_reviews",
+    "declarations",
+    "signature",
+    "contract_pass",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "external-vv-level2-promotion.v1"},
+    "promotion_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{7,127}$"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "reviewed_at": {"type": "string", "format": "date-time"},
+    "operator_attestation": {"$ref": "#/$defs/jsonArtifact"},
+    "verification_matrix": {"$ref": "#/$defs/jsonArtifact"},
+    "project_reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "organization",
+        "role",
+        "contact",
+        "authorized_for_project",
+        "independent_from_operator",
+        "signer_public_key_sha256"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 3},
+        "organization": {"type": "string", "minLength": 3},
+        "role": {"type": "string", "minLength": 3},
+        "contact": {"type": "string", "minLength": 5},
+        "authorized_for_project": {"const": true},
+        "independent_from_operator": {"const": true},
+        "signer_public_key_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "identity_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator_identity_authenticated",
+        "credentials_reference",
+        "credential_evidence",
+        "conflict_review_passed",
+        "review_notes"
+      ],
+      "properties": {
+        "operator_identity_authenticated": {"const": true},
+        "credentials_reference": {"type": "string", "pattern": "^(https|ticket|jira)://\\S+$"},
+        "credential_evidence": {"$ref": "#/$defs/fileArtifact"},
+        "conflict_review_passed": {"const": true},
+        "review_notes": {"type": "string", "minLength": 12}
+      }
+    },
+    "license_reviews": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "solver",
+          "license_id",
+          "approval_status",
+          "local_execution_allowed",
+          "commercial_use_allowed",
+          "redistribution_allowed",
+          "evidence"
+        ],
+        "properties": {
+          "solver": {"enum": ["OpenSees", "CalculiX"]},
+          "license_id": {"type": "string", "minLength": 2},
+          "approval_status": {"const": "approved"},
+          "local_execution_allowed": {"const": true},
+          "commercial_use_allowed": {"const": true},
+          "redistribution_allowed": {"type": "boolean"},
+          "evidence": {"$ref": "#/$defs/fileArtifact"}
+        }
+      }
+    },
+    "scientific_reviews": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "reference", "source", "artifacts", "decision"],
+        "properties": {
+          "category": {"enum": ["opensees_code_to_code", "second_solver_code_to_code"]},
+          "reference": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "version", "version_verified", "independent_from_product"],
+            "properties": {
+              "name": {"type": "string", "minLength": 2},
+              "version": {"type": "string", "minLength": 1},
+              "version_verified": {"const": true},
+              "independent_from_product": {"const": true}
+            }
+          },
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["url_or_doi", "sha256"],
+            "properties": {
+              "url_or_doi": {"type": "string", "pattern": "^https://\\S+$"},
+              "sha256": {"$ref": "#/$defs/sha256"}
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"$ref": "#/$defs/jsonArtifact"}
+          },
+          "decision": {"type": "object"}
+        }
+      }
+    },
+    "declarations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator_identity_authenticated",
+        "conflict_review_passed",
+        "legal_use_approved",
+        "scientific_review_completed",
+        "formal_level_2_promotion_approved",
+        "release_authority_granted",
+        "design_authority_granted"
+      ],
+      "properties": {
+        "operator_identity_authenticated": {"const": true},
+        "conflict_review_passed": {"const": true},
+        "legal_use_approved": {"const": true},
+        "scientific_review_completed": {"const": true},
+        "formal_level_2_promotion_approved": {"const": true},
+        "release_authority_granted": {"const": false},
+        "design_authority_granted": {"const": false}
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "signed_payload_sha256",
+        "public_key_path",
+        "public_key_sha256",
+        "signature_path",
+        "signature_sha256"
+      ],
+      "properties": {
+        "algorithm": {"const": "rsa-sha256"},
+        "signed_payload_sha256": {"$ref": "#/$defs/sha256"},
+        "public_key_path": {"type": "string", "minLength": 1},
+        "public_key_sha256": {"$ref": "#/$defs/sha256"},
+        "signature_path": {"type": "string", "minLength": 1},
+        "signature_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "contract_pass": {"const": true},
+    "claim_boundary": {"type": "string", "minLength": 80}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "fileArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "jsonArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256", "artifact_hash"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

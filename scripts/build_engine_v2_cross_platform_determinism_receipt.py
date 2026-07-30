@@ -54,14 +54,35 @@ from structural_analysis.engine_v2.cpu_fgmres import (  # noqa: E402
     run_cpu_fgmres,
     write_cpu_fgmres_solution_artifact,
 )
+from structural_analysis.api.nonlinear_frame import (  # noqa: E402
+    COROTATIONAL_GENERAL_PROFILE,
+    NonlinearFrameConfig,
+    analyze_nonlinear_frame_model_ir,
+    validate_nonlinear_frame_result,
+)
 from structural_analysis.model_ir import load_model_ir_v2  # noqa: E402
+from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
+    VECTOR_MATRIX_BACKEND,
+)
 
 
 RUN_SCHEMA_VERSION = "engine-v2-cross-platform-determinism-run-receipt.v1"
 MATRIX_SCHEMA_VERSION = "engine-v2-cross-platform-determinism-matrix-receipt.v1"
 MODEL_FIXTURE = Path("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json")
+BOUNDED_PLANAR_FIXTURE = Path(
+    "examples/bounded_planar_frame_alpha.model-ir.v2.json"
+)
+BOUNDED_PLANAR_SETTLEMENT_FIXTURE = Path(
+    "examples/bounded_planar_settlement.model-ir.v2.json"
+)
 EXPECTED_MODEL_FIXTURE_DATA_HASH = (
     "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9"
+)
+EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH = (
+    "sha256:b568804a0aadb200d62fcdb4f664c98a7a3293d11fc5a8cb68501434866e906f"
+)
+EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH = (
+    "sha256:c1a8a5a4ee59931f5ee4d40adde7d633687f6cdfc86fe745f00478546d53dbe8"
 )
 RUN_SCHEMA = Path(
     "src/structural_analysis/schemas/"
@@ -133,6 +154,90 @@ EXPECTED_GOLDENS = {
     ),
     "cpu_fgmres_solution_data_hash": (
         "sha256:78c19f52f7328f8e639debdb3ea64e9779c3cc7d7c0690bf387009355df4bc2c"
+    ),
+    "bounded_planar_result_hash": (
+        "sha256:d16b132542957fbd9e92b88844540b53beff48e41afab1be3c83544668358190"
+    ),
+    "bounded_planar_replay_result_hash": (
+        "sha256:8e49a918ace9de85b45c7799b97a36ed898bbc81b59fd8f03a74bc717d19687a"
+    ),
+    "bounded_planar_checkpoint_artifact_hash": (
+        "sha256:f7eb397bad05d93dc52ba05e505aa61c32372d2ffdf9effc2e8d27e600a3e2e9"
+    ),
+    "bounded_planar_checkpoint_chain_hash": (
+        "sha256:0955b9f84f23e3504341b6f8d8634574d8e091f0b8b9ed733c3631e9b3cef275"
+    ),
+    "bounded_planar_engineering_result_hash": (
+        "sha256:51084ecd5dc2647ccd8521d64e02f84b736b8866fbf416648b416c5d6373f2cc"
+    ),
+    "bounded_planar_execution_topology_plan_hash": (
+        "sha256:59d97be9b8d20e381e8d1f5e5f9e43bee3fbe003431e421674e10921d6f0c9fc"
+    ),
+    "bounded_planar_equation_scaling_binding_hash": (
+        "sha256:8e64febd9cf1b9d0f682b8dbc1a0777ae8ff50ca4fe3ce2e4edafdd412ff848d"
+    ),
+    "bounded_planar_engine_equation_scaling_hash": (
+        "sha256:ddc8495d56dc7d38e014565a4ce57a6b5905e2ecdb83ac507134263fefb62255"
+    ),
+    "bounded_planar_terminal_residual_trace_hash": (
+        "sha256:66b27e9d3fb5a871788cfc73b727913edda12233562c8c8e94f90f54fbd3881d"
+    ),
+    "bounded_planar_model_ir_content_hash": (
+        "sha256:4703d9137223345322db05cc37e8e53eb453d9bc67f12e88864c390ba3de66b7"
+    ),
+    "bounded_planar_model_ir_semantic_hash": (
+        "sha256:fa0bfb2cf75d58ce406fe116dc4d463eac3568f3a8c32009afb51f5650daf08d"
+    ),
+    "bounded_planar_model_ir_provenance_hash": (
+        "sha256:04a669a3a6deb764e9ea63d0215a563753a5bd74d0a68631001176821003938e"
+    ),
+    "bounded_planar_model_ir_adapter_hash": (
+        "sha256:ddbd248df8b8340e14a11a88051e67dceddf0598270d77434ec67dbbcfa9be9d"
+    ),
+    "bounded_planar_execution_plan_binding_hash": (
+        "sha256:823d5e0d88ea4a77a68c39c5003badd79577b996574795f49ca8f6050d752d6b"
+    ),
+    "bounded_planar_settlement_result_hash": (
+        "sha256:3dab96e2760102f0ad214fb2b98ee49da02c69db612f0957d04b1104127a443c"
+    ),
+    "bounded_planar_settlement_replay_result_hash": (
+        "sha256:42a44db2c6f1aa2736993308725b9efd6450a2cba886b0f8be43a123187604c0"
+    ),
+    "bounded_planar_settlement_checkpoint_artifact_hash": (
+        "sha256:806f77ba67e8fddcd5d1e4e751615ea9155658cd365f3ae7c3a03d4b76041a11"
+    ),
+    "bounded_planar_settlement_checkpoint_chain_hash": (
+        "sha256:74b7311b0b380f341279c995fd765413e18acf0f06ddfba4f4c6a11402c58100"
+    ),
+    "bounded_planar_settlement_engineering_result_hash": (
+        "sha256:b2576429b54928fc0d18abe50f78dfd395de313a2a9771e503bfa0e2ff29e507"
+    ),
+    "bounded_planar_settlement_execution_topology_plan_hash": (
+        "sha256:6434eef0b6c5b46f8462d1130e6cf25963caa5dcfda5788206ccb450051e2c76"
+    ),
+    "bounded_planar_settlement_equation_scaling_binding_hash": (
+        "sha256:9235cbe10b64eff50d2a604bb6ed6b593031572b21a3aa8d753cb86ac13c8f1a"
+    ),
+    "bounded_planar_settlement_engine_equation_scaling_hash": (
+        "sha256:9a0701511f475974ad6d090bbf5957e0460093d8dcc5bfff81a3b1e198d85ca7"
+    ),
+    "bounded_planar_settlement_terminal_residual_trace_hash": (
+        "sha256:f8a39aaf9d319c139f74ff57a3f6de7046ea131997ccca1411199744da11d683"
+    ),
+    "bounded_planar_settlement_model_ir_content_hash": (
+        "sha256:a3745cf7a6e2023465bbcd232a620fa96e3bdf2a31976bb082a38f1e64176e06"
+    ),
+    "bounded_planar_settlement_model_ir_semantic_hash": (
+        "sha256:5547a8be9e4fbf5ea2176e41adc9db3ec12931d3e327c1516c8b0cf11ab03b48"
+    ),
+    "bounded_planar_settlement_model_ir_provenance_hash": (
+        "sha256:963127da36dd4de2004596ec523dec07099ad8bb652ead4686dd6a7f830fbc1c"
+    ),
+    "bounded_planar_settlement_model_ir_adapter_hash": (
+        "sha256:effb190abe577aa11ad449bbfd16726a8df76c3420962489af36bd15baec309d"
+    ),
+    "bounded_planar_settlement_execution_plan_binding_hash": (
+        "sha256:175d9f8d60e0e7c238143ecc58a3faa6d34f56df2eceb828b60bb292de91421f"
     ),
 }
 
@@ -289,6 +394,113 @@ def _record_artifact(
     }
 
 
+def _compute_bounded_planar_case_goldens(
+    *,
+    fixture: Path,
+    golden_prefix: str,
+    repo_root: Path = ROOT,
+) -> dict[str, str]:
+    """Replay one public ModelIR adapter case and its exact checkpoint bytes."""
+
+    document = load_model_ir_v2(repo_root / fixture)
+    config = NonlinearFrameConfig(
+        profile=COROTATIONAL_GENERAL_PROFILE,
+        load_steps=4,
+        residual_tolerance=1.0e-9,
+        maximum_iterations=60,
+        matrix_backend=VECTOR_MATRIX_BACKEND,
+    )
+    result = analyze_nonlinear_frame_model_ir(document, config)
+    if not validate_nonlinear_frame_result(result).contract_pass:
+        raise RuntimeError(f"{golden_prefix}_cross_platform_result_blocked")
+    checkpoint = result.checkpoint_artifact()
+    replayed = analyze_nonlinear_frame_model_ir(
+        document,
+        config,
+        restart_checkpoint_chain=checkpoint,
+    )
+    if not validate_nonlinear_frame_result(replayed).contract_pass:
+        raise RuntimeError(f"{golden_prefix}_cross_platform_replay_blocked")
+    if replayed.checkpoint_artifact() != checkpoint:
+        raise RuntimeError(
+            f"{golden_prefix}_cross_platform_checkpoint_replay_changed"
+        )
+    if replayed.contract_bindings != result.contract_bindings:
+        raise RuntimeError(
+            f"{golden_prefix}_cross_platform_bindings_replay_changed"
+        )
+    source_binding = result.contract_bindings.get("source_model_ir_adapter")
+    if (
+        not isinstance(source_binding, Mapping)
+        or source_binding.get("model_ir_content_hash") != document.content_hash
+        or source_binding.get("model_ir_semantic_hash") != document.semantic_hash
+        or source_binding.get("model_ir_provenance_hash") != document.provenance_hash
+    ):
+        raise RuntimeError(
+            f"{golden_prefix}_cross_platform_model_ir_binding_changed"
+        )
+    for field_name in (
+        "node_displacements",
+        "support_reactions",
+        "member_end_forces",
+        "section_results",
+        "fiber_results",
+    ):
+        if getattr(replayed, field_name) != getattr(result, field_name):
+            raise RuntimeError(
+                f"{golden_prefix}_cross_platform_recovery_replay_changed:{field_name}"
+            )
+
+    return {
+        f"{golden_prefix}_result_hash": result.result_hash,
+        f"{golden_prefix}_replay_result_hash": replayed.result_hash,
+        f"{golden_prefix}_checkpoint_artifact_hash": sha256_prefixed(checkpoint),
+        f"{golden_prefix}_checkpoint_chain_hash": str(result.checkpoint["chain_hash"]),
+        f"{golden_prefix}_engineering_result_hash": str(
+            result.contract_bindings["engineering_result_hash"]
+        ),
+        f"{golden_prefix}_execution_topology_plan_hash": str(
+            result.contract_bindings["nonlinear_execution_topology_plan_hash"]
+        ),
+        f"{golden_prefix}_equation_scaling_binding_hash": str(
+            result.contract_bindings["physical_equation_scaling_binding_hash"]
+        ),
+        f"{golden_prefix}_engine_equation_scaling_hash": str(
+            result.contract_bindings["engine_equation_scaling_hash"]
+        ),
+        f"{golden_prefix}_terminal_residual_trace_hash": str(
+            result.contract_bindings["terminal_physical_residual_trace_hash"]
+        ),
+        f"{golden_prefix}_model_ir_content_hash": document.content_hash,
+        f"{golden_prefix}_model_ir_semantic_hash": document.semantic_hash,
+        f"{golden_prefix}_model_ir_provenance_hash": document.provenance_hash,
+        f"{golden_prefix}_model_ir_adapter_hash": str(source_binding["adapter_hash"]),
+        f"{golden_prefix}_execution_plan_binding_hash": str(
+            result.contract_bindings["bounded_planar_execution_plan"]["binding_hash"]
+        ),
+    }
+
+
+def compute_bounded_planar_cross_platform_goldens(
+    *,
+    repo_root: Path = ROOT,
+) -> dict[str, str]:
+    """Replay both public bounded-planar member-feature and settlement cases."""
+
+    return {
+        **_compute_bounded_planar_case_goldens(
+            fixture=BOUNDED_PLANAR_FIXTURE,
+            golden_prefix="bounded_planar",
+            repo_root=repo_root,
+        ),
+        **_compute_bounded_planar_case_goldens(
+            fixture=BOUNDED_PLANAR_SETTLEMENT_FIXTURE,
+            golden_prefix="bounded_planar_settlement",
+            repo_root=repo_root,
+        ),
+    }
+
+
 def compute_engine_v2_cross_platform_goldens(
     output_root: Path,
     *,
@@ -429,6 +641,7 @@ def compute_engine_v2_cross_platform_goldens(
         "residual_vector_bundle_hash": residual_vectors.bundle_hash,
         "cpu_fgmres_run_hash": fgmres.run_hash,
         "cpu_fgmres_solution_data_hash": fgmres.solution_descriptor.data_hash,
+        **compute_bounded_planar_cross_platform_goldens(repo_root=repo_root),
     }
     return goldens, dict(sorted(binary_artifacts.items()))
 
@@ -437,6 +650,12 @@ def expected_golden_set_hash() -> str:
     return canonical_hash(
         {
             "model_fixture_data_hash": EXPECTED_MODEL_FIXTURE_DATA_HASH,
+            "bounded_planar_fixture_data_hash": (
+                EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
+            ),
+            "bounded_planar_settlement_fixture_data_hash": (
+                EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+            ),
             "goldens": EXPECTED_GOLDENS,
             "binary_artifacts": EXPECTED_BINARY_ARTIFACTS,
         }
@@ -494,6 +713,12 @@ def build_run_receipt(
     observed_model_fixture_hash = sha256_prefixed(
         (repo_root / MODEL_FIXTURE).read_bytes()
     )
+    observed_bounded_planar_fixture_hash = sha256_prefixed(
+        (repo_root / BOUNDED_PLANAR_FIXTURE).read_bytes()
+    )
+    observed_bounded_planar_settlement_fixture_hash = sha256_prefixed(
+        (repo_root / BOUNDED_PLANAR_SETTLEMENT_FIXTURE).read_bytes()
+    )
 
     blockers: list[str] = []
     if os_label not in SUPPORTED_OS_LABELS:
@@ -516,6 +741,16 @@ def build_run_receipt(
         blockers.append("tracked_source_tree_dirty")
     if observed_model_fixture_hash != EXPECTED_MODEL_FIXTURE_DATA_HASH:
         blockers.append("model_fixture_data_hash_mismatch")
+    if (
+        observed_bounded_planar_fixture_hash
+        != EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
+    ):
+        blockers.append("bounded_planar_fixture_data_hash_mismatch")
+    if (
+        observed_bounded_planar_settlement_fixture_hash
+        != EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+    ):
+        blockers.append("bounded_planar_settlement_fixture_data_hash_mismatch")
     for name in sorted(set(EXPECTED_GOLDENS) | set(observed_goldens)):
         if observed_goldens.get(name) != EXPECTED_GOLDENS.get(name):
             blockers.append(f"golden_hash_mismatch:{name}")
@@ -571,6 +806,20 @@ def build_run_receipt(
                 "expected_data_hash": EXPECTED_MODEL_FIXTURE_DATA_HASH,
                 "observed_data_hash": observed_model_fixture_hash,
             },
+            "bounded_planar_fixture": {
+                "path": BOUNDED_PLANAR_FIXTURE.as_posix(),
+                "expected_data_hash": EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH,
+                "observed_data_hash": observed_bounded_planar_fixture_hash,
+            },
+            "bounded_planar_settlement_fixture": {
+                "path": BOUNDED_PLANAR_SETTLEMENT_FIXTURE.as_posix(),
+                "expected_data_hash": (
+                    EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+                ),
+                "observed_data_hash": (
+                    observed_bounded_planar_settlement_fixture_hash
+                ),
+            },
             "golden_set_hash": expected_golden_set_hash(),
             "expected_goldens": dict(EXPECTED_GOLDENS),
             "observed_goldens": observed_goldens,
@@ -586,15 +835,26 @@ def build_run_receipt(
                 "github_actions_coordinate_execution": (
                     contract_pass and origin_kind == "github_actions"
                 ),
+                "bounded_planar_exact_replay": (
+                    exact_replay
+                    and observed_bounded_planar_fixture_hash
+                    == EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
+                ),
+                "bounded_planar_settlement_exact_replay": (
+                    exact_replay
+                    and observed_bounded_planar_settlement_fixture_hash
+                    == EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+                ),
                 "four_way_cross_platform_determinism": False,
                 "cpu_hip_numerical_parity": False,
                 "developer_preview_windows_gate": False,
             },
             "claim_boundary": (
                 "This receipt covers one Engine v2 OS/Python coordinate, exact "
-                "contract hashes, and canonical binary write/readback. A passing "
-                "local receipt is local evidence only. A GitHub Actions coordinate "
-                "receipt requires retained run provenance, and no single receipt "
+                "contract hashes, canonical binary write/readback, and exact public "
+                "bounded-planar member-feature plus prescribed-settlement replay. "
+                "A passing local receipt is local evidence only. A GitHub Actions "
+                "coordinate receipt requires retained run provenance, and no single receipt "
                 "proves the four-way matrix, CPU/HIP parity, hardware execution, "
                 "or the Developer Preview Windows gate."
             ),
@@ -682,6 +942,12 @@ def build_matrix_receipt(
             blockers.append(f"coordinate_contract_blocked:{coordinate}")
         if not payload["claims"]["github_actions_coordinate_execution"]:
             blockers.append(f"coordinate_not_github_actions:{coordinate}")
+        if not payload["claims"]["bounded_planar_exact_replay"]:
+            blockers.append(f"coordinate_planar_replay_blocked:{coordinate}")
+        if not payload["claims"]["bounded_planar_settlement_exact_replay"]:
+            blockers.append(
+                f"coordinate_planar_settlement_replay_blocked:{coordinate}"
+            )
         if payload["source_commit_sha"] != source_commit_sha:
             blockers.append(f"coordinate_source_commit_mismatch:{coordinate}")
         if payload["source_tree"]["checkout_head_sha"] != source_commit_sha:
@@ -707,6 +973,26 @@ def build_matrix_receipt(
             EXPECTED_MODEL_FIXTURE_DATA_HASH
         ):
             blockers.append(f"coordinate_observed_fixture_mismatch:{coordinate}")
+        if payload["bounded_planar_fixture"]["expected_data_hash"] != (
+            EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
+        ):
+            blockers.append(f"coordinate_expected_planar_fixture_mismatch:{coordinate}")
+        if payload["bounded_planar_fixture"]["observed_data_hash"] != (
+            EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
+        ):
+            blockers.append(f"coordinate_observed_planar_fixture_mismatch:{coordinate}")
+        if payload["bounded_planar_settlement_fixture"]["expected_data_hash"] != (
+            EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+        ):
+            blockers.append(
+                f"coordinate_expected_planar_settlement_fixture_mismatch:{coordinate}"
+            )
+        if payload["bounded_planar_settlement_fixture"]["observed_data_hash"] != (
+            EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+        ):
+            blockers.append(
+                f"coordinate_observed_planar_settlement_fixture_mismatch:{coordinate}"
+            )
         if payload["expected_goldens"] != EXPECTED_GOLDENS:
             blockers.append(f"coordinate_expected_goldens_mismatch:{coordinate}")
         if payload["observed_goldens"] != EXPECTED_GOLDENS:
@@ -766,15 +1052,19 @@ def build_matrix_receipt(
                 "ubuntu_python_3_10_and_3_12_execution": contract_pass,
                 "windows_python_3_10_and_3_12_execution": contract_pass,
                 "cross_platform_contract_and_binary_hash_identity": contract_pass,
+                "bounded_planar_four_way_exact_replay": contract_pass,
+                "bounded_planar_settlement_four_way_exact_replay": contract_pass,
                 "cpu_hip_numerical_parity": False,
                 "developer_preview_windows_gate": False,
                 "product_readiness": False,
             },
             "claim_boundary": (
-                "A passing matrix receipt proves exact Engine v2 contract and "
-                "canonical binary replay for the four hosted GitHub Actions "
-                "Ubuntu/Windows and Python 3.10/3.12 coordinates from one clean "
-                "source commit and one retained workflow run. The receipt remains "
+                "A passing matrix receipt proves exact Engine v2 contract, "
+                "canonical binary replay, and two solved bounded planar member-"
+                "feature and prescribed-settlement result/checkpoint replays for "
+                "the four hosted GitHub "
+                "Actions Ubuntu/Windows and Python 3.10/3.12 coordinates from one "
+                "clean source commit and one retained workflow run. The receipt remains "
                 "dependent on the retained GitHub run and artifacts; it does not "
                 "prove CPU/HIP parity, hardware execution, broader Linux/Windows "
                 "product replay, Developer Preview closure, or product readiness."

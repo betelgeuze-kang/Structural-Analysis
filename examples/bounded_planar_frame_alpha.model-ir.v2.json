@@ -1,0 +1,144 @@
+{
+  "schema_version": "structural-analysis-model-ir.v2",
+  "model_id": "bounded-planar-member-features",
+  "capability_profile": "bounded_planar_frame_alpha",
+  "provenance": {
+    "source_format": "generated",
+    "source_ref": "generated:bounded-planar-member-features",
+    "source_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "normalizer_id": "bounded-planar-model-ir-sample-builder",
+    "normalizer_version": "1",
+    "source_units": {"length": "m", "force": "N", "mass": "kg", "time": "s", "rotation": "rad"},
+    "unit_scales_to_si": {"length_to_m": 1.0, "force_to_n": 1.0, "mass_to_kg": 1.0, "time_to_s": 1.0, "rotation_to_rad": 1.0},
+    "extensions": {}
+  },
+  "units": {"length": "m", "force": "N", "mass": "kg", "time": "s", "rotation": "rad"},
+  "coordinate_system": {
+    "frame_id": "global",
+    "axis_order": ["X", "Y", "Z"],
+    "up_axis": "Z",
+    "handedness": "right",
+    "origin_m": [0.0, 0.0, 0.0]
+  },
+  "dof_components": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+  "nodes": [
+    {"id": "N1", "index": 0, "coordinates_m": [0.0, 0.0, 0.0], "source_id": "generated:N1", "extensions": {}},
+    {"id": "N2", "index": 1, "coordinates_m": [4.0, 0.0, 0.0], "source_id": "generated:N2", "extensions": {}}
+  ],
+  "materials": [
+    {
+      "id": "steel",
+      "index": 0,
+      "law_id": "bilinear_combined_hardening_steel",
+      "parameter_set_version": "1",
+      "parameters": {
+        "elastic_modulus_pa": 200000000000.0,
+        "yield_stress_pa": 250000000.0,
+        "isotropic_hardening_modulus_pa": 3000000000.0,
+        "kinematic_hardening_modulus_pa": 5000000000.0,
+        "yield_tolerance_pa": 0.0001
+      },
+      "state_schema": {"stateful": true, "state_update_epoch": "accepted_step", "supports_trial_commit_rollback": true},
+      "source_id": "generated:steel",
+      "extensions": {}
+    },
+    {
+      "id": "concrete",
+      "index": 1,
+      "law_id": "asymmetric_concrete_damage",
+      "parameter_set_version": "1",
+      "parameters": {
+        "elastic_modulus_pa": 30000000000.0,
+        "tensile_strength_pa": 3000000.0,
+        "compressive_strength_pa": 30000000.0,
+        "tensile_softening_rate": 3000.0,
+        "compressive_softening_rate": 400.0,
+        "history_tolerance": 1e-14
+      },
+      "state_schema": {"stateful": true, "state_update_epoch": "accepted_step", "supports_trial_commit_rollback": true},
+      "source_id": "generated:concrete",
+      "extensions": {}
+    }
+  ],
+  "sections": [
+    {
+      "id": "RC1",
+      "index": 0,
+      "family_id": "rectangular_rc_fiber_2d",
+      "parameter_set_version": "1",
+      "parameters": {
+        "width_m": 0.4,
+        "depth_m": 0.6,
+        "cover_m": 0.05,
+        "concrete_layer_count": 2,
+        "top_bar_count": 4,
+        "bottom_bar_count": 4,
+        "bar_area_m2": 0.000387
+      },
+      "steel_material_id": "steel",
+      "concrete_material_id": "concrete",
+      "source_id": "generated:RC1",
+      "extensions": {}
+    }
+  ],
+  "elements": [
+    {
+      "id": "E1",
+      "index": 0,
+      "type": "frame_2d",
+      "formulation": "stateful_corotational_rc_fiber_frame2d",
+      "node_ids": ["N1", "N2"],
+      "section_id": "RC1",
+      "integration_order": 3,
+      "offsets": {"i_global_m": [0.2, 0.0, 0.0], "j_global_m": [-0.2, 0.0, 0.0]},
+      "releases": {"i": [], "j": ["RZ"]},
+      "uniform_distributed_load_local": {
+        "basis": "initial_member_local",
+        "behavior": "dead",
+        "qx_n_per_m": 0.0,
+        "qy_n_per_m": -2000.0
+      },
+      "source_id": "generated:E1",
+      "extensions": {}
+    }
+  ],
+  "constraints": [
+    {
+      "id": "BC1",
+      "index": 0,
+      "type": "fixed_dofs",
+      "node_id": "N1",
+      "dofs": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+      "prescribed_values_si": {"UX": 0.0, "UY": 0.0, "UZ": 0.0, "RX": 0.0, "RY": 0.0, "RZ": 0.0},
+      "source_id": "generated:BC1",
+      "extensions": {}
+    },
+    {
+      "id": "BC2",
+      "index": 1,
+      "type": "fixed_dofs",
+      "node_id": "N2",
+      "dofs": ["UZ", "RX", "RY", "RZ"],
+      "prescribed_values_si": {"UZ": 0.0, "RX": 0.0, "RY": 0.0, "RZ": 0.0},
+      "source_id": "generated:BC2",
+      "extensions": {}
+    }
+  ],
+  "load_patterns": [
+    {
+      "id": "LP1",
+      "index": 0,
+      "analysis_type": "nonlinear_static_load_control",
+      "self_weight": [0.0, 0.0, 0.0],
+      "nodal_loads": [],
+      "source_id": "generated:LP1",
+      "extensions": {}
+    }
+  ],
+  "load_combinations": [],
+  "time_functions": [],
+  "construction_stages": [],
+  "roundtrip_map": [],
+  "unsupported_features": [],
+  "extensions": {}
+}

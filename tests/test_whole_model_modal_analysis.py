@@ -201,6 +201,14 @@ def test_public_cantilever_modal_path_matches_one_element_closed_eigenvalues(
     assert result.metrics["general_frame_shell_modal_workflow"] is False
     assert result.metrics["binary_mode_vector_artifact_connected"] is False
     assert result.metrics["mass_normalized_mode_vectors_inlined"] is False
+    assert result.metrics["symmetric_coordinate_scaling_applied"] is True
+    assert result.metrics["characteristic_length"] == pytest.approx(2.0)
+    assert result.metrics["scaling_hash"].startswith("sha256:")
+    assert result.metrics["equation_scaling_6dof"]["scaling_hash"] == (
+        result.metrics["scaling_hash"]
+    )
+    assert result.metrics["scaled_mass_condition_number_status"] == "available"
+    assert result.metrics["scaled_mass_condition_number"] > 0.0
     assert result.metrics["raw_result_hash"] == replay.metrics["raw_result_hash"]
     assert result.metrics["semantic_result_hash"] == replay.metrics["semantic_result_hash"]
 

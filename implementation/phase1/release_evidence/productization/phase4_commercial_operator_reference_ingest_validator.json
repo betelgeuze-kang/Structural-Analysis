@@ -3,8 +3,8 @@
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
-  "engine_version": "1.0.0",
-  "generated_at": "2026-07-18T14:04:27.259176+00:00",
+  "engine_version": "0.3.0",
+  "generated_at": "2026-07-30T04:04:56.480021+00:00",
   "input_checksums": {
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
     "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
@@ -23,7 +23,7 @@
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "status": "blocked",
   "truth_class": "comparison_reference",
   "validation_result": {

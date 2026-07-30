@@ -108,9 +108,11 @@ def test_actual_258_equation_frame_uses_blocked_exact_sparse_diagnostics() -> No
     assert result.final_checkpoint.displacement[-6] > 0.0
     assert result.steps[0].checkpoint.converged_iterations == 1
     diagnostics = result.steps[0].factorization_diagnostics
-    assert len(diagnostics) == 1
-    diagnostic = diagnostics[0]
-    assert type(diagnostic) is ScalableSparseFactorizationDiagnostic
+    assert len(diagnostics) == 2
+    assert all(
+        type(row) is ScalableSparseFactorizationDiagnostic for row in diagnostics
+    )
+    diagnostic = diagnostics[-1]
     assert diagnostic.equation_count == 258
     assert diagnostic.inverse_solve_block_count == 9
     assert diagnostic.condition_estimate_is_exact is True
@@ -123,6 +125,11 @@ def test_actual_258_equation_frame_uses_blocked_exact_sparse_diagnostics() -> No
     assert diagnostic.regularization_used is False
     assert diagnostic.fallback_used is False
     assert diagnostic.to_manifest()["contract_pass"] is True
+    assert result.steps[0].scaled_condition_number_1 == (
+        diagnostic.condition_number_1
+    )
+    assert result.steps[0].residual_gate_passed is True
+    assert result.steps[0].increment_gate_passed is True
 
     schema = json.loads(
         (

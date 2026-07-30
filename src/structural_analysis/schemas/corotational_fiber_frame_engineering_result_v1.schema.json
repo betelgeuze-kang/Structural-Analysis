@@ -98,22 +98,7 @@
         "solver_terminal_relative_residual": {"type": "number", "minimum": 0}
       }
     },
-    "authority_axes": {
-      "const": {
-        "convergence": "inherited_bounded_candidate",
-        "displacement": "exact_bounded_candidate",
-        "reaction": "exact_bounded_candidate",
-        "member_force": "exact_bounded_candidate",
-        "member_features": "not_supported",
-        "section_resultant": "exact_bounded_candidate",
-        "fiber_result": "exact_bounded_candidate",
-        "fallback": "not_used",
-        "public_api": "not_promoted",
-        "external_vv": "not_attached",
-        "engineering_design": "not_authoritative",
-        "release_readiness": "not_authoritative"
-      }
-    },
+    "authority_axes": {"type": "object"},
     "limitations": {
       "oneOf": [
         {
@@ -138,9 +123,6 @@
             "load_control_cpu_dense_or_native_sparse_newton_only",
             "parallel_members_not_supported",
             "disconnected_graphs_not_supported",
-            "member_end_releases_not_supported",
-            "rigid_offsets_not_supported",
-            "distributed_member_loads_not_supported",
             "direct_displacement_control_not_supported",
             "external_level2_not_attached",
             "public_capability_not_promoted",
@@ -172,6 +154,22 @@
           "authority_profile": {
             "const": "exact_bounded_portal_engineering_candidate.v1"
           },
+          "authority_axes": {
+            "const": {
+              "convergence": "inherited_bounded_candidate",
+              "displacement": "exact_bounded_candidate",
+              "reaction": "exact_bounded_candidate",
+              "member_force": "exact_bounded_candidate",
+              "member_features": "not_supported",
+              "section_resultant": "exact_bounded_candidate",
+              "fiber_result": "exact_bounded_candidate",
+              "fallback": "not_used",
+              "public_api": "not_promoted",
+              "external_vv": "not_attached",
+              "engineering_design": "not_authoritative",
+              "release_readiness": "not_authoritative"
+            }
+          },
           "counts": {
             "properties": {"node": {"const": 4}, "member": {"const": 3}}
           }
@@ -181,6 +179,22 @@
         "properties": {
           "authority_profile": {
             "const": "exact_connected_frame2d_engineering_candidate.v1"
+          },
+          "authority_axes": {
+            "const": {
+              "convergence": "inherited_bounded_candidate",
+              "displacement": "exact_bounded_candidate",
+              "reaction": "exact_bounded_candidate",
+              "member_force": "exact_bounded_candidate",
+              "member_features": "exact_bounded_candidate",
+              "section_resultant": "exact_bounded_candidate",
+              "fiber_result": "exact_bounded_candidate",
+              "fallback": "not_used",
+              "public_api": "not_promoted",
+              "external_vv": "not_attached",
+              "engineering_design": "not_authoritative",
+              "release_readiness": "not_authoritative"
+            }
           }
         }
       }

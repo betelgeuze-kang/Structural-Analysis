@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/stateful-corotational-frame3d-displacement-control-resume-binding-v2.schema.json",
+  "title": "Stateful corotational Frame3D cyclic displacement-control resume binding v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "profile", "model_hash", "frame_solver_contract_hash",
+    "direct_control_contract_hash", "control_global_dof", "control_unit",
+    "path_mode", "last_completed_leg_direction_sign",
+    "cumulative_reversal_count", "cumulative_completed_target_count",
+    "accepted_target_chain_hash", "accepted_control_target",
+    "accepted_step_index", "accepted_checkpoint_hash", "binding_hash"
+  ],
+  "properties": {
+    "schema_version": {"const": "stateful-corotational-frame3d-displacement-control-resume-binding.v2"},
+    "profile": {"const": "stateful_corotational_frame3d_sparse_direct_displacement_control.v1"},
+    "model_hash": {"$ref": "#/$defs/hash"},
+    "frame_solver_contract_hash": {"$ref": "#/$defs/hash"},
+    "direct_control_contract_hash": {"$ref": "#/$defs/hash"},
+    "control_global_dof": {"type": "integer", "minimum": 0, "maximum": 767},
+    "control_unit": {"enum": ["m", "rad"]},
+    "path_mode": {"const": "cyclic_reversal"},
+    "last_completed_leg_direction_sign": {"enum": [-1, 1, null]},
+    "cumulative_reversal_count": {"type": "integer", "minimum": 0, "maximum": 4095},
+    "cumulative_completed_target_count": {"type": "integer", "minimum": 0, "maximum": 4096},
+    "accepted_target_chain_hash": {"$ref": "#/$defs/hash"},
+    "accepted_control_target": {"type": "number"},
+    "accepted_step_index": {"type": "integer", "minimum": 0},
+    "accepted_checkpoint_hash": {"$ref": "#/$defs/hash"},
+    "binding_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

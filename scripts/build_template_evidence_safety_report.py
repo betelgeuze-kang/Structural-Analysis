@@ -38,6 +38,8 @@ KNOWN_TEMPLATE_PROBES = {
     "independent_vv_attestation.template.json",
     "family_validation_manual_signoff.template.json",
     "customer_audit_failure_bundle_sla.template.json",
+    "external_vv_operator_attestation.template.json",
+    "external_vv_level2_promotion.template.json",
 }
 
 
@@ -213,6 +215,72 @@ def _probe_fresh_validation_template(template_dir: Path) -> dict[str, Any]:
     }
 
 
+def _probe_external_vv_operator_template(
+    template_dir: Path,
+) -> dict[str, Any]:
+    path = template_dir / "external_vv_operator_attestation.template.json"
+    validator = _load_script_module(
+        "validate_external_vv_operator_attestation_template_probe",
+        Path("scripts/validate_external_vv_operator_attestation.py"),
+    )
+    observed = "validator_accepted_template"
+    try:
+        validator._validate_schema(_load_json(path), Path.cwd())
+    except validator.ExternalVVOperatorAttestationError as error:
+        observed = error.code
+    expected_prefixes = (
+        "operator_attestation_schema_invalid:",
+        "operator_attestation_placeholder_rejected",
+    )
+    probe_pass = observed.startswith(expected_prefixes)
+    return {
+        "label": "external_vv_operator_attestation_template_probe",
+        "template_path": str(path),
+        "contract_pass": probe_pass,
+        "validator_contract_pass": not probe_pass,
+        "expected_error_prefixes": list(expected_prefixes),
+        "observed_error": observed,
+        "state": (
+            "template_rejected_as_external_vv_operator_attestation"
+            if probe_pass
+            else "template_probe_failed"
+        ),
+    }
+
+
+def _probe_external_vv_level2_template(
+    template_dir: Path,
+) -> dict[str, Any]:
+    path = template_dir / "external_vv_level2_promotion.template.json"
+    validator = _load_script_module(
+        "promote_external_vv_level2_template_probe",
+        Path("scripts/promote_external_vv_level2.py"),
+    )
+    observed = "validator_accepted_template"
+    try:
+        validator._validate_schema(_load_json(path), Path.cwd())
+    except validator.ExternalVVLevel2PromotionError as error:
+        observed = error.code
+    expected_prefixes = (
+        "level2_promotion_schema_invalid:",
+        "level2_promotion_placeholder_rejected",
+    )
+    probe_pass = observed.startswith(expected_prefixes)
+    return {
+        "label": "external_vv_level2_promotion_template_probe",
+        "template_path": str(path),
+        "contract_pass": probe_pass,
+        "validator_contract_pass": not probe_pass,
+        "expected_error_prefixes": list(expected_prefixes),
+        "observed_error": observed,
+        "state": (
+            "template_rejected_as_external_vv_level2_promotion"
+            if probe_pass
+            else "template_probe_failed"
+        ),
+    }
+
+
 def _probe_ga_signoff_templates(template_dir: Path) -> list[dict[str, Any]]:
     module = _load_script_module(
         "build_ga_enterprise_signoff_intake_packet",
@@ -267,6 +335,8 @@ def _validator_probes(template_dir: Path) -> list[dict[str, Any]]:
         _probe_fresh_validation_template(template_dir),
         _probe_license_template(template_dir),
         _probe_ux_template(template_dir),
+        _probe_external_vv_operator_template(template_dir),
+        _probe_external_vv_level2_template(template_dir),
         *_probe_ga_signoff_templates(template_dir),
     ]
 

@@ -1,0 +1,403 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/external_vv_operator_attestation_v1.schema.json",
+  "title": "Independent external V&V operator attestation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "attestation_id",
+    "signed_at",
+    "source_commit_sha",
+    "operator",
+    "execution",
+    "bundle",
+    "declarations",
+    "signature",
+    "contract_pass",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-external-vv-operator-attestation.v1"},
+    "attestation_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{2,127}$"},
+    "signed_at": {"type": "string", "format": "date-time"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "operator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "organization",
+        "contact",
+        "independence_basis",
+        "conflict_check_completed",
+        "signer_public_key_sha256"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 2},
+        "organization": {"type": "string", "minLength": 2},
+        "contact": {"type": "string", "minLength": 3},
+        "independence_basis": {"type": "string", "minLength": 20},
+        "conflict_check_completed": {"const": true},
+        "signer_public_key_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "started_at",
+        "completed_at",
+        "host_platform",
+        "runner_command",
+        "repository_mount_read_only",
+        "runtime_network_disabled"
+      ],
+      "properties": {
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"},
+        "host_platform": {"type": "string", "minLength": 3},
+        "runner_command": {"const": "scripts/run_external_vv_clean_runner.sh <external-asset-directory>"},
+        "supplementary_runner_commands": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "python opensees/bounded_planar_linear_portal.py external-results/bounded_planar_linear_portal.json",
+              "python opensees/bounded_planar_linear_multistory.py external-results/bounded_planar_linear_multistory.json",
+              "python runner/run_case.py --case-id bounded_planar_modal_rigid_mode --model models/bounded_planar_modal_rigid_mode.model.json --out external-results/bounded_planar_modal_rigid_mode.json",
+              "python runner/run_case.py --case-id bounded_planar_modal_repeated_mode --model models/bounded_planar_modal_repeated_mode.model.json --out external-results/bounded_planar_modal_repeated_mode.json",
+              "python runner/run_case.py --case-id bounded_planar_buckling_portal --model models/bounded_planar_buckling_portal.model.json --out external-results/bounded_planar_buckling_portal.json",
+              "python opensees/bounded_planar_negative_mechanism.py external-results/bounded_planar_negative_mechanism.json",
+              "python opensees/bounded_planar_negative_singular.py external-results/bounded_planar_negative_singular.json",
+              "python opensees/bounded_planar_negative_invalid_geometry.py external-results/bounded_planar_negative_invalid_geometry.json",
+              "python opensees/bounded_planar_scaling_unit_invariance.py external-results/bounded_planar_scaling_unit_invariance.json",
+              "python opensees/bounded_planar_scaling_characteristic_length_invariance.py external-results/bounded_planar_scaling_characteristic_length_invariance.json",
+              "python runner/run_case.py --case-id bounded_planar_p_delta --model models/bounded_planar_p_delta.case.json --out external-results/bounded_planar_p_delta.json",
+              "python runner/run_case.py --case-id bounded_planar_snap_through --model models/bounded_planar_snap_through.case.json --out external-results/bounded_planar_snap_through.json",
+              "python runner/run_case.py --case-id bounded_planar_steel_yield --model models/bounded_planar_steel_yield.case.json --out external-results/bounded_planar_steel_yield.json",
+              "python runner/run_case.py --case-id bounded_planar_rc_fiber --model models/bounded_planar_rc_fiber.case.json --out external-results/bounded_planar_rc_fiber.json",
+              "python runner/run_case.py --case-id bounded_planar_section_recovery --model models/bounded_planar_section_recovery.case.json --out external-results/bounded_planar_section_recovery.json",
+              "python runner/run_case.py --case-id bounded_planar_fiber_recovery --model models/bounded_planar_fiber_recovery.case.json --out external-results/bounded_planar_fiber_recovery.json"
+            ]
+          }
+        },
+        "repository_mount_read_only": {"const": true},
+        "runtime_network_disabled": {"const": true}
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["clean_runner", "code_to_code", "modal_buckling", "mode_vectors"],
+      "properties": {
+        "clean_runner": {"$ref": "#/$defs/jsonArtifact"},
+        "code_to_code": {"$ref": "#/$defs/jsonArtifact"},
+        "modal_buckling": {"$ref": "#/$defs/jsonArtifact"},
+        "bounded_planar_linear": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "execution_package_manifest",
+            "technical_receipt",
+            "external_results"
+          ],
+          "properties": {
+            "execution_package_manifest": {"$ref": "#/$defs/jsonArtifact"},
+            "technical_receipt": {"$ref": "#/$defs/jsonArtifact"},
+            "external_results": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {"$ref": "#/$defs/jsonArtifact"}
+            }
+          }
+        },
+        "bounded_planar_modal_buckling": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "execution_package_manifest",
+            "technical_receipt",
+            "external_results"
+          ],
+          "properties": {
+            "execution_package_manifest": {"$ref": "#/$defs/jsonArtifact"},
+            "technical_receipt": {"$ref": "#/$defs/jsonArtifact"},
+            "external_results": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {"$ref": "#/$defs/jsonArtifact"}
+            }
+          }
+        },
+        "bounded_planar_negative": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "execution_package_manifest",
+            "technical_receipt",
+            "external_results"
+          ],
+          "properties": {
+            "execution_package_manifest": {"$ref": "#/$defs/jsonArtifact"},
+            "technical_receipt": {"$ref": "#/$defs/jsonArtifact"},
+            "external_results": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {"$ref": "#/$defs/jsonArtifact"}
+            }
+          }
+        },
+        "bounded_planar_scaling": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "execution_package_manifest",
+            "technical_receipt",
+            "external_results"
+          ],
+          "properties": {
+            "execution_package_manifest": {"$ref": "#/$defs/jsonArtifact"},
+            "technical_receipt": {"$ref": "#/$defs/jsonArtifact"},
+            "external_results": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {"$ref": "#/$defs/jsonArtifact"}
+            }
+          }
+        },
+        "bounded_planar_nonlinear_material_recovery": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "execution_package_manifest",
+            "technical_receipt",
+            "external_results"
+          ],
+          "properties": {
+            "execution_package_manifest": {"$ref": "#/$defs/jsonArtifact"},
+            "technical_receipt": {"$ref": "#/$defs/jsonArtifact"},
+            "external_results": {
+              "type": "array",
+              "minItems": 6,
+              "maxItems": 6,
+              "items": {"$ref": "#/$defs/jsonArtifact"}
+            }
+          }
+        },
+        "additional_receipts": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/jsonArtifact"}
+        },
+        "mode_vectors": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {"$ref": "#/$defs/fileArtifact"}
+        }
+      }
+    },
+    "declarations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "independent_from_product_team",
+        "external_runtimes_executed_by_operator",
+        "no_external_execution_reuse",
+        "submitted_bundle_unmodified_after_execution",
+        "identity_credentials_verified_by_project"
+      ],
+      "properties": {
+        "independent_from_product_team": {"const": true},
+        "external_runtimes_executed_by_operator": {"const": true},
+        "no_external_execution_reuse": {"const": true},
+        "submitted_bundle_unmodified_after_execution": {"const": true},
+        "supplementary_results_executed_by_operator": {"const": true},
+        "identity_credentials_verified_by_project": {"const": false}
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "signed_payload_sha256",
+        "public_key_path",
+        "public_key_sha256",
+        "signature_path",
+        "signature_sha256"
+      ],
+      "properties": {
+        "algorithm": {"const": "rsa-sha256"},
+        "signed_payload_sha256": {"$ref": "#/$defs/sha256"},
+        "public_key_path": {"$ref": "#/$defs/relativePath"},
+        "public_key_sha256": {"$ref": "#/$defs/sha256"},
+        "signature_path": {"$ref": "#/$defs/relativePath"},
+        "signature_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "contract_pass": {"const": true},
+    "claim_boundary": {"type": "string", "minLength": 120}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "bundle": {"required": ["bounded_planar_linear"]}
+        },
+        "required": ["bundle"]
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "required": ["supplementary_runner_commands"],
+            "properties": {
+              "supplementary_runner_commands": {
+                "allOf": [
+                  {"contains": {"const": "python opensees/bounded_planar_linear_portal.py external-results/bounded_planar_linear_portal.json"}},
+                  {"contains": {"const": "python opensees/bounded_planar_linear_multistory.py external-results/bounded_planar_linear_multistory.json"}}
+                ]
+              }
+            }
+          },
+          "declarations": {"required": ["supplementary_results_executed_by_operator"]}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bundle": {"required": ["bounded_planar_modal_buckling"]}
+        },
+        "required": ["bundle"]
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "required": ["supplementary_runner_commands"],
+            "properties": {
+              "supplementary_runner_commands": {
+                "allOf": [
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_modal_rigid_mode --model models/bounded_planar_modal_rigid_mode.model.json --out external-results/bounded_planar_modal_rigid_mode.json"}},
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_modal_repeated_mode --model models/bounded_planar_modal_repeated_mode.model.json --out external-results/bounded_planar_modal_repeated_mode.json"}},
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_buckling_portal --model models/bounded_planar_buckling_portal.model.json --out external-results/bounded_planar_buckling_portal.json"}}
+                ]
+              }
+            }
+          },
+          "declarations": {"required": ["supplementary_results_executed_by_operator"]}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bundle": {"required": ["bounded_planar_negative"]}
+        },
+        "required": ["bundle"]
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "required": ["supplementary_runner_commands"],
+            "properties": {
+              "supplementary_runner_commands": {
+                "allOf": [
+                  {"contains": {"const": "python opensees/bounded_planar_negative_mechanism.py external-results/bounded_planar_negative_mechanism.json"}},
+                  {"contains": {"const": "python opensees/bounded_planar_negative_singular.py external-results/bounded_planar_negative_singular.json"}},
+                  {"contains": {"const": "python opensees/bounded_planar_negative_invalid_geometry.py external-results/bounded_planar_negative_invalid_geometry.json"}}
+                ]
+              }
+            }
+          },
+          "declarations": {"required": ["supplementary_results_executed_by_operator"]}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bundle": {"required": ["bounded_planar_scaling"]}
+        },
+        "required": ["bundle"]
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "required": ["supplementary_runner_commands"],
+            "properties": {
+              "supplementary_runner_commands": {
+                "allOf": [
+                  {"contains": {"const": "python opensees/bounded_planar_scaling_unit_invariance.py external-results/bounded_planar_scaling_unit_invariance.json"}},
+                  {"contains": {"const": "python opensees/bounded_planar_scaling_characteristic_length_invariance.py external-results/bounded_planar_scaling_characteristic_length_invariance.json"}}
+                ]
+              }
+            }
+          },
+          "declarations": {"required": ["supplementary_results_executed_by_operator"]}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "bundle": {"required": ["bounded_planar_nonlinear_material_recovery"]}
+        },
+        "required": ["bundle"]
+      },
+      "then": {
+        "properties": {
+          "execution": {
+            "required": ["supplementary_runner_commands"],
+            "properties": {
+              "supplementary_runner_commands": {
+                "allOf": [
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_p_delta --model models/bounded_planar_p_delta.case.json --out external-results/bounded_planar_p_delta.json"}},
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_snap_through --model models/bounded_planar_snap_through.case.json --out external-results/bounded_planar_snap_through.json"}},
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_steel_yield --model models/bounded_planar_steel_yield.case.json --out external-results/bounded_planar_steel_yield.json"}},
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_rc_fiber --model models/bounded_planar_rc_fiber.case.json --out external-results/bounded_planar_rc_fiber.json"}},
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_section_recovery --model models/bounded_planar_section_recovery.case.json --out external-results/bounded_planar_section_recovery.json"}},
+                  {"contains": {"const": "python runner/run_case.py --case-id bounded_planar_fiber_recovery --model models/bounded_planar_fiber_recovery.case.json --out external-results/bounded_planar_fiber_recovery.json"}}
+                ]
+              }
+            }
+          },
+          "declarations": {"required": ["supplementary_results_executed_by_operator"]}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$"
+    },
+    "fileArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256"],
+      "properties": {
+        "path": {"$ref": "#/$defs/relativePath"},
+        "file_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "jsonArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256", "artifact_hash"],
+      "properties": {
+        "path": {"$ref": "#/$defs/relativePath"},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

@@ -16,9 +16,27 @@ def _load_json(path: Path) -> dict:
 
 
 def test_release_gap_report_surfaces_pbd_hinge_benchmark_metrics(tmp_path: Path) -> None:
-    compare_payload = _load_json(
-        Path("implementation/phase1/release/benchmark_expansion/peer_blind_prediction_compare_report.json")
-    )
+    compare_payload = {
+        "contract_pass": True,
+        "reason_code": "PASS",
+        "summary_line": (
+            "PEER blind compare lane: READY | cases=10 | "
+            "measured_response=ready | channels=2"
+        ),
+        "summary": {
+            "case_count": 10,
+            "build_case_count": 10,
+            "measured_response_ready": True,
+            "acceleration_channel_count": 2,
+            "drift_channel_count": 2,
+        },
+        "results_explorer": {
+            "entry_kind": "benchmark_compare",
+            "entry_label": "PEER blind prediction compare",
+            "source_family": "edefense_peer_blind_prediction",
+            "summary_label": "10-case measured-response comparison",
+        },
+    }
     landing_payload = _load_json(
         Path(
             "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01.measured_response_landing_manifest.json"
@@ -32,6 +50,7 @@ def test_release_gap_report_surfaces_pbd_hinge_benchmark_metrics(tmp_path: Path)
         "wind": tmp_path / "wind_raw_mapping_report.json",
         "midas": tmp_path / "midas_mgt_conversion_report.json",
         "committee": tmp_path / "committee_summary.json",
+        "peer_compare": tmp_path / "peer_blind_prediction_compare_report.json",
         "out_json": tmp_path / "release_gap_report.json",
         "out_md": tmp_path / "release_gap_report.md",
     }
@@ -74,6 +93,7 @@ def test_release_gap_report_surfaces_pbd_hinge_benchmark_metrics(tmp_path: Path)
     _write_json(paths["wind"], {"contract_pass": True, "summary": {}, "reason": "wind closed"})
     _write_json(paths["midas"], {"contract_pass": True})
     _write_json(paths["committee"], {"metrics": {}})
+    _write_json(paths["peer_compare"], compare_payload)
 
     proc = subprocess.run(
         [
@@ -83,6 +103,8 @@ def test_release_gap_report_surfaces_pbd_hinge_benchmark_metrics(tmp_path: Path)
             str(paths["pbd"]),
             "--pbd-hinge-refresh-report",
             str(paths["pbd_hinge"]),
+            "--peer-blind-prediction-compare-report",
+            str(paths["peer_compare"]),
             "--panel-zone-clash-report",
             str(paths["panel"]),
             "--foundation-optimization-report",

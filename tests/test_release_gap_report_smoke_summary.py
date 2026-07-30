@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 from implementation.phase1.generate_release_gap_report import (
     DEFAULT_NATIVE_AUTHORING_FAMILY_TRACKS,
     DEFAULT_NATIVE_AUTHORING_LOCAL_VARIANT_WRITEBACK_TRACE_REPORT,
@@ -786,7 +788,9 @@ def test_release_gap_report_surfaces_panel_zone_status_semantics(tmp_path: Path)
     solver_hip = tmp_path / "solver_hip.json"
     rc = tmp_path / "rc.json"
     quality = tmp_path / "quality.json"
+    committee = tmp_path / "committee.json"
     pbd = tmp_path / "pbd.json"
+    pbd_hinge_refresh = tmp_path / "pbd_hinge_refresh.json"
     dataset = tmp_path / "dataset.json"
     foundation = tmp_path / "foundation.json"
     wind = tmp_path / "wind.json"
@@ -803,7 +807,48 @@ def test_release_gap_report_surfaces_panel_zone_status_semantics(tmp_path: Path)
     for path in [ci, freeze, promotion, commercial, authority, hip, midas, construction, diaphragm, repro, registry, kds, solver_hip, rc, quality]:
         _write(path, {"contract_pass": True, "summary": {}, "checks": {}, "global_metrics": {}, "grade": {}, "frontend_payload": {}})
     _write(static, {"pass": True})
+    _write(
+        committee,
+        {
+            "external_benchmark_submission_queue_rows": [
+                {
+                    "work_item_id": f"EB-{index:03d}",
+                    "queue_id": queue_id,
+                    "status": "ready_for_full_submission",
+                }
+                for index, queue_id in enumerate(
+                    [
+                        "hardest_external_10case",
+                        "tpu_hffb",
+                        "peer_spd_hinge",
+                        "korean_public_structures",
+                    ],
+                    start=1,
+                )
+            ],
+            "external_benchmark_submission_recommended_start_mode": (
+                "start_now_full_external_submission"
+            ),
+            "external_benchmark_submission_recommended_submission_scope": (
+                "full_external_submission_package"
+            ),
+        },
+    )
     _write(pbd, {"contract_pass": True, "summary": {}})
+    _write(
+        pbd_hinge_refresh,
+        {
+            "contract_pass": True,
+            "summary": {
+                "hinge_state_mode": "computed_member_local_hinge_refresh",
+                "hinge_refresh_artifact_present": True,
+                "hinge_refresh_artifact_kind": "hinge_refresh_source_json",
+                "hinge_refresh_source_mode": "rebar_sensitive_member_local_refresh",
+                "hinge_refresh_overlap_member_count": 1,
+                "hinge_refresh_rebar_sensitive_member_count": 1,
+            },
+        },
+    )
     _write(dataset, {"contract_pass": True, "summary": {}, "rows_head": []})
     _write(foundation, {"contract_pass": False, "summary": {}})
     _write(wind, {"contract_pass": False, "summary": {}})
@@ -894,8 +939,12 @@ def test_release_gap_report_surfaces_panel_zone_status_semantics(tmp_path: Path)
         str(rc),
         "--quality-mgt-corpus",
         str(quality),
+        "--committee-summary",
+        str(committee),
         "--pbd-package",
         str(pbd),
+        "--pbd-hinge-refresh-report",
+        str(pbd_hinge_refresh),
         "--design-opt-dataset-report",
         str(dataset),
         "--foundation-optimization-report",
@@ -2216,6 +2265,24 @@ def test_release_gap_report_surfaces_native_authoring_commercialization_lane(tmp
 
 
 def test_native_authoring_default_portfolio_surface_tracks_commercialization_artifacts() -> None:
+    required_release_inputs = [
+        DEFAULT_NATIVE_AUTHORING_OPS_PORTFOLIO,
+        DEFAULT_NATIVE_AUTHORING_FAMILY_TRACKS,
+        DEFAULT_NATIVE_AUTHORING_RUNTIME_SUBMISSION_LANE,
+        DEFAULT_NATIVE_AUTHORING_RUNTIME_WRITEBACK_DEPTH_REPORT,
+        DEFAULT_NATIVE_AUTHORING_LOCAL_RUNTIME_SCENARIO_DEPTH_REPORT,
+        DEFAULT_NATIVE_AUTHORING_MULTI_PROJECT_RUNTIME_WRITEBACK_REPORT,
+        DEFAULT_NATIVE_AUTHORING_SOLVER_FAMILY_BREADTH_REPORT,
+        DEFAULT_NATIVE_AUTHORING_WRITEBACK_BREADTH_REPORT,
+        DEFAULT_PROJECT_OPS_SERVICE_SNAPSHOT,
+    ]
+    missing_release_inputs = [str(path) for path in required_release_inputs if not path.exists()]
+    if missing_release_inputs:
+        pytest.skip(
+            "native-authoring release inputs are not available in this checkout: "
+            + ", ".join(missing_release_inputs)
+        )
+
     portfolio_report = json.loads(DEFAULT_NATIVE_AUTHORING_OPS_PORTFOLIO.read_text(encoding="utf-8"))
     family_tracks_report = json.loads(DEFAULT_NATIVE_AUTHORING_FAMILY_TRACKS.read_text(encoding="utf-8"))
     runtime_submission_report = json.loads(

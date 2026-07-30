@@ -22,7 +22,7 @@
     ]
   },
   "contract_pass": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "gates": [
     {
       "blockers": [],
@@ -111,10 +111,16 @@
     },
     {
       "blockers": [],
+      "commit_tree_bound": false,
+      "current_worktree_binding_valid": true,
       "label": "Client input validation report",
       "missing_data_report": [],
       "ok": true,
       "path": "implementation/phase1/client_input_validation_report.json",
+      "report_artifact_hash_valid": true,
+      "report_schema_valid": true,
+      "repository_path": "examples/workstation_client_input_reference",
+      "source_kind": "repository_reference_fixture",
       "status": "ready",
       "validation_status": "ready"
     },
@@ -147,12 +153,12 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-07-02T22:01:35.184840+00:00",
+  "generated_at": "2026-07-30T14:47:28.376056+00:00",
   "independent_commercial_product_ready": false,
   "input_checksums": {
-    "implementation/phase1/client_input_validation_report.json": "sha256:516c051f8f68126e80626cc65363bd23ea579fe36c46d60976a50dec1ec5d98a",
+    "implementation/phase1/client_input_validation_report.json": "sha256:cb0229945c401886dc8ebf27f70e282767220dddeedb41e59f036be4fc565684",
     "implementation/phase1/structure_viewer_browser_performance_probe.json": "sha256:bf7c000487aee9b46112110b3b8a3f65e43806babd3e96b44bc4e3ffafba64d4",
-    "implementation/phase1/structure_viewer_visual_regression_baseline.json": "sha256:70908d83636063c26f0fb0136f928365e0fca2dc826dcefa44efffe8dc1b6503",
+    "implementation/phase1/structure_viewer_visual_regression_baseline.json": "sha256:85d5150e46dc859042a824e9b98948a0e3476a781a3315b4903e8d9df7dd75be",
     "implementation/phase1/workstation_delivery_package_manifest.json": "sha256:2edc0da2014ccfc074d683e7098f63812687c3bea37759aa540f76b2f590c516",
     "implementation/phase1/workstation_delivery_viewer_smoke.json": "sha256:3a14e8951ca2a595489c56f1a7ebc21cad22423c7213ca840f0e3fe1ec732d9e",
     "implementation/phase1/workstation_hardware_profile.json": "sha256:6f3836677e9a49bc2085d17b4ffc110b99b80b6b17021978ca16c579b320891a",
@@ -163,7 +169,7 @@
   "reason_code": "PASS",
   "reused_evidence": false,
   "schema_version": "workstation-delivery-readiness.v1",
-  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "status": "ready",
   "summary_line": "Workstation delivery readiness: PASS | gates=8/8",
   "workstation_delivery_service_ready": true

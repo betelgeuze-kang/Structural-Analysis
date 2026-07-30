@@ -1,13 +1,13 @@
 {
   "schema_version": "mgt-surface-shell-bending-tangent.v1",
-  "generated_at": "2026-07-01T11:07:07.201933+00:00",
+  "generated_at": "2026-07-28T18:50:05.722458+00:00",
   "status": "ready",
   "surface_shell_bending_drilling_smoke_ready": true,
   "surface_shell_transverse_pressure_smoke_ready": true,
   "surface_shell_full_bending_tangent_ready": false,
-  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
-  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
-  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/건축구조분석/tmp/stage0-product-truth-20260728/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
   "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
   "mesh_fingerprint": {
     "surface_element_count": 7152,
@@ -68,9 +68,9 @@
   },
   "runtime_metrics": {
     "backend": "scipy_sparse_spsolve_cpu_surface_shell_bending",
-    "assembly_seconds": 4.554808141983813,
-    "solve_seconds": 0.33987082200474106,
-    "total_seconds": 4.894678963988554
+    "assembly_seconds": 4.468773127999157,
+    "solve_seconds": 0.3366551310173236,
+    "total_seconds": 4.80542825901648
   },
   "claim_boundary": "Assembles Mindlin-type CST shell bending/shear plus drilling regularization for MGT PLATE rows and runs a deterministic transverse-pressure smoke solve with source MGT plate thickness where available. Mesh-quality calibrated shell benchmarks, coupled frame-shell full-load Newton, and material nonlinearity remain outside this artifact.",
   "anisotropy": {

@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
-import type { WorkbenchCaseV2 } from '../model/caseSchema'
+import { isAvailableValue, type WorkbenchCaseV2 } from '../model/caseSchema'
+import { EngineeringValueText } from './EngineeringValueText'
 
 interface ResultSummaryCardProps {
   caseV2: WorkbenchCaseV2
@@ -8,11 +9,6 @@ interface ResultSummaryCardProps {
 
 type Verdict = 'converged' | 'failed' | 'unavailable'
 
-function fmt(value: number): string {
-  if (value !== 0 && (Math.abs(value) < 1e-3 || Math.abs(value) >= 1e6)) return value.toExponential(3)
-  return Number.isInteger(value) ? String(value) : value.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')
-}
-
 /**
  * Single-glance result card. The verdict is derived only from explicit analysis
  * data: converged true/false from the case, or UNAVAILABLE when convergence
@@ -20,7 +16,12 @@ function fmt(value: number): string {
  */
 export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummaryCardProps): ReactElement {
   const analysis = caseV2.analysis
-  const verdict: Verdict = !convergenceAvailable || !analysis ? 'unavailable' : analysis.converged ? 'converged' : 'failed'
+  const verdict: Verdict =
+    !convergenceAvailable || !analysis || !isAvailableValue(analysis.converged)
+      ? 'unavailable'
+      : analysis.converged.value
+        ? 'converged'
+        : 'failed'
 
   const verdictLabel =
     verdict === 'converged' ? 'Converged' : verdict === 'failed' ? 'Did not converge' : 'Convergence unavailable'
@@ -28,7 +29,11 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
     verdict === 'converged' ? 'wb2-chip--live' : verdict === 'failed' ? 'wb2-chip--blocked' : 'wb2-chip--unavailable'
 
   const withinTolerance =
-    analysis != null ? analysis.finalNormalizedResidual <= analysis.residualTolerance : null
+    analysis != null
+    && isAvailableValue(analysis.finalNormalizedResidual)
+    && isAvailableValue(analysis.residualTolerance)
+      ? analysis.finalNormalizedResidual.value <= analysis.residualTolerance.value
+      : null
 
   return (
     <section className="wb2-panel wb2-result-card" aria-labelledby="wb2-result-title" data-result-verdict={verdict}>
@@ -37,7 +42,11 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
       <div className="wb2-result-head">
         <span className={`wb2-chip ${chipClass}`} data-result-chip>{verdictLabel}</span>
         {verdict === 'unavailable' ? (
-          <span className="wb2-result-sub">No analysis attached — status is not inferred.</span>
+          <span className="wb2-result-sub">
+            {analysis
+              ? 'Convergence status is unavailable — it is not inferred from the attached values.'
+              : 'No analysis attached — status is not inferred.'}
+          </span>
         ) : (
           <span className="wb2-result-sub">
             {analysis!.type} · {analysis!.solver}
@@ -49,19 +58,19 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
         <dl className="wb2-result-metrics">
           <div className="wb2-result-metric">
             <dt>Final residual</dt>
-            <dd className="wb2-mono">{fmt(analysis.finalNormalizedResidual)}</dd>
+            <dd className="wb2-mono"><EngineeringValueText value={analysis.finalNormalizedResidual} /></dd>
           </div>
           <div className="wb2-result-metric">
             <dt>Tolerance</dt>
-            <dd className="wb2-mono">{fmt(analysis.residualTolerance)}</dd>
+            <dd className="wb2-mono"><EngineeringValueText value={analysis.residualTolerance} /></dd>
           </div>
           <div className="wb2-result-metric">
             <dt>Iterations</dt>
-            <dd className="wb2-mono">{analysis.iterationCount}</dd>
+            <dd className="wb2-mono"><EngineeringValueText value={analysis.iterationCount} integer /></dd>
           </div>
           <div className="wb2-result-metric">
             <dt>Load scale</dt>
-            <dd className="wb2-mono">{fmt(analysis.loadScale)}</dd>
+            <dd className="wb2-mono"><EngineeringValueText value={analysis.loadScale} /></dd>
           </div>
         </dl>
       ) : (
@@ -71,10 +80,15 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
       )}
 
       {analysis ? (
-        <p className={`wb2-result-tol${withinTolerance ? ' is-ok' : ' is-no'}`} data-result-within-tol={String(withinTolerance)}>
-          {withinTolerance
-            ? 'Final residual is at or below the requested tolerance.'
-            : 'Final residual is above the requested tolerance.'}
+        <p
+          className={`wb2-result-tol${withinTolerance === true ? ' is-ok' : withinTolerance === false ? ' is-no' : ''}`}
+          data-result-within-tol={withinTolerance == null ? 'unavailable' : String(withinTolerance)}
+        >
+          {withinTolerance == null
+            ? 'Tolerance comparison is unavailable unless both values are available.'
+            : withinTolerance
+              ? 'Final residual is at or below the requested tolerance.'
+              : 'Final residual is above the requested tolerance.'}
         </p>
       ) : null}
     </section>

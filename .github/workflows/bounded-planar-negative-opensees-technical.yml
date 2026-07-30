@@ -1,0 +1,131 @@
+name: Bounded Planar Negative OpenSees Technical Execution
+
+# Executes checksum-bound expected-rejection cases. Passing this workflow is
+# same-operator technical evidence only and grants no Level 2 or release authority.
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+  RESULT_DIR: ".ci/bounded-planar-negative-opensees/results"
+  RECEIPT_PATH: ".ci/bounded-planar-negative-opensees/technical-receipt.json"
+  ATTESTATION_BUNDLE_PATH: ".ci/bounded-planar-negative-opensees/technical-receipt.sigstore.json"
+  ATTESTATION_VERIFICATION_PATH: ".ci/bounded-planar-negative-opensees/attestation-verification.json"
+  GH_TOKEN: "${{ github.token }}"
+
+concurrency:
+  group: bounded-planar-negative-opensees-technical-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  execute:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact current-main source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Install product and contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Materialize exact current-source execution package
+        run: python scripts/build_bounded_planar_external_negative_case_package.py
+
+      - name: Verify generated execution package
+        run: >-
+          python scripts/build_bounded_planar_external_negative_case_package.py
+          --check
+
+      - name: Install pinned external runtime
+        run: >-
+          python -m pip install
+          -r artifacts/vv/bounded_planar_external_negative_case_package/requirements.txt
+
+      - name: Execute checksum-bound expected-rejection cases
+        run: |
+          mkdir -p "$RESULT_DIR"
+          for case_id in \
+            bounded_planar_negative_mechanism \
+            bounded_planar_negative_singular \
+            bounded_planar_negative_invalid_geometry
+          do
+            python "artifacts/vv/bounded_planar_external_negative_case_package/opensees/${case_id}.py" \
+              "$RESULT_DIR/${case_id}.json"
+          done
+
+      - name: Validate exact output schemas
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+
+          schema = json.loads(Path(
+              "src/structural_analysis/schemas/bounded_planar_opensees_negative_result_v1.schema.json"
+          ).read_text(encoding="utf-8"))
+          validator = Draft202012Validator(schema)
+          results = Path(".ci/bounded-planar-negative-opensees/results")
+          paths = sorted(results.glob("*.json"))
+          if len(paths) != 3:
+              raise SystemExit("expected exactly three negative-case results")
+          for path in paths:
+              payload = json.loads(path.read_text(encoding="utf-8"))
+              validator.validate(payload)
+              if payload["contract_pass"] is not True:
+                  raise SystemExit(f"negative-case contract blocked: {path}")
+          PY
+
+      - name: Build fail-closed technical receipt
+        run: >-
+          python scripts/ingest_bounded_planar_external_negative_results.py
+          --package-dir artifacts/vv/bounded_planar_external_negative_case_package
+          --results-dir "$RESULT_DIR"
+          --out "$RECEIPT_PATH"
+          --fail-technical-blocked
+
+      - name: Attest technical receipt provenance
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.RECEIPT_PATH }}
+
+      - name: Retain and verify exact provenance bundle
+        run: |
+          cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE_PATH"
+          gh attestation verify "$RECEIPT_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$ATTESTATION_BUNDLE_PATH" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/bounded-planar-negative-opensees-technical.yml" \
+            --source-digest "$SOURCE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$ATTESTATION_VERIFICATION_PATH"
+
+      - name: Upload outputs and bound package
+        uses: actions/upload-artifact@v7
+        with:
+          name: bounded-planar-negative-opensees-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            .ci/bounded-planar-negative-opensees
+            artifacts/vv/bounded_planar_external_negative_case_package
+          if-no-files-found: error
+          retention-days: 90

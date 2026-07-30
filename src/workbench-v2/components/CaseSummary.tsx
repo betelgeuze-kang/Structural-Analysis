@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import type { WorkbenchCaseV2 } from '../model/caseSchema'
+import { EngineeringValueText } from './EngineeringValueText'
 
 function shortSha(s: string): string {
   const v = s.startsWith('sha256:') ? s.slice(7) : s
@@ -25,9 +26,9 @@ export function CaseSummary({ caseV2 }: { caseV2: WorkbenchCaseV2 }): ReactEleme
       <dl className="wb2-kv">
         <dt>Unit system</dt><dd>{m.unitSystem}</dd>
         <dt>Coordinate system</dt><dd>{m.coordinateSystem}</dd>
-        <dt>Nodes</dt><dd>{m.nodeCount.toLocaleString()}</dd>
-        <dt>Elements</dt><dd>{m.elementCount.toLocaleString()}</dd>
-        <dt>DOF</dt><dd>{m.dofCount.toLocaleString()}</dd>
+        <dt>Nodes</dt><dd><EngineeringValueText value={m.nodeCount} integer /></dd>
+        <dt>Elements</dt><dd><EngineeringValueText value={m.elementCount} integer /></dd>
+        <dt>DOF</dt><dd><EngineeringValueText value={m.dofCount} integer /></dd>
       </dl>
     </section>
   )

@@ -6,7 +6,11 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = REPO_ROOT / "scripts" / "build_mgt_uncoarsened_boundary_pdelta_frontier_0p85_receipt.py"
+SCRIPT = (
+    REPO_ROOT
+    / "scripts"
+    / "build_mgt_uncoarsened_boundary_pdelta_frontier_0p85_receipt.py"
+)
 SEGMENT_DIR = (
     REPO_ROOT
     / "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_segments"
@@ -17,8 +21,8 @@ DEFAULT_OUT = (
 )
 
 
-def test_frontier_0p85_receipt_default_runs() -> None:
-    out = DEFAULT_OUT
+def test_frontier_0p85_receipt_default_runs(tmp_path: Path) -> None:
+    out = tmp_path / DEFAULT_OUT.name
     proc = subprocess.run(
         [sys.executable, str(SCRIPT), "--output-json", str(out)],
         check=False,
@@ -27,7 +31,10 @@ def test_frontier_0p85_receipt_default_runs() -> None:
     )
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(out.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == "mgt-uncoarsened-boundary-pdelta-frontier-0p85-receipt.v1"
+    assert (
+        payload["schema_version"]
+        == "mgt-uncoarsened-boundary-pdelta-frontier-0p85-receipt.v1"
+    )
     assert payload["target_load_scale"] == 0.85
     assert payload["summary"]["segment_count"] >= 50
     assert payload["frontier_load_scale"] >= 0.4
@@ -38,15 +45,16 @@ def test_frontier_0p85_receipt_default_runs() -> None:
     assert "claim_boundary" in payload
 
 
-def test_frontier_0p85_receipt_segment_dir_uses_real_segments() -> None:
+def test_frontier_0p85_receipt_segment_dir_uses_real_segments(tmp_path: Path) -> None:
+    out = tmp_path / DEFAULT_OUT.name
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--output-json", str(DEFAULT_OUT)],
+        [sys.executable, str(SCRIPT), "--output-json", str(out)],
         check=False,
         capture_output=True,
         text=True,
     )
     assert proc.returncode == 0, proc.stderr
-    payload = json.loads(DEFAULT_OUT.read_text(encoding="utf-8"))
+    payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["source"]["segment_count"] >= 50
     assert "strength" in payload["summary"]["rule_family_breakdown"]
 
@@ -79,7 +87,9 @@ def test_frontier_0p85_receipt_target_synthetic() -> None:
                     }
                 ],
             }
-            (seg_dir / f"segment_{idx:03d}.json").write_text(json.dumps(seg), encoding="utf-8")
+            (seg_dir / f"segment_{idx:03d}.json").write_text(
+                json.dumps(seg), encoding="utf-8"
+            )
         out = tmp_path / "receipt.json"
         proc = subprocess.run(
             [
@@ -131,7 +141,9 @@ def test_frontier_0p85_receipt_target_reached() -> None:
                     }
                 ],
             }
-            (seg_dir / f"segment_{idx:03d}.json").write_text(json.dumps(seg), encoding="utf-8")
+            (seg_dir / f"segment_{idx:03d}.json").write_text(
+                json.dumps(seg), encoding="utf-8"
+            )
         out = tmp_path / "receipt.json"
         proc = subprocess.run(
             [

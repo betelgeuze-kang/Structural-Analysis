@@ -12,8 +12,16 @@ The runner consumes the five exact external package files already pinned by
 extracting or executing anything. Solver packages are never copied into the repository.
 The OpenSees receipt includes the public one-bay corotational portal's four-step
 elastic-state load path and compares terminal free-node displacements and support reactions.
-It deliberately stays below the declared material yield and damage thresholds; it is not a
-material-nonlinear or cyclic validation.
+It also executes the bounded planar ModelIR member-feature sample with two finite rigid
+offsets, a J-end RZ release, and a uniform dead member load, comparing physical-node
+displacements, support reactions, and member-end moments. Both cases deliberately stay below
+the declared material yield and damage thresholds; neither is a material-nonlinear or cyclic
+validation.
+The boundary matrix includes a separate source-bound ModelIR case combining a 1 kN axial
+reference load with a -0.1 mm prescribed support settlement. It compares two physical-node
+displacements, five support reactions, and two member-end moments. The explicit nonzero
+reference load keeps the product's equation-scaling and convergence evidence available; this
+is not evidence for a displacement-only no-free-equation solve.
 The CalculiX receipt also compares a six-member tetrahedral `T3D2` spatial truss under a
 combined three-axis apex load, covering three apex displacements and nine base reactions.
 That bounded linear-truss case is not frame/shell or nonlinear-family validation.
@@ -80,3 +88,9 @@ can be considered for hierarchy promotion.
 CalculiX execution is retained as a shared regression in this package. It does not close the
 separate second-solver roadmap item, which still requires independent operator evidence and
 the stated breadth and review gates.
+
+An independent operator submits a fresh bundle through
+[`docs/external-vv-independent-operator-intake.md`](../../../docs/external-vv-independent-operator-intake.md).
+That contract binds the summary, both child receipts, all four binary mode vectors, the source
+commit, and a detached RSA-SHA256 signature. Passing the intake proves submission integrity,
+not operator identity, legal approval, Verification Level 2, or release readiness.

@@ -51,6 +51,27 @@
     },
     "checkpoint_hash": { "$ref": "#/$defs/hash" }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "step_index": { "const": 0 } },
+        "required": ["step_index"]
+      },
+      "then": {
+        "properties": {
+          "load_factor": { "const": 0 },
+          "displacement": { "items": { "const": 0 } },
+          "converged_iterations": { "const": 0 },
+          "parent_checkpoint_hash": { "type": "null" }
+        }
+      },
+      "else": {
+        "properties": {
+          "parent_checkpoint_hash": { "$ref": "#/$defs/hash" }
+        }
+      }
+    }
+  ],
   "$defs": {
     "hash": {
       "type": "string",

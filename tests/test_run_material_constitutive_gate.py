@@ -6,6 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from implementation.phase1.rc_constitutive_library import (
     ConcreteMaterial,
     bond_slip_cyclic_probe,
@@ -438,6 +440,7 @@ def test_material_constitutive_gate_passes_with_damage_cyclic_and_bond_evidence(
     contact = tmp_path / "contact.json"
     panel_zone = tmp_path / "panel_zone.json"
     wind = tmp_path / "wind.json"
+    wind_tunnel_raw_mapping = tmp_path / "wind_tunnel_raw_mapping.json"
     vibration_attenuation = tmp_path / "vibration_attenuation.json"
     vibration_compliance = tmp_path / "vibration_compliance.json"
     track_lf = tmp_path / "track_lf.json"
@@ -560,6 +563,22 @@ def test_material_constitutive_gate_passes_with_damage_cyclic_and_bond_evidence(
                     "artifacts": {"response_storage": "hdf5"},
                 },
             ],
+        },
+    )
+    _write(
+        wind_tunnel_raw_mapping,
+        {
+            "contract_pass": True,
+            "checks": {
+                "raw_wind_data_exists": True,
+                "raw_wind_manifest_verified": True,
+                "wind_raw_mapping_available": True,
+                "midas_traceability_ready": True,
+            },
+            "summary": {
+                "raw_row_count": 2,
+                "mapping_row_count": 2,
+            },
         },
     )
     for manifest in (nheri_manifest_a, nheri_manifest_b, nheri_manifest_c):
@@ -798,6 +817,8 @@ def test_material_constitutive_gate_passes_with_damage_cyclic_and_bond_evidence(
             str(panel_zone),
             "--wind-time-history-gate-report",
             str(wind),
+            "--wind-tunnel-raw-mapping-report",
+            str(wind_tunnel_raw_mapping),
             "--vibration-attenuation-report",
             str(vibration_attenuation),
             "--vibration-compliance-report",
@@ -1328,6 +1349,23 @@ def test_material_constitutive_gate_fails_when_bond_interface_is_missing(tmp_pat
 def test_material_constitutive_gate_promotes_solver_closed_panel_zone_summary_to_full_material_pass(
     tmp_path: Path,
 ) -> None:
+    required_default_reports = [
+        Path("implementation/phase1/rc_benchmark_lock_report.json"),
+        Path("implementation/phase1/construction_sequence_gate_report.json"),
+        Path("implementation/phase1/ssi_boundary_gate_report.json"),
+        Path("implementation/phase1/damper_validation_gate_report.json"),
+        Path("implementation/phase1/foundation_soil_link_gate_report.json"),
+        Path("implementation/phase1/structural_contact_validation_report.json"),
+        Path("implementation/phase1/wind_time_history_gate_report.json"),
+        Path("implementation/phase1/wind_tunnel_raw_mapping_report.json"),
+    ]
+    missing_reports = [path.as_posix() for path in required_default_reports if not path.is_file()]
+    if missing_reports:
+        pytest.skip(
+            "optional generated material-gate reports are unavailable: "
+            + ", ".join(missing_reports)
+        )
+
     out = tmp_path / "material_constitutive_default.json"
     proc = subprocess.run(
         [

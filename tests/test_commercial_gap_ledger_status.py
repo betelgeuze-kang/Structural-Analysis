@@ -266,23 +266,36 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "production_rocm_hip_residency_not_closed"
     ]
     assert hip_terminal["observed"]["production_hip_residual_jacobian_path"] is False
-    assert hip_terminal["observed"]["raw_production_hip_residual_jacobian_path"] is True
-    assert hip_terminal["observed"]["runtime_blockers"] == []
+    assert hip_terminal["observed"]["raw_production_hip_residual_jacobian_path"] is False
+    assert hip_terminal["observed"]["runtime_blockers"] == [
+        "dev_kfd_missing",
+        "dev_dri_missing",
+    ]
     assert (
-        "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven"
+        "hip_residual_jacobian_consistency_preflight_only"
         in hip_terminal["observed"]["receipt_blockers"]
     )
     assert (
         hip_terminal["observed"]["production_rocm_hip_residual_jvp_worker_ready"]
         is False
     )
-    assert hip_terminal["observed"]["production_rocm_hip_residual_jvp_worker_blockers"] == [
+    assert (
         "consistent_residual_jacobian_newton_gate_not_passed"
-    ]
+        in hip_terminal["observed"][
+            "production_rocm_hip_residual_jvp_worker_blockers"
+        ]
+    )
+    assert (
+        "production_hip_residual_jacobian_path_not_proven"
+        in hip_terminal["observed"][
+            "production_rocm_hip_residual_jvp_worker_blockers"
+        ]
+    )
     assert "consistent_residual_jacobian_newton_not_proven" in hip_terminal[
         "non_closing_reasons"
     ]
     assert "hip_receipt_blockers_present" in hip_terminal["non_closing_reasons"]
+    assert "hip_runtime_blockers_present" in hip_terminal["non_closing_reasons"]
     assert "production_rocm_hip_residual_jvp_worker_not_ready" in hip_terminal[
         "non_closing_reasons"
     ]
@@ -9238,12 +9251,14 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
             "implementation/phase1/release_evidence/productization/"
             "external_benchmark_submission_updates.json"
         ),
-        "external_benchmark_submission_readiness": (
-            "implementation/phase1/release/external_benchmark_submission_readiness.json"
-        ),
         "residual_holdout_closure_updates": (
             "implementation/phase1/release_evidence/productization/"
             "residual_holdout_closure_updates.json"
+        ),
+    }
+    assert rows["G6"]["evidence"]["unavailable_source_receipts"] == {
+        "external_benchmark_submission_readiness": (
+            "implementation/phase1/release/external_benchmark_submission_readiness.json"
         ),
     }
     g6_requirements = {
@@ -9297,6 +9312,8 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
             "implementation/phase1/release_evidence/productization/"
             "external_benchmark_submission_updates.json"
         ),
+    }
+    assert g6_submission_gate["unavailable_source_receipts"] == {
         "external_benchmark_submission_readiness": (
             "implementation/phase1/release/external_benchmark_submission_readiness.json"
         ),
@@ -10206,6 +10223,9 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert ai_g6_external_boundary["source_receipts"] == rows["G6"]["evidence"][
         "external_submission_closure_gate"
     ]["source_receipts"]
+    assert ai_g6_external_boundary["unavailable_source_receipts"] == rows["G6"][
+        "evidence"
+    ]["external_submission_closure_gate"]["unavailable_source_receipts"]
     assert ai_g6_external_boundary["non_closing_reasons"] == [
         "external_submission_receipts_pending",
         "ready_to_submit_is_not_terminal_receipt",
@@ -10433,7 +10453,8 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert "does not mean proposals were accepted by a human reviewer" in rows[
         "AI-G10"
     ]["claim_boundary"]
-    assert rows["G10"]["status"] in {"closed", "partial"}
+    assert rows["G10"]["status"] == "closed"
+    assert rows["G10"]["blockers"] == []
     g10_evidence = rows["G10"]["evidence"]
     assert g10_evidence["source_receipts"] == {
         "workstation_delivery_readiness": (

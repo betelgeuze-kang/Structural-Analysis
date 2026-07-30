@@ -38,8 +38,10 @@ from structural_analysis.materials.bond_slip import (
 )
 from structural_analysis.materials.confined_concrete import (
     CONFINED_CONCRETE_CLAIM_BOUNDARY,
+    CONFINED_CONCRETE_PATH_CAPABILITIES,
     CONFINED_CONCRETE_PROFILE,
     CONFINED_CONCRETE_STATE_SCHEMA_VERSION,
+    ConfinedConcreteAdmissibilityError,
     ConfinedConcreteMaterial,
     ConfinedConcreteResponse,
     ConfinedConcreteState,
@@ -128,9 +130,11 @@ __all__ = [
     "CONDENSED_PARTIAL_COMPOSITE_AXIAL_PROFILE",
     "CONDENSED_PARTIAL_COMPOSITE_AXIAL_STATE_SCHEMA_VERSION",
     "CONFINED_CONCRETE_CLAIM_BOUNDARY",
+    "CONFINED_CONCRETE_PATH_CAPABILITIES",
     "CONFINED_CONCRETE_PROFILE",
     "CONFINED_CONCRETE_STATE_SCHEMA_VERSION",
     "CondensedPartialCompositeAxialMaterial",
+    "ConfinedConcreteAdmissibilityError",
     "ConfinedConcreteMaterial",
     "ConfinedConcreteResponse",
     "ConfinedConcreteState",

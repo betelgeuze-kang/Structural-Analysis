@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import Callable
 
 
 DEFAULT_EXPECTED_SLUG = "betelgeuze-kang/Structural-Analysis"
@@ -109,6 +110,7 @@ def check_remotes(
     expected_slug: str = DEFAULT_EXPECTED_SLUG,
     forbidden_slugs: tuple[str, ...] = DEFAULT_FORBIDDEN_SLUGS,
     protected_remote_names: tuple[str, ...] = PROTECTED_REMOTE_NAMES,
+    slug_resolver: Callable[[str], str | None] = canonical_slug,
 ) -> list[str]:
     expected = _normalize_slug(expected_slug)
     forbidden = {_normalize_slug(slug) for slug in forbidden_slugs}
@@ -117,7 +119,7 @@ def check_remotes(
     expected_seen = False
     for name, urls in sorted(remotes.items()):
         for url in urls:
-            slug = canonical_slug(url)
+            slug = slug_resolver(url)
             if slug == expected:
                 expected_seen = True
             if slug in forbidden:
@@ -127,7 +129,7 @@ def check_remotes(
         urls = remotes.get(name)
         if not urls:
             continue
-        protected_slugs = {canonical_slug(url) for url in urls}
+        protected_slugs = {slug_resolver(url) for url in urls}
         if protected_slugs != {expected}:
             rendered = ", ".join(urls)
             errors.append(f"protected remote `{name}` must point to {expected}: {rendered}")
@@ -144,6 +146,7 @@ def build_report(
     expected_slug: str = DEFAULT_EXPECTED_SLUG,
     forbidden_slugs: tuple[str, ...] = DEFAULT_FORBIDDEN_SLUGS,
     protected_remote_names: tuple[str, ...] = PROTECTED_REMOTE_NAMES,
+    slug_resolver: Callable[[str], str | None] = canonical_slug,
 ) -> dict[str, object]:
     remotes = parse_remote_verbose(remote_text)
     errors = check_remotes(
@@ -151,23 +154,92 @@ def build_report(
         expected_slug=expected_slug,
         forbidden_slugs=forbidden_slugs,
         protected_remote_names=protected_remote_names,
+        slug_resolver=slug_resolver,
     )
     return {
         "errors": errors,
         "expected_slug": _normalize_slug(expected_slug),
         "ok": not errors,
         "remotes": remotes,
+        "resolved_slugs": {
+            name: [slug_resolver(url) for url in urls]
+            for name, urls in sorted(remotes.items())
+        },
     }
+
+
+def local_proxy_slug(
+    remote_url: str,
+    *,
+    repo_root: Path,
+    expected_slug: str = DEFAULT_EXPECTED_SLUG,
+    forbidden_slugs: tuple[str, ...] = DEFAULT_FORBIDDEN_SLUGS,
+    protected_remote_names: tuple[str, ...] = PROTECTED_REMOTE_NAMES,
+) -> str | None:
+    """Resolve a local Git proxy only when its own remotes pass this policy."""
+
+    cleaned = re.sub(r"\s+\((fetch|push)\)$", "", remote_url.strip())
+    candidate = Path(cleaned)
+    if not candidate.is_absolute():
+        candidate = repo_root / candidate
+    try:
+        candidate = candidate.resolve(strict=True)
+    except (OSError, RuntimeError):
+        return None
+    if not candidate.is_dir():
+        return None
+
+    inside = subprocess.run(
+        ["git", "-C", str(candidate), "rev-parse", "--is-inside-work-tree"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if inside.returncode != 0 or inside.stdout.strip() != "true":
+        return None
+    remote_proc = subprocess.run(
+        ["git", "-C", str(candidate), "remote", "-v"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if remote_proc.returncode != 0:
+        return None
+    proxy_remotes = parse_remote_verbose(remote_proc.stdout)
+    proxy_errors = check_remotes(
+        proxy_remotes,
+        expected_slug=expected_slug,
+        forbidden_slugs=forbidden_slugs,
+        protected_remote_names=protected_remote_names,
+    )
+    return _normalize_slug(expected_slug) if not proxy_errors else None
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(sys.argv[1:] if argv is None else argv)
     remote_text = args.remote_file.read_text(encoding="utf-8") if args.remote_file else _git_remote_verbose()
+    resolved_cache: dict[str, str | None] = {}
+
+    def resolve_slug(remote_url: str) -> str | None:
+        direct = canonical_slug(remote_url)
+        if direct is not None:
+            return direct
+        if remote_url not in resolved_cache:
+            resolved_cache[remote_url] = local_proxy_slug(
+                remote_url,
+                repo_root=Path.cwd(),
+                expected_slug=args.expected_slug,
+                forbidden_slugs=tuple(args.forbidden_slug),
+                protected_remote_names=tuple(args.protected_remote),
+            )
+        return resolved_cache[remote_url]
+
     report = build_report(
         remote_text,
         expected_slug=args.expected_slug,
         forbidden_slugs=tuple(args.forbidden_slug),
         protected_remote_names=tuple(args.protected_remote),
+        slug_resolver=resolve_slug,
     )
 
     if args.json:

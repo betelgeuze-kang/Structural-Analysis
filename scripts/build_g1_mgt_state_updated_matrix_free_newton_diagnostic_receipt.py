@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+from math import isclose, isfinite
 from pathlib import Path
 import sys
 from typing import Any
@@ -66,6 +67,25 @@ CASE_ID = "g1_real_mgt_state_updated_matrix_free_newton_diagnostic"
 LOAD_FACTOR = 1.0
 RESIDUAL_GATE_KN = 5.0e-7
 MAXIMUM_NEWTON_ATTEMPTS = 2
+PORTABLE_RELATIVE_TOLERANCE = 1.0e-9
+PORTABLE_ABSOLUTE_TOLERANCE = 5.0e-10
+PORTABLE_NUMERIC_ROOTS = frozenset(
+    {
+        "adapter_binding",
+        "solver_binding",
+    }
+)
+PORTABLE_OBSERVATION_ROOTS = frozenset({"newton_attempts", "metrics"})
+PORTABLE_HASH_RELAXED_ROOTS = PORTABLE_NUMERIC_ROOTS | PORTABLE_OBSERVATION_ROOTS
+PORTABLE_DYNAMIC_HASH_KEYS = frozenset(
+    {
+        "binding_hash",
+        "contract_hash",
+        "current_tangent_operator_array_bundle_hash",
+        "state_hash",
+        "state_operator_binding_hash",
+    }
+)
 CLAIM_BOUNDARY = (
     "This receipt starts from the actual-MGT full-unit zero-state linear "
     "predictor and evaluates at most two full Newton corrections at lambda=1. "
@@ -125,6 +145,211 @@ def _strip_volatile(payload: Any) -> Any:
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]
     return payload
+
+
+def _portable_path_ignored(path: tuple[str | int, ...]) -> bool:
+    if not path:
+        return False
+    key = path[-1]
+    if key in {"generated_at", "source_commit_sha"}:
+        return True
+    if not isinstance(key, str):
+        return False
+    root = path[0]
+    if root == "inputs" and key == "initial_state_data_hash":
+        return True
+    if root not in PORTABLE_HASH_RELAXED_ROOTS:
+        return False
+    if key.endswith("_data_hash"):
+        return True
+    return root == "newton_attempts" and key in PORTABLE_DYNAMIC_HASH_KEYS
+
+
+def _portable_numeric_path(path: tuple[str | int, ...]) -> bool:
+    return bool(path and path[0] in PORTABLE_NUMERIC_ROOTS)
+
+
+def _portable_path_label(path: tuple[str | int, ...]) -> str:
+    return ".".join(str(part) for part in path) or "<root>"
+
+
+def _portable_receipt_difference(
+    existing: Any,
+    expected: Any,
+    *,
+    path: tuple[str | int, ...] = (),
+) -> str | None:
+    """Return the first cross-platform contract mismatch, if any.
+
+    This receipt explicitly denies end-to-end cross-platform deterministic
+    arithmetic. Portable checking keeps source checksums, profiles, claims,
+    gates, counts, and structural relationships exact while comparing only
+    solver-produced numeric values with a tight tolerance. Exact state and
+    observation hashes remain covered by ``--check`` on the producing host.
+    """
+
+    if _portable_path_ignored(path):
+        return None
+    if isinstance(existing, dict) and isinstance(expected, dict):
+        existing_keys = {
+            key for key in existing if not _portable_path_ignored(path + (str(key),))
+        }
+        expected_keys = {
+            key for key in expected if not _portable_path_ignored(path + (str(key),))
+        }
+        if existing_keys != expected_keys:
+            return _portable_path_label(path) + ".keys"
+        for key in sorted(existing_keys, key=str):
+            difference = _portable_receipt_difference(
+                existing[key],
+                expected[key],
+                path=path + (str(key),),
+            )
+            if difference is not None:
+                return difference
+        return None
+    if isinstance(existing, list) and isinstance(expected, list):
+        if len(existing) != len(expected):
+            return _portable_path_label(path) + ".length"
+        for index, (existing_item, expected_item) in enumerate(
+            zip(existing, expected, strict=True)
+        ):
+            difference = _portable_receipt_difference(
+                existing_item,
+                expected_item,
+                path=path + (index,),
+            )
+            if difference is not None:
+                return difference
+        return None
+    if isinstance(existing, bool) or isinstance(expected, bool):
+        return None if existing is expected else _portable_path_label(path)
+    if isinstance(existing, int) or isinstance(expected, int):
+        return None if existing == expected else _portable_path_label(path)
+    if (
+        isinstance(existing, (int, float))
+        and isinstance(expected, (int, float))
+        and path
+        and path[0] in PORTABLE_OBSERVATION_ROOTS
+    ):
+        return None
+    if (
+        isinstance(existing, (int, float))
+        and isinstance(expected, (int, float))
+        and _portable_numeric_path(path)
+    ):
+        if isclose(
+            float(existing),
+            float(expected),
+            rel_tol=PORTABLE_RELATIVE_TOLERANCE,
+            abs_tol=PORTABLE_ABSOLUTE_TOLERANCE,
+        ):
+            return None
+        return _portable_path_label(path)
+    return None if existing == expected else _portable_path_label(path)
+
+
+def _portable_receipt_invariant_error(payload: dict[str, Any]) -> str | None:
+    """Validate portable solve semantics independently of exact FP64 bytes."""
+
+    if payload.get("status") != "partial":
+        return "status"
+    if payload.get("contract_pass") is not True:
+        return "contract_pass"
+    if payload.get("readiness_pass") is not False:
+        return "readiness_pass"
+    try:
+        attempts = payload["newton_attempts"]
+        metrics = payload["metrics"]
+        if not isinstance(attempts, list) or len(attempts) != 2:
+            return "newton_attempts.length"
+        residual_gate = float(metrics["residual_gate_kn"])
+        final_residual = float(metrics["final_accepted_residual_inf_kn"])
+        maximum_tangent_residual = float(
+            metrics["maximum_tangent_explicit_residual_inf_kn"]
+        )
+    except (KeyError, TypeError, ValueError):
+        return "portable_structure"
+    if not all(
+        isfinite(value)
+        for value in (residual_gate, final_residual, maximum_tangent_residual)
+    ):
+        return "metrics.non_finite"
+    if residual_gate <= 0.0:
+        return "metrics.residual_gate_kn"
+    if metrics.get("attempt_count") != len(attempts):
+        return "metrics.attempt_count"
+    if metrics.get("accepted_attempt_count") != len(attempts):
+        return "metrics.accepted_attempt_count"
+    if metrics.get("rejected_attempt_count") != 0:
+        return "metrics.rejected_attempt_count"
+    if metrics.get("fallback_count") != 0:
+        return "metrics.fallback_count"
+    if metrics.get("regularization_count") != 0:
+        return "metrics.regularization_count"
+    if metrics.get("line_search_executed") is not False:
+        return "metrics.line_search_executed"
+    if metrics.get("residual_gate_passed") is not True:
+        return "metrics.residual_gate_passed"
+    if final_residual > residual_gate:
+        return "metrics.final_accepted_residual_inf_kn"
+    if maximum_tangent_residual > residual_gate:
+        return "metrics.maximum_tangent_explicit_residual_inf_kn"
+
+    tangent_residuals: list[float] = []
+    previous_accepted_after: float | None = None
+    for index, attempt in enumerate(attempts):
+        prefix = f"newton_attempts.{index}"
+        try:
+            before = float(attempt["before_residual_inf_kn"])
+            trial = float(attempt["trial_residual_inf_kn"])
+            accepted_after = float(attempt["accepted_after_residual_inf_kn"])
+            tangent = attempt["tangent_solve"]
+            tangent_residual = float(tangent["explicit_residual_inf_kn"])
+            tangent_gate = float(tangent["explicit_residual_tolerance_inf_kn"])
+        except (KeyError, TypeError, ValueError):
+            return prefix + ".structure"
+        if not all(
+            isfinite(value)
+            for value in (
+                before,
+                trial,
+                accepted_after,
+                tangent_residual,
+                tangent_gate,
+            )
+        ):
+            return prefix + ".non_finite"
+        if attempt.get("attempt_index") != index + 1:
+            return prefix + ".attempt_index"
+        if attempt.get("accepted") is not True:
+            return prefix + ".accepted"
+        if attempt.get("residual_descent") is not True or not trial < before:
+            return prefix + ".residual_descent"
+        if previous_accepted_after is not None and before != previous_accepted_after:
+            return prefix + ".before_residual_inf_kn"
+        if accepted_after != trial:
+            return prefix + ".accepted_after_residual_inf_kn"
+        if tangent.get("contract_pass") is not True:
+            return prefix + ".tangent_solve.contract_pass"
+        if tangent.get("converged") is not True:
+            return prefix + ".tangent_solve.converged"
+        if tangent.get("fallback_count") != 0:
+            return prefix + ".tangent_solve.fallback_count"
+        if tangent.get("regularization_count") != 0:
+            return prefix + ".tangent_solve.regularization_count"
+        if tangent_gate <= 0.0 or tangent_residual > tangent_gate:
+            return prefix + ".tangent_solve.explicit_residual_inf_kn"
+        tangent_residuals.append(tangent_residual)
+        previous_accepted_after = accepted_after
+
+    if attempts[-1].get("trial_residual_gate_passed") is not True:
+        return "newton_attempts.1.trial_residual_gate_passed"
+    if final_residual != float(attempts[-1]["accepted_after_residual_inf_kn"]):
+        return "metrics.final_accepted_residual_inf_kn"
+    if maximum_tangent_residual != max(tangent_residuals):
+        return "metrics.maximum_tangent_explicit_residual_inf_kn"
+    return None
 
 
 def _resolve(repo_root: Path, path: Path) -> Path:
@@ -569,6 +794,51 @@ def check_receipt(
     return True, "g1_mgt_state_updated_matrix_free_newton_consistent"
 
 
+def check_portable_receipt(
+    *,
+    repo_root: Path = ROOT,
+    mgt_path: Path = DEFAULT_MGT,
+    checkpoint_npz: Path = DEFAULT_CHECKPOINT,
+    receipt_out: Path = DEFAULT_RECEIPT_OUT,
+) -> tuple[bool, str]:
+    """Check the bounded receipt without claiming cross-platform byte identity."""
+
+    target = _resolve(repo_root, receipt_out)
+    if not target.is_file():
+        return False, "g1_mgt_state_updated_matrix_free_newton_missing"
+    try:
+        existing = _read_json(target)
+        schema = _read_json(repo_root / SCHEMA_PATH)
+        Draft202012Validator.check_schema(schema)
+        Draft202012Validator(schema).validate(existing)
+    except Exception as exc:
+        return False, (
+            "g1_mgt_state_updated_matrix_free_newton_unreadable_or_invalid:"
+            f"{exc.__class__.__name__}"
+        )
+    expected = build_receipt(
+        repo_root=repo_root,
+        mgt_path=mgt_path,
+        checkpoint_npz=checkpoint_npz,
+        receipt_out=receipt_out,
+    )
+    if expected["contract_pass"] is not True:
+        return False, "g1_mgt_state_updated_matrix_free_newton_current_host_blocked"
+    for owner, payload in (("committed", existing), ("current_host", expected)):
+        invariant_error = _portable_receipt_invariant_error(payload)
+        if invariant_error is not None:
+            return False, (
+                "g1_mgt_state_updated_matrix_free_newton_portable_invariant:"
+                f"{owner}:{invariant_error}"
+            )
+    difference = _portable_receipt_difference(existing, expected)
+    if difference is not None:
+        return False, (
+            f"g1_mgt_state_updated_matrix_free_newton_portable_mismatch:{difference}"
+        )
+    return True, "g1_mgt_state_updated_matrix_free_newton_portable_consistent"
+
+
 def write_receipt(**kwargs: Any) -> dict[str, Any]:
     repo_root = Path(kwargs.get("repo_root", ROOT)).resolve()
     receipt_out = Path(kwargs.get("receipt_out", DEFAULT_RECEIPT_OUT))
@@ -585,7 +855,9 @@ def main() -> int:
     parser.add_argument("--mgt", type=Path, default=DEFAULT_MGT)
     parser.add_argument("--checkpoint", type=Path, default=DEFAULT_CHECKPOINT)
     parser.add_argument("--receipt-out", type=Path, default=DEFAULT_RECEIPT_OUT)
-    parser.add_argument("--check", action="store_true")
+    check_mode = parser.add_mutually_exclusive_group()
+    check_mode.add_argument("--check", action="store_true")
+    check_mode.add_argument("--portable-check", action="store_true")
     args = parser.parse_args()
     kwargs = {
         "repo_root": args.repo_root,
@@ -595,6 +867,10 @@ def main() -> int:
     }
     if args.check:
         passed, reason = check_receipt(**kwargs)
+        print(reason)
+        return 0 if passed else 1
+    if args.portable_check:
+        passed, reason = check_portable_receipt(**kwargs)
         print(reason)
         return 0 if passed else 1
     payload = write_receipt(**kwargs)

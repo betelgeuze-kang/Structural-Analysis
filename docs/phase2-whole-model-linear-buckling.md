@@ -15,6 +15,11 @@ analysis type is `linear_buckling`.
    local-axis and rigid-offset mapping as elastic stiffness.
 4. The reduced public path solves `K phi = lambda Kg phi`, equivalently locating
    loss of positive definiteness of `K - lambda Kg`.
+5. The common source-bound 6DOF characteristic length defines a symmetric
+   coordinate transform `C`. Eigen extraction uses `C^T K C` and `C^T Kg C`;
+   every vector is recovered with `phi = C q` and rechecked against the original
+   physical matrices before publication. The result binds the scaling manifest
+   and reports exact scaled condition numbers through 256 reduced equations.
 
 The sign convention is deliberately strict. Compression contributes a
 positive-semidefinite `Kg`; tension is not discarded, absolute-valued, or
@@ -46,9 +51,9 @@ vector artifacts.
 Current bindings:
 
 - result artifact:
-  `sha256:747b68fc1623d73d9cd100d41e6c35db05a267988821f8941674551cb7f603fb`
+  `sha256:78be972e72e00ee4c01f42abd4c1be23b9ed8380d36cecc376e7eb5f7d84a6c8`
 - source-set:
-  `sha256:8353f7b6a3dd11cf42a96dd3c17554fcbc7ba9132dc9ea8155f8e6d858301203`
+  `sha256:09cff3a3b7db551c2ad08cf9c0b172a13a5b9ca67015f028c8ca35d5212a4168`
 
 Artifacts:
 
@@ -76,3 +81,13 @@ artifacts beyond the separate small code-to-code vectors, ROCm/HIP parity, a
 broad independent buckling corpus beyond the separate one-column CalculiX B32
 technical comparison, Verification Level 2, commercial equivalence, or release
 readiness.
+
+The source-bound package at
+`artifacts/vv/bounded_planar_external_modal_buckling_case_package/` adds an exact
+three-member portal input with 16 product linear elements per member mapped to
+eight circular-section CalculiX B32 elements per member. The repository-local
+same-operator supplemental bundle now attaches an actual CalculiX 2.17 result;
+both factors pass the declared 5 percent tolerance at approximately 1.78 and
+0.165 percent relative error. Consequently `buckling.portal` is fresh technical
+evidence in the V&V matrix, while independent operation, legal approval,
+Verification Level 2, commercial equivalence, and release readiness remain false.

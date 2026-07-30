@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { JobLoadStatus } from '../model/jobProvider'
+import type { EngineeringResultIrManifest, JobLoadStatus } from '../model/jobProvider'
 import type { WorkbenchJobView } from '../model/jobSchema'
 import { StateChip, type ChipState } from './StateChip'
 
@@ -8,6 +8,7 @@ interface JobServicePanelProps {
   job: WorkbenchJobView | null
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
+  engineeringResultIr?: EngineeringResultIrManifest
 }
 
 function chip(job: WorkbenchJobView): ChipState {
@@ -20,7 +21,13 @@ function shortHash(value: string): string {
   return `${value.slice(0, 15)}…${value.slice(-8)}`
 }
 
-export function JobServicePanel({ loadStatus, job, errors, artifactStatus }: JobServicePanelProps): ReactElement {
+export function JobServicePanel({
+  loadStatus,
+  job,
+  errors,
+  artifactStatus,
+  engineeringResultIr,
+}: JobServicePanelProps): ReactElement {
   if (loadStatus !== 'ready' || !job) {
     const label = loadStatus === 'loading' ? 'Loading durable job status…' : loadStatus === 'unconfigured'
       ? 'No durable job endpoint is configured for this Workbench session.'
@@ -54,9 +61,19 @@ export function JobServicePanel({ loadStatus, job, errors, artifactStatus }: Job
         <dt>Result</dt><dd className="wb2-mono">{job.result ? shortHash(job.result.content_hash) : 'not published'}</dd>
         <dt>Evidence</dt><dd className="wb2-mono">{job.evidence ? shortHash(job.evidence.content_hash) : 'not published'}</dd>
         <dt>Published pair integrity</dt><dd>{artifactStatus ?? 'not evaluated'}</dd>
+        <dt>Engineering ResultIR</dt>
+        <dd className="wb2-mono" data-job-result-ir={engineeringResultIr ? 'verified' : 'unavailable'}>
+          {engineeringResultIr ? shortHash(engineeringResultIr.engineering_result_hash) : 'not verified'}
+        </dd>
+        <dt>ResultIR authority</dt>
+        <dd data-job-result-ir-authority>
+          {engineeringResultIr
+            ? `convergence=${engineeringResultIr.authority_axes.convergence}; displacement=${engineeringResultIr.authority_axes.displacement}; reaction=${engineeringResultIr.authority_axes.reaction}`
+            : 'UNAVAILABLE'}
+        </dd>
       </dl>
       <p className="wb2-muted" data-job-authority={job.result_authority}>
-        Job state is orchestration evidence only. Convergence and engineering values come from the referenced core result/evidence pair.
+        Job state is orchestration evidence only. This panel consumes only the verified embedded engineering ResultIR identity and authority axes; it never falls back to top-level result arrays.
       </p>
     </section>
   )

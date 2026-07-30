@@ -66,6 +66,12 @@ def test_stored_receipt_is_current_schema_valid_and_nonpromoting() -> None:
     )
     assert len(validated["mode_vector_artifacts"]) == 4
     assert all("values" not in row for row in validated["mode_vector_artifacts"])
+    source_checksums = validated["internal_source"]["input_checksums"]
+    assert "scripts/source_bound_python_inventory.py" in source_checksums
+    assert "src/structural_analysis/solvers/equation_scaling_6dof.py" in (
+        source_checksums
+    )
+    assert "src/structural_analysis/model_ir/validation.py" in source_checksums
 
 
 def test_modal_mac_and_buckling_subspace_metrics_are_recomputed_from_binary() -> None:

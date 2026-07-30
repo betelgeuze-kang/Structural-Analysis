@@ -6,6 +6,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+import pytest
+
 
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -299,10 +301,46 @@ def test_execute_external_benchmark_task_system_anchor(tmp_path: Path) -> None:
 
 
 def test_execute_external_benchmark_task_hardest_case_builds_receipt_and_bundle(tmp_path: Path) -> None:
+    required_case_reports = [
+        Path("implementation/phase1/nonlinear_ndtha_stress_report.json"),
+        Path("implementation/phase1/solver_truthfulness_gate_report.json"),
+        Path("implementation/phase1/solver_hip_e2e_contract_report.json"),
+    ]
+    unavailable = [str(path) for path in required_case_reports if not path.exists()]
+    if unavailable:
+        pytest.skip(
+            "hardest-case bundle integration requires non-committed source "
+            f"reports: {', '.join(unavailable)}"
+        )
     execution_manifest = tmp_path / "external_benchmark_execution_manifest.json"
     updates_json = tmp_path / "external_benchmark_execution_updates.json"
     status_manifest_out = tmp_path / "external_benchmark_execution_status_manifest.json"
     runs_dir = tmp_path / "runs"
+    signing_private_key = tmp_path / "test_signing_ed25519.pem"
+    signing_public_key = tmp_path / "test_signing_ed25519.pub.pem"
+    subprocess.run(
+        [
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "ED25519",
+            "-out",
+            str(signing_private_key),
+        ],
+        check=True,
+    )
+    subprocess.run(
+        [
+            "openssl",
+            "pkey",
+            "-in",
+            str(signing_private_key),
+            "-pubout",
+            "-out",
+            str(signing_public_key),
+        ],
+        check=True,
+    )
     _write_json(
         execution_manifest,
         {
@@ -336,6 +374,10 @@ def test_execute_external_benchmark_task_hardest_case_builds_receipt_and_bundle(
             str(runs_dir),
             "--task-id",
             "hardest::peer_tbi_tall_building_ndtha",
+            "--signing-private-key",
+            str(signing_private_key),
+            "--signing-public-key",
+            str(signing_public_key),
         ],
         check=False,
         capture_output=True,

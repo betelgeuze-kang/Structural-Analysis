@@ -133,6 +133,8 @@ DEFAULT_REFERENCE_REGRESSION_REPORT = Path(
 
 
 def _load_json(path: Path) -> dict:
+    if not path.is_file():
+        return {}
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -5790,6 +5792,13 @@ def main() -> None:
         default="implementation/phase1/release/design_optimization/design_optimization_dataset_report.json",
     )
     p.add_argument("--pbd-hinge-refresh-report", default="implementation/phase1/pbd_hinge_refresh_report.json")
+    p.add_argument(
+        "--peer-blind-prediction-compare-report",
+        default=(
+            "implementation/phase1/release/benchmark_expansion/"
+            "peer_blind_prediction_compare_report.json"
+        ),
+    )
     p.add_argument("--panel-zone-clash-report", default="implementation/phase1/panel_zone_clash_report.json")
     p.add_argument(
         "--panel-zone-solver-verified-inbox-status-report",
@@ -6385,7 +6394,7 @@ def main() -> None:
         commercial_workflow_breadth_path,
     )
     peer_blind_prediction_compare_report_path = Path(
-        "implementation/phase1/release/benchmark_expansion/peer_blind_prediction_compare_report.json"
+        args.peer_blind_prediction_compare_report
     )
     peer_blind_prediction_compare_report = (
         _load_json(peer_blind_prediction_compare_report_path)

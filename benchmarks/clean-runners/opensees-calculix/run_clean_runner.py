@@ -83,12 +83,17 @@ SEMANTIC_HASH_MISMATCH_BLOCKER = (
     "exact_cross_environment_buckling_semantic_hash_mismatch_within_tolerance"
 )
 REUSED_EXECUTION_BLOCKER = "external_runtime_current_source_rerun_missing"
+CROSS_ENVIRONMENT_PARITY_BLOCKER = (
+    "current_source_container_cross_environment_parity_missing"
+)
 
 CLAIM_BOUNDARY = (
     "This receipt proves a same-operator, container-isolated reproduction of the "
     "narrow non-promoting OpenSees/CalculiX technical comparisons, including the "
     "public one-bay corotational portal's four-step elastic-state load path and "
-    "the six-member CalculiX spatial-truss comparison. The "
+    "the bounded planar rigid-offset, RZ-release, uniform-member-load path, plus "
+    "a bounded OpenSees 3D elastic Timoshenko cantilever under combined transverse "
+    "forces and torsion, and the six-member CalculiX spatial-truss comparison. The "
     "source mount was read-only, runtime networking had no default route, and every "
     "external asset matched its pinned SHA-256 before execution. The source bytes "
     "are checksum-bound over the recorded base commit; this is not an independent "
@@ -271,13 +276,15 @@ def _cross_environment_parity(
     modal_receipt: dict[str, Any],
     host_code_reference: dict[str, Any],
     host_modal_reference: dict[str, Any],
+    require_contract_pass: bool = True,
 ) -> dict[str, Any]:
-    if (
+    source_set_match = bool(
         code_receipt["internal_source"]["source_set_hash"]
         != host_code_reference["internal_source"]["source_set_hash"]
         or modal_receipt["internal_source"]["source_set_hash"]
         != host_modal_reference["internal_source"]["source_set_hash"]
-    ):
+    ) is False
+    if require_contract_pass and not source_set_match:
         raise CleanRunnerError("cross_environment_source_set_mismatch")
     container_values = {
         **{
@@ -299,12 +306,18 @@ def _cross_environment_parity(
             for key, value in _metric_scalar_map(host_modal_reference).items()
         },
     }
-    if container_values.keys() != host_values.keys():
+    container_keys = set(container_values)
+    host_keys = set(host_values)
+    metric_set_match = container_keys == host_keys
+    if require_contract_pass and not metric_set_match:
         raise CleanRunnerError("cross_environment_metric_set_mismatch")
+    shared_keys = sorted(container_keys & host_keys)
+    container_only_metric_keys = sorted(container_keys - host_keys)
+    host_only_metric_keys = sorted(host_keys - container_keys)
     absolute_deltas: list[float] = []
     relative_deltas: list[float] = []
     contract_rows: list[bool] = []
-    for key in sorted(container_values):
+    for key in shared_keys:
         container_value = container_values[key]
         host_value = host_values[key]
         delta = abs(container_value - host_value)
@@ -332,8 +345,13 @@ def _cross_environment_parity(
         semantic_hash_matches["modal_model_hash"]
         and semantic_hash_matches["buckling_model_hash"]
     )
-    numerical_contract_pass = bool(all(contract_rows) and model_hashes_match)
-    if not numerical_contract_pass:
+    numerical_contract_pass = bool(
+        source_set_match
+        and metric_set_match
+        and all(contract_rows)
+        and model_hashes_match
+    )
+    if require_contract_pass and not numerical_contract_pass:
         raise CleanRunnerError("cross_environment_numerical_parity_failed")
     return {
         "host_reference_receipts": {
@@ -354,7 +372,13 @@ def _cross_environment_parity(
         },
         "absolute_tolerance": CROSS_ENVIRONMENT_ABSOLUTE_TOLERANCE,
         "relative_tolerance": CROSS_ENVIRONMENT_RELATIVE_TOLERANCE,
-        "scalar_comparison_count": len(container_values),
+        "source_set_match": source_set_match,
+        "metric_set_match": metric_set_match,
+        "scalar_comparison_count": len(shared_keys),
+        "container_scalar_count": len(container_values),
+        "host_scalar_count": len(host_values),
+        "container_only_metric_keys": container_only_metric_keys,
+        "host_only_metric_keys": host_only_metric_keys,
         "nonzero_delta_count": sum(delta > 0.0 for delta in absolute_deltas),
         "maximum_absolute_delta": max(absolute_deltas, default=0.0),
         "maximum_relative_delta": max(relative_deltas, default=0.0),
@@ -404,10 +428,13 @@ def _summary_blockers(
     *,
     fresh_execution: bool,
     exact_semantic_hash_parity: bool,
+    cross_environment_pass: bool,
 ) -> list[str]:
     blockers = list(BLOCKERS_REMAINING)
     if not exact_semantic_hash_parity:
         blockers.insert(-1, SEMANTIC_HASH_MISMATCH_BLOCKER)
+    if not cross_environment_pass:
+        blockers.insert(-1, CROSS_ENVIRONMENT_PARITY_BLOCKER)
     if not fresh_execution:
         blockers.append(REUSED_EXECUTION_BLOCKER)
     return blockers
@@ -558,6 +585,9 @@ def _build_summary(
             exact_semantic_hash_parity=cross_environment[
                 "exact_semantic_hash_parity"
             ],
+            cross_environment_pass=cross_environment[
+                "numerical_contract_pass"
+            ],
         ),
         "claim_boundary": _summary_claim_boundary(
             fresh_execution=fresh_execution,
@@ -615,6 +645,9 @@ def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
         exact_semantic_hash_parity=payload["cross_environment_parity"][
             "exact_semantic_hash_parity"
         ],
+        cross_environment_pass=payload["cross_environment_parity"][
+            "numerical_contract_pass"
+        ],
     ):
         raise CleanRunnerError("summary_blockers_invalid")
     if {
@@ -633,6 +666,7 @@ def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
         host_modal_reference=_read_json(
             repo_root / HOST_MODAL_REFERENCE_RELATIVE_PATH
         ),
+        require_contract_pass=False,
     )
     if payload["cross_environment_parity"] != expected_parity:
         raise CleanRunnerError("summary_cross_environment_parity_invalid")
@@ -679,6 +713,7 @@ def refresh_product_replay_summary(
         host_modal_reference=_read_json(
             repo_root / HOST_MODAL_REFERENCE_RELATIVE_PATH
         ),
+        require_contract_pass=False,
     )
     fresh_execution = bool(
         _receipt_fresh_execution(code_receipt)
@@ -719,6 +754,9 @@ def refresh_product_replay_summary(
                 fresh_execution=fresh_execution,
                 exact_semantic_hash_parity=cross_environment[
                     "exact_semantic_hash_parity"
+                ],
+                cross_environment_pass=cross_environment[
+                    "numerical_contract_pass"
                 ],
             ),
             "claim_boundary": _summary_claim_boundary(

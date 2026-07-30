@@ -12,9 +12,16 @@ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 NONLINEAR_TRANSIENT_PROFILE = "newmark_average_acceleration_bilinear_sdof.v1"
 NONLINEAR_TRANSIENT_SCHEMA_VERSION = "nonlinear-transient-solution.v1"
 NONLINEAR_TRANSIENT_CHECKPOINT_SCHEMA_VERSION = "nonlinear-transient-checkpoint.v1"
+NONLINEAR_TRANSIENT_CHECKPOINT_CHAIN_SCHEMA_VERSION = (
+    "nonlinear-transient-checkpoint-chain.v1"
+)
+SELF_CONSISTENT_CHECKPOINT_AUTHORITY = "self_consistent_checkpoint"
+SOURCE_AUTHENTICATED_CHECKPOINT_AUTHORITY = "source_authenticated_checkpoint"
 NONLINEAR_TRANSIENT_CLAIM_BOUNDARY = (
     "Deterministic force-driven SDOF bilinear kinematic-hardening reference; "
-    "not a whole-frame, ground-motion, damping-calibration, or release path."
+    "detached checkpoints carry self-consistency authority only and resume "
+    "requires a genesis-rooted source-authenticated force-history chain. Not a "
+    "whole-frame, ground-motion, damping-calibration, or release path."
 )
 _ZERO_HASH = "sha256:" + "0" * 64
 
@@ -173,6 +180,38 @@ class NonlinearTransientCheckpoint:
 
 
 @dataclass(frozen=True)
+class NonlinearTransientCheckpointChain:
+    schema_version: str
+    profile: str
+    model_hash: str
+    integration_contract_hash: str
+    authority: str
+    initial_displacement_m: float
+    initial_velocity_m_per_s: float
+    initial_condition_hash: str
+    force_history_hash: str
+    applied_force_history_kn: tuple[float, ...]
+    checkpoints: tuple[NonlinearTransientCheckpoint, ...]
+    chain_hash: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "profile": self.profile,
+            "model_hash": self.model_hash,
+            "integration_contract_hash": self.integration_contract_hash,
+            "authority": self.authority,
+            "initial_displacement_m": self.initial_displacement_m,
+            "initial_velocity_m_per_s": self.initial_velocity_m_per_s,
+            "initial_condition_hash": self.initial_condition_hash,
+            "force_history_hash": self.force_history_hash,
+            "applied_force_history_kn": list(self.applied_force_history_kn),
+            "checkpoints": [row.to_dict() for row in self.checkpoints],
+            "chain_hash": self.chain_hash,
+        }
+
+
+@dataclass(frozen=True)
 class NonlinearTransientStep:
     step_index: int
     time_s: float
@@ -209,12 +248,15 @@ class NonlinearTransientSolution:
     end_step_index: int
     steps: tuple[NonlinearTransientStep, ...]
     checkpoints: tuple[NonlinearTransientCheckpoint, ...]
+    checkpoint_chain: NonlinearTransientCheckpointChain
     maximum_relative_residual: float
     maximum_absolute_energy_balance_error_kn_m: float
     yielded_step_count: int
     result_hash: str
     deterministic: bool
     exact_checkpoint_resume_supported: bool
+    detached_checkpoint_validation_authority: str
+    resume_checkpoint_authority: str
     adaptive_time_step_used: bool
     regularization_used: bool
     fallback_used: bool
@@ -303,10 +345,34 @@ def solve_bilinear_transient(
     forces = _force_history(applied_force_history_kn, allow_empty=False)
     displacement = _finite_float(initial_displacement_m, "initial_displacement_m")
     velocity = _finite_float(initial_velocity_m_per_s, "initial_velocity_m_per_s")
+    checkpoint = _initial_checkpoint(
+        model,
+        config,
+        applied_force_kn=forces[0],
+        initial_displacement_m=displacement,
+        initial_velocity_m_per_s=velocity,
+    )
+    return _integrate(
+        model,
+        config,
+        checkpoint,
+        future_forces=forces[1:],
+        source_chain_prefix=None,
+    )
+
+
+def _initial_checkpoint(
+    model: BilinearOscillator,
+    config: NonlinearTransientConfig,
+    *,
+    applied_force_kn: float,
+    initial_displacement_m: float,
+    initial_velocity_m_per_s: float,
+) -> NonlinearTransientCheckpoint:
     initial_state = BilinearMaterialState()
     initial_response = evaluate_bilinear_restoring_force(
         model,
-        displacement,
+        initial_displacement_m,
         initial_state,
     )
     if initial_response.yielded:
@@ -314,18 +380,21 @@ def solve_bilinear_transient(
             "initial displacement must remain elastic; prehistory is otherwise ambiguous"
         )
     acceleration = (
-        forces[0] - model.damping_kn_s_per_m * velocity - initial_response.force_kn
+        applied_force_kn
+        - model.damping_kn_s_per_m * initial_velocity_m_per_s
+        - initial_response.force_kn
     ) / model.mass_kn_s2_per_m
     initial_energy = (
-        0.5 * model.mass_kn_s2_per_m * velocity**2 + initial_response.stored_energy_kn_m
+        0.5 * model.mass_kn_s2_per_m * initial_velocity_m_per_s**2
+        + initial_response.stored_energy_kn_m
     )
-    checkpoint = _create_checkpoint(
+    return _create_checkpoint(
         model=model,
         config=config,
         step_index=0,
-        applied_force_kn=forces[0],
-        displacement_m=displacement,
-        velocity_m_per_s=velocity,
+        applied_force_kn=applied_force_kn,
+        displacement_m=initial_displacement_m,
+        velocity_m_per_s=initial_velocity_m_per_s,
         acceleration_m_per_s2=acceleration,
         material_state=initial_state,
         external_work_kn_m=0.0,
@@ -333,30 +402,30 @@ def solve_bilinear_transient(
         initial_mechanical_energy_kn_m=initial_energy,
         parent_checkpoint_hash=None,
     )
-    return _integrate(
-        model,
-        config,
-        checkpoint,
-        future_forces=forces[1:],
-    )
 
 
 def resume_bilinear_transient(
     model: BilinearOscillator,
-    checkpoint: NonlinearTransientCheckpoint,
+    checkpoint_chain: NonlinearTransientCheckpointChain,
     future_applied_forces_kn: Iterable[float],
     *,
     config: NonlinearTransientConfig,
 ) -> NonlinearTransientSolution:
-    """Resume from an exact checkpoint; future forces exclude the checkpoint force."""
+    """Resume from a source-authenticated chain rooted at the initial condition."""
 
-    validate_nonlinear_transient_checkpoint(
-        checkpoint,
+    validate_nonlinear_transient_checkpoint_chain(
+        checkpoint_chain,
         model=model,
         config=config,
     )
     future = _force_history(future_applied_forces_kn, allow_empty=True)
-    return _integrate(model, config, checkpoint, future_forces=future)
+    return _integrate(
+        model,
+        config,
+        checkpoint_chain.checkpoints[-1],
+        future_forces=future,
+        source_chain_prefix=checkpoint_chain,
+    )
 
 
 def validate_nonlinear_transient_checkpoint(
@@ -404,6 +473,113 @@ def validate_nonlinear_transient_checkpoint(
     expected_hash = canonical_hash(_checkpoint_payload(checkpoint, include_hash=False))
     if checkpoint.checkpoint_hash != expected_hash:
         raise NonlinearTransientError("checkpoint hash mismatch")
+    response = evaluate_bilinear_restoring_force(
+        model,
+        checkpoint.displacement_m,
+        checkpoint.material_state,
+    )
+    if response.state != checkpoint.material_state:
+        raise NonlinearTransientError(
+            "checkpoint material state is not self-consistent"
+        )
+    equilibrium = (
+        model.mass_kn_s2_per_m * checkpoint.acceleration_m_per_s2
+        + model.damping_kn_s_per_m * checkpoint.velocity_m_per_s
+        + response.force_kn
+        - checkpoint.applied_force_kn
+    )
+    scale = max(
+        abs(checkpoint.applied_force_kn),
+        abs(model.mass_kn_s2_per_m * checkpoint.acceleration_m_per_s2)
+        + abs(model.damping_kn_s_per_m * checkpoint.velocity_m_per_s)
+        + abs(response.force_kn),
+        1.0,
+    )
+    if abs(equilibrium) > (
+        config.residual_absolute_tolerance_kn
+        + config.residual_relative_tolerance * scale
+    ):
+        raise NonlinearTransientError(
+            "checkpoint dynamic equilibrium is inconsistent"
+        )
+
+
+def validate_nonlinear_transient_checkpoint_chain(
+    chain: NonlinearTransientCheckpointChain,
+    *,
+    model: BilinearOscillator,
+    config: NonlinearTransientConfig,
+) -> None:
+    """Replay a genesis-rooted checkpoint chain from its exact source history."""
+
+    if type(chain) is not NonlinearTransientCheckpointChain:
+        raise NonlinearTransientError("checkpoint chain has the wrong type")
+    if (
+        chain.schema_version
+        != NONLINEAR_TRANSIENT_CHECKPOINT_CHAIN_SCHEMA_VERSION
+        or chain.profile != NONLINEAR_TRANSIENT_PROFILE
+        or chain.model_hash != model.model_hash
+        or chain.integration_contract_hash != config.contract_hash
+        or chain.authority != SOURCE_AUTHENTICATED_CHECKPOINT_AUTHORITY
+    ):
+        raise NonlinearTransientError("checkpoint chain contract binding mismatch")
+    forces = _force_history(chain.applied_force_history_kn, allow_empty=False)
+    initial_displacement = _finite_float(
+        chain.initial_displacement_m,
+        "initial_displacement_m",
+    )
+    initial_velocity = _finite_float(
+        chain.initial_velocity_m_per_s,
+        "initial_velocity_m_per_s",
+    )
+    if chain.initial_condition_hash != _initial_condition_hash(
+        initial_displacement,
+        initial_velocity,
+    ):
+        raise NonlinearTransientError("checkpoint chain initial-condition hash mismatch")
+    if chain.force_history_hash != _force_history_hash(forces):
+        raise NonlinearTransientError("checkpoint chain force-history hash mismatch")
+    if (
+        not isinstance(chain.checkpoints, tuple)
+        or len(chain.checkpoints) != len(forces)
+        or not chain.checkpoints
+    ):
+        raise NonlinearTransientError("checkpoint chain length mismatch")
+    for index, checkpoint in enumerate(chain.checkpoints):
+        validate_nonlinear_transient_checkpoint(
+            checkpoint,
+            model=model,
+            config=config,
+        )
+        if checkpoint.step_index != index:
+            raise NonlinearTransientError("checkpoint chain step ordering mismatch")
+        expected_parent = (
+            None if index == 0 else chain.checkpoints[index - 1].checkpoint_hash
+        )
+        if checkpoint.parent_checkpoint_hash != expected_parent:
+            raise NonlinearTransientError("checkpoint chain parent body mismatch")
+    if chain.chain_hash != canonical_hash(_chain_payload(chain, include_hash=False)):
+        raise NonlinearTransientError("checkpoint chain hash mismatch")
+
+    expected = _initial_checkpoint(
+        model,
+        config,
+        applied_force_kn=forces[0],
+        initial_displacement_m=initial_displacement,
+        initial_velocity_m_per_s=initial_velocity,
+    )
+    if chain.checkpoints[0] != expected:
+        raise NonlinearTransientError(
+            "checkpoint chain initial source replay mismatch"
+        )
+    previous = expected
+    for index, force in enumerate(forces[1:], start=1):
+        _, replayed = _advance_one_step(model, config, previous, force)
+        if chain.checkpoints[index] != replayed:
+            raise NonlinearTransientError(
+                f"checkpoint chain source replay mismatch at step {index}"
+            )
+        previous = replayed
 
 
 def _integrate(
@@ -412,6 +588,7 @@ def _integrate(
     start: NonlinearTransientCheckpoint,
     *,
     future_forces: tuple[float, ...],
+    source_chain_prefix: NonlinearTransientCheckpointChain | None,
 ) -> NonlinearTransientSolution:
     validate_nonlinear_transient_checkpoint(start, model=model, config=config)
     checkpoints = [start]
@@ -426,6 +603,30 @@ def _integrate(
         step, current = _advance_one_step(model, config, current, force)
         steps.append(step)
         checkpoints.append(current)
+    if source_chain_prefix is None:
+        complete_forces = (start.applied_force_kn, *future_forces)
+        complete_checkpoints = tuple(checkpoints)
+        initial_displacement = start.displacement_m
+        initial_velocity = start.velocity_m_per_s
+    else:
+        complete_forces = (
+            *source_chain_prefix.applied_force_history_kn,
+            *future_forces,
+        )
+        complete_checkpoints = (
+            *source_chain_prefix.checkpoints[:-1],
+            *checkpoints,
+        )
+        initial_displacement = source_chain_prefix.initial_displacement_m
+        initial_velocity = source_chain_prefix.initial_velocity_m_per_s
+    checkpoint_chain = _create_checkpoint_chain(
+        model=model,
+        config=config,
+        initial_displacement_m=initial_displacement,
+        initial_velocity_m_per_s=initial_velocity,
+        applied_force_history_kn=complete_forces,
+        checkpoints=complete_checkpoints,
+    )
     maximum_residual = max(step.relative_residual for step in steps)
     maximum_energy_error = max(abs(step.energy_balance_error_kn_m) for step in steps)
     provisional = NonlinearTransientSolution(
@@ -437,12 +638,17 @@ def _integrate(
         end_step_index=current.step_index,
         steps=tuple(steps),
         checkpoints=tuple(checkpoints),
+        checkpoint_chain=checkpoint_chain,
         maximum_relative_residual=maximum_residual,
         maximum_absolute_energy_balance_error_kn_m=maximum_energy_error,
         yielded_step_count=sum(step.yielded for step in steps),
         result_hash=_ZERO_HASH,
         deterministic=True,
         exact_checkpoint_resume_supported=True,
+        detached_checkpoint_validation_authority=(
+            SELF_CONSISTENT_CHECKPOINT_AUTHORITY
+        ),
+        resume_checkpoint_authority=SOURCE_AUTHENTICATED_CHECKPOINT_AUTHORITY,
         adaptive_time_step_used=False,
         regularization_used=False,
         fallback_used=False,
@@ -688,6 +894,86 @@ def _checkpoint_payload(
     return payload
 
 
+def _create_checkpoint_chain(
+    *,
+    model: BilinearOscillator,
+    config: NonlinearTransientConfig,
+    initial_displacement_m: float,
+    initial_velocity_m_per_s: float,
+    applied_force_history_kn: tuple[float, ...],
+    checkpoints: tuple[NonlinearTransientCheckpoint, ...],
+) -> NonlinearTransientCheckpointChain:
+    initial_displacement = _finite_float(
+        initial_displacement_m,
+        "initial_displacement_m",
+    )
+    initial_velocity = _finite_float(
+        initial_velocity_m_per_s,
+        "initial_velocity_m_per_s",
+    )
+    forces = _force_history(applied_force_history_kn, allow_empty=False)
+    provisional = NonlinearTransientCheckpointChain(
+        schema_version=NONLINEAR_TRANSIENT_CHECKPOINT_CHAIN_SCHEMA_VERSION,
+        profile=NONLINEAR_TRANSIENT_PROFILE,
+        model_hash=model.model_hash,
+        integration_contract_hash=config.contract_hash,
+        authority=SOURCE_AUTHENTICATED_CHECKPOINT_AUTHORITY,
+        initial_displacement_m=initial_displacement,
+        initial_velocity_m_per_s=initial_velocity,
+        initial_condition_hash=_initial_condition_hash(
+            initial_displacement,
+            initial_velocity,
+        ),
+        force_history_hash=_force_history_hash(forces),
+        applied_force_history_kn=forces,
+        checkpoints=tuple(checkpoints),
+        chain_hash=_ZERO_HASH,
+    )
+    chain = replace(
+        provisional,
+        chain_hash=canonical_hash(_chain_payload(provisional, include_hash=False)),
+    )
+    validate_nonlinear_transient_checkpoint_chain(
+        chain,
+        model=model,
+        config=config,
+    )
+    return chain
+
+
+def _initial_condition_hash(
+    initial_displacement_m: float,
+    initial_velocity_m_per_s: float,
+) -> str:
+    return canonical_hash(
+        {
+            "schema_version": "nonlinear-transient-initial-condition.v1",
+            "initial_displacement_m": initial_displacement_m,
+            "initial_velocity_m_per_s": initial_velocity_m_per_s,
+        }
+    )
+
+
+def _force_history_hash(applied_force_history_kn: tuple[float, ...]) -> str:
+    return canonical_hash(
+        {
+            "schema_version": "nonlinear-transient-force-history.v1",
+            "applied_force_history_kn": list(applied_force_history_kn),
+        }
+    )
+
+
+def _chain_payload(
+    chain: NonlinearTransientCheckpointChain,
+    *,
+    include_hash: bool,
+) -> dict[str, Any]:
+    payload = chain.to_dict()
+    if not include_hash:
+        payload.pop("chain_hash")
+    return payload
+
+
 def _solution_payload(
     solution: NonlinearTransientSolution,
     *,
@@ -770,14 +1056,18 @@ def _nonnegative_float(value: Any, name: str) -> float:
 
 
 __all__ = [
+    "NONLINEAR_TRANSIENT_CHECKPOINT_CHAIN_SCHEMA_VERSION",
     "NONLINEAR_TRANSIENT_CHECKPOINT_SCHEMA_VERSION",
     "NONLINEAR_TRANSIENT_CLAIM_BOUNDARY",
     "NONLINEAR_TRANSIENT_PROFILE",
     "NONLINEAR_TRANSIENT_SCHEMA_VERSION",
+    "SELF_CONSISTENT_CHECKPOINT_AUTHORITY",
+    "SOURCE_AUTHENTICATED_CHECKPOINT_AUTHORITY",
     "BilinearMaterialState",
     "BilinearOscillator",
     "BilinearRestoringResponse",
     "NonlinearTransientCheckpoint",
+    "NonlinearTransientCheckpointChain",
     "NonlinearTransientConfig",
     "NonlinearTransientError",
     "NonlinearTransientSolution",
@@ -786,4 +1076,5 @@ __all__ = [
     "resume_bilinear_transient",
     "solve_bilinear_transient",
     "validate_nonlinear_transient_checkpoint",
+    "validate_nonlinear_transient_checkpoint_chain",
 ]

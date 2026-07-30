@@ -3,7 +3,25 @@ from __future__ import annotations
 from implementation.phase1.run_solver_hip_e2e_contract import run_solver_hip_e2e_contract
 
 
+def _provide_visible_rocm_runtime(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "implementation.phase1.run_solver_hip_e2e_contract._collect_rocm_runtime_environment",
+        lambda: {
+            "schema_version": "rocm-runtime-environment-status.v1",
+            "status": "ready",
+            "contract_pass": True,
+            "rocminfo_path": "/fixture/rocminfo",
+            "rocm_smi_path": "/fixture/rocm-smi",
+            "dev_kfd_present": True,
+            "dev_dri_present": True,
+            "runtime_device_interface_present": True,
+            "blockers": [],
+        },
+    )
+
+
 def test_solver_hip_e2e_contract_passes_with_gpu_telemetry(monkeypatch) -> None:
+    _provide_visible_rocm_runtime(monkeypatch)
     gpu_runtime = {
         "main_loop_backend": "rocm_hip_kernel",
         "runtime_backend": "rocm_hip_kernel",
@@ -58,6 +76,7 @@ def test_solver_hip_e2e_contract_passes_with_gpu_telemetry(monkeypatch) -> None:
 
 
 def test_solver_hip_e2e_contract_fails_on_cpu_runtime(monkeypatch) -> None:
+    _provide_visible_rocm_runtime(monkeypatch)
     cpu_runtime = {
         "main_loop_backend": "rust_ffi_cpu",
         "runtime_backend": "rust_ffi_cpu",
@@ -104,6 +123,7 @@ def test_solver_hip_e2e_contract_fails_on_cpu_runtime(monkeypatch) -> None:
 
 
 def test_solver_hip_e2e_contract_fails_on_surrogate_runtime(monkeypatch) -> None:
+    _provide_visible_rocm_runtime(monkeypatch)
     surrogate_runtime = {
         "main_loop_backend": "rocm_hip_kernel",
         "runtime_backend": "rocm_hip_kernel",

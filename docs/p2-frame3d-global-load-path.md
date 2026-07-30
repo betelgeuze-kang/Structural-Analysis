@@ -1,6 +1,6 @@
 # P2 bounded global 3D frame load path
 
-`dense_elastic_corotational_timoshenko_frame3d_load_control.v1` scatters the
+`dense_elastic_corotational_timoshenko_frame3d_load_control.v2` scatters the
 energy-derived element force and tangent of the bounded corotational Frame3D
 reference into one shared six-DOF-per-node space. It is an experimental
 verification path, not a promoted 3D nonlinear analysis workflow.
@@ -17,8 +17,26 @@ is no inferred shear factor, default support, or implicit load pattern.
 Each strictly increasing load factor is solved by dense Newton iterations using
 the same assembled internal force and tangent. Singular or over-conditioned
 free tangents, non-finite corrections, principal rotation-branch violations,
-and nonconvergence fail closed. There is no line search, regularization, or
-solver fallback.
+and nonconvergence fail closed. Every update must pass deterministic
+backtracking with a strictly decreasing scaled residual. There is no
+regularization or solver fallback.
+
+The solve uses the shared source-bound 6DOF force/moment scaling. Rotational
+equilibrium rows and rotation columns are scaled with the model characteristic
+length before the dense solve, and the reported condition number is the exact
+1-norm condition number of that scaled matrix. Scaling inputs and linear-system
+values must be finite, real, and losslessly representable as binary64; coercive
+boolean/string/complex sources and lossy integer conversions fail closed. Each
+accepted step preserves
+separate raw translational and rotational residuals/increments, the
+dimensionless scaled residual and increment, and the scaling hash. The
+checkpoint retains its legacy raw residual observation, while equilibrium
+validation uses the scaled residual contract. A step may commit only when both
+the scaled residual and scaled Newton increment gates pass, the selected line
+search step is valid, the accepted state reassembles to the same equilibrium,
+and the parent checkpoint remains unchanged. The convergence and line-search
+histories retain these observations without turning a missing gate into a
+passing value.
 
 ## Checkpoint lineage
 
@@ -40,7 +58,8 @@ Tests cover two-member shared-DOF scatter, the cantilever
 bending-plus-shear closed form with reaction recovery, two-element
 free-equation equilibrium, byte-exact schema-valid resume, tamper and
 cross-model rejection, and singular-support/invalid-history fail-closed
-behavior.
+behavior. They also cover invalid increment/line-search configuration and
+prove that satisfying the residual gate alone cannot commit a step.
 
 ## Claim boundary
 

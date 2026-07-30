@@ -72,12 +72,22 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def _run(cmd: list[str]) -> dict[str, Any]:
+def _run(cmd: list[str], *, dry_run: bool = False) -> dict[str, Any]:
+    if dry_run:
+        return {
+            "command": shlex.join(cmd),
+            "return_code": 0,
+            "ok": True,
+            "status": "dry_run",
+            "stdout_tail": "",
+            "stderr_tail": "",
+        }
     proc = subprocess.run(cmd, check=False, capture_output=True, text=True)
     return {
         "command": shlex.join(cmd),
         "return_code": int(proc.returncode),
         "ok": bool(proc.returncode == 0),
+        "status": "ok" if proc.returncode == 0 else "failed",
         "stdout_tail": (proc.stdout or "")[-2000:],
         "stderr_tail": (proc.stderr or "")[-2000:],
     }
@@ -355,7 +365,7 @@ def main() -> None:
             ("post_consume_committee_review_package", committee_cmd),
             ("post_consume_release_registry_pass2", registry_pass2_cmd),
         ):
-            step = _run(cmd)
+            step = _run(cmd, dry_run=bool(args.dry_run))
             step["step"] = step_name
             steps.append(step)
             if not step["ok"]:
@@ -374,7 +384,7 @@ def main() -> None:
                 "--emit-lightweight",
                 "--prune-old",
             ]
-            external_step = _run(external_cmd)
+            external_step = _run(external_cmd, dry_run=bool(args.dry_run))
             external_step["step"] = "post_consume_external_validation_submission"
             steps.append(external_step)
             external_validation_refresh_pass = bool(external_step["ok"])

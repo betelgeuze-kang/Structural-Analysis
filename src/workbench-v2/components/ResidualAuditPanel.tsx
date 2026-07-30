@@ -1,15 +1,11 @@
 import type { ReactElement } from 'react'
-import type { ResidualStep } from '../model/caseSchema'
-
-function fmt(value: number): string {
-  if (value !== 0 && (Math.abs(value) < 1e-3 || Math.abs(value) >= 1e6)) return value.toExponential(3)
-  return Number.isInteger(value) ? String(value) : value.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')
-}
+import { isAvailableValue, type EngineeringValue, type ResidualStep } from '../model/caseSchema'
+import { EngineeringValueText } from './EngineeringValueText'
 
 interface ResidualAuditPanelProps {
   residualHistory: ResidualStep[]
   sourceLabel: string
-  residualTolerance?: number
+  residualTolerance?: EngineeringValue
 }
 
 const CHART_W = 460
@@ -26,7 +22,11 @@ const PAD_B = 26
  * only when residual history exists (never fabricated).
  */
 function ResidualChart({ history, tolerance }: { history: ResidualStep[]; tolerance?: number }): ReactElement {
-  const positive = history.filter((s) => s.residual > 0)
+  const positive = history.flatMap((step) => (
+    isAvailableValue(step.iteration) && isAvailableValue(step.residual) && step.residual.value > 0
+      ? [{ iteration: step.iteration.value, residual: step.residual.value }]
+      : []
+  ))
   const residualValues = positive.map((s) => s.residual)
   const candidates = [...residualValues]
   if (tolerance != null && tolerance > 0) candidates.push(tolerance)
@@ -86,13 +86,16 @@ function ResidualChart({ history, tolerance }: { history: ResidualStep[]; tolera
 }
 
 export function ResidualAuditPanel({ residualHistory, sourceLabel, residualTolerance }: ResidualAuditPanelProps): ReactElement {
-  const hasPositive = residualHistory.some((s) => s.residual > 0)
+  const tolerance = residualTolerance && isAvailableValue(residualTolerance) ? residualTolerance.value : undefined
+  const hasPositive = residualHistory.some(
+    (step) => isAvailableValue(step.iteration) && isAvailableValue(step.residual) && step.residual.value > 0,
+  )
   return (
     <section className="wb2-panel" aria-labelledby="wb2-residual-title">
       <h2 id="wb2-residual-title" className="wb2-panel__title">Residual audit</h2>
       {residualHistory.length ? (
         <>
-          {hasPositive ? <ResidualChart history={residualHistory} tolerance={residualTolerance} /> : null}
+          {hasPositive ? <ResidualChart history={residualHistory} tolerance={tolerance} /> : null}
           <div className="wb2-table-scroll" role="region" aria-label="Residual history table" tabIndex={0}>
             <table className="wb2-table">
               <thead>
@@ -104,12 +107,12 @@ export function ResidualAuditPanel({ residualHistory, sourceLabel, residualToler
                 </tr>
               </thead>
               <tbody>
-                {residualHistory.map((step) => (
-                  <tr key={step.iteration}>
-                    <td className="wb2-num">{step.iteration}</td>
-                    <td className="wb2-num">{fmt(step.residual)}</td>
-                    <td className="wb2-num">{fmt(step.relativeIncrement)}</td>
-                    <td className="wb2-num">{fmt(step.alpha)}</td>
+                {residualHistory.map((step, index) => (
+                  <tr key={index}>
+                    <td className="wb2-num"><EngineeringValueText value={step.iteration} integer /></td>
+                    <td className="wb2-num"><EngineeringValueText value={step.residual} /></td>
+                    <td className="wb2-num"><EngineeringValueText value={step.relativeIncrement} /></td>
+                    <td className="wb2-num"><EngineeringValueText value={step.alpha} /></td>
                   </tr>
                 ))}
               </tbody>

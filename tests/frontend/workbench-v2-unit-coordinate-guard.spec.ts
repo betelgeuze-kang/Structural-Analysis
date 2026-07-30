@@ -8,7 +8,7 @@ function liveCase(modelOverrides: Record<string, unknown>): Record<string, unkno
     schemaVersion: 'workbench-case.v2',
     provenance: {
       sourcePath: 'tests/live-case.json',
-      sourceSha256: 'sha256:test',
+      sourceSha256: `sha256:${'a'.repeat(64)}`,
       sourceCommitSha: 'test-commit',
       engineVersion: 'test-engine',
       generatedAt: '2026-07-10T00:00:00Z',

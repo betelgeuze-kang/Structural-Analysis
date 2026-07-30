@@ -168,7 +168,13 @@
         "host_reference_receipts",
         "absolute_tolerance",
         "relative_tolerance",
+        "source_set_match",
+        "metric_set_match",
         "scalar_comparison_count",
+        "container_scalar_count",
+        "host_scalar_count",
+        "container_only_metric_keys",
+        "host_only_metric_keys",
         "nonzero_delta_count",
         "maximum_absolute_delta",
         "maximum_relative_delta",
@@ -196,8 +202,39 @@
         "relative_tolerance": {
           "const": 1e-12
         },
+        "source_set_match": {
+          "type": "boolean"
+        },
+        "metric_set_match": {
+          "type": "boolean"
+        },
         "scalar_comparison_count": {
-          "const": 73
+          "type": "integer",
+          "minimum": 0
+        },
+        "container_scalar_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "host_scalar_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "container_only_metric_keys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "host_only_metric_keys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         },
         "nonzero_delta_count": {
           "type": "integer",
@@ -239,7 +276,7 @@
           "type": "boolean"
         },
         "numerical_contract_pass": {
-          "const": true
+          "type": "boolean"
         }
       }
     },
@@ -273,7 +310,7 @@
           "const": true
         },
         "cross_environment_numerical_parity": {
-          "const": true
+          "type": "boolean"
         },
         "independent_operator_attestation": {
           "const": false

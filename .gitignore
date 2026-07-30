@@ -16,6 +16,7 @@ __pycache__/
 .coverage.*
 htmlcov/
 .venv/
+.venv-*/
 venv/
 env/
 *.egg-info/
@@ -36,6 +37,21 @@ target/
 # Logs / temp
 *.log
 *.tmp
+.ci/
+
+# Exact-checkout generated product-state and external V&V inputs. These embed
+# the source commit and are uploaded by CI; tracking them would create a Git
+# commit-SHA self-reference that can never be current.
+artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json
+artifacts/manifests/internal_license_due_diligence.current.v1.json
+artifacts/manifests/product_state.current.v1.json
+artifacts/manifests/product_state.history.v1.json
+artifacts/vv/bounded_planar_external_linear_case_package/
+artifacts/vv/bounded_planar_external_negative_case_package/
+artifacts/vv/bounded_planar_external_scaling_case_package/
+artifacts/vv/bounded_planar_external_modal_buckling_case_package/
+artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package/
+artifacts/vv/bounded_planar_same_operator_supplemental_execution/
 
 # Local Codex/Betelgeuze runtime logs
 .betelgeuze/trace.jsonl

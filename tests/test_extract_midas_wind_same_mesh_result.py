@@ -9,12 +9,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_wind_extract_produces_base_shear_and_low_conf_drift() -> None:
-    out = (
-        REPO_ROOT
-        / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result.wind_test.json"
-    )
-    proc = subprocess.run(
+def _extract_wind_result(out: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/extract_midas_wind_same_mesh_result.py"),
@@ -25,6 +21,11 @@ def test_wind_extract_produces_base_shear_and_low_conf_drift() -> None:
         capture_output=True,
         text=True,
     )
+
+
+def test_wind_extract_produces_base_shear_and_low_conf_drift(tmp_path: Path) -> None:
+    out = tmp_path / "midas_gen_same_mesh_result.wind.json"
+    proc = _extract_wind_result(out)
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["source"]["kind"] == "model_derived_wind_estimate"
@@ -69,14 +70,16 @@ def test_wind_extract_site_override_scales_base_shear() -> None:
     assert high["assumptions"]["resolved_basic_wind_speed_mps"] == 40.0
 
 
-def test_wind_result_comparison_status_is_wind_ingest() -> None:
+def test_wind_result_comparison_status_is_wind_ingest(tmp_path: Path) -> None:
     sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
     from run_midas_gen_same_mesh_native_comparison import (  # noqa: E402
         run_midas_gen_same_mesh_native_comparison,
     )
 
     base = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized"
-    result_json = base.parent / "midas_generator_33.optimized.midas_gen_same_mesh_result.wind_test.json"
+    result_json = tmp_path / "midas_gen_same_mesh_result.wind.json"
+    proc = _extract_wind_result(result_json)
+    assert proc.returncode == 0, proc.stderr
     report = run_midas_gen_same_mesh_native_comparison(
         result_json=result_json,
         roundtrip_json=Path(str(base) + ".roundtrip.json"),

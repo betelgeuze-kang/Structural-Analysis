@@ -1,0 +1,153 @@
+name: Product State Current
+
+# product_state.current is generated after every completed Nightly Full Quality
+# run for a main commit. Successful and failed conclusions are both authentic
+# evidence; only a successful source-bound run can pass the product-state
+# contract. This also avoids embedding a self-referential commit SHA in a
+# tracked file.
+
+on:
+  workflow_run:
+    workflows: ["Nightly Full Quality"]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  PRODUCT_STATE_SHA: ${{ github.event.workflow_run.head_sha }}
+  PRODUCT_STATE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+
+jobs:
+  build-current-state:
+    if: >-
+      github.event.workflow_run.head_branch == 'main' &&
+      (github.event.workflow_run.event == 'schedule' ||
+       github.event.workflow_run.event == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout current main
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ env.PRODUCT_STATE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install current-state contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Materialize exact current-source product-state inputs
+        shell: bash
+        run: |
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+          mkdir -p .ci/product-state-inputs
+          cp \
+            implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json \
+            .ci/product-state-inputs/code-to-code-receipt.json
+          cp \
+            implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json \
+            .ci/product-state-inputs/modal-buckling-receipt.json
+          python scripts/run_external_code_to_code_technical_receipt.py \
+            --out .ci/product-state-inputs/code-to-code-receipt.json \
+            --refresh-product-replay \
+            --reuse-reason "Current-main product replay; external execution bytes reused without freshness credit."
+          python scripts/run_external_modal_buckling_technical_receipt.py \
+            --out .ci/product-state-inputs/modal-buckling-receipt.json \
+            --refresh-product-replay \
+            --reuse-reason "Current-main product replay; external execution bytes reused without freshness credit."
+          python scripts/build_bounded_planar_external_linear_case_package.py
+          python scripts/build_bounded_planar_external_negative_case_package.py
+          python scripts/build_bounded_planar_external_scaling_case_package.py
+          python scripts/build_bounded_planar_external_modal_buckling_case_package.py
+          python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+          python scripts/build_bounded_planar_external_vv_matrix.py \
+            --code-receipt .ci/product-state-inputs/code-to-code-receipt.json \
+            --modal-receipt .ci/product-state-inputs/modal-buckling-receipt.json
+          python scripts/build_internal_license_due_diligence.py \
+            --external-code-receipt .ci/product-state-inputs/code-to-code-receipt.json \
+            --external-modal-receipt .ci/product-state-inputs/modal-buckling-receipt.json \
+            --fail-blocked
+
+      - name: Build source-bound current product state
+        id: build_state
+        continue-on-error: true
+        run: >-
+          python scripts/build_product_state.py
+          --write
+          --json
+          --observed-main-sha "$PRODUCT_STATE_SHA"
+          --observed-main-source github_nightly_full_quality_observation
+          --nightly-workflow-run-event "$GITHUB_EVENT_PATH"
+          --verify-legacy-git-objects
+          --external-vv-code-receipt .ci/product-state-inputs/code-to-code-receipt.json
+          --external-vv-modal-receipt .ci/product-state-inputs/modal-buckling-receipt.json
+          > .ci/product-state-inputs/product-state-build-report.json
+
+      - name: Verify current-main binding, outcome, and bounded authority
+        shell: bash
+        env:
+          PRODUCT_STATE_BUILD_OUTCOME: ${{ steps.build_state.outcome }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(
+              Path("artifacts/manifests/product_state.current.v1.json").read_text()
+          )
+          conclusion = os.environ["PRODUCT_STATE_CONCLUSION"]
+          build_outcome = os.environ["PRODUCT_STATE_BUILD_OUTCOME"]
+          assert payload["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert payload["observed_github_main_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert payload["observed_github_main_source"] == "github_nightly_full_quality_observation"
+          assert payload["quality_evidence"]["status"] == "available"
+          assert payload["quality_evidence"]["workflow_name"] == "Nightly Full Quality"
+          assert payload["quality_evidence"]["conclusion"] == conclusion
+          assert payload["quality_evidence"]["head_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert payload["source_matches_observed_github_main"] is True
+          assert payload["product_profile"] == "repository_integrity_developer_preview"
+          assert payload["release_authority"] is False
+          assert payload["historical_state"]["git_object_verification"] == "passed"
+          if conclusion == "success":
+              assert build_outcome == "success"
+              assert payload["contract_pass"] is True
+              assert not any(
+                  blocker.startswith("nightly_full_quality_")
+                  for blocker in payload["blockers"]
+              )
+          else:
+              assert build_outcome == "failure"
+              assert payload["contract_pass"] is False
+              assert f"nightly_full_quality_not_success:{conclusion}" in payload["blockers"]
+              assert not any(
+                  blocker.startswith("nightly_full_quality_evidence_invalid:")
+                  for blocker in payload["blockers"]
+              )
+          PY
+
+      - name: Upload current and historical product-state manifests
+        uses: actions/upload-artifact@v7
+        with:
+          name: product-state-current-${{ env.PRODUCT_STATE_CONCLUSION }}-${{ env.PRODUCT_STATE_SHA }}
+          path: |
+            artifacts/manifests/product_state.current.v1.json
+            artifacts/manifests/product_state.history.v1.json
+            artifacts/manifests/product_state.legacy-sources.v1.json
+            artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json
+            artifacts/manifests/internal_license_due_diligence.current.v1.json
+            artifacts/vv/bounded_planar_external_linear_case_package
+            artifacts/vv/bounded_planar_external_negative_case_package
+            artifacts/vv/bounded_planar_external_scaling_case_package
+            artifacts/vv/bounded_planar_external_modal_buckling_case_package
+            artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package
+            .ci/product-state-inputs
+          if-no-files-found: error
+          retention-days: 30

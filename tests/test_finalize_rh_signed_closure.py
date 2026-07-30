@@ -10,12 +10,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = REPO_ROOT / "implementation/phase1/release_evidence/productization"
 
 
-def test_finalize_rh_closure_roundtrip() -> None:
+def test_finalize_rh_closure_roundtrip(tmp_path: Path) -> None:
     bundle_path = PRODUCTIZATION / "delivery_evidence_bundle.json"
     if not bundle_path.is_file():
         return
     rh_path = PRODUCTIZATION / "residual_holdout_closure_updates.json"
-    packet_dir = PRODUCTIZATION / "rh_signed_closure_packets_test"
+    packet_dir = tmp_path / "rh_signed_closure_packets"
     proc = subprocess.run(
         [
             sys.executable,

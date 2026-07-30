@@ -1,26 +1,26 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-07-02T22:01:55.026301+00:00",
-  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-07-28T18:50:04.844495+00:00",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "engine_version": "structural-analysis@0.3.0",
   "input_checksums": {
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json": "sha256:85722797bc2ff90c5fc6492aee108418d64ab73b5965d9770c0969a6e777c0f5",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:704f8462ca719ca0c1757d8a505d962ff9fb881ea8b77295aa8764b9be68addf",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json": "sha256:9dcb3fdb95c865eb269a4a6b2049e42dcccd499f585fa0c92c59931c88f18e28",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json": "sha256:becfdc4a1808f049c6d1737a9d34a580d24c295ed700f5f205318c8313576a82",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:53af198ecca38e58f0756ae7f70c2cecf2028a326909932edeb44b8edb1cb61f",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_newton_certification_checklist.json": "sha256:6b2e1b6e34a84f793c7ec4f62f6486799c0b46f32192fc3acc6d5f89f952962c",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json": "sha256:6ddcb6827eb70d369b008cf1c154298e7d06becd388c1b7e4d75dcae7137f07e",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json": "sha256:99424209c38c877a7fcb39243a5e785bfa824e06d3b9a910b23eb2b0a02a01e8",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_mesh_contract_gate.json": "sha256:3bf536c0698af58052993539c52fd045df11a5e62aafdb922944c398b4a4c781",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_readiness_gate.json": "sha256:c31ad2f8994c6084ba8dde8423da8070f9c224cbfec45fe55b964647f563b1e7",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_native_reanalysis_pipeline.json": "sha256:f8e1f8006e35a582df218258ce848aed5db8df7307049f8981d1c8809eade5fd",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ml_multi_objective_status.json": "sha256:f5d5ba45e8975563d74d69d03b81cc979818499039255408ba8308fdd9c74312",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:5cdcf8b8a530777df0e427639b94985ff3f5538d7367a67646e8dfdcd12ea115",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json": "sha256:4686217db8e9130b0509607129f66ed53360135ac32f3ba33b2d5c9a5c871d2c",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json": "sha256:16c265d807ca57eb3440465738212109a888bb0afbed2a6798612db3084060b7",
-    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json": "sha256:85722797bc2ff90c5fc6492aee108418d64ab73b5965d9770c0969a6e777c0f5",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:b724b4bcb202960341488cfe2c35e85e3d6093dff0bf59728cd8f6add01e4154",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json": "sha256:9dcb3fdb95c865eb269a4a6b2049e42dcccd499f585fa0c92c59931c88f18e28",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json": "sha256:becfdc4a1808f049c6d1737a9d34a580d24c295ed700f5f205318c8313576a82",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:134e121bb7181ab628abdb3a3c3a0cbe7bbeedb282e9a75c548bc1418dbe10c6",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/gpu_newton_certification_checklist.json": "sha256:6b2e1b6e34a84f793c7ec4f62f6486799c0b46f32192fc3acc6d5f89f952962c",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json": "sha256:6ddcb6827eb70d369b008cf1c154298e7d06becd388c1b7e4d75dcae7137f07e",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json": "sha256:99424209c38c877a7fcb39243a5e785bfa824e06d3b9a910b23eb2b0a02a01e8",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_global_fea_mesh_contract_gate.json": "sha256:3bf536c0698af58052993539c52fd045df11a5e62aafdb922944c398b4a4c781",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_global_fea_readiness_gate.json": "sha256:c31ad2f8994c6084ba8dde8423da8070f9c224cbfec45fe55b964647f563b1e7",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/mgt_native_reanalysis_pipeline.json": "sha256:f8e1f8006e35a582df218258ce848aed5db8df7307049f8981d1c8809eade5fd",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/ml_multi_objective_status.json": "sha256:f5d5ba45e8975563d74d69d03b81cc979818499039255408ba8308fdd9c74312",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:5cdcf8b8a530777df0e427639b94985ff3f5538d7367a67646e8dfdcd12ea115",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/rh_closure_checklist.json": "sha256:4686217db8e9130b0509607129f66ed53360135ac32f3ba33b2d5c9a5c871d2c",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json": "sha256:16c265d807ca57eb3440465738212109a888bb0afbed2a6798612db3084060b7",
+    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b0843cef68c05f5b4cef73a68c446861be1c47a3b7c5393c42aedcb413d86b91",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24"
   },
   "reused_evidence": false,
@@ -33,14 +33,15 @@
   "full_gap_ledger_ready": false,
   "full_gap_ledger_summary": {
     "total_count": 20,
-    "closed_count": 17,
+    "closed_count": 16,
     "partial_count": 2,
-    "open_count": 0,
+    "open_count": 1,
     "external_blocked_count": 1,
-    "locally_closable_open_count": 1,
-    "locally_closable_nonclosed_count": 1,
+    "locally_closable_open_count": 2,
+    "locally_closable_nonclosed_count": 2,
     "locally_closable_nonclosed_row_ids": [
-      "G1"
+      "G1",
+      "G10"
     ],
     "ai_engine_guardrail_rows_ready": true,
     "autonomous_ai_engine_claim_ready": false,
@@ -64,13 +65,15 @@
     "G7:operator_attached_real_mgt_header_ok_below_target",
     "G7:operator_source_mapping_blocked_actions_present",
     "G7:operator_rights_blocked_private_candidate_actions_present",
+    "G10:independent_solver_governance_and_support_workflow_not_closed",
     "autonomous_ai_engine_claim::deterministic_reference_solver_not_closed",
     "autonomous_ai_engine_claim::surrogate_truth_claim_frozen",
     "autonomous_ai_engine_claim::production_decision_loop_not_closed",
     "autonomous_ai_engine_claim::grounded_ai_workflow_not_closed"
   ],
   "next_locally_closable_gaps": [
-    "G1"
+    "G1",
+    "G10"
   ],
   "pending_authority_closure": false,
   "sections": {
@@ -154,26 +157,26 @@
       "status": "ready",
       "contract_pass": true,
       "row_count": 20,
-      "closed_row_count": 17,
-      "nonclosed_row_count": 3,
+      "closed_row_count": 16,
+      "nonclosed_row_count": 4,
       "closed_evidence_coverage": {
         "claim_boundary_advisory": "Closed rows may rely on next_gate for residual scope guidance today, but explicit row-level claim boundaries are listed for follow-up.",
         "closed_missing_boundary_or_next_gate_ids": [],
         "closed_missing_claim_boundary_ids": [],
         "closed_missing_evidence_ids": [],
-        "closed_row_count": 17,
-        "closed_rows_with_evidence_count": 17,
-        "closed_rows_without_blockers_count": 17,
+        "closed_row_count": 16,
+        "closed_rows_with_evidence_count": 16,
+        "closed_rows_without_blockers_count": 16,
         "closed_with_blockers_ids": []
       },
       "nonclosed_visibility": {
         "nonclosed_missing_blocker_ids": [],
         "nonclosed_missing_claim_boundary_ids": [],
         "nonclosed_missing_evidence_ids": [],
-        "nonclosed_row_count": 3,
-        "nonclosed_rows_with_blockers_count": 3,
-        "nonclosed_rows_with_claim_boundary_count": 3,
-        "nonclosed_rows_with_evidence_count": 3
+        "nonclosed_row_count": 4,
+        "nonclosed_rows_with_blockers_count": 4,
+        "nonclosed_rows_with_claim_boundary_count": 4,
+        "nonclosed_rows_with_evidence_count": 4
       },
       "claim_boundary": "This audit verifies whether the current G1-G10 and AI-G1-AI-G10 ledger rows are represented with evidence, blockers, and claim-boundary visibility. It does not create authoritative evidence, close any row, create external receipts, prove commercial readiness, or override the source ledger status."
     }
@@ -299,10 +302,12 @@
       "id": "G10",
       "title": "Product UX, Reports, Governance, Support",
       "ledger": "commercial_solver",
-      "status": "closed",
-      "closed": true,
+      "status": "open",
+      "closed": false,
       "locally_closable": true,
-      "blockers": [],
+      "blockers": [
+        "independent_solver_governance_and_support_workflow_not_closed"
+      ],
       "next_gate": "customer report separates solver/proxy/unsupported states and signed engineer review workflow",
       "claim_boundary": "G10 is locally closed for workstation delivery packaging plus governance/support contract evidence only. It does not promote full commercial readiness while G1, G6, or G7 remain partial or external-blocked, and it does not imply independent product, SaaS, external approval, or signed customer acceptance readiness."
     },
@@ -418,11 +423,11 @@
     }
   ],
   "artifacts": {
-    "delivery_evidence_bundle": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
-    "residual_holdout_closure_updates": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
-    "commercial_gap_ledger_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
-    "ai_freeze_boundary_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json",
-    "gap_ledger_evidence_audit": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json"
+    "delivery_evidence_bundle": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
+    "residual_holdout_closure_updates": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
+    "commercial_gap_ledger_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+    "ai_freeze_boundary_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json",
+    "gap_ledger_evidence_audit": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/tmp/stage0-product-truth-20260728/implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json"
   },
   "claim_boundary": "This is a read-only rollup of gap-ledger and productization evidence status. It does not create external receipts, customer evidence, G1 full-load closure, or release readiness by itself."
 }

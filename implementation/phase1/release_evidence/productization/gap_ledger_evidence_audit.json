@@ -6,32 +6,32 @@
     "closed_missing_boundary_or_next_gate_ids": [],
     "closed_missing_claim_boundary_ids": [],
     "closed_missing_evidence_ids": [],
-    "closed_row_count": 17,
-    "closed_rows_with_evidence_count": 17,
-    "closed_rows_without_blockers_count": 17,
+    "closed_row_count": 16,
+    "closed_rows_with_evidence_count": 16,
+    "closed_rows_without_blockers_count": 16,
     "closed_with_blockers_ids": []
   },
-  "closed_row_count": 17,
+  "closed_row_count": 16,
   "contract_pass": true,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "full_gap_ledger_ready": false,
-  "generated_at": "2026-07-02T22:01:44.716855+00:00",
+  "generated_at": "2026-07-28T14:32:56.499033+00:00",
   "input_checksums": {
-    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
+    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b0843cef68c05f5b4cef73a68c446861be1c47a3b7c5393c42aedcb413d86b91",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:704f8462ca719ca0c1757d8a505d962ff9fb881ea8b77295aa8764b9be68addf",
-    "scripts/build_gap_ledger_evidence_audit.py": "sha256:cce4f67978d3c2d7c4bced3ab6473157a062353fe5ee6f0994f3c0ee7ad34648"
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:b724b4bcb202960341488cfe2c35e85e3d6093dff0bf59728cd8f6add01e4154",
+    "scripts/build_gap_ledger_evidence_audit.py": "sha256:d941fad0ebd6d1f54cdd81867f5cd5b16a467bf6ca609d83c49da4b6faf02146"
   },
   "ledger_status": "open",
-  "nonclosed_row_count": 3,
+  "nonclosed_row_count": 4,
   "nonclosed_visibility": {
     "nonclosed_missing_blocker_ids": [],
     "nonclosed_missing_claim_boundary_ids": [],
     "nonclosed_missing_evidence_ids": [],
-    "nonclosed_row_count": 3,
-    "nonclosed_rows_with_blockers_count": 3,
-    "nonclosed_rows_with_claim_boundary_count": 3,
-    "nonclosed_rows_with_evidence_count": 3
+    "nonclosed_row_count": 4,
+    "nonclosed_rows_with_blockers_count": 4,
+    "nonclosed_rows_with_claim_boundary_count": 4,
+    "nonclosed_rows_with_evidence_count": 4
   },
   "reuse_policy": "gap_ledger_evidence_audit_reads_existing_gap_ledger_status_without_creating_closure",
   "reused_evidence": true,
@@ -58,9 +58,14 @@
       "id": "G1",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 21,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 21,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "partial"
     },
     {
@@ -76,9 +81,14 @@
       "id": "G2",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 2,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 2,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -94,9 +104,14 @@
       "id": "G3",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 3,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 3,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -112,9 +127,14 @@
       "id": "G4",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 8,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 8,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -130,9 +150,14 @@
       "id": "G5",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 4,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 4,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -148,14 +173,32 @@
         "eb_receipt_tpu_hffb"
       ],
       "closure_requirement_pass_count": 1,
-      "evidence_key_count": 8,
+      "evidence_key_count": 9,
       "evidence_present": true,
       "id": "G6",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 5,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 7,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 2,
+      "source_receipt_unavailable_paths": [
+        {
+          "evidence_status": "unavailable",
+          "field_path": "unavailable_source_receipts",
+          "path": "implementation/phase1/release/external_benchmark_submission_readiness.json",
+          "receipt_key": "external_benchmark_submission_readiness"
+        },
+        {
+          "evidence_status": "unavailable",
+          "field_path": "external_submission_closure_gate.unavailable_source_receipts",
+          "path": "implementation/phase1/release/external_benchmark_submission_readiness.json",
+          "receipt_key": "external_benchmark_submission_readiness"
+        }
+      ],
       "status": "external_blocked"
     },
     {
@@ -177,9 +220,14 @@
       "id": "G7",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 8,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 8,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "partial"
     },
     {
@@ -195,9 +243,14 @@
       "id": "G8",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 6,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 6,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -213,15 +266,20 @@
       "id": "G9",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 7,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 7,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
-      "blocker_count": 0,
+      "blocker_count": 1,
       "claim_boundary_present": true,
-      "closed": true,
+      "closed": false,
       "closure_requirement_count": 0,
       "closure_requirement_fail_count": 0,
       "closure_requirement_failed_ids": [],
@@ -231,10 +289,15 @@
       "id": "G10",
       "ledger": "commercial_solver",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 3,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 3,
-      "status": "closed"
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
+      "status": "open"
     },
     {
       "blocker_count": 0,
@@ -249,9 +312,14 @@
       "id": "AI-G1",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 8,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 8,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -267,9 +335,14 @@
       "id": "AI-G2",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 5,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 5,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -285,9 +358,14 @@
       "id": "AI-G3",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 4,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 4,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -303,9 +381,14 @@
       "id": "AI-G4",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 2,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 2,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -321,9 +404,14 @@
       "id": "AI-G5",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 2,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 2,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -339,9 +427,21 @@
       "id": "AI-G6",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 6,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 7,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 1,
+      "source_receipt_unavailable_paths": [
+        {
+          "evidence_status": "unavailable",
+          "field_path": "commercial_external_benchmark_audit_boundary.unavailable_source_receipts",
+          "path": "implementation/phase1/release/external_benchmark_submission_readiness.json",
+          "receipt_key": "external_benchmark_submission_readiness"
+        }
+      ],
       "status": "closed"
     },
     {
@@ -357,9 +457,14 @@
       "id": "AI-G7",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 7,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 7,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -375,9 +480,14 @@
       "id": "AI-G8",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 2,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 2,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -393,9 +503,14 @@
       "id": "AI-G9",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 2,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 2,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     },
     {
@@ -411,23 +526,35 @@
       "id": "AI-G10",
       "ledger": "ai_engine",
       "next_gate_present": true,
+      "source_receipt_available_path_count": 4,
       "source_receipt_missing_path_count": 0,
       "source_receipt_missing_paths": [],
       "source_receipt_path_count": 4,
+      "source_receipt_unavailable_but_present_path_count": 0,
+      "source_receipt_unavailable_but_present_paths": [],
+      "source_receipt_unavailable_path_count": 0,
+      "source_receipt_unavailable_paths": [],
       "status": "closed"
     }
   ],
   "schema_version": "gap-ledger-evidence-audit.v1",
-  "source_commit_sha": "55a8b1259050a94e77b24419198f4d94d9c037e9",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "source_receipt_path_coverage": {
-    "claim_boundary": "This checks only explicit source_receipts and *_source_receipts paths that the ledger status advertises as evidence or guard inputs. It does not require terminal closure-evidence paths that are intentionally absent for partial or external-blocked rows.",
+    "claim_boundary": "This checks only explicit source_receipts and *_source_receipts paths that the ledger status advertises as evidence or guard inputs. Paths declared through unavailable_source_receipts remain visible without being treated as available evidence. Available paths that are missing and unavailable paths that exist are contract violations.",
     "source_receipt_absent_row_count": 0,
     "source_receipt_absent_row_ids": [],
-    "source_receipt_existing_path_count": 112,
+    "source_receipt_existing_path_count": 109,
     "source_receipt_missing_path_count": 0,
     "source_receipt_missing_row_ids": [],
-    "source_receipt_path_count": 112
+    "source_receipt_path_count": 112,
+    "source_receipt_unavailable_but_present_path_count": 0,
+    "source_receipt_unavailable_but_present_row_ids": [],
+    "source_receipt_unavailable_path_count": 3,
+    "source_receipt_unavailable_row_ids": [
+      "G6",
+      "AI-G6"
+    ]
   },
   "status": "ready",
-  "summary_line": "Gap ledger evidence audit: READY | closed_evidence=17/17 | nonclosed_boundaries=3/3"
+  "summary_line": "Gap ledger evidence audit: READY | closed_evidence=16/16 | nonclosed_boundaries=4/4"
 }

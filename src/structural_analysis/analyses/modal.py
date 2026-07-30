@@ -18,6 +18,11 @@ from structural_analysis.assembly.modal import (
     assemble_modal_matrices,
 )
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.solvers.equation_scaling_6dof import (
+    create_equation_scaling_6dof,
+    equilibration_vectors_6dof,
+    exact_scaled_condition_number_1,
+)
 from structural_analysis.solvers.modal import ModalAnalysisError, solve_modal_modes
 
 
@@ -88,11 +93,40 @@ def run_authoritative_modal(
     free = np.asarray(assembly.free_dofs, dtype=np.int64)
     reduced_stiffness = assembly.stiffness[np.ix_(free, free)]
     reduced_mass = assembly.mass[np.ix_(free, free)]
+    reference_equation_load = np.zeros(
+        len(assembly.node_ids) * DOF_PER_NODE,
+        dtype=np.float64,
+    )
+    equation_scaling = create_equation_scaling_6dof(
+        source_identity_hash=model.canonical_model_checksum,
+        node_coordinates_m=assembly.node_coordinates,
+        reference_equation_load=reference_equation_load,
+        free_dofs=assembly.free_dofs,
+    )
+    _, coordinate_recovery_scale = equilibration_vectors_6dof(
+        assembly.free_dofs,
+        equation_scaling.characteristic_length_m,
+    )
+    scaled_stiffness = (
+        coordinate_recovery_scale[:, None]
+        * reduced_stiffness
+        * coordinate_recovery_scale[None, :]
+    )
+    scaled_mass = (
+        coordinate_recovery_scale[:, None]
+        * reduced_mass
+        * coordinate_recovery_scale[None, :]
+    )
+    scaled_stiffness_condition = exact_scaled_condition_number_1(
+        scaled_stiffness
+    )
+    scaled_mass_condition = exact_scaled_condition_number_1(scaled_mass)
     try:
         modal = solve_modal_modes(
             reduced_stiffness,
             reduced_mass,
             mode_count=mode_count,
+            coordinate_recovery_scale=coordinate_recovery_scale,
             positive_semidefinite_relative_tolerance=1.0e-10,
             rigid_mode_relative_tolerance=1.0e-10,
             cluster_relative_tolerance=1.0e-9,
@@ -173,6 +207,20 @@ def run_authoritative_modal(
         "mass_relative_symmetry_error": modal.mass_relative_symmetry_error,
         "stiffness_matrix_hash": modal.stiffness_matrix_hash,
         "mass_matrix_hash": modal.mass_matrix_hash,
+        "characteristic_length": equation_scaling.characteristic_length_m,
+        "scaling_hash": equation_scaling.scaling_hash,
+        "equation_scaling_6dof": equation_scaling.to_manifest(),
+        "symmetric_coordinate_scaling_applied": True,
+        "scaled_stiffness_condition_number_status": (
+            "available"
+            if scaled_stiffness_condition is not None
+            else "unsupported_exact_system_too_large_or_singular"
+        ),
+        "scaled_mass_condition_number_status": (
+            "available"
+            if scaled_mass_condition is not None
+            else "unsupported_exact_system_too_large_or_singular"
+        ),
         "raw_result_hash": modal.raw_result_hash,
         "semantic_result_hash": modal.semantic_result_hash,
         "semantic_hash_profile": modal.semantic_hash_profile,
@@ -190,6 +238,12 @@ def run_authoritative_modal(
         "release_readiness": False,
         "claim_boundary": MODAL_CLAIM_BOUNDARY,
     }
+    if scaled_stiffness_condition is not None:
+        metrics["scaled_stiffness_condition_number"] = (
+            scaled_stiffness_condition
+        )
+    if scaled_mass_condition is not None:
+        metrics["scaled_mass_condition_number"] = scaled_mass_condition
     return WholeModelModalSolution(
         status="ready",
         metrics=metrics,

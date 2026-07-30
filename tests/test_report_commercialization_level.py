@@ -140,12 +140,16 @@ def _residual_pending_updates(path: Path) -> Path:
 
 
 def test_report_commercialization_level_marks_engineer_in_loop_commercial_assist(tmp_path: Path) -> None:
+    p1_breadth = _write_json(
+        tmp_path / "p1-breadth.json",
+        {"p1_benchmark_execution_unblocked": True},
+    )
     payload = report_commercialization_level.build_report(
         commercial_readiness=_commercial(tmp_path / "commercial.json"),
         external_benchmark_submission_readiness=_external(tmp_path / "external.json"),
         external_benchmark_submission_updates=tmp_path / "missing-eb-updates.json",
         residual_holdout_closure_updates=_residual_pending_updates(tmp_path / "rh-updates.json"),
-        p1_benchmark_breadth_status=tmp_path / "missing-p1-breadth.json",
+        p1_benchmark_breadth_status=p1_breadth,
         p1_operational_queues=tmp_path / "missing-ops.json",
     )
 
@@ -198,6 +202,10 @@ def test_report_commercialization_level_promotes_when_evidence_closes(tmp_path: 
 
 
 def test_report_commercialization_level_reads_residual_holdout_sidecar(tmp_path: Path) -> None:
+    p1_breadth = _write_json(
+        tmp_path / "p1-breadth.json",
+        {"p1_benchmark_execution_unblocked": True},
+    )
     rh_updates = _write_json(
         tmp_path / "rh-updates.json",
         {
@@ -227,7 +235,7 @@ def test_report_commercialization_level_reads_residual_holdout_sidecar(tmp_path:
         external_benchmark_submission_readiness=_external(tmp_path / "external.json"),
         external_benchmark_submission_updates=tmp_path / "missing-eb-updates.json",
         residual_holdout_closure_updates=rh_updates,
-        p1_benchmark_breadth_status=tmp_path / "missing-p1-breadth.json",
+        p1_benchmark_breadth_status=p1_breadth,
         p1_operational_queues=tmp_path / "missing-ops.json",
     )
 

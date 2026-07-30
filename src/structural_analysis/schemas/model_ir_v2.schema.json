@@ -30,7 +30,11 @@
     "schema_version": {"const": "structural-analysis-model-ir.v2"},
     "model_id": {"$ref": "#/$defs/stableId"},
     "capability_profile": {
-      "enum": ["engine_v2_phase0_linear_3d"]
+      "enum": [
+        "engine_v2_phase0_linear_3d",
+        "bounded_planar_frame_alpha",
+        "bounded_frame3d_direct_displacement_control"
+      ]
     },
     "provenance": {"$ref": "#/$defs/provenance"},
     "units": {"$ref": "#/$defs/canonicalUnits"},
@@ -88,6 +92,117 @@
     },
     "extensions": {"$ref": "#/$defs/extensions"}
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "capability_profile": {"const": "engine_v2_phase0_linear_3d"}
+        }
+      },
+      "then": {
+        "properties": {
+          "materials": {
+            "items": {"$ref": "#/$defs/linearMaterial"}
+          },
+          "sections": {
+            "items": {
+              "oneOf": [
+                {"$ref": "#/$defs/frameSection"},
+                {"$ref": "#/$defs/trussSection"}
+              ]
+            }
+          },
+          "elements": {
+            "items": {
+              "oneOf": [
+                {"$ref": "#/$defs/frameElement"},
+                {"$ref": "#/$defs/trussElement"}
+              ]
+            }
+          },
+          "load_patterns": {
+            "items": {"$ref": "#/$defs/linearLoadPattern"}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "capability_profile": {"const": "bounded_planar_frame_alpha"}
+        }
+      },
+      "then": {
+        "properties": {
+          "nodes": {"minItems": 2, "maxItems": 128},
+          "materials": {
+            "minItems": 2,
+            "items": {
+              "oneOf": [
+                {"$ref": "#/$defs/bilinearSteelMaterial"},
+                {"$ref": "#/$defs/asymmetricConcreteMaterial"}
+              ]
+            }
+          },
+          "sections": {
+            "items": {"$ref": "#/$defs/rectangularRcFiberSection"}
+          },
+          "elements": {
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {"$ref": "#/$defs/corotationalRcFiberFrame2dElement"}
+          },
+          "load_patterns": {
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {"$ref": "#/$defs/nonlinearLoadPattern"}
+          },
+          "load_combinations": {"maxItems": 0},
+          "time_functions": {"maxItems": 0},
+          "construction_stages": {"maxItems": 0},
+          "unsupported_features": {"maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "capability_profile": {
+            "const": "bounded_frame3d_direct_displacement_control"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "nodes": {"minItems": 2, "maxItems": 128},
+          "materials": {
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {"$ref": "#/$defs/bilinearSteelMaterial"}
+          },
+          "sections": {
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {"$ref": "#/$defs/frameSection"}
+          },
+          "elements": {
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {"$ref": "#/$defs/statefulCorotationalFrame3dElement"}
+          },
+          "load_patterns": {
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {"$ref": "#/$defs/directDisplacementControlLoadPattern"}
+          },
+          "load_combinations": {"maxItems": 0},
+          "time_functions": {"maxItems": 0},
+          "construction_stages": {"maxItems": 0},
+          "unsupported_features": {"maxItems": 0}
+        }
+      }
+    }
+  ],
   "$defs": {
     "stableId": {
       "type": "string",
@@ -202,7 +317,7 @@
         "extensions": {"$ref": "#/$defs/extensions"}
       }
     },
-    "material": {
+    "linearMaterial": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "index", "law_id", "parameter_set_version", "parameters", "state_schema", "source_id", "extensions"],
@@ -234,6 +349,77 @@
         "source_id": {"type": ["string", "null"]},
         "extensions": {"$ref": "#/$defs/extensions"}
       }
+    },
+    "bilinearSteelMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "law_id", "parameter_set_version", "parameters", "state_schema", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "law_id": {"const": "bilinear_combined_hardening_steel"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["elastic_modulus_pa", "yield_stress_pa", "isotropic_hardening_modulus_pa", "kinematic_hardening_modulus_pa", "yield_tolerance_pa"],
+          "properties": {
+            "elastic_modulus_pa": {"$ref": "#/$defs/positiveNumber"},
+            "shear_modulus_pa": {"$ref": "#/$defs/positiveNumber"},
+            "yield_stress_pa": {"$ref": "#/$defs/positiveNumber"},
+            "isotropic_hardening_modulus_pa": {"type": "number", "minimum": 0},
+            "kinematic_hardening_modulus_pa": {"type": "number", "minimum": 0},
+            "yield_tolerance_pa": {"type": "number", "minimum": 0}
+          }
+        },
+        "state_schema": {"$ref": "#/$defs/nonlinearMaterialStateSchema"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "asymmetricConcreteMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "law_id", "parameter_set_version", "parameters", "state_schema", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "law_id": {"const": "asymmetric_concrete_damage"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["elastic_modulus_pa", "tensile_strength_pa", "compressive_strength_pa", "tensile_softening_rate", "compressive_softening_rate", "history_tolerance"],
+          "properties": {
+            "elastic_modulus_pa": {"$ref": "#/$defs/positiveNumber"},
+            "tensile_strength_pa": {"$ref": "#/$defs/positiveNumber"},
+            "compressive_strength_pa": {"$ref": "#/$defs/positiveNumber"},
+            "tensile_softening_rate": {"$ref": "#/$defs/positiveNumber"},
+            "compressive_softening_rate": {"$ref": "#/$defs/positiveNumber"},
+            "history_tolerance": {"type": "number", "minimum": 0}
+          }
+        },
+        "state_schema": {"$ref": "#/$defs/nonlinearMaterialStateSchema"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "nonlinearMaterialStateSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stateful", "state_update_epoch", "supports_trial_commit_rollback"],
+      "properties": {
+        "stateful": {"const": true},
+        "state_update_epoch": {"const": "accepted_step"},
+        "supports_trial_commit_rollback": {"const": true}
+      }
+    },
+    "material": {
+      "oneOf": [
+        {"$ref": "#/$defs/linearMaterial"},
+        {"$ref": "#/$defs/bilinearSteelMaterial"},
+        {"$ref": "#/$defs/asymmetricConcreteMaterial"}
+      ]
     },
     "frameSection": {
       "type": "object",
@@ -282,10 +468,40 @@
         "extensions": {"$ref": "#/$defs/extensions"}
       }
     },
+    "rectangularRcFiberSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "family_id", "parameter_set_version", "parameters", "steel_material_id", "concrete_material_id", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "family_id": {"const": "rectangular_rc_fiber_2d"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width_m", "depth_m", "cover_m", "concrete_layer_count", "top_bar_count", "bottom_bar_count", "bar_area_m2"],
+          "properties": {
+            "width_m": {"$ref": "#/$defs/positiveNumber"},
+            "depth_m": {"$ref": "#/$defs/positiveNumber"},
+            "cover_m": {"$ref": "#/$defs/positiveNumber"},
+            "concrete_layer_count": {"type": "integer", "minimum": 2, "maximum": 32},
+            "top_bar_count": {"type": "integer", "minimum": 1, "maximum": 64},
+            "bottom_bar_count": {"type": "integer", "minimum": 1, "maximum": 64},
+            "bar_area_m2": {"$ref": "#/$defs/positiveNumber"}
+          }
+        },
+        "steel_material_id": {"$ref": "#/$defs/stableId"},
+        "concrete_material_id": {"$ref": "#/$defs/stableId"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
     "section": {
       "oneOf": [
         {"$ref": "#/$defs/frameSection"},
-        {"$ref": "#/$defs/trussSection"}
+        {"$ref": "#/$defs/trussSection"},
+        {"$ref": "#/$defs/rectangularRcFiberSection"}
       ]
     },
     "elementOffsets": {
@@ -325,6 +541,27 @@
         "extensions": {"$ref": "#/$defs/extensions"}
       }
     },
+    "statefulCorotationalFrame3dElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "formulation", "node_ids", "material_id", "section_id", "local_axis_rotation_rad", "offsets", "releases", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "frame_3d"},
+        "formulation": {
+          "const": "stateful_corotational_timoshenko_frame3d"
+        },
+        "node_ids": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/stableId"}},
+        "material_id": {"$ref": "#/$defs/stableId"},
+        "section_id": {"$ref": "#/$defs/stableId"},
+        "local_axis_rotation_rad": {"type": "number"},
+        "offsets": {"$ref": "#/$defs/elementOffsets"},
+        "releases": {"$ref": "#/$defs/elementReleases"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
     "trussElement": {
       "type": "object",
       "additionalProperties": false,
@@ -342,10 +579,42 @@
         "extensions": {"$ref": "#/$defs/extensions"}
       }
     },
+    "uniformMemberLoad2d": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basis", "behavior", "qx_n_per_m", "qy_n_per_m"],
+      "properties": {
+        "basis": {"const": "initial_member_local"},
+        "behavior": {"const": "dead"},
+        "qx_n_per_m": {"type": "number"},
+        "qy_n_per_m": {"type": "number"}
+      }
+    },
+    "corotationalRcFiberFrame2dElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "formulation", "node_ids", "section_id", "integration_order", "offsets", "releases", "uniform_distributed_load_local", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "frame_2d"},
+        "formulation": {"const": "stateful_corotational_rc_fiber_frame2d"},
+        "node_ids": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/stableId"}},
+        "section_id": {"$ref": "#/$defs/stableId"},
+        "integration_order": {"type": "integer", "minimum": 2, "maximum": 3},
+        "offsets": {"$ref": "#/$defs/elementOffsets"},
+        "releases": {"$ref": "#/$defs/elementReleases"},
+        "uniform_distributed_load_local": {"$ref": "#/$defs/uniformMemberLoad2d"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
     "element": {
       "oneOf": [
         {"$ref": "#/$defs/frameElement"},
-        {"$ref": "#/$defs/trussElement"}
+        {"$ref": "#/$defs/trussElement"},
+        {"$ref": "#/$defs/corotationalRcFiberFrame2dElement"},
+        {"$ref": "#/$defs/statefulCorotationalFrame3dElement"}
       ]
     },
     "fixedDofConstraint": {
@@ -392,7 +661,7 @@
         "extensions": {"$ref": "#/$defs/extensions"}
       }
     },
-    "loadPattern": {
+    "linearLoadPattern": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "index", "analysis_type", "self_weight", "nodal_loads", "source_id", "extensions"],
@@ -405,6 +674,43 @@
         "source_id": {"type": ["string", "null"]},
         "extensions": {"$ref": "#/$defs/extensions"}
       }
+    },
+    "nonlinearLoadPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "analysis_type", "self_weight", "nodal_loads", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "analysis_type": {"const": "nonlinear_static_load_control"},
+        "self_weight": {"const": [0.0, 0.0, 0.0]},
+        "nodal_loads": {"type": "array", "items": {"$ref": "#/$defs/nodalLoad"}},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "directDisplacementControlLoadPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "analysis_type", "self_weight", "nodal_loads", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "analysis_type": {
+          "const": "nonlinear_static_direct_displacement_control"
+        },
+        "self_weight": {"const": [0.0, 0.0, 0.0]},
+        "nodal_loads": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/nodalLoad"}},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "loadPattern": {
+      "oneOf": [
+        {"$ref": "#/$defs/linearLoadPattern"},
+        {"$ref": "#/$defs/nonlinearLoadPattern"},
+        {"$ref": "#/$defs/directDisplacementControlLoadPattern"}
+      ]
     },
     "combinationTerm": {
       "type": "object",

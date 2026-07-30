@@ -6,8 +6,14 @@ interface CapabilityRow {
   title: string
   category: string
   status: 'supported' | 'bounded_public' | 'experimental' | 'shadow_only' | 'blocked'
+  representable: boolean
+  implemented: boolean
+  executable: boolean
   public: boolean
-  authority: string
+  numerical_authority: string
+  recovery_authority: string
+  external_vv_level: number
+  release_eligible: boolean
   interfaces: string[]
   profile: string
   limitations: string[]
@@ -41,6 +47,8 @@ export function CapabilitySupportPanel(): ReactElement {
         {' '}{registry.authorityRules.workbench_truth_owner}; AI authority:
         {' '}{registry.authorityRules.ai_truth_owner}; fallback promotion is
         {registry.authorityRules.fallback_promotion_allowed ? ' enabled' : ' disabled'}.
+        {' '}Representable, implemented, executable, public, numerical/recovery,
+        external-V&amp;V, and release axes are independent.
       </p>
       <div className="wb2-table-wrap">
         <table className="wb2-table" data-wb2-capability-table>
@@ -48,8 +56,11 @@ export function CapabilitySupportPanel(): ReactElement {
             <tr>
               <th scope="col">Capability</th>
               <th scope="col">Status</th>
-              <th scope="col">Public</th>
-              <th scope="col">Authority</th>
+              <th scope="col">R/I/E/P</th>
+              <th scope="col">Numerical authority</th>
+              <th scope="col">Recovery authority</th>
+              <th scope="col">External V&amp;V</th>
+              <th scope="col">Release</th>
               <th scope="col">Boundary</th>
             </tr>
           </thead>
@@ -58,8 +69,16 @@ export function CapabilitySupportPanel(): ReactElement {
               <tr key={row.id} data-capability-id={row.id} data-capability-status={row.status}>
                 <th scope="row">{row.title}</th>
                 <td>{row.status}</td>
-                <td>{row.public ? 'yes' : 'no'}</td>
-                <td>{row.authority}</td>
+                <td>
+                  {row.representable ? 'Y' : 'N'}/
+                  {row.implemented ? 'Y' : 'N'}/
+                  {row.executable ? 'Y' : 'N'}/
+                  {row.public ? 'Y' : 'N'}
+                </td>
+                <td>{row.numerical_authority}</td>
+                <td>{row.recovery_authority}</td>
+                <td>{row.external_vv_level}</td>
+                <td>{row.release_eligible ? 'yes' : 'no'}</td>
                 <td>{row.profile}; {row.limitations[0]}</td>
               </tr>
             ))}

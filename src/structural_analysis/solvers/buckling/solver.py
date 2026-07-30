@@ -81,6 +81,7 @@ def solve_linear_buckling(
     geometric_stiffness_per_unit_load: np.ndarray,
     *,
     mode_count: int,
+    coordinate_recovery_scale: np.ndarray | None = None,
     symmetry_relative_tolerance: float = 1.0e-12,
     positive_semidefinite_relative_tolerance: float = 1.0e-12,
     finite_mode_relative_tolerance: float = 1.0e-12,
@@ -141,16 +142,33 @@ def solve_linear_buckling(
             name="geometric_stiffness_per_unit_load",
             relative_tolerance=positive_semidefinite_relative_tolerance,
         )
+        recovery_scale = _coordinate_recovery_scale(
+            coordinate_recovery_scale,
+            int(k_matrix.shape[0]),
+        )
+        solve_stiffness = (
+            recovery_scale[:, None] * k_matrix * recovery_scale[None, :]
+        )
+        solve_geometric = (
+            recovery_scale[:, None] * kg_matrix * recovery_scale[None, :]
+        )
+        if not (
+            np.all(np.isfinite(solve_stiffness))
+            and np.all(np.isfinite(solve_geometric))
+        ):
+            raise GeneralizedEigenContractError(
+                "coordinate-scaled buckling matrices must be finite"
+            )
         raw_reciprocals, raw_vectors = eigh(
-            kg_matrix,
-            k_matrix,
+            solve_geometric,
+            solve_stiffness,
             check_finite=False,
             driver="gvd",
         )
         candidates: list[tuple[float, np.ndarray]] = []
         reciprocal_scale = max(
             float(np.max(np.abs(raw_reciprocals))),
-            np.finfo(np.float64).tiny,
+            float(np.finfo(np.float64).tiny),
         )
         positive_threshold = finite_mode_relative_tolerance * reciprocal_scale
         for index, reciprocal in enumerate(raw_reciprocals.tolist()):
@@ -161,7 +179,7 @@ def solve_linear_buckling(
             ):
                 continue
             vector = np.asarray(raw_vectors[:, index], dtype=np.float64)
-            norm_squared = float(vector @ k_matrix @ vector)
+            norm_squared = float(vector @ solve_stiffness @ vector)
             if not math.isfinite(norm_squared) or norm_squared <= 0.0:
                 continue
             candidates.append(
@@ -188,12 +206,13 @@ def solve_linear_buckling(
         ):
             canonical[:, cluster] = canonicalize_eigenspace(
                 selected_vectors[:, cluster],
-                metric=k_matrix,
+                metric=solve_stiffness,
             )
+        physical_modes = recovery_scale[:, None] * canonical
         values: list[float] = []
         modes: list[BucklingMode] = []
         for index in range(requested):
-            vector = canonical[:, index]
+            vector = physical_modes[:, index]
             elastic = float(vector @ k_matrix @ vector)
             geometric = float(vector @ kg_matrix @ vector)
             if not math.isfinite(geometric) or geometric <= 0.0:
@@ -206,7 +225,7 @@ def solve_linear_buckling(
                 float(np.linalg.norm(k_matrix @ vector, ord=np.inf))
                 + abs(load_factor)
                 * float(np.linalg.norm(kg_matrix @ vector, ord=np.inf)),
-                np.finfo(np.float64).tiny,
+                float(np.finfo(np.float64).tiny),
             )
             residual_relative = float(np.linalg.norm(residual, ord=np.inf)) / denominator
             if residual_relative > residual_relative_tolerance:
@@ -229,8 +248,8 @@ def solve_linear_buckling(
                 )
             )
         value_array = np.asarray(values, dtype=np.float64)
-        stiffness_gram = canonical.T @ k_matrix @ canonical
-        geometric_gram = canonical.T @ kg_matrix @ canonical
+        stiffness_gram = physical_modes.T @ k_matrix @ physical_modes
+        geometric_gram = physical_modes.T @ kg_matrix @ physical_modes
         stiffness_error = float(
             np.max(np.abs(stiffness_gram - np.eye(requested)))
         )
@@ -266,8 +285,11 @@ def solve_linear_buckling(
         geometric_stiffness_positive_rank=geometric_rank,
         stiffness_matrix_hash=matrix_sha256(k_matrix),
         geometric_stiffness_matrix_hash=matrix_sha256(kg_matrix),
-        raw_result_hash=raw_modes_sha256(value_array.tolist(), canonical),
-        semantic_result_hash=semantic_modes_sha256(value_array.tolist(), canonical),
+        raw_result_hash=raw_modes_sha256(value_array.tolist(), physical_modes),
+        semantic_result_hash=semantic_modes_sha256(
+            value_array.tolist(),
+            physical_modes,
+        ),
         semantic_hash_profile=SEMANTIC_HASH_PROFILE,
         symmetry_projection_applied=bool(k_projected or kg_projected),
         regularization_applied=False,
@@ -281,3 +303,21 @@ def _mode_count(value: int) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
         raise BucklingAnalysisError("mode_count must be a positive integer")
     return value
+
+
+def _coordinate_recovery_scale(
+    value: np.ndarray | None,
+    size: int,
+) -> np.ndarray:
+    if value is None:
+        return np.ones(size, dtype=np.float64)
+    scale = np.asarray(value, dtype=np.float64)
+    if (
+        scale.shape != (size,)
+        or not np.all(np.isfinite(scale))
+        or np.any(scale <= 0.0)
+    ):
+        raise BucklingAnalysisError(
+            "coordinate_recovery_scale must be a finite positive DOF vector"
+        )
+    return scale

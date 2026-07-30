@@ -475,6 +475,14 @@ def _load_optional_json(path: str) -> dict:
     return payload if isinstance(payload, dict) else {}
 
 
+def _load_injectable_optional_json(path: str) -> dict:
+    try:
+        payload = _load_json(path)
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
 def _pass(report: dict) -> bool:
     return bool(report.get("contract_pass", report.get("layout_pass", False)))
 
@@ -1766,16 +1774,16 @@ def main(argv: list[str] | None = None) -> int:
     repro_version_lock = _load_json(args.repro_version_lock_report)
     release_registry = _load_json(args.release_registry_report)
     performance_profiling_path = Path(args.performance_profiling_report)
-    performance_profiling = _load_json(args.performance_profiling_report) if performance_profiling_path.exists() else {}
-    solver_hip_e2e = _load_json(args.solver_hip_e2e) if Path(args.solver_hip_e2e).exists() else {}
-    solver_truthfulness = _load_json(args.solver_truthfulness) if Path(args.solver_truthfulness).exists() else {}
+    performance_profiling = _load_injectable_optional_json(args.performance_profiling_report)
+    solver_hip_e2e = _load_injectable_optional_json(args.solver_hip_e2e)
+    solver_truthfulness = _load_injectable_optional_json(args.solver_truthfulness)
     hardest_external_10case_kickoff = _load_json(args.hardest_external_10case_kickoff_report)
-    rc_benchmark_lock = _load_json(args.rc_benchmark_lock) if Path(args.rc_benchmark_lock).exists() else {}
+    rc_benchmark_lock = _load_injectable_optional_json(args.rc_benchmark_lock)
     midas_mgt_conversion = _load_json(args.midas_mgt_conversion)
     scaleout_io_report = _load_json(args.scaleout_io)
     nightly_10m_repro = _load_json(args.nightly_10m_repro)
-    hip_kernel_smoke = _load_json(args.hip_kernel_smoke) if Path(args.hip_kernel_smoke).exists() else {}
-    ndtha_long_profile = _load_json(args.ndtha_long_profile) if Path(args.ndtha_long_profile).exists() else {}
+    hip_kernel_smoke = _load_injectable_optional_json(args.hip_kernel_smoke)
+    ndtha_long_profile = _load_injectable_optional_json(args.ndtha_long_profile)
 
     panel_zone_clash_available = bool(panel_zone_clash)
     panel_zone_clash_summary = (

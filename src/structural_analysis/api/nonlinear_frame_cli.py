@@ -21,12 +21,18 @@ from structural_analysis.api.nonlinear_frame import (
     FIXED_CHORD_SERIAL_PROFILE,
     NonlinearFrameConfig,
     analyze_nonlinear_frame,
+    analyze_nonlinear_frame_model_ir,
     validate_nonlinear_frame_result,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_checkpoint_chain_io import (
     STATEFUL_COROTATIONAL_FIBER_FRAME2D_CHECKPOINT_CHAIN_MAX_BYTES,
 )
 from structural_analysis.solvers.nonlinear.newton import VECTOR_MATRIX_BACKENDS
+from structural_analysis.model_ir import (
+    MODEL_IR_V2_SCHEMA_VERSION,
+    load_json_object_strict,
+    load_model_ir_v2,
+)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -34,7 +40,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         prog="structural-analysis-nonlinear-frame",
         description="Run one explicit bounded nonlinear frame profile.",
     )
-    parser.add_argument("model_path", help="Neutral canonical JSON input.")
+    parser.add_argument(
+        "model_path",
+        help="Neutral canonical JSON or bounded planar ModelIR v2 input.",
+    )
     parser.add_argument(
         "--profile",
         choices=(
@@ -109,11 +118,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (OSError, OutputPathValidationError, ValueError) as error:
         parser.error(str(error))
 
-    result = analyze_nonlinear_frame(
-        load_model(args.model_path),
-        config,
-        restart_checkpoint_chain=restart,
-    )
+    try:
+        is_model_ir = _is_model_ir_v2(Path(args.model_path))
+        result = (
+            analyze_nonlinear_frame_model_ir(
+                load_model_ir_v2(args.model_path),
+                config,
+                restart_checkpoint_chain=restart,
+            )
+            if is_model_ir
+            else analyze_nonlinear_frame(
+                load_model(args.model_path),
+                config,
+                restart_checkpoint_chain=restart,
+            )
+        )
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
     report = validate_nonlinear_frame_result(result)
     if checkpoint_path is not None and report.checkpoint_available:
         write_json_pair_and_bytes(
@@ -150,6 +171,13 @@ def _read_checkpoint_chain(path: Path) -> bytes:
     if len(payload) > STATEFUL_COROTATIONAL_FIBER_FRAME2D_CHECKPOINT_CHAIN_MAX_BYTES:
         raise ValueError("restart checkpoint artifact exceeds the bounded byte limit")
     return payload
+
+
+def _is_model_ir_v2(path: Path) -> bool:
+    if path.suffix.lower() != ".json":
+        return False
+    payload = load_json_object_strict(path)
+    return payload.get("schema_version") == MODEL_IR_V2_SCHEMA_VERSION
 
 
 if __name__ == "__main__":

@@ -180,6 +180,16 @@ def test_public_two_plane_column_converges_to_euler_load_and_replays(
     assert result.metrics["whole_model_frame_linear_buckling_workflow"] is True
     assert result.metrics["general_frame_shell_linear_buckling_workflow"] is False
     assert result.metrics["binary_mode_vector_artifact_connected"] is False
+    assert result.metrics["symmetric_coordinate_scaling_applied"] is True
+    assert result.metrics["characteristic_length"] == pytest.approx(3.0)
+    assert result.metrics["scaling_hash"].startswith("sha256:")
+    assert result.metrics["equation_scaling_6dof"]["scaling_hash"] == (
+        result.metrics["scaling_hash"]
+    )
+    assert result.metrics["scaled_stiffness_condition_number_status"] == (
+        "available"
+    )
+    assert result.metrics["scaled_stiffness_condition_number"] > 0.0
     assert result.metrics["claim_boundary"] == BUCKLING_CLAIM_BOUNDARY
     assert result.metrics["raw_result_hash"] == replay.metrics["raw_result_hash"]
     assert result.metrics["semantic_result_hash"] == (

@@ -9,13 +9,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_midas_same_mesh_proxy_and_comparison() -> None:
+def test_midas_same_mesh_proxy_and_comparison(tmp_path: Path) -> None:
     roundtrip = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
     crossval = REPO_ROOT / "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json"
-    result_out = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_same_mesh_result_test.json"
-    compare_out = (
-        REPO_ROOT / "implementation/phase1/release_evidence/productization/midas_gen_same_mesh_native_comparison_test.json"
-    )
+    result_out = tmp_path / "midas_gen_same_mesh_result.json"
+    compare_out = tmp_path / "midas_gen_same_mesh_native_comparison.json"
 
     proc = subprocess.run(
         [

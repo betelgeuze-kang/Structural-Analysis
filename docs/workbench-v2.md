@@ -56,6 +56,11 @@ publication, invalid hashes, impossible progress, and inconsistent resume state.
 After success it fetches the referenced result/evidence endpoints, verifies
 their declared byte lengths and SHA-256 digests when Web Crypto is available,
 and checks the completion envelope's exact job/request/checkpoint/result binding.
+For a ready nonlinear result it then accepts only the embedded, hash-bound
+`corotational-fiber-frame2d-engineering-result-ir.v1` identity and authority
+axes. The durable-job UI does not fall back to legacy top-level displacement,
+reaction, member, section, fiber, or convergence arrays. Those compatibility
+fields remain owned by the core API and cannot become Workbench solver truth.
 If the endpoint is absent or invalid, the panel is explicitly **UNAVAILABLE**.
 See [Durable job service and exact resume](durable-job-service.md).
 

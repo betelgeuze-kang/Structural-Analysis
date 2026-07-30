@@ -164,6 +164,56 @@ def _p0_status() -> dict:
     }
 
 
+def _peer_kpi_receipt() -> dict:
+    return {
+        "schema_version": "hardest-external-case-kpi-receipt.v1",
+        "contract_pass": True,
+        "kpi_rows": [
+            {"label": "case_count", "value": 12, "source": "fixture.summary.case_count"},
+            {
+                "label": "max_drift_ratio_pct_max",
+                "value": 1.25,
+                "source": "fixture.summary.max_drift_ratio_pct_max",
+            },
+            {
+                "label": "peak_plastic_story_count_mean",
+                "value": 2.0,
+                "source": "fixture.summary.peak_plastic_story_count_mean",
+            },
+            {
+                "label": "avg_step_iterations_mean",
+                "value": 3.5,
+                "source": "fixture.summary.avg_step_iterations_mean",
+            },
+            {
+                "label": "residual_drift_ratio_pct_max_abs",
+                "value": 0.08,
+                "source": "fixture.summary.residual_drift_ratio_pct_max_abs",
+            },
+            {
+                "label": "solver_hip_variants",
+                "value": 1,
+                "source": "fixture.summary.solver_hip_variants",
+            },
+        ],
+    }
+
+
+def _open_data_restore_plan() -> dict:
+    return {
+        "schema_version": "open_data_artifact_restore_plan.v1",
+        "ok": True,
+        "summary": {
+            "artifact_count": 1,
+            "already_restored": 1,
+            "cache_ready": 0,
+            "blocked": 0,
+            "total_bytes": 1,
+        },
+        "artifacts": [],
+    }
+
+
 def _pending_external_updates() -> dict:
     return {
         "schema_version": "external-benchmark-submission-updates.v1",
@@ -266,6 +316,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
     coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
     peer = tmp_path / "generated" / "peer_tbi_benchmark_metric_records.json"
+    peer_kpi = tmp_path / "generated" / "peer_tbi_benchmark_kpi_receipt.json"
+    open_data_plan = tmp_path / "generated" / "open_data_restore_plan.json"
     row_provenance = tmp_path / "generated" / "real_project_row_provenance_report.json"
     p1_status = tmp_path / "generated" / "p1-readiness-status.json"
     p1_breadth = tmp_path / "generated" / "p1-benchmark-breadth-status.json"
@@ -276,6 +328,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
     out = tmp_path / "generated" / "clean-checkout-evidence-chain.json"
 
     _write_json(manifest, _manifest())
+    _write_json(peer_kpi, _peer_kpi_receipt())
+    _write_json(open_data_plan, _open_data_restore_plan())
     _write_json(p0_status, _p0_status())
     _write_json(
         evidence_index,
@@ -340,6 +394,10 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_and_generates_ordere
         str(coverage),
         "--peer-metric-records",
         str(peer),
+        "--peer-kpi-receipt",
+        str(peer_kpi),
+        "--open-data-restore-plan",
+        str(open_data_plan),
         "--row-provenance",
         str(row_provenance),
         "--midas-kds-validation-report",
@@ -458,6 +516,8 @@ def test_materialize_clean_checkout_evidence_chain_builds_sidecars_from_complete
     commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
     coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
     peer = tmp_path / "generated" / "peer_tbi_benchmark_metric_records.json"
+    peer_kpi = tmp_path / "generated" / "peer_tbi_benchmark_kpi_receipt.json"
+    open_data_plan = tmp_path / "generated" / "open_data_restore_plan.json"
     row_provenance = tmp_path / "generated" / "real_project_row_provenance_report.json"
     p1_status = tmp_path / "generated" / "p1-readiness-status.json"
     p1_breadth = tmp_path / "generated" / "p1-benchmark-breadth-status.json"
@@ -465,6 +525,8 @@ def test_materialize_clean_checkout_evidence_chain_builds_sidecars_from_complete
     out = tmp_path / "generated" / "clean-checkout-evidence-chain.json"
 
     _write_json(manifest, _manifest())
+    _write_json(peer_kpi, _peer_kpi_receipt())
+    _write_json(open_data_plan, _open_data_restore_plan())
     _write_json(p0_status, _p0_status())
     _write_json(
         evidence_index,
@@ -492,6 +554,10 @@ def test_materialize_clean_checkout_evidence_chain_builds_sidecars_from_complete
             str(coverage),
             "--peer-metric-records",
             str(peer),
+            "--peer-kpi-receipt",
+            str(peer_kpi),
+            "--open-data-restore-plan",
+            str(open_data_plan),
             "--row-provenance",
             str(row_provenance),
             "--midas-kds-validation-report",
@@ -576,6 +642,8 @@ def test_materialize_clean_checkout_evidence_chain_reports_incomplete_intake_bui
     commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
     coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
     peer = tmp_path / "generated" / "peer_tbi_benchmark_metric_records.json"
+    peer_kpi = tmp_path / "generated" / "peer_tbi_benchmark_kpi_receipt.json"
+    open_data_plan = tmp_path / "generated" / "open_data_restore_plan.json"
     row_provenance = tmp_path / "generated" / "real_project_row_provenance_report.json"
     p1_status = tmp_path / "generated" / "p1-readiness-status.json"
     p1_breadth = tmp_path / "generated" / "p1-benchmark-breadth-status.json"
@@ -583,6 +651,8 @@ def test_materialize_clean_checkout_evidence_chain_reports_incomplete_intake_bui
     out = tmp_path / "generated" / "clean-checkout-evidence-chain.json"
 
     _write_json(manifest, _manifest())
+    _write_json(peer_kpi, _peer_kpi_receipt())
+    _write_json(open_data_plan, _open_data_restore_plan())
     _write_json(p0_status, _p0_status())
     _write_json(
         evidence_index,
@@ -610,6 +680,10 @@ def test_materialize_clean_checkout_evidence_chain_reports_incomplete_intake_bui
             str(coverage),
             "--peer-metric-records",
             str(peer),
+            "--peer-kpi-receipt",
+            str(peer_kpi),
+            "--open-data-restore-plan",
+            str(open_data_plan),
             "--row-provenance",
             str(row_provenance),
             "--midas-kds-validation-report",
@@ -687,6 +761,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
     commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
     coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
     peer = tmp_path / "generated" / "peer_tbi_benchmark_metric_records.json"
+    peer_kpi = tmp_path / "generated" / "peer_tbi_benchmark_kpi_receipt.json"
+    open_data_plan = tmp_path / "generated" / "open_data_restore_plan.json"
     row_provenance = tmp_path / "generated" / "real_project_row_provenance_report.json"
     p1_status = tmp_path / "generated" / "p1-readiness-status.json"
     p1_breadth = tmp_path / "generated" / "p1-benchmark-breadth-status.json"
@@ -694,6 +770,8 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
     out = tmp_path / "generated" / "clean-checkout-evidence-chain.json"
 
     _write_json(manifest, _manifest())
+    _write_json(peer_kpi, _peer_kpi_receipt())
+    _write_json(open_data_plan, _open_data_restore_plan())
     _write_json(p0_status, _p0_status())
     _write_json(
         evidence_index,
@@ -781,6 +859,10 @@ def test_materialize_clean_checkout_evidence_chain_hydrates_external_submission_
             str(coverage),
             "--peer-metric-records",
             str(peer),
+            "--peer-kpi-receipt",
+            str(peer_kpi),
+            "--open-data-restore-plan",
+            str(open_data_plan),
             "--row-provenance",
             str(row_provenance),
             "--midas-kds-validation-report",
@@ -876,10 +958,14 @@ def test_materialize_clean_checkout_evidence_chain_keeps_contract_blocked_withou
     commercial_target = tmp_path / "generated" / "commercial_readiness_report.json"
     coverage = tmp_path / "generated" / "real_project_parser_coverage_matrix.json"
     peer = tmp_path / "generated" / "peer_tbi_benchmark_metric_records.json"
+    peer_kpi = tmp_path / "generated" / "peer_tbi_benchmark_kpi_receipt.json"
+    open_data_plan = tmp_path / "generated" / "open_data_restore_plan.json"
     row_provenance = tmp_path / "generated" / "real_project_row_provenance_report.json"
     out = tmp_path / "generated" / "clean-checkout-evidence-chain.json"
 
     _write_json(manifest, _manifest())
+    _write_json(peer_kpi, _peer_kpi_receipt())
+    _write_json(open_data_plan, _open_data_restore_plan())
     _write_json(midas_source, _midas_report())
     _write_json(commercial_source, _commercial_report())
     _write_json(external_submission, _external_submission())
@@ -894,6 +980,10 @@ def test_materialize_clean_checkout_evidence_chain_keeps_contract_blocked_withou
             str(coverage),
             "--peer-metric-records",
             str(peer),
+            "--peer-kpi-receipt",
+            str(peer_kpi),
+            "--open-data-restore-plan",
+            str(open_data_plan),
             "--row-provenance",
             str(row_provenance),
             "--midas-kds-validation-report",

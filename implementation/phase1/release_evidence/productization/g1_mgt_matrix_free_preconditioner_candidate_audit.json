@@ -337,7 +337,7 @@
     "residual_gate_passed": true,
     "solution_data_hash": "sha256:f34beea3dcaeefbb3ad7eb97eeb6c0448124198d69654d09d9189c616dea2b35"
   },
-  "generated_at": "2026-07-26T10:22:10.007203+00:00",
+  "generated_at": "2026-07-28T17:18:35.410819+00:00",
   "hip_current_tangent_execution_preparation": {
     "actual_hardware_execution": true,
     "actual_mgt_fixture": {
@@ -411,7 +411,7 @@
       "kernel_invocation_count": 1,
       "mid_action_d2h_transfer_count": 0,
       "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_hardware_parity_receipt.json",
-      "receipt_hash": "sha256:541017cb792b4f7e66729a4463872a26aa6de948bf317778f3ab37c2f167392b",
+      "receipt_hash": "sha256:a807b0d4746f505c7ce5151b32154cb2077ab2fd50e1f9ab17247236d66e636a",
       "runtime_output_hash": "sha256:f532b25d0596f6cbc076f1fcb9ed4791190770496fa211f3631bcf38a8427b18",
       "schema_version": "g1-mgt-hip-current-tangent-hardware-parity-receipt.v1"
     },
@@ -429,7 +429,7 @@
       "dual_target_host_fixture_parser_execution": true,
       "hip_runtime_api_call_count": 0,
       "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json",
-      "receipt_hash": "sha256:b0fc0084f50d7f2bc2ebdd603fb7633d1c0aad296e13f7ae7d4ab34a2b8638f9",
+      "receipt_hash": "sha256:bd0058768bed8461b0be4ce51934fbb4b63e495b08aa59a3027c34bd66091f8d",
       "schema_version": "g1-mgt-hip-current-tangent-host-parser-receipt.v1",
       "synthetic_and_actual_parser_binary_identity": true,
       "targets": [
@@ -866,7 +866,7 @@
       "reference_matrix_nnz": 1262462,
       "reference_preconditioner_contract_hash": "sha256:ef34a0e2f9031e8beec7e76725199a443b8144fbd5630776252526615d9d0d86",
       "row_permutation_data_hash": "sha256:b98f253062002e421ee77d77ee0b46dedeb7fbd31a4f85bfd573d1251f5d802b",
-      "scipy_version": "1.12.0",
+      "scipy_version": "1.15.3",
       "serialized_backend_neutral_factor_artifact_claim": true,
       "upper_factor": {
         "nnz": 6579694,
@@ -961,8 +961,8 @@
     "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json": "sha256:1cc3f97c879d72f2f2457509062f810f774fc5ce9f882a4e80044f028068fed5",
     "implementation/phase1/release_evidence/productization/engine_v2_hip_sparse_lu_apply_compile_receipt.json": "sha256:7a800bb71ebc9f0adaa02952db15d0e1e73b982865f814a2b24c0ea4a55eabd2",
     "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_action.f64le": "sha256:9c2eb32c3e568252b0b1a5c3b9e2f8176df19f597742fe6d1439b5cb733a97ab",
-    "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_hardware_parity_receipt.json": "sha256:4f55683ec76fce98e1730c9d75060cce73855fdd4e85c7d8b2e2705caae9aed4",
-    "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json": "sha256:91fb8943c3acb3ea70c95094e12a7f8c7db8454d2bdfcdfef6e291017d1995e3",
+    "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_hardware_parity_receipt.json": "sha256:563326c7286a3dff67d2facb89400b97d0b17c94e8fcdc0de2e96dfe34a74ca2",
+    "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json": "sha256:391d669baa306eb637fc2a5723ca89c9668ae2fcb2cc061014da630228b56cb2",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
     "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:88b0c6ee0c9bf8640dffde0cef4d0972539a398dd30a5ab354558b9992dc974a",
     "scripts/build_g1_mgt_matrix_free_preconditioner_candidate_audit.py": "sha256:64833041ca4b3e7e7dc835baec65ae393838c80e4b9800906269a50c00dcfe41",
@@ -979,7 +979,7 @@
     "src/structural_analysis/schemas/g1_mgt_matrix_free_preconditioner_candidate_audit_v1.schema.json": "sha256:c3cab4224d4b16ee12861a3083b231bf37ee226512e813ed06bd48d70884b8c3",
     "src/structural_analysis/schemas/hip_current_tangent_operator_compile_receipt_v1.schema.json": "sha256:9f61bc703756fbd2bb81c7edc80955c996f20fa24a9bd25846cb1f857a33186c",
     "src/structural_analysis/schemas/hip_current_tangent_operator_parity_v1.schema.json": "sha256:8a05dc056e0c205a718d9a339706ff221b7ef56ef35987267ba79e9d283da9f4",
-    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:8f9190f4b13112523f15e5c69b3f7d4e2eb31b7725331c0f5ed385ac7ade4804",
+    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:4ef27ccf8db7613c32f84165c1813c72663513c2e670f298a75db41c0c25f808",
     "src/structural_analysis/solvers/nonlinear/canonical_sparse_lu.py": "sha256:49f74473bf9fadea781bcdaf270af556ac8c80108d36d04f265e68fabe26abf1",
     "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py": "sha256:02c9d30c47759562ab66c92422105078c5a987bc8f4bafe6027a8c3b07a01058",
     "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:49a99e9882f6810569bac5d2cbecb5f5809c795edcc9fde69da7641eaac00dec",
@@ -1175,7 +1175,7 @@
   "readiness_pass": false,
   "schema_version": "g1-mgt-matrix-free-preconditioner-candidate-audit.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "322aa400a9f9ec8338893cba62071458b1c19f24",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }

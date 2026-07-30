@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from implementation.phase1.hardest_external_10case_catalog import CASE_CATALOG
+
 
 def _write_json(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -19,6 +21,23 @@ def test_run_hardest_external_10case_program_executes_all_cases(tmp_path: Path) 
     approve_all_preview = kickoff_dir / "external_benchmark_submission_readiness_preview.approve_all.json"
     reject_one_preview = kickoff_dir / "external_benchmark_submission_readiness_preview.reject_one.json"
     decision_runner = kickoff_dir / "audit_review_decision_batch_run_report.json"
+    case_source_root = tmp_path / "case_sources"
+
+    for case in CASE_CATALOG:
+        source_paths = [
+            str(case["primary_report_path"]),
+            *[str(path) for path in case.get("supporting_reports", {}).values()],
+        ]
+        for source_path in source_paths:
+            _write_json(
+                case_source_root / source_path,
+                {
+                    "contract_pass": True,
+                    "reason_code": "PASS_TEST_FIXTURE",
+                    "summary": {"case_count": 1, "selected_case_count": 1},
+                    "metrics": {"step_count": 1, "converged_ratio": 1.0},
+                },
+            )
 
     _write_json(
         hardest_report,
@@ -87,6 +106,8 @@ def test_run_hardest_external_10case_program_executes_all_cases(tmp_path: Path) 
             str(kickoff_dir / "runs"),
             "--out",
             str(kickoff_dir / "hardest_external_10case_program_report.json"),
+            "--case-source-root",
+            str(case_source_root),
             "--no-refresh-release-surfaces",
         ],
         cwd=Path(__file__).resolve().parents[1],

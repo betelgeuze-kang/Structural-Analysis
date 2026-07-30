@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded-frame3d-direct-control-result-v1.schema.json",
+  "title": "Bounded Frame3D direct-control candidate API result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "status",
+    "contract_pass",
+    "result_hash",
+    "source_binding",
+    "control",
+    "model_hash",
+    "solver_result_hash",
+    "terminal_reason_code",
+    "metrics",
+    "node_displacements",
+    "support_reactions",
+    "material_states",
+    "checkpoint_artifact",
+    "authority",
+    "warnings",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "bounded-frame3d-direct-control-result.v1"},
+    "profile": {"const": "bounded_frame3d_direct_displacement_control_model_ir_api.v1"},
+    "status": {"enum": ["ready", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "result_hash": {"$ref": "#/$defs/hash"},
+    "source_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model_ir_content_hash", "model_ir_semantic_hash", "model_ir_provenance_hash", "adapter_hash", "adapter_profile", "load_pattern_id"],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_semantic_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_provenance_hash": {"$ref": "#/$defs/hash"},
+        "adapter_hash": {"$ref": "#/$defs/hash"},
+        "adapter_profile": {"const": "model_ir_v2_to_stateful_corotational_frame3d_direct_control.v1"},
+        "load_pattern_id": {"$ref": "#/$defs/stableId"}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "control_node_id", "control_dof", "control_unit", "control_targets", "solver_config", "resume_contract_hash", "request_hash", "control_global_dof"],
+      "properties": {
+        "profile": {"const": "bounded_frame3d_direct_displacement_control_model_ir_api.v1"},
+        "control_node_id": {"$ref": "#/$defs/stableId"},
+        "control_dof": {"$ref": "#/$defs/dof"},
+        "control_unit": {"enum": ["m", "rad"]},
+        "control_targets": {"type": "array", "minItems": 1, "maxItems": 4096, "items": {"type": "number"}},
+        "solver_config": {"type": "object", "minProperties": 1},
+        "resume_contract_hash": {"$ref": "#/$defs/hash"},
+        "request_hash": {"$ref": "#/$defs/hash"},
+        "control_global_dof": {"type": "integer", "minimum": 0, "maximum": 767}
+      }
+    },
+    "model_hash": {"$ref": "#/$defs/hash"},
+    "solver_result_hash": {"$ref": "#/$defs/hash"},
+    "terminal_reason_code": {"type": ["string", "null"]},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requested_target_count", "completed_requested_target_count", "solve_attempt_count", "accepted_checkpoint_count", "target_cutback_attempt_count", "adaptive_target_cutback_used", "final_checkpoint_at_requested_target_boundary", "exact_checkpoint_resume_supported", "final_load_factor", "final_control_coordinate", "raw_translational_residual_inf_norm_kn", "raw_rotational_residual_inf_norm_kn_m", "scaled_residual_inf_norm", "scaled_residual_tolerance", "equation_scaling_hash", "maximum_accumulated_plastic_strain", "regularization_used", "fallback_used"],
+      "properties": {
+        "requested_target_count": {"type": "integer", "minimum": 1},
+        "completed_requested_target_count": {"type": "integer", "minimum": 0},
+        "solve_attempt_count": {"type": "integer", "minimum": 0},
+        "accepted_checkpoint_count": {"type": "integer", "minimum": 0},
+        "target_cutback_attempt_count": {"type": "integer", "minimum": 0},
+        "requested_direction_reversal_count": {"type": "integer", "minimum": 0},
+        "completed_direction_reversal_count": {"type": "integer", "minimum": 0},
+        "resumed_with_direction_reversal": {"type": "boolean"},
+        "path_mode": {"enum": ["monotonic_v1", "cyclic_reversal"]},
+        "cumulative_completed_target_count": {"type": "integer", "minimum": 0},
+        "cumulative_direction_reversal_count": {"type": "integer", "minimum": 0},
+        "accepted_target_chain_hash": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "adaptive_target_cutback_used": {"type": "boolean"},
+        "final_checkpoint_at_requested_target_boundary": {"type": "boolean"},
+        "exact_checkpoint_resume_supported": {"type": "boolean"},
+        "final_load_factor": {"type": "number"},
+        "final_control_coordinate": {"type": "number"},
+        "raw_translational_residual_inf_norm_kn": {"type": "number", "minimum": 0},
+        "raw_rotational_residual_inf_norm_kn_m": {"type": "number", "minimum": 0},
+        "scaled_residual_inf_norm": {"type": "number", "minimum": 0},
+        "scaled_residual_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "equation_scaling_hash": {"$ref": "#/$defs/hash"},
+        "maximum_accumulated_plastic_strain": {"type": "number", "minimum": 0},
+        "regularization_used": {"const": false},
+        "fallback_used": {"const": false}
+      }
+    },
+    "node_displacements": {"type": "array", "minItems": 2, "maxItems": 128, "items": {"$ref": "#/$defs/nodeDisplacement"}},
+    "support_reactions": {"type": "array", "minItems": 1, "maxItems": 768, "items": {"$ref": "#/$defs/reaction"}},
+    "material_states": {"type": "array", "minItems": 1, "maxItems": 256, "items": {"$ref": "#/$defs/materialState"}},
+    "checkpoint_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available", "schema_version", "artifact_hash", "byte_length", "checkpoint_hash", "exact_resume_supported"],
+      "properties": {
+        "available": {"type": "boolean"},
+        "schema_version": {"type": ["string", "null"]},
+        "artifact_hash": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "byte_length": {"type": "integer", "minimum": 0},
+        "checkpoint_hash": {"$ref": "#/$defs/hash"},
+        "exact_resume_supported": {"type": "boolean"}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_api_exposed", "capability_registry_public", "workbench_execution", "numerical_authority", "recovery_authority", "external_vv_level", "independent_operator_attached", "design_authority", "formal_verification_level_2", "release_eligible"],
+      "properties": {
+        "candidate_api_exposed": {"const": true},
+        "capability_registry_public": {"const": false},
+        "workbench_execution": {"const": false},
+        "numerical_authority": {"const": "bounded_candidate"},
+        "recovery_authority": {"const": "node_and_support_candidate"},
+        "external_vv_level": {"const": 0},
+        "independent_operator_attached": {"const": false},
+        "design_authority": {"const": false},
+        "formal_verification_level_2": {"const": false},
+        "release_eligible": {"const": false}
+      }
+    },
+    "warnings": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "ready"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "contract_pass": {"const": true},
+          "terminal_reason_code": {"type": "null"},
+          "metrics": {
+            "properties": {
+              "final_checkpoint_at_requested_target_boundary": {"const": true},
+              "exact_checkpoint_resume_supported": {"const": true}
+            }
+          },
+          "checkpoint_artifact": {
+            "properties": {
+              "available": {"const": true},
+              "exact_resume_supported": {"const": true}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"status": {"const": "blocked"}}, "required": ["status"]},
+      "then": {
+        "properties": {
+          "contract_pass": {"const": false},
+          "terminal_reason_code": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_artifact": {
+            "properties": {"available": {"const": true}},
+            "required": ["available"]
+          }
+        },
+        "required": ["checkpoint_artifact"]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_artifact": {
+            "properties": {
+              "schema_version": {"const": "bounded-frame3d-direct-control-checkpoint-artifact.v1"},
+              "artifact_hash": {"$ref": "#/$defs/hash"},
+              "byte_length": {"type": "integer", "minimum": 1},
+              "exact_resume_supported": {"const": true}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "checkpoint_artifact": {
+            "properties": {"available": {"const": false}},
+            "required": ["available"]
+          }
+        },
+        "required": ["checkpoint_artifact"]
+      },
+      "then": {
+        "properties": {
+          "checkpoint_artifact": {
+            "properties": {
+              "schema_version": {"type": "null"},
+              "artifact_hash": {"type": "null"},
+              "byte_length": {"const": 0},
+              "exact_resume_supported": {"const": false}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "stableId": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "dof": {"enum": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+    "nodeDisplacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "UX_m", "UY_m", "UZ_m", "RX_rad", "RY_rad", "RZ_rad"],
+      "properties": {
+        "node_id": {"$ref": "#/$defs/stableId"},
+        "UX_m": {"type": "number"}, "UY_m": {"type": "number"}, "UZ_m": {"type": "number"},
+        "RX_rad": {"type": "number"}, "RY_rad": {"type": "number"}, "RZ_rad": {"type": "number"}
+      }
+    },
+    "reaction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "dof", "value", "unit"],
+      "properties": {
+        "node_id": {"$ref": "#/$defs/stableId"},
+        "dof": {"$ref": "#/$defs/dof"},
+        "value": {"type": "number"},
+        "unit": {"enum": ["kN", "kN_m"]}
+      }
+    },
+    "materialState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["member_id", "material_id", "plastic_strain", "backstress_mpa", "accumulated_plastic_strain", "dissipated_energy_density_mj_per_m3", "state_hash"],
+      "properties": {
+        "member_id": {"$ref": "#/$defs/stableId"},
+        "material_id": {"$ref": "#/$defs/stableId"},
+        "plastic_strain": {"type": "number"},
+        "backstress_mpa": {"type": "number"},
+        "accumulated_plastic_strain": {"type": "number", "minimum": 0},
+        "dissipated_energy_density_mj_per_m3": {"type": "number", "minimum": 0},
+        "state_hash": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}

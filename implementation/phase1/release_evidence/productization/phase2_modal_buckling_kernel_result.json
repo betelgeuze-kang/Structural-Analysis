@@ -1,6 +1,6 @@
 {
   "analysis_scope": "dense_symmetric_generalized_eigen_matrix_kernels",
-  "artifact_hash": "sha256:e610ce8c74cda751e9012f50eb92b3bd33c75f7c192524e92c35a1e4553d5324",
+  "artifact_hash": "sha256:b7c265c102426ce6d7d18b90068f4a1b3502afbb82d80eca61d3b9373ceabb01",
   "blockers_remaining": [
     "whole_model_modal_assembly_not_connected",
     "whole_model_buckling_assembly_not_connected",
@@ -36,14 +36,14 @@
       "src/structural_analysis/schemas/modal_buckling_kernel_v1.schema.json": "sha256:08196f499271f6eed1ac2905c8a8d4b6237b87a2a6ce1de962bb51ded448c5e4",
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
       "src/structural_analysis/solvers/buckling/__init__.py": "sha256:3106196c1dfa87b96508ed7523e5ce46716e8b6609baef44c2180452b563e823",
-      "src/structural_analysis/solvers/buckling/solver.py": "sha256:589128f26a0f1c35a4b121de87e3bc28dedbefba17807ca485424475aa18542b",
+      "src/structural_analysis/solvers/buckling/solver.py": "sha256:b3572a2513274c4195735d958758ba67c284ca2c06e4bbda6e3ef9c25fc5f75d",
       "src/structural_analysis/solvers/modal/__init__.py": "sha256:31560958dad11385c572193c91095d80701239514bef91fbafdb08514739332f",
-      "src/structural_analysis/solvers/modal/solver.py": "sha256:f3e61d0d0f061abf1304a41408be83b2c01b2e607bdd0de5a6f4f21cb66976bb",
-      "tests/test_buckling_generalized_eigen_v1.py": "sha256:5a31bc9ecdaa8cb5a8ba101966afeb1891493e3cb8b6e643ae27867d06b0c361",
+      "src/structural_analysis/solvers/modal/solver.py": "sha256:91109241e086ea4f24be4a8d4a3485a6ac185959e5d7b5b09b093dd8a75af523",
+      "tests/test_buckling_generalized_eigen_v1.py": "sha256:2ef4b1fa247fc4a284af513d7a39c52e47cc23ecbaaa91751adca43e5358996d",
       "tests/test_build_phase2_modal_buckling_kernel_artifacts.py": "sha256:001dcd0f06a933f8faf072f0f7df878ec52f13506fa6b041e2a268ea80fa25ef",
-      "tests/test_modal_generalized_eigen_v1.py": "sha256:6c5bd492de2b741c7aef041cf31ad30442845b2a29150250769020323af87209"
+      "tests/test_modal_generalized_eigen_v1.py": "sha256:9788bc60da560c24d09de867edb054f96cc9ed22e3af1ce27e80ed52f910d1a4"
     },
-    "source_set_hash": "sha256:d0afe11cfb8a89b4f3a3e6f4fc35667a5299949fcf78993e6848f94cef9baf86"
+    "source_set_hash": "sha256:4b57d6f55e37fdad7de402a0505c45e2a56a82667bf335a1f62dfcef63bfc0ea"
   },
   "status": "partial",
   "summary": {

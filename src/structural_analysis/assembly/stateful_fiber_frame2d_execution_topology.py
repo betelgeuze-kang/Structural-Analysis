@@ -31,6 +31,15 @@ from structural_analysis.assembly.stateful_fiber_frame2d import (
     STATEFUL_FIBER_FRAME2D_TRANSFORMATION,
     StatefulFiberFrame2DProblem,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
+    STATEFUL_COROTATIONAL_FIBER_FRAME2D_ASSEMBLY,
+    STATEFUL_COROTATIONAL_FIBER_FRAME2D_COORDINATE_SCALING,
+    STATEFUL_COROTATIONAL_FIBER_FRAME2D_SCHEMA_VERSION,
+    StatefulCorotationalFiberFrame2DProblem,
+)
+from structural_analysis.assembly.corotational_frame2d_member_features import (
+    consistent_uniform_load_element_global,
+)
 from structural_analysis.engine_v2.contracts._canonical import (
     CanonicalContractError,
     array_content_hash,
@@ -84,6 +93,10 @@ _HASH_ZERO = "sha256:" + "0" * 64
 _HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 _STABLE_ID_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 _MAX_INDEX = 2**31 - 1
+
+FiberFrame2DTopologyProblem = (
+    StatefulFiberFrame2DProblem | StatefulCorotationalFiberFrame2DProblem
+)
 
 _PLAN_ARRAY_SPECS = (
     ("node_coordinates_xy_m", "<f8"),
@@ -241,7 +254,7 @@ class FiberFrameNonlinearExecutionTopologyPlan:
 
 
 def compile_stateful_fiber_frame2d_execution_topology(
-    problem: StatefulFiberFrame2DProblem,
+    problem: FiberFrame2DTopologyProblem,
     *,
     model_ir_content_hash: str,
     node_ids: Sequence[str] | None = None,
@@ -253,11 +266,11 @@ def compile_stateful_fiber_frame2d_execution_topology(
     It freezes nonlinear kinematic topology only and carries no result authority.
     """
 
-    if type(problem) is not StatefulFiberFrame2DProblem:
+    if not _is_supported_problem(problem):
         _fail(
             "fiber_frame_topology_problem_type_invalid",
             "/problem",
-            "Expected exact StatefulFiberFrame2DProblem.",
+            "Expected an exact supported stateful planar fiber-frame problem.",
         )
     model_hash = _require_hash(model_ir_content_hash, "/model_ir_content_hash")
     nodes = _normalize_node_ids(node_ids, len(problem.node_coordinates_m))
@@ -278,13 +291,7 @@ def compile_stateful_fiber_frame2d_execution_topology(
         _array_descriptor(name, arrays[name]) for name in _PLAN_ARRAY_NAMES
     )
     source_rows = [
-        {
-            "member_index": index,
-            "member_id": member.member_id,
-            "node_i": member.node_i,
-            "node_j": member.node_j,
-            "element_contract_hash": member.element.contract_hash,
-        }
+        _member_source_row(index, member)
         for index, member in enumerate(problem.members)
     ]
     source_identity_hash = canonical_hash(
@@ -297,9 +304,7 @@ def compile_stateful_fiber_frame2d_execution_topology(
             ),
             "members": source_rows,
             "fixed_solver_dofs": list(problem.fixed_global_dofs),
-            "reference_external_loads": [
-                [dof, value] for dof, value in problem.reference_external_loads
-            ],
+            "reference_external_loads": _reference_external_load_source_rows(problem),
             "rotation_coordinate_scale_m": problem.rotation_coordinate_scale_m,
         }
     )
@@ -338,12 +343,13 @@ def compile_stateful_fiber_frame2d_execution_topology(
     )
     operator_hash = canonical_hash(
         {
-            "source_schema_version": STATEFUL_FIBER_FRAME2D_SCHEMA_VERSION,
+            "source_schema_version": _problem_schema_version(problem),
             "problem_contract_hash": problem.contract_hash,
-            "transformation": STATEFUL_FIBER_FRAME2D_TRANSFORMATION,
+            "transformation": _problem_transformation(problem),
             "member_element_contract_hashes": [
                 member.element.contract_hash for member in problem.members
             ],
+            **_member_feature_operator_binding(problem),
             "residual_sign": "internal_minus_external",
         }
     )
@@ -539,17 +545,17 @@ def validate_fiber_frame_execution_topology_plan(
 
 
 def validate_fiber_frame_execution_topology_against_problem(
-    problem: StatefulFiberFrame2DProblem,
+    problem: FiberFrame2DTopologyProblem,
     plan: FiberFrameNonlinearExecutionTopologyPlan,
 ) -> FiberFrameNonlinearExecutionTopologyPlan:
     """Recompile source-dependent identities and compare exact array bytes."""
 
     validate_fiber_frame_execution_topology_plan(plan)
-    if type(problem) is not StatefulFiberFrame2DProblem:
+    if not _is_supported_problem(problem):
         _fail(
             "fiber_frame_topology_problem_type_invalid",
             "/problem",
-            "Expected exact StatefulFiberFrame2DProblem.",
+            "Expected an exact supported stateful planar fiber-frame problem.",
         )
     if plan.problem_contract_hash != problem.contract_hash:
         _fail(
@@ -590,13 +596,7 @@ def validate_fiber_frame_execution_topology_against_problem(
         _array_descriptor(name, expected_arrays[name]) for name in _PLAN_ARRAY_NAMES
     )
     source_rows = [
-        {
-            "member_index": index,
-            "member_id": member.member_id,
-            "node_i": member.node_i,
-            "node_j": member.node_j,
-            "element_contract_hash": member.element.contract_hash,
-        }
+        _member_source_row(index, member)
         for index, member in enumerate(problem.members)
     ]
     expected_source_identity_hash = canonical_hash(
@@ -609,9 +609,7 @@ def validate_fiber_frame_execution_topology_against_problem(
             ),
             "members": source_rows,
             "fixed_solver_dofs": list(problem.fixed_global_dofs),
-            "reference_external_loads": [
-                [dof, value] for dof, value in problem.reference_external_loads
-            ],
+            "reference_external_loads": _reference_external_load_source_rows(problem),
             "rotation_coordinate_scale_m": problem.rotation_coordinate_scale_m,
         }
     )
@@ -671,12 +669,13 @@ def validate_fiber_frame_execution_topology_against_problem(
 
     expected_operator_hash = canonical_hash(
         {
-            "source_schema_version": STATEFUL_FIBER_FRAME2D_SCHEMA_VERSION,
+            "source_schema_version": _problem_schema_version(problem),
             "problem_contract_hash": problem.contract_hash,
-            "transformation": STATEFUL_FIBER_FRAME2D_TRANSFORMATION,
+            "transformation": _problem_transformation(problem),
             "member_element_contract_hashes": [
                 member.element.contract_hash for member in problem.members
             ],
+            **_member_feature_operator_binding(problem),
             "residual_sign": "internal_minus_external",
         }
     )
@@ -793,12 +792,6 @@ def validate_fiber_frame_solver_coordinate_scaling(
             "fiber_frame_scaling_reference_load_map_invalid",
             "/solver_coordinate_scaling/arrays/reference_load_generalized_solver_order",
             "Generalized reference load does not match the coordinate Jacobian.",
-        )
-    if not np.any(physical_load != 0.0):
-        _fail(
-            "fiber_frame_scaling_reference_load_zero",
-            "/solver_coordinate_scaling/arrays/reference_load_physical_solver_order",
-            "Scaling receipt requires a nonzero reference load.",
         )
     if not isinstance(receipt.extensions, MappingProxyType) or receipt.extensions:
         _fail(
@@ -1221,8 +1214,87 @@ def validate_fiber_frame_execution_topology_manifest(
     return normalized
 
 
+def _is_supported_problem(problem: Any) -> bool:
+    return type(problem) in (
+        StatefulFiberFrame2DProblem,
+        StatefulCorotationalFiberFrame2DProblem,
+    )
+
+
+def _problem_schema_version(problem: FiberFrame2DTopologyProblem) -> str:
+    if type(problem) is StatefulFiberFrame2DProblem:
+        return STATEFUL_FIBER_FRAME2D_SCHEMA_VERSION
+    return STATEFUL_COROTATIONAL_FIBER_FRAME2D_SCHEMA_VERSION
+
+
+def _problem_transformation(problem: FiberFrame2DTopologyProblem) -> str:
+    if type(problem) is StatefulFiberFrame2DProblem:
+        return STATEFUL_FIBER_FRAME2D_TRANSFORMATION
+    return (
+        f"{STATEFUL_COROTATIONAL_FIBER_FRAME2D_ASSEMBLY};"
+        f"{STATEFUL_COROTATIONAL_FIBER_FRAME2D_COORDINATE_SCALING}"
+    )
+
+
+def _member_source_row(index: int, member: Any) -> dict[str, Any]:
+    row = {
+        "member_index": index,
+        "member_id": member.member_id,
+        "node_i": member.node_i,
+        "node_j": member.node_j,
+        "element_contract_hash": member.element.contract_hash,
+    }
+    if hasattr(member, "features"):
+        row["feature_contract_hash"] = member.features.contract_hash
+    return row
+
+
+def _member_feature_operator_binding(
+    problem: FiberFrame2DTopologyProblem,
+) -> dict[str, Any]:
+    if type(problem) is StatefulFiberFrame2DProblem:
+        return {}
+    return {
+        "member_feature_contract_hashes": [
+            member.features.contract_hash for member in problem.members
+        ]
+    }
+
+
+def _reference_external_load_source_rows(
+    problem: FiberFrame2DTopologyProblem,
+) -> list[list[Any]]:
+    return [[dof, value] for dof, value in problem.reference_external_loads]
+
+
+def _complete_reference_external_load_vector(
+    problem: FiberFrame2DTopologyProblem,
+) -> np.ndarray:
+    vector = np.array(
+        problem.reference_external_load_vector(),
+        dtype=np.float64,
+        copy=True,
+        order="C",
+    )
+    if type(problem) is StatefulCorotationalFiberFrame2DProblem:
+        for member in problem.members:
+            equivalent = consistent_uniform_load_element_global(
+                member.element,
+                member.features,
+            )
+            vector[list(problem.member_global_dofs(member))] += equivalent
+    if not np.all(np.isfinite(vector)):
+        _fail(
+            "fiber_frame_topology_reference_load_nonfinite",
+            "/arrays/reference_external_load_physical_6dof",
+            "Complete nodal and member reference load must remain finite.",
+        )
+    vector.setflags(write=False)
+    return vector
+
+
 def _create_solver_coordinate_scaling(
-    problem: StatefulFiberFrame2DProblem,
+    problem: FiberFrame2DTopologyProblem,
 ) -> FiberFrameSolverCoordinateScalingReceipt:
     scale_length = problem.rotation_coordinate_scale_m
     if scale_length < 1.0 / np.finfo(np.float64).max:
@@ -1259,7 +1331,7 @@ def _create_solver_coordinate_scaling(
         "/solver_coordinate_scaling/arrays/generalized_from_physical_scale",
     )
     physical_load = _immutable_contract_array(
-        problem.reference_external_load_vector(),
+        _complete_reference_external_load_vector(problem),
         "<f8",
         "/solver_coordinate_scaling/arrays/reference_load_physical_solver_order",
     )
@@ -1285,9 +1357,8 @@ def _create_solver_coordinate_scaling(
             "rotation_coordinate_scale_m": problem.rotation_coordinate_scale_m,
             "fixed_solver_dofs": list(problem.fixed_global_dofs),
             "free_solver_dofs": list(problem.free_global_dofs),
-            "reference_external_loads": [
-                [dof, value] for dof, value in problem.reference_external_loads
-            ],
+            "reference_external_loads": _reference_external_load_source_rows(problem),
+            **_member_feature_operator_binding(problem),
             "array_content_hashes": {
                 descriptor.name: descriptor.content_hash for descriptor in descriptors
             },
@@ -1316,7 +1387,7 @@ def _create_solver_coordinate_scaling(
 
 
 def _compile_plan_arrays(
-    problem: StatefulFiberFrame2DProblem,
+    problem: FiberFrame2DTopologyProblem,
 ) -> Mapping[str, np.ndarray]:
     node_count = len(problem.node_coordinates_m)
     physical_dof_count = 6 * node_count
@@ -1379,7 +1450,9 @@ def _compile_plan_arrays(
     member_solver = np.vstack(member_solver_rows).astype(np.int32, copy=False)
     row_ptr, columns = _csr_pattern(physical_dof_count, member_active)
     physical_load = np.zeros(physical_dof_count, dtype=np.float64)
-    physical_load[solver_to_physical] = problem.reference_external_load_vector()
+    physical_load[solver_to_physical] = _complete_reference_external_load_vector(
+        problem
+    )
     values: dict[str, tuple[Any, str]] = {
         "node_coordinates_xy_m": (problem.node_coordinates_m, "<f8"),
         "node_dof_indices": (node_dofs, "<i4"),
@@ -2307,6 +2380,7 @@ __all__ = [
     "FIBER_FRAME_SOLVER_COORDINATE_SCALING_SCHEMA_VERSION",
     "FIBER_FRAME_SOLVER_DOF_COMPONENTS",
     "FiberFrameExecutionTopologyError",
+    "FiberFrame2DTopologyProblem",
     "FiberFrameNonlinearExecutionTopologyPlan",
     "FiberFrameSolverCoordinateScalingReceipt",
     "FiberFrameTopologyArrayDescriptor",

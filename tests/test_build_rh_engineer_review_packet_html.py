@@ -9,10 +9,15 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_build_rh_engineer_review_html() -> None:
-    out = REPO_ROOT / "implementation/phase1/release_evidence/productization/rh_engineer_review_packet_test.html"
+def test_build_rh_engineer_review_html(tmp_path: Path) -> None:
+    out = tmp_path / "rh_engineer_review_packet_test.html"
     proc = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts/build_rh_engineer_review_packet_html.py"), "--output-html", str(out)],
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_rh_engineer_review_packet_html.py"),
+            "--output-html",
+            str(out),
+        ],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,

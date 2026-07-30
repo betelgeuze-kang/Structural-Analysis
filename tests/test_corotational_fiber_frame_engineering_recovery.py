@@ -112,6 +112,7 @@ def test_exact_recovery_binds_all_engineering_axes_and_si_quantities() -> None:
     assert result.artifact("fiber_stress_pa").shape == (126,)
     assert result.authority_axes["fallback"] == "not_used"
     assert result.authority_axes["public_api"] == "not_promoted"
+    assert result.authority_axes["member_features"] == "not_supported"
     assert (
         validate_corotational_fiber_frame_engineering_result_manifest(manifest)
         == manifest

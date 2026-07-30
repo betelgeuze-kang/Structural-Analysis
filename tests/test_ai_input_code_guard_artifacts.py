@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -11,13 +12,22 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_build_ai_input_code_guard_artifacts_current_lane() -> None:
+def test_build_ai_input_code_guard_artifacts_current_lane(tmp_path: Path) -> None:
+    productization = tmp_path / "productization"
+    productization.mkdir()
+    source = REPO_ROOT / "implementation/phase1/release_evidence/productization"
+    for name in (
+        "design_optimization_cost_reduction_changes.json",
+        "load_stage_semantics_contract.json",
+        "ai_review_queue.json",
+    ):
+        shutil.copy2(source / name, productization / name)
     proc = subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/build_ai_input_code_guard_artifacts.py"),
             "--productization-dir",
-            str(REPO_ROOT / "implementation/phase1/release_evidence/productization"),
+            str(productization),
         ],
         cwd=REPO_ROOT,
         check=False,
@@ -26,18 +36,15 @@ def test_build_ai_input_code_guard_artifacts_current_lane() -> None:
     )
     assert proc.returncode == 0, proc.stderr + proc.stdout
     index = json.loads(
-        (REPO_ROOT / "implementation/phase1/release_evidence/productization/ai_input_code_guard_artifacts.json")
-        .read_text(encoding="utf-8")
+        (productization / "ai_input_code_guard_artifacts.json").read_text(encoding="utf-8")
     )
     input_receipt = json.loads(
         (
-            REPO_ROOT
-            / "implementation/phase1/release_evidence/productization/ai_input_semantic_normalization_receipt.json"
+            productization / "ai_input_semantic_normalization_receipt.json"
         ).read_text(encoding="utf-8")
     )
     code_guard = json.loads(
-        (REPO_ROOT / "implementation/phase1/release_evidence/productization/ai_code_reasoning_guard.json")
-        .read_text(encoding="utf-8")
+        (productization / "ai_code_reasoning_guard.json").read_text(encoding="utf-8")
     )
     assert index["schema_version"] == "ai-input-code-guard-artifacts.v1"
     assert index["status"] == "ready"

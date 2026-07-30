@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 import warnings as warnings_module
 
 import numpy as np
@@ -21,6 +21,14 @@ from structural_analysis.assembly.linear_static import (
 )
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.results.viewer import build_linear_static_viewer_payload
+from structural_analysis.solvers.equation_scaling_6dof import (
+    EquationScaling6DOF,
+    create_equation_scaling_6dof,
+    exact_scaled_condition_number_1,
+    scale_linear_system_6dof,
+    scaled_increment_metrics_6dof,
+    scaled_residual_metrics_6dof,
+)
 
 MATRIX_BACKEND = "numpy_linalg_solve_dense"
 SPARSE_MATRIX_BACKEND = "scipy_sparse_spsolve_cpu"
@@ -143,27 +151,52 @@ def _solve_linear_static(
     constrained = set(assembly.constrained_dofs)
     active = set(assembly.active_dofs)
     free = sorted(active - constrained)
-    free_displacements = np.zeros(len(free), dtype=float)
+    free_displacements: np.ndarray = np.zeros(len(free), dtype=float)
+    equation_scaling: EquationScaling6DOF | None = None
+    scaled_condition_number: float | None = None
     if free:
         free_stiffness = assembly.stiffness[np.ix_(free, free)]
         free_loads = assembly.loads[free]
+        equation_scaling = create_equation_scaling_6dof(
+            source_identity_hash=model.canonical_model_checksum,
+            node_coordinates_m=assembly.node_coordinates,
+            reference_equation_load=assembly.loads,
+            free_dofs=free,
+        )
+        scaled_stiffness, scaled_loads, displacement_recovery_scale = (
+            scale_linear_system_6dof(
+                free_stiffness,
+                free_loads,
+                free,
+                equation_scaling,
+            )
+        )
+        scaled_condition_number = exact_scaled_condition_number_1(
+            scaled_stiffness
+        )
         try:
             if sparse_backend_used:
+                scaled_sparse_stiffness = cast(csr_matrix, scaled_stiffness)
                 rank_deficiency_detail = _small_sparse_rank_deficiency_detail(
-                    free_stiffness.tocsr()
+                    scaled_sparse_stiffness
                 )
                 if rank_deficiency_detail is not None:
                     raise ValueError(rank_deficiency_detail)
                 with warnings_module.catch_warnings():
                     warnings_module.simplefilter("error", MatrixRankWarning)
                     free_displacements = np.asarray(
-                        spsolve(free_stiffness.tocsc(), free_loads),
+                        spsolve(scaled_sparse_stiffness.tocsc(), scaled_loads),
                         dtype=float,
                     )
                 if not np.all(np.isfinite(free_displacements)):
                     raise ValueError("sparse solve returned non-finite displacements")
             else:
-                free_displacements = np.linalg.solve(free_stiffness, free_loads)
+                scaled_dense_stiffness = cast(np.ndarray, scaled_stiffness)
+                free_displacements = np.linalg.solve(
+                    scaled_dense_stiffness,
+                    scaled_loads,
+                )
+            free_displacements = displacement_recovery_scale * free_displacements
         except (np.linalg.LinAlgError, ValueError, MatrixRankWarning) as exc:
             return _blocked_response(
                 [
@@ -209,24 +242,34 @@ def _solve_linear_static(
         if reaction_constrained.size
         else 0.0
     )
-    load_norm = (
-        float(np.linalg.norm(assembly.loads, ord=np.inf))
-        if assembly.loads.size
-        else 0.0
-    )
     displacement_norm = (
         float(np.linalg.norm(displacements, ord=np.inf))
         if displacements.size
         else 0.0
     )
-    relative_residual = residual_norm / max(load_norm, 1.0)
+    if equation_scaling is not None:
+        residual_scaling = scaled_residual_metrics_6dof(
+            residual_free,
+            free,
+            equation_scaling,
+        )
+        increment_scaling = scaled_increment_metrics_6dof(
+            free_displacements,
+            free,
+            equation_scaling,
+        )
+        relative_residual = residual_scaling["scaled"]
+    else:
+        residual_scaling = {"translation": 0.0, "rotation": 0.0, "scaled": 0.0}
+        increment_scaling = {"translation": 0.0, "rotation": 0.0, "scaled": 0.0}
+        relative_residual = 0.0
     strain_energy = float(0.5 * displacements @ internal_forces)
     linear_ramp_external_work = float(0.5 * displacements @ external_forces)
     energy_balance_error = abs(strain_energy - linear_ramp_external_work)
     stiffness_symmetry_error = _stiffness_symmetry_error(assembly.stiffness)
     status = (
         "ready"
-        if residual_norm <= tolerance * max(load_norm, 1.0)
+        if relative_residual <= tolerance
         else "degraded"
     )
     warnings = list(assembly.warnings)
@@ -252,6 +295,36 @@ def _solve_linear_static(
         if element_types <= {"truss", "axial"}
         else "linear_static_3d_frame_cpu_reference_v1"
     )
+    scaling_metrics: dict[str, Any] = {}
+    scaling_history: dict[str, Any] = {}
+    if equation_scaling is not None:
+        scaling_metrics = {
+            "characteristic_length": equation_scaling.characteristic_length_m,
+            "raw_translational_residual": residual_scaling["translation"],
+            "raw_rotational_residual": residual_scaling["rotation"],
+            "dimensionless_scaled_residual": residual_scaling["scaled"],
+            "raw_translation_increment": increment_scaling["translation"],
+            "raw_rotation_increment": increment_scaling["rotation"],
+            "scaled_increment": increment_scaling["scaled"],
+            "scaled_condition_number_status": (
+                "available"
+                if scaled_condition_number is not None
+                else "unsupported_exact_system_too_large"
+            ),
+            "scaling_hash": equation_scaling.scaling_hash,
+            "equation_scaling_6dof": equation_scaling.to_manifest(),
+        }
+        if scaled_condition_number is not None:
+            scaling_metrics["scaled_condition_number"] = scaled_condition_number
+        scaling_history = {
+            "raw_translational_residual": residual_scaling["translation"],
+            "raw_rotational_residual": residual_scaling["rotation"],
+            "dimensionless_scaled_residual": residual_scaling["scaled"],
+            "raw_translation_increment": increment_scaling["translation"],
+            "raw_rotation_increment": increment_scaling["rotation"],
+            "scaled_increment": increment_scaling["scaled"],
+            "scaling_hash": equation_scaling.scaling_hash,
+        }
 
     return LinearStaticSolution(
         status=status,
@@ -316,6 +389,7 @@ def _solve_linear_static(
             "member_forces": member_forces,
             "viewer_payload": viewer_payload,
             "claim_boundary": claim_boundary,
+            **scaling_metrics,
         },
         convergence_history=[
             {
@@ -330,6 +404,7 @@ def _solve_linear_static(
                     "single_direct_linear_solve; no iterative relative increment"
                 ),
                 "status": status,
+                **scaling_history,
             }
         ],
         warnings=warnings,

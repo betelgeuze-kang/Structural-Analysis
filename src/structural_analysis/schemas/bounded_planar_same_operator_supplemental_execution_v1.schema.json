@@ -1,0 +1,568 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded-planar-same-operator-supplemental-execution-v1.schema.json",
+  "title": "Bounded planar same-operator supplemental execution receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_commit_sha",
+    "external_execution_source_commit_sha",
+    "execution_binding_hash",
+    "historical_execution_binding_hash",
+    "current_product_replay_binding_hash",
+    "execution_window",
+    "operator_context",
+    "runtime_assets",
+    "runtime_observations",
+    "replay_provenance",
+    "families",
+    "summary",
+    "technical_contract_pass",
+    "claims",
+    "blockers",
+    "claim_boundary",
+    "artifact_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "bounded-planar-same-operator-supplemental-execution.v1"
+    },
+    "source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "external_execution_source_commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "execution_binding_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "historical_execution_binding_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "current_product_replay_binding_hash": {
+      "$ref": "#/$defs/sha256"
+    },
+    "execution_window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["started_at", "completed_at"],
+      "properties": {
+        "started_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "operator_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operator_class",
+        "execution_environment",
+        "container_isolated",
+        "independently_operated"
+      ],
+      "properties": {
+        "operator_class": {
+          "const": "same_operator_local_standalone"
+        },
+        "execution_environment": {
+          "const": "local_pinned_venv_and_extracted_debs"
+        },
+        "container_isolated": {
+          "const": false
+        },
+        "independently_operated": {
+          "const": false
+        }
+      }
+    },
+    "runtime_assets": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/runtimeAsset"
+      }
+    },
+    "runtime_observations": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/runtimeObservation"
+      }
+    },
+    "replay_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_mode",
+        "external_runtime_executed_in_this_generation",
+        "external_execution_reused",
+        "historical_execution_input_bytes_attached",
+        "historical_execution_input_binding_pass",
+        "metric_semantics_match",
+        "current_product_replay_generated_at",
+        "current_product_replay_pass",
+        "reuse_reason"
+      ],
+      "properties": {
+        "execution_mode": {"const": "current_product_replay_only"},
+        "external_runtime_executed_in_this_generation": {"const": false},
+        "external_execution_reused": {"const": true},
+        "historical_execution_input_bytes_attached": {"const": true},
+        "historical_execution_input_binding_pass": {"const": true},
+        "metric_semantics_match": {"const": true},
+        "current_product_replay_generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "current_product_replay_pass": {"const": true},
+        "reuse_reason": {"type": "string", "minLength": 1}
+      }
+    },
+    "families": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/family"
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family_count",
+        "case_count",
+        "technical_pass_count",
+        "external_engine_invoked_case_count"
+      ],
+      "properties": {
+        "family_count": {
+          "const": 5
+        },
+        "case_count": {
+          "const": 16
+        },
+        "technical_pass_count": {
+          "const": 16
+        },
+        "external_engine_invoked_case_count": {
+          "const": 15
+        }
+      }
+    },
+    "technical_contract_pass": {
+      "const": true
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_source_package_bytes_authenticated",
+        "raw_external_results_attached",
+        "runtime_asset_hashes_recorded",
+        "runtime_asset_bytes_attached",
+        "same_operator_local_execution",
+        "actual_external_solver_execution",
+        "historical_execution_input_bytes_attached",
+        "raw_execution_binding_pass",
+        "metric_semantics_match",
+        "current_product_replay_pass",
+        "external_runtime_executed_in_this_generation",
+        "external_execution_reused",
+        "fresh_current_source_external_execution",
+        "container_isolated_reproduction",
+        "independent_operator_attested",
+        "legal_use_approved",
+        "formal_promotion_receipt_attached",
+        "verification_matrix_credit",
+        "verification_level_2",
+        "design_authority",
+        "commercial_equivalence",
+        "release_readiness"
+      ],
+      "properties": {
+        "current_source_package_bytes_authenticated": {
+          "const": true
+        },
+        "raw_external_results_attached": {
+          "const": true
+        },
+        "runtime_asset_hashes_recorded": {
+          "const": true
+        },
+        "runtime_asset_bytes_attached": {
+          "const": false
+        },
+        "same_operator_local_execution": {
+          "const": true
+        },
+        "actual_external_solver_execution": {
+          "const": true
+        },
+        "historical_execution_input_bytes_attached": {
+          "const": true
+        },
+        "raw_execution_binding_pass": {
+          "const": true
+        },
+        "metric_semantics_match": {
+          "const": true
+        },
+        "current_product_replay_pass": {
+          "const": true
+        },
+        "external_runtime_executed_in_this_generation": {
+          "const": false
+        },
+        "external_execution_reused": {
+          "const": true
+        },
+        "fresh_current_source_external_execution": {
+          "const": false
+        },
+        "container_isolated_reproduction": {
+          "const": false
+        },
+        "independent_operator_attested": {
+          "const": false
+        },
+        "legal_use_approved": {
+          "const": false
+        },
+        "formal_promotion_receipt_attached": {
+          "const": false
+        },
+        "verification_matrix_credit": {
+          "const": false
+        },
+        "verification_level_2": {
+          "const": false
+        },
+        "design_authority": {
+          "const": false
+        },
+        "commercial_equivalence": {
+          "const": false
+        },
+        "release_readiness": {
+          "const": false
+        }
+      }
+    },
+    "blockers": {
+      "const": [
+        "external_runtime_current_source_rerun_missing",
+        "container_isolation_not_attested",
+        "independent_operator_attestation_missing",
+        "product_legal_license_approval_missing",
+        "formal_level2_promotion_receipt_missing"
+      ]
+    },
+    "claim_boundary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_hash": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "runtimeAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "asset_id",
+        "file_name",
+        "version",
+        "file_sha256",
+        "size_bytes",
+        "bytes_attached"
+      ],
+      "properties": {
+        "asset_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_.-]+$"
+        },
+        "file_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bytes_attached": {
+          "const": false
+        }
+      }
+    },
+    "runtimeObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solver",
+        "solver_version",
+        "python_version",
+        "platform"
+      ],
+      "properties": {
+        "solver": {
+          "enum": ["OpenSees", "CalculiX", "independent_preflight"]
+        },
+        "solver_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "python_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "platform": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "packageBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_id",
+        "path",
+        "file_sha256",
+        "artifact_hash",
+        "source_commit_sha"
+      ],
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifact_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "source_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "fileDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "historicalPackageBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "manifest_file_sha256",
+        "manifest_artifact_hash",
+        "source_commit_sha",
+        "file_count",
+        "files",
+        "binding_hash"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "manifest_file_sha256": {"$ref": "#/$defs/sha256"},
+        "manifest_artifact_hash": {"$ref": "#/$defs/sha256"},
+        "source_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "file_count": {"type": "integer", "minimum": 2},
+        "files": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/fileDescriptor"}
+        },
+        "binding_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "artifactDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256", "artifact_hash"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifact_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "path",
+        "file_sha256",
+        "artifact_hash",
+        "executed_at",
+        "external_solver",
+        "external_engine_invoked",
+        "runtime"
+      ],
+      "properties": {
+        "case_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifact_hash": {
+          "$ref": "#/$defs/sha256"
+        },
+        "executed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "external_solver": {
+          "enum": ["OpenSees", "CalculiX", "independent_preflight"]
+        },
+        "external_engine_invoked": {
+          "type": "boolean"
+        },
+        "runtime": {
+          "$ref": "#/$defs/runtimeObservation"
+        }
+      }
+    },
+    "family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family_id",
+        "package_binding",
+        "historical_package_binding",
+        "technical_receipt",
+        "case_ids",
+        "results",
+        "technical_contract_pass",
+        "actual_external_solver_execution",
+        "raw_execution_binding_pass",
+        "metric_semantics_match",
+        "current_product_replay_pass",
+        "external_runtime_executed_in_this_generation",
+        "external_execution_reused",
+        "fresh_current_source_external_execution",
+        "independent_operator_attested",
+        "verification_matrix_credit"
+      ],
+      "properties": {
+        "family_id": {
+          "enum": [
+            "linear",
+            "negative",
+            "scaling",
+            "modal_buckling",
+            "nonlinear_material_recovery"
+          ]
+        },
+        "package_binding": {
+          "$ref": "#/$defs/packageBinding"
+        },
+        "historical_package_binding": {
+          "$ref": "#/$defs/historicalPackageBinding"
+        },
+        "technical_receipt": {
+          "$ref": "#/$defs/artifactDescriptor"
+        },
+        "case_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/result"
+          }
+        },
+        "technical_contract_pass": {
+          "const": true
+        },
+        "actual_external_solver_execution": {
+          "const": true
+        },
+        "raw_execution_binding_pass": {
+          "const": true
+        },
+        "metric_semantics_match": {
+          "const": true
+        },
+        "current_product_replay_pass": {
+          "const": true
+        },
+        "external_runtime_executed_in_this_generation": {
+          "const": false
+        },
+        "external_execution_reused": {
+          "const": true
+        },
+        "fresh_current_source_external_execution": {
+          "const": false
+        },
+        "independent_operator_attested": {
+          "const": false
+        },
+        "verification_matrix_credit": {
+          "const": false
+        }
+      }
+    }
+  }
+}

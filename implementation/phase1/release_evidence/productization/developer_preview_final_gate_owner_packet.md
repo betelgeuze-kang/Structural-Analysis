@@ -10,7 +10,7 @@
 | Slice | Gate | Status | Owner Review Required | Blockers |
 |---|---|---|---:|---:|
 | `A` | `benchmark_results_clean_checkout_regenerated` | `ready` | `False` | 0 |
-| `B` | `silent_import_loss_zero` | `blocked` | `True` | 8 |
+| `B` | `silent_import_loss_zero` | `blocked` | `True` | 9 |
 | `F` | `new_user_core_workflow_observation_passed` | `blocked` | `True` | 17 |
 
 - `nearest_abf_ready_count`: `1/3`
@@ -21,8 +21,8 @@
 | Gate | Owner | Blockers | Closure Decision |
 |---|---|---:|---|
 | `selected_medium_models_pass_or_approved_review` | `benchmark_validation_owner` | 8 | `five_PASS_or_explicit_APPROVED_REVIEW_rows` |
-| `silent_import_loss_zero` | `ifc_import_validation_owner` | 8 | `technical_IFC_import_and_silent_loss_evidence_passes` |
-| `linux_windows_reproducibility_confirmed` | `release_reproducibility_owner` | 1 | `direct_windows_replay_receipt_passes` |
+| `silent_import_loss_zero` | `ifc_import_validation_owner` | 9 | `technical_IFC_import_and_silent_loss_evidence_passes` |
+| `linux_windows_reproducibility_confirmed` | `release_reproducibility_owner` | 2 | `direct_windows_replay_receipt_passes` |
 | `new_user_core_workflow_observation_passed` | `ux_research_owner` | 17 | `accepted_human_new_user_observation` |
 
 ## Verification Commands
@@ -99,6 +99,7 @@
 
 ### `linux_windows_reproducibility_confirmed`
 - `attach_windows_platform_replay_receipt` from `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
+- `repair_linux_platform_replay_receipt` from `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
 - `rerun_linux_windows_parity_and_dp_rc_checks` from `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json`
 
 ### `new_user_core_workflow_observation_passed`
@@ -119,12 +120,12 @@
 | Artifact | Status | Pass | Plan Rows | Blockers |
 |---|---|---:|---:|---:|
 | `implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json` | `blocked` | `False` | 0 | 3 |
-| `implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json` | `blocked` | `False` | 0 | 13 |
+| `implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json` | `blocked` | `False` | 0 | 14 |
 
 ### `linux_windows_reproducibility_confirmed`
 | Artifact | Status | Pass | Plan Rows | Blockers |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json` | `blocked` | `False` | 2 | 1 |
+| `implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json` | `blocked` | `False` | 3 | 2 |
 
 ### `new_user_core_workflow_observation_passed`
 | Artifact | Status | Pass | Plan Rows | Blockers |

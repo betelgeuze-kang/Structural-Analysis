@@ -1,5 +1,9 @@
 {
-  "blockers": [],
+  "blockers": [
+    "phase3_clean_checkout_source_commit_mismatch",
+    "phase3_clean_checkout_expected_checksum_mismatch",
+    "phase3_clean_checkout_generated_checksum_mismatch"
+  ],
   "claim_boundary": "This Linux platform receipt is derived only from the passing local isolated clean-checkout Phase 3 seed replay. It is not a Windows receipt, not a git-clean-clone pass, not Linux/Windows parity, and does not promote Developer Preview RC readiness.",
   "commands": [
     {
@@ -171,9 +175,9 @@
       "stdout_excerpt": "Phase 3 benchmark factory check: phase3_benchmark_factory_consistent\n"
     }
   ],
-  "contract_pass": true,
+  "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
-  "engine_version": "structural-optimization-workbench@1.0.0",
+  "engine_version": "structural-analysis@0.3.0",
   "expected_scorecard": {
     "case_count": 30,
     "expected_output_comparison_count": 88,
@@ -195,10 +199,10 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-07-02T21:31:49.126520+00:00",
+  "generated_at": "2026-07-30T04:14:40.331626+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:a1e86d8ff00587e679ce8caf5ea651aff128a7b676e679d9ef493aa70b56d401",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:fd123502c0ba1dbe040509aed3e042a11fe7bf91bac52c52152e8fa18801db28",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:3dcd6e4e7d280b8938740078636258bc9da8d947587d1828b935e7e5808bb6a1",
     "scripts/build_phase6_linux_windows_parity_status.py": "sha256:47098596657f5ddb2aead9eff459b8c2e6e85c3ebbf45d1f7bdcdab19d455c4c"
   },
   "local_dirty_inputs": [],
@@ -215,7 +219,7 @@
     "python_version": "recorded_by_phase3_clean_checkout_command_results",
     "receipt_origin": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
     "replay_environment": "isolated_minimal_worktree_copy",
-    "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d"
+    "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0"
   },
   "python_version": "recorded_by_phase3_clean_checkout_command_results",
   "reuse_policy": "phase6_linux_platform_replay_receipt_from_phase3_local_clean_checkout",
@@ -225,23 +229,23 @@
   "source_clean_checkout_execution_mode": "isolated_minimal_worktree_copy",
   "source_clean_checkout_receipt": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
   "source_clean_checkout_status": "pass",
-  "source_commit_sha": "66d16d985afaa3520e14e2ed4fd53f0d91d1a54d",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "source_git_clean_clone_receipt": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
   "stable_artifact_checksums": {
-    "acquisition_plan": "sha256:ee8fc1bbf6f3ec11e5ee8a169a130cec20947ccc669e0902cacf53a089594e33",
-    "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:ad48bd01ec19d476563c7553c8157863bae5a067e9b5bc40db5607c251c789b6",
-    "buildingsmart_ifc_acquisition_receipt": "sha256:c79dea3ca47b7383bbe465976d584277bbaf82a30a971eddc2ed061f83dde2e3",
-    "commercial_comparison_import_template": "sha256:37dd0e219d8eee66b2d2e3c84ab13ba63a7f27334a727346dca577c231b2cb67",
-    "commercial_operator_reference_contract": "sha256:8844c9567f90dc0e34cf1e76fd36485b91fd3bf12e89e169db8830df7fc3950c",
-    "commercial_operator_reference_ingest_validator": "sha256:412da0288910f1c85fea8c0cbcda322c26d6a1f34e97a14e2a213b2e1395eb82",
-    "ifc_import_health_execution_receipt": "sha256:d3a40fdd0ddf89f5f6d71f47cde74235ca2ad9aeca1933b2212b6100782a5c0b",
-    "ifc_source_license_receipt": "sha256:b258d65101365debd52ee8f11218f61d715d3f3e208fa4e24b32bf97bcfa5bf1",
+    "acquisition_plan": "sha256:9b40530cd0ec9bc897ac63a5d03058fb211028a2476383a0b5a184d0eff51131",
+    "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:2221292a9677ede2d0397f6298f33fc967d42143fc87bf24ef715b01e2c8f2f2",
+    "buildingsmart_ifc_acquisition_receipt": "sha256:e6f80892819c0605b5e9e344fc9e471ae05e2219351962ab9a7f3900f36cb058",
+    "commercial_comparison_import_template": "sha256:cf8443c1620d591227e6161edcef658d7cffbb849dc11d917fd11dc851f816f8",
+    "commercial_operator_reference_contract": "sha256:47c63d66d926e91fa6f3cd0b434d9dfdc020759ee53a134760df3d2a04370814",
+    "commercial_operator_reference_ingest_validator": "sha256:fc2bc5bba0ffe07de1387674b67ada4a77dca8b3da7c3467651e2995a6ddd2a7",
+    "ifc_import_health_execution_receipt": "sha256:d84b425d32b46e619beafba7a77d05e0d106e68fa1462b521ff214bf6660b492",
+    "ifc_source_license_receipt": "sha256:efd95e5fc6eed3f736bf162cf9c2549b65c669e6ce4a428649ff252bbfcf013f",
     "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-    "opensees_source_license_receipt": "sha256:ccf9c7f617ff98c0a04c4a29a8dcd3fcd73a3618cb7275afc6e52fd2e5ae9fe2",
-    "phase4_analytic_physical_fallback_scorecard": "sha256:0bd85bd6c8e252ffe2e1df84d7866986e57e1f7a85be0aaf6070c276317e87cb",
-    "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
-    "summary": "sha256:63d646ef138f5282fd6d902f7dba29e9701d6605fbdf4473056bdb5e5becb014"
+    "opensees_source_license_receipt": "sha256:cd778e44762554ff14193b095ff24d8f79d8d7889d64a2d064187575ce5d9d94",
+    "phase4_analytic_physical_fallback_scorecard": "sha256:3dc04fe79e743342bfab4f3d244452f04199c8527c868698904798d383668c7b",
+    "scorecard": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
+    "summary": "sha256:8e81d99c832f83ff6c2ddc8e4b806306459a031b329552427a79a0e998e37d06"
   },
-  "working_tree_clean": true,
+  "working_tree_clean": false,
   "working_tree_clean_scope": "isolated_minimal_worktree_copy"
 }

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import hashlib
 import math
+from numbers import Integral, Real
 import struct
 from typing import Any, Iterable
 
@@ -19,11 +20,29 @@ FRACTURE_ENERGY_TANGENT_DEFINITION = "implicit_consistent_d_traction_d_total_str
 _STATE_HASH_DOMAIN = b"structural-analysis/concrete-damage-state/v1\0"
 
 
-def _require_finite(name: str, value: float) -> float:
-    normalized = float(value)
-    if not math.isfinite(normalized):
-        raise ValueError(f"{name} must be finite")
-    return normalized
+def _require_finite(name: str, value: Any) -> float:
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        )
+    try:
+        normalized = float(value)
+    except (TypeError, ValueError, OverflowError) as error:
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        ) from error
+    if (
+        not math.isfinite(normalized)
+        or value != normalized
+        or (
+            isinstance(value, Integral)
+            and int(normalized) != int(value)
+        )
+    ):
+        raise ValueError(
+            f"{name} must be a finite, losslessly representable real binary64 value"
+        )
+    return 0.0 if normalized == 0.0 else normalized
 
 
 @dataclass(frozen=True)
@@ -42,7 +61,11 @@ class ConcreteDamageState:
             "compressive_damage",
             "dissipated_energy_density_mj_per_m3",
         ):
-            _require_finite(name, getattr(self, name))
+            object.__setattr__(
+                self,
+                name,
+                _require_finite(name, getattr(self, name)),
+            )
         if self.tensile_history_strain < 0.0:
             raise ValueError("tensile_history_strain must be non-negative")
         if self.compressive_history_strain < 0.0:
@@ -133,7 +156,11 @@ class AsymmetricConcreteDamageMaterial:
             "compressive_softening_rate",
             "history_tolerance",
         ):
-            _require_finite(name, getattr(self, name))
+            object.__setattr__(
+                self,
+                name,
+                _require_finite(name, getattr(self, name)),
+            )
         if self.elastic_modulus_mpa <= 0.0:
             raise ValueError("elastic_modulus_mpa must be positive")
         if self.tensile_strength_mpa <= 0.0:
@@ -168,6 +195,62 @@ class AsymmetricConcreteDamageMaterial:
     def initial_state(self) -> ConcreteDamageState:
         return ConcreteDamageState()
 
+    def validate_state_admissibility(
+        self,
+        state: ConcreteDamageState,
+    ) -> ConcreteDamageState:
+        """Reject state variables that cannot belong to this damage law."""
+
+        if type(state) is not ConcreteDamageState:
+            raise ValueError("state must be an exact ConcreteDamageState")
+        expected_tensile = self._damage_and_derivative(
+            state.tensile_history_strain,
+            threshold_strain=self.tensile_threshold_strain,
+            softening_rate=self.tensile_softening_rate,
+        )[0]
+        expected_compressive = self._damage_and_derivative(
+            state.compressive_history_strain,
+            threshold_strain=self.compressive_threshold_strain,
+            softening_rate=self.compressive_softening_rate,
+        )[0]
+        if not math.isclose(
+            state.tensile_damage,
+            expected_tensile,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-12,
+        ) or not math.isclose(
+            state.compressive_damage,
+            expected_compressive,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-12,
+        ):
+            raise ValueError("damage is inconsistent with retained history strain")
+        lower_energy = self._minimum_branch_dissipated_energy_density(
+            state.tensile_history_strain,
+            threshold_strain=self.tensile_threshold_strain,
+            softening_rate=self.tensile_softening_rate,
+        ) + self._minimum_branch_dissipated_energy_density(
+            state.compressive_history_strain,
+            threshold_strain=self.compressive_threshold_strain,
+            softening_rate=self.compressive_softening_rate,
+        )
+        upper_energy = 0.5 * self.elastic_modulus_mpa * (
+            state.tensile_history_strain**2 * expected_tensile
+            + state.compressive_history_strain**2 * expected_compressive
+        )
+        tolerance = 1.0e-12 * max(
+            1.0,
+            upper_energy,
+            state.dissipated_energy_density_mj_per_m3,
+        )
+        if (
+            state.dissipated_energy_density_mj_per_m3 + tolerance < lower_energy
+            or state.dissipated_energy_density_mj_per_m3
+            > upper_energy + tolerance
+        ):
+            raise ValueError("dissipated energy is inconsistent with damage history")
+        return state
+
     @staticmethod
     def _damage_and_derivative(
         history_strain: float,
@@ -188,12 +271,41 @@ class AsymmetricConcreteDamageMaterial:
         derivative = survival * (1.0 / history_strain + softening_rate)
         return damage, derivative
 
+    def _minimum_branch_dissipated_energy_density(
+        self,
+        history_strain: float,
+        *,
+        threshold_strain: float,
+        softening_rate: float,
+    ) -> float:
+        """Continuous-history lower bound for the discrete damage-work sum."""
+
+        if history_strain <= threshold_strain:
+            return 0.0
+        delta = history_strain - threshold_strain
+        scaled_delta = softening_rate * delta
+        survival = math.exp(-scaled_delta)
+        one_minus_survival = -math.expm1(-scaled_delta)
+        integral = (
+            0.5
+            * self.elastic_modulus_mpa
+            * threshold_strain
+            / softening_rate
+            * (
+                (2.0 + softening_rate * threshold_strain)
+                * one_minus_survival
+                - scaled_delta * survival
+            )
+        )
+        return max(integral, 0.0)
+
     def integrate(
         self,
         total_strain: float,
         committed_state: ConcreteDamageState,
     ) -> ConcreteDamageResponse:
         strain = _require_finite("total_strain", total_strain)
+        self.validate_state_admissibility(committed_state)
         tensile_measure = max(strain, 0.0)
         compressive_measure = max(-strain, 0.0)
         next_tensile_history = max(
@@ -348,6 +460,56 @@ class FractureEnergyConcreteDamageMaterial(AsymmetricConcreteDamageMaterial):
     def tangent_definition(self) -> str:
         return FRACTURE_ENERGY_TANGENT_DEFINITION
 
+    def validate_state_admissibility(
+        self,
+        state: ConcreteDamageState,
+    ) -> ConcreteDamageState:
+        if type(state) is not ConcreteDamageState:
+            raise ValueError("state must be an exact ConcreteDamageState")
+        expected_tensile = self._traction_and_tangent(
+            state.tensile_history_strain,
+            elastic_modulus_mpa=self.elastic_modulus_mpa,
+            strength_mpa=self.tensile_strength_mpa,
+            softening_rate=self.tensile_softening_rate,
+        )[2]
+        expected_compressive = self._traction_and_tangent(
+            state.compressive_history_strain,
+            elastic_modulus_mpa=self.elastic_modulus_mpa,
+            strength_mpa=self.compressive_strength_mpa,
+            softening_rate=self.compressive_softening_rate,
+        )[2]
+        expected_energy = self._branch_dissipated_energy_density(
+            state.tensile_history_strain,
+            strength_mpa=self.tensile_strength_mpa,
+            fracture_energy_n_per_m=self.tensile_fracture_energy_n_per_m,
+            softening_rate=self.tensile_softening_rate,
+        ) + self._branch_dissipated_energy_density(
+            state.compressive_history_strain,
+            strength_mpa=self.compressive_strength_mpa,
+            fracture_energy_n_per_m=self.compressive_fracture_energy_n_per_m,
+            softening_rate=self.compressive_softening_rate,
+        )
+        if not math.isclose(
+            state.tensile_damage,
+            expected_tensile,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-12,
+        ) or not math.isclose(
+            state.compressive_damage,
+            expected_compressive,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-12,
+        ):
+            raise ValueError("damage is inconsistent with crack-band history")
+        if not math.isclose(
+            state.dissipated_energy_density_mj_per_m3,
+            expected_energy,
+            rel_tol=1.0e-12,
+            abs_tol=1.0e-12,
+        ):
+            raise ValueError("dissipated energy is inconsistent with crack-band history")
+        return state
+
     @staticmethod
     def _traction_and_tangent(
         history_strain: float,
@@ -416,8 +578,7 @@ class FractureEnergyConcreteDamageMaterial(AsymmetricConcreteDamageMaterial):
         committed_state: ConcreteDamageState,
     ) -> ConcreteDamageResponse:
         strain = _require_finite("total_strain", total_strain)
-        if type(committed_state) is not ConcreteDamageState:
-            raise ValueError("committed_state must be a ConcreteDamageState")
+        self.validate_state_admissibility(committed_state)
         tensile_measure = max(strain, 0.0)
         compressive_measure = max(-strain, 0.0)
         tensile_history = max(committed_state.tensile_history_strain, tensile_measure)

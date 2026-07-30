@@ -9,9 +9,12 @@ from pathlib import Path
 import pytest
 
 from structural_analysis.api.nonlinear_frame import (
+    COROTATIONAL_GENERAL_PROFILE,
     COROTATIONAL_PORTAL_PROFILE,
     NonlinearFrameConfig,
     analyze_nonlinear_frame,
+    analyze_nonlinear_frame_model_ir,
+    nonlinear_frame_model_ir_resume_contract_hash,
     validate_nonlinear_frame_manifest,
 )
 from structural_analysis.execution.job_http_api import (
@@ -28,6 +31,7 @@ from structural_analysis.execution.nonlinear_frame_worker import (
     execute_nonlinear_frame_claim,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+from structural_analysis.model_ir import parse_model_ir_v2
 from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_SPARSE_MATRIX_BACKEND,
 )
@@ -69,6 +73,30 @@ def _request(*, load_steps: int = 4) -> dict:
             "residual_tolerance": 1.0e-10,
             "increment_tolerance_m": 1.0e-12,
             "maximum_iterations": 40,
+            "matrix_backend": VECTOR_SPARSE_MATRIX_BACKEND,
+            "control_mode": "load_control",
+        },
+        "result_contract": "unified-nonlinear-frame-result.v1",
+    }
+
+
+def _model_ir_request(*, load_steps: int = 2) -> dict:
+    model = json.loads(
+        Path("examples/bounded_planar_frame_alpha.model-ir.v2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    return {
+        "schema_version": "structural-analysis-job-request.v1",
+        "operation": "nonlinear_frame",
+        "case_id": "durable-bounded-planar-model-ir",
+        "model": model,
+        "config": {
+            "profile": COROTATIONAL_GENERAL_PROFILE,
+            "load_steps": load_steps,
+            "residual_tolerance": 1.0e-9,
+            "increment_tolerance_m": 1.0e-12,
+            "maximum_iterations": 60,
             "matrix_backend": VECTOR_SPARSE_MATRIX_BACKEND,
             "control_mode": "load_control",
         },
@@ -276,6 +304,7 @@ def test_exact_checkpoint_resume_survives_service_restart_and_matches_full_path(
         "section_results",
         "fiber_results",
         "convergence_history",
+        "engineering_result_ir",
     ):
         assert resumed_payload[key] == direct[key]
     assert resumed_payload["checkpoint"]["chain_hash"] == direct["checkpoint"][
@@ -286,6 +315,100 @@ def test_exact_checkpoint_resume_survives_service_restart_and_matches_full_path(
     ]["terminal_state_hash"]
     assert resumed_payload["metrics"]["replayed_prefix_step_count"] == 2
     assert resumed_payload["metrics"]["newly_solved_step_count"] == 2
+    assert service.validate_integrity(
+        submitted.job_id,
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+    )["contract_pass"] is True
+
+
+def test_model_ir_checkpoint_resume_preserves_source_and_execution_plan_bindings(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "jobs"
+    request = _model_ir_request()
+    document = parse_model_ir_v2(request["model"])
+    service = _service(root)
+    submitted = service.submit_job(
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+        idempotency_key="bounded-planar-model-ir-run-1",
+        request=request,
+    )
+
+    partial = execute_nonlinear_frame_claim(
+        service,
+        _claim(service),
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+        checkpoint_step_budget=1,
+    )
+    assert partial.status == "checkpointed"
+    assert partial.progress_completed == 1
+    assert partial.checkpoint is not None
+    expected_resume_hash = nonlinear_frame_model_ir_resume_contract_hash(
+        document,
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            load_steps=2,
+            residual_tolerance=1.0e-9,
+            increment_tolerance_m=1.0e-12,
+            maximum_iterations=60,
+            matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+        ),
+    )
+    assert partial.resume_contract_hash == expected_resume_hash
+
+    service = _service(root)
+    final = execute_nonlinear_frame_claim(
+        service,
+        _claim(service),
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+    )
+    assert final.status == "succeeded"
+    assert final.progress_completed == final.progress_total == 2
+
+    resumed = json.loads(
+        service.read_result(
+            submitted.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )
+    )
+    validate_nonlinear_frame_manifest(resumed)
+    source = resumed["contract_bindings"]["source_model_ir_adapter"]
+    plan = resumed["contract_bindings"]["bounded_planar_execution_plan"]
+    assert resumed["input_checksum"] == document.content_hash
+    assert source["model_ir_content_hash"] == document.content_hash
+    assert plan["model_ir_content_hash"] == document.content_hash
+    assert source["adapter_hash"] == plan["model_ir_adapter_hash"]
+
+    direct = analyze_nonlinear_frame_model_ir(
+        document,
+        NonlinearFrameConfig(
+            profile=COROTATIONAL_GENERAL_PROFILE,
+            load_steps=2,
+            residual_tolerance=1.0e-9,
+            increment_tolerance_m=1.0e-12,
+            maximum_iterations=60,
+            matrix_backend=VECTOR_SPARSE_MATRIX_BACKEND,
+        ),
+    ).to_dict()
+    for key in (
+        "node_displacements",
+        "support_reactions",
+        "member_end_forces",
+        "section_results",
+        "fiber_results",
+        "convergence_history",
+        "engineering_result_ir",
+        "contract_bindings",
+    ):
+        assert resumed[key] == direct[key]
+    assert resumed["checkpoint"]["chain_hash"] == direct["checkpoint"]["chain_hash"]
+    assert resumed["metrics"]["replayed_prefix_step_count"] == 1
+    assert resumed["metrics"]["newly_solved_step_count"] == 1
     assert service.validate_integrity(
         submitted.job_id,
         tenant_id="tenant-a",

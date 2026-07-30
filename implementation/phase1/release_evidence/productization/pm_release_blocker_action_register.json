@@ -65,7 +65,7 @@
   },
   "contract_pass": false,
   "engine_version": "structural-analysis@0.3.0",
-  "generated_at": "2026-07-23T00:59:40.064791+00:00",
+  "generated_at": "2026-07-28T08:34:53.661659+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:500b7803686ab0e8a38937948dc8831ce19bf9ef6461e601121ef434e39ba81a",
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:9ddb5502fc9eb5911082834fb184629f72eb488fd8b53425594c32a52ef06a2f",
@@ -5980,7 +5980,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "47d45f9268f2672ac4b756a9ece5502d489c1a36",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 10,

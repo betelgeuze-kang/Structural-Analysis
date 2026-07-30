@@ -125,6 +125,33 @@ def test_global_cantilever_matches_timoshenko_closed_form_and_recovers_reactions
     assert reactions[5] == pytest.approx(-2.0, rel=1.0e-8, abs=1.0e-8)
     assert terminal.free_residual_inf_norm_kn <= 2.0e-8
     assert terminal.relative_residual <= 2.0e-8
+    assert terminal.raw_translational_residual_inf_norm_kn <= 2.0e-8
+    assert terminal.raw_rotational_residual_inf_norm_kn_m <= 2.0e-8
+    assert terminal.scaled_residual_inf_norm == terminal.relative_residual
+    assert terminal.raw_translation_increment_inf_norm_m >= 0.0
+    assert terminal.raw_rotation_increment_inf_norm_rad >= 0.0
+    assert terminal.scaled_increment_inf_norm >= 0.0
+    assert terminal.scaled_residual_inf_norm <= terminal.scaled_residual_tolerance
+    assert terminal.scaled_increment_inf_norm <= terminal.scaled_increment_tolerance
+    assert terminal.residual_gate_passed is True
+    assert terminal.increment_gate_passed is True
+    assert terminal.line_search_required is True
+    assert terminal.selected_line_search_alpha is not None
+    assert terminal.line_search_valid is True
+    assert terminal.final_reassembled_equilibrium_passed is True
+    assert terminal.parent_state_immutable is True
+    assert terminal.convergence_history[-1]["accepted"] is True
+    assert terminal.line_search_history
+    assert terminal.scaled_condition_number_1 == terminal.condition_number
+    assert terminal.scaled_condition_number_1 > 0.0
+    assert terminal.equation_scaling_hash == (
+        solution.equation_scaling["scaling_hash"]
+    )
+    assert solution.equation_scaling["characteristic_length_m"] == pytest.approx(
+        2.0
+    )
+    assert solution.maximum_scaled_residual_inf_norm <= 2.0e-8
+    assert solution.maximum_scaled_increment_inf_norm >= 0.0
     assert len(terminal.members) == 1
     assert terminal.members[0].current_length_m > terminal.members[0].initial_length_m
     assert terminal.members[0].strain_energy_kn_m > 0.0
@@ -259,3 +286,25 @@ def test_singular_supports_and_invalid_load_history_never_fallback() -> None:
     initial = initial_corotational_frame3d_global_checkpoint(base, config=config)
     assert initial.load_factor == 0.0
     assert initial.parent_checkpoint_hash is None
+
+
+def test_global_config_rejects_invalid_increment_and_line_search_contract() -> None:
+    with pytest.raises(ValueError, match="increment_relative_tolerance"):
+        CorotationalFrame3DGlobalConfig(increment_relative_tolerance=0.0)
+    with pytest.raises(ValueError, match="start with 1"):
+        CorotationalFrame3DGlobalConfig(line_search_alphas=(0.5, 0.25))
+    with pytest.raises(ValueError, match="strictly decreasing"):
+        CorotationalFrame3DGlobalConfig(line_search_alphas=(1.0, 0.5, 0.5))
+
+
+def test_global_path_cannot_commit_on_residual_gate_alone() -> None:
+    with pytest.raises(CorotationalFrame3DGlobalError, match="did not converge"):
+        solve_corotational_frame3d_global_load_path(
+            _cantilever_model(),
+            (1.0,),
+            config=CorotationalFrame3DGlobalConfig(
+                increment_relative_tolerance=1.0e-30,
+                increment_absolute_tolerance_m=1.0e-30,
+                maximum_iterations=2,
+            ),
+        )

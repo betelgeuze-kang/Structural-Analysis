@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from verify_delivery_evidence_for_ci import build_gap_status_command  # noqa: E402
@@ -16,12 +18,41 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 def test_mgt_pipeline_verifies_sha_and_runs_story_proxy(tmp_path: Path) -> None:
     out = tmp_path / "mgt_native_reanalysis_pipeline_test.json"
+    state_npz = tmp_path / "solver_state.npz"
+    np.savez_compressed(
+        state_npz,
+        group_ids=np.asarray(["G0"], dtype="<U8"),
+        rebar_ratio=np.asarray([0.012], dtype=np.float64),
+        thickness_scale=np.asarray([1.0], dtype=np.float64),
+        detailing_quality=np.asarray([0.88], dtype=np.float64),
+        max_dcr=np.asarray([0.98], dtype=np.float64),
+        congestion=np.asarray([0.20], dtype=np.float64),
+        lap_splice=np.asarray([0.10], dtype=np.float64),
+        anchorage=np.asarray([0.25], dtype=np.float64),
+        detailing=np.asarray([0.30], dtype=np.float64),
+        robustness_margin=np.asarray([0.22], dtype=np.float64),
+        multi_hazard_margin=np.asarray([0.24], dtype=np.float64),
+        group_cost_proxy=np.asarray([1200.0], dtype=np.float64),
+        member_type=np.asarray(["column"], dtype="<U16"),
+        zone_label=np.asarray(["transfer"], dtype="<U16"),
+        semantic_group=np.asarray(["G-T1"], dtype="<U16"),
+        story_band=np.asarray([0], dtype=np.int32),
+        repair_influence=np.asarray([1.35], dtype=np.float64),
+        combination_match_score=np.asarray([0.82], dtype=np.float64),
+        combination_risk=np.asarray([1.18], dtype=np.float64),
+        global_drift_pct=np.asarray([1.0], dtype=np.float64),
+        global_residual_drift_pct=np.asarray([0.1], dtype=np.float64),
+        action_mask=np.asarray([[True, True]], dtype=np.bool_),
+    )
     proc = subprocess.run(
         [
             sys.executable,
             str(REPO_ROOT / "scripts/run_mgt_native_reanalysis_pipeline.py"),
             "--output-json",
             str(out),
+            "--state-npz",
+            str(state_npz),
+            "--no-sync-provenance",
             "--skip-global-solves",
         ],
         check=False,
@@ -31,7 +62,7 @@ def test_mgt_pipeline_verifies_sha_and_runs_story_proxy(tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["mgt_integrity"]["mgt_exists"] is True
-    assert payload.get("mgt_refresh") is not None
+    assert payload.get("mgt_refresh") is None
     assert (payload.get("native_fea") or {}).get("status") in {
         "parse_linked",
         "readiness_pass",

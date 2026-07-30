@@ -53,10 +53,69 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "scripts/check_core_quality.py",
         "--contract-only",
     ] in commands
+    assert [
+        gate._python(),
+        "scripts/check_repository_hygiene_inventory.py",
+    ] in commands
+    assert [
+        gate._python(),
+        "scripts/build_bounded_planar_external_linear_case_package.py",
+        "--check",
+    ] in commands
+    assert [
+        gate._python(),
+        "scripts/build_bounded_planar_external_negative_case_package.py",
+        "--check",
+    ] in commands
+    assert [
+        gate._python(),
+        "scripts/build_bounded_planar_external_scaling_case_package.py",
+        "--check",
+    ] in commands
+    assert [
+        gate._python(),
+        "scripts/build_bounded_planar_external_modal_buckling_case_package.py",
+        "--check",
+    ] in commands
+    assert [
+        gate._python(),
+        "scripts/build_bounded_planar_external_vv_matrix.py",
+        "--check",
+    ] in commands
+    assert [
+        gate._python(),
+        "scripts/build_internal_license_due_diligence.py",
+        "--check",
+    ] in commands
     assert "tests/test_core_quality_contract.py" in targets
     assert "tests/test_current_head_readiness_ci.py" in targets
     assert "tests/test_check_large_git_blobs.py" in targets
     assert "tests/test_check_pr_issue_metadata.py" in targets
+    assert "tests/test_check_repository_hygiene_inventory.py" in targets
+    assert "tests/test_prune_ignored_test_experiments.py" in targets
+    assert (
+        "tests/test_build_bounded_planar_external_linear_case_package.py" in targets
+    )
+    assert (
+        "tests/test_build_bounded_planar_external_negative_case_package.py" in targets
+    )
+    assert (
+        "tests/test_build_bounded_planar_external_scaling_case_package.py" in targets
+    )
+    assert "tests/test_ingest_bounded_planar_external_linear_results.py" in targets
+    assert "tests/test_ingest_bounded_planar_external_negative_results.py" in targets
+    assert "tests/test_ingest_bounded_planar_external_scaling_results.py" in targets
+    assert (
+        "tests/test_build_bounded_planar_external_modal_buckling_case_package.py"
+        in targets
+    )
+    assert (
+        "tests/test_ingest_bounded_planar_external_modal_buckling_results.py"
+        in targets
+    )
+    assert "tests/test_build_bounded_planar_external_vv_matrix.py" in targets
+    assert "tests/test_build_internal_license_due_diligence.py" in targets
+    assert "tests/test_build_product_state.py" in targets
     assert "tests/test_structural_analysis_core_api.py" in targets
     assert "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py" in targets
     assert "tests/test_engine_v2_result_ir_v1.py" in targets
@@ -373,7 +432,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert [
         gate._python(),
         "scripts/build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py",
-        "--check",
+        "--portable-check",
     ] in commands
     assert [
         gate._python(),
