@@ -46,6 +46,7 @@ def test_product_truth_and_external_technical_workflows_are_approved_hosted_lane
     expected = {
         ".github/workflows/bounded-planar-negative-opensees-technical.yml",
         ".github/workflows/bounded-planar-modal-buckling-technical.yml",
+        ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml",
         ".github/workflows/bounded-planar-opensees-technical.yml",
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
         ".github/workflows/product-state-current.yml",

@@ -24,6 +24,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/authoritative-linear-core-ci.yml",
         ".github/workflows/bounded-planar-negative-opensees-technical.yml",
         ".github/workflows/bounded-planar-modal-buckling-technical.yml",
+        ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml",
         ".github/workflows/bounded-planar-opensees-technical.yml",
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
         ".github/workflows/ci.yml",
