@@ -1564,11 +1564,11 @@ def _validate_checkpoint_artifact_envelope(
                 "/last_completed_leg_direction_sign",
                 "Artifact lineage integers must remain exact JSON integers.",
             )
-    for field in integer_fields:
-        if type(payload[field]) is not int:
+    for integer_field in integer_fields:
+        if type(payload[integer_field]) is not int:
             _fail(
                 "bounded_frame3d_checkpoint_artifact_numeric_domain_mismatch",
-                f"/{field}",
+                f"/{integer_field}",
                 "Artifact control and lineage integers must remain exact JSON integers.",
             )
     artifact_hash = str(payload["artifact_hash"])
@@ -1678,31 +1678,42 @@ def _validate_checkpoint_artifact_envelope(
         or binding.accepted_control_target
         != checkpoint.displacement[control_global_dof]
     )
-    lineage_binding_mismatch = False
+    lineage_schema_mismatch = False
     if type(binding) is StatefulCorotationalFrame3DDisplacementControlResumeBinding:
-        lineage_binding_mismatch = bool(
+        lineage_schema_mismatch = bool(
             schema_version
             != BOUNDED_FRAME3D_DIRECT_CONTROL_CHECKPOINT_SCHEMA_VERSION
-            or binding.direction_sign != payload.get("direction_sign")
         )
+        if not lineage_schema_mismatch and binding.direction_sign != payload.get(
+            "direction_sign"
+        ):
+            _fail(
+                "bounded_frame3d_checkpoint_artifact_direction_mismatch",
+                "/direction_sign",
+                "Artifact direction does not match its internal resume binding.",
+            )
     elif type(binding) is (
         StatefulCorotationalFrame3DDisplacementControlCyclicResumeBinding
     ):
-        lineage_binding_mismatch = bool(
+        lineage_schema_mismatch = bool(
             schema_version
             != BOUNDED_FRAME3D_DIRECT_CONTROL_CYCLIC_CHECKPOINT_SCHEMA_VERSION
-            or any(
-                payload.get(field) != getattr(binding, field)
-                for field in (
-                    "path_mode",
-                    "last_completed_leg_direction_sign",
-                    "cumulative_reversal_count",
-                    "cumulative_completed_target_count",
-                    "accepted_target_chain_hash",
-                )
-            )
         )
-    if common_binding_mismatch or lineage_binding_mismatch:
+        if not lineage_schema_mismatch:
+            for lineage_field in (
+                "path_mode",
+                "last_completed_leg_direction_sign",
+                "cumulative_reversal_count",
+                "cumulative_completed_target_count",
+                "accepted_target_chain_hash",
+            ):
+                if payload.get(lineage_field) != getattr(binding, lineage_field):
+                    _fail(
+                        "bounded_frame3d_checkpoint_artifact_cyclic_binding_mismatch",
+                        f"/{lineage_field}",
+                        "Cyclic artifact lineage does not match its resume binding.",
+                    )
+    if common_binding_mismatch or lineage_schema_mismatch:
         _fail(
             "bounded_frame3d_checkpoint_internal_binding_mismatch",
             "/",
