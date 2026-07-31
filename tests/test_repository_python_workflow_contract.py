@@ -79,3 +79,14 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "product-state.current.sigstore.json" in workflow
     assert "gh attestation verify" in workflow
     assert "retention-days: 90" in workflow
+
+
+def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
+    workflow = (
+        ROOT / ".github" / "workflows" / "p0-canonical-contract.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "merge_group:" in workflow
+    assert '--source-sha "${{ github.sha }}"' in workflow
+    assert "--require-hashes" in workflow
+    assert "--no-deps" in workflow

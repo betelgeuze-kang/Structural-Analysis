@@ -6,7 +6,7 @@
       "capability_id": "vv.opensees_level2",
       "capability_kind": "verification",
       "contract_pass": false,
-      "evidence_artifact_count": 61,
+      "evidence_artifact_count": 53,
       "first_blocked_target": "",
       "first_next_action": "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted.",
       "gate_unblock_plan_count": 0,
@@ -85,7 +85,7 @@
   "blocked_capability_register_count": 4,
   "blockers": [],
   "canonical_registry": "artifacts/manifests/capabilities.yaml",
-  "capability_count": 31,
+  "capability_count": 32,
   "capability_rows": [
     {
       "blocker_count": 0,
@@ -327,6 +327,37 @@
     },
     {
       "blocker_count": 0,
+      "capability_id": "analysis.planar_frame_verified_alpha",
+      "capability_kind": "analysis",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "docs/planar-frame-verified-alpha-v1.md",
+        "src/structural_analysis/api/planar_frame.py",
+        "src/structural_analysis/api/planar_frame_cli.py",
+        "tests/test_planar_frame_verified_alpha_api.py",
+        "tests/test_planar_frame_verified_alpha_corpus.py",
+        "verification/planar_frame_verified_alpha_v1/corpus.manifest.json"
+      ],
+      "next_actions": [],
+      "state": "bounded_public",
+      "summary": {
+        "authority": "exact_bounded_candidate",
+        "interfaces": [
+          "python_api",
+          "cli"
+        ],
+        "limitations": [
+          "This Developer Preview row promotes only the source-bound nonlinear load-control path; the wider linear-static, modal, and linear-buckling product profile remains to be unified behind this API.",
+          "Direct displacement-control and arc-length remain separate experimental profiles.",
+          "Independent external V&V, release eligibility, design-code authority, and signed-export authority are not attached."
+        ],
+        "profile": "planar_frame_verified_alpha.v1",
+        "public": true
+      },
+      "title": "Planar frame verified alpha"
+    },
+    {
+      "blocker_count": 0,
       "capability_id": "analysis.nonlinear_corotational_fiber_frame_2d",
       "capability_kind": "analysis",
       "contract_pass": true,
@@ -476,15 +507,7 @@
         "docs/external-vv-independent-operator-intake.md",
         "docs/external-vv-level2-promotion-gate.md",
         "docs/bounded-planar-external-vv-matrix.md",
-        "docs/opensees-calculix-current-source-workflow.md",
-        "artifacts/vv/bounded_planar_external_linear_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_external_negative_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_external_scaling_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_external_modal_buckling_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipts/nonlinear-material-recovery-technical-receipt.json",
-        "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipt.json",
-        "artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json"
+        "docs/opensees-calculix-current-source-workflow.md"
       ],
       "next_actions": [
         "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted."
@@ -1093,7 +1116,7 @@
     "capability_id": "vv.opensees_level2",
     "capability_kind": "verification",
     "contract_pass": false,
-    "evidence_artifact_count": 61,
+    "evidence_artifact_count": 53,
     "first_blocked_target": "",
     "first_next_action": "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted.",
     "gate_unblock_plan_count": 0,
@@ -1111,9 +1134,9 @@
   "first_blocked_capability_id": "vv.opensees_level2",
   "first_blocked_capability_next_action": "Pinned external comparison values remain available, and current-product replay passes for all 25 bounded recommendation rows. Nine core rows retain their prior replay-only receipts. The sixteen-row supplemental receipt now preserves the historical model, runner, result-schema, and package bytes, validates the retained self-hashed OpenSees/CalculiX results against those execution inputs, and compares them with product results regenerated from the current source. No external runtime was executed while generating the current receipts, so all 25 rows are explicitly replay-only: 25/25 technical references, 0/25 fresh current-source technical rows, 0 technically missing rows, and 0/25 promotion-eligible rows. This completes only the bounded technical-reference inventory; fresh external reruns, cross-environment parity, independent operator identity, project legal approvals, complete scientific decisions, and a signed promotion decision remain absent. The Level 2 gate remains blocked, external_vv_level stays 0, and no design, commercial-equivalence, or release authority is granted.",
   "first_blocked_target": "",
-  "generated_at": "2026-07-30T17:09:52.206502+00:00",
+  "generated_at": "2026-07-31T10:52:06.973148+00:00",
   "input_checksums": {
-    "artifacts/manifests/capabilities.yaml": "sha256:866df341a2d4147230a5aa54d6bcca2a08bfaf5dae8a678c23551fe5337318fb",
+    "artifacts/manifests/capabilities.yaml": "sha256:06859beda6295cbd9c766db88a18bf58d700be3b4bb34e43768b62f67a37ebb8",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:280b3fdd93663a891e0ae5b6c505dd51c13ced5aea460943c0207f6fd953ef09",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
@@ -1123,7 +1146,7 @@
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
     "scripts/build_product_capabilities_surface.py": "sha256:79e3e6fc54e21901f3936e863625cee47ce786fbd6db8b6d27f24b622590907a",
-    "scripts/generate_capability_surfaces.py": "sha256:6c52d940b255a21e4f42047bc7457e9c97ff690717b27f37720ede2301cb3a46"
+    "scripts/generate_capability_surfaces.py": "sha256:d50133ccd5c3b15f6bc466da264bb0ea255b4c0aceb04ebed1a001331324e2d4"
   },
   "locked": false,
   "next_actions": [
@@ -1137,14 +1160,14 @@
     "mutation_allowed": false,
     "route": "/product/capabilities"
   },
-  "ready_capability_count": 10,
+  "ready_capability_count": 11,
   "reason_code": "PASS",
   "reuse_policy": "canonical_registry_plus_structural_solver_evidence_rollup",
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
   "shadow_only_capability_count": 1,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "29016987432ed8c612ca8c886dd86355c165d047",
   "source_evidence_rollup": {
     "blocker_count": 0,
     "capability_id": "structural_solver_restricted_alpha_surface",
@@ -1170,7 +1193,7 @@
     "title": "Restricted alpha structural solver evidence"
   },
   "status": "ready",
-  "summary_line": "Product capabilities surface: READY | capabilities=31 | ready=10 | experimental=16 | shadow_only=1 | blocked=4",
+  "summary_line": "Product capabilities surface: READY | capabilities=32 | ready=11 | experimental=16 | shadow_only=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
   "surface_kind": "product_capabilities_surface",
   "surface_scope": "product_capability_discovery"

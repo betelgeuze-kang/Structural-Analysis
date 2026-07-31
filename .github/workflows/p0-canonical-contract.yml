@@ -1,6 +1,7 @@
 name: P0 Canonical Verification Contract
 
 on:
+  merge_group:
   pull_request:
     paths:
       - "canonical/**"
@@ -64,6 +65,7 @@ jobs:
         run: >-
           python scripts/build_canonical_verification_receipt.py
           --enforce
+          --source-sha "${{ github.sha }}"
           --write .ci/canonical-verification-receipt.json
 
       - name: Validate receipt schema
