@@ -62,6 +62,11 @@ def test_mgt_native_modal_buckling_solver_generates_ready_evidence(tmp_path: Pat
     assert modal["final_reassembled_residual_pass"] is True
     assert modal["fallback_used"] is False
     assert modal["regularization_used"] is False
+    assert all(mode["modal_mass_normalized"] is False for mode in modal["modes"])
+    assert all(
+        mode["mode_shape_normalization"] == "max_abs_free_dof_equals_one"
+        for mode in modal["modes"]
+    )
     assert all(
         EQUATION_SCALING_FIELDS <= set(mode["equation_scaling_6dof"])
         and SOURCE_BOUND_SCALING_FIELDS <= set(mode["equation_scaling_6dof"])

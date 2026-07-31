@@ -17,7 +17,10 @@ from pathlib import Path
 import numpy as np
 
 from newton_adaptive_damping import AdaptiveNewtonConfig, solve_with_adaptive_damping
-from structural_analysis.dynamics import build_transient_checkpoint_authority
+from structural_analysis.dynamics import (
+    build_transient_checkpoint_authority,
+    build_transient_source_binding,
+)
 
 
 G = 9.80665
@@ -291,8 +294,16 @@ def main() -> None:
         -float(args.mass_kg) * float(acceleration_g) * G
         for acceleration_g in ag
     )
+    parent_content = gm_path.read_bytes()
+    source_binding = build_transient_source_binding(
+        parent_content=parent_content,
+        force_history=force_history,
+        initial_state=initial_state,
+    )
+    result = {**result, "source_binding": source_binding}
+    replay_result = {**replay_result, "source_binding": source_binding}
     checkpoint_authority = build_transient_checkpoint_authority(
-        parent_content=gm_path.read_bytes(),
+        parent_content=parent_content,
         force_history=force_history,
         initial_state=initial_state,
         source_result=result,

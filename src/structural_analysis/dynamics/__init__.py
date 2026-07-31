@@ -5,6 +5,7 @@ from structural_analysis.dynamics.transient_checkpoint import (
     TransientCheckpointAuthority,
     TransientCheckpointReplayError,
     build_transient_checkpoint_authority,
+    build_transient_source_binding,
 )
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "TransientCheckpointAuthority",
     "TransientCheckpointReplayError",
     "build_transient_checkpoint_authority",
+    "build_transient_source_binding",
 ]

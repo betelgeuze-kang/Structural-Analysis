@@ -117,6 +117,21 @@ def test_canonical_elastic_material_exposes_same_authoritative_contract() -> Non
     assert material.supports_multiaxial is True
 
 
+def test_canonical_elastic_material_preserves_nondefault_admissibility() -> None:
+    material = ElasticMaterial(
+        id="M1",
+        elastic_modulus=2.0e8,
+        supports_unloading=False,
+        supports_reversal=False,
+        supports_cyclic=False,
+    )
+
+    restored = ElasticMaterial.from_mapping(material.to_dict())
+
+    assert restored.admissibility == material.admissibility
+    assert restored.to_dict() == material.to_dict()
+
+
 def test_model_ir_v2_accepts_additive_material_admissibility_contract() -> None:
     fixture = (
         Path(__file__).resolve().parent

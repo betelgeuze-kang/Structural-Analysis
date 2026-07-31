@@ -8,7 +8,17 @@ from structural_analysis.dynamics import (
     SourceAuthenticCheckpointError,
     TransientCheckpointReplayError,
     build_transient_checkpoint_authority,
+    build_transient_source_binding,
 )
+
+
+PARENT_CONTENT = b"time_s,accel_g\n0.0,0.1\n0.1,0.2\n"
+FORCE_HISTORY = (-981.0, -1962.0)
+INITIAL_STATE = {
+    "displacement_m": 0.0,
+    "velocity_mps": 0.0,
+    "acceleration_mps2": -0.981,
+}
 
 
 def _result() -> dict:
@@ -47,16 +57,22 @@ def _result() -> dict:
     }
 
 
+def _bound_result() -> dict:
+    result = _result()
+    result["source_binding"] = build_transient_source_binding(
+        parent_content=PARENT_CONTENT,
+        force_history=FORCE_HISTORY,
+        initial_state=INITIAL_STATE,
+    )
+    return result
+
+
 def test_source_authentic_checkpoint_binds_all_required_evidence() -> None:
-    source = _result()
+    source = _bound_result()
     checkpoint = build_transient_checkpoint_authority(
-        parent_content=b"time_s,accel_g\n0.0,0.1\n0.1,0.2\n",
-        force_history=(-981.0, -1962.0),
-        initial_state={
-            "displacement_m": 0.0,
-            "velocity_mps": 0.0,
-            "acceleration_mps2": -0.981,
-        },
+        parent_content=PARENT_CONTENT,
+        force_history=FORCE_HISTORY,
+        initial_state=INITIAL_STATE,
         source_result=source,
         replay_result=deepcopy(source),
         source_authentic_requested=True,
@@ -69,6 +85,7 @@ def test_source_authentic_checkpoint_binds_all_required_evidence() -> None:
     assert checkpoint.parent_content_hash.startswith("sha256:")
     assert checkpoint.force_history_hash.startswith("sha256:")
     assert checkpoint.initial_state_hash.startswith("sha256:")
+    assert checkpoint.input_binding_hash.startswith("sha256:")
     assert checkpoint.newmark_replay_pass is True
     assert checkpoint.equilibrium_replay_pass is True
     assert checkpoint.work_dissipation_replay_pass is True
@@ -109,8 +126,25 @@ def test_source_authentic_checkpoint_requires_parent_content() -> None:
         )
 
 
+def test_source_authentic_checkpoint_rejects_result_bound_to_other_inputs() -> None:
+    source = _bound_result()
+
+    with pytest.raises(
+        SourceAuthenticCheckpointError,
+        match="input_binding_mismatch",
+    ):
+        build_transient_checkpoint_authority(
+            parent_content=b"different-ground-motion",
+            force_history=FORCE_HISTORY,
+            initial_state=INITIAL_STATE,
+            source_result=source,
+            replay_result=deepcopy(source),
+            source_authentic_requested=True,
+        )
+
+
 def test_tampered_replay_cannot_mint_either_checkpoint_authority() -> None:
-    source = _result()
+    source = _bound_result()
     replay = deepcopy(source)
     replay["trace"][1]["u_m"] = 0.125
 
@@ -119,9 +153,9 @@ def test_tampered_replay_cannot_mint_either_checkpoint_authority() -> None:
         match="newmark_replay",
     ):
         build_transient_checkpoint_authority(
-            parent_content=b"ground-motion",
-            force_history=(-981.0, -1962.0),
-            initial_state={"displacement_m": 0.0},
+            parent_content=PARENT_CONTENT,
+            force_history=FORCE_HISTORY,
+            initial_state=INITIAL_STATE,
             source_result=source,
             replay_result=replay,
             source_authentic_requested=True,
@@ -129,7 +163,7 @@ def test_tampered_replay_cannot_mint_either_checkpoint_authority() -> None:
 
 
 def test_tampered_work_replay_is_rejected_explicitly() -> None:
-    source = _result()
+    source = _bound_result()
     replay = deepcopy(source)
     replay["metrics"]["input_work_j"] = 99.0
 
@@ -138,9 +172,9 @@ def test_tampered_work_replay_is_rejected_explicitly() -> None:
         match="work_dissipation_replay",
     ):
         build_transient_checkpoint_authority(
-            parent_content=b"ground-motion",
-            force_history=(-981.0, -1962.0),
-            initial_state={"displacement_m": 0.0},
+            parent_content=PARENT_CONTENT,
+            force_history=FORCE_HISTORY,
+            initial_state=INITIAL_STATE,
             source_result=source,
             replay_result=replay,
             source_authentic_requested=True,

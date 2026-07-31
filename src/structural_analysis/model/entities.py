@@ -55,6 +55,12 @@ def _optional_finite_float(value: Any, *, field_name: str) -> float | None:
     return _finite_float(value, field_name=field_name)
 
 
+def _exact_bool(value: Any, *, field_name: str) -> bool:
+    if type(value) is not bool:
+        raise TypeError(f"{field_name} must be boolean")
+    return value
+
+
 class CanonicalEntity(Mapping[str, Any]):
     """Mapping-compatible immutable canonical entity base class."""
 
@@ -254,6 +260,52 @@ class ElasticMaterial(CanonicalEntity):
                 f"material {material_id} is not an elastic material: {material_type}"
             )
         modulus = payload.get("elastic_modulus", payload.get("E_kN_per_m2"))
+        raw_admissibility = payload.get("admissibility")
+        if raw_admissibility is None:
+            admissibility = MaterialAdmissibility(
+                loading_domain="finite_linear_elastic_3d",
+                supports_unloading=True,
+                supports_reversal=True,
+                supports_cyclic=True,
+                supports_tension=True,
+                supports_compression=True,
+                supports_multiaxial=True,
+            )
+        else:
+            if not isinstance(raw_admissibility, Mapping):
+                raise TypeError(
+                    f"material {material_id} admissibility must be a mapping"
+                )
+            admissibility = MaterialAdmissibility(
+                loading_domain=_nonempty_text(
+                    raw_admissibility.get("loading_domain"),
+                    field_name=f"material {material_id} loading_domain",
+                ),
+                supports_unloading=_exact_bool(
+                    raw_admissibility.get("supports_unloading"),
+                    field_name=f"material {material_id} supports_unloading",
+                ),
+                supports_reversal=_exact_bool(
+                    raw_admissibility.get("supports_reversal"),
+                    field_name=f"material {material_id} supports_reversal",
+                ),
+                supports_cyclic=_exact_bool(
+                    raw_admissibility.get("supports_cyclic"),
+                    field_name=f"material {material_id} supports_cyclic",
+                ),
+                supports_tension=_exact_bool(
+                    raw_admissibility.get("supports_tension"),
+                    field_name=f"material {material_id} supports_tension",
+                ),
+                supports_compression=_exact_bool(
+                    raw_admissibility.get("supports_compression"),
+                    field_name=f"material {material_id} supports_compression",
+                ),
+                supports_multiaxial=_exact_bool(
+                    raw_admissibility.get("supports_multiaxial"),
+                    field_name=f"material {material_id} supports_multiaxial",
+                ),
+            )
         return cls(
             id=material_id,
             material_type=material_type,
@@ -269,6 +321,13 @@ class ElasticMaterial(CanonicalEntity):
                 payload.get("density"),
                 field_name=f"material {material_id} density",
             ),
+            loading_domain=admissibility.loading_domain,
+            supports_unloading=admissibility.supports_unloading,
+            supports_reversal=admissibility.supports_reversal,
+            supports_cyclic=admissibility.supports_cyclic,
+            supports_tension=admissibility.supports_tension,
+            supports_compression=admissibility.supports_compression,
+            supports_multiaxial=admissibility.supports_multiaxial,
             extras_json=_extras_json(
                 payload,
                 {
@@ -278,6 +337,7 @@ class ElasticMaterial(CanonicalEntity):
                     "E_kN_per_m2",
                     "poisson_ratio",
                     "density",
+                    "admissibility",
                 },
             ),
         )
@@ -293,6 +353,17 @@ class ElasticMaterial(CanonicalEntity):
             payload["poisson_ratio"] = self.poisson_ratio
         if self.density is not None:
             payload["density"] = self.density
+        default_admissibility = MaterialAdmissibility(
+            loading_domain="finite_linear_elastic_3d",
+            supports_unloading=True,
+            supports_reversal=True,
+            supports_cyclic=True,
+            supports_tension=True,
+            supports_compression=True,
+            supports_multiaxial=True,
+        )
+        if self.admissibility != default_admissibility:
+            payload["admissibility"] = self.admissibility.to_dict()
         return payload
 
 

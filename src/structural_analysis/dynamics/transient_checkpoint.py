@@ -34,6 +34,7 @@ class TransientCheckpointAuthority:
     force_history_hash: str
     force_history_sample_count: int
     initial_state_hash: str
+    input_binding_hash: str | None
     source_result_hash: str
     replay_result_hash: str
     newmark_replay_pass: Literal[True]
@@ -74,6 +75,20 @@ def build_transient_checkpoint_authority(
 
     source_payload = _json_ready_mapping(source_result, owner="source_result")
     replay_payload = _json_ready_mapping(replay_result, owner="replay_result")
+    input_binding: dict[str, Any] | None = None
+    if source_authentic_requested:
+        input_binding = _source_binding_from_normalized(
+            parent_content=parent_content,
+            force_values=force_values,
+            normalized_initial_state=normalized_initial_state,
+        )
+        if (
+            source_payload.get("source_binding") != input_binding
+            or replay_payload.get("source_binding") != input_binding
+        ):
+            raise SourceAuthenticCheckpointError(
+                "source_authentic_checkpoint_input_binding_mismatch"
+            )
     source_result_hash = _canonical_hash(source_payload)
     replay_result_hash = _canonical_hash(replay_payload)
     newmark_replay_pass = source_result_hash == replay_result_hash
@@ -135,12 +150,60 @@ def build_transient_checkpoint_authority(
         force_history_hash=_canonical_hash(list(force_values)),
         force_history_sample_count=len(force_values),
         initial_state_hash=_canonical_hash(normalized_initial_state),
+        input_binding_hash=(
+            _canonical_hash(input_binding) if input_binding is not None else None
+        ),
         source_result_hash=source_result_hash,
         replay_result_hash=replay_result_hash,
         newmark_replay_pass=True,
         equilibrium_replay_pass=True,
         work_dissipation_replay_pass=True,
     )
+
+
+def build_transient_source_binding(
+    *,
+    parent_content: bytes,
+    force_history: Sequence[float],
+    initial_state: Mapping[str, float],
+) -> dict[str, Any]:
+    """Return the exact input binding a source-authentic result must carry."""
+
+    if not isinstance(parent_content, bytes) or not parent_content:
+        raise ValueError("parent content must be non-empty bytes")
+    force_values = tuple(float(value) for value in force_history)
+    if not force_values or any(not isfinite(value) for value in force_values):
+        raise ValueError("force history must contain finite samples")
+    normalized_initial_state = {
+        str(key): float(value) for key, value in initial_state.items()
+    }
+    if not normalized_initial_state or any(
+        not isfinite(value) for value in normalized_initial_state.values()
+    ):
+        raise ValueError("initial state must contain finite values")
+    return _source_binding_from_normalized(
+        parent_content=parent_content,
+        force_values=force_values,
+        normalized_initial_state=normalized_initial_state,
+    )
+
+
+def _source_binding_from_normalized(
+    *,
+    parent_content: bytes | None,
+    force_values: Sequence[float],
+    normalized_initial_state: Mapping[str, float],
+) -> dict[str, Any]:
+    if parent_content is None or not parent_content:
+        raise SourceAuthenticCheckpointError(
+            "source_authentic_checkpoint_requires_parent_content"
+        )
+    return {
+        "schema_version": "transient-source-binding.v1",
+        "parent_content_hash": _bytes_hash(parent_content),
+        "force_history_hash": _canonical_hash(list(force_values)),
+        "initial_state_hash": _canonical_hash(dict(normalized_initial_state)),
+    }
 
 
 def _metric_group_matches(
