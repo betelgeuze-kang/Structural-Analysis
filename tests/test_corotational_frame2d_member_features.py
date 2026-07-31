@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from structural_analysis.assembly.corotational_frame2d_member_features import (
     CorotationalFrame2DMemberFeatures,
@@ -75,6 +76,43 @@ def test_uniform_dead_load_uses_initial_local_consistent_vector() -> None:
         rtol=0.0,
         atol=2.0e-15,
     )
+
+
+def test_explicit_local_axis_and_self_weight_share_consistent_load_operator() -> None:
+    features = CorotationalFrame2DMemberFeatures(
+        offset_i_global_m=(0.2, 0.0),
+        offset_j_global_m=(-0.2, 0.0),
+        uniform_load_local_kn_per_m=(0.0, -2.0),
+        local_x_axis_global=(1.0, 0.0),
+        local_y_axis_global=(0.0, 1.0),
+        local_axis_explicit=True,
+        self_weight_local_kn_per_m=(0.0, -1.0),
+        self_weight_mass_per_length_kg_per_m=100.0,
+        self_weight_gravity_global_m_per_s2=(0.0, -10.0),
+    )
+    element = _feature_element(features)
+
+    np.testing.assert_allclose(
+        consistent_uniform_load_element_global(element, features),
+        [0.0, -5.4, -3.24, 0.0, -5.4, 3.24],
+        rtol=0.0,
+        atol=3.0e-15,
+    )
+    assert features.has_self_weight is True
+    assert features.combined_uniform_load_local_kn_per_m == (0.0, -3.0)
+    assert features.to_dict()["local_axis_explicit"] is True
+
+
+def test_explicit_local_axis_must_match_initial_member_chord() -> None:
+    features = CorotationalFrame2DMemberFeatures(
+        local_x_axis_global=(0.0, 1.0),
+        local_y_axis_global=(-1.0, 0.0),
+        local_axis_explicit=True,
+    )
+    element = _feature_element(features)
+
+    with pytest.raises(ValueError, match="must match the initial member chord"):
+        consistent_uniform_load_element_global(element, features)
 
 
 def test_combined_feature_residual_tangent_matches_same_parent_finite_difference() -> (

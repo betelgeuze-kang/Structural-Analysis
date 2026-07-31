@@ -140,9 +140,12 @@ UNIFIED_NONLINEAR_FRAME_CLAIM_BOUNDARY = (
     "portal and connected-frame profiles bind J1-J5, exact terminal engineering "
     "recovery, and epoch-zero checkpoint-chain replay. The connected-frame profile "
     "adds bounded connected graphs, multiple support components, proportional "
-    "prescribed displacements, finite rigid offsets, RZ end releases, and uniform "
-    "dead member loads in initial local axes. Direct displacement control remains "
-    "outside the unified entry point. The connected profile is still a non-public "
+    "prescribed displacements, finite rigid offsets, optional RZ end releases, and uniform "
+    "dead loads on members in explicitly declared chord-bound local axes. Explicit SI "
+    "mass-per-length and global gravity inputs generate self-weight in the same "
+    "consistent load operator. Density-derived self-weight and arbitrarily rotated "
+    "local axes remain outside the unified entry point. The connected profile is "
+    "still a non-public "
     "candidate until its promotion gates pass. No profile grants design-code, "
     "final-design, commercial, or release-readiness authority."
 )
@@ -1500,7 +1503,9 @@ def _compile_portal(
         }
         optional_element_keys = {
             "end_releases",
+            "local_axis",
             "rigid_offsets_global_m",
+            "self_weight",
             "uniform_distributed_load_local",
         }
         allowed_optional_element_keys = (
@@ -1554,7 +1559,12 @@ def _compile_portal(
         )
         node_i = node_index[str(node_i_id)]
         node_j = node_index[str(node_j_id)]
-        features = _corotational_member_features(row, path)
+        features = _corotational_member_features(
+            row,
+            path,
+            node_i_coordinates_m=coordinates[node_i],
+            node_j_coordinates_m=coordinates[node_j],
+        )
         element_coordinates = element_end_coordinates_m(
             coordinates[node_i], coordinates[node_j], features
         )
@@ -2749,6 +2759,9 @@ def _keys(row: Any, expected: set[str], path: str) -> None:
 def _corotational_member_features(
     row: Mapping[str, Any],
     path: str,
+    *,
+    node_i_coordinates_m: tuple[float, float],
+    node_j_coordinates_m: tuple[float, float],
 ) -> CorotationalFrame2DMemberFeatures:
     raw_offsets = row.get(
         "rigid_offsets_global_m",
@@ -2773,6 +2786,67 @@ def _corotational_member_features(
             _number(raw_vector[0], f"{path}/rigid_offsets_global_m/{end}/0"),
             _number(raw_vector[1], f"{path}/rigid_offsets_global_m/{end}/1"),
         )
+
+    element_i = np.asarray(node_i_coordinates_m, dtype=np.float64) + np.asarray(
+        offsets["i"], dtype=np.float64
+    )
+    element_j = np.asarray(node_j_coordinates_m, dtype=np.float64) + np.asarray(
+        offsets["j"], dtype=np.float64
+    )
+    chord = element_j - element_i
+    length = float(np.linalg.norm(chord))
+    if not math.isfinite(length) or length <= 0.0:
+        _fail(
+            "corotational_member_rigid_offset_invalid",
+            f"{path}/rigid_offsets_global_m",
+            "Rigid offsets must preserve a positive finite element length.",
+        )
+    chord_x = (float(chord[0] / length), float(chord[1] / length))
+    chord_y = (-chord_x[1], chord_x[0])
+
+    raw_axis = row.get("local_axis")
+    local_axis_explicit = raw_axis is not None
+    if raw_axis is None:
+        local_x_axis = chord_x
+        local_y_axis = chord_y
+    else:
+        if type(raw_axis) is not dict or set(raw_axis) != {
+            "x_axis_global",
+            "y_axis_global",
+        }:
+            _fail(
+                "corotational_member_local_axis_invalid",
+                f"{path}/local_axis",
+                "Local axis requires exact x_axis_global and y_axis_global XY vectors.",
+            )
+        parsed_axes: dict[str, tuple[float, float]] = {}
+        for name in ("x_axis_global", "y_axis_global"):
+            raw_vector = raw_axis[name]
+            if type(raw_vector) is not list or len(raw_vector) != 2:
+                _fail(
+                    "corotational_member_local_axis_invalid",
+                    f"{path}/local_axis/{name}",
+                    "Each local axis must be a two-value global XY vector.",
+                )
+            parsed_axes[name] = (
+                _number(raw_vector[0], f"{path}/local_axis/{name}/0"),
+                _number(raw_vector[1], f"{path}/local_axis/{name}/1"),
+            )
+        local_x_axis = parsed_axes["x_axis_global"]
+        local_y_axis = parsed_axes["y_axis_global"]
+        if not np.allclose(
+            local_x_axis, chord_x, rtol=0.0, atol=1.0e-12
+        ) or not np.allclose(
+            local_y_axis,
+            chord_y,
+            rtol=0.0,
+            atol=1.0e-12,
+        ):
+            _fail(
+                "corotational_member_local_axis_invalid",
+                f"{path}/local_axis",
+                "The bounded v1 local axes must match the offset-adjusted chord and right-handed normal.",
+            )
 
     raw_releases = row.get("end_releases", {"i": [], "j": []})
     if type(raw_releases) is not dict or set(raw_releases) != {"i", "j"}:
@@ -2817,6 +2891,54 @@ def _corotational_member_features(
             f"{path}/uniform_distributed_load_local",
             "The v1 load must be uniform, dead, and expressed in initial member local axes.",
         )
+    raw_self_weight = row.get("self_weight")
+    if raw_self_weight is None:
+        self_weight_local = (0.0, 0.0)
+        self_weight_mass = None
+        self_weight_gravity = None
+    else:
+        if type(raw_self_weight) is not dict or set(raw_self_weight) != {
+            "mass_per_length_kg_per_m",
+            "gravity_global_m_per_s2",
+        }:
+            _fail(
+                "corotational_member_self_weight_invalid",
+                f"{path}/self_weight",
+                "Self-weight requires exact SI mass-per-length and global gravity fields.",
+            )
+        raw_gravity = raw_self_weight["gravity_global_m_per_s2"]
+        if type(raw_gravity) is not list or len(raw_gravity) != 2:
+            _fail(
+                "corotational_member_self_weight_invalid",
+                f"{path}/self_weight/gravity_global_m_per_s2",
+                "Self-weight gravity must be a two-value global XY vector.",
+            )
+        self_weight_mass = _positive(
+            raw_self_weight["mass_per_length_kg_per_m"],
+            f"{path}/self_weight/mass_per_length_kg_per_m",
+        )
+        self_weight_gravity = (
+            _number(
+                raw_gravity[0],
+                f"{path}/self_weight/gravity_global_m_per_s2/0",
+            ),
+            _number(
+                raw_gravity[1],
+                f"{path}/self_weight/gravity_global_m_per_s2/1",
+            ),
+        )
+        gravity = np.asarray(self_weight_gravity, dtype=np.float64)
+        if not np.any(gravity != 0.0):
+            _fail(
+                "corotational_member_self_weight_invalid",
+                f"{path}/self_weight/gravity_global_m_per_s2",
+                "Self-weight gravity must be nonzero.",
+            )
+        global_weight_kn_per_m = self_weight_mass * gravity / 1000.0
+        self_weight_local = (
+            float(global_weight_kn_per_m @ np.asarray(local_x_axis)),
+            float(global_weight_kn_per_m @ np.asarray(local_y_axis)),
+        )
     try:
         return CorotationalFrame2DMemberFeatures(
             offset_i_global_m=offsets["i"],
@@ -2833,6 +2955,12 @@ def _corotational_member_features(
                     f"{path}/uniform_distributed_load_local/qy_kN_per_m",
                 ),
             ),
+            local_x_axis_global=local_x_axis,
+            local_y_axis_global=local_y_axis,
+            local_axis_explicit=local_axis_explicit,
+            self_weight_local_kn_per_m=self_weight_local,
+            self_weight_mass_per_length_kg_per_m=self_weight_mass,
+            self_weight_gravity_global_m_per_s2=self_weight_gravity,
         )
     except NonlinearFrameError:
         raise

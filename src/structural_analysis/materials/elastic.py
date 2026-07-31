@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from math import isfinite
 from typing import Any, Mapping
 
+from structural_analysis.materials.admissibility import MaterialAdmissibility
+
 
 @dataclass(frozen=True)
 class ElasticIsotropicMaterial:
@@ -15,6 +17,13 @@ class ElasticIsotropicMaterial:
     elastic_modulus: float
     poisson_ratio: float
     density: float | None = None
+    loading_domain: str = "finite_linear_elastic_3d"
+    supports_unloading: bool = True
+    supports_reversal: bool = True
+    supports_cyclic: bool = True
+    supports_tension: bool = True
+    supports_compression: bool = True
+    supports_multiaxial: bool = True
 
     def __post_init__(self) -> None:
         if not self.material_id:
@@ -37,6 +46,18 @@ class ElasticIsotropicMaterial:
     @property
     def shear_modulus(self) -> float:
         return self.elastic_modulus / (2.0 * (1.0 + self.poisson_ratio))
+
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return MaterialAdmissibility(
+            loading_domain=self.loading_domain,
+            supports_unloading=self.supports_unloading,
+            supports_reversal=self.supports_reversal,
+            supports_cyclic=self.supports_cyclic,
+            supports_tension=self.supports_tension,
+            supports_compression=self.supports_compression,
+            supports_multiaxial=self.supports_multiaxial,
+        )
 
     @classmethod
     def from_mapping(cls, payload: Mapping[str, Any]) -> "ElasticIsotropicMaterial":

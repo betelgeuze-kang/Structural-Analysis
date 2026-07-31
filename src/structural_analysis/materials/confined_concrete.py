@@ -9,6 +9,11 @@ import struct
 from types import MappingProxyType
 from typing import Any
 
+from structural_analysis.materials.admissibility import (
+    MaterialAdmissibility,
+    MaterialPathNotAdmissibleError,
+)
+
 
 CONFINED_CONCRETE_PROFILE = "mander_uniaxial_monotonic_compression.v1"
 CONFINED_CONCRETE_STATE_SCHEMA_VERSION = "confined-concrete-envelope-state.v1"
@@ -35,7 +40,7 @@ _STATE_DOMAIN = b"structural-analysis/confined-concrete-envelope-state/v1\0"
 _PATH_TOLERANCE = 1.0e-15
 
 
-class ConfinedConcreteAdmissibilityError(ValueError):
+class ConfinedConcreteAdmissibilityError(MaterialPathNotAdmissibleError):
     """Stable fail-closed constitutive-path or material-failure event."""
 
     def __init__(self, code: str, detail: str) -> None:
@@ -133,6 +138,18 @@ class ConfinedConcreteMaterial:
             self.elastic_modulus_mpa - self.secant_peak_modulus_mpa
         )
 
+    @property
+    def admissibility(self) -> MaterialAdmissibility:
+        return MaterialAdmissibility(
+            loading_domain="monotonic_compression",
+            supports_unloading=False,
+            supports_reversal=False,
+            supports_cyclic=False,
+            supports_tension=False,
+            supports_compression=True,
+            supports_multiaxial=False,
+        )
+
     def initial_state(self) -> ConfinedConcreteState:
         return ConfinedConcreteState()
 
@@ -183,7 +200,8 @@ class ConfinedConcreteMaterial:
                 "unsupported_constitutive_path",
                 (
                     "mander_uniaxial_monotonic_compression.v1 has no "
-                    f"unloading/reversal/tension law; trial compression "
+                    f"unloading/reversal/tension law; unsupported=unloading; "
+                    f"trial compression "
                     f"{trial_compression!r}, accepted maximum "
                     f"{accepted_maximum!r}"
                 ),
