@@ -1,5 +1,9 @@
 implementation/phase1/release_evidence/productization/*.npz filter=lfs diff=lfs merge=lfs -text
 implementation/phase1/release_evidence/productization/**/*.npz filter=lfs diff=lfs merge=lfs -text
+# These two checkpoint families predate the LFS policy and are intentionally
+# retained as direct Git blobs. Do not misclassify them as missing pointers.
+implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoints/*.npz -filter -diff -merge
+implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/*.npz -filter -diff -merge
 tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json text eol=lf
 examples/public_corotational_member_features.json text eol=lf
 examples/bounded_planar_frame_alpha.model-ir.v2.json text eol=lf

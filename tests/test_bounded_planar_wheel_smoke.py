@@ -34,9 +34,7 @@ def test_installed_wheel_output_contract_accepts_exact_result_pair(
         "result_hash": _hash("2"),
         "contract_bindings": {
             "source_model_ir_adapter": {"model_ir_content_hash": _hash("1")},
-            "bounded_planar_execution_plan": {
-                "model_ir_content_hash": _hash("1")
-            },
+            "bounded_planar_execution_plan": {"model_ir_content_hash": _hash("1")},
             "engineering_result_hash": engineering_hash,
         },
         "engineering_result_ir": {
@@ -58,8 +56,7 @@ def test_installed_wheel_output_contract_accepts_exact_result_pair(
     assert verified["result_hash"] == _hash("2")
     assert verified["engineering_result_hash"] == engineering_hash
     assert verified["checkpoint_sha256"] == (
-        "sha256:"
-        "47320987f9a49d5b00119b960f247a956773f57543982b8bfcb6da5bb3afd9ef"
+        "sha256:47320987f9a49d5b00119b960f247a956773f57543982b8bfcb6da5bb3afd9ef"
     )
     assert verified["checkpoint_byte_length"] == len(b"checkpoint")
 
@@ -77,7 +74,7 @@ def test_wheel_smoke_declares_member_feature_and_settlement_cases() -> None:
     )
 
 
-def test_wheel_build_is_offline_and_does_not_resolve_build_dependencies(
+def test_wheel_build_uses_pep517_isolation(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
@@ -103,14 +100,17 @@ def test_wheel_build_is_offline_and_does_not_resolve_build_dependencies(
     assert commands
     build_command = commands[0]
     assert build_command[:4] == [sys.executable, "-m", "pip", "wheel"]
-    assert "--no-build-isolation" in build_command
+    assert "--no-build-isolation" not in build_command
     assert "--no-deps" in build_command
 
 
 @pytest.mark.parametrize(
     ("mutation", "message"),
     [
-        (lambda result, report: report.update(contract_pass=False), "validation_report"),
+        (
+            lambda result, report: report.update(contract_pass=False),
+            "validation_report",
+        ),
         (
             lambda result, report: result["contract_bindings"][
                 "source_model_ir_adapter"
@@ -140,9 +140,7 @@ def test_installed_wheel_output_contract_fails_closed(
         "result_hash": _hash("2"),
         "contract_bindings": {
             "source_model_ir_adapter": {"model_ir_content_hash": _hash("1")},
-            "bounded_planar_execution_plan": {
-                "model_ir_content_hash": _hash("1")
-            },
+            "bounded_planar_execution_plan": {"model_ir_content_hash": _hash("1")},
             "engineering_result_hash": engineering_hash,
         },
         "engineering_result_ir": {

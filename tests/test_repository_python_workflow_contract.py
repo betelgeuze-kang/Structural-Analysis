@@ -14,7 +14,7 @@ def test_every_pull_request_collects_the_complete_pytest_suite() -> None:
     assert "pull_request:" in workflow
     assert "paths:" not in workflow
     assert "python -m pytest --collect-only -q" in workflow
-    assert "github.event_name == 'pull_request'" in workflow
+    assert "collect:\n    if:" not in workflow
 
 
 def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
@@ -25,8 +25,7 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
     assert "merge_group:" in workflow
     assert 'branches: ["main"]' in workflow
     assert "python -m pytest -q" in workflow
-    assert "github.event_name == 'merge_group'" in workflow
-    assert "github.event_name == 'push'" in workflow
+    assert "full:\n    if:" not in workflow
 
 
 def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
@@ -76,3 +75,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "continue-on-error: true" in workflow
     assert 'payload["release_authority"] is False' in workflow
     assert 'git_object_verification"] == "passed"' in workflow
+    assert "uses: actions/attest@v4" in workflow
+    assert "product-state.current.sigstore.json" in workflow
+    assert "gh attestation verify" in workflow
+    assert "retention-days: 90" in workflow

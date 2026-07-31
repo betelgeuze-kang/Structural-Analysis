@@ -1,6 +1,7 @@
 name: Core Quality and Compatibility CI
 
 on:
+  merge_group:
   pull_request:
     paths:
       - ".coveragerc"

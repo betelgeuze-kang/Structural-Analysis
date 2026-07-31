@@ -6,7 +6,7 @@ import {
   type ResidualStep,
 } from '../model/caseSchema'
 import type { RunStatus } from '../model/workbenchState'
-import { EngineeringValueText } from './EngineeringValueText'
+import { BooleanEvidenceValueText, EngineeringValueText } from './EngineeringValueText'
 import { StateChip } from './StateChip'
 
 interface RunMonitorProps {
@@ -21,7 +21,10 @@ const STATUS_LABEL: Record<RunStatus, string> = {
   validating: 'Validating',
   running: 'Running',
   converged: 'Converged',
+  not_converged: 'Did not converge',
   failed: 'Did not converge',
+  blocked: 'Blocked',
+  not_run: 'Not run',
 }
 
 /**
@@ -31,7 +34,7 @@ const STATUS_LABEL: Record<RunStatus, string> = {
  * the whole panel reports UNAVAILABLE and infers nothing.
  */
 export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAvailable }: RunMonitorProps): ReactElement {
-  if (!convergenceAvailable || !analysis) {
+  if (!analysis) {
     return (
       <section className="wb2-panel" aria-labelledby="wb2-run-title" data-run-monitor="unavailable">
         <h2 id="wb2-run-title" className="wb2-panel__title">Run Monitor</h2>
@@ -39,7 +42,7 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
           <StateChip state="UNAVAILABLE" srLabel="Run status" />
         </div>
         <p className="wb2-unavailable" data-wb2-unavailable>
-          No convergence information is attached to this case; run progress is not inferred.
+          No analysis is attached to this case; run progress is not inferred.
         </p>
       </section>
     )
@@ -58,7 +61,11 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
     isAvailableValue(analysis.finalNormalizedResidual) && isAvailableValue(analysis.residualTolerance)
       ? analysis.finalNormalizedResidual.value <= analysis.residualTolerance.value
       : null
-  const statusState = runStatus === 'converged' ? 'LIVE' : runStatus === 'failed' ? 'BLOCKED' : 'UNAVAILABLE'
+  const statusState = runStatus === 'converged'
+    ? 'LIVE'
+    : runStatus === 'failed' || runStatus === 'not_converged' || runStatus === 'blocked'
+      ? 'BLOCKED'
+      : 'UNAVAILABLE'
 
   return (
     <section className="wb2-panel" aria-labelledby="wb2-run-title" data-run-monitor={runStatus}>
@@ -88,11 +95,18 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
       </p>
 
       <dl className="wb2-kv">
+        <dt>Converged</dt><dd><BooleanEvidenceValueText value={analysis.converged} /></dd>
         <dt>Latest residual</dt><dd className="wb2-mono"><EngineeringValueText value={latestResidual} /></dd>
         <dt>Final residual</dt><dd className="wb2-mono"><EngineeringValueText value={analysis.finalNormalizedResidual} /></dd>
         <dt>Tolerance</dt><dd className="wb2-mono"><EngineeringValueText value={analysis.residualTolerance} /></dd>
         <dt>Final rel. increment</dt><dd className="wb2-mono"><EngineeringValueText value={analysis.finalRelativeIncrement} /></dd>
       </dl>
+
+      {!convergenceAvailable ? (
+        <p className="wb2-unavailable" data-wb2-unavailable>
+          Convergence is not available for status {analysis.status}; it is not inferred from progress or job completion.
+        </p>
+      ) : null}
 
       <p
         className={`wb2-result-tol${withinTolerance === true ? ' is-ok' : withinTolerance === false ? ' is-no' : ''}`}

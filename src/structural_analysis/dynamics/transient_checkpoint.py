@@ -108,9 +108,7 @@ def build_transient_checkpoint_authority(
         ),
     )
     if not (
-        newmark_replay_pass
-        and equilibrium_replay_pass
-        and work_dissipation_replay_pass
+        newmark_replay_pass and equilibrium_replay_pass and work_dissipation_replay_pass
     ):
         failed = [
             label
@@ -125,9 +123,10 @@ def build_transient_checkpoint_authority(
             "transient_checkpoint_replay_failed: " + ",".join(failed)
         )
 
-    parent_content_hash = (
-        _bytes_hash(parent_content) if parent_content_bound else None
-    )
+    parent_content_hash = None
+    if parent_content_bound:
+        assert parent_content is not None
+        parent_content_hash = _bytes_hash(parent_content)
     source_authentic = bool(
         source_authentic_requested
         and parent_content_bound

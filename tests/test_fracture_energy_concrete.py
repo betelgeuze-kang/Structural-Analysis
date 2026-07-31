@@ -102,7 +102,7 @@ def test_fracture_energy_material_fails_closed_for_invalid_mapping() -> None:
             characteristic_length_m=1.0,
             tensile_fracture_energy_n_per_m=10.0,
         )
-    with pytest.raises(ValueError, match="must be finite"):
+    with pytest.raises(ValueError, match=r"must be (?:a )?finite"):
         FractureEnergyConcreteDamageMaterial(characteristic_length_m=math.nan)
 
 

@@ -54,6 +54,24 @@ export type ExplicitValue<T> = EvidenceValue<T>
 export type EngineeringValue = EvidenceValue<number>
 export type TextValue = EvidenceValue<string>
 
+export const PLANAR_VERIFIED_ALPHA_PROFILE = 'planar_frame_verified_alpha.v1' as const
+
+export interface ProductProfileEvidence {
+  id: TextValue
+  public: EvidenceValue<boolean>
+  releaseEligible: EvidenceValue<boolean>
+}
+
+export type AnalysisStatus =
+  | 'idle'
+  | 'validating'
+  | 'running'
+  | 'converged'
+  | 'not_converged'
+  | 'failed'
+  | 'blocked'
+  | 'not_run'
+
 export interface CaseModel {
   unitSystem: UnitSystem
   coordinateSystem: CoordinateSystem
@@ -73,8 +91,8 @@ export interface CaseAnalysis {
   finalNormalizedResidual: EngineeringValue
   finalRelativeIncrement: EngineeringValue
   equationScaling6DOF: EquationScaling6DOFValues
-  /** Optional explicit run status when not converged (e.g. 'failed'). */
-  status?: 'idle' | 'validating' | 'running' | 'converged' | 'failed'
+  /** Normalized solver status. It is checked against `converged`. */
+  status: AnalysisStatus
   [extra: string]: unknown
 }
 
@@ -106,6 +124,7 @@ export interface WorkbenchCaseV2 {
   model: CaseModel
   analysis?: CaseAnalysis
   residualHistory: ResidualStep[]
+  productProfile: ProductProfileEvidence
   /** Forward-compatible: unknown top-level fields are preserved here. */
   [extra: string]: unknown
 }
@@ -289,8 +308,64 @@ function normalizeEquationScaling(
   }
 }
 
-function toRunStatus(v: unknown): CaseAnalysis['status'] {
-  return v === 'idle' || v === 'validating' || v === 'running' || v === 'converged' || v === 'failed' ? v : undefined
+function toRunStatus(v: unknown): AnalysisStatus | undefined {
+  return v === 'idle'
+    || v === 'validating'
+    || v === 'running'
+    || v === 'converged'
+    || v === 'not_converged'
+    || v === 'failed'
+    || v === 'blocked'
+    || v === 'not_run'
+    ? v
+    : undefined
+}
+
+function normalizeAnalysisTruth(
+  analysis: Record<string, unknown>,
+  warnings: string[],
+): { status: AnalysisStatus; converged: ExplicitValue<boolean> } {
+  const declaredStatus = toRunStatus(analysis.status)
+  const declaredConverged = explicitBoolean(analysis, 'converged', 'analysis.converged', warnings)
+
+  if (hasOwn(analysis, 'status') && declaredStatus === undefined) {
+    warnings.push(`analysis.status is invalid (${String(analysis.status)})`)
+    return {
+      status: 'not_run',
+      converged: { status: 'invalid', reason: `analysis.status is invalid (${String(analysis.status)})` },
+    }
+  }
+
+  // Legacy cases may omit status. Preserve their explicit boolean without
+  // deriving truth from job state, residuals, or any other secondary signal.
+  if (declaredStatus === undefined) {
+    if (isAvailableValue(declaredConverged)) {
+      return {
+        status: declaredConverged.value ? 'converged' : 'not_converged',
+        converged: declaredConverged,
+      }
+    }
+    return { status: 'not_run', converged: declaredConverged }
+  }
+
+  if (declaredStatus === 'blocked' || declaredStatus === 'not_run'
+      || declaredStatus === 'idle' || declaredStatus === 'validating' || declaredStatus === 'running') {
+    if (isAvailableValue(declaredConverged)) {
+      warnings.push(
+        `analysis.converged is ignored because analysis.status=${declaredStatus}; convergence is UNAVAILABLE`,
+      )
+    }
+    return { status: declaredStatus, converged: unavailable() }
+  }
+
+  const expected = declaredStatus === 'converged'
+  if (!isAvailableValue(declaredConverged)) return { status: declaredStatus, converged: declaredConverged }
+  if (declaredConverged.value !== expected) {
+    const reason = `analysis.converged contradicts analysis.status=${declaredStatus}`
+    warnings.push(reason)
+    return { status: declaredStatus, converged: { status: 'invalid', reason } }
+  }
+  return { status: declaredStatus, converged: declaredConverged }
 }
 
 function normalizeResidualHistory(v: unknown, warnings: string[]): ResidualStep[] {
@@ -345,6 +420,38 @@ function normalizeResidualHistory(v: unknown, warnings: string[]): ResidualStep[
   })
 }
 
+function normalizeProductProfile(raw: Record<string, unknown>, warnings: string[]): ProductProfileEvidence {
+  const token = raw.capabilityProfile ?? raw.capability_profile
+  if (token === undefined) {
+    return {
+      id: unavailable(),
+      public: unavailable(),
+      releaseEligible: unavailable(),
+    }
+  }
+  if (typeof token !== 'string' || token.trim() === '') {
+    const reason = 'capability profile is invalid (expected a non-empty string)'
+    warnings.push(reason)
+    return {
+      id: { status: 'invalid', reason },
+      public: { status: 'invalid', reason },
+      releaseEligible: { status: 'invalid', reason },
+    }
+  }
+  if (token === PLANAR_VERIFIED_ALPHA_PROFILE) {
+    return {
+      id: { status: 'available', value: token },
+      public: { status: 'available', value: true },
+      releaseEligible: { status: 'available', value: false },
+    }
+  }
+  return {
+    id: { status: 'available', value: token },
+    public: unavailable(),
+    releaseEligible: unavailable(),
+  }
+}
+
 /**
  * Validate a raw object as a WorkbenchCaseV2. Unknown fields are allowed and
  * preserved. Returns block errors, soft warnings, and a convergenceAvailable
@@ -395,9 +502,10 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
   if (hasOwn(raw, 'analysis') && analysis == null) {
     warnings.push('analysis is invalid (expected an object)')
   }
-  const converged = analysis
-    ? explicitBoolean(analysis, 'converged', 'analysis.converged', warnings)
-    : unavailable()
+  const analysisTruth = analysis
+    ? normalizeAnalysisTruth(analysis, warnings)
+    : { status: 'not_run' as const, converged: unavailable() }
+  const converged = analysisTruth.converged
   const convergenceAvailable = isAvailableValue(converged)
   if (converged.status === 'unavailable') {
     warnings.push('analysis.converged is missing — convergence is UNAVAILABLE, not inferred')
@@ -469,10 +577,11 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
             warnings,
           ),
           equationScaling6DOF: normalizeEquationScaling(analysis, warnings),
-          status: toRunStatus(analysis.status),
+          status: analysisTruth.status,
         }
       : undefined,
     residualHistory: normalizeResidualHistory(raw.residualHistory, warnings),
+    productProfile: normalizeProductProfile(raw, warnings),
   } as WorkbenchCaseV2
 
   return { ok: true, value, errors, warnings, convergenceAvailable }

@@ -1,0 +1,92 @@
+name: P0 Canonical Verification Contract
+
+on:
+  pull_request:
+    paths:
+      - "canonical/**"
+      - "scripts/build_canonical_verification_receipt.py"
+      - "scripts/check_generated_artifact_dag.py"
+      - "tests/test_build_canonical_verification_receipt.py"
+      - "tests/test_generated_artifact_dag.py"
+      - ".github/workflows/p0-canonical-contract.yml"
+  push:
+    branches: ["main", "codex/**", "ci/**"]
+    paths:
+      - "canonical/**"
+      - "scripts/build_canonical_verification_receipt.py"
+      - "scripts/check_generated_artifact_dag.py"
+      - "tests/test_build_canonical_verification_receipt.py"
+      - "tests/test_generated_artifact_dag.py"
+      - ".github/workflows/p0-canonical-contract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  LANG: "C.UTF-8"
+  LC_ALL: "C.UTF-8"
+  TZ: "UTC"
+  PYTHONHASHSEED: "0"
+
+jobs:
+  canonical-contract:
+    runs-on: ubuntu-latest
+    container:
+      image: docker.io/library/python:3.12.11-slim-bookworm@sha256:519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@v6
+
+      - name: Install exact hashed canonical dependencies
+        run: >-
+          python -m pip install
+          --only-binary=:all:
+          --require-hashes
+          --no-deps
+          -r canonical/requirements-cp312-manylinux2014-x86_64.lock
+
+      - name: Install source without dependency resolution
+        run: python -m pip install --no-deps --no-build-isolation -e .
+
+      - name: Verify canonical declarations and freshness behavior
+        run: >-
+          python -m pytest -q
+          tests/test_build_canonical_verification_receipt.py
+          tests/test_generated_artifact_dag.py
+
+      - name: Build exact-source canonical environment receipt
+        run: >-
+          python scripts/build_canonical_verification_receipt.py
+          --enforce
+          --write .ci/canonical-verification-receipt.json
+
+      - name: Validate receipt schema
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import jsonschema
+
+          schema = json.loads(
+              Path("canonical/canonical-verification-receipt.v1.schema.json").read_text()
+          )
+          receipt = json.loads(
+              Path(".ci/canonical-verification-receipt.json").read_text()
+          )
+          jsonschema.Draft202012Validator(schema).validate(receipt)
+          PY
+
+      - name: Upload canonical environment identity
+        uses: actions/upload-artifact@v7
+        with:
+          name: canonical-verification-environment-${{ github.sha }}
+          path: .ci/canonical-verification-receipt.json
+          if-no-files-found: error
+          retention-days: 30

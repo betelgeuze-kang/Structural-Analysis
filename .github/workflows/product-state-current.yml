@@ -14,11 +14,18 @@ on:
 permissions:
   actions: read
   contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   PRODUCT_STATE_SHA: ${{ github.event.workflow_run.head_sha }}
   PRODUCT_STATE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+  PRODUCT_STATE_PATH: artifacts/manifests/product_state.current.v1.json
+  PRODUCT_STATE_ATTESTATION_BUNDLE: .ci/product-state-inputs/product-state.current.sigstore.json
+  PRODUCT_STATE_ATTESTATION_VERIFICATION: .ci/product-state-inputs/product-state.current.attestation-verification.json
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   build-current-state:
@@ -133,6 +140,23 @@ jobs:
               )
           PY
 
+      - name: Attest exact-SHA product state
+        id: attest
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.PRODUCT_STATE_PATH }}
+
+      - name: Retain and verify product-state provenance bundle
+        shell: bash
+        run: |
+          cp "${{ steps.attest.outputs.bundle-path }}" "$PRODUCT_STATE_ATTESTATION_BUNDLE"
+          gh attestation verify "$PRODUCT_STATE_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$PRODUCT_STATE_ATTESTATION_BUNDLE" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --deny-self-hosted-runners \
+            --format json > "$PRODUCT_STATE_ATTESTATION_VERIFICATION"
+
       - name: Upload current and historical product-state manifests
         uses: actions/upload-artifact@v7
         with:
@@ -150,4 +174,4 @@ jobs:
             artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package
             .ci/product-state-inputs
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 90

@@ -11,13 +11,15 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import venv
 from typing import Any, Mapping, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SAMPLES = {
     "member_feature": ROOT / "examples/bounded_planar_frame_alpha.model-ir.v2.json",
-    "prescribed_settlement": ROOT / "examples/bounded_planar_settlement.model-ir.v2.json",
+    "prescribed_settlement": ROOT
+    / "examples/bounded_planar_settlement.model-ir.v2.json",
 }
 PROFILE = "corotational_connected_frame2d.v1"
 HASH_PREFIX = "sha256:"
@@ -151,7 +153,7 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="bounded-planar-wheel-smoke-") as raw:
         work = Path(raw)
         wheel_dir = work / "wheel"
-        installed_site = work / "installed"
+        installed_environment = work / "installed-environment"
         output = work / "output"
         wheel_dir.mkdir()
         output.mkdir()
@@ -162,7 +164,6 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "-m",
                 "pip",
                 "wheel",
-                "--no-build-isolation",
                 "--no-deps",
                 "--wheel-dir",
                 str(wheel_dir),
@@ -176,25 +177,27 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 f"wheel_artifact_count_invalid:{len(wheels)}"
             )
         wheel = wheels[0]
+        venv.EnvBuilder(with_pip=True, clear=True).create(installed_environment)
+        installed_python = installed_environment / (
+            "Scripts/python.exe" if os.name == "nt" else "bin/python"
+        )
         _run(
             [
-                sys.executable,
+                str(installed_python),
                 "-m",
                 "pip",
                 "install",
-                "--no-deps",
-                "--target",
-                str(installed_site),
                 str(wheel),
             ],
             cwd=work,
         )
 
         environment = dict(os.environ)
-        environment["PYTHONPATH"] = str(installed_site)
+        environment.pop("PYTHONPATH", None)
+        environment["PYTHONNOUSERSITE"] = "1"
         probe = _run(
             [
-                sys.executable,
+                str(installed_python),
                 "-c",
                 (
                     "import importlib.resources, json, pathlib, structural_analysis; "
@@ -217,8 +220,8 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "installed_package_probe_invalid"
             ) from error
         try:
-            module_path.relative_to(installed_site.resolve())
-            schema_path.relative_to(installed_site.resolve())
+            module_path.relative_to(installed_environment.resolve())
+            schema_path.relative_to(installed_environment.resolve())
         except ValueError as error:
             raise BoundedPlanarWheelSmokeError(
                 "installed_package_resolved_outside_wheel_target"
@@ -235,7 +238,7 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
             checkpoint_path = case_output / "checkpoint.json"
             _run(
                 [
-                    sys.executable,
+                    str(installed_python),
                     "-m",
                     "structural_analysis.api.nonlinear_frame_cli",
                     str(sample),
@@ -270,8 +273,12 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "contract_pass": True,
             "wheel_filename": wheel.name,
             "wheel_sha256": _sha256(wheel),
-            "installed_module": module_path.relative_to(installed_site).as_posix(),
-            "installed_schema": schema_path.relative_to(installed_site).as_posix(),
+            "installed_module": module_path.relative_to(
+                installed_environment
+            ).as_posix(),
+            "installed_schema": schema_path.relative_to(
+                installed_environment
+            ).as_posix(),
             "cases": verified_cases,
             "claim_boundary": (
                 "This smoke proves that the current wheel contains the bounded planar "

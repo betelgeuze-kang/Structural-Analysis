@@ -6,6 +6,7 @@ name: CI
 # this lane is triggered by the Python structural package and shared product gates.
 
 on:
+  merge_group:
   push:
     branches: ["main", "codex/**", "web/**", "feat/**", "solver/**", "ci/**"]
     paths:

@@ -37,7 +37,7 @@ def test_registry_is_valid_and_all_generated_surfaces_are_current() -> None:
     assert registry["authority_rules"]["fallback_promotion_allowed"] is False
     assert Counter(row["status"] for row in registry["capabilities"]) == {
         "supported": 1,
-        "bounded_public": 9,
+        "bounded_public": 10,
         "experimental": 16,
         "shadow_only": 1,
         "blocked": 4,
@@ -49,8 +49,8 @@ def test_public_api_filters_rows_and_returns_independent_copies() -> None:
     all_rows = capabilities()
     public_rows = capabilities(public_only=True)
 
-    assert len(all_rows) == 31
-    assert len(public_rows) == 10
+    assert len(all_rows) == 32
+    assert len(public_rows) == 11
     assert all(row["public"] for row in public_rows)
     assert all(row["status"] in {"supported", "bounded_public"} for row in public_rows)
     assert any(
@@ -85,11 +85,11 @@ def test_cli_prints_full_and_public_capability_views(
     assert cli_main(["--capabilities"]) == 0
     full_payload = json.loads(capsys.readouterr().out)
     assert full_payload["schema_version"] == "structural-analysis-capabilities.v2"
-    assert len(full_payload["capabilities"]) == 31
+    assert len(full_payload["capabilities"]) == 32
 
     assert cli_main(["--capabilities", "--public-only"]) == 0
     public_payload = json.loads(capsys.readouterr().out)
-    assert len(public_payload["capabilities"]) == 10
+    assert len(public_payload["capabilities"]) == 11
     assert all(row["public"] for row in public_payload["capabilities"])
 
 
@@ -105,7 +105,7 @@ def test_workbench_consumes_generated_registry_without_truth_ownership() -> None
 
     assert payload["authorityRules"]["workbench_truth_owner"] == "none"
     assert payload["authorityRules"]["ai_truth_owner"] == "none"
-    assert len(payload["capabilities"]) == 31
+    assert len(payload["capabilities"]) == 32
     assert "generatedCapabilities.json" in component
     assert "data-wb2-capability-table" in component
     assert "numerical_authority" in component

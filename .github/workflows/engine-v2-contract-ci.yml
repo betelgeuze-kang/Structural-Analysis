@@ -4,6 +4,7 @@ name: Engine v2 Contract CI
 # HIP/ROCm hardware and cannot create hardware or readiness evidence.
 
 on:
+  merge_group:
   pull_request:
     paths:
       - "src/structural_analysis/engine_v2/**"

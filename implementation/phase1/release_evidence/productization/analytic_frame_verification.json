@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:472f80a3718f5debfcb83e87f08e7119f90a4592df803af62e61b1d5366b4471",
+  "artifact_hash": "sha256:08cb6ec50a5d64b73bb6f18bd183e915e75f3e63605df44990de0991e46e193b",
   "blockers_remaining": [
     "independent_code_to_code_evidence_not_included",
     "published_benchmark_evidence_not_included",
@@ -347,8 +347,8 @@
       "src/structural_analysis/benchmark/analytic_frame.py": "sha256:2477100d38933e98454d7fa62fdfeb521763fe52f07ab98b6ce5d2e901d3be99",
       "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
       "src/structural_analysis/io/neutral/loader.py": "sha256:17646c526d2cdea80a7c498381c231dc5ca7530325108d63c800e96d6ff00e1c",
-      "src/structural_analysis/materials/elastic.py": "sha256:f57e5ad59bbfef197fce1ee39dd79277c994ec02928cfc9b3d74c409aa99fe3b",
-      "src/structural_analysis/model/entities.py": "sha256:fe538ba81940548da185ac83745e87c309ec5823f7d857eb5a6aa64a14abeced",
+      "src/structural_analysis/materials/elastic.py": "sha256:da75cd1c24102b7544a0a122f6d5688da600128bb57948ba202d05bc14d6a95a",
+      "src/structural_analysis/model/entities.py": "sha256:a3ce4c83ffde7b0cc260845a9a6b1984b0212dcce3ff5a9f01a0343199857be9",
       "src/structural_analysis/model/schema.py": "sha256:ee8265c7e5ebd9d7c6d8c7c666bebec656654c34fa07381b9b4f53a8f01b6802",
       "src/structural_analysis/results/schema.py": "sha256:d968361004fa20409e24b8eb6f8d475ce1b06e5cd4c6a7e00829356a28c210b4",
       "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
@@ -356,7 +356,7 @@
       "src/structural_analysis/solvers/linear/static.py": "sha256:065c4e9deb01fe2f55dc51fbc0fa342e550fd4c1b47c25e96e024f57913dc1a4",
       "tests/test_analytic_frame_verification.py": "sha256:8bd6190ebef7fc3278259b5736b252956cd4c5ff7fd544c24278c6e5fa27ea1c"
     },
-    "source_set_hash": "sha256:0d67695b2295c2a926def55789ef1d09348d39e83dd6a05f6c363c92b69a4777"
+    "source_set_hash": "sha256:9b187652c759f2a090ff443b5bb2b49cd7d73664dbfb1292b6317f56b32d835d"
   },
   "summary": {
     "case_count": 3,

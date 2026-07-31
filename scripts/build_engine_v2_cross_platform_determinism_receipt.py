@@ -69,9 +69,7 @@ from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
 RUN_SCHEMA_VERSION = "engine-v2-cross-platform-determinism-run-receipt.v1"
 MATRIX_SCHEMA_VERSION = "engine-v2-cross-platform-determinism-matrix-receipt.v1"
 MODEL_FIXTURE = Path("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json")
-BOUNDED_PLANAR_FIXTURE = Path(
-    "examples/bounded_planar_frame_alpha.model-ir.v2.json"
-)
+BOUNDED_PLANAR_FIXTURE = Path("examples/bounded_planar_frame_alpha.model-ir.v2.json")
 BOUNDED_PLANAR_SETTLEMENT_FIXTURE = Path(
     "examples/bounded_planar_settlement.model-ir.v2.json"
 )
@@ -156,31 +154,31 @@ EXPECTED_GOLDENS = {
         "sha256:78c19f52f7328f8e639debdb3ea64e9779c3cc7d7c0690bf387009355df4bc2c"
     ),
     "bounded_planar_result_hash": (
-        "sha256:d16b132542957fbd9e92b88844540b53beff48e41afab1be3c83544668358190"
+        "sha256:117c90503a60a188758992fd0e1234796a1cb1913725ffa87f9d33b4f5f7c5b6"
     ),
     "bounded_planar_replay_result_hash": (
-        "sha256:8e49a918ace9de85b45c7799b97a36ed898bbc81b59fd8f03a74bc717d19687a"
+        "sha256:e1b1cc5400c072ebb18b0bcf7c6e455190c77e3ac088c805888f5c7d6a3772d6"
     ),
     "bounded_planar_checkpoint_artifact_hash": (
-        "sha256:f7eb397bad05d93dc52ba05e505aa61c32372d2ffdf9effc2e8d27e600a3e2e9"
+        "sha256:0d10a6029a91012164dc56098aaef790e57db5358b92de7b8255edfac3961547"
     ),
     "bounded_planar_checkpoint_chain_hash": (
-        "sha256:0955b9f84f23e3504341b6f8d8634574d8e091f0b8b9ed733c3631e9b3cef275"
+        "sha256:cf48452dcb62e320b88406c56472c85dfbcf4c342e31ea1525d0e329e1b5cb90"
     ),
     "bounded_planar_engineering_result_hash": (
-        "sha256:51084ecd5dc2647ccd8521d64e02f84b736b8866fbf416648b416c5d6373f2cc"
+        "sha256:cc5bd7a004b0cb1de0c87982e8bb2f7fe83f7f97da8ee30725e8a10b55ae83aa"
     ),
     "bounded_planar_execution_topology_plan_hash": (
-        "sha256:59d97be9b8d20e381e8d1f5e5f9e43bee3fbe003431e421674e10921d6f0c9fc"
+        "sha256:58c8f22de77b6474777cbaa1dbe5afc8b0b641314d0f4aea5bdbcebee1f51f94"
     ),
     "bounded_planar_equation_scaling_binding_hash": (
-        "sha256:8e64febd9cf1b9d0f682b8dbc1a0777ae8ff50ca4fe3ce2e4edafdd412ff848d"
+        "sha256:6e8421f1d94ea7726300baf1a60ecd8f2e80302a56e729e96487d3a4515e4f52"
     ),
     "bounded_planar_engine_equation_scaling_hash": (
-        "sha256:ddc8495d56dc7d38e014565a4ce57a6b5905e2ecdb83ac507134263fefb62255"
+        "sha256:2dd5dc37376146201d8203e38b2c9a872019a79142326952a176842d29d32f78"
     ),
     "bounded_planar_terminal_residual_trace_hash": (
-        "sha256:66b27e9d3fb5a871788cfc73b727913edda12233562c8c8e94f90f54fbd3881d"
+        "sha256:3ff6e9971d4bd727ddff4507d18377e1f96d33031011765a3379638dcca5cc7c"
     ),
     "bounded_planar_model_ir_content_hash": (
         "sha256:4703d9137223345322db05cc37e8e53eb453d9bc67f12e88864c390ba3de66b7"
@@ -195,34 +193,34 @@ EXPECTED_GOLDENS = {
         "sha256:ddbd248df8b8340e14a11a88051e67dceddf0598270d77434ec67dbbcfa9be9d"
     ),
     "bounded_planar_execution_plan_binding_hash": (
-        "sha256:823d5e0d88ea4a77a68c39c5003badd79577b996574795f49ca8f6050d752d6b"
+        "sha256:bcc7c5c3e7b26c4c1d907e73ec352d4269f1be966c5e7f8e68132455ced6f1dd"
     ),
     "bounded_planar_settlement_result_hash": (
-        "sha256:3dab96e2760102f0ad214fb2b98ee49da02c69db612f0957d04b1104127a443c"
+        "sha256:d1a1d9c51cf87d64b917ba789e4724b901ef2ca161d67943613248a98bbaf537"
     ),
     "bounded_planar_settlement_replay_result_hash": (
-        "sha256:42a44db2c6f1aa2736993308725b9efd6450a2cba886b0f8be43a123187604c0"
+        "sha256:98e01640847327ca70cfac42cf89741235693cd1ba8b3638bceaf2df03eba006"
     ),
     "bounded_planar_settlement_checkpoint_artifact_hash": (
-        "sha256:806f77ba67e8fddcd5d1e4e751615ea9155658cd365f3ae7c3a03d4b76041a11"
+        "sha256:fbb7c5d068fc0ae8ad7a617e4f72d083e48a85f52644de25449767f1eafbbc13"
     ),
     "bounded_planar_settlement_checkpoint_chain_hash": (
-        "sha256:74b7311b0b380f341279c995fd765413e18acf0f06ddfba4f4c6a11402c58100"
+        "sha256:e48590b945cffadbf5e4edac2288565793c39ea383416b76dad50d1794b2d477"
     ),
     "bounded_planar_settlement_engineering_result_hash": (
-        "sha256:b2576429b54928fc0d18abe50f78dfd395de313a2a9771e503bfa0e2ff29e507"
+        "sha256:c0ea91d8b117f960350c784d17f74a17e0f39073f172dd3dae645d2fc18c5002"
     ),
     "bounded_planar_settlement_execution_topology_plan_hash": (
-        "sha256:6434eef0b6c5b46f8462d1130e6cf25963caa5dcfda5788206ccb450051e2c76"
+        "sha256:3dfd67bf543c98a63b2cb559857166e43c57dcfee616822e06749e283dd34fb6"
     ),
     "bounded_planar_settlement_equation_scaling_binding_hash": (
-        "sha256:9235cbe10b64eff50d2a604bb6ed6b593031572b21a3aa8d753cb86ac13c8f1a"
+        "sha256:eadb3cad4c29768c70b2bd75e78500e95f21153913ec90b4681297c96ec203f5"
     ),
     "bounded_planar_settlement_engine_equation_scaling_hash": (
-        "sha256:9a0701511f475974ad6d090bbf5957e0460093d8dcc5bfff81a3b1e198d85ca7"
+        "sha256:f36fc4a552c10a5c16cca842633bd0dbda813fcaf833627c41c249b35ac29efd"
     ),
     "bounded_planar_settlement_terminal_residual_trace_hash": (
-        "sha256:f8a39aaf9d319c139f74ff57a3f6de7046ea131997ccca1411199744da11d683"
+        "sha256:9ee4b06c17f4c3a084c53732fa7a7457a6e005f0dc7d2bb2b2c2644b410f542a"
     ),
     "bounded_planar_settlement_model_ir_content_hash": (
         "sha256:a3745cf7a6e2023465bbcd232a620fa96e3bdf2a31976bb082a38f1e64176e06"
@@ -237,7 +235,7 @@ EXPECTED_GOLDENS = {
         "sha256:effb190abe577aa11ad449bbfd16726a8df76c3420962489af36bd15baec309d"
     ),
     "bounded_planar_settlement_execution_plan_binding_hash": (
-        "sha256:175d9f8d60e0e7c238143ecc58a3faa6d34f56df2eceb828b60bb292de91421f"
+        "sha256:8ac07d8c1e940056a07c0434b75448551c2632dcc43ad80ab33e97e68fb7105a"
     ),
 }
 
@@ -422,13 +420,9 @@ def _compute_bounded_planar_case_goldens(
     if not validate_nonlinear_frame_result(replayed).contract_pass:
         raise RuntimeError(f"{golden_prefix}_cross_platform_replay_blocked")
     if replayed.checkpoint_artifact() != checkpoint:
-        raise RuntimeError(
-            f"{golden_prefix}_cross_platform_checkpoint_replay_changed"
-        )
+        raise RuntimeError(f"{golden_prefix}_cross_platform_checkpoint_replay_changed")
     if replayed.contract_bindings != result.contract_bindings:
-        raise RuntimeError(
-            f"{golden_prefix}_cross_platform_bindings_replay_changed"
-        )
+        raise RuntimeError(f"{golden_prefix}_cross_platform_bindings_replay_changed")
     source_binding = result.contract_bindings.get("source_model_ir_adapter")
     if (
         not isinstance(source_binding, Mapping)
@@ -436,9 +430,7 @@ def _compute_bounded_planar_case_goldens(
         or source_binding.get("model_ir_semantic_hash") != document.semantic_hash
         or source_binding.get("model_ir_provenance_hash") != document.provenance_hash
     ):
-        raise RuntimeError(
-            f"{golden_prefix}_cross_platform_model_ir_binding_changed"
-        )
+        raise RuntimeError(f"{golden_prefix}_cross_platform_model_ir_binding_changed")
     for field_name in (
         "node_displacements",
         "support_reactions",
@@ -816,9 +808,7 @@ def build_run_receipt(
                 "expected_data_hash": (
                     EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
                 ),
-                "observed_data_hash": (
-                    observed_bounded_planar_settlement_fixture_hash
-                ),
+                "observed_data_hash": (observed_bounded_planar_settlement_fixture_hash),
             },
             "golden_set_hash": expected_golden_set_hash(),
             "expected_goldens": dict(EXPECTED_GOLDENS),
@@ -945,9 +935,7 @@ def build_matrix_receipt(
         if not payload["claims"]["bounded_planar_exact_replay"]:
             blockers.append(f"coordinate_planar_replay_blocked:{coordinate}")
         if not payload["claims"]["bounded_planar_settlement_exact_replay"]:
-            blockers.append(
-                f"coordinate_planar_settlement_replay_blocked:{coordinate}"
-            )
+            blockers.append(f"coordinate_planar_settlement_replay_blocked:{coordinate}")
         if payload["source_commit_sha"] != source_commit_sha:
             blockers.append(f"coordinate_source_commit_mismatch:{coordinate}")
         if payload["source_tree"]["checkout_head_sha"] != source_commit_sha:

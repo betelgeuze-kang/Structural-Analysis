@@ -398,7 +398,9 @@ class _CorotationalExecution:
     newly_solved_step_count: int
 
 
-def _rigid_body_constraint_rank(problem: StatefulCorotationalFiberFrame2DProblem) -> int:
+def _rigid_body_constraint_rank(
+    problem: StatefulCorotationalFiberFrame2DProblem,
+) -> int:
     coordinates = np.asarray(problem.node_coordinates_m, dtype=np.float64)
     spans = np.ptp(coordinates, axis=0)
     characteristic_length = max(float(np.linalg.norm(spans)), 1.0)

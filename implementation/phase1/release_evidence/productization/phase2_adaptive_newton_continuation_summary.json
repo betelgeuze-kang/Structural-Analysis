@@ -26,10 +26,10 @@
   "finite_difference_jacobian_gate_passed": true,
   "full_mesh_closure_claim": false,
   "g1_full_load_claim": false,
-  "generated_at": "2026-07-23T06:01:21.693764+00:00",
+  "generated_at": "2026-07-31T04:38:43.474573+00:00",
   "input_checksums": {
     "scripts/build_phase2_adaptive_newton_continuation_artifacts.py": "sha256:ecac39ff811bcde4fc11a1dcee36971068e80b270312de7580ba84b753bfa9da",
-    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:c09d0bd753e0ce9475e5a2adaa4b234e013a7c7bf150beb2aeadf778c5702c63",
+    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:fab28d6dbe60142650eca8db3cb563158de3c42df8536385a83e6b375e23d072",
     "src/structural_analysis/schemas/adaptive_newton_continuation_v1.schema.json": "sha256:cda2488f210513437cf00e814bc6deb0eb62f5e3f66655d25521f20c17248688",
     "src/structural_analysis/solvers/nonlinear/continuation.py": "sha256:acc9b71a0865256c1a75522ec500f050703aaf9d474c0281442bf19886505b52",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
@@ -51,7 +51,7 @@
   "schema_version": "phase2-adaptive-newton-continuation-artifacts.v1",
   "solver_executed": true,
   "solver_executed_step_count": 4,
-  "source_commit_sha": "23b7b00c02517705dcd66e2bf826a52b6d678bb1",
+  "source_commit_sha": "308763d9fbea9a55023827d6ddcf69a9762db5bc",
   "status": "ready",
   "target_load_factor": 1.0,
   "terminal_dispositions": [

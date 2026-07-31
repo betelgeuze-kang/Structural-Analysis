@@ -465,7 +465,16 @@ def check_receipt(
         )
     except Exception as exc:
         return False, str(exc)
-    if _strip_volatile(existing) != _strip_volatile(expected):
+    expected_for_comparison = dict(expected)
+    if (
+        existing["source_commit_exact_replay_claim"] is False
+        and expected["source_commit_exact_replay_claim"] is False
+    ):
+        # For a non-exact replay receipt, current input checksums are the
+        # authority. The historical commit label remains informational and
+        # must not force downstream hardware receipts to be rewritten.
+        expected_for_comparison["source_commit_sha"] = existing["source_commit_sha"]
+    if _strip_volatile(existing) != _strip_volatile(expected_for_comparison):
         return False, "g1_mgt_hip_current_tangent_host_parser_mismatch"
     return True, "g1_mgt_hip_current_tangent_host_parser_consistent"
 

@@ -1,0 +1,54 @@
+{
+  "schema_version": "canonical-verification-environment.v1",
+  "profile": "linux-amd64-cpython-3.12",
+  "container": {
+    "image": "docker.io/library/python:3.12.11-slim-bookworm",
+    "digest": "sha256:519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7",
+    "platform": "linux/amd64"
+  },
+  "python": {
+    "implementation": "CPython",
+    "version": "3.12.11",
+    "abi": "cp312"
+  },
+  "dependency_lock": {
+    "path": "canonical/requirements-cp312-manylinux2014-x86_64.lock",
+    "resolver_mode": "only-binary",
+    "hash_mode": "require-hashes",
+    "index": "https://pypi.org/simple"
+  },
+  "build": {
+    "backend": "setuptools.build_meta",
+    "frontend": "pip",
+    "frontend_version": "25.1.1",
+    "setuptools_version": "80.9.0",
+    "wheel_version": "0.45.1",
+    "source_date_epoch": "source_commit_timestamp"
+  },
+  "determinism": {
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "TZ": "UTC",
+    "PYTHONHASHSEED": "0"
+  },
+  "required_receipt_fields": [
+    "source_commit_sha",
+    "container.image",
+    "container.digest",
+    "runtime.python",
+    "runtime.packages.numpy",
+    "runtime.packages.scipy",
+    "runtime.os",
+    "runtime.libc",
+    "runtime.blas",
+    "runtime.lapack",
+    "runtime.linear_algebra_shared_libraries",
+    "runtime.thread_limits",
+    "runtime.locale",
+    "runtime.timezone",
+    "runtime.python_hash_seed"
+  ]
+}

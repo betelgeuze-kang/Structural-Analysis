@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react'
 import { isAvailableValue, type WorkbenchCaseV2 } from '../model/caseSchema'
-import { EngineeringValueText } from './EngineeringValueText'
+import { BooleanEvidenceValueText, EngineeringValueText } from './EngineeringValueText'
 
 interface ResultSummaryCardProps {
   caseV2: WorkbenchCaseV2
   convergenceAvailable: boolean
 }
 
-type Verdict = 'converged' | 'failed' | 'unavailable'
+type Verdict = 'converged' | 'failed' | 'unavailable' | 'invalid' | 'unsupported'
 
 /**
  * Single-glance result card. The verdict is derived only from explicit analysis
@@ -16,17 +16,26 @@ type Verdict = 'converged' | 'failed' | 'unavailable'
  */
 export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummaryCardProps): ReactElement {
   const analysis = caseV2.analysis
-  const verdict: Verdict =
-    !convergenceAvailable || !analysis || !isAvailableValue(analysis.converged)
-      ? 'unavailable'
+  const verdict: Verdict = !analysis
+    ? 'unavailable'
+    : !isAvailableValue(analysis.converged)
+      ? analysis.converged.status
       : analysis.converged.value
         ? 'converged'
         : 'failed'
 
   const verdictLabel =
-    verdict === 'converged' ? 'Converged' : verdict === 'failed' ? 'Did not converge' : 'Convergence unavailable'
+    verdict === 'converged'
+      ? 'Converged'
+      : verdict === 'failed'
+        ? 'Did not converge'
+        : `Convergence ${verdict}`
   const chipClass =
-    verdict === 'converged' ? 'wb2-chip--live' : verdict === 'failed' ? 'wb2-chip--blocked' : 'wb2-chip--unavailable'
+    verdict === 'converged'
+      ? 'wb2-chip--live'
+      : verdict === 'failed' || verdict === 'invalid'
+        ? 'wb2-chip--blocked'
+        : 'wb2-chip--unavailable'
 
   const withinTolerance =
     analysis != null
@@ -41,7 +50,7 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
 
       <div className="wb2-result-head">
         <span className={`wb2-chip ${chipClass}`} data-result-chip>{verdictLabel}</span>
-        {verdict === 'unavailable' ? (
+        {verdict !== 'converged' && verdict !== 'failed' ? (
           <span className="wb2-result-sub">
             {analysis
               ? 'Convergence status is unavailable — it is not inferred from the attached values.'
@@ -56,6 +65,10 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
 
       {analysis ? (
         <dl className="wb2-result-metrics">
+          <div className="wb2-result-metric">
+            <dt>Converged</dt>
+            <dd><BooleanEvidenceValueText value={analysis.converged} /></dd>
+          </div>
           <div className="wb2-result-metric">
             <dt>Final residual</dt>
             <dd className="wb2-mono"><EngineeringValueText value={analysis.finalNormalizedResidual} /></dd>

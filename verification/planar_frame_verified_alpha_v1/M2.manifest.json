@@ -1,0 +1,1 @@
+{"case_id":"M2","fixture_schema":"planar-frame-deterministic-fixture.v1","generator":"rectangular_frame_grid.v1","parameters":{"bay_count":3,"story_count":8,"material":"rc_fiber","prescribed_settlement":true},"expected":{"node_count":36,"member_count":56},"claim":"fixture_definition_only"}

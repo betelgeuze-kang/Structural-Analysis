@@ -4,6 +4,7 @@ name: Workflow Contract CI
 # This lane is intentionally independent of workstation availability.
 
 on:
+  merge_group:
   pull_request:
     paths:
       - ".github/workflows/**"

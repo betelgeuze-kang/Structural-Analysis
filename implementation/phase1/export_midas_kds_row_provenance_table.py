@@ -10,12 +10,20 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
 from urllib.parse import urlencode
 from typing import Any
 
 from runtime_contracts import InputContractError, validate_input_contract
 
-from implementation.phase1 import generate_structural_optimization_visualization_viewer as viewer_module
+
+_IMPORT_ROOT = Path(__file__).resolve().parents[2]
+if str(_IMPORT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_IMPORT_ROOT))
+
+from implementation.phase1 import (  # noqa: E402
+    generate_structural_optimization_visualization_viewer as viewer_module,
+)
 
 
 INPUT_SCHEMA = {
@@ -32,7 +40,11 @@ INPUT_SCHEMA = {
 }
 
 VIEWER_REVERSE_SYNC_CONTRACT_VERSION = str(
-    getattr(viewer_module, "ROW_PROVENANCE_REVERSE_SYNC_CONTRACT_VERSION", "viewer_subset_reverse_jump_v2")
+    getattr(
+        viewer_module,
+        "ROW_PROVENANCE_REVERSE_SYNC_CONTRACT_VERSION",
+        "viewer_subset_reverse_jump_v2",
+    )
 )
 DEFAULT_VIEWER_READING_MODE = str(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_VIEWER_MODE", "midas")
@@ -59,19 +71,35 @@ DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX = int(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_RESULTS_COMPANION_ITEM_INDEX", 0)
 )
 DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_RESULTS_COMPANION_FOCUS_KEY", "chart-marker:0")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_RESULTS_COMPANION_FOCUS_KEY",
+        "chart-marker:0",
+    )
 )
 DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_RESULTS_COMPANION_SELECTION_KEY", "results-companion:interactive")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_RESULTS_COMPANION_SELECTION_KEY",
+        "results-companion:interactive",
+    )
 )
 DEFAULT_VIEWER_RESULTS_DETAIL_BLOCK = str(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_RESULTS_DETAIL_BLOCK", "chart")
 )
 DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_RESULTS_DETAIL_FOCUS_KEY", "chart-marker:0")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_RESULTS_DETAIL_FOCUS_KEY",
+        "chart-marker:0",
+    )
 )
 DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_RESULTS_DETAIL_SELECTION_KEY", "results-detail:chart")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_RESULTS_DETAIL_SELECTION_KEY",
+        "results-detail:chart",
+    )
 )
 DEFAULT_VIEWER_CODECHECK_COMPANION = str(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_COMPANION", "detail")
@@ -80,40 +108,74 @@ DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX = int(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_COMPANION_ITEM_INDEX", 0)
 )
 DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_COMPANION_FOCUS_KEY", "row-provenance:jump-row")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_CODECHECK_COMPANION_FOCUS_KEY",
+        "row-provenance:jump-row",
+    )
 )
 DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_COMPANION_SELECTION_KEY", "codecheck-companion:detail")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_CODECHECK_COMPANION_SELECTION_KEY",
+        "codecheck-companion:detail",
+    )
 )
 DEFAULT_VIEWER_CODECHECK_DETAIL_BLOCK = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_DETAIL_BLOCK", "row-provenance")
+    getattr(
+        viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_DETAIL_BLOCK", "row-provenance"
+    )
 )
 DEFAULT_VIEWER_CODECHECK_APPENDIX_BLOCK = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_APPENDIX_BLOCK", "subset-summary")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_CODECHECK_APPENDIX_BLOCK",
+        "subset-summary",
+    )
 )
 DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX = int(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_DETAIL_ITEM_INDEX", 0)
 )
 DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_DETAIL_FOCUS_KEY", "row-provenance:jump-row")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_CODECHECK_DETAIL_FOCUS_KEY",
+        "row-provenance:jump-row",
+    )
 )
 DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_DETAIL_SELECTION_KEY", "codecheck-detail:row-provenance")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_CODECHECK_DETAIL_SELECTION_KEY",
+        "codecheck-detail:row-provenance",
+    )
 )
 DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX = int(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_APPENDIX_ITEM_INDEX", 0)
 )
 DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_APPENDIX_FOCUS_KEY", "subset:current-slice")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_CODECHECK_APPENDIX_FOCUS_KEY",
+        "subset:current-slice",
+    )
 )
 DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_CODECHECK_APPENDIX_SELECTION_KEY", "codecheck-appendix:subset-summary")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_CODECHECK_APPENDIX_SELECTION_KEY",
+        "codecheck-appendix:subset-summary",
+    )
 )
 DEFAULT_VIEWER_SLICE_RESULTS_COMPANION = str(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_SLICE_RESULTS_COMPANION", "checks")
 )
 DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION = str(
-    getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_SLICE_CODECHECK_COMPANION", "reviewer-appendix")
+    getattr(
+        viewer_module,
+        "DEFAULT_ROW_PROVENANCE_SLICE_CODECHECK_COMPANION",
+        "reviewer-appendix",
+    )
 )
 DEFAULT_VIEWER_INTERACTIVE_DETAIL_MORE = str(
     getattr(viewer_module, "DEFAULT_ROW_PROVENANCE_INTERACTIVE_DETAIL_MORE", "open")
@@ -198,8 +260,11 @@ def _viewer_reverse_sync_state(
         "viewer_reading_mode": DEFAULT_VIEWER_READING_MODE,
         "viewer_focus_target": DEFAULT_VIEWER_FOCUS_TARGET,
         "viewer_results_card": str(
-            highlight.get("recommended_results_card", DEFAULT_VIEWER_RESULTS_CARD) or DEFAULT_VIEWER_RESULTS_CARD
-        ).strip().lower(),
+            highlight.get("recommended_results_card", DEFAULT_VIEWER_RESULTS_CARD)
+            or DEFAULT_VIEWER_RESULTS_CARD
+        )
+        .strip()
+        .lower(),
         "viewer_results_series_index": max(
             _int_or_default(
                 highlight.get(
@@ -296,7 +361,12 @@ def _viewer_url_for_row(
     overlay_detail_more: str = "",
     baseline_secondary: str = "",
 ) -> str:
-    viewer_path = (Path(__file__).resolve().parent / "release" / "visualization" / "structural_optimization_viewer.html").resolve()
+    viewer_path = (
+        Path(__file__).resolve().parent
+        / "release"
+        / "visualization"
+        / "structural_optimization_viewer.html"
+    ).resolve()
     params = {
         "source": str(source or "row_provenance_csv"),
         "combination": combination_name,
@@ -366,11 +436,15 @@ def _viewer_url_for_row(
     if codecheck_companion:
         params["codecheck_companion"] = codecheck_companion
     if codecheck_companion_item_index is not None:
-        params["codecheck_companion_item_index"] = str(int(codecheck_companion_item_index))
+        params["codecheck_companion_item_index"] = str(
+            int(codecheck_companion_item_index)
+        )
     if codecheck_companion_focus_key:
         params["codecheck_companion_focus_key"] = str(codecheck_companion_focus_key)
     if codecheck_companion_selection_key:
-        params["codecheck_companion_selection_key"] = str(codecheck_companion_selection_key)
+        params["codecheck_companion_selection_key"] = str(
+            codecheck_companion_selection_key
+        )
     if codecheck_detail_block:
         params["codecheck_detail_block"] = codecheck_detail_block
     if codecheck_appendix_block:
@@ -378,7 +452,9 @@ def _viewer_url_for_row(
     if codecheck_detail_item_index is not None:
         params["codecheck_detail_item_index"] = str(int(codecheck_detail_item_index))
     if codecheck_appendix_item_index is not None:
-        params["codecheck_appendix_item_index"] = str(int(codecheck_appendix_item_index))
+        params["codecheck_appendix_item_index"] = str(
+            int(codecheck_appendix_item_index)
+        )
     if codecheck_detail_focus_key:
         params["codecheck_detail_focus_key"] = str(codecheck_detail_focus_key)
     if codecheck_appendix_focus_key:
@@ -386,7 +462,9 @@ def _viewer_url_for_row(
     if codecheck_detail_selection_key:
         params["codecheck_detail_selection_key"] = str(codecheck_detail_selection_key)
     if codecheck_appendix_selection_key:
-        params["codecheck_appendix_selection_key"] = str(codecheck_appendix_selection_key)
+        params["codecheck_appendix_selection_key"] = str(
+            codecheck_appendix_selection_key
+        )
     if interactive_detail_more:
         params["interactive_detail_more"] = interactive_detail_more
     if overlay_detail_more:
@@ -396,7 +474,9 @@ def _viewer_url_for_row(
     return f"{viewer_path.as_uri()}?{urlencode(params)}"
 
 
-def _results_companion_focus_key(companion: str, *, series_index: int, sample_index: int) -> str:
+def _results_companion_focus_key(
+    companion: str, *, series_index: int, sample_index: int
+) -> str:
     normalized = str(companion or "").strip().lower()
     if normalized == "interactive":
         return f"chart-marker:{max(int(sample_index), 0)}"
@@ -418,7 +498,9 @@ def _results_companion_selection_key(companion: str) -> str:
     return DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY
 
 
-def _results_detail_focus_key(detail_block: str, *, series_index: int, sample_index: int) -> str:
+def _results_detail_focus_key(
+    detail_block: str, *, series_index: int, sample_index: int
+) -> str:
     normalized = str(detail_block or "").strip().lower()
     if normalized == "chart":
         return f"chart-marker:{max(int(sample_index), 0)}"
@@ -497,7 +579,9 @@ def _codecheck_appendix_focus_key(appendix_block: str) -> str:
     return DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY
 
 
-def _codecheck_appendix_selection_key(appendix_block: str, *, subset_key: str = "") -> str:
+def _codecheck_appendix_selection_key(
+    appendix_block: str, *, subset_key: str = ""
+) -> str:
     if str(subset_key or "").strip():
         return f"subset:{str(subset_key or '').strip()}"
     normalized = str(appendix_block or "").strip().lower()
@@ -538,19 +622,26 @@ def _flatten_rows(
             return 0
 
     rows_out: list[dict[str, Any]] = []
-    for combination_name, payload in sorted(table_by_name.items(), key=lambda item: str(item[0])):
+    for combination_name, payload in sorted(
+        table_by_name.items(), key=lambda item: str(item[0])
+    ):
         if not isinstance(payload, dict):
             continue
         reverse_sync_state = _viewer_reverse_sync_state(
             combination_name=str(combination_name),
             combination_highlights_by_name=combination_highlights_by_name,
         )
-        geometry_bridge_summary_label = str(payload.get("geometry_bridge_summary_label", "") or "").strip()
-        geometry_bridge_source_label = str(payload.get("geometry_bridge_source_label", "") or "").strip()
-        geometry_bridge_contract_label = str(payload.get("geometry_bridge_contract_label", "") or "").strip()
+        geometry_bridge_summary_label = str(
+            payload.get("geometry_bridge_summary_label", "") or ""
+        ).strip()
+        geometry_bridge_source_label = str(
+            payload.get("geometry_bridge_source_label", "") or ""
+        ).strip()
+        geometry_bridge_contract_label = str(
+            payload.get("geometry_bridge_contract_label", "") or ""
+        ).strip()
         table_rows = [
-            row for row in (payload.get("table_rows") or [])
-            if isinstance(row, dict)
+            row for row in (payload.get("table_rows") or []) if isinstance(row, dict)
         ]
         clause_options = _dimension_options(table_rows, "clause_label")
         hazard_options = _dimension_options(table_rows, "hazard_type")
@@ -563,20 +654,27 @@ def _flatten_rows(
             hazard_type = str(row.get("hazard_type", "") or "")
             rule_family = str(row.get("rule_family", "") or "")
             filtered_rows = [
-                candidate for candidate in table_rows
-                if str(candidate.get("clause_label", "") or "").strip() == clause_label.strip()
-                and str(candidate.get("hazard_type", "") or "").strip() == hazard_type.strip()
-                and str(candidate.get("rule_family", "") or "").strip() == rule_family.strip()
+                candidate
+                for candidate in table_rows
+                if str(candidate.get("clause_label", "") or "").strip()
+                == clause_label.strip()
+                and str(candidate.get("hazard_type", "") or "").strip()
+                == hazard_type.strip()
+                and str(candidate.get("rule_family", "") or "").strip()
+                == rule_family.strip()
             ]
             filtered_row_display_index = next(
                 (
                     display_index
                     for display_index, candidate in enumerate(filtered_rows)
-                    if int(candidate.get("row_index", display_index) or display_index) == row_index_value
+                    if int(candidate.get("row_index", display_index) or display_index)
+                    == row_index_value
                 ),
                 0,
             )
-            baseline_focus_member_id = str(row.get("baseline_focus_member_id", "") or "")
+            baseline_focus_member_id = str(
+                row.get("baseline_focus_member_id", "") or ""
+            )
             member_id = str(row.get("member_id", "") or "")
             case_id = str(row.get("case_id", "") or "")
             focus_member = _focus_member_id(
@@ -590,14 +688,33 @@ def _flatten_rows(
                 member_id=member_id,
                 case_id=case_id,
             )
-            viewer_results_card = str(reverse_sync_state.get("viewer_results_card", "") or "")
-            viewer_results_series_index = int(reverse_sync_state.get("viewer_results_series_index", 0) or 0)
-            viewer_results_sample_index = int(reverse_sync_state.get("viewer_results_sample_index", DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX) or 0)
-            viewer_results_companion = str(reverse_sync_state.get("viewer_results_companion", "") or "")
-            viewer_results_detail_block = str(reverse_sync_state.get("viewer_results_detail_block", "") or "")
-            viewer_codecheck_companion = str(reverse_sync_state.get("viewer_codecheck_companion", "") or "")
-            viewer_codecheck_detail_block = str(reverse_sync_state.get("viewer_codecheck_detail_block", "") or "")
-            viewer_codecheck_appendix_block = str(reverse_sync_state.get("viewer_codecheck_appendix_block", "") or "")
+            viewer_results_card = str(
+                reverse_sync_state.get("viewer_results_card", "") or ""
+            )
+            viewer_results_series_index = int(
+                reverse_sync_state.get("viewer_results_series_index", 0) or 0
+            )
+            viewer_results_sample_index = int(
+                reverse_sync_state.get(
+                    "viewer_results_sample_index", DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX
+                )
+                or 0
+            )
+            viewer_results_companion = str(
+                reverse_sync_state.get("viewer_results_companion", "") or ""
+            )
+            viewer_results_detail_block = str(
+                reverse_sync_state.get("viewer_results_detail_block", "") or ""
+            )
+            viewer_codecheck_companion = str(
+                reverse_sync_state.get("viewer_codecheck_companion", "") or ""
+            )
+            viewer_codecheck_detail_block = str(
+                reverse_sync_state.get("viewer_codecheck_detail_block", "") or ""
+            )
+            viewer_codecheck_appendix_block = str(
+                reverse_sync_state.get("viewer_codecheck_appendix_block", "") or ""
+            )
             viewer_results_companion_focus_key = _results_companion_focus_key(
                 viewer_results_companion,
                 series_index=viewer_results_series_index,
@@ -619,9 +736,11 @@ def _flatten_rows(
                 viewer_codecheck_companion,
                 row_ref=viewer_row_ref,
             )
-            viewer_codecheck_companion_selection_key = _codecheck_companion_selection_key(
-                viewer_codecheck_companion,
-                row_ref=viewer_row_ref,
+            viewer_codecheck_companion_selection_key = (
+                _codecheck_companion_selection_key(
+                    viewer_codecheck_companion,
+                    row_ref=viewer_row_ref,
+                )
             )
             viewer_codecheck_detail_focus_key = _codecheck_detail_focus_key(
                 viewer_codecheck_detail_block,
@@ -655,69 +774,167 @@ def _flatten_rows(
                 "dcr_label": str(row.get("dcr_label", "") or ""),
                 "demand_label": str(row.get("demand_label", "") or ""),
                 "capacity_label": str(row.get("capacity_label", "") or ""),
-                "combination_scale_label": str(row.get("combination_scale_label", "") or ""),
+                "combination_scale_label": str(
+                    row.get("combination_scale_label", "") or ""
+                ),
                 "baseline_focus_member_id": baseline_focus_member_id,
                 "viewer_focus_member_id": focus_member,
-                "viewer_reading_mode": str(reverse_sync_state.get("viewer_reading_mode", "") or ""),
-                "viewer_focus_target": str(reverse_sync_state.get("viewer_focus_target", "") or ""),
+                "viewer_reading_mode": str(
+                    reverse_sync_state.get("viewer_reading_mode", "") or ""
+                ),
+                "viewer_focus_target": str(
+                    reverse_sync_state.get("viewer_focus_target", "") or ""
+                ),
                 "viewer_results_card": viewer_results_card,
                 "viewer_results_series_index": viewer_results_series_index,
                 "viewer_results_sample_index": viewer_results_sample_index,
-                "viewer_results_detail_item_index": int(reverse_sync_state.get("viewer_results_detail_item_index", DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX) or 0),
-                "viewer_results_companion_item_index": int(reverse_sync_state.get("viewer_results_companion_item_index", DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX) or 0),
+                "viewer_results_detail_item_index": int(
+                    reverse_sync_state.get(
+                        "viewer_results_detail_item_index",
+                        DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+                    )
+                    or 0
+                ),
+                "viewer_results_companion_item_index": int(
+                    reverse_sync_state.get(
+                        "viewer_results_companion_item_index",
+                        DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+                    )
+                    or 0
+                ),
                 "viewer_results_companion_selection_key": viewer_results_companion_selection_key,
                 "viewer_results_companion_focus_key": viewer_results_companion_focus_key,
                 "viewer_results_detail_selection_key": viewer_results_detail_selection_key,
                 "viewer_results_detail_focus_key": viewer_results_detail_focus_key,
                 "viewer_codecheck_filtered_row_index": int(filtered_row_display_index),
-                "viewer_codecheck_clause_index": int(_option_index(clause_options, clause_label)),
-                "viewer_codecheck_hazard_index": int(_option_index(hazard_options, hazard_type)),
-                "viewer_codecheck_rule_family_index": int(_option_index(rule_family_options, rule_family)),
+                "viewer_codecheck_clause_index": int(
+                    _option_index(clause_options, clause_label)
+                ),
+                "viewer_codecheck_hazard_index": int(
+                    _option_index(hazard_options, hazard_type)
+                ),
+                "viewer_codecheck_rule_family_index": int(
+                    _option_index(rule_family_options, rule_family)
+                ),
                 "viewer_results_companion": viewer_results_companion,
                 "viewer_results_detail_block": viewer_results_detail_block,
-                "viewer_codecheck_surface": str(reverse_sync_state.get("viewer_codecheck_surface", "") or ""),
+                "viewer_codecheck_surface": str(
+                    reverse_sync_state.get("viewer_codecheck_surface", "") or ""
+                ),
                 "viewer_codecheck_companion": viewer_codecheck_companion,
-                "viewer_codecheck_companion_item_index": int(reverse_sync_state.get("viewer_codecheck_companion_item_index", DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX) or 0),
+                "viewer_codecheck_companion_item_index": int(
+                    reverse_sync_state.get(
+                        "viewer_codecheck_companion_item_index",
+                        DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+                    )
+                    or 0
+                ),
                 "viewer_codecheck_companion_selection_key": viewer_codecheck_companion_selection_key,
                 "viewer_codecheck_companion_focus_key": viewer_codecheck_companion_focus_key,
                 "viewer_codecheck_detail_block": viewer_codecheck_detail_block,
                 "viewer_codecheck_appendix_block": viewer_codecheck_appendix_block,
-                "viewer_codecheck_detail_item_index": int(reverse_sync_state.get("viewer_codecheck_detail_item_index", DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX) or 0),
-                "viewer_codecheck_appendix_item_index": int(reverse_sync_state.get("viewer_codecheck_appendix_item_index", DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX) or 0),
+                "viewer_codecheck_detail_item_index": int(
+                    reverse_sync_state.get(
+                        "viewer_codecheck_detail_item_index",
+                        DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+                    )
+                    or 0
+                ),
+                "viewer_codecheck_appendix_item_index": int(
+                    reverse_sync_state.get(
+                        "viewer_codecheck_appendix_item_index",
+                        DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+                    )
+                    or 0
+                ),
                 "viewer_codecheck_detail_selection_key": viewer_codecheck_detail_selection_key,
                 "viewer_codecheck_detail_focus_key": viewer_codecheck_detail_focus_key,
                 "viewer_codecheck_appendix_selection_key": viewer_codecheck_appendix_selection_key,
                 "viewer_codecheck_appendix_focus_key": viewer_codecheck_appendix_focus_key,
-                "viewer_interactive_detail_more": str(reverse_sync_state.get("viewer_interactive_detail_more", "") or ""),
-                "viewer_overlay_detail_more": str(reverse_sync_state.get("viewer_overlay_detail_more", "") or ""),
-                "viewer_baseline_secondary": str(reverse_sync_state.get("viewer_baseline_secondary", "") or ""),
-                "reverse_sync_contract_version": str(reverse_sync_state.get("reverse_sync_contract_version", "") or ""),
+                "viewer_interactive_detail_more": str(
+                    reverse_sync_state.get("viewer_interactive_detail_more", "") or ""
+                ),
+                "viewer_overlay_detail_more": str(
+                    reverse_sync_state.get("viewer_overlay_detail_more", "") or ""
+                ),
+                "viewer_baseline_secondary": str(
+                    reverse_sync_state.get("viewer_baseline_secondary", "") or ""
+                ),
+                "reverse_sync_contract_version": str(
+                    reverse_sync_state.get("reverse_sync_contract_version", "") or ""
+                ),
                 "bridge_available": bool(row.get("bridge_available", False)),
                 "bridge_source_label": str(row.get("bridge_source_label", "") or ""),
-                "bridge_contract_label": str(row.get("bridge_contract_label", "") or ""),
+                "bridge_contract_label": str(
+                    row.get("bridge_contract_label", "") or ""
+                ),
                 "bridge_summary_label": str(row.get("bridge_summary_label", "") or ""),
-                "bridge_match_strategy_label": str(row.get("bridge_match_strategy_label", "") or ""),
-                "bridge_row_provenance_summary_label": str(row.get("bridge_row_provenance_summary_label", "") or ""),
-                "bridge_row_provenance_top_row_label": str(row.get("bridge_row_provenance_top_row_label", "") or ""),
-                "bridge_row_provenance_row_count_label": str(row.get("bridge_row_provenance_row_count_label", "") or ""),
-                "bridge_row_provenance_combination_count_label": str(row.get("bridge_row_provenance_combination_count_label", "") or ""),
-                "bridge_row_provenance_clause_count_label": str(row.get("bridge_row_provenance_clause_count_label", "") or ""),
-                "bridge_row_provenance_component_count_label": str(row.get("bridge_row_provenance_component_count_label", "") or ""),
-                "bridge_row_provenance_mode_label": str(row.get("bridge_row_provenance_mode_label", "") or ""),
-                "bridge_review_keys_label": str(row.get("bridge_review_keys_label", "") or ""),
-                "bridge_member_inventory_count_label": str(row.get("bridge_member_inventory_count_label", "") or ""),
-                "bridge_member_inventory_summary_label": str(row.get("bridge_member_inventory_summary_label", "") or ""),
-                "bridge_member_inventory_member_type_label": str(row.get("bridge_member_inventory_member_type_label", "") or ""),
-                "bridge_member_inventory_source_label": str(row.get("bridge_member_inventory_source_label", "") or ""),
-                "clause_provenance_summary_label": str(row.get("clause_provenance_summary_label", "") or ""),
-                "clause_provenance_inventory_label": str(row.get("clause_provenance_inventory_label", "") or ""),
-                "clause_combo_row_count_label": str(row.get("clause_combo_row_count_label", "") or ""),
-                "clause_combo_member_count_label": str(row.get("clause_combo_member_count_label", "") or ""),
-                "clause_component_mix_label": str(row.get("clause_component_mix_label", "") or ""),
-                "clause_hazard_mix_label": str(row.get("clause_hazard_mix_label", "") or ""),
-                "clause_rule_family_mix_label": str(row.get("clause_rule_family_mix_label", "") or ""),
-                "clause_topology_mix_label": str(row.get("clause_topology_mix_label", "") or ""),
-                "clause_governing_row_label": str(row.get("clause_governing_row_label", "") or ""),
+                "bridge_match_strategy_label": str(
+                    row.get("bridge_match_strategy_label", "") or ""
+                ),
+                "bridge_row_provenance_summary_label": str(
+                    row.get("bridge_row_provenance_summary_label", "") or ""
+                ),
+                "bridge_row_provenance_top_row_label": str(
+                    row.get("bridge_row_provenance_top_row_label", "") or ""
+                ),
+                "bridge_row_provenance_row_count_label": str(
+                    row.get("bridge_row_provenance_row_count_label", "") or ""
+                ),
+                "bridge_row_provenance_combination_count_label": str(
+                    row.get("bridge_row_provenance_combination_count_label", "") or ""
+                ),
+                "bridge_row_provenance_clause_count_label": str(
+                    row.get("bridge_row_provenance_clause_count_label", "") or ""
+                ),
+                "bridge_row_provenance_component_count_label": str(
+                    row.get("bridge_row_provenance_component_count_label", "") or ""
+                ),
+                "bridge_row_provenance_mode_label": str(
+                    row.get("bridge_row_provenance_mode_label", "") or ""
+                ),
+                "bridge_review_keys_label": str(
+                    row.get("bridge_review_keys_label", "") or ""
+                ),
+                "bridge_member_inventory_count_label": str(
+                    row.get("bridge_member_inventory_count_label", "") or ""
+                ),
+                "bridge_member_inventory_summary_label": str(
+                    row.get("bridge_member_inventory_summary_label", "") or ""
+                ),
+                "bridge_member_inventory_member_type_label": str(
+                    row.get("bridge_member_inventory_member_type_label", "") or ""
+                ),
+                "bridge_member_inventory_source_label": str(
+                    row.get("bridge_member_inventory_source_label", "") or ""
+                ),
+                "clause_provenance_summary_label": str(
+                    row.get("clause_provenance_summary_label", "") or ""
+                ),
+                "clause_provenance_inventory_label": str(
+                    row.get("clause_provenance_inventory_label", "") or ""
+                ),
+                "clause_combo_row_count_label": str(
+                    row.get("clause_combo_row_count_label", "") or ""
+                ),
+                "clause_combo_member_count_label": str(
+                    row.get("clause_combo_member_count_label", "") or ""
+                ),
+                "clause_component_mix_label": str(
+                    row.get("clause_component_mix_label", "") or ""
+                ),
+                "clause_hazard_mix_label": str(
+                    row.get("clause_hazard_mix_label", "") or ""
+                ),
+                "clause_rule_family_mix_label": str(
+                    row.get("clause_rule_family_mix_label", "") or ""
+                ),
+                "clause_topology_mix_label": str(
+                    row.get("clause_topology_mix_label", "") or ""
+                ),
+                "clause_governing_row_label": str(
+                    row.get("clause_governing_row_label", "") or ""
+                ),
                 "geometry_bridge_summary_label": geometry_bridge_summary_label,
                 "geometry_bridge_source_label": geometry_bridge_source_label,
                 "geometry_bridge_contract_label": geometry_bridge_contract_label,
@@ -735,39 +952,86 @@ def _flatten_rows(
                     member_id=member_id,
                     case_id=case_id,
                     baseline_focus_member_id=baseline_focus_member_id,
-                    view_mode=str(reverse_sync_state.get("viewer_reading_mode", "") or ""),
+                    view_mode=str(
+                        reverse_sync_state.get("viewer_reading_mode", "") or ""
+                    ),
                     focus=str(reverse_sync_state.get("viewer_focus_target", "") or ""),
                     results_card=viewer_results_card,
                     results_series_index=viewer_results_series_index,
                     results_sample_index=viewer_results_sample_index,
-                    results_detail_item_index=int(reverse_sync_state.get("viewer_results_detail_item_index", DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX) or 0),
-                    results_companion_item_index=int(reverse_sync_state.get("viewer_results_companion_item_index", DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX) or 0),
+                    results_detail_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_results_detail_item_index",
+                            DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
+                    results_companion_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_results_companion_item_index",
+                            DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
                     results_companion_selection_key=viewer_results_companion_selection_key,
                     results_companion_focus_key=viewer_results_companion_focus_key,
                     results_detail_selection_key=viewer_results_detail_selection_key,
                     results_detail_focus_key=viewer_results_detail_focus_key,
                     codecheck_filtered_row_index=int(filtered_row_display_index),
-                    codecheck_clause_index=int(_option_index(clause_options, clause_label)),
-                    codecheck_hazard_index=int(_option_index(hazard_options, hazard_type)),
-                    codecheck_rule_family_index=int(_option_index(rule_family_options, rule_family)),
+                    codecheck_clause_index=int(
+                        _option_index(clause_options, clause_label)
+                    ),
+                    codecheck_hazard_index=int(
+                        _option_index(hazard_options, hazard_type)
+                    ),
+                    codecheck_rule_family_index=int(
+                        _option_index(rule_family_options, rule_family)
+                    ),
                     results_companion=viewer_results_companion,
                     results_detail_block=viewer_results_detail_block,
-                    codecheck_surface=str(reverse_sync_state.get("viewer_codecheck_surface", "") or ""),
+                    codecheck_surface=str(
+                        reverse_sync_state.get("viewer_codecheck_surface", "") or ""
+                    ),
                     codecheck_companion=viewer_codecheck_companion,
-                    codecheck_companion_item_index=int(reverse_sync_state.get("viewer_codecheck_companion_item_index", DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX) or 0),
+                    codecheck_companion_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_codecheck_companion_item_index",
+                            DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
                     codecheck_companion_selection_key=viewer_codecheck_companion_selection_key,
                     codecheck_companion_focus_key=viewer_codecheck_companion_focus_key,
                     codecheck_detail_block=viewer_codecheck_detail_block,
                     codecheck_appendix_block=viewer_codecheck_appendix_block,
-                    codecheck_detail_item_index=int(reverse_sync_state.get("viewer_codecheck_detail_item_index", DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX) or 0),
-                    codecheck_appendix_item_index=int(reverse_sync_state.get("viewer_codecheck_appendix_item_index", DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX) or 0),
+                    codecheck_detail_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_codecheck_detail_item_index",
+                            DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
+                    codecheck_appendix_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_codecheck_appendix_item_index",
+                            DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
                     codecheck_detail_selection_key=viewer_codecheck_detail_selection_key,
                     codecheck_detail_focus_key=viewer_codecheck_detail_focus_key,
                     codecheck_appendix_selection_key=viewer_codecheck_appendix_selection_key,
                     codecheck_appendix_focus_key=viewer_codecheck_appendix_focus_key,
-                    interactive_detail_more=str(reverse_sync_state.get("viewer_interactive_detail_more", "") or ""),
-                    overlay_detail_more=str(reverse_sync_state.get("viewer_overlay_detail_more", "") or ""),
-                    baseline_secondary=str(reverse_sync_state.get("viewer_baseline_secondary", "") or ""),
+                    interactive_detail_more=str(
+                        reverse_sync_state.get("viewer_interactive_detail_more", "")
+                        or ""
+                    ),
+                    overlay_detail_more=str(
+                        reverse_sync_state.get("viewer_overlay_detail_more", "") or ""
+                    ),
+                    baseline_secondary=str(
+                        reverse_sync_state.get("viewer_baseline_secondary", "") or ""
+                    ),
                 ),
                 "viewer_slice_url": _viewer_url_for_row(
                     combination_name=str(combination_name),
@@ -779,54 +1043,125 @@ def _flatten_rows(
                     member_id=member_id,
                     case_id=case_id,
                     baseline_focus_member_id=baseline_focus_member_id,
-                    view_mode=str(reverse_sync_state.get("viewer_reading_mode", "") or ""),
+                    view_mode=str(
+                        reverse_sync_state.get("viewer_reading_mode", "") or ""
+                    ),
                     focus=str(reverse_sync_state.get("viewer_focus_target", "") or ""),
                     results_card=viewer_results_card,
                     results_series_index=viewer_results_series_index,
                     results_sample_index=viewer_results_sample_index,
-                    results_detail_item_index=int(reverse_sync_state.get("viewer_results_detail_item_index", DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX) or 0),
-                    results_companion_item_index=int(reverse_sync_state.get("viewer_results_companion_item_index", DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX) or 0),
+                    results_detail_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_results_detail_item_index",
+                            DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
+                    results_companion_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_results_companion_item_index",
+                            DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
                     results_companion_selection_key=_results_companion_selection_key(
-                        str(reverse_sync_state.get("viewer_slice_results_companion", "") or ""),
+                        str(
+                            reverse_sync_state.get("viewer_slice_results_companion", "")
+                            or ""
+                        ),
                     ),
                     results_companion_focus_key=_results_companion_focus_key(
-                        str(reverse_sync_state.get("viewer_slice_results_companion", "") or ""),
+                        str(
+                            reverse_sync_state.get("viewer_slice_results_companion", "")
+                            or ""
+                        ),
                         series_index=viewer_results_series_index,
                         sample_index=viewer_results_sample_index,
                     ),
                     results_detail_selection_key=viewer_results_detail_selection_key,
                     results_detail_focus_key=viewer_results_detail_focus_key,
                     codecheck_filtered_row_index=int(filtered_row_display_index),
-                    codecheck_clause_index=int(_option_index(clause_options, clause_label)),
-                    codecheck_hazard_index=int(_option_index(hazard_options, hazard_type)),
-                    codecheck_rule_family_index=int(_option_index(rule_family_options, rule_family)),
-                    results_companion=str(reverse_sync_state.get("viewer_slice_results_companion", "") or ""),
+                    codecheck_clause_index=int(
+                        _option_index(clause_options, clause_label)
+                    ),
+                    codecheck_hazard_index=int(
+                        _option_index(hazard_options, hazard_type)
+                    ),
+                    codecheck_rule_family_index=int(
+                        _option_index(rule_family_options, rule_family)
+                    ),
+                    results_companion=str(
+                        reverse_sync_state.get("viewer_slice_results_companion", "")
+                        or ""
+                    ),
                     results_detail_block=viewer_results_detail_block,
-                    codecheck_surface=str(reverse_sync_state.get("viewer_codecheck_surface", "") or ""),
-                    codecheck_companion=str(reverse_sync_state.get("viewer_slice_codecheck_companion", "") or ""),
-                    codecheck_companion_item_index=int(reverse_sync_state.get("viewer_codecheck_companion_item_index", DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX) or 0),
+                    codecheck_surface=str(
+                        reverse_sync_state.get("viewer_codecheck_surface", "") or ""
+                    ),
+                    codecheck_companion=str(
+                        reverse_sync_state.get("viewer_slice_codecheck_companion", "")
+                        or ""
+                    ),
+                    codecheck_companion_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_codecheck_companion_item_index",
+                            DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
                     codecheck_companion_selection_key=_codecheck_companion_selection_key(
-                        str(reverse_sync_state.get("viewer_slice_codecheck_companion", "") or ""),
+                        str(
+                            reverse_sync_state.get(
+                                "viewer_slice_codecheck_companion", ""
+                            )
+                            or ""
+                        ),
                         row_ref=viewer_row_ref,
                     ),
                     codecheck_companion_focus_key=_codecheck_companion_focus_key(
-                        str(reverse_sync_state.get("viewer_slice_codecheck_companion", "") or ""),
+                        str(
+                            reverse_sync_state.get(
+                                "viewer_slice_codecheck_companion", ""
+                            )
+                            or ""
+                        ),
                         row_ref=viewer_row_ref,
                     ),
                     codecheck_detail_block=viewer_codecheck_detail_block,
                     codecheck_appendix_block=viewer_codecheck_appendix_block,
-                    codecheck_detail_item_index=int(reverse_sync_state.get("viewer_codecheck_detail_item_index", DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX) or 0),
-                    codecheck_appendix_item_index=int(reverse_sync_state.get("viewer_codecheck_appendix_item_index", DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX) or 0),
+                    codecheck_detail_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_codecheck_detail_item_index",
+                            DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
+                    codecheck_appendix_item_index=int(
+                        reverse_sync_state.get(
+                            "viewer_codecheck_appendix_item_index",
+                            DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+                        )
+                        or 0
+                    ),
                     codecheck_detail_selection_key=viewer_codecheck_detail_selection_key,
                     codecheck_detail_focus_key=viewer_codecheck_detail_focus_key,
                     codecheck_appendix_selection_key=_codecheck_appendix_selection_key(
                         viewer_codecheck_appendix_block,
                         subset_key=combination_subset_key,
                     ),
-                    codecheck_appendix_focus_key=_codecheck_appendix_focus_key(viewer_codecheck_appendix_block),
-                    interactive_detail_more=str(reverse_sync_state.get("viewer_interactive_detail_more", "") or ""),
-                    overlay_detail_more=str(reverse_sync_state.get("viewer_overlay_detail_more", "") or ""),
-                    baseline_secondary=str(reverse_sync_state.get("viewer_baseline_secondary", "") or ""),
+                    codecheck_appendix_focus_key=_codecheck_appendix_focus_key(
+                        viewer_codecheck_appendix_block
+                    ),
+                    interactive_detail_more=str(
+                        reverse_sync_state.get("viewer_interactive_detail_more", "")
+                        or ""
+                    ),
+                    overlay_detail_more=str(
+                        reverse_sync_state.get("viewer_overlay_detail_more", "") or ""
+                    ),
+                    baseline_secondary=str(
+                        reverse_sync_state.get("viewer_baseline_secondary", "") or ""
+                    ),
                 ),
             }
             rows_out.append(export_row)
@@ -842,10 +1177,18 @@ def _preview_rows(rows: list[dict[str, Any]], limit: int = 8) -> list[dict[str, 
                 "member_id": str(row.get("member_id", "") or ""),
                 "case_id": str(row.get("case_id", "") or ""),
                 "clause_label": str(row.get("clause_label", "") or ""),
-                "baseline_focus_member_id": str(row.get("baseline_focus_member_id", "") or ""),
-                "bridge_row_provenance_mode_label": str(row.get("bridge_row_provenance_mode_label", "") or ""),
-                "clause_provenance_summary_label": str(row.get("clause_provenance_summary_label", "") or ""),
-                "bridge_member_inventory_summary_label": str(row.get("bridge_member_inventory_summary_label", "") or ""),
+                "baseline_focus_member_id": str(
+                    row.get("baseline_focus_member_id", "") or ""
+                ),
+                "bridge_row_provenance_mode_label": str(
+                    row.get("bridge_row_provenance_mode_label", "") or ""
+                ),
+                "clause_provenance_summary_label": str(
+                    row.get("clause_provenance_summary_label", "") or ""
+                ),
+                "bridge_member_inventory_summary_label": str(
+                    row.get("bridge_member_inventory_summary_label", "") or ""
+                ),
             }
         )
     return preview
@@ -853,16 +1196,20 @@ def _preview_rows(rows: list[dict[str, Any]], limit: int = 8) -> list[dict[str, 
 
 def _write_rows_csv(rows: list[dict[str, Any]], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fieldnames = list(rows[0].keys()) if rows else [
-        "combination_name",
-        "row_index",
-        "member_id",
-        "case_id",
-        "member_type",
-        "component",
-        "clause_label",
-        "baseline_focus_member_id",
-    ]
+    fieldnames = (
+        list(rows[0].keys())
+        if rows
+        else [
+            "combination_name",
+            "row_index",
+            "member_id",
+            "case_id",
+            "member_type",
+            "component",
+            "clause_label",
+            "baseline_focus_member_id",
+        ]
+    )
     with path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
@@ -875,7 +1222,9 @@ def _slugify(value: str) -> str:
     return "_".join(part for part in normalized.split("_") if part) or "unknown"
 
 
-def _subset_row_refs(rows: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, Any]]:
+def _subset_row_refs(
+    rows: list[dict[str, Any]], limit: int | None = None
+) -> list[dict[str, Any]]:
     refs: list[dict[str, Any]] = []
     items = rows[: max(int(limit), 0)] if limit is not None else rows
     for row in items:
@@ -886,8 +1235,12 @@ def _subset_row_refs(rows: list[dict[str, Any]], limit: int | None = None) -> li
                 "member_id": str(row.get("member_id", "") or ""),
                 "case_id": str(row.get("case_id", "") or ""),
                 "clause_label": str(row.get("clause_label", "") or ""),
-                "baseline_focus_member_id": str(row.get("baseline_focus_member_id", "") or ""),
-                "viewer_focus_member_id": str(row.get("viewer_focus_member_id", "") or ""),
+                "baseline_focus_member_id": str(
+                    row.get("baseline_focus_member_id", "") or ""
+                ),
+                "viewer_focus_member_id": str(
+                    row.get("viewer_focus_member_id", "") or ""
+                ),
                 "viewer_row_ref": str(row.get("viewer_row_ref", "") or ""),
                 "viewer_row_url": str(row.get("viewer_row_url", "") or ""),
                 "viewer_slice_url": str(row.get("viewer_slice_url", "") or ""),
@@ -910,12 +1263,30 @@ def _filter_subset_rows(
             continue
         grouped.setdefault(label, []).append(row)
     ordered: list[dict[str, Any]] = []
-    for label, subset_rows in sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0])):
-        member_ids = sorted({str(row.get("member_id", "") or "") for row in subset_rows if str(row.get("member_id", "") or "")})
-        combination_names = sorted(
-            {str(row.get("combination_name", "") or "") for row in subset_rows if str(row.get("combination_name", "") or "")}
+    for label, subset_rows in sorted(
+        grouped.items(), key=lambda item: (-len(item[1]), item[0])
+    ):
+        member_ids = sorted(
+            {
+                str(row.get("member_id", "") or "")
+                for row in subset_rows
+                if str(row.get("member_id", "") or "")
+            }
         )
-        clause_labels = sorted({str(row.get("clause_label", "") or "") for row in subset_rows if str(row.get("clause_label", "") or "")})
+        combination_names = sorted(
+            {
+                str(row.get("combination_name", "") or "")
+                for row in subset_rows
+                if str(row.get("combination_name", "") or "")
+            }
+        )
+        clause_labels = sorted(
+            {
+                str(row.get("clause_label", "") or "")
+                for row in subset_rows
+                if str(row.get("clause_label", "") or "")
+            }
+        )
         top_row = subset_rows[0] if subset_rows else {}
         ordered.append(
             {
@@ -940,7 +1311,9 @@ def _filter_subset_rows(
     return ordered
 
 
-def _clause_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, Any]]:
+def _clause_filter_rows(
+    rows: list[dict[str, Any]], limit: int | None = None
+) -> list[dict[str, Any]]:
     grouped: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
         clause_label = str(row.get("clause_label", "") or "").strip()
@@ -948,18 +1321,32 @@ def _clause_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) ->
             continue
         grouped.setdefault(clause_label, []).append(row)
     ordered: list[dict[str, Any]] = []
-    for clause_label, clause_rows in sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0])):
+    for clause_label, clause_rows in sorted(
+        grouped.items(), key=lambda item: (-len(item[1]), item[0])
+    ):
         preview_rows = _preview_rows(clause_rows, limit=3)
-        member_ids = sorted({str(row.get("member_id", "") or "") for row in clause_rows if str(row.get("member_id", "") or "")})
+        member_ids = sorted(
+            {
+                str(row.get("member_id", "") or "")
+                for row in clause_rows
+                if str(row.get("member_id", "") or "")
+            }
+        )
         combination_names = sorted(
-            {str(row.get("combination_name", "") or "") for row in clause_rows if str(row.get("combination_name", "") or "")}
+            {
+                str(row.get("combination_name", "") or "")
+                for row in clause_rows
+                if str(row.get("combination_name", "") or "")
+            }
         )
         top_row = clause_rows[0] if clause_rows else {}
         ordered.append(
             {
                 "clause_label": clause_label,
                 "clause_title_label": str(top_row.get("clause_title_label", "") or ""),
-                "clause_family_label": str(top_row.get("clause_family_label", "") or ""),
+                "clause_family_label": str(
+                    top_row.get("clause_family_label", "") or ""
+                ),
                 "row_count": int(len(clause_rows)),
                 "member_count": int(len(member_ids)),
                 "combination_count": int(len(combination_names)),
@@ -977,7 +1364,9 @@ def _clause_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) ->
     return ordered
 
 
-def _member_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, Any]]:
+def _member_filter_rows(
+    rows: list[dict[str, Any]], limit: int | None = None
+) -> list[dict[str, Any]]:
     grouped: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
         member_id = str(row.get("member_id", "") or "").strip()
@@ -985,18 +1374,38 @@ def _member_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) ->
             continue
         grouped.setdefault(member_id, []).append(row)
     ordered: list[dict[str, Any]] = []
-    for member_id, member_rows in sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0])):
+    for member_id, member_rows in sorted(
+        grouped.items(), key=lambda item: (-len(item[1]), item[0])
+    ):
         preview_rows = _preview_rows(member_rows, limit=3)
-        clause_labels = sorted({str(row.get("clause_label", "") or "") for row in member_rows if str(row.get("clause_label", "") or "")})
-        combination_names = sorted(
-            {str(row.get("combination_name", "") or "") for row in member_rows if str(row.get("combination_name", "") or "")}
+        clause_labels = sorted(
+            {
+                str(row.get("clause_label", "") or "")
+                for row in member_rows
+                if str(row.get("clause_label", "") or "")
+            }
         )
-        member_types = sorted({str(row.get("member_type", "") or "") for row in member_rows if str(row.get("member_type", "") or "")})
+        combination_names = sorted(
+            {
+                str(row.get("combination_name", "") or "")
+                for row in member_rows
+                if str(row.get("combination_name", "") or "")
+            }
+        )
+        member_types = sorted(
+            {
+                str(row.get("member_type", "") or "")
+                for row in member_rows
+                if str(row.get("member_type", "") or "")
+            }
+        )
         top_row = member_rows[0] if member_rows else {}
         ordered.append(
             {
                 "member_id": member_id,
-                "baseline_focus_member_id": str(top_row.get("baseline_focus_member_id", "") or ""),
+                "baseline_focus_member_id": str(
+                    top_row.get("baseline_focus_member_id", "") or ""
+                ),
                 "member_type_label": ", ".join(member_types) if member_types else "",
                 "row_count": int(len(member_rows)),
                 "clause_count": int(len(clause_labels)),
@@ -1014,7 +1423,9 @@ def _member_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) ->
     return ordered
 
 
-def _hazard_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, Any]]:
+def _hazard_filter_rows(
+    rows: list[dict[str, Any]], limit: int | None = None
+) -> list[dict[str, Any]]:
     grouped: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
         hazard_type = str(row.get("hazard_type", "") or "").strip()
@@ -1022,10 +1433,24 @@ def _hazard_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) ->
             continue
         grouped.setdefault(hazard_type, []).append(row)
     ordered: list[dict[str, Any]] = []
-    for hazard_type, hazard_rows in sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0])):
+    for hazard_type, hazard_rows in sorted(
+        grouped.items(), key=lambda item: (-len(item[1]), item[0])
+    ):
         preview_rows = _preview_rows(hazard_rows, limit=3)
-        member_ids = sorted({str(row.get("member_id", "") or "") for row in hazard_rows if str(row.get("member_id", "") or "")})
-        clause_labels = sorted({str(row.get("clause_label", "") or "") for row in hazard_rows if str(row.get("clause_label", "") or "")})
+        member_ids = sorted(
+            {
+                str(row.get("member_id", "") or "")
+                for row in hazard_rows
+                if str(row.get("member_id", "") or "")
+            }
+        )
+        clause_labels = sorted(
+            {
+                str(row.get("clause_label", "") or "")
+                for row in hazard_rows
+                if str(row.get("clause_label", "") or "")
+            }
+        )
         ordered.append(
             {
                 "hazard_type": hazard_type,
@@ -1033,14 +1458,24 @@ def _hazard_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) ->
                 "member_count": int(len(member_ids)),
                 "clause_count": int(len(clause_labels)),
                 "combination_count": int(
-                    len({str(row.get("combination_name", "") or "") for row in hazard_rows if str(row.get("combination_name", "") or "")})
+                    len(
+                        {
+                            str(row.get("combination_name", "") or "")
+                            for row in hazard_rows
+                            if str(row.get("combination_name", "") or "")
+                        }
+                    )
                 ),
-                "top_combination_name": str(hazard_rows[0].get("combination_name", "") or ""),
+                "top_combination_name": str(
+                    hazard_rows[0].get("combination_name", "") or ""
+                ),
                 "top_member_id": str(hazard_rows[0].get("member_id", "") or ""),
                 "top_clause_label": str(hazard_rows[0].get("clause_label", "") or ""),
                 "top_dcr_label": str(hazard_rows[0].get("dcr_label", "") or ""),
                 "viewer_row_url": str(hazard_rows[0].get("viewer_row_url", "") or ""),
-                "viewer_slice_url": str(hazard_rows[0].get("viewer_slice_url", "") or ""),
+                "viewer_slice_url": str(
+                    hazard_rows[0].get("viewer_slice_url", "") or ""
+                ),
                 "preview_rows": preview_rows,
             }
         )
@@ -1049,7 +1484,9 @@ def _hazard_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) ->
     return ordered
 
 
-def _rule_family_filter_rows(rows: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, Any]]:
+def _rule_family_filter_rows(
+    rows: list[dict[str, Any]], limit: int | None = None
+) -> list[dict[str, Any]]:
     grouped: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
         rule_family = str(row.get("rule_family", "") or "").strip()
@@ -1057,10 +1494,24 @@ def _rule_family_filter_rows(rows: list[dict[str, Any]], limit: int | None = Non
             continue
         grouped.setdefault(rule_family, []).append(row)
     ordered: list[dict[str, Any]] = []
-    for rule_family, rule_rows in sorted(grouped.items(), key=lambda item: (-len(item[1]), item[0])):
+    for rule_family, rule_rows in sorted(
+        grouped.items(), key=lambda item: (-len(item[1]), item[0])
+    ):
         preview_rows = _preview_rows(rule_rows, limit=3)
-        member_ids = sorted({str(row.get("member_id", "") or "") for row in rule_rows if str(row.get("member_id", "") or "")})
-        hazard_types = sorted({str(row.get("hazard_type", "") or "") for row in rule_rows if str(row.get("hazard_type", "") or "")})
+        member_ids = sorted(
+            {
+                str(row.get("member_id", "") or "")
+                for row in rule_rows
+                if str(row.get("member_id", "") or "")
+            }
+        )
+        hazard_types = sorted(
+            {
+                str(row.get("hazard_type", "") or "")
+                for row in rule_rows
+                if str(row.get("hazard_type", "") or "")
+            }
+        )
         ordered.append(
             {
                 "rule_family": rule_family,
@@ -1068,9 +1519,17 @@ def _rule_family_filter_rows(rows: list[dict[str, Any]], limit: int | None = Non
                 "member_count": int(len(member_ids)),
                 "hazard_count": int(len(hazard_types)),
                 "combination_count": int(
-                    len({str(row.get("combination_name", "") or "") for row in rule_rows if str(row.get("combination_name", "") or "")})
+                    len(
+                        {
+                            str(row.get("combination_name", "") or "")
+                            for row in rule_rows
+                            if str(row.get("combination_name", "") or "")
+                        }
+                    )
                 ),
-                "top_combination_name": str(rule_rows[0].get("combination_name", "") or ""),
+                "top_combination_name": str(
+                    rule_rows[0].get("combination_name", "") or ""
+                ),
                 "top_member_id": str(rule_rows[0].get("member_id", "") or ""),
                 "top_clause_label": str(rule_rows[0].get("clause_label", "") or ""),
                 "top_dcr_label": str(rule_rows[0].get("dcr_label", "") or ""),
@@ -1084,7 +1543,9 @@ def _rule_family_filter_rows(rows: list[dict[str, Any]], limit: int | None = Non
     return ordered
 
 
-def build_row_provenance_export(model_json: Path, kds_report: Path) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
+def build_row_provenance_export(
+    model_json: Path, kds_report: Path
+) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
     viewer_module.DEFAULT_KDS_COMPLIANCE_REPORT = kds_report
     context = viewer_module._make_midas_load_pattern_context(model_json)
     combination_highlights_by_name = {
@@ -1101,19 +1562,36 @@ def build_row_provenance_export(model_json: Path, kds_report: Path) -> tuple[dic
         table_by_name,
         combination_highlights_by_name=combination_highlights_by_name,
     )
-    clause_names = sorted({str(row.get("clause_label", "") or "") for row in rows if str(row.get("clause_label", "") or "")})
-    member_ids = sorted({str(row.get("member_id", "") or "") for row in rows if str(row.get("member_id", "") or "")})
+    clause_names = sorted(
+        {
+            str(row.get("clause_label", "") or "")
+            for row in rows
+            if str(row.get("clause_label", "") or "")
+        }
+    )
+    member_ids = sorted(
+        {
+            str(row.get("member_id", "") or "")
+            for row in rows
+            if str(row.get("member_id", "") or "")
+        }
+    )
     exact_rows = sum(
         1
         for row in rows
-        if str(row.get("bridge_row_provenance_mode_label", "") or "").strip() == "exact row-level provenance"
+        if str(row.get("bridge_row_provenance_mode_label", "") or "").strip()
+        == "exact row-level provenance"
     )
     clause_filter_rows = _clause_filter_rows(rows)
     member_filter_rows = _member_filter_rows(rows)
     hazard_filter_rows = _hazard_filter_rows(rows)
     rule_family_filter_rows = _rule_family_filter_rows(rows)
-    hazard_filter_subsets = _filter_subset_rows(rows, subset_type="hazard", key="hazard_type")
-    rule_family_filter_subsets = _filter_subset_rows(rows, subset_type="rule_family", key="rule_family")
+    hazard_filter_subsets = _filter_subset_rows(
+        rows, subset_type="hazard", key="hazard_type"
+    )
+    rule_family_filter_subsets = _filter_subset_rows(
+        rows, subset_type="rule_family", key="rule_family"
+    )
     export_payload = {
         "schema_version": "1.1",
         "run_id": "phase1-midas-kds-row-provenance-table-export",
@@ -1173,8 +1651,12 @@ def build_row_provenance_export(model_json: Path, kds_report: Path) -> tuple[dic
         "member_filter_rows": _member_filter_rows(rows, limit=8),
         "hazard_filter_rows": _hazard_filter_rows(rows, limit=8),
         "rule_family_filter_rows": _rule_family_filter_rows(rows, limit=8),
-        "hazard_filter_subsets": _filter_subset_rows(rows, subset_type="hazard", key="hazard_type", limit=12),
-        "rule_family_filter_subsets": _filter_subset_rows(rows, subset_type="rule_family", key="rule_family", limit=12),
+        "hazard_filter_subsets": _filter_subset_rows(
+            rows, subset_type="hazard", key="hazard_type", limit=12
+        ),
+        "rule_family_filter_subsets": _filter_subset_rows(
+            rows, subset_type="rule_family", key="rule_family", limit=12
+        ),
         "summary_line": (
             f"MIDAS KDS row provenance export: {'PASS' if rows else 'CHECK'} | "
             f"combos={len(table_by_name)} | rows={len(rows)} | members={len(member_ids)} | "
@@ -1184,12 +1666,16 @@ def build_row_provenance_export(model_json: Path, kds_report: Path) -> tuple[dic
         ),
         "contract_pass": bool(rows),
         "reason_code": "PASS" if rows else "ERR_NO_ROWS",
-        "reason": "row-level provenance table exported" if rows else "no row-level provenance rows were available",
+        "reason": "row-level provenance table exported"
+        if rows
+        else "no row-level provenance rows were available",
     }
     return export_payload, report, rows
 
 
-def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> dict[str, Any]:
+def _build_subset_artifacts(
+    rows: list[dict[str, Any]], subset_root: Path
+) -> dict[str, Any]:
     subset_root.mkdir(parents=True, exist_ok=True)
     rows_by_combination: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
@@ -1210,11 +1696,19 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
         rule_family_label: str = "",
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
         top_row = subset_rows[0] if subset_rows else {}
-        top_row_index = int(top_row.get("row_index", 0) or 0) if isinstance(top_row, dict) else 0
-        top_member_id = str(top_row.get("member_id", "") or "") if isinstance(top_row, dict) else ""
-        top_case_id = str(top_row.get("case_id", "") or "") if isinstance(top_row, dict) else ""
+        top_row_index = (
+            int(top_row.get("row_index", 0) or 0) if isinstance(top_row, dict) else 0
+        )
+        top_member_id = (
+            str(top_row.get("member_id", "") or "") if isinstance(top_row, dict) else ""
+        )
+        top_case_id = (
+            str(top_row.get("case_id", "") or "") if isinstance(top_row, dict) else ""
+        )
         top_baseline_focus_member_id = (
-            str(top_row.get("baseline_focus_member_id", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("baseline_focus_member_id", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_focus_member = _focus_member_id(
             baseline_focus_member_id=top_baseline_focus_member_id,
@@ -1231,98 +1725,210 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
             member_id=top_member_id,
             case_id=top_case_id,
         )
-        top_viewer_reading_mode = str(top_row.get("viewer_reading_mode", "") or "") if isinstance(top_row, dict) else ""
-        top_viewer_focus_target = str(top_row.get("viewer_focus_target", "") or "") if isinstance(top_row, dict) else ""
-        top_viewer_results_card = str(top_row.get("viewer_results_card", "") or "") if isinstance(top_row, dict) else ""
+        top_viewer_reading_mode = (
+            str(top_row.get("viewer_reading_mode", "") or "")
+            if isinstance(top_row, dict)
+            else ""
+        )
+        top_viewer_focus_target = (
+            str(top_row.get("viewer_focus_target", "") or "")
+            if isinstance(top_row, dict)
+            else ""
+        )
+        top_viewer_results_card = (
+            str(top_row.get("viewer_results_card", "") or "")
+            if isinstance(top_row, dict)
+            else ""
+        )
         top_viewer_results_series_index = (
-            _int_or_default(top_row.get("viewer_results_series_index", 0), 0) if isinstance(top_row, dict) else 0
+            _int_or_default(top_row.get("viewer_results_series_index", 0), 0)
+            if isinstance(top_row, dict)
+            else 0
         )
         top_viewer_results_sample_index = (
-            _int_or_default(top_row.get("viewer_results_sample_index", DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX), DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX
+            _int_or_default(
+                top_row.get(
+                    "viewer_results_sample_index", DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX
+                ),
+                DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX,
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX
         )
         top_viewer_results_detail_item_index = (
-            _int_or_default(top_row.get("viewer_results_detail_item_index", DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX), DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX
+            _int_or_default(
+                top_row.get(
+                    "viewer_results_detail_item_index",
+                    DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+                ),
+                DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX
         )
         top_viewer_results_companion_item_index = (
-            _int_or_default(top_row.get("viewer_results_companion_item_index", DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX), DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX
+            _int_or_default(
+                top_row.get(
+                    "viewer_results_companion_item_index",
+                    DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+                ),
+                DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX
         )
         top_viewer_results_detail_focus_key = (
-            str(top_row.get("viewer_results_detail_focus_key", DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY) or DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY
+            str(
+                top_row.get(
+                    "viewer_results_detail_focus_key",
+                    DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY,
+                )
+                or DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY
         )
         top_viewer_results_detail_selection_key = (
-            str(top_row.get("viewer_results_detail_selection_key", DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY) or DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY
+            str(
+                top_row.get(
+                    "viewer_results_detail_selection_key",
+                    DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY,
+                )
+                or DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY
         )
         top_viewer_codecheck_filtered_row_index = (
             _int_or_default(top_row.get("viewer_codecheck_filtered_row_index", 0), 0)
-            if isinstance(top_row, dict) else 0
+            if isinstance(top_row, dict)
+            else 0
         )
         top_viewer_codecheck_clause_index = (
             _int_or_default(top_row.get("viewer_codecheck_clause_index", 0), 0)
-            if isinstance(top_row, dict) else 0
+            if isinstance(top_row, dict)
+            else 0
         )
         top_viewer_codecheck_hazard_index = (
             _int_or_default(top_row.get("viewer_codecheck_hazard_index", 0), 0)
-            if isinstance(top_row, dict) else 0
+            if isinstance(top_row, dict)
+            else 0
         )
         top_viewer_codecheck_rule_family_index = (
             _int_or_default(top_row.get("viewer_codecheck_rule_family_index", 0), 0)
-            if isinstance(top_row, dict) else 0
+            if isinstance(top_row, dict)
+            else 0
         )
         top_viewer_results_companion = (
-            str(top_row.get("viewer_results_companion", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_results_companion", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_viewer_codecheck_surface = (
-            str(top_row.get("viewer_codecheck_surface", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_codecheck_surface", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_viewer_codecheck_companion = (
-            str(top_row.get("viewer_codecheck_companion", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_codecheck_companion", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_viewer_codecheck_companion_item_index = (
-            _int_or_default(top_row.get("viewer_codecheck_companion_item_index", DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX
+            _int_or_default(
+                top_row.get(
+                    "viewer_codecheck_companion_item_index",
+                    DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+                ),
+                DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX
         )
         top_viewer_codecheck_detail_block = (
-            str(top_row.get("viewer_codecheck_detail_block", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_codecheck_detail_block", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_viewer_results_detail_block = (
-            str(top_row.get("viewer_results_detail_block", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_results_detail_block", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_viewer_codecheck_appendix_block = (
-            str(top_row.get("viewer_codecheck_appendix_block", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_codecheck_appendix_block", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_viewer_codecheck_detail_item_index = (
-            _int_or_default(top_row.get("viewer_codecheck_detail_item_index", DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX
+            _int_or_default(
+                top_row.get(
+                    "viewer_codecheck_detail_item_index",
+                    DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+                ),
+                DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX
         )
         top_viewer_codecheck_appendix_item_index = (
-            _int_or_default(top_row.get("viewer_codecheck_appendix_item_index", DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX
+            _int_or_default(
+                top_row.get(
+                    "viewer_codecheck_appendix_item_index",
+                    DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+                ),
+                DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX
         )
         top_viewer_codecheck_detail_focus_key = (
-            str(top_row.get("viewer_codecheck_detail_focus_key", DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY
+            str(
+                top_row.get(
+                    "viewer_codecheck_detail_focus_key",
+                    DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY,
+                )
+                or DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY
         )
         top_viewer_codecheck_detail_selection_key = (
-            str(top_row.get("viewer_codecheck_detail_selection_key", DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY
+            str(
+                top_row.get(
+                    "viewer_codecheck_detail_selection_key",
+                    DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY,
+                )
+                or DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY
         )
         top_viewer_codecheck_appendix_focus_key = (
-            str(top_row.get("viewer_codecheck_appendix_focus_key", DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY)
-            if isinstance(top_row, dict) else DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY
+            str(
+                top_row.get(
+                    "viewer_codecheck_appendix_focus_key",
+                    DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY,
+                )
+                or DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY
+            )
+            if isinstance(top_row, dict)
+            else DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY
         )
         top_viewer_interactive_detail_more = (
-            str(top_row.get("viewer_interactive_detail_more", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_interactive_detail_more", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_viewer_overlay_detail_more = (
-            str(top_row.get("viewer_overlay_detail_more", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_overlay_detail_more", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         top_viewer_baseline_secondary = (
-            str(top_row.get("viewer_baseline_secondary", "") or "") if isinstance(top_row, dict) else ""
+            str(top_row.get("viewer_baseline_secondary", "") or "")
+            if isinstance(top_row, dict)
+            else ""
         )
         viewer_subset_url = _viewer_url_for_row(
             combination_name=combination_name,
@@ -1359,17 +1965,21 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
             codecheck_clause_index=top_viewer_codecheck_clause_index,
             codecheck_hazard_index=top_viewer_codecheck_hazard_index,
             codecheck_rule_family_index=top_viewer_codecheck_rule_family_index,
-            results_companion=DEFAULT_VIEWER_SLICE_RESULTS_COMPANION or top_viewer_results_companion,
+            results_companion=DEFAULT_VIEWER_SLICE_RESULTS_COMPANION
+            or top_viewer_results_companion,
             results_detail_block=top_viewer_results_detail_block,
             codecheck_surface=top_viewer_codecheck_surface,
-            codecheck_companion=DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION or top_viewer_codecheck_companion,
+            codecheck_companion=DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION
+            or top_viewer_codecheck_companion,
             codecheck_companion_item_index=top_viewer_codecheck_companion_item_index,
             codecheck_companion_selection_key=_codecheck_companion_selection_key(
-                DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION or top_viewer_codecheck_companion,
+                DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION
+                or top_viewer_codecheck_companion,
                 row_ref=top_row_ref,
             ),
             codecheck_companion_focus_key=_codecheck_companion_focus_key(
-                DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION or top_viewer_codecheck_companion,
+                DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION
+                or top_viewer_codecheck_companion,
                 row_ref=top_row_ref,
             ),
             codecheck_detail_block=top_viewer_codecheck_detail_block,
@@ -1393,9 +2003,13 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
             row_index = int(row.get("row_index", 0) or 0)
             member_id = str(row.get("member_id", "") or "")
             case_id = str(row.get("case_id", "") or "")
-            baseline_focus_member_id = str(row.get("baseline_focus_member_id", "") or "")
+            baseline_focus_member_id = str(
+                row.get("baseline_focus_member_id", "") or ""
+            )
             focus_member = baseline_focus_member_id or member_id or case_id
-            viewer_row_ref = str(row.get("viewer_row_ref", "") or "").strip() or _viewer_row_ref(
+            viewer_row_ref = str(
+                row.get("viewer_row_ref", "") or ""
+            ).strip() or _viewer_row_ref(
                 combination_name=combination_name,
                 row_index=row_index,
                 member_id=member_id,
@@ -1420,35 +2034,153 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                 view_mode=str(row.get("viewer_reading_mode", "") or ""),
                 focus=str(row.get("viewer_focus_target", "") or ""),
                 results_card=str(row.get("viewer_results_card", "") or ""),
-                results_series_index=_int_or_default(row.get("viewer_results_series_index", 0), 0),
-                results_sample_index=_int_or_default(row.get("viewer_results_sample_index", DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX), DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX),
-                results_detail_item_index=_int_or_default(row.get("viewer_results_detail_item_index", DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX), DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX),
-                results_companion_item_index=_int_or_default(row.get("viewer_results_companion_item_index", DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX), DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX),
-                results_companion_selection_key=str(row.get("viewer_results_companion_selection_key", DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY) or DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY),
-                results_companion_focus_key=str(row.get("viewer_results_companion_focus_key", DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY) or DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY),
-                results_detail_selection_key=str(row.get("viewer_results_detail_selection_key", DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY) or DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY),
-                results_detail_focus_key=str(row.get("viewer_results_detail_focus_key", DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY) or DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY),
-                codecheck_filtered_row_index=_int_or_default(row.get("viewer_codecheck_filtered_row_index", 0), 0),
-                codecheck_clause_index=_int_or_default(row.get("viewer_codecheck_clause_index", 0), 0),
-                codecheck_hazard_index=_int_or_default(row.get("viewer_codecheck_hazard_index", 0), 0),
-                codecheck_rule_family_index=_int_or_default(row.get("viewer_codecheck_rule_family_index", 0), 0),
+                results_series_index=_int_or_default(
+                    row.get("viewer_results_series_index", 0), 0
+                ),
+                results_sample_index=_int_or_default(
+                    row.get(
+                        "viewer_results_sample_index",
+                        DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX,
+                    ),
+                    DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX,
+                ),
+                results_detail_item_index=_int_or_default(
+                    row.get(
+                        "viewer_results_detail_item_index",
+                        DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+                    ),
+                    DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+                ),
+                results_companion_item_index=_int_or_default(
+                    row.get(
+                        "viewer_results_companion_item_index",
+                        DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+                    ),
+                    DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+                ),
+                results_companion_selection_key=str(
+                    row.get(
+                        "viewer_results_companion_selection_key",
+                        DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY,
+                    )
+                    or DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY
+                ),
+                results_companion_focus_key=str(
+                    row.get(
+                        "viewer_results_companion_focus_key",
+                        DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY,
+                    )
+                    or DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY
+                ),
+                results_detail_selection_key=str(
+                    row.get(
+                        "viewer_results_detail_selection_key",
+                        DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY,
+                    )
+                    or DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY
+                ),
+                results_detail_focus_key=str(
+                    row.get(
+                        "viewer_results_detail_focus_key",
+                        DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY,
+                    )
+                    or DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY
+                ),
+                codecheck_filtered_row_index=_int_or_default(
+                    row.get("viewer_codecheck_filtered_row_index", 0), 0
+                ),
+                codecheck_clause_index=_int_or_default(
+                    row.get("viewer_codecheck_clause_index", 0), 0
+                ),
+                codecheck_hazard_index=_int_or_default(
+                    row.get("viewer_codecheck_hazard_index", 0), 0
+                ),
+                codecheck_rule_family_index=_int_or_default(
+                    row.get("viewer_codecheck_rule_family_index", 0), 0
+                ),
                 results_companion=str(row.get("viewer_results_companion", "") or ""),
-                results_detail_block=str(row.get("viewer_results_detail_block", "") or ""),
+                results_detail_block=str(
+                    row.get("viewer_results_detail_block", "") or ""
+                ),
                 codecheck_surface=str(row.get("viewer_codecheck_surface", "") or ""),
-                codecheck_companion=str(row.get("viewer_codecheck_companion", "") or ""),
-                codecheck_companion_item_index=_int_or_default(row.get("viewer_codecheck_companion_item_index", DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX),
-                codecheck_companion_selection_key=str(row.get("viewer_codecheck_companion_selection_key", DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY),
-                codecheck_companion_focus_key=str(row.get("viewer_codecheck_companion_focus_key", DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY),
-                codecheck_detail_block=str(row.get("viewer_codecheck_detail_block", "") or ""),
-                codecheck_appendix_block=str(row.get("viewer_codecheck_appendix_block", "") or ""),
-                codecheck_detail_item_index=_int_or_default(row.get("viewer_codecheck_detail_item_index", DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX),
-                codecheck_appendix_item_index=_int_or_default(row.get("viewer_codecheck_appendix_item_index", DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX),
-                codecheck_detail_selection_key=str(row.get("viewer_codecheck_detail_selection_key", DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY),
-                codecheck_detail_focus_key=str(row.get("viewer_codecheck_detail_focus_key", DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY),
-                codecheck_appendix_selection_key=str(row.get("viewer_codecheck_appendix_selection_key", DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY),
-                codecheck_appendix_focus_key=str(row.get("viewer_codecheck_appendix_focus_key", DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY),
-                interactive_detail_more=str(row.get("viewer_interactive_detail_more", "") or ""),
-                overlay_detail_more=str(row.get("viewer_overlay_detail_more", "") or ""),
+                codecheck_companion=str(
+                    row.get("viewer_codecheck_companion", "") or ""
+                ),
+                codecheck_companion_item_index=_int_or_default(
+                    row.get(
+                        "viewer_codecheck_companion_item_index",
+                        DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+                    ),
+                    DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+                ),
+                codecheck_companion_selection_key=str(
+                    row.get(
+                        "viewer_codecheck_companion_selection_key",
+                        DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY,
+                    )
+                    or DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY
+                ),
+                codecheck_companion_focus_key=str(
+                    row.get(
+                        "viewer_codecheck_companion_focus_key",
+                        DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY,
+                    )
+                    or DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY
+                ),
+                codecheck_detail_block=str(
+                    row.get("viewer_codecheck_detail_block", "") or ""
+                ),
+                codecheck_appendix_block=str(
+                    row.get("viewer_codecheck_appendix_block", "") or ""
+                ),
+                codecheck_detail_item_index=_int_or_default(
+                    row.get(
+                        "viewer_codecheck_detail_item_index",
+                        DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+                    ),
+                    DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+                ),
+                codecheck_appendix_item_index=_int_or_default(
+                    row.get(
+                        "viewer_codecheck_appendix_item_index",
+                        DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+                    ),
+                    DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+                ),
+                codecheck_detail_selection_key=str(
+                    row.get(
+                        "viewer_codecheck_detail_selection_key",
+                        DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY,
+                    )
+                    or DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY
+                ),
+                codecheck_detail_focus_key=str(
+                    row.get(
+                        "viewer_codecheck_detail_focus_key",
+                        DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY,
+                    )
+                    or DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY
+                ),
+                codecheck_appendix_selection_key=str(
+                    row.get(
+                        "viewer_codecheck_appendix_selection_key",
+                        DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY,
+                    )
+                    or DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY
+                ),
+                codecheck_appendix_focus_key=str(
+                    row.get(
+                        "viewer_codecheck_appendix_focus_key",
+                        DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY,
+                    )
+                    or DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY
+                ),
+                interactive_detail_more=str(
+                    row.get("viewer_interactive_detail_more", "") or ""
+                ),
+                overlay_detail_more=str(
+                    row.get("viewer_overlay_detail_more", "") or ""
+                ),
                 baseline_secondary=str(row.get("viewer_baseline_secondary", "") or ""),
             )
             contextual_row = {
@@ -1474,39 +2206,169 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                     "clause_label": str(row.get("clause_label", "") or ""),
                     "baseline_focus_member_id": baseline_focus_member_id,
                     "viewer_focus_member_id": focus_member,
-                    "viewer_reading_mode": str(row.get("viewer_reading_mode", "") or ""),
-                    "viewer_focus_target": str(row.get("viewer_focus_target", "") or ""),
-                    "viewer_results_card": str(row.get("viewer_results_card", "") or ""),
-                    "viewer_results_series_index": _int_or_default(row.get("viewer_results_series_index", 0), 0),
-                    "viewer_results_sample_index": _int_or_default(row.get("viewer_results_sample_index", DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX), DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX),
-                    "viewer_results_detail_item_index": _int_or_default(row.get("viewer_results_detail_item_index", DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX), DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX),
-                    "viewer_results_companion_item_index": _int_or_default(row.get("viewer_results_companion_item_index", DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX), DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX),
-                    "viewer_results_companion_selection_key": str(row.get("viewer_results_companion_selection_key", DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY) or DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY),
-                    "viewer_results_companion_focus_key": str(row.get("viewer_results_companion_focus_key", DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY) or DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY),
-                    "viewer_results_detail_selection_key": str(row.get("viewer_results_detail_selection_key", DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY) or DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY),
-                    "viewer_results_detail_focus_key": str(row.get("viewer_results_detail_focus_key", DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY) or DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY),
-                    "viewer_codecheck_filtered_row_index": _int_or_default(row.get("viewer_codecheck_filtered_row_index", 0), 0),
-                    "viewer_codecheck_clause_index": _int_or_default(row.get("viewer_codecheck_clause_index", 0), 0),
-                    "viewer_codecheck_hazard_index": _int_or_default(row.get("viewer_codecheck_hazard_index", 0), 0),
-                    "viewer_codecheck_rule_family_index": _int_or_default(row.get("viewer_codecheck_rule_family_index", 0), 0),
-                    "viewer_results_companion": str(row.get("viewer_results_companion", "") or ""),
-                    "viewer_results_detail_block": str(row.get("viewer_results_detail_block", "") or ""),
-                    "viewer_codecheck_surface": str(row.get("viewer_codecheck_surface", "") or ""),
-                    "viewer_codecheck_companion": str(row.get("viewer_codecheck_companion", "") or ""),
-                    "viewer_codecheck_companion_item_index": _int_or_default(row.get("viewer_codecheck_companion_item_index", DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX),
-                    "viewer_codecheck_companion_selection_key": str(row.get("viewer_codecheck_companion_selection_key", DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY),
-                    "viewer_codecheck_companion_focus_key": str(row.get("viewer_codecheck_companion_focus_key", DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY),
-                    "viewer_codecheck_detail_block": str(row.get("viewer_codecheck_detail_block", "") or ""),
-                    "viewer_codecheck_appendix_block": str(row.get("viewer_codecheck_appendix_block", "") or ""),
-                    "viewer_codecheck_detail_item_index": _int_or_default(row.get("viewer_codecheck_detail_item_index", DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX),
-                    "viewer_codecheck_appendix_item_index": _int_or_default(row.get("viewer_codecheck_appendix_item_index", DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX), DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX),
-                    "viewer_codecheck_detail_selection_key": str(row.get("viewer_codecheck_detail_selection_key", DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY),
-                    "viewer_codecheck_detail_focus_key": str(row.get("viewer_codecheck_detail_focus_key", DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY),
-                    "viewer_codecheck_appendix_selection_key": str(row.get("viewer_codecheck_appendix_selection_key", DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY) or DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY),
-                    "viewer_codecheck_appendix_focus_key": str(row.get("viewer_codecheck_appendix_focus_key", DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY) or DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY),
-                    "viewer_interactive_detail_more": str(row.get("viewer_interactive_detail_more", "") or ""),
-                    "viewer_overlay_detail_more": str(row.get("viewer_overlay_detail_more", "") or ""),
-                    "viewer_baseline_secondary": str(row.get("viewer_baseline_secondary", "") or ""),
+                    "viewer_reading_mode": str(
+                        row.get("viewer_reading_mode", "") or ""
+                    ),
+                    "viewer_focus_target": str(
+                        row.get("viewer_focus_target", "") or ""
+                    ),
+                    "viewer_results_card": str(
+                        row.get("viewer_results_card", "") or ""
+                    ),
+                    "viewer_results_series_index": _int_or_default(
+                        row.get("viewer_results_series_index", 0), 0
+                    ),
+                    "viewer_results_sample_index": _int_or_default(
+                        row.get(
+                            "viewer_results_sample_index",
+                            DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX,
+                        ),
+                        DEFAULT_VIEWER_RESULTS_SAMPLE_INDEX,
+                    ),
+                    "viewer_results_detail_item_index": _int_or_default(
+                        row.get(
+                            "viewer_results_detail_item_index",
+                            DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+                        ),
+                        DEFAULT_VIEWER_RESULTS_DETAIL_ITEM_INDEX,
+                    ),
+                    "viewer_results_companion_item_index": _int_or_default(
+                        row.get(
+                            "viewer_results_companion_item_index",
+                            DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+                        ),
+                        DEFAULT_VIEWER_RESULTS_COMPANION_ITEM_INDEX,
+                    ),
+                    "viewer_results_companion_selection_key": str(
+                        row.get(
+                            "viewer_results_companion_selection_key",
+                            DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY,
+                        )
+                        or DEFAULT_VIEWER_RESULTS_COMPANION_SELECTION_KEY
+                    ),
+                    "viewer_results_companion_focus_key": str(
+                        row.get(
+                            "viewer_results_companion_focus_key",
+                            DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY,
+                        )
+                        or DEFAULT_VIEWER_RESULTS_COMPANION_FOCUS_KEY
+                    ),
+                    "viewer_results_detail_selection_key": str(
+                        row.get(
+                            "viewer_results_detail_selection_key",
+                            DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY,
+                        )
+                        or DEFAULT_VIEWER_RESULTS_DETAIL_SELECTION_KEY
+                    ),
+                    "viewer_results_detail_focus_key": str(
+                        row.get(
+                            "viewer_results_detail_focus_key",
+                            DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY,
+                        )
+                        or DEFAULT_VIEWER_RESULTS_DETAIL_FOCUS_KEY
+                    ),
+                    "viewer_codecheck_filtered_row_index": _int_or_default(
+                        row.get("viewer_codecheck_filtered_row_index", 0), 0
+                    ),
+                    "viewer_codecheck_clause_index": _int_or_default(
+                        row.get("viewer_codecheck_clause_index", 0), 0
+                    ),
+                    "viewer_codecheck_hazard_index": _int_or_default(
+                        row.get("viewer_codecheck_hazard_index", 0), 0
+                    ),
+                    "viewer_codecheck_rule_family_index": _int_or_default(
+                        row.get("viewer_codecheck_rule_family_index", 0), 0
+                    ),
+                    "viewer_results_companion": str(
+                        row.get("viewer_results_companion", "") or ""
+                    ),
+                    "viewer_results_detail_block": str(
+                        row.get("viewer_results_detail_block", "") or ""
+                    ),
+                    "viewer_codecheck_surface": str(
+                        row.get("viewer_codecheck_surface", "") or ""
+                    ),
+                    "viewer_codecheck_companion": str(
+                        row.get("viewer_codecheck_companion", "") or ""
+                    ),
+                    "viewer_codecheck_companion_item_index": _int_or_default(
+                        row.get(
+                            "viewer_codecheck_companion_item_index",
+                            DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+                        ),
+                        DEFAULT_VIEWER_CODECHECK_COMPANION_ITEM_INDEX,
+                    ),
+                    "viewer_codecheck_companion_selection_key": str(
+                        row.get(
+                            "viewer_codecheck_companion_selection_key",
+                            DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY,
+                        )
+                        or DEFAULT_VIEWER_CODECHECK_COMPANION_SELECTION_KEY
+                    ),
+                    "viewer_codecheck_companion_focus_key": str(
+                        row.get(
+                            "viewer_codecheck_companion_focus_key",
+                            DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY,
+                        )
+                        or DEFAULT_VIEWER_CODECHECK_COMPANION_FOCUS_KEY
+                    ),
+                    "viewer_codecheck_detail_block": str(
+                        row.get("viewer_codecheck_detail_block", "") or ""
+                    ),
+                    "viewer_codecheck_appendix_block": str(
+                        row.get("viewer_codecheck_appendix_block", "") or ""
+                    ),
+                    "viewer_codecheck_detail_item_index": _int_or_default(
+                        row.get(
+                            "viewer_codecheck_detail_item_index",
+                            DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+                        ),
+                        DEFAULT_VIEWER_CODECHECK_DETAIL_ITEM_INDEX,
+                    ),
+                    "viewer_codecheck_appendix_item_index": _int_or_default(
+                        row.get(
+                            "viewer_codecheck_appendix_item_index",
+                            DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+                        ),
+                        DEFAULT_VIEWER_CODECHECK_APPENDIX_ITEM_INDEX,
+                    ),
+                    "viewer_codecheck_detail_selection_key": str(
+                        row.get(
+                            "viewer_codecheck_detail_selection_key",
+                            DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY,
+                        )
+                        or DEFAULT_VIEWER_CODECHECK_DETAIL_SELECTION_KEY
+                    ),
+                    "viewer_codecheck_detail_focus_key": str(
+                        row.get(
+                            "viewer_codecheck_detail_focus_key",
+                            DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY,
+                        )
+                        or DEFAULT_VIEWER_CODECHECK_DETAIL_FOCUS_KEY
+                    ),
+                    "viewer_codecheck_appendix_selection_key": str(
+                        row.get(
+                            "viewer_codecheck_appendix_selection_key",
+                            DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY,
+                        )
+                        or DEFAULT_VIEWER_CODECHECK_APPENDIX_SELECTION_KEY
+                    ),
+                    "viewer_codecheck_appendix_focus_key": str(
+                        row.get(
+                            "viewer_codecheck_appendix_focus_key",
+                            DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY,
+                        )
+                        or DEFAULT_VIEWER_CODECHECK_APPENDIX_FOCUS_KEY
+                    ),
+                    "viewer_interactive_detail_more": str(
+                        row.get("viewer_interactive_detail_more", "") or ""
+                    ),
+                    "viewer_overlay_detail_more": str(
+                        row.get("viewer_overlay_detail_more", "") or ""
+                    ),
+                    "viewer_baseline_secondary": str(
+                        row.get("viewer_baseline_secondary", "") or ""
+                    ),
                     "viewer_row_ref": viewer_row_ref,
                     "viewer_row_url": viewer_subset_row_url,
                     "viewer_slice_url": viewer_subset_url,
@@ -1541,36 +2403,63 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                 "metadata_json": str(metadata_json),
             },
             "viewer_slice_url": viewer_subset_url,
-            "viewer_row_url": str(row_refs[0].get("viewer_row_url", "") or "") if row_refs else "",
-            "viewer_focus_member_id": str(row_refs[0].get("viewer_focus_member_id", "") or "") if row_refs else "",
+            "viewer_row_url": str(row_refs[0].get("viewer_row_url", "") or "")
+            if row_refs
+            else "",
+            "viewer_focus_member_id": str(
+                row_refs[0].get("viewer_focus_member_id", "") or ""
+            )
+            if row_refs
+            else "",
             "viewer_reading_mode": top_viewer_reading_mode,
             "viewer_focus_target": top_viewer_focus_target,
             "viewer_results_card": top_viewer_results_card,
             "viewer_results_series_index": int(top_viewer_results_series_index),
             "viewer_results_sample_index": int(top_viewer_results_sample_index),
-            "viewer_results_detail_item_index": int(top_viewer_results_detail_item_index),
-            "viewer_results_companion_item_index": int(top_viewer_results_companion_item_index),
+            "viewer_results_detail_item_index": int(
+                top_viewer_results_detail_item_index
+            ),
+            "viewer_results_companion_item_index": int(
+                top_viewer_results_companion_item_index
+            ),
             "viewer_results_companion_selection_key": _results_companion_selection_key(
                 DEFAULT_VIEWER_SLICE_RESULTS_COMPANION or top_viewer_results_companion,
             ),
             "viewer_results_detail_selection_key": top_viewer_results_detail_selection_key,
-            "viewer_codecheck_filtered_row_index": int(top_viewer_codecheck_filtered_row_index),
+            "viewer_codecheck_filtered_row_index": int(
+                top_viewer_codecheck_filtered_row_index
+            ),
             "viewer_codecheck_clause_index": int(top_viewer_codecheck_clause_index),
             "viewer_codecheck_hazard_index": int(top_viewer_codecheck_hazard_index),
-            "viewer_codecheck_rule_family_index": int(top_viewer_codecheck_rule_family_index),
-            "viewer_results_companion": DEFAULT_VIEWER_SLICE_RESULTS_COMPANION or top_viewer_results_companion,
-            "viewer_results_detail_block": str(DEFAULT_VIEWER_RESULTS_DETAIL_BLOCK or ""),
+            "viewer_codecheck_rule_family_index": int(
+                top_viewer_codecheck_rule_family_index
+            ),
+            "viewer_results_companion": DEFAULT_VIEWER_SLICE_RESULTS_COMPANION
+            or top_viewer_results_companion,
+            "viewer_results_detail_block": str(
+                DEFAULT_VIEWER_RESULTS_DETAIL_BLOCK or ""
+            ),
             "viewer_codecheck_surface": top_viewer_codecheck_surface,
-            "viewer_codecheck_companion": DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION or top_viewer_codecheck_companion,
-            "viewer_codecheck_companion_item_index": int(top_viewer_codecheck_companion_item_index),
+            "viewer_codecheck_companion": DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION
+            or top_viewer_codecheck_companion,
+            "viewer_codecheck_companion_item_index": int(
+                top_viewer_codecheck_companion_item_index
+            ),
             "viewer_codecheck_companion_selection_key": _codecheck_companion_selection_key(
-                DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION or top_viewer_codecheck_companion,
+                DEFAULT_VIEWER_SLICE_CODECHECK_COMPANION
+                or top_viewer_codecheck_companion,
                 row_ref=top_row_ref,
             ),
             "viewer_codecheck_detail_block": top_viewer_codecheck_detail_block,
-            "viewer_codecheck_appendix_block": str(DEFAULT_VIEWER_CODECHECK_APPENDIX_BLOCK or ""),
-            "viewer_codecheck_detail_item_index": int(top_viewer_codecheck_detail_item_index),
-            "viewer_codecheck_appendix_item_index": int(top_viewer_codecheck_appendix_item_index),
+            "viewer_codecheck_appendix_block": str(
+                DEFAULT_VIEWER_CODECHECK_APPENDIX_BLOCK or ""
+            ),
+            "viewer_codecheck_detail_item_index": int(
+                top_viewer_codecheck_detail_item_index
+            ),
+            "viewer_codecheck_appendix_item_index": int(
+                top_viewer_codecheck_appendix_item_index
+            ),
             "viewer_codecheck_detail_selection_key": top_viewer_codecheck_detail_selection_key,
             "viewer_codecheck_appendix_selection_key": _codecheck_appendix_selection_key(
                 top_viewer_codecheck_appendix_block,
@@ -1606,7 +2495,9 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
             metadata_json=all_json,
         )
         _write_rows_csv(contextual_combo_rows, all_csv)
-        all_json.write_text(json.dumps(combo_contract, ensure_ascii=False, indent=2), encoding="utf-8")
+        all_json.write_text(
+            json.dumps(combo_contract, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         combo_payload: dict[str, Any] = {
             "slug": combo_slug,
             "row_count": int(len(combo_rows)),
@@ -1616,7 +2507,9 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
             "subset_type": "combination",
             "viewer_slice_url": str(combo_contract.get("viewer_slice_url", "") or ""),
             "viewer_row_url": str(combo_contract.get("viewer_row_url", "") or ""),
-            "viewer_focus_member_id": str(combo_contract.get("viewer_focus_member_id", "") or ""),
+            "viewer_focus_member_id": str(
+                combo_contract.get("viewer_focus_member_id", "") or ""
+            ),
             "row_refs_preview": combo_contract.get("preview_row_refs", []),
             "hazard": {},
             "rule_family": {},
@@ -1652,7 +2545,10 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                 hazard_label=hazard_label,
             )
             _write_rows_csv(contextual_rows, hazard_csv)
-            hazard_json.write_text(json.dumps(subset_contract, ensure_ascii=False, indent=2), encoding="utf-8")
+            hazard_json.write_text(
+                json.dumps(subset_contract, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
             combo_payload["hazard"][hazard_label] = {
                 "slug": hazard_slug,
                 "row_count": int(len(hazard_rows)),
@@ -1660,9 +2556,13 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                 "metadata_json": str(hazard_json),
                 "subset_key": subset_key,
                 "subset_type": "hazard",
-                "viewer_slice_url": str(subset_contract.get("viewer_slice_url", "") or ""),
+                "viewer_slice_url": str(
+                    subset_contract.get("viewer_slice_url", "") or ""
+                ),
                 "viewer_row_url": str(subset_contract.get("viewer_row_url", "") or ""),
-                "viewer_focus_member_id": str(subset_contract.get("viewer_focus_member_id", "") or ""),
+                "viewer_focus_member_id": str(
+                    subset_contract.get("viewer_focus_member_id", "") or ""
+                ),
                 "row_refs_preview": subset_contract.get("preview_row_refs", []),
             }
 
@@ -1681,7 +2581,10 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                 rule_family_label=rule_label,
             )
             _write_rows_csv(contextual_rows, rule_csv)
-            rule_json.write_text(json.dumps(subset_contract, ensure_ascii=False, indent=2), encoding="utf-8")
+            rule_json.write_text(
+                json.dumps(subset_contract, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
             combo_payload["rule_family"][rule_label] = {
                 "slug": rule_slug,
                 "row_count": int(len(rule_rows)),
@@ -1689,9 +2592,13 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                 "metadata_json": str(rule_json),
                 "subset_key": subset_key,
                 "subset_type": "rule_family",
-                "viewer_slice_url": str(subset_contract.get("viewer_slice_url", "") or ""),
+                "viewer_slice_url": str(
+                    subset_contract.get("viewer_slice_url", "") or ""
+                ),
                 "viewer_row_url": str(subset_contract.get("viewer_row_url", "") or ""),
-                "viewer_focus_member_id": str(subset_contract.get("viewer_focus_member_id", "") or ""),
+                "viewer_focus_member_id": str(
+                    subset_contract.get("viewer_focus_member_id", "") or ""
+                ),
                 "row_refs_preview": subset_contract.get("preview_row_refs", []),
             }
 
@@ -1700,7 +2607,9 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
             hazard_slug = _safe_slug(hazard_label)
             rule_slug = _safe_slug(rule_label)
             subset_csv = combo_root / "hazard_rule" / f"{hazard_slug}__{rule_slug}.csv"
-            subset_json = combo_root / "hazard_rule" / f"{hazard_slug}__{rule_slug}.json"
+            subset_json = (
+                combo_root / "hazard_rule" / f"{hazard_slug}__{rule_slug}.json"
+            )
             subset_key = f"hazard_rule:{composite_key}"
             contextual_rows, subset_contract = _build_subset_contract(
                 combination_name=combination_name,
@@ -1713,7 +2622,10 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                 rule_family_label=rule_label,
             )
             _write_rows_csv(contextual_rows, subset_csv)
-            subset_json.write_text(json.dumps(subset_contract, ensure_ascii=False, indent=2), encoding="utf-8")
+            subset_json.write_text(
+                json.dumps(subset_contract, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
             combo_payload["hazard_rule_family"][composite_key] = {
                 "hazard_label": hazard_label,
                 "rule_family_label": rule_label,
@@ -1723,9 +2635,13 @@ def _build_subset_artifacts(rows: list[dict[str, Any]], subset_root: Path) -> di
                 "metadata_json": str(subset_json),
                 "subset_key": subset_key,
                 "subset_type": "hazard_rule",
-                "viewer_slice_url": str(subset_contract.get("viewer_slice_url", "") or ""),
+                "viewer_slice_url": str(
+                    subset_contract.get("viewer_slice_url", "") or ""
+                ),
                 "viewer_row_url": str(subset_contract.get("viewer_row_url", "") or ""),
-                "viewer_focus_member_id": str(subset_contract.get("viewer_focus_member_id", "") or ""),
+                "viewer_focus_member_id": str(
+                    subset_contract.get("viewer_focus_member_id", "") or ""
+                ),
                 "row_refs_preview": subset_contract.get("preview_row_refs", []),
             }
 
@@ -1750,7 +2666,9 @@ def write_row_provenance_export(
             "kds_report": _sha256(kds_report) if kds_report.exists() else "",
         },
     }
-    out_json.write_text(json.dumps(export_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    out_json.write_text(
+        json.dumps(export_payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     _write_rows_csv(rows, out_csv)
 
     subset_root = out_csv.parent / "midas_kds_row_provenance_subsets"
@@ -1762,7 +2680,9 @@ def write_row_provenance_export(
         "subset_root": str(subset_root),
         "subset_index": subset_artifacts,
     }
-    out_json.write_text(json.dumps(export_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    out_json.write_text(
+        json.dumps(export_payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
 
     report["inputs"] = input_payload
     report["artifacts"] = {
@@ -1771,17 +2691,34 @@ def write_row_provenance_export(
         "subset_root": str(subset_root),
         "combination_subset_count": int(subset_artifacts.get("combination_count", 0)),
     }
-    out_report.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    out_report.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     return export_payload, report
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-json", default="implementation/phase1/open_data/midas/midas_generator_33.json")
-    parser.add_argument("--kds-report", default="implementation/phase1/release/kds_compliance/code_check_report.json")
-    parser.add_argument("--out-json", default="implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.json")
-    parser.add_argument("--out-csv", default="implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.csv")
-    parser.add_argument("--out-report", default="implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json")
+    parser.add_argument(
+        "--model-json",
+        default="implementation/phase1/open_data/midas/midas_generator_33.json",
+    )
+    parser.add_argument(
+        "--kds-report",
+        default="implementation/phase1/release/kds_compliance/code_check_report.json",
+    )
+    parser.add_argument(
+        "--out-json",
+        default="implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.json",
+    )
+    parser.add_argument(
+        "--out-csv",
+        default="implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table.csv",
+    )
+    parser.add_argument(
+        "--out-report",
+        default="implementation/phase1/release/kds_compliance/midas_kds_row_provenance_table_report.json",
+    )
     args = parser.parse_args()
 
     input_payload = {
@@ -1799,7 +2736,11 @@ def main() -> None:
     out_report.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        validate_input_contract(input_payload, INPUT_SCHEMA, label="phase1.export_midas_kds_row_provenance_table")
+        validate_input_contract(
+            input_payload,
+            INPUT_SCHEMA,
+            label="phase1.export_midas_kds_row_provenance_table",
+        )
         model_json = Path(args.model_json)
         kds_report = Path(args.kds_report)
 
@@ -1825,7 +2766,9 @@ def main() -> None:
             "reason_code": "ERR_INVALID_INPUT",
             "reason": str(exc),
         }
-        out_report.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        out_report.write_text(
+            json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         print(report["summary_line"])
         raise SystemExit(2) from exc
 

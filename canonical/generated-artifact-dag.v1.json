@@ -1,0 +1,41 @@
+{
+  "schema_version": "generated-artifact-dag.v1",
+  "nodes": [
+    {
+      "id": "capability-registry",
+      "kind": "source",
+      "dependencies": [],
+      "inputs": ["artifacts/manifests/capabilities.yaml"],
+      "outputs": []
+    },
+    {
+      "id": "generated-capability-surfaces",
+      "kind": "generated",
+      "dependencies": ["capability-registry"],
+      "inputs": ["scripts/generate_capability_surfaces.py"],
+      "outputs": [
+        "README.md",
+        "docs/api-capabilities.md",
+        "src/structural_analysis/generated_capabilities.py",
+        "src/workbench-v2/model/generatedCapabilities.json"
+      ]
+    },
+    {
+      "id": "verification-receipts",
+      "kind": "receipt",
+      "dependencies": ["generated-capability-surfaces"],
+      "inputs": [
+        "canonical/verification-environment.v1.json",
+        "canonical/requirements-cp312-manylinux2014-x86_64.lock"
+      ],
+      "outputs": ["artifacts/manifests/canonical_verification_environment.current.v1.json"]
+    },
+    {
+      "id": "product-state",
+      "kind": "product-state",
+      "dependencies": ["verification-receipts"],
+      "inputs": ["scripts/build_product_state.py"],
+      "outputs": ["artifacts/manifests/product_state.current.v1.json"]
+    }
+  ]
+}

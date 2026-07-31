@@ -7,6 +7,7 @@ import {
 } from '../model/reviewDraft'
 import { canonicalJson, sha256Hex } from '../model/checksum'
 import { evidenceManifestUrl, type EvidenceManifest } from '../model/evidence/evidenceSources'
+import { BooleanEvidenceValueText, EvidenceValueText } from './EngineeringValueText'
 
 export interface ComparisonRow {
   id: string
@@ -101,6 +102,7 @@ export function ExportPanel({
         model: caseV2.model,
         analysis: caseV2.analysis ?? null,
         residual_history: caseV2.residualHistory,
+        product_profile: caseV2.productProfile,
         selected_member_id: selectedMemberId,
         viewer_deep_link: viewerDeepLink,
         // Blockers exactly as displayed — never silently dropped.
@@ -132,6 +134,19 @@ export function ExportPanel({
   return (
     <section className="wb2-panel" aria-labelledby="wb2-export-title">
       <h2 id="wb2-export-title" className="wb2-panel__title">Export</h2>
+      <dl className="wb2-kv" data-export-truth-state>
+        <dt>Product profile</dt><dd>
+          <EvidenceValueText value={caseV2.productProfile.id} format={(value) => value} />
+        </dd>
+        <dt>Public profile</dt><dd><BooleanEvidenceValueText value={caseV2.productProfile.public} /></dd>
+        <dt>Release eligible</dt><dd>
+          <BooleanEvidenceValueText value={caseV2.productProfile.releaseEligible} />
+        </dd>
+        <dt>Analysis status</dt><dd>{caseV2.analysis?.status ?? 'not_run'}</dd>
+        <dt>Converged</dt><dd>
+          <BooleanEvidenceValueText value={caseV2.analysis?.converged ?? { status: 'unavailable' }} />
+        </dd>
+      </dl>
       <ul className="wb2-export-contents" aria-label="Export contents">
         <li>provenance + source checksum + analysis result checksum</li>
         <li>displayed blockers ({blockers.length})</li>

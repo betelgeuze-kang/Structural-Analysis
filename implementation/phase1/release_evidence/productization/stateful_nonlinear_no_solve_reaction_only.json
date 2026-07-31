@@ -329,7 +329,7 @@
   "external_validation_claim": false,
   "full_building_equilibrium_claim": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-28T17:21:57.459651+00:00",
+  "generated_at": "2026-07-31T05:25:45.586617+00:00",
   "input_checksums": {
     "docs/stateful-nonlinear-no-solve-reaction-only.md": "sha256:87a53e20bf131bd8452233693f8d36b6346073655ffc1b9acff7c4185afc4945",
     "scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py": "sha256:9d1015e93a9bd309fda2dda4d99cad032defed27c9b410750bce2e73d55524f9",
@@ -357,7 +357,7 @@
   "reused_evidence": false,
   "schema_path": "src/structural_analysis/schemas/stateful_nonlinear_no_solve_reaction_only_v1.schema.json",
   "schema_version": "stateful-nonlinear-no-solve-reaction-only.v1",
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "308763d9fbea9a55023827d6ddcf69a9762db5bc",
   "status": "ready",
   "terminal_disposition": "no_solve_reaction_only",
   "truth_class": "deterministic_local_stateful_axial_fixture_truth",

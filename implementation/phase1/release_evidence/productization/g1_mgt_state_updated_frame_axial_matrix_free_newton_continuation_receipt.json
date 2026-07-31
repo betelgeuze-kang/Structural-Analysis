@@ -3230,7 +3230,7 @@
     "schema_version": "g1-mgt-state-updated-frame-axial-live-load-1p0-diagnostic-vector.v1",
     "status": "ready"
   },
-  "generated_at": "2026-07-28T07:05:22.307808+00:00",
+  "generated_at": "2026-07-31T04:33:38.448413+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
@@ -4701,7 +4701,7 @@
   },
   "schema_version": "g1-mgt-state-updated-frame-axial-matrix-free-newton-continuation-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "308763d9fbea9a55023827d6ddcf69a9762db5bc",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "strict_g1_gate_full_load_probe": {

@@ -13,7 +13,12 @@ import tempfile
 from typing import Any
 import zipfile
 
-from implementation.phase1.hardest_external_10case_catalog import (
+
+_IMPORT_ROOT = Path(__file__).resolve().parents[2]
+if str(_IMPORT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_IMPORT_ROOT))
+
+from implementation.phase1.hardest_external_10case_catalog import (  # noqa: E402
     REPO_ROOT,
     catalog_map,
     extract_case_kpis,
@@ -27,10 +32,16 @@ DEFAULT_EXECUTION_MANIFEST = Path(
     "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json"
 )
 DEFAULT_RUNS_DIR = Path("implementation/phase1/release/external_benchmark_kickoff/runs")
-DEFAULT_STATUS_UPDATER = Path("implementation/phase1/update_external_benchmark_execution_status.py")
+DEFAULT_STATUS_UPDATER = Path(
+    "implementation/phase1/update_external_benchmark_execution_status.py"
+)
 DEFAULT_WIND_EXECUTOR = Path("implementation/phase1/build_wind_raw_mapping_artifact.py")
-DEFAULT_RELEASE_SIGNING_KEY = Path("implementation/phase1/release/signing/release_registry_ed25519.pem")
-DEFAULT_RELEASE_SIGNING_PUB = Path("implementation/phase1/release/signing/release_registry_ed25519.pub.pem")
+DEFAULT_RELEASE_SIGNING_KEY = Path(
+    "implementation/phase1/release/signing/release_registry_ed25519.pem"
+)
+DEFAULT_RELEASE_SIGNING_PUB = Path(
+    "implementation/phase1/release/signing/release_registry_ed25519.pub.pem"
+)
 DEFAULT_MIDAS_NATIVE_ROUNDTRIP_REPORT = Path(
     "implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json"
 )
@@ -102,7 +113,9 @@ def _sign_manifest_bytes(payload: dict[str, Any], *, private_key: Path) -> str:
             text=True,
         )
         if proc.returncode != 0:
-            raise RuntimeError((proc.stderr or proc.stdout or "openssl sign failed").strip())
+            raise RuntimeError(
+                (proc.stderr or proc.stdout or "openssl sign failed").strip()
+            )
         return base64.b64encode(sig_path.read_bytes()).decode("ascii")
     finally:
         payload_path.unlink(missing_ok=True)
@@ -111,7 +124,11 @@ def _sign_manifest_bytes(payload: dict[str, Any], *, private_key: Path) -> str:
 
 def _task_lookup(execution_manifest: dict[str, Any], task_id: str) -> dict[str, Any]:
     for bucket in ("ready_tasks", "blocked_tasks"):
-        rows = execution_manifest.get(bucket) if isinstance(execution_manifest.get(bucket), list) else []
+        rows = (
+            execution_manifest.get(bucket)
+            if isinstance(execution_manifest.get(bucket), list)
+            else []
+        )
         for row in rows:
             if isinstance(row, dict) and str(row.get("task_id", "") or "") == task_id:
                 return row
@@ -120,7 +137,11 @@ def _task_lookup(execution_manifest: dict[str, Any], task_id: str) -> dict[str, 
 
 def _load_midas_native_roundtrip_appendix() -> tuple[dict[str, Any], list[Path]]:
     report = _load_json(REPO_ROOT / DEFAULT_MIDAS_NATIVE_ROUNDTRIP_REPORT)
-    batch_rows = report.get("structure_type_batches") if isinstance(report.get("structure_type_batches"), list) else []
+    batch_rows = (
+        report.get("structure_type_batches")
+        if isinstance(report.get("structure_type_batches"), list)
+        else []
+    )
     artifact_paths: list[Path] = []
     for candidate in (
         REPO_ROOT / DEFAULT_MIDAS_NATIVE_APPENDIX_MD,
@@ -164,7 +185,10 @@ def _default_updates_json(execution_manifest_path: Path) -> Path:
 
 
 def _default_status_manifest_out(execution_manifest_path: Path) -> Path:
-    return execution_manifest_path.parent / "external_benchmark_execution_status_manifest.json"
+    return (
+        execution_manifest_path.parent
+        / "external_benchmark_execution_status_manifest.json"
+    )
 
 
 def _run_status_update(
@@ -280,7 +304,9 @@ def _execute_component_wind(
     artifact = _load_json(result_path)
     execution_payload["artifact"] = artifact
     contract_pass = bool(artifact.get("contract_pass", False))
-    reason_code = str(artifact.get("reason_code", "PASS" if contract_pass else "ERR_WIND_TASK_FAILED"))
+    reason_code = str(
+        artifact.get("reason_code", "PASS" if contract_pass else "ERR_WIND_TASK_FAILED")
+    )
     execution_payload["contract_pass"] = contract_pass
     execution_payload["reason_code"] = reason_code
     execution_payload["summary"] = artifact.get("summary", {})
@@ -311,17 +337,30 @@ def _execute_component_hinge(
         )
         return True, "PASS_DRY_RUN", execution_payload, result_path
 
-    specimen_summary = fixture.get("specimen_summary") if isinstance(fixture.get("specimen_summary"), dict) else {}
-    hysteresis_summary = fixture.get("hysteresis_summary") if isinstance(fixture.get("hysteresis_summary"), dict) else {}
+    specimen_summary = (
+        fixture.get("specimen_summary")
+        if isinstance(fixture.get("specimen_summary"), dict)
+        else {}
+    )
+    hysteresis_summary = (
+        fixture.get("hysteresis_summary")
+        if isinstance(fixture.get("hysteresis_summary"), dict)
+        else {}
+    )
     hinge_refresh_targets = (
-        fixture.get("hinge_refresh_targets") if isinstance(fixture.get("hinge_refresh_targets"), dict) else {}
+        fixture.get("hinge_refresh_targets")
+        if isinstance(fixture.get("hinge_refresh_targets"), dict)
+        else {}
     )
     point_count = int(hysteresis_summary.get("point_count", 0) or 0)
-    peak_abs_drift_ratio = float(hysteresis_summary.get("peak_abs_drift_ratio", 0.0) or 0.0)
+    peak_abs_drift_ratio = float(
+        hysteresis_summary.get("peak_abs_drift_ratio", 0.0) or 0.0
+    )
     contract_pass = bool(
         fixture_path.exists()
         and bool(fixture.get("contract_pass", False))
-        and str(fixture.get("seed_id", "") or "") == str(task.get("task_id", "") or "").split("::", 1)[-1]
+        and str(fixture.get("seed_id", "") or "")
+        == str(task.get("task_id", "") or "").split("::", 1)[-1]
         and point_count > 0
         and str(specimen_summary.get("specimen_id", "") or "")
     )
@@ -337,9 +376,15 @@ def _execute_component_hinge(
             "specimen_id": str(specimen_summary.get("specimen_id", "") or ""),
             "point_count": point_count,
             "peak_abs_drift_ratio": peak_abs_drift_ratio,
-            "rebar_sensitive_expected": bool(hinge_refresh_targets.get("rebar_sensitive_expected", False)),
-            "confinement_sensitive_expected": bool(hinge_refresh_targets.get("confinement_sensitive_expected", False)),
-            "axial_load_sensitive_expected": bool(hinge_refresh_targets.get("axial_load_sensitive_expected", False)),
+            "rebar_sensitive_expected": bool(
+                hinge_refresh_targets.get("rebar_sensitive_expected", False)
+            ),
+            "confinement_sensitive_expected": bool(
+                hinge_refresh_targets.get("confinement_sensitive_expected", False)
+            ),
+            "axial_load_sensitive_expected": bool(
+                hinge_refresh_targets.get("axial_load_sensitive_expected", False)
+            ),
         },
     }
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -375,9 +420,19 @@ def _execute_system_anchor(
         )
         return True, "PASS_DRY_RUN", execution_payload, result_path
 
-    report_summary = report_payload.get("summary") if isinstance(report_payload.get("summary"), dict) else {}
-    contract_pass = bool(report_path.exists() and bool(report_payload.get("contract_pass", False)))
-    reason_code = str(report_payload.get("reason_code", "PASS" if contract_pass else "ERR_SYSTEM_ANCHOR_INVALID"))
+    report_summary = (
+        report_payload.get("summary")
+        if isinstance(report_payload.get("summary"), dict)
+        else {}
+    )
+    contract_pass = bool(
+        report_path.exists() and bool(report_payload.get("contract_pass", False))
+    )
+    reason_code = str(
+        report_payload.get(
+            "reason_code", "PASS" if contract_pass else "ERR_SYSTEM_ANCHOR_INVALID"
+        )
+    )
     artifact_payload = {
         "schema_version": "1.0",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -386,10 +441,14 @@ def _execute_system_anchor(
         "summary": {
             "benchmark_family": str(task.get("benchmark_family", "") or ""),
             "source_report_path": str(report_path),
-            "case_count": int(report_summary.get("case_count", report_summary.get("selected_case_count", 0)) or 0),
+            "case_count": int(
+                report_summary.get(
+                    "case_count", report_summary.get("selected_case_count", 0)
+                )
+                or 0
+            ),
             "summary_head": {
-                key: report_summary.get(key)
-                for key in list(report_summary.keys())[:8]
+                key: report_summary.get(key) for key in list(report_summary.keys())[:8]
             },
         },
     }
@@ -463,17 +522,23 @@ def _execute_hardest_case(
             {
                 "role": str(role),
                 "path": str(report_path),
-                "reason_code": str(supporting_payloads.get(role, {}).get("reason_code", "") or ""),
+                "reason_code": str(
+                    supporting_payloads.get(role, {}).get("reason_code", "") or ""
+                ),
                 "contract_pass": bool(supporting_status.get(role, False)),
             }
         )
-    native_roundtrip_report, native_roundtrip_appendix_artifacts = _load_midas_native_roundtrip_appendix()
+    native_roundtrip_report, native_roundtrip_appendix_artifacts = (
+        _load_midas_native_roundtrip_appendix()
+    )
     native_roundtrip_summary = (
         native_roundtrip_report.get("summary")
         if isinstance(native_roundtrip_report.get("summary"), dict)
         else {}
     )
-    native_roundtrip_summary_line = str(native_roundtrip_report.get("summary_line", "") or "").strip()
+    native_roundtrip_summary_line = str(
+        native_roundtrip_report.get("summary_line", "") or ""
+    ).strip()
 
     receipt_payload = {
         "schema_version": "1.0",
@@ -500,15 +565,30 @@ def _execute_hardest_case(
         },
         "native_midas_roundtrip_appendix": {
             "summary_line": native_roundtrip_summary_line,
-            "public_native_ready_count": int(native_roundtrip_summary.get("public_native_writeback_ready_count", 0) or 0),
-            "public_preview_ready_count": int(
-                native_roundtrip_summary.get("public_archive_preview_writeback_ready_count", 0) or 0
+            "public_native_ready_count": int(
+                native_roundtrip_summary.get("public_native_writeback_ready_count", 0)
+                or 0
             ),
-            "public_source_ready_count": int(native_roundtrip_summary.get("public_source_writeback_ready_count", 0) or 0),
-            "structure_type_count": int(native_roundtrip_summary.get("structure_type_count", 0) or 0),
+            "public_preview_ready_count": int(
+                native_roundtrip_summary.get(
+                    "public_archive_preview_writeback_ready_count", 0
+                )
+                or 0
+            ),
+            "public_source_ready_count": int(
+                native_roundtrip_summary.get("public_source_writeback_ready_count", 0)
+                or 0
+            ),
+            "structure_type_count": int(
+                native_roundtrip_summary.get("structure_type_count", 0) or 0
+            ),
             "appendix_markdown": str(DEFAULT_MIDAS_NATIVE_APPENDIX_MD),
             "appendix_json": str(DEFAULT_MIDAS_NATIVE_APPENDIX_JSON),
-            "batch_markdowns": [str(path.relative_to(REPO_ROOT)) for path in native_roundtrip_appendix_artifacts if path.suffix == ".md"],
+            "batch_markdowns": [
+                str(path.relative_to(REPO_ROOT))
+                for path in native_roundtrip_appendix_artifacts
+                if path.suffix == ".md"
+            ],
         },
     }
     receipt_lines = [
@@ -528,9 +608,7 @@ def _execute_hardest_case(
         "|---|---|---|",
     ]
     for row in kpi_rows:
-        receipt_lines.append(
-            f"| {row['label']} | {row['value']} | {row['source']} |"
-        )
+        receipt_lines.append(f"| {row['label']} | {row['value']} | {row['source']} |")
     if native_roundtrip_summary_line:
         receipt_lines.extend(
             [
@@ -550,7 +628,10 @@ def _execute_hardest_case(
             ]
         )
         batch_markdowns = [
-            path for path in native_roundtrip_appendix_artifacts if path.suffix == ".md" and path.name != DEFAULT_MIDAS_NATIVE_APPENDIX_MD.name
+            path
+            for path in native_roundtrip_appendix_artifacts
+            if path.suffix == ".md"
+            and path.name != DEFAULT_MIDAS_NATIVE_APPENDIX_MD.name
         ]
         if batch_markdowns:
             receipt_lines.append("- `structure_type_batches`:")
@@ -674,9 +755,17 @@ def main() -> None:
     parser.add_argument("--status-manifest-out", default="")
     parser.add_argument("--task-id", required=True)
     parser.add_argument("--note", default="")
-    parser.add_argument("--midas-json", default="implementation/phase1/midas_model.json")
-    parser.add_argument("--midas-conversion", default="implementation/phase1/midas_mgt_conversion_report.json")
-    parser.add_argument("--wind-gate-report", default="implementation/phase1/wind_time_history_gate_report.json")
+    parser.add_argument(
+        "--midas-json", default="implementation/phase1/midas_model.json"
+    )
+    parser.add_argument(
+        "--midas-conversion",
+        default="implementation/phase1/midas_mgt_conversion_report.json",
+    )
+    parser.add_argument(
+        "--wind-gate-report",
+        default="implementation/phase1/wind_time_history_gate_report.json",
+    )
     parser.add_argument(
         "--signing-private-key",
         default=str(DEFAULT_RELEASE_SIGNING_KEY),
@@ -686,8 +775,14 @@ def main() -> None:
         default=str(DEFAULT_RELEASE_SIGNING_PUB),
     )
     parser.add_argument("--case-source-root", default=str(REPO_ROOT))
-    parser.add_argument("--refresh-release-surfaces", action=argparse.BooleanOptionalAction, default=False)
-    parser.add_argument("--dry-run", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument(
+        "--refresh-release-surfaces",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--dry-run", action=argparse.BooleanOptionalAction, default=False
+    )
     args = parser.parse_args()
 
     execution_manifest_path = Path(args.execution_manifest)
@@ -695,9 +790,12 @@ def main() -> None:
     if not execution_manifest:
         raise SystemExit(f"invalid execution manifest: {execution_manifest_path}")
 
-    updates_json = Path(str(args.updates_json).strip() or _default_updates_json(execution_manifest_path))
+    updates_json = Path(
+        str(args.updates_json).strip() or _default_updates_json(execution_manifest_path)
+    )
     status_manifest_out = Path(
-        str(args.status_manifest_out).strip() or _default_status_manifest_out(execution_manifest_path)
+        str(args.status_manifest_out).strip()
+        or _default_status_manifest_out(execution_manifest_path)
     )
     task_id = str(args.task_id).strip()
     task = _task_lookup(execution_manifest, task_id)
@@ -720,34 +818,42 @@ def main() -> None:
     phase = str(task.get("phase", "") or "")
 
     if benchmark_family == "tpu_raw_hffb_mapping" and phase == "component_wind":
-        contract_pass, reason_code, execution_payload, artifact_path = _execute_component_wind(
-            task=task,
-            run_dir=run_dir,
-            midas_json=str(args.midas_json),
-            midas_conversion=str(args.midas_conversion),
-            wind_gate_report=str(args.wind_gate_report),
-            dry_run=bool(args.dry_run),
+        contract_pass, reason_code, execution_payload, artifact_path = (
+            _execute_component_wind(
+                task=task,
+                run_dir=run_dir,
+                midas_json=str(args.midas_json),
+                midas_conversion=str(args.midas_conversion),
+                wind_gate_report=str(args.wind_gate_report),
+                dry_run=bool(args.dry_run),
+            )
         )
     elif benchmark_family == "peer_spd_column_hinge" and phase == "component_hinge":
-        contract_pass, reason_code, execution_payload, artifact_path = _execute_component_hinge(
-            task=task,
-            run_dir=run_dir,
-            dry_run=bool(args.dry_run),
+        contract_pass, reason_code, execution_payload, artifact_path = (
+            _execute_component_hinge(
+                task=task,
+                run_dir=run_dir,
+                dry_run=bool(args.dry_run),
+            )
         )
     elif phase == "system_anchor":
-        contract_pass, reason_code, execution_payload, artifact_path = _execute_system_anchor(
-            task=task,
-            run_dir=run_dir,
-            dry_run=bool(args.dry_run),
+        contract_pass, reason_code, execution_payload, artifact_path = (
+            _execute_system_anchor(
+                task=task,
+                run_dir=run_dir,
+                dry_run=bool(args.dry_run),
+            )
         )
     elif phase == "hardest_case":
-        contract_pass, reason_code, execution_payload, artifact_path = _execute_hardest_case(
-            task=task,
-            run_dir=run_dir,
-            dry_run=bool(args.dry_run),
-            signing_private_key=Path(args.signing_private_key),
-            signing_public_key=Path(args.signing_public_key),
-            case_source_root=Path(args.case_source_root),
+        contract_pass, reason_code, execution_payload, artifact_path = (
+            _execute_hardest_case(
+                task=task,
+                run_dir=run_dir,
+                dry_run=bool(args.dry_run),
+                signing_private_key=Path(args.signing_private_key),
+                signing_public_key=Path(args.signing_public_key),
+                case_source_root=Path(args.case_source_root),
+            )
         )
     else:
         report = {
@@ -781,7 +887,9 @@ def main() -> None:
     if not args.dry_run:
         run_dir.mkdir(parents=True, exist_ok=True)
         _write_json(execution_log_json, execution_log)
-        execution_log_md.write_text(json.dumps(execution_log, ensure_ascii=False, indent=2), encoding="utf-8")
+        execution_log_md.write_text(
+            json.dumps(execution_log, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
 
     rc, update_report, update_stderr = _run_status_update(
         execution_manifest_path=execution_manifest_path,
@@ -826,7 +934,9 @@ def main() -> None:
         "artifact_path": str(artifact_path),
         "kpi_receipt_path": str(execution_payload.get("kpi_receipt_path", "") or ""),
         "case_bundle_dir": str(execution_payload.get("case_bundle_dir", "") or ""),
-        "case_bundle_zip_path": str(execution_payload.get("case_bundle_zip_path", "") or ""),
+        "case_bundle_zip_path": str(
+            execution_payload.get("case_bundle_zip_path", "") or ""
+        ),
         "bundle_id": str(execution_payload.get("bundle_id", "") or ""),
         "lifecycle_status_set": lifecycle_status,
         "update_report": update_report,

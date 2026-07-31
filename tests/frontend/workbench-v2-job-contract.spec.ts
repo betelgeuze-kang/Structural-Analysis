@@ -61,6 +61,21 @@ test('Workbench requires an atomic result and evidence pair for success', () => 
   expect(validateWorkbenchJobView({ ...succeeded, evidence: null }).ok).toBe(false)
 })
 
+test('job success is publication state and carries no inferred convergence field', () => {
+  const succeeded = {
+    ...queuedJob(),
+    status: 'succeeded',
+    revision: 2,
+    attempt: 1,
+    progress: { completed_steps: 4, total_steps: 4 },
+    result: { role: 'result', content_hash: hash, byte_length: 10, media_type: 'application/json' },
+    evidence: { role: 'evidence', content_hash: hash, byte_length: 10, media_type: 'application/json' },
+  }
+  const validation = validateWorkbenchJobView(succeeded)
+  expect(validation.ok).toBe(true)
+  expect(validation.value).not.toHaveProperty('converged')
+})
+
 test('Workbench never accepts a lease token in the tenant projection', () => {
   expect(validateWorkbenchJobView({ ...queuedJob(), lease_token: 'secret' }).ok).toBe(false)
 })

@@ -1,0 +1,1 @@
+{"case_id":"M1","fixture_schema":"planar-frame-deterministic-fixture.v1","generator":"rectangular_frame_grid.v1","parameters":{"bay_count":4,"story_count":6,"material":"steel"},"expected":{"node_count":35,"member_count":54},"claim":"fixture_definition_only"}

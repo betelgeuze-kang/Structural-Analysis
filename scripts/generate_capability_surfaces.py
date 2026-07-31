@@ -36,6 +36,7 @@ REQUIRED_AUTHORITY_AXES = {
     "external_vv_level",
     "release_eligible",
 }
+RUNTIME_ARTIFACT_REQUIRED_AT = {"verification", "release"}
 
 
 class CapabilityRegistryError(ValueError):
@@ -129,6 +130,7 @@ def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
         interfaces = row.get("interfaces")
         limitations = row.get("limitations")
         evidence = row.get("evidence")
+        runtime_artifacts = row.get("runtime_artifacts", [])
         if not isinstance(interfaces, list) or not interfaces:
             raise CapabilityRegistryError(f"{capability_id}: interfaces are required")
         if not isinstance(limitations, list) or not limitations:
@@ -139,6 +141,32 @@ def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
             if not (repo_root / str(evidence_path)).exists():
                 raise CapabilityRegistryError(
                     f"{capability_id}: missing evidence path {evidence_path}"
+                )
+        if not isinstance(runtime_artifacts, list):
+            raise CapabilityRegistryError(
+                f"{capability_id}: runtime_artifacts must be a list"
+            )
+        for artifact_index, artifact in enumerate(runtime_artifacts):
+            label = f"{capability_id}: runtime_artifacts[{artifact_index}]"
+            if not isinstance(artifact, dict):
+                raise CapabilityRegistryError(f"{label} must be an object")
+            path = str(artifact.get("path", "")).strip()
+            producer = str(artifact.get("producer", "")).strip()
+            schema_version = str(artifact.get("schema_version", "")).strip()
+            required_at = str(artifact.get("required_at", "")).strip()
+            if not path or Path(path).is_absolute() or ".." in Path(path).parts:
+                raise CapabilityRegistryError(
+                    f"{label} path must be repository-relative"
+                )
+            if not producer or not (repo_root / producer).is_file():
+                raise CapabilityRegistryError(
+                    f"{label} producer is missing: {producer}"
+                )
+            if not schema_version:
+                raise CapabilityRegistryError(f"{label} schema_version is required")
+            if required_at not in RUNTIME_ARTIFACT_REQUIRED_AT:
+                raise CapabilityRegistryError(
+                    f"{label} required_at must be verification or release"
                 )
         if row.get("authority") == "none" and public:
             raise CapabilityRegistryError(

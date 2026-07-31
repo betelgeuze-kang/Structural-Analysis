@@ -37,6 +37,7 @@ structural-analysis = "structural_analysis.api.cli:main"
 structural-analysis-benchmark = "structural_analysis.benchmark.cli:main"
 structural-analysis-nonlinear-fiber-frame = "structural_analysis.api.nonlinear_fiber_frame_cli:main"
 structural-analysis-nonlinear-frame = "structural_analysis.api.nonlinear_frame_cli:main"
+structural-analysis-planar-frame = "structural_analysis.api.planar_frame_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -59,10 +60,16 @@ testpaths = ["tests"]
 [tool.mypy]
 python_version = "3.10"
 files = [
+  "src/structural_analysis/adapters",
   "src/structural_analysis/analyses",
+  "src/structural_analysis/dynamics/transient_checkpoint.py",
+  "src/structural_analysis/elements/corotational_frame3d.py",
+  "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py",
+  "src/structural_analysis/materials",
   "src/structural_analysis/model",
   "src/structural_analysis/results/schema.py",
   "src/structural_analysis/results/validation.py",
+  "src/structural_analysis/solvers/nonlinear/transient.py",
   "src/structural_analysis/units",
 ]
 check_untyped_defs = true

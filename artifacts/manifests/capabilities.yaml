@@ -280,6 +280,39 @@
       ]
     },
     {
+      "id": "analysis.planar_frame_verified_alpha",
+      "title": "Planar frame verified alpha",
+      "category": "analysis",
+      "status": "bounded_public",
+      "representable": true,
+      "implemented": true,
+      "executable": true,
+      "public": true,
+      "numerical_authority": "exact_bounded_candidate",
+      "recovery_authority": "exact_bounded_candidate",
+      "external_vv_level": 0,
+      "release_eligible": false,
+      "authority": "exact_bounded_candidate",
+      "interfaces": [
+        "python_api",
+        "cli"
+      ],
+      "profile": "planar_frame_verified_alpha.v1",
+      "limitations": [
+        "This Developer Preview row promotes only the source-bound nonlinear load-control path; the wider linear-static, modal, and linear-buckling product profile remains to be unified behind this API.",
+        "Direct displacement-control and arc-length remain separate experimental profiles.",
+        "Independent external V&V, release eligibility, design-code authority, and signed-export authority are not attached."
+      ],
+      "evidence": [
+        "docs/planar-frame-verified-alpha-v1.md",
+        "src/structural_analysis/api/planar_frame.py",
+        "src/structural_analysis/api/planar_frame_cli.py",
+        "tests/test_planar_frame_verified_alpha_api.py",
+        "tests/test_planar_frame_verified_alpha_corpus.py",
+        "verification/planar_frame_verified_alpha_v1/corpus.manifest.json"
+      ]
+    },
+    {
       "id": "analysis.nonlinear_corotational_fiber_frame_2d",
       "title": "Corotational 2D fiber frame",
       "category": "analysis",
@@ -450,15 +483,57 @@
         "docs/external-vv-independent-operator-intake.md",
         "docs/external-vv-level2-promotion-gate.md",
         "docs/bounded-planar-external-vv-matrix.md",
-        "docs/opensees-calculix-current-source-workflow.md",
-        "artifacts/vv/bounded_planar_external_linear_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_external_negative_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_external_scaling_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_external_modal_buckling_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package/manifest.json",
-        "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipts/nonlinear-material-recovery-technical-receipt.json",
-        "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipt.json",
-        "artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json"
+        "docs/opensees-calculix-current-source-workflow.md"
+      ],
+      "runtime_artifacts": [
+        {
+          "path": "artifacts/vv/bounded_planar_external_linear_case_package/manifest.json",
+          "producer": "scripts/build_bounded_planar_external_linear_case_package.py",
+          "schema_version": "bounded-planar-external-linear-case-package.v1",
+          "required_at": "verification"
+        },
+        {
+          "path": "artifacts/vv/bounded_planar_external_negative_case_package/manifest.json",
+          "producer": "scripts/build_bounded_planar_external_negative_case_package.py",
+          "schema_version": "bounded-planar-external-negative-case-package.v1",
+          "required_at": "verification"
+        },
+        {
+          "path": "artifacts/vv/bounded_planar_external_scaling_case_package/manifest.json",
+          "producer": "scripts/build_bounded_planar_external_scaling_case_package.py",
+          "schema_version": "bounded-planar-external-scaling-case-package.v1",
+          "required_at": "verification"
+        },
+        {
+          "path": "artifacts/vv/bounded_planar_external_modal_buckling_case_package/manifest.json",
+          "producer": "scripts/build_bounded_planar_external_modal_buckling_case_package.py",
+          "schema_version": "bounded-planar-external-modal-buckling-case-package.v1",
+          "required_at": "verification"
+        },
+        {
+          "path": "artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package/manifest.json",
+          "producer": "scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py",
+          "schema_version": "bounded-planar-external-nonlinear-material-recovery-case-package.v1",
+          "required_at": "verification"
+        },
+        {
+          "path": "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipts/nonlinear-material-recovery-technical-receipt.json",
+          "producer": "scripts/build_bounded_planar_same_operator_supplemental_execution.py",
+          "schema_version": "bounded-planar-external-nonlinear-material-recovery-execution-receipt.v1",
+          "required_at": "verification"
+        },
+        {
+          "path": "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipt.json",
+          "producer": "scripts/build_bounded_planar_same_operator_supplemental_execution.py",
+          "schema_version": "bounded-planar-same-operator-supplemental-execution.v1",
+          "required_at": "verification"
+        },
+        {
+          "path": "artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json",
+          "producer": "scripts/build_bounded_planar_external_vv_matrix.py",
+          "schema_version": "bounded-planar-external-vv-matrix-status.v1",
+          "required_at": "verification"
+        }
       ]
     },
     {

@@ -9,46 +9,73 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import sys
 
 import numpy as np
 
-from runtime_contracts import InputContractError, validate_input_contract
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.runtime_contracts import (  # noqa: E402
+    InputContractError,
+    validate_input_contract,
+)
+
 try:
-    from layered_shell_wall import (
+    from implementation.phase1.layered_shell_wall import (
         evaluate_layered_panel_response,
         make_layered_slab_section,
         make_layered_wall_section,
     )
-except Exception:  # pragma: no cover - additive fallback when the helper is unavailable.
+except (
+    Exception
+):  # pragma: no cover - additive fallback when the helper is unavailable.
     evaluate_layered_panel_response = None
     make_layered_slab_section = None
     make_layered_wall_section = None
 
 try:
-    from beam_column_nonlinear import (
+    from implementation.phase1.beam_column_nonlinear import (
         BeamColumnProperties,
         solve_beam_column_response,
         solve_beam_column_supported_response,
     )
-except Exception:  # pragma: no cover - additive fallback when the helper is unavailable.
+except (
+    Exception
+):  # pragma: no cover - additive fallback when the helper is unavailable.
     BeamColumnProperties = None
     solve_beam_column_response = None
     solve_beam_column_supported_response = None
 
 try:
-    from section_family_library import evaluate_story_section_profile
-except Exception:  # pragma: no cover - additive fallback when the helper is unavailable.
+    from implementation.phase1.section_family_library import (
+        evaluate_story_section_profile,
+    )
+except (
+    Exception
+):  # pragma: no cover - additive fallback when the helper is unavailable.
     evaluate_story_section_profile = None
 
 try:
-    from foundation_link_library import describe_foundation_link_library
-except Exception:  # pragma: no cover - additive fallback when the library is unavailable.
+    from implementation.phase1.foundation_link_library import (
+        describe_foundation_link_library,
+    )
+except (
+    Exception
+):  # pragma: no cover - additive fallback when the library is unavailable.
+
     def describe_foundation_link_library() -> dict[str, object]:
         return {}
 
+
 try:
-    from device_library import describe_device_library
-except Exception:  # pragma: no cover - additive fallback when the library is unavailable.
+    from implementation.phase1.device_library import describe_device_library
+except (
+    Exception
+):  # pragma: no cover - additive fallback when the library is unavailable.
+
     def describe_device_library() -> dict[str, object]:
         return {}
 
@@ -211,9 +238,15 @@ def _compression_damage_evidence(payload: dict) -> dict:
         if not isinstance(row, dict):
             continue
         summary = row.get("summary") if isinstance(row.get("summary"), dict) else {}
-        material_indices = summary.get("material_indices") if isinstance(summary.get("material_indices"), dict) else {}
+        material_indices = (
+            summary.get("material_indices")
+            if isinstance(summary.get("material_indices"), dict)
+            else {}
+        )
         try:
-            compression_damage = float(material_indices.get("compression_damage_mean", 0.0) or 0.0)
+            compression_damage = float(
+                material_indices.get("compression_damage_mean", 0.0) or 0.0
+            )
         except Exception:
             compression_damage = 0.0
         values.append(compression_damage)
@@ -255,14 +288,18 @@ def _collect_material_models(payload: dict) -> set[str]:
             row_model = row.get("material_model")
             if isinstance(row_model, str) and row_model.strip():
                 models.add(row_model.strip())
-            row_summary = row.get("summary") if isinstance(row.get("summary"), dict) else {}
+            row_summary = (
+                row.get("summary") if isinstance(row.get("summary"), dict) else {}
+            )
             row_summary_model = row_summary.get("material_model")
             if isinstance(row_summary_model, str) and row_summary_model.strip():
                 models.add(row_summary_model.strip())
     return models
 
 
-def _add_material_source(models_by_source: dict[str, set[str]], source_name: str, payload: dict) -> None:
+def _add_material_source(
+    models_by_source: dict[str, set[str]], source_name: str, payload: dict
+) -> None:
     checks = payload.get("checks") if isinstance(payload.get("checks"), dict) else {}
     if not bool(payload.get("contract_pass", False)):
         return
@@ -391,7 +428,9 @@ def _panel_contact_failure_reason_rows(
     node_to_surface_proxy_family_types: list[str],
 ) -> list[dict]:
     rows: list[dict] = []
-    evidence_tags = {str(tag) for tag in panel_rc_cyclic_summary.get("evidence_tags", [])}
+    evidence_tags = {
+        str(tag) for tag in panel_rc_cyclic_summary.get("evidence_tags", [])
+    }
     if "crushing" in evidence_tags:
         rows.append(
             {
@@ -430,7 +469,9 @@ def _panel_contact_failure_reason_rows(
                 "evidence_basis": "structural_contact_link_model_types",
             }
         )
-    if {"bearing_bilinear", "coulomb_friction", "kelvin_voigt_pounding"}.issubset(link_models):
+    if {"bearing_bilinear", "coulomb_friction", "kelvin_voigt_pounding"}.issubset(
+        link_models
+    ):
         rows.append(
             {
                 "domain": "contact",
@@ -440,7 +481,9 @@ def _panel_contact_failure_reason_rows(
             }
         )
 
-    support_families = set(support_search_family_types) | set(node_to_surface_proxy_family_types)
+    support_families = set(support_search_family_types) | set(
+        node_to_surface_proxy_family_types
+    )
     for family in sorted(support_families):
         rows.append(
             {
@@ -456,7 +499,9 @@ def _panel_contact_failure_reason_rows(
 def _nonlinear_residual_integrated_case_rows(ndtha_payload: dict) -> list[dict]:
     if not bool(ndtha_payload.get("contract_pass", False)):
         return []
-    rows = ndtha_payload.get("rows") if isinstance(ndtha_payload.get("rows"), list) else []
+    rows = (
+        ndtha_payload.get("rows") if isinstance(ndtha_payload.get("rows"), list) else []
+    )
     integrated_rows: list[dict] = []
     for row in rows:
         if not isinstance(row, dict):
@@ -464,13 +509,21 @@ def _nonlinear_residual_integrated_case_rows(ndtha_payload: dict) -> list[dict]:
         row_checks = row.get("checks") if isinstance(row.get("checks"), dict) else {}
         row_summary = row.get("summary") if isinstance(row.get("summary"), dict) else {}
         material_model = str(row_summary.get("material_model", "") or "").strip()
-        residual_source = str(row_summary.get("residual_metric_source", "") or "").strip()
+        residual_source = str(
+            row_summary.get("residual_metric_source", "") or ""
+        ).strip()
         try:
-            residual_top = float(row_summary.get("residual_top_displacement_m", 0.0) or 0.0)
-            residual_drift = float(row_summary.get("residual_drift_ratio_pct", 0.0) or 0.0)
+            residual_top = float(
+                row_summary.get("residual_top_displacement_m", 0.0) or 0.0
+            )
+            residual_drift = float(
+                row_summary.get("residual_drift_ratio_pct", 0.0) or 0.0
+            )
         except Exception:
             continue
-        residual_fallback_used = bool(row_summary.get("residual_metric_fallback_used", False))
+        residual_fallback_used = bool(
+            row_summary.get("residual_metric_fallback_used", False)
+        )
         integrated_pass = bool(
             row_checks.get("converged_all_steps", False)
             and row_checks.get("plasticity_triggered", False)
@@ -547,7 +600,11 @@ def _panel_rc_cyclic_surface_summary() -> dict[str, object]:
             diaphragm_strain=1.0e-4,
         ),
     ]
-    evidence = [response.cyclic_evidence for response in responses if response.cyclic_evidence is not None]
+    evidence = [
+        response.cyclic_evidence
+        for response in responses
+        if response.cyclic_evidence is not None
+    ]
     if not evidence:
         return {
             "present": False,
@@ -580,9 +637,15 @@ def _panel_rc_cyclic_surface_summary() -> dict[str, object]:
         "reversal_count_max": max(item.reversal_count for item in evidence),
         "min_pinching_ratio": min(item.min_pinching_ratio for item in evidence),
         "max_crushing_ratio": max(item.max_crushing_ratio for item in evidence),
-        "max_stiffness_degradation": max(item.max_stiffness_degradation for item in evidence),
-        "max_strength_degradation": max(item.max_strength_degradation for item in evidence),
-        "evidence_tags": sorted({tag for item in evidence for tag in item.evidence_tags}),
+        "max_stiffness_degradation": max(
+            item.max_stiffness_degradation for item in evidence
+        ),
+        "max_strength_degradation": max(
+            item.max_strength_degradation for item in evidence
+        ),
+        "evidence_tags": sorted(
+            {tag for item in evidence for tag in item.evidence_tags}
+        ),
         "total_energy_like": float(sum(item.cyclic_energy_like for item in evidence)),
     }
 
@@ -640,14 +703,23 @@ def _assembled_global_depth_surface_summary() -> dict[str, object]:
             yield_moment_kNm=120.0,
             hardening_ratio=0.05,
         ),
-        deformation_local=np.array([0.0, 0.0, 0.14, 0.0, 0.16, -0.02], dtype=np.float64),
+        deformation_local=np.array(
+            [0.0, 0.0, 0.14, 0.0, 0.16, -0.02], dtype=np.float64
+        ),
         axial_force_n=1.6e6,
         include_geometric=True,
         formulation="force_based",
     )
-    beam_free_dof_residual_max = max(abs(float(value)) for value in beam_supported_response.free_dof_residual)
-    beam_displacement_max_m = max(abs(float(value)) for value in beam_supported_response.displacement_global)
-    beam_equilibrium_pass = bool(beam_free_dof_residual_max <= 1.0e-6 and beam_supported_response.iteration_count >= 1)
+    beam_free_dof_residual_max = max(
+        abs(float(value)) for value in beam_supported_response.free_dof_residual
+    )
+    beam_displacement_max_m = max(
+        abs(float(value)) for value in beam_supported_response.displacement_global
+    )
+    beam_equilibrium_pass = bool(
+        beam_free_dof_residual_max <= 1.0e-6
+        and beam_supported_response.iteration_count >= 1
+    )
 
     wall_section = make_layered_wall_section()
     slab_section = make_layered_slab_section()
@@ -681,7 +753,11 @@ def _assembled_global_depth_surface_summary() -> dict[str, object]:
             ),
         ),
     ]
-    assembled = [response.assembled_response for _, response in panel_cases if response.assembled_response is not None]
+    assembled = [
+        response.assembled_response
+        for _, response in panel_cases
+        if response.assembled_response is not None
+    ]
     panel_force_balance_error_max_n = max(
         (abs(float(item.force_balance_error_n)) for item in assembled),
         default=0.0,
@@ -693,12 +769,17 @@ def _assembled_global_depth_surface_summary() -> dict[str, object]:
         ),
         default=0.0,
     )
-    panel_torsional_case_count = sum(abs(float(item.torsional_coupling_moment_n_m)) > 1.0e-9 for item in assembled)
+    panel_torsional_case_count = sum(
+        abs(float(item.torsional_coupling_moment_n_m)) > 1.0e-9 for item in assembled
+    )
     panel_diaphragm_coupling_case_count = sum(
-        max(abs(float(value)) for value in item.diaphragm_coupling_vector_n_per_m) > 1.0e-9
+        max(abs(float(value)) for value in item.diaphragm_coupling_vector_n_per_m)
+        > 1.0e-9
         for item in assembled
     )
-    panel_force_balance_pass = bool(panel_force_balance_error_max_n <= 1.0e-6 and len(assembled) == len(panel_cases))
+    panel_force_balance_pass = bool(
+        panel_force_balance_error_max_n <= 1.0e-6 and len(assembled) == len(panel_cases)
+    )
     present = bool(beam_equilibrium_pass and panel_force_balance_pass)
     return {
         "present": present,
@@ -706,8 +787,12 @@ def _assembled_global_depth_surface_summary() -> dict[str, object]:
         "beam_iteration_count": int(beam_supported_response.iteration_count),
         "beam_yielded_end_count": int(beam_probe_response.yielded_end_count),
         "beam_tangent_scale_min": float(beam_probe_response.tangent_scale),
-        "beam_max_trial_end_moment_ratio": float(np.max(beam_probe_response.trial_end_moment_ratios)),
-        "beam_max_plastic_rotation_proxy_rad": float(np.max(beam_probe_response.plastic_rotation_proxy_rad)),
+        "beam_max_trial_end_moment_ratio": float(
+            np.max(beam_probe_response.trial_end_moment_ratios)
+        ),
+        "beam_max_plastic_rotation_proxy_rad": float(
+            np.max(beam_probe_response.plastic_rotation_proxy_rad)
+        ),
         "beam_stability_index": float(beam_probe_response.stability_index),
         "beam_strain_energy_n_m": float(beam_probe_response.strain_energy_n_m),
         "beam_free_dof_residual_max": float(beam_free_dof_residual_max),
@@ -720,7 +805,12 @@ def _assembled_global_depth_surface_summary() -> dict[str, object]:
         "panel_torsional_case_count": int(panel_torsional_case_count),
         "panel_diaphragm_coupling_case_count": int(panel_diaphragm_coupling_case_count),
         "panel_force_balance_pass": panel_force_balance_pass,
-        "depth_signal_count": int(1 + len(assembled) + panel_torsional_case_count + panel_diaphragm_coupling_case_count),
+        "depth_signal_count": int(
+            1
+            + len(assembled)
+            + panel_torsional_case_count
+            + panel_diaphragm_coupling_case_count
+        ),
     }
 
 
@@ -744,11 +834,17 @@ def _section_family_demand_surface_summary() -> dict[str, object]:
         topology="wall-frame",
         material_type="rc_composite",
         story_h_m=np.array([3.8, 3.6, 3.5, 3.4, 3.3], dtype=np.float64),
-        drift_ratio_profile=np.array([0.012, 0.0105, 0.009, 0.0075, 0.006], dtype=np.float64),
+        drift_ratio_profile=np.array(
+            [0.012, 0.0105, 0.009, 0.0075, 0.006], dtype=np.float64
+        ),
         load_scale=1.15,
     )
     summary = profile.get("summary") if isinstance(profile.get("summary"), dict) else {}
-    family_counts = profile.get("family_counts") if isinstance(profile.get("family_counts"), dict) else {}
+    family_counts = (
+        profile.get("family_counts")
+        if isinstance(profile.get("family_counts"), dict)
+        else {}
+    )
     present = bool(
         int(summary.get("story_count", 0) or 0) >= 5
         and float(summary.get("beam_tangent_scale_min", 0.0) or 0.0) > 0.0
@@ -758,16 +854,30 @@ def _section_family_demand_surface_summary() -> dict[str, object]:
     return {
         "present": present,
         "story_count": int(summary.get("story_count", 0) or 0),
-        "family_counts": {str(name): int(count) for name, count in family_counts.items()},
-        "beam_tangent_scale_mean": float(summary.get("beam_tangent_scale_mean", 0.0) or 0.0),
-        "beam_tangent_scale_min": float(summary.get("beam_tangent_scale_min", 0.0) or 0.0),
-        "beam_yielded_story_count": int(summary.get("beam_yielded_story_count", 0) or 0),
-        "beam_max_trial_end_moment_ratio": float(summary.get("beam_max_trial_end_moment_ratio", 0.0) or 0.0),
+        "family_counts": {
+            str(name): int(count) for name, count in family_counts.items()
+        },
+        "beam_tangent_scale_mean": float(
+            summary.get("beam_tangent_scale_mean", 0.0) or 0.0
+        ),
+        "beam_tangent_scale_min": float(
+            summary.get("beam_tangent_scale_min", 0.0) or 0.0
+        ),
+        "beam_yielded_story_count": int(
+            summary.get("beam_yielded_story_count", 0) or 0
+        ),
+        "beam_max_trial_end_moment_ratio": float(
+            summary.get("beam_max_trial_end_moment_ratio", 0.0) or 0.0
+        ),
         "beam_max_plastic_rotation_proxy_rad": float(
             summary.get("beam_max_plastic_rotation_proxy_rad", 0.0) or 0.0
         ),
-        "beam_stability_index_max": float(summary.get("beam_stability_index_max", 0.0) or 0.0),
-        "beam_strain_energy_total_n_m": float(summary.get("beam_strain_energy_total_n_m", 0.0) or 0.0),
+        "beam_stability_index_max": float(
+            summary.get("beam_stability_index_max", 0.0) or 0.0
+        ),
+        "beam_strain_energy_total_n_m": float(
+            summary.get("beam_strain_energy_total_n_m", 0.0) or 0.0
+        ),
     }
 
 
@@ -815,10 +925,18 @@ def _beam_shell_contact_coupling_surface_summary(
         and node_to_surface_proxy_model_types
         and support_search_family_types
         and node_to_surface_proxy_family_types
-        and structural_contact_validation_checks.get("support_search_family_surface_pass", False)
-        and structural_contact_validation_checks.get("node_to_surface_proxy_family_surface_pass", False)
-        and foundation_soil_link_checks.get("support_search_family_surface_ready", False)
-        and foundation_soil_link_checks.get("node_to_surface_proxy_family_surface_ready", False)
+        and structural_contact_validation_checks.get(
+            "support_search_family_surface_pass", False
+        )
+        and structural_contact_validation_checks.get(
+            "node_to_surface_proxy_family_surface_pass", False
+        )
+        and foundation_soil_link_checks.get(
+            "support_search_family_surface_ready", False
+        )
+        and foundation_soil_link_checks.get(
+            "node_to_surface_proxy_family_surface_ready", False
+        )
     )
     coupling_signal_count = (
         int(bool(beam_signal_present))
@@ -828,14 +946,20 @@ def _beam_shell_contact_coupling_surface_summary(
         + len(support_search_family_types)
         + len(node_to_surface_proxy_family_types)
     )
-    present = bool(beam_signal_present and panel_signal_present and support_signal_present)
+    present = bool(
+        beam_signal_present and panel_signal_present and support_signal_present
+    )
     return {
         "present": present,
         "beam_signal_present": bool(beam_signal_present),
         "panel_signal_present": bool(panel_signal_present),
         "support_signal_present": bool(support_signal_present),
-        "beam_case_count": int(assembled_global_depth_summary.get("beam_case_count", 0) or 0),
-        "panel_case_count": int(assembled_global_depth_summary.get("panel_case_count", 0) or 0),
+        "beam_case_count": int(
+            assembled_global_depth_summary.get("beam_case_count", 0) or 0
+        ),
+        "panel_case_count": int(
+            assembled_global_depth_summary.get("panel_case_count", 0) or 0
+        ),
         "support_depth_score": int(support_depth_score),
         "support_search_model_count": len(support_search_model_types),
         "node_to_surface_proxy_model_count": len(node_to_surface_proxy_model_types),
@@ -851,14 +975,38 @@ def _beam_shell_contact_coupling_surface_summary(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--topology-report", default="implementation/phase1/opensees_topology_report.json")
-    parser.add_argument("--flexible-diaphragm-report", default="implementation/phase1/flexible_diaphragm_gate_report.json")
-    parser.add_argument("--pushover-stress-report", default="implementation/phase1/nonlinear_pushover_stress_report.json")
-    parser.add_argument("--ndtha-stress-report", default="implementation/phase1/nonlinear_ndtha_stress_report.json")
-    parser.add_argument("--ssi-boundary-report", default="implementation/phase1/ssi_boundary_gate_report.json")
-    parser.add_argument("--substructuring-interface-report", default="implementation/phase1/substructuring_interface_report.json")
-    parser.add_argument("--wind-time-history-report", default="implementation/phase1/wind_time_history_gate_report.json")
-    parser.add_argument("--special-link-library", default="implementation/phase1/special_link_library.py")
+    parser.add_argument(
+        "--topology-report",
+        default="implementation/phase1/opensees_topology_report.json",
+    )
+    parser.add_argument(
+        "--flexible-diaphragm-report",
+        default="implementation/phase1/flexible_diaphragm_gate_report.json",
+    )
+    parser.add_argument(
+        "--pushover-stress-report",
+        default="implementation/phase1/nonlinear_pushover_stress_report.json",
+    )
+    parser.add_argument(
+        "--ndtha-stress-report",
+        default="implementation/phase1/nonlinear_ndtha_stress_report.json",
+    )
+    parser.add_argument(
+        "--ssi-boundary-report",
+        default="implementation/phase1/ssi_boundary_gate_report.json",
+    )
+    parser.add_argument(
+        "--substructuring-interface-report",
+        default="implementation/phase1/substructuring_interface_report.json",
+    )
+    parser.add_argument(
+        "--wind-time-history-report",
+        default="implementation/phase1/wind_time_history_gate_report.json",
+    )
+    parser.add_argument(
+        "--special-link-library",
+        default="implementation/phase1/special_link_library.py",
+    )
     parser.add_argument(
         "--structural-contact-validation-report",
         default="implementation/phase1/structural_contact_validation_report.json",
@@ -867,9 +1015,18 @@ def main() -> None:
         "--structural-contact-gate-report",
         default="implementation/phase1/structural_contact_gate_report.json",
     )
-    parser.add_argument("--rc-benchmark-lock-report", default="implementation/phase1/rc_benchmark_lock_report.json")
-    parser.add_argument("--construction-sequence-report", default="implementation/phase1/construction_sequence_gate_report.json")
-    parser.add_argument("--damper-validation-report", default="implementation/phase1/damper_validation_gate_report.json")
+    parser.add_argument(
+        "--rc-benchmark-lock-report",
+        default="implementation/phase1/rc_benchmark_lock_report.json",
+    )
+    parser.add_argument(
+        "--construction-sequence-report",
+        default="implementation/phase1/construction_sequence_gate_report.json",
+    )
+    parser.add_argument(
+        "--damper-validation-report",
+        default="implementation/phase1/damper_validation_gate_report.json",
+    )
     parser.add_argument(
         "--foundation-soil-link-gate-report",
         default="implementation/phase1/foundation_soil_link_gate_report.json",
@@ -882,7 +1039,9 @@ def main() -> None:
             "implementation/phase1/commercial_benchmark_cases.atwood_open.json"
         ),
     )
-    parser.add_argument("--required-material-models", default="rc_composite,steel_elastic_plastic")
+    parser.add_argument(
+        "--required-material-models", default="rc_composite,steel_elastic_plastic"
+    )
     parser.add_argument(
         "--required-link-models",
         default="normal_gap_unilateral,uplift_seat_unilateral,compression_only_penalty,bearing_bilinear,coulomb_friction,kelvin_voigt_pounding",
@@ -902,7 +1061,10 @@ def main() -> None:
     parser.add_argument("--min-wall-frame-cases", type=int, default=1)
     parser.add_argument("--min-compression-surrogate-rows", type=int, default=1)
     parser.add_argument("--min-contact-material-coupled-cases", type=int, default=10)
-    parser.add_argument("--out", default="implementation/phase1/element_material_breadth_gate_report.json")
+    parser.add_argument(
+        "--out",
+        default="implementation/phase1/element_material_breadth_gate_report.json",
+    )
     args = parser.parse_args()
 
     input_payload = {
@@ -914,7 +1076,9 @@ def main() -> None:
         "substructuring_interface_report": str(args.substructuring_interface_report),
         "wind_time_history_report": str(args.wind_time_history_report),
         "special_link_library": str(args.special_link_library),
-        "structural_contact_validation_report": str(args.structural_contact_validation_report),
+        "structural_contact_validation_report": str(
+            args.structural_contact_validation_report
+        ),
         "structural_contact_gate_report": str(args.structural_contact_gate_report),
         "rc_benchmark_lock_report": str(args.rc_benchmark_lock_report),
         "construction_sequence_report": str(args.construction_sequence_report),
@@ -929,19 +1093,29 @@ def main() -> None:
         "min_wall_rows": int(args.min_wall_rows),
         "min_wall_frame_cases": int(args.min_wall_frame_cases),
         "min_compression_surrogate_rows": int(args.min_compression_surrogate_rows),
-        "min_contact_material_coupled_cases": int(args.min_contact_material_coupled_cases),
+        "min_contact_material_coupled_cases": int(
+            args.min_contact_material_coupled_cases
+        ),
         "out": str(args.out),
     }
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        validate_input_contract(input_payload, INPUT_SCHEMA, label="phase1.run_element_material_breadth_gate")
+        validate_input_contract(
+            input_payload,
+            INPUT_SCHEMA,
+            label="phase1.run_element_material_breadth_gate",
+        )
 
         case_paths = [Path(item) for item in _parse_csv(args.benchmark_cases)]
-        required_material_models = sorted(set(_parse_csv(args.required_material_models)))
+        required_material_models = sorted(
+            set(_parse_csv(args.required_material_models))
+        )
         required_link_models = sorted(set(_parse_csv(args.required_link_models)))
-        required_material_capabilities = sorted(set(_parse_csv(args.required_material_capabilities)))
+        required_material_capabilities = sorted(
+            set(_parse_csv(args.required_material_capabilities))
+        )
         if not case_paths:
             raise ValueError("no benchmark case files provided")
         if not required_material_models:
@@ -959,26 +1133,46 @@ def main() -> None:
         substructuring = _load_json(Path(args.substructuring_interface_report))
         wind = _load_json(Path(args.wind_time_history_report))
         special_link_text = _load_text(Path(args.special_link_library))
-        structural_contact_validation = _load_json(Path(args.structural_contact_validation_report))
+        structural_contact_validation = _load_json(
+            Path(args.structural_contact_validation_report)
+        )
         structural_contact_gate = _load_json(Path(args.structural_contact_gate_report))
         rc_benchmark_lock = _load_json(Path(args.rc_benchmark_lock_report))
         construction_sequence = _load_json(Path(args.construction_sequence_report))
         damper_validation = _load_json(Path(args.damper_validation_report))
-        foundation_soil_link_gate = _load_json(Path(args.foundation_soil_link_gate_report))
+        foundation_soil_link_gate = _load_json(
+            Path(args.foundation_soil_link_gate_report)
+        )
         benchmarks = _aggregate_benchmark_cases(case_paths)
 
-        topology_checks = topology.get("checks") if isinstance(topology.get("checks"), dict) else {}
-        topology_metrics = topology.get("metrics") if isinstance(topology.get("metrics"), dict) else {}
-        diaphragm_checks = diaphragm.get("checks") if isinstance(diaphragm.get("checks"), dict) else {}
-        pushover_checks = pushover.get("checks") if isinstance(pushover.get("checks"), dict) else {}
-        ndtha_checks = ndtha.get("checks") if isinstance(ndtha.get("checks"), dict) else {}
+        topology_checks = (
+            topology.get("checks") if isinstance(topology.get("checks"), dict) else {}
+        )
+        topology_metrics = (
+            topology.get("metrics") if isinstance(topology.get("metrics"), dict) else {}
+        )
+        diaphragm_checks = (
+            diaphragm.get("checks") if isinstance(diaphragm.get("checks"), dict) else {}
+        )
+        pushover_checks = (
+            pushover.get("checks") if isinstance(pushover.get("checks"), dict) else {}
+        )
+        ndtha_checks = (
+            ndtha.get("checks") if isinstance(ndtha.get("checks"), dict) else {}
+        )
         ssi_checks = ssi.get("checks") if isinstance(ssi.get("checks"), dict) else {}
         substructuring_checks = (
-            substructuring.get("checks") if isinstance(substructuring.get("checks"), dict) else {}
+            substructuring.get("checks")
+            if isinstance(substructuring.get("checks"), dict)
+            else {}
         )
         shell_element_count = int(topology_metrics.get("shell_element_count", 0) or 0)
-        shell_beam_mix_case_count = int((benchmarks.get("element_mix_counts") or {}).get("shell_beam_mix", 0) or 0)
-        wall_frame_case_count = int((benchmarks.get("topology_counts") or {}).get("wall-frame", 0) or 0)
+        shell_beam_mix_case_count = int(
+            (benchmarks.get("element_mix_counts") or {}).get("shell_beam_mix", 0) or 0
+        )
+        wall_frame_case_count = int(
+            (benchmarks.get("topology_counts") or {}).get("wall-frame", 0) or 0
+        )
 
         shell_topology_evidence_pass = bool(
             topology.get("contract_pass", False)
@@ -1038,8 +1232,10 @@ def main() -> None:
             and ndtha.get("contract_pass", False)
             and pushover_checks.get("material_model_pass", False)
             and ndtha_checks.get("material_model_pass", False)
-            and int(pushover_compression.get("qualifying_row_count", 0)) >= int(args.min_compression_surrogate_rows)
-            and int(ndtha_compression.get("qualifying_row_count", 0)) >= int(args.min_compression_surrogate_rows)
+            and int(pushover_compression.get("qualifying_row_count", 0))
+            >= int(args.min_compression_surrogate_rows)
+            and int(ndtha_compression.get("qualifying_row_count", 0))
+            >= int(args.min_compression_surrogate_rows)
         )
 
         material_sources: dict[str, set[str]] = {}
@@ -1048,7 +1244,9 @@ def main() -> None:
         _add_material_source(material_sources, "ssi_boundary_report", ssi)
         _add_material_source(material_sources, "wind_time_history_report", wind)
         material_models = sorted(material_sources)
-        missing_material_models = [model for model in required_material_models if model not in material_sources]
+        missing_material_models = [
+            model for model in required_material_models if model not in material_sources
+        ]
         material_model_breadth_pass = bool(not missing_material_models)
 
         structural_contact_checks = (
@@ -1106,17 +1304,30 @@ def main() -> None:
             structural_contact_summary.get("device_model_types"),
             list(describe_device_library().keys()),
         )
-        missing_link_models = [model for model in required_link_models if model not in link_model_types]
+        missing_link_models = [
+            model for model in required_link_models if model not in link_model_types
+        ]
         special_link_keywords_present = all(
             token in special_link_text.lower()
-            for token in ("gap", "uplift", "compression-only", "bearing", "friction", "pounding")
+            for token in (
+                "gap",
+                "uplift",
+                "compression-only",
+                "bearing",
+                "friction",
+                "pounding",
+            )
         )
         link_model_breadth_pass = bool(not missing_link_models)
         structural_contact_direct_contract_pass = bool(
             structural_contact_gate.get("contract_pass", False)
             and structural_contact_validation.get("contract_pass", False)
-            and structural_contact_checks.get("all_structural_contact_categories_ready", False)
-            and structural_contact_checks.get("structural_contact_event_sequence_zero_pass", False)
+            and structural_contact_checks.get(
+                "all_structural_contact_categories_ready", False
+            )
+            and structural_contact_checks.get(
+                "structural_contact_event_sequence_zero_pass", False
+            )
             and special_link_keywords_present
             and link_model_breadth_pass
         )
@@ -1142,11 +1353,15 @@ def main() -> None:
                     and rc_benchmark_checks.get("slab_wall_case_pass", False)
                 ),
                 "wall_compression_damage": bool(
-                    int(pushover_compression.get("qualifying_row_count", 0)) >= int(args.min_compression_surrogate_rows)
-                    and int(ndtha_compression.get("qualifying_row_count", 0)) >= int(args.min_compression_surrogate_rows)
+                    int(pushover_compression.get("qualifying_row_count", 0))
+                    >= int(args.min_compression_surrogate_rows)
+                    and int(ndtha_compression.get("qualifying_row_count", 0))
+                    >= int(args.min_compression_surrogate_rows)
                 ),
                 "shell_surface_transfer": bool(shell_diaphragm_evidence_pass),
-                "interface_transfer_finite": bool(substructuring_interface_evidence_pass),
+                "interface_transfer_finite": bool(
+                    substructuring_interface_evidence_pass
+                ),
                 "soil_boundary_nonlinear": bool(
                     ssi.get("contract_pass", False)
                     and ssi_checks.get("ssi_nonlinear_boundary_active", False)
@@ -1162,18 +1377,28 @@ def main() -> None:
                 "foundation_soil_link_nonlinear": bool(
                     foundation_soil_link_gate.get("contract_pass", False)
                     and foundation_soil_link_checks.get("foundation_scope_ready", False)
-                    and foundation_soil_link_checks.get("foundation_artifact_ready", False)
+                    and foundation_soil_link_checks.get(
+                        "foundation_artifact_ready", False
+                    )
                     and foundation_soil_link_checks.get("ssi_boundary_ready", False)
                     and foundation_soil_link_checks.get("soil_tunnel_ready", False)
                     and foundation_soil_link_checks.get("impedance_schema_ready", False)
-                    and foundation_soil_link_checks.get("foundation_link_models_ready", False)
+                    and foundation_soil_link_checks.get(
+                        "foundation_link_models_ready", False
+                    )
                 ),
                 "contact_gap_uplift_unilateral": bool(
-                    {"normal_gap_unilateral", "uplift_seat_unilateral"}.issubset(set(link_model_types))
+                    {"normal_gap_unilateral", "uplift_seat_unilateral"}.issubset(
+                        set(link_model_types)
+                    )
                     and structural_contact_direct_contract_pass
                 ),
                 "contact_bearing_friction_impact": bool(
-                    {"bearing_bilinear", "coulomb_friction", "kelvin_voigt_pounding"}.issubset(set(link_model_types))
+                    {
+                        "bearing_bilinear",
+                        "coulomb_friction",
+                        "kelvin_voigt_pounding",
+                    }.issubset(set(link_model_types))
                     and structural_contact_direct_contract_pass
                 ),
             }.items()
@@ -1188,7 +1413,12 @@ def main() -> None:
 
         wall_family_counter: Counter[str] = Counter()
         for row in pushover_wall_rows + ndtha_wall_rows:
-            wall_family_counter.update({name: int(count) for name, count in row["section_family_counts"].items()})
+            wall_family_counter.update(
+                {
+                    name: int(count)
+                    for name, count in row["section_family_counts"].items()
+                }
+            )
 
         panel_rc_cyclic_summary = _panel_rc_cyclic_surface_summary()
         assembled_global_depth_summary = _assembled_global_depth_surface_summary()
@@ -1208,7 +1438,9 @@ def main() -> None:
             else "tracked_gap"
         )
         contact_material_coupled_case_rows = _contact_material_coupled_case_rows(
-            benchmarks.get("case_rows") if isinstance(benchmarks.get("case_rows"), list) else [],
+            benchmarks.get("case_rows")
+            if isinstance(benchmarks.get("case_rows"), list)
+            else [],
             material_models=material_models,
             contact_surface_status=contact_surface_status,
             structural_contact_direct_contract_pass=structural_contact_direct_contract_pass,
@@ -1218,12 +1450,18 @@ def main() -> None:
         panel_contact_failure_reason_rows = _panel_contact_failure_reason_rows(
             panel_rc_cyclic_summary=panel_rc_cyclic_summary,
             link_model_types=link_model_types,
-            support_search_family_types=list(beam_shell_contact_coupling_summary["support_search_family_types"]),
+            support_search_family_types=list(
+                beam_shell_contact_coupling_summary["support_search_family_types"]
+            ),
             node_to_surface_proxy_family_types=list(
-                beam_shell_contact_coupling_summary["node_to_surface_proxy_family_types"]
+                beam_shell_contact_coupling_summary[
+                    "node_to_surface_proxy_family_types"
+                ]
             ),
         )
-        nonlinear_residual_integrated_case_rows = _nonlinear_residual_integrated_case_rows(ndtha)
+        nonlinear_residual_integrated_case_rows = (
+            _nonlinear_residual_integrated_case_rows(ndtha)
+        )
         checks = {
             "shell_topology_evidence_pass": bool(shell_topology_evidence_pass),
             "shell_diaphragm_evidence_pass": bool(shell_diaphragm_evidence_pass),
@@ -1232,10 +1470,16 @@ def main() -> None:
             "ndtha_wall_evidence_pass": bool(ndtha_wall_evidence_pass),
             "wall_direct_contract_pass": bool(wall_direct_contract_pass),
             "ssi_boundary_evidence_pass": bool(ssi_boundary_evidence_pass),
-            "substructuring_interface_evidence_pass": bool(substructuring_interface_evidence_pass),
-            "contact_interface_compression_surrogate_pass": bool(contact_interface_compression_surrogate_pass),
+            "substructuring_interface_evidence_pass": bool(
+                substructuring_interface_evidence_pass
+            ),
+            "contact_interface_compression_surrogate_pass": bool(
+                contact_interface_compression_surrogate_pass
+            ),
             "special_link_keywords_present": bool(special_link_keywords_present),
-            "structural_contact_direct_contract_pass": bool(structural_contact_direct_contract_pass),
+            "structural_contact_direct_contract_pass": bool(
+                structural_contact_direct_contract_pass
+            ),
             "foundation_soil_link_direct_contract_pass": bool(
                 foundation_soil_link_gate.get("contract_pass", False)
                 and foundation_soil_link_checks.get("foundation_scope_ready", False)
@@ -1243,30 +1487,57 @@ def main() -> None:
                 and foundation_soil_link_checks.get("ssi_boundary_ready", False)
                 and foundation_soil_link_checks.get("soil_tunnel_ready", False)
                 and foundation_soil_link_checks.get("impedance_schema_ready", False)
-                and foundation_soil_link_checks.get("foundation_link_models_ready", False)
+                and foundation_soil_link_checks.get(
+                    "foundation_link_models_ready", False
+                )
             ),
             "support_link_surface_present": bool(
-                link_model_types and foundation_support_model_types and device_model_types
+                link_model_types
+                and foundation_support_model_types
+                and device_model_types
             ),
             "material_model_breadth_pass": bool(material_model_breadth_pass),
             "link_model_breadth_pass": bool(link_model_breadth_pass),
             "material_capability_breadth_pass": bool(material_capability_breadth_pass),
             "panel_rc_cyclic_surface_present": bool(panel_rc_cyclic_summary["present"]),
-            "beam_column_global_surface_present": bool(assembled_global_depth_summary["beam_case_count"]),
-            "beam_column_global_equilibrium_pass": bool(assembled_global_depth_summary["beam_equilibrium_pass"]),
-            "layered_panel_assembled_surface_present": bool(assembled_global_depth_summary["panel_case_count"]),
-            "layered_panel_force_balance_pass": bool(assembled_global_depth_summary["panel_force_balance_pass"]),
-            "assembled_global_depth_surface_present": bool(assembled_global_depth_summary["present"]),
-            "section_family_demand_surface_present": bool(section_family_demand_summary["present"]),
-            "beam_shell_contact_coupling_surface_present": bool(beam_shell_contact_coupling_summary["present"]),
+            "beam_column_global_surface_present": bool(
+                assembled_global_depth_summary["beam_case_count"]
+            ),
+            "beam_column_global_equilibrium_pass": bool(
+                assembled_global_depth_summary["beam_equilibrium_pass"]
+            ),
+            "layered_panel_assembled_surface_present": bool(
+                assembled_global_depth_summary["panel_case_count"]
+            ),
+            "layered_panel_force_balance_pass": bool(
+                assembled_global_depth_summary["panel_force_balance_pass"]
+            ),
+            "assembled_global_depth_surface_present": bool(
+                assembled_global_depth_summary["present"]
+            ),
+            "section_family_demand_surface_present": bool(
+                section_family_demand_summary["present"]
+            ),
+            "beam_shell_contact_coupling_surface_present": bool(
+                beam_shell_contact_coupling_summary["present"]
+            ),
             "contact_material_coupled_case_manifest_pass": bool(
-                len(contact_material_coupled_case_rows) >= int(args.min_contact_material_coupled_cases)
+                len(contact_material_coupled_case_rows)
+                >= int(args.min_contact_material_coupled_cases)
             ),
             "panel_contact_failure_mode_reason_code_pass": bool(
-                any(row.get("domain") == "panel" for row in panel_contact_failure_reason_rows)
-                and any(row.get("domain") == "contact" for row in panel_contact_failure_reason_rows)
+                any(
+                    row.get("domain") == "panel"
+                    for row in panel_contact_failure_reason_rows
+                )
+                and any(
+                    row.get("domain") == "contact"
+                    for row in panel_contact_failure_reason_rows
+                )
             ),
-            "nonlinear_residual_integrated_case_pass": bool(nonlinear_residual_integrated_case_rows),
+            "nonlinear_residual_integrated_case_pass": bool(
+                nonlinear_residual_integrated_case_rows
+            ),
         }
         contract_pass = bool(
             checks["shell_direct_contract_pass"]
@@ -1310,33 +1581,71 @@ def main() -> None:
             "panel_rc_cyclic_surface_status": (
                 "pass" if checks["panel_rc_cyclic_surface_present"] else "missing"
             ),
-            "panel_rc_cyclic_section_count": int(panel_rc_cyclic_summary["section_count"]),
-            "panel_rc_cyclic_section_families": list(panel_rc_cyclic_summary["section_families"]),
-            "panel_rc_cyclic_section_names": list(panel_rc_cyclic_summary["section_names"]),
-            "panel_rc_cyclic_reversal_count_min": int(panel_rc_cyclic_summary["reversal_count_min"]),
-            "panel_rc_cyclic_reversal_count_max": int(panel_rc_cyclic_summary["reversal_count_max"]),
-            "panel_rc_cyclic_min_pinching_ratio": float(panel_rc_cyclic_summary["min_pinching_ratio"]),
-            "panel_rc_cyclic_max_crushing_ratio": float(panel_rc_cyclic_summary["max_crushing_ratio"]),
-            "panel_rc_cyclic_max_stiffness_degradation": float(panel_rc_cyclic_summary["max_stiffness_degradation"]),
-            "panel_rc_cyclic_max_strength_degradation": float(panel_rc_cyclic_summary["max_strength_degradation"]),
-            "panel_rc_cyclic_evidence_tags": list(panel_rc_cyclic_summary["evidence_tags"]),
-            "panel_rc_cyclic_total_energy_like": float(panel_rc_cyclic_summary["total_energy_like"]),
-            "assembled_global_depth_surface_status": (
-                "pass" if checks["assembled_global_depth_surface_present"] else "missing"
+            "panel_rc_cyclic_section_count": int(
+                panel_rc_cyclic_summary["section_count"]
             ),
-            "assembled_global_depth_signal_count": int(assembled_global_depth_summary["depth_signal_count"]),
-            "beam_column_global_case_count": int(assembled_global_depth_summary["beam_case_count"]),
-            "beam_column_global_iteration_count": int(assembled_global_depth_summary["beam_iteration_count"]),
-            "beam_column_global_yielded_end_count": int(assembled_global_depth_summary["beam_yielded_end_count"]),
-            "beam_column_global_tangent_scale_min": float(assembled_global_depth_summary["beam_tangent_scale_min"]),
+            "panel_rc_cyclic_section_families": list(
+                panel_rc_cyclic_summary["section_families"]
+            ),
+            "panel_rc_cyclic_section_names": list(
+                panel_rc_cyclic_summary["section_names"]
+            ),
+            "panel_rc_cyclic_reversal_count_min": int(
+                panel_rc_cyclic_summary["reversal_count_min"]
+            ),
+            "panel_rc_cyclic_reversal_count_max": int(
+                panel_rc_cyclic_summary["reversal_count_max"]
+            ),
+            "panel_rc_cyclic_min_pinching_ratio": float(
+                panel_rc_cyclic_summary["min_pinching_ratio"]
+            ),
+            "panel_rc_cyclic_max_crushing_ratio": float(
+                panel_rc_cyclic_summary["max_crushing_ratio"]
+            ),
+            "panel_rc_cyclic_max_stiffness_degradation": float(
+                panel_rc_cyclic_summary["max_stiffness_degradation"]
+            ),
+            "panel_rc_cyclic_max_strength_degradation": float(
+                panel_rc_cyclic_summary["max_strength_degradation"]
+            ),
+            "panel_rc_cyclic_evidence_tags": list(
+                panel_rc_cyclic_summary["evidence_tags"]
+            ),
+            "panel_rc_cyclic_total_energy_like": float(
+                panel_rc_cyclic_summary["total_energy_like"]
+            ),
+            "assembled_global_depth_surface_status": (
+                "pass"
+                if checks["assembled_global_depth_surface_present"]
+                else "missing"
+            ),
+            "assembled_global_depth_signal_count": int(
+                assembled_global_depth_summary["depth_signal_count"]
+            ),
+            "beam_column_global_case_count": int(
+                assembled_global_depth_summary["beam_case_count"]
+            ),
+            "beam_column_global_iteration_count": int(
+                assembled_global_depth_summary["beam_iteration_count"]
+            ),
+            "beam_column_global_yielded_end_count": int(
+                assembled_global_depth_summary["beam_yielded_end_count"]
+            ),
+            "beam_column_global_tangent_scale_min": float(
+                assembled_global_depth_summary["beam_tangent_scale_min"]
+            ),
             "beam_column_global_max_trial_end_moment_ratio": float(
                 assembled_global_depth_summary["beam_max_trial_end_moment_ratio"]
             ),
             "beam_column_global_max_plastic_rotation_proxy_rad": float(
                 assembled_global_depth_summary["beam_max_plastic_rotation_proxy_rad"]
             ),
-            "beam_column_global_stability_index": float(assembled_global_depth_summary["beam_stability_index"]),
-            "beam_column_global_strain_energy_n_m": float(assembled_global_depth_summary["beam_strain_energy_n_m"]),
+            "beam_column_global_stability_index": float(
+                assembled_global_depth_summary["beam_stability_index"]
+            ),
+            "beam_column_global_strain_energy_n_m": float(
+                assembled_global_depth_summary["beam_strain_energy_n_m"]
+            ),
             "beam_column_global_free_dof_residual_max": float(
                 assembled_global_depth_summary["beam_free_dof_residual_max"]
             ),
@@ -1346,8 +1655,12 @@ def main() -> None:
             "section_family_demand_surface_status": (
                 "pass" if checks["section_family_demand_surface_present"] else "missing"
             ),
-            "section_family_story_count": int(section_family_demand_summary["story_count"]),
-            "section_family_distribution": dict(sorted(section_family_demand_summary["family_counts"].items())),
+            "section_family_story_count": int(
+                section_family_demand_summary["story_count"]
+            ),
+            "section_family_distribution": dict(
+                sorted(section_family_demand_summary["family_counts"].items())
+            ),
             "section_family_beam_tangent_scale_mean": float(
                 section_family_demand_summary["beam_tangent_scale_mean"]
             ),
@@ -1369,7 +1682,9 @@ def main() -> None:
             "section_family_beam_strain_energy_total_n_m": float(
                 section_family_demand_summary["beam_strain_energy_total_n_m"]
             ),
-            "layered_panel_assembled_case_count": int(assembled_global_depth_summary["panel_case_count"]),
+            "layered_panel_assembled_case_count": int(
+                assembled_global_depth_summary["panel_case_count"]
+            ),
             "layered_panel_assembled_section_families": list(
                 assembled_global_depth_summary["panel_section_families"]
             ),
@@ -1386,12 +1701,22 @@ def main() -> None:
                 assembled_global_depth_summary["panel_diaphragm_coupling_case_count"]
             ),
             "beam_shell_contact_coupling_surface_status": (
-                "pass" if checks["beam_shell_contact_coupling_surface_present"] else "missing"
+                "pass"
+                if checks["beam_shell_contact_coupling_surface_present"]
+                else "missing"
             ),
-            "beam_shell_contact_coupling_signal_count": int(beam_shell_contact_coupling_summary["coupling_signal_count"]),
-            "contact_material_coupled_case_count": len(contact_material_coupled_case_rows),
-            "min_contact_material_coupled_cases": int(args.min_contact_material_coupled_cases),
-            "beam_shell_contact_support_depth_score": int(beam_shell_contact_coupling_summary["support_depth_score"]),
+            "beam_shell_contact_coupling_signal_count": int(
+                beam_shell_contact_coupling_summary["coupling_signal_count"]
+            ),
+            "contact_material_coupled_case_count": len(
+                contact_material_coupled_case_rows
+            ),
+            "min_contact_material_coupled_cases": int(
+                args.min_contact_material_coupled_cases
+            ),
+            "beam_shell_contact_support_depth_score": int(
+                beam_shell_contact_coupling_summary["support_depth_score"]
+            ),
             "beam_shell_contact_support_search_count": int(
                 beam_shell_contact_coupling_summary["support_search_model_count"]
             ),
@@ -1402,30 +1727,46 @@ def main() -> None:
                 beam_shell_contact_coupling_summary["support_search_family_count"]
             ),
             "beam_shell_contact_proxy_family_count": int(
-                beam_shell_contact_coupling_summary["node_to_surface_proxy_family_count"]
+                beam_shell_contact_coupling_summary[
+                    "node_to_surface_proxy_family_count"
+                ]
             ),
-            "panel_contact_failure_mode_reason_code_count": len(panel_contact_failure_reason_rows),
+            "panel_contact_failure_mode_reason_code_count": len(
+                panel_contact_failure_reason_rows
+            ),
             "panel_contact_failure_mode_reason_codes": [
-                str(row.get("reason_code", "") or "") for row in panel_contact_failure_reason_rows
+                str(row.get("reason_code", "") or "")
+                for row in panel_contact_failure_reason_rows
             ],
-            "nonlinear_residual_integrated_case_count": len(nonlinear_residual_integrated_case_rows),
+            "nonlinear_residual_integrated_case_count": len(
+                nonlinear_residual_integrated_case_rows
+            ),
             "substructuring_transfer_ratio": float(
-                (substructuring.get("metrics") or {}).get("mean_transfer_ratio_building_to_track", 0.0)
+                (substructuring.get("metrics") or {}).get(
+                    "mean_transfer_ratio_building_to_track", 0.0
+                )
             )
             if isinstance(substructuring.get("metrics"), dict)
             else 0.0,
-            "pushover_compression_surrogate_row_count": int(pushover_compression.get("qualifying_row_count", 0)),
-            "ndtha_compression_surrogate_row_count": int(ndtha_compression.get("qualifying_row_count", 0)),
+            "pushover_compression_surrogate_row_count": int(
+                pushover_compression.get("qualifying_row_count", 0)
+            ),
+            "ndtha_compression_surrogate_row_count": int(
+                ndtha_compression.get("qualifying_row_count", 0)
+            ),
             "material_model_types": material_models,
             "material_model_source_map": {
-                model: sorted(sources) for model, sources in sorted(material_sources.items())
+                model: sorted(sources)
+                for model, sources in sorted(material_sources.items())
             },
             "required_material_models": required_material_models,
             "missing_material_models": missing_material_models,
             "link_model_types": link_model_types,
             "required_link_models": required_link_models,
             "missing_link_models": missing_link_models,
-            "foundation_soil_link_status": "pass" if checks["foundation_soil_link_direct_contract_pass"] else "missing",
+            "foundation_soil_link_status": "pass"
+            if checks["foundation_soil_link_direct_contract_pass"]
+            else "missing",
             "foundation_support_model_types": foundation_support_model_types,
             "device_model_types": device_model_types,
             "support_link_group_counts": {
@@ -1434,14 +1775,41 @@ def main() -> None:
                 "device": len(device_model_types),
             },
             "support_link_family_count": len(
-                set(link_model_types) | set(foundation_support_model_types) | set(device_model_types)
+                set(link_model_types)
+                | set(foundation_support_model_types)
+                | set(device_model_types)
             ),
             "material_capability_types": material_capabilities,
             "material_capability_group_counts": {
-                "rc": sum(1 for capability in material_capabilities if capability.startswith("rc_") or capability in {"slab_wall_interaction", "wall_compression_damage"}),
-                "shell_interface": sum(1 for capability in material_capabilities if capability in {"shell_surface_transfer", "interface_transfer_finite"}),
-                "foundation_soil": sum(1 for capability in material_capabilities if capability in {"soil_boundary_nonlinear", "foundation_soil_link_nonlinear"}),
-                "device_contact": sum(1 for capability in material_capabilities if capability in {"dissipative_device_response", "contact_gap_uplift_unilateral", "contact_bearing_friction_impact"}),
+                "rc": sum(
+                    1
+                    for capability in material_capabilities
+                    if capability.startswith("rc_")
+                    or capability
+                    in {"slab_wall_interaction", "wall_compression_damage"}
+                ),
+                "shell_interface": sum(
+                    1
+                    for capability in material_capabilities
+                    if capability
+                    in {"shell_surface_transfer", "interface_transfer_finite"}
+                ),
+                "foundation_soil": sum(
+                    1
+                    for capability in material_capabilities
+                    if capability
+                    in {"soil_boundary_nonlinear", "foundation_soil_link_nonlinear"}
+                ),
+                "device_contact": sum(
+                    1
+                    for capability in material_capabilities
+                    if capability
+                    in {
+                        "dissipative_device_response",
+                        "contact_gap_uplift_unilateral",
+                        "contact_bearing_friction_impact",
+                    }
+                ),
             },
             "required_material_capabilities": required_material_capabilities,
             "missing_material_capabilities": missing_material_capabilities,
@@ -1570,8 +1938,12 @@ def main() -> None:
             "Section-family demand surface is a bounded story-wise reduced-order profile and highlights beam demand/stability aggregation without replacing a full assembled frame benchmark set.",
             "Beam/shell-contact coupling is a bounded rollup of assembled beam depth, panel assembly depth, and support-search depth from validated contact/foundation summaries; it does not replace the separate general FE contact benchmark matrix.",
         ]
-        if shell_beam_mix_case_count < int(args.min_shell_beam_mix_cases) or wall_frame_case_count < int(args.min_wall_frame_cases):
-            limitations.append("Benchmark case counts are used as breadth context only and do not replace direct solver evidence.")
+        if shell_beam_mix_case_count < int(
+            args.min_shell_beam_mix_cases
+        ) or wall_frame_case_count < int(args.min_wall_frame_cases):
+            limitations.append(
+                "Benchmark case counts are used as breadth context only and do not replace direct solver evidence."
+            )
 
         summary_line = (
             f"Element/material breadth: {'PASS' if contract_pass else 'CHECK'} | "
@@ -1637,7 +2009,9 @@ def main() -> None:
             "reason_code": reason_code,
             "reason": REASONS[reason_code],
         }
-        out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        out.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         print(summary_line)
         print(f"Wrote element/material breadth gate report: {out}")
         if not contract_pass:
@@ -1653,7 +2027,9 @@ def main() -> None:
             "reason_code": "ERR_INVALID_INPUT",
             "reason": f"{REASONS['ERR_INVALID_INPUT']}: {exc}",
         }
-        out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        out.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
         print(payload["reason"])
         raise SystemExit(1)
 

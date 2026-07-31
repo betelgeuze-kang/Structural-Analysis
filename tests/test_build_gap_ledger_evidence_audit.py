@@ -12,7 +12,9 @@ for candidate in (REPO_ROOT / "scripts", REPO_ROOT / "src"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-spec = importlib.util.spec_from_file_location("build_gap_ledger_evidence_audit", SCRIPT_PATH)
+spec = importlib.util.spec_from_file_location(
+    "build_gap_ledger_evidence_audit", SCRIPT_PATH
+)
 assert spec is not None
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
@@ -29,19 +31,19 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     assert payload["full_gap_ledger_ready"] is False
     assert payload["ledger_status"] == "open"
     assert payload["row_count"] == 20
-    assert payload["closed_row_count"] == 16
-    assert payload["nonclosed_row_count"] == 4
+    assert payload["closed_row_count"] == 17
+    assert payload["nonclosed_row_count"] == 3
     closed = payload["closed_evidence_coverage"]
-    assert closed["closed_rows_with_evidence_count"] == 16
-    assert closed["closed_rows_without_blockers_count"] == 16
+    assert closed["closed_rows_with_evidence_count"] == 17
+    assert closed["closed_rows_without_blockers_count"] == 17
     assert closed["closed_missing_evidence_ids"] == []
     assert closed["closed_with_blockers_ids"] == []
     assert closed["closed_missing_claim_boundary_ids"] == []
     assert closed["closed_missing_boundary_or_next_gate_ids"] == []
     nonclosed = payload["nonclosed_visibility"]
-    assert nonclosed["nonclosed_rows_with_blockers_count"] == 4
-    assert nonclosed["nonclosed_rows_with_claim_boundary_count"] == 4
-    assert nonclosed["nonclosed_rows_with_evidence_count"] == 4
+    assert nonclosed["nonclosed_rows_with_blockers_count"] == 3
+    assert nonclosed["nonclosed_rows_with_claim_boundary_count"] == 3
+    assert nonclosed["nonclosed_rows_with_evidence_count"] == 3
     assert nonclosed["nonclosed_missing_blocker_ids"] == []
     assert nonclosed["nonclosed_missing_claim_boundary_ids"] == []
     source_paths = payload["source_receipt_path_coverage"]
@@ -117,9 +119,14 @@ def test_gap_ledger_evidence_audit_check_detects_drift(tmp_path: Path) -> None:
     module.write_gap_ledger_evidence_audit(repo_root=REPO_ROOT, out_path=out)
     payload = json.loads(out.read_text(encoding="utf-8"))
     payload["contract_pass"] = False
-    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
-    ok, message = module.check_gap_ledger_evidence_audit(repo_root=REPO_ROOT, out_path=out)
+    ok, message = module.check_gap_ledger_evidence_audit(
+        repo_root=REPO_ROOT, out_path=out
+    )
 
     assert ok is False
     assert message == "gap_ledger_evidence_audit_mismatch"
@@ -164,9 +171,10 @@ def test_gap_ledger_evidence_audit_blocks_missing_source_receipt_path(
 
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
-    assert payload["source_receipt_path_coverage"][
-        "source_receipt_missing_path_count"
-    ] == 1
+    assert (
+        payload["source_receipt_path_coverage"]["source_receipt_missing_path_count"]
+        == 1
+    )
     assert payload["source_receipt_path_coverage"][
         "source_receipt_missing_row_ids"
     ] == ["G1"]
@@ -208,10 +216,10 @@ def test_gap_ledger_evidence_audit_blocks_rows_without_source_receipts(
 
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
-    assert payload["source_receipt_path_coverage"][
-        "source_receipt_absent_row_count"
-    ] == 1
-    assert payload["source_receipt_path_coverage"][
-        "source_receipt_absent_row_ids"
-    ] == ["G2"]
+    assert (
+        payload["source_receipt_path_coverage"]["source_receipt_absent_row_count"] == 1
+    )
+    assert payload["source_receipt_path_coverage"]["source_receipt_absent_row_ids"] == [
+        "G2"
+    ]
     assert payload["blockers"] == ["source_receipts_absent:G2"]

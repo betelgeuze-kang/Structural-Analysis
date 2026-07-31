@@ -4,6 +4,7 @@ name: Engine v2 Cross-platform Determinism CI
 # CPU/HIP parity, independent V&V, hardware evidence, or product readiness.
 
 on:
+  merge_group:
   pull_request:
     paths:
       - "src/structural_analysis/engine_v2/**"

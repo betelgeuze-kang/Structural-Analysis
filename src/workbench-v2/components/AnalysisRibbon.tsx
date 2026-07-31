@@ -19,7 +19,7 @@ interface AnalysisRibbonProps {
 
 export function AnalysisRibbon({ runStatus, analysis, convergenceAvailable }: AnalysisRibbonProps): ReactElement {
   const activeIndex = STAGES.findIndex((s) => s.key === runStatus)
-  const failed = runStatus === 'failed'
+  const failed = runStatus === 'failed' || runStatus === 'not_converged' || runStatus === 'blocked'
 
   return (
     <section className="wb2-panel wb2-ribbon" aria-labelledby="wb2-ribbon-title">

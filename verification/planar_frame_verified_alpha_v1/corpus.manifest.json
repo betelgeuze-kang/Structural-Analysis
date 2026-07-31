@@ -1,0 +1,16 @@
+{
+  "schema_version": "planar-frame-verification-corpus.v1",
+  "profile": "planar_frame_verified_alpha.v1",
+  "status": "fixture_manifests_only",
+  "release_eligible": false,
+  "cases": [
+    {"case_id":"M1","size":"medium","node_count":35,"member_count":54,"fixture_manifest_path":"verification/planar_frame_verified_alpha_v1/M1.manifest.json","fixture_manifest_sha256":"sha256:0d012408e1a83c694fedc8148864831434f9d9d2ce1eab450c94c5b4f70ac323"},
+    {"case_id":"M2","size":"medium","node_count":36,"member_count":56,"fixture_manifest_path":"verification/planar_frame_verified_alpha_v1/M2.manifest.json","fixture_manifest_sha256":"sha256:264a625ff148b887615ceab6ddaaefb90774c1458361a2e7815279820e85aac6"},
+    {"case_id":"M3","size":"medium","node_count":36,"member_count":55,"fixture_manifest_path":"verification/planar_frame_verified_alpha_v1/M3.manifest.json","fixture_manifest_sha256":"sha256:5916823dc160021d9dab03e2e0c27e85bad146af16c13e3a93326189462f31bc"},
+    {"case_id":"M4","size":"medium","node_count":48,"member_count":78,"fixture_manifest_path":"verification/planar_frame_verified_alpha_v1/M4.manifest.json","fixture_manifest_sha256":"sha256:9c4f60025cb5aa96ff4e5c34b6737446c01bc5254fe8462847e5f7d07f3586a1"},
+    {"case_id":"M5","size":"medium","node_count":55,"member_count":90,"fixture_manifest_path":"verification/planar_frame_verified_alpha_v1/M5.manifest.json","fixture_manifest_sha256":"sha256:d01648b76fe3330959e916a7e8a2c0332f61e5cb5bbebba6344df8581ae03a7a"},
+    {"case_id":"L1","size":"large","node_count":85,"member_count":144,"fixture_manifest_path":"verification/planar_frame_verified_alpha_v1/L1.manifest.json","fixture_manifest_sha256":"sha256:5ea218f275418b425604a3d353a94322cf04addf1fb5b3039dfc1c2874a945d7"},
+    {"case_id":"L2","size":"large","node_count":126,"member_count":220,"fixture_manifest_path":"verification/planar_frame_verified_alpha_v1/L2.manifest.json","fixture_manifest_sha256":"sha256:134d284070e203e9986bb95a523b3d320caa786bcfb7f573c9588bfc11901f27"}
+  ],
+  "claim_boundary": "These deterministic fixture manifests reserve exact corpus identities and sizes. They are not generated ModelIR files, executed verification results, external V&V, performance evidence, or release evidence."
+}

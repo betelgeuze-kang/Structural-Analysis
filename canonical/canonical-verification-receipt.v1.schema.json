@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/canonical-verification-receipt.v1.schema.json",
+  "title": "Canonical verification environment receipt",
+  "type": "object",
+  "required": ["schema_version", "source_commit_sha", "container", "runtime", "contract_pass", "violations"],
+  "properties": {
+    "schema_version": {"const": "canonical-verification-receipt.v1"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "container": {
+      "type": "object",
+      "required": ["image", "digest", "platform"],
+      "properties": {
+        "image": {"type": "string"},
+        "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "platform": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["python", "packages", "os", "libc", "blas", "lapack", "linear_algebra_shared_libraries", "thread_limits", "locale", "timezone", "python_hash_seed"],
+      "properties": {
+        "python": {"type": "object"},
+        "packages": {"type": "object", "required": ["numpy", "scipy"]},
+        "os": {"type": "object"},
+        "libc": {"type": "object"},
+        "blas": {"type": "object"},
+        "lapack": {"type": "object"},
+        "linear_algebra_shared_libraries": {"type": "array"},
+        "thread_limits": {"type": "object"},
+        "locale": {"type": "object"},
+        "timezone": {"type": ["string", "null"]},
+        "python_hash_seed": {"type": ["string", "null"]}
+      },
+      "additionalProperties": true
+    },
+    "contract_pass": {"type": "boolean"},
+    "violations": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}
