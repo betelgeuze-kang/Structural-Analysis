@@ -6,18 +6,6 @@ name: Workflow Contract CI
 on:
   merge_group:
   pull_request:
-    paths:
-      - ".github/workflows/**"
-      - "scripts/check_github_actions_runner_policy.py"
-      - "scripts/check_product_ci_boundaries.py"
-      - "scripts/run_product_ci_lane.py"
-      - "scripts/build_github_actions_ci_streak_evidence.py"
-      - "scripts/verify_quality_gate.py"
-      - "tests/test_check_github_actions_runner_policy.py"
-      - "tests/test_check_product_ci_boundaries.py"
-      - "tests/test_product_ci_workflow_contract.py"
-      - "tests/test_build_github_actions_ci_streak_evidence.py"
-      - "tests/test_verify_quality_gate.py"
   push:
     branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]
     paths:
@@ -43,6 +31,7 @@ concurrency:
 
 jobs:
   validate:
+    name: workflow-contract
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

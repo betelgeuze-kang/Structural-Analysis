@@ -82,11 +82,30 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
 
 
 def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
-    workflow = (
-        ROOT / ".github" / "workflows" / "p0-canonical-contract.yml"
-    ).read_text(encoding="utf-8")
+    workflow = (ROOT / ".github" / "workflows" / "p0-canonical-contract.yml").read_text(
+        encoding="utf-8"
+    )
 
     assert "merge_group:" in workflow
     assert '--source-sha "${{ github.sha }}"' in workflow
     assert "--require-hashes" in workflow
     assert "--no-deps" in workflow
+
+
+def test_required_workflow_contexts_are_unique_and_unconditional_on_prs() -> None:
+    workflows = {
+        "canonical-contract": "p0-canonical-contract.yml",
+        "workflow-contract": "workflow-contract-ci.yml",
+        "git-lfs-integrity": "git-lfs-integrity.yml",
+        "pytest-collection": "python-test-collection.yml",
+        "pytest-full": "python-test-collection.yml",
+    }
+
+    for context, filename in workflows.items():
+        workflow = (ROOT / ".github" / "workflows" / filename).read_text(
+            encoding="utf-8"
+        )
+        pull_request = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
+        assert "paths:" not in pull_request
+        assert "merge_group:" in workflow
+        assert f"name: {context}" in workflow

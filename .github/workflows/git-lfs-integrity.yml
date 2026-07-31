@@ -15,6 +15,7 @@ env:
 
 jobs:
   verify:
+    name: git-lfs-integrity
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
