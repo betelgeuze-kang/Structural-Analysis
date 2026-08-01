@@ -284,7 +284,16 @@ def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
     assert "--force-reinstall" in workflow
     assert "--no-cache-dir" in workflow
     assert '--find-links "$CANONICAL_WHEELHOUSE"' in workflow
-    assert "SOURCE_DATE_EPOCH=$(git show -s --format=%ct" in workflow
+    assert 'git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD' in workflow
+    assert (
+        'git -c safe.directory="$GITHUB_WORKSPACE" show -s --format=%ct'
+        in workflow
+    )
+    assert 'test "$checkout_sha" = "$source_sha"' in workflow
+    assert "''|*[!0-9]*)" in workflow
+    assert 'echo "SOURCE_DATE_EPOCH=$source_date_epoch"' in workflow
+    assert "git config --global" not in workflow
+    assert 'echo "SOURCE_DATE_EPOCH=$(git show' not in workflow
     assert "scripts/build_canonical_project_wheel.py" in workflow
     assert '--source-date-epoch "$SOURCE_DATE_EPOCH"' in workflow
     assert '--wheelhouse "$CANONICAL_WHEELHOUSE"' in workflow

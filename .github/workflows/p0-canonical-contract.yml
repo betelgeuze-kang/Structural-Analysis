@@ -71,7 +71,18 @@ jobs:
 
       - name: Derive operational source epoch from exact commit
         shell: bash
-        run: echo "SOURCE_DATE_EPOCH=$(git show -s --format=%ct '${{ github.sha }}')" >> "$GITHUB_ENV"
+        run: |
+          source_sha="${{ github.sha }}"
+          checkout_sha="$(git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD)"
+          test "$checkout_sha" = "$source_sha"
+          source_date_epoch="$(git -c safe.directory="$GITHUB_WORKSPACE" show -s --format=%ct "$source_sha")"
+          case "$source_date_epoch" in
+            ''|*[!0-9]*)
+              echo "invalid SOURCE_DATE_EPOCH for $source_sha: $source_date_epoch" >&2
+              exit 1
+              ;;
+          esac
+          echo "SOURCE_DATE_EPOCH=$source_date_epoch" >> "$GITHUB_ENV"
 
       - name: Build twice and replay exact installed project wheel
         run: >-
