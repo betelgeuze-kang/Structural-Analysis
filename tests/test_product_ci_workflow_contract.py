@@ -16,6 +16,7 @@ def test_canonical_ci_owns_structural_core_lane() -> None:
 
     assert "name: CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
+    assert "timeout-minutes: 120" in workflow
     assert "scripts/check_product_ci_boundaries.py" in workflow
     assert "scripts/run_product_ci_lane.py --lane core" in workflow
     assert "scripts/verify_quality_gate.py --mode pr" in workflow
