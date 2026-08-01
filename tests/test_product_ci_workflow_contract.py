@@ -102,6 +102,8 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
     assert "tests/test_build_product_readiness_snapshot.py" in workflow
     assert "tests/test_validate_external_vv_operator_attestation.py" in workflow
     assert "tests/test_promote_external_vv_level2.py" in workflow
+    assert "run_clean_runner.py" in workflow
+    assert "--refresh-product-replay-summary" in workflow
     assert (
         "scripts/build_bounded_planar_external_linear_case_package.py" in workflow
     )

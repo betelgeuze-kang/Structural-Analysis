@@ -80,6 +80,10 @@ jobs:
           python scripts/run_external_modal_buckling_technical_receipt.py \
             --refresh-product-replay \
             --reuse-reason "CI product replay; external execution bytes reused without freshness credit."
+          python benchmarks/clean-runners/opensees-calculix/run_clean_runner.py \
+            --repo-root . \
+            --output-dir artifacts/vv/opensees_calculix_clean_runner \
+            --refresh-product-replay-summary
           python scripts/build_bounded_planar_external_linear_case_package.py
           python scripts/build_bounded_planar_external_negative_case_package.py
           python scripts/build_bounded_planar_external_scaling_case_package.py

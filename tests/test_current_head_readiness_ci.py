@@ -41,6 +41,8 @@ def test_ci_materializes_runtime_evidence_before_snapshot_and_quality_gate() -> 
     for command in (
         "run_external_code_to_code_technical_receipt.py",
         "run_external_modal_buckling_technical_receipt.py",
+        "run_clean_runner.py",
+        "--refresh-product-replay-summary",
         "build_bounded_planar_external_linear_case_package.py",
         "build_bounded_planar_external_negative_case_package.py",
         "build_bounded_planar_external_scaling_case_package.py",
