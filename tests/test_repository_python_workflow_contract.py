@@ -294,6 +294,9 @@ def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
     assert 'echo "SOURCE_DATE_EPOCH=$source_date_epoch"' in workflow
     assert "git config --global" not in workflow
     assert 'echo "SOURCE_DATE_EPOCH=$(git show' not in workflow
+    assert 'GIT_CONFIG_COUNT: "1"' in workflow
+    assert "GIT_CONFIG_KEY_0: safe.directory" in workflow
+    assert "GIT_CONFIG_VALUE_0: ${{ github.workspace }}" in workflow
     assert "scripts/build_canonical_project_wheel.py" in workflow
     assert '--source-date-epoch "$SOURCE_DATE_EPOCH"' in workflow
     assert '--wheelhouse "$CANONICAL_WHEELHOUSE"' in workflow

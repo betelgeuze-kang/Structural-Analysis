@@ -6,6 +6,7 @@ import io
 import json
 import hashlib
 from pathlib import Path
+import subprocess
 import zipfile
 
 from jsonschema import Draft202012Validator
@@ -16,6 +17,30 @@ from scripts import check_generated_artifact_dag as dag_module
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_git_commands_scope_safe_directory_to_resolved_repo_root(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        observed["command"] = list(command)
+        observed["cwd"] = kwargs["cwd"]
+        return subprocess.CompletedProcess(command, 0, "a" * 40 + "\n", "")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    assert module._git_source_sha(tmp_path) == "a" * 40
+    assert observed["command"] == [
+        "git",
+        "-c",
+        f"safe.directory={tmp_path.resolve()}",
+        "rev-parse",
+        "HEAD",
+    ]
+    assert observed["cwd"] == tmp_path
 
 
 def _linear_algebra_runtime(

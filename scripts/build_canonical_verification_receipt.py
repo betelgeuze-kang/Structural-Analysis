@@ -145,9 +145,18 @@ def load_lock(path: Path) -> dict[str, dict[str, str]]:
     return rows
 
 
+def _git_command(repo_root: Path, *arguments: str) -> list[str]:
+    return [
+        "git",
+        "-c",
+        f"safe.directory={repo_root.resolve()}",
+        *arguments,
+    ]
+
+
 def _git_source_sha(repo_root: Path) -> str:
     result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
+        _git_command(repo_root, "rev-parse", "HEAD"),
         cwd=repo_root,
         check=True,
         capture_output=True,
@@ -238,7 +247,7 @@ def _installed_replay_projection(
 
 def _source_commit_timestamp(repo_root: Path, source_sha: str) -> int:
     result = subprocess.run(
-        ["git", "show", "-s", "--format=%ct", source_sha],
+        _git_command(repo_root, "show", "-s", "--format=%ct", source_sha),
         cwd=repo_root,
         check=False,
         capture_output=True,
