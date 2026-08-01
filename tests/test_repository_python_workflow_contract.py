@@ -35,6 +35,18 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
         1,
     )[0]
     assert "fetch-depth: 0" in full_checkout
+    materialize = workflow.index(
+        "- name: Materialize exact current-source test evidence"
+    )
+    full_suite = workflow.index("- name: Run complete repository test suite")
+    for command in (
+        "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
+        "python scripts/build_fracture_energy_concrete_benchmark.py",
+        "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",
+        "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py",
+    ):
+        assert command in workflow
+        assert materialize < workflow.index(command) < full_suite
 
 
 def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
