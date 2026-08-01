@@ -34,13 +34,16 @@ def test_engine_v2_cross_platform_golden_hashes_and_written_bytes(
         repo_root=REPO_ROOT,
     )
 
-    require_reference_numerical = (
-        platform.system() == "Linux" and sys.version_info[:2] == (3, 12)
+    require_reference_numerical = platform.system() == "Linux" and sys.version_info[
+        :2
+    ] == (3, 12)
+    assert (
+        module.golden_hash_mismatches(
+            goldens,
+            require_reference_numerical=require_reference_numerical,
+        )
+        == ()
     )
-    assert module.golden_hash_mismatches(
-        goldens,
-        require_reference_numerical=require_reference_numerical,
-    ) == ()
     assert binary_artifacts == module.EXPECTED_BINARY_ARTIFACTS
     assert goldens["bounded_planar_result_hash"].startswith("sha256:")
     assert goldens["bounded_planar_semantic_hash"].startswith("sha256:")
@@ -53,18 +56,16 @@ def test_engine_v2_cross_platform_golden_hashes_and_written_bytes(
     assert goldens["bounded_planar_execution_plan_binding_hash"].startswith("sha256:")
     assert goldens["bounded_planar_settlement_result_hash"].startswith("sha256:")
     assert goldens["bounded_planar_settlement_semantic_hash"].startswith("sha256:")
-    assert goldens["bounded_planar_settlement_replay_result_hash"].startswith(
+    assert goldens["bounded_planar_settlement_replay_result_hash"].startswith("sha256:")
+    assert goldens["bounded_planar_settlement_checkpoint_artifact_hash"].startswith(
         "sha256:"
     )
-    assert goldens[
-        "bounded_planar_settlement_checkpoint_artifact_hash"
-    ].startswith("sha256:")
-    assert goldens[
-        "bounded_planar_settlement_engineering_result_hash"
-    ].startswith("sha256:")
-    assert goldens[
-        "bounded_planar_settlement_execution_plan_binding_hash"
-    ].startswith("sha256:")
+    assert goldens["bounded_planar_settlement_engineering_result_hash"].startswith(
+        "sha256:"
+    )
+    assert goldens["bounded_planar_settlement_execution_plan_binding_hash"].startswith(
+        "sha256:"
+    )
     assert binary_artifacts["scaling/scale_divisors_si.f64le"] == {
         "byte_length": 96,
         "data_hash": (
@@ -105,35 +106,69 @@ def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     )
     assert "examples/public_corotational_member_features.json text eol=lf" in attributes
     assert (
-        "examples/bounded_planar_settlement.model-ir.v2.json text eol=lf"
-        in attributes
+        "examples/bounded_planar_settlement.model-ir.v2.json text eol=lf" in attributes
     )
-    assert (
-        'ENGINE_V2_SOURCE_SHA: "${{ github.event.pull_request.head.sha || github.sha }}"'
-        in workflow
-    )
+    assert 'ENGINE_V2_SOURCE_SHA: "${{ github.sha }}"' in workflow
+    assert "github.event.pull_request.head.sha || github.sha" not in workflow
     assert workflow.count("ref: ${{ env.ENGINE_V2_SOURCE_SHA }}") == 2
-    assert workflow.count('--source-commit "${{ env.ENGINE_V2_SOURCE_SHA }}"') == 2
+    assert workflow.count('--source-commit "${{ env.ENGINE_V2_SOURCE_SHA }}"') == 3
     assert "build_engine_v2_cross_platform_determinism_receipt.py" in workflow
+    assert "build_bounded_planar_wheel_smoke_manifest.py" in workflow
     assert "verify_bounded_planar_wheel_smoke.py --json" in workflow
-    assert workflow.count('scripts/verify_bounded_planar_wheel_smoke.py') == 3
+    assert workflow.count("scripts/verify_bounded_planar_wheel_smoke.py") == 3
+    assert '--write ".ci/engine-v2-wheel-smoke/receipt.json"' in workflow
+    assert '--wheel-out-dir ".ci/engine-v2-wheel-smoke/wheel"' in workflow
+    assert '--os-label "${{ matrix.os }}"' in workflow
+    assert '--python-version "${{ matrix.python-version }}"' in workflow
+    assert (
+        "name: bounded-planar-wheel-smoke-${{ matrix.os }}-python-"
+        "${{ matrix.python-version }}" in workflow
+    )
+    assert "pattern: bounded-planar-wheel-smoke-*" in workflow
+    assert "path: .ci/engine-v2-wheel-smoke/coordinates" in workflow
+    assert "merge-multiple: false" in workflow
+    wheel_upload = workflow.split(
+        "      - name: Upload exact-source wheel smoke receipt and wheel",
+        1,
+    )[1].split("      - name: Replay reference-exact", 1)[0]
+    assert "if-no-files-found: error" in wheel_upload
+    assert "include-hidden-files: true" in wheel_upload
+    wheel_download = workflow.split(
+        "      - name: Download exact-source wheel smoke receipts and wheels",
+        1,
+    )[1].split("      - name: Aggregate four-way", 1)[0]
+    assert "continue-on-error" not in wheel_download
+    assert "merge-multiple: false" in wheel_download
+    matrix_upload = workflow.split(
+        "      - name: Upload four-way determinism receipt",
+        1,
+    )[1].split("      - name: Upload four-way wheel smoke manifest", 1)[0]
+    assert "ENGINE_V2_MATRIX_RECEIPT" in matrix_upload
+    assert "engine-v2-wheel-smoke" not in matrix_upload
+    assert "include-hidden-files: true" in matrix_upload
+    assert "bounded-planar-wheel-smoke-four-way-" in workflow
+    assert "ENGINE_V2_WHEEL_MANIFEST" in workflow
     assert "tests/test_engine_v2_cross_platform_goldens.py" in workflow
     assert "tests/test_build_engine_v2_cross_platform_determinism_receipt.py" in (
         workflow
     )
     assert "src/structural_analysis/api/**" in workflow
-    assert workflow.count('src/structural_analysis/adapters/**') == 2
+    assert workflow.count("src/structural_analysis/adapters/**") == 2
     assert "examples/public_corotational_member_features.json" in workflow
     assert "examples/bounded_planar_frame_alpha.model-ir.v2.json" in workflow
-    assert workflow.count(
-        'examples/bounded_planar_settlement.model-ir.v2.json'
-    ) == 2
-    assert workflow.count('tests/test_bounded_planar_wheel_smoke.py') == 2
+    assert workflow.count("examples/bounded_planar_settlement.model-ir.v2.json") == 2
+    assert workflow.count("tests/test_bounded_planar_wheel_smoke.py") == 2
+    assert (
+        workflow.count("tests/test_build_bounded_planar_wheel_smoke_manifest.py") == 2
+    )
+    assert workflow.count("ci/bounded-planar-wheel-smoke.constraints.txt") == 2
     assert workflow.count('- "pyproject.toml"') == 2
     assert "actions/upload-artifact@v7" in workflow
     assert "actions/download-artifact@v7" in workflow
     assert "Reference-coordinate exact hashes" in workflow
     assert "separately pinned P0 canonical workflow" in workflow
+    assert "two byte-identical builds in one workflow execution" in workflow
+    assert "Future-run and cross-platform wheel byte equality" in workflow
     assert workflow.count("retention-days: 90") >= 3
     assert "id-token: write" in workflow
     assert "attestations: write" in workflow
@@ -149,12 +184,14 @@ def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     assert "uses: actions/attest@v4" in workflow
     assert "github.event_name != 'pull_request'" in workflow
     assert "steps.attest.outputs.bundle-path" in workflow
+    assert "steps.attest-wheel-manifest.outputs.bundle-path" in workflow
     assert "gh attestation verify" in workflow
     assert "--signer-workflow" in workflow
     assert '--source-digest "$ENGINE_V2_SOURCE_SHA"' in workflow
     assert "--source-ref refs/heads/main" in workflow
     assert "--deny-self-hosted-runners" in workflow
     assert "engine-v2-determinism-four-way-attested-" in workflow
+    assert "bounded-planar-wheel-smoke-four-way-attested-" in workflow
     assert "merge-multiple: true" in workflow
     assert "--matrix-job-result" in workflow
     assert "needs.cross-platform-goldens.result" in workflow

@@ -2,6 +2,8 @@ name: Engine v2 Cross-platform Determinism CI
 
 # Reference-coordinate exact hashes plus four-way bounded-planar semantic replay.
 # The separately pinned P0 canonical workflow owns canonical-environment truth.
+# Each coordinate requires two byte-identical builds in one workflow execution.
+# Future-run and cross-platform wheel byte equality are deliberately not claimed.
 # Passing this lane is not CPU/HIP parity, independent V&V, hardware evidence,
 # or product readiness.
 
@@ -27,10 +29,13 @@ on:
       - "tests/test_unified_nonlinear_frame_api.py"
       - "tests/test_bounded_planar_model_ir_adapter.py"
       - "tests/test_bounded_planar_wheel_smoke.py"
+      - "tests/test_build_bounded_planar_wheel_smoke_manifest.py"
       - "tests/test_engine_v2_cross_platform_goldens.py"
       - "tests/test_build_engine_v2_cross_platform_determinism_receipt.py"
       - "scripts/build_engine_v2_cross_platform_determinism_receipt.py"
+      - "scripts/build_bounded_planar_wheel_smoke_manifest.py"
       - "scripts/verify_bounded_planar_wheel_smoke.py"
+      - "ci/bounded-planar-wheel-smoke.constraints.txt"
       - "pyproject.toml"
       - ".github/workflows/engine-v2-determinism-ci.yml"
   push:
@@ -54,10 +59,13 @@ on:
       - "tests/test_unified_nonlinear_frame_api.py"
       - "tests/test_bounded_planar_model_ir_adapter.py"
       - "tests/test_bounded_planar_wheel_smoke.py"
+      - "tests/test_build_bounded_planar_wheel_smoke_manifest.py"
       - "tests/test_engine_v2_cross_platform_goldens.py"
       - "tests/test_build_engine_v2_cross_platform_determinism_receipt.py"
       - "scripts/build_engine_v2_cross_platform_determinism_receipt.py"
+      - "scripts/build_bounded_planar_wheel_smoke_manifest.py"
       - "scripts/verify_bounded_planar_wheel_smoke.py"
+      - "ci/bounded-planar-wheel-smoke.constraints.txt"
       - "pyproject.toml"
       - ".github/workflows/engine-v2-determinism-ci.yml"
   workflow_dispatch:
@@ -75,10 +83,13 @@ env:
   OMP_NUM_THREADS: "1"
   MKL_NUM_THREADS: "1"
   PYTHONHASHSEED: "0"
-  ENGINE_V2_SOURCE_SHA: "${{ github.event.pull_request.head.sha || github.sha }}"
+  ENGINE_V2_SOURCE_SHA: "${{ github.sha }}"
   ENGINE_V2_MATRIX_RECEIPT: ".ci/engine-v2-determinism/engine-v2-four-way-matrix-receipt.json"
+  ENGINE_V2_WHEEL_MANIFEST: ".ci/engine-v2-wheel-smoke-manifest/bounded-planar-wheel-smoke-four-way.json"
   ENGINE_V2_ATTESTATION_BUNDLE: ".ci/engine-v2-determinism/engine-v2-four-way-matrix-receipt.sigstore.json"
   ENGINE_V2_ATTESTATION_VERIFICATION: ".ci/engine-v2-determinism/engine-v2-four-way-matrix-receipt.attestation-verification.json"
+  ENGINE_V2_WHEEL_ATTESTATION_BUNDLE: ".ci/engine-v2-wheel-smoke-manifest/bounded-planar-wheel-smoke-four-way.sigstore.json"
+  ENGINE_V2_WHEEL_ATTESTATION_VERIFICATION: ".ci/engine-v2-wheel-smoke-manifest/bounded-planar-wheel-smoke-four-way.attestation-verification.json"
   GH_TOKEN: "${{ github.token }}"
   # Keep checkout faithful to committed bytes: historical evidence contains both
   # direct NPZ blobs and LFS pointers, plus paths longer than Win32's default.
@@ -128,7 +139,22 @@ jobs:
           python -m pip install -e .[dev]
 
       - name: Verify installed-wheel bounded planar sample
-        run: python scripts/verify_bounded_planar_wheel_smoke.py --json
+        run: >-
+          python scripts/verify_bounded_planar_wheel_smoke.py --json
+          --os-label "${{ matrix.os }}"
+          --python-version "${{ matrix.python-version }}"
+          --wheel-out-dir ".ci/engine-v2-wheel-smoke/wheel"
+          --write ".ci/engine-v2-wheel-smoke/receipt.json"
+
+      - name: Upload exact-source wheel smoke receipt and wheel
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: bounded-planar-wheel-smoke-${{ matrix.os }}-python-${{ matrix.python-version }}
+          path: .ci/engine-v2-wheel-smoke/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
 
       - name: Replay reference-exact and semantic Engine v2 goldens
         run: >-
@@ -159,7 +185,8 @@ jobs:
         with:
           name: engine-v2-determinism-coordinate-${{ matrix.os }}-python-${{ matrix.python-version }}
           path: .ci/engine-v2-determinism/*.json
-          if-no-files-found: warn
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 90
 
   matrix-receipt:
@@ -193,6 +220,13 @@ jobs:
           path: .ci/engine-v2-determinism/coordinates
           merge-multiple: true
 
+      - name: Download exact-source wheel smoke receipts and wheels
+        uses: actions/download-artifact@v7
+        with:
+          pattern: bounded-planar-wheel-smoke-*
+          path: .ci/engine-v2-wheel-smoke/coordinates
+          merge-multiple: false
+
       - name: Aggregate four-way exact and semantic receipt
         run: >-
           python scripts/build_engine_v2_cross_platform_determinism_receipt.py aggregate
@@ -206,13 +240,31 @@ jobs:
           --json
           --fail-blocked
 
+      - name: Validate and bind four-way wheel smoke artifacts
+        run: >-
+          python scripts/build_bounded_planar_wheel_smoke_manifest.py
+          --artifacts-dir .ci/engine-v2-wheel-smoke/coordinates
+          --source-commit "${{ env.ENGINE_V2_SOURCE_SHA }}"
+          --out "$ENGINE_V2_WHEEL_MANIFEST"
+          --json
+
       - name: Upload four-way determinism receipt
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: engine-v2-determinism-four-way-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.ENGINE_V2_MATRIX_RECEIPT }}
-          if-no-files-found: warn
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
+
+      - name: Upload four-way wheel smoke manifest
+        uses: actions/upload-artifact@v7
+        with:
+          name: bounded-planar-wheel-smoke-four-way-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.ENGINE_V2_WHEEL_MANIFEST }}
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 90
 
   attest-current-main:
@@ -233,11 +285,23 @@ jobs:
           name: engine-v2-determinism-four-way-${{ github.run_id }}-${{ github.run_attempt }}
           path: .ci/engine-v2-determinism
 
+      - name: Download exact four-way wheel smoke manifest
+        uses: actions/download-artifact@v7
+        with:
+          name: bounded-planar-wheel-smoke-four-way-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci/engine-v2-wheel-smoke-manifest
+
       - name: Attest current-main four-way receipt
         id: attest
         uses: actions/attest@v4
         with:
           subject-path: ${{ env.ENGINE_V2_MATRIX_RECEIPT }}
+
+      - name: Attest current-main four-way wheel smoke manifest
+        id: attest-wheel-manifest
+        uses: actions/attest@v4
+        with:
+          subject-path: ${{ env.ENGINE_V2_WHEEL_MANIFEST }}
 
       - name: Retain and verify exact current-main provenance bundle
         run: |
@@ -251,6 +315,18 @@ jobs:
             --deny-self-hosted-runners \
             --format json > "$ENGINE_V2_ATTESTATION_VERIFICATION"
 
+      - name: Retain and verify exact current-main wheel manifest provenance
+        run: |
+          cp "${{ steps.attest-wheel-manifest.outputs.bundle-path }}" "$ENGINE_V2_WHEEL_ATTESTATION_BUNDLE"
+          gh attestation verify "$ENGINE_V2_WHEEL_MANIFEST" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$ENGINE_V2_WHEEL_ATTESTATION_BUNDLE" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/engine-v2-determinism-ci.yml" \
+            --source-digest "$ENGINE_V2_SOURCE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$ENGINE_V2_WHEEL_ATTESTATION_VERIFICATION"
+
       - name: Upload attested receipt and verification bundle
         uses: actions/upload-artifact@v7
         with:
@@ -260,4 +336,17 @@ jobs:
             ${{ env.ENGINE_V2_ATTESTATION_BUNDLE }}
             ${{ env.ENGINE_V2_ATTESTATION_VERIFICATION }}
           if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
+
+      - name: Upload attested wheel manifest and verification bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: bounded-planar-wheel-smoke-four-way-attested-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.ENGINE_V2_WHEEL_MANIFEST }}
+            ${{ env.ENGINE_V2_WHEEL_ATTESTATION_BUNDLE }}
+            ${{ env.ENGINE_V2_WHEEL_ATTESTATION_VERIFICATION }}
+          if-no-files-found: error
+          include-hidden-files: true
           retention-days: 90

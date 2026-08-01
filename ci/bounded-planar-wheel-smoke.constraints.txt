@@ -1,0 +1,6 @@
+# Cross-platform direct runtime constraints for the noncanonical wheel smoke.
+# The canonical Linux/amd64 lane owns platform-specific wheel hashes.
+numpy==1.26.4
+scipy==1.12.0
+matplotlib==3.10.3
+jsonschema==4.24.0

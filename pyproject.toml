@@ -1,5 +1,10 @@
 [build-system]
-requires = ["setuptools>=68", "wheel", "tomli; python_version < '3.11'"]
+requires = [
+  "setuptools==80.9.0",
+  "wheel==0.45.1",
+  "packaging==26.2",
+  "tomli==2.4.1; python_version < '3.11'",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
