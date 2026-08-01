@@ -164,6 +164,12 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
 
     assert "name: Engine v2 Contract CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
+    assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
+    assert 'OMP_NUM_THREADS: "1"' in workflow
+    assert 'MKL_NUM_THREADS: "1"' in workflow
+    assert 'PYTHONHASHSEED: "0"' in workflow
     assert "python -m pytest -q" in workflow
     assert "tests/test_engine_v2*.py" in workflow
     assert "tests/test_model_ir_v2_contract.py" in workflow
