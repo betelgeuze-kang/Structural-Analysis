@@ -200,12 +200,14 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 str(installed_python),
                 "-c",
                 (
-                    "import importlib.resources, json, pathlib, structural_analysis; "
+                    "import importlib.resources, json, pathlib, structural_analysis, "
+                    "sys; "
                     "schema = importlib.resources.files('structural_analysis').joinpath("
                     "'schemas/model_ir_v2.schema.json'); "
                     "print(json.dumps({'module': str(pathlib.Path("
                     "structural_analysis.__file__).resolve()), "
-                    "'schema': str(pathlib.Path(str(schema)).resolve())}))"
+                    "'schema': str(pathlib.Path(str(schema)).resolve()), "
+                    "'environment': str(pathlib.Path(sys.prefix).resolve())}))"
                 ),
             ],
             cwd=work,
@@ -215,14 +217,17 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
             probe_payload = json.loads(probe.stdout)
             module_path = Path(probe_payload["module"]).resolve()
             schema_path = Path(probe_payload["schema"]).resolve()
+            actual_environment = Path(probe_payload["environment"]).resolve()
         except (json.JSONDecodeError, KeyError, TypeError) as error:
             raise BoundedPlanarWheelSmokeError(
                 "installed_package_probe_invalid"
             ) from error
         try:
-            module_path.relative_to(installed_environment.resolve())
-            schema_path.relative_to(installed_environment.resolve())
-        except ValueError as error:
+            if not actual_environment.samefile(installed_environment):
+                raise ValueError("installed environment identity changed")
+            module_relative_path = module_path.relative_to(actual_environment)
+            schema_relative_path = schema_path.relative_to(actual_environment)
+        except (OSError, ValueError) as error:
             raise BoundedPlanarWheelSmokeError(
                 "installed_package_resolved_outside_wheel_target"
             ) from error
@@ -273,12 +278,8 @@ def run_wheel_smoke(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "contract_pass": True,
             "wheel_filename": wheel.name,
             "wheel_sha256": _sha256(wheel),
-            "installed_module": module_path.relative_to(
-                installed_environment
-            ).as_posix(),
-            "installed_schema": schema_path.relative_to(
-                installed_environment
-            ).as_posix(),
+            "installed_module": module_relative_path.as_posix(),
+            "installed_schema": schema_relative_path.as_posix(),
             "cases": verified_cases,
             "claim_boundary": (
                 "This smoke proves that the current wheel contains the bounded planar "

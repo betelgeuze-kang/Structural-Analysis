@@ -37,6 +37,8 @@ import build_bounded_planar_external_scaling_case_package as scaling_package  # 
 import ingest_bounded_planar_external_scaling_results as scaling_ingest  # noqa: E402
 import build_bounded_planar_external_nonlinear_material_recovery_case_package as nonlinear_material_recovery_package  # noqa: E402
 import ingest_bounded_planar_external_nonlinear_material_recovery_results as nonlinear_material_recovery_ingest  # noqa: E402
+import run_external_code_to_code_technical_receipt as code_receipt  # noqa: E402
+import run_external_modal_buckling_technical_receipt as modal_receipt  # noqa: E402
 
 
 SCHEMA_VERSION = "structural-analysis-external-vv-operator-attestation.v1"
@@ -253,6 +255,65 @@ def _fresh_child(payload: Mapping[str, Any], *, source_commit_sha: str) -> None:
         or replay.get("current_product_replay_pass") is not True
     ):
         _fail("operator_attestation_fresh_external_runtime_required")
+
+
+def _current_repo_head(repo_root: Path) -> str:
+    try:
+        completed = subprocess.run(
+            ["git", "rev-parse", "--verify", "HEAD"],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        raise ExternalVVOperatorAttestationError(
+            "operator_attestation_source_commit_unavailable"
+        ) from exc
+    return completed.stdout.strip()
+
+
+def _require_sources_at_head(
+    repo_root: Path,
+    children: tuple[Mapping[str, Any], ...],
+) -> None:
+    source_paths = sorted(
+        {
+            str(path)
+            for child in children
+            for path in child["internal_source"]["input_checksums"]
+        }
+    )
+    if not source_paths:
+        _fail("operator_attestation_source_inventory_empty")
+    try:
+        tracked = subprocess.run(
+            ["git", "ls-files", "-z", "--", *source_paths],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        difference = subprocess.run(
+            ["git", "diff", "--quiet", "HEAD", "--", *source_paths],
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+        raise ExternalVVOperatorAttestationError(
+            "operator_attestation_source_commit_unavailable"
+        ) from exc
+    tracked_paths = {path for path in tracked.stdout.split("\0") if path}
+    if tracked_paths != set(source_paths):
+        _fail("operator_attestation_source_path_not_tracked")
+    if difference.returncode == 1:
+        _fail("operator_attestation_source_bytes_not_at_commit")
+    if difference.returncode != 0:
+        _fail("operator_attestation_source_commit_unavailable")
 
 
 def _timestamp(value: object, code: str) -> datetime:
@@ -1108,6 +1169,62 @@ def _validate_bundle(
         code="operator_attestation_modal_buckling",
     )
     source_commit = str(attestation["source_commit_sha"])
+    if source_commit != _current_repo_head(repo_root):
+        _fail("operator_attestation_source_commit_mismatch")
+    _require_sources_at_head(repo_root, (code, modal))
+
+    vector_rows = bundle["mode_vectors"]
+    assert isinstance(vector_rows, list)
+    submitted: dict[str, str] = {}
+    submitted_paths: dict[str, Path] = {}
+    for descriptor in vector_rows:
+        assert isinstance(descriptor, Mapping)
+        path, _ = _check_descriptor(descriptor, bundle_root, json_artifact=False)
+        if path.name in submitted:
+            _fail("operator_attestation_mode_vector_duplicate")
+        submitted[path.name] = str(descriptor["file_sha256"])
+        submitted_paths[path.name] = path
+    modal_vector_descriptors = modal.get("mode_vector_artifacts", [])
+    expected = {
+        Path(str(row["artifact_path"])).name: str(row["data_hash"])
+        for row in modal_vector_descriptors
+        if isinstance(row, Mapping)
+    }
+    if len(expected) != 4 or submitted != expected:
+        _fail("operator_attestation_mode_vector_binding_invalid")
+    mode_vector_paths = {
+        str(row["name"]): submitted_paths[Path(str(row["artifact_path"])).name]
+        for row in modal_vector_descriptors
+        if isinstance(row, Mapping)
+    }
+
+    try:
+        code_receipt.validate_external_code_to_code_technical_receipt(
+            dict(code),
+            repo_root=repo_root,
+            require_current_sources=True,
+        )
+    except code_receipt.ExternalCodeToCodeReceiptError as exc:
+        error_code = (
+            "operator_attestation_code_to_code_receipt_sources_stale"
+            if exc.code == "receipt_sources_stale"
+            else "operator_attestation_code_to_code_receipt_invalid"
+        )
+        raise ExternalVVOperatorAttestationError(error_code) from exc
+    try:
+        modal_receipt.validate_external_modal_buckling_technical_receipt(
+            dict(modal),
+            repo_root=repo_root,
+            require_current_sources=True,
+            mode_vector_paths=mode_vector_paths,
+        )
+    except modal_receipt.ExternalModalBucklingReceiptError as exc:
+        error_code = (
+            "operator_attestation_modal_buckling_receipt_sources_stale"
+            if exc.code == "receipt_sources_stale"
+            else "operator_attestation_modal_buckling_receipt_invalid"
+        )
+        raise ExternalVVOperatorAttestationError(error_code) from exc
     _fresh_child(code, source_commit_sha=source_commit)
     _fresh_child(modal, source_commit_sha=source_commit)
     claims = summary.get("claims")
@@ -1143,22 +1260,6 @@ def _validate_bundle(
         ):
             _fail("operator_attestation_summary_child_binding_invalid")
 
-    vector_rows = bundle["mode_vectors"]
-    assert isinstance(vector_rows, list)
-    submitted: dict[str, str] = {}
-    for descriptor in vector_rows:
-        assert isinstance(descriptor, Mapping)
-        path, _ = _check_descriptor(descriptor, bundle_root, json_artifact=False)
-        if path.name in submitted:
-            _fail("operator_attestation_mode_vector_duplicate")
-        submitted[path.name] = str(descriptor["file_sha256"])
-    expected = {
-        Path(str(row["artifact_path"])).name: str(row["data_hash"])
-        for row in modal.get("mode_vector_artifacts", [])
-        if isinstance(row, Mapping)
-    }
-    if len(expected) != 4 or submitted != expected:
-        _fail("operator_attestation_mode_vector_binding_invalid")
     additional_bindings: list[dict[str, Any]] = []
     additional_rows = bundle.get("additional_receipts", [])
     if not isinstance(additional_rows, list):

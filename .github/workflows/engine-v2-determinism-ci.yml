@@ -1,7 +1,9 @@
 name: Engine v2 Cross-platform Determinism CI
 
-# Exact canonical-hash and bounded planar replay only. Passing this lane is not
-# CPU/HIP parity, independent V&V, hardware evidence, or product readiness.
+# Reference-coordinate exact hashes plus four-way bounded-planar semantic replay.
+# The separately pinned P0 canonical workflow owns canonical-environment truth.
+# Passing this lane is not CPU/HIP parity, independent V&V, hardware evidence,
+# or product readiness.
 
 on:
   merge_group:
@@ -118,7 +120,7 @@ jobs:
       - name: Verify installed-wheel bounded planar sample
         run: python scripts/verify_bounded_planar_wheel_smoke.py --json
 
-      - name: Replay exact Engine v2 golden hashes
+      - name: Replay reference-exact and semantic Engine v2 goldens
         run: >-
           python -m pytest -q
           tests/test_engine_v2_cross_platform_goldens.py
@@ -148,7 +150,7 @@ jobs:
           name: engine-v2-determinism-coordinate-${{ matrix.os }}-python-${{ matrix.python-version }}
           path: .ci/engine-v2-determinism/*.json
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 90
 
   matrix-receipt:
     name: Aggregate four-way determinism receipt
@@ -179,7 +181,7 @@ jobs:
           path: .ci/engine-v2-determinism/coordinates
           merge-multiple: true
 
-      - name: Aggregate exact four-way receipt
+      - name: Aggregate four-way exact and semantic receipt
         run: >-
           python scripts/build_engine_v2_cross_platform_determinism_receipt.py aggregate
           --receipts-dir .ci/engine-v2-determinism/coordinates

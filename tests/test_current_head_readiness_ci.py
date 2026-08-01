@@ -27,6 +27,7 @@ def test_ci_materializes_validates_and_uploads_current_head_snapshot() -> None:
 
 def test_ci_materializes_runtime_evidence_before_snapshot_and_quality_gate() -> None:
     workflow = _workflow()
+    workflow_environment = workflow.split("concurrency:", 1)[0]
     materialize = workflow.index(
         "- name: Materialize exact current-source test evidence"
     )
@@ -34,6 +35,9 @@ def test_ci_materializes_runtime_evidence_before_snapshot_and_quality_gate() -> 
     quality_gate = workflow.index("- name: PR quality gate")
 
     assert materialize < snapshot < quality_gate
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow_environment
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow_environment
+    assert 'OMP_NUM_THREADS: "1"' in workflow_environment
     for command in (
         "run_external_code_to_code_technical_receipt.py",
         "run_external_modal_buckling_technical_receipt.py",

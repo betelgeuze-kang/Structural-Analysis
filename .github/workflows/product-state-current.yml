@@ -20,6 +20,14 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  OPENBLAS_CORETYPE: Haswell
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  LANG: "C.UTF-8"
+  LC_ALL: "C.UTF-8"
+  TZ: "UTC"
+  PYTHONHASHSEED: "0"
   PRODUCT_STATE_SHA: ${{ github.event.workflow_run.head_sha }}
   PRODUCT_STATE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
   PRODUCT_STATE_PATH: artifacts/manifests/product_state.current.v1.json
@@ -45,10 +53,16 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.12.11"
 
       - name: Install current-state contract tools
-        run: python -m pip install -e .[dev]
+        run: |
+          python -m pip install \
+            --only-binary=:all: \
+            --require-hashes \
+            --no-deps \
+            -r canonical/requirements-cp312-manylinux2014-x86_64.lock
+          python -m pip install --no-deps --no-build-isolation -e .
 
       - name: Materialize exact current-source product-state inputs
         shell: bash

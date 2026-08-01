@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import platform
 import sys
 
 
@@ -33,9 +34,16 @@ def test_engine_v2_cross_platform_golden_hashes_and_written_bytes(
         repo_root=REPO_ROOT,
     )
 
-    assert goldens == module.EXPECTED_GOLDENS
+    require_reference_numerical = (
+        platform.system() == "Linux" and sys.version_info[:2] == (3, 12)
+    )
+    assert module.golden_hash_mismatches(
+        goldens,
+        require_reference_numerical=require_reference_numerical,
+    ) == ()
     assert binary_artifacts == module.EXPECTED_BINARY_ARTIFACTS
     assert goldens["bounded_planar_result_hash"].startswith("sha256:")
+    assert goldens["bounded_planar_semantic_hash"].startswith("sha256:")
     assert goldens["bounded_planar_replay_result_hash"].startswith("sha256:")
     assert goldens["bounded_planar_checkpoint_artifact_hash"].startswith("sha256:")
     assert goldens["bounded_planar_engineering_result_hash"].startswith("sha256:")
@@ -44,6 +52,7 @@ def test_engine_v2_cross_platform_golden_hashes_and_written_bytes(
     assert goldens["bounded_planar_model_ir_adapter_hash"].startswith("sha256:")
     assert goldens["bounded_planar_execution_plan_binding_hash"].startswith("sha256:")
     assert goldens["bounded_planar_settlement_result_hash"].startswith("sha256:")
+    assert goldens["bounded_planar_settlement_semantic_hash"].startswith("sha256:")
     assert goldens["bounded_planar_settlement_replay_result_hash"].startswith(
         "sha256:"
     )
@@ -117,6 +126,9 @@ def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     assert workflow.count('- "pyproject.toml"') == 2
     assert "actions/upload-artifact@v7" in workflow
     assert "actions/download-artifact@v7" in workflow
+    assert "Reference-coordinate exact hashes" in workflow
+    assert "separately pinned P0 canonical workflow" in workflow
+    assert workflow.count("retention-days: 90") >= 3
     assert "id-token: write" in workflow
     assert "attestations: write" in workflow
     assert "artifact-metadata: write" in workflow

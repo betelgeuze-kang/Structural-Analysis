@@ -139,26 +139,38 @@ def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None
     ) is (not parity["numerical_contract_pass"])
 
 
-def test_embedded_product_receipts_and_mode_vectors_validate_against_current_sources() -> (
-    None
-):
+def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources() -> None:
     summary = _json(SUMMARY)
     code = _json(CODE_RECEIPT)
     modal = _json(MODAL_RECEIPT)
 
-    code_module.validate_external_code_to_code_technical_receipt(
-        code,
-        repo_root=ROOT,
-        require_current_sources=True,
-    )
-    modal_module.validate_external_modal_buckling_technical_receipt(
-        modal,
-        repo_root=ROOT,
-        require_current_sources=False,
-    )
-    assert modal["internal_source"][
-        "input_checksums"
-    ] == modal_module._source_checksums(ROOT)
+    for receipt, validator, current_checksums, error_type in (
+        (
+            code,
+            code_module.validate_external_code_to_code_technical_receipt,
+            code_module._source_checksums(ROOT),
+            code_module.ExternalCodeToCodeReceiptError,
+        ),
+        (
+            modal,
+            modal_module.validate_external_modal_buckling_technical_receipt,
+            modal_module._source_checksums(ROOT),
+            modal_module.ExternalModalBucklingReceiptError,
+        ),
+    ):
+        validator(receipt, repo_root=ROOT, require_current_sources=False)
+        source_is_current = (
+            receipt["internal_source"]["input_checksums"] == current_checksums
+        )
+        if source_is_current:
+            validator(receipt, repo_root=ROOT, require_current_sources=True)
+        else:
+            with pytest.raises(error_type, match="receipt_sources_stale"):
+                validator(receipt, repo_root=ROOT, require_current_sources=True)
+            assert (
+                "external_runtime_current_source_rerun_missing"
+                in receipt["blockers_remaining"]
+            )
 
     for name, receipt, path in (
         ("code_to_code", code, CODE_RECEIPT),

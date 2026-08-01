@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
 import platform as platform_module
 import re
@@ -66,8 +67,8 @@ from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
 )
 
 
-RUN_SCHEMA_VERSION = "engine-v2-cross-platform-determinism-run-receipt.v1"
-MATRIX_SCHEMA_VERSION = "engine-v2-cross-platform-determinism-matrix-receipt.v1"
+RUN_SCHEMA_VERSION = "engine-v2-cross-platform-determinism-run-receipt.v2"
+MATRIX_SCHEMA_VERSION = "engine-v2-cross-platform-determinism-matrix-receipt.v2"
 MODEL_FIXTURE = Path("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json")
 BOUNDED_PLANAR_FIXTURE = Path("examples/bounded_planar_frame_alpha.model-ir.v2.json")
 BOUNDED_PLANAR_SETTLEMENT_FIXTURE = Path(
@@ -84,11 +85,11 @@ EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH = (
 )
 RUN_SCHEMA = Path(
     "src/structural_analysis/schemas/"
-    "engine_v2_cross_platform_determinism_run_receipt_v1.schema.json"
+    "engine_v2_cross_platform_determinism_run_receipt_v2.schema.json"
 )
 MATRIX_SCHEMA = Path(
     "src/structural_analysis/schemas/"
-    "engine_v2_cross_platform_determinism_matrix_receipt_v1.schema.json"
+    "engine_v2_cross_platform_determinism_matrix_receipt_v2.schema.json"
 )
 SUPPORTED_OS_LABELS = ("ubuntu-latest", "windows-latest")
 SUPPORTED_PYTHON_VERSIONS = ("3.10", "3.12")
@@ -97,6 +98,23 @@ REQUIRED_COORDINATES = tuple(
     for os_label in SUPPORTED_OS_LABELS
     for python_version in SUPPORTED_PYTHON_VERSIONS
 )
+REFERENCE_EXACT_COORDINATE = "ubuntu-latest|python-3.12"
+SEMANTIC_SIGNIFICANT_DIGITS = 8
+SEMANTIC_POLICY: dict[str, Any] = {
+    "schema_version": "bounded-planar-semantic-projection.v1",
+    "significant_digits": SEMANTIC_SIGNIFICANT_DIGITS,
+    "absolute_zero_by_quantity": {
+        "area_m2": 1.0e-16,
+        "dimensionless": 1.0e-12,
+        "force_kN": 1.0e-9,
+        "force_N": 1.0e-6,
+        "length_m": 1.0e-12,
+        "moment_Nm": 1.0e-6,
+        "rotation_rad": 1.0e-12,
+        "strain": 1.0e-12,
+        "stress_Pa": 1.0e-3,
+    },
+}
 _EXPECTED_SYSTEM_BY_OS_LABEL = {
     "ubuntu-latest": "Linux",
     "windows-latest": "Windows",
@@ -156,6 +174,9 @@ EXPECTED_GOLDENS = {
     "bounded_planar_result_hash": (
         "sha256:117c90503a60a188758992fd0e1234796a1cb1913725ffa87f9d33b4f5f7c5b6"
     ),
+    "bounded_planar_semantic_hash": (
+        "sha256:e137559a5e79a62a501898db1117e2b3403667c68abb493c296e0d1eff175368"
+    ),
     "bounded_planar_replay_result_hash": (
         "sha256:e1b1cc5400c072ebb18b0bcf7c6e455190c77e3ac088c805888f5c7d6a3772d6"
     ),
@@ -198,6 +219,9 @@ EXPECTED_GOLDENS = {
     "bounded_planar_settlement_result_hash": (
         "sha256:d1a1d9c51cf87d64b917ba789e4724b901ef2ca161d67943613248a98bbaf537"
     ),
+    "bounded_planar_settlement_semantic_hash": (
+        "sha256:c5cb95e2c5da13cf792a3a01fb9dbf223fb7790e3fa79678a631377cd189448e"
+    ),
     "bounded_planar_settlement_replay_result_hash": (
         "sha256:98e01640847327ca70cfac42cf89741235693cd1ba8b3638bceaf2df03eba006"
     ),
@@ -238,6 +262,36 @@ EXPECTED_GOLDENS = {
         "sha256:8ac07d8c1e940056a07c0434b75448551c2632dcc43ad80ab33e97e68fb7105a"
     ),
 }
+
+# These hashes bind raw floating-point solve output and are required only on the
+# designated reference coordinate. Hosted nonreference coordinates retain the raw
+# observations but are gated by the significant-digit semantic hashes instead.
+REFERENCE_ONLY_NUMERICAL_GOLDENS = frozenset(
+    {
+        "bounded_planar_result_hash",
+        "bounded_planar_replay_result_hash",
+        "bounded_planar_checkpoint_artifact_hash",
+        "bounded_planar_checkpoint_chain_hash",
+        "bounded_planar_engineering_result_hash",
+        "bounded_planar_terminal_residual_trace_hash",
+        "bounded_planar_settlement_result_hash",
+        "bounded_planar_settlement_replay_result_hash",
+        "bounded_planar_settlement_checkpoint_artifact_hash",
+        "bounded_planar_settlement_checkpoint_chain_hash",
+        "bounded_planar_settlement_engineering_result_hash",
+        "bounded_planar_settlement_terminal_residual_trace_hash",
+    }
+)
+BOUNDED_PLANAR_EXACT_GOLDENS = frozenset(
+    name
+    for name in REFERENCE_ONLY_NUMERICAL_GOLDENS
+    if not name.startswith("bounded_planar_settlement_")
+)
+BOUNDED_PLANAR_SETTLEMENT_EXACT_GOLDENS = frozenset(
+    name
+    for name in REFERENCE_ONLY_NUMERICAL_GOLDENS
+    if name.startswith("bounded_planar_settlement_")
+)
 
 # Populated from canonical writer readback, then frozen as exact cross-platform
 # byte goldens. The builder never derives expected values from the observation.
@@ -392,6 +446,110 @@ def _record_artifact(
     }
 
 
+def _semantic_quantity(field_name: str) -> str:
+    normalized = field_name.lower()
+    if "area_m2" in normalized:
+        return "area_m2"
+    if normalized.endswith("_pa") or "stress_pa" in normalized:
+        return "stress_Pa"
+    if normalized.endswith(("_n_m", "_nm")) or "moment" in normalized:
+        return "moment_Nm"
+    if normalized.endswith("_kn"):
+        return "force_kN"
+    if normalized == "value_si" or normalized.endswith("_n"):
+        return "force_N"
+    if normalized.endswith("_rad") or "rotation" in normalized:
+        return "rotation_rad"
+    if normalized.endswith("_m") or "displacement" in normalized or "increment" in normalized:
+        return "length_m"
+    if "strain" in normalized or "curvature" in normalized:
+        return "strain"
+    return "dimensionless"
+
+
+def _semantic_normalize(value: Any, *, field_name: str = "") -> Any:
+    """Project numerical meaning without claiming floating-point byte identity."""
+
+    if value is None or isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValueError("bounded_planar_semantic_value_nonfinite")
+        quantity = _semantic_quantity(field_name)
+        absolute_zero = float(
+            SEMANTIC_POLICY["absolute_zero_by_quantity"][quantity]
+        )
+        if abs(value) <= absolute_zero:
+            return 0.0
+        return float(format(value, f".{SEMANTIC_SIGNIFICANT_DIGITS}g"))
+    if isinstance(value, str):
+        if re.fullmatch(r"sha256:[0-9a-f]{64}", value):
+            return "sha256:<excluded-from-semantic-projection>"
+        return value
+    if isinstance(value, Mapping):
+        return {
+            str(key): _semantic_normalize(item, field_name=str(key))
+            for key, item in sorted(value.items(), key=lambda row: str(row[0]))
+            if "hash" not in str(key).lower()
+            and not str(key).lower().endswith("checksum")
+        }
+    if isinstance(value, (list, tuple)):
+        return [_semantic_normalize(item, field_name=field_name) for item in value]
+    raise TypeError(f"bounded_planar_semantic_value_unsupported:{type(value).__name__}")
+
+
+def _bounded_planar_semantic_hash(result: Any) -> str:
+    payload = result.to_dict()
+    projection = {
+        field_name: _semantic_normalize(payload[field_name])
+        for field_name in (
+            "status",
+            "contract_pass",
+            "profile",
+            "configuration",
+            "authority",
+            "node_displacements",
+            "support_reactions",
+            "member_end_forces",
+            "section_results",
+            "fiber_results",
+            "convergence_history",
+            "metrics",
+            "unsupported_features",
+            "warnings",
+        )
+    }
+    return canonical_hash(
+        {
+            "semantic_policy": SEMANTIC_POLICY,
+            "result_projection": projection,
+        }
+    )
+
+
+def golden_hash_mismatches(
+    observed: Mapping[str, str],
+    *,
+    require_reference_numerical: bool,
+) -> tuple[str, ...]:
+    required_names = set(EXPECTED_GOLDENS)
+    if not require_reference_numerical:
+        required_names.difference_update(REFERENCE_ONLY_NUMERICAL_GOLDENS)
+    return tuple(
+        name
+        for name in sorted(required_names)
+        if observed.get(name) != EXPECTED_GOLDENS[name]
+    )
+
+
+def _golden_subset_matches(
+    observed: Mapping[str, str], names: Sequence[str]
+) -> bool:
+    return all(observed.get(name) == EXPECTED_GOLDENS[name] for name in names)
+
+
 def _compute_bounded_planar_case_goldens(
     *,
     fixture: Path,
@@ -445,6 +603,7 @@ def _compute_bounded_planar_case_goldens(
 
     return {
         f"{golden_prefix}_result_hash": result.result_hash,
+        f"{golden_prefix}_semantic_hash": _bounded_planar_semantic_hash(result),
         f"{golden_prefix}_replay_result_hash": replayed.result_hash,
         f"{golden_prefix}_checkpoint_artifact_hash": sha256_prefixed(checkpoint),
         f"{golden_prefix}_checkpoint_chain_hash": str(result.checkpoint["chain_hash"]),
@@ -648,6 +807,7 @@ def expected_golden_set_hash() -> str:
             "bounded_planar_settlement_fixture_data_hash": (
                 EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
             ),
+            "semantic_policy": SEMANTIC_POLICY,
             "goldens": EXPECTED_GOLDENS,
             "binary_artifacts": EXPECTED_BINARY_ARTIFACTS,
         }
@@ -743,9 +903,14 @@ def build_run_receipt(
         != EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
     ):
         blockers.append("bounded_planar_settlement_fixture_data_hash_mismatch")
-    for name in sorted(set(EXPECTED_GOLDENS) | set(observed_goldens)):
-        if observed_goldens.get(name) != EXPECTED_GOLDENS.get(name):
-            blockers.append(f"golden_hash_mismatch:{name}")
+    coordinate_id = _coordinate(os_label, python_version)
+    require_reference_numerical = coordinate_id == REFERENCE_EXACT_COORDINATE
+    required_golden_mismatches = golden_hash_mismatches(
+        observed_goldens,
+        require_reference_numerical=require_reference_numerical,
+    )
+    for name in required_golden_mismatches:
+        blockers.append(f"golden_hash_mismatch:{name}")
     for name in sorted(set(EXPECTED_BINARY_ARTIFACTS) | set(observed_binary_artifacts)):
         if observed_binary_artifacts.get(name) != EXPECTED_BINARY_ARTIFACTS.get(name):
             blockers.append(f"binary_artifact_mismatch:{name}")
@@ -761,9 +926,21 @@ def build_run_receipt(
         if not job:
             blockers.append("github_job_missing")
 
-    exact_replay = not any(
-        blocker.startswith(("golden_hash_mismatch:", "binary_artifact_mismatch:"))
-        for blocker in blockers
+    exact_contract_replay = not required_golden_mismatches
+    all_numerical_exact = observed_goldens == EXPECTED_GOLDENS
+    bounded_planar_exact = _golden_subset_matches(
+        observed_goldens, BOUNDED_PLANAR_EXACT_GOLDENS
+    )
+    bounded_planar_settlement_exact = _golden_subset_matches(
+        observed_goldens, BOUNDED_PLANAR_SETTLEMENT_EXACT_GOLDENS
+    )
+    bounded_planar_semantic = (
+        observed_goldens.get("bounded_planar_semantic_hash")
+        == EXPECTED_GOLDENS["bounded_planar_semantic_hash"]
+    )
+    bounded_planar_settlement_semantic = (
+        observed_goldens.get("bounded_planar_settlement_semantic_hash")
+        == EXPECTED_GOLDENS["bounded_planar_settlement_semantic_hash"]
     )
     contract_pass = not blockers
     receipt = _with_receipt_hash(
@@ -810,6 +987,7 @@ def build_run_receipt(
                 ),
                 "observed_data_hash": (observed_bounded_planar_settlement_fixture_hash),
             },
+            "semantic_policy": SEMANTIC_POLICY,
             "golden_set_hash": expected_golden_set_hash(),
             "expected_goldens": dict(EXPECTED_GOLDENS),
             "observed_goldens": observed_goldens,
@@ -818,20 +996,35 @@ def build_run_receipt(
             "contract_pass": contract_pass,
             "blockers": blockers,
             "claims": {
-                "exact_contract_hash_replay": exact_replay,
+                "exact_contract_hash_replay": exact_contract_replay,
                 "canonical_binary_write_readback": (
                     observed_binary_artifacts == EXPECTED_BINARY_ARTIFACTS
+                ),
+                "reference_coordinate_exact_replay": (
+                    require_reference_numerical
+                    and all_numerical_exact
+                    and observed_binary_artifacts == EXPECTED_BINARY_ARTIFACTS
                 ),
                 "github_actions_coordinate_execution": (
                     contract_pass and origin_kind == "github_actions"
                 ),
                 "bounded_planar_exact_replay": (
-                    exact_replay
+                    bounded_planar_exact
+                    and observed_bounded_planar_fixture_hash
+                    == EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
+                ),
+                "bounded_planar_semantic_parity": (
+                    bounded_planar_semantic
                     and observed_bounded_planar_fixture_hash
                     == EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
                 ),
                 "bounded_planar_settlement_exact_replay": (
-                    exact_replay
+                    bounded_planar_settlement_exact
+                    and observed_bounded_planar_settlement_fixture_hash
+                    == EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+                ),
+                "bounded_planar_settlement_semantic_parity": (
+                    bounded_planar_settlement_semantic
                     and observed_bounded_planar_settlement_fixture_hash
                     == EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
                 ),
@@ -841,8 +1034,12 @@ def build_run_receipt(
             },
             "claim_boundary": (
                 "This receipt covers one Engine v2 OS/Python coordinate, exact "
-                "contract hashes, canonical binary write/readback, and exact public "
-                "bounded-planar member-feature plus prescribed-settlement replay. "
+                "platform-invariant contract hashes, canonical binary write/readback, "
+                "and significant-digit semantic replay for the public bounded-planar "
+                "member-feature and prescribed-settlement cases. Raw numerical hashes "
+                "are retained at every coordinate but are an exact gate only for the "
+                "designated Ubuntu/Python 3.12 reference coordinate. This matrix does "
+                "not define the separately pinned canonical environment. "
                 "A passing local receipt is local evidence only. A GitHub Actions "
                 "coordinate receipt requires retained run provenance, and no single receipt "
                 "proves the four-way matrix, CPU/HIP parity, hardware execution, "
@@ -902,6 +1099,9 @@ def build_matrix_receipt(
 
     summaries: list[dict[str, Any]] = []
     coordinate_counts: dict[str, int] = {}
+    raw_exact_by_coordinate: dict[str, bool] = {}
+    planar_exact_by_coordinate: dict[str, bool] = {}
+    settlement_exact_by_coordinate: dict[str, bool] = {}
     for path, payload in loaded:
         try:
             _validate_schema(payload, repo_root=repo_root, schema_path=RUN_SCHEMA)
@@ -930,12 +1130,18 @@ def build_matrix_receipt(
             blockers.append(f"coordinate_actual_python_invalid:{coordinate}")
         if not payload["contract_pass"]:
             blockers.append(f"coordinate_contract_blocked:{coordinate}")
+        if not payload["claims"]["exact_contract_hash_replay"]:
+            blockers.append(f"coordinate_contract_hash_replay_blocked:{coordinate}")
+        if not payload["claims"]["canonical_binary_write_readback"]:
+            blockers.append(f"coordinate_binary_readback_blocked:{coordinate}")
         if not payload["claims"]["github_actions_coordinate_execution"]:
             blockers.append(f"coordinate_not_github_actions:{coordinate}")
-        if not payload["claims"]["bounded_planar_exact_replay"]:
-            blockers.append(f"coordinate_planar_replay_blocked:{coordinate}")
-        if not payload["claims"]["bounded_planar_settlement_exact_replay"]:
-            blockers.append(f"coordinate_planar_settlement_replay_blocked:{coordinate}")
+        if not payload["claims"]["bounded_planar_semantic_parity"]:
+            blockers.append(f"coordinate_planar_semantic_parity_blocked:{coordinate}")
+        if not payload["claims"]["bounded_planar_settlement_semantic_parity"]:
+            blockers.append(
+                f"coordinate_planar_settlement_semantic_parity_blocked:{coordinate}"
+            )
         if payload["source_commit_sha"] != source_commit_sha:
             blockers.append(f"coordinate_source_commit_mismatch:{coordinate}")
         if payload["source_tree"]["checkout_head_sha"] != source_commit_sha:
@@ -953,6 +1159,8 @@ def build_matrix_receipt(
             blockers.append(f"coordinate_run_url_mismatch:{coordinate}")
         if payload["golden_set_hash"] != expected_golden_set_hash():
             blockers.append(f"coordinate_golden_set_mismatch:{coordinate}")
+        if payload["semantic_policy"] != SEMANTIC_POLICY:
+            blockers.append(f"coordinate_semantic_policy_mismatch:{coordinate}")
         if payload["model_fixture"]["expected_data_hash"] != (
             EXPECTED_MODEL_FIXTURE_DATA_HASH
         ):
@@ -983,12 +1191,70 @@ def build_matrix_receipt(
             )
         if payload["expected_goldens"] != EXPECTED_GOLDENS:
             blockers.append(f"coordinate_expected_goldens_mismatch:{coordinate}")
-        if payload["observed_goldens"] != EXPECTED_GOLDENS:
-            blockers.append(f"coordinate_observed_goldens_mismatch:{coordinate}")
+        observed_goldens = payload["observed_goldens"]
+        coordinate_requires_reference = coordinate == REFERENCE_EXACT_COORDINATE
+        required_mismatches = golden_hash_mismatches(
+            observed_goldens,
+            require_reference_numerical=coordinate_requires_reference,
+        )
+        for name in required_mismatches:
+            blockers.append(f"coordinate_observed_golden_mismatch:{coordinate}:{name}")
+        raw_exact = observed_goldens == EXPECTED_GOLDENS
+        planar_exact = _golden_subset_matches(
+            observed_goldens, BOUNDED_PLANAR_EXACT_GOLDENS
+        ) and (
+            payload["bounded_planar_fixture"]["observed_data_hash"]
+            == EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
+        )
+        settlement_exact = _golden_subset_matches(
+            observed_goldens, BOUNDED_PLANAR_SETTLEMENT_EXACT_GOLDENS
+        ) and (
+            payload["bounded_planar_settlement_fixture"]["observed_data_hash"]
+            == EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+        )
+        planar_semantic = (
+            observed_goldens.get("bounded_planar_semantic_hash")
+            == EXPECTED_GOLDENS["bounded_planar_semantic_hash"]
+            and payload["bounded_planar_fixture"]["observed_data_hash"]
+            == EXPECTED_BOUNDED_PLANAR_FIXTURE_DATA_HASH
+        )
+        settlement_semantic = (
+            observed_goldens.get("bounded_planar_settlement_semantic_hash")
+            == EXPECTED_GOLDENS["bounded_planar_settlement_semantic_hash"]
+            and payload["bounded_planar_settlement_fixture"]["observed_data_hash"]
+            == EXPECTED_BOUNDED_PLANAR_SETTLEMENT_FIXTURE_DATA_HASH
+        )
+        claim_checks = {
+            "exact_contract_hash_replay": not required_mismatches,
+            "bounded_planar_exact_replay": planar_exact,
+            "bounded_planar_semantic_parity": planar_semantic,
+            "bounded_planar_settlement_exact_replay": settlement_exact,
+            "bounded_planar_settlement_semantic_parity": settlement_semantic,
+        }
+        for claim_name, expected_claim in claim_checks.items():
+            if payload["claims"][claim_name] is not expected_claim:
+                blockers.append(
+                    f"coordinate_claim_inconsistent:{coordinate}:{claim_name}"
+                )
+        raw_exact_by_coordinate[coordinate] = raw_exact
+        planar_exact_by_coordinate[coordinate] = planar_exact
+        settlement_exact_by_coordinate[coordinate] = settlement_exact
         if payload["expected_binary_artifacts"] != EXPECTED_BINARY_ARTIFACTS:
             blockers.append(f"coordinate_expected_binary_mismatch:{coordinate}")
-        if payload["observed_binary_artifacts"] != EXPECTED_BINARY_ARTIFACTS:
+        binary_exact = payload["observed_binary_artifacts"] == EXPECTED_BINARY_ARTIFACTS
+        if not binary_exact:
             blockers.append(f"coordinate_observed_binary_mismatch:{coordinate}")
+        expected_reference_claim = (
+            coordinate_requires_reference and raw_exact and binary_exact
+        )
+        if (
+            payload["claims"]["reference_coordinate_exact_replay"]
+            is not expected_reference_claim
+        ):
+            blockers.append(
+                "coordinate_claim_inconsistent:"
+                f"{coordinate}:reference_coordinate_exact_replay"
+            )
         summaries.append(
             {
                 "coordinate_id": coordinate,
@@ -1016,6 +1282,18 @@ def build_matrix_receipt(
 
     blockers = sorted(set(blockers))
     contract_pass = not blockers
+    four_way_raw_exact = contract_pass and all(
+        raw_exact_by_coordinate.get(coordinate, False)
+        for coordinate in REQUIRED_COORDINATES
+    )
+    four_way_planar_exact = contract_pass and all(
+        planar_exact_by_coordinate.get(coordinate, False)
+        for coordinate in REQUIRED_COORDINATES
+    )
+    four_way_settlement_exact = contract_pass and all(
+        settlement_exact_by_coordinate.get(coordinate, False)
+        for coordinate in REQUIRED_COORDINATES
+    )
     receipt = _with_receipt_hash(
         {
             "schema_version": MATRIX_SCHEMA_VERSION,
@@ -1036,23 +1314,35 @@ def build_matrix_receipt(
             "contract_pass": contract_pass,
             "blockers": blockers,
             "claims": {
-                "four_way_github_actions_exact_replay": contract_pass,
+                "four_way_github_actions_exact_replay": four_way_raw_exact,
+                "reference_github_actions_exact_replay": (
+                    contract_pass
+                    and raw_exact_by_coordinate.get(REFERENCE_EXACT_COORDINATE, False)
+                ),
                 "ubuntu_python_3_10_and_3_12_execution": contract_pass,
                 "windows_python_3_10_and_3_12_execution": contract_pass,
                 "cross_platform_contract_and_binary_hash_identity": contract_pass,
-                "bounded_planar_four_way_exact_replay": contract_pass,
-                "bounded_planar_settlement_four_way_exact_replay": contract_pass,
+                "nonreference_semantic_parity": contract_pass,
+                "bounded_planar_four_way_exact_replay": four_way_planar_exact,
+                "bounded_planar_four_way_semantic_parity": contract_pass,
+                "bounded_planar_settlement_four_way_exact_replay": (
+                    four_way_settlement_exact
+                ),
+                "bounded_planar_settlement_four_way_semantic_parity": contract_pass,
                 "cpu_hip_numerical_parity": False,
                 "developer_preview_windows_gate": False,
                 "product_readiness": False,
             },
             "claim_boundary": (
-                "A passing matrix receipt proves exact Engine v2 contract, "
-                "canonical binary replay, and two solved bounded planar member-"
-                "feature and prescribed-settlement result/checkpoint replays for "
-                "the four hosted GitHub "
-                "Actions Ubuntu/Windows and Python 3.10/3.12 coordinates from one "
-                "clean source commit and one retained workflow run. The receipt remains "
+                "A passing matrix receipt proves exact platform-invariant Engine v2 "
+                "contract and canonical-binary replay at all four hosted coordinates, "
+                "exact solved-result/checkpoint replay at the designated Ubuntu/Python "
+                "3.12 reference coordinate, and significant-digit semantic parity for "
+                "bounded-planar member-feature and prescribed-settlement cases on the "
+                "other Ubuntu/Windows and Python 3.10/3.12 coordinates from one clean "
+                "source commit and one retained workflow run. Raw per-coordinate "
+                "numerical hashes remain retained observations, not portability gates. "
+                "The receipt remains "
                 "dependent on the retained GitHub run and artifacts; it does not "
                 "prove CPU/HIP parity, hardware execution, broader Linux/Windows "
                 "product replay, Developer Preview closure, or product readiness."

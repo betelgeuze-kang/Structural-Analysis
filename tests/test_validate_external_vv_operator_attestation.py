@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from functools import lru_cache
 import importlib.util
 import json
 from pathlib import Path
@@ -21,6 +22,9 @@ assert spec is not None and spec.loader is not None
 module = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = module
 spec.loader.exec_module(module)
+
+import run_external_code_to_code_technical_receipt as code_receipt  # noqa: E402
+import run_external_modal_buckling_technical_receipt as modal_receipt  # noqa: E402
 
 
 def _write_json_artifact(path: Path, body: dict) -> dict:
@@ -44,8 +48,8 @@ def _descriptor(path: Path, root: Path, payload: dict | None = None) -> dict:
     return row
 
 
-def _build_submission(root: Path, *, fresh: bool = True) -> tuple[dict, Path]:
-    root.mkdir(parents=True, exist_ok=True)
+@lru_cache(maxsize=1)
+def _current_source_receipt_templates() -> tuple[dict, dict, dict]:
     source_root = ROOT / "artifacts/vv/opensees_calculix_clean_runner"
     code = json.loads(
         (source_root / "external_code_to_code_receipt.json").read_text(encoding="utf-8")
@@ -58,8 +62,36 @@ def _build_submission(root: Path, *, fresh: bool = True) -> tuple[dict, Path]:
     summary = json.loads(
         (source_root / "clean_runner_receipt.json").read_text(encoding="utf-8")
     )
+    retained_source_commit = code["source_commit_sha"]
+    assert (
+        modal["source_commit_sha"]
+        == summary["source_commit_sha"]
+        == retained_source_commit
+    )
+    reuse_reason = (
+        "Synthetic current-source unit fixture; retained external values receive "
+        "no freshness or verification credit."
+    )
+    code = code_receipt.refresh_external_code_to_code_product_replay(
+        code,
+        repo_root=ROOT,
+        reuse_reason=reuse_reason,
+    )
+    modal = modal_receipt.refresh_external_modal_buckling_product_replay(
+        modal,
+        repo_root=ROOT,
+        reuse_reason=reuse_reason,
+    )
+    return code, modal, summary
+
+
+def _build_submission(root: Path, *, fresh: bool = True) -> tuple[dict, Path]:
+    root.mkdir(parents=True, exist_ok=True)
+    source_root = ROOT / "artifacts/vv/opensees_calculix_clean_runner"
+    code, modal, summary = deepcopy(_current_source_receipt_templates())
     source_commit = code["source_commit_sha"]
-    assert modal["source_commit_sha"] == summary["source_commit_sha"] == source_commit
+    assert modal["source_commit_sha"] == source_commit
+    summary["source_commit_sha"] = source_commit
 
     mode_descriptors = []
     for row in modal["mode_vector_artifacts"]:
@@ -85,7 +117,12 @@ def _build_submission(root: Path, *, fresh: bool = True) -> tuple[dict, Path]:
             child["blockers_remaining"] = [
                 blocker
                 for blocker in child["blockers_remaining"]
-                if blocker != "external_runtime_current_source_rerun_missing"
+                if blocker
+                not in {
+                    "external_runtime_current_source_rerun_missing",
+                    code_receipt.REUSED_EXECUTION_BLOCKER,
+                    modal_receipt.REUSED_EXECUTION_BLOCKER,
+                }
             ]
         child["artifact_hash"] = module.artifact_hash(child)
 
@@ -865,12 +902,159 @@ def test_signed_fresh_bundle_is_integrity_valid_but_not_level2(tmp_path: Path) -
     )
 
     assert result["intake_contract_pass"] is True
+    assert result["source_commit_sha"] == subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
     assert result["fresh_external_runtime_execution"] is True
     assert result["two_external_solver_slots_bound"] is True
     assert result["signature"]["cryptographic_signature_verified"] is True
     assert result["operator_identity_credentials_verified"] is False
     assert result["claims"]["verification_hierarchy_level_2"] is False
     assert "operator_identity_authentication_missing" in result["blockers_remaining"]
+
+
+@pytest.mark.parametrize(
+    ("bundle_key", "receipt_module", "expected_code"),
+    [
+        (
+            "code_to_code",
+            code_receipt,
+            "operator_attestation_code_to_code_receipt_sources_stale",
+        ),
+        (
+            "modal_buckling",
+            modal_receipt,
+            "operator_attestation_modal_buckling_receipt_sources_stale",
+        ),
+    ],
+)
+def test_rehashed_source_sha_rebinding_cannot_hide_stale_child_sources(
+    tmp_path: Path,
+    bundle_key: str,
+    receipt_module: object,
+    expected_code: str,
+) -> None:
+    attestation, bundle_root = _build_submission(tmp_path / "bundle")
+    child_path = bundle_root / attestation["bundle"][bundle_key]["path"]
+    child = json.loads(child_path.read_text(encoding="utf-8"))
+    checksums = child["internal_source"]["input_checksums"]
+    source_path = sorted(checksums)[0]
+    replacement = "sha256:" + "0" * 64
+    if checksums[source_path] == replacement:
+        replacement = "sha256:" + "f" * 64
+    checksums[source_path] = replacement
+    child["internal_source"]["source_set_hash"] = receipt_module._hash_value(
+        checksums
+    )
+    child = _write_json_artifact(child_path, child)
+
+    summary_path = bundle_root / attestation["bundle"]["clean_runner"]["path"]
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary["product_receipts"][bundle_key].update(
+        {
+            "file_sha256": module.file_sha256(child_path),
+            "artifact_hash": child["artifact_hash"],
+            "source_set_hash": child["internal_source"]["source_set_hash"],
+        }
+    )
+    summary = _write_json_artifact(summary_path, summary)
+    attestation["bundle"][bundle_key] = _descriptor(
+        child_path, bundle_root, child
+    )
+    attestation["bundle"]["clean_runner"] = _descriptor(
+        summary_path, bundle_root, summary
+    )
+    _resign(attestation, bundle_root)
+
+    with pytest.raises(module.ExternalVVOperatorAttestationError) as exc_info:
+        module.validate_external_vv_operator_attestation(
+            attestation,
+            bundle_root=bundle_root,
+            repo_root=ROOT,
+        )
+    assert exc_info.value.code == expected_code
+
+
+def test_coherently_rehashed_bundle_must_match_exact_repository_head(
+    tmp_path: Path,
+) -> None:
+    attestation, bundle_root = _build_submission(tmp_path / "bundle")
+    replacement_sha = "0" * 40
+    if attestation["source_commit_sha"] == replacement_sha:
+        replacement_sha = "f" * 40
+
+    rewritten_children: dict[str, dict] = {}
+    for bundle_key in ("code_to_code", "modal_buckling"):
+        child_path = bundle_root / attestation["bundle"][bundle_key]["path"]
+        child = json.loads(child_path.read_text(encoding="utf-8"))
+        child["source_commit_sha"] = replacement_sha
+        child = _write_json_artifact(child_path, child)
+        rewritten_children[bundle_key] = child
+        attestation["bundle"][bundle_key] = _descriptor(
+            child_path, bundle_root, child
+        )
+
+    summary_path = bundle_root / attestation["bundle"]["clean_runner"]["path"]
+    summary = json.loads(summary_path.read_text(encoding="utf-8"))
+    summary["source_commit_sha"] = replacement_sha
+    for bundle_key, child in rewritten_children.items():
+        child_path = bundle_root / attestation["bundle"][bundle_key]["path"]
+        summary["product_receipts"][bundle_key].update(
+            {
+                "file_sha256": module.file_sha256(child_path),
+                "artifact_hash": child["artifact_hash"],
+                "source_set_hash": child["internal_source"]["source_set_hash"],
+            }
+        )
+    summary = _write_json_artifact(summary_path, summary)
+    attestation["source_commit_sha"] = replacement_sha
+    attestation["bundle"]["clean_runner"] = _descriptor(
+        summary_path, bundle_root, summary
+    )
+    _resign(attestation, bundle_root)
+
+    with pytest.raises(module.ExternalVVOperatorAttestationError) as exc_info:
+        module.validate_external_vv_operator_attestation(
+            attestation,
+            bundle_root=bundle_root,
+            repo_root=ROOT,
+        )
+    assert exc_info.value.code == "operator_attestation_source_commit_mismatch"
+
+
+def test_exact_repository_binding_rejects_dirty_source_bytes(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=repo_root, check=True)
+    subprocess.run(
+        ["git", "config", "user.name", "Contract Test"],
+        cwd=repo_root,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.email", "contract@example.test"],
+        cwd=repo_root,
+        check=True,
+    )
+    source_path = repo_root / "source.py"
+    source_path.write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "source.py"], cwd=repo_root, check=True)
+    subprocess.run(
+        ["git", "commit", "-q", "-m", "fixture"],
+        cwd=repo_root,
+        check=True,
+    )
+    child = {
+        "internal_source": {
+            "input_checksums": {"source.py": "sha256:" + "0" * 64}
+        }
+    }
+    module._require_sources_at_head(repo_root, (child,))
+    source_path.write_text("VALUE = 2\n", encoding="utf-8")
+
+    with pytest.raises(module.ExternalVVOperatorAttestationError) as exc_info:
+        module._require_sources_at_head(repo_root, (child,))
+    assert exc_info.value.code == "operator_attestation_source_bytes_not_at_commit"
 
 
 def test_signed_linear_supplement_is_bound_but_not_promoted(tmp_path: Path) -> None:

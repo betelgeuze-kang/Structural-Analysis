@@ -248,6 +248,8 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
                'scripts/build_engine_v2_cross_platform_determinism_receipt.py',
                'src/structural_analysis/schemas/engine_v2_cross_platform_determinism_run_receipt_v1.schema.json',
                'src/structural_analysis/schemas/engine_v2_cross_platform_determinism_matrix_receipt_v1.schema.json',
+               'src/structural_analysis/schemas/engine_v2_cross_platform_determinism_run_receipt_v2.schema.json',
+               'src/structural_analysis/schemas/engine_v2_cross_platform_determinism_matrix_receipt_v2.schema.json',
                'scripts/verify_bounded_planar_wheel_smoke.py',
                '.github/workflows/opensees-calculix-current-source.yml',
                'tests/test_corotational_fiber_frame_general.py',
@@ -283,18 +285,20 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
                   'authority; blocked results expose a schema-enforced stable reason_code plus '
                   'detailed kind/path/detail. The nonlinear ExecutionPlan remains distinct from '
                   'linear-static Engine v2 ExecutionPlan v1. A source-bound Ubuntu/Windows and '
-                  'Python 3.10/3.12 exact result/checkpoint/recovery replay gate now enters '
-                  'through the public ModelIR v2 adapter for both the member-feature and '
-                  "prescribed-settlement fixtures and binds each fixture's content, semantic, "
-                  'provenance, adapter, execution-plan, result, checkpoint, and recovery hashes; '
-                  'no retained passing current-source four-way platform matrix receipt is attached '
-                  'yet. Fresh checksum-bound current-source host receipts record actual '
-                  'same-operator OpenSees/CalculiX execution for the exact cantilever, '
-                  'member-feature, prescribed-settlement, column-buckling, reaction, and '
-                  'member-recovery rows. The retained clean-runner summary has mismatched '
-                  'host/container source and metric sets, so same_operator_execution_binding is '
-                  'unavailable and supplies no current container-parity credit. The separate '
-                  'main-only GitHub provenance workflow still has no retained run attestation, so '
+                  'Python 3.10/3.12 gate retains raw result/checkpoint/recovery hashes at every '
+                  'coordinate, requires exact numerical replay only at the designated '
+                  'Ubuntu/Python 3.12 reference coordinate, and requires a versioned '
+                  'significant-digit semantic projection elsewhere for both member-feature and '
+                  'prescribed-settlement fixtures; the separately pinned P0 workflow owns '
+                  'canonical-environment truth, and no retained passing current-source four-way '
+                  'platform matrix receipt is attached yet. Fresh checksum-bound current-source '
+                  'host receipts record actual same-operator OpenSees/CalculiX execution for the '
+                  'exact cantilever, member-feature, prescribed-settlement, column-buckling, '
+                  'reaction, and member-recovery rows. The retained clean-runner summary has '
+                  'mismatched host/container source and metric sets, so '
+                  'same_operator_execution_binding is unavailable and supplies no current '
+                  'container-parity credit. The separate main-only GitHub provenance workflow '
+                  'still has no retained run attestation, so '
                   'current_source_execution_attached=false remains for that workflow only. '
                   'Independent operator attestation and Level 2 promotion remain absent, so '
                   'external_vv_level stays 0. Direct displacement control remains lower-level '
