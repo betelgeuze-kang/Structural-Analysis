@@ -101,6 +101,30 @@ def test_locked_wheelhouse_requires_exact_complete_hash_set(tmp_path: Path) -> N
         module.validate_locked_wheelhouse(wheelhouse, lock)
 
 
+def test_git_commands_scope_safe_directory_to_resolved_repo_root(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        observed["command"] = list(command)
+        observed["cwd"] = kwargs["cwd"]
+        return subprocess.CompletedProcess(command, 0, "resolved-head\n", "")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    assert module._git_text(tmp_path, "rev-parse", "HEAD") == "resolved-head"
+    assert observed["command"] == [
+        "git",
+        "-c",
+        f"safe.directory={tmp_path.resolve()}",
+        "rev-parse",
+        "HEAD",
+    ]
+    assert observed["cwd"] == tmp_path
+
+
 def test_build_command_is_no_index_pep517_isolated_and_uses_epoch(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,

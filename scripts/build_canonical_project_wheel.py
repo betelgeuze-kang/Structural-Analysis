@@ -68,9 +68,18 @@ def _canonical_hash(value: object) -> str:
     return HASH_PREFIX + hashlib.sha256(encoded).hexdigest()
 
 
+def _git_command(repo_root: Path, *arguments: str) -> list[str]:
+    return [
+        "git",
+        "-c",
+        f"safe.directory={repo_root.resolve()}",
+        *arguments,
+    ]
+
+
 def _git_text(repo_root: Path, *arguments: str) -> str:
     completed = subprocess.run(
-        ["git", *arguments],
+        _git_command(repo_root, *arguments),
         cwd=repo_root,
         check=False,
         capture_output=True,
@@ -106,7 +115,7 @@ def _safe_extract_git_archive(
     archive_path = destination.parent / f"{destination.name}.tar"
     with archive_path.open("wb") as handle:
         completed = subprocess.run(
-            ["git", "archive", "--format=tar", source_sha],
+            _git_command(repo_root, "archive", "--format=tar", source_sha),
             cwd=repo_root,
             check=False,
             stdout=handle,
