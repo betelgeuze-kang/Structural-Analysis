@@ -1161,8 +1161,12 @@ def build_matrix_receipt(
             blockers.append(f"coordinate_origin_invalid:{coordinate}")
         if execution["run_id"] != run_id:
             blockers.append(f"coordinate_run_id_mismatch:{coordinate}")
-        if execution["run_attempt"] != run_attempt:
-            blockers.append(f"coordinate_run_attempt_mismatch:{coordinate}")
+        coordinate_run_attempt = execution["run_attempt"]
+        if not 1 <= coordinate_run_attempt <= run_attempt:
+            blockers.append(
+                "coordinate_run_attempt_out_of_range:"
+                f"{coordinate}:{coordinate_run_attempt}>{run_attempt}"
+            )
         if execution["run_url"] != run_url:
             blockers.append(f"coordinate_run_url_mismatch:{coordinate}")
         if payload["golden_set_hash"] != expected_golden_set_hash():
@@ -1273,6 +1277,7 @@ def build_matrix_receipt(
                 "actual_python_version": payload["coordinate"]["actual_python_version"],
                 "numpy_version": payload["coordinate"]["numpy_version"],
                 "runner_name": execution["runner_name"],
+                "run_attempt": coordinate_run_attempt,
             }
         )
 
@@ -1348,7 +1353,10 @@ def build_matrix_receipt(
                 "3.12 reference coordinate, and significant-digit semantic parity for "
                 "bounded-planar member-feature and prescribed-settlement cases on the "
                 "other Ubuntu/Windows and Python 3.10/3.12 coordinates from one clean "
-                "source commit and one retained workflow run. Raw per-coordinate "
+                "source commit and one retained workflow run. A failed-job rerun may "
+                "reuse successful coordinates from earlier attempts of that same run; "
+                "each coordinate attempt is retained explicitly and may never be newer "
+                "than the aggregate attempt. Raw per-coordinate "
                 "numerical hashes remain retained observations, not portability gates. "
                 "The receipt remains "
                 "dependent on the retained GitHub run and artifacts; it does not "

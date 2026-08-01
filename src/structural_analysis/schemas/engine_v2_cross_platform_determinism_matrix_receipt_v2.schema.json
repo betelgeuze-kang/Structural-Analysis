@@ -144,7 +144,8 @@
         "actual_system": {"type": "string", "minLength": 1},
         "actual_python_version": {"type": "string", "minLength": 1},
         "numpy_version": {"type": "string", "minLength": 1},
-        "runner_name": {"type": "string"}
+        "runner_name": {"type": "string"},
+        "run_attempt": {"type": "integer", "minimum": 1}
       }
     }
   }

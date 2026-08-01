@@ -335,6 +335,7 @@ def test_four_github_receipts_aggregate_to_exact_matrix_receipt(
     assert matrix["observed_coordinates"] == sorted(module.REQUIRED_COORDINATES)
     assert matrix["observed_coordinate_count"] == 4
     assert len(matrix["receipts"]) == 4
+    assert {row["run_attempt"] for row in matrix["receipts"]} == {RUN_ATTEMPT}
     assert matrix["claims"]["four_way_github_actions_exact_replay"] is True
     assert matrix["claims"]["reference_github_actions_exact_replay"] is True
     assert matrix["claims"]["windows_python_3_10_and_3_12_execution"] is True
@@ -352,6 +353,98 @@ def test_four_github_receipts_aggregate_to_exact_matrix_receipt(
     )
     assert matrix["claims"]["developer_preview_windows_gate"] is False
     assert matrix["receipt_hash"] == module._receipt_hash(matrix)
+
+
+def test_matrix_accepts_successful_coordinates_from_prior_failed_job_attempt(
+    tmp_path: Path,
+) -> None:
+    receipts = _write_four_receipts(tmp_path)
+    for receipt in receipts[:3]:
+        receipt["execution"]["run_attempt"] = RUN_ATTEMPT - 1
+        receipt["receipt_hash"] = module._receipt_hash(receipt)
+        coordinate = receipt["coordinate"]
+        path = tmp_path / (
+            f"{coordinate['os_label']}-python-"
+            f"{coordinate['requested_python_version']}.json"
+        )
+        path.write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    matrix = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+
+    assert matrix["contract_pass"] is True
+    assert [row["run_attempt"] for row in matrix["receipts"]].count(
+        RUN_ATTEMPT - 1
+    ) == 3
+    assert [row["run_attempt"] for row in matrix["receipts"]].count(
+        RUN_ATTEMPT
+    ) == 1
+
+
+def test_matrix_v2_schema_keeps_historical_summaries_without_attempt_field(
+    tmp_path: Path,
+) -> None:
+    _write_four_receipts(tmp_path)
+    matrix = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+    historical = copy.deepcopy(matrix)
+    for receipt in historical["receipts"]:
+        receipt.pop("run_attempt")
+    historical["receipt_hash"] = module._receipt_hash(historical)
+
+    module._validate_schema(
+        historical,
+        repo_root=REPO_ROOT,
+        schema_path=module.MATRIX_SCHEMA,
+    )
+
+
+def test_matrix_rejects_coordinate_from_future_attempt(tmp_path: Path) -> None:
+    receipts = _write_four_receipts(tmp_path)
+    future = receipts[-1]
+    future["execution"]["run_attempt"] = RUN_ATTEMPT + 1
+    future["receipt_hash"] = module._receipt_hash(future)
+    path = tmp_path / "windows-latest-python-3.12.json"
+    path.write_text(
+        json.dumps(future, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    matrix = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+
+    assert matrix["contract_pass"] is False
+    assert (
+        "coordinate_run_attempt_out_of_range:"
+        f"windows-latest|python-3.12:{RUN_ATTEMPT + 1}>{RUN_ATTEMPT}"
+    ) in matrix["blockers"]
 
 
 def test_matrix_recomputes_nonreference_exact_claims_from_observations(

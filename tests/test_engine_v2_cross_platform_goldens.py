@@ -88,6 +88,7 @@ def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     assert "os: [ubuntu-latest, windows-latest]" in workflow
     assert 'python-version: ["3.10", "3.12"]' in workflow
     assert "fail-fast: false" in workflow
+    assert workflow.count("python -m pip install numpy==1.26.4 scipy==1.12.0") == 2
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
     assert 'OMP_NUM_THREADS: "1"' in workflow
