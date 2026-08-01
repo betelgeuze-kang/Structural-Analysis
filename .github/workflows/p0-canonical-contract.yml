@@ -26,9 +26,6 @@ env:
   CANONICAL_RECEIPT_PATH: artifacts/manifests/canonical_verification_environment.current.v1.json
   DAG_CANDIDATE_STATE_PATH: .ci/generated-artifact-dag-candidate-state.v2.json
   DAG_CANDIDATE_REPORT_PATH: .ci/generated-artifact-dag-candidate-report.v2.json
-  GIT_CONFIG_COUNT: "1"
-  GIT_CONFIG_KEY_0: safe.directory
-  GIT_CONFIG_VALUE_0: ${{ github.workspace }}
 
 jobs:
   canonical-contract:
@@ -86,6 +83,9 @@ jobs:
               ;;
           esac
           echo "SOURCE_DATE_EPOCH=$source_date_epoch" >> "$GITHUB_ENV"
+          echo "GIT_CONFIG_COUNT=1" >> "$GITHUB_ENV"
+          echo "GIT_CONFIG_KEY_0=safe.directory" >> "$GITHUB_ENV"
+          echo "GIT_CONFIG_VALUE_0=$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
 
       - name: Build twice and replay exact installed project wheel
         run: >-
