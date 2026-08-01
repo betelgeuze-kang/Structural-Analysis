@@ -13,6 +13,11 @@ import sys
 import tempfile
 from typing import Any
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
+    import tomli as tomllib  # type: ignore[no-redef]
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = Path("artifacts/manifests/core_quality.json")
@@ -59,6 +64,17 @@ def _mapping(value: Any, *, field: str) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"{field} must be an object")
     return value
+
+
+def _mypy_config_paths(path: Path) -> list[str]:
+    with path.open("rb") as handle:
+        config = tomllib.load(handle)
+    tool = _mapping(config.get("tool"), field="typecheck.config.tool")
+    mypy = _mapping(tool.get("mypy"), field="typecheck.config.tool.mypy")
+    return _string_list(
+        mypy.get("files"),
+        field="typecheck.config.tool.mypy.files",
+    )
 
 
 def _coverage_config(path: Path) -> tuple[bool, int, list[str], list[str]]:
@@ -119,6 +135,15 @@ def check_contract(payload: dict[str, Any], *, root: Path = ROOT) -> None:
     ]
     if missing:
         raise ValueError(f"core-quality manifest references missing paths: {missing}")
+
+    configured_typecheck_paths = _mypy_config_paths(
+        _resolve(root, str(typecheck["config"]))
+    )
+    if typecheck_paths != configured_typecheck_paths:
+        raise ValueError(
+            "typecheck.paths must exactly match the ordered "
+            "tool.mypy.files scope in typecheck.config"
+        )
 
     minimum_percent = int(coverage.get("minimum_percent") or 0)
     if coverage.get("branch") is not True:

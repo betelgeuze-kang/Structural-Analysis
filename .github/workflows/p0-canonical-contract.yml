@@ -7,9 +7,16 @@ on:
     branches: ["main", "codex/**", "ci/**"]
     paths:
       - "canonical/**"
+      - "artifacts/manifests/capabilities.yaml"
+      - "README.md"
+      - "docs/api-capabilities.md"
       - "scripts/build_canonical_verification_receipt.py"
       - "scripts/check_generated_artifact_dag.py"
+      - "scripts/generate_capability_surfaces.py"
+      - "src/structural_analysis/generated_capabilities.py"
+      - "src/workbench-v2/model/generatedCapabilities.json"
       - "tests/test_build_canonical_verification_receipt.py"
+      - "tests/test_capability_registry.py"
       - "tests/test_generated_artifact_dag.py"
       - ".github/workflows/p0-canonical-contract.yml"
   workflow_dispatch:
@@ -26,6 +33,8 @@ env:
   LC_ALL: "C.UTF-8"
   TZ: "UTC"
   PYTHONHASHSEED: "0"
+  CANONICAL_VERIFICATION_RECEIPT_PATH: artifacts/manifests/canonical_verification_environment.current.v1.json
+  GENERATED_ARTIFACT_DAG_STATE_PATH: .ci/canonical-generated-artifact-dag-state.v1.json
 
 jobs:
   canonical-contract:
@@ -60,13 +69,14 @@ jobs:
           python scripts/build_canonical_verification_receipt.py
           --enforce
           --source-sha "${{ github.sha }}"
-          --write .ci/canonical-verification-receipt.json
+          --write "$CANONICAL_VERIFICATION_RECEIPT_PATH"
 
       - name: Validate receipt schema
         shell: bash
         run: |
           python - <<'PY'
           import json
+          import os
           from pathlib import Path
           import jsonschema
 
@@ -74,15 +84,41 @@ jobs:
               Path("canonical/canonical-verification-receipt.v1.schema.json").read_text()
           )
           receipt = json.loads(
-              Path(".ci/canonical-verification-receipt.json").read_text()
+              Path(os.environ["CANONICAL_VERIFICATION_RECEIPT_PATH"]).read_text()
           )
           jsonschema.Draft202012Validator(schema).validate(receipt)
+          assert receipt["source_commit_sha"] == os.environ["GITHUB_SHA"]
           PY
 
-      - name: Upload canonical environment identity
+      - name: Verify capability surfaces and record required DAG prefix
+        shell: bash
+        run: |
+          python scripts/generate_capability_surfaces.py --json
+          python scripts/check_generated_artifact_dag.py \
+            --source-sha "${{ github.sha }}" \
+            --require-through verification-receipts \
+            --write-state "$GENERATED_ARTIFACT_DAG_STATE_PATH"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import jsonschema
+
+          schema = json.loads(
+              Path("canonical/generated-artifact-dag-state.v1.schema.json").read_text()
+          )
+          state = json.loads(
+              Path(os.environ["GENERATED_ARTIFACT_DAG_STATE_PATH"]).read_text()
+          )
+          jsonschema.Draft202012Validator(schema).validate(state)
+          PY
+
+      - name: Upload canonical environment identity and DAG evidence
         uses: actions/upload-artifact@v7
         with:
           name: canonical-verification-environment-${{ github.sha }}
-          path: .ci/canonical-verification-receipt.json
+          path: |
+            ${{ env.CANONICAL_VERIFICATION_RECEIPT_PATH }}
+            ${{ env.GENERATED_ARTIFACT_DAG_STATE_PATH }}
           if-no-files-found: error
           retention-days: 30

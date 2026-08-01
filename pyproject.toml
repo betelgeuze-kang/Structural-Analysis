@@ -69,6 +69,7 @@ files = [
   "src/structural_analysis/model",
   "src/structural_analysis/results/schema.py",
   "src/structural_analysis/results/validation.py",
+  "src/structural_analysis/engine_v2/contracts/result_quantity.py",
   "src/structural_analysis/solvers/nonlinear/transient.py",
   "src/structural_analysis/units",
 ]

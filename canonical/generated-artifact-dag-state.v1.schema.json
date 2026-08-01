@@ -3,9 +3,10 @@
   "$id": "https://structural-analysis.local/schemas/generated-artifact-dag-state.v1.schema.json",
   "title": "Generated artifact DAG state",
   "type": "object",
-  "required": ["schema_version", "nodes"],
+  "required": ["schema_version", "source_commit_sha", "nodes"],
   "properties": {
     "schema_version": {"const": "generated-artifact-dag-state.v1"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "nodes": {
       "type": "object",
       "additionalProperties": {

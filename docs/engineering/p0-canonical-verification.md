@@ -23,16 +23,20 @@ capability registry
   -> product-state
 ```
 
-`check_generated_artifact_dag.py` hashes every declared input and output plus the current fingerprints of its dependencies. Comparing a candidate snapshot with a trusted baseline marks a changed node stale and propagates that status through every descendant. Missing files are always stale, even if a previous snapshot also recorded them as missing.
+`check_generated_artifact_dag.py` hashes every declared input and output plus the current fingerprints of its dependencies. The exact 40-hex source commit SHA is retained once as the top-level provenance binding; it is deliberately excluded from node fingerprints, so commit movement alone does not misclassify byte-identical generated artifacts as stale. Comparing a candidate snapshot with a separately retained baseline marks a changed node stale and propagates that status through every descendant. Missing files are always stale, even if a previous snapshot also recorded them as missing.
 
-Use `--write-state PATH` only in the trusted exact-SHA product-state workflow after all declared outputs exist. It refuses to bless missing artifacts by default. Use `--state PATH` in check lanes; this computes the candidate in memory and does not alter the baseline. `--report PATH` is intended for CI artifacts, not tracked generated state.
+Every invocation requires `--source-sha SHA`. The canonical PR lane uses `--require-through verification-receipts`: registry, generated capability surfaces, and the freshly materialized canonical receipt are strict, while the downstream product-state node remains visible as deferred and may honestly be absent. Its digest-pinned slim container does not carry Git, so source binding is established by the workflow SHA passed to both the receipt and top-level DAG state, with an explicit `receipt.source_commit_sha == GITHUB_SHA` check. The exact-main product-state workflow has Git available, uses `--verify-head`, and uses `--require-through product-state` only after all declared outputs exist.
+
+Both lanes write and schema-validate a provenance DAG state. They do not compare that state with itself, because such a comparison cannot establish freshness. A real stale-evidence decision requires a separately retained, trusted state from an earlier run; wiring and authenticating that cross-run artifact baseline remains pending and is not claimed by this slice. Missing artifacts in the required prefix still fail closed while the provenance state is written.
 
 Example:
 
 ```bash
 python scripts/check_generated_artifact_dag.py \
-  --state .ci/trusted-generated-artifact-state.json \
-  --report .ci/generated-artifact-dag-report.json
+  --source-sha "$(git rev-parse HEAD)" \
+  --verify-head \
+  --require-through verification-receipts \
+  --write-state .ci/generated-artifact-dag-state.json
 ```
 
-Until a trusted product-state workflow publishes that exact-SHA baseline and its runtime receipts, this slice provides the fail-closed DAG mechanism but does not claim P0-RC completion.
+The exact-main workflow obtains the canonical runtime receipt from a separate job running the same digest-pinned container as the PR lane, observes `refs/heads/main` through the GitHub API immediately before product-state construction, and refuses attestation if that observation changes before signing. A source/observed-main mismatch is recorded as blocked rather than as a false current match. The workflow retains its complete provenance state and runtime receipt as artifacts. PR and product-state checks deliberately do not yet download or trust a historical-main DAG state, so stale cross-run invalidation remains an explicit pending gate and this wiring does not claim P0-RC completion.

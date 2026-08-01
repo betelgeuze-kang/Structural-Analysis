@@ -1,0 +1,418 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/product-state.current.v1.schema.json",
+  "title": "Current exact-source product state",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_commit_sha",
+    "observed_github_main_sha",
+    "observed_github_main_source",
+    "inventory_observed_main_sha",
+    "source_matches_observed_github_main",
+    "candidate_worktree_dirty",
+    "candidate_worktree_change_count",
+    "status",
+    "contract_pass",
+    "blockers",
+    "product_profile",
+    "release_authority",
+    "release_eligible",
+    "authority_tracks",
+    "promotion_blockers",
+    "quality_evidence",
+    "capability_registry",
+    "bounded_planar_external_vv",
+    "legacy_readiness",
+    "workstation_readiness",
+    "result_authority",
+    "historical_state",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "product-state.current.v1"},
+    "source_commit_sha": {"$ref": "#/$defs/sourceSha"},
+    "observed_github_main_sha": {"$ref": "#/$defs/sourceSha"},
+    "observed_github_main_source": {"type": "string", "minLength": 1},
+    "inventory_observed_main_sha": {"type": "string"},
+    "source_matches_observed_github_main": {"type": "boolean"},
+    "candidate_worktree_dirty": {"type": "boolean"},
+    "candidate_worktree_change_count": {"type": "integer", "minimum": 0},
+    "status": {"enum": ["ready", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "blockers": {"$ref": "#/$defs/stringArray"},
+    "product_profile": {"const": "repository_integrity_developer_preview"},
+    "release_authority": {"const": false},
+    "release_eligible": {"const": false},
+    "authority_tracks": {
+      "type": "object",
+      "required": [
+        "solo_developer_technical",
+        "external_promotion",
+        "internal_license_due_diligence"
+      ],
+      "properties": {
+        "solo_developer_technical": {
+          "type": "object",
+          "required": [
+            "status",
+            "scope",
+            "requires_independent_identity_authentication",
+            "requires_counsel_legal_approval",
+            "blockers",
+            "grants",
+            "does_not_grant"
+          ],
+          "properties": {
+            "status": {"enum": ["complete", "in_progress"]},
+            "scope": {"$ref": "#/$defs/stringArray"},
+            "requires_independent_identity_authentication": {"const": false},
+            "requires_counsel_legal_approval": {"const": false},
+            "blockers": {"$ref": "#/$defs/stringArray"},
+            "grants": {"$ref": "#/$defs/stringArray"},
+            "does_not_grant": {"$ref": "#/$defs/stringArray"}
+          },
+          "additionalProperties": false
+        },
+        "external_promotion": {
+          "type": "object",
+          "required": ["status", "evidence", "required_for", "does_not_block"],
+          "properties": {
+            "status": {"enum": ["complete", "unavailable"]},
+            "evidence": {
+              "type": "object",
+              "required": [
+                "independent_operator_identity_authentication",
+                "product_legal_license_approval",
+                "formal_level_2_promotion"
+              ],
+              "properties": {
+                "independent_operator_identity_authentication": {
+                  "$ref": "#/$defs/authorityEvidence"
+                },
+                "product_legal_license_approval": {
+                  "$ref": "#/$defs/authorityEvidence"
+                },
+                "formal_level_2_promotion": {
+                  "$ref": "#/$defs/authorityEvidence"
+                }
+              },
+              "additionalProperties": false
+            },
+            "required_for": {"$ref": "#/$defs/stringArray"},
+            "does_not_block": {"$ref": "#/$defs/stringArray"}
+          },
+          "additionalProperties": false
+        },
+        "internal_license_due_diligence": {
+          "type": "object",
+          "required": [
+            "status",
+            "attainable_by_solo_developer",
+            "components",
+            "evidence",
+            "claims",
+            "external_actions",
+            "blockers",
+            "does_not_grant",
+            "claim_boundary"
+          ],
+          "properties": {
+            "status": {"enum": ["complete", "blocked"]},
+            "attainable_by_solo_developer": {"const": true},
+            "components": {"$ref": "#/$defs/stringArray"},
+            "evidence": {"type": "object", "minProperties": 1},
+            "claims": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {"type": "boolean"}
+            },
+            "external_actions": {"type": "array"},
+            "blockers": {"$ref": "#/$defs/stringArray"},
+            "does_not_grant": {"$ref": "#/$defs/stringArray"},
+            "claim_boundary": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "promotion_blockers": {"$ref": "#/$defs/stringArray"},
+    "quality_evidence": {
+      "type": "object",
+      "required": ["status", "authority"],
+      "properties": {
+        "status": {"enum": ["available", "invalid", "unavailable"]},
+        "authority": {"const": "github_actions_workflow_run_event"}
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "status": {"const": "available"},
+            "workflow_name": {"const": "Nightly Full Quality"},
+            "run_id": {"type": "integer", "minimum": 1},
+            "run_number": {"type": "integer", "minimum": 1},
+            "run_attempt": {"type": "integer", "minimum": 1},
+            "trigger_event": {"enum": ["schedule", "workflow_dispatch"]},
+            "conclusion": {"type": "string", "minLength": 1},
+            "head_branch": {"const": "main"},
+            "head_sha": {"$ref": "#/$defs/sourceSha"},
+            "html_url": {"type": "string", "pattern": "^https://github\\.com/"}
+          },
+          "required": [
+            "workflow_name",
+            "run_id",
+            "run_number",
+            "run_attempt",
+            "trigger_event",
+            "conclusion",
+            "head_branch",
+            "head_sha",
+            "html_url"
+          ]
+        },
+        {
+          "properties": {
+            "status": {"const": "invalid"},
+            "reason": {"type": "string", "minLength": 1}
+          },
+          "required": ["reason"]
+        },
+        {"properties": {"status": {"const": "unavailable"}}}
+      ],
+      "additionalProperties": true
+    },
+    "capability_registry": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256",
+        "schema_version",
+        "capability_count",
+        "public_count",
+        "release_eligible_count"
+      ],
+      "properties": {
+        "path": {"const": "artifacts/manifests/capabilities.yaml"},
+        "sha256": {"$ref": "#/$defs/prefixedSha256"},
+        "schema_version": {"type": "string"},
+        "capability_count": {"type": "integer", "minimum": 0},
+        "public_count": {"type": "integer", "minimum": 0},
+        "release_eligible_count": {"type": "integer", "minimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "bounded_planar_external_vv": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256",
+        "schema_version",
+        "source_commit_sha",
+        "source_commit_matches_current",
+        "artifact_load_pass",
+        "status_check_pass",
+        "validation_pass",
+        "validation_reason",
+        "status",
+        "contract_pass",
+        "claims",
+        "stored_claims",
+        "claim_boundary"
+      ],
+      "properties": {
+        "path": {
+          "const": "artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json"
+        },
+        "sha256": {"type": "string", "minLength": 1},
+        "schema_version": {"type": ["string", "null"]},
+        "source_commit_sha": {"type": ["string", "null"]},
+        "source_commit_matches_current": {"type": "boolean"},
+        "artifact_load_pass": {"type": "boolean"},
+        "status_check_pass": {"type": "boolean"},
+        "validation_pass": {"type": "boolean"},
+        "validation_reason": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "minLength": 1},
+        "contract_pass": {"type": "boolean"},
+        "claims": {"type": "object"},
+        "stored_claims": {"type": "object"},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": true
+    },
+    "legacy_readiness": {
+      "type": "object",
+      "required": [
+        "path",
+        "classification",
+        "current_product_authority",
+        "historical_record_id"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "classification": {"const": "historical_only"},
+        "current_product_authority": {"const": false},
+        "historical_record_id": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "workstation_readiness": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256",
+        "source_commit_sha",
+        "status",
+        "contract_pass",
+        "current_source_bound"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/prefixedSha256"},
+        "source_commit_sha": {"type": "string"},
+        "status": {"type": "string", "minLength": 1},
+        "contract_pass": {"type": "boolean"},
+        "current_source_bound": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "result_authority": {
+      "type": "object",
+      "required": [
+        "source",
+        "numerical_authority_counts",
+        "release_eligible_capability_count"
+      ],
+      "properties": {
+        "source": {"const": "artifacts/manifests/capabilities.yaml"},
+        "numerical_authority_counts": {
+          "type": "object",
+          "additionalProperties": {"type": "integer", "minimum": 0}
+        },
+        "release_eligible_capability_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "historical_state": {
+      "type": "object",
+      "required": [
+        "path",
+        "record_count",
+        "legacy_g1_record_count",
+        "source_catalog_path",
+        "source_catalog_sha256",
+        "git_object_verification",
+        "current_authority"
+      ],
+      "properties": {
+        "path": {"const": "artifacts/manifests/product_state.history.v1.json"},
+        "record_count": {"type": "integer", "minimum": 0},
+        "legacy_g1_record_count": {"type": "integer", "minimum": 0},
+        "source_catalog_path": {"type": "string", "minLength": 1},
+        "source_catalog_sha256": {"$ref": "#/$defs/prefixedSha256"},
+        "git_object_verification": {"enum": ["passed", "failed", "not_requested"]},
+        "current_authority": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"contract_pass": {"const": true}},
+        "required": ["contract_pass"]
+      },
+      "then": {
+        "properties": {
+          "status": {"const": "ready"},
+          "blockers": {"maxItems": 0},
+          "source_matches_observed_github_main": {"const": true},
+          "candidate_worktree_dirty": {"const": false},
+          "quality_evidence": {
+            "properties": {
+              "status": {"const": "available"},
+              "conclusion": {"const": "success"}
+            },
+            "required": ["status", "conclusion"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"contract_pass": {"const": false}},
+        "required": ["contract_pass"]
+      },
+      "then": {
+        "properties": {
+          "status": {"const": "blocked"},
+          "blockers": {"minItems": 1}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "source_matches_observed_github_main": {"const": false}
+        },
+        "required": ["source_matches_observed_github_main"]
+      },
+      "then": {
+        "properties": {
+          "status": {"const": "blocked"},
+          "contract_pass": {"const": false},
+          "blockers": {
+            "contains": {
+              "const": "source_commit_does_not_match_observed_github_main"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"candidate_worktree_dirty": {"const": false}},
+        "required": ["candidate_worktree_dirty"]
+      },
+      "then": {
+        "properties": {"candidate_worktree_change_count": {"const": 0}}
+      },
+      "else": {
+        "properties": {"candidate_worktree_change_count": {"minimum": 1}}
+      }
+    }
+  ],
+  "$defs": {
+    "sourceSha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "prefixedSha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "stringArray": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "authorityEvidence": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["status", "value"],
+          "properties": {
+            "status": {"const": "available"},
+            "value": {"const": true}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["status"],
+          "properties": {"status": {"const": "unavailable"}},
+          "additionalProperties": false
+        }
+      ]
+    }
+  },
+  "additionalProperties": false
+}

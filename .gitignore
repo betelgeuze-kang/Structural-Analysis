@@ -43,6 +43,7 @@ target/
 # the source commit and are uploaded by CI; tracking them would create a Git
 # commit-SHA self-reference that can never be current.
 artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json
+artifacts/manifests/canonical_verification_environment.current.v1.json
 artifacts/manifests/internal_license_due_diligence.current.v1.json
 artifacts/manifests/product_state.current.v1.json
 artifacts/manifests/product_state.history.v1.json

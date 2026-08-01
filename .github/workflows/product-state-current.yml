@@ -31,18 +31,82 @@ env:
   PRODUCT_STATE_SHA: ${{ github.event.workflow_run.head_sha }}
   PRODUCT_STATE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
   PRODUCT_STATE_PATH: artifacts/manifests/product_state.current.v1.json
+  CANONICAL_VERIFICATION_RECEIPT_PATH: artifacts/manifests/canonical_verification_environment.current.v1.json
+  GENERATED_ARTIFACT_DAG_STATE_PATH: .ci/product-state-inputs/generated-artifact-dag-state.v1.json
+  NIGHTLY_WORKFLOW_RUN_EVENT_PATH: .ci/product-state-inputs/nightly-workflow-run-event.json
   PRODUCT_STATE_ATTESTATION_BUNDLE: .ci/product-state-inputs/product-state.current.sigstore.json
   PRODUCT_STATE_ATTESTATION_VERIFICATION: .ci/product-state-inputs/product-state.current.attestation-verification.json
   GH_TOKEN: ${{ github.token }}
 
 jobs:
-  build-current-state:
+  canonical-receipt:
     if: >-
       github.event.workflow_run.head_branch == 'main' &&
       (github.event.workflow_run.event == 'schedule' ||
        github.event.workflow_run.event == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    container:
+      image: docker.io/library/python:3.12.11-slim-bookworm@sha256:519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact product-state source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.PRODUCT_STATE_SHA }}
+
+      - name: Install exact hashed canonical dependencies
+        run: >-
+          python -m pip install
+          --only-binary=:all:
+          --require-hashes
+          --no-deps
+          -r canonical/requirements-cp312-manylinux2014-x86_64.lock
+
+      - name: Install source without dependency resolution
+        run: python -m pip install --no-deps --no-build-isolation -e .
+
+      - name: Build exact-source canonical environment receipt
+        run: >-
+          python scripts/build_canonical_verification_receipt.py
+          --enforce
+          --source-sha "$PRODUCT_STATE_SHA"
+          --write "$CANONICAL_VERIFICATION_RECEIPT_PATH"
+
+      - name: Validate canonical receipt schema and source binding
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import jsonschema
+
+          schema = json.loads(
+              Path("canonical/canonical-verification-receipt.v1.schema.json").read_text()
+          )
+          receipt = json.loads(
+              Path(os.environ["CANONICAL_VERIFICATION_RECEIPT_PATH"]).read_text()
+          )
+          jsonschema.Draft202012Validator(schema).validate(receipt)
+          assert receipt["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          PY
+
+      - name: Upload canonical product-state input
+        uses: actions/upload-artifact@v7
+        with:
+          name: product-state-canonical-receipt-${{ env.PRODUCT_STATE_SHA }}
+          path: ${{ env.CANONICAL_VERIFICATION_RECEIPT_PATH }}
+          if-no-files-found: error
+          retention-days: 90
+
+  build-current-state:
+    if: >-
+      github.event.workflow_run.head_branch == 'main' &&
+      (github.event.workflow_run.event == 'schedule' ||
+       github.event.workflow_run.event == 'workflow_dispatch')
+    needs: canonical-receipt
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout current main
         uses: actions/checkout@v6
@@ -64,11 +128,45 @@ jobs:
             -r canonical/requirements-cp312-manylinux2014-x86_64.lock
           python -m pip install --no-deps --no-build-isolation -e .
 
+      - name: Verify clean exact-source checkout
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$PRODUCT_STATE_SHA"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+      - name: Download canonical environment receipt
+        uses: actions/download-artifact@v7
+        with:
+          name: product-state-canonical-receipt-${{ env.PRODUCT_STATE_SHA }}
+          path: artifacts/manifests
+
+      - name: Validate canonical receipt schema and source binding
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import jsonschema
+
+          schema = json.loads(
+              Path("canonical/canonical-verification-receipt.v1.schema.json").read_text()
+          )
+          receipt = json.loads(
+              Path(os.environ["CANONICAL_VERIFICATION_RECEIPT_PATH"]).read_text()
+          )
+          jsonschema.Draft202012Validator(schema).validate(receipt)
+          assert receipt["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          PY
+
+      - name: Verify generated capability surfaces
+        run: python scripts/generate_capability_surfaces.py --json
+
       - name: Materialize exact current-source product-state inputs
         shell: bash
         run: |
-          test -z "$(git status --porcelain=v1 --untracked-files=all)"
           mkdir -p .ci/product-state-inputs
+          cp "$GITHUB_EVENT_PATH" "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
           cp \
             implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json \
             .ci/product-state-inputs/code-to-code-receipt.json
@@ -96,6 +194,16 @@ jobs:
             --external-modal-receipt .ci/product-state-inputs/modal-buckling-receipt.json \
             --fail-blocked
 
+      - name: Observe refs/heads/main immediately before build
+        id: observe_main
+        shell: bash
+        run: |
+          observed_main_sha="$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha'
+          )"
+          [[ "$observed_main_sha" =~ ^[0-9a-f]{40}$ ]]
+          printf 'sha=%s\n' "$observed_main_sha" >> "$GITHUB_OUTPUT"
+
       - name: Build source-bound current product state
         id: build_state
         continue-on-error: true
@@ -103,17 +211,37 @@ jobs:
           python scripts/build_product_state.py
           --write
           --json
-          --observed-main-sha "$PRODUCT_STATE_SHA"
-          --observed-main-source github_nightly_full_quality_observation
-          --nightly-workflow-run-event "$GITHUB_EVENT_PATH"
+          --observed-main-sha "${{ steps.observe_main.outputs.sha }}"
+          --observed-main-source github_api_refs_heads_main_pre_build
+          --nightly-workflow-run-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
           --verify-legacy-git-objects
           --external-vv-code-receipt .ci/product-state-inputs/code-to-code-receipt.json
           --external-vv-modal-receipt .ci/product-state-inputs/modal-buckling-receipt.json
           > .ci/product-state-inputs/product-state-build-report.json
 
+      - name: Validate current product-state schema
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import jsonschema
+
+          schema = json.loads(
+              Path("canonical/product-state.current.v1.schema.json").read_text()
+          )
+          product_state = json.loads(
+              Path(os.environ["PRODUCT_STATE_PATH"]).read_text()
+          )
+          jsonschema.Draft202012Validator.check_schema(schema)
+          jsonschema.Draft202012Validator(schema).validate(product_state)
+          PY
+
       - name: Verify current-main binding, outcome, and bounded authority
         shell: bash
         env:
+          OBSERVED_MAIN_SHA: ${{ steps.observe_main.outputs.sha }}
           PRODUCT_STATE_BUILD_OUTCOME: ${{ steps.build_state.outcome }}
         run: |
           python - <<'PY'
@@ -126,20 +254,31 @@ jobs:
           )
           conclusion = os.environ["PRODUCT_STATE_CONCLUSION"]
           build_outcome = os.environ["PRODUCT_STATE_BUILD_OUTCOME"]
+          observed_main_sha = os.environ["OBSERVED_MAIN_SHA"]
+          source_sha = os.environ["PRODUCT_STATE_SHA"]
           assert payload["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
-          assert payload["observed_github_main_sha"] == os.environ["PRODUCT_STATE_SHA"]
-          assert payload["observed_github_main_source"] == "github_nightly_full_quality_observation"
-          assert payload["quality_evidence"]["status"] == "available"
+          assert payload["observed_github_main_sha"] == observed_main_sha
+          assert payload["observed_github_main_source"] == "github_api_refs_heads_main_pre_build"
           assert payload["quality_evidence"]["workflow_name"] == "Nightly Full Quality"
           assert payload["quality_evidence"]["conclusion"] == conclusion
           assert payload["quality_evidence"]["head_sha"] == os.environ["PRODUCT_STATE_SHA"]
-          assert payload["source_matches_observed_github_main"] is True
+          assert payload["source_matches_observed_github_main"] is (
+              source_sha == observed_main_sha
+          )
           assert payload["product_profile"] == "repository_integrity_developer_preview"
           assert payload["release_authority"] is False
           assert payload["historical_state"]["git_object_verification"] == "passed"
-          if conclusion == "success":
+          if source_sha != observed_main_sha:
+              assert build_outcome == "failure"
+              assert payload["status"] == "blocked"
+              assert payload["contract_pass"] is False
+              assert "source_commit_does_not_match_observed_github_main" in payload["blockers"]
+              assert payload["quality_evidence"]["status"] == "invalid"
+              assert "nightly_full_quality_evidence_invalid:head_sha" in payload["blockers"]
+          elif conclusion == "success":
               assert build_outcome == "success"
               assert payload["contract_pass"] is True
+              assert payload["quality_evidence"]["status"] == "available"
               assert not any(
                   blocker.startswith("nightly_full_quality_")
                   for blocker in payload["blockers"]
@@ -147,12 +286,48 @@ jobs:
           else:
               assert build_outcome == "failure"
               assert payload["contract_pass"] is False
+              assert payload["quality_evidence"]["status"] == "available"
               assert f"nightly_full_quality_not_success:{conclusion}" in payload["blockers"]
               assert not any(
                   blocker.startswith("nightly_full_quality_evidence_invalid:")
                   for blocker in payload["blockers"]
               )
           PY
+
+      - name: Record complete exact-source generated-artifact DAG provenance
+        shell: bash
+        run: |
+          python scripts/check_generated_artifact_dag.py \
+            --source-sha "$PRODUCT_STATE_SHA" \
+            --verify-head \
+            --require-through product-state \
+            --write-state "$GENERATED_ARTIFACT_DAG_STATE_PATH"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import jsonschema
+
+          schema = json.loads(
+              Path("canonical/generated-artifact-dag-state.v1.schema.json").read_text()
+          )
+          state = json.loads(
+              Path(os.environ["GENERATED_ARTIFACT_DAG_STATE_PATH"]).read_text()
+          )
+          jsonschema.Draft202012Validator(schema).validate(state)
+          assert state["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          PY
+
+      - name: Confirm main observation is stable before attestation
+        shell: bash
+        env:
+          OBSERVED_MAIN_SHA: ${{ steps.observe_main.outputs.sha }}
+        run: |
+          current_main_sha="$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha'
+          )"
+          [[ "$current_main_sha" =~ ^[0-9a-f]{40}$ ]]
+          test "$current_main_sha" = "$OBSERVED_MAIN_SHA"
 
       - name: Attest exact-SHA product state
         id: attest
@@ -180,6 +355,7 @@ jobs:
             artifacts/manifests/product_state.history.v1.json
             artifacts/manifests/product_state.legacy-sources.v1.json
             artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json
+            artifacts/manifests/canonical_verification_environment.current.v1.json
             artifacts/manifests/internal_license_due_diligence.current.v1.json
             artifacts/vv/bounded_planar_external_linear_case_package
             artifacts/vv/bounded_planar_external_negative_case_package

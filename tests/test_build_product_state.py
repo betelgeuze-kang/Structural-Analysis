@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
 import sys
 
+from jsonschema import Draft202012Validator, ValidationError
 import pytest
 
 
@@ -39,6 +41,80 @@ def _nightly_event(
             "html_url": "https://github.com/example/repository/actions/runs/30207954772",
         }
     }
+
+
+def test_current_product_state_matches_schema_and_cannot_promote_release() -> None:
+    current, _ = product_state.build_product_state(ROOT)
+    schema = json.loads(
+        (ROOT / "canonical/product-state.current.v1.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+
+    Draft202012Validator.check_schema(schema)
+    Draft202012Validator(schema).validate(current)
+
+    promoted = {**current, "release_authority": True}
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(promoted)
+
+    unbound = {**current, "source_commit_sha": "main"}
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(unbound)
+
+    contradictory_status = {**current, "contract_pass": True, "status": "blocked"}
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(contradictory_status)
+
+    missing_source_mismatch_blocker = deepcopy(current)
+    missing_source_mismatch_blocker["source_matches_observed_github_main"] = False
+    missing_source_mismatch_blocker["blockers"] = [
+        blocker
+        for blocker in missing_source_mismatch_blocker["blockers"]
+        if blocker != "source_commit_does_not_match_observed_github_main"
+    ]
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(missing_source_mismatch_blocker)
+
+    impossible_clean_count = {
+        **current,
+        "candidate_worktree_dirty": False,
+        "candidate_worktree_change_count": 1,
+    }
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(impossible_clean_count)
+
+    empty_authority_track = deepcopy(current)
+    empty_authority_track["authority_tracks"]["solo_developer_technical"] = {}
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(empty_authority_track)
+
+    incomplete_available_quality = deepcopy(current)
+    incomplete_available_quality["quality_evidence"] = {
+        "status": "available",
+        "authority": "github_actions_workflow_run_event",
+    }
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(incomplete_available_quality)
+
+
+def test_observed_main_mismatch_is_blocked_without_false_current_match() -> None:
+    head = product_state._git(ROOT, "rev-parse", "HEAD")
+    observed_main = "0" * 40 if head != "0" * 40 else "1" * 40
+
+    current, _ = product_state.build_product_state(
+        ROOT,
+        observed_main_sha=observed_main,
+        observed_main_source="github_api_refs_heads_main_pre_build",
+        nightly_workflow_run_event=_nightly_event(head),
+    )
+
+    assert current["observed_github_main_sha"] == observed_main
+    assert current["source_matches_observed_github_main"] is False
+    assert current["status"] == "blocked"
+    assert current["contract_pass"] is False
+    assert "source_commit_does_not_match_observed_github_main" in current["blockers"]
+    assert "nightly_full_quality_evidence_invalid:head_sha" in current["blockers"]
 
 
 @pytest.mark.skipif(
@@ -285,7 +361,17 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
     )
 
 
-def test_dirty_candidate_fails_closed_without_promoting_legacy_readiness() -> None:
+def test_dirty_candidate_fails_closed_without_promoting_legacy_readiness(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    real_git = product_state._git
+
+    def dirty_git(repo_root: Path, *args: str) -> str:
+        if args == ("status", "--short", "--untracked-files=normal"):
+            return " M synthetic-dirty-file"
+        return real_git(repo_root, *args)
+
+    monkeypatch.setattr(product_state, "_git", dirty_git)
     current_head = product_state._git(ROOT, "rev-parse", "HEAD")
     current, _ = product_state.build_product_state(
         ROOT,
