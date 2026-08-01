@@ -507,7 +507,7 @@ class StatefulCorotationalFiberFrame3D:
             )
             responses.append(response)
             states.append(response.state)
-        tangent = 0.5 * (tangent + tangent.T)
+        tangent[...] = 0.5 * (tangent + tangent.T)
         return force, tangent, tuple(responses), tuple(states)
 
     def _initial_basic_tangent(self) -> np.ndarray:
