@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 
@@ -65,6 +66,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         encoding="utf-8"
     )
 
+    assert "timeout-minutes: 30" in workflow
     assert "workflow_run:" in workflow
     assert 'workflows: ["Nightly Full Quality"]' in workflow
     assert "github.event.workflow_run.conclusion == 'success'" not in workflow
@@ -76,7 +78,23 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         "PRODUCT_STATE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}"
         in workflow
     )
+    assert "PRODUCT_STATE_WORKFLOW_SHA: ${{ github.workflow_sha }}" in workflow
+    assert "PRODUCT_STATE_WORKFLOW_REF: ${{ github.workflow_ref }}" in workflow
+    assert "PRODUCT_STATE_WORKFLOW_NAME: ${{ github.workflow }}" in workflow
+    assert "PRODUCT_STATE_WORKFLOW_EVENT: ${{ github.event_name }}" in workflow
+    assert "PRODUCT_STATE_WORKFLOW_RUN_ID: ${{ github.run_id }}" in workflow
+    assert "PRODUCT_STATE_WORKFLOW_RUN_NUMBER: ${{ github.run_number }}" in workflow
+    assert "PRODUCT_STATE_WORKFLOW_RUN_ATTEMPT: ${{ github.run_attempt }}" in workflow
     assert "ref: ${{ env.PRODUCT_STATE_SHA }}" in workflow
+    assert 'test "$PRODUCT_STATE_WORKFLOW_SHA" = "$PRODUCT_STATE_SHA"' in workflow
+    assert 'test "$PRODUCT_STATE_WORKFLOW_EVENT" = "workflow_run"' in workflow
+    assert (
+        "$GITHUB_REPOSITORY/.github/workflows/"
+        "product-state-current.yml@refs/heads/main" in workflow
+    )
+    identity_step = workflow.index("Verify product-state workflow execution identity")
+    evidence_step = workflow.index("Verify generated capability surfaces")
+    assert identity_step < evidence_step
     assert 'python-version: "3.12.11"' in workflow
     assert "canonical/requirements-cp312-manylinux2014-x86_64.lock" in workflow
     assert "--require-hashes" in workflow
@@ -84,107 +102,220 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'PYTHONHASHSEED: "0"' in workflow
     assert "scripts/build_product_state.py" in workflow
+    assert "scripts/generate_capability_surfaces.py" in workflow
+    assert "p0-canonical-contract.yml" in workflow
+    assert "head_sha=$PRODUCT_STATE_SHA" in workflow
+    assert "for attempt in {1..30}" in workflow
+    assert "sleep 10" in workflow
+    assert "canonical workflow lookup failed after bounded retry" in workflow
+    assert 'row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]' in workflow
+    assert "gh run download" in workflow
+    assert "for attempt in {1..12}" in workflow
+    assert "sleep 5" in workflow
+    assert "exact-SHA canonical artifact unavailable after bounded retry" in workflow
+    assert (
+        "artifacts/manifests/canonical_verification_environment.current.v1.json"
+        in workflow
+    )
+    assert (
+        "CANONICAL_WHEEL_CONTRACT_PATH: .ci/canonical-project-wheel-contract.json"
+        in workflow
+    )
+    assert (
+        "CANONICAL_WHEEL_PATH: .ci/canonical-wheel/"
+        "structural_analysis-0.3.0-py3-none-any.whl" in workflow
+    )
+    assert (
+        "NIGHTLY_WORKFLOW_RUN_EVENT_PATH: "
+        ".ci/product-state-inputs/nightly-workflow-run-event.json" in workflow
+    )
+    assert (
+        'receipt["contract_profile"] == "p0-canonical-installed-wheel.v1"' in workflow
+    )
+    assert 'receipt["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]' in workflow
+    assert 'receipt["project_wheel"] == wheel_contract' in workflow
+    assert "hashlib.sha256(wheel_path.read_bytes()).hexdigest()" in workflow
+    assert 'receipt["contract_pass"] is True' in workflow
+    assert 'cp "$GITHUB_EVENT_PATH" "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"' in workflow
+    assert (
+        workflow.count(
+            'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" '
+            "--jq '.object.sha'"
+        )
+        == 2
+    )
     assert '--observed-main-sha "${{ steps.observe_main.outputs.sha }}"' in workflow
     assert "github_api_refs_heads_main_pre_build" in workflow
-    assert 'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"' in workflow
-    assert workflow.count(
-        'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"'
-    ) == 2
-    assert '--nightly-workflow-run-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"' in workflow
-    assert 'cp "$GITHUB_EVENT_PATH" "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"' in workflow
+    assert (
+        workflow.count(
+            '--nightly-workflow-run-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"'
+        )
+        == 2
+    )
+    assert '--product-state-workflow-sha "$PRODUCT_STATE_WORKFLOW_SHA"' in workflow
+    assert '--product-state-workflow-ref "$PRODUCT_STATE_WORKFLOW_REF"' in workflow
+    assert '--product-state-workflow-name "$PRODUCT_STATE_WORKFLOW_NAME"' in workflow
+    assert '--product-state-workflow-event "$PRODUCT_STATE_WORKFLOW_EVENT"' in workflow
+    assert (
+        '--product-state-workflow-run-id "$PRODUCT_STATE_WORKFLOW_RUN_ID"' in workflow
+    )
+    assert (
+        '--product-state-workflow-run-number "$PRODUCT_STATE_WORKFLOW_RUN_NUMBER"'
+        in workflow
+    )
+    assert (
+        "--product-state-workflow-run-attempt "
+        '"$PRODUCT_STATE_WORKFLOW_RUN_ATTEMPT"' in workflow
+    )
     assert "--verify-legacy-git-objects" in workflow
-    assert 'payload["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]' in workflow
+    assert 'payload["source_commit_sha"] == source_sha' in workflow
     assert (
         'payload["observed_github_main_sha"] == observed_main_sha'
         in workflow
     )
+    assert 'if source_sha != observed_main_sha:' in workflow
+    assert 'payload["quality_evidence"]["status"] == "invalid"' in workflow
     assert 'payload["quality_evidence"]["status"] == "available"' in workflow
+    assert '"source_commit_does_not_match_observed_github_main"' in workflow
+    assert '"nightly_full_quality_evidence_invalid:head_sha"' in workflow
     assert 'payload["quality_evidence"]["conclusion"] == conclusion' in workflow
-    assert 'if conclusion == "success":' in workflow
+    assert 'elif conclusion == "success":' in workflow
     assert 'payload["contract_pass"] is True' in workflow
     assert 'payload["contract_pass"] is False' in workflow
     assert 'f"nightly_full_quality_not_success:{conclusion}"' in workflow
     assert "continue-on-error: true" in workflow
+    assert '--write-state "$DAG_STATE_PATH"' in workflow
+    assert '--report "$DAG_REPORT_PATH"' in workflow
+    assert (
+        '--product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"'
+        in workflow
+    )
+    assert "--allow-missing" not in workflow
+    assert "canonical/generated-artifact-dag-state.v2.schema.json" in workflow
+    assert "canonical/generated-artifact-dag-report.v2.schema.json" in workflow
+    assert 'report["contract_pass"] is True' in workflow
+    assert 'report["stale_nodes"] == []' in workflow
+    assert 'row["current_binding"]["status"] == "current"' in workflow
     assert 'payload["release_authority"] is False' in workflow
     assert 'git_object_verification"] == "passed"' in workflow
-    assert "uses: actions/attest@v4" in workflow
+    assert "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803" in workflow
+    assert "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1" in workflow
+    assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in workflow
+    assert (
+        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
+    )
+    assert "actions/checkout@v" not in workflow
+    assert "actions/setup-python@v" not in workflow
+    assert "actions/attest@v" not in workflow
+    assert "actions/upload-artifact@v" not in workflow
     assert "product-state.current.sigstore.json" in workflow
-    assert "gh attestation verify" in workflow
-    assert "retention-days: 90" in workflow
-    assert "timeout-minutes: 45" in workflow
-    assert (
-        "CANONICAL_VERIFICATION_RECEIPT_PATH: "
-        "artifacts/manifests/canonical_verification_environment.current.v1.json"
-        in workflow
-    )
-    assert "python scripts/generate_capability_surfaces.py --json" in workflow
+    assert "scripts/build_product_state_provenance_bundle.py" in workflow
     assert '--source-sha "$PRODUCT_STATE_SHA"' in workflow
-    assert 'test "$(git rev-parse HEAD)" = "$PRODUCT_STATE_SHA"' in workflow
-    assert workflow.count("--verify-head") == 1
-    assert "--require-through product-state" in workflow
-    assert '--write-state "$GENERATED_ARTIFACT_DAG_STATE_PATH"' in workflow
-    assert '--state "$GENERATED_ARTIFACT_DAG_STATE_PATH"' not in workflow
-    assert "GENERATED_ARTIFACT_DAG_REPORT_PATH" not in workflow
-    assert "canonical/generated-artifact-dag-state.v1.schema.json" in workflow
-    assert "canonical/product-state.current.v1.schema.json" in workflow
-    assert "jsonschema.Draft202012Validator(schema).validate(product_state)" in workflow
-    assert 'receipt["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]' in workflow
-    assert "canonical-receipt:" in workflow
-    assert "needs: canonical-receipt" in workflow
+    assert '--product-state "$PRODUCT_STATE_PATH"' in workflow
+    assert '--canonical-receipt "$CANONICAL_RECEIPT_PATH"' in workflow
+    assert '--canonical-wheel-contract "$CANONICAL_WHEEL_CONTRACT_PATH"' in workflow
+    assert '--canonical-wheel "$CANONICAL_WHEEL_PATH"' in workflow
+    assert '--dag-state "$DAG_STATE_PATH"' in workflow
+    assert '--dag-report "$DAG_REPORT_PATH"' in workflow
+    assert "canonical-verification-workflow-run.json" in workflow
+    assert "product-state.provenance-bundle.v1.json" in workflow
     assert (
-        "docker.io/library/python:3.12.11-slim-bookworm@sha256:"
-        "519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7"
-        in workflow
+        workflow.count("actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d") == 2
     )
-    assert "uses: actions/upload-artifact@v7" in workflow
-    assert "uses: actions/download-artifact@v7" in workflow
-    assert "product-state-canonical-receipt-${{ env.PRODUCT_STATE_SHA }}" in workflow
-    download = workflow.index("Download canonical environment receipt")
-    downloaded_receipt_validation = workflow.index(
-        "Validate canonical receipt schema and source binding", download
+    assert "steps.attest_provenance.outputs.bundle-path" in workflow
+    assert workflow.index("steps.attest.outputs.bundle-path") < workflow.index(
+        "id: attest_provenance"
     )
-    assert download < downloaded_receipt_validation
-    observe = workflow.index(
-        "      - name: Observe refs/heads/main immediately before build"
+    assert "product-state.provenance-bundle.sigstore.json" in workflow
+    assert "product-state.provenance-bundle.attestation-verification.json" in workflow
+    assert workflow.count(".github/workflows/product-state-current.yml") >= 5
+    assert workflow.count("gh attestation verify") == 2
+    assert workflow.count('--signer-digest "$PRODUCT_STATE_WORKFLOW_SHA"') == 2
+    assert workflow.count('--source-digest "$PRODUCT_STATE_SHA"') == 2
+    assert workflow.count("--source-ref refs/heads/main") == 2
+    assert "canonical/product-state.current.v1.schema.json" in workflow
+    assert "jsonschema.Draft202012Validator.check_schema(schema)" in workflow
+    assert 'test "$current_main_sha" = "$PRODUCT_STATE_SHA"' in workflow
+    assert workflow.index("Validate current product-state schema") < workflow.index(
+        "Verify current-main binding, outcome, and bounded authority"
     )
-    build = workflow.index("      - name: Build source-bound current product state")
-    assert observe < build
-    assert workflow[observe:build].count("      - name:") == 1
-    assert 'source_sha == observed_main_sha' in workflow
-    assert 'payload["source_matches_observed_github_main"] is True' not in workflow
-    stable = workflow.index("Confirm main observation is stable before attestation")
-    attest = workflow.index("Attest exact-SHA product state")
-    assert stable < attest
-    assert 'test "$current_main_sha" = "$OBSERVED_MAIN_SHA"' in workflow
-    assert workflow.index("python scripts/build_product_state.py") < workflow.index(
-        '--write-state "$GENERATED_ARTIFACT_DAG_STATE_PATH"'
+    assert workflow.index("Confirm main observation is stable before attestation") < (
+        workflow.index("id: attest")
     )
+    assert workflow.count("include-hidden-files: true") == 1
+    assert "retention-days: 90" in workflow
 
 
 def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
     workflow = (ROOT / ".github" / "workflows" / "p0-canonical-contract.yml").read_text(
         encoding="utf-8"
     )
+    config = json.loads(
+        (ROOT / "canonical/verification-environment.v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
 
+    assert "timeout-minutes: 30" in workflow
     assert "merge_group:" in workflow
+    assert "runs-on: ubuntu-latest" in workflow
+    assert config["container"]["platform"] == "linux/amd64"
+    assert config["python"]["abi"] == "cp312"
+    assert config["dependency_lock"]["path"].endswith(
+        "requirements-cp312-manylinux2014-x86_64.lock"
+    )
+    assert (
+        f"image: {config['container']['image']}@{config['container']['digest']}"
+        in workflow
+    )
+    source_control_probe = workflow.index("- name: Verify source-control toolchain")
+    checkout = workflow.index("- name: Checkout exact source")
+    assert source_control_probe < checkout
+    assert "command -v git" in workflow
+    assert "git --version" in workflow
+    push = workflow.split("  push:", 1)[1].split("  workflow_dispatch:", 1)[0]
+    assert "paths:" not in push
     assert '--source-sha "${{ github.sha }}"' in workflow
+    assert "ref: ${{ github.sha }}" in workflow
     assert "--require-hashes" in workflow
     assert "--no-deps" in workflow
+    assert "python -m pip download" in workflow
+    assert "--no-index" in workflow
+    assert "--force-reinstall" in workflow
+    assert "--no-cache-dir" in workflow
+    assert '--find-links "$CANONICAL_WHEELHOUSE"' in workflow
+    assert "SOURCE_DATE_EPOCH=$(git show -s --format=%ct" in workflow
+    assert "scripts/build_canonical_project_wheel.py" in workflow
+    assert '--source-date-epoch "$SOURCE_DATE_EPOCH"' in workflow
+    assert '--wheelhouse "$CANONICAL_WHEELHOUSE"' in workflow
+    assert '--project-wheel-contract "$CANONICAL_WHEEL_CONTRACT"' in workflow
+    assert '--dependency-wheelhouse "$CANONICAL_WHEELHOUSE"' in workflow
+    assert "canonical-project-wheel-contract.v1.schema.json" in workflow
     assert (
-        "CANONICAL_VERIFICATION_RECEIPT_PATH: "
+        'receipt["contract_profile"] == "p0-canonical-installed-wheel.v1"' in workflow
+    )
+    assert 'receipt["contract_pass"] is True' in workflow
+    assert "--no-build-isolation -e ." not in workflow
+    assert "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803" in workflow
+    assert (
+        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
+    )
+    assert "actions/checkout@v" not in workflow
+    assert "actions/upload-artifact@v" not in workflow
+    assert "retention-days: 90" in workflow
+    assert "scripts/generate_capability_surfaces.py" in workflow
+    assert (
         "artifacts/manifests/canonical_verification_environment.current.v1.json"
         in workflow
     )
-    assert "python scripts/generate_capability_surfaces.py --json" in workflow
-    assert "--verify-head" not in workflow
-    assert "--require-through verification-receipts" in workflow
-    assert '--write-state "$GENERATED_ARTIFACT_DAG_STATE_PATH"' in workflow
-    assert '--state "$GENERATED_ARTIFACT_DAG_STATE_PATH"' not in workflow
-    assert "GENERATED_ARTIFACT_DAG_REPORT_PATH" not in workflow
-    assert "canonical/generated-artifact-dag-state.v1.schema.json" in workflow
-    assert "${{ env.CANONICAL_VERIFICATION_RECEIPT_PATH }}" in workflow
-    assert "${{ env.GENERATED_ARTIFACT_DAG_STATE_PATH }}" in workflow
-    assert 'receipt["source_commit_sha"] == os.environ["GITHUB_SHA"]' in workflow
+    assert '--write-candidate-state "$DAG_CANDIDATE_STATE_PATH"' in workflow
+    assert '--report "$DAG_CANDIDATE_REPORT_PATH"' in workflow
+    assert 'report["scope_pass"] is True' in workflow
+    assert 'report["contract_pass"] is False' in workflow
+    assert 'report["stale_nodes"] == ["product-state"]' in workflow
+    assert '["current_binding"]["status"] == "out_of_scope"' in workflow
+    assert "generated-artifact-dag-candidate-${{ github.sha }}" in workflow
+    assert workflow.count("include-hidden-files: true") == 2
 
 
 def test_required_workflow_contexts_are_unique_and_unconditional_on_prs() -> None:

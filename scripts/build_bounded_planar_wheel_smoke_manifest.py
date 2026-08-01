@@ -34,6 +34,21 @@ EXPECTED_BUILD_SYSTEM_REQUIREMENTS = [
     "tomli==2.4.1; python_version < '3.11'",
 ]
 EXPECTED_RUNTIME_CONSTRAINTS_PATH = "ci/bounded-planar-wheel-smoke.constraints.txt"
+EXPECTED_SOURCE_EXPORT = "git_archive_exact_commit_paths"
+EXPECTED_SOURCE_ARCHIVE_PATHS = (
+    "pyproject.toml",
+    "setup.cfg",
+    "README.md",
+    "LICENSE",
+    "src",
+    EXPECTED_RUNTIME_CONSTRAINTS_PATH,
+    "examples/bounded_planar_frame_alpha.model-ir.v2.json",
+    "examples/bounded_planar_settlement.model-ir.v2.json",
+)
+EXPECTED_CASES = {
+    "member_feature": "examples/bounded_planar_frame_alpha.model-ir.v2.json",
+    "prescribed_settlement": "examples/bounded_planar_settlement.model-ir.v2.json",
+}
 _GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 _WHEEL_FILENAME_RE = re.compile(
     r"^structural_analysis-[A-Za-z0-9_.+]+-py3-none-any\.whl$"
@@ -96,6 +111,56 @@ def _require_hash(value: object, *, field: str) -> str:
     return value
 
 
+def _require_positive_int(value: object, *, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise WheelSmokeManifestError(f"positive_integer_invalid:{field}")
+    return value
+
+
+def _validated_cases(
+    payload: Mapping[str, Any],
+    *,
+    coordinate: str,
+) -> dict[str, dict[str, Any]]:
+    cases = payload.get("cases")
+    if not isinstance(cases, Mapping) or set(cases) != set(EXPECTED_CASES):
+        raise WheelSmokeManifestError(f"cases_shape_invalid:{coordinate}")
+
+    validated: dict[str, dict[str, Any]] = {}
+    for case_id, expected_sample in EXPECTED_CASES.items():
+        row = cases.get(case_id)
+        if not isinstance(row, Mapping):
+            raise WheelSmokeManifestError(f"case_invalid:{coordinate}:{case_id}")
+        if row.get("sample") != expected_sample:
+            raise WheelSmokeManifestError(
+                f"case_sample_mismatch:{coordinate}:{case_id}"
+            )
+        validated[case_id] = {
+            "sample": expected_sample,
+            "sample_sha256": _require_hash(
+                row.get("sample_sha256"),
+                field=f"cases:{coordinate}:{case_id}:sample_sha256",
+            ),
+            "result_hash": _require_hash(
+                row.get("result_hash"),
+                field=f"cases:{coordinate}:{case_id}:result_hash",
+            ),
+            "engineering_result_hash": _require_hash(
+                row.get("engineering_result_hash"),
+                field=f"cases:{coordinate}:{case_id}:engineering_result_hash",
+            ),
+            "checkpoint_sha256": _require_hash(
+                row.get("checkpoint_sha256"),
+                field=f"cases:{coordinate}:{case_id}:checkpoint_sha256",
+            ),
+            "checkpoint_byte_length": _require_positive_int(
+                row.get("checkpoint_byte_length"),
+                field=f"cases:{coordinate}:{case_id}:checkpoint_byte_length",
+            ),
+        }
+    return validated
+
+
 def _artifact_directory(receipts_directory: Path, receipt_path: Path) -> str:
     relative = receipt_path.relative_to(receipts_directory)
     if len(relative.parts) < 2:
@@ -121,6 +186,7 @@ def build_manifest(
 
     observed: dict[str, dict[str, Any]] = {}
     source_tree_shas: set[str] = set()
+    source_date_epochs: set[int] = set()
     runtime_constraint_hashes: set[str] = set()
     for receipt_path in receipt_paths:
         payload = _load_receipt(receipt_path)
@@ -140,6 +206,20 @@ def build_manifest(
                 f"receipt_source_tree_invalid:{receipt_path.name}"
             )
         source_tree_shas.add(source_tree_sha)
+        source_date_epochs.add(
+            _require_positive_int(
+                payload.get("source_date_epoch"),
+                field=f"source_date_epoch:{receipt_path.as_posix()}",
+            )
+        )
+        if payload.get("source_export") != EXPECTED_SOURCE_EXPORT:
+            raise WheelSmokeManifestError(
+                f"source_export_mismatch:{receipt_path.as_posix()}"
+            )
+        if payload.get("source_archive_paths") != list(EXPECTED_SOURCE_ARCHIVE_PATHS):
+            raise WheelSmokeManifestError(
+                f"source_archive_paths_mismatch:{receipt_path.as_posix()}"
+            )
         if payload.get("build_system_requirements") != (
             EXPECTED_BUILD_SYSTEM_REQUIREMENTS
         ):
@@ -256,6 +336,7 @@ def build_manifest(
                 )
         if not isinstance(packages.get("pip"), str) or not packages["pip"]:
             raise WheelSmokeManifestError(f"runtime_pip_missing:{coordinate}")
+        cases = _validated_cases(payload, coordinate=coordinate)
 
         observed[coordinate] = {
             "coordinate_id": coordinate,
@@ -267,6 +348,7 @@ def build_manifest(
             "wheel_sha256": wheel_hash,
             "wheel_byte_length": wheel_path.stat().st_size,
             "runtime": runtime,
+            "cases": cases,
         }
 
     missing = sorted(set(EXPECTED_COORDINATES) - set(observed))
@@ -276,6 +358,8 @@ def build_manifest(
         )
     if len(source_tree_shas) != 1:
         raise WheelSmokeManifestError("source_tree_sha_not_uniform")
+    if len(source_date_epochs) != 1:
+        raise WheelSmokeManifestError("source_date_epoch_not_uniform")
     if len(runtime_constraint_hashes) != 1:
         raise WheelSmokeManifestError("runtime_constraints_hash_not_uniform")
 
@@ -283,6 +367,9 @@ def build_manifest(
         "schema_version": SCHEMA_VERSION,
         "source_commit_sha": source_commit_sha,
         "source_tree_sha": next(iter(source_tree_shas)),
+        "source_date_epoch": next(iter(source_date_epochs)),
+        "source_export": EXPECTED_SOURCE_EXPORT,
+        "source_archive_paths": list(EXPECTED_SOURCE_ARCHIVE_PATHS),
         "build_system_requirements": EXPECTED_BUILD_SYSTEM_REQUIREMENTS,
         "runtime_constraints": {
             "path": EXPECTED_RUNTIME_CONSTRAINTS_PATH,
@@ -294,15 +381,19 @@ def build_manifest(
         "contract_pass": True,
         "blockers": [],
         "claims": {
+            "exact_source_epoch_uniform": True,
             "each_coordinate_same_run_wheel_byte_identity": True,
             "four_coordinate_preserved_wheel_hashes_verified": True,
             "installed_console_script_executed_on_all_coordinates": True,
+            "case_output_hashes_verified": True,
         },
         "claim_boundary": (
-            "This manifest binds four exact-source workflow artifacts and verifies "
-            "that each retained wheel matches two byte-identical builds within its "
-            "own execution coordinate. It does not claim future-run or cross-platform "
-            "wheel byte equality, canonical-environment identity, or release readiness."
+            "This manifest binds four exact-source workflow artifacts and verifies one "
+            "exact Git archive extracted into two independent build roots, two "
+            "byte-identical builds, the retained wheel, and both bounded planar case "
+            "hash projections within each coordinate. It does not claim future-run or "
+            "cross-platform wheel byte equality, canonical-environment identity, or "
+            "release readiness."
         ),
     }
     manifest["manifest_sha256"] = _content_hash(manifest)

@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/product-state-provenance-bundle.v1.schema.json",
+  "title": "Exact-SHA product-state provenance bundle",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_commit_sha",
+    "contracts",
+    "artifacts",
+    "dag_artifact_bindings",
+    "workflow_runs",
+    "bundle_integrity_pass",
+    "release_authority",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "product-state-provenance-bundle.v1"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "contracts": {
+      "type": "object",
+      "required": [
+        "product_state",
+        "canonical_verification",
+        "generated_artifact_dag"
+      ],
+      "properties": {
+        "product_state": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "product_profile",
+            "status",
+            "contract_pass"
+          ],
+          "properties": {
+            "schema_version": {"const": "product-state.current.v1"},
+            "product_profile": {"const": "repository_integrity_developer_preview"},
+            "status": {"enum": ["ready", "blocked"]},
+            "contract_pass": {"type": "boolean"}
+          },
+          "allOf": [
+            {
+              "if": {"properties": {"contract_pass": {"const": true}}},
+              "then": {"properties": {"status": {"const": "ready"}}},
+              "else": {"properties": {"status": {"const": "blocked"}}}
+            }
+          ],
+          "additionalProperties": false
+        },
+        "canonical_verification": {
+          "type": "object",
+          "required": [
+            "receipt_schema_version",
+            "contract_profile",
+            "project_wheel_schema_version",
+            "contract_pass"
+          ],
+          "properties": {
+            "receipt_schema_version": {"const": "canonical-verification-receipt.v1"},
+            "contract_profile": {"const": "p0-canonical-installed-wheel.v1"},
+            "project_wheel_schema_version": {"const": "canonical-project-wheel-contract.v1"},
+            "contract_pass": {"const": true}
+          },
+          "additionalProperties": false
+        },
+        "generated_artifact_dag": {
+          "type": "object",
+          "required": [
+            "state_schema_version",
+            "report_schema_version",
+            "state_kind",
+            "evaluated_through",
+            "contract_pass"
+          ],
+          "properties": {
+            "state_schema_version": {"const": "generated-artifact-dag-state.v2"},
+            "report_schema_version": {"const": "generated-artifact-dag-report.v2"},
+            "state_kind": {"const": "full"},
+            "evaluated_through": {"const": "product-state"},
+            "contract_pass": {"const": true}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "required": [
+        "product_state",
+        "canonical_receipt",
+        "canonical_project_wheel_contract",
+        "canonical_project_wheel",
+        "generated_artifact_dag_state",
+        "generated_artifact_dag_report",
+        "product_state_workflow_definition"
+      ],
+      "properties": {
+        "product_state": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": "artifacts/manifests/product_state.current.v1.json"}
+              }
+            }
+          ]
+        },
+        "canonical_receipt": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": "artifacts/manifests/canonical_verification_environment.current.v1.json"}
+              }
+            }
+          ]
+        },
+        "canonical_project_wheel_contract": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": ".ci/canonical-project-wheel-contract.json"}
+              }
+            }
+          ]
+        },
+        "canonical_project_wheel": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl"}
+              }
+            }
+          ]
+        },
+        "generated_artifact_dag_state": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": ".ci/product-state-inputs/generated-artifact-dag-state.v2.json"}
+              }
+            }
+          ]
+        },
+        "generated_artifact_dag_report": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": ".ci/product-state-inputs/generated-artifact-dag-report.v2.json"}
+              }
+            }
+          ]
+        },
+        "product_state_workflow_definition": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": ".github/workflows/product-state-current.yml"}
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "dag_artifact_bindings": {
+      "type": "object",
+      "required": [
+        "canonical_receipt",
+        "canonical_project_wheel_contract",
+        "canonical_project_wheel",
+        "product_state"
+      ],
+      "properties": {
+        "canonical_receipt": {
+          "allOf": [
+            {"$ref": "#/$defs/dagBinding"},
+            {
+              "properties": {
+                "artifact": {"const": "canonical_receipt"},
+                "node_id": {"const": "verification-receipts"},
+                "path": {"const": "artifacts/manifests/canonical_verification_environment.current.v1.json"}
+              }
+            }
+          ]
+        },
+        "canonical_project_wheel_contract": {
+          "allOf": [
+            {"$ref": "#/$defs/dagBinding"},
+            {
+              "properties": {
+                "artifact": {"const": "canonical_project_wheel_contract"},
+                "node_id": {"const": "verification-receipts"},
+                "path": {"const": ".ci/canonical-project-wheel-contract.json"}
+              }
+            }
+          ]
+        },
+        "canonical_project_wheel": {
+          "allOf": [
+            {"$ref": "#/$defs/dagBinding"},
+            {
+              "properties": {
+                "artifact": {"const": "canonical_project_wheel"},
+                "node_id": {"const": "verification-receipts"},
+                "path": {"const": ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl"}
+              }
+            }
+          ]
+        },
+        "product_state": {
+          "allOf": [
+            {"$ref": "#/$defs/dagBinding"},
+            {
+              "properties": {
+                "artifact": {"const": "product_state"},
+                "node_id": {"const": "product-state"},
+                "path": {"const": "artifacts/manifests/product_state.current.v1.json"}
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "workflow_runs": {
+      "type": "object",
+      "required": [
+        "canonical_verification",
+        "nightly_full_quality",
+        "product_state_current"
+      ],
+      "properties": {
+        "canonical_verification": {
+          "allOf": [
+            {"$ref": "#/$defs/workflowRun"},
+            {
+              "properties": {
+                "authority": {"const": "github_actions_workflow_run_api"},
+                "workflow_name": {"const": "P0 Canonical Verification Contract"},
+                "workflow_path": {"const": ".github/workflows/p0-canonical-contract.yml"},
+                "trigger_event": {"enum": ["push", "workflow_dispatch"]},
+                "conclusion": {"const": "success"}
+              }
+            }
+          ]
+        },
+        "nightly_full_quality": {
+          "allOf": [
+            {"$ref": "#/$defs/workflowRun"},
+            {
+              "properties": {
+                "authority": {"const": "github_actions_workflow_run_event"},
+                "workflow_name": {"const": "Nightly Full Quality"},
+                "workflow_path": {"const": ".github/workflows/nightly-full-quality.yml"},
+                "trigger_event": {"enum": ["schedule", "workflow_dispatch"]}
+              }
+            }
+          ]
+        },
+        "product_state_current": {
+          "$ref": "#/$defs/productStateCurrentWorkflowRun"
+        }
+      },
+      "additionalProperties": false
+    },
+    "bundle_integrity_pass": {"const": true},
+    "release_authority": {"const": false},
+    "claim_boundary": {
+      "const": "Integrity-only exact-SHA provenance: this bundle binds the listed bytes and validates their bounded developer-preview contracts. It preserves, but does not promote, the product-state readiness outcome and does not grant release, design, commercial, or independent-verification authority."
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "required": ["path", "sha256", "byte_length"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "byte_length": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "dagBinding": {
+      "type": "object",
+      "required": ["artifact", "node_id", "path", "sha256"],
+      "properties": {
+        "artifact": {
+          "enum": [
+            "canonical_receipt",
+            "canonical_project_wheel_contract",
+            "canonical_project_wheel",
+            "product_state"
+          ]
+        },
+        "node_id": {"enum": ["verification-receipts", "product-state"]},
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "workflowRun": {
+      "type": "object",
+      "required": [
+        "authority",
+        "workflow_name",
+        "workflow_path",
+        "run_id",
+        "run_number",
+        "run_attempt",
+        "trigger_event",
+        "conclusion",
+        "head_branch",
+        "head_sha"
+      ],
+      "properties": {
+        "authority": {
+          "enum": [
+            "github_actions_workflow_run_api",
+            "github_actions_workflow_run_event"
+          ]
+        },
+        "workflow_name": {"type": "string", "minLength": 1},
+        "workflow_path": {
+          "type": "string",
+          "pattern": "^\\.github/workflows/[A-Za-z0-9_.-]+\\.ya?ml$"
+        },
+        "run_id": {"type": "integer", "minimum": 1},
+        "run_number": {"type": "integer", "minimum": 1},
+        "run_attempt": {"type": "integer", "minimum": 1},
+        "trigger_event": {
+          "enum": ["push", "workflow_dispatch", "schedule"]
+        },
+        "conclusion": {
+          "enum": [
+            "action_required",
+            "cancelled",
+            "failure",
+            "neutral",
+            "skipped",
+            "stale",
+            "success",
+            "timed_out"
+          ]
+        },
+        "head_branch": {"const": "main"},
+        "head_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      },
+      "additionalProperties": false
+    },
+    "productStateCurrentWorkflowRun": {
+      "type": "object",
+      "required": [
+        "authority",
+        "repository",
+        "workflow_name",
+        "workflow_path",
+        "workflow_ref",
+        "workflow_sha",
+        "run_id",
+        "run_number",
+        "run_attempt",
+        "trigger_event",
+        "workflow_definition"
+      ],
+      "properties": {
+        "authority": {"const": "github_actions_workflow_context"},
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "workflow_name": {"const": "Product State Current"},
+        "workflow_path": {"const": ".github/workflows/product-state-current.yml"},
+        "workflow_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+/\\.github/workflows/product-state-current\\.yml@refs/heads/main$"
+        },
+        "workflow_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "run_id": {"type": "integer", "minimum": 1},
+        "run_number": {"type": "integer", "minimum": 1},
+        "run_attempt": {"type": "integer", "minimum": 1},
+        "trigger_event": {"const": "workflow_run"},
+        "workflow_definition": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": ".github/workflows/product-state-current.yml"}
+              }
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -50,21 +50,22 @@ def test_current_product_state_matches_schema_and_cannot_promote_release() -> No
             encoding="utf-8"
         )
     )
+    validator = Draft202012Validator(schema)
 
     Draft202012Validator.check_schema(schema)
-    Draft202012Validator(schema).validate(current)
+    validator.validate(current)
 
     promoted = {**current, "release_authority": True}
     with pytest.raises(ValidationError):
-        Draft202012Validator(schema).validate(promoted)
+        validator.validate(promoted)
 
     unbound = {**current, "source_commit_sha": "main"}
     with pytest.raises(ValidationError):
-        Draft202012Validator(schema).validate(unbound)
+        validator.validate(unbound)
 
     contradictory_status = {**current, "contract_pass": True, "status": "blocked"}
     with pytest.raises(ValidationError):
-        Draft202012Validator(schema).validate(contradictory_status)
+        validator.validate(contradictory_status)
 
     missing_source_mismatch_blocker = deepcopy(current)
     missing_source_mismatch_blocker["source_matches_observed_github_main"] = False
@@ -74,7 +75,7 @@ def test_current_product_state_matches_schema_and_cannot_promote_release() -> No
         if blocker != "source_commit_does_not_match_observed_github_main"
     ]
     with pytest.raises(ValidationError):
-        Draft202012Validator(schema).validate(missing_source_mismatch_blocker)
+        validator.validate(missing_source_mismatch_blocker)
 
     impossible_clean_count = {
         **current,
@@ -82,12 +83,12 @@ def test_current_product_state_matches_schema_and_cannot_promote_release() -> No
         "candidate_worktree_change_count": 1,
     }
     with pytest.raises(ValidationError):
-        Draft202012Validator(schema).validate(impossible_clean_count)
+        validator.validate(impossible_clean_count)
 
     empty_authority_track = deepcopy(current)
     empty_authority_track["authority_tracks"]["solo_developer_technical"] = {}
     with pytest.raises(ValidationError):
-        Draft202012Validator(schema).validate(empty_authority_track)
+        validator.validate(empty_authority_track)
 
     incomplete_available_quality = deepcopy(current)
     incomplete_available_quality["quality_evidence"] = {
@@ -95,7 +96,7 @@ def test_current_product_state_matches_schema_and_cannot_promote_release() -> No
         "authority": "github_actions_workflow_run_event",
     }
     with pytest.raises(ValidationError):
-        Draft202012Validator(schema).validate(incomplete_available_quality)
+        validator.validate(incomplete_available_quality)
 
 
 def test_observed_main_mismatch_is_blocked_without_false_current_match() -> None:
@@ -115,6 +116,23 @@ def test_observed_main_mismatch_is_blocked_without_false_current_match() -> None
     assert current["contract_pass"] is False
     assert "source_commit_does_not_match_observed_github_main" in current["blockers"]
     assert "nightly_full_quality_evidence_invalid:head_sha" in current["blockers"]
+
+
+def test_generated_worktree_allowance_is_exact_and_receipt_only() -> None:
+    receipt = product_state.CANONICAL_VERIFICATION_RECEIPT
+
+    assert product_state._status_row_matches_exact_path(
+        f"?? {receipt.as_posix()}", receipt
+    )
+    assert product_state._status_row_matches_exact_path(
+        f" M {receipt.as_posix()}", receipt
+    )
+    assert not product_state._status_row_matches_exact_path(
+        f"R  other.json -> {receipt.as_posix()}", receipt
+    )
+    assert not product_state._status_row_matches_exact_path(
+        f"?? prefix-{receipt.as_posix()}", receipt
+    )
 
 
 @pytest.mark.skipif(
@@ -364,12 +382,12 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
 def test_dirty_candidate_fails_closed_without_promoting_legacy_readiness(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    real_git = product_state._git
+    original_git = product_state._git
 
-    def dirty_git(repo_root: Path, *args: str) -> str:
-        if args == ("status", "--short", "--untracked-files=normal"):
-            return " M synthetic-dirty-file"
-        return real_git(repo_root, *args)
+    def dirty_git(repo_root: Path, *arguments: str) -> str:
+        if arguments == ("status", "--short", "--untracked-files=normal"):
+            return " M README.md"
+        return original_git(repo_root, *arguments)
 
     monkeypatch.setattr(product_state, "_git", dirty_git)
     current_head = product_state._git(ROOT, "rev-parse", "HEAD")

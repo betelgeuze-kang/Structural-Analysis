@@ -7,6 +7,7 @@ from pathlib import Path
 import sys
 
 import pytest
+from scripts import verify_bounded_planar_wheel_smoke as verifier
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,6 +21,7 @@ SPEC.loader.exec_module(module)
 
 SOURCE_COMMIT = "a" * 40
 SOURCE_TREE = "b" * 40
+SOURCE_DATE_EPOCH = 1700000000
 WHEEL_FILENAME = "structural_analysis-0.3.0-py3-none-any.whl"
 
 
@@ -39,11 +41,29 @@ def _write_coordinate_artifacts(
     wheel.parent.mkdir(parents=True)
     wheel.write_bytes(wheel_bytes)
     wheel_hash = _sha256(wheel_bytes)
+    cases = {
+        case_id: {
+            "sample": sample,
+            "sample_sha256": _sha256(f"{coordinate}:{case_id}:sample".encode()),
+            "result_hash": _sha256(f"{coordinate}:{case_id}:result".encode()),
+            "engineering_result_hash": _sha256(
+                f"{coordinate}:{case_id}:engineering".encode()
+            ),
+            "checkpoint_sha256": _sha256(
+                f"{coordinate}:{case_id}:checkpoint".encode()
+            ),
+            "checkpoint_byte_length": 100 + len(case_id),
+        }
+        for case_id, sample in module.EXPECTED_CASES.items()
+    }
     receipt = {
         "schema_version": "bounded-planar-wheel-smoke.v4",
         "contract_pass": True,
         "source_commit_sha": SOURCE_COMMIT,
         "source_tree_sha": SOURCE_TREE,
+        "source_date_epoch": SOURCE_DATE_EPOCH,
+        "source_export": module.EXPECTED_SOURCE_EXPORT,
+        "source_archive_paths": list(module.EXPECTED_SOURCE_ARCHIVE_PATHS),
         "build_system_requirements": module.EXPECTED_BUILD_SYSTEM_REQUIREMENTS,
         "runtime_constraints": {
             "path": module.EXPECTED_RUNTIME_CONSTRAINTS_PATH,
@@ -77,6 +97,7 @@ def _write_coordinate_artifacts(
             for build_number in (1, 2)
         ],
         "installed_console_script_executed": True,
+        "cases": cases,
     }
     receipt_path = artifact / "receipt.json"
     receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
@@ -105,14 +126,26 @@ def test_manifest_binds_exactly_four_receipts_and_retained_wheels(
     assert manifest["contract_pass"] is True
     assert manifest["source_commit_sha"] == SOURCE_COMMIT
     assert manifest["source_tree_sha"] == SOURCE_TREE
+    assert manifest["source_date_epoch"] == SOURCE_DATE_EPOCH
+    assert manifest["source_export"] == module.EXPECTED_SOURCE_EXPORT
+    assert manifest["source_archive_paths"] == list(
+        module.EXPECTED_SOURCE_ARCHIVE_PATHS
+    )
+    assert module.EXPECTED_SOURCE_ARCHIVE_PATHS == verifier.SOURCE_ARCHIVE_PATHS
     assert manifest["required_coordinates"] == list(module.EXPECTED_COORDINATES)
     assert manifest["observed_coordinate_count"] == 4
     assert len(manifest["coordinates"]) == 4
     assert manifest["claims"] == {
+        "exact_source_epoch_uniform": True,
         "each_coordinate_same_run_wheel_byte_identity": True,
         "four_coordinate_preserved_wheel_hashes_verified": True,
         "installed_console_script_executed_on_all_coordinates": True,
+        "case_output_hashes_verified": True,
     }
+    assert all(
+        set(row["cases"]) == set(module.EXPECTED_CASES)
+        for row in manifest["coordinates"]
+    )
     assert manifest["manifest_sha256"].startswith("sha256:")
 
 
@@ -136,6 +169,74 @@ def test_manifest_rejects_retained_wheel_hash_drift(tmp_path: Path) -> None:
     with pytest.raises(
         module.WheelSmokeManifestError,
         match="preserved_wheel_hash_mismatch",
+    ):
+        module.build_manifest(
+            artifacts_directory=tmp_path,
+            source_commit_sha=SOURCE_COMMIT,
+        )
+
+
+def _mutate_first_receipt(tmp_path: Path, mutation) -> None:
+    receipt_path = sorted(tmp_path.glob("*/receipt.json"))[0]
+    payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+    mutation(payload)
+    receipt_path.write_text(json.dumps(payload), encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        (
+            lambda payload: payload.pop("source_export"),
+            "source_export_mismatch",
+        ),
+        (
+            lambda payload: payload["source_archive_paths"].pop(),
+            "source_archive_paths_mismatch",
+        ),
+        (
+            lambda payload: payload["cases"].pop("member_feature"),
+            "cases_shape_invalid",
+        ),
+        (
+            lambda payload: payload["cases"]["member_feature"].update(
+                result_hash="not-a-hash"
+            ),
+            "hash_invalid:cases",
+        ),
+        (
+            lambda payload: payload["cases"]["prescribed_settlement"].update(
+                checkpoint_byte_length=0
+            ),
+            "positive_integer_invalid:cases",
+        ),
+    ],
+)
+def test_manifest_rejects_incomplete_or_corrupt_exact_source_receipts(
+    tmp_path: Path,
+    mutation,
+    message: str,
+) -> None:
+    _write_four_coordinates(tmp_path)
+    _mutate_first_receipt(tmp_path, mutation)
+
+    with pytest.raises(module.WheelSmokeManifestError, match=message):
+        module.build_manifest(
+            artifacts_directory=tmp_path,
+            source_commit_sha=SOURCE_COMMIT,
+        )
+
+
+def test_manifest_rejects_nonuniform_source_epoch(tmp_path: Path) -> None:
+    _write_four_coordinates(tmp_path)
+    _mutate_first_receipt(
+        tmp_path,
+        lambda payload: payload.update(source_date_epoch=SOURCE_DATE_EPOCH + 1),
+    )
+
+    with pytest.raises(
+        module.WheelSmokeManifestError,
+        match="source_date_epoch_not_uniform",
     ):
         module.build_manifest(
             artifacts_directory=tmp_path,

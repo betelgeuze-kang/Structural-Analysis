@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/canonical-project-wheel-contract.v1.schema.json",
+  "title": "Canonical exact project wheel contract",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_commit_sha",
+    "source_date_epoch",
+    "build",
+    "dependency_wheelhouse",
+    "wheel",
+    "installed_replay",
+    "contract_pass",
+    "violations",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "canonical-project-wheel-contract.v1"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source_date_epoch": {"type": "integer", "minimum": 1},
+    "build": {
+      "type": "object",
+      "required": [
+        "pep517_isolation",
+        "dependency_index_access",
+        "pip_cache",
+        "source_export",
+        "submodules_allowed",
+        "lfs_pointer_package_inputs_allowed",
+        "repeated_build_count",
+        "reproducible_wheel_bytes"
+      ],
+      "properties": {
+        "pep517_isolation": {"const": true},
+        "dependency_index_access": {"const": false},
+        "pip_cache": {"const": false},
+        "source_export": {"const": "git-archive-exact-commit"},
+        "submodules_allowed": {"const": false},
+        "lfs_pointer_package_inputs_allowed": {"const": false},
+        "repeated_build_count": {"const": 2},
+        "reproducible_wheel_bytes": {"const": true}
+      },
+      "additionalProperties": false
+    },
+    "dependency_wheelhouse": {
+      "type": "object",
+      "required": ["lock_path", "package_count", "manifest_sha256", "all_locked_hashes_verified"],
+      "properties": {
+        "lock_path": {"type": "string"},
+        "package_count": {"type": "integer", "minimum": 1},
+        "manifest_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "all_locked_hashes_verified": {"const": true}
+      },
+      "additionalProperties": false
+    },
+    "wheel": {
+      "type": "object",
+      "required": ["filename", "sha256", "byte_length", "repeat_sha256", "record"],
+      "properties": {
+        "filename": {"type": "string", "pattern": "^structural_analysis-.*\\.whl$"},
+        "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "byte_length": {"type": "integer", "minimum": 1},
+        "repeat_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "record": {
+          "type": "object",
+          "required": ["path", "sha256", "entry_count", "all_payload_entries_sha256_verified", "source_identity_member"],
+          "properties": {
+            "path": {"type": "string"},
+            "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+            "entry_count": {"type": "integer", "minimum": 1},
+            "all_payload_entries_sha256_verified": {"const": true},
+            "source_identity_member": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "installed_replay": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "contract_pass",
+        "wheel_origin",
+        "wheel_filename",
+        "wheel_sha256",
+        "installed_module",
+        "installed_schema",
+        "installed_source_commit_sha",
+        "installed_source_date_epoch",
+        "execution_count",
+        "exact_repeat_match",
+        "first_projection_sha256",
+        "repeat_projection_sha256",
+        "cases",
+        "repeat_cases",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {"const": "bounded-planar-wheel-smoke.v2"},
+        "contract_pass": {"const": true},
+        "wheel_origin": {"const": "prebuilt_exact_artifact"},
+        "wheel_filename": {"type": "string"},
+        "wheel_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "installed_module": {"type": "string"},
+        "installed_schema": {"type": "string"},
+        "installed_source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "installed_source_date_epoch": {"type": "integer", "minimum": 1},
+        "execution_count": {"const": 2},
+        "exact_repeat_match": {"const": true},
+        "first_projection_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "repeat_projection_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "cases": {"$ref": "#/$defs/replayCases"},
+        "repeat_cases": {"$ref": "#/$defs/replayCases"},
+        "claim_boundary": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "contract_pass": {"const": true},
+    "violations": {"type": "array", "maxItems": 0},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "replayCases": {
+      "type": "object",
+      "required": ["member_feature", "prescribed_settlement"],
+      "properties": {
+        "member_feature": {"$ref": "#/$defs/replayCase"},
+        "prescribed_settlement": {"$ref": "#/$defs/replayCase"}
+      },
+      "additionalProperties": false
+    },
+    "replayCase": {
+      "type": "object",
+      "required": ["result_hash", "engineering_result_hash", "checkpoint_sha256"],
+      "properties": {
+        "result_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "engineering_result_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "checkpoint_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

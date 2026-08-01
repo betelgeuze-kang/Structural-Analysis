@@ -537,7 +537,7 @@
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:e5d52668ed5a3f8034e1437260cf4f2e68fecc5b8caa435874e1eb10ffa24dc4",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:3f5a61946808f94526642de4f55b79db44a6328778ed554f90f7aa79180172d1",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:5bed5889b451568bd86262bace0d309fcbeac1c1d59a5936472de42ae2f85ce2",
-    "pyproject.toml": "sha256:61d17a8b3f3f7224da69dfb59e4e2db479fc19c7ae46dfab308f09a753a3b83b",
+    "pyproject.toml": "sha256:32228d56234aa2bbade5c1973cf8e301f1362669d4c6de25b793b7fcf1969b29",
     "scripts/build_phase6_platform_replay_receipt.py": "sha256:4033a3af3c9149894b6df4091c07f7b6c3262bee3253cc301848bb3dab1a5ce6",
     "setup.cfg": "sha256:9cc1374957d640479c86cc3e3d71ff7ea69ad864ccdd77c4ce113e6ec028f646"
   },

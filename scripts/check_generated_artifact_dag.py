@@ -7,16 +7,94 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-import re
 import subprocess
 import sys
 import tempfile
-from typing import Any
+from typing import Any, Mapping
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DAG = ROOT / "canonical/generated-artifact-dag.v1.json"
-SOURCE_SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
+LEGACY_STATE_SCHEMA_VERSION = "generated-artifact-dag-state.v1"
+STATE_SCHEMA_VERSION = "generated-artifact-dag-state.v2"
+REPORT_SCHEMA_VERSION = "generated-artifact-dag-report.v2"
+FULL_STATE = "full"
+CANDIDATE_STATE = "candidate"
+ALLOWED_NODE_KINDS = {"source", "generated", "receipt", "product-state"}
+EXPECTED_NODE_KINDS = {
+    "capability-registry": "source",
+    "generated-capability-surfaces": "generated",
+    "verification-receipts": "receipt",
+    "product-state": "product-state",
+}
+EXPECTED_NODE_ORDER = tuple(EXPECTED_NODE_KINDS)
+EXPECTED_NODE_PATHS = {
+    "capability-registry": {
+        "inputs": ["artifacts/manifests/capabilities.yaml"],
+        "outputs": [],
+    },
+    "generated-capability-surfaces": {
+        "inputs": ["scripts/generate_capability_surfaces.py"],
+        "outputs": [
+            "README.md",
+            "docs/api-capabilities.md",
+            "src/structural_analysis/generated_capabilities.py",
+            "src/workbench-v2/model/generatedCapabilities.json",
+        ],
+    },
+    "verification-receipts": {
+        "inputs": [
+            "canonical/verification-environment.v1.json",
+            "canonical/requirements-cp312-manylinux2014-x86_64.lock",
+            "canonical/canonical-project-wheel-contract.v1.schema.json",
+            "canonical/canonical-verification-receipt.v1.schema.json",
+            "scripts/build_canonical_project_wheel.py",
+            "scripts/build_canonical_verification_receipt.py",
+            "scripts/verify_bounded_planar_wheel_smoke.py",
+        ],
+        "outputs": [
+            "artifacts/manifests/canonical_verification_environment.current.v1.json",
+            ".ci/canonical-project-wheel-contract.json",
+            ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl",
+        ],
+    },
+    "product-state": {
+        "inputs": [
+            "canonical/product-state.current.v1.schema.json",
+            "scripts/build_product_state.py",
+        ],
+        "outputs": ["artifacts/manifests/product_state.current.v1.json"],
+    },
+}
+LEGACY_EXPECTED_NODE_PATHS = {
+    **EXPECTED_NODE_PATHS,
+    "verification-receipts": {
+        "inputs": [
+            "canonical/verification-environment.v1.json",
+            "canonical/requirements-cp312-manylinux2014-x86_64.lock",
+        ],
+        "outputs": [
+            "artifacts/manifests/canonical_verification_environment.current.v1.json"
+        ],
+    },
+    "product-state": {
+        "inputs": ["scripts/build_product_state.py"],
+        "outputs": ["artifacts/manifests/product_state.current.v1.json"],
+    },
+}
+CURRENT_BINDING_VALIDATORS = {
+    "capability-registry": "capability-registry-schema-and-evidence.v2",
+    "generated-capability-surfaces": "capability-surface-exact-render.v2",
+    "verification-receipts": "canonical-persisted-wheel-bundle.v1",
+    "product-state": "product-state-exact-producer-rebuild.v1",
+}
+PRODUCT_STATE_NIGHTLY_SOURCE = "github_nightly_full_quality_observation"
+PRODUCT_STATE_EXTERNAL_CODE_RECEIPT = Path(
+    ".ci/product-state-inputs/code-to-code-receipt.json"
+)
+PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT = Path(
+    ".ci/product-state-inputs/modal-buckling-receipt.json"
+)
 
 
 class ArtifactDAGError(ValueError):
@@ -38,30 +116,11 @@ def _safe_path(value: Any) -> str:
     return path.as_posix()
 
 
-def _source_sha(value: Any) -> str:
-    source_sha = str(value).strip()
-    if SOURCE_SHA_PATTERN.fullmatch(source_sha) is None:
-        raise ArtifactDAGError("source SHA must be exactly 40 lowercase hex characters")
-    return source_sha
-
-
-def _repository_head_sha(repo_root: Path) -> str:
-    try:
-        completed = subprocess.run(
-            ["git", "rev-parse", "--verify", "HEAD"],
-            cwd=repo_root,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-    except (subprocess.CalledProcessError, FileNotFoundError) as exc:
-        raise ArtifactDAGError(
-            f"cannot resolve checked-out Git HEAD below {repo_root}"
-        ) from exc
-    return _source_sha(completed.stdout)
-
-
-def load_dag(path: Path = DEFAULT_DAG) -> list[dict[str, Any]]:
+def load_dag(
+    path: Path = DEFAULT_DAG,
+    *,
+    enforce_canonical_paths: bool = True,
+) -> list[dict[str, Any]]:
     payload = _read_json(path)
     if payload.get("schema_version") != "generated-artifact-dag.v1":
         raise ArtifactDAGError("unsupported artifact DAG schema")
@@ -77,6 +136,14 @@ def load_dag(path: Path = DEFAULT_DAG) -> list[dict[str, Any]]:
         if not node_id or node_id in ids:
             raise ArtifactDAGError(f"invalid or duplicate node id: {node_id!r}")
         ids.add(node_id)
+        kind = str(raw_node.get("kind", "")).strip()
+        if kind not in ALLOWED_NODE_KINDS:
+            raise ArtifactDAGError(f"{node_id}: unsupported node kind {kind!r}")
+        expected_kind = EXPECTED_NODE_KINDS.get(node_id)
+        if expected_kind is not None and kind != expected_kind:
+            raise ArtifactDAGError(
+                f"{node_id}: kind must be {expected_kind!r}, got {kind!r}"
+            )
         dependencies = raw_node.get("dependencies")
         inputs = raw_node.get("inputs")
         outputs = raw_node.get("outputs")
@@ -89,7 +156,7 @@ def load_dag(path: Path = DEFAULT_DAG) -> list[dict[str, Any]]:
         nodes.append(
             {
                 "id": node_id,
-                "kind": str(raw_node.get("kind", "")).strip(),
+                "kind": kind,
                 "dependencies": [str(item) for item in dependencies],
                 "inputs": [_safe_path(item) for item in inputs],
                 "outputs": [_safe_path(item) for item in outputs],
@@ -108,12 +175,33 @@ def load_dag(path: Path = DEFAULT_DAG) -> list[dict[str, Any]]:
                 f"{node['id']}: nodes must be topologically ordered; dependencies follow node {sorted(not_yet_seen)}"
             )
         known.add(node["id"])
-    if nodes[0]["id"] != "capability-registry" or nodes[-1]["id"] != "product-state":
-        raise ArtifactDAGError("DAG must run from capability-registry to product-state")
+    if tuple(node["id"] for node in nodes) != EXPECTED_NODE_ORDER:
+        raise ArtifactDAGError(
+            "artifact DAG v1 must contain the canonical registry-to-product-state chain"
+        )
+    for index, node in enumerate(nodes):
+        expected_dependencies = [] if index == 0 else [nodes[index - 1]["id"]]
+        if node["dependencies"] != expected_dependencies:
+            raise ArtifactDAGError(
+                "artifact DAG must be one linear authority chain; "
+                f"{node['id']} must depend on {expected_dependencies}"
+            )
+        if enforce_canonical_paths:
+            expected_paths = EXPECTED_NODE_PATHS[node["id"]]
+            for field in ("inputs", "outputs"):
+                if node[field] != expected_paths[field]:
+                    raise ArtifactDAGError(
+                        "artifact DAG must preserve canonical node paths; "
+                        f"{node['id']}.{field} must be {expected_paths[field]}"
+                    )
     return nodes
 
 
-def _path_identity(repo_root: Path, relative_path: str) -> dict[str, Any]:
+def _path_identity(
+    repo_root: Path, relative_path: str, *, available_in_scope: bool = True
+) -> dict[str, Any]:
+    if not available_in_scope:
+        return {"path": relative_path, "status": "unavailable", "sha256": None}
     path = repo_root / relative_path
     if not path.is_file():
         return {"path": relative_path, "status": "missing", "sha256": None}
@@ -124,14 +212,194 @@ def _path_identity(repo_root: Path, relative_path: str) -> dict[str, Any]:
     }
 
 
-def build_snapshot(
-    nodes: list[dict[str, Any]], *, repo_root: Path, source_sha: str
+def _current_binding(
+    node_id: str,
+    *,
+    violations: list[str] | tuple[str, ...] = (),
+    out_of_scope: bool = False,
 ) -> dict[str, Any]:
-    exact_source_sha = _source_sha(source_sha)
+    unique_violations = list(dict.fromkeys(str(item) for item in violations))
+    if out_of_scope:
+        status = "out_of_scope"
+        contract_pass = False
+    elif unique_violations:
+        status = "stale"
+        contract_pass = False
+    else:
+        status = "current"
+        contract_pass = True
+    return {
+        "validator": CURRENT_BINDING_VALIDATORS[node_id],
+        "status": status,
+        "contract_pass": contract_pass,
+        "violations": unique_violations,
+    }
+
+
+def _git_head(repo_root: Path) -> str:
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    value = result.stdout.strip()
+    if (
+        result.returncode != 0
+        or len(value) != 40
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise ArtifactDAGError("exact repository HEAD is unavailable")
+    return value
+
+
+def _validate_capability_registry_binding(repo_root: Path) -> list[str]:
+    from scripts.generate_capability_surfaces import load_registry
+
+    load_registry(repo_root)
+    return []
+
+
+def _validate_capability_surfaces_binding(repo_root: Path) -> list[str]:
+    from scripts.generate_capability_surfaces import check_outputs
+
+    return [f"stale_or_missing:{path}" for path in check_outputs(repo_root)]
+
+
+def _validate_canonical_artifacts_binding(repo_root: Path) -> list[str]:
+    from scripts.build_canonical_verification_receipt import (
+        validate_persisted_canonical_bundle,
+    )
+
+    outputs = EXPECTED_NODE_PATHS["verification-receipts"]["outputs"]
+    return validate_persisted_canonical_bundle(
+        repo_root=repo_root,
+        receipt_path=Path(outputs[0]),
+        project_wheel_contract_path=Path(outputs[1]),
+        project_wheel_path=Path(outputs[2]),
+    )
+
+
+def _load_json_object(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ArtifactDAGError(f"{path}: JSON object required")
+    return payload
+
+
+def _validate_product_state_binding(
+    repo_root: Path,
+    *,
+    nightly_workflow_run_event: Path | None,
+) -> list[str]:
+    from scripts.build_product_state import build_product_state
+
+    if nightly_workflow_run_event is None:
+        return ["product_state_nightly_event_missing"]
+    event_path = (
+        nightly_workflow_run_event
+        if nightly_workflow_run_event.is_absolute()
+        else repo_root / nightly_workflow_run_event
+    )
+    if not event_path.is_file():
+        return ["product_state_nightly_event_missing"]
+    external_code_receipt = repo_root / PRODUCT_STATE_EXTERNAL_CODE_RECEIPT
+    external_modal_receipt = repo_root / PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT
+    missing_inputs = [
+        relative.as_posix()
+        for relative, path in (
+            (PRODUCT_STATE_EXTERNAL_CODE_RECEIPT, external_code_receipt),
+            (PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT, external_modal_receipt),
+        )
+        if not path.is_file()
+    ]
+    if missing_inputs:
+        return [
+            f"product_state_rebuild_input_missing:{path}" for path in missing_inputs
+        ]
+    output_path = repo_root / EXPECTED_NODE_PATHS["product-state"]["outputs"][0]
+    if not output_path.is_file():
+        return ["product_state_output_missing"]
+    try:
+        nightly_event = _load_json_object(event_path)
+    except (OSError, json.JSONDecodeError, ArtifactDAGError):
+        return ["product_state_nightly_event_invalid"]
+    current, _ = build_product_state(
+        repo_root,
+        observed_main_sha=_git_head(repo_root),
+        observed_main_source=PRODUCT_STATE_NIGHTLY_SOURCE,
+        verify_legacy_git_objects=True,
+        nightly_workflow_run_event=nightly_event,
+        external_vv_code_receipt=external_code_receipt,
+        external_vv_modal_receipt=external_modal_receipt,
+    )
+    expected = (
+        json.dumps(current, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+    if output_path.read_bytes() != expected:
+        return ["product_state_exact_rebuild_mismatch"]
+    return []
+
+
+def validate_current_bindings(
+    *,
+    repo_root: Path,
+    candidate: bool,
+    product_state_nightly_event: Path | None = None,
+) -> dict[str, dict[str, Any]]:
+    """Run producer-specific validators for every node in the evaluated scope."""
+
+    bindings: dict[str, dict[str, Any]] = {}
+    validators = {
+        "capability-registry": lambda: _validate_capability_registry_binding(repo_root),
+        "generated-capability-surfaces": (
+            lambda: _validate_capability_surfaces_binding(repo_root)
+        ),
+        "verification-receipts": lambda: _validate_canonical_artifacts_binding(
+            repo_root
+        ),
+        "product-state": lambda: _validate_product_state_binding(
+            repo_root,
+            nightly_workflow_run_event=product_state_nightly_event,
+        ),
+    }
+    for node_id in EXPECTED_NODE_ORDER:
+        if candidate and node_id == "product-state":
+            bindings[node_id] = _current_binding(
+                node_id,
+                violations=["candidate_scope_excludes_product_state"],
+                out_of_scope=True,
+            )
+            continue
+        try:
+            violations = validators[node_id]()
+        except Exception:  # producer exceptions must fail closed with stable output
+            violations = ["producer_validator_error"]
+        bindings[node_id] = _current_binding(node_id, violations=violations)
+    return bindings
+
+
+def build_snapshot(
+    nodes: list[dict[str, Any]],
+    *,
+    repo_root: Path,
+    candidate: bool = False,
+) -> dict[str, Any]:
     snapshots: dict[str, dict[str, Any]] = {}
+    evaluated_through = nodes[-1]["id"]
     for node in nodes:
-        inputs = [_path_identity(repo_root, path) for path in node["inputs"]]
-        outputs = [_path_identity(repo_root, path) for path in node["outputs"]]
+        available_in_scope = not (candidate and node["id"] == nodes[-1]["id"])
+        if candidate and available_in_scope:
+            evaluated_through = node["id"]
+        inputs = [
+            _path_identity(repo_root, path, available_in_scope=available_in_scope)
+            for path in node["inputs"]
+        ]
+        outputs = [
+            _path_identity(repo_root, path, available_in_scope=available_in_scope)
+            for path in node["outputs"]
+        ]
         identity = {
             "id": node["id"],
             "kind": node["kind"],
@@ -143,58 +411,316 @@ def build_snapshot(
             "outputs": outputs,
         }
         fingerprint = hashlib.sha256(
-            json.dumps(
-                identity,
-                sort_keys=True,
-                separators=(",", ":"),
-            ).encode("utf-8")
+            json.dumps(identity, sort_keys=True, separators=(",", ":")).encode("utf-8")
         ).hexdigest()
         snapshots[node["id"]] = {**identity, "fingerprint": fingerprint}
     return {
-        "schema_version": "generated-artifact-dag-state.v1",
-        "source_commit_sha": exact_source_sha,
+        "schema_version": STATE_SCHEMA_VERSION,
+        "state_kind": CANDIDATE_STATE if candidate else FULL_STATE,
+        "evaluated_through": evaluated_through,
         "nodes": snapshots,
     }
 
 
-def _validate_state(payload: dict[str, Any]) -> str:
-    if payload.get("schema_version") != "generated-artifact-dag-state.v1":
+def _state_dependencies(node_id: str, node: dict[str, Any]) -> set[str]:
+    dependencies = node.get("dependencies")
+    if not isinstance(dependencies, dict):
+        raise ArtifactDAGError(f"{node_id}: state dependencies must be an object")
+    return set(dependencies)
+
+
+def _topological_state_node_ids(nodes: dict[str, Any]) -> list[str]:
+    remaining = list(nodes)
+    ordered: list[str] = []
+    known = set(nodes)
+    while remaining:
+        ready = [
+            node_id
+            for node_id in remaining
+            if _state_dependencies(node_id, nodes[node_id]) <= set(ordered)
+        ]
+        if not ready:
+            unknown = {
+                dependency
+                for node_id in remaining
+                for dependency in _state_dependencies(node_id, nodes[node_id])
+                if dependency not in known
+            }
+            reason = f"unknown dependencies {sorted(unknown)}" if unknown else "cycle"
+            raise ArtifactDAGError(f"artifact DAG state is not topological: {reason}")
+        for node_id in ready:
+            remaining.remove(node_id)
+            ordered.append(node_id)
+    return ordered
+
+
+def _state_ancestors(nodes: dict[str, Any], node_id: str) -> set[str]:
+    ancestors = {node_id}
+    pending = [node_id]
+    while pending:
+        current = pending.pop()
+        for dependency in _state_dependencies(current, nodes[current]):
+            if dependency not in ancestors:
+                ancestors.add(dependency)
+                pending.append(dependency)
+    return ancestors
+
+
+def validate_state(payload: dict[str, Any]) -> None:
+    """Validate state metadata while accepting pre-metadata v1 snapshots."""
+
+    schema_version = payload.get("schema_version")
+    if schema_version not in {LEGACY_STATE_SCHEMA_VERSION, STATE_SCHEMA_VERSION}:
         raise ArtifactDAGError("unsupported artifact DAG state schema")
-    source_sha = _source_sha(payload.get("source_commit_sha"))
     if not isinstance(payload.get("nodes"), dict):
         raise ArtifactDAGError("artifact DAG state nodes must be an object")
-    return source_sha
+    legacy = schema_version == LEGACY_STATE_SCHEMA_VERSION
+    if legacy:
+        if "state_kind" in payload or "evaluated_through" in payload:
+            raise ArtifactDAGError("legacy v1 state cannot contain v2 scope metadata")
+        state_kind = FULL_STATE
+        evaluated_through = "product-state"
+    else:
+        state_kind = payload.get("state_kind")
+        if state_kind not in {FULL_STATE, CANDIDATE_STATE}:
+            raise ArtifactDAGError(
+                f"unsupported artifact DAG state kind: {state_kind!r}"
+            )
+        evaluated_through = str(payload.get("evaluated_through", "")).strip()
+    nodes = payload["nodes"]
+    if set(nodes) != set(EXPECTED_NODE_ORDER):
+        raise ArtifactDAGError(
+            "artifact DAG state must contain the canonical registry-to-product-state chain"
+        )
+    if not evaluated_through or evaluated_through not in nodes:
+        raise ArtifactDAGError(
+            "artifact DAG state evaluated_through must identify a state node"
+        )
+    terminal = nodes.get("product-state")
+    if not isinstance(terminal, dict) or terminal.get("kind") != "product-state":
+        raise ArtifactDAGError("artifact DAG state must end at product-state")
+    dependencies = terminal.get("dependencies")
+    if not isinstance(dependencies, dict) or len(dependencies) != 1:
+        raise ArtifactDAGError("product-state must have exactly one dependency")
+    terminal_dependency = next(iter(dependencies))
+    unavailable_nodes: set[str] = set()
+    for node_id, node in nodes.items():
+        if not isinstance(node, dict) or node.get("id") != node_id:
+            raise ArtifactDAGError(f"invalid artifact DAG state node: {node_id}")
+        required_node_fields = {
+            "id",
+            "kind",
+            "dependencies",
+            "inputs",
+            "outputs",
+            "fingerprint",
+        }
+        if set(node) != required_node_fields:
+            raise ArtifactDAGError(f"{node_id}: state node fields are invalid")
+        if node.get("kind") not in ALLOWED_NODE_KINDS:
+            raise ArtifactDAGError(f"{node_id}: invalid artifact DAG state kind")
+        expected_kind = EXPECTED_NODE_KINDS.get(node_id)
+        if expected_kind is not None and node.get("kind") != expected_kind:
+            raise ArtifactDAGError(f"{node_id}: state kind must be {expected_kind!r}")
+        if node.get("kind") == "product-state" and node_id != "product-state":
+            raise ArtifactDAGError(
+                f"{node_id}: only the terminal node can be product-state"
+            )
+        inputs = node.get("inputs")
+        outputs = node.get("outputs")
+        if not isinstance(inputs, list) or not isinstance(outputs, list):
+            raise ArtifactDAGError(f"{node_id}: state paths must be lists")
+        identities = [*inputs, *outputs]
+        if not all(isinstance(row, dict) for row in identities):
+            raise ArtifactDAGError(f"{node_id}: state path identity must be an object")
+        expected_paths = (
+            LEGACY_EXPECTED_NODE_PATHS[node_id]
+            if legacy
+            else EXPECTED_NODE_PATHS[node_id]
+        )
+        for field, rows in (("inputs", inputs), ("outputs", outputs)):
+            actual_paths = [row.get("path") for row in rows]
+            if actual_paths != expected_paths[field]:
+                raise ArtifactDAGError(
+                    "artifact DAG state must preserve canonical node paths; "
+                    f"{node_id}.{field} must be {expected_paths[field]}"
+                )
+        allowed_statuses = {"available", "missing"}
+        if not legacy:
+            allowed_statuses.add("unavailable")
+        for row in identities:
+            if set(row) != {"path", "status", "sha256"}:
+                raise ArtifactDAGError(
+                    f"{node_id}: state path identity fields are invalid"
+                )
+            path = row.get("path")
+            if not isinstance(path, str) or _safe_path(path) != path:
+                raise ArtifactDAGError(f"{node_id}: state path is invalid")
+            status = row.get("status")
+            if status not in allowed_statuses:
+                raise ArtifactDAGError(f"{node_id}: state path status is invalid")
+            digest = row.get("sha256")
+            if status == "available":
+                if not (
+                    isinstance(digest, str)
+                    and len(digest) == 64
+                    and all(character in "0123456789abcdef" for character in digest)
+                ):
+                    raise ArtifactDAGError(
+                        f"{node_id}: available state path hash is invalid"
+                    )
+            elif digest is not None:
+                raise ArtifactDAGError(
+                    f"{node_id}: unavailable state path hash must be null"
+                )
+        fingerprint = node.get("fingerprint")
+        identity = {
+            "id": node["id"],
+            "kind": node["kind"],
+            "dependencies": node["dependencies"],
+            "inputs": inputs,
+            "outputs": outputs,
+        }
+        expected_fingerprint = hashlib.sha256(
+            json.dumps(identity, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        if fingerprint != expected_fingerprint:
+            raise ArtifactDAGError(f"{node_id}: state fingerprint is invalid")
+        if any(row.get("status") == "unavailable" for row in identities):
+            unavailable_nodes.add(node_id)
+    ordered_node_ids = _topological_state_node_ids(nodes)
+    if tuple(ordered_node_ids) != EXPECTED_NODE_ORDER:
+        raise ArtifactDAGError(
+            "artifact DAG state must preserve the canonical authority order"
+        )
+    for index, node_id in enumerate(ordered_node_ids):
+        expected_dependencies = set() if index == 0 else {ordered_node_ids[index - 1]}
+        actual_dependencies = _state_dependencies(node_id, nodes[node_id])
+        if actual_dependencies != expected_dependencies:
+            raise ArtifactDAGError(
+                "artifact DAG state must preserve the canonical linear dependency "
+                f"chain; {node_id} must depend on {sorted(expected_dependencies)}"
+            )
+        for dependency, fingerprint in nodes[node_id]["dependencies"].items():
+            if nodes[dependency].get("fingerprint") != fingerprint:
+                raise ArtifactDAGError(
+                    f"{node_id}: dependency fingerprint does not match {dependency}"
+                )
+    if _state_ancestors(nodes, "product-state") != set(nodes):
+        raise ArtifactDAGError("every state node must feed product-state")
+    if state_kind == CANDIDATE_STATE:
+        if evaluated_through != terminal_dependency:
+            raise ArtifactDAGError(
+                "candidate state must evaluate through the product-state dependency"
+            )
+        if unavailable_nodes != {"product-state"}:
+            raise ArtifactDAGError(
+                "candidate state must mark only product-state unavailable"
+            )
+        terminal_identities = [
+            *terminal.get("inputs", []),
+            *terminal.get("outputs", []),
+        ]
+        if not terminal_identities or any(
+            row.get("status") != "unavailable" for row in terminal_identities
+        ):
+            raise ArtifactDAGError(
+                "candidate state must mark every product-state path unavailable"
+            )
+    else:
+        if evaluated_through != "product-state":
+            raise ArtifactDAGError("full state must evaluate through product-state")
+        if unavailable_nodes:
+            raise ArtifactDAGError("full state cannot contain unavailable nodes")
 
 
-def _required_node_ids(
-    candidate: dict[str, Any], require_through: str | None
-) -> tuple[list[str], list[str], str]:
-    node_ids = list(candidate["nodes"])
-    if not node_ids:
-        raise ArtifactDAGError("artifact DAG state must contain nodes")
-    target = require_through or node_ids[-1]
-    if target not in candidate["nodes"]:
-        raise ArtifactDAGError(f"unknown --require-through node: {target}")
-    target_index = node_ids.index(target)
-    return node_ids[: target_index + 1], node_ids[target_index + 1 :], target
+def load_baseline(path: Path) -> dict[str, Any]:
+    payload = _read_json(path)
+    validate_state(payload)
+    if payload.get("state_kind", FULL_STATE) == CANDIDATE_STATE:
+        raise ArtifactDAGError(
+            "candidate state cannot be used as a trusted artifact DAG baseline"
+        )
+    return payload
+
+
+def _normalized_current_bindings(
+    candidate: dict[str, Any],
+    current_bindings: Mapping[str, Any] | None,
+) -> dict[str, dict[str, Any]]:
+    bindings = current_bindings if isinstance(current_bindings, Mapping) else {}
+    normalized: dict[str, dict[str, Any]] = {}
+    candidate_mode = candidate.get("state_kind", FULL_STATE) == CANDIDATE_STATE
+    for node_id in EXPECTED_NODE_ORDER:
+        raw = bindings.get(node_id)
+        if not isinstance(raw, Mapping):
+            normalized[node_id] = _current_binding(
+                node_id, violations=["current_binding_result_missing"]
+            )
+            continue
+        expected_fields = {"validator", "status", "contract_pass", "violations"}
+        violations = raw.get("violations")
+        structurally_valid = (
+            set(raw) == expected_fields
+            and raw.get("validator") == CURRENT_BINDING_VALIDATORS[node_id]
+            and raw.get("status") in {"current", "stale", "out_of_scope"}
+            and type(raw.get("contract_pass")) is bool
+            and isinstance(violations, list)
+            and all(isinstance(item, str) and item for item in violations)
+            and len(violations) == len(set(violations))
+        )
+        status = raw.get("status")
+        if status == "current":
+            structurally_valid = (
+                structurally_valid
+                and raw.get("contract_pass") is True
+                and violations == []
+            )
+        elif status == "stale":
+            structurally_valid = (
+                structurally_valid
+                and raw.get("contract_pass") is False
+                and bool(violations)
+            )
+        elif status == "out_of_scope":
+            structurally_valid = (
+                structurally_valid
+                and candidate_mode
+                and node_id == "product-state"
+                and raw.get("contract_pass") is False
+                and violations == ["candidate_scope_excludes_product_state"]
+            )
+        if not structurally_valid:
+            normalized[node_id] = _current_binding(
+                node_id, violations=["current_binding_result_invalid"]
+            )
+            continue
+        normalized[node_id] = dict(raw)
+    if set(bindings) != set(EXPECTED_NODE_ORDER):
+        for node_id in EXPECTED_NODE_ORDER:
+            if node_id not in bindings:
+                continue
+            normalized[node_id] = _current_binding(
+                node_id, violations=["current_binding_result_set_invalid"]
+            )
+    return normalized
 
 
 def evaluate_snapshot(
     candidate: dict[str, Any],
     baseline: dict[str, Any] | None,
     *,
-    require_through: str | None = None,
+    current_bindings: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    source_sha = _validate_state(candidate)
+    validate_state(candidate)
     if baseline is not None:
-        _validate_state(baseline)
-    required_nodes, deferred_nodes, target = _required_node_ids(
-        candidate, require_through
-    )
-    required = set(required_nodes)
+        validate_state(baseline)
+    bindings = _normalized_current_bindings(candidate, current_bindings)
     baseline_nodes = baseline.get("nodes", {}) if isinstance(baseline, dict) else {}
     report_nodes: dict[str, dict[str, Any]] = {}
-    for node_id, node in candidate["nodes"].items():
+    ordered_node_ids = _topological_state_node_ids(candidate["nodes"])
+    for node_id in ordered_node_ids:
+        node = candidate["nodes"][node_id]
         reasons: list[str] = []
         missing = [
             row["path"]
@@ -203,6 +729,19 @@ def evaluate_snapshot(
         ]
         if missing:
             reasons.extend(f"missing:{path}" for path in missing)
+        unavailable = [
+            row["path"]
+            for row in [*node["inputs"], *node["outputs"]]
+            if row["status"] == "unavailable"
+        ]
+        if unavailable:
+            reasons.extend(f"candidate_unavailable:{path}" for path in unavailable)
+        current_binding = bindings[node_id]
+        if current_binding["status"] == "stale":
+            reasons.extend(
+                f"current_binding:{violation}"
+                for violation in current_binding["violations"]
+            )
         previous = (
             baseline_nodes.get(node_id) if isinstance(baseline_nodes, dict) else None
         )
@@ -220,25 +759,39 @@ def evaluate_snapshot(
         )
         report_nodes[node_id] = {
             "status": "stale" if reasons else "fresh",
-            "required": node_id in required,
             "fingerprint": node["fingerprint"],
             "reasons": reasons,
+            "current_binding": current_binding,
         }
     stale = [
         node_id for node_id, node in report_nodes.items() if node["status"] == "stale"
     ]
-    required_stale = [node_id for node_id in stale if node_id in required]
-    deferred_stale = [node_id for node_id in stale if node_id not in required]
+    evaluated_through = str(
+        candidate.get("evaluated_through")
+        or (
+            "product-state"
+            if "product-state" in candidate["nodes"]
+            else next(reversed(candidate["nodes"]), "")
+        )
+    )
+    scope = _state_ancestors(candidate["nodes"], evaluated_through)
+    scoped_node_ids = [node_id for node_id in ordered_node_ids if node_id in scope]
+    scope_stale = [node_id for node_id in scoped_node_ids if node_id in stale]
     return {
-        "schema_version": "generated-artifact-dag-report.v1",
-        "source_commit_sha": source_sha,
-        "require_through": target,
-        "required_nodes": required_nodes,
-        "deferred_nodes": deferred_nodes,
-        "contract_pass": not required_stale,
-        "stale_nodes": required_stale,
-        "deferred_stale_nodes": deferred_stale,
+        "schema_version": REPORT_SCHEMA_VERSION,
+        "evaluation_mode": candidate.get("state_kind", FULL_STATE),
+        "evaluated_through": evaluated_through,
+        "contract_pass": not stale,
+        "scope_pass": not scope_stale,
+        "stale_nodes": stale,
         "nodes": report_nodes,
+        "claim_boundary": (
+            "scope_pass requires artifact availability, DAG fingerprint consistency, "
+            "and producer-specific current binding through evaluated_through. A "
+            "self-baselined hash cannot override a failed or missing producer "
+            "validator. contract_pass requires every DAG node; neither field grants "
+            "product or release authority."
+        ),
     }
 
 
@@ -260,47 +813,30 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dag", type=Path, default=DEFAULT_DAG)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
-    parser.add_argument("--source-sha", required=True)
-    parser.add_argument(
-        "--verify-head",
-        action="store_true",
-        help="Require --source-sha to equal the checked-out repository HEAD.",
-    )
-    parser.add_argument("--state", type=Path)
-    parser.add_argument("--write-state", type=Path)
-    parser.add_argument(
-        "--require-through",
-        help=(
-            "Require the topologically ordered DAG prefix through this node; "
-            "later nodes remain visible but do not decide the exit status."
-        ),
-    )
+    state_mode = parser.add_mutually_exclusive_group()
+    state_mode.add_argument("--state", type=Path)
+    state_mode.add_argument("--write-state", type=Path)
+    state_mode.add_argument("--write-candidate-state", type=Path)
     parser.add_argument("--allow-missing", action="store_true")
     parser.add_argument("--report", type=Path)
+    parser.add_argument("--product-state-nightly-event", type=Path)
     args = parser.parse_args(argv)
 
-    if args.state and args.write_state:
-        parser.error("--state and --write-state are mutually exclusive")
-    exact_source_sha = _source_sha(args.source_sha)
-    if args.verify_head:
-        observed_head = _repository_head_sha(args.repo_root)
-        if observed_head != exact_source_sha:
-            print(
-                "source SHA does not match checked-out HEAD: "
-                f"expected={exact_source_sha} observed={observed_head}",
-                file=sys.stderr,
-            )
-            return 1
     nodes = load_dag(args.dag)
+    if args.allow_missing and not args.write_state:
+        parser.error("--allow-missing is valid only with --write-state")
+    if args.write_candidate_state and args.report is None:
+        parser.error("--write-candidate-state requires --report")
+    if args.write_state and args.report is None:
+        parser.error("--write-state requires --report")
     snapshot = build_snapshot(
-        nodes, repo_root=args.repo_root, source_sha=exact_source_sha
+        nodes,
+        repo_root=args.repo_root,
+        candidate=bool(args.write_candidate_state),
     )
-    required_nodes, _, _ = _required_node_ids(snapshot, args.require_through)
-    required = set(required_nodes)
     missing = [
         row["path"]
-        for node_id, node in snapshot["nodes"].items()
-        if node_id in required
+        for node in snapshot["nodes"].values()
         for row in [*node["inputs"], *node["outputs"]]
         if row["status"] == "missing"
     ]
@@ -311,12 +847,49 @@ def main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return 1
+        current_bindings = validate_current_bindings(
+            repo_root=args.repo_root,
+            candidate=False,
+            product_state_nightly_event=args.product_state_nightly_event,
+        )
+        report = evaluate_snapshot(
+            snapshot,
+            snapshot,
+            current_bindings=current_bindings,
+        )
         _atomic_write(args.write_state, snapshot)
+        _atomic_write(args.report, report)
         print(_serialized(snapshot), end="")
-        return 0
+        return 0 if report["contract_pass"] else 1
 
-    baseline = _read_json(args.state) if args.state and args.state.is_file() else None
-    report = evaluate_snapshot(snapshot, baseline, require_through=args.require_through)
+    if args.write_candidate_state:
+        current_bindings = validate_current_bindings(
+            repo_root=args.repo_root,
+            candidate=True,
+        )
+        report = evaluate_snapshot(
+            snapshot,
+            snapshot,
+            current_bindings=current_bindings,
+        )
+        _atomic_write(args.write_candidate_state, snapshot)
+        _atomic_write(args.report, report)
+        print(_serialized(report), end="")
+        return 0 if report["scope_pass"] else 1
+
+    baseline = (
+        load_baseline(args.state) if args.state and args.state.is_file() else None
+    )
+    current_bindings = validate_current_bindings(
+        repo_root=args.repo_root,
+        candidate=False,
+        product_state_nightly_event=args.product_state_nightly_event,
+    )
+    report = evaluate_snapshot(
+        snapshot,
+        baseline,
+        current_bindings=current_bindings,
+    )
     if args.report:
         _atomic_write(args.report, report)
     print(_serialized(report), end="")

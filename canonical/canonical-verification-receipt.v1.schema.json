@@ -2,11 +2,166 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://structural-analysis.local/schemas/canonical-verification-receipt.v1.schema.json",
   "title": "Canonical verification environment receipt",
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "linearAlgebraRuntimeRole": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "found",
+        "detection method",
+        "openblas configuration"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "found": {"const": true},
+        "detection method": {"type": "string", "minLength": 1},
+        "openblas configuration": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": true
+    },
+    "linearAlgebraRole": {
+      "type": "object",
+      "required": [
+        "name",
+        "version",
+        "found",
+        "detection method",
+        "openblas configuration"
+      ],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1},
+        "found": {"const": true},
+        "detection method": {"type": "string", "minLength": 1},
+        "openblas configuration": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "linearAlgebraRuntimeLibrary": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^/[^\\\\]*$"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "linearAlgebraLibrary": {
+      "type": "object",
+      "required": [
+        "filename",
+        "sha256",
+        "distribution",
+        "member",
+        "wheel_filename",
+        "wheel_sha256"
+      ],
+      "properties": {
+        "filename": {"type": "string", "pattern": "^[^/\\\\]+$"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "distribution": {"enum": ["numpy", "scipy"]},
+        "member": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        },
+        "wheel_filename": {
+          "type": "string",
+          "pattern": "^(numpy|scipy)-[^/\\\\]+\\.whl$"
+        },
+        "wheel_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "linearAlgebraLoadedLibrary": {
+      "type": "object",
+      "required": [
+        "path",
+        "filename",
+        "sha256",
+        "distribution",
+        "member",
+        "wheel_filename",
+        "wheel_sha256"
+      ],
+      "properties": {
+        "path": {"type": "string", "pattern": "^/[^\\\\]*$"},
+        "filename": {"type": "string", "pattern": "^[^/\\\\]+$"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "distribution": {"enum": ["numpy", "scipy"]},
+        "member": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        },
+        "wheel_filename": {
+          "type": "string",
+          "pattern": "^(numpy|scipy)-[^/\\\\]+\\.whl$"
+        },
+        "wheel_sha256": {"$ref": "#/$defs/sha256"}
+      },
+      "additionalProperties": false
+    },
+    "linearAlgebraIdentity": {
+      "type": "object",
+      "required": [
+        "provider_family",
+        "openblas_coretype",
+        "roles",
+        "libraries",
+        "fingerprint_sha256",
+        "loaded_libraries",
+        "wheel_membership_verified"
+      ],
+      "properties": {
+        "provider_family": {"const": "openblas"},
+        "openblas_coretype": {"const": "Haswell"},
+        "roles": {
+          "type": "object",
+          "required": ["blas", "lapack"],
+          "properties": {
+            "blas": {"$ref": "#/$defs/linearAlgebraRole"},
+            "lapack": {"$ref": "#/$defs/linearAlgebraRole"}
+          },
+          "additionalProperties": false
+        },
+        "libraries": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/linearAlgebraLibrary"}
+        },
+        "fingerprint_sha256": {"$ref": "#/$defs/sha256"},
+        "loaded_libraries": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/linearAlgebraLoadedLibrary"}
+        },
+        "wheel_membership_verified": {"const": true}
+      },
+      "additionalProperties": false
+    }
+  },
   "type": "object",
-  "required": ["schema_version", "source_commit_sha", "container", "runtime", "contract_pass", "violations"],
+  "required": [
+    "schema_version",
+    "source_commit_sha",
+    "container",
+    "runtime",
+    "contract_pass",
+    "violations"
+  ],
   "properties": {
     "schema_version": {"const": "canonical-verification-receipt.v1"},
+    "contract_profile": {"const": "p0-canonical-installed-wheel.v1"},
     "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source_checkout_head_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source_date_epoch": {"type": "integer", "minimum": 1},
     "container": {
       "type": "object",
       "required": ["image", "digest", "platform"],
@@ -17,9 +172,22 @@
       },
       "additionalProperties": false
     },
+    "project_wheel": {"type": "object"},
     "runtime": {
       "type": "object",
-      "required": ["python", "packages", "os", "libc", "blas", "lapack", "linear_algebra_shared_libraries", "thread_limits", "locale", "timezone", "python_hash_seed"],
+      "required": [
+        "python",
+        "packages",
+        "os",
+        "libc",
+        "blas",
+        "lapack",
+        "linear_algebra_shared_libraries",
+        "thread_limits",
+        "locale",
+        "timezone",
+        "python_hash_seed"
+      ],
       "properties": {
         "python": {"type": "object"},
         "packages": {"type": "object", "required": ["numpy", "scipy"]},
@@ -28,6 +196,7 @@
         "blas": {"type": "object"},
         "lapack": {"type": "object"},
         "linear_algebra_shared_libraries": {"type": "array"},
+        "linear_algebra_identity": {"type": "object"},
         "thread_limits": {"type": "object"},
         "locale": {"type": "object"},
         "timezone": {"type": ["string", "null"]},
@@ -38,5 +207,54 @@
     "contract_pass": {"type": "boolean"},
     "violations": {"type": "array", "items": {"type": "string"}}
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "contract_profile": {"const": "p0-canonical-installed-wheel.v1"}
+        },
+        "required": ["contract_profile"]
+      },
+      "then": {
+        "required": [
+          "source_checkout_head_sha",
+          "source_date_epoch",
+          "project_wheel"
+        ],
+        "properties": {
+          "project_wheel": {
+            "type": "object",
+            "required": [
+              "schema_version",
+              "source_commit_sha",
+              "source_date_epoch",
+              "build",
+              "dependency_wheelhouse",
+              "wheel",
+              "installed_replay",
+              "contract_pass",
+              "violations"
+            ]
+          },
+          "runtime": {
+            "required": ["linear_algebra_identity"],
+            "properties": {
+              "blas": {"$ref": "#/$defs/linearAlgebraRuntimeRole"},
+              "lapack": {"$ref": "#/$defs/linearAlgebraRuntimeRole"},
+              "linear_algebra_shared_libraries": {
+                "type": "array",
+                "minItems": 2,
+                "uniqueItems": true,
+                "items": {"$ref": "#/$defs/linearAlgebraRuntimeLibrary"}
+              },
+              "linear_algebra_identity": {
+                "$ref": "#/$defs/linearAlgebraIdentity"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

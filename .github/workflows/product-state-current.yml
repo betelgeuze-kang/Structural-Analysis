@@ -30,92 +30,57 @@ env:
   PYTHONHASHSEED: "0"
   PRODUCT_STATE_SHA: ${{ github.event.workflow_run.head_sha }}
   PRODUCT_STATE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+  PRODUCT_STATE_WORKFLOW_SHA: ${{ github.workflow_sha }}
+  PRODUCT_STATE_WORKFLOW_REF: ${{ github.workflow_ref }}
+  PRODUCT_STATE_WORKFLOW_NAME: ${{ github.workflow }}
+  PRODUCT_STATE_WORKFLOW_EVENT: ${{ github.event_name }}
+  PRODUCT_STATE_WORKFLOW_RUN_ID: ${{ github.run_id }}
+  PRODUCT_STATE_WORKFLOW_RUN_NUMBER: ${{ github.run_number }}
+  PRODUCT_STATE_WORKFLOW_RUN_ATTEMPT: ${{ github.run_attempt }}
   PRODUCT_STATE_PATH: artifacts/manifests/product_state.current.v1.json
-  CANONICAL_VERIFICATION_RECEIPT_PATH: artifacts/manifests/canonical_verification_environment.current.v1.json
-  GENERATED_ARTIFACT_DAG_STATE_PATH: .ci/product-state-inputs/generated-artifact-dag-state.v1.json
-  NIGHTLY_WORKFLOW_RUN_EVENT_PATH: .ci/product-state-inputs/nightly-workflow-run-event.json
   PRODUCT_STATE_ATTESTATION_BUNDLE: .ci/product-state-inputs/product-state.current.sigstore.json
   PRODUCT_STATE_ATTESTATION_VERIFICATION: .ci/product-state-inputs/product-state.current.attestation-verification.json
+  PRODUCT_STATE_PROVENANCE_PATH: .ci/product-state-inputs/product-state.provenance-bundle.v1.json
+  PRODUCT_STATE_PROVENANCE_ATTESTATION_BUNDLE: .ci/product-state-inputs/product-state.provenance-bundle.sigstore.json
+  PRODUCT_STATE_PROVENANCE_ATTESTATION_VERIFICATION: .ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json
+  CANONICAL_RECEIPT_PATH: artifacts/manifests/canonical_verification_environment.current.v1.json
+  CANONICAL_WHEEL_CONTRACT_PATH: .ci/canonical-project-wheel-contract.json
+  CANONICAL_WHEEL_PATH: .ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl
+  DAG_STATE_PATH: .ci/product-state-inputs/generated-artifact-dag-state.v2.json
+  DAG_REPORT_PATH: .ci/product-state-inputs/generated-artifact-dag-report.v2.json
+  NIGHTLY_WORKFLOW_RUN_EVENT_PATH: .ci/product-state-inputs/nightly-workflow-run-event.json
   GH_TOKEN: ${{ github.token }}
 
 jobs:
-  canonical-receipt:
-    if: >-
-      github.event.workflow_run.head_branch == 'main' &&
-      (github.event.workflow_run.event == 'schedule' ||
-       github.event.workflow_run.event == 'workflow_dispatch')
-    runs-on: ubuntu-latest
-    container:
-      image: docker.io/library/python:3.12.11-slim-bookworm@sha256:519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7
-    timeout-minutes: 20
-    steps:
-      - name: Checkout exact product-state source
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ env.PRODUCT_STATE_SHA }}
-
-      - name: Install exact hashed canonical dependencies
-        run: >-
-          python -m pip install
-          --only-binary=:all:
-          --require-hashes
-          --no-deps
-          -r canonical/requirements-cp312-manylinux2014-x86_64.lock
-
-      - name: Install source without dependency resolution
-        run: python -m pip install --no-deps --no-build-isolation -e .
-
-      - name: Build exact-source canonical environment receipt
-        run: >-
-          python scripts/build_canonical_verification_receipt.py
-          --enforce
-          --source-sha "$PRODUCT_STATE_SHA"
-          --write "$CANONICAL_VERIFICATION_RECEIPT_PATH"
-
-      - name: Validate canonical receipt schema and source binding
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
-          import jsonschema
-
-          schema = json.loads(
-              Path("canonical/canonical-verification-receipt.v1.schema.json").read_text()
-          )
-          receipt = json.loads(
-              Path(os.environ["CANONICAL_VERIFICATION_RECEIPT_PATH"]).read_text()
-          )
-          jsonschema.Draft202012Validator(schema).validate(receipt)
-          assert receipt["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
-          PY
-
-      - name: Upload canonical product-state input
-        uses: actions/upload-artifact@v7
-        with:
-          name: product-state-canonical-receipt-${{ env.PRODUCT_STATE_SHA }}
-          path: ${{ env.CANONICAL_VERIFICATION_RECEIPT_PATH }}
-          if-no-files-found: error
-          retention-days: 90
-
   build-current-state:
     if: >-
       github.event.workflow_run.head_branch == 'main' &&
       (github.event.workflow_run.event == 'schedule' ||
        github.event.workflow_run.event == 'workflow_dispatch')
-    needs: canonical-receipt
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - name: Checkout current main
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
           ref: ${{ env.PRODUCT_STATE_SHA }}
 
+      - name: Verify product-state workflow execution identity
+        shell: bash
+        run: |
+          test "$PRODUCT_STATE_WORKFLOW_SHA" = "$PRODUCT_STATE_SHA"
+          test "$PRODUCT_STATE_WORKFLOW_NAME" = "Product State Current"
+          test "$PRODUCT_STATE_WORKFLOW_EVENT" = "workflow_run"
+          test "$PRODUCT_STATE_WORKFLOW_REF" = \
+            "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml@refs/heads/main"
+          test "$(git rev-parse --verify 'HEAD^{commit}')" = "$PRODUCT_STATE_SHA"
+          git show \
+            "$PRODUCT_STATE_WORKFLOW_SHA:.github/workflows/product-state-current.yml" \
+            | cmp - .github/workflows/product-state-current.yml
+
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12.11"
 
@@ -128,43 +93,148 @@ jobs:
             -r canonical/requirements-cp312-manylinux2014-x86_64.lock
           python -m pip install --no-deps --no-build-isolation -e .
 
-      - name: Verify clean exact-source checkout
+      - name: Verify generated capability surfaces
+        run: python scripts/generate_capability_surfaces.py
+
+      - name: Materialize exact-SHA canonical verification receipt
         shell: bash
         run: |
-          test "$(git rev-parse HEAD)" = "$PRODUCT_STATE_SHA"
-          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+          mkdir -p .ci/canonical-receipt-download .ci/product-state-inputs
+          canonical_run_id=""
+          for attempt in {1..30}; do
+            if ! gh api --method GET \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/p0-canonical-contract.yml/runs?branch=main&status=success&head_sha=$PRODUCT_STATE_SHA&per_page=100" \
+              > .ci/product-state-inputs/canonical-verification-workflow-runs.json; then
+              if test "$attempt" -lt 30; then
+                sleep 10
+                continue
+              fi
+              echo "canonical workflow lookup failed after bounded retry" >&2
+              exit 1
+            fi
+            canonical_run_id="$(
+              python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
 
-      - name: Download canonical environment receipt
-        uses: actions/download-artifact@v7
-        with:
-          name: product-state-canonical-receipt-${{ env.PRODUCT_STATE_SHA }}
-          path: artifacts/manifests
-
-      - name: Validate canonical receipt schema and source binding
-        shell: bash
-        run: |
+          payload = json.loads(
+              Path(".ci/product-state-inputs/canonical-verification-workflow-runs.json").read_text()
+          )
+          matches = [
+              row
+              for row in payload.get("workflow_runs", [])
+              if row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]
+              and row.get("head_branch") == "main"
+              and row.get("conclusion") == "success"
+              and row.get("path") == ".github/workflows/p0-canonical-contract.yml"
+          ]
+          if matches:
+              print(max(matches, key=lambda row: int(row["id"]))["id"])
+          PY
+            )"
+            if test -n "$canonical_run_id"; then
+              break
+            fi
+            if test "$attempt" -lt 30; then
+              sleep 10
+            fi
+          done
+          if test -z "$canonical_run_id"; then
+            echo "no successful exact-SHA canonical workflow run after bounded retry" >&2
+            exit 1
+          fi
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$canonical_run_id" \
+            > .ci/product-state-inputs/canonical-verification-workflow-run.json
+          canonical_download_dir=""
+          for attempt in {1..12}; do
+            attempt_dir=".ci/canonical-receipt-download/$attempt"
+            mkdir -p "$attempt_dir"
+            if gh run download "$canonical_run_id" \
+              --repo "$GITHUB_REPOSITORY" \
+              --name "canonical-verification-environment-$PRODUCT_STATE_SHA" \
+              --dir "$attempt_dir"; then
+              canonical_download_dir="$attempt_dir"
+              break
+            fi
+            if test "$attempt" -lt 12; then
+              sleep 5
+            fi
+          done
+          if test -z "$canonical_download_dir"; then
+            echo "exact-SHA canonical artifact unavailable after bounded retry" >&2
+            exit 1
+          fi
+          mapfile -t downloaded_receipts < <(
+            find "$canonical_download_dir" \
+              -type f \
+              -name "$(basename "$CANONICAL_RECEIPT_PATH")"
+          )
+          mapfile -t downloaded_wheel_contracts < <(
+            find "$canonical_download_dir" \
+              -type f \
+              -name "$(basename "$CANONICAL_WHEEL_CONTRACT_PATH")"
+          )
+          mapfile -t downloaded_wheels < <(
+            find "$canonical_download_dir" \
+              -type f \
+              -name "$(basename "$CANONICAL_WHEEL_PATH")"
+          )
+          test "${#downloaded_receipts[@]}" -eq 1
+          test "${#downloaded_wheel_contracts[@]}" -eq 1
+          test "${#downloaded_wheels[@]}" -eq 1
+          downloaded_receipt="${downloaded_receipts[0]}"
+          downloaded_wheel_contract="${downloaded_wheel_contracts[0]}"
+          downloaded_wheel="${downloaded_wheels[0]}"
+          mkdir -p "$(dirname "$CANONICAL_RECEIPT_PATH")"
+          mkdir -p "$(dirname "$CANONICAL_WHEEL_CONTRACT_PATH")"
+          mkdir -p "$(dirname "$CANONICAL_WHEEL_PATH")"
+          cp "$downloaded_receipt" "$CANONICAL_RECEIPT_PATH"
+          cp "$downloaded_wheel_contract" "$CANONICAL_WHEEL_CONTRACT_PATH"
+          cp "$downloaded_wheel" "$CANONICAL_WHEEL_PATH"
           python - <<'PY'
+          import hashlib
           import json
           import os
           from pathlib import Path
           import jsonschema
 
-          schema = json.loads(
-              Path("canonical/canonical-verification-receipt.v1.schema.json").read_text()
-          )
-          receipt = json.loads(
-              Path(os.environ["CANONICAL_VERIFICATION_RECEIPT_PATH"]).read_text()
-          )
+          receipt = json.loads(Path(os.environ["CANONICAL_RECEIPT_PATH"]).read_text())
+          schema = json.loads(Path("canonical/canonical-verification-receipt.v1.schema.json").read_text())
+          wheel_contract = json.loads(Path(os.environ["CANONICAL_WHEEL_CONTRACT_PATH"]).read_text())
+          wheel_schema = json.loads(Path("canonical/canonical-project-wheel-contract.v1.schema.json").read_text())
+          wheel_path = Path(os.environ["CANONICAL_WHEEL_PATH"])
+          run = json.loads(Path(".ci/product-state-inputs/canonical-verification-workflow-run.json").read_text())
           jsonschema.Draft202012Validator(schema).validate(receipt)
+          jsonschema.Draft202012Validator(wheel_schema).validate(wheel_contract)
+          assert receipt["contract_profile"] == "p0-canonical-installed-wheel.v1"
           assert receipt["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert receipt["source_checkout_head_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert receipt["contract_pass"] is True
+          assert receipt["project_wheel"] == wheel_contract
+          assert wheel_contract["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert wheel_contract["wheel"]["filename"] == wheel_path.name
+          assert wheel_contract["wheel"]["byte_length"] == wheel_path.stat().st_size
+          assert wheel_contract["wheel"]["sha256"] == (
+              "sha256:" + hashlib.sha256(wheel_path.read_bytes()).hexdigest()
+          )
+          assert wheel_contract["installed_replay"]["installed_source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert run["name"] == "P0 Canonical Verification Contract"
+          assert run["path"] == ".github/workflows/p0-canonical-contract.yml"
+          assert run["head_branch"] == "main"
+          assert run["head_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert run["conclusion"] == "success"
           PY
-
-      - name: Verify generated capability surfaces
-        run: python scripts/generate_capability_surfaces.py --json
 
       - name: Materialize exact current-source product-state inputs
         shell: bash
         run: |
+          test -z "$(
+            git status --porcelain=v1 --untracked-files=all -- \
+              . \
+              ":(exclude)$CANONICAL_RECEIPT_PATH"
+          )"
           mkdir -p .ci/product-state-inputs
           cp "$GITHUB_EVENT_PATH" "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
           cp \
@@ -231,9 +301,7 @@ jobs:
           schema = json.loads(
               Path("canonical/product-state.current.v1.schema.json").read_text()
           )
-          product_state = json.loads(
-              Path(os.environ["PRODUCT_STATE_PATH"]).read_text()
-          )
+          product_state = json.loads(Path(os.environ["PRODUCT_STATE_PATH"]).read_text())
           jsonschema.Draft202012Validator.check_schema(schema)
           jsonschema.Draft202012Validator(schema).validate(product_state)
           PY
@@ -256,12 +324,12 @@ jobs:
           build_outcome = os.environ["PRODUCT_STATE_BUILD_OUTCOME"]
           observed_main_sha = os.environ["OBSERVED_MAIN_SHA"]
           source_sha = os.environ["PRODUCT_STATE_SHA"]
-          assert payload["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert payload["source_commit_sha"] == source_sha
           assert payload["observed_github_main_sha"] == observed_main_sha
           assert payload["observed_github_main_source"] == "github_api_refs_heads_main_pre_build"
           assert payload["quality_evidence"]["workflow_name"] == "Nightly Full Quality"
           assert payload["quality_evidence"]["conclusion"] == conclusion
-          assert payload["quality_evidence"]["head_sha"] == os.environ["PRODUCT_STATE_SHA"]
+          assert payload["quality_evidence"]["head_sha"] == source_sha
           assert payload["source_matches_observed_github_main"] is (
               source_sha == observed_main_sha
           )
@@ -294,48 +362,73 @@ jobs:
               )
           PY
 
-      - name: Record complete exact-source generated-artifact DAG provenance
+      - name: Write and validate full exact-SHA generated-artifact DAG
         shell: bash
         run: |
           python scripts/check_generated_artifact_dag.py \
-            --source-sha "$PRODUCT_STATE_SHA" \
-            --verify-head \
-            --require-through product-state \
-            --write-state "$GENERATED_ARTIFACT_DAG_STATE_PATH"
+            --write-state "$DAG_STATE_PATH" \
+            --report "$DAG_REPORT_PATH" \
+            --product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
           python - <<'PY'
           import json
           import os
           from pathlib import Path
           import jsonschema
 
-          schema = json.loads(
-              Path("canonical/generated-artifact-dag-state.v1.schema.json").read_text()
+          state = json.loads(Path(os.environ["DAG_STATE_PATH"]).read_text())
+          report = json.loads(Path(os.environ["DAG_REPORT_PATH"]).read_text())
+          state_schema = json.loads(Path("canonical/generated-artifact-dag-state.v2.schema.json").read_text())
+          report_schema = json.loads(Path("canonical/generated-artifact-dag-report.v2.schema.json").read_text())
+          jsonschema.Draft202012Validator(state_schema).validate(state)
+          jsonschema.Draft202012Validator(report_schema).validate(report)
+          assert state["state_kind"] == "full"
+          assert state["evaluated_through"] == "product-state"
+          assert report["scope_pass"] is True
+          assert report["contract_pass"] is True
+          assert report["stale_nodes"] == []
+          assert all(
+              row["current_binding"]["status"] == "current"
+              for row in report["nodes"].values()
           )
-          state = json.loads(
-              Path(os.environ["GENERATED_ARTIFACT_DAG_STATE_PATH"]).read_text()
-          )
-          jsonschema.Draft202012Validator(schema).validate(state)
-          assert state["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
           PY
+
+      - name: Build exact-SHA product-state provenance bundle
+        run: >-
+          python scripts/build_product_state_provenance_bundle.py
+          --source-sha "$PRODUCT_STATE_SHA"
+          --product-state "$PRODUCT_STATE_PATH"
+          --canonical-receipt "$CANONICAL_RECEIPT_PATH"
+          --canonical-wheel-contract "$CANONICAL_WHEEL_CONTRACT_PATH"
+          --canonical-wheel "$CANONICAL_WHEEL_PATH"
+          --dag-state "$DAG_STATE_PATH"
+          --dag-report "$DAG_REPORT_PATH"
+          --canonical-workflow-run .ci/product-state-inputs/canonical-verification-workflow-run.json
+          --nightly-workflow-run-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
+          --product-state-workflow-sha "$PRODUCT_STATE_WORKFLOW_SHA"
+          --product-state-workflow-ref "$PRODUCT_STATE_WORKFLOW_REF"
+          --product-state-workflow-name "$PRODUCT_STATE_WORKFLOW_NAME"
+          --product-state-workflow-event "$PRODUCT_STATE_WORKFLOW_EVENT"
+          --product-state-workflow-run-id "$PRODUCT_STATE_WORKFLOW_RUN_ID"
+          --product-state-workflow-run-number "$PRODUCT_STATE_WORKFLOW_RUN_NUMBER"
+          --product-state-workflow-run-attempt "$PRODUCT_STATE_WORKFLOW_RUN_ATTEMPT"
+          --out "$PRODUCT_STATE_PROVENANCE_PATH"
 
       - name: Confirm main observation is stable before attestation
         shell: bash
-        env:
-          OBSERVED_MAIN_SHA: ${{ steps.observe_main.outputs.sha }}
         run: |
           current_main_sha="$(
             gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha'
           )"
           [[ "$current_main_sha" =~ ^[0-9a-f]{40}$ ]]
-          test "$current_main_sha" = "$OBSERVED_MAIN_SHA"
+          test "$current_main_sha" = "$PRODUCT_STATE_SHA"
 
       - name: Attest exact-SHA product state
         id: attest
-        uses: actions/attest@v4
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
         with:
           subject-path: ${{ env.PRODUCT_STATE_PATH }}
 
-      - name: Retain and verify product-state provenance bundle
+      - name: Retain and verify product-state attestation
         shell: bash
         run: |
           cp "${{ steps.attest.outputs.bundle-path }}" "$PRODUCT_STATE_ATTESTATION_BUNDLE"
@@ -343,11 +436,35 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --bundle "$PRODUCT_STATE_ATTESTATION_BUNDLE" \
             --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --signer-digest "$PRODUCT_STATE_WORKFLOW_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
             --deny-self-hosted-runners \
             --format json > "$PRODUCT_STATE_ATTESTATION_VERIFICATION"
 
+      - name: Attest exact-SHA product-state provenance bundle
+        id: attest_provenance
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
+        with:
+          subject-path: ${{ env.PRODUCT_STATE_PROVENANCE_PATH }}
+
+      - name: Retain and verify provenance-bundle attestation
+        shell: bash
+        run: |
+          cp "${{ steps.attest_provenance.outputs.bundle-path }}" \
+            "$PRODUCT_STATE_PROVENANCE_ATTESTATION_BUNDLE"
+          gh attestation verify "$PRODUCT_STATE_PROVENANCE_PATH" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$PRODUCT_STATE_PROVENANCE_ATTESTATION_BUNDLE" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --signer-digest "$PRODUCT_STATE_WORKFLOW_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$PRODUCT_STATE_PROVENANCE_ATTESTATION_VERIFICATION"
+
       - name: Upload current and historical product-state manifests
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: product-state-current-${{ env.PRODUCT_STATE_CONCLUSION }}-${{ env.PRODUCT_STATE_SHA }}
           path: |
@@ -355,13 +472,18 @@ jobs:
             artifacts/manifests/product_state.history.v1.json
             artifacts/manifests/product_state.legacy-sources.v1.json
             artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json
-            artifacts/manifests/canonical_verification_environment.current.v1.json
             artifacts/manifests/internal_license_due_diligence.current.v1.json
+            artifacts/manifests/canonical_verification_environment.current.v1.json
+            canonical/product-state.current.v1.schema.json
+            .github/workflows/product-state-current.yml
+            ${{ env.CANONICAL_WHEEL_CONTRACT_PATH }}
+            ${{ env.CANONICAL_WHEEL_PATH }}
             artifacts/vv/bounded_planar_external_linear_case_package
             artifacts/vv/bounded_planar_external_negative_case_package
             artifacts/vv/bounded_planar_external_scaling_case_package
             artifacts/vv/bounded_planar_external_modal_buckling_case_package
             artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package
             .ci/product-state-inputs
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90

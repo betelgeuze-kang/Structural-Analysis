@@ -163,8 +163,30 @@ def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     )
     assert workflow.count("ci/bounded-planar-wheel-smoke.constraints.txt") == 2
     assert workflow.count('- "pyproject.toml"') == 2
-    assert "actions/upload-artifact@v7" in workflow
-    assert "actions/download-artifact@v7" in workflow
+    assert (
+        workflow.count(
+            "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803"
+        )
+        == 2
+    )
+    assert (
+        workflow.count(
+            "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1"
+        )
+        == 2
+    )
+    assert (
+        workflow.count(
+            "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        )
+        == 6
+    )
+    assert (
+        workflow.count(
+            "actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131"
+        )
+        == 4
+    )
     assert "Reference-coordinate exact hashes" in workflow
     assert "separately pinned P0 canonical workflow" in workflow
     assert "two byte-identical builds in one workflow execution" in workflow
@@ -181,15 +203,36 @@ def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     assert "id-token: write" in attestation_job
     assert "attestations: write" in attestation_job
     assert "artifact-metadata: write" in attestation_job
-    assert "uses: actions/attest@v4" in workflow
+    assert (
+        workflow.count("actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d")
+        == 2
+    )
+    for mutable_ref in (
+        "actions/checkout@v",
+        "actions/setup-python@v",
+        "actions/upload-artifact@v",
+        "actions/download-artifact@v",
+        "actions/attest@v",
+    ):
+        assert mutable_ref not in workflow
     assert "github.event_name != 'pull_request'" in workflow
     assert "steps.attest.outputs.bundle-path" in workflow
     assert "steps.attest-wheel-manifest.outputs.bundle-path" in workflow
     assert "gh attestation verify" in workflow
     assert "--signer-workflow" in workflow
+    assert 'ENGINE_V2_WORKFLOW_SHA: "${{ github.workflow_sha }}"' in workflow
+    assert 'ENGINE_V2_WORKFLOW_REF: "${{ github.workflow_ref }}"' in workflow
+    assert 'test "$ENGINE_V2_WORKFLOW_SHA" = "$ENGINE_V2_SOURCE_SHA"' in workflow
+    assert "engine-v2-determinism-ci.yml@refs/heads/main" in workflow
+    assert workflow.count('--signer-digest "$ENGINE_V2_WORKFLOW_SHA"') == 2
     assert '--source-digest "$ENGINE_V2_SOURCE_SHA"' in workflow
     assert "--source-ref refs/heads/main" in workflow
     assert "--deny-self-hosted-runners" in workflow
+    assert 'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"' in workflow
+    assert 'test "$current_main_sha" = "$ENGINE_V2_SOURCE_SHA"' in workflow
+    assert workflow.index("Verify current-main workflow execution identity") < (
+        workflow.index("id: attest")
+    )
     assert "engine-v2-determinism-four-way-attested-" in workflow
     assert "bounded-planar-wheel-smoke-four-way-attested-" in workflow
     assert "merge-multiple: true" in workflow

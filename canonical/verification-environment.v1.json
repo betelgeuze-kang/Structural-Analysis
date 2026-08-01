@@ -2,8 +2,8 @@
   "schema_version": "canonical-verification-environment.v1",
   "profile": "linux-amd64-cpython-3.12",
   "container": {
-    "image": "docker.io/library/python:3.12.11-slim-bookworm",
-    "digest": "sha256:519591d6871b7bc437060736b9f7456b8731f1499a57e22e6c285135ae657bf7",
+    "image": "docker.io/library/python:3.12.11-bookworm",
+    "digest": "sha256:47d28e7d429679c31c3ea60e90857c54c7967084685e2ee287935116e5a79b92",
     "platform": "linux/amd64"
   },
   "python": {
@@ -25,7 +25,19 @@
     "wheel_version": "0.45.1",
     "source_date_epoch": "source_commit_timestamp"
   },
+  "project_wheel": {
+    "contract_schema_version": "canonical-project-wheel-contract.v1",
+    "build_isolation": "pep517-exact-wheelhouse-no-index",
+    "reproducibility_check": "two-independent-git-archive-builds-byte-equal",
+    "installed_replay": "bounded-planar-member-feature-and-settlement"
+  },
+  "linear_algebra": {
+    "provider_family": "openblas",
+    "wheel_bound_distributions": ["numpy", "scipy"],
+    "identity": "loaded-shared-library-sha256-bound-to-exact-locked-wheel-member"
+  },
   "determinism": {
+    "OPENBLAS_CORETYPE": "Haswell",
     "OPENBLAS_NUM_THREADS": "1",
     "OMP_NUM_THREADS": "1",
     "MKL_NUM_THREADS": "1",
@@ -36,8 +48,12 @@
   },
   "required_receipt_fields": [
     "source_commit_sha",
+    "source_checkout_head_sha",
+    "source_date_epoch",
     "container.image",
     "container.digest",
+    "project_wheel.wheel.sha256",
+    "project_wheel.installed_replay",
     "runtime.python",
     "runtime.packages.numpy",
     "runtime.packages.scipy",
@@ -46,6 +62,7 @@
     "runtime.blas",
     "runtime.lapack",
     "runtime.linear_algebra_shared_libraries",
+    "runtime.linear_algebra_identity",
     "runtime.thread_limits",
     "runtime.locale",
     "runtime.timezone",

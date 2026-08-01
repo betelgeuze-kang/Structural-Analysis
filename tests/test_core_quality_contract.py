@@ -8,20 +8,6 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "check_core_quality.py"
-P0_TYPECHECK_PATHS = [
-    "src/structural_analysis/adapters",
-    "src/structural_analysis/analyses",
-    "src/structural_analysis/dynamics/transient_checkpoint.py",
-    "src/structural_analysis/elements/corotational_frame3d.py",
-    "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py",
-    "src/structural_analysis/materials",
-    "src/structural_analysis/model",
-    "src/structural_analysis/results/schema.py",
-    "src/structural_analysis/results/validation.py",
-    "src/structural_analysis/engine_v2/contracts/result_quantity.py",
-    "src/structural_analysis/solvers/nonlinear/transient.py",
-    "src/structural_analysis/units",
-]
 
 
 def _load_module():
@@ -51,8 +37,54 @@ def test_core_quality_manifest_contract() -> None:
     ]
     assert payload["compatibility_matrix"]["required_coordinate_count"] == 9
     assert len(payload["coverage"]["tests"]) == 9
-    assert payload["typecheck"]["paths"] == P0_TYPECHECK_PATHS
     assert "exact parity" in payload["claim_boundary"]
+    assert set(payload["typecheck"]["paths"]) == {
+        "src/structural_analysis/adapters",
+        "src/structural_analysis/analyses",
+        "src/structural_analysis/dynamics/transient_checkpoint.py",
+        "src/structural_analysis/elements/corotational_frame3d.py",
+        "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py",
+        "src/structural_analysis/engine_v2/contracts/result_quantity.py",
+        "src/structural_analysis/materials",
+        "src/structural_analysis/model",
+        "src/structural_analysis/results/schema.py",
+        "src/structural_analysis/results/validation.py",
+        "src/structural_analysis/solvers/nonlinear/transient.py",
+        "src/structural_analysis/units",
+    }
+
+
+def test_contract_rejects_mypy_config_scope_missing_from_manifest() -> None:
+    module = _load_module()
+    payload = module.load_manifest()
+    weakened = deepcopy(payload)
+    weakened["typecheck"]["paths"].remove("src/structural_analysis/adapters")
+
+    try:
+        module.check_contract(weakened)
+    except ValueError as exc:
+        assert "must match exactly and in order" in str(exc)
+        assert "src/structural_analysis/adapters" in str(exc)
+    else:
+        raise AssertionError("unowned mypy config scope was accepted")
+
+
+def test_contract_rejects_manifest_scope_missing_from_mypy_config() -> None:
+    module = _load_module()
+    payload = module.load_manifest()
+    weakened = deepcopy(payload)
+    weakened["typecheck"]["paths"].append(
+        "src/structural_analysis/engine_v2/contracts/__init__.py"
+    )
+
+    try:
+        module.check_contract(weakened)
+    except ValueError as exc:
+        assert "must match exactly and in order" in str(exc)
+        assert "missing_from_config" in str(exc)
+        assert "src/structural_analysis/engine_v2/contracts/__init__.py" in str(exc)
+    else:
+        raise AssertionError("manifest-only mypy scope was accepted")
 
 
 def test_core_quality_commands_are_manifest_driven() -> None:
@@ -69,7 +101,7 @@ def test_core_quality_commands_are_manifest_driven() -> None:
         "--config-file",
         "pyproject.toml",
     ]
-    assert typecheck[5:] == P0_TYPECHECK_PATHS
+    assert set(payload["typecheck"]["paths"]).issubset(typecheck)
     assert coverage_run[:5] == [
         sys.executable,
         "-m",
@@ -105,22 +137,6 @@ def test_contract_rejects_quietly_weakened_threshold_or_matrix() -> None:
         raise AssertionError("weakened compatibility matrix was accepted")
 
 
-def test_contract_rejects_mypy_scope_drift_from_pyproject() -> None:
-    module = _load_module()
-    payload = module.load_manifest()
-
-    weakened_typecheck = deepcopy(payload)
-    weakened_typecheck["typecheck"]["paths"].remove(
-        "src/structural_analysis/adapters"
-    )
-    try:
-        module.check_contract(weakened_typecheck)
-    except ValueError as exc:
-        assert "must exactly match" in str(exc)
-    else:
-        raise AssertionError("a pyproject P0 mypy path was omitted without failure")
-
-
 def test_workflow_matches_manifest_matrix_and_runs_bounded_gate() -> None:
     module = _load_module()
     payload = module.load_manifest()
@@ -132,14 +148,14 @@ def test_workflow_matches_manifest_matrix_and_runs_bounded_gate() -> None:
         assert os_name in workflow
     for version in payload["compatibility_matrix"]["python_versions"]:
         assert f'"{version}"' in workflow
-    for path in P0_TYPECHECK_PATHS:
-        trigger = f"{path}/**" if (ROOT / path).is_dir() else path
-        assert workflow.count(f'- "{trigger}"') == 2
     assert "python scripts/check_core_quality.py" in workflow
     assert "tests/test_result_quantity_catalog.py" in workflow
     assert "src/structural_analysis/engine_v2/contracts/result_quantity.py" in workflow
     assert "--fail-under=90" in workflow
     assert "fail-fast: false" in workflow
+    for path in payload["typecheck"]["paths"]:
+        trigger = f"{path}/**" if (ROOT / path).is_dir() else path
+        assert workflow.count(f'- "{trigger}"') == 2
     git_checkout_config = [
         ("core.longpaths", '"true"'),
         ("filter.lfs.required", '"false"'),

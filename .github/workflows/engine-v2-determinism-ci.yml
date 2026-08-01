@@ -84,6 +84,8 @@ env:
   MKL_NUM_THREADS: "1"
   PYTHONHASHSEED: "0"
   ENGINE_V2_SOURCE_SHA: "${{ github.sha }}"
+  ENGINE_V2_WORKFLOW_SHA: "${{ github.workflow_sha }}"
+  ENGINE_V2_WORKFLOW_REF: "${{ github.workflow_ref }}"
   ENGINE_V2_MATRIX_RECEIPT: ".ci/engine-v2-determinism/engine-v2-four-way-matrix-receipt.json"
   ENGINE_V2_WHEEL_MANIFEST: ".ci/engine-v2-wheel-smoke-manifest/bounded-planar-wheel-smoke-four-way.json"
   ENGINE_V2_ATTESTATION_BUNDLE: ".ci/engine-v2-determinism/engine-v2-four-way-matrix-receipt.sigstore.json"
@@ -123,12 +125,12 @@ jobs:
         python-version: ["3.10", "3.12"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.ENGINE_V2_SOURCE_SHA }}
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -148,7 +150,7 @@ jobs:
 
       - name: Upload exact-source wheel smoke receipt and wheel
         if: ${{ always() }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bounded-planar-wheel-smoke-${{ matrix.os }}-python-${{ matrix.python-version }}
           path: .ci/engine-v2-wheel-smoke/
@@ -181,7 +183,7 @@ jobs:
 
       - name: Upload coordinate determinism receipt
         if: ${{ always() }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: engine-v2-determinism-coordinate-${{ matrix.os }}-python-${{ matrix.python-version }}
           path: .ci/engine-v2-determinism/*.json
@@ -197,12 +199,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.ENGINE_V2_SOURCE_SHA }}
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
           cache: pip
@@ -214,14 +216,14 @@ jobs:
 
       - name: Download coordinate receipts
         continue-on-error: true
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           pattern: engine-v2-determinism-coordinate-*
           path: .ci/engine-v2-determinism/coordinates
           merge-multiple: true
 
       - name: Download exact-source wheel smoke receipts and wheels
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           pattern: bounded-planar-wheel-smoke-*
           path: .ci/engine-v2-wheel-smoke/coordinates
@@ -250,7 +252,7 @@ jobs:
 
       - name: Upload four-way determinism receipt
         if: ${{ always() }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: engine-v2-determinism-four-way-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.ENGINE_V2_MATRIX_RECEIPT }}
@@ -259,7 +261,7 @@ jobs:
           retention-days: 90
 
       - name: Upload four-way wheel smoke manifest
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bounded-planar-wheel-smoke-four-way-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.ENGINE_V2_WHEEL_MANIFEST }}
@@ -280,26 +282,40 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Download exact four-way receipt
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: engine-v2-determinism-four-way-${{ github.run_id }}-${{ github.run_attempt }}
           path: .ci/engine-v2-determinism
 
       - name: Download exact four-way wheel smoke manifest
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: bounded-planar-wheel-smoke-four-way-${{ github.run_id }}-${{ github.run_attempt }}
           path: .ci/engine-v2-wheel-smoke-manifest
 
+      - name: Verify current-main workflow execution identity
+        shell: bash
+        run: |
+          [[ "$ENGINE_V2_WORKFLOW_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$ENGINE_V2_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$ENGINE_V2_WORKFLOW_SHA" = "$ENGINE_V2_SOURCE_SHA"
+          test "$ENGINE_V2_WORKFLOW_REF" = \
+            "$GITHUB_REPOSITORY/.github/workflows/engine-v2-determinism-ci.yml@refs/heads/main"
+          current_main_sha="$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha'
+          )"
+          [[ "$current_main_sha" =~ ^[0-9a-f]{40}$ ]]
+          test "$current_main_sha" = "$ENGINE_V2_SOURCE_SHA"
+
       - name: Attest current-main four-way receipt
         id: attest
-        uses: actions/attest@v4
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
         with:
           subject-path: ${{ env.ENGINE_V2_MATRIX_RECEIPT }}
 
       - name: Attest current-main four-way wheel smoke manifest
         id: attest-wheel-manifest
-        uses: actions/attest@v4
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
         with:
           subject-path: ${{ env.ENGINE_V2_WHEEL_MANIFEST }}
 
@@ -310,6 +326,7 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --bundle "$ENGINE_V2_ATTESTATION_BUNDLE" \
             --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/engine-v2-determinism-ci.yml" \
+            --signer-digest "$ENGINE_V2_WORKFLOW_SHA" \
             --source-digest "$ENGINE_V2_SOURCE_SHA" \
             --source-ref refs/heads/main \
             --deny-self-hosted-runners \
@@ -322,13 +339,14 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --bundle "$ENGINE_V2_WHEEL_ATTESTATION_BUNDLE" \
             --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/engine-v2-determinism-ci.yml" \
+            --signer-digest "$ENGINE_V2_WORKFLOW_SHA" \
             --source-digest "$ENGINE_V2_SOURCE_SHA" \
             --source-ref refs/heads/main \
             --deny-self-hosted-runners \
             --format json > "$ENGINE_V2_WHEEL_ATTESTATION_VERIFICATION"
 
       - name: Upload attested receipt and verification bundle
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: engine-v2-determinism-four-way-attested-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
@@ -340,7 +358,7 @@ jobs:
           retention-days: 90
 
       - name: Upload attested wheel manifest and verification bundle
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bounded-planar-wheel-smoke-four-way-attested-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
