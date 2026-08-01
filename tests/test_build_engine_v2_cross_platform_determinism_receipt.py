@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -163,6 +164,18 @@ def test_semantic_policy_is_quantity_aware_and_bound_to_golden_set(
     assert module._semantic_normalize({"UX_m": 1.234567891}) != (
         module._semantic_normalize({"UX_m": 1.2345689})
     )
+    assert module._semantic_normalize({"relative_residual": 1.0e-10}) == {
+        "relative_residual": 0.0
+    }
+    assert module._semantic_normalize({"relative_residual": 9.0e-10}) == {
+        "relative_residual": 0.0
+    }
+    assert module._semantic_normalize({"relative_residual": 1.1e-9}) == {
+        "relative_residual": 1.1e-9
+    }
+    assert module._semantic_normalize(
+        {"dimensionless_scaled_residual_linf": 9.0e-10}
+    ) == {"dimensionless_scaled_residual_linf": 0.0}
 
     before = module.expected_golden_set_hash()
     monkeypatch.setitem(
@@ -171,6 +184,39 @@ def test_semantic_policy_is_quantity_aware_and_bound_to_golden_set(
         1.0e-5,
     )
     assert module.expected_golden_set_hash() != before
+
+
+def test_semantic_hash_collapses_only_gate_passed_relative_residuals() -> None:
+    def result(relative_residual: float) -> SimpleNamespace:
+        payload = {
+            "status": "converged",
+            "contract_pass": True,
+            "profile": "test",
+            "configuration": {"residual_tolerance": 1.0e-9},
+            "authority": {},
+            "node_displacements": [],
+            "support_reactions": [],
+            "member_end_forces": [],
+            "section_results": [],
+            "fiber_results": [],
+            "convergence_history": [
+                {"relative_residual": relative_residual},
+            ],
+            "metrics": {
+                "free_residual_relative": relative_residual,
+                "dimensionless_scaled_residual_linf": relative_residual,
+            },
+            "unsupported_features": [],
+            "warnings": [],
+        }
+        return SimpleNamespace(to_dict=lambda: payload)
+
+    below_gate = module._bounded_planar_semantic_hash(result(1.0e-10))
+    at_gate = module._bounded_planar_semantic_hash(result(1.0e-9))
+    above_gate = module._bounded_planar_semantic_hash(result(1.1e-9))
+
+    assert below_gate == at_gate
+    assert above_gate != at_gate
 
 
 def test_nonreference_coordinate_accepts_semantic_not_raw_numerical_identity(

@@ -67,6 +67,14 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  # Keep noncanonical semantic replay independent of hosted-runner CPU dispatch
+  # and parallel reduction order. The separately pinned canonical workflow still
+  # owns the exact dependency and BLAS/LAPACK identity receipt.
+  OPENBLAS_CORETYPE: Haswell
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  PYTHONHASHSEED: "0"
   ENGINE_V2_SOURCE_SHA: "${{ github.event.pull_request.head.sha || github.sha }}"
   ENGINE_V2_MATRIX_RECEIPT: ".ci/engine-v2-determinism/engine-v2-four-way-matrix-receipt.json"
   ENGINE_V2_ATTESTATION_BUNDLE: ".ci/engine-v2-determinism/engine-v2-four-way-matrix-receipt.sigstore.json"

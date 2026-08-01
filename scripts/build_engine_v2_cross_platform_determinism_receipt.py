@@ -101,7 +101,7 @@ REQUIRED_COORDINATES = tuple(
 REFERENCE_EXACT_COORDINATE = "ubuntu-latest|python-3.12"
 SEMANTIC_SIGNIFICANT_DIGITS = 8
 SEMANTIC_POLICY: dict[str, Any] = {
-    "schema_version": "bounded-planar-semantic-projection.v1",
+    "schema_version": "bounded-planar-semantic-projection.v2",
     "significant_digits": SEMANTIC_SIGNIFICANT_DIGITS,
     "absolute_zero_by_quantity": {
         "area_m2": 1.0e-16,
@@ -110,6 +110,9 @@ SEMANTIC_POLICY: dict[str, Any] = {
         "force_N": 1.0e-6,
         "length_m": 1.0e-12,
         "moment_Nm": 1.0e-6,
+        # Residuals at or below the public bounded-planar solve gate carry the
+        # same converged meaning even when BLAS roundoff changes their bytes.
+        "relative_residual": 1.0e-9,
         "rotation_rad": 1.0e-12,
         "strain": 1.0e-12,
         "stress_Pa": 1.0e-3,
@@ -175,7 +178,7 @@ EXPECTED_GOLDENS = {
         "sha256:117c90503a60a188758992fd0e1234796a1cb1913725ffa87f9d33b4f5f7c5b6"
     ),
     "bounded_planar_semantic_hash": (
-        "sha256:e137559a5e79a62a501898db1117e2b3403667c68abb493c296e0d1eff175368"
+        "sha256:95493872569eb1ec292f7fda2e49334a09a7826073beb7b8a437c856201e0707"
     ),
     "bounded_planar_replay_result_hash": (
         "sha256:e1b1cc5400c072ebb18b0bcf7c6e455190c77e3ac088c805888f5c7d6a3772d6"
@@ -220,7 +223,7 @@ EXPECTED_GOLDENS = {
         "sha256:d1a1d9c51cf87d64b917ba789e4724b901ef2ca161d67943613248a98bbaf537"
     ),
     "bounded_planar_settlement_semantic_hash": (
-        "sha256:c5cb95e2c5da13cf792a3a01fb9dbf223fb7790e3fa79678a631377cd189448e"
+        "sha256:13a8bbaaac06627b438d2166e122988e815ab6e7d2c47fe74bfaab779a3b1ea3"
     ),
     "bounded_planar_settlement_replay_result_hash": (
         "sha256:98e01640847327ca70cfac42cf89741235693cd1ba8b3638bceaf2df03eba006"
@@ -448,6 +451,11 @@ def _record_artifact(
 
 def _semantic_quantity(field_name: str) -> str:
     normalized = field_name.lower()
+    if (
+        ("relative" in normalized and "residual" in normalized)
+        or "dimensionless_scaled_residual" in normalized
+    ):
+        return "relative_residual"
     if "area_m2" in normalized:
         return "area_m2"
     if normalized.endswith("_pa") or "stress_pa" in normalized:

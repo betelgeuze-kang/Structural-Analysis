@@ -88,6 +88,11 @@ def test_cross_platform_workflow_owns_receipt_backed_four_way_matrix() -> None:
     assert "os: [ubuntu-latest, windows-latest]" in workflow
     assert 'python-version: ["3.10", "3.12"]' in workflow
     assert "fail-fast: false" in workflow
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
+    assert 'OMP_NUM_THREADS: "1"' in workflow
+    assert 'MKL_NUM_THREADS: "1"' in workflow
+    assert 'PYTHONHASHSEED: "0"' in workflow
     assert 'GIT_CONFIG_COUNT: "6"' in workflow
     assert "GIT_CONFIG_KEY_0: core.longpaths" in workflow
     assert "GIT_CONFIG_KEY_4: filter.lfs.process" in workflow

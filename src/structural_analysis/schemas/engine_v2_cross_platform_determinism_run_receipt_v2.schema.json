@@ -139,7 +139,7 @@
       ],
       "properties": {
         "schema_version": {
-          "const": "bounded-planar-semantic-projection.v1"
+          "const": "bounded-planar-semantic-projection.v2"
         },
         "significant_digits": {
           "type": "integer",
