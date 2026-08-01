@@ -30,6 +30,11 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
     assert 'branches: ["main"]' in workflow
     assert "python -m pytest -q" in workflow
     assert "full:\n    if:" not in workflow
+    full_checkout = workflow.split("  full:", 1)[1].split(
+        "      - name: Set up Python",
+        1,
+    )[0]
+    assert "fetch-depth: 0" in full_checkout
 
 
 def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
