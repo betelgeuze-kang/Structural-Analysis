@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 
 import jsonschema
 import pytest
@@ -10,6 +13,28 @@ from scripts import check_generated_artifact_dag as module
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_direct_script_bootstraps_repo_root_without_pythonpath() -> None:
+    script = ROOT / "scripts/check_generated_artifact_dag.py"
+    environment = dict(os.environ)
+    environment.pop("PYTHONPATH", None)
+    code = (
+        "import runpy, sys; "
+        f"runpy.run_path({str(script)!r}, run_name='dag_path_probe'); "
+        f"assert {str(ROOT)!r} in sys.path; "
+        "import scripts.generate_capability_surfaces"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-S", "-c", code],
+        cwd=ROOT,
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
 
 
 def _write(path: Path, text: str) -> None:
