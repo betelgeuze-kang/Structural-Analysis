@@ -4,10 +4,15 @@
     "mode": "direct_aggregator_source_tracking",
     "source_artifacts": [
       "scripts/build_pm_release_blocker_closure_board.py",
+      "scripts/release_evidence_metadata.py",
       "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
       "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
     ]
   },
+  "blockers": [
+    "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED",
+    "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
+  ],
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
     "release_area_blocker_count": 51,
@@ -69,18 +74,44 @@
     "release_area_total_count": 16
   },
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
+  "computed_without_provenance": {
+    "action_register_matches_pm_report": true,
+    "contract_pass": false,
+    "open_blocker_count": 72,
+    "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
+    "status": "blocked",
+    "upstream_contracts": {
+      "pm_release_blocker_action_register": {
+        "contract_field_present": true,
+        "contract_pass": false,
+        "loaded": true,
+        "required_pass": false,
+        "source_input_provenance_contract_pass": true,
+        "source_input_provenance_present": true
+      },
+      "pm_release_gate_report": {
+        "contract_field_present": true,
+        "contract_pass": false,
+        "loaded": true,
+        "required_pass": false,
+        "source_input_provenance_contract_pass": false,
+        "source_input_provenance_present": true
+      }
+    }
+  },
   "contract_pass": false,
   "engine_version": "structural-analysis@0.3.0",
-  "generated_at": "2026-08-02T02:54:42.929853+00:00",
+  "generated_at": "2026-08-02T04:22:00.634400+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:0585c1eab48f1d0e93f7e91b828d6e8ed249096e01798cc981af1bb03a5e4a7c",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
-    "scripts/build_pm_release_blocker_closure_board.py": "sha256:f617948b2ab9956f207ebf3867abcd1863e32c73dbeabb4dcb0044ef88e46c1a"
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d3d7fc8164b7237dd78311be3bc8a5c31c7d2e1c8f7b1ba49bdd25f2108c2d7b",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
+    "scripts/build_pm_release_blocker_closure_board.py": "sha256:a087981bbcb9ef97a48e8b75fe1d24d5fb659bc36b58986f1d20a6c8ef29681b",
+    "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: BLOCKED | source_provenance=BLOCKED | computed_without_provenance=PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304",
-  "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
+  "reason_code": "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED",
   "reuse_policy": "pm_release_blocker_closure_board_aggregates_action_register_and_pm_report",
   "reused_evidence": true,
   "rows": [
@@ -2299,7 +2330,7 @@
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
       "resolution_type": "release_evidence_remediation_required",
-      "scope": "unknown",
+      "scope": "ga_enterprise",
       "verification_commands": [
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
@@ -2522,44 +2553,53 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "098544e5d9c80cc020b33dcd498048aa8cab1dac",
+  "source_commit_sha": "a7e2be1ebe829eaa16211b6754c997e1aa2fe714",
   "source_input_provenance": {
     "blocker_count": 0,
     "blockers": [],
     "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim.",
     "contract_pass": true,
-    "input_count": 3,
+    "input_count": 4,
     "inputs": [
       {
         "blocker": "",
         "path": "scripts/build_pm_release_blocker_closure_board.py",
-        "source_checksum": "sha256:f617948b2ab9956f207ebf3867abcd1863e32c73dbeabb4dcb0044ef88e46c1a",
+        "source_checksum": "sha256:a087981bbcb9ef97a48e8b75fe1d24d5fb659bc36b58986f1d20a6c8ef29681b",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:f617948b2ab9956f207ebf3867abcd1863e32c73dbeabb4dcb0044ef88e46c1a",
+        "workspace_checksum": "sha256:a087981bbcb9ef97a48e8b75fe1d24d5fb659bc36b58986f1d20a6c8ef29681b",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/release_evidence_metadata.py",
+        "source_checksum": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
         "workspace_matches_source": true
       },
       {
         "blocker": "",
         "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "source_checksum": "sha256:0585c1eab48f1d0e93f7e91b828d6e8ed249096e01798cc981af1bb03a5e4a7c",
+        "source_checksum": "sha256:d3d7fc8164b7237dd78311be3bc8a5c31c7d2e1c8f7b1ba49bdd25f2108c2d7b",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:0585c1eab48f1d0e93f7e91b828d6e8ed249096e01798cc981af1bb03a5e4a7c",
+        "workspace_checksum": "sha256:d3d7fc8164b7237dd78311be3bc8a5c31c7d2e1c8f7b1ba49bdd25f2108c2d7b",
         "workspace_matches_source": true
       },
       {
         "blocker": "",
         "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "source_checksum": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
+        "source_checksum": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
+        "workspace_checksum": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
         "workspace_matches_source": true
       }
     ],
     "reason_code": "PASS",
     "schema_version": "source-input-provenance.v1",
     "source_commit_resolved": true,
-    "workspace_match_count": 3
+    "workspace_match_count": 4
   },
+  "status": "blocked",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
