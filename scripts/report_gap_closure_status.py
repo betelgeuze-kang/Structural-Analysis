@@ -64,6 +64,21 @@ def _git_head() -> str:
         return ""
 
 
+def _portable_repo_path(path: Path) -> Path:
+    """Return repository inputs as stable relative paths.
+
+    Explicit productization directories outside the repository remain absolute so
+    callers can still identify their ad-hoc inputs.  Tracked receipts, however,
+    must not capture the checkout-specific repository root.
+    """
+
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(REPO_ROOT.resolve())
+    except ValueError:
+        return resolved
+
+
 def _compact_ledger_requirements(rows: list[Any]) -> list[dict[str, Any]]:
     compact: list[dict[str, Any]] = []
     for row in rows:
@@ -88,7 +103,10 @@ def _compact_ledger_requirements(rows: list[Any]) -> list[dict[str, Any]]:
 def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str, Any]:
     productization = Path(productization_dir or PRODUCTIZATION)
     checksum_inputs = [
-        *(productization / filename for filename in GAP_CLOSURE_INPUT_FILES),
+        *(
+            _portable_repo_path(productization / filename)
+            for filename in GAP_CLOSURE_INPUT_FILES
+        ),
         Path("docs/commercial-structural-solver-product-gap-ledger.md"),
         Path("docs/structural-analysis-ai-engine-gap-ledger.md"),
     ]
@@ -244,11 +262,23 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
         "sections": sections,
         "ledger_requirements": _compact_ledger_requirements(ledger_rows),
         "artifacts": {
-            "delivery_evidence_bundle": str(productization / "delivery_evidence_bundle.json"),
-            "residual_holdout_closure_updates": str(productization / "residual_holdout_closure_updates.json"),
-            "commercial_gap_ledger_status": str(productization / "commercial_gap_ledger_status.json"),
-            "ai_freeze_boundary_status": str(productization / "ai_freeze_boundary_status.json"),
-            "gap_ledger_evidence_audit": str(productization / "gap_ledger_evidence_audit.json"),
+            "delivery_evidence_bundle": str(
+                _portable_repo_path(productization / "delivery_evidence_bundle.json")
+            ),
+            "residual_holdout_closure_updates": str(
+                _portable_repo_path(
+                    productization / "residual_holdout_closure_updates.json"
+                )
+            ),
+            "commercial_gap_ledger_status": str(
+                _portable_repo_path(productization / "commercial_gap_ledger_status.json")
+            ),
+            "ai_freeze_boundary_status": str(
+                _portable_repo_path(productization / "ai_freeze_boundary_status.json")
+            ),
+            "gap_ledger_evidence_audit": str(
+                _portable_repo_path(productization / "gap_ledger_evidence_audit.json")
+            ),
         },
         "claim_boundary": (
             "This is a read-only rollup of gap-ledger and productization evidence status. "

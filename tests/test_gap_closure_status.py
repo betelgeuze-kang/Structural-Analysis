@@ -58,12 +58,12 @@ def test_report_gap_closure_status(tmp_path: Path) -> None:
     assert audit["status"] == "ready"
     assert audit["contract_pass"] is True
     assert audit["row_count"] == 20
-    assert audit["closed_row_count"] == 16
-    assert audit["nonclosed_row_count"] == 4
-    assert audit["closed_evidence_coverage"]["closed_rows_with_evidence_count"] == 16
+    assert audit["closed_row_count"] == 17
+    assert audit["nonclosed_row_count"] == 3
+    assert audit["closed_evidence_coverage"]["closed_rows_with_evidence_count"] == 17
     assert audit["closed_evidence_coverage"]["closed_missing_claim_boundary_ids"] == []
     assert (
-        audit["nonclosed_visibility"]["nonclosed_rows_with_claim_boundary_count"] == 4
+        audit["nonclosed_visibility"]["nonclosed_rows_with_claim_boundary_count"] == 3
     )
     assert "does not create authoritative evidence" in audit["claim_boundary"]
     assert payload["artifacts"]["gap_ledger_evidence_audit"].endswith(
@@ -92,6 +92,8 @@ def test_report_gap_closure_status(tmp_path: Path) -> None:
         "does not close full-mesh full-load 3D nonlinear equilibrium"
         in g1["claim_boundary"]
     )
+    assert all(not Path(path).is_absolute() for path in payload["input_checksums"])
+    assert all(not Path(path).is_absolute() for path in payload["artifacts"].values())
 
 
 def test_report_gap_closure_status_uses_explicit_productization_dir(
