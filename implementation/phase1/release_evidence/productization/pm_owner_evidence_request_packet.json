@@ -63,7 +63,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked except for explicit non-tier structural scope cleanup adjunct handoffs. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-08-02T02:55:02.679527+00:00",
+  "generated_at": "2026-08-02T04:22:37.772628+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -4427,7 +4427,8 @@
             "`full_release_gate_ready == true` after PM report regeneration"
           ],
           "blocked_release_tiers": [
-            "release_tier.limited_commercial_full_gate_ready"
+            "release_tier.limited_commercial_full_gate_ready",
+            "release_tier.ga_enterprise_evidence_gate_pass"
           ],
           "blocker_id": "source_provenance::input_not_reproducible_at_declared_commit",
           "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
@@ -4447,7 +4448,7 @@
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
           ],
-          "scope": "unknown",
+          "scope": "ga_enterprise",
           "title": "source_provenance",
           "verification_commands": [
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
@@ -4961,13 +4962,11 @@
     {
       "acceptance_criteria": [
         "`release_tier.technical_paid_pilot_candidate` status is `pass` in `pm_release_gate_reviewer_handoff.json`",
-        "`release_tier.paid_pilot_scope_guard_pass` status is `pass` in `pm_release_gate_reviewer_handoff.json`",
         "`limited_commercial_release_ready == true` in `pm_release_gate_report.json`",
         "`release_tiers.limited_commercial_full_gate_ready == true` in `pm_release_gate_report.json`"
       ],
       "blockers": [
         "technical_paid_pilot_candidate_false",
-        "paid_pilot_scope_guard_missing_or_failed",
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "strict_ci::direct_require_hip_failed_without_cpu_only_scope",
@@ -5029,12 +5028,11 @@
       "intake_signoff_request_rows": [],
       "next_actions": [
         "Regenerate the PM release gate after milestone or scope-guard evidence changes.",
-        "Regenerate the paid pilot scope guard and keep all customer-facing use constrained to the scope guard until release-area blockers close.",
         "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion."
       ],
       "owner": "release_owner",
       "owner_input_required": true,
-      "release_tier_request_count": 3,
+      "release_tier_request_count": 2,
       "reproduction_commands": [
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
@@ -5061,32 +5059,6 @@
             "python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
           ],
           "requirement_id": "release_tier.technical_paid_pilot_candidate",
-          "status": "blocked",
-          "verification_commands": [
-            "python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
-          ]
-        },
-        {
-          "acceptance_criteria": [
-            "`release_tier.paid_pilot_scope_guard_pass` status is `pass` in `pm_release_gate_reviewer_handoff.json`"
-          ],
-          "blockers": [
-            "paid_pilot_scope_guard_missing_or_failed"
-          ],
-          "claim_boundary": "Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness.",
-          "expected_intake_artifact": "",
-          "expected_intake_detail": {},
-          "expected_intake_path": "",
-          "external_input_required": true,
-          "handoff_ready": true,
-          "next_action": "Regenerate the paid pilot scope guard and keep all customer-facing use constrained to the scope guard until release-area blockers close.",
-          "owner": "release_owner",
-          "owner_input_required": true,
-          "reproduction_commands": [
-            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-            "python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
-          ],
-          "requirement_id": "release_tier.paid_pilot_scope_guard_pass",
           "status": "blocked",
           "verification_commands": [
             "python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
@@ -5173,7 +5145,6 @@
       "request_state": "ready_for_owner_input",
       "requirement_ids": [
         "release_tier.technical_paid_pilot_candidate",
-        "release_tier.paid_pilot_scope_guard_pass",
         "release_tier.limited_commercial_full_gate_ready"
       ],
       "verification_commands": [
@@ -5241,7 +5212,8 @@
         "support::failure_bundle_export_not_green",
         "security::license_status_not_configured",
         "security::repro_build_not_green",
-        "github_sync::github_sync_preflight::local_head_mismatch"
+        "github_sync::github_sync_preflight::local_head_mismatch",
+        "source_provenance::input_not_reproducible_at_declared_commit"
       ],
       "expected_intake_artifacts": [
         "ga_enterprise_signoff_intake_packet"
@@ -5555,7 +5527,8 @@
             "support::failure_bundle_export_not_green",
             "security::license_status_not_configured",
             "security::repro_build_not_green",
-            "github_sync::github_sync_preflight::local_head_mismatch"
+            "github_sync::github_sync_preflight::local_head_mismatch",
+            "source_provenance::input_not_reproducible_at_declared_commit"
           ],
           "claim_boundary": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
           "expected_intake_artifact": "ga_enterprise_signoff_intake_packet",
@@ -5719,7 +5692,7 @@
   "schema_version": "pm-owner-evidence-request-packet.v1",
   "summary": {
     "allowed_non_tier_owner_handoff_count": 0,
-    "blocked_release_tier_impact_count": 122,
+    "blocked_release_tier_impact_count": 123,
     "evidence_closure_pass": false,
     "expected_intake_contract_pass_count": 1,
     "expected_intake_count": 5,
@@ -5744,12 +5717,12 @@
     "release_area_gate_ready": false,
     "release_area_green_count": 4,
     "release_area_total_count": 16,
-    "release_tier_external_input_required_count": 4,
+    "release_tier_external_input_required_count": 3,
     "release_tier_impact_contract_pass": true,
     "release_tier_incomplete_request_count": 0,
-    "release_tier_owner_input_required_count": 4,
+    "release_tier_owner_input_required_count": 3,
     "release_tier_owner_packet_count": 2,
-    "release_tier_request_count": 4
+    "release_tier_request_count": 3
   },
-  "summary_line": "PM owner evidence request packet: PASS | owners=8 | open_blockers=72 | tier_requests=4 | incomplete=0"
+  "summary_line": "PM owner evidence request packet: PASS | owners=8 | open_blockers=72 | tier_requests=3 | incomplete=0"
 }
