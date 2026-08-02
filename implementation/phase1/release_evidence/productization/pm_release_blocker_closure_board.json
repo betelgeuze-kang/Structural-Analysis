@@ -71,10 +71,10 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-analysis@0.3.0",
-  "generated_at": "2026-08-02T02:44:43.368856+00:00",
+  "generated_at": "2026-08-02T02:54:42.929853+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:fde960cda2ee009a31ee7bba3d9d9486fe88b8278938533e103696f2f16e0758",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:255960d1bb0ca579ab9514db1f5ab25bf087f58427e9744e2485044ac76f88aa",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:0585c1eab48f1d0e93f7e91b828d6e8ed249096e01798cc981af1bb03a5e4a7c",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:f617948b2ab9956f207ebf3867abcd1863e32c73dbeabb4dcb0044ef88e46c1a"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -2522,7 +2522,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "38703364383414e78ab52cf3389cc571088ea5f7",
+  "source_commit_sha": "098544e5d9c80cc020b33dcd498048aa8cab1dac",
   "source_input_provenance": {
     "blocker_count": 0,
     "blockers": [],
@@ -2541,17 +2541,17 @@
       {
         "blocker": "",
         "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "source_checksum": "sha256:fde960cda2ee009a31ee7bba3d9d9486fe88b8278938533e103696f2f16e0758",
+        "source_checksum": "sha256:0585c1eab48f1d0e93f7e91b828d6e8ed249096e01798cc981af1bb03a5e4a7c",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:fde960cda2ee009a31ee7bba3d9d9486fe88b8278938533e103696f2f16e0758",
+        "workspace_checksum": "sha256:0585c1eab48f1d0e93f7e91b828d6e8ed249096e01798cc981af1bb03a5e4a7c",
         "workspace_matches_source": true
       },
       {
         "blocker": "",
         "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "source_checksum": "sha256:255960d1bb0ca579ab9514db1f5ab25bf087f58427e9744e2485044ac76f88aa",
+        "source_checksum": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:255960d1bb0ca579ab9514db1f5ab25bf087f58427e9744e2485044ac76f88aa",
+        "workspace_checksum": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
         "workspace_matches_source": true
       }
     ],
