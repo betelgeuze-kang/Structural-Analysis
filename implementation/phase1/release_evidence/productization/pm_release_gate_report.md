@@ -17,7 +17,7 @@
 - `release_allowed`: `False`
 - `blocked_release_count`: `66`
 - `first_blocker`: `source_provenance::input_not_reproducible_at_declared_commit`
-- `operator_action_count`: `73`
+- `operator_action_count`: `74`
 - `approval_token_count`: `5`
 - `stale_artifact_count`: `27`
 - `evidence_surface_count`: `8`
