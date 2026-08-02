@@ -66,7 +66,7 @@
     "schedule_profile": "free_row_sorted_element_local_incidence.v1",
     "schema_version": "engine-v2-hip-current-tangent-operator-fixture.v1"
   },
-  "generated_at": "2026-07-31T04:20:45.277450+00:00",
+  "generated_at": "2026-08-02T01:03:22.544726+00:00",
   "input_checksums": {
     "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
     "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
@@ -78,7 +78,7 @@
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py": "sha256:11b2364da86bf40a8e20737f85ec30e21e4f4a141d605f5efbf0eb58d7683f7a",
     "src/structural_analysis/schemas/g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json": "sha256:e1ebf5fa26c8e9891d8669be6a884fd4c4d92c9dd86cc5b35678e12882da5672",
-    "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:49a99e9882f6810569bac5d2cbecb5f5809c795edcc9fde69da7641eaac00dec"
+    "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:beecbb328e7d5b0896416249edabefb4510973507f903aa07ba69c4950e6b631"
   },
   "inputs": {
     "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
@@ -91,10 +91,10 @@
     "state_data_hash": "sha256:7da92568f855e09df91d4a561cf678c65bddd0cd2d161393aa548cafb316a58d",
     "state_policy": "full_unit_zero_state_linear_predictor"
   },
-  "receipt_hash": "sha256:e833e26b9f4d84ee0c80453d3547321b95c327031f43f4d6645c6ff72a513259",
+  "receipt_hash": "sha256:dce5c6d1cb3430ab158c0808a7bcd6ecb099b3d11ea536cff583d41273787f17",
   "schema_version": "g1-mgt-hip-current-tangent-host-parser-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "308763d9fbea9a55023827d6ddcf69a9762db5bc",
+  "source_commit_sha": "b3cab016c5c41d290cc0c4ed67a8c1bb1fc9abfc",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "synthetic_compile_receipt": {

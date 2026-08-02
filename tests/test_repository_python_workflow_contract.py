@@ -31,15 +31,25 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
     assert 'branches: ["main"]' in workflow
     assert "python -m pytest -q" in workflow
     assert "full:\n    if:" not in workflow
+    full_job = workflow.split("  full:", 1)[1]
+    assert "timeout-minutes: 360" in full_job
     full_checkout = workflow.split("  full:", 1)[1].split(
         "      - name: Set up Python",
         1,
     )[0]
     assert "fetch-depth: 0" in full_checkout
+    pristine_ledger = workflow.index("- name: Validate pristine commercial gap ledger")
     materialize = workflow.index(
         "- name: Materialize exact current-source test evidence"
     )
-    full_suite = workflow.index("- name: Run complete repository test suite")
+    full_suite = workflow.index("- name: Run materialized repository test suite")
+    ledger_nodeid = (
+        "tests/test_commercial_gap_ledger_status.py::"
+        "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
+    )
+    assert workflow.count(ledger_nodeid) == 2
+    assert pristine_ledger < materialize < full_suite
+    assert "--deselect" in workflow[full_suite:]
     for command in (
         "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
         "python scripts/build_fracture_energy_concrete_benchmark.py",

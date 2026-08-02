@@ -30,6 +30,11 @@ def _current_bindings() -> dict[str, dict[str, Any]]:
 
 @pytest.fixture(autouse=True)
 def _stub_producer_current_bindings(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Unit fixtures use a synthetic repository/workflow identity.  Hosted
+    # runners export GITHUB_ACTIONS for the outer workflow, which must not be
+    # mistaken for the synthetic Product State Current execution under test.
+    # Tests for Actions-context binding opt back in explicitly below.
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
     monkeypatch.setattr(
         module,
         "validate_current_bindings",

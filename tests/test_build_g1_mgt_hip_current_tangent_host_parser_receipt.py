@@ -11,6 +11,7 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_HIPCC = Path("/opt/rocm-6.0.2/bin/hipcc")
 SCRIPT = ROOT / "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
 SPEC = importlib.util.spec_from_file_location(
     "build_g1_mgt_hip_current_tangent_host_parser_receipt",
@@ -156,6 +157,9 @@ def test_non_exact_receipt_is_bound_by_current_source_checksums() -> None:
 
 
 def test_committed_receipt_is_reproducible() -> None:
+    if not DEFAULT_HIPCC.is_file():
+        pytest.skip("ROCm 6.0.2 hipcc is required for binary reproduction")
+
     passed, reason = module.check_receipt(repo_root=ROOT)
 
     assert passed is True, reason
