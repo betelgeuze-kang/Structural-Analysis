@@ -134,7 +134,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-08-02T02:46:45.827361+00:00",
+  "generated_at": "2026-08-02T02:54:16.296529+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -180,7 +180,7 @@
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json": "sha256:60766fe101aaac8fe37a5228f7f31dfd193b1320a9844f5d9996a8afb710c364",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
-    "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:775cc2cfdf39dc265fcbaf941ce8ad27cdee14406c16ab936042a2b7abe7a54a",
+    "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:4151ff635414d4bdbcba88a3ff7abf088a60ba52f46f5e5d2f0935f0f80e60f3",
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:b53f93027d92b7ef50f7418d1526712130b7fa4f09498ea93a1acabf29198ff1",
     "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json": "sha256:b872d4933b7f728a2f74a42a9acbddc3fed88a06678318c0a0da3dd24f519e72",
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json": "sha256:89ac93f8bb82086b12a55fe5b01d11398d3dd5b26365befdf627b9021309448c",
@@ -2426,7 +2426,7 @@
           "verification/planar_frame_verified_alpha_v1/corpus.manifest.json",
           "vite.config.ts"
         ],
-        "current_head_sha": "37cc0b24810e83acd31c09f00ba4a8249c7049d6",
+        "current_head_sha": "de876205210245f644ce073b4e7604e7030fb4fb",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -2733,7 +2733,7 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "37cc0b24810e83acd31c09f00ba4a8249c7049d6",
+  "source_commit_sha": "de876205210245f644ce073b4e7604e7030fb4fb",
   "source_input_provenance": {
     "blocker_count": 2,
     "blockers": [
@@ -3163,9 +3163,9 @@
       {
         "blocker": "",
         "path": "implementation/phase1/release_evidence/productization/gap_closure_status.json",
-        "source_checksum": "sha256:775cc2cfdf39dc265fcbaf941ce8ad27cdee14406c16ab936042a2b7abe7a54a",
+        "source_checksum": "sha256:4151ff635414d4bdbcba88a3ff7abf088a60ba52f46f5e5d2f0935f0f80e60f3",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:775cc2cfdf39dc265fcbaf941ce8ad27cdee14406c16ab936042a2b7abe7a54a",
+        "workspace_checksum": "sha256:4151ff635414d4bdbcba88a3ff7abf088a60ba52f46f5e5d2f0935f0f80e60f3",
         "workspace_matches_source": true
       },
       {
