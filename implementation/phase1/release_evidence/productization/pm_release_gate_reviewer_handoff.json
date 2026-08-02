@@ -1,7 +1,7 @@
 {
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 50,
+    "release_area_blocker_count": 51,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -52,7 +52,8 @@
       "support::failure_bundle_export_not_green",
       "security::license_status_not_configured",
       "security::repro_build_not_green",
-      "github_sync::github_sync_preflight::local_head_mismatch"
+      "github_sync::github_sync_preflight::local_head_mismatch",
+      "source_provenance::input_not_reproducible_at_declared_commit"
     ],
     "release_area_green_count": 4,
     "release_area_summary": "4/16",
@@ -60,13 +61,13 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-08-02T01:46:21.200250+00:00",
+  "generated_at": "2026-08-02T02:45:03.655125+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_completion_audit": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: BLOCKED | source_provenance=BLOCKED | computed_without_provenance=PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304",
   "reason_code": "PASS",
   "release_tier_rows": [
     {
@@ -86,17 +87,19 @@
       "title": "Technical Paid Pilot Candidate"
     },
     {
-      "blockers": [],
+      "blockers": [
+        "paid_pilot_scope_guard_missing_or_failed"
+      ],
       "claim_boundary": "Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness.",
       "evidence_artifact_paths": {
         "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
         "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
         "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
       },
-      "next_action": "",
-      "pass": true,
+      "next_action": "Regenerate the paid pilot scope guard and keep all customer-facing use constrained to the scope guard until release-area blockers close.",
+      "pass": false,
       "requirement_id": "release_tier.paid_pilot_scope_guard_pass",
-      "status": "pass",
+      "status": "blocked",
       "title": "Paid Pilot Scope Guard"
     },
     {
@@ -150,7 +153,8 @@
         "support::failure_bundle_export_not_green",
         "security::license_status_not_configured",
         "security::repro_build_not_green",
-        "github_sync::github_sync_preflight::local_head_mismatch"
+        "github_sync::github_sync_preflight::local_head_mismatch",
+        "source_provenance::input_not_reproducible_at_declared_commit"
       ],
       "claim_boundary": "Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green.",
       "evidence_artifact_paths": {
@@ -2923,6 +2927,41 @@
     },
     {
       "acceptance_criteria": [
+        "`source_provenance::input_not_reproducible_at_declared_commit` absent from `full_release_blockers`",
+        "`full_release_gate_ready == true` after PM report regeneration"
+      ],
+      "blocker_id": "source_provenance::input_not_reproducible_at_declared_commit",
+      "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_state": "open_release_evidence_blocker",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Resolve `input_not_reproducible_at_declared_commit` in source_provenance evidence, regenerate PM release reports, and attach the updated evidence.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "",
+      "release_area_status": "",
+      "reproduction_commands": [
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_tier.limited_commercial_full_gate_ready` pass is `true` in `pm_release_gate_completion_audit.json`",
+        "`source_provenance::input_not_reproducible_at_declared_commit` is absent from `release_tier.limited_commercial_full_gate_ready.blockers` in `pm_release_gate_completion_audit.json`",
+        "Current false audit check(s): `limited_commercial_full_gate_ready`"
+      ],
+      "verdict_requirement_group": "release_tier",
+      "verdict_requirement_id": "release_tier.limited_commercial_full_gate_ready",
+      "verdict_requirement_status": "blocked",
+      "verification_commands": [
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
         "`ga_enterprise_readiness_report.json.contract_pass == true` or no `independent_vv_missing` blocker",
         "`ga_enterprise_signoff_intake_packet.json` shows independent V&V evidence accepted",
         "`independent_vv_missing` absent from `ga_enterprise_blockers`"
@@ -3184,22 +3223,22 @@
   "summary": {
     "external_input_required_count": 10,
     "full_release_gate_ready": false,
-    "handoff_complete_count": 71,
+    "handoff_complete_count": 72,
     "handoff_incomplete_count": 0,
     "limited_commercial_milestone_ready": false,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "open_blocker_count": 71,
+    "open_blocker_count": 72,
     "owner_input_required_count": 10,
     "paid_pilot_candidate": false,
-    "release_area_blocker_count": 50,
+    "release_area_blocker_count": 51,
     "release_area_gate_ready": false,
     "release_area_green_count": 4,
     "release_area_total_count": 16,
-    "release_tier_blocked_count": 3,
+    "release_tier_blocked_count": 4,
     "release_tier_count": 4,
     "release_tier_handoff_incomplete_count": 0,
-    "release_tier_pass_count": 1
+    "release_tier_pass_count": 0
   },
-  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=71 | incomplete=0 | release_tiers=1/4"
+  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=72 | incomplete=0 | release_tiers=0/4"
 }
