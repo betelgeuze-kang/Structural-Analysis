@@ -15,12 +15,12 @@
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
   "full_gap_ledger_ready": false,
-  "generated_at": "2026-08-02T02:43:16.792740+00:00",
+  "generated_at": "2026-08-02T02:53:30.340535+00:00",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:c4164eae3f313ec8e0f6addb526c3639a2edea59ccc4da66b1d0f0368809b5a7",
-    "scripts/build_gap_ledger_evidence_audit.py": "sha256:e3157d078b5c5a7c03e4cd175655743c5174316d1f3717557ac31dfddd95015e"
+    "scripts/build_gap_ledger_evidence_audit.py": "sha256:dec5fce8edc0ae89b6def2b4c4a0bac8acb59dfc87fe31e25e9450565b55d432"
   },
   "ledger_status": "open",
   "nonclosed_row_count": 3,
@@ -538,7 +538,7 @@
     }
   ],
   "schema_version": "gap-ledger-evidence-audit.v1",
-  "source_commit_sha": "4d002d47e94bb41687e40c1e9c321a981a5030d7",
+  "source_commit_sha": "c000637e3efa70a4c1f510c3ea640cd05b1aac8b",
   "source_input_provenance": {
     "blocker_count": 0,
     "blockers": [],
@@ -573,9 +573,9 @@
       {
         "blocker": "",
         "path": "scripts/build_gap_ledger_evidence_audit.py",
-        "source_checksum": "sha256:e3157d078b5c5a7c03e4cd175655743c5174316d1f3717557ac31dfddd95015e",
+        "source_checksum": "sha256:dec5fce8edc0ae89b6def2b4c4a0bac8acb59dfc87fe31e25e9450565b55d432",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:e3157d078b5c5a7c03e4cd175655743c5174316d1f3717557ac31dfddd95015e",
+        "workspace_checksum": "sha256:dec5fce8edc0ae89b6def2b4c4a0bac8acb59dfc87fe31e25e9450565b55d432",
         "workspace_matches_source": true
       }
     ],
