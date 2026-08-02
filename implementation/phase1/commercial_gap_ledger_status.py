@@ -272,15 +272,15 @@ def _operator_terminal_attachment_requirements(
         portable_local_path = _repo_relative_path(local_path_text) or ""
         local_path = Path(portable_local_path) if portable_local_path else None
         repo_root_resolved = REPO_ROOT.resolve()
-        resolved_local_path = (
-            (repo_root_resolved / local_path).resolve()
-            if local_path is not None and not local_path.is_absolute()
-            else None
-        )
-        if resolved_local_path is not None and not resolved_local_path.is_relative_to(
-            repo_root_resolved
-        ):
-            resolved_local_path = None
+        resolved_local_path = None
+        if local_path is not None and not local_path.is_absolute():
+            candidate = (repo_root_resolved / local_path).resolve()
+            if candidate.is_relative_to(repo_root_resolved):
+                resolved_local_path = candidate
+            else:
+                portable_local_path = ""
+        elif local_path is not None:
+            portable_local_path = ""
         artifact_exists = bool(
             resolved_local_path is not None and resolved_local_path.is_file()
         )

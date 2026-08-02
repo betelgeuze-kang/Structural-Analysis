@@ -7,6 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from implementation.phase1 import commercial_gap_ledger_status as ledger_module
 from implementation.phase1.commercial_gap_ledger_status import (
     build_commercial_gap_ledger_status,
     inference_runtime_contract_closed,
@@ -14,6 +15,28 @@ from implementation.phase1.commercial_gap_ledger_status import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_operator_attachment_paths_fail_closed_outside_repository(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(ledger_module, "REPO_ROOT", tmp_path)
+    outside_path = tmp_path.parent / "outside-artifact.mgt"
+    outside_path.write_text("untracked host artifact", encoding="utf-8")
+    queue = {
+        "status": "pending_operator_fill",
+        "attachments": [
+            {"source_id": "absolute", "local_path": str(outside_path)},
+            {"source_id": "traversal", "local_path": "../outside-artifact.mgt"},
+        ],
+    }
+
+    result = ledger_module._operator_terminal_attachment_requirements(queue, {})
+
+    assert result["artifact_missing_count"] == 2
+    assert all(row["artifact_exists"] is False for row in result["requirements"])
+    assert all(row["local_path"] == "" for row in result["requirements"])
 
 
 def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
