@@ -68,6 +68,20 @@ def _repo_relative_path(value: Any) -> str | None:
     return path.as_posix()
 
 
+def _portable_receipt_value(value: Any) -> Any:
+    """Normalize repository-local paths embedded by reused evidence receipts."""
+
+    if isinstance(value, dict):
+        return {key: _portable_receipt_value(child) for key, child in value.items()}
+    if isinstance(value, list):
+        return [_portable_receipt_value(child) for child in value]
+    if isinstance(value, tuple):
+        return tuple(_portable_receipt_value(child) for child in value)
+    if isinstance(value, str) and Path(value).is_absolute():
+        return _repo_relative_path(value)
+    return value
+
+
 def _external_submission_closure_gate(
     p1_benchmark_breadth_status: dict[str, Any],
 ) -> dict[str, Any]:
@@ -9291,7 +9305,7 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
         f"claim_boundary_missing:{gap_id}" for gap_id in nonclosed_claim_boundary_missing_ids
     )
 
-    return {
+    payload = {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
             input_paths=[
@@ -9348,3 +9362,6 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
         "blockers": blockers,
         "next_locally_closable_gaps": locally_closable_nonclosed_row_ids[:8],
     }
+    portable_payload = _portable_receipt_value(payload)
+    assert isinstance(portable_payload, dict)
+    return portable_payload

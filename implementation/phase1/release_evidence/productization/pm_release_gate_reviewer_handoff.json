@@ -1,7 +1,7 @@
 {
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 52,
+    "release_area_blocker_count": 50,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -49,8 +49,6 @@
       "report::reproducibility_lock_not_green",
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
-      "support::pm_blocker_closure_board_count_mismatch",
-      "support::pm_release_reproduction_command_audit_not_green",
       "support::failure_bundle_export_not_green",
       "security::license_status_not_configured",
       "security::repro_build_not_green",
@@ -62,7 +60,7 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-08-02T01:36:24.401299+00:00",
+  "generated_at": "2026-08-02T01:46:21.200250+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -149,8 +147,6 @@
         "report::reproducibility_lock_not_green",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "support::pm_blocker_closure_board_count_mismatch",
-        "support::pm_release_reproduction_command_audit_not_green",
         "support::failure_bundle_export_not_green",
         "security::license_status_not_configured",
         "security::repro_build_not_green",
@@ -222,8 +218,6 @@
         "report::reproducibility_lock_not_green",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "support::pm_blocker_closure_board_count_mismatch",
-        "support::pm_release_reproduction_command_audit_not_green",
         "support::failure_bundle_export_not_green",
         "security::license_status_not_configured",
         "security::repro_build_not_green",
@@ -811,94 +805,6 @@
       "external_input_required": false,
       "handoff_state": "local_remediation_ready",
       "next_action": "Resolve `support_bundle_export_missing_or_failed` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
-      "owner": "release_owner",
-      "owner_input_required": false,
-      "release_area_requirement_id": "",
-      "release_area_status": "",
-      "reproduction_commands": [
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "verdict_change_conditions": [
-        "An owning PM completion-audit requirement row must be identified.",
-        "The owning release-area row has no blocker-specific false check in the PM report."
-      ],
-      "verdict_requirement_group": "",
-      "verdict_requirement_id": "",
-      "verdict_requirement_status": "",
-      "verification_commands": [
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
-        "`M5::pm_blocker_closure_board_count_mismatch` absent from `full_release_blockers`",
-        "`full_release_gate_ready == true` after PM report regeneration"
-      ],
-      "blocker_id": "M5::pm_blocker_closure_board_count_mismatch",
-      "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
-      "closure_state": "local_remediation_ready",
-      "evidence_artifact_paths": {
-        "limitation_manual": "docs/release-limitation-manual.md",
-        "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_registry": "implementation/phase1/release/release_registry.json",
-        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
-        "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json",
-        "validation_manual": "docs/release-validation-manual.md",
-        "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
-      },
-      "evidence_state": "open_release_evidence_blocker",
-      "external_input_required": false,
-      "handoff_state": "local_remediation_ready",
-      "next_action": "Resolve `pm_blocker_closure_board_count_mismatch` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
-      "owner": "release_owner",
-      "owner_input_required": false,
-      "release_area_requirement_id": "",
-      "release_area_status": "",
-      "reproduction_commands": [
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "verdict_change_conditions": [
-        "An owning PM completion-audit requirement row must be identified.",
-        "The owning release-area row has no blocker-specific false check in the PM report."
-      ],
-      "verdict_requirement_group": "",
-      "verdict_requirement_id": "",
-      "verdict_requirement_status": "",
-      "verification_commands": [
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
-        "`M5::pm_release_reproduction_command_audit_not_green` absent from `full_release_blockers`",
-        "`full_release_gate_ready == true` after PM report regeneration"
-      ],
-      "blocker_id": "M5::pm_release_reproduction_command_audit_not_green",
-      "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
-      "closure_state": "local_remediation_ready",
-      "evidence_artifact_paths": {
-        "limitation_manual": "docs/release-limitation-manual.md",
-        "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_registry": "implementation/phase1/release/release_registry.json",
-        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
-        "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json",
-        "validation_manual": "docs/release-validation-manual.md",
-        "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
-      },
-      "evidence_state": "open_release_evidence_blocker",
-      "external_input_required": false,
-      "handoff_state": "local_remediation_ready",
-      "next_action": "Resolve `pm_release_reproduction_command_audit_not_green` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
       "owner": "release_owner",
       "owner_input_required": false,
       "release_area_requirement_id": "",
@@ -2841,92 +2747,6 @@
     },
     {
       "acceptance_criteria": [
-        "`support::pm_blocker_closure_board_count_mismatch` absent from `full_release_blockers`",
-        "`full_release_gate_ready == true` after PM report regeneration"
-      ],
-      "blocker_id": "support::pm_blocker_closure_board_count_mismatch",
-      "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
-      "closure_state": "local_remediation_ready",
-      "evidence_artifact_paths": {
-        "limitation_manual": "docs/release-limitation-manual.md",
-        "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "runtime_packaging": "implementation/phase1/production_runtime_packaging_manifest.json",
-        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
-        "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
-      },
-      "evidence_state": "open_release_evidence_blocker",
-      "external_input_required": false,
-      "handoff_state": "local_remediation_ready",
-      "next_action": "Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
-      "owner": "release_owner",
-      "owner_input_required": false,
-      "release_area_requirement_id": "release_area.support",
-      "release_area_status": "blocked_local_remediation_ready",
-      "reproduction_commands": [
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "verdict_change_conditions": [
-        "`release_area.support` status is `pass` in `pm_release_gate_completion_audit.json`",
-        "`support::pm_blocker_closure_board_count_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`",
-        "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `failure_bundle_export_pass`, `pm_blocker_closure_board_register_count_match`, `pm_release_reproduction_command_audit_pass`"
-      ],
-      "verdict_requirement_group": "release_area",
-      "verdict_requirement_id": "release_area.support",
-      "verdict_requirement_status": "blocked_local_remediation_ready",
-      "verification_commands": [
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
-        "`support::pm_release_reproduction_command_audit_not_green` absent from `full_release_blockers`",
-        "`full_release_gate_ready == true` after PM report regeneration"
-      ],
-      "blocker_id": "support::pm_release_reproduction_command_audit_not_green",
-      "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
-      "closure_state": "local_remediation_ready",
-      "evidence_artifact_paths": {
-        "limitation_manual": "docs/release-limitation-manual.md",
-        "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "runtime_packaging": "implementation/phase1/production_runtime_packaging_manifest.json",
-        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
-        "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
-      },
-      "evidence_state": "open_release_evidence_blocker",
-      "external_input_required": false,
-      "handoff_state": "local_remediation_ready",
-      "next_action": "Resolve `pm_release_reproduction_command_audit_not_green` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
-      "owner": "release_owner",
-      "owner_input_required": false,
-      "release_area_requirement_id": "release_area.support",
-      "release_area_status": "blocked_local_remediation_ready",
-      "reproduction_commands": [
-        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
-      ],
-      "verdict_change_conditions": [
-        "`release_area.support` status is `pass` in `pm_release_gate_completion_audit.json`",
-        "`support::pm_release_reproduction_command_audit_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`",
-        "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `failure_bundle_export_pass`, `pm_blocker_closure_board_register_count_match`, `pm_release_reproduction_command_audit_pass`"
-      ],
-      "verdict_requirement_group": "release_area",
-      "verdict_requirement_id": "release_area.support",
-      "verdict_requirement_status": "blocked_local_remediation_ready",
-      "verification_commands": [
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
-      ]
-    },
-    {
-      "acceptance_criteria": [
         "`support::failure_bundle_export_not_green` absent from `full_release_blockers`",
         "`full_release_gate_ready == true` after PM report regeneration"
       ],
@@ -2959,7 +2779,7 @@
         "`release_area.support` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`support::failure_bundle_export_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "The owning release-area row has no blocker-specific false check in the PM report.",
-        "Current false audit check(s): `failure_bundle_export_pass`, `pm_blocker_closure_board_register_count_match`, `pm_release_reproduction_command_audit_pass`"
+        "Current false audit check(s): `failure_bundle_export_pass`"
       ],
       "verdict_requirement_group": "release_area",
       "verdict_requirement_id": "release_area.support",
@@ -3364,15 +3184,15 @@
   "summary": {
     "external_input_required_count": 10,
     "full_release_gate_ready": false,
-    "handoff_complete_count": 75,
+    "handoff_complete_count": 71,
     "handoff_incomplete_count": 0,
     "limited_commercial_milestone_ready": false,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "open_blocker_count": 75,
+    "open_blocker_count": 71,
     "owner_input_required_count": 10,
     "paid_pilot_candidate": false,
-    "release_area_blocker_count": 52,
+    "release_area_blocker_count": 50,
     "release_area_gate_ready": false,
     "release_area_green_count": 4,
     "release_area_total_count": 16,
@@ -3381,5 +3201,5 @@
     "release_tier_handoff_incomplete_count": 0,
     "release_tier_pass_count": 1
   },
-  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=75 | incomplete=0 | release_tiers=1/4"
+  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=71 | incomplete=0 | release_tiers=1/4"
 }

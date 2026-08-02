@@ -57,6 +57,28 @@ def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
     ].startswith("sha256:")
     assert payload["doc_requirements"]["missing_doc_ids"] == []
     assert payload["doc_requirements"]["missing_status_ids"] == []
+    assert payload["doc_requirements"]["commercial_doc"] == (
+        "docs/commercial-structural-solver-product-gap-ledger.md"
+    )
+    assert payload["doc_requirements"]["ai_doc"] == (
+        "docs/structural-analysis-ai-engine-gap-ledger.md"
+    )
+    pending: list[object] = [payload]
+    string_values: list[str] = []
+    while pending:
+        value = pending.pop()
+        if isinstance(value, dict):
+            pending.extend(value.values())
+        elif isinstance(value, list):
+            pending.extend(value)
+        elif isinstance(value, str):
+            string_values.append(value)
+    repo_anchors = {"implementation", "artifacts", "docs", "scripts", "src", "tests"}
+    assert [
+        value
+        for value in string_values
+        if Path(value).is_absolute() and repo_anchors.intersection(Path(value).parts)
+    ] == []
     ids = {row["id"] for row in payload["rows"]}
     assert {f"G{idx}" for idx in range(1, 11)} <= ids
     assert {f"AI-G{idx}" for idx in range(1, 11)} <= ids

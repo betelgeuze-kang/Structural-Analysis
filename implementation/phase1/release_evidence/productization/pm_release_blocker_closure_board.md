@@ -1,11 +1,11 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=75 | external_owner_ready=10 | handoff_not_ready=0`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=71 | external_owner_ready=10 | handoff_not_ready=0`
 - `pm_summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `75`
+- `open_blocker_count`: `71`
 - `release_area_summary`: `4/16`
-- `release_area_blocker_count`: `52`
+- `release_area_blocker_count`: `50`
 - `all_open_blockers_have_handoff`: `True`
 - `action_register_matches_pm_report`: `True`
 
@@ -26,8 +26,6 @@
 | `M5::audit_trail_action_source_trace_missing` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `audit_trail_action_source_trace_missing` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence. |
 | `M5::signed_release_registry_missing_or_failed` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `signed_release_registry_missing_or_failed` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence. |
 | `M5::support_bundle_export_missing_or_failed` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `support_bundle_export_missing_or_failed` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence. |
-| `M5::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `pm_blocker_closure_board_count_mismatch` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence. |
-| `M5::pm_release_reproduction_command_audit_not_green` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `pm_release_reproduction_command_audit_not_green` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence. |
 | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `self_hosted_runner_offline` | Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff. |
 | `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `self_hosted_runner_offline` | Bring at least one GitHub Actions self-hosted runner online with labels self-hosted, linux, x64, then refresh github_actions_self_hosted_runner_status.json and github_actions_ci_streak_evidence.json before collecting the 30-run streak. After that, Resolve the nightly GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff. |
 | `strict_ci::direct_require_hip_failed_without_cpu_only_scope` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `direct_require_hip_failed_without_cpu_only_scope` in Strict CI evidence, regenerate PM release reports, and attach the updated evidence. |
@@ -74,8 +72,6 @@
 | `report::reproducibility_lock_not_green` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `reproducibility_lock_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence. |
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_observation` | Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_completion_evidence` | Attach a human new-user observation record for the sample project workflow, including an anonymized participant_ref, participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
-| `support::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence. |
-| `support::pm_release_reproduction_command_audit_not_green` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `pm_release_reproduction_command_audit_not_green` in Support evidence, regenerate PM release reports, and attach the updated evidence. |
 | `support::failure_bundle_export_not_green` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `failure_bundle_export_not_green` in Support evidence, regenerate PM release reports, and attach the updated evidence. |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `not_configured` | Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass. |
 | `security::repro_build_not_green` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `repro_build_not_green` in Security evidence, regenerate PM release reports, and attach the updated evidence. |
