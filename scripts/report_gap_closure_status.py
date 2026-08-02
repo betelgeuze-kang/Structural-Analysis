@@ -7,7 +7,6 @@ import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
-import subprocess
 from typing import Any
 import sys
 
@@ -52,18 +51,6 @@ def _load(path: Path) -> dict[str, Any]:
         return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
-
-
-def _git_head() -> str:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "HEAD"],
-            cwd=REPO_ROOT,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except Exception:
-        return ""
 
 
 def _portable_repo_path(path: Path) -> Path:
@@ -111,6 +98,8 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
         ),
         Path("docs/commercial-structural-solver-product-gap-ledger.md"),
         Path("docs/structural-analysis-ai-engine-gap-ledger.md"),
+        Path("scripts/report_gap_closure_status.py"),
+        Path("scripts/release_evidence_metadata.py"),
     ]
     bundle = _load(productization / "delivery_evidence_bundle.json")
     gpu = _load(productization / "gpu_solver_claim_receipt.json")
@@ -247,6 +236,22 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
         checksum_inputs,
         repo_root=REPO_ROOT,
     )
+    provenance_pass = bool(
+        provenance["source_input_provenance"]["contract_pass"]
+    )
+    computed_full_gap_ledger_ready = bool(
+        ledger_status.get("full_gap_ledger_ready")
+    )
+    computed_contract_pass = bool(
+        delivery_status == "ready" and computed_full_gap_ledger_ready
+    )
+    provenance_blocker = (
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    )
+    effective_blockers = list(blockers)
+    if not provenance_pass and provenance_blocker not in effective_blockers:
+        effective_blockers.append(provenance_blocker)
+    contract_pass = bool(computed_contract_pass and provenance_pass)
     return {
         "schema_version": "gap-closure-status.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -255,13 +260,38 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
         "input_checksums": provenance["input_checksums"],
         "source_input_provenance": provenance["source_input_provenance"],
         "reused_evidence": False,
-        "overall_status": delivery_status,
+        "status": "ready" if contract_pass else "blocked",
+        "contract_pass": contract_pass,
+        "reason_code": (
+            "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+            if not provenance_pass
+            else "PASS"
+            if computed_contract_pass
+            else "ERR_GAP_CLOSURE_INCOMPLETE"
+        ),
+        "computed_without_provenance": {
+            "status": "ready" if computed_contract_pass else "blocked",
+            "contract_pass": computed_contract_pass,
+            "overall_status": delivery_status,
+            "delivery_status": delivery_status,
+            "full_gap_ledger_ready": computed_full_gap_ledger_ready,
+            "blockers": list(blockers),
+        },
+        "overall_status": delivery_status if provenance_pass else "blocked",
         "delivery_status": delivery_status,
         "authority_holdout_status": authority_holdout_status,
         "bundle_status": bundle.get("status"),
-        "blockers": blockers,
+        "blockers": effective_blockers,
         "full_gap_ledger_status": ledger_status.get("status"),
-        "full_gap_ledger_ready": bool(ledger_status.get("full_gap_ledger_ready")),
+        "full_gap_ledger_source_input_provenance": ledger_status.get(
+            "source_input_provenance", {}
+        ),
+        "full_gap_ledger_computed_without_provenance": ledger_status.get(
+            "computed_without_provenance", {}
+        ),
+        "full_gap_ledger_ready": bool(
+            computed_full_gap_ledger_ready and provenance_pass
+        ),
         "full_gap_ledger_summary": ledger_status.get("summary", {}),
         "full_gap_ledger_blockers": ledger_status.get("blockers", []),
         "next_locally_closable_gaps": ledger_status.get("next_locally_closable_gaps", []),
@@ -295,7 +325,7 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
     }
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--productization-dir",
@@ -313,7 +343,12 @@ def main() -> int:
         action="store_true",
         help="Exit non-zero when the commercial solver/AI gap ledgers are not fully closed.",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--fail-blocked",
+        action="store_true",
+        help="Exit non-zero when the top-level rollup contract is blocked, including by source provenance.",
+    )
+    args = parser.parse_args(argv)
     output_json = args.output_json or (args.productization_dir / "gap_closure_status.json")
     payload = build_gap_closure_status(productization_dir=args.productization_dir)
     output_json.parent.mkdir(parents=True, exist_ok=True)
@@ -323,6 +358,8 @@ def main() -> int:
         f"authority_holdout={payload['authority_holdout_status']} "
         f"full_gap_ledger={payload['full_gap_ledger_status']} -> {output_json}"
     )
+    if args.fail_blocked and not payload.get("contract_pass"):
+        return 2
     if args.fail_full_closure and not payload.get("full_gap_ledger_ready"):
         return 3
     return 0

@@ -129,3 +129,219 @@ def test_commit_bound_directory_checksum_matches_clean_workspace(
     assert dirty_metadata["source_input_provenance"]["blockers"] == [
         "input_differs_from_source_commit:workflows"
     ]
+
+
+def test_commit_bound_external_relative_input_resolves_from_repo_root_once(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "provenance-test@example.invalid")
+    _git(repo, "config", "user.name", "Provenance Test")
+    tracked = repo / "tracked.txt"
+    tracked.write_text("tracked\n", encoding="utf-8")
+    _git(repo, "add", "tracked.txt")
+    _git(repo, "commit", "-m", "source")
+    external = tmp_path / "external.txt"
+    external.write_bytes(b"external evidence\n")
+    alternate_cwd = tmp_path / "alternate-cwd"
+    alternate_cwd.mkdir()
+    monkeypatch.chdir(alternate_cwd)
+
+    metadata = commit_bound_input_metadata(
+        [Path("../external.txt")],
+        repo_root=repo,
+    )
+
+    expected = f"sha256:{hashlib.sha256(external.read_bytes()).hexdigest()}"
+    assert metadata["input_checksums"]["../external.txt"] == expected
+    provenance = metadata["source_input_provenance"]
+    assert provenance["contract_pass"] is False
+    assert provenance["inputs"][0]["workspace_checksum"] == expected
+    assert provenance["blockers"] == [
+        "external_input_not_commit_bound:../external.txt"
+    ]
+
+
+def test_commit_bound_external_directory_is_hashed_but_fails_closed(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "provenance-test@example.invalid")
+    _git(repo, "config", "user.name", "Provenance Test")
+    tracked = repo / "tracked.txt"
+    tracked.write_text("tracked\n", encoding="utf-8")
+    _git(repo, "add", "tracked.txt")
+    _git(repo, "commit", "-m", "source")
+    external = tmp_path / "external-dir"
+    external.mkdir()
+    (external / "receipt.json").write_text("{}\n", encoding="utf-8")
+
+    metadata = commit_bound_input_metadata(
+        [external],
+        repo_root=repo,
+    )
+
+    assert metadata["input_checksums"][external.as_posix()].startswith(
+        "dir-sha256:"
+    )
+    assert metadata["source_input_provenance"]["blockers"] == [
+        f"external_input_not_commit_bound:{external.as_posix()}"
+    ]
+
+
+def test_commit_bound_missing_external_input_still_fails_closed(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "provenance-test@example.invalid")
+    _git(repo, "config", "user.name", "Provenance Test")
+    tracked = repo / "tracked.txt"
+    tracked.write_text("tracked\n", encoding="utf-8")
+    _git(repo, "add", "tracked.txt")
+    _git(repo, "commit", "-m", "source")
+    missing_external = tmp_path / "missing-external.json"
+
+    metadata = commit_bound_input_metadata(
+        [missing_external],
+        repo_root=repo,
+    )
+
+    assert metadata["input_checksums"][missing_external.as_posix()] == "missing"
+    assert metadata["source_input_provenance"]["blockers"] == [
+        f"external_input_not_commit_bound:{missing_external.as_posix()}"
+    ]
+
+
+def test_commit_bound_repo_relative_input_is_independent_of_cwd(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "provenance-test@example.invalid")
+    _git(repo, "config", "user.name", "Provenance Test")
+    receipt = repo / "evidence" / "receipt.json"
+    receipt.parent.mkdir()
+    receipt.write_text('{"status":"ready"}\n', encoding="utf-8")
+    _git(repo, "add", "evidence/receipt.json")
+    _git(repo, "commit", "-m", "source")
+    alternate_cwd = tmp_path / "alternate-cwd"
+    alternate_cwd.mkdir()
+    monkeypatch.chdir(alternate_cwd)
+
+    metadata = commit_bound_input_metadata(
+        [Path("evidence/receipt.json")],
+        repo_root=repo,
+    )
+
+    assert metadata["source_input_provenance"]["contract_pass"] is True
+    assert metadata["source_input_provenance"]["workspace_match_count"] == 1
+
+
+def test_commit_bound_input_fails_closed_when_tracked_workspace_file_deleted(
+    tmp_path: Path,
+) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "provenance-test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Provenance Test")
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text('{"status":"blocked"}\n', encoding="utf-8")
+    _git(tmp_path, "add", "receipt.json")
+    _git(tmp_path, "commit", "-m", "source")
+    receipt.unlink()
+
+    metadata = commit_bound_input_metadata(
+        [Path("receipt.json")],
+        repo_root=tmp_path,
+    )
+
+    assert metadata["input_checksums"]["receipt.json"].startswith("sha256:")
+    assert metadata["source_input_provenance"]["blockers"] == [
+        "input_missing_from_workspace:receipt.json"
+    ]
+
+
+def test_commit_bound_input_records_missing_from_source_and_workspace_reproducibly(
+    tmp_path: Path,
+) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "provenance-test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Provenance Test")
+    tracked = tmp_path / "tracked.txt"
+    tracked.write_text("tracked\n", encoding="utf-8")
+    _git(tmp_path, "add", "tracked.txt")
+    _git(tmp_path, "commit", "-m", "source")
+
+    metadata = commit_bound_input_metadata(
+        [Path("intentionally-missing.json")],
+        repo_root=tmp_path,
+    )
+
+    assert metadata["input_checksums"]["intentionally-missing.json"] == "missing"
+    provenance = metadata["source_input_provenance"]
+    assert provenance["contract_pass"] is True
+    assert provenance["inputs"][0]["source_state"] == "missing"
+    assert provenance["inputs"][0]["workspace_matches_source"] is True
+
+
+def test_commit_bound_input_fails_closed_for_unresolved_source_commit(
+    tmp_path: Path,
+) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "provenance-test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Provenance Test")
+    tracked = tmp_path / "tracked.txt"
+    tracked.write_text("tracked\n", encoding="utf-8")
+    _git(tmp_path, "add", "tracked.txt")
+    _git(tmp_path, "commit", "-m", "source")
+
+    metadata = commit_bound_input_metadata(
+        [Path("tracked.txt")],
+        repo_root=tmp_path,
+        source_commit_sha="0" * 40,
+    )
+
+    provenance = metadata["source_input_provenance"]
+    assert provenance["contract_pass"] is False
+    assert provenance["source_commit_resolved"] is False
+    assert provenance["blockers"] == ["source_commit_unresolved"]
+
+
+def test_commit_bound_directory_with_gitlink_fails_closed_without_exception(
+    tmp_path: Path,
+) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "provenance-test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Provenance Test")
+    tracked = tmp_path / "tracked.txt"
+    tracked.write_text("tracked\n", encoding="utf-8")
+    _git(tmp_path, "add", "tracked.txt")
+    _git(tmp_path, "commit", "-m", "base")
+    commit_sha = _git(tmp_path, "rev-parse", "HEAD")
+    _git(
+        tmp_path,
+        "update-index",
+        "--add",
+        "--cacheinfo",
+        f"160000,{commit_sha},vendor/subrepo",
+    )
+    _git(tmp_path, "commit", "-m", "gitlink")
+
+    metadata = commit_bound_input_metadata(
+        [Path("vendor")],
+        repo_root=tmp_path,
+    )
+
+    provenance = metadata["source_input_provenance"]
+    assert provenance["contract_pass"] is False
+    assert provenance["inputs"][0]["source_state"] == "tracked"
+    assert provenance["inputs"][0]["workspace_matches_source"] is False
+    assert provenance["blockers"] == [
+        "input_gitlink_not_commit_bound:vendor/subrepo"
+    ]

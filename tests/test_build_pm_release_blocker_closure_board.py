@@ -3,6 +3,9 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+from typing import Any
+
+import pytest
 
 
 SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "build_pm_release_blocker_closure_board.py"
@@ -13,10 +16,55 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(build_board_module)
 
 
+@pytest.fixture(autouse=True)
+def _clean_source_provenance_for_computation_tests(monkeypatch: pytest.MonkeyPatch):
+    original = build_board_module.commit_bound_input_metadata
+
+    def _passing_metadata(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        metadata = original(*args, **kwargs)
+        provenance = dict(metadata["source_input_provenance"])
+        provenance.update(
+            {
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "blocker_count": 0,
+                "blockers": [],
+            }
+        )
+        metadata["source_input_provenance"] = provenance
+        return metadata
+
+    monkeypatch.setattr(
+        build_board_module, "commit_bound_input_metadata", _passing_metadata
+    )
+
+
 def _write_json(path: Path, payload: object) -> Path:
+    if isinstance(payload, dict) and (
+        "pm_release_gate" in path.name
+        or path.name == "pm-release-gate.json"
+        or ("action" in path.name and "register" in path.name)
+    ):
+        payload = dict(payload)
+        payload.setdefault("contract_pass", True)
+        payload.setdefault("source_input_provenance", {"contract_pass": True})
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
+
+
+def _blocked_source_metadata(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    paths = list(args[0] if args else kwargs.get("paths", []))
+    return {
+        "source_commit_sha": "a" * 40,
+        "input_checksums": {str(path): "missing" for path in paths},
+        "source_input_provenance": {
+            "contract_pass": False,
+            "reason_code": "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE",
+            "blocker_count": 1,
+            "blockers": ["source_commit_unresolved"],
+        },
+    }
 
 
 def test_build_board_groups_open_blockers_by_closure_state(tmp_path: Path) -> None:
@@ -102,8 +150,10 @@ def test_build_board_groups_open_blockers_by_closure_state(tmp_path: Path) -> No
     )
     assert action_register.as_posix() in payload["input_checksums"]
     assert pm_report.as_posix() in payload["input_checksums"]
+    assert "scripts/build_pm_release_blocker_closure_board.py" in payload["input_checksums"]
+    assert "scripts/release_evidence_metadata.py" in payload["input_checksums"]
     assert payload["aggregator_freshness_policy"]["mode"] == "direct_aggregator_source_tracking"
-    assert payload["reason_code"] == "ERR_PM_RELEASE_BLOCKERS_OPEN"
+    assert payload["reason_code"] == "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
     assert payload["summary"]["open_blocker_count"] == 2
     assert payload["summary"]["register_open_blocker_count"] == 2
     assert payload["summary"]["external_owner_input_ready_count"] == 1
@@ -150,6 +200,49 @@ def test_build_board_passes_when_gate_and_register_are_closed(tmp_path: Path) ->
     assert payload["summary"]["open_blocker_count"] == 0
     assert payload["summary"]["action_register_matches_pm_report"] is True
     assert payload["rows"] == []
+
+
+def test_build_board_and_cli_fail_closed_on_source_provenance(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    monkeypatch.setattr(
+        build_board_module,
+        "commit_bound_input_metadata",
+        _blocked_source_metadata,
+    )
+    pm_report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {"summary_line": "PM release gate: READY", "full_release_gate_ready": True},
+    )
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {"contract_pass": True, "summary": {"open_blocker_count": 0}, "rows": []},
+    )
+    payload = build_board_module.build_board(
+        action_register=action_register,
+        pm_report=pm_report,
+    )
+
+    assert payload["computed_without_provenance"]["contract_pass"] is True
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+
+    exit_code = build_board_module.main(
+        [
+            "--action-register",
+            str(action_register),
+            "--pm-report",
+            str(pm_report),
+            "--out",
+            str(tmp_path / "board.json"),
+            "--out-md",
+            str(tmp_path / "board.md"),
+            "--fail-blocked",
+        ]
+    )
+    capsys.readouterr()
+    assert exit_code == 1
 
 
 def test_build_board_compares_ga_enterprise_blockers_with_action_register(tmp_path: Path) -> None:
@@ -207,7 +300,7 @@ def test_build_board_compares_ga_enterprise_blockers_with_action_register(tmp_pa
     payload = build_board_module.build_board(action_register=action_register, pm_report=pm_report)
 
     assert payload["contract_pass"] is False
-    assert payload["reason_code"] == "ERR_PM_RELEASE_BLOCKERS_OPEN"
+    assert payload["reason_code"] == "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
     assert payload["summary"]["action_register_matches_pm_report"] is True
     assert payload["summary"]["pm_report_blocker_count"] == 3
     assert payload["summary"]["register_blocker_count"] == 3
@@ -246,7 +339,7 @@ def test_build_board_blocks_stale_action_register(tmp_path: Path) -> None:
     payload = build_board_module.build_board(action_register=action_register, pm_report=pm_report)
 
     assert payload["contract_pass"] is False
-    assert payload["reason_code"] == "ERR_PM_BLOCKER_ACTION_REGISTER_STALE"
+    assert payload["reason_code"] == "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
     assert payload["summary"]["action_register_matches_pm_report"] is False
     assert payload["summary"]["missing_from_action_register"] == ["security::license_status_not_configured"]
     assert payload["summary"]["stale_action_register_blockers"] == [
@@ -299,7 +392,7 @@ def test_build_board_allows_structural_scope_cleanup_adjunct_handoff(
     )
 
     assert payload["contract_pass"] is False
-    assert payload["reason_code"] == "ERR_PM_RELEASE_BLOCKERS_OPEN"
+    assert payload["reason_code"] == "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
     assert payload["summary"]["action_register_matches_pm_report"] is True
     assert payload["summary"]["missing_from_action_register"] == []
     assert payload["summary"]["stale_action_register_blockers"] == []
@@ -357,3 +450,132 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_blocker_count"] == 1
     assert "ux::human_new_user_observation_missing_or_failed" in out_md.read_text(encoding="utf-8")
     assert "action_register_matches_pm_report" in out_md.read_text(encoding="utf-8")
+
+
+def test_build_board_relative_reads_are_independent_of_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(build_board_module.ROOT)
+    expected = build_board_module.build_board()
+    alternate_cwd = tmp_path / "alternate-cwd"
+    alternate_cwd.mkdir()
+    monkeypatch.chdir(alternate_cwd)
+
+    actual = build_board_module.build_board()
+
+    assert actual["pm_summary_line"] == expected["pm_summary_line"]
+    assert actual["summary"] == expected["summary"]
+    assert actual["rows"] == expected["rows"]
+    assert actual["input_checksums"] == expected["input_checksums"]
+
+
+def test_build_board_propagates_each_blocked_upstream_contract_and_cli(
+    tmp_path: Path, capsys
+) -> None:
+    pm_report = _write_json(
+        tmp_path / "pm-release-gate.json",
+        {
+            "summary_line": "PM release gate: READY",
+            "contract_pass": True,
+            "source_input_provenance": {"contract_pass": False},
+            "full_release_gate_ready": True,
+            "full_release_blockers": [],
+        },
+    )
+    action_register = _write_json(
+        tmp_path / "action-register.json",
+        {
+            "contract_pass": True,
+            "source_input_provenance": {"contract_pass": True},
+            "summary": {"open_blocker_count": 0},
+            "rows": [],
+        },
+    )
+
+    pm_blocked = build_board_module.build_board(
+        action_register=action_register,
+        pm_report=pm_report,
+    )
+
+    assert pm_blocked["rows"] == []
+    assert pm_blocked["computed_without_provenance"]["contract_pass"] is True
+    assert pm_blocked["reason_code"] == "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"
+    assert pm_blocked["blockers"] == ["ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"]
+
+    _write_json(
+        pm_report,
+        {
+            "summary_line": "PM release gate: READY",
+            "contract_pass": True,
+            "source_input_provenance": {"contract_pass": True},
+            "full_release_gate_ready": True,
+            "full_release_blockers": [],
+        },
+    )
+    action_payload = json.loads(action_register.read_text(encoding="utf-8"))
+    action_payload["contract_pass"] = False
+    _write_json(action_register, action_payload)
+    action_blocked = build_board_module.build_board(
+        action_register=action_register,
+        pm_report=pm_report,
+    )
+
+    assert action_blocked["rows"] == []
+    assert action_blocked["computed_without_provenance"]["contract_pass"] is True
+    assert action_blocked["reason_code"] == "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
+    assert action_blocked["blockers"] == ["ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"]
+    upstream = action_blocked["computed_without_provenance"]["upstream_contracts"]
+    assert upstream["pm_release_gate_report"]["required_pass"] is True
+    assert upstream["pm_release_blocker_action_register"]["required_pass"] is False
+
+    exit_code = build_board_module.main(
+        [
+            "--action-register",
+            str(action_register),
+            "--pm-report",
+            str(pm_report),
+            "--out",
+            str(tmp_path / "closure-board.json"),
+            "--out-md",
+            str(tmp_path / "closure-board.md"),
+            "--fail-blocked",
+        ]
+    )
+    capsys.readouterr()
+    assert exit_code == 1
+
+
+def test_build_board_requires_explicit_action_register_provenance_contract(
+    tmp_path: Path,
+) -> None:
+    pm_report = _write_json(
+        tmp_path / "pm-release-gate.json",
+        {
+            "summary_line": "PM release gate: READY",
+            "full_release_gate_ready": True,
+            "full_release_blockers": [],
+        },
+    )
+    action_register = tmp_path / "legacy-action-register.json"
+    action_register.write_text(
+        json.dumps(
+            {
+                "contract_pass": True,
+                "summary": {"open_blocker_count": 0},
+                "rows": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = build_board_module.build_board(
+        action_register=action_register,
+        pm_report=pm_report,
+    )
+
+    assert payload["reason_code"] == "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
+    upstream = payload["computed_without_provenance"]["upstream_contracts"][
+        "pm_release_blocker_action_register"
+    ]
+    assert upstream["source_input_provenance_present"] is False
+    assert upstream["required_pass"] is False

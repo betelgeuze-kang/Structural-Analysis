@@ -22,6 +22,7 @@ SCHEMA_VERSION = "pm-release-gate-report.v1"
 from release_evidence_metadata import (  # noqa: E402
     CANONICAL_ENGINE_VERSION,
     commit_bound_input_metadata,
+    resolve_input_path,
 )
 
 ENGINE_VERSION = CANONICAL_ENGINE_VERSION
@@ -181,13 +182,30 @@ LIMITATION_MANUAL_REQUIRED_TERMS = (
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    if not path.exists():
+    resolved = resolve_input_path(path, repo_root=SCRIPT_DIR.parent)
+    if not resolved.exists():
         return {}
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
     except Exception:
         return {}
     return payload if isinstance(payload, dict) else {}
+
+
+def _resolved_path(path: Path) -> Path:
+    return resolve_input_path(path, repo_root=SCRIPT_DIR.parent)
+
+
+def _path_exists(path: Path) -> bool:
+    return _resolved_path(path).exists()
+
+
+def _path_key(path: Path) -> str:
+    resolved = _resolved_path(path)
+    try:
+        return resolved.relative_to(SCRIPT_DIR.parent.resolve()).as_posix()
+    except ValueError:
+        return resolved.as_posix()
 
 
 def _git_head() -> str:
@@ -305,6 +323,17 @@ def _unique_paths(paths: list[Path]) -> list[Path]:
     return unique
 
 
+def _same_repo_path(path: Path, canonical: Path, *, repo_root: Path) -> bool:
+    """Compare path declarations after repository-relative normalization."""
+
+    root = repo_root.resolve()
+
+    def _resolved(value: Path) -> Path:
+        return value.resolve() if value.is_absolute() else (root / value).resolve()
+
+    return _resolved(path) == _resolved(canonical)
+
+
 def _summary(payload: dict[str, Any]) -> dict[str, Any]:
     value = payload.get("summary")
     return value if isinstance(value, dict) else {}
@@ -329,9 +358,14 @@ def _truthy_contract(payload: dict[str, Any]) -> bool:
 
 
 def _evidence_surface_json_paths(evidence_surface_dir: Path) -> list[Path]:
-    if not evidence_surface_dir.exists() or not evidence_surface_dir.is_dir():
+    resolved_dir = _resolved_path(evidence_surface_dir)
+    if not resolved_dir.exists() or not resolved_dir.is_dir():
         return []
-    return sorted(path for path in evidence_surface_dir.glob("*.json") if path.is_file())
+    return [
+        evidence_surface_dir / path.name
+        for path in sorted(resolved_dir.glob("*.json"))
+        if path.is_file()
+    ]
 
 
 def _failed_criteria(gate: dict[str, Any]) -> list[str]:
@@ -393,7 +427,7 @@ def _evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
         rows.append(
             {
                 "surface_id": surface_id,
-                "path": str(path),
+                "path": _path_key(path),
                 "present": bool(payload),
                 "contract_pass": _truthy_contract(payload),
                 "status": status,
@@ -428,11 +462,11 @@ def _excluded_evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str
         surface_id = path.stem
         if surface_id in STRUCTURAL_EVIDENCE_SURFACE_IDS:
             continue
-        non_structural_product_path = _non_structural_product_path(str(path))
+        non_structural_product_path = _non_structural_product_path(_path_key(path))
         rows.append(
             {
                 "surface_id": surface_id,
-                "path": str(path),
+                "path": _path_key(path),
                 "excluded_from_release_gate": True,
                 "exclusion_reason": (
                     "non_structural_product_surface"
@@ -682,7 +716,11 @@ def _release_decision(
     evidence_surfaces = _evidence_surface_rows(evidence_surface_dir)
     excluded_evidence_surfaces = _excluded_evidence_surface_rows(evidence_surface_dir)
     missing_surface_count = sum(1 for row in evidence_surfaces if row["missing"])
-    if not evidence_surface_dir.exists() or not evidence_surface_dir.is_dir():
+    resolved_evidence_surface_dir = _resolved_path(evidence_surface_dir)
+    if (
+        not resolved_evidence_surface_dir.exists()
+        or not resolved_evidence_surface_dir.is_dir()
+    ):
         missing_surface_count += 1
     locked_surface_count = sum(1 for row in evidence_surfaces if row["locked"])
     stale_count = _stale_artifact_count(release_evidence_freshness_payload)
@@ -936,10 +974,11 @@ def _ci_lane_claim_boundary(lane: str) -> str:
 
 
 def _read_text_or_empty(path: Path) -> str:
-    if not path.exists():
+    resolved = _resolved_path(path)
+    if not resolved.exists():
         return ""
     try:
-        return path.read_text(encoding="utf-8")
+        return resolved.read_text(encoding="utf-8")
     except Exception:
         return ""
 
@@ -1180,7 +1219,9 @@ def _residual_milestone(path: Path, *, max_fallback_rate: float) -> dict[str, An
     corrected_pass = bool(corrected_report_required and checks.get("corrected_state_recompute_pass", False))
 
     gate_checks = {
-        "release_evidence_path_fixed": bool(path.exists() and _in_release_evidence(path)),
+        "release_evidence_path_fixed": bool(
+            _path_exists(path) and _in_release_evidence(path)
+        ),
         "ndtha_residual_contract_pass": _truthy_contract(payload),
         "strict_recommended_residual_hard_fail_enabled": strict_enabled,
         "strict_recommended_residual_pass": strict_recommended_pass,
@@ -1566,13 +1607,17 @@ def _packaging_milestone(
             support_optional_sections,
             "ux_new_user_observation_intake_packet",
         ),
-        "template_evidence_safety_report_present": template_evidence_safety_path.exists(),
+        "template_evidence_safety_report_present": _path_exists(
+            template_evidence_safety_path
+        ),
         "template_evidence_safety_pass": _truthy_contract(template_evidence_safety),
         "support_bundle_template_evidence_safety_report_present": _support_section_present(
             support_optional_sections,
             "template_evidence_safety_report",
         ),
-        "pm_release_reproduction_command_audit_present": pm_release_reproduction_command_audit_path.exists(),
+        "pm_release_reproduction_command_audit_present": _path_exists(
+            pm_release_reproduction_command_audit_path
+        ),
         "pm_release_reproduction_command_audit_pass": _truthy_contract(pm_release_reproduction_command_audit),
         "support_bundle_pm_release_reproduction_command_audit_present": _support_section_present(
             support_optional_sections,
@@ -1586,8 +1631,8 @@ def _packaging_milestone(
             support_optional_sections,
             "gap_closure_status",
         ),
-        "validation_manual_present": validation_manual_path.exists(),
-        "limitation_manual_present": limitation_manual_path.exists(),
+        "validation_manual_present": _path_exists(validation_manual_path),
+        "limitation_manual_present": _path_exists(limitation_manual_path),
         "validation_manual_content_pass": _contains_terms(
             validation_manual_text,
             VALIDATION_MANUAL_REQUIRED_TERMS,
@@ -2326,7 +2371,7 @@ def _build_release_area_matrix(
         and residual_level3_status == "ready"
         and residual_level3_reason_code == "PASS"
     )
-    residual_level3_artifact_present = residual_level3_status_path.exists()
+    residual_level3_artifact_present = _path_exists(residual_level3_status_path)
     residual_area_checks = {
         "hard_residual_pass": bool(
             residual_checks.get("residual_top_hard_pass", False)
@@ -2717,7 +2762,9 @@ def _build_release_area_matrix(
     support_optional_sections = _as_dict(support.get("optional_sections"))
     limitation_manual_text = _read_text_or_empty(limitation_manual_path)
     support_area_checks = {
-        "known_issue_or_limitation_register_present": limitation_manual_path.exists(),
+        "known_issue_or_limitation_register_present": _path_exists(
+            limitation_manual_path
+        ),
         "known_issue_or_limitation_register_content_pass": _contains_terms(
             limitation_manual_text,
             LIMITATION_MANUAL_REQUIRED_TERMS,
@@ -2795,13 +2842,17 @@ def _build_release_area_matrix(
             support_optional_sections,
             "ux_new_user_observation_intake_packet",
         ),
-        "template_evidence_safety_report_present": template_evidence_safety_path.exists(),
+        "template_evidence_safety_report_present": _path_exists(
+            template_evidence_safety_path
+        ),
         "template_evidence_safety_pass": _truthy_contract(template_evidence_safety),
         "template_evidence_safety_report_in_failure_bundle": _support_section_present(
             support_optional_sections,
             "template_evidence_safety_report",
         ),
-        "pm_release_reproduction_command_audit_present": pm_release_reproduction_command_audit_path.exists(),
+        "pm_release_reproduction_command_audit_present": _path_exists(
+            pm_release_reproduction_command_audit_path
+        ),
         "pm_release_reproduction_command_audit_pass": _truthy_contract(pm_release_reproduction_command_audit),
         "pm_release_reproduction_command_audit_in_failure_bundle": _support_section_present(
             support_optional_sections,
@@ -3096,9 +3147,13 @@ def _build_release_area_matrix(
             "no production default secret" in security_text and "negative" in security_text
         ),
         "license_status_configured_pass": _reason_pass(license_status_closure),
-        "license_status_closure_report_present": license_status_closure_path.exists(),
+        "license_status_closure_report_present": _path_exists(
+            license_status_closure_path
+        ),
         "sbom_present_pass": bool(sbom.get("component_count", 0)),
-        "frontend_dependency_audit_report_present": frontend_dependency_audit_path.exists(),
+        "frontend_dependency_audit_report_present": _path_exists(
+            frontend_dependency_audit_path
+        ),
         "frontend_dependency_audit_pass": _reason_pass(frontend_dependency_audit),
         "frontend_dependency_high_or_critical_zero_pass": bool(
             frontend_dependency_audit_checks.get("dependency_high_or_critical_zero_pass", False)
@@ -3432,6 +3487,8 @@ def build_report(
 
     report_input_paths = _unique_paths(
         [
+            Path("scripts/report_pm_release_gate.py"),
+            Path("scripts/release_evidence_metadata.py"),
             *_artifact_paths_from_rows(milestones),
             *_artifact_paths_from_rows(release_area_matrix),
             ga_enterprise_readiness,
@@ -3449,13 +3506,23 @@ def build_report(
             ],
         ]
     )
+    repo_root = SCRIPT_DIR.parent
+    canonical_action_cycle_edge = _same_repo_path(
+        pm_release_blocker_action_register,
+        DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER,
+        repo_root=repo_root,
+    )
+    canonical_board_cycle_edge = _same_repo_path(
+        pm_release_blocker_closure_board,
+        DEFAULT_PM_RELEASE_BLOCKER_CLOSURE_BOARD,
+        repo_root=repo_root,
+    )
     canonical_feedback_cycle = bool(
-        pm_release_blocker_action_register == DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER
-        and pm_release_blocker_closure_board == DEFAULT_PM_RELEASE_BLOCKER_CLOSURE_BOARD
+        canonical_action_cycle_edge or canonical_board_cycle_edge
     )
     provenance = commit_bound_input_metadata(
         report_input_paths,
-        repo_root=SCRIPT_DIR.parent,
+        repo_root=repo_root,
         additional_blockers=(
             [
                 "cyclic_input_dependency:pm_release_gate_report->"
@@ -3478,6 +3545,8 @@ def build_report(
             "mode": "diagnostics_only_fail_closed",
             "dependency_dag_repaired": False,
             "direct_cycle_detected": canonical_feedback_cycle,
+            "canonical_action_register_edge_detected": canonical_action_cycle_edge,
+            "canonical_closure_board_edge_detected": canonical_board_cycle_edge,
             "claim_boundary": (
                 "This guard exposes and blocks the direct PM report/action-register/closure-board "
                 "feedback edge. It does not break or certify the wider productization evidence "
@@ -3621,12 +3690,30 @@ def build_report(
     if payload["release_claims_fail_closed"]:
         provenance_blocker = "source_provenance::input_not_reproducible_at_declared_commit"
         computed_summary_line = str(payload["summary_line"])
+        payload["computed_without_provenance"] = {
+            "contract_pass": bool(payload["contract_pass"]),
+            "milestone_gate_pass": bool(payload["milestone_gate_pass"]),
+            "release_area_gate_ready": bool(payload["release_area_gate_ready"]),
+            "full_release_gate_ready": bool(payload["full_release_gate_ready"]),
+            "paid_pilot_candidate": bool(payload["paid_pilot_candidate"]),
+            "limited_commercial_milestone_ready": bool(
+                payload["limited_commercial_milestone_ready"]
+            ),
+            "limited_commercial_release_ready": bool(
+                payload["limited_commercial_release_ready"]
+            ),
+            "limited_commercial_ready": bool(
+                payload["limited_commercial_ready"]
+            ),
+            "ga_enterprise_ready": bool(payload["ga_enterprise_ready"]),
+            "recommended_scope": str(payload["recommended_scope"]),
+            "summary_line": computed_summary_line,
+            "release_tiers": dict(_as_dict(payload.get("release_tiers"))),
+        }
         payload["contract_pass"] = False
-        payload["milestone_gate_pass"] = False
         payload["release_area_gate_ready"] = False
         payload["full_release_gate_ready"] = False
         payload["paid_pilot_candidate"] = False
-        payload["limited_commercial_milestone_ready"] = False
         payload["limited_commercial_release_ready"] = False
         payload["limited_commercial_ready"] = False
         payload["ga_enterprise_ready"] = False
@@ -3663,24 +3750,46 @@ def build_report(
             "reason": "one or more inputs are not reproducible from source_commit_sha",
             "artifact": "source_input_provenance",
         }
-        if provenance_action not in operator_actions:
+        action_appended = not any(
+            isinstance(action, dict)
+            and action.get("action_id") == provenance_action["action_id"]
+            for action in operator_actions
+        )
+        if action_appended:
             operator_actions.append(provenance_action)
         release_decision_payload["operator_actions"] = operator_actions
-        release_decision_payload["operator_action_count"] = (
-            _as_int(release_decision_payload.get("operator_action_count"), 0) + 1
+        release_decision_payload["operator_action_count"] = _as_int(
+            release_decision_payload.get("operator_action_count"), 0
+        ) + int(action_appended)
+        release_decision_payload["source_provenance_operator_action_appended"] = (
+            action_appended
         )
         payload["release_decision"] = release_decision_payload
         release_tiers_payload = _as_dict(payload.get("release_tiers"))
         for key in (
             "paid_pilot",
-            "technical_paid_pilot_candidate",
-            "paid_pilot_scope_guard_pass",
-            "limited_commercial_milestone_ready",
             "limited_commercial_full_gate_ready",
             "ga_enterprise",
-            "ga_enterprise_evidence_gate_pass",
         ):
             release_tiers_payload[key] = False
+        for blocker_key in (
+            "paid_pilot_blockers",
+            "limited_commercial_blockers",
+            "ga_enterprise_blockers",
+        ):
+            release_tiers_payload[blocker_key] = list(
+                dict.fromkeys(
+                    [
+                        *[
+                            str(item)
+                            for item in _as_list(
+                                release_tiers_payload.get(blocker_key)
+                            )
+                        ],
+                        provenance_blocker,
+                    ]
+                )
+            )
         payload["release_tiers"] = release_tiers_payload
     return payload
 

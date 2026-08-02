@@ -26,10 +26,22 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     payload = module.build_gap_ledger_evidence_audit(repo_root=REPO_ROOT)
 
     assert payload["schema_version"] == "gap-ledger-evidence-audit.v1"
-    assert payload["status"] == "ready"
-    assert payload["contract_pass"] is True
+    assert payload["computed_without_provenance"]["status"] == "ready"
+    assert payload["computed_without_provenance"]["contract_pass"] is True
+    if payload["source_input_provenance"]["contract_pass"]:
+        assert payload["status"] == "ready"
+        assert payload["contract_pass"] is True
+    else:
+        assert payload["status"] == "blocked"
+        assert payload["contract_pass"] is False
+        assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
     assert payload["full_gap_ledger_ready"] is False
-    assert payload["ledger_status"] == "open"
+    assert payload["computed_without_provenance"]["ledger_status"] == "open"
+    assert payload["ledger_status"] == (
+        "open"
+        if payload["source_input_provenance"]["contract_pass"]
+        else "blocked"
+    )
     assert payload["row_count"] == 20
     assert payload["closed_row_count"] == 17
     assert payload["nonclosed_row_count"] == 3
@@ -56,7 +68,16 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     assert source_paths["source_receipt_absent_row_ids"] == []
     assert source_paths["source_receipt_missing_path_count"] == 0
     assert source_paths["source_receipt_missing_row_ids"] == []
-    assert payload["blockers"] == []
+    assert payload["computed_without_provenance"]["blockers"] == []
+    if payload["source_input_provenance"]["contract_pass"]:
+        assert payload["blockers"] == []
+        assert payload["reason_code"] == "PASS"
+    else:
+        assert payload["blockers"] == [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+        ]
+    assert "scripts/build_gap_ledger_evidence_audit.py" in payload["input_checksums"]
+    assert "scripts/release_evidence_metadata.py" in payload["input_checksums"]
     outcomes = {row["id"]: row for row in payload["row_outcomes"]}
     assert outcomes["G1"]["closed"] is False
     assert outcomes["G1"]["claim_boundary_present"] is True
@@ -118,7 +139,7 @@ def test_gap_ledger_evidence_audit_check_detects_drift(tmp_path: Path) -> None:
     out = tmp_path / "audit.json"
     module.write_gap_ledger_evidence_audit(repo_root=REPO_ROOT, out_path=out)
     payload = json.loads(out.read_text(encoding="utf-8"))
-    payload["contract_pass"] = False
+    payload["row_count"] = -1
     out.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -198,7 +219,14 @@ def test_gap_ledger_evidence_audit_blocks_missing_source_receipt_path(
     assert payload["source_receipt_path_coverage"][
         "source_receipt_missing_row_ids"
     ] == ["G1"]
-    assert payload["blockers"] == ["source_receipt_path_missing:G1"]
+    assert payload["computed_without_provenance"]["blockers"] == [
+        "source_receipt_path_missing:G1"
+    ]
+    assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+    assert payload["blockers"] == [
+        "source_receipt_path_missing:G1",
+        "source_provenance::input_not_reproducible_at_declared_commit",
+    ]
 
 
 def test_gap_ledger_evidence_audit_blocks_rows_without_source_receipts(
@@ -242,4 +270,100 @@ def test_gap_ledger_evidence_audit_blocks_rows_without_source_receipts(
     assert payload["source_receipt_path_coverage"]["source_receipt_absent_row_ids"] == [
         "G2"
     ]
-    assert payload["blockers"] == ["source_receipts_absent:G2"]
+    assert payload["computed_without_provenance"]["blockers"] == [
+        "source_receipts_absent:G2"
+    ]
+    assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+    assert payload["blockers"] == [
+        "source_receipts_absent:G2",
+        "source_provenance::input_not_reproducible_at_declared_commit",
+    ]
+
+
+def test_gap_ledger_audit_and_cli_fail_closed_on_source_provenance(
+    tmp_path: Path,
+) -> None:
+    ledger = tmp_path / "commercial_gap_ledger_status.json"
+    ledger.write_text(
+        json.dumps(
+            {"status": "closed", "full_gap_ledger_ready": True, "rows": []},
+            ensure_ascii=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    payload = module.build_gap_ledger_evidence_audit(
+        repo_root=tmp_path,
+        ledger_status_path=ledger,
+    )
+
+    assert payload["computed_without_provenance"]["contract_pass"] is True
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+
+    exit_code = module.main(
+        [
+            "--ledger-status",
+            str(ledger),
+            "--out",
+            str(tmp_path / "gap-audit.json"),
+            "--fail-blocked",
+        ]
+    )
+    assert exit_code == 2
+
+
+def test_gap_ledger_audit_binds_deduped_available_and_unavailable_receipts(
+    tmp_path: Path,
+) -> None:
+    receipt = tmp_path / "receipts" / "attached.json"
+    receipt.parent.mkdir()
+    receipt.write_text('{"status":"ready"}\n', encoding="utf-8")
+    ledger = tmp_path / "commercial_gap_ledger_status.json"
+    ledger.write_text(
+        json.dumps(
+            {
+                "status": "closed",
+                "full_gap_ledger_ready": True,
+                "rows": [
+                    {
+                        "id": "G1",
+                        "ledger": "commercial_solver",
+                        "status": "closed",
+                        "closed": True,
+                        "blockers": [],
+                        "claim_boundary": "bounded",
+                        "evidence": {
+                            "source_receipts": {
+                                "first": "receipts/attached.json",
+                                "duplicate": "receipts/attached.json",
+                            },
+                            "unavailable_source_receipts": {
+                                "pending": "receipts/pending.json"
+                            },
+                        },
+                    }
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    payload = module.build_gap_ledger_evidence_audit(
+        repo_root=tmp_path,
+        ledger_status_path=ledger,
+    )
+
+    assert "receipts/attached.json" in payload["input_checksums"]
+    assert "receipts/pending.json" in payload["input_checksums"]
+    provenance_paths = [
+        row["path"] for row in payload["source_input_provenance"]["inputs"]
+    ]
+    assert provenance_paths.count("receipts/attached.json") == 1
+    assert provenance_paths.count("receipts/pending.json") == 1
+    assert payload["computed_without_provenance"]["ledger_status"] == "closed"
+    assert payload["ledger_status"] == "blocked"
+    assert payload["full_gap_ledger_ready"] is False

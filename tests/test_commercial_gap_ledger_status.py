@@ -17,6 +17,15 @@ from implementation.phase1.commercial_gap_ledger_status import (
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+def _git(repo: Path, *args: str) -> str:
+    return subprocess.check_output(
+        ["git", *args],
+        cwd=repo,
+        text=True,
+        stderr=subprocess.DEVNULL,
+    ).strip()
+
+
 def test_operator_attachment_paths_fail_closed_outside_repository(
     tmp_path: Path,
     monkeypatch,
@@ -55,6 +64,15 @@ def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
     assert payload["input_checksums"][
         "implementation/phase1/commercial_gap_ledger_status.py"
     ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "scripts/release_evidence_metadata.py"
+    ].startswith("sha256:")
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "mgt_global_fea_3d_native_solve.json"
+        in payload["input_checksums"]
+    )
+    assert len(payload["input_checksums"]) > 300
     assert payload["doc_requirements"]["missing_doc_ids"] == []
     assert payload["doc_requirements"]["missing_status_ids"] == []
     assert payload["doc_requirements"]["commercial_doc"] == (
@@ -100,7 +118,12 @@ def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
         row for row in payload["rows"] if row["id"] == "AI-G2"
     )["claim_boundary"]
     assert payload["full_gap_ledger_ready"] is False
-    assert payload["status"] == "open"
+    assert payload["computed_without_provenance"]["status"] == "open"
+    assert payload["status"] == (
+        "open"
+        if payload["source_input_provenance"]["contract_pass"]
+        else "blocked"
+    )
 
 
 def test_ai_inference_runtime_closed_allows_success_without_fallback_reason() -> None:
@@ -11866,6 +11889,144 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G9"]["evidence"]["full_3d_rocm_nonlinear_equilibrium_ready"] is False
 
 
+def test_commercial_gap_ledger_status_surfaces_source_provenance_at_top_level(
+    monkeypatch,
+) -> None:
+    original = ledger_module.commit_bound_release_evidence_metadata
+
+    def _blocked_metadata(**kwargs):
+        metadata = original(**kwargs)
+        provenance = dict(metadata["source_input_provenance"])
+        provenance.update(
+            {
+                "contract_pass": False,
+                "reason_code": "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE",
+                "blocker_count": 1,
+                "blockers": ["source_commit_unresolved"],
+            }
+        )
+        metadata["source_input_provenance"] = provenance
+        return metadata
+
+    monkeypatch.setattr(
+        ledger_module,
+        "commit_bound_release_evidence_metadata",
+        _blocked_metadata,
+    )
+
+    payload = build_commercial_gap_ledger_status()
+
+    assert payload["computed_without_provenance"]["status"] == "open"
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+    assert (
+        "source_provenance::input_not_reproducible_at_declared_commit"
+        in payload["blockers"]
+    )
+
+
+def test_commercial_gap_readiness_fields_fail_closed_but_preserve_raw_facts(
+    monkeypatch,
+) -> None:
+    original = ledger_module.commit_bound_release_evidence_metadata
+
+    def _blocked_metadata(**kwargs):
+        metadata = original(**kwargs)
+        provenance = dict(metadata["source_input_provenance"])
+        provenance.update(
+            {
+                "contract_pass": False,
+                "reason_code": "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE",
+                "blocker_count": 1,
+                "blockers": ["source_commit_unresolved"],
+            }
+        )
+        metadata["source_input_provenance"] = provenance
+        return metadata
+
+    monkeypatch.setattr(ledger_module, "_doc_ids", lambda path, prefix: [prefix + "1"])
+    monkeypatch.setattr(
+        ledger_module,
+        "_commercial_rows",
+        lambda productization: [
+            {
+                "id": "G1",
+                "ledger": "commercial_solver",
+                "status": "closed",
+                "locally_closable": True,
+                "claim_boundary": "bounded",
+                "blockers": [],
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        ledger_module,
+        "_ai_rows",
+        lambda productization: [
+            {
+                "id": "AI-G1",
+                "ledger": "ai_engine",
+                "status": "closed",
+                "locally_closable": True,
+                "claim_boundary": "bounded",
+                "blockers": [],
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        ledger_module,
+        "commit_bound_release_evidence_metadata",
+        _blocked_metadata,
+    )
+
+    payload = build_commercial_gap_ledger_status()
+    raw = payload["computed_without_provenance"]
+
+    assert raw["commercial_solver_gap_ready"] is True
+    assert raw["ai_engine_guardrail_rows_ready"] is True
+    for field in (
+        "commercial_solver_gap_ready",
+        "ai_engine_guardrail_rows_ready",
+        "ai_engine_gap_ready",
+        "autonomous_ai_engine_claim_ready",
+        "full_gap_ledger_ready",
+    ):
+        assert payload[field] is False
+
+
+def test_translation_frontier_candidates_union_workspace_and_head(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo = tmp_path / "repo"
+    productization = repo / "implementation/phase1/release_evidence/productization"
+    productization.mkdir(parents=True)
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "frontier-test@example.invalid")
+    _git(repo, "config", "user.name", "Frontier Test")
+    prefix = (
+        "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_"
+        "support32_followup"
+    )
+    tracked_deleted = productization / f"{prefix}1_probe.json"
+    tracked_deleted.write_text("{}\n", encoding="utf-8")
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "tracked frontier")
+    tracked_deleted.unlink()
+    untracked_added = productization / f"{prefix}2_probe.json"
+    untracked_added.write_text("{}\n", encoding="utf-8")
+    monkeypatch.setattr(ledger_module, "REPO_ROOT", repo)
+
+    candidates = ledger_module._translation_frontier_candidate_paths(
+        productization
+    )
+
+    assert {path.name for path in candidates} == {
+        tracked_deleted.name,
+        untracked_added.name,
+    }
+
+
 def test_report_commercial_gap_ledger_status_cli(tmp_path: Path) -> None:
     out = tmp_path / "commercial_gap_ledger_status.json"
     proc = subprocess.run(
@@ -11907,3 +12068,21 @@ def test_report_commercial_gap_ledger_status_fail_open(tmp_path: Path) -> None:
         text=True,
     )
     assert proc.returncode == 3
+
+
+def test_report_commercial_gap_ledger_status_fail_blocked(tmp_path: Path) -> None:
+    out = tmp_path / "commercial_gap_ledger_status.json"
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/report_commercial_gap_ledger_status.py"),
+            "--output-json",
+            str(out),
+            "--fail-blocked",
+        ],
+        cwd=REPO_ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 2

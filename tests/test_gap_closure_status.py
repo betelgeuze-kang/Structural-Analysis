@@ -71,8 +71,15 @@ def test_report_gap_closure_status(tmp_path: Path) -> None:
     )
     assert payload["delivery_status"] in {"ready", "review_required", "missing"}
     assert payload["authority_holdout_status"] in {"open", "closed"}
-    assert payload["full_gap_ledger_status"] == "open"
+    assert payload["full_gap_ledger_computed_without_provenance"]["status"] == "open"
+    assert payload["full_gap_ledger_status"] == (
+        "open"
+        if payload["full_gap_ledger_source_input_provenance"]["contract_pass"]
+        else "blocked"
+    )
     assert payload["full_gap_ledger_ready"] is False
+    assert "scripts/report_gap_closure_status.py" in payload["input_checksums"]
+    assert "scripts/release_evidence_metadata.py" in payload["input_checksums"]
     assert payload["full_gap_ledger_summary"]["total_count"] == len(
         payload["ledger_requirements"]
     )
@@ -134,9 +141,52 @@ def test_report_gap_closure_status_uses_explicit_productization_dir(
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["delivery_status"] == "ready"
+    assert payload["computed_without_provenance"]["delivery_status"] == "ready"
+    assert payload["overall_status"] == "blocked"
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
     assert payload["artifacts"]["delivery_evidence_bundle"] == str(
         productization / "delivery_evidence_bundle.json"
     )
     assert payload["full_gap_ledger_summary"]["total_count"] == len(
         payload["ledger_requirements"]
     )
+
+
+def test_report_gap_closure_status_fail_blocked_for_external_inputs(
+    tmp_path: Path,
+) -> None:
+    productization = tmp_path / "productization"
+    productization.mkdir()
+    (productization / "delivery_evidence_bundle.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "delivery-evidence-bundle.v1",
+                "status": "ready",
+                "blockers": [],
+                "summary": {},
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    out = tmp_path / "gap_closure_status.json"
+    proc = subprocess.run(
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/report_gap_closure_status.py"),
+            "--productization-dir",
+            str(productization),
+            "--output-json",
+            str(out),
+            "--fail-blocked",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert proc.returncode == 2
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"

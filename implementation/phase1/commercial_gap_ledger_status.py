@@ -3,9 +3,12 @@
 
 from __future__ import annotations
 
+from contextvars import ContextVar
+from fnmatch import fnmatch
 import re
 import json
 from pathlib import Path
+import subprocess
 import sys
 from typing import Any
 
@@ -26,13 +29,35 @@ if str(SCRIPTS) not in sys.path:
 
 from release_evidence_metadata import (  # noqa: E402
     commit_bound_release_evidence_metadata,
+    resolve_input_path,
 )
 
 
+_OBSERVED_INPUT_PATHS: ContextVar[set[Path] | None] = ContextVar(
+    "commercial_gap_observed_input_paths", default=None
+)
+_DYNAMIC_INPUT_BLOCKERS: ContextVar[set[str] | None] = ContextVar(
+    "commercial_gap_dynamic_input_blockers", default=None
+)
+
+
+def _observe_input(path: Path) -> Path:
+    resolved = resolve_input_path(path, repo_root=REPO_ROOT)
+    observed = _OBSERVED_INPUT_PATHS.get()
+    if observed is not None:
+        observed.add(resolved)
+    return resolved
+
+
+def _tracked_is_file(path: Path) -> bool:
+    return _observe_input(path).is_file()
+
+
 def _load(path: Path) -> dict[str, Any]:
-    if not path.is_file():
+    resolved = _observe_input(path)
+    if not resolved.is_file():
         return {}
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(resolved.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
 
 
@@ -298,7 +323,7 @@ def _operator_terminal_attachment_requirements(
         elif local_path is not None:
             portable_local_path = ""
         artifact_exists = bool(
-            resolved_local_path is not None and resolved_local_path.is_file()
+            resolved_local_path is not None and _tracked_is_file(resolved_local_path)
         )
         rights_confirmed = bool(
             attachment.get("rights_confirmed") is True
@@ -422,10 +447,11 @@ def _operator_terminal_attachment_requirements(
 
 
 def _doc_ids(path: Path, prefix: str) -> list[str]:
-    if not path.is_file():
+    resolved = _observe_input(path)
+    if not resolved.is_file():
         return []
     pattern = re.compile(rf"^###\s+({re.escape(prefix)}\d+)\.", re.MULTILINE)
-    return pattern.findall(path.read_text(encoding="utf-8", errors="replace"))
+    return pattern.findall(resolved.read_text(encoding="utf-8", errors="replace"))
 
 
 def _status(ok: bool, partial: bool = False, *, external: bool = False) -> str:
@@ -836,16 +862,68 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
     }
 
 
+def _translation_frontier_candidate_paths(productization: Path) -> list[Path]:
+    filename_pattern = (
+        "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_"
+        "support32_followup*_probe.json"
+    )
+    resolved_productization = resolve_input_path(
+        productization, repo_root=REPO_ROOT
+    )
+    candidates = set(resolved_productization.glob(filename_pattern))
+    try:
+        relative_productization = resolved_productization.relative_to(
+            REPO_ROOT.resolve()
+        )
+    except ValueError:
+        return sorted(candidates)
+
+    try:
+        listing = subprocess.check_output(
+            [
+                "git",
+                "ls-tree",
+                "-r",
+                "-z",
+                "--name-only",
+                "HEAD",
+                "--",
+                relative_productization.as_posix(),
+            ],
+            cwd=REPO_ROOT,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        blockers = _DYNAMIC_INPUT_BLOCKERS.get()
+        if blockers is not None:
+            blockers.add(
+                "unbound_dynamic_inputs:commercial_gap_productization_receipts"
+            )
+        return sorted(candidates)
+
+    for raw_path in listing.split(b"\0"):
+        if not raw_path:
+            continue
+        tracked_relative = Path(
+            raw_path.decode("utf-8", errors="surrogateescape")
+        )
+        if (
+            tracked_relative.parent == relative_productization
+            and fnmatch(tracked_relative.name, filename_pattern)
+        ):
+            candidates.add(REPO_ROOT / tracked_relative)
+    return sorted(candidates)
+
+
 def _translation_frontier_followup_series(productization: Path) -> dict[str, Any]:
     pattern = re.compile(
         r"mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup(\d+)_probe\.json$"
     )
     rows: list[dict[str, Any]] = []
-    for path in sorted(
-        productization.glob(
-            "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup*_probe.json"
-        )
-    ):
+    resolved_productization = resolve_input_path(
+        productization, repo_root=REPO_ROOT
+    )
+    for path in _translation_frontier_candidate_paths(resolved_productization):
         match = pattern.match(path.name)
         if not match:
             continue
@@ -853,7 +931,7 @@ def _translation_frontier_followup_series(productization: Path) -> dict[str, Any
         payload = _load(path)
         summary = _direct_residual_probe_summary(payload)
         component_path = (
-            productization
+            resolved_productization
             / f"mgt_residual_jacobian_post_block_rows21_support32_translation_followup{followup_index}_component_probe.json"
         )
         component = _load(component_path)
@@ -863,7 +941,9 @@ def _translation_frontier_followup_series(productization: Path) -> dict[str, Any
             {
                 "followup_index": followup_index,
                 "probe_file": path.name,
-                "component_probe_file": component_path.name if component_path.is_file() else None,
+                "component_probe_file": (
+                    component_path.name if _tracked_is_file(component_path) else None
+                ),
                 "status": summary.get("status"),
                 "ready": summary.get("ready"),
                 "base_direct_residual_inf_n": summary.get("base_direct_residual_inf_n"),
@@ -6758,7 +6838,7 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 and bool(kds_detailing.get("optimization_rows_guarded"))
                 and bool(kds_detailing.get("trace_ready"))
                 and bool(kds_detailing.get("unsupported_queue_ready")),
-                kds_rule.is_file(),
+                _tracked_is_file(kds_rule),
             ),
             blockers=[] if kds_detailing.get("status") == "ready" else [
                 "full_kds_member_detailing_clause_breadth_not_closed"
@@ -6782,7 +6862,7 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                         .relative_to(REPO_ROOT)
                     ),
                 },
-                "kds_rule_engine_present": kds_rule.is_file(),
+                "kds_rule_engine_present": _tracked_is_file(kds_rule),
                 "kds_detailing_support_status": kds_detailing.get("status"),
                 "kds_detailing_claim_boundary": kds_detailing.get("claim_boundary"),
                 "clause_breadth_ready": kds_detailing.get("clause_breadth_ready"),
@@ -8617,7 +8697,10 @@ def _ai_rows(productization_dir: Path | None = None) -> list[dict[str, Any]]:
             "AI-G3",
             "Optimization Policy And Design Action Space",
             ledger="ai_engine",
-            status=_status(policy_replay_ready, env.is_file() and not runner_has_ml),
+            status=_status(
+                policy_replay_ready,
+                _tracked_is_file(env) and not runner_has_ml,
+            ),
             blockers=[] if policy_replay_ready else ["production_policy_replay_contract_not_closed"],
             evidence={
                 "source_receipts": {
@@ -8638,7 +8721,7 @@ def _ai_rows(productization_dir: Path | None = None) -> list[dict[str, Any]]:
                         / "ml_multi_objective_status.json"
                     ),
                 },
-                "deterministic_env_present": env.is_file(),
+                "deterministic_env_present": _tracked_is_file(env),
                 "runner_static_scan": runner_scan,
                 "production_ml_refs_in_runner": runner_has_ml,
                 "proxy_divergence_count": _get(bundle, "summary", "proxy_divergence_count"),
@@ -8770,7 +8853,7 @@ def _ai_rows(productization_dir: Path | None = None) -> list[dict[str, Any]]:
             status=_status(
                 code_guard.get("status") == "ready"
                 and bool(code_guard.get("all_rows_have_clause_or_review_guard")),
-                kds_rule.is_file(),
+                _tracked_is_file(kds_rule),
             ),
             blockers=[]
             if (
@@ -8789,7 +8872,7 @@ def _ai_rows(productization_dir: Path | None = None) -> list[dict[str, Any]]:
                         / "kds_detailing_support_matrix.json"
                     ),
                 },
-                "kds_rule_engine_present": kds_rule.is_file(),
+                "kds_rule_engine_present": _tracked_is_file(kds_rule),
                 "code_reasoning_guard_status": code_guard.get("status"),
                 "jurisdiction_profile": code_guard.get("jurisdiction_profile"),
                 "governing_clause_ids": code_guard.get("governing_clause_ids"),
@@ -9245,10 +9328,20 @@ def _ai_rows(productization_dir: Path | None = None) -> list[dict[str, Any]]:
 
 
 def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -> dict[str, Any]:
-    productization = Path(productization_dir or PRODUCTIZATION)
-    commercial_doc_ids = _doc_ids(COMMERCIAL_DOC, "G")
-    ai_doc_ids = _doc_ids(AI_DOC, "AI-G")
-    rows = [*_commercial_rows(productization), *_ai_rows(productization)]
+    productization = resolve_input_path(
+        Path(productization_dir or PRODUCTIZATION), repo_root=REPO_ROOT
+    )
+    observed_inputs: set[Path] = set()
+    dynamic_input_blockers: set[str] = set()
+    observed_token = _OBSERVED_INPUT_PATHS.set(observed_inputs)
+    blocker_token = _DYNAMIC_INPUT_BLOCKERS.set(dynamic_input_blockers)
+    try:
+        commercial_doc_ids = _doc_ids(COMMERCIAL_DOC, "G")
+        ai_doc_ids = _doc_ids(AI_DOC, "AI-G")
+        rows = [*_commercial_rows(productization), *_ai_rows(productization)]
+    finally:
+        _DYNAMIC_INPUT_BLOCKERS.reset(blocker_token)
+        _OBSERVED_INPUT_PATHS.reset(observed_token)
     by_id = {row["id"]: row for row in rows}
     commercial_status_ids = [row["id"] for row in rows if row.get("ledger") == "commercial_solver"]
     ai_status_ids = [row["id"] for row in rows if row.get("ledger") == "ai_engine"]
@@ -9307,28 +9400,68 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
         f"claim_boundary_missing:{gap_id}" for gap_id in nonclosed_claim_boundary_missing_ids
     )
 
+    computed_status = "closed" if not blockers else "open"
+    computed_contract_pass = not blockers
+    metadata = commit_bound_release_evidence_metadata(
+        input_paths=[
+            *sorted(observed_inputs),
+            Path("implementation/phase1/commercial_gap_ledger_status.py"),
+            Path("scripts/release_evidence_metadata.py"),
+        ],
+        reused_evidence=True,
+        reuse_policy=(
+            "summarizes_existing_gap_ledgers_and_productization_receipts; "
+            "does_not_create_authoritative_closure_evidence"
+        ),
+        repo_root=REPO_ROOT,
+        additional_blockers=sorted(dynamic_input_blockers),
+    )
+    provenance_pass = bool(
+        metadata["source_input_provenance"]["contract_pass"]
+    )
+    provenance_blocker = (
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    )
+    effective_blockers = list(blockers)
+    if not provenance_pass and provenance_blocker not in effective_blockers:
+        effective_blockers.append(provenance_blocker)
+
     payload = {
         "schema_version": SCHEMA_VERSION,
-        **commit_bound_release_evidence_metadata(
-            input_paths=[
-                Path("docs/commercial-structural-solver-product-gap-ledger.md"),
-                Path("docs/structural-analysis-ai-engine-gap-ledger.md"),
-                Path("implementation/phase1/commercial_gap_ledger_status.py"),
-            ],
-            reused_evidence=True,
-            reuse_policy=(
-                "summarizes_existing_gap_ledgers_and_productization_receipts; "
-                "does_not_create_authoritative_closure_evidence"
-            ),
-            repo_root=REPO_ROOT,
+        **metadata,
+        "status": computed_status if provenance_pass else "blocked",
+        "contract_pass": bool(computed_contract_pass and provenance_pass),
+        "reason_code": (
+            "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+            if not provenance_pass
+            else "PASS"
+            if computed_contract_pass
+            else "ERR_GAP_LEDGER_OPEN"
         ),
-        "status": "closed" if not blockers else "open",
-        "commercial_solver_gap_ready": commercial_solver_gap_ready,
-        "ai_engine_guardrail_rows_ready": ai_engine_guardrail_rows_ready,
-        "ai_engine_gap_ready": autonomous_ai_engine_claim_ready,
-        "autonomous_ai_engine_claim_ready": autonomous_ai_engine_claim_ready,
+        "computed_without_provenance": {
+            "status": computed_status,
+            "contract_pass": computed_contract_pass,
+            "commercial_solver_gap_ready": commercial_solver_gap_ready,
+            "ai_engine_guardrail_rows_ready": ai_engine_guardrail_rows_ready,
+            "ai_engine_gap_ready": autonomous_ai_engine_claim_ready,
+            "autonomous_ai_engine_claim_ready": autonomous_ai_engine_claim_ready,
+            "full_gap_ledger_ready": computed_contract_pass,
+            "blockers": list(blockers),
+        },
+        "commercial_solver_gap_ready": bool(
+            commercial_solver_gap_ready and provenance_pass
+        ),
+        "ai_engine_guardrail_rows_ready": bool(
+            ai_engine_guardrail_rows_ready and provenance_pass
+        ),
+        "ai_engine_gap_ready": bool(
+            autonomous_ai_engine_claim_ready and provenance_pass
+        ),
+        "autonomous_ai_engine_claim_ready": bool(
+            autonomous_ai_engine_claim_ready and provenance_pass
+        ),
         "autonomous_ai_engine_claim_blockers": autonomous_ai_engine_claim_blockers,
-        "full_gap_ledger_ready": not blockers,
+        "full_gap_ledger_ready": bool(computed_contract_pass and provenance_pass),
         "summary": {
             "total_count": len(rows),
             "closed_count": closed_count,
@@ -9361,7 +9494,7 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
             "nonclosed_claim_boundary_missing_ids": nonclosed_claim_boundary_missing_ids,
         },
         "rows": rows,
-        "blockers": blockers,
+        "blockers": effective_blockers,
         "next_locally_closable_gaps": locally_closable_nonclosed_row_ids[:8],
     }
     portable_payload = _portable_receipt_value(payload)

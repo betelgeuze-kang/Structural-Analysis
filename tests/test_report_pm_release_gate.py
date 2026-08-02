@@ -1012,10 +1012,10 @@ def test_pm_release_gate_keeps_explicit_evidence_diagnostic_but_blocks_unbound_i
     )
 
     assert payload["paid_pilot_candidate"] is False
-    assert payload["release_tiers"]["technical_paid_pilot_candidate"] is False
-    assert payload["release_tiers"]["paid_pilot_scope_guard_pass"] is False
+    assert payload["release_tiers"]["technical_paid_pilot_candidate"] is True
+    assert payload["release_tiers"]["paid_pilot_scope_guard_pass"] is True
     assert payload["release_tiers"]["paid_pilot_scope_guard_report"].endswith("paid_pilot_scope_guard.json")
-    assert payload["limited_commercial_milestone_ready"] is False
+    assert payload["limited_commercial_milestone_ready"] is True
     assert payload["limited_commercial_release_ready"] is False
     assert payload["limited_commercial_ready"] is False
     assert payload["contract_pass"] is False
@@ -1030,10 +1030,28 @@ def test_pm_release_gate_keeps_explicit_evidence_diagnostic_but_blocks_unbound_i
     assert payload["input_checksums"][str(base_kwargs["external_benchmark_submission_readiness"])].startswith(
         "sha256:"
     )
+    assert "scripts/report_pm_release_gate.py" in payload["input_checksums"]
+    assert "scripts/release_evidence_metadata.py" in payload["input_checksums"]
     assert payload["source_input_provenance"]["contract_pass"] is False
     assert payload["release_claims_fail_closed"] is True
     assert payload["release_area_gate_ready"] is False
     assert payload["full_release_gate_ready"] is False
+    computed = payload["computed_without_provenance"]
+    assert computed["contract_pass"] is True
+    assert computed["milestone_gate_pass"] is True
+    assert computed["release_area_gate_ready"] is True
+    assert computed["full_release_gate_ready"] is True
+    assert computed["paid_pilot_candidate"] is True
+    assert computed["limited_commercial_milestone_ready"] is True
+    assert payload["release_tiers"]["paid_pilot"] is False
+    assert payload["release_tiers"]["limited_commercial_full_gate_ready"] is False
+    assert payload["release_tiers"]["ga_enterprise"] is False
+    provenance_blocker = (
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    )
+    assert provenance_blocker in payload["release_tiers"]["paid_pilot_blockers"]
+    assert provenance_blocker in payload["release_tiers"]["limited_commercial_blockers"]
+    assert provenance_blocker in payload["release_tiers"]["ga_enterprise_blockers"]
     decision = payload["release_decision"]
     assert decision["release_allowed"] is False
     assert decision["blocked_release_count"] == 1
@@ -1460,7 +1478,7 @@ def test_pm_release_gate_keeps_explicit_evidence_diagnostic_but_blocks_unbound_i
         **base_kwargs,
     )
 
-    assert payload_with_stale_strict_ci["limited_commercial_milestone_ready"] is False
+    assert payload_with_stale_strict_ci["limited_commercial_milestone_ready"] is True
     assert payload_with_stale_strict_ci["limited_commercial_release_ready"] is False
     assert payload_with_stale_strict_ci["limited_commercial_ready"] is False
     assert payload_with_stale_strict_ci["release_area_gate_ready"] is False
@@ -2169,3 +2187,98 @@ def test_default_report_fails_closed_on_pm_feedback_cycle() -> None:
     assert payload["release_tiers"]["paid_pilot"] is False
     assert payload["release_tiers"]["limited_commercial_full_gate_ready"] is False
     assert payload["release_tiers"]["ga_enterprise"] is False
+
+
+def test_pm_feedback_cycle_detects_one_sided_canonical_board_edge(
+    tmp_path: Path,
+) -> None:
+    payload = report_pm_release_gate.build_report(
+        pm_release_blocker_action_register=tmp_path / "detached-action-register.json",
+        pm_release_blocker_closure_board=(
+            report_pm_release_gate.DEFAULT_PM_RELEASE_BLOCKER_CLOSURE_BOARD
+        ),
+    )
+
+    guard = payload["provenance_guard"]
+    assert guard["direct_cycle_detected"] is True
+    assert guard["canonical_action_register_edge_detected"] is False
+    assert guard["canonical_closure_board_edge_detected"] is True
+
+
+def test_pm_feedback_cycle_detects_absolute_canonical_action_edge(
+    tmp_path: Path,
+) -> None:
+    repo_root = report_pm_release_gate.SCRIPT_DIR.parent
+    absolute_action = (
+        repo_root
+        / report_pm_release_gate.DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER
+    ).resolve()
+    payload = report_pm_release_gate.build_report(
+        pm_release_blocker_action_register=absolute_action,
+        pm_release_blocker_closure_board=tmp_path / "detached-closure-board.json",
+    )
+
+    guard = payload["provenance_guard"]
+    assert guard["direct_cycle_detected"] is True
+    assert guard["canonical_action_register_edge_detected"] is True
+    assert guard["canonical_closure_board_edge_detected"] is False
+
+
+def test_pm_provenance_operator_action_count_is_idempotent(monkeypatch) -> None:
+    provenance_action = {
+        "action_id": "regenerate_source_input_provenance",
+        "status": "required",
+        "reason": "one or more inputs are not reproducible from source_commit_sha",
+        "artifact": "source_input_provenance",
+    }
+    monkeypatch.setattr(
+        report_pm_release_gate,
+        "_release_decision",
+        lambda **kwargs: {
+            "release_allowed": True,
+            "blocked_release_count": 0,
+            "first_blocker": "",
+            "operator_action_count": 7,
+            "operator_actions": [dict(provenance_action)],
+        },
+    )
+
+    payload = report_pm_release_gate.build_report()
+    decision = payload["release_decision"]
+
+    assert decision["operator_actions"] == [provenance_action]
+    assert decision["operator_action_count"] == 7
+    assert decision["source_provenance_operator_action_appended"] is False
+
+
+def test_pm_report_relative_reads_are_independent_of_cwd(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo_root = report_pm_release_gate.SCRIPT_DIR.parent
+    monkeypatch.chdir(repo_root)
+    expected = report_pm_release_gate.build_report()
+    alternate_cwd = tmp_path / "alternate-cwd"
+    alternate_cwd.mkdir()
+    monkeypatch.chdir(alternate_cwd)
+
+    actual = report_pm_release_gate.build_report()
+
+    assert actual["milestones"] == expected["milestones"]
+    assert actual["release_area_matrix"] == expected["release_area_matrix"]
+    assert actual["release_tiers"] == expected["release_tiers"]
+    assert actual["gap_ledger_status"] == expected["gap_ledger_status"]
+    assert actual["input_checksums"] == expected["input_checksums"]
+
+
+def test_pm_report_cli_fail_blocked_exits_nonzero(tmp_path: Path, capsys) -> None:
+    out = tmp_path / "pm-report.json"
+
+    exit_code = report_pm_release_gate.main(
+        ["--out", str(out), "--fail-blocked"]
+    )
+
+    capsys.readouterr()
+    assert exit_code == 1
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["contract_pass"] is False
+    assert payload["release_claims_fail_closed"] is True

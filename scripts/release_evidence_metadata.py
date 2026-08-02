@@ -101,15 +101,32 @@ def _sha256_bytes(payload: bytes) -> str:
     return f"sha256:{hashlib.sha256(payload).hexdigest()}"
 
 
-def _repo_relative_input(path: Path, *, repo_root: Path) -> tuple[str, Path] | None:
-    """Return a stable git path and resolved workspace path for a repository input."""
+def resolve_input_path(path: Path, *, repo_root: Path = Path(".")) -> Path:
+    """Resolve a declared input against its repository, never the caller CWD."""
 
     root = repo_root.resolve()
-    resolved = path.resolve() if path.is_absolute() else (root / path).resolve()
+    return path.resolve() if path.is_absolute() else (root / path).resolve()
+
+
+def _resolved_input(
+    path: Path, *, repo_root: Path
+) -> tuple[str | None, Path]:
+    """Resolve an input exactly once, relative to ``repo_root`` when needed.
+
+    ``Path.resolve()`` on a relative path uses the process working directory.
+    Evidence builders can be invoked from any directory, so resolving a
+    repository-relative declaration before joining it to ``repo_root`` would
+    make provenance depend on the caller's current directory.  Returning the
+    resolved path even for external inputs also prevents callers from resolving
+    the same declaration a second, potentially different, way.
+    """
+
+    root = repo_root.resolve()
+    resolved = resolve_input_path(path, repo_root=root)
     try:
         relative = resolved.relative_to(root).as_posix()
     except ValueError:
-        return None
+        relative = None
     return relative, resolved
 
 
@@ -140,7 +157,7 @@ def _git_object_type(
 
 def _git_directory_sha256(
     repo_root: Path, source_commit_sha: str, relative_path: str
-) -> str | None:
+) -> tuple[str | None, str]:
     try:
         listing = subprocess.check_output(
             ["git", "ls-tree", "-r", "-z", source_commit_sha, "--", relative_path],
@@ -148,23 +165,34 @@ def _git_directory_sha256(
             stderr=subprocess.DEVNULL,
         )
     except Exception:
-        return None
+        return None, f"input_source_tree_unreadable:{relative_path}"
     rows: list[tuple[str, bytes]] = []
     prefix = f"{relative_path.rstrip('/')}/"
     for entry in listing.split(b"\0"):
         if not entry:
             continue
-        metadata, raw_name = entry.split(b"\t", 1)
-        object_id = metadata.split()[2].decode("ascii")
+        try:
+            metadata, raw_name = entry.split(b"\t", 1)
+            mode, object_type, object_id_raw = metadata.split()
+        except ValueError:
+            return None, f"input_source_tree_entry_malformed:{relative_path}"
+        object_id = object_id_raw.decode("ascii")
         name = raw_name.decode("utf-8", errors="surrogateescape")
         child = Path(name)
         if _checksum_ignored(child):
             continue
-        payload = subprocess.check_output(
-            ["git", "cat-file", "blob", object_id],
-            cwd=repo_root,
-            stderr=subprocess.DEVNULL,
-        )
+        if mode == b"160000" or object_type == b"commit":
+            return None, f"input_gitlink_not_commit_bound:{name}"
+        if object_type != b"blob":
+            return None, f"input_source_tree_entry_not_blob:{name}"
+        try:
+            payload = subprocess.check_output(
+                ["git", "cat-file", "blob", object_id],
+                cwd=repo_root,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception:
+            return None, f"input_source_blob_unreadable:{name}"
         nested_name = name[len(prefix) :] if name.startswith(prefix) else name
         rows.append((nested_name, payload))
     digest = hashlib.sha256()
@@ -173,20 +201,30 @@ def _git_directory_sha256(
         digest.update(b"\0")
         digest.update(_sha256_bytes(payload).encode("utf-8"))
         digest.update(b"\0")
-    return f"dir-sha256:{digest.hexdigest()}"
+    return f"dir-sha256:{digest.hexdigest()}", ""
 
 
 def _git_path_checksum(
     repo_root: Path, source_commit_sha: str, relative_path: str
-) -> tuple[str, bool]:
+) -> tuple[str, bool, str]:
     object_type = _git_object_type(repo_root, source_commit_sha, relative_path)
     if object_type == "tree":
-        checksum = _git_directory_sha256(repo_root, source_commit_sha, relative_path)
-        return (checksum or "missing"), checksum is not None
+        checksum, blocker = _git_directory_sha256(
+            repo_root, source_commit_sha, relative_path
+        )
+        return (checksum or "missing"), True, blocker
     if object_type == "blob":
         payload = _git_object(repo_root, source_commit_sha, relative_path)
-        return (_sha256_bytes(payload), True) if payload is not None else ("missing", False)
-    return "missing", False
+        if payload is not None:
+            return _sha256_bytes(payload), True, ""
+        return "missing", True, f"input_source_blob_unreadable:{relative_path}"
+    if object_type:
+        return (
+            "missing",
+            True,
+            f"input_source_object_type_unsupported:{relative_path}:{object_type}",
+        )
+    return "missing", False, ""
 
 
 def commit_bound_input_metadata(
@@ -231,9 +269,8 @@ def commit_bound_input_metadata(
     blockers = [str(item) for item in additional_blockers if str(item)]
     for raw_path in paths:
         path = Path(raw_path)
-        repo_input = _repo_relative_input(path, repo_root=root)
-        if repo_input is None:
-            resolved = path.resolve()
+        relative, resolved = _resolved_input(path, repo_root=root)
+        if relative is None:
             key = path.as_posix()
             workspace_checksum = (
                 directory_sha256(resolved)
@@ -257,11 +294,11 @@ def commit_bound_input_metadata(
             )
             continue
 
-        key, resolved = repo_input
-        source_checksum, source_present = (
+        key = relative
+        source_checksum, source_present, source_blocker = (
             _git_path_checksum(root, source_sha, key)
             if source_resolved
-            else ("missing", False)
+            else ("missing", False, "")
         )
         workspace_checksum = (
             directory_sha256(resolved)
@@ -271,10 +308,16 @@ def commit_bound_input_metadata(
             else "missing"
         )
         checksums[key] = source_checksum
-        workspace_matches_source = workspace_checksum == source_checksum
+        workspace_matches_source = bool(
+            source_resolved
+            and not source_blocker
+            and workspace_checksum == source_checksum
+        )
         blocker = ""
         if not source_resolved:
             blocker = "source_commit_unresolved"
+        elif source_blocker:
+            blocker = source_blocker
         elif not source_present and workspace_checksum != "missing":
             blocker = f"input_untracked_at_source_commit:{key}"
         elif source_present and workspace_checksum == "missing":

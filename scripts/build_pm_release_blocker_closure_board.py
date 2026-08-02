@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 from release_evidence_metadata import (  # noqa: E402
     CANONICAL_ENGINE_VERSION,
     commit_bound_input_metadata,
+    resolve_input_path,
 )
 
 ENGINE_VERSION = CANONICAL_ENGINE_VERSION
@@ -36,20 +37,22 @@ def _now_utc_iso() -> str:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    if not path.exists():
+    resolved = resolve_input_path(path, repo_root=ROOT)
+    if not resolved.exists():
         return {}
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(resolved.read_text(encoding="utf-8"))
     except Exception:
         return {}
     return payload if isinstance(payload, dict) else {}
 
 
 def _path_key(path: Path) -> str:
+    resolved = resolve_input_path(path, repo_root=ROOT)
     try:
-        return path.resolve().relative_to(ROOT).as_posix()
+        return resolved.relative_to(ROOT.resolve()).as_posix()
     except ValueError:
-        return path.as_posix()
+        return resolved.as_posix()
 
 
 def _source_tracking_metadata(source_paths: list[Path]) -> dict[str, Any]:
@@ -87,6 +90,29 @@ def _as_int(value: Any, default: int = 0) -> int:
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def _upstream_contract_status(payload: dict[str, Any]) -> dict[str, Any]:
+    provenance = _as_dict(payload.get("source_input_provenance"))
+    loaded = bool(payload)
+    contract_field_present = "contract_pass" in payload
+    provenance_present = bool(provenance)
+    contract_pass = payload.get("contract_pass") is True
+    provenance_pass = provenance.get("contract_pass") is True
+    return {
+        "loaded": loaded,
+        "contract_field_present": contract_field_present,
+        "contract_pass": contract_pass,
+        "source_input_provenance_present": provenance_present,
+        "source_input_provenance_contract_pass": provenance_pass,
+        "required_pass": bool(
+            loaded
+            and contract_field_present
+            and contract_pass
+            and provenance_present
+            and provenance_pass
+        ),
+    }
 
 
 def _release_area_green_total(report: dict[str, Any]) -> tuple[int, int]:
@@ -274,25 +300,79 @@ def build_board(
         rows=rows,
         full_release_gate_ready=full_release_gate_ready,
     )
-    contract_pass = reason_code == "PASS"
+    computed_contract_pass = reason_code == "PASS"
+    upstream_pm_status = _upstream_contract_status(pm_payload)
+    upstream_action_status = _upstream_contract_status(register_payload)
     closure_state_counts = _state_counts(rows)
     handoff_not_ready_count = sum(1 for row in rows if not row["handoff_ready"])
     external_owner_input_ready_count = closure_state_counts.get("external_owner_input_ready", 0)
     local_remediation_ready_count = closure_state_counts.get("local_remediation_ready", 0)
+    source_metadata = _source_tracking_metadata(
+        [
+            Path("scripts/build_pm_release_blocker_closure_board.py"),
+            Path("scripts/release_evidence_metadata.py"),
+            action_register,
+            pm_report,
+        ]
+    )
+    provenance_pass = bool(
+        source_metadata["source_input_provenance"]["contract_pass"]
+    )
+    provenance_blocker = (
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    )
+    upstream_blockers = [
+        *(
+            []
+            if upstream_pm_status["required_pass"]
+            else ["ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"]
+        ),
+        *(
+            []
+            if upstream_action_status["required_pass"]
+            else ["ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"]
+        ),
+    ]
+    effective_blockers = [
+        *upstream_blockers,
+        *([] if provenance_pass else [provenance_blocker]),
+    ]
+    contract_pass = bool(
+        computed_contract_pass
+        and upstream_pm_status["required_pass"]
+        and upstream_action_status["required_pass"]
+        and provenance_pass
+    )
+    effective_reason_code = (
+        "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"
+        if not upstream_pm_status["required_pass"]
+        else "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
+        if not upstream_action_status["required_pass"]
+        else "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+        if not provenance_pass
+        else reason_code
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
-        **_source_tracking_metadata(
-            [
-                Path("scripts/build_pm_release_blocker_closure_board.py"),
-                action_register,
-                pm_report,
-            ]
-        ),
+        **source_metadata,
+        "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
-        "reason_code": reason_code,
-        "pm_release_gate_report": str(pm_report),
-        "pm_release_blocker_action_register": str(action_register),
+        "reason_code": effective_reason_code,
+        "blockers": effective_blockers,
+        "computed_without_provenance": {
+            "status": "ready" if computed_contract_pass else "blocked",
+            "contract_pass": computed_contract_pass,
+            "reason_code": reason_code,
+            "open_blocker_count": len(rows),
+            "action_register_matches_pm_report": action_register_matches_pm_report,
+            "upstream_contracts": {
+                "pm_release_gate_report": upstream_pm_status,
+                "pm_release_blocker_action_register": upstream_action_status,
+            },
+        },
+        "pm_release_gate_report": _path_key(pm_report),
+        "pm_release_blocker_action_register": _path_key(action_register),
         "pm_summary_line": str(
             pm_payload.get("summary_line", register_payload.get("pm_summary_line", ""))
         ),
