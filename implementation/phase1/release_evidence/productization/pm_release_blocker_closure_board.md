@@ -1,11 +1,11 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=71 | external_owner_ready=10 | handoff_not_ready=0`
-- `pm_summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=72 | external_owner_ready=10 | handoff_not_ready=0`
+- `pm_summary_line`: `PM release gate: BLOCKED | source_provenance=BLOCKED | computed_without_provenance=PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `71`
+- `open_blocker_count`: `72`
 - `release_area_summary`: `4/16`
-- `release_area_blocker_count`: `50`
+- `release_area_blocker_count`: `51`
 - `all_open_blockers_have_handoff`: `True`
 - `action_register_matches_pm_report`: `True`
 
@@ -76,6 +76,7 @@
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `not_configured` | Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass. |
 | `security::repro_build_not_green` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `repro_build_not_green` in Security evidence, regenerate PM release reports, and attach the updated evidence. |
 | `github_sync::github_sync_preflight::local_head_mismatch` | `release_owner` | `external_owner_input_ready` | `synced` | Tracked GitHub sync preflight is stale for the current release HEAD (`source_delta`). Regenerate it with `python3 scripts/check_github_development_sync_preflight.py --json`, obtain explicit R4 approval phrase `feature push + main fast-forward 승인` for the pending feature push and main fast-forward, then rerun the PM release gate. |
+| `source_provenance::input_not_reproducible_at_declared_commit` | `release_owner` | `local_remediation_ready` | `open_release_evidence_blocker` | Resolve `input_not_reproducible_at_declared_commit` in source_provenance evidence, regenerate PM release reports, and attach the updated evidence. |
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence. |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence. |
 | `customer_audit_failure_bundle_sla_missing` | `customer_success_ops_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release. |

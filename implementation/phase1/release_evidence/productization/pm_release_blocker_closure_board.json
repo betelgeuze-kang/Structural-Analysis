@@ -10,7 +10,7 @@
   },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 50,
+    "release_area_blocker_count": 51,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -61,7 +61,8 @@
       "support::failure_bundle_export_not_green",
       "security::license_status_not_configured",
       "security::repro_build_not_green",
-      "github_sync::github_sync_preflight::local_head_mismatch"
+      "github_sync::github_sync_preflight::local_head_mismatch",
+      "source_provenance::input_not_reproducible_at_declared_commit"
     ],
     "release_area_green_count": 4,
     "release_area_summary": "4/16",
@@ -70,15 +71,15 @@
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
   "engine_version": "structural-analysis@0.3.0",
-  "generated_at": "2026-08-02T01:46:20.917729+00:00",
+  "generated_at": "2026-08-02T02:44:43.368856+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:90ac63a7eb9db32d55f23e6a0b2e71c69ee9c9b424f0383ad66328d1d9b2c555",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a39af51f9a27fcfff0c63980b83f293c48afe58ea1637c19cbb307ae3037872d",
-    "scripts/build_pm_release_blocker_closure_board.py": "sha256:dc37d1edd5d99f2a2c42bb062c0b68db43b4726fa054b905fffd89296d264b37"
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:fde960cda2ee009a31ee7bba3d9d9486fe88b8278938533e103696f2f16e0758",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:255960d1bb0ca579ab9514db1f5ab25bf087f58427e9744e2485044ac76f88aa",
+    "scripts/build_pm_release_blocker_closure_board.py": "sha256:f617948b2ab9956f207ebf3867abcd1863e32c73dbeabb4dcb0044ef88e46c1a"
   },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304",
+  "pm_summary_line": "PM release gate: BLOCKED | source_provenance=BLOCKED | computed_without_provenance=PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
   "reuse_policy": "pm_release_blocker_closure_board_aggregates_action_register_and_pm_report",
   "reused_evidence": true,
@@ -2277,6 +2278,34 @@
     },
     {
       "acceptance_criteria": [
+        "`source_provenance::input_not_reproducible_at_declared_commit` absent from `full_release_blockers`",
+        "`full_release_gate_ready == true` after PM report regeneration"
+      ],
+      "blocker_id": "source_provenance::input_not_reproducible_at_declared_commit",
+      "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
+      "closure_state": "local_remediation_ready",
+      "evidence_state": "open_release_evidence_blocker",
+      "external_input_required": false,
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Resolve `input_not_reproducible_at_declared_commit` in source_provenance evidence, regenerate PM release reports, and attach the updated evidence.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "primary_evidence_artifacts": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "reproduction_commands": [
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "release_evidence_remediation_required",
+      "scope": "unknown",
+      "verification_commands": [
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
         "`ga_enterprise_readiness_report.json.contract_pass == true` or no `independent_vv_missing` blocker",
         "`ga_enterprise_signoff_intake_packet.json` shows independent V&V evidence accepted",
         "`independent_vv_missing` absent from `ga_enterprise_blockers`"
@@ -2493,7 +2522,44 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "83284bd4989a6f34acae0a79c3d40fe14789128c",
+  "source_commit_sha": "38703364383414e78ab52cf3389cc571088ea5f7",
+  "source_input_provenance": {
+    "blocker_count": 0,
+    "blockers": [],
+    "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim.",
+    "contract_pass": true,
+    "input_count": 3,
+    "inputs": [
+      {
+        "blocker": "",
+        "path": "scripts/build_pm_release_blocker_closure_board.py",
+        "source_checksum": "sha256:f617948b2ab9956f207ebf3867abcd1863e32c73dbeabb4dcb0044ef88e46c1a",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:f617948b2ab9956f207ebf3867abcd1863e32c73dbeabb4dcb0044ef88e46c1a",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "source_checksum": "sha256:fde960cda2ee009a31ee7bba3d9d9486fe88b8278938533e103696f2f16e0758",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:fde960cda2ee009a31ee7bba3d9d9486fe88b8278938533e103696f2f16e0758",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "source_checksum": "sha256:255960d1bb0ca579ab9514db1f5ab25bf087f58427e9744e2485044ac76f88aa",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:255960d1bb0ca579ab9514db1f5ab25bf087f58427e9744e2485044ac76f88aa",
+        "workspace_matches_source": true
+      }
+    ],
+    "reason_code": "PASS",
+    "schema_version": "source-input-provenance.v1",
+    "source_commit_resolved": true,
+    "workspace_match_count": 3
+  },
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
@@ -2502,32 +2568,32 @@
     "allowed_adjunct_action_register_blockers": [],
     "closure_state_counts": {
       "external_owner_input_ready": 10,
-      "local_remediation_ready": 61
+      "local_remediation_ready": 62
     },
     "external_input_required_count": 10,
     "external_owner_input_ready_count": 10,
     "full_release_gate_ready": false,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 71,
+    "handoff_ready_count": 72,
     "limited_commercial_milestone_ready": false,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "local_remediation_ready_count": 61,
+    "local_remediation_ready_count": 62,
     "missing_from_action_register": [],
     "missing_from_action_register_count": 0,
-    "open_blocker_count": 71,
+    "open_blocker_count": 72,
     "owner_input_required_count": 10,
     "paid_pilot_candidate": false,
-    "pm_report_blocker_count": 71,
+    "pm_report_blocker_count": 72,
     "pm_report_loaded": true,
-    "register_blocker_count": 71,
-    "register_open_blocker_count": 71,
-    "release_area_blocker_count": 50,
+    "register_blocker_count": 72,
+    "register_open_blocker_count": 72,
+    "release_area_blocker_count": 51,
     "release_area_gate_ready": false,
     "release_area_green_count": 4,
     "release_area_total_count": 16,
     "stale_action_register_blocker_count": 0,
     "stale_action_register_blockers": []
   },
-  "summary_line": "PM release blocker closure board: BLOCKED | open=71 | external_owner_ready=10 | handoff_not_ready=0"
+  "summary_line": "PM release blocker closure board: BLOCKED | open=72 | external_owner_ready=10 | handoff_not_ready=0"
 }
