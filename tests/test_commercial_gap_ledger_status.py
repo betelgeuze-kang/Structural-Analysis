@@ -9721,7 +9721,7 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert operator_attachment_gate[
         "operator_terminal_attachment_artifact_missing_count"
-    ] == 9
+    ] == 10
     assert operator_attachment_gate[
         "operator_terminal_attachment_rights_missing_count"
     ] == 14
@@ -9729,6 +9729,10 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "operator_terminal_attachment_source_native_missing_count"
     ] == 14
     assert len(terminal_requirements) == 14
+    assert all(
+        not Path(requirement["local_path"]).is_absolute()
+        for requirement in terminal_requirements
+    )
     terminal_by_source = {
         requirement["source_id"]: requirement
         for requirement in terminal_requirements
@@ -10293,7 +10297,7 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert (
         ai_g7_corpus_boundary["operator_terminal_attachment_artifact_missing_count"]
-        == 9
+        == 10
     )
     assert (
         ai_g7_corpus_boundary["operator_terminal_attachment_rights_missing_count"]

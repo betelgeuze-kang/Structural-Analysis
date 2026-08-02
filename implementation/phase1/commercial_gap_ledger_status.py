@@ -269,16 +269,20 @@ def _operator_terminal_attachment_requirements(
         local_path_text = str(
             attachment.get("local_path") or validation_row.get("local_path") or ""
         )
-        local_path = Path(local_path_text) if local_path_text else None
+        portable_local_path = _repo_relative_path(local_path_text) or ""
+        local_path = Path(portable_local_path) if portable_local_path else None
+        repo_root_resolved = REPO_ROOT.resolve()
         resolved_local_path = (
-            local_path
-            if local_path is not None and local_path.is_absolute()
-            else REPO_ROOT / local_path
-            if local_path is not None
+            (repo_root_resolved / local_path).resolve()
+            if local_path is not None and not local_path.is_absolute()
             else None
         )
+        if resolved_local_path is not None and not resolved_local_path.is_relative_to(
+            repo_root_resolved
+        ):
+            resolved_local_path = None
         artifact_exists = bool(
-            resolved_local_path is not None and resolved_local_path.exists()
+            resolved_local_path is not None and resolved_local_path.is_file()
         )
         rights_confirmed = bool(
             attachment.get("rights_confirmed") is True
@@ -340,7 +344,7 @@ def _operator_terminal_attachment_requirements(
                 "action_type": attachment.get("action_type"),
                 "file_type": attachment.get("file_type")
                 or validation_row.get("file_type"),
-                "local_path": local_path_text,
+                "local_path": portable_local_path,
                 "artifact_exists": artifact_exists,
                 "rights_confirmed": rights_confirmed,
                 "source_native_artifact": source_native_artifact,
