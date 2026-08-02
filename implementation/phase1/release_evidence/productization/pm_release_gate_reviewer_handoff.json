@@ -61,7 +61,7 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-08-02T02:54:55.618550+00:00",
+  "generated_at": "2026-08-02T04:22:27.371806+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -87,19 +87,17 @@
       "title": "Technical Paid Pilot Candidate"
     },
     {
-      "blockers": [
-        "paid_pilot_scope_guard_missing_or_failed"
-      ],
+      "blockers": [],
       "claim_boundary": "Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness.",
       "evidence_artifact_paths": {
         "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
         "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
         "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
       },
-      "next_action": "Regenerate the paid pilot scope guard and keep all customer-facing use constrained to the scope guard until release-area blockers close.",
-      "pass": false,
+      "next_action": "",
+      "pass": true,
       "requirement_id": "release_tier.paid_pilot_scope_guard_pass",
-      "status": "blocked",
+      "status": "pass",
       "title": "Paid Pilot Scope Guard"
     },
     {
@@ -225,7 +223,8 @@
         "support::failure_bundle_export_not_green",
         "security::license_status_not_configured",
         "security::repro_build_not_green",
-        "github_sync::github_sync_preflight::local_head_mismatch"
+        "github_sync::github_sync_preflight::local_head_mismatch",
+        "source_provenance::input_not_reproducible_at_declared_commit"
       ],
       "claim_boundary": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
       "evidence_artifact_paths": {
@@ -3235,10 +3234,10 @@
     "release_area_gate_ready": false,
     "release_area_green_count": 4,
     "release_area_total_count": 16,
-    "release_tier_blocked_count": 4,
+    "release_tier_blocked_count": 3,
     "release_tier_count": 4,
     "release_tier_handoff_incomplete_count": 0,
-    "release_tier_pass_count": 0
+    "release_tier_pass_count": 1
   },
-  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=72 | incomplete=0 | release_tiers=0/4"
+  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=72 | incomplete=0 | release_tiers=1/4"
 }
