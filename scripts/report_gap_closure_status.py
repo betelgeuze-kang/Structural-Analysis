@@ -22,7 +22,9 @@ if str(REPO_ROOT) not in sys.path:
 from implementation.phase1.commercial_gap_ledger_status import (  # noqa: E402
     build_commercial_gap_ledger_status,
 )
-from scripts.release_evidence_metadata import input_checksums  # noqa: E402
+from scripts.release_evidence_metadata import (  # noqa: E402
+    commit_bound_input_metadata,
+)
 
 
 GAP_CLOSURE_INPUT_FILES = (
@@ -241,12 +243,17 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
     if not isinstance(ledger_rows, list):
         ledger_rows = []
 
+    provenance = commit_bound_input_metadata(
+        checksum_inputs,
+        repo_root=REPO_ROOT,
+    )
     return {
         "schema_version": "gap-closure-status.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "source_commit_sha": _git_head(),
+        "source_commit_sha": provenance["source_commit_sha"],
         "engine_version": ENGINE_VERSION,
-        "input_checksums": input_checksums(checksum_inputs, repo_root=REPO_ROOT),
+        "input_checksums": provenance["input_checksums"],
+        "source_input_provenance": provenance["source_input_provenance"],
         "reused_evidence": False,
         "overall_status": delivery_status,
         "delivery_status": delivery_status,

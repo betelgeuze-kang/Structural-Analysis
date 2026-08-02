@@ -838,7 +838,7 @@ def test_release_decision_blocks_non_structural_allowlisted_surface(
 
 
 
-def test_pm_release_gate_keeps_paid_pilot_scope_when_limited_blockers_remain(tmp_path: Path) -> None:
+def test_pm_release_gate_fails_closed_for_unbound_custom_inputs(tmp_path: Path) -> None:
     ndtha = _write(
         tmp_path / "release_evidence" / "productization" / "ndtha_residual_gate_report.json",
         {
@@ -898,7 +898,7 @@ def test_pm_release_gate_keeps_paid_pilot_scope_when_limited_blockers_remain(tmp
         **_base_kwargs(tmp_path),
     )
 
-    assert payload["paid_pilot_candidate"] is True
+    assert payload["paid_pilot_candidate"] is False
     assert payload["limited_commercial_milestone_ready"] is False
     assert payload["limited_commercial_release_ready"] is False
     assert payload["limited_commercial_ready"] is False
@@ -907,10 +907,14 @@ def test_pm_release_gate_keeps_paid_pilot_scope_when_limited_blockers_remain(tmp
     assert "M2::contact_material_coupled_case_count_lt_10_or_missing" in payload["blockers"]
     assert "M4::holdout_cases_per_family_missing" in payload["blockers"]
     assert payload["release_area_gate_ready"] is False
-    assert "Paid pilot / constrained customer PoC only" in payload["recommended_scope"]
+    assert payload["source_input_provenance"]["contract_pass"] is False
+    assert payload["release_claims_fail_closed"] is True
+    assert "reproducible from the declared commit" in payload["recommended_scope"]
 
 
-def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(tmp_path: Path) -> None:
+def test_pm_release_gate_keeps_explicit_evidence_diagnostic_but_blocks_unbound_inputs(
+    tmp_path: Path,
+) -> None:
     ndtha = _write(
         tmp_path / "release_evidence" / "productization" / "ndtha_residual_gate_report.json",
         {
@@ -1007,14 +1011,14 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         **base_kwargs,
     )
 
-    assert payload["paid_pilot_candidate"] is True
-    assert payload["release_tiers"]["technical_paid_pilot_candidate"] is True
-    assert payload["release_tiers"]["paid_pilot_scope_guard_pass"] is True
+    assert payload["paid_pilot_candidate"] is False
+    assert payload["release_tiers"]["technical_paid_pilot_candidate"] is False
+    assert payload["release_tiers"]["paid_pilot_scope_guard_pass"] is False
     assert payload["release_tiers"]["paid_pilot_scope_guard_report"].endswith("paid_pilot_scope_guard.json")
-    assert payload["limited_commercial_milestone_ready"] is True
-    assert payload["limited_commercial_release_ready"] is True
-    assert payload["limited_commercial_ready"] is True
-    assert payload["contract_pass"] is True
+    assert payload["limited_commercial_milestone_ready"] is False
+    assert payload["limited_commercial_release_ready"] is False
+    assert payload["limited_commercial_ready"] is False
+    assert payload["contract_pass"] is False
     assert payload["source_commit_sha"]
     assert payload["engine_version"] == "structural-analysis@0.3.0"
     assert payload["reused_evidence"] is True
@@ -1026,13 +1030,17 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["input_checksums"][str(base_kwargs["external_benchmark_submission_readiness"])].startswith(
         "sha256:"
     )
-    assert payload["release_area_gate_ready"] is True
-    assert payload["full_release_gate_ready"] is True
+    assert payload["source_input_provenance"]["contract_pass"] is False
+    assert payload["release_claims_fail_closed"] is True
+    assert payload["release_area_gate_ready"] is False
+    assert payload["full_release_gate_ready"] is False
     decision = payload["release_decision"]
-    assert decision["release_allowed"] is True
-    assert decision["blocked_release_count"] == 0
-    assert decision["first_blocker"] == ""
-    assert decision["operator_action_count"] == 16
+    assert decision["release_allowed"] is False
+    assert decision["blocked_release_count"] == 1
+    assert decision["first_blocker"] == (
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    )
+    assert decision["operator_action_count"] == 17
     assert decision["approval_token_count"] == 0
     assert decision["stale_artifact_count"] == 0
     assert decision["stale_artifact_refresh_required"] is False
@@ -1044,7 +1052,14 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert decision["missing_evidence_surface_count"] == 0
     assert decision["locked_evidence_surface_count"] == 0
     assert decision["public_benchmark_ready"] is True
-    assert decision["operator_actions"] == []
+    assert decision["operator_actions"] == [
+        {
+            "action_id": "regenerate_source_input_provenance",
+            "status": "required",
+            "reason": "one or more inputs are not reproducible from source_commit_sha",
+            "artifact": "source_input_provenance",
+        }
+    ]
     surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
     assert surface_paths["structural_contact_gate_report"]["contract_pass"] is True
     excluded_surface_paths = {
@@ -1272,8 +1287,12 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing"
         in payload["release_tiers"]["ga_enterprise_blockers"]
     )
-    assert payload["blockers"] == []
-    assert payload["release_area_blockers"] == []
+    assert payload["blockers"] == [
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    ]
+    assert payload["release_area_blockers"] == [
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    ]
 
     missing_freshness_kwargs = dict(base_kwargs)
     missing_freshness_kwargs["release_evidence_freshness"] = tmp_path / "missing_freshness.json"
@@ -1322,6 +1341,12 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "status": "refresh_required",
             "reason": "release_evidence_freshness_report has stale or incomplete source-of-truth blockers",
             "artifact": "release_evidence_freshness_report",
+        },
+        {
+            "action_id": "regenerate_source_input_provenance",
+            "status": "required",
+            "reason": "one or more inputs are not reproducible from source_commit_sha",
+            "artifact": "source_input_provenance",
         },
     ]
 
@@ -1435,7 +1460,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         **base_kwargs,
     )
 
-    assert payload_with_stale_strict_ci["limited_commercial_milestone_ready"] is True
+    assert payload_with_stale_strict_ci["limited_commercial_milestone_ready"] is False
     assert payload_with_stale_strict_ci["limited_commercial_release_ready"] is False
     assert payload_with_stale_strict_ci["limited_commercial_ready"] is False
     assert payload_with_stale_strict_ci["release_area_gate_ready"] is False
@@ -2118,3 +2143,29 @@ def test_github_sync_preflight_source_state_blocks_source_delta(monkeypatch) -> 
     assert fresh is False
     assert kind == "source_delta"
     assert changed_paths == ["scripts/report_pm_release_gate.py"]
+
+
+def test_default_report_fails_closed_on_pm_feedback_cycle() -> None:
+    payload = report_pm_release_gate.build_report()
+
+    provenance = payload["source_input_provenance"]
+    assert provenance["contract_pass"] is False
+    assert any(
+        blocker.startswith("cyclic_input_dependency:pm_release_gate_report->")
+        for blocker in provenance["blockers"]
+    )
+    assert payload["release_claims_fail_closed"] is True
+    assert payload["provenance_guard"]["mode"] == "diagnostics_only_fail_closed"
+    assert payload["provenance_guard"]["dependency_dag_repaired"] is False
+    assert payload["contract_pass"] is False
+    assert payload["release_area_gate_ready"] is False
+    assert payload["full_release_gate_ready"] is False
+    assert payload["paid_pilot_candidate"] is False
+    assert payload["limited_commercial_milestone_ready"] is False
+    assert payload["limited_commercial_release_ready"] is False
+    assert payload["limited_commercial_ready"] is False
+    assert payload["ga_enterprise_ready"] is False
+    assert payload["release_decision"]["release_allowed"] is False
+    assert payload["release_tiers"]["paid_pilot"] is False
+    assert payload["release_tiers"]["limited_commercial_full_gate_ready"] is False
+    assert payload["release_tiers"]["ga_enterprise"] is False

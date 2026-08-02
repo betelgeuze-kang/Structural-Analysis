@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
-import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -20,7 +19,10 @@ import check_github_development_sync_preflight  # noqa: E402
 
 
 SCHEMA_VERSION = "pm-release-gate-report.v1"
-from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+from release_evidence_metadata import (  # noqa: E402
+    CANONICAL_ENGINE_VERSION,
+    commit_bound_input_metadata,
+)
 
 ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 
@@ -276,21 +278,6 @@ def _github_sync_preflight_source_state(
     if non_evidence_paths:
         return False, "source_delta", non_evidence_paths
     return True, "evidence_only_delta", changed_paths
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as fh:
-        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return f"sha256:{digest.hexdigest()}"
-
-
-def _input_checksums(paths: list[Path]) -> dict[str, str]:
-    checksums: dict[str, str] = {}
-    for path in paths:
-        checksums[str(path)] = _sha256(path) if path.exists() else "missing"
-    return checksums
 
 
 def _artifact_paths_from_rows(rows: list[dict[str, Any]]) -> list[Path]:
@@ -3462,13 +3449,44 @@ def build_report(
             ],
         ]
     )
+    canonical_feedback_cycle = bool(
+        pm_release_blocker_action_register == DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER
+        and pm_release_blocker_closure_board == DEFAULT_PM_RELEASE_BLOCKER_CLOSURE_BOARD
+    )
+    provenance = commit_bound_input_metadata(
+        report_input_paths,
+        repo_root=SCRIPT_DIR.parent,
+        additional_blockers=(
+            [
+                "cyclic_input_dependency:pm_release_gate_report->"
+                "pm_release_blocker_action_register/pm_release_blocker_closure_board->"
+                "pm_release_gate_report"
+            ]
+            if canonical_feedback_cycle
+            else []
+        ),
+    )
 
-    return {
+    payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "source_commit_sha": _git_head(),
+        "source_commit_sha": provenance["source_commit_sha"],
         "engine_version": ENGINE_VERSION,
-        "input_checksums": _input_checksums(report_input_paths),
+        "input_checksums": provenance["input_checksums"],
+        "source_input_provenance": provenance["source_input_provenance"],
+        "provenance_guard": {
+            "mode": "diagnostics_only_fail_closed",
+            "dependency_dag_repaired": False,
+            "direct_cycle_detected": canonical_feedback_cycle,
+            "claim_boundary": (
+                "This guard exposes and blocks the direct PM report/action-register/closure-board "
+                "feedback edge. It does not break or certify the wider productization evidence "
+                "dependency graph; that SCC requires a separate DAG redesign."
+            ),
+        },
+        "release_claims_fail_closed": bool(
+            not provenance["source_input_provenance"]["contract_pass"]
+        ),
         "reused_evidence": True,
         "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
         "contract_pass": limited_ready,
@@ -3600,6 +3618,71 @@ def build_report(
             ),
         },
     }
+    if payload["release_claims_fail_closed"]:
+        provenance_blocker = "source_provenance::input_not_reproducible_at_declared_commit"
+        computed_summary_line = str(payload["summary_line"])
+        payload["contract_pass"] = False
+        payload["milestone_gate_pass"] = False
+        payload["release_area_gate_ready"] = False
+        payload["full_release_gate_ready"] = False
+        payload["paid_pilot_candidate"] = False
+        payload["limited_commercial_milestone_ready"] = False
+        payload["limited_commercial_release_ready"] = False
+        payload["limited_commercial_ready"] = False
+        payload["ga_enterprise_ready"] = False
+        payload["recommended_scope"] = (
+            "Release blocked until every source input is reproducible from the declared commit. "
+            "Any disclosed dependency cycle also requires a separate DAG redesign."
+        )
+        payload["summary_line"] = (
+            "PM release gate: BLOCKED | source_provenance=BLOCKED | "
+            f"computed_without_provenance={computed_summary_line}"
+        )
+        payload["blockers"] = list(
+            dict.fromkeys([*payload["blockers"], provenance_blocker])
+        )
+        payload["release_area_blockers"] = list(
+            dict.fromkeys([*payload["release_area_blockers"], provenance_blocker])
+        )
+        payload["full_release_blockers"] = list(
+            dict.fromkeys([*payload["full_release_blockers"], provenance_blocker])
+        )
+        release_decision_payload = _as_dict(payload.get("release_decision"))
+        release_decision_payload["release_allowed"] = False
+        release_decision_payload["blocked_release_count"] = (
+            _as_int(release_decision_payload.get("blocked_release_count"), 0) + 1
+        )
+        release_decision_payload["first_blocker"] = provenance_blocker
+        release_decision_payload["source_provenance_contract_pass"] = False
+        operator_actions = list(
+            _as_list(release_decision_payload.get("operator_actions"))
+        )
+        provenance_action = {
+            "action_id": "regenerate_source_input_provenance",
+            "status": "required",
+            "reason": "one or more inputs are not reproducible from source_commit_sha",
+            "artifact": "source_input_provenance",
+        }
+        if provenance_action not in operator_actions:
+            operator_actions.append(provenance_action)
+        release_decision_payload["operator_actions"] = operator_actions
+        release_decision_payload["operator_action_count"] = (
+            _as_int(release_decision_payload.get("operator_action_count"), 0) + 1
+        )
+        payload["release_decision"] = release_decision_payload
+        release_tiers_payload = _as_dict(payload.get("release_tiers"))
+        for key in (
+            "paid_pilot",
+            "technical_paid_pilot_candidate",
+            "paid_pilot_scope_guard_pass",
+            "limited_commercial_milestone_ready",
+            "limited_commercial_full_gate_ready",
+            "ga_enterprise",
+            "ga_enterprise_evidence_gate_pass",
+        ):
+            release_tiers_payload[key] = False
+        payload["release_tiers"] = release_tiers_payload
+    return payload
 
 
 def _markdown(payload: dict[str, Any]) -> str:

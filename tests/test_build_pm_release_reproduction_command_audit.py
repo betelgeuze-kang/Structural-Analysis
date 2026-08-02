@@ -44,6 +44,7 @@ def _repo(tmp_path: Path) -> Path:
         "build_mgt_g1_direct_residual_terminal_gate_report.py",
         "build_mgt_g1_shell_material_budgeted_continuation_status.py",
         "report_commercial_gap_ledger_status.py",
+        "build_gap_ledger_evidence_audit.py",
         "report_gap_closure_status.py",
         "build_support_bundle.py",
         "build_paid_pilot_scope_guard_report.py",
@@ -225,7 +226,7 @@ def test_accepts_current_pm_release_command_artifacts_in_clean_checkout(monkeypa
     assert payload["summary"]["artifact_count"] == 7
     assert payload["summary"]["artifact_pass_count"] == 7
     assert payload["summary"]["command_count"] > 0
-    assert payload["summary"]["package_regeneration_command_count"] == 13
+    assert payload["summary"]["package_regeneration_command_count"] == 14
     assert payload["summary"]["package_regeneration_violation_count"] == 0
     assert payload["summary"]["external_owner_command_count"] >= 1
     assert any(
@@ -261,17 +262,21 @@ def test_accepts_current_pm_release_command_artifacts_in_clean_checkout(monkeypa
         for command in payload["package_regeneration_commands"]
     )
     assert any(
+        "build_gap_ledger_evidence_audit.py" in command
+        for command in payload["package_regeneration_commands"]
+    )
+    assert any(
         "report_gap_closure_status.py" in command
         for command in payload["package_regeneration_commands"]
     )
-    assert payload["summary"]["package_regeneration_expected_output_count"] == 23
+    assert payload["summary"]["package_regeneration_expected_output_count"] == 24
     failed_outputs = [
         row
         for row in payload["package_regeneration_output_rows"]
         if row["contract_pass"] is False
     ]
     assert payload["summary"]["package_regeneration_expected_output_pass_count"] == (
-        23 - len(failed_outputs)
+        24 - len(failed_outputs)
     )
     assert payload["summary"]["package_regeneration_output_violation_count"] == len(
         failed_outputs
@@ -284,6 +289,10 @@ def test_accepts_current_pm_release_command_artifacts_in_clean_checkout(monkeypa
     )
     assert any(
         row["label"] == "commercial_gap_ledger_status" and row["contract_pass"] is True
+        for row in payload["package_regeneration_output_rows"]
+    )
+    assert any(
+        row["label"] == "gap_ledger_evidence_audit" and row["contract_pass"] is True
         for row in payload["package_regeneration_output_rows"]
     )
     assert any(

@@ -24,7 +24,9 @@ SCRIPTS = REPO_ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from release_evidence_metadata import (  # noqa: E402
+    commit_bound_release_evidence_metadata,
+)
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -9307,7 +9309,7 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
 
     payload = {
         "schema_version": SCHEMA_VERSION,
-        **release_evidence_metadata(
+        **commit_bound_release_evidence_metadata(
             input_paths=[
                 Path("docs/commercial-structural-solver-product-gap-ledger.md"),
                 Path("docs/structural-analysis-ai-engine-gap-ledger.md"),

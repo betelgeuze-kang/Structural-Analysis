@@ -97,6 +97,252 @@ def input_checksums(paths: Iterable[Path], *, repo_root: Path = Path(".")) -> di
     return dict(sorted(checksums.items()))
 
 
+def _sha256_bytes(payload: bytes) -> str:
+    return f"sha256:{hashlib.sha256(payload).hexdigest()}"
+
+
+def _repo_relative_input(path: Path, *, repo_root: Path) -> tuple[str, Path] | None:
+    """Return a stable git path and resolved workspace path for a repository input."""
+
+    root = repo_root.resolve()
+    resolved = path.resolve() if path.is_absolute() else (root / path).resolve()
+    try:
+        relative = resolved.relative_to(root).as_posix()
+    except ValueError:
+        return None
+    return relative, resolved
+
+
+def _git_object(repo_root: Path, source_commit_sha: str, relative_path: str) -> bytes | None:
+    try:
+        return subprocess.check_output(
+            ["git", "show", f"{source_commit_sha}:{relative_path}"],
+            cwd=repo_root,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return None
+
+
+def _git_object_type(
+    repo_root: Path, source_commit_sha: str, relative_path: str
+) -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "cat-file", "-t", f"{source_commit_sha}:{relative_path}"],
+            cwd=repo_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _git_directory_sha256(
+    repo_root: Path, source_commit_sha: str, relative_path: str
+) -> str | None:
+    try:
+        listing = subprocess.check_output(
+            ["git", "ls-tree", "-r", "-z", source_commit_sha, "--", relative_path],
+            cwd=repo_root,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return None
+    rows: list[tuple[str, bytes]] = []
+    prefix = f"{relative_path.rstrip('/')}/"
+    for entry in listing.split(b"\0"):
+        if not entry:
+            continue
+        metadata, raw_name = entry.split(b"\t", 1)
+        object_id = metadata.split()[2].decode("ascii")
+        name = raw_name.decode("utf-8", errors="surrogateescape")
+        child = Path(name)
+        if _checksum_ignored(child):
+            continue
+        payload = subprocess.check_output(
+            ["git", "cat-file", "blob", object_id],
+            cwd=repo_root,
+            stderr=subprocess.DEVNULL,
+        )
+        nested_name = name[len(prefix) :] if name.startswith(prefix) else name
+        rows.append((nested_name, payload))
+    digest = hashlib.sha256()
+    for nested_name, payload in sorted(rows):
+        digest.update(nested_name.encode("utf-8", errors="surrogateescape"))
+        digest.update(b"\0")
+        digest.update(_sha256_bytes(payload).encode("utf-8"))
+        digest.update(b"\0")
+    return f"dir-sha256:{digest.hexdigest()}"
+
+
+def _git_path_checksum(
+    repo_root: Path, source_commit_sha: str, relative_path: str
+) -> tuple[str, bool]:
+    object_type = _git_object_type(repo_root, source_commit_sha, relative_path)
+    if object_type == "tree":
+        checksum = _git_directory_sha256(repo_root, source_commit_sha, relative_path)
+        return (checksum or "missing"), checksum is not None
+    if object_type == "blob":
+        payload = _git_object(repo_root, source_commit_sha, relative_path)
+        return (_sha256_bytes(payload), True) if payload is not None else ("missing", False)
+    return "missing", False
+
+
+def commit_bound_input_metadata(
+    paths: Iterable[Path],
+    *,
+    repo_root: Path = Path("."),
+    source_commit_sha: str | None = None,
+    additional_blockers: Iterable[str] = (),
+) -> dict[str, Any]:
+    """Bind input hashes to one commit and disclose workspace divergence.
+
+    Repository-local input checksums are computed from ``source_commit_sha``
+    rather than from mutable workspace bytes.  A tracked input that differs in
+    the workspace, or an untracked workspace input that is absent from the
+    declared commit, makes the provenance contract fail closed.  Missing inputs
+    that are absent from both the commit and workspace remain a reproducible
+    ``missing`` observation.
+
+    Absolute inputs outside ``repo_root`` cannot be reproduced from a git
+    commit.  They retain their workspace checksum for diagnostic callers but
+    are explicitly marked unbound and fail the provenance contract.
+    """
+
+    root = repo_root.resolve()
+    source_sha = source_commit_sha or git_head(root)
+    source_resolved = False
+    if source_sha:
+        try:
+            resolved_sha = subprocess.check_output(
+                ["git", "rev-parse", "--verify", f"{source_sha}^{{commit}}"],
+                cwd=root,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            source_resolved = bool(resolved_sha)
+            source_sha = resolved_sha or source_sha
+        except Exception:
+            source_resolved = False
+
+    checksums: dict[str, str] = {}
+    rows: list[dict[str, Any]] = []
+    blockers = [str(item) for item in additional_blockers if str(item)]
+    for raw_path in paths:
+        path = Path(raw_path)
+        repo_input = _repo_relative_input(path, repo_root=root)
+        if repo_input is None:
+            resolved = path.resolve()
+            key = path.as_posix()
+            workspace_checksum = (
+                directory_sha256(resolved)
+                if resolved.is_dir()
+                else file_sha256(resolved)
+                if resolved.is_file()
+                else "missing"
+            )
+            checksums[key] = workspace_checksum
+            blocker = f"external_input_not_commit_bound:{key}"
+            blockers.append(blocker)
+            rows.append(
+                {
+                    "path": key,
+                    "source_state": "external_unbound",
+                    "source_checksum": workspace_checksum,
+                    "workspace_checksum": workspace_checksum,
+                    "workspace_matches_source": False,
+                    "blocker": blocker,
+                }
+            )
+            continue
+
+        key, resolved = repo_input
+        source_checksum, source_present = (
+            _git_path_checksum(root, source_sha, key)
+            if source_resolved
+            else ("missing", False)
+        )
+        workspace_checksum = (
+            directory_sha256(resolved)
+            if resolved.is_dir()
+            else file_sha256(resolved)
+            if resolved.is_file()
+            else "missing"
+        )
+        checksums[key] = source_checksum
+        workspace_matches_source = workspace_checksum == source_checksum
+        blocker = ""
+        if not source_resolved:
+            blocker = "source_commit_unresolved"
+        elif not source_present and workspace_checksum != "missing":
+            blocker = f"input_untracked_at_source_commit:{key}"
+        elif source_present and workspace_checksum == "missing":
+            blocker = f"input_missing_from_workspace:{key}"
+        elif not workspace_matches_source:
+            blocker = f"input_differs_from_source_commit:{key}"
+        if blocker:
+            blockers.append(blocker)
+        rows.append(
+            {
+                "path": key,
+                "source_state": "tracked" if source_present else "missing",
+                "source_checksum": source_checksum,
+                "workspace_checksum": workspace_checksum,
+                "workspace_matches_source": workspace_matches_source,
+                "blocker": blocker,
+            }
+        )
+
+    blockers = list(dict.fromkeys(blockers))
+    return {
+        "source_commit_sha": source_sha,
+        "input_checksums": dict(sorted(checksums.items())),
+        "source_input_provenance": {
+            "schema_version": "source-input-provenance.v1",
+            "contract_pass": not blockers,
+            "reason_code": "PASS" if not blockers else "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE",
+            "source_commit_resolved": source_resolved,
+            "input_count": len(rows),
+            "workspace_match_count": sum(
+                1 for row in rows if row["workspace_matches_source"] is True
+            ),
+            "blocker_count": len(blockers),
+            "blockers": blockers,
+            "inputs": rows,
+            "claim_boundary": (
+                "input_checksums records bytes from source_commit_sha for repository-local inputs. "
+                "Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance "
+                "contract and cannot support a release-ready claim."
+            ),
+        },
+    }
+
+
+def commit_bound_release_evidence_metadata(
+    *,
+    input_paths: Iterable[Path],
+    reused_evidence: bool,
+    reuse_policy: str,
+    repo_root: Path = Path("."),
+    source_commit_sha: str | None = None,
+    additional_blockers: Iterable[str] = (),
+) -> dict[str, Any]:
+    metadata = commit_bound_input_metadata(
+        input_paths,
+        repo_root=repo_root,
+        source_commit_sha=source_commit_sha,
+        additional_blockers=additional_blockers,
+    )
+    return {
+        "generated_at": now_utc_iso(),
+        **metadata,
+        "engine_version": engine_version(repo_root),
+        "reused_evidence": bool(reused_evidence),
+        "reuse_policy": reuse_policy,
+    }
+
+
 def release_evidence_metadata(
     *,
     input_paths: Iterable[Path],

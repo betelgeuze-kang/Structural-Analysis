@@ -5,16 +5,17 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
-import hashlib
 import json
 from pathlib import Path
-import subprocess
 from typing import Any
 
 
 SCHEMA_VERSION = "pm-release-gate-completion-audit.v1"
 ROOT = Path(__file__).resolve().parents[1]
-from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+from release_evidence_metadata import (  # noqa: E402
+    CANONICAL_ENGINE_VERSION,
+    commit_bound_input_metadata,
+)
 
 ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 AGGREGATOR_REUSE_POLICY = "pm_release_gate_completion_audit_aggregates_pm_report_and_closure_board"
@@ -125,18 +126,6 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
-def _git_head() -> str:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "HEAD"],
-            cwd=ROOT,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except Exception:
-        return ""
-
-
 def _path_key(path: Path) -> str:
     try:
         return path.resolve().relative_to(ROOT).as_posix()
@@ -144,22 +133,11 @@ def _path_key(path: Path) -> str:
         return path.as_posix()
 
 
-def _sha256_or_missing(path: Path) -> str:
-    resolved = path if path.is_absolute() else ROOT / path
-    if not resolved.exists() or not resolved.is_file():
-        return "missing"
-    digest = hashlib.sha256()
-    with resolved.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return f"sha256:{digest.hexdigest()}"
-
-
 def _source_tracking_metadata(source_paths: list[Path]) -> dict[str, Any]:
+    provenance = commit_bound_input_metadata(source_paths, repo_root=ROOT)
     return {
-        "source_commit_sha": _git_head(),
+        **provenance,
         "engine_version": ENGINE_VERSION,
-        "input_checksums": {_path_key(path): _sha256_or_missing(path) for path in source_paths},
         "reused_evidence": True,
         "reuse_policy": AGGREGATOR_REUSE_POLICY,
         "aggregator_freshness_policy": {
