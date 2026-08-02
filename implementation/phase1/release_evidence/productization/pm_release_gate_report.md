@@ -1,7 +1,7 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304`
-- `recommended_scope`: Release blocked until core PM gates have green evidence.
+- `summary_line`: `PM release gate: BLOCKED | source_provenance=BLOCKED | computed_without_provenance=PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304`
+- `recommended_scope`: Release blocked until every source input is reproducible from the declared commit. Any disclosed dependency cycle also requires a separate DAG redesign.
 - `paid_pilot_candidate`: `False`
 - `limited_commercial_milestone_ready`: `False`
 - `limited_commercial_ready`: `False`
@@ -15,9 +15,9 @@
 - `commercial_solver_gap_ready`: `False`
 - `ai_engine_gap_ready`: `False`
 - `release_allowed`: `False`
-- `blocked_release_count`: `65`
-- `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `72`
+- `blocked_release_count`: `66`
+- `first_blocker`: `source_provenance::input_not_reproducible_at_declared_commit`
+- `operator_action_count`: `73`
 - `approval_token_count`: `5`
 - `stale_artifact_count`: `27`
 - `evidence_surface_count`: `8`
