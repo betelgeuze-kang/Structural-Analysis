@@ -1,13 +1,50 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-08-02T01:45:53.572158+00:00",
-  "source_commit_sha": "83284bd4989a6f34acae0a79c3d40fe14789128c",
-  "engine_version": "structural-analysis@0.3.0",
+  "generated_at": "2026-08-02T02:43:04.776897+00:00",
+  "source_commit_sha": "dc182627f8b55bf2d38e8111c88395e70f1baafd",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
-    "implementation/phase1/commercial_gap_ledger_status.py": "sha256:4e10b3fff1eb3598299c7f7bbaaebfd25f1ed7bc485870f33664ed47f095c04e"
+    "implementation/phase1/commercial_gap_ledger_status.py": "sha256:0aa9012108eeaa31b9c7d2efe265e042b5173c3c7a132368eea2650a3419fc44"
   },
+  "source_input_provenance": {
+    "schema_version": "source-input-provenance.v1",
+    "contract_pass": true,
+    "reason_code": "PASS",
+    "source_commit_resolved": true,
+    "input_count": 3,
+    "workspace_match_count": 3,
+    "blocker_count": 0,
+    "blockers": [],
+    "inputs": [
+      {
+        "path": "docs/commercial-structural-solver-product-gap-ledger.md",
+        "source_state": "tracked",
+        "source_checksum": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
+        "workspace_checksum": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
+        "workspace_matches_source": true,
+        "blocker": ""
+      },
+      {
+        "path": "docs/structural-analysis-ai-engine-gap-ledger.md",
+        "source_state": "tracked",
+        "source_checksum": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
+        "workspace_checksum": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
+        "workspace_matches_source": true,
+        "blocker": ""
+      },
+      {
+        "path": "implementation/phase1/commercial_gap_ledger_status.py",
+        "source_state": "tracked",
+        "source_checksum": "sha256:0aa9012108eeaa31b9c7d2efe265e042b5173c3c7a132368eea2650a3419fc44",
+        "workspace_checksum": "sha256:0aa9012108eeaa31b9c7d2efe265e042b5173c3c7a132368eea2650a3419fc44",
+        "workspace_matches_source": true,
+        "blocker": ""
+      }
+    ],
+    "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim."
+  },
+  "engine_version": "structural-analysis@0.3.0",
   "reused_evidence": true,
   "reuse_policy": "summarizes_existing_gap_ledgers_and_productization_receipts; does_not_create_authoritative_closure_evidence",
   "status": "open",
