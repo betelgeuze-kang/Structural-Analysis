@@ -1,7 +1,7 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-08-02T02:43:24.539801+00:00",
-  "source_commit_sha": "62552475e41c42ddaed3933487a5293e2daf068d",
+  "generated_at": "2026-08-02T02:53:38.991091+00:00",
+  "source_commit_sha": "bae6f5c1810f8b2b568065dac4313957ee863831",
   "engine_version": "structural-analysis@0.3.0",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
@@ -11,7 +11,7 @@
     "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
     "implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json": "sha256:9dcb3fdb95c865eb269a4a6b2049e42dcccd499f585fa0c92c59931c88f18e28",
     "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json": "sha256:becfdc4a1808f049c6d1737a9d34a580d24c295ed700f5f205318c8313576a82",
-    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:928da11384ddc3561c27b7f831ef7738abb553ec138ec78867504ca64d89cde8",
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:bd57dca1fd314819f0a5584684e87a8399634420517ba09dfc5d67c83f8c9874",
     "implementation/phase1/release_evidence/productization/gpu_newton_certification_checklist.json": "sha256:6b2e1b6e34a84f793c7ec4f62f6486799c0b46f32192fc3acc6d5f89f952962c",
     "implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json": "sha256:6ddcb6827eb70d369b008cf1c154298e7d06becd388c1b7e4d75dcae7137f07e",
     "implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json": "sha256:99424209c38c877a7fcb39243a5e785bfa824e06d3b9a910b23eb2b0a02a01e8",
@@ -148,8 +148,8 @@
       {
         "path": "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json",
         "source_state": "tracked",
-        "source_checksum": "sha256:928da11384ddc3561c27b7f831ef7738abb553ec138ec78867504ca64d89cde8",
-        "workspace_checksum": "sha256:928da11384ddc3561c27b7f831ef7738abb553ec138ec78867504ca64d89cde8",
+        "source_checksum": "sha256:bd57dca1fd314819f0a5584684e87a8399634420517ba09dfc5d67c83f8c9874",
+        "workspace_checksum": "sha256:bd57dca1fd314819f0a5584684e87a8399634420517ba09dfc5d67c83f8c9874",
         "workspace_matches_source": true,
         "blocker": ""
       },
