@@ -4,23 +4,53 @@
     "mode": "direct_aggregator_source_tracking",
     "source_artifacts": [
       "scripts/build_pm_release_gate_completion_audit.py",
+      "scripts/release_evidence_metadata.py",
       "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
       "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
     ]
   },
+  "blockers": [
+    "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED",
+    "ERR_UPSTREAM_CLOSURE_BOARD_BLOCKED"
+  ],
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
+  "computed_without_provenance": {
+    "blocked_requirement_count": 30,
+    "contract_pass": false,
+    "reason_code": "ERR_PM_REQUIREMENTS_BLOCKED",
+    "status": "blocked",
+    "upstream_contracts": {
+      "pm_release_blocker_closure_board": {
+        "contract_field_present": true,
+        "contract_pass": false,
+        "loaded": true,
+        "required_pass": false,
+        "source_input_provenance_contract_pass": true,
+        "source_input_provenance_present": true
+      },
+      "pm_release_gate_report": {
+        "contract_field_present": true,
+        "contract_pass": false,
+        "loaded": true,
+        "required_pass": false,
+        "source_input_provenance_contract_pass": false,
+        "source_input_provenance_present": true
+      }
+    }
+  },
   "contract_pass": false,
   "engine_version": "structural-analysis@0.3.0",
-  "generated_at": "2026-08-02T02:54:48.953251+00:00",
+  "generated_at": "2026-08-02T04:22:15.395003+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:a1bcb2c4a783975e178ab5329dfde51edc74541ba6230efd55f81b97964d68bf",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
-    "scripts/build_pm_release_gate_completion_audit.py": "sha256:8a246aa7915e6bdef185c93fe52c298dabc2aa14771b0aa64048632a18426896"
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:9800f83ce70b54ee18ff48177ca7a8dbf110d53df437a4dd1f8355cbd433f811",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
+    "scripts/build_pm_release_gate_completion_audit.py": "sha256:dfb7600a3d4a6b9d6adc52e3f4eccb418c804ac637fef64109abfa6387920c51",
+    "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671"
   },
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: BLOCKED | source_provenance=BLOCKED | computed_without_provenance=PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304",
-  "reason_code": "ERR_PM_REQUIREMENTS_BLOCKED",
+  "reason_code": "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED",
   "reuse_policy": "pm_release_gate_completion_audit_aggregates_pm_report_and_closure_board",
   "reused_evidence": true,
   "rows": [
@@ -1606,6 +1636,7 @@
           "scripts/promote_external_vv_level2.py",
           "scripts/prune_ignored_test_experiments.py",
           "scripts/release_evidence_metadata.py",
+          "scripts/report_commercial_gap_ledger_status.py",
           "scripts/report_gap_closure_status.py",
           "scripts/report_pm_release_gate.py",
           "scripts/report_release_evidence_freshness.py",
@@ -2438,7 +2469,7 @@
           "verification/planar_frame_verified_alpha_v1/corpus.manifest.json",
           "vite.config.ts"
         ],
-        "current_head_sha": "de876205210245f644ce073b4e7604e7030fb4fb",
+        "current_head_sha": "389bcf511a474e1ee3b4184a34358f9fcade8c12",
         "feature_ahead_count": 0,
         "feature_synced_to_head": true,
         "main_ahead_count": 0,
@@ -4046,7 +4077,8 @@
             "support::failure_bundle_export_not_green",
             "security::license_status_not_configured",
             "security::repro_build_not_green",
-            "github_sync::github_sync_preflight::local_head_mismatch"
+            "github_sync::github_sync_preflight::local_head_mismatch",
+            "source_provenance::input_not_reproducible_at_declared_commit"
           ],
           "ga_enterprise_evidence_gate_pass": false,
           "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -4057,10 +4089,16 @@
           "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
           "ga_validation_case_threshold": 300,
           "ga_validation_case_threshold_met": true,
+          "limited_commercial_blockers": [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+          ],
           "limited_commercial_full_gate_ready": false,
           "limited_commercial_milestone_ready": false,
           "paid_pilot": false,
-          "paid_pilot_scope_guard_pass": false,
+          "paid_pilot_blockers": [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+          ],
+          "paid_pilot_scope_guard_pass": true,
           "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
           "technical_paid_pilot_candidate": false
@@ -4069,13 +4107,11 @@
       "title": "Technical Paid Pilot Candidate"
     },
     {
-      "blockers": [
-        "paid_pilot_scope_guard_missing_or_failed"
-      ],
+      "blockers": [],
       "check_key": "paid_pilot_scope_guard_pass",
-      "check_value": false,
+      "check_value": true,
       "checks": {
-        "paid_pilot_scope_guard_pass": false
+        "paid_pilot_scope_guard_pass": true
       },
       "claim_boundary": "Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness.",
       "evidence_artifacts": {
@@ -4084,21 +4120,13 @@
         "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
       },
       "group": "release_tier",
-      "next_action": "Regenerate the paid pilot scope guard and keep all customer-facing use constrained to the scope guard until release-area blockers close.",
-      "next_actions": [
-        {
-          "blocker_id": "paid_pilot_scope_guard_missing_or_failed",
-          "closure_state": "blocked",
-          "evidence_state": "release_tier_blocked",
-          "next_action": "Regenerate the paid pilot scope guard and keep all customer-facing use constrained to the scope guard until release-area blockers close.",
-          "owner": "release_owner"
-        }
-      ],
-      "pass": false,
+      "next_action": "",
+      "next_actions": [],
+      "pass": true,
       "requirement": "paid pilot use is constrained by the scope guard and evidence-package references",
       "requirement_id": "release_tier.paid_pilot_scope_guard_pass",
       "source_present": true,
-      "status": "blocked",
+      "status": "pass",
       "summary_snapshot": {
         "recommended_scope": "Release blocked until every source input is reproducible from the declared commit. Any disclosed dependency cycle also requires a separate DAG redesign.",
         "release_tiers": {
@@ -4178,7 +4206,8 @@
             "support::failure_bundle_export_not_green",
             "security::license_status_not_configured",
             "security::repro_build_not_green",
-            "github_sync::github_sync_preflight::local_head_mismatch"
+            "github_sync::github_sync_preflight::local_head_mismatch",
+            "source_provenance::input_not_reproducible_at_declared_commit"
           ],
           "ga_enterprise_evidence_gate_pass": false,
           "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -4189,10 +4218,16 @@
           "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
           "ga_validation_case_threshold": 300,
           "ga_validation_case_threshold_met": true,
+          "limited_commercial_blockers": [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+          ],
           "limited_commercial_full_gate_ready": false,
           "limited_commercial_milestone_ready": false,
           "paid_pilot": false,
-          "paid_pilot_scope_guard_pass": false,
+          "paid_pilot_blockers": [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+          ],
+          "paid_pilot_scope_guard_pass": true,
           "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
           "technical_paid_pilot_candidate": false
@@ -4710,7 +4745,8 @@
             "support::failure_bundle_export_not_green",
             "security::license_status_not_configured",
             "security::repro_build_not_green",
-            "github_sync::github_sync_preflight::local_head_mismatch"
+            "github_sync::github_sync_preflight::local_head_mismatch",
+            "source_provenance::input_not_reproducible_at_declared_commit"
           ],
           "ga_enterprise_evidence_gate_pass": false,
           "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -4721,10 +4757,16 @@
           "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
           "ga_validation_case_threshold": 300,
           "ga_validation_case_threshold_met": true,
+          "limited_commercial_blockers": [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+          ],
           "limited_commercial_full_gate_ready": false,
           "limited_commercial_milestone_ready": false,
           "paid_pilot": false,
-          "paid_pilot_scope_guard_pass": false,
+          "paid_pilot_blockers": [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+          ],
+          "paid_pilot_scope_guard_pass": true,
           "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
           "technical_paid_pilot_candidate": false
@@ -4789,7 +4831,8 @@
         "support::failure_bundle_export_not_green",
         "security::license_status_not_configured",
         "security::repro_build_not_green",
-        "github_sync::github_sync_preflight::local_head_mismatch"
+        "github_sync::github_sync_preflight::local_head_mismatch",
+        "source_provenance::input_not_reproducible_at_declared_commit"
       ],
       "check_key": "ga_enterprise_evidence_gate_pass",
       "check_value": false,
@@ -5196,6 +5239,13 @@
           "evidence_state": "release_tier_blocked",
           "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
           "owner": "release_owner"
+        },
+        {
+          "blocker_id": "source_provenance::input_not_reproducible_at_declared_commit",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
         }
       ],
       "pass": false,
@@ -5282,7 +5332,8 @@
             "support::failure_bundle_export_not_green",
             "security::license_status_not_configured",
             "security::repro_build_not_green",
-            "github_sync::github_sync_preflight::local_head_mismatch"
+            "github_sync::github_sync_preflight::local_head_mismatch",
+            "source_provenance::input_not_reproducible_at_declared_commit"
           ],
           "ga_enterprise_evidence_gate_pass": false,
           "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -5293,10 +5344,16 @@
           "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
           "ga_validation_case_threshold": 300,
           "ga_validation_case_threshold_met": true,
+          "limited_commercial_blockers": [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+          ],
           "limited_commercial_full_gate_ready": false,
           "limited_commercial_milestone_ready": false,
           "paid_pilot": false,
-          "paid_pilot_scope_guard_pass": false,
+          "paid_pilot_blockers": [
+            "source_provenance::input_not_reproducible_at_declared_commit"
+          ],
+          "paid_pilot_scope_guard_pass": true,
           "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
           "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | support_sales_boundary=5/5 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
           "technical_paid_pilot_candidate": false
@@ -5314,44 +5371,53 @@
     "reason": "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests hash this audit as an output artifact, so the audit avoids embedding support-bundle archive hashes that would create circular freshness claims.",
     "stable_summary_snapshot": true
   },
-  "source_commit_sha": "69f408d8529c681ea3f0c3c9dd34721f3f6aad30",
+  "source_commit_sha": "336abc51da16ef889168b7281160d57573b78b37",
   "source_input_provenance": {
     "blocker_count": 0,
     "blockers": [],
     "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim.",
     "contract_pass": true,
-    "input_count": 3,
+    "input_count": 4,
     "inputs": [
       {
         "blocker": "",
         "path": "scripts/build_pm_release_gate_completion_audit.py",
-        "source_checksum": "sha256:8a246aa7915e6bdef185c93fe52c298dabc2aa14771b0aa64048632a18426896",
+        "source_checksum": "sha256:dfb7600a3d4a6b9d6adc52e3f4eccb418c804ac637fef64109abfa6387920c51",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:8a246aa7915e6bdef185c93fe52c298dabc2aa14771b0aa64048632a18426896",
+        "workspace_checksum": "sha256:dfb7600a3d4a6b9d6adc52e3f4eccb418c804ac637fef64109abfa6387920c51",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/release_evidence_metadata.py",
+        "source_checksum": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
         "workspace_matches_source": true
       },
       {
         "blocker": "",
         "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "source_checksum": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
+        "source_checksum": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:70cb75221daf6e3b469e8b2d69b90ea9ff7764e0a00f3178670b0d92afe29762",
+        "workspace_checksum": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
         "workspace_matches_source": true
       },
       {
         "blocker": "",
         "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
-        "source_checksum": "sha256:a1bcb2c4a783975e178ab5329dfde51edc74541ba6230efd55f81b97964d68bf",
+        "source_checksum": "sha256:9800f83ce70b54ee18ff48177ca7a8dbf110d53df437a4dd1f8355cbd433f811",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:a1bcb2c4a783975e178ab5329dfde51edc74541ba6230efd55f81b97964d68bf",
+        "workspace_checksum": "sha256:9800f83ce70b54ee18ff48177ca7a8dbf110d53df437a4dd1f8355cbd433f811",
         "workspace_matches_source": true
       }
     ],
     "reason_code": "PASS",
     "schema_version": "source-input-provenance.v1",
     "source_commit_resolved": true,
-    "workspace_match_count": 3
+    "workspace_match_count": 4
   },
+  "status": "blocked",
   "summary": {
     "blocked_external_owner_input_ready_count": 3,
     "blocked_handoff_incomplete_count": 0,
@@ -5369,7 +5435,7 @@
     "blocked_release_tier_claim_boundary_missing_ids": [],
     "blocked_release_tier_next_action_missing_count": 0,
     "blocked_release_tier_next_action_missing_ids": [],
-    "blocked_requirement_count": 31,
+    "blocked_requirement_count": 30,
     "explicit_requirement_count": 52,
     "full_release_gate_ready": false,
     "limited_commercial_milestone_ready": false,
@@ -5380,21 +5446,21 @@
     "milestone_subrequirement_pass_count": 17,
     "missing_evidence_count": 0,
     "paid_pilot_candidate": false,
-    "pass_requirement_count": 21,
+    "pass_requirement_count": 22,
     "release_area_blocked_count": 12,
     "release_area_gate_ready": false,
     "release_area_pass_count": 4,
     "release_area_requirement_count": 16,
-    "release_tier_blocked_count": 4,
-    "release_tier_pass_count": 0,
+    "release_tier_blocked_count": 3,
+    "release_tier_pass_count": 1,
     "release_tier_requirement_count": 4,
     "status_counts": {
-      "blocked": 19,
+      "blocked": 18,
       "blocked_external_owner_input_ready": 3,
       "blocked_local_remediation_ready": 8,
       "blocked_mixed_closure_ready": 1,
-      "pass": 21
+      "pass": 22
     }
   },
-  "summary_line": "PM release gate completion audit: BLOCKED | requirements=52 | pass=21 | blocked=31"
+  "summary_line": "PM release gate completion audit: BLOCKED | requirements=52 | pass=22 | blocked=30"
 }
