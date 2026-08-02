@@ -1059,7 +1059,9 @@ def _github_sync_payload(github_sync_preflight_path: Path | None) -> tuple[dict[
         return _load_json(github_sync_preflight_path), str(github_sync_preflight_path)
     try:
         payload = check_github_development_sync_preflight.build_report(
-            check_github_development_sync_preflight.collect_git_state(),
+            check_github_development_sync_preflight.collect_git_state(
+                cwd=SCRIPT_DIR.parent
+            ),
             remote_fetch_attempted=False,
             remote_fetch_ok=None,
         )
