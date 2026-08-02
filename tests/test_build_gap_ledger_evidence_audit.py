@@ -132,6 +132,26 @@ def test_gap_ledger_evidence_audit_check_detects_drift(tmp_path: Path) -> None:
     assert message == "gap_ledger_evidence_audit_mismatch"
 
 
+def test_gap_ledger_evidence_audit_check_ignores_source_commit_wrapper(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "audit.json"
+    module.write_gap_ledger_evidence_audit(repo_root=REPO_ROOT, out_path=out)
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["source_commit_sha"] = "0" * 40
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message = module.check_gap_ledger_evidence_audit(
+        repo_root=REPO_ROOT, out_path=out
+    )
+
+    assert ok is True
+    assert message == "gap_ledger_evidence_audit_consistent"
+
+
 def test_gap_ledger_evidence_audit_blocks_missing_source_receipt_path(
     tmp_path: Path,
 ) -> None:
