@@ -3081,12 +3081,12 @@
   "engine_version": "structural-analysis@0.3.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-08-02T01:48:30.247235+00:00",
+  "generated_at": "2026-08-02T01:50:44.709594+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:399e22660d3f3cb1e5649de4b81e7c0af38e0c6a147b06ba5cd73495ebcf8f95",
-    "README.md": "sha256:f59778cd6fd3f9ced810bece9823b7b8bb06ba914db599cbc9e6e24d0797d20a",
-    "docs/commercialization-gap-current-state.md": "sha256:3d27df864363f712894f4a2192104dff72dfb78b2ed5238daabab435660c81d7",
+    "README.md": "sha256:81fdb6f681fb26e6cf2a97f7c34d15463c4641d69d757632a891c0f51121d031",
+    "docs/commercialization-gap-current-state.md": "sha256:6577fcc0be3d392deb4fc1cfcd6cd4c474ce4d3be8e86cab959ad304ef4ee9bc",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:9b1aad51e021dbc4dfb333618dd87a69d3475cc8c550c4b40de2951d90c41b2c",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "missing",
     "implementation/phase1/release/independent_product_readiness.json": "missing",
@@ -3482,7 +3482,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "72e6106ff529d340281f0883aa448cf9a0a49a50",
+  "source_commit_sha": "4088c5ca34f84a9d0c103c2acaecdc81943ce974",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
