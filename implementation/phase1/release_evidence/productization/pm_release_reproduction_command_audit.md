@@ -1,6 +1,6 @@
 # PM Release Reproduction Command Audit
 
-- `summary_line`: `PM reproduction command audit: PASS | artifacts=7/7 | commands=1507 | violations=0`
+- `summary_line`: `PM reproduction command audit: PASS | artifacts=7/7 | commands=1504 | violations=0`
 - `contract_pass`: `True`
 
 ## Artifacts
@@ -10,7 +10,7 @@
 | `pm_release_blocker_action_register` | `True` | `345` | `0` |
 | `pm_release_blocker_closure_board` | `True` | `345` | `0` |
 | `pm_release_gate_reviewer_handoff` | `True` | `345` | `0` |
-| `pm_owner_evidence_request_packet` | `True` | `428` | `0` |
+| `pm_owner_evidence_request_packet` | `True` | `425` | `0` |
 | `ci_streak_intake_packet` | `True` | `12` | `0` |
 | `ux_new_user_observation_intake_packet` | `True` | `10` | `0` |
 | `license_status_intake_packet` | `True` | `8` | `0` |
@@ -1508,9 +1508,6 @@
 | `pm_owner_evidence_request_packet` | `verification_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked` |
 | `pm_owner_evidence_request_packet` | `reproduction_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md` |
 | `pm_owner_evidence_request_packet` | `reproduction_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |
-| `pm_owner_evidence_request_packet` | `reproduction_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md` |
-| `pm_owner_evidence_request_packet` | `reproduction_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |
-| `pm_owner_evidence_request_packet` | `verification_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |
 | `pm_owner_evidence_request_packet` | `reproduction_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md` |
 | `pm_owner_evidence_request_packet` | `reproduction_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |
 | `pm_owner_evidence_request_packet` | `verification_commands` | `True` | `local_static_or_report` | `none` | `python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md` |

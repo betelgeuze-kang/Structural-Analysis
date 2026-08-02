@@ -30,7 +30,7 @@
     {
       "artifact": "pm_owner_evidence_request_packet",
       "blockers": [],
-      "command_count": 428,
+      "command_count": 425,
       "contract_pass": true,
       "exists": true,
       "path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
@@ -28235,63 +28235,6 @@
       "artifact": "pm_owner_evidence_request_packet",
       "artifact_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
       "blockers": [],
-      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-      "command_index": 0,
-      "contract_pass": true,
-      "execution_class": "local_static_or_report",
-      "field": "reproduction_commands",
-      "json_path": "$.release_tier_owner_packets[0].request_rows[2].reproduction_commands[0]",
-      "parsed_argv": [
-        "python3",
-        "scripts/report_pm_release_gate.py",
-        "--out",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "--out-md",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
-      ]
-    },
-    {
-      "artifact": "pm_owner_evidence_request_packet",
-      "artifact_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-      "blockers": [],
-      "command": "python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-      "command_index": 1,
-      "contract_pass": true,
-      "execution_class": "local_static_or_report",
-      "field": "reproduction_commands",
-      "json_path": "$.release_tier_owner_packets[0].request_rows[2].reproduction_commands[1]",
-      "parsed_argv": [
-        "python3",
-        "scripts/build_pm_release_gate_reviewer_handoff.py",
-        "--out",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-        "--out-md",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
-      ]
-    },
-    {
-      "artifact": "pm_owner_evidence_request_packet",
-      "artifact_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-      "blockers": [],
-      "command": "python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
-      "command_index": 0,
-      "contract_pass": true,
-      "execution_class": "local_static_or_report",
-      "field": "verification_commands",
-      "json_path": "$.release_tier_owner_packets[0].request_rows[2].verification_commands[0]",
-      "parsed_argv": [
-        "python3",
-        "scripts/build_pm_release_gate_reviewer_handoff.py",
-        "--out",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
-        "--out-md",
-        "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md"
-      ]
-    },
-    {
-      "artifact": "pm_owner_evidence_request_packet",
-      "artifact_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
-      "blockers": [],
       "command": "python3 scripts/build_pm_release_gate_reviewer_handoff.py --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md",
       "command_index": 0,
       "contract_pass": true,
@@ -29289,7 +29232,7 @@
     }
   ],
   "contract_pass": true,
-  "generated_at": "2026-08-02T02:55:11.097891+00:00",
+  "generated_at": "2026-08-02T04:22:48.599300+00:00",
   "mode": "static_command_audit",
   "package_regeneration_command_rows": [
     {
@@ -29810,7 +29753,7 @@
   "summary": {
     "artifact_count": 7,
     "artifact_pass_count": 7,
-    "command_count": 1507,
+    "command_count": 1504,
     "command_violation_count": 0,
     "external_owner_command_count": 11,
     "npm_script_count": 27,
@@ -29821,7 +29764,7 @@
     "package_regeneration_violation_count": 0,
     "violation_count": 0
   },
-  "summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=1507 | violations=0",
+  "summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=1504 | violations=0",
   "validation_commands": [
     "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
     "python3 scripts/build_pm_release_blocker_closure_board.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",
