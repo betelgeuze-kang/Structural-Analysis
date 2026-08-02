@@ -6,32 +6,32 @@
     "closed_missing_boundary_or_next_gate_ids": [],
     "closed_missing_claim_boundary_ids": [],
     "closed_missing_evidence_ids": [],
-    "closed_row_count": 16,
-    "closed_rows_with_evidence_count": 16,
-    "closed_rows_without_blockers_count": 16,
+    "closed_row_count": 17,
+    "closed_rows_with_evidence_count": 17,
+    "closed_rows_without_blockers_count": 17,
     "closed_with_blockers_ids": []
   },
-  "closed_row_count": 16,
+  "closed_row_count": 17,
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
   "full_gap_ledger_ready": false,
-  "generated_at": "2026-07-28T14:32:56.499033+00:00",
+  "generated_at": "2026-08-02T01:29:41.823023+00:00",
   "input_checksums": {
-    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b0843cef68c05f5b4cef73a68c446861be1c47a3b7c5393c42aedcb413d86b91",
+    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:b724b4bcb202960341488cfe2c35e85e3d6093dff0bf59728cd8f6add01e4154",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:60e78343724f43927aa7c1eb58dfaeb3ad321711d8f37f54f35ec5d8bf1fe803",
     "scripts/build_gap_ledger_evidence_audit.py": "sha256:d941fad0ebd6d1f54cdd81867f5cd5b16a467bf6ca609d83c49da4b6faf02146"
   },
   "ledger_status": "open",
-  "nonclosed_row_count": 4,
+  "nonclosed_row_count": 3,
   "nonclosed_visibility": {
     "nonclosed_missing_blocker_ids": [],
     "nonclosed_missing_claim_boundary_ids": [],
     "nonclosed_missing_evidence_ids": [],
-    "nonclosed_row_count": 4,
-    "nonclosed_rows_with_blockers_count": 4,
-    "nonclosed_rows_with_claim_boundary_count": 4,
-    "nonclosed_rows_with_evidence_count": 4
+    "nonclosed_row_count": 3,
+    "nonclosed_rows_with_blockers_count": 3,
+    "nonclosed_rows_with_claim_boundary_count": 3,
+    "nonclosed_rows_with_evidence_count": 3
   },
   "reuse_policy": "gap_ledger_evidence_audit_reads_existing_gap_ledger_status_without_creating_closure",
   "reused_evidence": true,
@@ -277,9 +277,9 @@
       "status": "closed"
     },
     {
-      "blocker_count": 1,
+      "blocker_count": 0,
       "claim_boundary_present": true,
-      "closed": false,
+      "closed": true,
       "closure_requirement_count": 0,
       "closure_requirement_fail_count": 0,
       "closure_requirement_failed_ids": [],
@@ -297,7 +297,7 @@
       "source_receipt_unavailable_but_present_paths": [],
       "source_receipt_unavailable_path_count": 0,
       "source_receipt_unavailable_paths": [],
-      "status": "open"
+      "status": "closed"
     },
     {
       "blocker_count": 0,
@@ -538,7 +538,7 @@
     }
   ],
   "schema_version": "gap-ledger-evidence-audit.v1",
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "b1239374422380e5013d1dbc20338c6067e16fd1",
   "source_receipt_path_coverage": {
     "claim_boundary": "This checks only explicit source_receipts and *_source_receipts paths that the ledger status advertises as evidence or guard inputs. Paths declared through unavailable_source_receipts remain visible without being treated as available evidence. Available paths that are missing and unavailable paths that exist are contract violations.",
     "source_receipt_absent_row_count": 0,
@@ -556,5 +556,5 @@
     ]
   },
   "status": "ready",
-  "summary_line": "Gap ledger evidence audit: READY | closed_evidence=16/16 | nonclosed_boundaries=4/4"
+  "summary_line": "Gap ledger evidence audit: READY | closed_evidence=17/17 | nonclosed_boundaries=3/3"
 }
