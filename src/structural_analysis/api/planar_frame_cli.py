@@ -70,7 +70,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ) as error:
         parser.error(str(error))
     write_json_pair(out, result.to_dict(), report_out, report.to_dict())
-    return 0 if report.contract_pass else 2
+    return 0 if result.status == "converged" else 2
 
 
 if __name__ == "__main__":
