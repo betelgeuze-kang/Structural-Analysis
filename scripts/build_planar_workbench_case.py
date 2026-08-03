@@ -3,7 +3,9 @@
 
 Only values explicitly present in the ModelIR, public result, or validation report
 are projected. Missing numerical fields remain explicit ``unavailable`` evidence;
-the adapter never derives convergence or substitutes numeric defaults.
+the adapter never derives convergence or substitutes numeric defaults. Workbench
+history iteration is the globally ordered evidence-row index; solver-local load-step
+and iteration fields remain preserved under ``source``.
 """
 
 from __future__ import annotations
@@ -85,16 +87,9 @@ def _first_number(row: Mapping[str, Any], keys: Sequence[str]) -> dict[str, Any]
 def _history(result_ir: Mapping[str, Any]) -> list[dict[str, Any]]:
     normalized: list[dict[str, Any]] = []
     for index, row in enumerate(_rows(result_ir.get("convergence_history"))):
-        iteration = _first_number(row, ("iteration", "iteration_index"))
-        if iteration["status"] == "unavailable":
-            iteration = _available(index)
-        elif not float(iteration["value"]).is_integer():
-            iteration = _unavailable()
-        else:
-            iteration = _available(int(iteration["value"]))
         normalized.append(
             {
-                "iteration": iteration,
+                "iteration": _available(index),
                 "residual": _first_number(
                     row,
                     (
