@@ -45,6 +45,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install contract test tool
+        run: python -m pip install pytest==8.4.2
+
       - name: Verify profile-scoped state contracts
         run: python -m pytest -q tests/test_build_profile_scoped_product_states.py
 
