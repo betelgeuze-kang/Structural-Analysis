@@ -110,7 +110,7 @@ jobs:
           python scripts/run_planar_product_replay.py --json
           --wheel-dir ".ci/product-replay/wheel"
           --output-root ".ci/product-replay/runtime"
-          --source-commit "$SOURCE_SHA"
+          --source-commit "${{ env.SOURCE_SHA }}"
           --engine-version "structural-analysis@0.3.0"
           --os-label "${{ matrix.os }}"
           --python-version "3.12"
