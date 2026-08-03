@@ -7,7 +7,10 @@ on:
       - "scripts/build_profile_scoped_product_states.py"
       - "tests/test_build_profile_scoped_product_states.py"
       - "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
-      - "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      - "implementation/phase1/customer_shadow_evidence_status.json"
+      - "implementation/phase1/release_evidence/productization/license_status_closure_report.json"
+      - "implementation/phase1/workstation_delivery_readiness.json"
+      - "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json"
       - ".github/workflows/profile-scoped-product-state.yml"
   push:
     branches: ["main"]
@@ -15,7 +18,10 @@ on:
       - "scripts/build_profile_scoped_product_states.py"
       - "tests/test_build_profile_scoped_product_states.py"
       - "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
-      - "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      - "implementation/phase1/customer_shadow_evidence_status.json"
+      - "implementation/phase1/release_evidence/productization/license_status_closure_report.json"
+      - "implementation/phase1/workstation_delivery_readiness.json"
+      - "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json"
       - ".github/workflows/profile-scoped-product-state.yml"
   workflow_dispatch:
 
