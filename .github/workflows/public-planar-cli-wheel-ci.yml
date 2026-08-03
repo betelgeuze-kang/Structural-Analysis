@@ -1,0 +1,120 @@
+name: Public Planar CLI Wheel CI
+
+on:
+  merge_group:
+  pull_request:
+    paths:
+      - "src/structural_analysis/api/planar_frame.py"
+      - "src/structural_analysis/api/planar_frame_cli.py"
+      - "src/structural_analysis/api/_output_integrity.py"
+      - "src/structural_analysis/adapters/**"
+      - "src/structural_analysis/model_ir/**"
+      - "src/structural_analysis/schemas/**"
+      - "src/structural_analysis/assembly/**"
+      - "src/structural_analysis/elements/**"
+      - "src/structural_analysis/materials/**"
+      - "src/structural_analysis/solvers/nonlinear/**"
+      - "examples/bounded_planar_frame_alpha.model-ir.v2.json"
+      - "examples/bounded_planar_settlement.model-ir.v2.json"
+      - "scripts/verify_bounded_planar_wheel_smoke.py"
+      - "scripts/verify_public_planar_cli_wheel.py"
+      - "tests/test_planar_frame_verified_alpha_api.py"
+      - "ci/bounded-planar-wheel-smoke.constraints.txt"
+      - "pyproject.toml"
+      - ".github/workflows/public-planar-cli-wheel-ci.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "src/structural_analysis/api/planar_frame.py"
+      - "src/structural_analysis/api/planar_frame_cli.py"
+      - "src/structural_analysis/api/_output_integrity.py"
+      - "src/structural_analysis/adapters/**"
+      - "src/structural_analysis/model_ir/**"
+      - "src/structural_analysis/schemas/**"
+      - "src/structural_analysis/assembly/**"
+      - "src/structural_analysis/elements/**"
+      - "src/structural_analysis/materials/**"
+      - "src/structural_analysis/solvers/nonlinear/**"
+      - "examples/bounded_planar_frame_alpha.model-ir.v2.json"
+      - "examples/bounded_planar_settlement.model-ir.v2.json"
+      - "scripts/verify_bounded_planar_wheel_smoke.py"
+      - "scripts/verify_public_planar_cli_wheel.py"
+      - "tests/test_planar_frame_verified_alpha_api.py"
+      - "ci/bounded-planar-wheel-smoke.constraints.txt"
+      - "pyproject.toml"
+      - ".github/workflows/public-planar-cli-wheel-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  OPENBLAS_CORETYPE: Haswell
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  PYTHONHASHSEED: "0"
+  SOURCE_SHA: "${{ github.sha }}"
+  GIT_CONFIG_COUNT: "2"
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: "true"
+  GIT_CONFIG_KEY_1: core.autocrlf
+  GIT_CONFIG_VALUE_1: "false"
+
+concurrency:
+  group: public-planar-cli-wheel-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  installed-public-cli:
+    name: ${{ matrix.os }} / Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12"]
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install build and verification tools
+        run: |
+          python -m pip install numpy==1.26.4 scipy==1.12.0
+          python -m pip install -e .[dev]
+
+      - name: Build reproducible exact-source wheel
+        run: >-
+          python scripts/verify_bounded_planar_wheel_smoke.py --json
+          --os-label "${{ matrix.os }}"
+          --python-version "${{ matrix.python-version }}"
+          --wheel-out-dir ".ci/public-planar-cli/wheel"
+          --write ".ci/public-planar-cli/internal-smoke.json"
+
+      - name: Execute installed public planar CLI
+        run: >-
+          python scripts/verify_public_planar_cli_wheel.py --json
+          --wheel-dir ".ci/public-planar-cli/wheel"
+          --os-label "${{ matrix.os }}"
+          --python-version "${{ matrix.python-version }}"
+          --write ".ci/public-planar-cli/public-cli-smoke.json"
+
+      - name: Upload public CLI wheel evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: public-planar-cli-wheel-${{ matrix.os }}-python-${{ matrix.python-version }}
+          path: .ci/public-planar-cli/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
