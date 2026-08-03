@@ -38,6 +38,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/nightly-full-quality.yml",
         ".github/workflows/opensees-calculix-current-source.yml",
         ".github/workflows/p0-canonical-contract.yml",
+        ".github/workflows/planar-product-replay-ci.yml",
         ".github/workflows/pr-metadata-ci.yml",
         ".github/workflows/product-state-current.yml",
         ".github/workflows/profile-scoped-product-state.yml",
