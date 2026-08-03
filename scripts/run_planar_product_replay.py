@@ -99,6 +99,21 @@ def _load_adapter():
     return module
 
 
+def _commit_timestamp(repo_root: Path, source_commit_sha: str) -> str:
+    completed = subprocess.run(
+        ["git", "show", "-s", "--format=%cI", source_commit_sha],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    value = completed.stdout.strip()
+    if completed.returncode != 0 or not value:
+        raise PlanarProductReplayError("source_commit_timestamp_unavailable")
+    return value
+
+
 def run_product_replay(
     *,
     repo_root: Path,
@@ -107,11 +122,16 @@ def run_product_replay(
     output_root: Path,
     source_commit_sha: str,
     engine_version: str,
-    generated_at: str,
+    generated_at: str | None,
     os_label: str,
     requested_python_version: str,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
+    if len(source_commit_sha) != 40 or any(
+        character not in "0123456789abcdef" for character in source_commit_sha
+    ):
+        raise PlanarProductReplayError("source_commit_sha_invalid")
+    generated_at = generated_at or _commit_timestamp(repo_root, source_commit_sha)
     wheel = _find_wheel(wheel_dir)
     constraints = repo_root / CONSTRAINTS
     sample = sample_path if sample_path.is_absolute() else repo_root / sample_path
@@ -199,6 +219,7 @@ def run_product_replay(
         "profile": PROFILE,
         "source_commit_sha": source_commit_sha,
         "engine_version": engine_version,
+        "generated_at": generated_at,
         "coordinate": {
             "os_label": os_label,
             "requested_python_version": requested_python_version,
@@ -242,7 +263,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--source-commit", required=True)
     parser.add_argument("--engine-version", required=True)
-    parser.add_argument("--generated-at", required=True)
+    parser.add_argument("--generated-at")
     parser.add_argument("--os-label", required=True)
     parser.add_argument("--python-version", required=True)
     parser.add_argument("--json", action="store_true")
