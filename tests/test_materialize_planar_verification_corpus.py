@@ -39,7 +39,7 @@ def test_medium_seed_executes_through_public_sparse_path() -> None:
     result = analyze_planar_frame(
         document,
         PlanarFrameConfig(
-            load_steps=1,
+            load_steps=2,
             maximum_iterations=30,
             residual_tolerance=1.0e-8,
             increment_tolerance_m=1.0e-10,
