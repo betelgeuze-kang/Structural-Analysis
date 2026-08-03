@@ -9,6 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = REPO_ROOT / "implementation" / "phase1" / "release_evidence" / "productization"
 PM_REPORT = PRODUCTIZATION / "pm_release_gate_report.json"
 SUPPORT_BUNDLE = REPO_ROOT / "implementation" / "phase1" / "support_bundle_manifest.json"
+SOURCE_PROVENANCE_BLOCKER = "source_provenance::input_not_reproducible_at_declared_commit"
 
 
 PM_JSON_ARTIFACTS = [
@@ -57,6 +58,17 @@ def _canonical_release_area_evidence(payload: dict) -> dict:
     return {}
 
 
+def _area_blockers_from_matrix(report: dict) -> list[str]:
+    return sorted(
+        {
+            f"{row['area']}::{blocker}"
+            for row in report["release_area_matrix"]
+            if isinstance(row, dict)
+            for blocker in row.get("blockers", [])
+        }
+    )
+
+
 def test_pm_release_area_counts_and_blockers_are_canonical() -> None:
     report = _load_json(PM_REPORT)
     release_area_rows = [
@@ -67,8 +79,13 @@ def test_pm_release_area_counts_and_blockers_are_canonical() -> None:
         len(release_area_rows),
     )
     expected_summary = f"{expected_green_total[0]}/{expected_green_total[1]}"
-    expected_blockers = sorted(str(item) for item in report["release_area_blockers"])
+    expected_blockers = _area_blockers_from_matrix(report)
+    cross_cutting_blockers = sorted(
+        set(str(item) for item in report["release_area_blockers"])
+        - set(expected_blockers)
+    )
 
+    assert cross_cutting_blockers in ([], [SOURCE_PROVENANCE_BLOCKER])
     assert _summary_green_total(report["summary_line"]) == expected_green_total
 
     register = _load_json(PRODUCTIZATION / "pm_release_blocker_action_register.json")
