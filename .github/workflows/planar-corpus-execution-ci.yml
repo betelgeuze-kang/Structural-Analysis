@@ -1,0 +1,119 @@
+name: Planar Corpus Execution CI
+
+on:
+  merge_group:
+  pull_request:
+    paths:
+      - "scripts/materialize_planar_verification_corpus.py"
+      - "scripts/run_planar_verification_corpus.py"
+      - "tests/test_materialize_planar_verification_corpus.py"
+      - "src/structural_analysis/api/planar_frame.py"
+      - "src/structural_analysis/adapters/**"
+      - "src/structural_analysis/model_ir/**"
+      - "src/structural_analysis/assembly/**"
+      - "src/structural_analysis/elements/**"
+      - "src/structural_analysis/materials/**"
+      - "src/structural_analysis/solvers/nonlinear/**"
+      - ".github/workflows/planar-corpus-execution-ci.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "scripts/materialize_planar_verification_corpus.py"
+      - "scripts/run_planar_verification_corpus.py"
+      - "tests/test_materialize_planar_verification_corpus.py"
+      - "src/structural_analysis/api/planar_frame.py"
+      - "src/structural_analysis/adapters/**"
+      - "src/structural_analysis/model_ir/**"
+      - "src/structural_analysis/assembly/**"
+      - "src/structural_analysis/elements/**"
+      - "src/structural_analysis/materials/**"
+      - "src/structural_analysis/solvers/nonlinear/**"
+      - ".github/workflows/planar-corpus-execution-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  OPENBLAS_CORETYPE: Haswell
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  PYTHONHASHSEED: "0"
+  SOURCE_SHA: "${{ github.sha }}"
+
+concurrency:
+  group: planar-corpus-execution-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract-and-seed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package and test tools
+        run: python -m pip install -e .[dev]
+
+      - name: Validate all generated ModelIR and execute M1 seed
+        run: python -m pytest -q tests/test_materialize_planar_verification_corpus.py
+
+  execute-case:
+    needs: contract-and-seed
+    name: ${{ matrix.case-id }} internal execution
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        case-id: [M1, M2, M3, M4, M5, L1, L2]
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install runtime
+        run: python -m pip install -e .
+
+      - name: Materialize exact case
+        run: >-
+          python scripts/materialize_planar_verification_corpus.py --json
+          --case "${{ matrix.case-id }}"
+          --out-dir ".ci/planar-corpus/${{ matrix.case-id }}/models"
+
+      - name: Execute case with sparse CPU backend
+        run: >-
+          python scripts/run_planar_verification_corpus.py --json
+          --case "${{ matrix.case-id }}"
+          --out-dir ".ci/planar-corpus/${{ matrix.case-id }}/execution"
+          --matrix-backend scipy_sparse_spsolve_cpu
+          --load-steps 1
+          --require-converged
+
+      - name: Upload case receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: planar-corpus-${{ matrix.case-id }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci/planar-corpus/${{ matrix.case-id }}/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
