@@ -61,11 +61,19 @@ def test_projection_uses_only_explicit_result_values(tmp_path: Path) -> None:
                 },
                 "convergence_history": [
                     {
+                        "load_step": 1,
                         "iteration": 0,
                         "scaled_residual_norm": 0.1,
                         "relative_increment": 0.02,
                         "line_search_alpha": 1.0,
-                    }
+                    },
+                    {
+                        "load_step": 2,
+                        "iteration": 0,
+                        "scaled_residual_norm": 2e-10,
+                        "relative_increment": 1e-11,
+                        "line_search_alpha": 1.0,
+                    },
                 ],
             },
         },
@@ -97,9 +105,12 @@ def test_projection_uses_only_explicit_result_values(tmp_path: Path) -> None:
     assert case["model"]["dofCount"] == {"status": "available", "value": 12}
     assert case["analysis"]["status"] == "converged"
     assert case["analysis"]["converged"] is True
+    assert case["analysis"]["iterationCount"] == {"status": "available", "value": 2}
+    assert [row["iteration"]["value"] for row in case["residualHistory"]] == [0, 1]
+    assert [row["source"]["iteration"] for row in case["residualHistory"]] == [0, 0]
     assert case["analysis"]["finalRelativeIncrement"] == {
         "status": "available",
-        "value": 0.02,
+        "value": 1e-11,
     }
     scaling = case["analysis"]["equation_scaling_6dof"]
     assert scaling["reference_force"] == {"status": "available", "value": 10.0}
