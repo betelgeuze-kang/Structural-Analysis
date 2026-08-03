@@ -98,10 +98,8 @@ export function ExportPanel({
 }: ExportPanelProps): ReactElement {
   const [busy, setBusy] = useState(false)
   const provenanceIssues = productProvenanceIssues(caseV2, dataMode)
-  const exportAllowed = provenanceIssues.length === 0
 
   async function exportBundle(): Promise<void> {
-    if (!exportAllowed) return
     setBusy(true)
     try {
       const evidenceManifest = await loadEvidenceManifestRef(baseUrl)
@@ -136,6 +134,10 @@ export function ExportPanel({
         reviewer_draft_persistence: reviewDraftPersistenceMetadata(reviewDraftState.receipt),
       }
       const reviewEnvelopeSha256 = await sha256Hex(canonicalJson(reviewEnvelope))
+      const provenanceContract = {
+        status: provenanceIssues.length === 0 ? 'available' : 'invalid',
+        issues: provenanceIssues,
+      }
       const bundle = {
         schema_version: 'workbench-v2-export.v3',
         exported_at: new Date().toISOString(),
@@ -165,12 +167,9 @@ export function ExportPanel({
         evidence_manifest: evidenceManifest,
         reviewer_draft: reviewDraftState.draft,
         reviewer_draft_persistence: reviewDraftPersistenceMetadata(reviewDraftState.receipt),
-        provenance_contract: {
-          status: 'available',
-          issues: [],
-        },
+        provenance_contract: provenanceContract,
         claim_boundary:
-          'Workbench v2 export. immutable_analysis_core is the solver-produced evidence projection; review_envelope is the human review context. Their checksums are integrity references, not a validated verdict or signature. reviewer_draft remains a human note and reviewer_draft_persistence states whether that exact in-memory note was saved.',
+          'Workbench v2 export. immutable_analysis_core is the solver-produced evidence projection; review_envelope is the human review context. Their checksums are integrity references, not a validated verdict or signature. Incomplete product provenance remains explicit and makes the bundle diagnostic-only; it never becomes release-authoritative. reviewer_draft remains a human note and reviewer_draft_persistence states whether that exact in-memory note was saved.',
       }
       const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
@@ -204,7 +203,7 @@ export function ExportPanel({
       </dl>
       {provenanceIssues.length > 0 ? (
         <div className="wb2-callout wb2-callout--warning" data-export-provenance-blocked>
-          Product export blocked: {provenanceIssues.join('; ')}.
+          Product provenance is incomplete; exported bundle is diagnostic-only: {provenanceIssues.join('; ')}.
         </div>
       ) : null}
       <ul className="wb2-export-contents" aria-label="Export contents">
@@ -216,7 +215,7 @@ export function ExportPanel({
         <li>evidence manifest reference (checksum + commit, if published)</li>
       </ul>
       <div className="wb2-actions">
-        <button type="button" className="wb2-btn" data-wb2-export disabled={busy || !exportAllowed} onClick={() => void exportBundle()}>
+        <button type="button" className="wb2-btn" data-wb2-export disabled={busy} onClick={() => void exportBundle()}>
           {busy ? 'Preparing…' : 'Export bundle (JSON)'}
         </button>
         <span className="wb2-action-hint">
