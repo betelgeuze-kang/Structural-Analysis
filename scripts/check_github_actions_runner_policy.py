@@ -40,6 +40,8 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/pr-metadata-ci.yml",
         ".github/workflows/product-state-current.yml",
+        ".github/workflows/profile-scoped-product-state.yml",
+        ".github/workflows/public-planar-cli-wheel-ci.yml",
         ".github/workflows/python-test-collection.yml",
         ".github/workflows/repository-hygiene-freshness.yml",
         ".github/workflows/runtime-input-viewer-ci.yml",
