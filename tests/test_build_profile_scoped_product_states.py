@@ -21,11 +21,26 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
-def test_developer_preview_state_does_not_consume_commercial_inputs() -> None:
-    state = module.build_developer_preview_state(
-        source_commit_sha="a" * 40,
+def _developer_preview_state(source_commit: str = "a" * 40) -> dict:
+    return module.build_developer_preview_state(
+        source_commit_sha=source_commit,
         developer_preview_status=module.DEFAULT_DP_STATUS,
     )
+
+
+def _commercial_state(source_commit: str = "b" * 40) -> dict:
+    return module.build_commercial_state(
+        source_commit_sha=source_commit,
+        developer_preview_state=_developer_preview_state(source_commit),
+        customer_shadow_status=module.DEFAULT_CUSTOMER_SHADOW,
+        license_closure=module.DEFAULT_LICENSE_CLOSURE,
+        workstation_readiness=module.DEFAULT_WORKSTATION,
+        external_vv_receipt=module.DEFAULT_EXTERNAL_VV,
+    )
+
+
+def test_developer_preview_state_does_not_consume_commercial_inputs() -> None:
+    state = _developer_preview_state()
 
     assert state["schema_version"] == "developer-preview-product-state.v1"
     assert state["target_profile"] == "planar_frame_verified_alpha.v1"
@@ -45,20 +60,30 @@ def test_developer_preview_state_does_not_consume_commercial_inputs() -> None:
     assert state["final_gate_count"] == 9
 
 
-def test_commercial_state_remains_fail_closed_on_pm_provenance() -> None:
-    state = module.build_commercial_state(
-        source_commit_sha="b" * 40,
-        pm_report=module.DEFAULT_PM_REPORT,
-    )
+def test_commercial_state_is_acyclic_and_does_not_consume_legacy_pm_report() -> None:
+    state = _commercial_state()
 
-    assert state["schema_version"] == "commercial-release-product-state.v1"
+    assert state["schema_version"] == "bounded-planar-commercial-product-state.v2"
+    assert state["target_profile"] == "bounded_planar_limited_commercial"
+    assert state["product_scope"] == "bounded_planar_cpu"
     assert state["contract_pass"] is True
     assert state["state_ready"] is False
     assert state["status"] == "blocked"
-    assert state["release_claims_fail_closed"] is True
-    assert "source_provenance::input_not_reproducible_at_declared_commit" in state[
-        "blockers"
-    ]
+    assert state["legacy_pm_report_consumed"] is False
+    assert state["legacy_cyclic_inputs_consumed"] == []
+    assert state["dependency_dag"]["acyclic"] is True
+    assert state["gpu_required_for_scope"] is False
+    assert state["g1_required_for_scope"] is False
+    consumed = {
+        row["path"] for row in state["inputs"].values()
+    }
+    assert consumed.isdisjoint(module.LEGACY_CYCLIC_INPUTS)
+    assert "developer_preview_not_ready" in state["blockers"]
+    assert "customer_shadow_not_ready" in state["blockers"]
+    assert "product_license_not_ready" in state["blockers"]
+    assert "independent_operator_attestation_missing" in state["blockers"]
+    assert "verification_level_2_not_achieved" in state["blockers"]
+    assert "fresh_code_to_code_execution_missing" in state["blockers"]
 
 
 def test_profile_scoped_state_cli_writes_both_artifacts(tmp_path: Path) -> None:
@@ -79,3 +104,5 @@ def test_profile_scoped_state_cli_writes_both_artifacts(tmp_path: Path) -> None:
     assert dp["source_commit_sha"] == "c" * 40
     assert commercial["source_commit_sha"] == "c" * 40
     assert dp["target_profile"] != commercial["target_profile"]
+    assert commercial["legacy_pm_report_consumed"] is False
+    assert commercial["dependency_dag"]["acyclic"] is True
