@@ -1,0 +1,140 @@
+name: Planar Product Replay CI
+
+on:
+  merge_group:
+  pull_request:
+    paths:
+      - "src/structural_analysis/api/planar_frame.py"
+      - "src/structural_analysis/api/planar_frame_cli.py"
+      - "src/workbench-v2/**"
+      - "scripts/build_planar_workbench_case.py"
+      - "scripts/run_planar_product_replay.py"
+      - "scripts/verify_bounded_planar_wheel_smoke.py"
+      - "scripts/verify-workbench-product-replay.mjs"
+      - "scripts/json-module-loader.mjs"
+      - "tests/test_build_planar_workbench_case.py"
+      - "tests/frontend/workbench-v2-product-replay.spec.ts"
+      - "examples/bounded_planar_frame_alpha.model-ir.v2.json"
+      - "ci/bounded-planar-wheel-smoke.constraints.txt"
+      - "package.json"
+      - "package-lock.json"
+      - "pyproject.toml"
+      - ".github/workflows/planar-product-replay-ci.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "src/structural_analysis/api/planar_frame.py"
+      - "src/structural_analysis/api/planar_frame_cli.py"
+      - "src/workbench-v2/**"
+      - "scripts/build_planar_workbench_case.py"
+      - "scripts/run_planar_product_replay.py"
+      - "scripts/verify_bounded_planar_wheel_smoke.py"
+      - "scripts/verify-workbench-product-replay.mjs"
+      - "scripts/json-module-loader.mjs"
+      - "tests/test_build_planar_workbench_case.py"
+      - "tests/frontend/workbench-v2-product-replay.spec.ts"
+      - "examples/bounded_planar_frame_alpha.model-ir.v2.json"
+      - "ci/bounded-planar-wheel-smoke.constraints.txt"
+      - "package.json"
+      - "package-lock.json"
+      - "pyproject.toml"
+      - ".github/workflows/planar-product-replay-ci.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+  OPENBLAS_CORETYPE: Haswell
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  PYTHONHASHSEED: "0"
+  GIT_CONFIG_COUNT: "2"
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: "true"
+  GIT_CONFIG_KEY_1: core.autocrlf
+  GIT_CONFIG_VALUE_1: "false"
+
+concurrency:
+  group: planar-product-replay-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  replay:
+    name: ${{ matrix.os }} / Python 3.12
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Install replay test tools
+        run: |
+          python -m pip install pytest==8.4.2 numpy==1.26.4 scipy==1.12.0
+          npm ci
+
+      - name: Verify Workbench projection adapter
+        run: python -m pytest -q tests/test_build_planar_workbench_case.py
+
+      - name: Build reproducible exact-source wheel
+        run: >-
+          python scripts/verify_bounded_planar_wheel_smoke.py --json
+          --os-label "${{ matrix.os }}"
+          --python-version "3.12"
+          --wheel-out-dir ".ci/product-replay/wheel"
+          --write ".ci/product-replay/internal-wheel-smoke.json"
+
+      - name: Run installed public planar product replay
+        run: >-
+          python scripts/run_planar_product_replay.py --json
+          --wheel-dir ".ci/product-replay/wheel"
+          --output-root ".ci/product-replay/runtime"
+          --source-commit "$SOURCE_SHA"
+          --engine-version "structural-analysis@0.3.0"
+          --os-label "${{ matrix.os }}"
+          --python-version "3.12"
+
+      - name: Install Playwright browser with Linux dependencies
+        if: runner.os == 'Linux'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright browser on Windows
+        if: runner.os == 'Windows'
+        run: npx playwright install chromium
+
+      - name: Replay Workbench live provider and export
+        run: node scripts/verify-workbench-product-replay.mjs
+        env:
+          WORKBENCH_PRODUCT_REPLAY_CASE: ${{ github.workspace }}/.ci/product-replay/runtime/workbench-case.json
+          WORKBENCH_PRODUCT_REPLAY_RECEIPT: ${{ github.workspace }}/.ci/product-replay/runtime/product-replay.json
+
+      - name: Upload product replay evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: planar-product-replay-${{ matrix.os }}-python-3.12
+          path: .ci/product-replay/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
