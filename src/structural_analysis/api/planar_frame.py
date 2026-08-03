@@ -27,7 +27,7 @@ from structural_analysis.model_ir.types import ModelIRDocument
 
 PLANAR_FRAME_RESULT_SCHEMA_VERSION: Final = "planar-frame-result.v1"
 PLANAR_FRAME_VALIDATION_REPORT_SCHEMA_VERSION: Final = (
-    "planar-frame-validation-report.v1"
+    "planar-frame-validation-report.v2"
 )
 PLANAR_FRAME_UNSUPPORTED_REASON_CODES: Final[tuple[str, ...]] = (
     "planar_frame_arc_length_experimental",
@@ -131,6 +131,12 @@ class PlanarFrameValidationReport:
     status: PlanarFrameStatus
     converged: bool | None
     contract_pass: bool
+    artifact_contract_pass: bool
+    execution_contract_pass: bool
+    executed: bool
+    diagnostic_authority: bool
+    numerical_result_authority: bool
+    engineering_result_authority: bool
     result_hash: str
     unsupported_reason_codes: tuple[str, ...] = ()
     profile: str = PLANAR_FRAME_VERIFIED_ALPHA_V1_PROFILE
@@ -144,6 +150,12 @@ class PlanarFrameValidationReport:
             "status": self.status,
             "converged": self.converged,
             "contract_pass": self.contract_pass,
+            "artifact_contract_pass": self.artifact_contract_pass,
+            "execution_contract_pass": self.execution_contract_pass,
+            "executed": self.executed,
+            "diagnostic_authority": self.diagnostic_authority,
+            "numerical_result_authority": self.numerical_result_authority,
+            "engineering_result_authority": self.engineering_result_authority,
             "result_hash": self.result_hash,
             "profile": self.profile,
             "public": self.public,
@@ -181,7 +193,7 @@ def analyze_planar_frame(
     )
     source_report = validate_nonlinear_frame_result(source)
     converged = bool(source_report.contract_pass and source.status == "ready")
-    authority = MappingProxyType(
+    authority = _deep_freeze(
         {
             "profile": "public_developer_preview",
             "numerical_result": (
@@ -200,7 +212,7 @@ def analyze_planar_frame(
         converged=converged,
         result_hash="sha256:" + "0" * 64,
         authority=authority,
-        result_ir=MappingProxyType(source.to_dict()),
+        result_ir=_deep_freeze(source.to_dict()),
         _checkpoint_bytes=(
             source.checkpoint_artifact()
             if source.checkpoint.get("available") is True
@@ -237,6 +249,10 @@ def validate_planar_frame_result(
         _result_payload(result, include_hash=False)
     ):
         raise ValueError("result_hash does not match the planar-frame result payload")
+
+    artifact_contract_pass = True
+    execution_contract_pass = True
+    diagnostic_authority = True
     if result.status == "not_run":
         if result.result_ir is not None:
             raise ValueError("not_run result must not expose a result_ir")
@@ -255,7 +271,13 @@ def validate_planar_frame_result(
         return PlanarFrameValidationReport(
             status=result.status,
             converged=None,
-            contract_pass=False,
+            contract_pass=True,
+            artifact_contract_pass=artifact_contract_pass,
+            execution_contract_pass=execution_contract_pass,
+            executed=False,
+            diagnostic_authority=diagnostic_authority,
+            numerical_result_authority=False,
+            engineering_result_authority=False,
             result_hash=result.result_hash,
             unsupported_reason_codes=reason_codes,
         )
@@ -263,7 +285,9 @@ def validate_planar_frame_result(
         raise ValueError("executed result requires a result_ir")
     if result.unsupported_features:
         raise ValueError("executed result must not retain unsupported routing")
-    source = dict(result.result_ir)
+    source = _deep_thaw(result.result_ir)
+    if not isinstance(source, dict):
+        raise ValueError("result_ir must thaw to an object")
     if source.get("profile") != COROTATIONAL_GENERAL_PROFILE:
         raise ValueError("result_ir is not the connected planar nonlinear result")
     if bool(source.get("contract_pass")) != result.converged:
@@ -278,10 +302,17 @@ def validate_planar_frame_result(
         or result.authority.get("release_readiness") != "not_authoritative"
     ):
         raise ValueError("result authority differs from profile contract")
+    numerical_authority = result.converged is True
     return PlanarFrameValidationReport(
         status=result.status,
         converged=result.converged,
-        contract_pass=result.converged,
+        contract_pass=True,
+        artifact_contract_pass=artifact_contract_pass,
+        execution_contract_pass=execution_contract_pass,
+        executed=True,
+        diagnostic_authority=diagnostic_authority,
+        numerical_result_authority=numerical_authority,
+        engineering_result_authority=numerical_authority,
         result_hash=result.result_hash,
     )
 
@@ -291,7 +322,7 @@ def _not_run_result(error: PlanarFrameUnsupportedError) -> PlanarFrameResult:
         status="not_run",
         converged=None,
         result_hash="sha256:" + "0" * 64,
-        authority=MappingProxyType(
+        authority=_deep_freeze(
             {
                 "profile": "public_developer_preview",
                 "numerical_result": "not_authoritative",
@@ -302,7 +333,7 @@ def _not_run_result(error: PlanarFrameUnsupportedError) -> PlanarFrameResult:
             }
         ),
         result_ir=None,
-        unsupported_features=(MappingProxyType(error.to_dict()),),
+        unsupported_features=(_deep_freeze(error.to_dict()),),
     )
     result = PlanarFrameResult(
         **{
@@ -316,6 +347,24 @@ def _not_run_result(error: PlanarFrameUnsupportedError) -> PlanarFrameResult:
     return result
 
 
+def _deep_freeze(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return MappingProxyType(
+            {str(key): _deep_freeze(item) for key, item in value.items()}
+        )
+    if isinstance(value, (list, tuple)):
+        return tuple(_deep_freeze(item) for item in value)
+    return value
+
+
+def _deep_thaw(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {str(key): _deep_thaw(item) for key, item in value.items()}
+    if isinstance(value, tuple):
+        return [_deep_thaw(item) for item in value]
+    return value
+
+
 def _result_payload(result: PlanarFrameResult, *, include_hash: bool) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "schema_version": PLANAR_FRAME_RESULT_SCHEMA_VERSION,
@@ -324,9 +373,11 @@ def _result_payload(result: PlanarFrameResult, *, include_hash: bool) -> dict[st
         "profile": result.profile,
         "public": result.public,
         "release_eligible": result.release_eligible,
-        "authority": dict(result.authority),
-        "result_ir": dict(result.result_ir) if result.result_ir is not None else None,
-        "unsupported_features": [dict(row) for row in result.unsupported_features],
+        "authority": _deep_thaw(result.authority),
+        "result_ir": (
+            _deep_thaw(result.result_ir) if result.result_ir is not None else None
+        ),
+        "unsupported_features": _deep_thaw(result.unsupported_features),
         "claim_boundary": result.claim_boundary,
     }
     if include_hash:
