@@ -2,7 +2,7 @@ import { createReadStream, existsSync, statSync } from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 // Builds the app (Vite) and serves dist/, then runs the Workbench v2 E2E specs.
 // SPA: unknown paths fall back to index.html (the route uses a hash, so this is
@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = path.join(rootDir, 'dist')
+const jsonLoader = pathToFileURL(path.join(rootDir, 'scripts', 'json-module-loader.mjs')).href
 const specs = [
   'tests/frontend/workbench-v2-e2e.spec.ts',
   'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',
@@ -73,8 +74,11 @@ async function main() {
   const { port } = server.address()
   const playwrightBin = path.join(rootDir, 'node_modules', '.bin', process.platform === 'win32' ? 'playwright.cmd' : 'playwright')
   try {
+    const existingOptions = process.env.NODE_OPTIONS?.trim()
+    const loaderOption = `--loader=${jsonLoader}`
     process.exitCode = await run(playwrightBin, ['test', ...specs, '--reporter=line', ...passthrough], {
       WORKBENCH_V2_BASE_URL: `http://127.0.0.1:${port}`,
+      NODE_OPTIONS: existingOptions ? `${existingOptions} ${loaderOption}` : loaderOption,
     })
   } finally {
     await new Promise((resolve) => server.close(resolve))
