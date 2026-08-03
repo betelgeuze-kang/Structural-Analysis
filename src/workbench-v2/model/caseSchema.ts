@@ -14,6 +14,8 @@
 //   invalid (present but malformed, non-finite, or outside its domain), or
 //   unsupported (the producer explicitly declares that result unsupported).
 
+import generatedCapabilitiesRaw from './generatedCapabilities.json'
+
 export type UnitSystem = 'SI'
 export type CoordinateSystem = 'global_xyz'
 
@@ -56,10 +58,31 @@ export type TextValue = EvidenceValue<string>
 
 export const PLANAR_VERIFIED_ALPHA_PROFILE = 'planar_frame_verified_alpha.v1' as const
 
+interface GeneratedCapabilityRow {
+  id: string
+  profile: string
+  public: boolean
+  numerical_authority: string
+  recovery_authority: string
+  external_vv_level: number
+  release_eligible: boolean
+}
+
+interface GeneratedCapabilityRegistry {
+  schemaVersion: string
+  capabilities: GeneratedCapabilityRow[]
+}
+
+const generatedCapabilities = generatedCapabilitiesRaw as GeneratedCapabilityRegistry
+
 export interface ProductProfileEvidence {
   id: TextValue
   public: EvidenceValue<boolean>
   releaseEligible: EvidenceValue<boolean>
+  numericalAuthority: TextValue
+  recoveryAuthority: TextValue
+  externalVvLevel: EngineeringValue
+  authoritySource: TextValue
 }
 
 export type AnalysisStatus =
@@ -422,33 +445,84 @@ function normalizeResidualHistory(v: unknown, warnings: string[]): ResidualStep[
 
 function normalizeProductProfile(raw: Record<string, unknown>, warnings: string[]): ProductProfileEvidence {
   const token = raw.capabilityProfile ?? raw.capability_profile
-  if (token === undefined) {
-    return {
-      id: unavailable(),
-      public: unavailable(),
-      releaseEligible: unavailable(),
-    }
-  }
+  const unavailableProfile = (): ProductProfileEvidence => ({
+    id: unavailable(),
+    public: unavailable(),
+    releaseEligible: unavailable(),
+    numericalAuthority: unavailable(),
+    recoveryAuthority: unavailable(),
+    externalVvLevel: unavailable(),
+    authoritySource: unavailable(),
+  })
+  if (token === undefined) return unavailableProfile()
   if (typeof token !== 'string' || token.trim() === '') {
     const reason = 'capability profile is invalid (expected a non-empty string)'
     warnings.push(reason)
+    const value: InvalidValue = { status: 'invalid', reason }
     return {
-      id: { status: 'invalid', reason },
-      public: { status: 'invalid', reason },
-      releaseEligible: { status: 'invalid', reason },
+      id: value,
+      public: value,
+      releaseEligible: value,
+      numericalAuthority: value,
+      recoveryAuthority: value,
+      externalVvLevel: value,
+      authoritySource: value,
     }
   }
-  if (token === PLANAR_VERIFIED_ALPHA_PROFILE) {
+
+  const row = generatedCapabilities.capabilities.find(
+    (candidate) => candidate.profile === token,
+  )
+  if (!row) {
     return {
+      ...unavailableProfile(),
       id: { status: 'available', value: token },
-      public: { status: 'available', value: true },
-      releaseEligible: { status: 'available', value: false },
     }
   }
+
+  const declared = isRecord(raw.productProfile) ? raw.productProfile : null
+  const mismatches: string[] = []
+  if (declared) {
+    const expected: Record<string, unknown> = {
+      id: token,
+      public: row.public,
+      releaseEligible: row.release_eligible,
+      numericalAuthority: row.numerical_authority,
+      recoveryAuthority: row.recovery_authority,
+      externalVvLevel: row.external_vv_level,
+    }
+    for (const [key, value] of Object.entries(expected)) {
+      if (hasOwn(declared, key) && declared[key] !== value) {
+        mismatches.push(`productProfile.${key} contradicts generated capability registry`)
+      }
+    }
+  }
+  if (mismatches.length > 0) {
+    warnings.push(...mismatches)
+    const reason = mismatches.join('; ')
+    const value: InvalidValue = { status: 'invalid', reason }
+    return {
+      id: value,
+      public: value,
+      releaseEligible: value,
+      numericalAuthority: value,
+      recoveryAuthority: value,
+      externalVvLevel: value,
+      authoritySource: value,
+    }
+  }
+
   return {
     id: { status: 'available', value: token },
-    public: unavailable(),
-    releaseEligible: unavailable(),
+    public: { status: 'available', value: row.public },
+    releaseEligible: { status: 'available', value: row.release_eligible },
+    numericalAuthority: { status: 'available', value: row.numerical_authority },
+    recoveryAuthority: { status: 'available', value: row.recovery_authority },
+    externalVvLevel: { status: 'available', value: row.external_vv_level },
+    authoritySource: {
+      status: 'available',
+      value: `generated_capability_registry:${generatedCapabilities.schemaVersion}`,
+    },
   }
 }
 
