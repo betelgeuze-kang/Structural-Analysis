@@ -9,7 +9,9 @@ import pytest
 from scipy.sparse import csr_matrix
 
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
-import structural_analysis.solvers.nonlinear.sparse_factorization as sparse_factorization
+from structural_analysis.solvers.nonlinear import (
+    _sparse_factorization_v1 as sparse_factorization_v1,
+)
 from structural_analysis.solvers.nonlinear.sparse_factorization import (
     SPARSE_FACTORIZATION_BACKEND,
     SparseFactorizationError,
@@ -231,7 +233,7 @@ def test_complex_tangent_is_rejected_before_factorization(matrix) -> None:
 
 def test_nonfinite_condition_estimate_raises_structured_error(monkeypatch) -> None:
     monkeypatch.setattr(
-        sparse_factorization,
+        sparse_factorization_v1,
         "_exact_inverse_one_norm",
         lambda _factor, _size: math.inf,
     )
