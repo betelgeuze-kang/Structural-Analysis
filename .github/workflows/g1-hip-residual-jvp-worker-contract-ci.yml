@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - "src/structural_analysis/solvers/nonlinear/residual_jacobian_consistency.py"
+      - "src/structural_analysis/engine_v2_backends/_hip_residual_jvp_worker_contract.py"
       - "src/structural_analysis/engine_v2_backends/hip_residual_jvp_worker.py"
       - "scripts/build_g1_hip_residual_jvp_worker_contract.py"
       - "tests/test_residual_jacobian_consistency.py"
@@ -14,6 +15,7 @@ on:
     branches: ["main"]
     paths:
       - "src/structural_analysis/solvers/nonlinear/residual_jacobian_consistency.py"
+      - "src/structural_analysis/engine_v2_backends/_hip_residual_jvp_worker_contract.py"
       - "src/structural_analysis/engine_v2_backends/hip_residual_jvp_worker.py"
       - "scripts/build_g1_hip_residual_jvp_worker_contract.py"
       - "tests/test_residual_jacobian_consistency.py"
