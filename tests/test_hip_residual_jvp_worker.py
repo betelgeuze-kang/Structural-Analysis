@@ -107,7 +107,7 @@ def test_synthetic_hardware_metadata_cannot_replace_local_device_probe(
         _execute(runtime)
 
 
-def test_complete_local_hardware_evidence_closes_worker_contract_only(
+def test_complete_local_hardware_claim_remains_blocked_until_external_attestation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _allow_local_hip_probe(monkeypatch)
@@ -133,9 +133,14 @@ def test_complete_local_hardware_evidence_closes_worker_contract_only(
 
     validate_hip_residual_jvp_worker_receipt(receipt)
     assert receipt.directional_gate_passed is True
-    assert receipt.hardware_execution_proven is True
-    assert receipt.production_path_ready is True
-    assert receipt.blockers == ()
+    assert receipt.runtime["execution_kind"] == "hardware"
+    assert receipt.hardware_execution_proven is False
+    assert receipt.production_path_ready is False
+    assert receipt.blockers == (
+        "hardware_execution_attestation_unverified",
+        "independent_hardware_operator_attestation_missing",
+    )
+    assert receipt.numerical_authority == "diagnostic_only"
     assert receipt.engineering_authority == "none"
     assert receipt.release_authority == "none"
 
@@ -162,9 +167,11 @@ def test_cpu_fallback_and_cpu_tangent_refresh_block_production(
         )
     )
 
+    assert receipt.hardware_execution_proven is False
     assert receipt.production_path_ready is False
     assert "accepted_state_tangent_refresh_used_cpu" in receipt.blockers
     assert "cpu_fallback_used" in receipt.blockers
+    assert "hardware_execution_attestation_unverified" in receipt.blockers
 
 
 def test_wrong_jvp_blocks_production_even_with_complete_runtime_evidence(
@@ -193,8 +200,10 @@ def test_wrong_jvp_blocks_production_even_with_complete_runtime_evidence(
     )
 
     assert receipt.directional_gate_passed is False
+    assert receipt.hardware_execution_proven is False
     assert receipt.production_path_ready is False
     assert "physical_residual_jacobian_directional_gate_failed" in receipt.blockers
+    assert "independent_hardware_operator_attestation_missing" in receipt.blockers
 
 
 def test_hardware_runtime_requires_device_nodes_and_receipt_hash() -> None:
@@ -233,6 +242,31 @@ def test_hardware_runtime_rejects_placeholder_hashes_and_test_backend(
             device_architecture="gfx1030",
             available_device_nodes=("/dev/kfd", "/dev/dri"),
             hardware_receipt_hash="sha256:" + "f" * 64,
+        ).validate()
+
+
+def test_hardware_runtime_rejects_invalid_architecture_and_inconsistent_counts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _allow_local_hip_probe(monkeypatch)
+    with pytest.raises(HIPResidualJVPWorkerError, match="device_architecture_invalid"):
+        _runtime(
+            execution_kind="hardware",
+            backend_id="hip_residual_jvp_worker_device",
+            device_architecture="amd-radeon",
+            available_device_nodes=("/dev/kfd", "/dev/dri"),
+            hardware_receipt_hash="sha256:" + "f" * 64,
+        ).validate()
+    with pytest.raises(HIPResidualJVPWorkerError, match="invocation_count_inconsistent"):
+        _runtime(
+            execution_kind="hardware",
+            backend_id="hip_residual_jvp_worker_gfx1030",
+            device_architecture="gfx1030",
+            available_device_nodes=("/dev/kfd", "/dev/dri"),
+            hardware_receipt_hash="sha256:" + "f" * 64,
+            hip_kernel_invocation_count=2,
+            residual_kernel_invocation_count=2,
+            jvp_kernel_invocation_count=2,
         ).validate()
 
 
