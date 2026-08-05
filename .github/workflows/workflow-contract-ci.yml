@@ -18,6 +18,7 @@ on:
       - "tests/test_check_github_actions_runner_policy.py"
       - "tests/test_check_product_ci_boundaries.py"
       - "tests/test_product_ci_workflow_contract.py"
+      - "tests/test_long_running_workflow_action_pins.py"
       - "tests/test_build_github_actions_ci_streak_evidence.py"
       - "tests/test_verify_quality_gate.py"
   workflow_dispatch:
@@ -91,7 +92,7 @@ jobs:
       - name: Validate product CI ownership boundaries
         run: python scripts/check_product_ci_boundaries.py --json --fail-blocked
 
-      - name: Verify workflow, boundary, and CI-streak contracts
+      - name: Verify workflow, boundary, action-pin, and CI-streak contracts
         shell: bash
         run: |
           set +e
@@ -99,6 +100,7 @@ jobs:
             tests/test_check_github_actions_runner_policy.py \
             tests/test_check_product_ci_boundaries.py \
             tests/test_product_ci_workflow_contract.py \
+            tests/test_long_running_workflow_action_pins.py \
             tests/test_build_github_actions_ci_streak_evidence.py \
             tests/test_verify_quality_gate.py \
             > workflow-contract-tests.log 2>&1
