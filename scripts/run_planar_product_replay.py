@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILE = "planar_frame_verified_alpha.v1"
 CONSTRAINTS = Path("ci/bounded-planar-wheel-smoke.constraints.txt")
 DEFAULT_SAMPLE = Path("examples/bounded_planar_frame_alpha.model-ir.v2.json")
+CANONICAL_MODEL_SOURCE_PATH = "product-replay/public-model.json"
 ADAPTER_PATH = ROOT / "scripts/build_planar_workbench_case.py"
 
 
@@ -37,12 +38,15 @@ def _load_object(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _serialized(payload: Mapping[str, Any]) -> bytes:
+    return (
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+
+
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    path.write_bytes(_serialized(payload))
 
 
 def _sha256(path: Path) -> str:
@@ -208,6 +212,7 @@ def run_product_replay(
         source_commit_sha=source_commit_sha,
         engine_version=engine_version,
         generated_at=generated_at,
+        source_path=CANONICAL_MODEL_SOURCE_PATH,
     )
     workbench_case_path = output_root / "workbench-case.json"
     _write_json(workbench_case_path, workbench_case)
