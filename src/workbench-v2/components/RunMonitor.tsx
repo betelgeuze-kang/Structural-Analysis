@@ -22,7 +22,7 @@ const STATUS_LABEL: Record<RunStatus, string> = {
   running: 'Running',
   converged: 'Converged',
   not_converged: 'Did not converge',
-  failed: 'Did not converge',
+  failed: 'Analysis failed',
   blocked: 'Blocked',
   not_run: 'Not run',
 }
@@ -30,8 +30,9 @@ const STATUS_LABEL: Record<RunStatus, string> = {
 /**
  * Run Monitor. Shows live-style progress derived only from the attached
  * analysis: recorded iterations vs. the iteration count, the latest residual,
- * and how it stands against tolerance. When convergence information is absent,
- * the whole panel reports UNAVAILABLE and infers nothing.
+ * and how it stands against tolerance. Explicit run status is preserved when
+ * convergence is unavailable; progress and tolerance never create a numerical
+ * convergence verdict.
  */
 export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAvailable }: RunMonitorProps): ReactElement {
   if (!analysis) {
@@ -66,6 +67,13 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
     : runStatus === 'failed' || runStatus === 'not_converged' || runStatus === 'blocked'
       ? 'BLOCKED'
       : 'UNAVAILABLE'
+  const toleranceMessage = withinTolerance == null
+    ? 'Tolerance comparison is unavailable unless both values are available.'
+    : withinTolerance
+      ? 'Final residual is at or below tolerance.'
+      : runStatus === 'not_converged'
+        ? 'Final residual is above tolerance; analysis reports not converged.'
+        : 'Final residual is above tolerance; this comparison does not establish convergence.'
 
   return (
     <section className="wb2-panel" aria-labelledby="wb2-run-title" data-run-monitor={runStatus}>
@@ -112,11 +120,7 @@ export function RunMonitor({ runStatus, analysis, residualHistory, convergenceAv
         className={`wb2-result-tol${withinTolerance === true ? ' is-ok' : withinTolerance === false ? ' is-no' : ''}`}
         data-run-within-tol={withinTolerance == null ? 'unavailable' : String(withinTolerance)}
       >
-        {withinTolerance == null
-          ? 'Tolerance comparison is unavailable unless both values are available.'
-          : withinTolerance
-            ? 'Final residual is at or below tolerance.'
-            : 'Final residual is above tolerance — run is not converged.'}
+        {toleranceMessage}
       </p>
     </section>
   )

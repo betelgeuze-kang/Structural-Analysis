@@ -17,7 +17,7 @@
   "analysis": {
     "type": "nonlinear_static",
     "solver": "demo-newton",
-    "converged": false,
+    "converged": { "status": "unavailable" },
     "loadScale": 1.35,
     "iterationCount": 25,
     "residualTolerance": 1e-6,

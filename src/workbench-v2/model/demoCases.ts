@@ -1,10 +1,10 @@
 // Catalog of bundled demo cases for Workbench v2.
 //
-// These are clearly-labelled DEMO fixtures used to exercise the three honest
-// result states the UI must distinguish:
-//   - converged: analysis present and converged
-//   - failed: analysis present, did not converge (status = failed)
-//   - unavailable: no convergence information at all (never inferred)
+// These are clearly-labelled DEMO fixtures used to exercise three honest
+// result scenarios the UI must distinguish:
+//   - converged: analysis present and numerically converged
+//   - failed: execution failed; numerical convergence remains unavailable
+//   - unavailable: no analysis or convergence information (never inferred)
 //
 // They are NOT validated solver artifacts. The provider validates each against
 // the Case Contract v2 before the UI renders it.
@@ -32,8 +32,8 @@ export const demoCases: DemoCaseEntry[] = [
   },
   {
     id: 'failed',
-    label: 'Did not converge (demo)',
-    description: 'Overloaded run that stalls above tolerance and is reported failed.',
+    label: 'Analysis failed (demo)',
+    description: 'Execution terminates with status failed; numerical convergence remains unavailable.',
     raw: failedRaw,
   },
   {

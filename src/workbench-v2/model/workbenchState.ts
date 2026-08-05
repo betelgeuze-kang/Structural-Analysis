@@ -40,7 +40,7 @@ export const initialWorkbenchState: WorkbenchState = {
 export function deriveRunStatus(caseV2: WorkbenchCaseV2, convergenceAvailable: boolean): RunStatus {
   if (!caseV2.analysis) return 'not_run'
   const { status, converged } = caseV2.analysis
-  if (status === 'blocked' || status === 'not_run' || status === 'idle'
+  if (status === 'failed' || status === 'blocked' || status === 'not_run' || status === 'idle'
       || status === 'validating' || status === 'running') return status
   if (!convergenceAvailable || !isAvailableValue(converged)) return 'not_run'
   return status
