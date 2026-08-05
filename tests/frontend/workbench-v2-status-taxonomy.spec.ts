@@ -100,3 +100,24 @@ test('unsupported convergence evidence remains unsupported even with a numerical
   expect(validation.convergenceAvailable).toBe(false)
   expect(deriveResultVerdict(validation.value!, validation.convergenceAvailable)).toBe('unsupported')
 })
+
+test.each([
+  ['converged', false],
+  ['not_converged', true],
+] as const)(
+  'direct consumers cannot bypass validation with %s status and converged=%s',
+  (status, converged) => {
+    const valid = validateWorkbenchCaseV2(caseWithStatus(status, status === 'converged'))
+    expect(valid.ok).toBe(true)
+    const contradictory = {
+      ...valid.value!,
+      analysis: {
+        ...valid.value!.analysis!,
+        converged: { status: 'available' as const, value: converged },
+      },
+    }
+
+    expect(deriveRunStatus(contradictory, true)).toBe('not_run')
+    expect(deriveResultVerdict(contradictory, true)).toBe('invalid')
+  },
+)
