@@ -22,10 +22,10 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
     ? 'unavailable'
     : executionFailed
       ? 'failed'
-      : !convergenceAvailable
-        ? 'unavailable'
-        : !isAvailableValue(analysis.converged)
-          ? analysis.converged.status
+      : !isAvailableValue(analysis.converged)
+        ? analysis.converged.status
+        : !convergenceAvailable
+          ? 'unavailable'
           : analysis.converged.value
             ? 'converged'
             : 'failed'
