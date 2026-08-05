@@ -22,11 +22,13 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
     ? 'unavailable'
     : executionFailed
       ? 'failed'
-      : !convergenceAvailable || !isAvailableValue(analysis.converged)
-        ? analysis.converged.status
-        : analysis.converged.value
-          ? 'converged'
-          : 'failed'
+      : !convergenceAvailable
+        ? 'unavailable'
+        : !isAvailableValue(analysis.converged)
+          ? analysis.converged.status
+          : analysis.converged.value
+            ? 'converged'
+            : 'failed'
 
   const verdictLabel =
     verdict === 'converged'
