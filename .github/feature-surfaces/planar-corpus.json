@@ -1,0 +1,36 @@
+{
+  "schema_version": "stack-feature-surface.v1",
+  "feature_id": "planar-corpus-execution",
+  "core_feature_paths": [
+    ".github/workflows/planar-corpus-execution-ci.yml",
+    "scripts/check_github_actions_runner_policy.py",
+    "scripts/materialize_planar_verification_corpus.py",
+    "scripts/run_planar_verification_corpus.py",
+    "src/structural_analysis/solvers/nonlinear/_sparse_factorization_v1.py",
+    "src/structural_analysis/solvers/nonlinear/sparse_factorization.py",
+    "tests/test_materialize_planar_verification_corpus.py",
+    "tests/test_run_planar_verification_corpus_status.py",
+    "tests/test_sparse_factorization_medium_scope.py",
+    "tests/test_sparse_factorization_diagnostics.py"
+  ],
+  "guard_paths": [
+    ".github/feature-surfaces/planar-corpus.json",
+    "scripts/check_stack_feature_surface.py",
+    "tests/test_planar_corpus_feature_surface.py"
+  ],
+  "workflow_path": ".github/workflows/planar-corpus-execution-ci.yml",
+  "workflow_referenced_paths": [
+    ".github/feature-surfaces/planar-corpus.json",
+    "scripts/check_stack_feature_surface.py",
+    "scripts/materialize_planar_verification_corpus.py",
+    "scripts/run_planar_verification_corpus.py",
+    "tests/test_planar_corpus_feature_surface.py",
+    "tests/test_materialize_planar_verification_corpus.py",
+    "tests/test_run_planar_verification_corpus_status.py",
+    "tests/test_sparse_factorization_medium_scope.py"
+  ],
+  "import_modules": [
+    "structural_analysis.solvers.nonlinear._sparse_factorization_v1",
+    "structural_analysis.solvers.nonlinear.sparse_factorization"
+  ]
+}
