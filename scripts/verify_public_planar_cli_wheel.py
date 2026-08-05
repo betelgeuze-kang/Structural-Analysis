@@ -8,7 +8,6 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -124,6 +123,18 @@ def _engineering_hash(result: Mapping[str, Any]) -> str:
     return str(value)
 
 
+def _terminal_state_hash(checkpoint_path: Path) -> str:
+    checkpoint = _load_object(checkpoint_path)
+    value = checkpoint.get("terminal_state_hash")
+    if not _is_hash(value):
+        rows = checkpoint.get("checkpoints")
+        if isinstance(rows, list) and rows and isinstance(rows[-1], Mapping):
+            value = rows[-1].get("state_hash")
+    if not _is_hash(value):
+        raise PublicPlanarCliWheelError("checkpoint_terminal_state_hash_invalid")
+    return str(value)
+
+
 def _validate_converged(
     *,
     result_path: Path,
@@ -151,6 +162,7 @@ def _validate_converged(
     return {
         "result_hash": str(result["result_hash"]),
         "engineering_result_hash": _engineering_hash(result),
+        "terminal_state_hash": _terminal_state_hash(checkpoint_path),
         "checkpoint_sha256": _sha256(checkpoint_path),
         "checkpoint_byte_length": checkpoint_path.stat().st_size,
     }
@@ -307,15 +319,33 @@ def run_public_cli_smoke(
                 report_path=restart_report,
                 checkpoint_path=restart_checkpoint,
             )
-            if initial_summary != restart_summary:
+            if (
+                initial_summary["engineering_result_hash"]
+                != restart_summary["engineering_result_hash"]
+            ):
                 raise PublicPlanarCliWheelError(
-                    f"public_restart_not_exact:{case_id}"
+                    f"public_restart_engineering_result_mismatch:{case_id}"
+                )
+            if (
+                initial_summary["terminal_state_hash"]
+                != restart_summary["terminal_state_hash"]
+            ):
+                raise PublicPlanarCliWheelError(
+                    f"public_restart_terminal_state_mismatch:{case_id}"
                 )
             cases[case_id] = {
                 "model_sha256": _sha256(public_model),
                 "initial": initial_summary,
                 "restart": restart_summary,
-                "exact_restart": True,
+                "engineering_result_parity": True,
+                "terminal_state_parity": True,
+                "result_hash_equal": (
+                    initial_summary["result_hash"] == restart_summary["result_hash"]
+                ),
+                "checkpoint_bytes_equal": (
+                    initial_summary["checkpoint_sha256"]
+                    == restart_summary["checkpoint_sha256"]
+                ),
             }
 
         unsupported: dict[str, Any] = {}
@@ -351,7 +381,7 @@ def run_public_cli_smoke(
             }
 
         return {
-            "schema_version": "public-planar-cli-wheel-smoke.v1",
+            "schema_version": "public-planar-cli-wheel-smoke.v2",
             "contract_pass": True,
             "profile": PUBLIC_PROFILE,
             "wheel_filename": wheel.name,
@@ -366,10 +396,11 @@ def run_public_cli_smoke(
             "unsupported_controls": unsupported,
             "claim_boundary": (
                 "This receipt proves installed-wheel execution of the public bounded "
-                "planar CLI, exact checkpoint restart for the declared samples, and "
-                "stable fail-closed routing for experimental controls. It does not "
-                "establish external V&V, design authority, release eligibility, or "
-                "future-run wheel equality."
+                "planar CLI, terminal state and engineering-result parity after "
+                "checkpoint restart, and stable fail-closed routing for experimental "
+                "controls. Checkpoint and result bytes may differ when restart lineage "
+                "is represented explicitly. It does not establish external V&V, design "
+                "authority, release eligibility, or future-run wheel equality."
             ),
         }
 
