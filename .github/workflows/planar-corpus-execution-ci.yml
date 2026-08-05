@@ -4,8 +4,11 @@ on:
   merge_group:
   pull_request:
     paths:
+      - ".github/feature-surfaces/planar-corpus.json"
+      - "scripts/check_stack_feature_surface.py"
       - "scripts/materialize_planar_verification_corpus.py"
       - "scripts/run_planar_verification_corpus.py"
+      - "tests/test_planar_corpus_feature_surface.py"
       - "tests/test_materialize_planar_verification_corpus.py"
       - "tests/test_run_planar_verification_corpus_status.py"
       - "tests/test_sparse_factorization_medium_scope.py"
@@ -20,8 +23,11 @@ on:
   push:
     branches: ["main"]
     paths:
+      - ".github/feature-surfaces/planar-corpus.json"
+      - "scripts/check_stack_feature_surface.py"
       - "scripts/materialize_planar_verification_corpus.py"
       - "scripts/run_planar_verification_corpus.py"
+      - "tests/test_planar_corpus_feature_surface.py"
       - "tests/test_materialize_planar_verification_corpus.py"
       - "tests/test_run_planar_verification_corpus_status.py"
       - "tests/test_sparse_factorization_medium_scope.py"
@@ -70,12 +76,29 @@ jobs:
       - name: Install package and test tools
         run: python -m pip install -e .[dev]
 
+      - name: Validate stacked feature surface and package imports
+        run: >-
+          python scripts/check_stack_feature_surface.py --json
+          --manifest .github/feature-surfaces/planar-corpus.json
+          --write .ci/planar-corpus-contract/feature-surface.json
+
       - name: Validate corpus, execution taxonomy, and exact diagnostic scope
         run: >-
           python -m pytest -q
+          tests/test_planar_corpus_feature_surface.py
           tests/test_materialize_planar_verification_corpus.py
           tests/test_run_planar_verification_corpus_status.py
           tests/test_sparse_factorization_medium_scope.py
+
+      - name: Upload feature-surface receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: planar-corpus-contract-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci/planar-corpus-contract/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
 
   execute-case:
     needs: contract-and-seed
