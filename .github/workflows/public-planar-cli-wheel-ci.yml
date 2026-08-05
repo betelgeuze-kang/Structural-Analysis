@@ -4,6 +4,8 @@ on:
   merge_group:
   pull_request:
     paths:
+      - ".github/feature-surfaces/planar-corpus.json"
+      - "scripts/check_stack_feature_surface.py"
       - "src/structural_analysis/api/planar_frame.py"
       - "src/structural_analysis/api/planar_frame_cli.py"
       - "src/structural_analysis/api/_output_integrity.py"
@@ -25,6 +27,8 @@ on:
   push:
     branches: ["main"]
     paths:
+      - ".github/feature-surfaces/planar-corpus.json"
+      - "scripts/check_stack_feature_surface.py"
       - "src/structural_analysis/api/planar_frame.py"
       - "src/structural_analysis/api/planar_frame_cli.py"
       - "src/structural_analysis/api/_output_integrity.py"
@@ -92,6 +96,12 @@ jobs:
         run: |
           python -m pip install numpy==1.26.4 scipy==1.12.0
           python -m pip install -e .[dev]
+
+      - name: Validate stacked feature surface and package imports
+        run: >-
+          python scripts/check_stack_feature_surface.py --json
+          --manifest .github/feature-surfaces/planar-corpus.json
+          --write .ci/public-planar-cli/feature-surface.json
 
       - name: Build reproducible exact-source wheel
         run: >-
