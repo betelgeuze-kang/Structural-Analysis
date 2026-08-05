@@ -85,13 +85,17 @@ test.describe('Workbench v2 — demo case samples', () => {
     await expect(card.locator('[data-result-within-tol="true"]')).toBeVisible()
   })
 
-  test('failed sample shows a non-converged verdict above tolerance — not inferred as passing', async ({ page }) => {
+  test('failed sample preserves execution failure while numerical convergence stays unavailable', async ({ page }) => {
     await open(page)
     await page.locator('[data-wb2-case="failed"]').click()
     const card = page.locator('[data-result-verdict]')
     await expect(card).toHaveAttribute('data-result-verdict', 'failed')
-    await expect(card.locator('[data-result-chip]')).toContainText(/Did not converge/i)
+    await expect(card.locator('[data-result-chip]')).toContainText(/Analysis failed/i)
+    const convergenceMetric = card.locator('.wb2-result-metric').filter({ hasText: 'Converged' })
+    await expect(convergenceMetric).toContainText(/UNAVAILABLE/i)
     await expect(card.locator('[data-result-within-tol="false"]')).toBeVisible()
+    await expect(page.locator('[data-run-status]')).toHaveText('Analysis failed')
+    await expect(page.locator('#wb2-sec-analysis')).toContainText(/Analysis execution failed/i)
   })
 
   test('unavailable sample reports convergence UNAVAILABLE with no chart and no inferred status', async ({ page }) => {

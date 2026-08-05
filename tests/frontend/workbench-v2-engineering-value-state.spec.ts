@@ -59,7 +59,7 @@ test.describe('Workbench v2 — explicit engineering value states', () => {
   test('status and convergence normalize to one consistent source of solver truth', () => {
     const cases = [
       { status: 'converged', converged: true, evidence: 'available', run: 'converged' },
-      { status: 'failed', converged: false, evidence: 'available', run: 'failed' },
+      { status: 'failed', converged: false, evidence: 'unavailable', run: 'failed' },
       { status: 'not_converged', converged: false, evidence: 'available', run: 'not_converged' },
       { status: 'blocked', converged: true, evidence: 'unavailable', run: 'blocked' },
       { status: 'not_run', converged: false, evidence: 'unavailable', run: 'not_run' },
