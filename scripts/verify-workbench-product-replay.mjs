@@ -18,15 +18,52 @@ const mime = {
   '.woff2': 'font/woff2',
 }
 
-function run(cmd, args, env = {}) {
+function platformCommand(command) {
+  if (process.platform !== 'win32') {
+    return command
+  }
+  if (command === 'npm' || command === 'npx') {
+    return `${command}.cmd`
+  }
+  return command
+}
+
+function run(command, args, env = {}) {
   return new Promise((resolve) => {
-    const child = spawn(cmd, args, {
+    const executable = platformCommand(command)
+    let settled = false
+    const settle = (code) => {
+      if (settled) {
+        return
+      }
+      settled = true
+      resolve(code)
+    }
+    const child = spawn(executable, args, {
       cwd: rootDir,
       stdio: 'inherit',
       env: { ...process.env, ...env },
+      windowsHide: true,
     })
-    child.on('error', () => resolve(1))
-    child.on('close', (code) => resolve(code ?? 1))
+    child.once('error', (error) => {
+      console.error(
+        `Failed to start command: ${JSON.stringify({
+          command: executable,
+          args,
+          cwd: rootDir,
+          platform: process.platform,
+          code: error.code ?? null,
+          message: error.message,
+        })}`,
+      )
+      settle(1)
+    })
+    child.once('close', (code, signal) => {
+      if (signal) {
+        console.error(`Command terminated by signal ${signal}: ${executable}`)
+      }
+      settle(code ?? 1)
+    })
   })
 }
 
