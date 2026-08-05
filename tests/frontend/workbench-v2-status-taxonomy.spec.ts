@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 import { validateWorkbenchCaseV2 } from '../../src/workbench-v2/model/caseSchema'
-import { deriveRunStatus } from '../../src/workbench-v2/model/workbenchState'
+import { deriveResultVerdict, deriveRunStatus } from '../../src/workbench-v2/model/workbenchState'
 
 function caseWithStatus(status: 'failed' | 'not_converged'): Record<string, unknown> {
   return {
@@ -28,7 +28,7 @@ function caseWithStatus(status: 'failed' | 'not_converged'): Record<string, unkn
   }
 }
 
-test('failed execution keeps run status but exposes no numerical convergence evidence', () => {
+test('failed execution keeps run and result status but exposes no numerical convergence evidence', () => {
   const validation = validateWorkbenchCaseV2(caseWithStatus('failed'))
 
   expect(validation.ok).toBe(true)
@@ -37,9 +37,10 @@ test('failed execution keeps run status but exposes no numerical convergence evi
   expect(validation.convergenceAvailable).toBe(false)
   expect(validation.warnings.join(' ')).toContain('analysis.status=failed')
   expect(deriveRunStatus(validation.value!, validation.convergenceAvailable)).toBe('failed')
+  expect(deriveResultVerdict(validation.value!, validation.convergenceAvailable)).toBe('failed')
 })
 
-test('completed numerical non-convergence retains explicit false evidence', () => {
+test('completed numerical non-convergence retains explicit false evidence and a distinct result verdict', () => {
   const validation = validateWorkbenchCaseV2(caseWithStatus('not_converged'))
 
   expect(validation.ok).toBe(true)
@@ -47,4 +48,5 @@ test('completed numerical non-convergence retains explicit false evidence', () =
   expect(validation.value?.analysis?.converged).toEqual({ status: 'available', value: false })
   expect(validation.convergenceAvailable).toBe(true)
   expect(deriveRunStatus(validation.value!, validation.convergenceAvailable)).toBe('not_converged')
+  expect(deriveResultVerdict(validation.value!, validation.convergenceAvailable)).toBe('not_converged')
 })

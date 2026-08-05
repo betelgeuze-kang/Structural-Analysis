@@ -18,6 +18,15 @@ export type RunStatus =
   | 'blocked'
   | 'not_run'
 
+export type ResultVerdict =
+  | 'converged'
+  | 'not_converged'
+  | 'failed'
+  | 'blocked'
+  | 'unavailable'
+  | 'invalid'
+  | 'unsupported'
+
 export interface WorkbenchState {
   dataMode: DataMode
   caseId: string | null
@@ -44,6 +53,24 @@ export function deriveRunStatus(caseV2: WorkbenchCaseV2, convergenceAvailable: b
       || status === 'validating' || status === 'running') return status
   if (!convergenceAvailable || !isAvailableValue(converged)) return 'not_run'
   return status
+}
+
+/**
+ * Derive the machine-readable result verdict without collapsing execution
+ * failure, execution blocking, and completed numerical non-convergence.
+ */
+export function deriveResultVerdict(
+  caseV2: WorkbenchCaseV2,
+  convergenceAvailable: boolean,
+): ResultVerdict {
+  if (!caseV2.analysis) return 'unavailable'
+  const { status, converged } = caseV2.analysis
+  if (status === 'failed') return 'failed'
+  if (status === 'blocked') return 'blocked'
+  if (status === 'not_converged') return 'not_converged'
+  if (!isAvailableValue(converged)) return converged.status
+  if (!convergenceAvailable || status !== 'converged') return 'unavailable'
+  return converged.value ? 'converged' : 'not_converged'
 }
 
 export type WorkbenchAction =
