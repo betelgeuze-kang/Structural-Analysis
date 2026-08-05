@@ -90,6 +90,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Hydrate merge-ref ancestry for provenance tests
+        shell: bash
+        run: |
+          if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+            git fetch --no-tags --deepen=512 origin
+          fi
+          git cat-file -e "${GITHUB_SHA}^{commit}"
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
