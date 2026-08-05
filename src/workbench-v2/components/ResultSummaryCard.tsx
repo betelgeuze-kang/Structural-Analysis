@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { isAvailableValue, type WorkbenchCaseV2 } from '../model/caseSchema'
+import { deriveResultVerdict } from '../model/workbenchState'
 import { BooleanEvidenceValueText, EngineeringValueText } from './EngineeringValueText'
 
 interface ResultSummaryCardProps {
@@ -7,41 +8,30 @@ interface ResultSummaryCardProps {
   convergenceAvailable: boolean
 }
 
-type Verdict = 'converged' | 'failed' | 'unavailable' | 'invalid' | 'unsupported'
-
 /**
- * Single-glance result card. Explicit execution failure remains visible even
- * though numerical convergence is unavailable. Numerical convergence is shown
- * only from the explicit converged evidence and is never inferred from residual
- * history, tolerance comparison, or job completion.
+ * Single-glance result card. Explicit execution failure, execution blocking,
+ * and completed numerical non-convergence remain distinct. Numerical
+ * convergence is shown only from explicit evidence and is never inferred from
+ * residual history, tolerance comparison, or job completion.
  */
 export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummaryCardProps): ReactElement {
   const analysis = caseV2.analysis
-  const executionFailed = analysis?.status === 'failed'
-  const verdict: Verdict = !analysis
-    ? 'unavailable'
-    : executionFailed
-      ? 'failed'
-      : !isAvailableValue(analysis.converged)
-        ? analysis.converged.status
-        : !convergenceAvailable
-          ? 'unavailable'
-          : analysis.converged.value
-            ? 'converged'
-            : 'failed'
+  const verdict = deriveResultVerdict(caseV2, convergenceAvailable)
 
   const verdictLabel =
     verdict === 'converged'
       ? 'Converged'
-      : verdict === 'failed'
-        ? executionFailed
+      : verdict === 'not_converged'
+        ? 'Did not converge'
+        : verdict === 'failed'
           ? 'Analysis failed'
-          : 'Did not converge'
-        : `Convergence ${verdict}`
+          : verdict === 'blocked'
+            ? 'Analysis blocked'
+            : `Convergence ${verdict}`
   const chipClass =
     verdict === 'converged'
       ? 'wb2-chip--live'
-      : verdict === 'failed' || verdict === 'invalid'
+      : verdict === 'failed' || verdict === 'not_converged' || verdict === 'blocked' || verdict === 'invalid'
         ? 'wb2-chip--blocked'
         : 'wb2-chip--unavailable'
 
@@ -58,19 +48,23 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
 
       <div className="wb2-result-head">
         <span className={`wb2-chip ${chipClass}`} data-result-chip>{verdictLabel}</span>
-        {executionFailed ? (
+        {verdict === 'failed' ? (
           <span className="wb2-result-sub">
             Execution failed; numerical convergence is unavailable and is not inferred.
           </span>
-        ) : verdict !== 'converged' && verdict !== 'failed' ? (
+        ) : verdict === 'blocked' ? (
+          <span className="wb2-result-sub">
+            Execution was blocked before a numerical convergence outcome.
+          </span>
+        ) : analysis && (verdict === 'converged' || verdict === 'not_converged') ? (
+          <span className="wb2-result-sub">
+            {analysis.type} · {analysis.solver}
+          </span>
+        ) : (
           <span className="wb2-result-sub">
             {analysis
               ? 'Convergence status is unavailable — it is not inferred from the attached values.'
               : 'No analysis attached — status is not inferred.'}
-          </span>
-        ) : (
-          <span className="wb2-result-sub">
-            {analysis!.type} · {analysis!.solver}
           </span>
         )}
       </div>
