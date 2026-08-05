@@ -1,0 +1,50 @@
+import { expect, test } from '@playwright/test'
+
+import { validateWorkbenchCaseV2 } from '../../src/workbench-v2/model/caseSchema'
+import { deriveRunStatus } from '../../src/workbench-v2/model/workbenchState'
+
+function caseWithStatus(status: 'failed' | 'not_converged'): Record<string, unknown> {
+  return {
+    schemaVersion: 'workbench-case.v2',
+    capability_profile: 'planar_frame_verified_alpha.v1',
+    provenance: {
+      sourcePath: 'tests/status-taxonomy.json',
+      sourceSha256: `sha256:${'f'.repeat(64)}`,
+      sourceCommitSha: 'status-taxonomy-test',
+      engineVersion: 'test-engine',
+      generatedAt: '2026-08-05T00:00:00Z',
+    },
+    model: {
+      unitSystem: 'SI',
+      coordinateSystem: 'global_xyz',
+    },
+    analysis: {
+      type: 'nonlinear_static',
+      solver: 'test-solver',
+      status,
+      converged: false,
+    },
+    residualHistory: [],
+  }
+}
+
+test('failed execution keeps run status but exposes no numerical convergence evidence', () => {
+  const validation = validateWorkbenchCaseV2(caseWithStatus('failed'))
+
+  expect(validation.ok).toBe(true)
+  expect(validation.value?.analysis?.status).toBe('failed')
+  expect(validation.value?.analysis?.converged.status).toBe('unavailable')
+  expect(validation.convergenceAvailable).toBe(false)
+  expect(validation.warnings.join(' ')).toContain('analysis.status=failed')
+  expect(deriveRunStatus(validation.value!, validation.convergenceAvailable)).toBe('failed')
+})
+
+test('completed numerical non-convergence retains explicit false evidence', () => {
+  const validation = validateWorkbenchCaseV2(caseWithStatus('not_converged'))
+
+  expect(validation.ok).toBe(true)
+  expect(validation.value?.analysis?.status).toBe('not_converged')
+  expect(validation.value?.analysis?.converged).toEqual({ status: 'available', value: false })
+  expect(validation.convergenceAvailable).toBe(true)
+  expect(deriveRunStatus(validation.value!, validation.convergenceAvailable)).toBe('not_converged')
+})
