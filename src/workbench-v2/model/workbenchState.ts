@@ -57,7 +57,9 @@ export function deriveRunStatus(caseV2: WorkbenchCaseV2, convergenceAvailable: b
 
 /**
  * Derive the machine-readable result verdict without collapsing execution
- * failure, execution blocking, and completed numerical non-convergence.
+ * failure, execution blocking, and completed numerical non-convergence. A
+ * numerical terminal status is accepted only with matching available evidence;
+ * invalid, unsupported, or missing convergence evidence remains explicit.
  */
 export function deriveResultVerdict(
   caseV2: WorkbenchCaseV2,
@@ -67,10 +69,11 @@ export function deriveResultVerdict(
   const { status, converged } = caseV2.analysis
   if (status === 'failed') return 'failed'
   if (status === 'blocked') return 'blocked'
-  if (status === 'not_converged') return 'not_converged'
   if (!isAvailableValue(converged)) return converged.status
-  if (!convergenceAvailable || status !== 'converged') return 'unavailable'
-  return converged.value ? 'converged' : 'not_converged'
+  if (!convergenceAvailable) return 'unavailable'
+  if (status === 'converged') return converged.value ? 'converged' : 'invalid'
+  if (status === 'not_converged') return converged.value ? 'invalid' : 'not_converged'
+  return 'unavailable'
 }
 
 export type WorkbenchAction =
