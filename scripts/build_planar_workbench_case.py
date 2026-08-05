@@ -39,13 +39,16 @@ def _sha256(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _serialized(payload: Mapping[str, Any]) -> bytes:
+    return (
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+
+
 def _write_json(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    serialized = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
-    with tempfile.NamedTemporaryFile(
-        "w", encoding="utf-8", dir=path.parent, delete=False
-    ) as handle:
-        handle.write(serialized)
+    with tempfile.NamedTemporaryFile("wb", dir=path.parent, delete=False) as handle:
+        handle.write(_serialized(payload))
         temporary = Path(handle.name)
     temporary.replace(path)
 
@@ -126,6 +129,7 @@ def build_workbench_case(
     source_commit_sha: str,
     engine_version: str,
     generated_at: str,
+    source_path: str | None = None,
 ) -> dict[str, Any]:
     if len(source_commit_sha) != 40 or any(
         character not in "0123456789abcdef" for character in source_commit_sha
@@ -135,6 +139,14 @@ def build_workbench_case(
         raise PlanarWorkbenchProjectionError("engine_version_invalid")
     if not generated_at or generated_at == "unknown":
         raise PlanarWorkbenchProjectionError("generated_at_invalid")
+    if source_path is not None and (
+        not source_path
+        or source_path.startswith("/")
+        or ":" in source_path
+        or "\\" in source_path
+        or any(part in {"", ".", ".."} for part in source_path.split("/"))
+    ):
+        raise PlanarWorkbenchProjectionError("source_path_not_canonical_relative")
 
     model = _load_object(model_path)
     result = _load_object(result_path)
@@ -193,7 +205,7 @@ def build_workbench_case(
         "schemaVersion": "workbench-case.v2",
         "capability_profile": PROFILE,
         "provenance": {
-            "sourcePath": model_path.as_posix(),
+            "sourcePath": source_path or model_path.as_posix(),
             "sourceSha256": _sha256(model_path),
             "sourceCommitSha": source_commit_sha,
             "engineVersion": engine_version,
@@ -274,6 +286,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--source-commit", required=True)
     parser.add_argument("--engine-version", required=True)
     parser.add_argument("--generated-at", required=True)
+    parser.add_argument("--source-path")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -284,6 +297,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         source_commit_sha=args.source_commit,
         engine_version=args.engine_version,
         generated_at=args.generated_at,
+        source_path=args.source_path,
     )
     _write_json(args.out, payload)
     if args.json:
