@@ -35,9 +35,6 @@ JacobianVectorProduct = _contract.JacobianVectorProduct
 HIPResidualJVPWorkerError = _contract.HIPResidualJVPWorkerError
 HIPResidualJVPWorkerConfig = _contract.HIPResidualJVPWorkerConfig
 HIPResidualJVPWorkerReceipt = _contract.HIPResidualJVPWorkerReceipt
-validate_hip_residual_jvp_worker_receipt = (
-    _contract.validate_hip_residual_jvp_worker_receipt
-)
 
 _ZERO_HASH: Final = "sha256:" + "0" * 64
 _GFX_ARCHITECTURE = re.compile(r"gfx[0-9a-f]{3,5}")
@@ -115,6 +112,24 @@ def _retain_external_attestation_boundary(
         production_path_ready=False,
         receipt_hash=_contract._json_hash(provisional),
     )
+
+
+def validate_hip_residual_jvp_worker_receipt(
+    receipt: HIPResidualJVPWorkerReceipt,
+) -> None:
+    """Validate the supported public receipt without accepting private promotion."""
+
+    _contract.validate_hip_residual_jvp_worker_receipt(receipt)
+    if receipt.runtime.get("execution_kind") != "hardware":
+        return
+    if any(blocker not in receipt.blockers for blocker in _EXTERNAL_ATTESTATION_BLOCKERS):
+        raise HIPResidualJVPWorkerError(
+            "public_hardware_receipt_external_attestation_boundary_missing"
+        )
+    if receipt.hardware_execution_proven or receipt.production_path_ready:
+        raise HIPResidualJVPWorkerError(
+            "public_hardware_promotion_forbidden_without_external_attestation"
+        )
 
 
 def execute_hip_residual_jvp_worker_probe(
