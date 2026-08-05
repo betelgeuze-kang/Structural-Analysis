@@ -66,13 +66,17 @@ See [Durable job service and exact resume](durable-job-service.md).
 
 ### Demo cases
 
-The demo provider offers three samples so each honest result state is visible:
+The demo provider offers three samples so the execution and evidence boundaries are visible:
 
 | case | what it shows |
 | --- | --- |
-| Converged | analysis reaches the residual tolerance |
-| Did not converge | run stalls above tolerance (`status: failed`) |
+| Converged | analysis reaches the residual tolerance and carries explicit `converged: true` evidence |
+| Analysis failed | execution terminates with `status: failed`; numerical convergence remains **UNAVAILABLE** |
 | Convergence unavailable | no analysis attached — status is **not** inferred |
+
+`failed` is an execution outcome and never implies `converged: false`.
+Completed numerical non-convergence is represented separately as
+`status: not_converged` with explicit `converged: false` evidence.
 
 ### Previewing live mode locally
 

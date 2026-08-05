@@ -10,25 +10,33 @@ interface ResultSummaryCardProps {
 type Verdict = 'converged' | 'failed' | 'unavailable' | 'invalid' | 'unsupported'
 
 /**
- * Single-glance result card. The verdict is derived only from explicit analysis
- * data: converged true/false from the case, or UNAVAILABLE when convergence
- * information is absent. Nothing is inferred from residual history length.
+ * Single-glance result card. Explicit execution failure remains visible even
+ * though numerical convergence is unavailable. Numerical convergence is shown
+ * only from the explicit converged evidence and is never inferred from residual
+ * history, tolerance comparison, or job completion.
  */
 export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummaryCardProps): ReactElement {
   const analysis = caseV2.analysis
+  const executionFailed = analysis?.status === 'failed'
   const verdict: Verdict = !analysis
     ? 'unavailable'
-    : !isAvailableValue(analysis.converged)
-      ? analysis.converged.status
-      : analysis.converged.value
-        ? 'converged'
-        : 'failed'
+    : executionFailed
+      ? 'failed'
+      : !isAvailableValue(analysis.converged)
+        ? analysis.converged.status
+        : !convergenceAvailable
+          ? 'unavailable'
+          : analysis.converged.value
+            ? 'converged'
+            : 'failed'
 
   const verdictLabel =
     verdict === 'converged'
       ? 'Converged'
       : verdict === 'failed'
-        ? 'Did not converge'
+        ? executionFailed
+          ? 'Analysis failed'
+          : 'Did not converge'
         : `Convergence ${verdict}`
   const chipClass =
     verdict === 'converged'
@@ -50,7 +58,11 @@ export function ResultSummaryCard({ caseV2, convergenceAvailable }: ResultSummar
 
       <div className="wb2-result-head">
         <span className={`wb2-chip ${chipClass}`} data-result-chip>{verdictLabel}</span>
-        {verdict !== 'converged' && verdict !== 'failed' ? (
+        {executionFailed ? (
+          <span className="wb2-result-sub">
+            Execution failed; numerical convergence is unavailable and is not inferred.
+          </span>
+        ) : verdict !== 'converged' && verdict !== 'failed' ? (
           <span className="wb2-result-sub">
             {analysis
               ? 'Convergence status is unavailable — it is not inferred from the attached values.'
