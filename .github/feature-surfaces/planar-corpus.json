@@ -15,6 +15,7 @@
   ],
   "guard_paths": [
     ".github/feature-surfaces/planar-corpus.json",
+    ".github/workflows/public-planar-cli-wheel-ci.yml",
     "scripts/check_stack_feature_surface.py",
     "tests/test_planar_corpus_feature_surface.py"
   ],
