@@ -52,7 +52,8 @@ export function deriveRunStatus(caseV2: WorkbenchCaseV2, convergenceAvailable: b
   if (status === 'failed' || status === 'blocked' || status === 'not_run' || status === 'idle'
       || status === 'validating' || status === 'running') return status
   if (!convergenceAvailable || !isAvailableValue(converged)) return 'not_run'
-  return status
+  if (status === 'converged') return converged.value ? 'converged' : 'not_run'
+  return converged.value ? 'not_run' : 'not_converged'
 }
 
 /**
