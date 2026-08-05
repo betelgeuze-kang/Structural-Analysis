@@ -371,7 +371,7 @@ function normalizeAnalysisTruth(
     return { status: 'not_run', converged: declaredConverged }
   }
 
-  if (declaredStatus === 'blocked' || declaredStatus === 'not_run'
+  if (declaredStatus === 'failed' || declaredStatus === 'blocked' || declaredStatus === 'not_run'
       || declaredStatus === 'idle' || declaredStatus === 'validating' || declaredStatus === 'running') {
     if (isAvailableValue(declaredConverged)) {
       warnings.push(
