@@ -8,11 +8,13 @@ on:
       - "src/structural_analysis/api/planar_frame_cli.py"
       - "src/workbench-v2/**"
       - "scripts/build_planar_workbench_case.py"
+      - "scripts/compare_planar_product_replays.py"
       - "scripts/run_planar_product_replay.py"
       - "scripts/verify_bounded_planar_wheel_smoke.py"
       - "scripts/verify-workbench-product-replay.mjs"
       - "scripts/json-module-loader.mjs"
       - "tests/test_build_planar_workbench_case.py"
+      - "tests/test_compare_planar_product_replays.py"
       - "tests/frontend/workbench-v2-product-replay.spec.ts"
       - "examples/bounded_planar_frame_alpha.model-ir.v2.json"
       - "ci/bounded-planar-wheel-smoke.constraints.txt"
@@ -27,11 +29,13 @@ on:
       - "src/structural_analysis/api/planar_frame_cli.py"
       - "src/workbench-v2/**"
       - "scripts/build_planar_workbench_case.py"
+      - "scripts/compare_planar_product_replays.py"
       - "scripts/run_planar_product_replay.py"
       - "scripts/verify_bounded_planar_wheel_smoke.py"
       - "scripts/verify-workbench-product-replay.mjs"
       - "scripts/json-module-loader.mjs"
       - "tests/test_build_planar_workbench_case.py"
+      - "tests/test_compare_planar_product_replays.py"
       - "tests/frontend/workbench-v2-product-replay.spec.ts"
       - "examples/bounded_planar_frame_alpha.model-ir.v2.json"
       - "ci/bounded-planar-wheel-smoke.constraints.txt"
@@ -63,8 +67,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  canonical-wheel:
+    name: Build canonical exact-source wheel
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install contract test tools
+        run: python -m pip install pytest==8.4.2 numpy==1.26.4 scipy==1.12.0
+
+      - name: Verify projection and comparison contracts
+        run: >-
+          python -m pytest -q
+          tests/test_build_planar_workbench_case.py
+          tests/test_compare_planar_product_replays.py
+
+      - name: Build one canonical reproducible wheel
+        run: >-
+          python scripts/verify_bounded_planar_wheel_smoke.py --json
+          --os-label "canonical-ubuntu-latest"
+          --python-version "3.12"
+          --wheel-out-dir ".ci/product-replay/canonical/wheel"
+          --write ".ci/product-replay/canonical/internal-wheel-smoke.json"
+
+      - name: Upload canonical wheel and build receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: planar-product-replay-canonical-wheel-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci/product-replay/canonical/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
+
   replay:
     name: ${{ matrix.os }} / Python 3.12
+    needs: canonical-wheel
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     strategy:
@@ -89,21 +136,14 @@ jobs:
           node-version: "20.19.0"
           cache: npm
 
-      - name: Install replay test tools
-        run: |
-          python -m pip install pytest==8.4.2 numpy==1.26.4 scipy==1.12.0
-          npm ci
+      - name: Install browser replay tools
+        run: npm ci
 
-      - name: Verify Workbench projection adapter
-        run: python -m pytest -q tests/test_build_planar_workbench_case.py
-
-      - name: Build reproducible exact-source wheel
-        run: >-
-          python scripts/verify_bounded_planar_wheel_smoke.py --json
-          --os-label "${{ matrix.os }}"
-          --python-version "3.12"
-          --wheel-out-dir ".ci/product-replay/wheel"
-          --write ".ci/product-replay/internal-wheel-smoke.json"
+      - name: Download the exact canonical wheel
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: planar-product-replay-canonical-wheel-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci/product-replay
 
       - name: Run installed public planar product replay
         run: >-
@@ -128,6 +168,7 @@ jobs:
         env:
           WORKBENCH_PRODUCT_REPLAY_CASE: ${{ github.workspace }}/.ci/product-replay/runtime/workbench-case.json
           WORKBENCH_PRODUCT_REPLAY_RECEIPT: ${{ github.workspace }}/.ci/product-replay/runtime/product-replay.json
+          WORKBENCH_PRODUCT_REPLAY_BROWSER_RECEIPT: ${{ github.workspace }}/.ci/product-replay/runtime/browser-replay.json
 
       - name: Upload product replay evidence
         if: always()
@@ -135,6 +176,48 @@ jobs:
         with:
           name: planar-product-replay-${{ matrix.os }}-python-3.12
           path: .ci/product-replay/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
+
+  compare:
+    name: Compare Linux and Windows product replay
+    needs: replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: Download coordinate replay evidence
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: planar-product-replay-*-python-3.12
+          path: .ci/product-replay/coordinates
+          merge-multiple: false
+
+      - name: Compare installed product and Workbench evidence
+        run: >-
+          python scripts/compare_planar_product_replays.py
+          --artifacts-root .ci/product-replay/coordinates
+          --expected-source-commit "${{ env.SOURCE_SHA }}"
+          --out .ci/product-replay/comparison/planar-product-replay-comparison.json
+          --json
+          --fail-blocked
+
+      - name: Upload aggregate comparison receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: planar-product-replay-comparison-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci/product-replay/comparison/planar-product-replay-comparison.json
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 90
