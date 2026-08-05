@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { readFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { expect, test } from '@playwright/test'
 import { canonicalJson } from '../../src/workbench-v2/model/checksum'
@@ -8,13 +8,17 @@ const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 const routeUrl = `${baseUrl}/#/workbench-v2`
 const casePath = process.env.WORKBENCH_PRODUCT_REPLAY_CASE
 const receiptPath = process.env.WORKBENCH_PRODUCT_REPLAY_RECEIPT
+const browserReceiptPath = process.env.WORKBENCH_PRODUCT_REPLAY_BROWSER_RECEIPT
 
 function sha256Canonical(value: unknown): string {
   return `sha256:${createHash('sha256').update(canonicalJson(value)).digest('hex')}`
 }
 
 test.describe('Workbench v2 — installed planar product replay', () => {
-  test.skip(!casePath || !receiptPath, 'product replay artifacts are not configured')
+  test.skip(
+    !casePath || !receiptPath || !browserReceiptPath,
+    'product replay artifacts are not configured',
+  )
 
   test('loads the installed-wheel result and exports two independently hashed envelopes', async ({ page }) => {
     const casePayload = JSON.parse(await readFile(path.resolve(casePath!), 'utf8')) as Record<string, unknown>
@@ -73,5 +77,28 @@ test.describe('Workbench v2 — installed planar product replay', () => {
     expect(review.data_mode).toBe('live')
     expect(review.displayed_blockers).toEqual([])
     expect(bundle.provenance_contract).toEqual({ status: 'available', issues: [] })
+
+    const outputPath = path.resolve(browserReceiptPath!)
+    await mkdir(path.dirname(outputPath), { recursive: true })
+    await writeFile(
+      outputPath,
+      `${JSON.stringify({
+        schema_version: 'workbench-product-replay-browser.v1',
+        contract_pass: true,
+        source_commit_sha: replayReceipt.source_commit_sha,
+        coordinate: replayReceipt.coordinate,
+        immutable_analysis_core_sha256: bundle.immutable_analysis_core_sha256,
+        review_envelope_sha256: bundle.review_envelope_sha256,
+        analysis_result_sha256: bundle.analysis_result_sha256,
+        product_profile: core.product_profile,
+        analysis_status: (core.analysis as Record<string, unknown>).status,
+        provenance_contract: bundle.provenance_contract,
+        claim_boundary: (
+          'This receipt records deterministic Workbench import and export envelope hashes for one declared OS coordinate. '
+          + 'Cross-platform equality is established only by the aggregate comparison receipt.'
+        ),
+      }, null, 2)}\n`,
+      'utf8',
+    )
   })
 })
