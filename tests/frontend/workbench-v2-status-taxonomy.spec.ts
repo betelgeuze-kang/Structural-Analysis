@@ -3,7 +3,13 @@ import { expect, test } from '@playwright/test'
 import { validateWorkbenchCaseV2 } from '../../src/workbench-v2/model/caseSchema'
 import { deriveResultVerdict, deriveRunStatus } from '../../src/workbench-v2/model/workbenchState'
 
-function caseWithStatus(status: 'failed' | 'not_converged'): Record<string, unknown> {
+type NumericalStatus = 'converged' | 'not_converged'
+
+function caseWithStatus(
+  status: 'failed' | NumericalStatus,
+  converged: unknown = false,
+  includeConverged = true,
+): Record<string, unknown> {
   return {
     schemaVersion: 'workbench-case.v2',
     capability_profile: 'planar_frame_verified_alpha.v1',
@@ -22,7 +28,7 @@ function caseWithStatus(status: 'failed' | 'not_converged'): Record<string, unkn
       type: 'nonlinear_static',
       solver: 'test-solver',
       status,
-      converged: false,
+      ...(includeConverged ? { converged } : {}),
     },
     residualHistory: [],
   }
@@ -50,3 +56,68 @@ test('completed numerical non-convergence retains explicit false evidence and a 
   expect(deriveRunStatus(validation.value!, validation.convergenceAvailable)).toBe('not_converged')
   expect(deriveResultVerdict(validation.value!, validation.convergenceAvailable)).toBe('not_converged')
 })
+
+test.each([
+  ['converged', false],
+  ['not_converged', true],
+] as const)(
+  'contradictory %s status and converged=%s evidence is invalid, never a terminal numerical verdict',
+  (status, converged) => {
+    const validation = validateWorkbenchCaseV2(caseWithStatus(status, converged))
+
+    expect(validation.ok).toBe(true)
+    expect(validation.value?.analysis?.status).toBe(status)
+    expect(validation.value?.analysis?.converged.status).toBe('invalid')
+    expect(validation.convergenceAvailable).toBe(false)
+    expect(validation.warnings.join(' ')).toContain(`analysis.converged contradicts analysis.status=${status}`)
+    expect(deriveRunStatus(validation.value!, validation.convergenceAvailable)).toBe('not_run')
+    expect(deriveResultVerdict(validation.value!, validation.convergenceAvailable)).toBe('invalid')
+  },
+)
+
+test('a numerical status without convergence evidence remains unavailable', () => {
+  const validation = validateWorkbenchCaseV2(caseWithStatus('not_converged', false, false))
+
+  expect(validation.ok).toBe(true)
+  expect(validation.value?.analysis?.status).toBe('not_converged')
+  expect(validation.value?.analysis?.converged.status).toBe('unavailable')
+  expect(validation.convergenceAvailable).toBe(false)
+  expect(deriveRunStatus(validation.value!, validation.convergenceAvailable)).toBe('not_run')
+  expect(deriveResultVerdict(validation.value!, validation.convergenceAvailable)).toBe('unavailable')
+})
+
+test('unsupported convergence evidence remains unsupported even with a numerical status', () => {
+  const validation = validateWorkbenchCaseV2(caseWithStatus(
+    'not_converged',
+    { status: 'unsupported', reason: 'producer does not expose convergence truth' },
+  ))
+
+  expect(validation.ok).toBe(true)
+  expect(validation.value?.analysis?.converged).toEqual({
+    status: 'unsupported',
+    reason: 'producer does not expose convergence truth',
+  })
+  expect(validation.convergenceAvailable).toBe(false)
+  expect(deriveResultVerdict(validation.value!, validation.convergenceAvailable)).toBe('unsupported')
+})
+
+test.each([
+  ['converged', false],
+  ['not_converged', true],
+] as const)(
+  'direct consumers cannot bypass validation with %s status and converged=%s',
+  (status, converged) => {
+    const valid = validateWorkbenchCaseV2(caseWithStatus(status, status === 'converged'))
+    expect(valid.ok).toBe(true)
+    const contradictory = {
+      ...valid.value!,
+      analysis: {
+        ...valid.value!.analysis!,
+        converged: { status: 'available' as const, value: converged },
+      },
+    }
+
+    expect(deriveRunStatus(contradictory, true)).toBe('not_run')
+    expect(deriveResultVerdict(contradictory, true)).toBe('invalid')
+  },
+)
