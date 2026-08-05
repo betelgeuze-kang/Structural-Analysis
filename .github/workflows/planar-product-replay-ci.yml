@@ -15,6 +15,7 @@ on:
       - "scripts/json-module-loader.mjs"
       - "tests/test_build_planar_workbench_case.py"
       - "tests/test_compare_planar_product_replays.py"
+      - "tests/test_planar_product_replay_canonicalization.py"
       - "tests/frontend/workbench-v2-product-replay.spec.ts"
       - "examples/bounded_planar_frame_alpha.model-ir.v2.json"
       - "ci/bounded-planar-wheel-smoke.constraints.txt"
@@ -36,6 +37,7 @@ on:
       - "scripts/json-module-loader.mjs"
       - "tests/test_build_planar_workbench_case.py"
       - "tests/test_compare_planar_product_replays.py"
+      - "tests/test_planar_product_replay_canonicalization.py"
       - "tests/frontend/workbench-v2-product-replay.spec.ts"
       - "examples/bounded_planar_frame_alpha.model-ir.v2.json"
       - "ci/bounded-planar-wheel-smoke.constraints.txt"
@@ -91,6 +93,7 @@ jobs:
           python -m pytest -q
           tests/test_build_planar_workbench_case.py
           tests/test_compare_planar_product_replays.py
+          tests/test_planar_product_replay_canonicalization.py
 
       - name: Build one canonical reproducible wheel
         run: >-
