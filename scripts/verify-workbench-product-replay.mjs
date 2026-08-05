@@ -28,6 +28,19 @@ function platformCommand(command) {
   return command
 }
 
+function logSpawnFailure(executable, args, error) {
+  console.error(
+    `Failed to start command: ${JSON.stringify({
+      command: executable,
+      args,
+      cwd: rootDir,
+      platform: process.platform,
+      code: error?.code ?? null,
+      message: error?.message ?? String(error),
+    })}`,
+  )
+}
+
 function run(command, args, env = {}) {
   return new Promise((resolve) => {
     const executable = platformCommand(command)
@@ -39,23 +52,22 @@ function run(command, args, env = {}) {
       settled = true
       resolve(code)
     }
-    const child = spawn(executable, args, {
-      cwd: rootDir,
-      stdio: 'inherit',
-      env: { ...process.env, ...env },
-      windowsHide: true,
-    })
+    let child
+    try {
+      child = spawn(executable, args, {
+        cwd: rootDir,
+        stdio: 'inherit',
+        env: { ...process.env, ...env },
+        windowsHide: true,
+        shell: process.platform === 'win32',
+      })
+    } catch (error) {
+      logSpawnFailure(executable, args, error)
+      settle(1)
+      return
+    }
     child.once('error', (error) => {
-      console.error(
-        `Failed to start command: ${JSON.stringify({
-          command: executable,
-          args,
-          cwd: rootDir,
-          platform: process.platform,
-          code: error.code ?? null,
-          message: error.message,
-        })}`,
-      )
+      logSpawnFailure(executable, args, error)
       settle(1)
     })
     child.once('close', (code, signal) => {
