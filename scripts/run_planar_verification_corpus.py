@@ -69,6 +69,49 @@ def _peak_rss_bytes() -> int:
     return int(value if os.uname().sysname == "Darwin" else value * 1024)
 
 
+def _terminal_reason_code(result_ir: Mapping[str, Any]) -> str | None:
+    unsupported = result_ir.get("unsupported_features")
+    if not isinstance(unsupported, list):
+        return None
+    for row in unsupported:
+        if not isinstance(row, Mapping):
+            continue
+        detail = row.get("detail")
+        if isinstance(detail, str) and "terminal_reason=" in detail:
+            reason = detail.split("terminal_reason=", 1)[1]
+            reason = reason.split(".", 1)[0].split(",", 1)[0].strip()
+            if reason:
+                return reason
+        reason_code = row.get("reason_code")
+        if isinstance(reason_code, str) and reason_code:
+            return reason_code
+    return None
+
+
+def _classify_execution(
+    result_status: object,
+    result_ir: Mapping[str, Any],
+) -> tuple[str, str, str | None]:
+    """Separate execution state from numerical convergence semantics."""
+
+    public_status = str(result_status)
+    internal_status = str(result_ir.get("status", ""))
+    reason_code = _terminal_reason_code(result_ir)
+    if internal_status == "blocked":
+        return (
+            "blocked",
+            "not_applicable",
+            reason_code or "solver_execution_blocked",
+        )
+    if public_status == "converged":
+        return "completed", "converged", None
+    if public_status == "not_converged":
+        return "completed", "not_converged", reason_code
+    if public_status == "not_run":
+        return "not_run", "not_applicable", reason_code
+    return "failed", "not_applicable", reason_code or "solver_execution_failed"
+
+
 def execute_case(
     case_id: str,
     *,
@@ -114,15 +157,15 @@ def execute_case(
         checkpoint_available = True
 
     result_ir = result.result_ir if isinstance(result.result_ir, Mapping) else {}
-    engineering = (
-        result_ir.get("engineering_result_ir")
-        if isinstance(result_ir, Mapping)
-        else None
-    )
+    engineering = result_ir.get("engineering_result_ir")
     engineering_hash = (
         engineering.get("engineering_result_hash")
         if isinstance(engineering, Mapping)
         else None
+    )
+    execution_status, numerical_status, reason_code = _classify_execution(
+        result.status,
+        result_ir,
     )
     row = {
         "schema_version": "planar-corpus-execution-case.v1",
@@ -130,6 +173,10 @@ def execute_case(
         "profile": generator.PROFILE,
         "contract_pass": report.contract_pass,
         "status": result.status,
+        "internal_status": result_ir.get("status"),
+        "execution_status": execution_status,
+        "numerical_status": numerical_status,
+        "reason_code": reason_code,
         "converged": result.converged,
         "artifact_contract_pass": report.artifact_contract_pass,
         "execution_contract_pass": report.execution_contract_pass,
@@ -161,6 +208,33 @@ def execute_case(
     return row
 
 
+def _required_convergence_error(rows: Sequence[Mapping[str, Any]]) -> str | None:
+    groups = (
+        (
+            "corpus_cases_blocked",
+            [row["case_id"] for row in rows if row["execution_status"] == "blocked"],
+        ),
+        (
+            "corpus_cases_failed",
+            [row["case_id"] for row in rows if row["execution_status"] == "failed"],
+        ),
+        (
+            "corpus_cases_not_run",
+            [row["case_id"] for row in rows if row["execution_status"] == "not_run"],
+        ),
+        (
+            "corpus_cases_not_converged",
+            [
+                row["case_id"]
+                for row in rows
+                if row["numerical_status"] == "not_converged"
+            ],
+        ),
+    )
+    failures = [f"{label}:{','.join(case_ids)}" for label, case_ids in groups if case_ids]
+    return ";".join(failures) if failures else None
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", choices=tuple(generator.CASE_SIZES), action="append")
@@ -185,17 +259,24 @@ def main(argv: Sequence[str] | None = None) -> int:
         for case_id in selected
     ]
     if args.require_converged:
-        blocked = [row["case_id"] for row in rows if row["converged"] is not True]
-        if blocked:
-            raise PlanarCorpusExecutionError(
-                "corpus_cases_not_converged:" + ",".join(blocked)
-            )
+        failure = _required_convergence_error(rows)
+        if failure:
+            raise PlanarCorpusExecutionError(failure)
     receipt = {
         "schema_version": "planar-corpus-execution-matrix.v1",
         "contract_pass": all(row["artifact_contract_pass"] is True for row in rows),
         "profile": generator.PROFILE,
         "case_count": len(rows),
-        "converged_case_count": sum(row["converged"] is True for row in rows),
+        "completed_case_count": sum(
+            row["execution_status"] == "completed" for row in rows
+        ),
+        "blocked_case_count": sum(row["execution_status"] == "blocked" for row in rows),
+        "failed_case_count": sum(row["execution_status"] == "failed" for row in rows),
+        "not_run_case_count": sum(row["execution_status"] == "not_run" for row in rows),
+        "converged_case_count": sum(row["numerical_status"] == "converged" for row in rows),
+        "not_converged_case_count": sum(
+            row["numerical_status"] == "not_converged" for row in rows
+        ),
         "cases": rows,
         "claim_boundary": (
             "This matrix records internal deterministic execution and resource evidence. "
