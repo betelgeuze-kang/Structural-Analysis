@@ -1,10 +1,25 @@
 name: OpenSees CalculiX Current Source Clean Runner
 
 # Same-operator technical execution only. The runtime assets remain outside the
-# repository and are not uploaded. A passing run does not establish independent
-# reproduction, legal approval, Verification Level 2, or release authority.
+# repository and are not uploaded. A passing pull-request or main run does not
+# establish independent reproduction, legal approval, Verification Level 2, or
+# release authority.
 
 on:
+  pull_request:
+    paths:
+      - "src/structural_analysis/**"
+      - "scripts/run_external_vv_clean_runner.sh"
+      - "scripts/run_external_code_to_code_technical_receipt.py"
+      - "scripts/run_external_modal_buckling_technical_receipt.py"
+      - "scripts/validate_external_vv_clean_runner.py"
+      - "scripts/validate_external_vv_operator_attestation.py"
+      - "benchmarks/clean-runners/opensees-calculix/**"
+      - "tests/test_external_vv_clean_runner.py"
+      - "tests/test_external_vv_operator_attestation.py"
+      - "examples/**"
+      - "pyproject.toml"
+      - ".github/workflows/opensees-calculix-current-source.yml"
   push:
     branches: ["main"]
   workflow_dispatch:
@@ -16,6 +31,9 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   SOURCE_SHA: "${{ github.sha }}"
   EXTERNAL_ASSET_DIR: "/tmp/structural-analysis-external-assets"
+  HOST_RUNTIME_DIR: ".ci/external-vv-host-runtime"
+  HOST_CODE_RECEIPT: "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json"
+  HOST_MODAL_RECEIPT: "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json"
   RECEIPT_DIR: "artifacts/vv/opensees_calculix_clean_runner"
   SUMMARY_RECEIPT: "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json"
   ATTESTATION_BUNDLE: "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.sigstore.json"
@@ -27,17 +45,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  execute-and-attest:
-    if: github.ref == 'refs/heads/main'
+  execute-technical:
     permissions:
       contents: read
       id-token: write
       attestations: write
       artifact-metadata: write
     runs-on: ubuntu-22.04
-    timeout-minutes: 45
+    timeout-minutes: 55
     steps:
-      - name: Checkout exact current-main source
+      - name: Checkout exact current source
         uses: actions/checkout@v6
         with:
           ref: ${{ env.SOURCE_SHA }}
@@ -61,6 +78,12 @@ jobs:
             openseespy==3.7.1.2 \
             openseespylinux==3.7.1.2
           sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            libblas3 \
+            libgfortran5 \
+            liblapack3 \
+            libopenmpi3 \
+            libquadmath0
           cd "$EXTERNAL_ASSET_DIR"
           apt-get download \
             calculix-ccx=2.17-3 \
@@ -92,10 +115,71 @@ jobs:
           print("external runtime assets: exact hashes verified")
           PY
 
+      - name: Prepare exact host external runtimes
+        run: |
+          rm -rf "$HOST_RUNTIME_DIR"
+          mkdir -p "$HOST_RUNTIME_DIR/opensees" "$HOST_RUNTIME_DIR/calculix-root" "$HOST_RUNTIME_DIR/mode-vectors"
+          python -m pip install \
+            --no-deps \
+            --target "$HOST_RUNTIME_DIR/opensees" \
+            "$EXTERNAL_ASSET_DIR/openseespy-3.7.1.2-py3-none-any.whl" \
+            "$EXTERNAL_ASSET_DIR/openseespylinux-3.7.1.2-py3-none-any.whl"
+          for asset in \
+            calculix-ccx_2.17-3_amd64.deb \
+            libarpack2_3.8.0-1_amd64.deb \
+            libspooles2.2_2.2-14_amd64.deb
+          do
+            dpkg-deb --extract "$EXTERNAL_ASSET_DIR/$asset" "$HOST_RUNTIME_DIR/calculix-root"
+          done
+
+      - name: Probe exact host CalculiX runtime
+        run: |
+          binary="$HOST_RUNTIME_DIR/calculix-root/usr/bin/ccx"
+          library_dir="$HOST_RUNTIME_DIR/calculix-root/usr/lib/x86_64-linux-gnu"
+          ldd "$binary"
+          set +e
+          version_output="$(LD_LIBRARY_PATH="$library_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$binary" -v 2>&1)"
+          version_rc=$?
+          set -e
+          printf '%s\n' "$version_output"
+          if ! grep -Eq 'Version[[:space:]]+2\.17' <<<"$version_output"; then
+            echo "CalculiX runtime version output did not contain Version 2.17" >&2
+            exit 1
+          fi
+          if [[ "$version_rc" -ne 0 && "$version_rc" -ne 201 ]]; then
+            echo "CalculiX runtime version probe returned $version_rc" >&2
+            exit 1
+          fi
+
+      - name: Execute exact current-source host technical references
+        run: |
+          shared=(
+            --python-executable "$(command -v python)"
+            --opensees-python-path "$HOST_RUNTIME_DIR/opensees"
+            --opensees-license "$HOST_RUNTIME_DIR/opensees/openseespy-3.7.1.2.dist-info/METADATA"
+            --calculix-binary "$HOST_RUNTIME_DIR/calculix-root/usr/bin/ccx"
+            --calculix-library-dir "$HOST_RUNTIME_DIR/calculix-root/usr/lib/x86_64-linux-gnu"
+            --calculix-license "$HOST_RUNTIME_DIR/calculix-root/usr/share/doc/calculix-ccx/copyright"
+          )
+          for asset in "$EXTERNAL_ASSET_DIR"/*; do
+            shared+=(--external-asset "$asset")
+          done
+          python scripts/run_external_code_to_code_technical_receipt.py \
+            --out "$HOST_CODE_RECEIPT" \
+            "${shared[@]}"
+          python scripts/run_external_modal_buckling_technical_receipt.py \
+            --out "$HOST_MODAL_RECEIPT" \
+            --vector-dir "$HOST_RUNTIME_DIR/mode-vectors" \
+            "${shared[@]}"
+          python scripts/run_external_code_to_code_technical_receipt.py \
+            --out "$HOST_CODE_RECEIPT" --check
+          python scripts/run_external_modal_buckling_technical_receipt.py \
+            --out "$HOST_MODAL_RECEIPT" --check
+
       - name: Execute network-disabled read-only clean runner
         run: bash scripts/run_external_vv_clean_runner.sh "$EXTERNAL_ASSET_DIR"
 
-      - name: Verify fresh current-source execution boundary
+      - name: Verify fresh current-source technical boundary
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -105,6 +189,7 @@ jobs:
           payload = json.loads(Path(os.environ["SUMMARY_RECEIPT"]).read_text())
           claims = payload.get("claims", {})
           blockers = payload.get("blockers_remaining", [])
+          parity = payload.get("cross_environment_parity", {})
           required = {
               "source_commit_sha": os.environ["SOURCE_SHA"],
               "technical_contract_pass": True,
@@ -116,20 +201,30 @@ jobs:
               raise SystemExit("clean_runner_fresh_reproduction_missing")
           if claims.get("actual_external_solver_execution") is not True:
               raise SystemExit("clean_runner_external_execution_missing")
+          if parity.get("source_set_match") is not True:
+              raise SystemExit("clean_runner_current_source_set_mismatch")
+          if parity.get("metric_set_match") is not True:
+              raise SystemExit("clean_runner_current_metric_set_mismatch")
+          if parity.get("numerical_contract_pass") is not True:
+              raise SystemExit("clean_runner_cross_environment_numerical_parity_failed")
           if claims.get("verification_level_2") is not False:
               raise SystemExit("clean_runner_level2_promotion_forbidden")
+          if claims.get("independent_operator_attestation") is not False:
+              raise SystemExit("clean_runner_independent_operator_promotion_forbidden")
           if "external_runtime_current_source_rerun_missing" in blockers:
               raise SystemExit("clean_runner_current_source_blocker_not_cleared")
           print("current-source OpenSees/CalculiX clean runner: technical pass")
           PY
 
-      - name: Attest clean-runner summary provenance
+      - name: Attest main clean-runner summary provenance
+        if: github.ref == 'refs/heads/main'
         id: attest
         uses: actions/attest@v4
         with:
           subject-path: ${{ env.SUMMARY_RECEIPT }}
 
-      - name: Retain and verify exact provenance bundle
+      - name: Retain and verify exact main provenance bundle
+        if: github.ref == 'refs/heads/main'
         run: |
           cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE"
           gh attestation verify "$SUMMARY_RECEIPT" \
@@ -145,6 +240,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: opensees-calculix-current-source-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ env.RECEIPT_DIR }}
+          path: |
+            ${{ env.RECEIPT_DIR }}
+            ${{ env.HOST_CODE_RECEIPT }}
+            ${{ env.HOST_MODAL_RECEIPT }}
           if-no-files-found: error
           retention-days: 90

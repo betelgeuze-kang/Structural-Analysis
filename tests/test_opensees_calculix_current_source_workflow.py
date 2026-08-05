@@ -7,25 +7,51 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/opensees-calculix-current-source.yml"
 
 
-def test_workflow_runs_exact_current_main_in_isolated_clean_runner() -> None:
-    source = WORKFLOW.read_text(encoding="utf-8")
+def _workflow_source() -> str:
+    return WORKFLOW.read_text(encoding="utf-8")
 
-    assert 'branches: ["main"]' in source
-    assert "workflow_dispatch:" in source
-    assert "pull_request:" not in source
-    assert "if: github.ref == 'refs/heads/main'" in source
-    assert "runs-on: ubuntu-22.04" in source
-    assert "ref: ${{ env.SOURCE_SHA }}" in source
-    assert "scripts/run_external_vv_clean_runner.sh" in source
-    assert '"$EXTERNAL_ASSET_DIR"' in source
-    assert "--network none" not in source  # enforced inside the reviewed wrapper
-    assert "same_operator_container_isolated_reproduction" in source
-    assert "actual_external_solver_execution" in source
-    assert "external_runtime_current_source_rerun_missing" in source
+
+def _job_block(source: str, name: str) -> str:
+    marker = f"  {name}:\n"
+    assert marker in source
+    tail = source.split(marker, 1)[1]
+    next_job = tail.find("\n  ")
+    return tail if next_job < 0 else tail[:next_job]
+
+
+def _step_block(source: str, name: str) -> str:
+    marker = f"      - name: {name}\n"
+    assert marker in source
+    tail = source.split(marker, 1)[1]
+    next_step = tail.find("\n      - name: ")
+    return tail if next_step < 0 else tail[:next_step]
+
+
+def test_workflow_runs_exact_current_source_in_pr_and_main_lanes() -> None:
+    source = _workflow_source()
+    workflow_header = source.split("jobs:", 1)[0]
+    job = _job_block(source, "execute-technical")
+
+    assert "pull_request:" in workflow_header
+    assert 'branches: ["main"]' in workflow_header
+    assert "workflow_dispatch:" in workflow_header
+    assert "runs-on: ubuntu-22.04" in job
+    assert "ref: ${{ env.SOURCE_SHA }}" in job
+    assert "scripts/run_external_vv_clean_runner.sh" in job
+    assert '"$EXTERNAL_ASSET_DIR"' in job
+    assert "--network none" not in job  # enforced inside the reviewed wrapper
+    assert "same_operator_container_isolated_reproduction" in job
+    assert "actual_external_solver_execution" in job
+    assert "external_runtime_current_source_rerun_missing" in job
+
+    attest = _step_block(source, "Attest main clean-runner summary provenance")
+    verify = _step_block(source, "Retain and verify exact main provenance bundle")
+    assert "if: github.ref == 'refs/heads/main'" in attest
+    assert "if: github.ref == 'refs/heads/main'" in verify
 
 
 def test_workflow_pins_assets_and_never_uploads_solver_packages() -> None:
-    source = WORKFLOW.read_text(encoding="utf-8")
+    source = _workflow_source()
 
     for name, digest in {
         "openseespy-3.7.1.2-py3-none-any.whl": (
@@ -46,26 +72,34 @@ def test_workflow_pins_assets_and_never_uploads_solver_packages() -> None:
     }.items():
         assert name in source
         assert digest in source
+
     assert 'EXTERNAL_ASSET_DIR: "/tmp/' in source
-    assert "path: ${{ env.RECEIPT_DIR }}" in source
-    upload_section = source.split("- name: Upload receipts without external runtime assets", 1)[1]
-    assert "EXTERNAL_ASSET_DIR" not in upload_section
+    upload = _step_block(source, "Upload receipts without external runtime assets")
+    assert "path: |" in upload
+    assert "${{ env.RECEIPT_DIR }}" in upload
+    assert "${{ env.HOST_CODE_RECEIPT }}" in upload
+    assert "${{ env.HOST_MODAL_RECEIPT }}" in upload
+    assert "EXTERNAL_ASSET_DIR" not in upload
 
 
-def test_workflow_attests_without_promoting_level2() -> None:
-    source = WORKFLOW.read_text(encoding="utf-8")
+def test_workflow_attests_main_only_without_promoting_level2() -> None:
+    source = _workflow_source()
     workflow_header = source.split("jobs:", 1)[0]
-    job = source.split("  execute-and-attest:", 1)[1]
+    job = _job_block(source, "execute-technical")
+    attest = _step_block(source, "Attest main clean-runner summary provenance")
+    verify = _step_block(source, "Retain and verify exact main provenance bundle")
+    boundary = _step_block(source, "Verify fresh current-source technical boundary")
 
     assert "id-token: write" not in workflow_header
     assert "attestations: write" not in workflow_header
     assert "id-token: write" in job
     assert "attestations: write" in job
     assert "artifact-metadata: write" in job
-    assert "uses: actions/attest@v4" in source
-    assert "steps.attest.outputs.bundle-path" in source
-    assert "gh attestation verify" in source
-    assert "--source-digest" in source
-    assert "--source-ref refs/heads/main" in source
-    assert "--deny-self-hosted-runners" in source
-    assert 'claims.get("verification_level_2") is not False' in source
+    assert "uses: actions/attest@v4" in attest
+    assert "steps.attest.outputs.bundle-path" in verify
+    assert "gh attestation verify" in verify
+    assert "--source-digest" in verify
+    assert "--source-ref refs/heads/main" in verify
+    assert "--deny-self-hosted-runners" in verify
+    assert 'claims.get("verification_level_2") is not False' in boundary
+    assert 'claims.get("independent_operator_attestation") is not False' in boundary
