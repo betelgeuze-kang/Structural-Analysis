@@ -7,6 +7,8 @@ on:
       - "scripts/materialize_planar_verification_corpus.py"
       - "scripts/run_planar_verification_corpus.py"
       - "tests/test_materialize_planar_verification_corpus.py"
+      - "tests/test_run_planar_verification_corpus_status.py"
+      - "tests/test_sparse_factorization_medium_scope.py"
       - "src/structural_analysis/api/planar_frame.py"
       - "src/structural_analysis/adapters/**"
       - "src/structural_analysis/model_ir/**"
@@ -21,6 +23,8 @@ on:
       - "scripts/materialize_planar_verification_corpus.py"
       - "scripts/run_planar_verification_corpus.py"
       - "tests/test_materialize_planar_verification_corpus.py"
+      - "tests/test_run_planar_verification_corpus_status.py"
+      - "tests/test_sparse_factorization_medium_scope.py"
       - "src/structural_analysis/api/planar_frame.py"
       - "src/structural_analysis/adapters/**"
       - "src/structural_analysis/model_ir/**"
@@ -66,8 +70,12 @@ jobs:
       - name: Install package and test tools
         run: python -m pip install -e .[dev]
 
-      - name: Validate all generated ModelIR and execute M1 seed
-        run: python -m pytest -q tests/test_materialize_planar_verification_corpus.py
+      - name: Validate corpus, execution taxonomy, and exact diagnostic scope
+        run: >-
+          python -m pytest -q
+          tests/test_materialize_planar_verification_corpus.py
+          tests/test_run_planar_verification_corpus_status.py
+          tests/test_sparse_factorization_medium_scope.py
 
   execute-case:
     needs: contract-and-seed
