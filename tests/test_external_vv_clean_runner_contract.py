@@ -51,6 +51,29 @@ def _json(path: Path) -> dict:
     return payload
 
 
+def _is_ancestor(ancestor: str, descendant: str) -> bool:
+    return (
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+        ).returncode
+        == 0
+    )
+
+
+def _direct_parents(commit: str) -> set[str]:
+    raw_commit = subprocess.check_output(
+        ["git", "cat-file", "-p", commit], cwd=ROOT, text=True
+    )
+    return {
+        line.removeprefix("parent ")
+        for line in raw_commit.splitlines()
+        if line.startswith("parent ")
+    }
+
+
 def test_external_receipt_documents_do_not_copy_volatile_replay_hashes() -> None:
     document = (
         ROOT / "docs/external-code-to-code-technical-execution.md"
@@ -219,31 +242,15 @@ def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sourc
         text=True,
     ).strip() == "true"
     if recorded_object_available:
-        ancestry = subprocess.run(
-            ["git", "merge-base", "--is-ancestor", recorded_commit, head],
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-        )
-        if ancestry.returncode != 0:
-            if shallow_repository:
-                raw_head = subprocess.check_output(
-                    ["git", "cat-file", "-p", head], cwd=ROOT, text=True
-                )
-                direct_parents = {
-                    line.removeprefix("parent ")
-                    for line in raw_head.splitlines()
-                    if line.startswith("parent ")
-                }
-                assert recorded_commit in direct_parents
-            else:
-                shared_history = subprocess.run(
-                    ["git", "merge-base", recorded_commit, head],
-                    cwd=ROOT,
-                    check=False,
-                    capture_output=True,
-                )
-                assert shared_history.returncode == 0
+        ancestry_verified = _is_ancestor(recorded_commit, head)
+        if not ancestry_verified and shallow_repository:
+            parents = _direct_parents(head)
+            assert parents
+            ancestry_verified = any(
+                parent == recorded_commit or _is_ancestor(recorded_commit, parent)
+                for parent in parents
+            )
+        assert ancestry_verified
     else:
         assert shallow_repository
 
