@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/opensees-calculix-current-source.yml"
+_JOB_HEADING = re.compile(r"(?m)^  [A-Za-z0-9_-]+:\s*$")
 
 
 def _workflow_source() -> str:
@@ -15,8 +17,8 @@ def _job_block(source: str, name: str) -> str:
     marker = f"  {name}:\n"
     assert marker in source
     tail = source.split(marker, 1)[1]
-    next_job = tail.find("\n  ")
-    return tail if next_job < 0 else tail[:next_job]
+    next_job = _JOB_HEADING.search(tail)
+    return tail if next_job is None else tail[: next_job.start()]
 
 
 def _step_block(source: str, name: str) -> str:
