@@ -480,6 +480,97 @@ def test_matrix_free_fgmres_marks_formula_bound_operator_outputs() -> None:
     assert result.receipt["cross_platform_deterministic_recurrence_claim"] is False
 
 
+def test_matrix_free_fgmres_binds_complete_exact_restart_identity() -> None:
+    problem = _problem()
+    exact_restart_binding = {
+        "source_commit_sha": "a" * 40,
+        "model_source_sha256": "sha256:" + "b" * 64,
+        "equilibrium_operator_binding_hash": "sha256:" + "c" * 64,
+        "complete": True,
+    }
+    problem.matrix_free_current_tangent_operator_binding = lambda: {
+        "schema_version": (
+            MATRIX_FREE_STATE_TANGENT_OPERATOR_BINDING_SCHEMA_VERSION
+        ),
+        "case_id": problem.case_id,
+        "equation_count": problem.equation_count,
+        "free_equation_order_data_hash": "sha256:" + "1" * 64,
+        "residual_formula_hash": "sha256:" + "2" * 64,
+        "current_tangent_action_contract": "synthetic-analytic-action.v1",
+        "reference_load_free_n_data_hash": "sha256:" + "3" * 64,
+        "residual_force_unit": "kN",
+        "displacement_unit": "m",
+        "tangent_action_unit": "kN/m",
+        "load_factor_unit": "dimensionless",
+        "exact_restart_binding": exact_restart_binding,
+    }
+
+    solver = create_matrix_free_cpu_fgmres_state_tangent_solver(
+        problem,
+        config=_config(),
+    )
+    result = solver.solve_at_state(
+        problem,
+        np.asarray([0.12, -0.08, 0.05, -0.03], dtype=np.float64),
+        np.asarray([1.2, -0.5, 0.8, -0.3], dtype=np.float64),
+        load_factor=0.7,
+        solve_id="exact-restart-bound-operator",
+    )
+
+    assert result.contract_pass is True
+    assert result.receipt["operator_binding"]["exact_restart_binding"] == (
+        exact_restart_binding
+    )
+
+
+@pytest.mark.parametrize(
+    "exact_restart_binding",
+    [
+        {
+            "source_commit_sha": "not-a-commit",
+            "model_source_sha256": "sha256:" + "b" * 64,
+            "equilibrium_operator_binding_hash": "sha256:" + "c" * 64,
+            "complete": True,
+        },
+        {
+            "source_commit_sha": "a" * 40,
+            "model_source_sha256": "invalid",
+            "equilibrium_operator_binding_hash": "sha256:" + "c" * 64,
+            "complete": True,
+        },
+        {
+            "source_commit_sha": "a" * 40,
+            "model_source_sha256": "sha256:" + "b" * 64,
+            "equilibrium_operator_binding_hash": "sha256:" + "c" * 64,
+            "complete": False,
+        },
+    ],
+)
+def test_matrix_free_fgmres_rejects_incomplete_exact_restart_identity(
+    exact_restart_binding: dict[str, object],
+) -> None:
+    problem = _problem()
+    problem.matrix_free_current_tangent_operator_binding = lambda: {
+        "schema_version": (
+            MATRIX_FREE_STATE_TANGENT_OPERATOR_BINDING_SCHEMA_VERSION
+        ),
+        "case_id": problem.case_id,
+        "equation_count": problem.equation_count,
+        "free_equation_order_data_hash": "sha256:" + "1" * 64,
+        "residual_formula_hash": "sha256:" + "2" * 64,
+        "current_tangent_action_contract": "synthetic-analytic-action.v1",
+        "reference_load_free_n_data_hash": "sha256:" + "3" * 64,
+        "residual_force_unit": "kN",
+        "displacement_unit": "m",
+        "tangent_action_unit": "kN/m",
+        "load_factor_unit": "dimensionless",
+        "exact_restart_binding": exact_restart_binding,
+    }
+
+    with pytest.raises(MatrixFreeCPUFGMRESError, match="exact restart"):
+        create_matrix_free_cpu_fgmres_state_tangent_solver(problem)
+
+
 def test_matrix_free_fgmres_rejects_mismatched_operator_binding() -> None:
     problem = _problem()
     problem.matrix_free_current_tangent_operator_binding = lambda: {

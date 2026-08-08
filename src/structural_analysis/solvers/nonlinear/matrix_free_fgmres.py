@@ -332,8 +332,14 @@ def _operator_binding_payload(
         "operator_callback_reference_evaluator",
         "operator_callback_outputs_in_contract",
     }
+    restart_binding_fields = {"exact_restart_binding"}
     raw_fields = set(raw)
-    if raw_fields not in (required, required | contract_bound_fields):
+    if raw_fields not in (
+        required,
+        required | restart_binding_fields,
+        required | contract_bound_fields,
+        required | contract_bound_fields | restart_binding_fields,
+    ):
         raise MatrixFreeCPUFGMRESError(
             "matrix-free operator binding fields are not exact"
         )
@@ -376,6 +382,41 @@ def _operator_binding_payload(
         raise MatrixFreeCPUFGMRESError(
             "matrix-free operator binding units are unsupported"
         )
+    if restart_binding_fields <= raw_fields:
+        restart_binding = raw["exact_restart_binding"]
+        if not isinstance(restart_binding, dict) or set(restart_binding) != {
+            "source_commit_sha",
+            "model_source_sha256",
+            "equilibrium_operator_binding_hash",
+            "complete",
+        }:
+            raise MatrixFreeCPUFGMRESError(
+                "matrix-free exact restart binding fields are not exact"
+            )
+        source_commit_sha = restart_binding["source_commit_sha"]
+        if (
+            not isinstance(source_commit_sha, str)
+            or len(source_commit_sha) not in {40, 64}
+            or any(
+                character not in "0123456789abcdef"
+                for character in source_commit_sha
+            )
+        ):
+            raise MatrixFreeCPUFGMRESError(
+                "matrix-free exact restart source commit is invalid"
+            )
+        for name in (
+            "model_source_sha256",
+            "equilibrium_operator_binding_hash",
+        ):
+            if not _is_sha256(restart_binding[name]):
+                raise MatrixFreeCPUFGMRESError(
+                    f"matrix-free exact restart {name} is invalid"
+                )
+        if restart_binding["complete"] is not True:
+            raise MatrixFreeCPUFGMRESError(
+                "matrix-free exact restart binding must be complete"
+            )
     if contract_bound_fields <= raw_fields:
         for name in (
             "current_tangent_operator_contract_hash",
