@@ -20,6 +20,10 @@ for candidate in (ROOT / "scripts", ROOT / "src", ROOT / "implementation/phase1"
     sys.path.insert(0, str(candidate))
 
 from release_evidence_metadata import file_sha256, git_head, input_checksums  # noqa: E402
+from build_g1_mgt_material_family_adequacy_audit import (  # noqa: E402
+    DEFAULT_OUT as MATERIAL_FAMILY_AUDIT,
+    validate as validate_material_family_audit,
+)
 from run_g1_mgt_device_fgmres import (  # noqa: E402
     DEFAULT_ACCEPTED_STATE, DEFAULT_COMMITTED_MATERIAL, DEFAULT_INITIAL_MATERIAL,
     DEFAULT_OUT as FGMRES_RECEIPT, DEFAULT_REJECTED_MATERIAL, DEFAULT_SOLUTION,
@@ -56,6 +60,7 @@ VERSION = "g1-mgt-nonlinear-result-ir-receipt.v1"
 SOURCE_PATHS = (
     FGMRES_RECEIPT, DEFAULT_ACCEPTED_STATE, DEFAULT_SOLUTION, DEFAULT_INITIAL_MATERIAL,
     DEFAULT_COMMITTED_MATERIAL, DEFAULT_REJECTED_MATERIAL,
+    MATERIAL_FAMILY_AUDIT,
     Path("scripts/build_g1_mgt_nonlinear_result_ir.py"), SCHEMA,
     Path("src/structural_analysis/engine_v2/contracts/nonlinear_result.py"),
     Path("src/structural_analysis/engine_v2/contracts/result_ir.py"),
@@ -145,6 +150,7 @@ class _Adapter:
 class _DiagnosticAdapter:
     snapshot: DiagnosticIRSourceSnapshot
     source: dict[str, Any]
+    material_family_audit: dict[str, Any]
     terminal: NonlinearTerminalReceipt
 
     def validate_diagnostic_ir_source(self) -> DiagnosticIRSourceSnapshot:
@@ -157,6 +163,32 @@ class _DiagnosticAdapter:
             raise ValueError("diagnostic_fallback_or_regularization_observed")
         if self.snapshot.source_receipt_hash != self.source["receipt_hash"]:
             raise ValueError("diagnostic_receipt_hash_mismatch")
+        audit_claims = self.material_family_audit["claims"]
+        if not (
+            audit_claims["actual_mgt_full_mesh_material_family_order_bound"]
+            and audit_claims["accepted_state_family_strains_measured"]
+            and not audit_claims[
+                "source_authoritative_nonlinear_material_parameters_complete"
+            ]
+            and not audit_claims[
+                "nonlinear_material_family_breadth_connected_to_equilibrium"
+            ]
+        ):
+            raise ValueError("diagnostic_material_family_audit_claims_invalid")
+        material_entry = next(
+            (
+                row
+                for row in self.snapshot.entries
+                if row.code == "nonlinear_material_family_breadth_unavailable"
+            ),
+            None,
+        )
+        if (
+            material_entry is None
+            or self.material_family_audit["receipt_hash"]
+            not in material_entry.evidence_hashes
+        ):
+            raise ValueError("diagnostic_material_family_audit_not_bound")
         return self.snapshot
 
 
@@ -164,6 +196,9 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
     root = root.resolve()
     if not _clean(root): raise RuntimeError("result_ir_requires_clean_sources")
     source = _read(root / FGMRES_RECEIPT)
+    material_family_audit = validate_material_family_audit(
+        _read(root / MATERIAL_FAMILY_AUDIT), root=root, current=True
+    )
     _, _, _, context = build_references(root=root)
     count = int(source["material_lifecycle"]["integration_point_count"])
     material_shape = (count, len(MATERIAL_STATE_FIELD_NAMES))
@@ -262,7 +297,10 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
         create_diagnostic_entry(
             code="nonlinear_material_family_breadth_unavailable",
             path="/material/nonlinear_family_breadth", severity="warning",
-            disposition="unsupported", evidence_hashes=(bundle.bundle_hash,)),
+            disposition="unsupported", evidence_hashes=(
+                bundle.bundle_hash,
+                material_family_audit["receipt_hash"],
+            )),
         create_diagnostic_entry(
             code="independent_gfx1100_execution_unavailable",
             path="/runtime/gfx1100", severity="warning", disposition="unsupported",
@@ -282,7 +320,9 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
         backend_receipt_hash=backend_hashes["hip"], entries=diagnostic_entries)
     diagnostic = create_adapter_bound_diagnostic_ir(
         diagnostic_id="diagnostic.g1.mgt.hip.terminal",
-        source_adapter=_DiagnosticAdapter(diagnostic_snapshot, source, terminal))
+        source_adapter=_DiagnosticAdapter(
+            diagnostic_snapshot, source, material_family_audit, terminal
+        ))
     diagnostic_manifest = diagnostic.to_manifest()
     binding_parity_keys = (
         "model_ir_content_hash", "execution_plan_hash", "equation_scaling_hash",
@@ -308,7 +348,10 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
         "source": {"repository_commit_sha": git_head(root),
                    "source_paths_clean_at_execution": True,
                    "input_checksums": input_checksums(SOURCE_PATHS, repo_root=root),
-                   "fgmres_receipt_hash": source["receipt_hash"]},
+                   "fgmres_receipt_hash": source["receipt_hash"],
+                   "material_family_adequacy_audit_hash": (
+                       material_family_audit["receipt_hash"]
+                   )},
         "terminal": {"load_factor": 1.0, "dof_count": int(displacement.size),
                      "free_equation_count": int(accepted_state.size),
                      "cpu_residual_replay_inf_n": cpu_residual_inf,
@@ -331,10 +374,12 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
                        "unsupported_count": sum(row.disposition == "unsupported" for row in diagnostic.entries)},
         "claims": {"authoritative_nonlinear_resultir_emitted": True,
                    "terminal_resultir_parity": True, "diagnosticir_emitted": True,
+                   "actual_mgt_material_family_order_bound": True,
+                   "source_authoritative_nonlinear_material_parameters_complete": False,
                    "independent_gfx1100_run": False, "g1_closure": False},
         "blockers_remaining": ["nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
                                "independent_gfx1100_hardware_run_not_available"],
-        "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests and a non-authoritative stable DiagnosticIR for the exact actual-MGT terminal displacement and committed elastic MaterialStateBundle, with CPU/HIP terminal binding parity. The retained adapters replay source-specific mixed-topology identities without fabricating an ExecutionPlan v1 shell topology. Nonlinear material-family breadth, independent gfx1100 hardware, and G1 closure remain unclaimed."}
+        "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests and a non-authoritative stable DiagnosticIR for the exact actual-MGT terminal displacement and committed elastic MaterialStateBundle, with CPU/HIP terminal binding parity. The retained adapters replay source-specific mixed-topology identities without fabricating an ExecutionPlan v1 shell topology. The DiagnosticIR also binds the exact 5,572-element material-family order/source-adequacy audit: elastic properties are complete, but authoritative hardening, damage/softening, and SRC constituent-fraction parameters are not. Nonlinear material-family breadth, independent gfx1100 hardware, and G1 closure remain unclaimed."}
     payload["artifacts"]["diagnostic"] = {
         "path": DEFAULT_DIAGNOSTIC.as_posix(), "byte_length": len(diagnostic_raw),
         "file_sha256": sha256_prefixed(diagnostic_raw)}

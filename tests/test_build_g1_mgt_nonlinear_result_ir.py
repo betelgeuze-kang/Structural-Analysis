@@ -21,6 +21,13 @@ def test_result_ir_parity_does_not_promote_open_g1_boundaries() -> None:
     assert payload["diagnostic"]["status"] == "partial"
     assert payload["diagnostic"]["entry_count"] == 5
     assert payload["diagnostic"]["unsupported_count"] == 2
+    assert payload["claims"]["actual_mgt_material_family_order_bound"] is True
+    assert payload["claims"][
+        "source_authoritative_nonlinear_material_parameters_complete"
+    ] is False
+    assert payload["source"]["material_family_adequacy_audit_hash"].startswith(
+        "sha256:"
+    )
     assert payload["claims"]["independent_gfx1100_run"] is False
     assert payload["claims"]["g1_closure"] is False
     assert payload["terminal"]["material_entry_count"] == 5_572

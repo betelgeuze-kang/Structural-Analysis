@@ -1,0 +1,142 @@
+{
+  "accepted_state_audit": {
+    "engineering_strain_data_hash": "sha256:86600b7be852d760af47aa7f84ccd64c3fa37665ca7c71bbff7c8d508683a70e",
+    "family_statistics": {
+      "CONC": {
+        "compression_element_count": 1187,
+        "element_count": 2182,
+        "maximum_absolute_engineering_strain": 5.730568843739347e-05,
+        "maximum_engineering_strain": 2.5523452865195453e-06,
+        "minimum_engineering_strain": -5.730568843739347e-05,
+        "tension_element_count": 993
+      },
+      "SRC": {
+        "compression_element_count": 158,
+        "element_count": 1692,
+        "maximum_absolute_engineering_strain": 1.1921315255801465e-15,
+        "maximum_engineering_strain": 2.5925243169834086e-17,
+        "minimum_engineering_strain": -1.1921315255801465e-15,
+        "tension_element_count": 1534
+      },
+      "STEEL": {
+        "compression_element_count": 1692,
+        "element_count": 1692,
+        "maximum_absolute_engineering_strain": 3.999755246960676e-07,
+        "maximum_engineering_strain": -2.8724771616252555e-08,
+        "minimum_engineering_strain": -3.999755246960676e-07,
+        "tension_element_count": 0
+      },
+      "USER": {
+        "compression_element_count": 2,
+        "element_count": 6,
+        "maximum_absolute_engineering_strain": 8.646490738534571e-11,
+        "maximum_engineering_strain": 8.646490738534571e-11,
+        "minimum_engineering_strain": -3.6538976130926174e-11,
+        "tension_element_count": 4
+      }
+    },
+    "free_equation_count": 70560,
+    "global_displacement_data_hash": "sha256:16e96e6e80165d1c50f0d5db3f568e58c0cc777a60c8b49b028eae59e7dd96f0",
+    "global_dof_count": 78282,
+    "load_factor": 1.0,
+    "maximum_absolute_engineering_strain": 5.730568843739347e-05
+  },
+  "blockers_remaining": [
+    "source_authoritative_steel_hardening_parameters_unavailable",
+    "source_authoritative_concrete_damage_softening_parameters_unavailable",
+    "source_authoritative_src_constituent_area_fraction_unavailable",
+    "independent_gfx1100_hardware_run_unavailable"
+  ],
+  "claim_boundary": "This audit binds all 5,572 actual MGT frame elements to the exact finite-chord geometry order consumed by the current tangent operator, records CONC/STEEL/SRC/USER family codes and source elastic moduli, and measures accepted-state axial strain at load scale 1.0. The normalized source-property contract does not supply the hardening, damage/softening, or SRC constituent-fraction parameters required by the repository's stateful nonlinear laws. No grade-name inference or default material parameter is promoted to authority; nonlinear material breadth and G1 closure therefore remain false.",
+  "claims": {
+    "accepted_state_family_strains_measured": true,
+    "actual_mgt_full_mesh_material_family_order_bound": true,
+    "g1_closure": false,
+    "independent_gfx1100_run": false,
+    "nonlinear_material_family_breadth_connected_to_equilibrium": false,
+    "source_authoritative_nonlinear_material_parameters_complete": false,
+    "source_elastic_properties_complete": true
+  },
+  "contract_pass": true,
+  "contract_scope": "actual_mgt_full_load_material_family_order_and_source_adequacy",
+  "generated_at": "2026-08-08T14:40:41.337632+00:00",
+  "material_fixture": {
+    "element_count": 5572,
+    "element_id_order_data_hash": "sha256:936abc1baba1dd63334b6c1d0f4fcaf763e422f48eb982b9c8949eaf123f62a9",
+    "family_code_data_hash": "sha256:d9c5cb5acd6bba325ea31801dbf2e68b805855d22d567ce2c4082c84e4c90548",
+    "family_code_mapping": {
+      "CONC": 1,
+      "SRC": 3,
+      "STEEL": 2,
+      "USER": 4
+    },
+    "family_count": 4,
+    "family_counts": {
+      "CONC": 2182,
+      "SRC": 1692,
+      "STEEL": 1692,
+      "USER": 6
+    },
+    "first_element_id": 9,
+    "last_element_id": 33072,
+    "material_id_order_data_hash": "sha256:3a0efe43f2ecbbb74caf7978b2ee3076273d8591d6a754b417c94dd0a239638c",
+    "primary_elastic_modulus_mpa_data_hash": "sha256:644125fa9eef3b8457c6ac5207dc6e91c38c272c1cd14c3a2ced009907e1963f",
+    "profile": "actual_mgt_geometry_ordered_material_family_fixture.v1",
+    "secondary_elastic_modulus_mpa_data_hash": "sha256:47a41bc55ef0d2004023636f05b3b3859b93a9f9cb8ae57c0e72cd65039545e2"
+  },
+  "operator_binding": {
+    "all_geometry_arrays_exact": true,
+    "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
+    "current_tangent_operator_contract_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+    "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
+    "geometry_element_count": 5572,
+    "independent_fixture_array_identity": {
+      "axial": true,
+      "chords": true,
+      "dofs": true,
+      "lengths": true,
+      "relative": true
+    },
+    "property_fallback_count": 0,
+    "selected_frame_element_count": 5572,
+    "uncoarsened_parser_contract_pass": true
+  },
+  "receipt_hash": "sha256:606a98d9666e6adaf653d9b793941de5cf111b05483aedca64b1f5809509f012",
+  "schema_version": "g1-mgt-material-family-adequacy-audit.v1",
+  "source": {
+    "checkpoint_path": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz",
+    "checkpoint_sha256": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
+    "input_checksums": {
+      "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+      "implementation/phase1/mgt_state_updated_frame_axial_geometry.py": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
+      "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
+      "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
+      "scripts/build_g1_mgt_material_family_adequacy_audit.py": "sha256:1fb1bb62f33a6da0d0b1ef31839d1a4183b140b54c3529d69757c337c921f2ce",
+      "src/structural_analysis/schemas/g1_mgt_material_family_adequacy_audit_v1.schema.json": "sha256:7409a5c9cab63e59180ccc779f40b9a007b6e62f388e0a1eb862f247bbe11f3e",
+      "tests/test_build_g1_mgt_material_family_adequacy_audit.py": "sha256:fe6b0fecabcc90db4a96e1be48762202be7aa2e998a91bb04e4858c24479f3b4"
+    },
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "repository_commit_sha": "a0be314d42e8f6c8bde21614f3f0310361c8cdc9",
+    "source_paths_clean_at_execution": true
+  },
+  "source_adequacy": {
+    "authoritative_nonlinear_parameter_set_complete": false,
+    "engineer_review_required": true,
+    "missing_authoritative_nonlinear_fields": {
+      "concrete_compressive_softening_rate": true,
+      "concrete_compressive_strength_mpa": true,
+      "concrete_tensile_softening_rate": true,
+      "concrete_tensile_strength_mpa": true,
+      "src_steel_area_fraction": true,
+      "steel_isotropic_hardening_modulus_mpa": true,
+      "steel_kinematic_hardening_modulus_mpa": true,
+      "steel_yield_stress_mpa": true
+    },
+    "normalized_property_contract": "MATERIAL_plus_exact_DGN_type_name_alias_elastic_properties.v1",
+    "primary_elastic_modulus_complete": true,
+    "src_secondary_elastic_modulus_complete": true
+  },
+  "status": "partial"
+}
