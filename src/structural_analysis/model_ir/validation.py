@@ -337,14 +337,14 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
     }
     for index, element in enumerate(payload["elements"]):
         base = f"/elements/{index}"
-        node_pair = tuple(str(value) for value in element["node_ids"])
-        if node_pair[0] == node_pair[1]:
+        element_nodes = tuple(str(value) for value in element["node_ids"])
+        if len(set(element_nodes)) != len(element_nodes):
             yield ModelIRValidationIssue(
                 "element_nodes_not_distinct",
                 f"{base}/node_ids",
-                "Element end nodes must differ.",
+                "Element nodes must be distinct.",
             )
-        for node_id in node_pair:
+        for node_id in element_nodes:
             if node_id not in node_ids:
                 yield _missing_reference(f"{base}/node_ids", "node", node_id)
         material_id = str(element["material_id"])
@@ -355,24 +355,42 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
         if section is None:
             yield _missing_reference(f"{base}/section_id", "section", section_id)
         else:
-            expected_family = (
-                "frame_3d" if element["type"] == "frame_3d" else "truss_3d"
-            )
+            expected_family = {
+                "frame_3d": "frame_3d",
+                "truss_3d": "truss_3d",
+                "shell_3": "shell_3",
+            }[element["type"]]
             if section["family_id"] != expected_family:
                 yield ModelIRValidationIssue(
                     "element_section_family_mismatch",
                     f"{base}/section_id",
                     f"Element type {element['type']} requires section family {expected_family}.",
                 )
-        if all(node_id in node_coordinates for node_id in node_pair):
+        if element["type"] == "shell_3" and all(node_id in node_coordinates for node_id in element_nodes):
+            a, b, c = (node_coordinates[node_id] for node_id in element_nodes)
+            ab = tuple(b[axis] - a[axis] for axis in range(3))
+            ac = tuple(c[axis] - a[axis] for axis in range(3))
+            cross = (
+                ab[1] * ac[2] - ab[2] * ac[1],
+                ab[2] * ac[0] - ab[0] * ac[2],
+                ab[0] * ac[1] - ab[1] * ac[0],
+            )
+            twice_area = math.sqrt(sum(value * value for value in cross))
+            if twice_area <= _ZERO_LENGTH_TOLERANCE_M**2:
+                yield ModelIRValidationIssue(
+                    "element_zero_area",
+                    base,
+                    "Shell element area must be positive.",
+                )
+        elif all(node_id in node_coordinates for node_id in element_nodes):
             offsets = element["offsets"]
             start = tuple(
-                node_coordinates[node_pair[0]][axis]
+                node_coordinates[element_nodes[0]][axis]
                 + float(offsets["i_global_m"][axis])
                 for axis in range(3)
             )
             end = tuple(
-                node_coordinates[node_pair[1]][axis]
+                node_coordinates[element_nodes[1]][axis]
                 + float(offsets["j_global_m"][axis])
                 for axis in range(3)
             )

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/shell_static_result_ir_v1.schema.json",
+  "title": "Shell linear static ResultIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "result_id", "analysis_type", "authority", "bindings", "solver", "node_ids", "element_ids", "displacement_global", "reaction_global_n_nm", "equilibrium_residual_global_n_nm", "element_results", "energy", "checkpoint", "claim_boundary", "result_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-shell-result-ir.v1"},
+    "result_id": {"$ref": "#/$defs/id"},
+    "analysis_type": {"const": "shell_linear_static"},
+    "authority": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile", "nodal_response", "element_recovery", "checkpoint", "engineering_design", "release_readiness"],
+      "properties": {
+        "profile": {"const": "authoritative_linear_cst_membrane_mindlin_shell.v1"},
+        "nodal_response": {"const": "authoritative"}, "element_recovery": {"const": "authoritative"},
+        "checkpoint": {"const": "exact_hash_bound"}, "engineering_design": {"const": "not_authoritative"},
+        "release_readiness": {"const": "not_authoritative"}
+      }
+    },
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["model_ir_content_hash", "solver_result_hash", "stiffness_hash", "load_hash"],
+      "properties": {"model_ir_content_hash": {"$ref": "#/$defs/hash"}, "solver_result_hash": {"$ref": "#/$defs/hash"}, "stiffness_hash": {"$ref": "#/$defs/hash"}, "load_hash": {"$ref": "#/$defs/hash"}}
+    },
+    "solver": {
+      "type": "object", "additionalProperties": false,
+      "required": ["solver_id", "maximum_free_residual", "fallback_used", "regularization_used"],
+      "properties": {"solver_id": {"$ref": "#/$defs/id"}, "maximum_free_residual": {"type": "number", "minimum": 0}, "fallback_used": {"const": false}, "regularization_used": {"const": false}}
+    },
+    "node_ids": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "element_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "displacement_global": {"$ref": "#/$defs/vector"},
+    "reaction_global_n_nm": {"$ref": "#/$defs/vector"},
+    "equilibrium_residual_global_n_nm": {"$ref": "#/$defs/vector"},
+    "element_results": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/elementResult"}},
+    "energy": {
+      "type": "object", "additionalProperties": false, "required": ["strain_energy_j", "external_work_j"],
+      "properties": {"strain_energy_j": {"type": "number", "minimum": 0}, "external_work_j": {"type": "number", "minimum": 0}}
+    },
+    "checkpoint": {
+      "type": "object", "additionalProperties": false, "required": ["terminal_checkpoint_hash", "exact_restart_required"],
+      "properties": {"terminal_checkpoint_hash": {"$ref": "#/$defs/hash"}, "exact_restart_required": {"const": true}}
+    },
+    "claim_boundary": {"type": "string", "minLength": 1},
+    "result_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "vector": {"type": "array", "items": {"type": "number"}},
+    "vector2": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+    "vector3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}},
+    "elementResult": {
+      "type": "object", "additionalProperties": false,
+      "required": ["element_id", "membrane_strain", "membrane_resultant_n_per_m", "curvature_per_m", "bending_resultant_nm_per_m", "transverse_shear_strain", "transverse_shear_resultant_n_per_m", "strain_energy_j"],
+      "properties": {
+        "element_id": {"$ref": "#/$defs/id"}, "membrane_strain": {"$ref": "#/$defs/vector3"},
+        "membrane_resultant_n_per_m": {"$ref": "#/$defs/vector3"}, "curvature_per_m": {"$ref": "#/$defs/vector3"},
+        "bending_resultant_nm_per_m": {"$ref": "#/$defs/vector3"}, "transverse_shear_strain": {"$ref": "#/$defs/vector2"},
+        "transverse_shear_resultant_n_per_m": {"$ref": "#/$defs/vector2"}, "strain_energy_j": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}

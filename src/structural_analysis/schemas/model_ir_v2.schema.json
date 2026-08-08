@@ -36,7 +36,8 @@
         "frame3d_modal_buckling_3d_v1",
         "sdof_authenticated_transient_v1",
         "mdof_linear_transient_v1",
-        "nonlinear_mdof_transient_v1"
+        "nonlinear_mdof_transient_v1",
+        "shell_linear_static_v1"
       ]
     },
     "provenance": {"$ref": "#/$defs/provenance"},
@@ -363,10 +364,32 @@
         "extensions": {"$ref": "#/$defs/extensions"}
       }
     },
+    "shellSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "family_id", "parameter_set_version", "parameters", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "family_id": {"const": "shell_3"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["thickness_m"],
+          "properties": {
+            "thickness_m": {"$ref": "#/$defs/positiveNumber"}
+          }
+        },
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
     "section": {
       "oneOf": [
         {"$ref": "#/$defs/frameSection"},
-        {"$ref": "#/$defs/trussSection"}
+        {"$ref": "#/$defs/trussSection"},
+        {"$ref": "#/$defs/shellSection"}
       ]
     },
     "elementOffsets": {
@@ -423,10 +446,27 @@
         "extensions": {"$ref": "#/$defs/extensions"}
       }
     },
+    "shellElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "formulation", "node_ids", "material_id", "section_id", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "shell_3"},
+        "formulation": {"const": "cst_membrane_mindlin_triangle"},
+        "node_ids": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "material_id": {"$ref": "#/$defs/stableId"},
+        "section_id": {"$ref": "#/$defs/stableId"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
     "element": {
       "oneOf": [
         {"$ref": "#/$defs/frameElement"},
-        {"$ref": "#/$defs/trussElement"}
+        {"$ref": "#/$defs/trussElement"},
+        {"$ref": "#/$defs/shellElement"}
       ]
     },
     "fixedDofConstraint": {
