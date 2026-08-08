@@ -55,3 +55,16 @@ def test_modal_buckling_frame3d_profile_is_analysis_ready() -> None:
     assert payload["materials"][0]["parameters"]["density_kg_m3"] == 7850.0
     assert payload["load_patterns"][0]["analysis_type"] == "linear_buckling"
     assert payload["load_patterns"][0]["nodal_loads"][0]["components_si"]["FX"] < 0.0
+
+
+def test_sdof_authenticated_transient_profile_binds_source_history() -> None:
+    fixture = ROOT / "tests/fixtures/model_ir_v2/sdof_authenticated_transient.json"
+    document = load_model_ir_v2(fixture)
+    payload = document.to_dict()
+    dynamics = payload["dynamics"]
+
+    assert document.capability_profile == "sdof_authenticated_transient_v1"
+    assert document.analysis_ready is True
+    assert dynamics["checkpoint_authority"] == "source_authenticated_checkpoint"
+    assert dynamics["force_history_sha256"].startswith("sha256:")
+    assert len(payload["time_functions"][0]["points"]) == 21

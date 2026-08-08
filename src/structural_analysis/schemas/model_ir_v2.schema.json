@@ -33,7 +33,8 @@
       "enum": [
         "engine_v2_phase0_linear_3d",
         "frame3d_stateful_nonlinear_3d_v1",
-        "frame3d_modal_buckling_3d_v1"
+        "frame3d_modal_buckling_3d_v1",
+        "sdof_authenticated_transient_v1"
       ]
     },
     "provenance": {"$ref": "#/$defs/provenance"},
@@ -82,6 +83,7 @@
       "type": "array",
       "items": {"$ref": "#/$defs/constructionStage"}
     },
+    "dynamics": {"$ref": "#/$defs/dynamics"},
     "roundtrip_map": {
       "type": "array",
       "items": {"$ref": "#/$defs/roundtripRow"}
@@ -92,6 +94,15 @@
     },
     "extensions": {"$ref": "#/$defs/extensions"}
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"capability_profile": {"const": "sdof_authenticated_transient_v1"}},
+        "required": ["capability_profile"]
+      },
+      "then": {"required": ["dynamics"]}
+    }
+  ],
   "$defs": {
     "stableId": {
       "type": "string",
@@ -453,7 +464,7 @@
       "properties": {
         "id": {"$ref": "#/$defs/stableId"},
         "index": {"$ref": "#/$defs/nonNegativeIndex"},
-        "analysis_type": {"enum": ["linear_static", "nonlinear_static", "linear_buckling"]},
+        "analysis_type": {"enum": ["linear_static", "nonlinear_static", "linear_buckling", "transient"]},
         "self_weight": {"$ref": "#/$defs/vector3"},
         "nodal_loads": {"type": "array", "items": {"$ref": "#/$defs/nodalLoad"}},
         "source_id": {"type": ["string", "null"]},
@@ -502,6 +513,36 @@
           }
         },
         "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "dynamics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "mass_kg",
+        "elastic_stiffness_n_per_m",
+        "yield_force_n",
+        "post_yield_stiffness_ratio",
+        "damping_n_s_per_m",
+        "time_step_s",
+        "force_time_function_id",
+        "force_history_source_path",
+        "force_history_sha256",
+        "checkpoint_authority"
+      ],
+      "properties": {
+        "profile": {"const": "newmark_average_acceleration_bilinear_sdof.v1"},
+        "mass_kg": {"$ref": "#/$defs/positiveNumber"},
+        "elastic_stiffness_n_per_m": {"$ref": "#/$defs/positiveNumber"},
+        "yield_force_n": {"$ref": "#/$defs/positiveNumber"},
+        "post_yield_stiffness_ratio": {"type": "number", "minimum": 0, "exclusiveMaximum": 1},
+        "damping_n_s_per_m": {"$ref": "#/$defs/nonNegativeNumber"},
+        "time_step_s": {"$ref": "#/$defs/positiveNumber"},
+        "force_time_function_id": {"$ref": "#/$defs/stableId"},
+        "force_history_source_path": {"type": "string", "minLength": 1},
+        "force_history_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_authority": {"const": "source_authenticated_checkpoint"}
       }
     },
     "constructionStage": {
