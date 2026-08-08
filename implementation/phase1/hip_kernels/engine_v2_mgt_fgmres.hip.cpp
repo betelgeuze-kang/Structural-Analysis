@@ -25,6 +25,7 @@ namespace {
 
 constexpr int kBlockSize = 256;
 constexpr int kRestart = 6;
+constexpr int kLineSearchCandidates = 5;
 constexpr const char* kOutputVersion = "engine-v2-mgt-fgmres-output.v1";
 
 void check_hip(hipError_t status, const char* where) {
@@ -163,6 +164,158 @@ __global__ void residual_metrics_kernel(std::int64_t n, const double* residual_n
   metrics[3] = maximum / reference_force_n;
 }
 
+__device__ double state_value_from(
+    const composition::tangent_component::DeviceFixture& fixture,
+    const double* free_state, std::int64_t global_dof) {
+  const std::int64_t free_index = fixture.global_to_free[global_dof];
+  return free_index >= 0 ? free_state[free_index]
+                         : fixture.background_displacements[global_dof];
+}
+
+__device__ double geometry_local_correction(
+    const composition::tangent_component::DeviceFixture& fixture,
+    const double* free_state, std::int64_t element, std::int64_t local_dof) {
+  double relative[3] = {0.0, 0.0, 0.0};
+  for (std::int64_t axis = 0; axis < 3; ++axis) {
+    for (std::int64_t local = 0; local < 12; ++local) {
+      const std::size_t index =
+          (static_cast<std::size_t>(element) * 3U + axis) * 12U + local;
+      relative[axis] += fixture.geometry_relative[index] * state_value_from(
+          fixture, free_state,
+          fixture.geometry_dofs[static_cast<std::size_t>(element) * 12U + local]);
+    }
+  }
+  double chord[3] = {0.0, 0.0, 0.0};
+  double length_squared = 0.0;
+  double linear_extension = 0.0;
+  double relative_squared = 0.0;
+  const double reference_length = fixture.geometry_reference_lengths[element];
+  for (std::int64_t axis = 0; axis < 3; ++axis) {
+    const double reference_chord = fixture.geometry_reference_chords[
+        static_cast<std::size_t>(element) * 3U + axis];
+    const double reference_direction = reference_chord / reference_length;
+    chord[axis] = reference_chord + relative[axis];
+    length_squared += chord[axis] * chord[axis];
+    linear_extension += reference_direction * relative[axis];
+    relative_squared += relative[axis] * relative[axis];
+  }
+  const double current_length = sqrt(length_squared);
+  const double extension =
+      (2.0 * reference_length * linear_extension + relative_squared) /
+      (current_length + reference_length);
+  const double extension_minus_linear =
+      (relative_squared - linear_extension * extension) /
+      (current_length + reference_length);
+  double value = 0.0;
+  for (std::int64_t axis = 0; axis < 3; ++axis) {
+    const double reference_direction = fixture.geometry_reference_chords[
+        static_cast<std::size_t>(element) * 3U + axis] / reference_length;
+    const double direction_delta = chord[axis] / current_length - reference_direction;
+    const double end_force = fixture.geometry_axial_stiffness[element] *
+        (extension_minus_linear * reference_direction + extension * direction_delta);
+    const std::size_t index =
+        (static_cast<std::size_t>(element) * 3U + axis) * 12U + local_dof;
+    value += fixture.geometry_relative[index] * end_force;
+  }
+  return value;
+}
+
+__global__ void trial_state_kernel(std::int64_t n, const double* accepted,
+                                   const double* correction, double alpha,
+                                   double* trial) {
+  const std::int64_t i =
+      static_cast<std::int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (i < n) trial[i] = accepted[i] + alpha * correction[i];
+}
+
+__global__ void nonlinear_incremental_residual_kernel(
+    composition::tangent_component::DeviceFixture fixture,
+    const double* accepted_state, const double* trial_state,
+    const double* base_rhs_kn, double* output_n) {
+  const std::int64_t row =
+      static_cast<std::int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (row >= fixture.equation_count) return;
+  double total = -base_rhs_kn[row] * 1000.0;
+  for (std::int64_t p = fixture.reference_row_pointer[row];
+       p < fixture.reference_row_pointer[row + 1]; ++p) {
+    const std::int64_t column = fixture.reference_column_indices[p];
+    total += fixture.reference_values[p] *
+             (trial_state[column] - accepted_state[column]);
+  }
+  for (std::int64_t p = fixture.frame_incidence_pointer[row];
+       p < fixture.frame_incidence_pointer[row + 1]; ++p) {
+    const std::int64_t element = fixture.frame_incidence_element[p];
+    const std::int64_t local_dof = fixture.frame_incidence_local_dof[p];
+    double action = 0.0;
+    for (std::int64_t column = 0; column < 12; ++column) {
+      const std::int64_t global_dof = fixture.frame_dofs[
+          static_cast<std::size_t>(element) * 12U + column];
+      const std::int64_t free_index = fixture.global_to_free[global_dof];
+      if (free_index >= 0) {
+        const std::size_t index =
+            (static_cast<std::size_t>(element) * 12U + local_dof) * 12U + column;
+        action += fixture.frame_delta[index] *
+                  (trial_state[free_index] - accepted_state[free_index]);
+      }
+    }
+    total += fixture.load_factor * action;
+  }
+  for (std::int64_t p = fixture.geometry_incidence_pointer[row];
+       p < fixture.geometry_incidence_pointer[row + 1]; ++p) {
+    const std::int64_t element = fixture.geometry_incidence_element[p];
+    const std::int64_t local_dof = fixture.geometry_incidence_local_dof[p];
+    total += geometry_local_correction(fixture, trial_state, element, local_dof) -
+             geometry_local_correction(fixture, accepted_state, element, local_dof);
+  }
+  output_n[row] = total;
+}
+
+__global__ void candidate_metrics_kernel(std::int64_t n,
+                                         const double* residuals,
+                                         double* l2, double* inf,
+                                         int candidate) {
+  if (blockIdx.x != 0 || threadIdx.x != 0) return;
+  const double* values = residuals + static_cast<std::int64_t>(candidate) * n;
+  double sum = 0.0;
+  double maximum = 0.0;
+  for (std::int64_t i = 0; i < n; ++i) {
+    sum += values[i] * values[i];
+    maximum = fmax(maximum, fabs(values[i]));
+  }
+  l2[candidate] = sqrt(sum);
+  inf[candidate] = maximum;
+}
+
+__global__ void select_line_search_kernel(const double* alphas,
+                                          const double* l2,
+                                          const double* scaled_beta,
+                                          double reference_force_n,
+                                          int* selected) {
+  if (blockIdx.x != 0 || threadIdx.x != 0) return;
+  selected[0] = -1;
+  const double base_l2_n = scaled_beta[0] * reference_force_n;
+  for (int i = 0; i < kLineSearchCandidates; ++i) {
+    if (l2[i] <= (1.0 - 1.0e-4 * alphas[i]) * base_l2_n) {
+      selected[0] = i;
+      break;
+    }
+  }
+}
+
+__global__ void accept_candidate_kernel(
+    std::int64_t n, const double* candidate_residuals,
+    const double* trial_states, const int* selected,
+    double* accepted_residual, double* accepted_state) {
+  const std::int64_t i =
+      static_cast<std::int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (i < n && selected[0] >= 0) {
+    accepted_residual[i] = candidate_residuals[
+        static_cast<std::int64_t>(selected[0]) * n + i];
+    accepted_state[i] = trial_states[
+        static_cast<std::int64_t>(selected[0]) * n + i];
+  }
+}
+
 template <typename T>
 T* allocate(std::size_t count, std::uint64_t* bytes) {
   T* result = nullptr;
@@ -182,7 +335,9 @@ void write_vector(const char* path, const std::vector<double>& values) {
 
 int main(int argc, char** argv) {
   try {
-    if (argc != 6) throw std::runtime_error("usage:fgmres sparse.bin tangent.bin reference_force_n solution.bin residual.bin");
+    if (argc != 8) throw std::runtime_error(
+        "usage:fgmres sparse.bin tangent.bin reference_force_n solution.bin "
+        "linear_residual.bin accepted_state.bin nonlinear_residual.bin");
     const composition::SparseFixture sparse = composition::read_sparse_fixture(argv[1]);
     const composition::tangent_component::Fixture tangent = composition::tangent_component::read_fixture(argv[2]);
     const double reference_force_n = std::stod(argv[3]);
@@ -217,12 +372,26 @@ int main(int argc, char** argv) {
     double* d_residual = allocate<double>(sparse.dimension, &allocated_bytes);
     double* d_h = allocate<double>((kRestart + 1) * kRestart, &allocated_bytes);
     double* d_g = allocate<double>(kRestart + 1, &allocated_bytes);
+    double* d_base_beta = allocate<double>(1, &allocated_bytes);
     double* d_c = allocate<double>(kRestart, &allocated_bytes);
     double* d_s = allocate<double>(kRestart, &allocated_bytes);
     double* d_y = allocate<double>(kRestart, &allocated_bytes);
     double* d_scalar = allocate<double>(1, &allocated_bytes);
     double* d_history = allocate<double>(kRestart, &allocated_bytes);
     double* d_metrics = allocate<double>(4, &allocated_bytes);
+    double* d_trial_states = allocate<double>(
+        kLineSearchCandidates * sparse.dimension, &allocated_bytes);
+    double* d_candidate_residuals = allocate<double>(
+        kLineSearchCandidates * sparse.dimension, &allocated_bytes);
+    double* d_candidate_l2 = allocate<double>(kLineSearchCandidates, &allocated_bytes);
+    double* d_candidate_inf = allocate<double>(kLineSearchCandidates, &allocated_bytes);
+    double* d_accepted_state = allocate<double>(sparse.dimension, &allocated_bytes);
+    double* d_accepted_residual = allocate<double>(sparse.dimension, &allocated_bytes);
+    int* d_selected = allocate<int>(1, &allocated_bytes);
+    const std::vector<double> line_search_alphas = {
+        1.0, 0.5, 0.25, 0.125, 0.0625};
+    double* d_alphas = composition::allocate_and_copy(
+        line_search_alphas, stream, &h2d_bytes, &allocated_bytes);
 
     composition::tangent_component::DeviceFixture dt{
       static_cast<std::int64_t>(tangent.equation_count), tangent.load_factor,
@@ -241,6 +410,8 @@ int main(int argc, char** argv) {
     check_hip(hipMemsetAsync(d_g, 0, (kRestart + 1) * sizeof(double), stream), "memset_g");
     hipLaunchKernelGGL(initialize_basis_kernel, dim3(1), dim3(1), 0, stream, sparse.dimension,
                        d_original_rhs_kn, reference_force_n, d_basis, d_g);
+    check_hip(hipMemcpyAsync(d_base_beta, d_g, sizeof(double),
+                             hipMemcpyDeviceToDevice, stream), "base_beta_d2d");
     std::int64_t sparse_kernels = 0;
     std::int64_t vector_kernels = 1;
     for (int iteration = 0; iteration < kRestart; ++iteration) {
@@ -299,14 +470,56 @@ int main(int argc, char** argv) {
                        sparse.dimension, d_residual, reference_force_n, d_metrics);
     vector_kernels += 5;
 
+    for (int candidate = 0; candidate < kLineSearchCandidates; ++candidate) {
+      double* trial = d_trial_states +
+          static_cast<std::int64_t>(candidate) * sparse.dimension;
+      double* candidate_residual = d_candidate_residuals +
+          static_cast<std::int64_t>(candidate) * sparse.dimension;
+      hipLaunchKernelGGL(trial_state_kernel, dim3(grid), dim3(kBlockSize), 0, stream,
+                         sparse.dimension, dt.free_displacements, d_solution,
+                         line_search_alphas[candidate], trial);
+      hipLaunchKernelGGL(nonlinear_incremental_residual_kernel,
+                         dim3(grid), dim3(kBlockSize), 0, stream, dt,
+                         dt.free_displacements, trial, d_original_rhs_kn,
+                         candidate_residual);
+      hipLaunchKernelGGL(candidate_metrics_kernel, dim3(1), dim3(1), 0, stream,
+                         sparse.dimension, d_candidate_residuals,
+                         d_candidate_l2, d_candidate_inf, candidate);
+      vector_kernels += 3;
+    }
+    hipLaunchKernelGGL(select_line_search_kernel, dim3(1), dim3(1), 0, stream,
+                       d_alphas, d_candidate_l2, d_base_beta, reference_force_n,
+                       d_selected);
+    hipLaunchKernelGGL(accept_candidate_kernel, dim3(grid), dim3(kBlockSize), 0, stream,
+                       sparse.dimension, d_candidate_residuals, d_trial_states,
+                       d_selected, d_accepted_residual, d_accepted_state);
+    vector_kernels += 2;
+
     std::vector<double> solution(sparse.dimension), residual(sparse.dimension), history(kRestart), metrics(4);
+    std::vector<double> accepted_state(sparse.dimension), accepted_residual(sparse.dimension);
+    std::vector<double> candidate_l2(kLineSearchCandidates), candidate_inf(kLineSearchCandidates);
+    int selected = -1;
     check_hip(hipMemcpyAsync(solution.data(), d_solution, vector_bytes, hipMemcpyDeviceToHost, stream), "solution_d2h");
     check_hip(hipMemcpyAsync(residual.data(), d_residual, vector_bytes, hipMemcpyDeviceToHost, stream), "residual_d2h");
     check_hip(hipMemcpyAsync(history.data(), d_history, kRestart * sizeof(double), hipMemcpyDeviceToHost, stream), "history_d2h");
     check_hip(hipMemcpyAsync(metrics.data(), d_metrics, 4 * sizeof(double), hipMemcpyDeviceToHost, stream), "metrics_d2h");
+    check_hip(hipMemcpyAsync(accepted_state.data(), d_accepted_state, vector_bytes,
+                             hipMemcpyDeviceToHost, stream), "accepted_state_d2h");
+    check_hip(hipMemcpyAsync(accepted_residual.data(), d_accepted_residual, vector_bytes,
+                             hipMemcpyDeviceToHost, stream), "accepted_residual_d2h");
+    check_hip(hipMemcpyAsync(candidate_l2.data(), d_candidate_l2,
+                             kLineSearchCandidates * sizeof(double),
+                             hipMemcpyDeviceToHost, stream), "candidate_l2_d2h");
+    check_hip(hipMemcpyAsync(candidate_inf.data(), d_candidate_inf,
+                             kLineSearchCandidates * sizeof(double),
+                             hipMemcpyDeviceToHost, stream), "candidate_inf_d2h");
+    check_hip(hipMemcpyAsync(&selected, d_selected, sizeof(int),
+                             hipMemcpyDeviceToHost, stream), "selected_d2h");
     check_hip(hipStreamSynchronize(stream), "hipStreamSynchronize");
     const double wall_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
+    if (selected < 0) throw std::runtime_error("line_search_no_acceptable_candidate");
     write_vector(argv[4], solution); write_vector(argv[5], residual);
+    write_vector(argv[6], accepted_state); write_vector(argv[7], accepted_residual);
     std::cout << std::setprecision(17) << "{\"schema_version\":\"" << kOutputVersion
       << "\",\"status\":\"ok\",\"cpu_backend\":false,\"device_name\":\""
       << composition::tangent_component::json_escape(properties.name) << "\",\"gcn_arch_name\":\""
@@ -315,13 +528,30 @@ int main(int argc, char** argv) {
       << ",\"preconditioner_apply_count\":" << kRestart << ",\"matvec_count\":" << kRestart + 1
       << ",\"sparse_kernel_invocation_count\":" << sparse_kernels
       << ",\"vector_kernel_invocation_count\":" << vector_kernels
-      << ",\"mid_iteration_d2h_transfer_count\":0,\"final_d2h_transfer_count\":4"
-      << ",\"h2d_bytes\":" << h2d_bytes << ",\"d2h_bytes\":" << 2 * vector_bytes + (kRestart + 4) * sizeof(double)
+      << ",\"mid_iteration_d2h_transfer_count\":0,\"final_d2h_transfer_count\":9"
+      << ",\"h2d_bytes\":" << h2d_bytes << ",\"d2h_bytes\":"
+      << 4 * vector_bytes + (kRestart + 4 + 2 * kLineSearchCandidates) * sizeof(double) + sizeof(int)
       << ",\"tracked_peak_device_allocation_bytes\":" << allocated_bytes
       << ",\"reference_force_n\":" << reference_force_n
       << ",\"physical_residual_l2_n\":" << metrics[0] << ",\"physical_residual_inf_n\":" << metrics[1]
       << ",\"scaled_residual_l2\":" << metrics[2] << ",\"scaled_residual_inf\":" << metrics[3]
-      << ",\"device_lifecycle_wall_time_ms\":" << wall_ms << ",\"estimated_residual_history\":[";
+      << ",\"device_lifecycle_wall_time_ms\":" << wall_ms
+      << ",\"line_search_candidate_count\":" << kLineSearchCandidates
+      << ",\"line_search_selected_index\":" << selected
+      << ",\"accepted_alpha\":" << line_search_alphas[selected]
+      << ",\"accepted_nonlinear_residual_l2_n\":" << candidate_l2[selected]
+      << ",\"accepted_nonlinear_residual_inf_n\":" << candidate_inf[selected]
+      << ",\"line_search_candidate_l2_n\":[";
+    for (int i = 0; i < kLineSearchCandidates; ++i) {
+      if (i) std::cout << ',';
+      std::cout << candidate_l2[i];
+    }
+    std::cout << "],\"line_search_candidate_inf_n\":[";
+    for (int i = 0; i < kLineSearchCandidates; ++i) {
+      if (i) std::cout << ',';
+      std::cout << candidate_inf[i];
+    }
+    std::cout << "],\"estimated_residual_history\":[";
     for (int i = 0; i < kRestart; ++i) { if (i) std::cout << ','; std::cout << history[i]; }
     std::cout << "]}\n";
     return 0;

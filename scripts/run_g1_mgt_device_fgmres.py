@@ -32,6 +32,8 @@ SCHEMA = Path("src/structural_analysis/schemas/g1_mgt_device_fgmres_v1.schema.js
 DEFAULT_OUT = PRODUCTIZATION / "g1_mgt_device_fgmres_receipt.json"
 DEFAULT_SOLUTION = PRODUCTIZATION / "g1_mgt_device_fgmres_solution.f64le"
 DEFAULT_RESIDUAL = PRODUCTIZATION / "g1_mgt_device_fgmres_residual.f64le"
+DEFAULT_ACCEPTED_STATE = PRODUCTIZATION / "g1_mgt_device_fgmres_accepted_state.f64le"
+DEFAULT_NONLINEAR_RESIDUAL = PRODUCTIZATION / "g1_mgt_device_fgmres_nonlinear_residual.f64le"
 VERSION = "g1-mgt-device-fgmres-receipt.v1"
 N = 70_560
 SOURCE_PATHS = (
@@ -86,27 +88,33 @@ def _compile_run(root: Path, sparse: Any, tangent: Any, reference_force_n: float
         temp = Path(raw); sp = temp / "sparse.bin"; tp = temp / "tangent.bin"
         binary = temp / "fgmres"; cross = temp / "fgmres-gfx1100"
         solution = temp / "solution.bin"; residual = temp / "residual.bin"
+        accepted_state = temp / "accepted-state.bin"; nonlinear_residual = temp / "nonlinear-residual.bin"
         sp.write_bytes(sparse.to_bytes()); tp.write_bytes(tangent.to_bytes())
         base = [str(compiler), f"--rocm-path={rocm_path}", f"--rocm-device-lib-path={libs}"]
         tail = [str(root / SOURCE), "-O2", "-Werror", "-ffp-contract=off", "-std=c++17"]
         for arch, output in (("gfx1030", binary), ("gfx1100", cross)):
             built = _run([*base, f"--offload-arch={arch}", *tail, "-o", str(output)], cwd=root, timeout=180)
             if built.returncode: raise RuntimeError(f"device_fgmres_{arch}_compile_failed:" + built.stderr[-1000:])
-        executed = _run([str(binary), str(sp), str(tp), repr(reference_force_n), str(solution), str(residual)],
+        executed = _run([str(binary), str(sp), str(tp), repr(reference_force_n),
+                         str(solution), str(residual), str(accepted_state), str(nonlinear_residual)],
                         cwd=root, timeout=timeout)
         if executed.returncode: raise RuntimeError("device_fgmres_execution_failed:" + executed.stderr[-1000:])
         runtime = json.loads(executed.stdout.strip().splitlines()[-1])
         return {"runtime": runtime, "solution": np.fromfile(solution, dtype="<f8"),
                 "residual": np.fromfile(residual, dtype="<f8"),
+                "accepted_state": np.fromfile(accepted_state, dtype="<f8"),
+                "nonlinear_residual": np.fromfile(nonlinear_residual, dtype="<f8"),
                 "binary_sha256": file_sha256(binary), "binary_byte_length": binary.stat().st_size,
                 "gfx1100_cross_binary_sha256": file_sha256(cross),
                 "compiler_version": _run([str(compiler), "--version"], cwd=root, timeout=30).stdout.splitlines()[0]}
 
 
 def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFAULT_SOLUTION,
-        residual_out: Path = DEFAULT_RESIDUAL, hipcc: str = "/opt/rocm-6.0.2/bin/hipcc",
+        residual_out: Path = DEFAULT_RESIDUAL, accepted_state_out: Path = DEFAULT_ACCEPTED_STATE,
+        nonlinear_residual_out: Path = DEFAULT_NONLINEAR_RESIDUAL,
+        hipcc: str = "/opt/rocm-6.0.2/bin/hipcc",
         rocm_path: str = "/opt/rocm-6.0.2", device_lib_path: str = "", timeout: float = 600
-        ) -> tuple[dict[str, Any], bytes, bytes]:
+        ) -> tuple[dict[str, Any], bytes, bytes, bytes, bytes]:
     root = root.resolve()
     if not _clean(root): raise RuntimeError("device_fgmres_requires_clean_source_paths")
     sparse, _, tangent, context = build_references(root=root)
@@ -115,20 +123,33 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     execution = _compile_run(root, sparse, tangent.fixture, reference_force_n,
                              hipcc, rocm_path, device_lib_path, timeout)
     runtime = execution["runtime"]; solution = execution["solution"]; residual = execution["residual"]
-    if solution.shape != (N,) or residual.shape != (N,): raise RuntimeError("device_fgmres_output_shape_invalid")
+    accepted_state = execution["accepted_state"]; nonlinear_residual = execution["nonlinear_residual"]
+    if any(value.shape != (N,) for value in (solution, residual, accepted_state, nonlinear_residual)):
+        raise RuntimeError("device_fgmres_output_shape_invalid")
     replay_fixture = create_hip_current_tangent_operator_fixture(
         context["problem"].current_tangent_operator,
         free_displacements_m=context["state"], load_factor=1.0, free_direction_m=solution)
     replay = create_hip_current_tangent_operator_reference(replay_fixture)
     expected_residual = context["rhs_kn"] * 1000.0 - replay.device_order_action_n_per_m
     replay_error = float(np.max(np.abs(residual - expected_residual)))
+    expected_nonlinear_residual = np.asarray(
+        context["problem"].residual_kn(accepted_state, 1.0), dtype=np.float64) * 1000.0
+    nonlinear_replay_error = float(np.max(np.abs(
+        nonlinear_residual - expected_nonlinear_residual)))
+    nonlinear_parity_tolerance_n = 2.0e-6
     contract = bool(runtime["status"] == "ok" and runtime["gcn_arch_name"] == "gfx1030"
                     and runtime["krylov_iterations"] == 6 and runtime["preconditioner_apply_count"] == 6
                     and runtime["matvec_count"] == 7 and runtime["mid_iteration_d2h_transfer_count"] == 0
-                    and runtime["physical_residual_inf_n"] <= 1.0e-9 and replay_error <= 1.0e-18)
+                    and runtime["physical_residual_inf_n"] <= 1.0e-9 and replay_error <= 1.0e-18
+                    and runtime["accepted_alpha"] == 1.0
+                    and runtime["accepted_nonlinear_residual_inf_n"] <= 5.0e-4
+                    and nonlinear_replay_error <= nonlinear_parity_tolerance_n)
     if not contract: raise RuntimeError("device_fgmres_contract_failed")
     solution_item, solution_raw = _artifact(root, solution_out, solution)
     residual_item, residual_raw = _artifact(root, residual_out, residual)
+    accepted_state_item, accepted_state_raw = _artifact(root, accepted_state_out, accepted_state)
+    nonlinear_residual_item, nonlinear_residual_raw = _artifact(
+        root, nonlinear_residual_out, nonlinear_residual)
     scaling = {"schema_version": "equation-scaling-mgt-translation-free.v1",
                "reference_force_policy": "max_translation_or_equivalent_moment_with_floor.v1",
                "minimum_reference_force_n": 1.0, "reference_force_n": reference_force_n,
@@ -152,19 +173,29 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
         "equation_scaling": scaling, "hardware_execution": runtime,
         "comparison": {"terminal_physical_residual_cpu_replay_max_abs_error_n": replay_error,
                        "terminal_physical_residual_tolerance_n": 1.0e-9,
-                       "solution_artifact": solution_item, "residual_artifact": residual_item},
+                       "accepted_nonlinear_residual_cpu_replay_max_abs_error_n": nonlinear_replay_error,
+                       "accepted_nonlinear_residual_parity_tolerance_n": nonlinear_parity_tolerance_n,
+                       "accepted_nonlinear_residual_cpu_inf_n": float(np.linalg.norm(expected_nonlinear_residual, ord=np.inf)),
+                       "solution_artifact": solution_item, "residual_artifact": residual_item,
+                       "accepted_state_artifact": accepted_state_item,
+                       "nonlinear_residual_artifact": nonlinear_residual_item},
         "claims": {"actual_mgt_full_load_accepted_state": True, "production_size_fgmres": True,
                    "two_pass_mgs_arnoldi": True, "device_givens_and_backsolve": True,
                    "equation_scaling": True, "terminal_physical_residual_replay": True,
                    "single_device_lifecycle": True, "mid_iteration_d2h_zero": True,
+                   "newton_update_on_device": True, "physical_line_search_on_device": True,
+                   "nonlinear_convergence_gate_on_device": True,
                    "gfx1100_cross_compile": True, "independent_gfx1100_run": False,
-                   "newton_update_line_search_material_checkpoint": False, "g1_closure": False},
+                   "material_commit_rollback": False, "checkpoint_resultir": False,
+                   "g1_closure": False},
         "blockers_remaining": ["independent_gfx1100_hardware_run_not_available",
-                               "device_newton_update_line_search_material_commit_checkpoint_resultir_not_established"],
-        "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, and a terminal physical-residual replay in one gfx1030 lifecycle with zero iteration-time D2H. gfx1100 is cross-compiled only; no independent gfx1100 hardware or full nonlinear step lifecycle is claimed."
+                               "material_commit_rollback_not_established",
+                               "checkpoint_resultir_diagnosticir_not_established"],
+        "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. gfx1100 is cross-compiled only; material commit/rollback, checkpoint, ResultIR, DiagnosticIR, and independent gfx1100 hardware remain unclaimed."
     }
     payload["receipt_hash"] = _hash(payload); validate(payload, root=root, current=True)
-    return payload, solution_raw, residual_raw
+    return (payload, solution_raw, residual_raw, accepted_state_raw,
+            nonlinear_residual_raw)
 
 
 def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = False, artifacts: bool = False) -> dict[str, Any]:
@@ -173,7 +204,7 @@ def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = Fals
     if current and payload["source"]["input_checksums"] != input_checksums(SOURCE_PATHS, repo_root=root):
         raise ValueError("device_fgmres_sources_stale")
     if artifacts:
-        for key in ("solution_artifact", "residual_artifact"):
+        for key in ("solution_artifact", "residual_artifact", "accepted_state_artifact", "nonlinear_residual_artifact"):
             item = payload["comparison"][key]; path = _resolve(root, Path(item["path"]))
             if file_sha256(path) != item["file_sha256"] or path.stat().st_size != item["byte_length"]:
                 raise ValueError("device_fgmres_artifact_invalid")
@@ -183,7 +214,11 @@ def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = Fals
 def write(**kwargs: Any) -> dict[str, Any]:
     root = Path(kwargs.get("root", ROOT)).resolve(); out = Path(kwargs.get("out", DEFAULT_OUT))
     solution = Path(kwargs.get("solution_out", DEFAULT_SOLUTION)); residual = Path(kwargs.get("residual_out", DEFAULT_RESIDUAL))
-    payload, sr, rr = run(**kwargs); _resolve(root, solution).write_bytes(sr); _resolve(root, residual).write_bytes(rr)
+    accepted = Path(kwargs.get("accepted_state_out", DEFAULT_ACCEPTED_STATE))
+    nonlinear = Path(kwargs.get("nonlinear_residual_out", DEFAULT_NONLINEAR_RESIDUAL))
+    payload, sr, rr, ar, nr = run(**kwargs)
+    _resolve(root, solution).write_bytes(sr); _resolve(root, residual).write_bytes(rr)
+    _resolve(root, accepted).write_bytes(ar); _resolve(root, nonlinear).write_bytes(nr)
     _resolve(root, out).write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     return validate(payload, root=root, current=True, artifacts=True)
 
