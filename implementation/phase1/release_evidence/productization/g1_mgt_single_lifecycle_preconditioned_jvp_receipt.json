@@ -57,7 +57,7 @@
     "sparse_lu_factor_contract_hash": "sha256:d3c3f1bc4fd49a5b909dc34890b3916c3ca658dbbf5eafbe9cf55f16f9ccc0c8",
     "sparse_lu_fixture_hash": "sha256:9475a6c8edf10329fe1965c843ffda22e00d834eb96a58cdaba502a89c4b26f6"
   },
-  "generated_at": "2026-08-08T13:03:56.639120+00:00",
+  "generated_at": "2026-08-08T13:17:34.038991+00:00",
   "hardware_execution": {
     "action_artifact": {
       "byte_length": 564480,
@@ -76,7 +76,7 @@
       "cpu_backend": false,
       "current_tangent_kernel_invocation_count": 1,
       "d2h_bytes": 1128960,
-      "device_lifecycle_wall_time_ms": 872.958075,
+      "device_lifecycle_wall_time_ms": 872.56019,
       "device_name": "AMD Radeon RX 6900 XT",
       "equation_count": 70560,
       "final_d2h_transfer_count": 2,
@@ -94,9 +94,9 @@
       "total_kernel_invocation_count": 8662,
       "tracked_peak_device_allocation_bytes": 242646200
     },
-    "runtime_output_hash": "sha256:1e987daf78105d5cc81c0584ce50af79d0004370aafa53359a58359e39dca770"
+    "runtime_output_hash": "sha256:0bb77465962f23aa95387095795a30f5ef3f6f9f908fb038072196561f2e3a64"
   },
-  "receipt_hash": "sha256:bdf65576332236fbc94d980bf5ed467dbe94ff87c35c33a99dba4796031684e5",
+  "receipt_hash": "sha256:7187c93a576edf7c13674fc610a2060d3df76a5e74708ca4b3af682e1402c213",
   "runtime": {
     "backend": "amd_rocm_hip",
     "binary_byte_length": 107504,
@@ -125,20 +125,20 @@
       "dist/structural_analysis-0.3.0-py3-none-any.whl": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a",
       "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
       "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
-      "implementation/phase1/hip_kernels/engine_v2_mgt_preconditioned_jvp.hip.cpp": "sha256:2cd95bfe2296756c998256007e5e44d3479c813a96590b1cd61355da221e91a1",
+      "implementation/phase1/hip_kernels/engine_v2_mgt_preconditioned_jvp.hip.cpp": "sha256:7d876b3cf5dc5080f9b403b854aa17582934a21692a8fa5d4379c19c2067dcea",
       "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp": "sha256:452d5964ec9ca38c0653a27d7d0879fdbf8e110ebdc38c1d2bc6600d3d7706e2",
       "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
       "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_parity_receipt.json": "sha256:ea16b96ea40544a36ec963a1dc99fdb7770934d97eaed66a7f2ba9ed11bd093a",
       "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_solution.f64le": "sha256:50059bc7b4e10c41e0a596e5903ccde9453603aa913751ab2e19237598bb117a",
       "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
       "scripts/run_g1_mgt_accepted_state_hip_sparse_lu_parity.py": "sha256:83be5ccf2e0aab3f1588e55b942de27a9382bba9d6e3f135d9061a0aa2f8ea36",
-      "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py": "sha256:7bf1422dceda84f35e7e5e17235fa659e8abb890231c89073168bb0c17c4d91e",
+      "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py": "sha256:d3e5647af39e64ef6b9906a7901697c5399c2284be62d471142fab49ab0d86f3",
       "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py": "sha256:11b2364da86bf40a8e20737f85ec30e21e4f4a141d605f5efbf0eb58d7683f7a",
       "src/structural_analysis/engine_v2_backends/hip_sparse_lu_apply.py": "sha256:b9da2c5044c215fd3d391fb0ac6e794fa22c1ab718b5cd150ac6b87aa7341a9e",
       "src/structural_analysis/schemas/g1_mgt_single_lifecycle_preconditioned_jvp_v1.schema.json": "sha256:fdae41f67b0752c259c59a3a9e6d3eee491ef093a82ed1a05ea192e679f97e51",
       "tests/test_run_g1_mgt_single_lifecycle_preconditioned_jvp.py": "sha256:69c52f22087b053174afbe215e418f09759e5651a7f74fd16961aef8a72a1d38"
     },
-    "repository_commit_sha": "09cbf2484308911fb663de6cb0e4df345027c9fe",
+    "repository_commit_sha": "37c853943ce67be6f9b73eaec8cc9e942a7e40c9",
     "source_paths_clean_at_execution": true
   },
   "status": "partial"
