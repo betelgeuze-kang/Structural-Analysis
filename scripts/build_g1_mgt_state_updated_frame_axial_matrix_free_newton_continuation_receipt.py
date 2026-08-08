@@ -498,6 +498,7 @@ def build_receipt(
     receipt_out: Path = DEFAULT_RECEIPT_OUT,
     final_vector_out: Path = DEFAULT_FINAL_VECTOR_OUT,
     _write_final_vector: bool = False,
+    source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     resolved_mgt = _resolve(repo_root, mgt_path)
@@ -508,6 +509,7 @@ def build_receipt(
             checkpoint_npz=checkpoint_npz,
         ),
         repo_root=repo_root,
+        source_commit_sha=source_commit_sha,
     )
     source_provenance = source_metadata["source_input_provenance"]
     source_exact = bool(source_provenance["contract_pass"])
@@ -1247,13 +1249,6 @@ def check_receipt(
         return False, "g1_state_updated_newton_continuation_receipt_missing"
     if not vector_target.is_file():
         return False, "g1_state_updated_newton_continuation_vector_missing"
-    expected = build_receipt(
-        repo_root=repo_root,
-        mgt_path=mgt_path,
-        checkpoint_npz=checkpoint_npz,
-        receipt_out=receipt_out,
-        final_vector_out=final_vector_out,
-    )
     try:
         existing = _read_json(receipt_target)
     except Exception as exc:
@@ -1261,6 +1256,14 @@ def check_receipt(
             "g1_state_updated_newton_continuation_receipt_unreadable:"
             f"{exc.__class__.__name__}"
         )
+    expected = build_receipt(
+        repo_root=repo_root,
+        mgt_path=mgt_path,
+        checkpoint_npz=checkpoint_npz,
+        receipt_out=receipt_out,
+        final_vector_out=final_vector_out,
+        source_commit_sha=str(existing["source_commit_sha"]),
+    )
     if _strip_volatile(existing) != _strip_volatile(expected):
         return False, "g1_state_updated_newton_continuation_receipt_mismatch"
     descriptor = expected["final_vector_artifact"]
