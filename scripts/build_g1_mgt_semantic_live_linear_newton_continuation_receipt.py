@@ -259,6 +259,7 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
     summary_out: Path = DEFAULT_SUMMARY_OUT,
     restart_vector_out: Path = DEFAULT_RESTART_VECTOR_OUT,
     full_load_vector_out: Path = DEFAULT_FULL_LOAD_VECTOR_OUT,
+    source_commit_sha: str | None = None,
 ) -> tuple[dict[str, dict[str, Any]], dict[str, bytes]]:
     repo_root = repo_root.resolve()
     source_metadata = commit_bound_input_metadata(
@@ -267,6 +268,7 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
             operator_checkpoint=operator_checkpoint,
         ),
         repo_root=repo_root,
+        source_commit_sha=source_commit_sha,
     )
     source_provenance = source_metadata["source_input_provenance"]
     source_exact = bool(source_provenance["contract_pass"])
@@ -623,6 +625,13 @@ def check_g1_mgt_semantic_live_linear_newton_continuation_receipt(
     for label, relative in outputs:
         if not _resolve(repo_root, relative).is_file():
             return False, f"g1_linear_newton_continuation_missing:{label}"
+    try:
+        existing_receipt = _read_json(_resolve(repo_root, receipt_out))
+    except Exception as exc:
+        return False, (
+            "g1_linear_newton_continuation_unreadable:receipt:"
+            f"{exc.__class__.__name__}"
+        )
     expected_payloads, expected_binaries = (
         build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
             repo_root=repo_root,
@@ -632,11 +641,16 @@ def check_g1_mgt_semantic_live_linear_newton_continuation_receipt(
             summary_out=summary_out,
             restart_vector_out=restart_vector_out,
             full_load_vector_out=full_load_vector_out,
+            source_commit_sha=str(existing_receipt["source_commit_sha"]),
         )
     )
     for label, relative in (("receipt", receipt_out), ("summary", summary_out)):
         try:
-            existing = _read_json(_resolve(repo_root, relative))
+            existing = (
+                existing_receipt
+                if label == "receipt"
+                else _read_json(_resolve(repo_root, relative))
+            )
         except Exception as exc:
             return False, (
                 f"g1_linear_newton_continuation_unreadable:{label}:"
