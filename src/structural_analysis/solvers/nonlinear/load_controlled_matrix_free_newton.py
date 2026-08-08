@@ -43,6 +43,7 @@ LOAD_CONTROLLED_MATRIX_FREE_NEWTON_CLAIM_BOUNDARY = (
     "material-state commit/rollback, a production Krylov backend, HIP parity, "
     "full-corotational frame behavior, or G1 closure."
 )
+PHYSICAL_RESIDUAL_MERIT_PROFILE = "half_squared_physical_residual_l2.v1"
 
 
 class LoadControlledMatrixFreeNewtonError(ValueError):
@@ -148,7 +149,10 @@ class LoadControlledMatrixFreeNewtonConfig:
             "line_search_reduction": self.line_search_reduction,
             "minimum_line_search_alpha": self.minimum_line_search_alpha,
             "accepted_trial_policy": "immutable_accepted_copy_trial_then_commit",
-            "line_search_acceptance": "strict_residual_inf_decrease",
+            "line_search_merit": PHYSICAL_RESIDUAL_MERIT_PROFILE,
+            "line_search_acceptance": (
+                "strict_physical_merit_and_residual_inf_decrease"
+            ),
             "step_acceptance": "residual_and_absolute_or_relative_increment",
         }
 
@@ -442,6 +446,18 @@ def _residual_kn(
     )
 
 
+def _physical_residual_merit(residual_kn: np.ndarray) -> float:
+    """Return 1/2 ||R||_2^2 for the declared physical residual in kN."""
+
+    residual = np.asarray(residual_kn, dtype=np.float64)
+    merit = 0.5 * float(np.dot(residual, residual))
+    if not math.isfinite(merit):
+        raise LoadControlledMatrixFreeNewtonError(
+            "physical residual merit must be finite"
+        )
+    return merit
+
+
 def _validate_tangent_solve(
     *,
     solve: VectorArcLengthTangentSolve,
@@ -522,6 +538,7 @@ def _attempt_step(
     for newton_iteration in range(config.maximum_newton_iterations + 1):
         residual = _residual_kn(problem, trial, target_load_factor)
         residual_inf = float(np.linalg.norm(residual, ord=np.inf))
+        residual_merit = _physical_residual_merit(residual)
         residual_gate_passed = bool(
             residual_inf <= config.residual_tolerance_inf_kn
         )
@@ -544,6 +561,10 @@ def _attempt_step(
             "trial_state_data_hash": array_data_hash(trial),
             "residual_data_hash": array_data_hash(residual),
             "residual_inf_kn": residual_inf,
+            "physical_residual_merit_half_l2_squared_kn2": residual_merit,
+            "physical_residual_merit_profile": (
+                PHYSICAL_RESIDUAL_MERIT_PROFILE
+            ),
             "residual_gate_passed": residual_gate_passed,
             "last_increment_source": last_increment_source,
             "last_increment_inf_m": last_increment_inf_m,
@@ -609,6 +630,12 @@ def _attempt_step(
             ),
         )
         history_row["tangent_solve"] = solve_meta
+        history_row["accepted_iterate_tangent_refresh"] = {
+            "performed": True,
+            "linearization_state_data_hash": array_data_hash(trial),
+            "load_factor": float(target_load_factor),
+            "same_state_used_for_independent_action_replay": True,
+        }
         correction_inf_m = float(
             np.linalg.norm(correction, ord=np.inf)
         )
@@ -696,7 +723,12 @@ def _attempt_step(
             candidate_inf = float(
                 np.linalg.norm(candidate_residual, ord=np.inf)
             )
-            decreases = bool(candidate_inf < residual_inf)
+            candidate_merit = _physical_residual_merit(candidate_residual)
+            physical_merit_decreases = bool(candidate_merit < residual_merit)
+            residual_inf_decreases = bool(candidate_inf < residual_inf)
+            decreases = bool(
+                physical_merit_decreases and residual_inf_decreases
+            )
             line_search_rows.append(
                 {
                     "backtrack_index": backtrack,
@@ -706,6 +738,19 @@ def _attempt_step(
                         candidate_residual
                     ),
                     "candidate_residual_inf_kn": candidate_inf,
+                    "parent_physical_residual_merit_half_l2_squared_kn2": (
+                        residual_merit
+                    ),
+                    "candidate_physical_residual_merit_half_l2_squared_kn2": (
+                        candidate_merit
+                    ),
+                    "physical_residual_merit_profile": (
+                        PHYSICAL_RESIDUAL_MERIT_PROFILE
+                    ),
+                    "strict_physical_merit_decrease": (
+                        physical_merit_decreases
+                    ),
+                    "strict_residual_inf_decrease": residual_inf_decreases,
                     "strict_residual_decrease": decreases,
                 }
             )
@@ -799,6 +844,15 @@ class LoadControlledMatrixFreeNewtonResult:
                     self.metrics["contract_pass"]
                 ),
                 "current_state_tangent_solver": True,
+                "accepted_iterate_tangent_refresh": bool(
+                    self.metrics["accepted_iterate_tangent_refresh_count"]
+                    == self.metrics["tangent_solve_count"]
+                ),
+                "line_search_physical_merit": True,
+                "fallback_zero": bool(
+                    self.metrics["fallback_count"] == 0
+                    and self.metrics["regularization_count"] == 0
+                ),
                 "accepted_trial_displacement_state": True,
                 "residual_and_increment_acceptance_gate": True,
                 "failed_step_rollback_exact": bool(
@@ -979,11 +1033,31 @@ def load_controlled_matrix_free_newton_continuation(
         for row in attempt["history"]
         if "tangent_solve" in row
     ]
+    tangent_history_rows = [
+        row
+        for attempt in attempts
+        for row in attempt["history"]
+        if "tangent_solve" in row
+    ]
+    line_search_rows = [
+        candidate
+        for attempt in attempts
+        for row in attempt["history"]
+        for candidate in row.get("line_search", [])
+    ]
     failed_attempts = [row for row in attempts if not row["accepted"]]
     accepted_attempts = [row for row in attempts if row["accepted"]]
     accepted_terminal_rows = [
         row["history"][-1] for row in accepted_attempts
     ]
+    fallback_count = sum(
+        int(row["receipt"].get("fallback_count", 0))
+        for row in tangent_rows
+    )
+    regularization_count = sum(
+        int(row["receipt"].get("regularization_count", 0))
+        for row in tangent_rows
+    )
     maximum_checkpoint_residual_inf = max(
         (
             float(
@@ -1016,6 +1090,8 @@ def load_controlled_matrix_free_newton_continuation(
             for row in accepted_terminal_rows
         )
         and all(row["rollback_exact"] for row in failed_attempts)
+        and fallback_count == 0
+        and regularization_count == 0
     )
     metrics = {
         "contract_pass": contract_pass,
@@ -1027,6 +1103,14 @@ def load_controlled_matrix_free_newton_continuation(
         "failed_step_count": len(failed_attempts),
         "checkpoint_count": len(checkpoints),
         "tangent_solve_count": len(tangent_rows),
+        "accepted_iterate_tangent_refresh_count": sum(
+            bool(row.get("accepted_iterate_tangent_refresh", {}).get("performed"))
+            for row in tangent_history_rows
+        ),
+        "physical_merit_line_search_candidate_count": len(
+            line_search_rows
+        ),
+        "physical_merit_profile": PHYSICAL_RESIDUAL_MERIT_PROFILE,
         "maximum_tangent_solve_iterations": max(
             (
                 int(row["receipt"].get("iteration_count", 0))
@@ -1084,14 +1168,8 @@ def load_controlled_matrix_free_newton_continuation(
             ),
             default=1.0,
         ),
-        "fallback_count": sum(
-            int(row["receipt"].get("fallback_count", 0))
-            for row in tangent_rows
-        ),
-        "regularization_count": sum(
-            int(row["receipt"].get("regularization_count", 0))
-            for row in tangent_rows
-        ),
+        "fallback_count": fallback_count,
+        "regularization_count": regularization_count,
         "rollback_exact": bool(
             all(row["rollback_exact"] for row in failed_attempts)
         ),
@@ -1174,6 +1252,10 @@ class AdaptiveLoadControlledMatrixFreeNewtonResult:
                 ),
                 "checkpoint_restart_consumed": bool(
                     self.metrics["restart_checkpoint_consumed"]
+                ),
+                "fallback_zero": bool(
+                    self.metrics["fallback_count"] == 0
+                    and self.metrics["regularization_count"] == 0
                 ),
                 "material_state_commit_rollback": False,
                 "arc_length_branch": False,
@@ -1398,6 +1480,14 @@ def adaptive_load_controlled_matrix_free_newton_continuation(
         for row in attempt["history"]
         if "tangent_solve" in row
     ]
+    fallback_count = sum(
+        int(row["receipt"].get("fallback_count", 0))
+        for row in tangent_rows
+    )
+    regularization_count = sum(
+        int(row["receipt"].get("regularization_count", 0))
+        for row in tangent_rows
+    )
     accepted_terminal_rows = [
         row["history"][-1] for row in accepted_attempts
     ]
@@ -1441,6 +1531,8 @@ def adaptive_load_controlled_matrix_free_newton_continuation(
             for row in tangent_rows
         )
         and rollback_exact
+        and fallback_count == 0
+        and regularization_count == 0
     )
     metrics = {
         "contract_pass": contract_pass,
@@ -1518,14 +1610,8 @@ def adaptive_load_controlled_matrix_free_newton_continuation(
             ),
             default=1.0,
         ),
-        "fallback_count": sum(
-            int(row["receipt"].get("fallback_count", 0))
-            for row in tangent_rows
-        ),
-        "regularization_count": sum(
-            int(row["receipt"].get("regularization_count", 0))
-            for row in tangent_rows
-        ),
+        "fallback_count": fallback_count,
+        "regularization_count": regularization_count,
         "rollback_exact": rollback_exact,
         "restart_checkpoint_consumed": checkpoint is not None,
         "production_solver_claim": False,

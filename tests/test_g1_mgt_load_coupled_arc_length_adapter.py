@@ -412,6 +412,9 @@ def test_matrix_free_operator_binding_propagates_to_zero_state() -> None:
         current_tangent_action_contract=(
             module.MGT_CURRENT_STATE_TANGENT_ACTION_CONTRACT
         ),
+        source_commit_sha="a" * 40,
+        model_source_sha256="sha256:" + "b" * 64,
+        equilibrium_operator_binding_hash="sha256:" + "c" * 64,
     )
 
     binding = problem.matrix_free_current_tangent_operator_binding()
@@ -426,12 +429,50 @@ def test_matrix_free_operator_binding_propagates_to_zero_state() -> None:
         reference_load_n,
         dtype="<f8",
     )
+    assert binding["exact_restart_binding"] == {
+        "source_commit_sha": "a" * 40,
+        "model_source_sha256": "sha256:" + "b" * 64,
+        "equilibrium_operator_binding_hash": "sha256:" + "c" * 64,
+        "complete": True,
+    }
     assert problem.free_equation_global_dofs is not None
     assert problem.free_equation_global_dofs.flags.writeable is False
     assert (
         problem.zero_state_problem().matrix_free_current_tangent_operator_binding()
         == binding
     )
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("source_commit_sha", "not-a-commit", "source_commit_sha"),
+        ("model_source_sha256", "sha256:short", "model_source_sha256"),
+        (
+            "equilibrium_operator_binding_hash",
+            "sha256:short",
+            "equilibrium_operator_binding_hash",
+        ),
+    ],
+)
+def test_exact_restart_binding_rejects_noncanonical_identity(
+    field: str,
+    value: str,
+    message: str,
+) -> None:
+    kwargs = {
+        "case_id": "invalid_restart_binding",
+        "initial_displacements_m": np.zeros(2),
+        "initial_factor": 0.0,
+        "reference_load_free_n": np.ones(2),
+        "residual_free_n": lambda displacement, load_factor: displacement,
+        "negative_load_derivative_free_n": (
+            lambda displacement, load_factor: np.ones(2)
+        ),
+        field: value,
+    }
+    with pytest.raises(ValueError, match=message):
+        module.LoadCoupledArcLengthCallbackProblem(**kwargs)
 
 
 def test_backend_neutral_operator_drives_callback_and_extended_binding() -> None:

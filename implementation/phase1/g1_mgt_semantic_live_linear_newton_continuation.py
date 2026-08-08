@@ -70,6 +70,60 @@ def _canonical_hash(payload: dict[str, Any]) -> str:
     return "sha256:" + hashlib.sha256(encoded).hexdigest()
 
 
+def _is_canonical_sha256(value: str) -> bool:
+    return bool(
+        len(value) == 71
+        and value.startswith("sha256:")
+        and all(character in "0123456789abcdef" for character in value[7:])
+    )
+
+
+def _is_canonical_commit_sha(value: str) -> bool:
+    return bool(
+        len(value) in {40, 64}
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _problem_exact_restart_binding(problem: Any) -> dict[str, Any]:
+    binding_method = getattr(problem, "exact_restart_binding", None)
+    if callable(binding_method):
+        raw = binding_method()
+    else:
+        raw = {
+            "source_commit_sha": getattr(
+                problem,
+                "source_commit_sha",
+                "unavailable",
+            ),
+            "model_source_sha256": getattr(
+                problem,
+                "model_source_sha256",
+                "unavailable",
+            ),
+            "equilibrium_operator_binding_hash": getattr(
+                problem,
+                "equilibrium_operator_binding_hash",
+                "unavailable",
+            ),
+        }
+    source_commit_sha = str(raw.get("source_commit_sha", "unavailable"))
+    model_source_sha256 = str(raw.get("model_source_sha256", "unavailable"))
+    operator_hash = str(
+        raw.get("equilibrium_operator_binding_hash", "unavailable")
+    )
+    return {
+        "source_commit_sha": source_commit_sha,
+        "model_source_sha256": model_source_sha256,
+        "equilibrium_operator_binding_hash": operator_hash,
+        "complete": bool(
+            _is_canonical_commit_sha(source_commit_sha)
+            and _is_canonical_sha256(model_source_sha256)
+            and _is_canonical_sha256(operator_hash)
+        ),
+    }
+
+
 @dataclass(frozen=True)
 class LinearReferenceNewtonConfig:
     target_load_factor: float = 1.0
@@ -181,6 +235,7 @@ class LinearReferenceNewtonConfig:
 
 
 def _path_contract_hash(problem: Any, config: LinearReferenceNewtonConfig) -> str:
+    restart_binding = _problem_exact_restart_binding(problem)
     return _canonical_hash(
         {
             **config.path_contract_payload(),
@@ -189,6 +244,11 @@ def _path_contract_hash(problem: Any, config: LinearReferenceNewtonConfig) -> st
             "state_invariant_tangent_contract": str(
                 problem.state_invariant_tangent_contract
             ),
+            "source_commit_sha": restart_binding["source_commit_sha"],
+            "model_source_sha256": restart_binding["model_source_sha256"],
+            "equilibrium_operator_binding_hash": restart_binding[
+                "equilibrium_operator_binding_hash"
+            ],
         }
     )
 
@@ -223,6 +283,9 @@ class LinearReferenceNewtonCheckpoint:
     load_factor: float
     free_displacements_m: np.ndarray
     state_hash: str
+    source_commit_sha: str = "unavailable"
+    model_source_sha256: str = "unavailable"
+    equilibrium_operator_binding_hash: str = "unavailable"
 
     def __post_init__(self) -> None:
         if self.schema_version != LINEAR_NEWTON_CHECKPOINT_SCHEMA_VERSION:
@@ -237,6 +300,23 @@ class LinearReferenceNewtonCheckpoint:
             raise LinearReferenceNewtonContractError(
                 "checkpoint path_contract_hash is invalid"
             )
+        source_commit_sha = str(self.source_commit_sha)
+        model_source_sha256 = str(self.model_source_sha256)
+        operator_hash = str(self.equilibrium_operator_binding_hash)
+        if source_commit_sha != "unavailable" and not _is_canonical_commit_sha(
+            source_commit_sha
+        ):
+            raise LinearReferenceNewtonContractError(
+                "checkpoint source_commit_sha is invalid"
+            )
+        for name, value in (
+            ("model_source_sha256", model_source_sha256),
+            ("equilibrium_operator_binding_hash", operator_hash),
+        ):
+            if value != "unavailable" and not _is_canonical_sha256(value):
+                raise LinearReferenceNewtonContractError(
+                    f"checkpoint {name} is invalid"
+                )
         if self.step_index < 0:
             raise LinearReferenceNewtonContractError(
                 "checkpoint step_index must be nonnegative"
@@ -278,6 +358,18 @@ class LinearReferenceNewtonCheckpoint:
                 self.free_displacements_m
             ),
             "state_hash": self.state_hash,
+            "source_commit_sha": self.source_commit_sha,
+            "model_source_sha256": self.model_source_sha256,
+            "equilibrium_operator_binding_hash": (
+                self.equilibrium_operator_binding_hash
+            ),
+            "exact_restart_binding_complete": bool(
+                _is_canonical_commit_sha(self.source_commit_sha)
+                and _is_canonical_sha256(self.model_source_sha256)
+                and _is_canonical_sha256(
+                    self.equilibrium_operator_binding_hash
+                )
+            ),
         }
 
 
@@ -294,6 +386,7 @@ def create_linear_reference_newton_checkpoint(
         name="free_displacements_m",
         dimension=int(problem.equation_count),
     )
+    restart_binding = _problem_exact_restart_binding(problem)
     return LinearReferenceNewtonCheckpoint(
         schema_version=LINEAR_NEWTON_CHECKPOINT_SCHEMA_VERSION,
         case_id=str(problem.case_id),
@@ -308,6 +401,11 @@ def create_linear_reference_newton_checkpoint(
             load_factor=float(load_factor),
             free_displacements_m=vector,
         ),
+        source_commit_sha=restart_binding["source_commit_sha"],
+        model_source_sha256=restart_binding["model_source_sha256"],
+        equilibrium_operator_binding_hash=restart_binding[
+            "equilibrium_operator_binding_hash"
+        ],
     )
 
 
@@ -326,6 +424,11 @@ class LinearReferenceNewtonResult:
     metrics: dict[str, Any]
 
     def to_dict(self) -> dict[str, Any]:
+        exact_restart_binding_complete = bool(
+            self.initial_checkpoint.descriptor()[
+                "exact_restart_binding_complete"
+            ]
+        )
         return {
             "schema_version": LINEAR_NEWTON_SCHEMA_VERSION,
             "status": self.status,
@@ -366,6 +469,9 @@ class LinearReferenceNewtonResult:
                     and self.metrics["rollback_exact"]
                 ),
                 "restart_checkpoint_contract": True,
+                "source_model_operator_bound_restart": (
+                    exact_restart_binding_complete
+                ),
                 "restart_checkpoint_consumed": bool(
                     self.metrics["restart_checkpoint_consumed"]
                 ),
@@ -383,6 +489,11 @@ class LinearReferenceNewtonResult:
                 "g1_full_building_closure": False,
             },
             "blockers_remaining": [
+                *(
+                    []
+                    if exact_restart_binding_complete
+                    else ["restart_source_model_operator_binding_incomplete"]
+                ),
                 "linear_reference_geometry_operator_only",
                 "nonlinear_current_tangent_not_connected",
                 "quadratic_convergence_not_demonstrated",
@@ -415,6 +526,7 @@ def _validate_restart_checkpoint(
     path_contract_hash: str,
     config: LinearReferenceNewtonConfig,
 ) -> None:
+    restart_binding = _problem_exact_restart_binding(problem)
     if checkpoint.case_id != str(problem.case_id):
         raise LinearReferenceNewtonContractError(
             "checkpoint case_id does not match problem"
@@ -423,6 +535,15 @@ def _validate_restart_checkpoint(
         raise LinearReferenceNewtonContractError(
             "checkpoint path contract does not match"
         )
+    for name in (
+        "source_commit_sha",
+        "model_source_sha256",
+        "equilibrium_operator_binding_hash",
+    ):
+        if getattr(checkpoint, name) != restart_binding[name]:
+            raise LinearReferenceNewtonContractError(
+                f"checkpoint {name} does not match problem"
+            )
     if checkpoint.free_displacements_m.size != int(problem.equation_count):
         raise LinearReferenceNewtonContractError(
             "checkpoint equation_count does not match"

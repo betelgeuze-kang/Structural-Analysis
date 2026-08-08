@@ -90,6 +90,21 @@ def _file_hash(path: Path) -> str:
     return "sha256:" + digest.hexdigest()
 
 
+def _is_canonical_sha256(value: str) -> bool:
+    return bool(
+        len(value) == 71
+        and value.startswith("sha256:")
+        and all(character in "0123456789abcdef" for character in value[7:])
+    )
+
+
+def _is_canonical_commit_sha(value: str) -> bool:
+    return bool(
+        len(value) in {40, 64}
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
 def _canonical_json_hash_without_generated_at(payload: Any) -> str:
     """Hash JSON semantics while excluding volatile generation timestamps."""
 
@@ -240,6 +255,9 @@ class LoadCoupledArcLengthCallbackProblem:
     residual_formula_hash: str = "unavailable"
     current_tangent_action_contract: str = "unavailable"
     current_tangent_operator: CurrentTangentOperatorContract | None = None
+    source_commit_sha: str = "unavailable"
+    model_source_sha256: str = "unavailable"
+    equilibrium_operator_binding_hash: str = "unavailable"
 
     def __post_init__(self) -> None:
         if not str(self.case_id).strip():
@@ -282,6 +300,31 @@ class LoadCoupledArcLengthCallbackProblem:
             self.current_tangent_action_contract
         ).strip()
         current_tangent_operator = self.current_tangent_operator
+        source_commit_sha = str(self.source_commit_sha).strip()
+        model_source_sha256 = str(self.model_source_sha256).strip()
+        equilibrium_operator_binding_hash = str(
+            self.equilibrium_operator_binding_hash
+        ).strip()
+        if source_commit_sha != "unavailable" and not _is_canonical_commit_sha(
+            source_commit_sha
+        ):
+            raise ValueError("source_commit_sha must be a canonical commit SHA")
+        for name, value in (
+            ("model_source_sha256", model_source_sha256),
+            (
+                "equilibrium_operator_binding_hash",
+                equilibrium_operator_binding_hash,
+            ),
+        ):
+            if value != "unavailable" and not _is_canonical_sha256(value):
+                raise ValueError(f"{name} must be canonical SHA-256")
+        object.__setattr__(self, "source_commit_sha", source_commit_sha)
+        object.__setattr__(self, "model_source_sha256", model_source_sha256)
+        object.__setattr__(
+            self,
+            "equilibrium_operator_binding_hash",
+            equilibrium_operator_binding_hash,
+        )
         if current_tangent_operator is not None:
             current_tangent_operator = validate_current_tangent_operator(
                 current_tangent_operator
@@ -502,7 +545,29 @@ class LoadCoupledArcLengthCallbackProblem:
             residual_formula_hash=self.residual_formula_hash,
             current_tangent_action_contract=(self.current_tangent_action_contract),
             current_tangent_operator=self.current_tangent_operator,
+            source_commit_sha=self.source_commit_sha,
+            model_source_sha256=self.model_source_sha256,
+            equilibrium_operator_binding_hash=(
+                self.equilibrium_operator_binding_hash
+            ),
         )
+
+    def exact_restart_binding(self) -> dict[str, Any]:
+        """Return the immutable source/model/operator identity for restart."""
+
+        complete = bool(
+            _is_canonical_commit_sha(self.source_commit_sha)
+            and _is_canonical_sha256(self.model_source_sha256)
+            and _is_canonical_sha256(self.equilibrium_operator_binding_hash)
+        )
+        return {
+            "source_commit_sha": self.source_commit_sha,
+            "model_source_sha256": self.model_source_sha256,
+            "equilibrium_operator_binding_hash": (
+                self.equilibrium_operator_binding_hash
+            ),
+            "complete": complete,
+        }
 
     def state_invariant_tangent_free_csr_n_per_m(self) -> Any:
         """Return a copy of the exact CSR tangent for this linear slice."""
@@ -546,6 +611,7 @@ class LoadCoupledArcLengthCallbackProblem:
             "displacement_unit": "m",
             "tangent_action_unit": "kN/m",
             "load_factor_unit": "dimensionless",
+            "exact_restart_binding": self.exact_restart_binding(),
         }
         if self.current_tangent_operator is not None:
             binding.update(
@@ -735,6 +801,7 @@ def build_real_mgt_load_coupled_arc_length_problem(
     apply_shell_material_tangent: bool = False,
     apply_state_updated_frame_axial_geometry: bool = False,
     tangent_difference_step_m: float = 1.0e-7,
+    source_commit_sha: str = "unavailable",
 ) -> tuple[LoadCoupledArcLengthCallbackProblem, dict[str, Any]]:
     """Build one actual-MGT load-coupled problem without running continuation."""
 
@@ -2195,6 +2262,57 @@ def build_real_mgt_load_coupled_arc_length_problem(
             ),
         )
         del frame_stiffness_delta_n_per_m
+    model_source_sha256 = _file_hash(mgt_path)
+    roundtrip_sha256 = _file_hash(roundtrip_path)
+    roundtrip_json_sha256 = _canonical_roundtrip_json_hash(
+        roundtrip_payload,
+        mgt_path=mgt_path,
+    )
+    equilibrium_operator_binding = {
+        "schema_version": "mgt-equilibrium-operator-binding.v1",
+        "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+        "model_source_sha256": model_source_sha256,
+        "roundtrip_sha256": roundtrip_sha256,
+        "roundtrip_json_sha256": roundtrip_json_sha256,
+        "semantic_load_case": str(semantic_load_audit["target_name"]),
+        "free_equation_order_data_hash": _array_hash(free, dtype="<i8"),
+        "reference_load_free_n_data_hash": _array_hash(
+            reference_external_n[free],
+            dtype="<f8",
+        ),
+        "zero_reference_background_displacement_data_hash": _array_hash(
+            zero_reference_background_u,
+            dtype="<f8",
+        ),
+        "residual_formula_hash": residual_evaluation_contract[
+            "residual_formula_hash"
+        ],
+        "operator_classification": state_invariant_tangent_contract[
+            "operator_classification"
+        ],
+        "state_invariant_tangent_contract_hash": (
+            _canonical_json_hash_without_generated_at(
+                state_invariant_tangent_contract
+            )
+        ),
+        "current_tangent_operator_contract_hash": (
+            current_tangent_operator.contract_hash
+            if current_tangent_operator is not None
+            else "unavailable"
+        ),
+        "current_tangent_operator_array_bundle_hash": (
+            current_tangent_operator.array_bundle_hash
+            if current_tangent_operator is not None
+            else "unavailable"
+        ),
+        "apply_shell_material_tangent": bool(apply_shell_material_tangent),
+        "apply_state_updated_frame_axial_geometry": bool(
+            apply_state_updated_frame_axial_geometry
+        ),
+    }
+    equilibrium_operator_binding_hash = (
+        _canonical_json_hash_without_generated_at(equilibrium_operator_binding)
+    )
     problem = LoadCoupledArcLengthCallbackProblem(
         case_id="g1_real_mgt_load_coupled_arc_length_adapter",
         initial_displacements_m=np.asarray(checkpoint_u[free], dtype=np.float64),
@@ -2250,6 +2368,9 @@ def build_real_mgt_load_coupled_arc_length_problem(
             else "unavailable"
         ),
         current_tangent_operator=current_tangent_operator,
+        source_commit_sha=source_commit_sha,
+        model_source_sha256=model_source_sha256,
+        equilibrium_operator_binding_hash=equilibrium_operator_binding_hash,
     )
     metadata = {
         "schema_version": MGT_LOAD_COUPLED_ADAPTER_SCHEMA_VERSION,
@@ -2269,17 +2390,14 @@ def build_real_mgt_load_coupled_arc_length_problem(
         ),
         "roundtrip_generated_uncoarsened": generated_roundtrip,
         "checkpoint_npz": _repo_relative_path(checkpoint_npz),
-        "mgt_sha256": _file_hash(mgt_path),
-        "roundtrip_sha256": _file_hash(roundtrip_path),
-        "roundtrip_json_sha256": (
-            _canonical_roundtrip_json_hash(
-                roundtrip_payload,
-                mgt_path=mgt_path,
-            )
-        ),
+        "mgt_sha256": model_source_sha256,
+        "roundtrip_sha256": roundtrip_sha256,
+        "roundtrip_json_sha256": roundtrip_json_sha256,
         "roundtrip_json_hash_mode": MGT_ROUNDTRIP_JSON_HASH_MODE,
         "checkpoint_sha256": _file_hash(checkpoint_npz),
         "checkpoint_schema": checkpoint_schema,
+        "exact_restart_binding": problem.exact_restart_binding(),
+        "equilibrium_operator_binding": equilibrium_operator_binding,
         "checkpoint_load_factor": checkpoint_load_factor,
         "initial_state_policy": problem.initial_state_policy,
         "initial_load_factor": problem.initial_load_factor(),

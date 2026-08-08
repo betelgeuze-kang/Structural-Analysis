@@ -122,6 +122,41 @@ def _solver(problem: _NonlinearLoadProblem):
     )
 
 
+@dataclass(frozen=True)
+class _EscapeReportingSolver:
+    delegate: object
+    reported_field: str
+
+    @property
+    def profile(self) -> str:
+        return str(getattr(self.delegate, "profile"))
+
+    @property
+    def contract_hash(self) -> str:
+        return str(getattr(self.delegate, "contract_hash"))
+
+    def solve_at_state(
+        self,
+        problem,
+        free_displacements_m,
+        right_hand_side_kn,
+        *,
+        load_factor,
+        solve_id,
+    ) -> VectorArcLengthTangentSolve:
+        solve = getattr(self.delegate, "solve_at_state")(
+            problem,
+            free_displacements_m,
+            right_hand_side_kn,
+            load_factor=load_factor,
+            solve_id=solve_id,
+        )
+        return replace(
+            solve,
+            receipt={**solve.receipt, self.reported_field: 1},
+        )
+
+
 def _config() -> LoadControlledMatrixFreeNewtonConfig:
     return LoadControlledMatrixFreeNewtonConfig(
         target_load_factors=(0.25, 0.5, 0.75, 1.0),
@@ -151,6 +186,10 @@ def test_load_controlled_matrix_free_newton_reaches_target() -> None:
     assert result.metrics["failed_step_count"] == 0
     assert result.metrics["checkpoint_count"] == 5
     assert result.metrics["tangent_solve_count"] >= 4
+    assert result.metrics["accepted_iterate_tangent_refresh_count"] == (
+        result.metrics["tangent_solve_count"]
+    )
+    assert result.metrics["physical_merit_line_search_candidate_count"] > 0
     assert result.metrics["maximum_tangent_solve_iterations"] <= 3
     assert result.metrics["maximum_checkpoint_residual_inf_kn"] <= 1.0e-11
     assert result.metrics["final_residual_inf_kn"] <= 1.0e-11
@@ -182,6 +221,8 @@ def test_load_controlled_matrix_free_newton_reaches_target() -> None:
     assert payload["solver_profile"] == solver.profile
     assert payload["claims"]["load_controlled_matrix_free_newton_path"] is True
     assert payload["claims"]["accepted_trial_displacement_state"] is True
+    assert payload["claims"]["accepted_iterate_tangent_refresh"] is True
+    assert payload["claims"]["line_search_physical_merit"] is True
     assert payload["claims"]["residual_and_increment_acceptance_gate"] is True
     assert payload["claims"]["failed_step_rollback_exact"] is False
     assert payload["claims"]["material_state_commit_rollback"] is False
@@ -191,6 +232,21 @@ def test_load_controlled_matrix_free_newton_reaches_target() -> None:
     assert LOAD_CONTROLLED_MATRIX_FREE_NEWTON_PROFILE in result.path_contract_hash or (
         result.path_contract_hash.startswith("sha256:")
     )
+    for attempt in result.attempts:
+        for row in attempt["history"]:
+            if "tangent_solve" in row:
+                refresh = row["accepted_iterate_tangent_refresh"]
+                assert refresh["performed"] is True
+                assert refresh["linearization_state_data_hash"] == (
+                    row["trial_state_data_hash"]
+                )
+            for candidate in row.get("line_search", []):
+                assert candidate["physical_residual_merit_profile"] == (
+                    "half_squared_physical_residual_l2.v1"
+                )
+                if candidate["strict_residual_decrease"]:
+                    assert candidate["strict_physical_merit_decrease"] is True
+                    assert candidate["strict_residual_inf_decrease"] is True
 
 
 def test_midpoint_restart_reproduces_terminal_checkpoint_exactly() -> None:
@@ -223,6 +279,40 @@ def test_midpoint_restart_reproduces_terminal_checkpoint_exactly() -> None:
         restarted.final_free_displacements_m,
         one_shot.final_free_displacements_m,
     )
+
+
+@pytest.mark.parametrize(
+    "reported_field",
+    ("fallback_count", "regularization_count"),
+)
+def test_fixed_and_adaptive_contracts_fail_when_solver_escape_is_reported(
+    reported_field: str,
+) -> None:
+    problem = _problem()
+    fallback_solver = _EscapeReportingSolver(
+        _solver(problem),
+        reported_field,
+    )
+
+    fixed = load_controlled_matrix_free_newton_continuation(
+        problem,
+        fallback_solver,
+        config=_config(),
+    )
+    adaptive = adaptive_load_controlled_matrix_free_newton_continuation(
+        problem,
+        fallback_solver,
+        config=_adaptive_config(),
+    )
+
+    assert fixed.final_checkpoint.load_factor == 1.0
+    assert fixed.status == "blocked"
+    assert fixed.metrics[reported_field] > 0
+    assert fixed.to_dict()["claims"]["fallback_zero"] is False
+    assert adaptive.final_checkpoint.load_factor == 1.0
+    assert adaptive.status == "blocked"
+    assert adaptive.metrics[reported_field] > 0
+    assert adaptive.to_dict()["claims"]["fallback_zero"] is False
 
 
 def _adaptive_config() -> AdaptiveLoadControlledMatrixFreeNewtonConfig:
