@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from io import BytesIO
 import json
 from pathlib import Path
+import re
 import subprocess
 import struct
 import sys
@@ -81,6 +82,28 @@ SOURCE_PATHS = (
     Path("src/structural_analysis/engine_v2/contracts/material_state_bundle.py"),
     Path("tests/test_run_g1_mgt_device_fgmres.py"),
 )
+
+
+def artifact_paths(prefix: str) -> dict[str, Path]:
+    """Return an isolated productization artifact set for one hardware run."""
+    normalized = prefix.strip()
+    if normalized != prefix or re.fullmatch(
+        r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}", normalized
+    ) is None:
+        raise ValueError("device_fgmres_artifact_prefix_invalid")
+    base = PRODUCTIZATION / normalized
+    return {
+        "out": PRODUCTIZATION / f"{normalized}_receipt.json",
+        "solution_out": Path(f"{base}_solution.f64le"),
+        "residual_out": Path(f"{base}_residual.f64le"),
+        "accepted_state_out": Path(f"{base}_accepted_state.f64le"),
+        "nonlinear_residual_out": Path(f"{base}_nonlinear_residual.f64le"),
+        "checkpoint_out": Path(f"{base}_checkpoint.npz"),
+        "initial_material_out": Path(f"{base}_initial_material.f64le"),
+        "committed_material_out": Path(f"{base}_committed_material.f64le"),
+        "rejected_material_out": Path(f"{base}_rejected_material.f64le"),
+        "rollback_material_out": Path(f"{base}_rollback_material.f64le"),
+    }
 
 
 def _material_family_fixture(
@@ -797,6 +820,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument(
+        "--artifact-prefix",
+        help="Optional productization basename for an isolated runner artifact set",
+    )
+    parser.add_argument(
         "--expected-architecture",
         choices=("gfx1030", "gfx1100"),
         default="gfx1030",
@@ -810,8 +837,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         passed, reason = check(out=args.out)
         print(reason)
         return 0 if passed else 1
+    write_kwargs: dict[str, Any] = {"out": args.out}
+    if args.artifact_prefix:
+        write_kwargs = artifact_paths(args.artifact_prefix)
     payload = write(
-        out=args.out,
+        **write_kwargs,
         expected_architecture=args.expected_architecture,
         hipcc=args.hipcc,
         rocm_path=args.rocm_path,

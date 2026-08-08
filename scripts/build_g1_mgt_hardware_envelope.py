@@ -475,11 +475,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--attach-signature", type=Path)
     parser.add_argument("--public-key", type=Path)
     parser.add_argument("--signer-id")
+    parser.add_argument("--export-evidence", type=Path)
     args = parser.parse_args(argv)
     target = _resolve(ROOT, args.out)
     if args.check:
         validate(_read(target), root=ROOT, require_current_sources=True)
         print("g1_mgt_hardware_envelope_consistent")
+        return 0
+    if args.export_evidence is not None:
+        payload = validate(
+            _read(target), root=ROOT, require_current_sources=True
+        )
+        export_target = _resolve(ROOT, args.export_evidence)
+        export_target.write_bytes(evidence_bytes(payload))
+        print(
+            "exported | bytes="
+            f"{export_target.stat().st_size} | "
+            f"hash={payload['signature']['signed_payload_hash']}"
+        )
         return 0
     if args.attach_signature is not None:
         if args.public_key is None or args.signer_id is None:

@@ -2,10 +2,29 @@ from pathlib import Path
 import json
 import sys
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import run_g1_mgt_device_fgmres as gate
+
+
+def test_isolated_artifact_prefix_is_bounded_to_productization() -> None:
+    paths = gate.artifact_paths("g1_mgt_gfx1100_device_fgmres")
+    assert paths["out"] == (
+        gate.PRODUCTIZATION / "g1_mgt_gfx1100_device_fgmres_receipt.json"
+    )
+    assert len(paths) == 10
+    assert all(path.is_relative_to(gate.PRODUCTIZATION) for path in paths.values())
+
+
+@pytest.mark.parametrize(
+    "prefix", ("../escape", "nested/escape", "nested\\escape", ".", "", " x")
+)
+def test_isolated_artifact_prefix_rejects_path_traversal(prefix: str) -> None:
+    with pytest.raises(ValueError, match="artifact_prefix_invalid"):
+        gate.artifact_paths(prefix)
 
 
 def test_committed_receipt_is_current_and_artifacts_are_bound() -> None:
