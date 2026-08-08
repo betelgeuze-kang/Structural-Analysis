@@ -1,0 +1,317 @@
+{
+  "schema_version": "structural-analysis-model-ir.v2",
+  "model_id": "f3-nonlinear-mdof-transient",
+  "capability_profile": "nonlinear_mdof_transient_v1",
+  "provenance": {
+    "source_format": "generated",
+    "source_ref": "generated:f3-nonlinear-mdof-transient-v1",
+    "source_sha256": "sha256:924b60ccad5c7cf598669dc1eec8f1e9a686a1bd9b2e21ff876a816b6823e6e2",
+    "normalizer_id": "f3-nonlinear-mdof-transient-fixture-builder",
+    "normalizer_version": "1",
+    "source_units": {
+      "length": "m",
+      "force": "N",
+      "mass": "kg",
+      "time": "s",
+      "rotation": "rad"
+    },
+    "unit_scales_to_si": {
+      "length_to_m": 1,
+      "force_to_n": 1,
+      "mass_to_kg": 1,
+      "time_to_s": 1,
+      "rotation_to_rad": 1
+    },
+    "extensions": {}
+  },
+  "units": {
+    "length": "m",
+    "force": "N",
+    "mass": "kg",
+    "time": "s",
+    "rotation": "rad"
+  },
+  "coordinate_system": {
+    "frame_id": "global",
+    "axis_order": [
+      "X",
+      "Y",
+      "Z"
+    ],
+    "up_axis": "Z",
+    "handedness": "right",
+    "origin_m": [
+      0,
+      0,
+      0
+    ]
+  },
+  "dof_components": [
+    "UX",
+    "UY",
+    "UZ",
+    "RX",
+    "RY",
+    "RZ"
+  ],
+  "nodes": [
+    {
+      "id": "N0",
+      "index": 0,
+      "coordinates_m": [
+        0,
+        0,
+        0
+      ],
+      "source_id": "generated:N0",
+      "extensions": {}
+    },
+    {
+      "id": "N1",
+      "index": 1,
+      "coordinates_m": [
+        0,
+        0,
+        3
+      ],
+      "source_id": "generated:N1",
+      "extensions": {}
+    },
+    {
+      "id": "N2",
+      "index": 2,
+      "coordinates_m": [
+        0,
+        0,
+        6
+      ],
+      "source_id": "generated:N2",
+      "extensions": {}
+    }
+  ],
+  "materials": [
+    {
+      "id": "M1",
+      "index": 0,
+      "law_id": "linear_elastic_isotropic",
+      "parameter_set_version": "1",
+      "parameters": {
+        "elastic_modulus_pa": 200000000000,
+        "poisson_ratio": 0.3,
+        "density_kg_m3": 7850
+      },
+      "state_schema": {
+        "stateful": false,
+        "state_update_epoch": "none",
+        "supports_trial_commit_rollback": true
+      },
+      "source_id": "generated:M1",
+      "extensions": {}
+    }
+  ],
+  "sections": [
+    {
+      "id": "S1",
+      "index": 0,
+      "family_id": "frame_3d",
+      "parameter_set_version": "1",
+      "parameters": {
+        "area_m2": 0.01,
+        "iy_m4": 0.000001,
+        "iz_m4": 0.000001,
+        "torsional_constant_m4": 0.000001,
+        "shear_area_y_m2": 0.01,
+        "shear_area_z_m2": 0.01
+      },
+      "source_id": "generated:S1",
+      "extensions": {}
+    }
+  ],
+  "elements": [
+    {
+      "id": "E1",
+      "index": 0,
+      "type": "frame_3d",
+      "formulation": "euler_bernoulli_3d",
+      "node_ids": [
+        "N0",
+        "N1"
+      ],
+      "material_id": "M1",
+      "section_id": "S1",
+      "local_axis_rotation_rad": 0,
+      "offsets": {
+        "i_global_m": [
+          0,
+          0,
+          0
+        ],
+        "j_global_m": [
+          0,
+          0,
+          0
+        ]
+      },
+      "releases": {
+        "i": [],
+        "j": []
+      },
+      "source_id": "generated:E1",
+      "extensions": {}
+    },
+    {
+      "id": "E2",
+      "index": 1,
+      "type": "frame_3d",
+      "formulation": "euler_bernoulli_3d",
+      "node_ids": [
+        "N1",
+        "N2"
+      ],
+      "material_id": "M1",
+      "section_id": "S1",
+      "local_axis_rotation_rad": 0,
+      "offsets": {
+        "i_global_m": [
+          0,
+          0,
+          0
+        ],
+        "j_global_m": [
+          0,
+          0,
+          0
+        ]
+      },
+      "releases": {
+        "i": [],
+        "j": []
+      },
+      "source_id": "generated:E2",
+      "extensions": {}
+    }
+  ],
+  "constraints": [
+    {
+      "id": "BC0",
+      "index": 0,
+      "type": "fixed_dofs",
+      "node_id": "N0",
+      "dofs": [
+        "UX",
+        "UY",
+        "UZ",
+        "RX",
+        "RY",
+        "RZ"
+      ],
+      "prescribed_values_si": {
+        "UX": 0,
+        "UY": 0,
+        "UZ": 0,
+        "RX": 0,
+        "RY": 0,
+        "RZ": 0
+      },
+      "source_id": "generated:BC0",
+      "extensions": {}
+    }
+  ],
+  "load_patterns": [
+    {
+      "id": "TRANSIENT_FORCE",
+      "index": 0,
+      "analysis_type": "transient",
+      "self_weight": [
+        0,
+        0,
+        0
+      ],
+      "nodal_loads": [
+        {
+          "id": "L1",
+          "index": 0,
+          "node_id": "N1",
+          "components_si": {
+            "FX": 1,
+            "FY": 0,
+            "FZ": 0,
+            "MX": 0,
+            "MY": 0,
+            "MZ": 0
+          },
+          "source_id": "generated:L1",
+          "extensions": {}
+        },
+        {
+          "id": "L2",
+          "index": 1,
+          "node_id": "N2",
+          "components_si": {
+            "FX": 1,
+            "FY": 0,
+            "FZ": 0,
+            "MX": 0,
+            "MY": 0,
+            "MZ": 0
+          },
+          "source_id": "generated:L2",
+          "extensions": {}
+        }
+      ],
+      "source_id": "generated:TRANSIENT_FORCE",
+      "extensions": {}
+    }
+  ],
+  "load_combinations": [],
+  "time_functions": [],
+  "construction_stages": [],
+  "roundtrip_map": [],
+  "unsupported_features": [],
+  "dynamics": {
+    "profile": "newmark_consistent_newton_bilinear_shear_mdof.v1",
+    "dof_ids": [
+      "Floor1_UX",
+      "Floor2_UX"
+    ],
+    "mass_matrix_kg": [
+      [
+        500,
+        0
+      ],
+      [
+        0,
+        300
+      ]
+    ],
+    "damping_matrix_n_s_per_m": [
+      [
+        500,
+        0
+      ],
+      [
+        0,
+        300
+      ]
+    ],
+    "stories": [
+      {
+        "story_id": "Story1",
+        "elastic_stiffness_n_per_m": 1000000,
+        "yield_force_n": 5000,
+        "post_yield_stiffness_ratio": 0.05
+      },
+      {
+        "story_id": "Story2",
+        "elastic_stiffness_n_per_m": 800000,
+        "yield_force_n": 4000,
+        "post_yield_stiffness_ratio": 0.05
+      }
+    ],
+    "time_step_s": 0.01,
+    "force_history_source_path": "tests/fixtures/dynamics/nonlinear_mdof_force_history.csv",
+    "force_history_sha256": "sha256:ff0ae1a89306f0182e0837ff4460e11ea7fd0a86574c618a790e2b2eb81b7571",
+    "checkpoint_authority": "source_authenticated_checkpoint"
+  },
+  "extensions": {}
+}

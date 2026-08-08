@@ -35,7 +35,8 @@
         "frame3d_stateful_nonlinear_3d_v1",
         "frame3d_modal_buckling_3d_v1",
         "sdof_authenticated_transient_v1",
-        "mdof_linear_transient_v1"
+        "mdof_linear_transient_v1",
+        "nonlinear_mdof_transient_v1"
       ]
     },
     "provenance": {"$ref": "#/$defs/provenance"},
@@ -99,6 +100,13 @@
     {
       "if": {
         "properties": {"capability_profile": {"const": "sdof_authenticated_transient_v1"}},
+        "required": ["capability_profile"]
+      },
+      "then": {"required": ["dynamics"]}
+    },
+    {
+      "if": {
+        "properties": {"capability_profile": {"const": "nonlinear_mdof_transient_v1"}},
         "required": ["capability_profile"]
       },
       "then": {"required": ["dynamics"]}
@@ -526,7 +534,8 @@
     "dynamics": {
       "oneOf": [
         {"$ref": "#/$defs/sdofDynamics"},
-        {"$ref": "#/$defs/mdofLinearDynamics"}
+        {"$ref": "#/$defs/mdofLinearDynamics"},
+        {"$ref": "#/$defs/nonlinearMdofDynamics"}
       ]
     },
     "sdofDynamics": {
@@ -597,6 +606,38 @@
         "type": "array",
         "minItems": 2,
         "items": {"type": "number"}
+      }
+    },
+    "nonlinearMdofDynamics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile", "dof_ids", "mass_matrix_kg", "damping_matrix_n_s_per_m",
+        "stories", "time_step_s", "force_history_source_path",
+        "force_history_sha256", "checkpoint_authority"
+      ],
+      "properties": {
+        "profile": {"const": "newmark_consistent_newton_bilinear_shear_mdof.v1"},
+        "dof_ids": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "mass_matrix_kg": {"$ref": "#/$defs/squareNumericMatrix"},
+        "damping_matrix_n_s_per_m": {"$ref": "#/$defs/squareNumericMatrix"},
+        "stories": {
+          "type": "array", "minItems": 2,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["story_id", "elastic_stiffness_n_per_m", "yield_force_n", "post_yield_stiffness_ratio"],
+            "properties": {
+              "story_id": {"$ref": "#/$defs/stableId"},
+              "elastic_stiffness_n_per_m": {"$ref": "#/$defs/positiveNumber"},
+              "yield_force_n": {"$ref": "#/$defs/positiveNumber"},
+              "post_yield_stiffness_ratio": {"type": "number", "minimum": 0, "exclusiveMaximum": 1}
+            }
+          }
+        },
+        "time_step_s": {"$ref": "#/$defs/positiveNumber"},
+        "force_history_source_path": {"type": "string", "minLength": 1},
+        "force_history_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_authority": {"const": "source_authenticated_checkpoint"}
       }
     },
     "constructionStage": {
