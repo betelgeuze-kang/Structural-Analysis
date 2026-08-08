@@ -470,15 +470,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
-    payload = build_receipt()
-    text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     output = ROOT / args.out
     if args.check:
-        if not output.is_file() or output.read_text(encoding="utf-8") != text:
+        if not output.is_file():
+            print("f3_frame3d_linear_vertical_evidence_mismatch")
+            return 1
+        recorded = json.loads(output.read_text(encoding="utf-8"))
+        payload = build_receipt(source_commit_sha=str(recorded["source_commit_sha"]))
+        text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        if (
+            recorded.get("source_input_checksums") != payload["source_input_checksums"]
+            or output.read_text(encoding="utf-8") != text
+        ):
             print("f3_frame3d_linear_vertical_evidence_mismatch")
             return 1
         print("f3_frame3d_linear_vertical_evidence_consistent")
         return 0
+    payload = build_receipt()
+    text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(text, encoding="utf-8")
     print(

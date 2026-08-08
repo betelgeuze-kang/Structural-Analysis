@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 
@@ -18,7 +19,7 @@ def test_load_control_closes_nine_surfaces_after_linear_predecessor() -> None:
     assert payload["status"] == "ready"
     assert payload["contract_pass"] is True
     assert payload["stage_gate"]["predecessor_stage"] == "frame3d_linear"
-    assert payload["predecessor_replay"]["input_checksums_unchanged"] is True
+    assert payload["predecessor_replay"]["current_source_replay_executed"] is True
     assert len(payload["stage_gate"]["verified_surfaces"]) == 9
     assert payload["stage_gate"]["blockers"] == []
 
@@ -48,3 +49,11 @@ def test_load_control_uses_authoritative_nonlinear_result_and_bound_viewer() -> 
     assert result["claim_boundary"]["residual_and_increment_terminal_gate"] is True
     assert result["claim_boundary"]["fallback_or_regularization_promoted"] is False
     assert viewer["model_identity"]["canonical_model_checksum"].startswith("sha256:")
+
+
+def test_check_replays_recorded_source_commit_after_evidence_commit(tmp_path: Path) -> None:
+    target = tmp_path / "load-control.json"
+    payload = MODULE.build_receipt(source_commit_sha="1" * 40)
+    target.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    assert MODULE.main(["--out", str(target), "--check"]) == 0

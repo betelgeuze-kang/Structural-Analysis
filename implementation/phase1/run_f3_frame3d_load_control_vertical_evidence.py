@@ -280,9 +280,11 @@ def _predecessor(source_commit: str) -> tuple[Any, str, dict[str, Any]]:
         path: LINEAR._file_sha(Path(path))
         for path in linear_payload["source_input_checksums"]
     }
-    if checksums_current != linear_payload["source_input_checksums"]:
-        raise RuntimeError("f3_linear_predecessor_input_drift")
-    artifacts = linear_payload["surface_artifacts"]
+    inputs_unchanged = checksums_current == linear_payload["source_input_checksums"]
+    current_linear_payload = LINEAR.build_receipt(source_commit_sha=source_commit)
+    if not current_linear_payload["contract_pass"]:
+        raise RuntimeError("f3_linear_predecessor_replay_failed")
+    artifacts = current_linear_payload["surface_artifacts"]
     evidence = [
         F3Evidence(surface=surface, status="verified", artifact_sha256=LINEAR._sha_payload(artifact))
         for surface, artifact in artifacts.items()
@@ -300,7 +302,8 @@ def _predecessor(source_commit: str) -> tuple[Any, str, dict[str, Any]]:
     replay = {
         "source_receipt_path": LINEAR_RECEIPT.as_posix(),
         "source_receipt_sha256": LINEAR._file_sha(LINEAR_RECEIPT),
-        "input_checksums_unchanged": True,
+        "input_checksums_unchanged": inputs_unchanged,
+        "current_source_replay_executed": True,
         "replayed_source_commit_sha": source_commit,
         "public_product_promotion_passed": receipt.public_product_promotion_passed,
     }
@@ -520,15 +523,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
-    payload = build_receipt()
-    text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     out = ROOT / args.out
     if args.check:
-        if not out.is_file() or out.read_text(encoding="utf-8") != text:
+        if not out.is_file():
+            print("f3_frame3d_load_control_vertical_evidence_mismatch")
+            return 1
+        recorded = json.loads(out.read_text(encoding="utf-8"))
+        payload = build_receipt(source_commit_sha=str(recorded["source_commit_sha"]))
+        text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        if (
+            recorded.get("source_input_checksums") != payload["source_input_checksums"]
+            or out.read_text(encoding="utf-8") != text
+        ):
             print("f3_frame3d_load_control_vertical_evidence_mismatch")
             return 1
         print("f3_frame3d_load_control_vertical_evidence_consistent")
         return 0
+    payload = build_receipt()
+    text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(text, encoding="utf-8")
     print(

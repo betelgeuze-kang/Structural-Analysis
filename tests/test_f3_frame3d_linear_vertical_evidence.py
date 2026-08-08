@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 
@@ -49,3 +50,11 @@ def test_result_ir_and_workbench_surfaces_are_authority_bound() -> None:
     assert all(row["authority"]["reaction"] == "not_evaluated" for row in result_rows)
     assert all("model_identity" in row for row in viewer_rows)
     assert all(row["source"] == "authoritative_solver_result" for row in viewer_rows)
+
+
+def test_check_replays_recorded_source_commit_after_evidence_commit(tmp_path: Path) -> None:
+    target = tmp_path / "linear.json"
+    payload = MODULE.build_receipt(source_commit_sha="d" * 40)
+    target.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    assert MODULE.main(["--out", str(target), "--check"]) == 0
