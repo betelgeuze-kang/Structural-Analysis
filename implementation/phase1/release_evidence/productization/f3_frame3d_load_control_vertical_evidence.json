@@ -1,0 +1,386 @@
+{
+  "claim_boundary": "Closes the bounded elastic Corotational Frame3D load-control stage for one ModelIR-bound cantilever through 0.25, 0.5, and 1.0 load factors, authoritative nonlinear ResultIR, equilibrium recovery, exact restart, bound viewer payload, and deterministic replay. Direct control, stateful material, broader topology, dynamics, shell, and contact remain outside.",
+  "contract_pass": true,
+  "predecessor_replay": {
+    "input_checksums_unchanged": true,
+    "public_product_promotion_passed": true,
+    "replayed_source_commit_sha": "965260fcf863ad40eb011321b29a72f82a634aa7",
+    "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_frame3d_linear_vertical_evidence.json",
+    "source_receipt_sha256": "sha256:e94622093c4ee0e2dd790322daf2441eae9c16fd08455666a14f8ef9ee0aa654"
+  },
+  "schema_version": "f3-frame3d-load-control-vertical-evidence.v1",
+  "source_commit_sha": "965260fcf863ad40eb011321b29a72f82a634aa7",
+  "source_input_checksums": {
+    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:040ec60787319904c2ad75dcb747b41dfb1b3bda3305a73cc2ead39a4acb2b46",
+    "implementation/phase1/run_f3_frame3d_load_control_vertical_evidence.py": "sha256:8df646c3745d26d182db829eabb68f2de5eae42bc07c2345a6aa16ce30a90a65",
+    "src/structural_analysis/assembly/corotational_frame3d_global.py": "sha256:a7b62158fd522c493e0b5d3ecd6a9256e7242b1c0d5a4cbcb6e5b600b5202ba8",
+    "src/structural_analysis/elements/corotational_frame3d.py": "sha256:0bf888f2ffd60b2872f1ae40cce7fc2f23f764ea90ae6c5f1e6de41a925bf526",
+    "src/structural_analysis/engine_v2/contracts/nonlinear_result.py": "sha256:75c8648440a6faf5f8ed050b8bb7dd1701e1219486934579bd46a84b25430566",
+    "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
+    "src/structural_analysis/validation/f3_vertical_evidence.py": "sha256:604936ab0933be7f8d346102edd02d426ccb585a43e142266e1a779cd5e0c39e",
+    "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9",
+    "tests/test_f3_frame3d_load_control_vertical_evidence.py": "sha256:967b67b586ad196bfb32ff0bdf18ff495dc9a89424a31e0631f6e7ac4c32f398"
+  },
+  "stage_gate": {
+    "blockers": [],
+    "evidence_artifact_sha256": {
+      "benchmark": "sha256:e19d9a873b82f5f3e36a8a10f3bdc745ea92537eb8abbfa0865572e1c77fe339",
+      "checkpoint": "sha256:55f876c71153722076ac9fc688b1c4a62be99c150812bfc0c1e1b99e6b6aa414",
+      "external_vv": "sha256:0df71164b5f9b27c03f31584998d1cbb686b8841a52a33e16bbf0eaa36d272ee",
+      "model_ir": "sha256:f09208849f5a913c91717b57d4d8f83eb8bf9ea2a69850fa323d24697aa415fd",
+      "platform": "sha256:9839955bd4c466a3cb1c22cc599c50b24cded43742947451f7646ef5cdc5b5d4",
+      "recovery": "sha256:f698364db8009cc322c4dce170aafd90117812250ff72322f0d20bcf97c5d9b9",
+      "result_ir": "sha256:5374130258222ba6f98b9df0f349983ed0ad2a1e2c8dc98b9de19096de879921",
+      "solver": "sha256:ba01a83f5b5ee2009ed13b2f4afb78590066cce926d5ce0fcab7d74f23ba71d5",
+      "workbench": "sha256:2c0a90deed3208241b8ce23c6f33ed318e605ee2ba07126f4b1cafba7bf57bbf"
+    },
+    "external_vv_signature_status": "waived",
+    "predecessor_receipt_sha256": "sha256:fa4dab8540ba22fae3f6e42e5ab10d706233ad72ad4e63142e052a524ac5cbaf",
+    "predecessor_stage": "frame3d_linear",
+    "public_product_promotion_passed": true,
+    "required_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ],
+    "source_commit_sha": "965260fcf863ad40eb011321b29a72f82a634aa7",
+    "stage": "frame3d_load_control",
+    "stage_index": 1,
+    "verified_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ]
+  },
+  "status": "ready",
+  "surface_artifacts": {
+    "benchmark": {
+      "all_convergence_checks_pass": true,
+      "benchmark_id": "frame3d-corotational-cantilever-load-control.v1",
+      "deterministic_repeat": true,
+      "full_load_reached": true,
+      "load_factor_monotonic": true
+    },
+    "checkpoint": {
+      "checkpoint": {
+        "checkpoint_hash": "sha256:5441c6349c8f94b96e1c17a430b47c523eaa549ddd6bf53c79a6bbb75c20b3df",
+        "converged_iterations": 2,
+        "displacement": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.7927996865131736e-06,
+          -0.002682913466149589,
+          1.6915264660654424e-17,
+          -5.373963598245002e-16,
+          -1.9734284349166036e-17,
+          -0.0019999982072790344
+        ],
+        "load_factor": 1.0,
+        "model_hash": "sha256:b10c6ba15f7d455d2ec8b34ba2664581aa007b7d2aff8e715e44790da00f51f4",
+        "parent_checkpoint_hash": "sha256:ed72eb065644eea3020744cd94073f006e4035d5a9190d249933963abb7998dc",
+        "profile": "dense_elastic_corotational_timoshenko_frame3d_load_control.v1",
+        "residual_inf_norm_kn": 3.8972380878021795e-10,
+        "schema_version": "corotational-frame3d-global-checkpoint.v1",
+        "solver_contract_hash": "sha256:8782e25cd2bf79d5b375d27a25e961087d7753f4218aa3272433db41f69631d3"
+      },
+      "exact_restart": true,
+      "prefix_checkpoint_hash": "sha256:ed72eb065644eea3020744cd94073f006e4035d5a9190d249933963abb7998dc",
+      "resumed_checkpoint_hash": "sha256:5441c6349c8f94b96e1c17a430b47c523eaa549ddd6bf53c79a6bbb75c20b3df",
+      "schema_version": "corotational-frame3d-global-checkpoint.v1"
+    },
+    "external_vv": {
+      "deterministic_repeat_pass": true,
+      "exact_restart_pass": true,
+      "full_load_equilibrium_pass": true,
+      "reference_profile": "independent_linear_limit_plus_equilibrium_and_restart.v1",
+      "signature_verifier_waived": true,
+      "verification_mode": "local_self_verification_user_authorized"
+    },
+    "model_ir": {
+      "analysis_ready": true,
+      "content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+      "load_pattern_id": "LC_WEAK",
+      "model_id": "engine-v2-frame-cantilever"
+    },
+    "platform": {
+      "implementation": "CPython",
+      "numpy_version": "1.26.4",
+      "python_version": "3.10.12",
+      "self_verified": true,
+      "source_commit_sha": "965260fcf863ad40eb011321b29a72f82a634aa7"
+    },
+    "recovery": {
+      "equilibrium_pass": true,
+      "free_residual_inf_n": 3.8972380878021795e-07,
+      "local_end_forces_n": [
+        3585.599373026347,
+        10243.728883058317,
+        6.765647252427869e-11,
+        2.0669090762480777e-10,
+        9.021780226904963e-11,
+        20243.719919453488,
+        -3585.599373026347,
+        -10243.728883058317,
+        -6.765647252427869e-11,
+        -2.0669090762480777e-10,
+        -2.25530747317607e-10,
+        243.73784666314512
+      ],
+      "reactions_n": [
+        -4.6519501214111375e-07,
+        10000.00000038958,
+        7.228014483236696e-11,
+        4.3368086899420177e-10,
+        7.228014483236696e-11,
+        19999.982072789193
+      ]
+    },
+    "result_ir": {
+      "manifest": {
+        "authority": {
+          "code_compliance": "not_authoritative",
+          "commercial_use": "not_authoritative",
+          "convergence": "authoritative",
+          "displacement": "authoritative",
+          "engineering_design": "not_authoritative",
+          "integration_point_engineering_output": "not_evaluated",
+          "material_state": "authoritative",
+          "member_force": "not_evaluated",
+          "numerical_state": "authoritative",
+          "reaction": "not_evaluated",
+          "release_readiness": "not_authoritative"
+        },
+        "authority_profile": "authoritative_converged_nonlinear_numerical_and_terminal_material_state.v1",
+        "backend": {
+          "receipt_hash": "sha256:98ea4486e170035f41f04c0f181ae761e93646126134ddc40feadaa327f1a48d",
+          "role": "cpu_reference"
+        },
+        "bindings": {
+          "boundary_condition_receipt_hash": "sha256:87394cee73a99ece4fccd9afe63c837a547668f5edf0fc9afb6b6e7166ea53d8",
+          "equation_scaling_hash": "sha256:143f046377cfa399cef87be642a45415b5c19028c8c02af62b90661f9f735963",
+          "execution_plan_hash": "sha256:3100f4c42691311b6210e187cbbd4a603cd31142848595c6d7de147dff1154f1",
+          "full_residual_receipt_hash": "sha256:12af243c3a4790af222a612cd491093cd9b64dd2907b333d12f9abfb0dcf707c",
+          "integration_point_order_hash": "sha256:b5f2883265611aea89fcb4f2cc274953675a9fc5ba4ebd1b400888a26ccb2632",
+          "material_state_bundle_hash": "sha256:6a74988e566513c421d473f2f32038bf7ce9d12af740445e54308532b8b54657",
+          "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+          "nonlinear_terminal_hash": "sha256:a2c1695fcfdcdc0876e46f3dce32b29286bc6a8c76a71be075c01db86a875ff5",
+          "operator_hash": "sha256:4777a00b1de63e12cb66d0d52bda8433a88d6ef1f42158bd45a08ed61230ba3d",
+          "path_history_hash": "sha256:6608fc48a966eae5c5f818cb119c1b2acb9363ac3a149d095de834771d5e66e0",
+          "reduced_csr_identity_hash": "sha256:918f8fcee6801efa97ef624d3d6d38e2444da1c2f372f7815433a56034512d2f",
+          "state_epoch": 1,
+          "state_hash": "sha256:d8e12bb8d9d47a4539223a8b5062f0d8a8ae299660534970d9c367152ec49af4"
+        },
+        "claim_boundary": {
+          "commercial_claim": false,
+          "committed_nonlinear_state": true,
+          "constitutive_law_verified": false,
+          "design_or_code_authority": false,
+          "equation_scaling_replay_bound": true,
+          "fallback_or_regularization_promoted": false,
+          "fiber_frame_kinematic_adapter_authority": false,
+          "integration_point_engineering_output_authority": false,
+          "material_state_history_replayed": false,
+          "member_force_authority": false,
+          "ordered_material_state_bundle": true,
+          "reaction_authority": false,
+          "reduced_csr_identity_bound": true,
+          "release_readiness": false,
+          "residual_and_increment_terminal_gate": true,
+          "source_free_solution_bytes_bound": true,
+          "viewer_projection": false
+        },
+        "displacement_artifact": {
+          "artifact_uri": "artifact://nonlinear-result/f3.frame3d.load-control.lc-weak/d8e12bb8d9d47a45/6a74988e566513c4/displacement_global.f64le",
+          "byte_length": 96,
+          "byte_order": "little",
+          "content_hash": "sha256:3972bc383280daba29bfb14e5a644b8179ce86ad386a52bfba92381a3be25951",
+          "data_hash": "sha256:d531bd13365a40ccb723cdcd43f52a4323359a5e0218c72e7ab080b85493f39e",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "displacement_global_si",
+          "shape": [
+            12
+          ],
+          "storage_profile": "canonical_little_endian_fp64_binary.v1",
+          "unit_profile": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+        },
+        "dof_count": 12,
+        "extensions": {},
+        "load_factor": 1.0,
+        "result_hash": "sha256:7c969a3748b459281f690429064733824d88515550b70cd906412f3f348c593a",
+        "result_id": "f3.frame3d.load-control.lc-weak",
+        "result_kind": "nonlinear_static_numerical_state",
+        "schema_version": "structural-analysis-nonlinear-numerical-result-ir.v1",
+        "time_s": 0.0
+      },
+      "manifest_valid": true,
+      "schema_version": "structural-analysis-nonlinear-numerical-result-ir.v1"
+    },
+    "solver": {
+      "contract_pass": true,
+      "fallback_used": false,
+      "load_factors": [
+        0.25,
+        0.5,
+        1.0
+      ],
+      "path_history": [
+        {
+          "accepted_line_search_alphas": [
+            1.0,
+            1.0
+          ],
+          "checkpoint_hash": "sha256:d701384fdb9d5666ed3b0bea60f15ed482a087ebf3299fceeeff77eb838ee790",
+          "free_residual_inf_norm_kn": 9.06856060875714e-10,
+          "load_factor": 0.25
+        },
+        {
+          "accepted_line_search_alphas": [
+            1.0,
+            1.0
+          ],
+          "checkpoint_hash": "sha256:ed72eb065644eea3020744cd94073f006e4035d5a9190d249933963abb7998dc",
+          "free_residual_inf_norm_kn": 2.0901610881899715e-10,
+          "load_factor": 0.5
+        },
+        {
+          "accepted_line_search_alphas": [
+            1.0,
+            1.0
+          ],
+          "checkpoint_hash": "sha256:5441c6349c8f94b96e1c17a430b47c523eaa549ddd6bf53c79a6bbb75c20b3df",
+          "free_residual_inf_norm_kn": 3.8972380878021795e-10,
+          "load_factor": 1.0
+        }
+      ],
+      "profile": "dense_elastic_corotational_timoshenko_frame3d_load_control.v1",
+      "regularization_used": false,
+      "result_hash": "sha256:55f1d5050f7c67640022df936cd3d2f2ad410896303983ac3701f8de0b676d96",
+      "schema_version": "corotational-frame3d-global-solution.v1"
+    },
+    "workbench": {
+      "model_identity_bound": true,
+      "schema_version": "structural-analysis-viewer-payload.v2",
+      "viewer_payload": {
+        "analysis_fidelity": "cpu_reference_linear_fea",
+        "elements": [
+          {
+            "id": "E1",
+            "local_end_forces": {
+              "FX_I": 3585.599373026347,
+              "FX_J": -3585.599373026347,
+              "FY_I": 10243.728883058317,
+              "FY_J": -10243.728883058317,
+              "FZ_I": 6.765647252427869e-11,
+              "FZ_J": -6.765647252427869e-11,
+              "MX_I": 2.0669090762480777e-10,
+              "MX_J": -2.0669090762480777e-10,
+              "MY_I": 9.021780226904963e-11,
+              "MY_J": -2.25530747317607e-10,
+              "MZ_I": 20243.719919453488,
+              "MZ_J": 243.73784666314512
+            },
+            "nodes": [
+              "N1",
+              "N2"
+            ],
+            "type": "frame"
+          }
+        ],
+        "equilibrium_residual_definition": "free_dof_internal_minus_external_force; constrained entries are zero",
+        "model_identity": {
+          "analysis_input_snapshot": "detached_canonical_model_v1",
+          "canonical_model_checksum": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+          "identity_policy": "source_bytes_and_detached_canonical_model_v1",
+          "source_input_checksum": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9"
+        },
+        "nodes": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "displacement": {
+              "RX": 0.0,
+              "RY": 0.0,
+              "RZ": 0.0,
+              "UX": 0.0,
+              "UY": 0.0,
+              "UZ": 0.0
+            },
+            "equilibrium_residual": {
+              "FX": 0.0,
+              "FY": 0.0,
+              "FZ": 0.0,
+              "MX": 0.0,
+              "MY": 0.0,
+              "MZ": 0.0
+            },
+            "id": "N1",
+            "reaction": {
+              "FX": -4.6519501214111375e-07,
+              "FY": 10000.00000038958,
+              "FZ": 7.228014483236696e-11,
+              "MX": 4.3368086899420177e-10,
+              "MY": 7.228014483236696e-11,
+              "MZ": 19999.982072789193
+            }
+          },
+          {
+            "coordinates": [
+              2.0,
+              0.0,
+              0.0
+            ],
+            "displacement": {
+              "RX": -5.373963598245002e-16,
+              "RY": -1.9734284349166036e-17,
+              "RZ": -0.0019999982072790344,
+              "UX": -1.7927996865131736e-06,
+              "UY": -0.002682913466149589,
+              "UZ": 1.6915264660654424e-17
+            },
+            "equilibrium_residual": {
+              "FX": 1.6978606021123e-07,
+              "FY": -3.8972380878021795e-07,
+              "FZ": 1.0842021724855044e-10,
+              "MX": 7.228014483236696e-11,
+              "MY": -2.1684043449710089e-10,
+              "MZ": -3.903127820947816e-09
+            },
+            "id": "N2",
+            "reaction": {
+              "FX": 0.0,
+              "FY": 0.0,
+              "FZ": 0.0,
+              "MX": 0.0,
+              "MY": 0.0,
+              "MZ": 0.0
+            }
+          }
+        ],
+        "reaction_definition": "constrained_dof_internal_minus_external_force",
+        "schema_version": "structural-analysis-viewer-payload.v2",
+        "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
+        "source": "authoritative_solver_result"
+      }
+    }
+  }
+}
