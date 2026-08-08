@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "contract_scope", "source", "runtime", "accepted_state", "equation_scaling", "hardware_execution", "comparison", "claims", "blockers_remaining", "claim_boundary"],
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "contract_scope", "source", "runtime", "accepted_state", "equation_scaling", "hardware_execution", "performance", "comparison", "claims", "blockers_remaining", "claim_boundary"],
   "properties": {
     "schema_version": {"const": "g1-mgt-device-fgmres-receipt.v1"},
     "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
@@ -9,7 +9,8 @@
     "contract_pass": {"const": true}, "contract_scope": {"type": "string"},
     "source": {"type": "object"}, "runtime": {"type": "object"},
     "accepted_state": {"type": "object"}, "equation_scaling": {"type": "object"},
-    "hardware_execution": {"type": "object"}, "comparison": {"type": "object"},
+    "hardware_execution": {"type": "object"}, "performance": {"type": "object"},
+    "comparison": {"type": "object"},
     "claims": {"type": "object"}, "blockers_remaining": {"type": "array", "items": {"type": "string"}},
     "claim_boundary": {"type": "string"}
   },
