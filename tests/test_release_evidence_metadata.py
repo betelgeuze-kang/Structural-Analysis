@@ -95,6 +95,37 @@ def test_commit_bound_inputs_record_untracked_workspace_input_as_missing(
     ]
 
 
+def test_commit_bound_inputs_verify_materialized_git_lfs_content(
+    tmp_path: Path,
+) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "provenance-test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Provenance Test")
+    content = b"materialized checkpoint bytes\x00\x01"
+    digest = hashlib.sha256(content).hexdigest()
+    pointer = (
+        "version https://git-lfs.github.com/spec/v1\n"
+        f"oid sha256:{digest}\n"
+        f"size {len(content)}\n"
+    )
+    artifact = tmp_path / "checkpoint.npz"
+    artifact.write_text(pointer, encoding="ascii")
+    _git(tmp_path, "add", "checkpoint.npz")
+    _git(tmp_path, "commit", "-m", "track LFS pointer")
+    artifact.write_bytes(content)
+
+    metadata = commit_bound_input_metadata(
+        [Path("checkpoint.npz")],
+        repo_root=tmp_path,
+    )
+
+    assert metadata["input_checksums"]["checkpoint.npz"] == f"sha256:{digest}"
+    provenance = metadata["source_input_provenance"]
+    assert provenance["contract_pass"] is True
+    assert provenance["workspace_match_count"] == 1
+    assert provenance["blockers"] == []
+
+
 def test_commit_bound_directory_checksum_matches_clean_workspace(
     tmp_path: Path,
 ) -> None:

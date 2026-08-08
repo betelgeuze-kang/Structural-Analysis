@@ -51,9 +51,13 @@
       "pattern": "^[0-9a-f]{40}$"
     },
     "engine_version": {"type": "string", "minLength": 1},
-    "source_commit_exact_replay_claim": {"const": false},
+    "source_commit_exact_replay_claim": {"type": "boolean"},
     "source_tree_state": {
-      "const": "working_tree_with_uncommitted_goal_changes"
+      "enum": [
+        "commit_bound_inputs_exact",
+        "working_tree_input_divergence",
+        "working_tree_with_uncommitted_goal_changes"
+      ]
     },
     "input_checksums": {
       "type": "object",

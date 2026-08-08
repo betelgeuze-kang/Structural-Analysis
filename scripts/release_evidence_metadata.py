@@ -101,6 +101,43 @@ def _sha256_bytes(payload: bytes) -> str:
     return f"sha256:{hashlib.sha256(payload).hexdigest()}"
 
 
+def _git_lfs_content_checksum(payload: bytes) -> str | None:
+    """Return the content OID carried by one canonical Git LFS pointer.
+
+    Release inputs are frequently materialized in the worktree while their Git
+    object is the small LFS pointer.  Comparing the worktree bytes with the
+    pointer bytes makes a clean, reproducible LFS input look dirty.  The LFS
+    SHA-256 OID is the immutable content identity and is therefore the correct
+    source checksum for this comparison.
+    """
+
+    try:
+        text = payload.decode("ascii")
+    except UnicodeDecodeError:
+        return None
+    lines = text.splitlines()
+    if not lines or lines[0] != "version https://git-lfs.github.com/spec/v1":
+        return None
+    oid_rows = [line.removeprefix("oid ") for line in lines if line.startswith("oid ")]
+    size_rows = [line.removeprefix("size ") for line in lines if line.startswith("size ")]
+    if len(oid_rows) != 1 or len(size_rows) != 1:
+        return None
+    oid = oid_rows[0]
+    if (
+        len(oid) != 71
+        or not oid.startswith("sha256:")
+        or any(character not in "0123456789abcdef" for character in oid[7:])
+    ):
+        return None
+    try:
+        declared_size = int(size_rows[0])
+    except ValueError:
+        return None
+    if declared_size < 0:
+        return None
+    return oid
+
+
 def resolve_input_path(path: Path, *, repo_root: Path = Path(".")) -> Path:
     """Resolve a declared input against its repository, never the caller CWD."""
 
@@ -216,7 +253,11 @@ def _git_path_checksum(
     if object_type == "blob":
         payload = _git_object(repo_root, source_commit_sha, relative_path)
         if payload is not None:
-            return _sha256_bytes(payload), True, ""
+            return (
+                _git_lfs_content_checksum(payload) or _sha256_bytes(payload),
+                True,
+                "",
+            )
         return "missing", True, f"input_source_blob_unreadable:{relative_path}"
     if object_type:
         return (
