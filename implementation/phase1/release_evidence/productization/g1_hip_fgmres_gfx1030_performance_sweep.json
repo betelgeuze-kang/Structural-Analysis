@@ -1,25 +1,26 @@
 {
   "blockers_remaining": [
-    "production_scale_70560_equation_performance_not_measured",
+    "production_mgt_70560_operator_performance_not_measured",
     "production_operator_and_preconditioner_breadth_not_measured",
     "independent_gfx1100_run_not_available",
     "cross_device_performance_sweep_not_available"
   ],
-  "claim_boundary": "Actual current-source gfx1030 lifecycle sweep for synthetic tridiagonal SPD reduced-CSR fixtures from 66 through 4092 equations. Reports exact runtime counters and CPU comparison without claiming the 70,560-equation production shell operator, production preconditioner breadth, gfx1100, or cross-device performance.",
+  "claim_boundary": "Actual current-source gfx1030 lifecycle sweep for synthetic tridiagonal SPD reduced-CSR fixtures from 66 through 70,560 equations. Reports exact runtime counters and CPU comparison without claiming the 70,560-equation production MGT shell operator, production preconditioner breadth, gfx1100, or cross-device performance.",
   "claims": {
     "actual_gfx1030_hardware": true,
     "bounded_model_size_performance_sweep": true,
     "cross_device_performance": false,
     "independent_gfx1100": false,
     "mid_recurrence_d2h_zero": true,
-    "production_scale_70560_equations": false
+    "production_mgt_70560_operator": false,
+    "synthetic_70560_equation_lifecycle": true
   },
   "contract_pass": true,
-  "receipt_hash": "sha256:e2a9331ec8d9debedacc0e408792ef79c01e3b93851492e3acf2a5be8d5e29cc",
+  "receipt_hash": "sha256:854e39233ca497e51aaa87b70a93509e18c3f0d61c7163766c2263e1de7aa9d6",
   "runtime": {
     "backend": "amd_rocm_hip",
     "compiler": {
-      "binary_sha256": "sha256:cb7b2c43ccaf3dcb0802a21c1326ede4c23a4daaf3a8b10bc2603a206a3a022a",
+      "binary_sha256": "sha256:9db9a1919ea433c111dc7389375418308984faf804d8c307c98e0ec605ffc3ea",
       "path": "/opt/rocm-6.0.2/bin/hipcc",
       "version_first_line": "HIP version: 6.0.32831-204d35d16",
       "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
@@ -39,13 +40,13 @@
   "schema_version": "g1-hip-fgmres-performance-sweep.v1",
   "source": {
     "input_checksums": {
-      "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp": "sha256:3ab37fba9bfb40498088eb07e8a8adc3cbbc21be987d9778581126fe16ab57b7",
-      "scripts/run_g1_hip_fgmres_performance_sweep.py": "sha256:565dce6d5411a1c7613f86ff218e098d493a95c90fc662c6f3decfcfe6abc6c7",
-      "src/structural_analysis/schemas/g1_hip_fgmres_performance_sweep_v1.schema.json": "sha256:d20c445c26237138bdbc06e25d7b2bc813f38b8f4a8a68cee2561eb21d2309e7",
-      "tests/test_g1_hip_fgmres_performance_sweep.py": "sha256:94d5f004385fe23041013a040e2291893abb18b933a2fb5ec2bb18f07826f0d2"
+      "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp": "sha256:0745831161140e1b4f4af9572652f67f7026b8775ccee00124d8f2497dce7c67",
+      "scripts/run_g1_hip_fgmres_performance_sweep.py": "sha256:999ba4c0c20ce78f57c7facb1905f2837ba8be3e45a6ae659e9a4359f3cd39e3",
+      "src/structural_analysis/schemas/g1_hip_fgmres_performance_sweep_v1.schema.json": "sha256:1907a6999af026a78f92d554ecc8e4aed2b9b2a0e0dcc9dc8a3d8b1bf4cb1d50",
+      "tests/test_g1_hip_fgmres_performance_sweep.py": "sha256:8ca1d3b37a3bceb2be9e4a7de70b0a016f5287618baed1ab3cf532ae63c6b849"
     },
-    "repository_commit_sha": "abdff406933d26bbdabc80a1f7839c71f220ef9a",
-    "worktree_clean_at_execution": true
+    "repository_commit_sha": "1945975b79fcf0ac4ce2a782e0e38c9017f1cca8",
+    "source_paths_clean_at_execution": true
   },
   "sweep": {
     "cases": [
@@ -54,33 +55,36 @@
           "implementation": "scipy.sparse.linalg.gmres",
           "iteration_count": 17,
           "matvec_count": 18,
+          "maximum_exact_solution_error": 2.2067769833711282e-10,
           "maximum_physical_residual_n": 7.343992081132455e-10,
-          "wall_time_median_ms": 1.329184999121935,
+          "wall_time_median_ms": 1.3133620013832115,
           "wall_time_samples_ms": [
-            1.522160999229527,
-            1.329184999121935,
-            1.3054239989287453
+            1.42971400055103,
+            1.3061520003248006,
+            1.3133620013832115
           ]
         },
         "dimension": 66,
         "gpu": {
           "d2h_bytes": 41232,
-          "device_lifecycle_wall_time_median_ms": 158.548143,
+          "device_lifecycle_wall_time_median_ms": 158.998085,
           "device_lifecycle_wall_time_samples_ms": [
-            158.548143,
-            159.464604,
-            158.224423
+            164.512666,
+            158.998085,
+            158.615232
           ],
           "h2d_bytes": 8168,
           "krylov_iteration_count": 17,
           "matvec_count": 42,
+          "maximum_exact_solution_error": 2.2067703220329804e-10,
+          "maximum_physical_residual_n": 7.343974317564061e-10,
           "mid_recurrence_host_transfer_count": 0,
           "preconditioner_apply_count": 20,
-          "process_wall_time_median_ms": 211.898616000326,
+          "process_wall_time_median_ms": 215.83874699899752,
           "process_wall_time_samples_ms": [
-            207.3598930001026,
-            219.9203749987646,
-            211.898616000326
+            219.89235500041104,
+            215.83874699899752,
+            212.31514300052368
           ],
           "terminal_scaled_l2": 1.3665732934675897e-09,
           "tracked_peak_device_allocation_bytes": 161928
@@ -88,8 +92,8 @@
         "nnz": 196,
         "repetitions": 3,
         "speedup": {
-          "device_lifecycle_vs_cpu_solver": 0.008383478822088349,
-          "gpu_process_vs_cpu_solver": 0.006272740352017638
+          "device_lifecycle_vs_cpu_solver": 0.008260237859991908,
+          "gpu_process_vs_cpu_solver": 0.006084922284085126
         }
       },
       {
@@ -97,33 +101,36 @@
           "implementation": "scipy.sparse.linalg.gmres",
           "iteration_count": 17,
           "matvec_count": 18,
+          "maximum_exact_solution_error": 2.555444744700708e-10,
           "maximum_physical_residual_n": 8.213314472982347e-10,
-          "wall_time_median_ms": 1.4587890000257175,
+          "wall_time_median_ms": 1.4370040007634088,
           "wall_time_samples_ms": [
-            1.4587890000257175,
-            1.3495359999069478,
-            1.5936830004648073
+            1.4782040016143583,
+            1.4370040007634088,
+            1.3527319988497766
           ]
         },
         "dimension": 264,
         "gpu": {
           "d2h_bytes": 45984,
-          "device_lifecycle_wall_time_median_ms": 159.691602,
+          "device_lifecycle_wall_time_median_ms": 163.657998,
           "device_lifecycle_wall_time_samples_ms": [
-            158.886606,
-            160.067336,
-            159.691602
+            163.657998,
+            170.163286,
+            161.262667
           ],
           "h2d_bytes": 32720,
           "krylov_iteration_count": 17,
           "matvec_count": 42,
+          "maximum_exact_solution_error": 2.555453626484905e-10,
+          "maximum_physical_residual_n": 8.213332236550741e-10,
           "mid_recurrence_host_transfer_count": 0,
           "preconditioner_apply_count": 20,
-          "process_wall_time_median_ms": 215.8033770010661,
+          "process_wall_time_median_ms": 223.25375900072686,
           "process_wall_time_samples_ms": [
-            219.70611899996584,
-            215.8033770010661,
-            215.78785700148728
+            215.44911700038938,
+            233.55164999884437,
+            223.25375900072686
           ],
           "terminal_scaled_l2": 1.4249400298618978e-09,
           "tracked_peak_device_allocation_bytes": 528624
@@ -131,8 +138,8 @@
         "nnz": 790,
         "repetitions": 3,
         "speedup": {
-          "device_lifecycle_vs_cpu_solver": 0.00913503892349779,
-          "gpu_process_vs_cpu_solver": 0.006759806173091123
+          "device_lifecycle_vs_cpu_solver": 0.00878053024187311,
+          "gpu_process_vs_cpu_solver": 0.006436639665980855
         }
       },
       {
@@ -140,33 +147,36 @@
           "implementation": "scipy.sparse.linalg.gmres",
           "iteration_count": 16,
           "matvec_count": 17,
+          "maximum_exact_solution_error": 9.724381300202367e-10,
           "maximum_physical_residual_n": 3.1119538057566842e-09,
-          "wall_time_median_ms": 1.4956899995013373,
+          "wall_time_median_ms": 1.3538830007746583,
           "wall_time_samples_ms": [
-            1.541972000268288,
-            1.3390149997576373,
-            1.4956899995013373
+            1.5477259985345881,
+            1.3538830007746583,
+            1.3203019989305176
           ]
         },
         "dimension": 1056,
         "gpu": {
           "d2h_bytes": 64992,
-          "device_lifecycle_wall_time_median_ms": 160.086536,
+          "device_lifecycle_wall_time_median_ms": 167.003207,
           "device_lifecycle_wall_time_samples_ms": [
-            163.876973,
-            159.681502,
-            160.086536
+            167.003207,
+            173.430466,
+            161.980154
           ],
           "h2d_bytes": 130928,
           "krylov_iteration_count": 16,
           "matvec_count": 40,
+          "maximum_exact_solution_error": 9.724361316187924e-10,
+          "maximum_physical_residual_n": 3.1119498089537956e-09,
           "mid_recurrence_host_transfer_count": 0,
           "preconditioner_apply_count": 19,
-          "process_wall_time_median_ms": 214.81798399872787,
+          "process_wall_time_median_ms": 219.49635999953898,
           "process_wall_time_samples_ms": [
-            219.95428599984734,
-            214.81798399872787,
-            211.2946750003175
+            219.49635999953898,
+            227.29237100065802,
+            215.39836099873355
           ],
           "terminal_scaled_l2": 5.348571784210426e-09,
           "tracked_peak_device_allocation_bytes": 1995408
@@ -174,8 +184,8 @@
         "nnz": 3166,
         "repetitions": 3,
         "speedup": {
-          "device_lifecycle_vs_cpu_solver": 0.009343009330287073,
-          "gpu_process_vs_cpu_solver": 0.006962592105464478
+          "device_lifecycle_vs_cpu_solver": 0.008106928154826741,
+          "gpu_process_vs_cpu_solver": 0.006168134181257046
         }
       },
       {
@@ -183,33 +193,36 @@
           "implementation": "scipy.sparse.linalg.gmres",
           "iteration_count": 16,
           "matvec_count": 17,
+          "maximum_exact_solution_error": 9.765708242071014e-10,
           "maximum_physical_residual_n": 3.1222606722280943e-09,
-          "wall_time_median_ms": 1.7105380011344096,
+          "wall_time_median_ms": 1.791209999282728,
           "wall_time_samples_ms": [
-            1.9229749996156897,
-            1.7105380011344096,
-            1.6667859999870416
+            2.0457950013224036,
+            1.679789000263554,
+            1.791209999282728
           ]
         },
         "dimension": 4092,
         "gpu": {
           "d2h_bytes": 137856,
-          "device_lifecycle_wall_time_median_ms": 161.606808,
+          "device_lifecycle_wall_time_median_ms": 166.349882,
           "device_lifecycle_wall_time_samples_ms": [
-            161.497504,
-            161.606808,
-            161.732802
+            162.629408,
+            167.50106,
+            166.349882
           ],
           "h2d_bytes": 507392,
           "krylov_iteration_count": 16,
           "matvec_count": 40,
+          "maximum_exact_solution_error": 9.76575043054595e-10,
+          "maximum_physical_residual_n": 3.1222691099230815e-09,
           "mid_recurrence_host_transfer_count": 0,
           "preconditioner_apply_count": 19,
-          "process_wall_time_median_ms": 217.31503899900417,
+          "process_wall_time_median_ms": 225.7447020001564,
           "process_wall_time_samples_ms": [
-            217.31503899900417,
-            213.85477199874003,
-            222.82593499949144
+            225.7447020001564,
+            226.82933900068747,
+            221.27779599941277
           ],
           "terminal_scaled_l2": 5.355314347830008e-09,
           "tracked_peak_device_allocation_bytes": 7618080
@@ -217,8 +230,54 @@
         "nnz": 12274,
         "repetitions": 3,
         "speedup": {
-          "device_lifecycle_vs_cpu_solver": 0.010584566469095842,
-          "gpu_process_vs_cpu_solver": 0.007871236197059735
+          "device_lifecycle_vs_cpu_solver": 0.010767726299215095,
+          "gpu_process_vs_cpu_solver": 0.007934671260995915
+        }
+      },
+      {
+        "cpu": {
+          "implementation": "scipy.sparse.linalg.gmres",
+          "iteration_count": 15,
+          "matvec_count": 16,
+          "maximum_exact_solution_error": 3.64947982944841e-09,
+          "maximum_physical_residual_n": 1.1664604393502032e-08,
+          "wall_time_median_ms": 9.780325999599881,
+          "wall_time_samples_ms": [
+            9.780325999599881,
+            10.31880399932561,
+            9.196135000820505
+          ]
+        },
+        "dimension": 70560,
+        "gpu": {
+          "d2h_bytes": 1733088,
+          "device_lifecycle_wall_time_median_ms": 218.890421,
+          "device_lifecycle_wall_time_samples_ms": [
+            208.452826,
+            218.890421,
+            236.425493
+          ],
+          "h2d_bytes": 8749424,
+          "krylov_iteration_count": 15,
+          "matvec_count": 38,
+          "maximum_exact_solution_error": 3.6495615418630223e-09,
+          "maximum_physical_residual_n": 1.1664767374242047e-08,
+          "mid_recurrence_host_transfer_count": 0,
+          "preconditioner_apply_count": 18,
+          "process_wall_time_median_ms": 334.4423119997373,
+          "process_wall_time_samples_ms": [
+            326.02733800013084,
+            334.4423119997373,
+            347.7849549999519
+          ],
+          "terminal_scaled_l2": 1.999433546435228e-08,
+          "tracked_peak_device_allocation_bytes": 130716816
+        },
+        "nnz": 211678,
+        "repetitions": 3,
+        "speedup": {
+          "device_lifecycle_vs_cpu_solver": 0.044681379636982294,
+          "gpu_process_vs_cpu_solver": 0.029243686126675158
         }
       }
     ],
@@ -226,7 +285,8 @@
       66,
       264,
       1056,
-      4092
+      4092,
+      70560
     ]
   }
 }
