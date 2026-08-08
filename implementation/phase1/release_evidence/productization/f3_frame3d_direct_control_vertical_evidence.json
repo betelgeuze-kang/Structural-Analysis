@@ -1,0 +1,459 @@
+{
+  "claim_boundary": "Closes the bounded single-translation Frame3D direct-control stage for an axial target/reversal path with state/material ancestry, exact restart, nonlinear ResultIR, recovery, and bound Workbench projection. Rotational or multi-point control, yielded material breadth, modal, dynamics, shell, and contact remain outside this stage.",
+  "contract_pass": true,
+  "predecessor_replay": {
+    "current_source_replay_executed": true,
+    "persisted_source_commit_sha": "2694914a03dc9f299ad86e8210a77e311487dec5",
+    "public_product_promotion_passed": true,
+    "replayed_source_commit_sha": "2d18c02d2c4a95ebee3a1567e0968a7a9f0fccc6",
+    "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_frame3d_load_control_vertical_evidence.json",
+    "source_receipt_sha256": "sha256:132714249eeddc3d424e2a4b8579c2ef78717e3d1dd444899bb135cf121295b2"
+  },
+  "schema_version": "f3-frame3d-direct-control-vertical-evidence.v1",
+  "source_commit_sha": "2d18c02d2c4a95ebee3a1567e0968a7a9f0fccc6",
+  "source_input_checksums": {
+    "implementation/phase1/run_f3_frame3d_direct_control_vertical_evidence.py": "sha256:c4db1f49e15ea0551e0ae9ca4eb50d4af94719da113a9eb276112c9810e88e04",
+    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:841529ecc3e2b5b524eb3e527a4e95373aa5eb97124b700fbaf33b92272a4809",
+    "implementation/phase1/run_f3_frame3d_load_control_vertical_evidence.py": "sha256:87917f4cc01f1f4757816c194e4e7726438db7d06ac1c841d92836a5364a2fdd",
+    "src/structural_analysis/assembly/stateful_corotational_frame3d_displacement_control.py": "sha256:8cc8b149fda49e5718cf453ef5c62716a2a53570d4f51cb0452fb68450cc90c5",
+    "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py": "sha256:36203031c0b7f870b06bde09170de403c3391700062f1e7bffc58368efc3ce3a",
+    "src/structural_analysis/engine_v2/contracts/nonlinear_result.py": "sha256:75c8648440a6faf5f8ed050b8bb7dd1701e1219486934579bd46a84b25430566",
+    "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:9bbb52ba8db6dc572f2b5e5cdf78762da3b42464f818e88ae21863ad85c77932",
+    "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
+    "src/structural_analysis/validation/f3_vertical_evidence.py": "sha256:604936ab0933be7f8d346102edd02d426ccb585a43e142266e1a779cd5e0c39e",
+    "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9",
+    "tests/test_f3_frame3d_direct_control_vertical_evidence.py": "sha256:0c35f9bde11d673dafaca429beebef87f3d94d7c6a2b0b421891ee65ca4695ce"
+  },
+  "stage_gate": {
+    "blockers": [],
+    "evidence_artifact_sha256": {
+      "benchmark": "sha256:09f195b20f48b94544926fa4497ffd925594c8364ef7476ea280ad397705fdb9",
+      "checkpoint": "sha256:105780d4c7d0fa8f1ad83dde37a1e40ccc47d5b151bd8ef4bc1082080ac31f8a",
+      "external_vv": "sha256:bd387565b4fa3343e2d0c5c2261b6af421efa954cb0d0027a479f8291c9c1782",
+      "model_ir": "sha256:913fba45d736d11ec28751a13eea5b095c315fb2d6d7beb52ce16dfeafbae6de",
+      "platform": "sha256:7096ac21cd430706923ee895682d7611169c5c8a0dcc44c1336ef69a07900a47",
+      "recovery": "sha256:c94b40e1ba9fe58f3d5ae9d470cdbea227475ef735c0b4914c237c5cb0c8c0bd",
+      "result_ir": "sha256:4feec56c29d6333c562e92aa697065f2d530a0aa6e6e1027e8883cf9222f6a17",
+      "solver": "sha256:8bbf3400ccc5bdf3f46f4f98a73145865467c2162768516319e2bd2ac42b45f4",
+      "workbench": "sha256:3e49d0ce94dbbd1f827587071fb0fcefd63443bf2665968a5ccafa780f9ef504"
+    },
+    "external_vv_signature_status": "waived",
+    "predecessor_receipt_sha256": "sha256:ed2bd0183ca265516a22de54b369c34a1bf514a1e2eb072998295ff046776170",
+    "predecessor_stage": "frame3d_load_control",
+    "public_product_promotion_passed": true,
+    "required_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ],
+    "source_commit_sha": "2d18c02d2c4a95ebee3a1567e0968a7a9f0fccc6",
+    "stage": "frame3d_direct_control",
+    "stage_index": 2,
+    "verified_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ]
+  },
+  "status": "ready",
+  "surface_artifacts": {
+    "benchmark": {
+      "benchmark_id": "frame3d-axial-direct-control-reversal.v1",
+      "deterministic_repeat": true,
+      "exact_reversal_path": false,
+      "expected_final_load_factor": -0.5,
+      "load_factor_absolute_error": 3.356759314954161e-11,
+      "observed_final_load_factor": -0.5000000000335676
+    },
+    "checkpoint": {
+      "checkpoint": {
+        "checkpoint_hash": "sha256:6d080551d8cb7e589649b8fb6c08f89111e26f903bc57ebc599c0e9f3f1f4587",
+        "converged_iterations": 1,
+        "displacement": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -2.5000000000000005e-05,
+          8.269117442683539e-18,
+          2.1045368860729974e-17,
+          -1.5269180595838205e-16,
+          -1.886766382832631e-17,
+          9.84377376104286e-18
+        ],
+        "load_factor": -0.5000000000335676,
+        "material_states": [
+          {
+            "accumulated_plastic_strain": 0.0,
+            "backstress_mpa": 0.0,
+            "dissipated_energy_density_mj_per_m3": 0.0,
+            "plastic_strain": 0.0,
+            "schema_version": "uniaxial-combined-hardening-state.v1",
+            "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+          }
+        ],
+        "model_hash": "sha256:379928b54bb7a126f2c2684ec3f93a82dbc968ebc43cd327e2440a4a083782ec",
+        "parent_checkpoint_hash": "sha256:a3338ebc86a0ea58c20c7265fec8eb6bf68f92397b17bed77d00c299a67c034b",
+        "profile": "stateful_axial_material_corotational_timoshenko_frame3d_native_coo_csr.v1",
+        "residual_inf_norm_kn": 3.1272335831999953e-09,
+        "schema_version": "stateful-corotational-frame3d-sparse-checkpoint.v1",
+        "solver_contract_hash": "sha256:b346fc9db482e536f24e54628e3deb76f66157f7422a1c07a8b4af701eca0eb6",
+        "step_index": 3
+      },
+      "exact_restart": true,
+      "parent_state_immutability_enforced": true,
+      "prefix_checkpoint_hash": "sha256:a3338ebc86a0ea58c20c7265fec8eb6bf68f92397b17bed77d00c299a67c034b",
+      "resumed_checkpoint_hash": "sha256:6d080551d8cb7e589649b8fb6c08f89111e26f903bc57ebc599c0e9f3f1f4587",
+      "schema_version": "stateful-corotational-frame3d-sparse-checkpoint.v1"
+    },
+    "external_vv": {
+      "equilibrium_pass": true,
+      "exact_restart_pass": true,
+      "load_factor_absolute_error": 3.356759314954161e-11,
+      "reference_profile": "independent_axial_bar_force_displacement_control.v1",
+      "signature_verifier_waived": true,
+      "verification_mode": "local_self_verification_user_authorized"
+    },
+    "model_ir": {
+      "analysis_ready": true,
+      "content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+      "load_pattern_id": "LC_AXIAL",
+      "model_id": "engine-v2-frame-cantilever"
+    },
+    "platform": {
+      "implementation": "CPython",
+      "numpy_version": "1.26.4",
+      "python_version": "3.10.12",
+      "self_verified": true,
+      "source_commit_sha": "2d18c02d2c4a95ebee3a1567e0968a7a9f0fccc6"
+    },
+    "recovery": {
+      "axial_material_response": {
+        "committed_state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1",
+        "consistent_tangent_mpa": 200000.0,
+        "elastic_strain": -1.2499999999970868e-05,
+        "final_yield_function_mpa": -247.50000000000583,
+        "plastic_multiplier_increment": 0.0,
+        "stress_mpa": -2.4999999999941735,
+        "total_strain": -1.2499999999970868e-05,
+        "trial_state": {
+          "accumulated_plastic_strain": 0.0,
+          "backstress_mpa": 0.0,
+          "dissipated_energy_density_mj_per_m3": 0.0,
+          "plastic_strain": 0.0,
+          "schema_version": "uniaxial-combined-hardening-state.v1",
+          "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
+        },
+        "trial_yield_function_mpa": -247.50000000000583,
+        "yielded": false
+      },
+      "final_residual_inf_n": 3.1272335831999953e-06,
+      "local_end_forces_n": [
+        49999.9999980831,
+        6.776263578034403e-12,
+        -5.872761767629815e-11,
+        6.776263578034403e-11,
+        1.942528892369862e-10,
+        2.2587545260114674e-11,
+        -50000.00000022953,
+        -2.2587545260114674e-12,
+        4.9692599572252284e-11,
+        -5.872761767629815e-11,
+        -1.4907779871675686e-10,
+        8.131516293641283e-11
+      ],
+      "reactions_n": [
+        49999.9999980831,
+        6.776263578034403e-12,
+        -5.872761767629815e-11,
+        6.776263578034403e-11,
+        1.942528892369862e-10,
+        2.2587545260114674e-11
+      ]
+    },
+    "result_ir": {
+      "manifest": {
+        "authority": {
+          "code_compliance": "not_authoritative",
+          "commercial_use": "not_authoritative",
+          "convergence": "authoritative",
+          "displacement": "authoritative",
+          "engineering_design": "not_authoritative",
+          "integration_point_engineering_output": "not_evaluated",
+          "material_state": "authoritative",
+          "member_force": "not_evaluated",
+          "numerical_state": "authoritative",
+          "reaction": "not_evaluated",
+          "release_readiness": "not_authoritative"
+        },
+        "authority_profile": "authoritative_converged_nonlinear_numerical_and_terminal_material_state.v1",
+        "backend": {
+          "receipt_hash": "sha256:98ea4486e170035f41f04c0f181ae761e93646126134ddc40feadaa327f1a48d",
+          "role": "cpu_reference"
+        },
+        "bindings": {
+          "boundary_condition_receipt_hash": "sha256:87394cee73a99ece4fccd9afe63c837a547668f5edf0fc9afb6b6e7166ea53d8",
+          "equation_scaling_hash": "sha256:35e020dd6eb7c089289d3c197a27be25149b0c789cfcea75b02d460261258849",
+          "execution_plan_hash": "sha256:1bfe1551423034aa2e4af2fc1d18ceb0f970175d6170fe167b76120792cc3e67",
+          "full_residual_receipt_hash": "sha256:55af188333c2058f1888164ca2a016f7a6bde0c82bc7748ac2c6305ab8ae470d",
+          "integration_point_order_hash": "sha256:f8a69faa4535d95aa2c3d6e80de06f7a2f0fd597a0d19421e8cd50fad3391e72",
+          "material_state_bundle_hash": "sha256:c1a82ea8cb8f6de1f90b3f543ce2c02bed304e98aa658d065cc7bd6c6f60dc87",
+          "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+          "nonlinear_terminal_hash": "sha256:7e26a8bcfba6c85e9cbb2925936d37edfa8ec8db52244b836772298967ddeec7",
+          "operator_hash": "sha256:3a341e92da9918574765090b1cf398f0e2989959bd9a51f2c84ccd618f70a862",
+          "path_history_hash": "sha256:0d4291e7ee49f7bf21351f6739f70bb6ccdc1f1caca5f239c98b6af03dae1afa",
+          "reduced_csr_identity_hash": "sha256:e34dc3b7905cf07e355b5ae4c91877f615d4f6bb7cbdf4d1e0162f5542f15f0a",
+          "state_epoch": 3,
+          "state_hash": "sha256:7d9a88d8673fa2870a34ac2965040f82e7a3a39d3475e2d0159c06e78baf9719"
+        },
+        "claim_boundary": {
+          "commercial_claim": false,
+          "committed_nonlinear_state": true,
+          "constitutive_law_verified": false,
+          "design_or_code_authority": false,
+          "equation_scaling_replay_bound": true,
+          "fallback_or_regularization_promoted": false,
+          "fiber_frame_kinematic_adapter_authority": false,
+          "integration_point_engineering_output_authority": false,
+          "material_state_history_replayed": false,
+          "member_force_authority": false,
+          "ordered_material_state_bundle": true,
+          "reaction_authority": false,
+          "reduced_csr_identity_bound": true,
+          "release_readiness": false,
+          "residual_and_increment_terminal_gate": true,
+          "source_free_solution_bytes_bound": true,
+          "viewer_projection": false
+        },
+        "displacement_artifact": {
+          "artifact_uri": "artifact://nonlinear-result/f3.frame3d.direct-control.lc-axial/7d9a88d8673fa287/c1a82ea8cb8f6de1/displacement_global.f64le",
+          "byte_length": 96,
+          "byte_order": "little",
+          "content_hash": "sha256:5d2cfe4a012fa1d434b177f72f1db33d55510f4c54d8a75a673585fe8ad3dbdf",
+          "data_hash": "sha256:d02dff285612dc3bf656eab388ff5d728035d59264fb89a6c89344dffb63dfac",
+          "dtype": "<f8",
+          "layout": "C",
+          "name": "displacement_global_si",
+          "shape": [
+            12
+          ],
+          "storage_profile": "canonical_little_endian_fp64_binary.v1",
+          "unit_profile": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+        },
+        "dof_count": 12,
+        "extensions": {},
+        "load_factor": -0.5000000000335676,
+        "result_hash": "sha256:6d21bda227833d4709f929068a9ceec1028999e665021feb2b8624d23b782985",
+        "result_id": "f3.frame3d.direct-control.lc-axial",
+        "result_kind": "nonlinear_static_numerical_state",
+        "schema_version": "structural-analysis-nonlinear-numerical-result-ir.v1",
+        "time_s": 0.0
+      },
+      "manifest_valid": true,
+      "schema_version": "structural-analysis-nonlinear-numerical-result-ir.v1"
+    },
+    "solver": {
+      "contract_pass": true,
+      "control_global_dof": 6,
+      "fallback_used": false,
+      "path_history": [
+        {
+          "accepted_line_search_alphas": [
+            1.0
+          ],
+          "checkpoint_hash": "sha256:648ec4342ef3ebd48e865064b549a456148db5a6b0c531bbd563e51a76fcfeb7",
+          "convergence_checks": {
+            "augmented_sparse_diagnostic_pass": true,
+            "fallback_not_used": true,
+            "final_reassembled_equilibrium": true,
+            "line_search_step_valid": true,
+            "load_factor_increment_gate": true,
+            "material_admissibility": true,
+            "parent_state_immutable": true,
+            "regularization_not_used": true,
+            "scaled_control_gate": true,
+            "scaled_increment_gate": true,
+            "scaled_residual_gate": true
+          },
+          "scaled_control_error": 0.0,
+          "solved_load_factor": 0.5000000000035906,
+          "target_control_displacement_m": 2.5e-05
+        },
+        {
+          "accepted_line_search_alphas": [
+            1.0
+          ],
+          "checkpoint_hash": "sha256:a3338ebc86a0ea58c20c7265fec8eb6bf68f92397b17bed77d00c299a67c034b",
+          "convergence_checks": {
+            "augmented_sparse_diagnostic_pass": true,
+            "fallback_not_used": true,
+            "final_reassembled_equilibrium": true,
+            "line_search_step_valid": true,
+            "load_factor_increment_gate": true,
+            "material_admissibility": true,
+            "parent_state_immutable": true,
+            "regularization_not_used": true,
+            "scaled_control_gate": true,
+            "scaled_increment_gate": true,
+            "scaled_residual_gate": true
+          },
+          "scaled_control_error": 0.0,
+          "solved_load_factor": 1.000000000016248,
+          "target_control_displacement_m": 5e-05
+        },
+        {
+          "accepted_line_search_alphas": [
+            1.0
+          ],
+          "checkpoint_hash": "sha256:6d080551d8cb7e589649b8fb6c08f89111e26f903bc57ebc599c0e9f3f1f4587",
+          "convergence_checks": {
+            "augmented_sparse_diagnostic_pass": true,
+            "fallback_not_used": true,
+            "final_reassembled_equilibrium": true,
+            "line_search_step_valid": true,
+            "load_factor_increment_gate": true,
+            "material_admissibility": true,
+            "parent_state_immutable": true,
+            "regularization_not_used": true,
+            "scaled_control_gate": true,
+            "scaled_increment_gate": true,
+            "scaled_residual_gate": true
+          },
+          "scaled_control_error": -4.517509052022935e-17,
+          "solved_load_factor": -0.5000000000335676,
+          "target_control_displacement_m": -2.5e-05
+        }
+      ],
+      "profile": "stateful-corotational-frame3d-direct-displacement-control.v1",
+      "regularization_used": false,
+      "schema_version": "stateful-corotational-frame3d-direct-displacement-control-result.v1",
+      "targets_m": [
+        2.5e-05,
+        5e-05,
+        -2.5e-05
+      ]
+    },
+    "workbench": {
+      "model_identity_bound": true,
+      "schema_version": "structural-analysis-viewer-payload.v2",
+      "viewer_payload": {
+        "analysis_fidelity": "cpu_reference_linear_fea",
+        "elements": [
+          {
+            "id": "E1",
+            "local_end_forces": {
+              "FX_I": 49999.9999980831,
+              "FX_J": -50000.00000022953,
+              "FY_I": 6.776263578034403e-12,
+              "FY_J": -2.2587545260114674e-12,
+              "FZ_I": -5.872761767629815e-11,
+              "FZ_J": 4.9692599572252284e-11,
+              "MX_I": 6.776263578034403e-11,
+              "MX_J": -5.872761767629815e-11,
+              "MY_I": 1.942528892369862e-10,
+              "MY_J": -1.4907779871675686e-10,
+              "MZ_I": 2.2587545260114674e-11,
+              "MZ_J": 8.131516293641283e-11
+            },
+            "nodes": [
+              "N1",
+              "N2"
+            ],
+            "type": "frame"
+          }
+        ],
+        "equilibrium_residual_definition": "free_dof_internal_minus_external_force; constrained entries are zero",
+        "model_identity": {
+          "analysis_input_snapshot": "detached_canonical_model_v1",
+          "canonical_model_checksum": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+          "identity_policy": "source_bytes_and_detached_canonical_model_v1",
+          "source_input_checksum": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9"
+        },
+        "nodes": [
+          {
+            "coordinates": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "displacement": {
+              "RX": 0.0,
+              "RY": 0.0,
+              "RZ": 0.0,
+              "UX": 0.0,
+              "UY": 0.0,
+              "UZ": 0.0
+            },
+            "equilibrium_residual": {
+              "FX": 0.0,
+              "FY": 0.0,
+              "FZ": 0.0,
+              "MX": 0.0,
+              "MY": 0.0,
+              "MZ": 0.0
+            },
+            "id": "N1",
+            "reaction": {
+              "FX": 49999.9999980831,
+              "FY": 6.776263578034403e-12,
+              "FZ": -5.872761767629815e-11,
+              "MX": 6.776263578034403e-11,
+              "MY": 1.942528892369862e-10,
+              "MZ": 2.2587545260114674e-11
+            }
+          },
+          {
+            "coordinates": [
+              2.0,
+              0.0,
+              0.0
+            ],
+            "displacement": {
+              "RX": -1.5269180595838205e-16,
+              "RY": -1.886766382832631e-17,
+              "RZ": 9.84377376104286e-18,
+              "UX": -2.5000000000000005e-05,
+              "UY": 8.269117442683539e-18,
+              "UZ": 2.1045368860729974e-17
+            },
+            "equilibrium_residual": {
+              "FX": 0.0,
+              "FY": 0.0,
+              "FZ": 0.0,
+              "MX": 0.0,
+              "MY": 0.0,
+              "MZ": 0.0
+            },
+            "id": "N2",
+            "reaction": {
+              "FX": 0.0,
+              "FY": 0.0,
+              "FZ": 0.0,
+              "MX": 0.0,
+              "MY": 0.0,
+              "MZ": 0.0
+            }
+          }
+        ],
+        "reaction_definition": "constrained_dof_internal_minus_external_force",
+        "schema_version": "structural-analysis-viewer-payload.v2",
+        "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
+        "source": "authoritative_solver_result"
+      }
+    }
+  }
+}
