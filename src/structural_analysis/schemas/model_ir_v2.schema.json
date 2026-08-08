@@ -37,7 +37,8 @@
         "sdof_authenticated_transient_v1",
         "mdof_linear_transient_v1",
         "nonlinear_mdof_transient_v1",
-        "shell_linear_static_v1"
+        "shell_linear_static_v1",
+        "contact_frictionless_static_v1"
       ]
     },
     "provenance": {"$ref": "#/$defs/provenance"},
@@ -87,6 +88,7 @@
       "items": {"$ref": "#/$defs/constructionStage"}
     },
     "dynamics": {"$ref": "#/$defs/dynamics"},
+    "contact": {"$ref": "#/$defs/contactStatic"},
     "roundtrip_map": {
       "type": "array",
       "items": {"$ref": "#/$defs/roundtripRow"}
@@ -577,6 +579,21 @@
         {"$ref": "#/$defs/mdofLinearDynamics"},
         {"$ref": "#/$defs/nonlinearMdofDynamics"}
       ]
+    },
+    "contactStatic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "dof_ids", "contact_ids", "stiffness_matrix_n_per_m", "load_vector_n", "gap_upper_m", "constraint_direction", "checkpoint_authority"],
+      "properties": {
+        "profile": {"const": "frictionless_unilateral_gap_active_set.v1"},
+        "dof_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "contact_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "stiffness_matrix_n_per_m": {"type": "array", "minItems": 1, "items": {"type": "array", "minItems": 1, "items": {"type": "number"}}},
+        "load_vector_n": {"type": "array", "minItems": 1, "items": {"type": "number"}},
+        "gap_upper_m": {"type": "array", "minItems": 1, "items": {"type": "number"}},
+        "constraint_direction": {"const": "displacement_less_than_or_equal_gap"},
+        "checkpoint_authority": {"const": "exact_hash_bound_checkpoint"}
+      }
     },
     "sdofDynamics": {
       "type": "object",

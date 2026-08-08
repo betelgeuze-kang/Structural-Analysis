@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/contact_static_result_ir_v1.schema.json",
+  "title": "Frictionless contact static ResultIR v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "result_id", "analysis_type", "authority", "bindings", "solver", "dof_ids", "contact_ids", "displacement_m", "contact_multiplier_n", "gap_remaining_m", "equilibrium_residual_n", "complementarity_n_m", "active_contact_ids", "kkt", "checkpoint", "claim_boundary", "result_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-contact-result-ir.v1"}, "result_id": {"$ref": "#/$defs/id"}, "analysis_type": {"const": "contact_frictionless_static"},
+    "authority": {"type": "object", "additionalProperties": false, "required": ["profile", "contact_response", "kkt_metrics", "checkpoint", "engineering_design", "release_readiness"], "properties": {"profile": {"const": "authoritative_frictionless_unilateral_gap_kkt.v1"}, "contact_response": {"const": "authoritative"}, "kkt_metrics": {"const": "authoritative"}, "checkpoint": {"const": "exact_hash_bound"}, "engineering_design": {"const": "not_authoritative"}, "release_readiness": {"const": "not_authoritative"}}},
+    "bindings": {"type": "object", "additionalProperties": false, "required": ["model_ir_content_hash", "solver_result_hash", "stiffness_hash", "load_hash"], "properties": {"model_ir_content_hash": {"$ref": "#/$defs/hash"}, "solver_result_hash": {"$ref": "#/$defs/hash"}, "stiffness_hash": {"$ref": "#/$defs/hash"}, "load_hash": {"$ref": "#/$defs/hash"}}},
+    "solver": {"type": "object", "additionalProperties": false, "required": ["solver_id", "fallback_used", "regularization_used"], "properties": {"solver_id": {"$ref": "#/$defs/id"}, "fallback_used": {"const": false}, "regularization_used": {"const": false}}},
+    "dof_ids": {"$ref": "#/$defs/ids"}, "contact_ids": {"$ref": "#/$defs/ids"},
+    "displacement_m": {"$ref": "#/$defs/vector"}, "contact_multiplier_n": {"$ref": "#/$defs/vector"}, "gap_remaining_m": {"$ref": "#/$defs/vector"}, "equilibrium_residual_n": {"$ref": "#/$defs/vector"}, "complementarity_n_m": {"$ref": "#/$defs/vector"},
+    "active_contact_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "kkt": {"type": "object", "additionalProperties": false, "required": ["maximum_equilibrium_residual_n", "maximum_penetration_m", "minimum_contact_multiplier_n", "maximum_complementarity_n_m"], "properties": {"maximum_equilibrium_residual_n": {"type": "number", "minimum": 0}, "maximum_penetration_m": {"type": "number", "minimum": 0}, "minimum_contact_multiplier_n": {"type": "number", "minimum": 0}, "maximum_complementarity_n_m": {"type": "number", "minimum": 0}}},
+    "checkpoint": {"type": "object", "additionalProperties": false, "required": ["terminal_checkpoint_hash", "exact_restart_required"], "properties": {"terminal_checkpoint_hash": {"$ref": "#/$defs/hash"}, "exact_restart_required": {"const": true}}},
+    "claim_boundary": {"type": "string", "minLength": 1}, "result_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"}, "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}, "vector": {"type": "array", "minItems": 1, "items": {"type": "number"}}
+  }
+}
