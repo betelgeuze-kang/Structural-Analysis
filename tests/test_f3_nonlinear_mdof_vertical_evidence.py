@@ -54,7 +54,16 @@ def test_nonlinear_mdof_result_and_elastic_limit_vv(receipt: dict[str, object]) 
     assert benchmark["yielded_step_count"] == 0
 
 
-def test_check_replays_recorded_source_commit(tmp_path: Path, receipt: dict[str, object]) -> None:
+def test_check_replays_recorded_source_commit(
+    tmp_path: Path,
+    receipt: dict[str, object],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     target = tmp_path / "nonlinear-mdof.json"
     target.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    monkeypatch.setattr(
+        MODULE,
+        "build_receipt",
+        lambda *, source_commit_sha=None: receipt,
+    )
     assert MODULE.main(["--out", str(target), "--check"]) == 0
