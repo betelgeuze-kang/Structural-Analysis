@@ -235,6 +235,46 @@ def test_non_exact_device_receipt_is_bound_by_current_source_checksums(
     )
 
 
+def test_exact_device_receipt_allows_descendant_evidence_commit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(module.local_runner, "_worktree_clean", lambda _: True)
+    receipt = _receipt()
+    monkeypatch.setattr(
+        module,
+        "_source_commit_is_ancestor",
+        lambda _repo_root, _source_commit_sha: True,
+    )
+
+    assert (
+        module.validate_device_receipt(
+            receipt,
+            repo_root=ROOT,
+            require_current_sources=True,
+        )
+        == receipt
+    )
+
+
+def test_exact_device_receipt_rejects_unrelated_source_commit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(module.local_runner, "_worktree_clean", lambda _: True)
+    receipt = _receipt()
+    monkeypatch.setattr(
+        module,
+        "_source_commit_is_ancestor",
+        lambda _repo_root, _source_commit_sha: False,
+    )
+
+    with pytest.raises(ValueError, match="source_not_ancestor"):
+        module.validate_device_receipt(
+            receipt,
+            repo_root=ROOT,
+            require_current_sources=True,
+        )
+
+
 def test_device_receipt_wraps_validated_runtime_without_relabeling_wheel() -> None:
     upstream = json.loads(
         (

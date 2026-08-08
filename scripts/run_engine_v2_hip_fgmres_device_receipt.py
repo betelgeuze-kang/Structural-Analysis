@@ -91,6 +91,23 @@ def _source_set_hash(checksums: dict[str, str]) -> str:
     return _sha256_bytes(_canonical_bytes(checksums))
 
 
+def _source_commit_is_ancestor(repo_root: Path, source_commit_sha: str) -> bool:
+    """Allow immutable evidence-only commits after the executed source commit."""
+
+    result = local_runner._run(
+        [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            source_commit_sha,
+            "HEAD",
+        ],
+        cwd=repo_root,
+        timeout=30.0,
+    )
+    return result.returncode == 0
+
+
 def device_evidence_bytes(receipt: dict[str, Any]) -> bytes:
     """Return the exact canonical bytes covered by the detached signature."""
 
@@ -387,11 +404,13 @@ def validate_device_receipt(
         current = input_checksums(_device_source_paths(), repo_root=repo_root)
         if current != source["input_checksums"]:
             raise ValueError("engine_v2_device_receipt_sources_stale")
-        if (
-            source["exact_source_commit_claim"] is True
-            and git_head(repo_root) != source["repository_commit_sha"]
+        if source["exact_source_commit_claim"] is True and not (
+            _source_commit_is_ancestor(
+                repo_root,
+                source["repository_commit_sha"],
+            )
         ):
-            raise ValueError("engine_v2_device_receipt_commit_mismatch")
+            raise ValueError("engine_v2_device_receipt_source_not_ancestor")
     if evidence["fixture_identity"] != _fixture_identity():
         raise ValueError("engine_v2_device_receipt_fixture_identity_mismatch")
     hardware = evidence["hardware_execution"]
